@@ -119,7 +119,9 @@ abstract class BaseViewModel<S, I, E>(
   (`single<GitSync> { JGitSync(...) }`), selected at startup.
 - Bindings are to interfaces: `single<NoteRepository> { FileSystemNoteRepository(...) }`.
 - ViewModels are declared with `viewModelOf(::WelcomeViewModel)`; use cases with `factoryOf(::OpenVaultUseCase)`.
-- A Koin `verify()` test checks the whole graph resolves.
+- `desktopModules` (jvmMain) lists every module of the desktop app; `main` starts Koin with it and
+  `DesktopModulesTest` builds the same graph with `koinApplication` (no global Koin) and resolves its root bindings.
+- Modules use the Koin DSL (`module { }`, `factoryOf`, `single<Interface> { }`), not Koin annotations.
 
 ## 7. UI text and resources
 
@@ -158,3 +160,20 @@ abstract class BaseViewModel<S, I, E>(
 - Kermit, with one tag per class.
 - Never log note content, titles, chunks, prompts, answers or embeddings (`GUIDELINES.md` §13). Log ids,
   counts, durations, error types and paths relative to the vault.
+
+## 10. Reference implementations
+
+New code copies the structure of these features instead of inventing its own. Read them before writing a feature.
+
+| Concern | Reference | Files |
+|---|---|---|
+| Domain model, port and use case | `core.platform.domain` | `PlatformConventions`, `SystemEnvironment` (port), `ResolvePlatformConventionsUseCase` |
+| Platform implementation of a port | `core.platform.data` (jvmMain) | `JvmSystemEnvironment` |
+| Koin wiring | `core.platform.di`, `di` | `platformModule`, `jvmPlatformModule`, `appModule`, `desktopModules`, `main.kt` |
+| Unit tests with fakes | `commonTest` `core.platform.domain` | `FakeSystemEnvironment`, `ResolvePlatformConventionsUseCaseTest` |
+| Dependency graph test | `jvmTest` `di` | `DesktopModulesTest` |
+| MVI screen (State, Intent, Effect, ViewModel, Screen) | Pending: `ROADMAP.md` 1.3 (Welcome screen) | Added here when 1.3 is merged |
+
+The pattern in short: a **port** (interface) in `domain` for anything the platform provides, its **adapter** in `data`
+of the platform source set, **all decisions in a use case** in `commonMain` tested with a hand-written **fake**, and
+**Koin modules** that bind the adapter to the port.

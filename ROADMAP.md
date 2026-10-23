@@ -18,14 +18,18 @@ branch name is given next to it. Estimates assume one developer and are meant fo
   its settings for attachments, daily notes and templates folders are honored (read-only).
 - **Local only:** see the privacy rules in `GUIDELINES.md`.
 
-| Milestone | Goal | Estimate |
-|---|---|---|
-| M0 — Foundation | Project setup, tooling, guidelines | Done |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks |
-| M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks |
-| M3 — Chat with citations | Local LLM, model download, RAG chat with citations | 2 weeks |
-| M4 — Git sync | Optional commit / pull / push of the vault | 1 week |
-| M5 — Release | Onboarding polish, packaging, signing, first public release | 1 week |
+**Status tracking:** features are never removed from this file. Each feature title carries its status —
+⬜ not started, 🚧 in progress (branch open), ✅ done (with its pull request) — and the table below counts them.
+`CHANGELOG.md` records what changed; this file records what is planned and what is left.
+
+| Milestone | Goal | Estimate | Status |
+|---|---|---|---|
+| M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 1 / 16 |
+| M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
+| M3 — Chat with citations | Local LLM, model download, RAG chat with citations | 2 weeks | 0 / 4 |
+| M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
+| M5 — Release | Onboarding polish, packaging, signing, first public release | 1 week | 0 / 4 |
 | Post-MVP | Extensions (Koog + MCP), mobile, more | — |
 
 ---
@@ -109,14 +113,17 @@ platform guidelines, community files. See `CHANGELOG.md`.
 
 ## M1 — Vault and editor
 
-### 1.1 Platform conventions — `feature/platform-conventions`
+### ✅ 1.1 Platform conventions — `feature/platform-conventions` — [notekea#15](https://github.com/juanchurtado1991/notekea/pull/15)
 
-The `Platform` abstraction from `PLATFORM_GUIDELINES.md`: current OS, primary shortcut modifier, quit shortcut,
-dialog button order, application data directory.
+The platform conventions from `PLATFORM_GUIDELINES.md`: current OS, primary shortcut modifier, quit shortcut,
+dialog button order, application data directory. Implemented as the `SystemEnvironment` port (read-only facts,
+`JvmSystemEnvironment` on desktop) plus `ResolvePlatformConventionsUseCase` (all mapping logic, tested for every OS
+from `commonTest`), exposed through Koin as a single `PlatformConventions`. This is the reference implementation
+for domain, data, dependency injection and tests (`ARCHITECTURE.md` §10).
 
 - **Done when:** every mapping is unit tested; nothing else checks the OS name.
 
-### 1.2 Theme and design system — `feature/design-system`
+### ⬜ 1.2 Theme and design system — `feature/design-system`
 
 Notekea theme (tokens above), bundled fonts, light/dark, base components: buttons, text field, list item, tab,
 status bar item, empty state, error banner.
@@ -124,7 +131,7 @@ status bar item, empty state, error banner.
 - **Done when:** the window renders with the theme in both modes; components have a preview gallery screen
   available in debug builds.
 
-### 1.3 Open a vault — `feature/vault-open`
+### ⬜ 1.3 Open a vault — `feature/vault-open`
 
 Pick a folder with the native picker (FileKit); remember the last vault (Multiplatform Settings); recent vaults list.
 
@@ -148,7 +155,7 @@ Pick a folder with the native picker (FileKit); remember the last vault (Multipl
 - Shortcut: `Mod+O` opens a folder.
 - **Done when:** a vault opens, survives restart, and missing folders are handled.
 
-### 1.4 Vault tree and note list — `feature/vault-tree`
+### ⬜ 1.4 Vault tree and note list — `feature/vault-tree`
 
 Read the folder recursively (Okio), only `.md` files, ignoring `.git`, `.obsidian`, `.trash` and hidden folders.
 Parse frontmatter (title, tags, aliases) with Ghost YAML. Live updates through `FileWatcher`.
@@ -162,7 +169,7 @@ Parse frontmatter (title, tags, aliases) with Ghost YAML. Live updates through `
 - Shortcuts: `Mod+N` new note, `F2` / `Enter` (macOS) rename, `Delete` / `Mod+Backspace` (macOS) delete.
 - **Done when:** a 5,000-note vault lists in under 1 s after the first scan, external changes appear within 1 s.
 
-### 1.5 Editor — `feature/editor`
+### ⬜ 1.5 Editor — `feature/editor`
 
 `BasicTextField` with Markdown highlighting (headings, bold, italic, code, links, `[[wiki links]]`), autosave
 (debounced 1 s), Read mode with the Markdown renderer, clickable `[[links]]` and `#tags`.
@@ -175,7 +182,7 @@ Parse frontmatter (title, tags, aliases) with Ghost YAML. Live updates through `
 - Find in note: `Mod+F` opens an inline bar with match count and next/previous (`Enter` / `Shift+Enter`).
 - **Done when:** typing never loses text, external changes are detected, frontmatter is preserved untouched.
 
-### 1.6 Quick switcher and search — `feature/quick-switcher`
+### ⬜ 1.6 Quick switcher and search — `feature/quick-switcher`
 
 `Mod+P` opens a palette with fuzzy search over note titles and aliases; `Mod+Shift+F` searches note content
 (plain text in M1, upgraded to hybrid search in M2).
@@ -183,7 +190,7 @@ Parse frontmatter (title, tags, aliases) with Ghost YAML. Live updates through `
 **UI — Palette:** centered overlay 560 dp wide, input on top, up to 10 results with title, folder and matching
 snippet; arrows to move, `Enter` to open, `Esc` to close. Empty state: "No notes match".
 
-### 1.7 Tasks and callouts — `feature/markdown-extensions`
+### ⬜ 1.7 Tasks and callouts — `feature/markdown-extensions`
 
 Obsidian-flavored Markdown blocks that most vaults use.
 
@@ -194,7 +201,7 @@ Obsidian-flavored Markdown blocks that most vaults use.
 - Unknown callout types render as `note`, never as broken text.
 - **Done when:** every callout type and nesting level in the sample vault renders correctly in Read mode.
 
-### 1.8 Images and attachments — `feature/attachments`
+### ⬜ 1.8 Images and attachments — `feature/attachments`
 
 - Render images (`![[image.png]]`, `![alt](path.png)`) inline, scaled to the editor width; `![[image.png|300]]`
   sets the width.
@@ -205,13 +212,13 @@ Obsidian-flavored Markdown blocks that most vaults use.
 - States: missing file (placeholder with the broken path and "Locate…"), unsupported format (file chip).
 - **Done when:** pasting a screenshot works on the three OSes and the result opens unchanged in Obsidian.
 
-### 1.9 Outline — `feature/outline`
+### ⬜ 1.9 Outline — `feature/outline`
 
 **UI — Right panel, Outline tab:** the headings of the current note as an indented tree; click scrolls the editor
 to that heading; the heading under the cursor is highlighted while scrolling. Empty state: "This note has no
 headings". Shortcut: `Mod+Shift+O` focuses the outline.
 
-### 1.10 Daily notes — `feature/daily-notes`
+### ⬜ 1.10 Daily notes — `feature/daily-notes`
 
 - "Today" in the sidebar and `Mod+D` open today's note, creating it if needed.
 - Folder and date format from `.obsidian/daily-notes.json` when present, otherwise `Journal/` and `YYYY-MM-DD`;
@@ -219,7 +226,7 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 - Previous / next day navigation in the note header (`Mod+Alt+←` / `Mod+Alt+→`).
 - **Done when:** the date format, folder and template are honored and covered by tests, including timezones.
 
-### 1.11 Tabs and split panes — `feature/editor-tabs`
+### ⬜ 1.11 Tabs and split panes — `feature/editor-tabs`
 
 - Each opened note becomes a tab; `Mod+click` (or middle click) opens a link in a new tab.
 - `Mod+W` closes the tab, `Ctrl+Tab` / `Ctrl+Shift+Tab` cycle tabs (on every OS), `Mod+1…9` jump to a tab.
@@ -228,20 +235,20 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 - Open tabs and splits are restored when the vault is reopened.
 - Tabs live inside the window content; the window keeps its native title bar (`PLATFORM_GUIDELINES.md`).
 
-### 1.12 Templates — `feature/templates`
+### ⬜ 1.12 Templates — `feature/templates`
 
 - Templates folder: `.obsidian/templates.json` when present, otherwise `Templates/`.
 - `Mod+T` opens a picker of templates and inserts the chosen one at the cursor (or into a new note).
 - Variables: `{{title}}`, `{{date}}`, `{{time}}`, with optional format (`{{date:YYYY-MM-DD}}`).
 - States: no templates folder ("Create a Templates folder to add templates" with a "Create" button).
 
-### 1.13 Bookmarks — `feature/bookmarks`
+### ⬜ 1.13 Bookmarks — `feature/bookmarks`
 
 - Star a note from the header or the context menu (`Mod+Shift+B`); bookmarks section at the top of the sidebar,
   reorderable by drag and drop.
 - Stored in the app data directory per vault, so the vault files are never touched.
 
-### 1.14 Properties view — `feature/properties`
+### ⬜ 1.14 Properties view — `feature/properties`
 
 Frontmatter shown as a compact form above the note content.
 
@@ -254,7 +261,7 @@ Frontmatter shown as a compact form above the note content.
 - **Done when:** round-tripping every sample-vault note through the properties view produces byte-identical
   files when nothing was edited.
 
-### 1.15 Embeds — `feature/embeds`
+### ⬜ 1.15 Embeds — `feature/embeds`
 
 - `![[Other note]]` renders the target note inline in Read mode inside a bordered card with its title as a link;
   `![[Other note#Heading]]` embeds only that section.
@@ -262,7 +269,7 @@ Frontmatter shown as a compact form above the note content.
   looping; maximum depth 3.
 - Missing targets show a placeholder with "Create note".
 
-### 1.16 Sample vault — `chore/sample-vault`
+### ⬜ 1.16 Sample vault — `chore/sample-vault`
 
 `samples/vault/` with 40 Markdown notes on varied topics (projects, journal, books, recipes, meeting notes), with
 frontmatter, wiki links and some deliberately related notes without links. It also covers every feature above:
@@ -273,17 +280,17 @@ tasks, all callout types, images and attachments, daily notes, templates, embeds
 
 ## M2 — Indexing, links and related notes
 
-### 2.1 Markdown chunking — `feature/chunking`
+### ⬜ 2.1 Markdown chunking — `feature/chunking`
 
 Split each note by headings into chunks of ~200–400 tokens with overlap; keep note path, heading path and
 character range of every chunk (needed for citations). Pure `commonMain` logic, exhaustively unit tested.
 
-### 2.2 Embedding engine — `feature/embeddings`
+### ⬜ 2.2 Embedding engine — `feature/embeddings`
 
 `LlmEngine.embed` implemented with java-llama.cpp and a small bundled GGUF embedding model
 (~100 MB, e.g. nomic-embed or bge-small). Batched, off the UI thread, cancellable.
 
-### 2.3 Hybrid index — `feature/hybrid-index`
+### ⬜ 2.3 Hybrid index — `feature/hybrid-index`
 
 `VectorIndex` with Lucene: HNSW vectors + BM25 keywords, merged with reciprocal rank fusion. Incremental
 re-indexing using the SQLDelight index state (path, content hash, modified date). Index stored in the app data
@@ -297,7 +304,7 @@ directory, never inside the vault.
 - **Done when:** editing one note re-indexes only that note within 2 s; closing the app mid-indexing resumes
   correctly.
 
-### 2.4 Related notes panel — `feature/related-notes`
+### ⬜ 2.4 Related notes panel — `feature/related-notes`
 
 For the open note, the top 8 most similar notes (excluding notes already linked from it), updated when the note
 changes.
@@ -309,7 +316,7 @@ changes.
 - Section "Already linked" collapsed at the bottom.
 - States: index not ready ("Related notes appear after indexing"), no results, error.
 
-### 2.5 Backlinks — `feature/backlinks`
+### ⬜ 2.5 Backlinks — `feature/backlinks`
 
 A link graph built from `[[wiki links]]`, Markdown links, embeds and frontmatter aliases, kept up to date by the
 `FileWatcher` (independent of the vector index, so it works even before indexing finishes).
@@ -324,11 +331,11 @@ A link graph built from `[[wiki links]]`, Markdown links, embeds and frontmatter
 - **Done when:** link resolution matches Obsidian's (shortest path, aliases, headings `[[Note#Heading]]`,
   block references are kept as-is) on the sample vault.
 
-### 2.6 Hybrid search — `feature/hybrid-search`
+### ⬜ 2.6 Hybrid search — `feature/hybrid-search`
 
 `Mod+Shift+F` switches to hybrid search: results ranked by meaning and keywords, each with its snippet.
 
-### 2.7 Graph view — `feature/graph-view`
+### ⬜ 2.7 Graph view — `feature/graph-view`
 
 **UI — Graph** (opened with `Mod+G` or from the sidebar, as an editor tab):
 - Notes as nodes, sized by number of links; `[[links]]` as solid edges and semantic relations (above a similarity
@@ -338,7 +345,7 @@ A link graph built from `[[wiki links]]`, Markdown links, embeds and frontmatter
 - Force-directed layout computed off the UI thread; with more than 2,000 nodes it starts in local mode.
 - States: empty vault, index not ready (only link edges, with a hint), too large (local mode suggestion).
 
-### 2.8 Retrieval evaluation set — `chore/rag-eval`
+### ⬜ 2.8 Retrieval evaluation set — `chore/rag-eval`
 
 `samples/eval/retrieval.json` (fixtures from 1.16): 50 questions over the sample vault with the expected note and heading. A test
 reports recall@5 and fails below the agreed baseline, so changes to chunking, models or ranking are measured.
@@ -347,7 +354,7 @@ reports recall@5 and fails below the agreed baseline, so changes to chunking, mo
 
 ## M3 — Chat with citations
 
-### 3.1 Model manager — `feature/model-manager`
+### ⬜ 3.1 Model manager — `feature/model-manager`
 
 Catalog of tested chat models (JSON parsed with Ghost; 3B–4B GGUF, ~2 GB), download with Ktor (progress, pause,
 resume), SHA-256 verification, delete. Hardware check: warns when RAM is below the model's requirement.
@@ -369,7 +376,7 @@ resume), SHA-256 verification, delete. Hardware check: warns when RAM is below t
 - States: not downloaded, downloading (pause/resume/cancel), verifying, ready, failed checksum (retry),
   not enough disk space.
 
-### 3.2 Chat engine — `feature/chat-engine`
+### ⬜ 3.2 Chat engine — `feature/chat-engine`
 
 `LlmEngine.generate` with java-llama.cpp, streaming tokens as a `Flow`, cancellable. Prompts are built with
 `LlamaModel.applyTemplate` (passing messages with an empty prompt returns nothing), and integration tests exit the
@@ -377,7 +384,7 @@ process explicitly because llama.cpp keeps native threads alive (spike of 2026-1
 chunks (hybrid index), build a prompt that requires citing chunk ids, parse citations from the answer, drop
 citations that do not match a retrieved chunk.
 
-### 3.3 Chat panel — `feature/chat-panel`
+### ⬜ 3.3 Chat panel — `feature/chat-panel`
 
 **UI — Right panel, Chat tab:**
 - Message list; the answer streams token by token with a "Stop" button (`Esc`).
@@ -390,7 +397,7 @@ citations that do not match a retrieved chunk.
 - States: model not downloaded (inline card with "Download model"), index not ready, generating, error with retry.
 - Chat history per vault, stored as JSON (Ghost) in the app data directory, with "Clear history".
 
-### 3.4 Answer evaluation — `chore/answer-eval`
+### ⬜ 3.4 Answer evaluation — `chore/answer-eval`
 
 Extends the eval set with expected facts per question; a manual-run task reports citation accuracy
 (cited paragraph actually contains the fact) for the active model.
@@ -399,13 +406,13 @@ Extends the eval set with expected facts per question; a manual-run task reports
 
 ## M4 — Git sync
 
-### 4.1 Git sync engine — `feature/git-sync`
+### ⬜ 4.1 Git sync engine — `feature/git-sync`
 
 `GitSync` with JGit: connect (clone or init + remote), auto-commit after 10 s of inactivity, `pull --rebase` on
 open and every 5 minutes, push after commit. Conflicts keep both versions (`note.md` and `note (conflict).md`).
 The index folder is never committed. Token stored in the OS keychain (Java Keyring).
 
-### 4.2 Sync UI — `feature/sync-ui`
+### ⬜ 4.2 Sync UI — `feature/sync-ui`
 
 - **Settings → Sync:** remote URL, authentication (HTTPS token or SSH key), auto-sync on/off, interval,
   "Sync now".
@@ -419,7 +426,7 @@ The index folder is never committed. Token stored in the OS keychain (Java Keyri
 
 ## M5 — Release
 
-### 5.1 Onboarding — `feature/onboarding`
+### ⬜ 5.1 Onboarding — `feature/onboarding`
 
 First run flow, three steps, skippable at any point:
 
@@ -427,20 +434,20 @@ First run flow, three steps, skippable at any point:
 2. **Choose your notes:** open folder / create vault / use the sample vault.
 3. **Get the AI:** recommended model for this machine's RAM, download in the background while indexing starts.
 
-### 5.2 Settings — `feature/settings`
+### ⬜ 5.2 Settings — `feature/settings`
 
 `Mod+,` opens Settings with sections: General (theme, language, open last vault), Editor (font size, line width,
 spell check), Files (attachments folder, daily notes folder and date format, templates folder — prefilled from
 `.obsidian/` when present), AI (model manager, chat scope default), Sync (M4), Shortcuts (read-only list),
 About (version, licenses, privacy statement).
 
-### 5.3 Packaging and signing — `chore/release-pipeline`
+### ⬜ 5.3 Packaging and signing — `chore/release-pipeline`
 
 GitHub Actions on tag `v*`: build `.dmg` (macOS, signed and notarized), `.msi` (Windows, signed) and `.deb`
 (Linux), attach them to a GitHub Release with checksums. Requires an Apple Developer account and a Windows
 code-signing certificate.
 
-### 5.4 Release v0.1.0
+### ⬜ 5.4 Release v0.1.0
 
 Website `notekea.app` with download links, README screenshots, announcement (Hacker News, r/ObsidianMD,
 r/LocalLLaMA, Kotlin Slack). Measure: stars in the first month, issues from real users, retention feedback.

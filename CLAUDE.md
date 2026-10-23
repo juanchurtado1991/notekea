@@ -7,7 +7,11 @@ Before changing anything, read and follow:
   injected dispatchers and clock, string resources, testing strategy (fakes, never a real model in unit tests).
 - `PLATFORM_GUIDELINES.md` — UI behavior on Windows, macOS and Linux.
 - `LIBRARIES.md` — the approved libraries and why. Do not add a library that is not listed there without asking.
-- `ROADMAP.md` — milestones, features (with branch names) and the UI specification of each screen.
+- `ROADMAP.md` — milestones, features (with branch names, status and the UI specification of each screen).
+  When a feature's pull request is ready, mark it ✅ with the PR link and update the milestone count.
+
+**Before writing a feature, read the reference implementations in `ARCHITECTURE.md` §10 and mirror their
+structure** (port in domain, adapter in data, logic in a use case tested with a fake, Koin modules).
 
 Everything written into this repository (code, comments, docs) is in English.
 
