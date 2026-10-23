@@ -159,3 +159,18 @@ Notekea's core promise is that notes never leave the user's computer. Every chan
 - **Model downloads are verified** with a checksum before they are loaded.
 - **Everything stays in user-visible places:** the vault folder and the platform's application data directory
   (see `PLATFORM_GUIDELINES.md`). Deleting the vault and that directory removes every trace of the user's data.
+
+## 14. Dependency updates
+
+Updating too often breaks things and steals time from features; updating too rarely creates risky big jumps and
+leaves vulnerabilities unpatched. The policy:
+
+- **Security updates are applied as soon as they arrive** (Dependabot security updates and alerts are enabled).
+- **Routine updates are monthly and grouped:** Dependabot opens at most one pull request per ecosystem per month
+  with all minor and patch updates (`.github/dependabot.yml`).
+- **Major versions are upgraded by hand**, one per branch, after reading the release notes, because they change APIs.
+- **Kotlin, KSP, Compose Multiplatform and Ghost are upgraded together and by hand.** They are tightly coupled:
+  check that Compose and KSP support the new Kotlin version and that Ghost is tested against it before bumping.
+  Dependabot ignores them; security alerts for them still appear in the Security tab.
+- Every upgrade goes through a `chore/` branch and a pull request with green CI on the three OSes. Upgrades of
+  runtime libraries also need the manual smoke test (§8) and a `Changed` entry in `CHANGELOG.md`.
