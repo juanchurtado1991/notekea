@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Contribution workflow: a feature is one branch and one pull request made of granular commits (each keeping the
+  build green), merged with rebase merging, instead of a single commit per feature.
+
 ### Added
 
 - Kotlin Multiplatform project skeleton with a Compose Desktop window (`composeApp`, JVM target).
