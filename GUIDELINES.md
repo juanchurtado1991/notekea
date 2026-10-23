@@ -104,6 +104,11 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   The pull request records the OS and version used and what was checked. Changes that are platform-specific
   (file system, shortcuts, menus, packaging, Git credentials) must be smoke tested on **each affected OS**.
   `chore/` branches that do not change runtime behavior (docs, CI, tooling) are exempt.
+- **Dependabot pull requests** are exempt from the `CHANGELOG.md` entry and from the manual smoke test when they
+  only update GitHub Actions, Gradle plugins or build/test tooling; green CI on the three OSes is enough. When they
+  update a library used at runtime (Compose, Koin, Ktor, Okio, Lucene, java-llama.cpp, JGit, SQLDelight, Ghost…),
+  a smoke test on at least one OS is required before merging, and notable upgrades get a `Changed` entry in the
+  changelog.
 
 ## 9. Format before every commit
 
