@@ -22,7 +22,7 @@
 
 ## Checklist
 
-- [ ] One feature per PR, on a `feature/`, `fix/` or `chore/` branch
+- [ ] One feature per PR, on a `feature/`, `fix/` or `chore/` branch, split into granular commits that each build
 - [ ] Unit tests cover the new behavior (useful tests, not getters)
 - [ ] Tests live in `commonTest` whenever possible
 - [ ] `./gradlew ktlintFormat` and `./gradlew check koverVerify` pass locally

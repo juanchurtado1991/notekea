@@ -85,7 +85,13 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   - `fix/<short-description>` for bug fixes
   - `chore/<short-description>` for tooling, build or documentation changes
 - Changes reach `main` through a pull request. CI runs on every pull request and every merge to `main`.
-- **One commit per feature:** each commit contains the feature, its tests and its `CHANGELOG.md` entry, and leaves the build green.
+- **One branch and one pull request per feature, with granular commits inside.** Prefer several small commits,
+  each doing one logical step (e.g. `feat: add Platform interface`, `test: cover shortcut mapping`,
+  `feat: bind JVM platform in Koin`), over one large commit. Every commit must leave the build green (the
+  pre-commit hook enforces it), so history stays readable, reviewable and bisectable.
+- The feature's tests and its `CHANGELOG.md` entry are part of the same pull request (in any of its commits).
+- Pull requests are merged with **rebase merging**, so the granular commits land on `main` as they are and history
+  stays linear.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`.
 - **Manual smoke test before every pull request of a `feature/` or `fix/` branch.** Automated tests do not prove the
   app works as a whole, so the developer runs the app (`./gradlew :composeApp:run`) on **at least one OS** and checks:

@@ -5,7 +5,8 @@ The MVP is a desktop app (Windows, macOS, Linux) that answers one promise:
 > Open your Markdown folder and, without configuring anything, Notekea shows which notes are related and answers
 > questions about them citing the exact paragraph. Everything on your computer.
 
-Milestones are delivered in order. Each feature is one branch and one commit (see `GUIDELINES.md`); the suggested
+Milestones are delivered in order. Each feature is one branch and one pull request, with granular commits
+(see `GUIDELINES.md`); the suggested
 branch name is given next to it. Estimates assume one developer and are meant for planning, not as promises.
 
 ## Product principles
