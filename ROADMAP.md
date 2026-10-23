@@ -25,7 +25,7 @@ branch name is given next to it. Estimates assume one developer and are meant fo
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 1 / 16 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 2 / 16 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations | 2 weeks | 0 / 4 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -123,13 +123,16 @@ for domain, data, dependency injection and tests (`ARCHITECTURE.md` §10).
 
 - **Done when:** every mapping is unit tested; nothing else checks the OS name.
 
-### ⬜ 1.2 Theme and design system — `feature/design-system`
+### ✅ 1.2 Theme and design system — `feature/design-system` — [notekea#16](https://github.com/juanchurtado1991/notekea/pull/16)
 
 Notekea theme (tokens above), bundled fonts, light/dark, base components: buttons, text field, list item, tab,
 status bar item, empty state, error banner.
 
 - **Done when:** the window renders with the theme in both modes; components have a preview gallery screen
   available in debug builds.
+- Implemented in `core.presentation.theme` (internal `palette` + semantic `NotekeaColorSchemes`, typography,
+  dimensions) and `core.presentation.components`; a test gates WCAG AA contrast for every text pair. The gallery
+  opens with `./gradlew :composeApp:run -Pgallery`.
 
 ### ⬜ 1.3 Open a vault — `feature/vault-open`
 

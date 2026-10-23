@@ -26,7 +26,7 @@ shows related notes and answers questions citing the exact paragraph. Everything
 | Compose Multiplatform | `org.jetbrains.compose` (plugin) + `org.jetbrains.compose.{runtime,foundation,ui}` | 1.12.2 | UI and packaging (.dmg / .msi / .deb) |
 | Material 3 | `org.jetbrains.compose.material3:material3` | 1.9.0 | Components |
 | ViewModel | `org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose` | 2.11.0 | Host of the MVI state (`StateFlow<State>`) per screen |
-| Compose resources | `org.jetbrains.compose.components:components-resources` | 1.12.2 | UI strings, icons and fonts (`Res.string.*`, see `ARCHITECTURE.md` §7); added with the first UI string |
+| Compose resources | `org.jetbrains.compose.components:components-resources` | 1.12.2 | UI strings, icons and bundled fonts (`Res.*`, `ARCHITECTURE.md` §7); generated accessors in `app.notekea.resources`, excluded from coverage |
 | FileKit | `io.github.vinceglb:filekit-dialogs-compose` | 0.16.0 | Native folder picker for the vault |
 | Markdown renderer | `com.mikepenz:multiplatform-markdown-renderer-m3` | 0.46.0 | Renders notes and chat answers |
 

@@ -130,6 +130,8 @@ abstract class BaseViewModel<S, I, E>(
 - Composables use `stringResource(Res.string.<key>)`; keys are `snake_case`, grouped by screen prefix
   (`welcome_open_folder`).
 - Brand names and file-format literals are constants, not resources.
+- Exception: the developer-only design system gallery (`core.presentation.gallery`), never reachable from a
+  packaged build, uses constants for its sample texts.
 - Icons and fonts live in `composeResources` as well (fonts: see `LIBRARIES.md` §8).
 
 ## 8. Testing strategy
@@ -174,6 +176,7 @@ New code copies the structure of these features instead of inventing its own. Re
 | Koin wiring | `core.platform.di`, `di` | `platformModule`, `jvmPlatformModule`, `appModule`, `desktopModules`, `main.kt` |
 | Unit tests with fakes | `commonTest` `core.platform.domain` | `FakeSystemEnvironment`, `ResolvePlatformConventionsUseCaseTest` |
 | Dependency graph test | `jvmTest` `di` | `DesktopModulesTest` |
+| Theme tokens and shared UI components | `core.presentation.theme`, `core.presentation.components` | `NotekeaTheme`, `NotekeaColorSchemes`, `NotekeaDimensions`, `NotekeaButton`, `EmptyState`, `ErrorBanner`… |
 | MVI screen (State, Intent, Effect, ViewModel, Screen) | Pending: `ROADMAP.md` 1.3 (Welcome screen) | Added here when 1.3 is merged |
 
 The pattern in short: a **port** (interface) in `domain` for anything the platform provides, its **adapter** in `data`
