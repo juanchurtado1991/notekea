@@ -8,21 +8,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import app.notekea.core.presentation.theme.NotekeaTheme
 
 private const val APP_NAME = "Notekea"
 
 @Composable
 fun App() {
-    MaterialTheme {
+    NotekeaTheme {
         Surface(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
         ) {
             Box(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = APP_NAME,
-                    style = MaterialTheme.typography.headlineLarge
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
