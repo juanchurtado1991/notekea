@@ -1,0 +1,22 @@
+#!/bin/sh
+# Formats the staged Kotlin files with ktlint and blocks the commit when lint, tests or coverage fail.
+# Installed automatically by the `installGitHooks` Gradle task (git config core.hooksPath .githooks).
+# Skip only in an emergency with `git commit --no-verify`.
+set -e
+
+staged_kotlin_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.kt' '*.kts')
+
+echo "pre-commit: running ktlintFormat"
+./gradlew ktlintFormat --quiet
+
+if [ -n "$staged_kotlin_files" ]; then
+    # Re-stage the files ktlint may have reformatted so the commit contains the formatted version.
+    echo "$staged_kotlin_files" | while IFS= read -r file; do
+        if [ -f "$file" ]; then
+            git add -- "$file"
+        fi
+    done
+fi
+
+echo "pre-commit: running check and koverVerify"
+./gradlew check koverVerify --quiet

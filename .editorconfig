@@ -1,0 +1,36 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+indent_size = 4
+indent_style = space
+max_line_length = 120
+ij_kotlin_allow_trailing_comma = false
+ij_kotlin_allow_trailing_comma_on_call_site = false
+
+ktlint_standard_import-ordering = disabled
+ktlint_experimental_annotation = disabled
+ktlint_experimental_type-argument-list-spacing = disabled
+ktlint_experimental_type-parameter-list-spacing = disabled
+
+# Match IntelliJ's default Kotlin formatter, not ktlint's own opinionated style.
+ktlint_standard_function-signature = disabled
+ktlint_standard_class-signature = disabled
+ktlint_standard_multiline-expression-wrapping = disabled
+ktlint_standard_function-expression-body = disabled
+# Custom rules from :ktlint-rules (disable with ktlint_notekea_<rule-id> = disabled):
+# - expression-on-assignment-line: keeps the expression on the same line as `=` when it fits.
+# - max-function-length: function bodies may not exceed 40 lines (lint only).
+# - parameter-order: parameters ordered mandatory, nullable, then with a default value (lint only).
+
+ktlint_standard_filename = disabled
+ktlint_standard_no-consecutive-comments = disabled
+ktlint_standard_no-empty-first-line-in-class-body = disabled
+
+# Compose functions are PascalCase by convention.
+ktlint_function_naming_ignore_when_annotated_with = Composable

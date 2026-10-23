@@ -1,0 +1,58 @@
+# --- Gradle ---------------------------------------------------------------
+.gradle/
+build/
+local.properties
+
+# --- Kotlin / Kotlin Multiplatform -----------------------------------------
+.kotlin/
+kotlin-js-store/
+
+# --- IntelliJ IDEA / Android Studio / Fleet / VS Code ----------------------
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.fleet/
+.vscode/
+captures/
+
+# --- Compose Desktop packaging output --------------------------------------
+*.dmg
+*.msi
+*.deb
+*.exe
+*.pkg
+
+# --- iOS / Xcode (future mobile targets) -----------------------------------
+xcuserdata/
+DerivedData/
+*.xcuserstate
+Pods/
+
+# --- AI models (never committed; the app downloads and verifies them) -------
+*.gguf
+/models/
+
+# --- Runtime output --------------------------------------------------------
+*.log
+*.hprof
+hs_err_pid*
+
+# --- Secrets ---------------------------------------------------------------
+.env
+.env.*
+*.jks
+*.keystore
+*.p12
+
+# --- Claude Code -----------------------------------------------------------
+# Shared and committed: CLAUDE.md and .claude/skills/. Personal and ignored:
+.claude/settings.local.json
+.claude/*.local.*
+
+# --- Operating systems -----------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+*~

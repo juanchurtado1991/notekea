@@ -1,0 +1,99 @@
+[versions]
+compose-material3 = "1.9.0"
+compose-multiplatform = "1.12.2"
+directory-watcher = "0.19.1"
+filekit = "0.16.0"
+ghost = "1.3.5"
+java-keyring = "1.0.4"
+jetbrains-markdown = "0.7.18"
+jgit = "7.8.0.202609011348-r"
+junit-jupiter = "5.14.4"
+junit-platform = "1.14.4"
+kermit = "2.2.0"
+koin = "4.2.2"
+konsist = "0.18.1"
+koog = "1.3.0"
+kover = "0.9.11"
+kotlin = "2.3.21"
+kotlinx-coroutines = "1.11.0"
+ksp = "2.3.12"
+ktlint-cli = "1.5.0"
+ktlint-plugin = "12.3.0"
+ktor = "3.6.0"
+lifecycle = "2.11.0"
+llama = "4.2.0"
+lucene = "10.5.2"
+markdown-renderer = "0.46.0"
+multiplatform-settings = "1.3.0"
+okio = "3.18.2"
+slf4j = "2.0.17"
+sqldelight = "2.4.1"
+turbine = "1.2.1"
+
+[libraries]
+# Core and serialization
+ghost-ktor = { module = "com.ghostserializer:ghost-ktor", version.ref = "ghost" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+
+# UI
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
+lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown-renderer" }
+
+# Notes and files
+directory-watcher = { module = "io.methvin:directory-watcher", version.ref = "directory-watcher" }
+jetbrains-markdown = { module = "org.jetbrains:markdown", version.ref = "jetbrains-markdown" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+
+# Local AI
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+llama = { module = "de.kherud:llama", version.ref = "llama" }
+lucene-core = { module = "org.apache.lucene:lucene-core", version.ref = "lucene" }
+
+# Agents
+koog-agents-core = { module = "ai.koog:agents-core", version.ref = "koog" }
+koog-agents-tools = { module = "ai.koog:agents-tools", version.ref = "koog" }
+
+# Git sync
+java-keyring = { module = "com.github.javakeyring:java-keyring", version.ref = "java-keyring" }
+jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
+jgit-ssh-apache = { module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "jgit" }
+
+# Infrastructure
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatform-settings" }
+sqldelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
+sqldelight-sqlite-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
+
+# Lint rules
+ktlint-cli-ruleset-core = { module = "com.pinterest.ktlint:ktlint-cli-ruleset-core", version.ref = "ktlint-cli" }
+ktlint-rule-engine-core = { module = "com.pinterest.ktlint:ktlint-rule-engine-core", version.ref = "ktlint-cli" }
+ktlint-test = { module = "com.pinterest.ktlint:ktlint-test", version.ref = "ktlint-cli" }
+
+# Tests
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
+konsist = { module = "com.lemonappdev:konsist", version.ref = "konsist" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+
+[plugins]
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+ghost = { id = "com.ghostserializer.ghost", version.ref = "ghost" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }

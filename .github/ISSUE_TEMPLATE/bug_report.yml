@@ -1,0 +1,58 @@
+name: Bug report
+description: Something does not work as expected
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please do not paste private note content. For security issues, follow SECURITY.md instead.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open a vault with...
+        2. Ask...
+        3. See...
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: OS version
+      placeholder: e.g. Windows 11 24H2, macOS 15.4, Ubuntu 24.04
+  - type: input
+    id: app-version
+    attributes:
+      label: Notekea version
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: AI model in use
+      placeholder: e.g. the default model, or the GGUF file name
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Notekea logs never contain note content, but review them before pasting.
+      render: shell

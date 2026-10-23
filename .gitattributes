@@ -1,0 +1,17 @@
+# Normalize line endings to LF in the repository and in working copies, on every OS.
+# Required because .editorconfig enforces `end_of_line = lf` and CI runs ktlint on Windows.
+* text=auto eol=lf
+
+# Windows scripts must keep CRLF to run in cmd.exe.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files.
+*.jar binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.icns binary
+*.ttf binary
+*.otf binary
+*.gguf binary
