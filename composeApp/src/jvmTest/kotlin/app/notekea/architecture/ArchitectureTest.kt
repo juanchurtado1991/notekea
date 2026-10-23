@@ -16,8 +16,10 @@ private const val DISPATCHERS_IMPLEMENTATION = "JvmAppDispatchers"
 private const val DOMAIN_LAYER = "domain"
 private const val KOIN_COMPONENT_IMPORT = "org.koin.core.component.KoinComponent"
 private const val MODULE_NAME = "composeApp"
+private const val OS_NAME_PROPERTY = "\"os.name\""
 private const val PRESENTATION_LAYER = "presentation"
 private const val SYSTEM_CLOCK = "Clock.System"
+private const val SYSTEM_ENVIRONMENT_IMPLEMENTATION = "JvmSystemEnvironment"
 private const val THEME_PACKAGE = "app.notekea.core.presentation.theme"
 
 /**
@@ -104,6 +106,15 @@ class ArchitectureTest {
         productionScope.files.assertFalse(additionalMessage = "ARCHITECTURE.md §6") { file ->
             file.imports.any { it.name == KOIN_COMPONENT_IMPORT }
         }
+    }
+
+    @Test
+    fun `only the system environment reads the operating system name`() {
+        productionScope.files
+            .filterNot { it.name == SYSTEM_ENVIRONMENT_IMPLEMENTATION }
+            .assertFalse(additionalMessage = "PLATFORM_GUIDELINES.md: read PlatformConventions instead") {
+                it.text.contains(other = OS_NAME_PROPERTY)
+            }
     }
 
     @Test
