@@ -18,9 +18,7 @@ import kotlinx.coroutines.launch
  * exactly once (buffered until collected); [onIntent] is the only public entry point.
  * [launchGuarded] catches unexpected exceptions at the edge of the app while always rethrowing cancellation.
  */
-abstract class BaseViewModel<S, I, E>(
-    initialState: S
-) : ViewModel() {
+abstract class BaseViewModel<S, I, E>(initialState: S) : ViewModel() {
     private val effectChannel = Channel<E>(capacity = Channel.BUFFERED)
     private val mutableState = MutableStateFlow(value = initialState)
 

@@ -18,9 +18,7 @@ private const val XDG_DATA_HOME_VARIABLE = "XDG_DATA_HOME"
  * dialog button order and the standard per-user application data directory, honoring `APPDATA` and
  * `XDG_DATA_HOME` when they are set.
  */
-class ResolvePlatformConventionsUseCase(
-    private val systemEnvironment: SystemEnvironment
-) {
+class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnvironment) {
     private val macosNamePattern = Regex(pattern = MACOS_NAME_MARKERS)
 
     operator fun invoke(): PlatformConventions {
