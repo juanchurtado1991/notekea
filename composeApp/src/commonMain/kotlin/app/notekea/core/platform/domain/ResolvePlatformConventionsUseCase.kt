@@ -1,17 +1,5 @@
 package app.notekea.core.platform.domain
 
-private const val APP_DATA_FOLDER = "Notekea"
-private const val LINUX_APP_DATA_FOLDER = "notekea"
-private const val LINUX_DEFAULT_DATA_HOME = ".local/share"
-private const val MACOS_APPLICATION_SUPPORT = "Library/Application Support"
-private const val MACOS_NAME_MARKERS = "mac|darwin"
-private const val UNIX_SEPARATOR = "/"
-private const val WINDOWS_APP_DATA_VARIABLE = "APPDATA"
-private const val WINDOWS_DEFAULT_APP_DATA = "AppData\\Roaming"
-private const val WINDOWS_NAME_PREFIX = "windows"
-private const val WINDOWS_SEPARATOR = "\\"
-private const val XDG_DATA_HOME_VARIABLE = "XDG_DATA_HOME"
-
 /**
  * Maps the raw [SystemEnvironment] to the [PlatformConventions] defined in `PLATFORM_GUIDELINES.md`:
  * primary modifier (Cmd on macOS, Ctrl elsewhere), quit shortcut (Cmd+Q, Alt+F4 on Windows, Ctrl+Q on Linux),
@@ -112,5 +100,19 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
         val appData = nonBlankVariable(name = WINDOWS_APP_DATA_VARIABLE)
             ?: joinWindowsPath(systemEnvironment.userHome, WINDOWS_DEFAULT_APP_DATA)
         return joinWindowsPath(appData, APP_DATA_FOLDER)
+    }
+
+    companion object {
+        private const val APP_DATA_FOLDER = "Notekea"
+        private const val LINUX_APP_DATA_FOLDER = "notekea"
+        private const val LINUX_DEFAULT_DATA_HOME = ".local/share"
+        private const val MACOS_APPLICATION_SUPPORT = "Library/Application Support"
+        private const val MACOS_NAME_MARKERS = "mac|darwin"
+        private const val UNIX_SEPARATOR = "/"
+        private const val WINDOWS_APP_DATA_VARIABLE = "APPDATA"
+        private const val WINDOWS_DEFAULT_APP_DATA = "AppData\\Roaming"
+        private const val WINDOWS_NAME_PREFIX = "windows"
+        private const val WINDOWS_SEPARATOR = "\\"
+        private const val XDG_DATA_HOME_VARIABLE = "XDG_DATA_HOME"
     }
 }

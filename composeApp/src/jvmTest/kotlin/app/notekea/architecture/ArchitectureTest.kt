@@ -2,31 +2,20 @@ package app.notekea.architecture
 
 import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.declaration.KoFileDeclaration
+import com.lemonappdev.konsist.api.declaration.KoObjectDeclaration
 import com.lemonappdev.konsist.api.ext.list.withNameEndingWith
 import com.lemonappdev.konsist.api.verify.assertFalse
 import com.lemonappdev.konsist.api.verify.assertTrue
 import kotlin.test.Test
 
-private const val BASE_VIEW_MODEL = "BaseViewModel"
-private const val COLOR_LITERAL = "Color(0x"
-private const val DATA_LAYER = "data"
-private const val DI_LAYER = "di"
-private const val DIRECT_DISPATCHER_PATTERN = "Dispatchers\\.(IO|Default|Main|Unconfined)"
-private const val DISPATCHERS_IMPLEMENTATION = "JvmAppDispatchers"
-private const val DOMAIN_LAYER = "domain"
-private const val KOIN_COMPONENT_IMPORT = "org.koin.core.component.KoinComponent"
-private const val MODULE_NAME = "composeApp"
-private const val OS_NAME_PROPERTY = "\"os.name\""
-private const val PRESENTATION_LAYER = "presentation"
-private const val SYSTEM_CLOCK = "Clock.System"
-private const val SYSTEM_ENVIRONMENT_IMPLEMENTATION = "JvmSystemEnvironment"
-private const val THEME_PACKAGE = "app.notekea.core.presentation.theme"
-
 /**
  * Turns the rules of `ARCHITECTURE.md` into failing tests, so layer boundaries and naming conventions hold no matter
- * who (or which AI agent) writes the code. Rules run on production code only and pass while a category is empty.
+ * who (or which AI agent) writes the code. Layer rules run on production code; file-structure rules run on all the
+ * code of both modules, tests included. Rules pass while a category is empty.
  */
 class ArchitectureTest {
+    private val allCodeScope = Konsist.scopeFromModule(moduleName = MODULE_NAME) +
+        Konsist.scopeFromModule(moduleName = KTLINT_RULES_MODULE_NAME)
     private val productionScope = Konsist.scopeFromProduction(moduleName = MODULE_NAME)
 
     private val forbiddenDomainImportPrefixes = listOf(
@@ -172,6 +161,26 @@ class ArchitectureTest {
     }
 
     @Test
+    fun `companion objects are the last declaration of their class`() {
+        allCodeScope
+            .classes()
+            .filter { koClass -> koClass.objects(includeNested = false).any { it.hasCompanionModifier } }
+            .assertTrue(additionalMessage = "GUIDELINES.md §2: move the companion object to the end of the class") {
+                val lastDeclaration = it.declarations(includeNested = false, includeLocal = false).lastOrNull()
+                lastDeclaration is KoObjectDeclaration && lastDeclaration.hasCompanionModifier
+            }
+    }
+
+    @Test
+    fun `constants live in the companion object of the file's class`() {
+        allCodeScope.files
+            .filter { topLevelTypeCount(file = it) > 0 }
+            .assertFalse(additionalMessage = "GUIDELINES.md §2: move constants into the companion object") {
+                it.properties(includeNested = false).isNotEmpty()
+            }
+    }
+
+    @Test
     fun `utility functions do not share a file with a type`() {
         productionScope.files
             .filter { topLevelTypeCount(file = it) > 0 }
@@ -207,4 +216,22 @@ class ArchitectureTest {
         ?.name
         ?.split(".")
         ?.contains(element = layer) == true
+
+    companion object {
+        private const val BASE_VIEW_MODEL = "BaseViewModel"
+        private const val COLOR_LITERAL = "Color(0x"
+        private const val DATA_LAYER = "data"
+        private const val DI_LAYER = "di"
+        private const val DIRECT_DISPATCHER_PATTERN = "Dispatchers\\.(IO|Default|Main|Unconfined)"
+        private const val DISPATCHERS_IMPLEMENTATION = "JvmAppDispatchers"
+        private const val DOMAIN_LAYER = "domain"
+        private const val KTLINT_RULES_MODULE_NAME = "ktlint-rules"
+        private const val KOIN_COMPONENT_IMPORT = "org.koin.core.component.KoinComponent"
+        private const val MODULE_NAME = "composeApp"
+        private const val OS_NAME_PROPERTY = "\"os.name\""
+        private const val PRESENTATION_LAYER = "presentation"
+        private const val SYSTEM_CLOCK = "Clock.System"
+        private const val SYSTEM_ENVIRONMENT_IMPLEMENTATION = "JvmSystemEnvironment"
+        private const val THEME_PACKAGE = "app.notekea.core.presentation.theme"
+    }
 }

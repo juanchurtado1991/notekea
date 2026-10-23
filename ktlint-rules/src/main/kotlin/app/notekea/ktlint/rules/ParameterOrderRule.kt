@@ -1,5 +1,7 @@
 package app.notekea.ktlint.rules
 
+import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_ID
+import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_MAINTAINER
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.ACTUAL_KEYWORD
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.EQ
@@ -17,9 +19,6 @@ import com.pinterest.ktlint.rule.engine.core.api.Rule
 import com.pinterest.ktlint.rule.engine.core.api.RuleAutocorrectApproveHandler
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
-
-private const val ERROR_MESSAGE = "Parameters must be ordered: mandatory, then nullable, then with a default value"
-private const val RULE_ID = "$RULE_SET_ID:parameter-order"
 
 /**
  * Lint-only rule: parameters of functions and constructors are ordered mandatory, nullable, then with a default
@@ -95,5 +94,11 @@ class ParameterOrderRule :
             isNullable -> ParameterKind.NULLABLE
             else -> ParameterKind.MANDATORY
         }
+    }
+
+    companion object {
+        private const val ERROR_MESSAGE = "Parameters must be ordered: mandatory, then nullable, " +
+            "then with a default value"
+        private const val RULE_ID = "$RULE_SET_ID:parameter-order"
     }
 }

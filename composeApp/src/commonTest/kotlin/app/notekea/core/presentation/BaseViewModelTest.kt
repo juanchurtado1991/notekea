@@ -15,9 +15,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-private const val FAILURE_MESSAGE = "boom"
-private const val INITIAL_COUNT = 0
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class BaseViewModelTest {
     private val testDispatcher: TestDispatcher = StandardTestDispatcher()
@@ -141,5 +138,10 @@ class BaseViewModelTest {
         ) {
             reduce { it.copy(error = throwable.message) }
         }
+    }
+
+    companion object {
+        private const val FAILURE_MESSAGE = "boom"
+        private const val INITIAL_COUNT = 0
     }
 }
