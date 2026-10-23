@@ -28,6 +28,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.compose.components.resources)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
             implementation(libs.compose.runtime)
@@ -121,6 +122,11 @@ tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.KtLintFormatTask>().configure
 // Every developer who compiles the app gets the pre-commit hook installed, so formatting is never skipped.
 tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
     dependsOn(":installGitHooks")
+}
+
+compose.resources {
+    packageOfResClass = "app.notekea.resources"
+    publicResClass = false
 }
 
 compose.desktop {
