@@ -2,3 +2,8 @@ Notekea
 Copyright 2026 Juan Hurtado
 
 This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product bundles the following fonts, licensed under the SIL Open Font License 1.1
+(license texts in composeApp/src/commonMain/composeResources/files/licenses/):
+- Inter 4.1, Copyright (c) 2016 The Inter Project Authors (https://github.com/rsms/inter)
+- JetBrains Mono 2.304, Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
