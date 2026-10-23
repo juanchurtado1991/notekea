@@ -20,6 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Platform conventions (ROADMAP 1.1): `PlatformConventions` resolved at startup with the primary shortcut modifier,
+  quit shortcut, dialog button order and per-user application data directory for Windows, macOS and Linux;
+  Koin is started on launch. It is the reference implementation for new features (`ARCHITECTURE.md` §10).
+- Architecture rule: only `JvmSystemEnvironment` may read the operating system name.
+- Status tracking in `ROADMAP.md` (⬜ / 🚧 / ✅ per feature and a count per milestone).
+- The desktop JVM runs with `--enable-native-access=ALL-UNNAMED`, removing the Skiko native-access warning.
+
 - Kotlin Multiplatform project skeleton with a Compose Desktop window (`composeApp`, JVM target).
 - Domain interfaces for the core features: `LlmEngine`, `VectorIndex`, `GitSync` and `FileWatcher`.
 - Core building blocks: `Outcome` for typed errors, `AppDispatchers` (`JvmAppDispatchers` on desktop) and
