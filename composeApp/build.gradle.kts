@@ -15,6 +15,7 @@ private val appPackageName = "Notekea"
 private val appPackageVersion = "1.0.0"
 private val jdkVersion = 21
 private val mainClassName = "app.notekea.MainKt"
+private val nativeAccessJvmArgument = "--enable-native-access=ALL-UNNAMED"
 
 kotlin {
     jvmToolchain(jdkVersion)
@@ -125,6 +126,8 @@ tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
 compose.desktop {
     application {
         mainClass = mainClassName
+        // Skiko and java-llama.cpp load native libraries; without this the JVM warns on every launch.
+        jvmArgs += nativeAccessJvmArgument
 
         nativeDistributions {
             targetFormats(
