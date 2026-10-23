@@ -1,5 +1,7 @@
 package app.notekea.ktlint.rules
 
+import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_ID
+import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_MAINTAINER
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.BLOCK_COMMENT
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.EOL_COMMENT
@@ -18,11 +20,6 @@ import com.pinterest.ktlint.rule.engine.core.api.editorconfig.MAX_LINE_LENGTH_PR
 import com.pinterest.ktlint.rule.engine.core.api.ifAutocorrectAllowed
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
-
-private const val ERROR_MESSAGE = "Expression should start on the same line as '='"
-private const val NEWLINE = '\n'
-private const val RULE_ID = "$RULE_SET_ID:expression-on-assignment-line"
-private const val SINGLE_SPACE = " "
 
 /**
  * Keeps the expression on the same line as the `=` of a function expression body, a property initializer
@@ -106,5 +103,12 @@ class ExpressionOnAssignmentLineRule :
         val leadingString = generateSequence(seed = expression) { it.firstChildNode }
             .firstOrNull { it.elementType == STRING_TEMPLATE }
         return leadingString?.text?.contains(NEWLINE) == true
+    }
+
+    companion object {
+        private const val ERROR_MESSAGE = "Expression should start on the same line as '='"
+        private const val NEWLINE = '\n'
+        private const val RULE_ID = "$RULE_SET_ID:expression-on-assignment-line"
+        private const val SINGLE_SPACE = " "
     }
 }

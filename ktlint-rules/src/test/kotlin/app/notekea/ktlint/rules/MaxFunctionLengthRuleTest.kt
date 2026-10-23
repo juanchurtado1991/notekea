@@ -1,10 +1,8 @@
 package app.notekea.ktlint.rules
 
+import app.notekea.ktlint.rules.MaxFunctionLengthRule.Companion.MAX_FUNCTION_BODY_LINES
 import com.pinterest.ktlint.test.KtLintAssertThat.Companion.assertThatRule
 import org.junit.jupiter.api.Test
-
-private const val BLOCK_BRACE_LINES = 2
-private const val EXPRESSION_BODY_EXTRA_LINES = 1
 
 class MaxFunctionLengthRuleTest {
     private val assertThatCode = assertThatRule { MaxFunctionLengthRule() }
@@ -77,5 +75,10 @@ class MaxFunctionLengthRuleTest {
     ): String {
         val arguments = (1..argumentLines).joinToString(separator = ",\n") { "    $it" }
         return "fun long() = listOf(\n$arguments\n)"
+    }
+
+    companion object {
+        private const val BLOCK_BRACE_LINES = 2
+        private const val EXPRESSION_BODY_EXTRA_LINES = 1
     }
 }

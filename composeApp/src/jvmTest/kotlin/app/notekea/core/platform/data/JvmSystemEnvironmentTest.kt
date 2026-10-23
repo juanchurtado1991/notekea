@@ -5,10 +5,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-private const val MISSING_VARIABLE = "NOTEKEA_TEST_VARIABLE_THAT_DOES_NOT_EXIST"
-private const val OS_NAME_PROPERTY = "os.name"
-private const val USER_HOME_PROPERTY = "user.home"
-
 class JvmSystemEnvironmentTest {
     private val environment = JvmSystemEnvironment()
 
@@ -28,5 +24,11 @@ class JvmSystemEnvironmentTest {
             actual = environment.userHome
         )
         assertTrue(actual = environment.userHome.isNotBlank())
+    }
+
+    companion object {
+        private const val MISSING_VARIABLE = "NOTEKEA_TEST_VARIABLE_THAT_DOES_NOT_EXIST"
+        private const val OS_NAME_PROPERTY = "os.name"
+        private const val USER_HOME_PROPERTY = "user.home"
     }
 }

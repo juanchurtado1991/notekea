@@ -1,5 +1,7 @@
 package app.notekea.ktlint.rules
 
+import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_ID
+import app.notekea.ktlint.rules.NotekeaRuleSetProvider.Companion.RULE_SET_MAINTAINER
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.BLOCK
 import com.pinterest.ktlint.rule.engine.core.api.ElementType.EQ
@@ -8,11 +10,6 @@ import com.pinterest.ktlint.rule.engine.core.api.Rule
 import com.pinterest.ktlint.rule.engine.core.api.RuleAutocorrectApproveHandler
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
-
-internal const val MAX_FUNCTION_BODY_LINES = 40
-
-private const val NEWLINE = '\n'
-private const val RULE_ID = "$RULE_SET_ID:max-function-length"
 
 /**
  * Lint-only rule: the body of a function (from `{` to `}`, or from `=` to the end of an expression body)
@@ -59,5 +56,11 @@ class MaxFunctionLengthRule :
         val functionText = function.text
         val bodyStart = assignment.startOffset - function.startOffset
         return functionText.substring(startIndex = bodyStart)
+    }
+
+    companion object {
+        internal const val MAX_FUNCTION_BODY_LINES = 40
+        private const val NEWLINE = '\n'
+        private const val RULE_ID = "$RULE_SET_ID:max-function-length"
     }
 }

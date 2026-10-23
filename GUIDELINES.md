@@ -36,6 +36,10 @@ app.notekea.<feature>
   classes (`<Topic>Extensions.kt`, `<Topic>Mappers.kt`), never as public top-level functions next to a class.
   Private top-level constants and private helpers used only by that file's class are allowed.
 - Nested types stay nested: the subtypes of a sealed interface are declared inside it, in the same file.
+- **Constants live in a `companion object`** of the file's class (`private const val` inside it), never as
+  top-level declarations next to a class. Only files without a class (top-level composables, `main.kt`, Koin
+  module files) keep their private top-level constants.
+- **The `companion object` is always the last element of its class.**
 - Enforced by the Konsist architecture tests (`ARCHITECTURE.md` §8).
 
 ## 3. Dependency injection with Koin

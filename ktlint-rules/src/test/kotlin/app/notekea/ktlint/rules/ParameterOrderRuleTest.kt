@@ -3,8 +3,6 @@ package app.notekea.ktlint.rules
 import com.pinterest.ktlint.test.KtLintAssertThat.Companion.assertThatRule
 import org.junit.jupiter.api.Test
 
-private const val ERROR_MESSAGE = "Parameters must be ordered: mandatory, then nullable, then with a default value"
-
 class ParameterOrderRuleTest {
     private val assertThatCode = assertThatRule { ParameterOrderRule() }
 
@@ -101,5 +99,10 @@ class ParameterOrderRuleTest {
             """.trimIndent()
 
         assertThatCode(code).hasNoLintViolations()
+    }
+
+    companion object {
+        private const val ERROR_MESSAGE = "Parameters must be ordered: mandatory, then nullable, " +
+            "then with a default value"
     }
 }

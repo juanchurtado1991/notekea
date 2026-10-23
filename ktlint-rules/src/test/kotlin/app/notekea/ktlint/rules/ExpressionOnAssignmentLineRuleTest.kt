@@ -4,9 +4,6 @@ import com.pinterest.ktlint.rule.engine.core.api.editorconfig.MAX_LINE_LENGTH_PR
 import com.pinterest.ktlint.test.KtLintAssertThat.Companion.assertThatRule
 import org.junit.jupiter.api.Test
 
-private const val ERROR_MESSAGE = "Expression should start on the same line as '='"
-private const val SHORT_MAX_LINE_LENGTH = 20
-
 class ExpressionOnAssignmentLineRuleTest {
     private val assertThatCode = assertThatRule { ExpressionOnAssignmentLineRule() }
 
@@ -117,5 +114,10 @@ class ExpressionOnAssignmentLineRuleTest {
                 col = 18,
                 detail = ERROR_MESSAGE
             ).isFormattedAs(formattedCode)
+    }
+
+    companion object {
+        private const val ERROR_MESSAGE = "Expression should start on the same line as '='"
+        private const val SHORT_MAX_LINE_LENGTH = 20
     }
 }

@@ -3,15 +3,6 @@ package app.notekea.core.platform.domain
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-private const val APP_DATA_VARIABLE = "APPDATA"
-private const val LINUX_HOME = "/home/ana"
-private const val LINUX_NAME = "Linux"
-private const val MACOS_HOME = "/Users/ana"
-private const val MACOS_NAME = "Mac OS X"
-private const val WINDOWS_HOME = "C:\\Users\\ana"
-private const val WINDOWS_NAME = "Windows 11"
-private const val XDG_DATA_HOME_VARIABLE = "XDG_DATA_HOME"
-
 class ResolvePlatformConventionsUseCaseTest {
     @Test
     fun `linux honors XDG_DATA_HOME and ignores a trailing slash`() {
@@ -163,4 +154,15 @@ class ResolvePlatformConventionsUseCaseTest {
             environmentVariables = environmentVariables
         )
     ).invoke()
+
+    companion object {
+        private const val APP_DATA_VARIABLE = "APPDATA"
+        private const val LINUX_HOME = "/home/ana"
+        private const val LINUX_NAME = "Linux"
+        private const val MACOS_HOME = "/Users/ana"
+        private const val MACOS_NAME = "Mac OS X"
+        private const val WINDOWS_HOME = "C:\\Users\\ana"
+        private const val WINDOWS_NAME = "Windows 11"
+        private const val XDG_DATA_HOME_VARIABLE = "XDG_DATA_HOME"
+    }
 }

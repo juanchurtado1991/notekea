@@ -148,7 +148,9 @@ abstract class BaseViewModel<S, I, E>(
   no `Impl` classes; use cases live in domain with a single `operator fun invoke`; ViewModels extend
   `BaseViewModel` and live in presentation; no `KoinComponent`; no direct `Dispatchers.*` outside
   `JvmAppDispatchers`; no `Clock.System` outside `di`; no `Color(0x…)` outside the theme package; one top-level
-  class, interface or object per file; no public top-level functions in files that declare a type.
+  class, interface or object per file; no public top-level functions in files that declare a type; constants in
+  the class's `companion object`, which is the last element of the class (these file-structure rules also cover
+  tests and the `:ktlint-rules` module).
   A new convention in this document comes with its Konsist rule in the same pull request.
 - **Unit tests never load a real model.** `FakeLlmEngine` returns deterministic embeddings and scripted
   generations. Tests that need real inference are integration tests, excluded from `check` and run with
