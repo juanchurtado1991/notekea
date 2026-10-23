@@ -35,7 +35,7 @@ jobs:
           java-version: 21
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       # `check` runs ktlint and every test task of every module; `koverVerify` enforces the minimum coverage.
       - name: Lint, test and coverage
