@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Contribution workflow: a feature is one branch and one pull request made of granular commits (each keeping the
   build green), merged with rebase merging, instead of a single commit per feature.
+- Dependabot pull requests that only touch CI or build tooling are exempt from changelog entries and smoke tests;
+  runtime library upgrades still require a smoke test.
+- CI uses `actions/setup-java` v6.
 
 ### Added
 
