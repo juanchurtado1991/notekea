@@ -125,7 +125,7 @@ Font files are added with feature 1.2 (`feature/design-system`, see `ROADMAP.md`
 | Custom rules | `:ktlint-rules` module | — | `notekea:expression-on-assignment-line`, `notekea:max-function-length` (40 lines), `notekea:parameter-order` |
 | Kover | `org.jetbrains.kotlinx.kover` | 0.9.11 | `koverVerify` requires 80% line coverage in every module on its own (Composable UI excluded); the root also publishes a merged report. Rules live once in the root build script |
 | GitHub Actions | `.github/workflows/ci.yml` | — | `./gradlew check koverVerify` on Windows, macOS and Linux on every pull request and merge to `main` |
-| Dependabot | `.github/dependabot.yml` | — | Weekly update PRs for the version catalog and GitHub Actions |
+| Dependabot | `.github/dependabot.yml` | — | Monthly grouped minor/patch PRs for the version catalog and GitHub Actions; majors and Kotlin/KSP/Compose/Ghost upgraded by hand (`GUIDELINES.md` §14) |
 | Git hooks | `.githooks/pre-commit` | — | `ktlintFormat` + `check` + `koverVerify` before each commit; installed by the first build (`installGitHooks`) |
 
 ## Source set split
