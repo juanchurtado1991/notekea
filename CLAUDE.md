@@ -28,5 +28,6 @@ When a skill disagrees with the project documents above, **the project documents
 ```
 
 A `feature/` or `fix/` branch is not done until the developer has run the manual smoke test (`GUIDELINES.md` §8).
-Agents cannot replace it: when the automated checks pass, hand over a short smoke test script based on the
+Every feature also adds its release test cases to `MVP_SMOKE_TEST.md` (`GUIDELINES.md` §8).
+Agents cannot replace the smoke test: when the automated checks pass, hand over a short smoke test script based on the
 feature's "Done when" criteria in `ROADMAP.md`, and wait for the developer's result before opening the pull request.
