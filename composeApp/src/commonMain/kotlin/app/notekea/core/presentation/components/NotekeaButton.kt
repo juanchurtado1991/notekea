@@ -8,7 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-/** Text button in the three Notekea weights; colors come from the theme's semantic roles. */
+/** Text button in the three Notekea weights with the 6 dp control radius; colors come from semantic roles. */
 @Composable
 fun NotekeaButton(
     text: String,
@@ -18,11 +18,13 @@ fun NotekeaButton(
     enabled: Boolean = true
 ) {
     val label: @Composable () -> Unit = { Text(text = text, style = MaterialTheme.typography.labelLarge) }
+    val shape = MaterialTheme.shapes.small
     when (style) {
         NotekeaButtonStyle.DESTRUCTIVE -> Button(
             onClick = onClick,
             modifier = modifier,
             enabled = enabled,
+            shape = shape,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.error,
                 contentColor = MaterialTheme.colorScheme.onError
@@ -32,13 +34,15 @@ fun NotekeaButton(
         NotekeaButtonStyle.PRIMARY -> Button(
             onClick = onClick,
             modifier = modifier,
-            enabled = enabled
+            enabled = enabled,
+            shape = shape
         ) { label() }
 
         NotekeaButtonStyle.SECONDARY -> OutlinedButton(
             onClick = onClick,
             modifier = modifier,
-            enabled = enabled
+            enabled = enabled,
+            shape = shape
         ) { label() }
     }
 }
