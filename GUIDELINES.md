@@ -71,6 +71,9 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
 - Long or multi-line conditions go into a well-named `val` (e.g. `val isExpressionOnNextLine = ...`) instead of
   being inlined in the `if`.
 - Prefer names over comments: `tryAddKspDependency()` instead of `addKspDependency() // returns false if...`.
+- **Parameters go one per line**, in functions and constructors. Exception: a class whose primary constructor has
+  a **single parameter** keeps it on the class line when the line fits in 120 columns:
+  `class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnvironment) {`.
 
 ## 7. No warnings
 
