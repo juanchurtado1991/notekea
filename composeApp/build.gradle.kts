@@ -14,6 +14,8 @@ plugins {
 private val appPackageName = "Notekea"
 private val appPackageVersion = "1.0.0"
 private val jdkVersion = 21
+private val galleryGradleProperty = "gallery"
+private val gallerySystemProperty = "notekea.gallery"
 private val mainClassName = "app.notekea.MainKt"
 private val nativeAccessJvmArgument = "--enable-native-access=ALL-UNNAMED"
 
@@ -122,6 +124,13 @@ tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.KtLintFormatTask>().configure
 // Every developer who compiles the app gets the pre-commit hook installed, so formatting is never skipped.
 tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
     dependsOn(":installGitHooks")
+}
+
+// `./gradlew :composeApp:run -Pgallery` opens the design system gallery instead of the app (development only).
+tasks.withType<JavaExec>().matching { it.name == "run" }.configureEach {
+    if (project.hasProperty(galleryGradleProperty)) {
+        systemProperty(gallerySystemProperty, true)
+    }
 }
 
 compose.resources {
