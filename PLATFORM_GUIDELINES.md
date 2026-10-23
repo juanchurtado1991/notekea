@@ -85,10 +85,13 @@ Never reuse a shortcut the operating system reserves (e.g. `Cmd+H` / `Cmd+M` on 
 
 ## Implementation
 
-- A single `Platform` abstraction (in `commonMain`, implemented in `jvmMain`) exposes the current OS and the
-  platform conventions: primary shortcut modifier, quit shortcut, dialog button order, app data directory.
-- Menus, shortcuts and dialogs read from it; composables never check the OS name directly.
-- Every platform rule above is covered by unit tests on the `Platform` mapping, which run on all three OSes in CI.
+- `PlatformConventions` (in `commonMain`, provided by Koin) exposes the current OS and the platform conventions:
+  primary shortcut modifier, quit shortcut, dialog button order, app data directory.
+- It is computed by `ResolvePlatformConventionsUseCase` from the `SystemEnvironment` port, whose desktop adapter
+  `JvmSystemEnvironment` is the only code allowed to read the OS name (enforced by a Konsist test).
+- Menus, shortcuts and dialogs read `PlatformConventions`; composables never check the OS name directly.
+- Every platform rule above is covered by unit tests on the use case, simulating each OS with a fake environment,
+  and those tests run on all three OSes in CI.
 
 ## References
 
