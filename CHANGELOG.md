@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Koin is started on launch. It is the reference implementation for new features (`ARCHITECTURE.md` §10).
 - Architecture rule: only `JvmSystemEnvironment` may read the operating system name.
 - Status tracking in `ROADMAP.md` (⬜ / 🚧 / ✅ per feature and a count per milestone).
+- `MVP_SMOKE_TEST.md`: the manual test run for Windows, macOS and Linux before v0.1.0; every feature adds its cases.
+- Code rules: single-parameter class constructors stay on one line; constants live in the class's
+  `companion object`, which is the last element of the class (enforced by Konsist).
 - The desktop JVM runs with `--enable-native-access=ALL-UNNAMED`, removing the Skiko native-access warning.
 
 - Kotlin Multiplatform project skeleton with a Compose Desktop window (`composeApp`, JVM target).

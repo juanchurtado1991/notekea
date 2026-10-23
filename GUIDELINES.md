@@ -111,6 +111,9 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   The pull request records the OS and version used and what was checked. Changes that are platform-specific
   (file system, shortcuts, menus, packaging, Git credentials) must be smoke tested on **each affected OS**.
   `chore/` branches that do not change runtime behavior (docs, CI, tooling) are exempt.
+- **Every `feature/` and `fix/` pull request adds its cases to `MVP_SMOKE_TEST.md`**: what a person must check on
+  each OS before the release, including cases that only become testable with later features. That file is run in
+  full on Windows, macOS and Linux before v0.1.0 and is the main source of bugs before release.
 - **Dependabot pull requests** are exempt from the `CHANGELOG.md` entry and from the manual smoke test when they
   only update GitHub Actions, Gradle plugins or build/test tooling; green CI on the three OSes is enough. When they
   update a library used at runtime (Compose, Koin, Ktor, Okio, Lucene, java-llama.cpp, JGit, SQLDelight, Ghost…),

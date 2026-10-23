@@ -30,7 +30,8 @@ The first build also installs the repository's git hooks (`git config core.hooks
    `chore:`). Include unit tests and a `CHANGELOG.md` entry under `[Unreleased]` before opening the pull request.
 3. Every commit must keep the build green: the pre-commit hook runs `ktlintFormat`, then `check` and
    `koverVerify`, and blocks the commit if they fail.
-4. **Smoke test the app manually** on at least one OS (every affected OS for platform-specific changes):
+4. **Add the feature's cases to `MVP_SMOKE_TEST.md`** (what to check on each OS before the release), then
+   **smoke test the app manually** on at least one OS (every affected OS for platform-specific changes):
    run `./gradlew :composeApp:run`, follow the feature's "Done when" criteria in `ROADMAP.md` and check that
    nearby features still work (see `GUIDELINES.md` §8).
 5. Open a pull request against `main`, record the smoke test (OS and what you checked) and fill in the checklist.

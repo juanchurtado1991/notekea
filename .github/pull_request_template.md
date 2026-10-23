@@ -20,6 +20,8 @@
 
 <!-- Short list of the steps you followed, ideally the feature's "Done when" criteria from ROADMAP.md. -->
 
+- [ ] Added this feature's cases to `MVP_SMOKE_TEST.md` (feature/ and fix/ branches)
+
 ## Checklist
 
 - [ ] One feature per PR, on a `feature/`, `fix/` or `chore/` branch, split into granular commits that each build
