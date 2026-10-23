@@ -13,9 +13,9 @@ kotlin {
 
     compilerOptions {
         allWarningsAsErrors.set(true)
-        // The rule set runs on ktlint's own Kotlin stdlib (2.1), so newer stdlib APIs must not be used.
-        apiVersion.set(KotlinVersion.KOTLIN_2_1)
-        languageVersion.set(KotlinVersion.KOTLIN_2_1)
+        // The rule set runs on ktlint's own Kotlin stdlib (2.2), so newer stdlib APIs must not be used.
+        apiVersion.set(KotlinVersion.KOTLIN_2_2)
+        languageVersion.set(KotlinVersion.KOTLIN_2_2)
     }
 }
 

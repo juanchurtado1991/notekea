@@ -125,10 +125,13 @@ class BaseViewModelTest {
                 CounterIntent.Cancel -> launchGuarded(onError = ::showError) {
                     throw CancellationException(FAILURE_MESSAGE)
                 }
+
                 CounterIntent.Fail -> launchGuarded(onError = ::showError) {
                     error(FAILURE_MESSAGE)
                 }
+
                 CounterIntent.Increment -> reduce { it.copy(count = it.count + 1) }
+
                 CounterIntent.Notify -> emit(effect = CounterEffect.Notified)
             }
         }
