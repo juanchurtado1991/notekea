@@ -15,7 +15,7 @@ shows related notes and answers questions citing the exact paragraph. Everything
 | Ghost (plugin) | `com.ghostserializer.ghost` | 1.3.5 | Wires KSP and Ghost automatically |
 | Ghost | `com.ghostserializer:ghost-serialization` | 1.3.5 | YAML: note frontmatter (tags, aliases, dates). JSON: settings, chat history, model catalog, index manifest |
 | Ghost Ktor | `com.ghostserializer:ghost-ktor` | 1.3.5 | Reads the JSON of the downloadable model catalog |
-| Kotlin | `org.jetbrains.kotlin.multiplatform` | 2.4.21 | Within the range Ghost is tested against (2.2.21 / 2.3.21 / 2.4.0) |
+| Kotlin | `org.jetbrains.kotlin.multiplatform` | 2.4.21 | Ghost is tested up to 2.4.0; 2.4.21 builds and runs, Ghost codegen to be rechecked with the first DTO |
 | KSP | `com.google.devtools.ksp` | 2.3.12 | Required by Ghost |
 | Coroutines | `org.jetbrains.kotlinx:kotlinx-coroutines-core` / `-swing` | 1.11.0 | Background indexing and streaming chat |
 
@@ -104,8 +104,8 @@ MVP behavior:
 | Coroutines Test | `org.jetbrains.kotlinx:kotlinx-coroutines-test` | 1.11.0 | Testing asynchronous code |
 | Turbine | `app.cash.turbine:turbine` | 1.2.1 | Testing `Flow` (indexing progress, chat streaming) |
 | Konsist | `com.lemonappdev:konsist` | 0.18.1 | Architecture tests (`jvmTest`): layer boundaries and the conventions of `ARCHITECTURE.md` |
-| JUnit Jupiter | `org.junit.jupiter:junit-jupiter` (+ `junit-platform-launcher` 1.14.4) | 5.14.4 | Test runner of `:ktlint-rules` |
-| ktlint test | `com.pinterest.ktlint:ktlint-test` | 1.5.0 | Assertions for the custom ktlint rules |
+| JUnit Jupiter | `org.junit.jupiter:junit-jupiter` (+ `junit-platform-launcher` 6.1.3) | 6.1.3 | Test runner of `:ktlint-rules` |
+| ktlint test | `com.pinterest.ktlint:ktlint-test` | 1.8.0 | Assertions for the custom ktlint rules |
 
 ## 8. Bundled assets
 
@@ -120,8 +120,8 @@ Font files are added with feature 1.2 (`feature/design-system`, see `ROADMAP.md`
 
 | Tool | Coordinates | Version | Purpose |
 |---|---|---|---|
-| ktlint Gradle plugin | `org.jlleitschuh.gradle.ktlint` | 12.3.0 | `ktlintCheck` / `ktlintFormat` tasks |
-| ktlint | `com.pinterest.ktlint` | 1.5.0 | Lint engine; rules configured in `.editorconfig` |
+| ktlint Gradle plugin | `org.jlleitschuh.gradle.ktlint` | 14.2.0 | `ktlintCheck` / `ktlintFormat` tasks |
+| ktlint | `com.pinterest.ktlint` | 1.8.0 | Lint engine; rules configured in `.editorconfig` |
 | Custom rules | `:ktlint-rules` module | — | `notekea:expression-on-assignment-line`, `notekea:max-function-length` (40 lines), `notekea:parameter-order` |
 | Kover | `org.jetbrains.kotlinx.kover` | 0.9.11 | `koverVerify` requires 80% line coverage in every module on its own (Composable UI excluded); the root also publishes a merged report. Rules live once in the root build script |
 | GitHub Actions | `.github/workflows/ci.yml` | — | `./gradlew check koverVerify` on Windows, macOS and Linux on every pull request and merge to `main` |

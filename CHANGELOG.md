@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   build green), merged with rebase merging, instead of a single commit per feature.
 - Dependabot pull requests that only touch CI or build tooling are exempt from changelog entries and smoke tests;
   runtime library upgrades still require a smoke test.
-- CI uses `actions/setup-java` v6.
+- Dependencies: Kotlin 2.4.21, ktlint 1.8.0 (Gradle plugin 14.2.0), Gradle 9.8.2, JUnit 6.1.3, slf4j 2.0.20;
+  CI actions `checkout` v7, `setup-java` v6, `setup-gradle` v6 and `upload-artifact` v7.
 
 ### Added
 
