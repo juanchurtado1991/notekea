@@ -15,7 +15,7 @@ shows related notes and answers questions citing the exact paragraph. Everything
 | Ghost (plugin) | `com.ghostserializer.ghost` | 1.3.5 | Wires KSP and Ghost automatically |
 | Ghost | `com.ghostserializer:ghost-serialization` | 1.3.5 | YAML: note frontmatter (tags, aliases, dates). JSON: settings, chat history, model catalog, index manifest |
 | Ghost Ktor | `com.ghostserializer:ghost-ktor` | 1.3.5 | Reads the JSON of the downloadable model catalog |
-| Kotlin | `org.jetbrains.kotlin.multiplatform` | 2.3.21 | Within the range Ghost is tested against (2.2.21 / 2.3.21 / 2.4.0) |
+| Kotlin | `org.jetbrains.kotlin.multiplatform` | 2.4.21 | Within the range Ghost is tested against (2.2.21 / 2.3.21 / 2.4.0) |
 | KSP | `com.google.devtools.ksp` | 2.3.12 | Required by Ghost |
 | Coroutines | `org.jetbrains.kotlinx:kotlinx-coroutines-core` / `-swing` | 1.11.0 | Background indexing and streaming chat |
 
