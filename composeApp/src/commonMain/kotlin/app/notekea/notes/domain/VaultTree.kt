@@ -21,12 +21,43 @@ data class VaultTree(
         return copy(folders = folders + parentFolders, notes = notes + (path to note))
     }
 
+    /**
+     * The tree after [from] was renamed or moved to [to]: a note keeps its metadata and a folder takes its whole
+     * content along, so the change shows at once instead of waiting for the file watcher.
+     */
+    fun renamed(
+        from: RelativePath,
+        to: RelativePath
+    ): VaultTree {
+        val withMovedFolders = folders
+            .filter { it.isWithin(folder = from) }
+            .fold(
+                initial = without(path = from)
+            ) { tree, folder -> tree.withFolder(path = moved(path = folder, from = from, to = to)) }
+        return notes.values
+            .filter {
+                it.file.path.isWithin(
+                    folder = from
+                )
+            }.fold(initial = withMovedFolders) { tree, note ->
+                tree.withNote(
+                    note = note.copy(file = note.file.copy(path = moved(path = note.file.path, from = from, to = to)))
+                )
+            }
+    }
+
     fun without(
         path: RelativePath
     ): VaultTree = copy(
         folders = folders.filterNot { it.isWithin(folder = path) }.toSet(),
         notes = notes.filterKeys { !it.isWithin(folder = path) }
     )
+
+    private fun moved(
+        path: RelativePath,
+        from: RelativePath,
+        to: RelativePath
+    ): RelativePath = RelativePath(value = to.value + path.value.removePrefix(prefix = from.value))
 
     private fun ancestorsAndSelf(
         path: RelativePath
