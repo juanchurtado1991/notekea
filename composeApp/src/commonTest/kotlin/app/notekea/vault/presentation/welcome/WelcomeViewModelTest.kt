@@ -193,6 +193,17 @@ class WelcomeViewModelTest {
     }
 
     @Test
+    fun `editing the name clears its error`() = runWelcomeTest {
+        val viewModel = startedViewModel()
+        send(viewModel = viewModel, intent = WelcomeIntent.OnCreateVaultClick(suggestedName = INVALID_NAME))
+        send(viewModel = viewModel, intent = WelcomeIntent.OnNewVaultConfirm)
+
+        send(viewModel = viewModel, intent = WelcomeIntent.OnNewVaultNameChange(name = NAME))
+
+        assertNull(actual = viewModel.state.value.error)
+    }
+
+    @Test
     fun `form intents without an open form are ignored`() = runWelcomeTest {
         val viewModel = startedViewModel()
         val before = viewModel.state.value

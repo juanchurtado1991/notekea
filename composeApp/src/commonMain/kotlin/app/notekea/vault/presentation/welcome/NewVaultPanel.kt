@@ -9,6 +9,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import app.notekea.core.presentation.components.NotekeaProgressIndicator
+import app.notekea.resources.welcome_busy
+import app.notekea.vault.domain.VaultError
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,22 +47,31 @@ import app.notekea.resources.welcome_new_vault_summary
 import app.notekea.resources.welcome_new_vault_title
 import org.jetbrains.compose.resources.stringResource
 
+private const val PREVIEW_INVALID_NAME = "a/b"
 private const val PREVIEW_WIDTH_DP = 520
 private const val UNIX_SEPARATOR = "/"
 private const val WINDOWS_SEPARATOR = "\\"
 
 /**
  * Inline "Create a new vault" panel: a suggested name and location, so a first-time user only has to press
- * "Create vault", and a sentence saying exactly which folder will be created. Buttons follow the platform order.
+ * "Create vault", and a sentence saying exactly which folder will be created. The name field takes focus when the
+ * panel opens, Enter creates and Esc cancels; errors appear under the field they are about, keeping what was typed.
+ * Buttons follow the platform order.
  */
 @Composable
 internal fun NewVaultPanel(
     form: NewVaultForm,
     platformConventions: PlatformConventions,
-    onIntent: (WelcomeIntent) -> Unit,
-    enabled: Boolean = true
+    onNameChange: (String) -> Unit,
+    onChangeLocation: () -> Unit,
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit,
+    error: VaultError?,
+    isBusy: Boolean = false
 ) {
-    NotekeaCard(modifier = Modifier.fillMaxWidth()) {
+    val nameFocus = remember { FocusRequester() }
+    LaunchedEffect(key1 = Unit) { nameFocus.requestFocus() }
+    NotekeaCard(modifier = Modifier.fillMaxWidth().cancelOnEscape(onCancel = onCancel)) {
         Column(
             modifier = Modifier.padding(all = NotekeaDimensions.SpacingL),
             verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
@@ -59,24 +80,27 @@ internal fun NewVaultPanel(
                 text = stringResource(resource = Res.string.welcome_new_vault_title),
                 style = MaterialTheme.typography.titleMedium
             )
-            FieldLabel(text = stringResource(resource = Res.string.welcome_new_vault_name_label))
-            NotekeaTextField(
-                value = form.name,
-                onValueChange = { onIntent(WelcomeIntent.OnNewVaultNameChange(name = it)) },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = stringResource(resource = Res.string.welcome_new_vault_default_name)
+            NameField(
+                name = form.name,
+                platformConventions = platformConventions,
+                focusRequester = nameFocus,
+                onNameChange = onNameChange,
+                error = error?.takeIf { it.isAboutName() },
+                onSubmit = onConfirm.takeIf { !isBusy }
             )
             FieldLabel(text = stringResource(resource = Res.string.welcome_new_vault_location_label))
-            LocationRow(form = form, platformConventions = platformConventions, enabled = enabled, onIntent = onIntent)
-            Text(
-                text = stringResource(Res.string.welcome_new_vault_summary, newFolderPath(form, platformConventions)),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            LocationRow(
+                form = form,
+                platformConventions = platformConventions,
+                onChangeLocation = onChangeLocation,
+                enabled = !isBusy,
+                error = error?.takeUnless { it.isAboutName() }
             )
             PanelButtons(
                 dialogButtonOrder = platformConventions.dialogButtonOrder,
-                canCreate = enabled && form.name.isNotBlank(),
-                onIntent = onIntent
+                onCancel = onCancel,
+                onConfirm = onConfirm,
+                isBusy = isBusy
             )
         }
     }
@@ -97,8 +121,9 @@ private fun FieldLabel(
 private fun LocationRow(
     form: NewVaultForm,
     platformConventions: PlatformConventions,
+    onChangeLocation: () -> Unit,
     enabled: Boolean,
-    onIntent: (WelcomeIntent) -> Unit
+    error: VaultError?
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
@@ -110,37 +135,66 @@ private fun LocationRow(
         )
         NotekeaButton(
             text = stringResource(resource = Res.string.welcome_new_vault_change_location),
-            onClick = { onIntent(WelcomeIntent.OnNewVaultLocationClick) },
+            onClick = onChangeLocation,
             style = NotekeaButtonStyle.SECONDARY,
             enabled = enabled
         )
     }
+    Text(
+        text = error?.let { vaultErrorMessage(error = it, platformConventions = platformConventions) }
+            ?: stringResource(Res.string.welcome_new_vault_summary, newFolderPath(form, platformConventions)),
+        style = MaterialTheme.typography.bodySmall,
+        color = if (error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+@Composable
+private fun NameField(
+    name: String,
+    platformConventions: PlatformConventions,
+    focusRequester: FocusRequester,
+    onNameChange: (String) -> Unit,
+    error: VaultError?,
+    onSubmit: (() -> Unit)?
+) {
+    FieldLabel(text = stringResource(resource = Res.string.welcome_new_vault_name_label))
+    NotekeaTextField(
+        value = name,
+        onValueChange = onNameChange,
+        modifier = Modifier.fillMaxWidth().focusRequester(focusRequester = focusRequester),
+        placeholder = stringResource(resource = Res.string.welcome_new_vault_default_name),
+        errorText = error?.let { vaultErrorMessage(error = it, platformConventions = platformConventions) },
+        onSubmit = onSubmit
+    )
 }
 
 @Composable
 private fun PanelButtons(
     dialogButtonOrder: DialogButtonOrder,
-    canCreate: Boolean,
-    onIntent: (WelcomeIntent) -> Unit
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit,
+    isBusy: Boolean
 ) {
     val cancel: @Composable () -> Unit = {
         NotekeaButton(
             text = stringResource(resource = Res.string.welcome_new_vault_cancel),
-            onClick = { onIntent(WelcomeIntent.OnNewVaultCancel) },
+            onClick = onCancel,
             style = NotekeaButtonStyle.SECONDARY
         )
     }
     val create: @Composable () -> Unit = {
         NotekeaButton(
             text = stringResource(resource = Res.string.welcome_new_vault_confirm),
-            onClick = { onIntent(WelcomeIntent.OnNewVaultConfirm) },
-            enabled = canCreate
+            onClick = onConfirm,
+            enabled = !isBusy
         )
     }
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS, alignment = Alignment.End)
+        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS, alignment = Alignment.End),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        if (isBusy) NotekeaProgressIndicator(label = stringResource(resource = Res.string.welcome_busy))
         when (dialogButtonOrder) {
             DialogButtonOrder.CANCEL_THEN_PRIMARY -> {
                 cancel()
@@ -154,6 +208,16 @@ private fun PanelButtons(
         }
     }
 }
+
+private fun Modifier.cancelOnEscape(
+    onCancel: () -> Unit
+): Modifier = onPreviewKeyEvent { event ->
+    val isEscape = event.type == KeyEventType.KeyDown && event.key == Key.Escape
+    if (isEscape) onCancel()
+    isEscape
+}
+
+private fun VaultError.isAboutName(): Boolean = this is VaultError.InvalidName || this is VaultError.FolderAlreadyExists
 
 private fun newFolderPath(
     form: NewVaultForm,
@@ -173,7 +237,48 @@ private fun NewVaultPanelPreview() {
             NewVaultPanel(
                 form = WelcomePreviewData.newVaultForm,
                 platformConventions = WelcomePreviewData.platformConventions,
-                onIntent = {}
+                onNameChange = {},
+                onChangeLocation = {},
+                onCancel = {},
+                onConfirm = {},
+                error = null
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun NewVaultPanelInvalidNamePreview() {
+    NotekeaPreviewThemes {
+        Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
+            NewVaultPanel(
+                form = WelcomePreviewData.newVaultForm.copy(name = PREVIEW_INVALID_NAME),
+                platformConventions = WelcomePreviewData.platformConventions,
+                onNameChange = {},
+                onChangeLocation = {},
+                onCancel = {},
+                onConfirm = {},
+                error = VaultError.InvalidName
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun NewVaultPanelBusyPreview() {
+    NotekeaPreviewThemes {
+        Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
+            NewVaultPanel(
+                form = WelcomePreviewData.newVaultForm,
+                platformConventions = WelcomePreviewData.platformConventions,
+                onNameChange = {},
+                onChangeLocation = {},
+                onCancel = {},
+                onConfirm = {},
+                error = null,
+                isBusy = true
             )
         }
     }
