@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +38,7 @@ import app.notekea.core.presentation.components.NotekeaListItem
 import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
+import app.notekea.core.presentation.components.NotekeaSplitPane
 import app.notekea.core.presentation.components.NotekeaTab
 import app.notekea.core.presentation.components.NotekeaTabRow
 import app.notekea.core.presentation.components.NotekeaTextField
@@ -76,6 +78,12 @@ private const val MENU_REVEAL = "Show in Files"
 private const val DIALOG_MESSAGE = "“Tomato plan” will be moved to the trash. You can restore it from there."
 private const val DIALOG_OPEN = "Delete note…"
 private const val DIALOG_TITLE = "Delete this note?"
+private const val SPLIT_END = "Editor"
+private const val SPLIT_HEIGHT_DP = 120
+private const val SPLIT_MAX_DP = 320
+private const val SPLIT_MIN_DP = 120
+private const val SPLIT_START = "Sidebar — drag the edge"
+private const val SPLIT_TOGGLE = "Hide or show the sidebar"
 private const val CODE_SAMPLE = "fun main() = println(\"Notekea\")"
 private const val DARK_TITLE = "Dark"
 private const val EMPTY_MESSAGE = "Create your first note to get started."
@@ -133,6 +141,7 @@ private fun GalleryColumn(
                 TreeSection()
                 ContextMenuSection()
                 ConfirmDialogSection()
+                SplitPaneSection()
                 TabsSection()
                 FeedbackSection()
                 Text(text = CODE_SAMPLE, style = LocalNotekeaCodeTextStyle.current)
@@ -294,6 +303,25 @@ private fun ConfirmDialogSection() {
             onConfirm = { isOpen = false },
             onDismiss = { isOpen = false },
             isDestructive = true
+        )
+    }
+}
+
+@Composable
+private fun SplitPaneSection() {
+    var isVisible by remember { mutableStateOf(value = true) }
+    var width by remember { mutableStateOf(value = SPLIT_MIN_DP.dp) }
+    NotekeaIconButton(icon = NotekeaIcons.HideSidebar, label = SPLIT_TOGGLE, onClick = { isVisible = !isVisible })
+    NotekeaCard {
+        NotekeaSplitPane(
+            startWidth = width,
+            onStartWidthChange = { width = it },
+            isStartVisible = isVisible,
+            minStartWidth = SPLIT_MIN_DP.dp,
+            maxStartWidth = SPLIT_MAX_DP.dp,
+            start = { Text(text = SPLIT_START, modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)) },
+            end = { Text(text = SPLIT_END, modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)) },
+            modifier = Modifier.height(height = SPLIT_HEIGHT_DP.dp)
         )
     }
 }
