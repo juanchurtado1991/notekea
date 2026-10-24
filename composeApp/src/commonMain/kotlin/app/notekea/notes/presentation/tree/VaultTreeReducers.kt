@@ -193,7 +193,6 @@ internal fun reduceLinksUpdated(
     state: VaultTreeState,
     result: LinkUpdateResult
 ): VaultTreeState = state.copy(
-    linkUpdatePrompt = null,
     notice = TreeNotice.LinksUpdated(updatedCount = result.updatedCount, skippedCount = result.skipped.size)
 )
 

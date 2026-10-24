@@ -178,8 +178,9 @@ notes are read again.
 - Sidebar resizable (200–480 dp, 260 by default) and hideable with `Mod+\`; expanded folders remembered per vault,
   sort, width and visibility for all vaults.
 - Delete moves to the system trash (`gio trash` on Linux), falling back to the vault's `.trash` folder.
-- Rename offers to update the `[[wiki links]]`, embeds and Markdown links that point to the entry ("Update links?"),
-  rewriting only notes unchanged since the question was asked.
+- Rename updates the `[[wiki links]]`, embeds and Markdown links that point to the entry, as Obsidian does by
+  default, so no link breaks; a notice says how many notes changed. A note that changes while it is rewritten is
+  left as it was and counted in the notice. Keeping the old links is a Settings option (5.2).
 - Until the editor (1.5), the main area shows the selected note's title, folder, tags and aliases.
 - **Done when:** a 5,000-note vault lists in under 1 s after the first scan, external changes appear within 1 s.
 - Smoke test: cases 1.4-01 to 1.4-12; 1.3-02, 1.3-04 and 1.3-07 rewritten for the tree.
@@ -512,7 +513,7 @@ First run flow, three steps, skippable at any point:
 ### ⬜ 5.2 Settings — `feature/settings`
 
 `Mod+,` opens Settings with sections: General (theme, language, open last vault), Editor (font size, line width,
-spell check), Files (attachments folder, daily notes folder and date format, templates folder — prefilled from
+spell check), Files (update links when renaming: always or ask, default always; attachments folder, daily notes folder and date format, templates folder — prefilled from
 `.obsidian/` when present), AI (model manager, chat scope default), Sync (M4), Shortcuts (read-only list),
 About (version, licenses, privacy statement).
 

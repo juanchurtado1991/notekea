@@ -188,7 +188,7 @@ class VaultTreeViewModelTest {
     }
 
     @Test
-    fun `renaming a linked note asks before updating the notes that link to it`() = runTreeTest {
+    fun `renaming a linked note updates the notes that link to it and says so`() = runTreeTest {
         contents.texts[path("Start here.md")] = ""
         contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
         val viewModel = startedViewModel()
@@ -197,14 +197,7 @@ class VaultTreeViewModelTest {
 
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameConfirm)
         advanceUntilIdle()
-        val prompt = viewModel.state.value.linkUpdatePrompt
-        viewModel.onIntent(intent = VaultTreeIntent.OnLinkUpdateConfirm)
-        advanceUntilIdle()
 
-        assertEquals(
-            expected = LinkUpdatePrompt(oldName = "Welcome", newName = "Start here", noteCount = 1),
-            actual = prompt
-        )
         assertEquals(
             expected = "Begin with [[Start here]]." to TreeNotice.LinksUpdated(updatedCount = 1, skippedCount = 0),
             actual = contents.texts.getValue(path(ROADMAP)) to viewModel.state.value.notice
@@ -212,21 +205,18 @@ class VaultTreeViewModelTest {
     }
 
     @Test
-    fun `declining the link update changes no note`() = runTreeTest {
-        contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
+    fun `renaming a note nothing links to changes no other note and says nothing`() = runTreeTest {
+        contents.texts[path(ROADMAP)] = "No links here."
         val viewModel = startedViewModel()
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(WELCOME)))
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameTextChange(text = "Start here"))
+
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameConfirm)
         advanceUntilIdle()
 
-        viewModel.onIntent(intent = VaultTreeIntent.OnLinkUpdateCancel)
-        viewModel.onIntent(intent = VaultTreeIntent.OnLinkUpdateConfirm)
-        advanceUntilIdle()
-
         assertEquals(
-            expected = "Begin with [[Welcome]]." to null,
-            actual = contents.texts.getValue(path(ROADMAP)) to viewModel.state.value.linkUpdatePrompt
+            expected = "No links here." to null,
+            actual = contents.texts.getValue(path(ROADMAP)) to viewModel.state.value.notice
         )
     }
 

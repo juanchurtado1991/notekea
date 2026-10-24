@@ -60,14 +60,6 @@ private fun TreeQuestions(
     state: VaultTreeState,
     onIntent: (VaultTreeIntent) -> Unit
 ) {
-    state.linkUpdatePrompt?.let { prompt ->
-        LinkUpdateDialog(
-            prompt = prompt,
-            buttonOrder = state.platformConventions.dialogButtonOrder,
-            onConfirm = { onIntent(VaultTreeIntent.OnLinkUpdateConfirm) },
-            onDismiss = { onIntent(VaultTreeIntent.OnLinkUpdateCancel) }
-        )
-    }
     state.pendingDelete?.let { path ->
         DeleteEntryDialog(
             path = path,
@@ -120,11 +112,9 @@ private fun VaultTreeContentSidebarHiddenPreview() {
 
 @Preview
 @Composable
-private fun VaultTreeContentLinkUpdatePreview() {
+private fun VaultTreeContentLinksUpdatedPreview() {
     VaultTreeContentPreviewFrame(
-        state = TreePreviewData.state().copy(
-            linkUpdatePrompt = LinkUpdatePrompt(oldName = "Arepas", newName = "Arepas reina", noteCount = 4)
-        )
+        state = TreePreviewData.state().copy(notice = TreeNotice.LinksUpdated(updatedCount = 2, skippedCount = 0))
     )
 }
 
