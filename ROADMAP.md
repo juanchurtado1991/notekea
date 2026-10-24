@@ -174,6 +174,7 @@ Parse frontmatter (title, tags, aliases) with Ghost YAML. Live updates through `
 - States: empty vault ("This folder has no notes yet" + "New note" button), loading skeleton, error banner.
 - Shortcuts: `Mod+N` new note, `F2` / `Enter` (macOS) rename, `Delete` / `Mod+Backspace` (macOS) delete.
 - **Done when:** a 5,000-note vault lists in under 1 s after the first scan, external changes appear within 1 s.
+- Smoke test: rewrite 1.3-02, 1.3-04 and 1.3-07 (marked "Revised by 1.4" in `MVP_SMOKE_TEST.md`).
 
 ### ⬜ 1.5 Editor — `feature/editor`
 

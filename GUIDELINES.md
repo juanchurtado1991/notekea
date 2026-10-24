@@ -142,6 +142,11 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
 - **Every `feature/` and `fix/` pull request adds its cases to `MVP_SMOKE_TEST.md`**: what a person must check on
   each OS before the release, including cases that only become testable with later features. That file is run in
   full on Windows, macOS and Linux before v0.1.0 and is the main source of bugs before release.
+- **The same pull request revises the existing cases its change makes outdated.** The file describes the app as it
+  is after the change, not as it was: when a feature replaces or extends behavior an earlier case checks (the note
+  tree replacing the "12 notes found" summary), that case is rewritten in place, keeping its ID, so the release
+  run never tests something that no longer exists. Cases that a later feature will change carry a note naming
+  that feature, and that feature's pull request removes the note when it revises them.
 - **Dependabot pull requests** are exempt from the `CHANGELOG.md` entry and from the manual smoke test when they
   only update GitHub Actions, Gradle plugins or build/test tooling; green CI on the three OSes is enough. When they
   update a library used at runtime (Compose, Koin, Ktor, Okio, Lucene, java-llama.cpp, JGit, SQLDelight, Ghost…),
