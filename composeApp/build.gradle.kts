@@ -97,9 +97,10 @@ ktlint {
     filter {
         exclude("**/build/**")
         exclude("**/generated/**")
-        exclude { element ->
-            element.file.path.contains("/build/generated/")
-        }
+        // Generated sources (Compose resources, KSP) live under build/. Compare files, not path strings, so the
+        // exclusion also works with Windows backslash separators.
+        val buildDirectory = layout.buildDirectory.get().asFile
+        exclude { element -> element.file.startsWith(buildDirectory) }
     }
 }
 
