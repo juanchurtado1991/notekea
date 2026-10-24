@@ -24,7 +24,7 @@ fun WelcomeScreen(
     viewModel: WelcomeViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val vaultName = state.openedVault?.vault?.name
+    val vaultName = state.openedVault?.name
     LaunchedEffect(key1 = vaultName) { onVaultNameChange(vaultName) }
     WindowShortcut(
         shortcut = state.platformConventions.openFolderShortcut,

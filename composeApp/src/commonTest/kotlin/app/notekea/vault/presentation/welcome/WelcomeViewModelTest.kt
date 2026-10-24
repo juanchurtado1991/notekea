@@ -2,7 +2,6 @@ package app.notekea.vault.presentation.welcome
 
 import app.notekea.vault.domain.FakeVaultFileSystem
 import app.notekea.vault.domain.FolderAccess
-import app.notekea.vault.domain.OpenedVault
 import app.notekea.vault.domain.Vault
 import app.notekea.vault.domain.VaultError
 import app.notekea.vault.domain.VaultFixture
@@ -38,7 +37,7 @@ class WelcomeViewModelTest {
 
     @Test
     fun `startup reopens the last vault`() = runWelcomeTest {
-        fixture.addFolder(path = VaultFixture.NOTES, noteCount = NOTE_COUNT)
+        fixture.addFolder(path = VaultFixture.NOTES)
         fixture.store.recentVaults = listOf(fixture.recent(path = VaultFixture.NOTES))
 
         val state = startedViewModel().state.value
@@ -48,7 +47,7 @@ class WelcomeViewModelTest {
             actual = state.isLoading
         )
         assertEquals(
-            expected = OpenedVault(vault = Vault.fromPath(path = VaultFixture.NOTES), noteCount = NOTE_COUNT),
+            expected = Vault.fromPath(path = VaultFixture.NOTES),
             actual = state.openedVault
         )
     }
@@ -85,7 +84,6 @@ class WelcomeViewModelTest {
         assertEquals(
             expected = VaultFixture.WORK,
             actual = viewModel.state.value.openedVault
-                ?.vault
                 ?.path
         )
         assertEquals(
@@ -147,7 +145,6 @@ class WelcomeViewModelTest {
         assertEquals(
             expected = FakeVaultFileSystem.DEFAULT_PARENT + FakeVaultFileSystem.SEPARATOR + NAME,
             actual = viewModel.state.value.openedVault
-                ?.vault
                 ?.path
         )
         assertNull(actual = viewModel.state.value.newVaultForm)
@@ -239,7 +236,6 @@ class WelcomeViewModelTest {
         assertEquals(
             expected = VaultFixture.WORK,
             actual = viewModel.state.value.openedVault
-                ?.vault
                 ?.path
         )
     }
@@ -308,7 +304,6 @@ class WelcomeViewModelTest {
         private const val FAILURE = "Dialog crashed"
         private const val INVALID_NAME = "a/b"
         private const val NAME = "Journal"
-        private const val NOTE_COUNT = 12
         private const val SUGGESTED_NAME = "My Notes"
     }
 }

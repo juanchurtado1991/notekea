@@ -95,11 +95,11 @@ class RecentVaultUseCasesTest {
 
     @Test
     fun `the last vault is restored when it can be opened`() = runTest {
-        fixture.addFolder(path = VaultFixture.NOTES, noteCount = 3)
+        fixture.addFolder(path = VaultFixture.NOTES)
         fixture.store.recentVaults = listOf(fixture.recent(path = VaultFixture.NOTES))
 
         assertEquals(
-            expected = OpenedVault(vault = Vault.fromPath(path = VaultFixture.NOTES), noteCount = 3),
+            expected = Vault.fromPath(path = VaultFixture.NOTES),
             actual = fixture.restoreLastVault()
         )
     }

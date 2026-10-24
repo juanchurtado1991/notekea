@@ -1,8 +1,8 @@
 package app.notekea.vault.presentation.welcome
 
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.vault.domain.OpenedVault
 import app.notekea.vault.domain.RecentVaultStatus
+import app.notekea.vault.domain.Vault
 import app.notekea.vault.domain.VaultError
 
 /**
@@ -17,5 +17,5 @@ data class WelcomeState(
     val newVaultForm: NewVaultForm? = null,
     val error: VaultError? = null,
     val hasUnexpectedError: Boolean = false,
-    val openedVault: OpenedVault? = null
+    val openedVault: Vault? = null
 )

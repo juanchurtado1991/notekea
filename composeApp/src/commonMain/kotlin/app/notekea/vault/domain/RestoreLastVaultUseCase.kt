@@ -10,7 +10,7 @@ class RestoreLastVaultUseCase(
     private val recentVaultsStore: RecentVaultsStore,
     private val openVault: OpenVaultUseCase
 ) {
-    suspend operator fun invoke(): OpenedVault? {
+    suspend operator fun invoke(): Vault? {
         val lastVault = recentVaultsStore.read().firstOrNull() ?: return null
         return (openVault(path = lastVault.path) as? Outcome.Success)?.value
     }
