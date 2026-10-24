@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 # Prepares the smoke-test scenarios that cannot live in the repository (macOS and Linux).
-# Git cannot store a folder without read permission, and "moving" a vault must happen outside the repository, so
-# this script builds them in a scratch folder. It never touches the vaults in smoke-data/vaults.
+# Git cannot store a folder without read permission, and a moved vault must not change tracked files, so this script
+# builds them in smoke-data/scratch (ignored by Git). It lives in the repository, not in /tmp, because sandboxed
+# terminals and the native folder picker may each see a different /tmp. It never touches smoke-data/vaults.
 # Usage: smoke-data/smoke.sh prepare | move | first-launch | restore-settings | clean
 set -euo pipefail
 
 SMOKE_ROOT="$(cd "$(dirname "$0")" && pwd)"
-SCRATCH_NAME="notekea-smoke"
-SCRATCH_PARENT="${TMPDIR:-/tmp}"
-SCRATCH="${SCRATCH_PARENT%/}/$SCRATCH_NAME"
+SCRATCH="$SMOKE_ROOT/scratch"
 SETTINGS_FILE="settings.properties"
 BACKUP_SUFFIX=".smoke-backup"
 
@@ -23,7 +22,7 @@ app_data_dir() {
 clean() {
     if [ -d "$SCRATCH/Locked Vault" ]; then chmod 755 "$SCRATCH/Locked Vault"; fi
     if [ -d "$SCRATCH" ]; then
-        # Only ever deletes a folder named notekea-smoke inside the temporary directory.
+        # Only ever deletes smoke-data/scratch, next to this script.
         find "$SCRATCH" -depth -delete
     fi
 }

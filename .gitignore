@@ -56,3 +56,6 @@ hs_err_pid*
 Thumbs.db
 desktop.ini
 *~
+
+# Smoke test scenarios built by smoke-data/smoke.sh and smoke.ps1
+smoke-data/scratch/
