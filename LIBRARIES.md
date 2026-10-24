@@ -31,11 +31,14 @@ shows related notes and answers questions citing the exact paragraph. Everything
 | Compose UI tooling | `org.jetbrains.compose.ui:ui-tooling` (on `androidRuntimeClasspath`) | 1.12.2 | Renders previews in Android Studio |
 | Compose preview | `org.jetbrains.compose.ui:ui-tooling-preview` | 1.12.2 | `@Preview` annotation (`androidx.compose.ui.tooling.preview`) for IDE previews of every UI element (`GUIDELINES.md` §6) |
 | FileKit | `io.github.vinceglb:filekit-dialogs-compose` | 0.16.0 | Native folder picker for the vault |
+| Lucide icons | `com.composables:icons-lucide-cmp` | 2.2.1 | UI icons as `ImageVector`s (MIT wrapper, ISC icons). Lucide is the icon set of Obsidian, so its users recognize folders, notes and actions at a glance; ~5.7 MB on the JVM against ~38 MB for the frozen `material-icons-extended`. Only `NotekeaIcons` imports it (Konsist) |
 | Markdown renderer | `com.mikepenz:multiplatform-markdown-renderer-m3` | 0.46.0 | Renders notes and chat answers |
 
 Decisions:
 - The MVP editor is a `BasicTextField` with custom highlighting (no library).
 - No Navigation library: with 3–4 screens it is not worth it.
+- Icons come from Lucide through `core.presentation.theme.NotekeaIcons`, never from the library directly, so the set
+  can change in one file. `material-icons-extended` is not used: JetBrains stopped publishing it after 1.7.3.
 - Compose dependencies use direct coordinates; the `compose.*` accessors of the Gradle plugin are deprecated.
 - **MVI** (see `GUIDELINES.md`) is implemented with ViewModel + `StateFlow` + `sealed interface` intents/effects.
   No MVI library: the pattern is small enough that a framework would only add indirection.

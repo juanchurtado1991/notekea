@@ -7,3 +7,9 @@ This product bundles the following fonts, licensed under the SIL Open Font Licen
 (license texts in composeApp/src/commonMain/composeResources/files/licenses/):
 - Inter 4.1, Copyright (c) 2016 The Inter Project Authors (https://github.com/rsms/inter)
 - JetBrains Mono 2.304, Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
+
+This product bundles the following icons (license texts in the same folder):
+- Lucide, Copyright (c) 2026 Lucide Icons and Contributors, licensed under the ISC License (https://lucide.dev);
+  the icons derived from Feather are Copyright (c) 2013-present Cole Bemis, licensed under the MIT License
+- Compose Icons 2.2.1 (Lucide for Compose Multiplatform), Copyright (c) 2025 Composable Horizons, licensed under the
+  MIT License (https://github.com/composablehorizons/composeicons)
