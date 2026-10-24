@@ -19,7 +19,8 @@ private const val PREVIEW_OLD_NAME = "Arepas"
 
 /**
  * Asks, after a rename, whether to update the links in the notes that point to the renamed entry: Notekea changes a
- * note only on an explicit answer. Saying no keeps the old links, as they were written.
+ * note only on an explicit answer, so focus starts on "Don't update". Saying no keeps the old links, as they were
+ * written.
  */
 @Composable
 internal fun LinkUpdateDialog(
@@ -41,7 +42,9 @@ internal fun LinkUpdateDialog(
         cancelLabel = stringResource(resource = Res.string.tree_links_dont_update),
         buttonOrder = buttonOrder,
         onConfirm = onConfirm,
-        onDismiss = onDismiss
+        onDismiss = onDismiss,
+        // It opens right after the Enter that confirmed the rename; a repeat of that key must not change notes.
+        isCancelFocused = true
     )
 }
 
