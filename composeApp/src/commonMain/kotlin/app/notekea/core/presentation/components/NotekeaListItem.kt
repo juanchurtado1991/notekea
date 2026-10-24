@@ -12,6 +12,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.unit.dp
+
+private const val PREVIEW_FOLDER = "Projects/Notekea"
+private const val PREVIEW_LONG_TITLE = "A very long note title that does not fit in the list and gets ellipsized"
+private const val PREVIEW_MEETING = "Meeting with Ana"
+private const val PREVIEW_PRICING = "Pricing ideas"
+private const val PREVIEW_WIDTH_DP = 260
 
 /** Selectable row with a title and optional supporting text (folder, snippet); selection uses the primary container. */
 @Composable
@@ -49,6 +59,18 @@ fun NotekeaListItem(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun NotekeaListItemPreview() {
+    NotekeaPreviewThemes {
+        Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
+            NotekeaListItem(title = PREVIEW_PRICING, onClick = {}, supportingText = PREVIEW_FOLDER, selected = true)
+            NotekeaListItem(title = PREVIEW_MEETING, onClick = {}, supportingText = PREVIEW_FOLDER)
+            NotekeaListItem(title = PREVIEW_LONG_TITLE, onClick = {})
         }
     }
 }

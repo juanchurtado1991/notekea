@@ -27,6 +27,7 @@ shows related notes and answers questions citing the exact paragraph. Everything
 | Material 3 | `org.jetbrains.compose.material3:material3` | 1.9.0 | Components |
 | ViewModel | `org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose` | 2.11.0 | Host of the MVI state (`StateFlow<State>`) per screen |
 | Compose resources | `org.jetbrains.compose.components:components-resources` | 1.12.2 | UI strings, icons and bundled fonts (`Res.*`, `ARCHITECTURE.md` §7); generated accessors in `app.notekea.resources`, excluded from coverage |
+| Compose preview | `org.jetbrains.compose.ui:ui-tooling-preview` | 1.12.2 | `@Preview` annotation (`androidx.compose.ui.tooling.preview`) for IDE previews of every UI element (`GUIDELINES.md` §6) |
 | FileKit | `io.github.vinceglb:filekit-dialogs-compose` | 0.16.0 | Native folder picker for the vault |
 | Markdown renderer | `com.mikepenz:multiplatform-markdown-renderer-m3` | 0.46.0 | Renders notes and chat answers |
 

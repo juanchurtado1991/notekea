@@ -15,6 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+
+private const val PREVIEW_INDEXED = "Indexed 1,204 notes"
+private const val PREVIEW_MODEL = "Model: ready"
+private const val PREVIEW_SYNC = "Sync: conflict"
 
 /** Clickable status bar entry: a colored state dot and a short label ("Indexed 1,204 notes"). */
 @Composable
@@ -42,5 +48,17 @@ fun StatusBarItem(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Preview
+@Composable
+private fun StatusBarItemPreview() {
+    NotekeaPreviewThemes {
+        Row {
+            StatusBarItem(label = PREVIEW_INDEXED, onClick = {}, indicator = StatusIndicator.ACTIVE)
+            StatusBarItem(label = PREVIEW_MODEL, onClick = {})
+            StatusBarItem(label = PREVIEW_SYNC, onClick = {}, indicator = StatusIndicator.ERROR)
+        }
     }
 }

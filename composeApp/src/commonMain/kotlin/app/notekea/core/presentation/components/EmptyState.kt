@@ -10,6 +10,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+
+private const val PREVIEW_ACTION = "New note"
+private const val PREVIEW_MESSAGE = "Create your first note to get started."
+private const val PREVIEW_TITLE = "This folder has no notes yet"
 
 /** Centered empty state with a title, an explanation and an optional action slot (usually a [NotekeaButton]). */
 @Composable
@@ -34,5 +40,23 @@ fun EmptyState(
         action?.let {
             Column(modifier = Modifier.padding(top = NotekeaDimensions.SpacingS)) { it() }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun EmptyStatePreview() {
+    NotekeaPreviewThemes {
+        EmptyState(title = PREVIEW_TITLE, message = PREVIEW_MESSAGE, action = {
+            NotekeaButton(text = PREVIEW_ACTION, onClick = {})
+        })
+    }
+}
+
+@Preview
+@Composable
+private fun EmptyStateWithoutActionPreview() {
+    NotekeaPreviewThemes {
+        EmptyState(title = PREVIEW_TITLE, message = PREVIEW_MESSAGE)
     }
 }
