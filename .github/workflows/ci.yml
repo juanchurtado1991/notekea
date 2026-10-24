@@ -1,9 +1,8 @@
 name: CI
 
 on:
+  # Every pull request: to main, and the step pull requests into a feature branch (GUIDELINES.md §8).
   pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
