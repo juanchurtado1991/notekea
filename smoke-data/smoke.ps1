@@ -1,6 +1,6 @@
 # Prepares the smoke-test scenarios that cannot live in the repository (Windows).
-# Git cannot store a folder without read permission, and "moving" a vault must happen outside the repository, so
-# this script builds them in a scratch folder. It never touches the vaults in smoke-data\vaults.
+# Git cannot store a folder without read permission, and a moved vault must not change tracked files, so this script
+# builds them in smoke-data\scratch (ignored by Git), next to the sample vaults. It never touches smoke-data\vaults.
 # Usage: powershell -ExecutionPolicy Bypass -File smoke-data\smoke.ps1 prepare|move|first-launch|restore-settings|clean
 param(
     [Parameter(Mandatory = $true)]
@@ -10,7 +10,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $SmokeRoot = $PSScriptRoot
-$Scratch = Join-Path $env:TEMP "notekea-smoke"
+$Scratch = Join-Path $SmokeRoot "scratch"
 $Locked = Join-Path $Scratch "Locked Vault"
 $Settings = Join-Path (Join-Path $env:APPDATA "Notekea") "settings.properties"
 $Backup = "$Settings.smoke-backup"

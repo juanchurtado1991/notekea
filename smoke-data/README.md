@@ -15,10 +15,12 @@ Open them with **Open folder…**. Notekea never writes inside a vault, so openi
 
 `SmokeDataTest` (composeApp `jvmTest`) fails if these counts change, so this table stays true.
 
-## Scenarios outside the repository (`smoke.sh`, `smoke.ps1`)
+## Scenarios Git cannot hold (`smoke.sh`, `smoke.ps1`)
 
 Some cases cannot live in Git: a folder without read permission, a vault that moves, or a first launch with no
-saved settings. The scripts build them in a scratch folder (`$TMPDIR/notekea-smoke`, `%TEMP%\notekea-smoke`).
+saved settings. The scripts build them in `smoke-data/scratch/` (ignored by Git), next to the sample vaults, so the
+folder picker reaches them the same way. Not in `/tmp`: a sandboxed terminal and the native picker may each see a
+different `/tmp`.
 
 ```bash
 smoke-data/smoke.sh prepare           # Movable Vault, Locked Vault (no permission), New Vault Location
