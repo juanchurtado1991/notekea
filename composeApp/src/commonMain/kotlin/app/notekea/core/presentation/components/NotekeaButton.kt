@@ -7,6 +7,16 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import app.notekea.core.presentation.theme.NotekeaDimensions
+
+private const val PREVIEW_CANCEL = "Cancel"
+private const val PREVIEW_DELETE = "Delete note"
+private const val PREVIEW_DISABLED = "Disabled"
+private const val PREVIEW_OPEN = "Open folder…"
 
 /** Text button in the three Notekea weights with the 6 dp control radius; colors come from semantic roles. */
 @Composable
@@ -44,5 +54,18 @@ fun NotekeaButton(
             enabled = enabled,
             shape = shape
         ) { label() }
+    }
+}
+
+@Preview
+@Composable
+private fun NotekeaButtonPreview() {
+    NotekeaPreviewThemes {
+        Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+            NotekeaButton(text = PREVIEW_OPEN, onClick = {})
+            NotekeaButton(text = PREVIEW_CANCEL, onClick = {}, style = NotekeaButtonStyle.SECONDARY)
+            NotekeaButton(text = PREVIEW_DELETE, onClick = {}, style = NotekeaButtonStyle.DESTRUCTIVE)
+            NotekeaButton(text = PREVIEW_DISABLED, onClick = {}, enabled = false)
+        }
     }
 }

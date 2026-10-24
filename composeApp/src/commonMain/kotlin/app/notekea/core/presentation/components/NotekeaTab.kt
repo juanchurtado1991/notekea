@@ -10,6 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+
+private const val PREVIEW_BACKLINKS = "Backlinks"
+private const val PREVIEW_BADGE_COUNT = 12
+private const val PREVIEW_RELATED = "Related"
 
 /** Tab for the right panel (Related, Backlinks, Outline, Chat) with an optional count badge. */
 @Composable
@@ -39,6 +45,17 @@ fun NotekeaTab(
                     contentColor = MaterialTheme.colorScheme.onTertiary
                 ) { Text(text = it.toString()) }
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun NotekeaTabPreview() {
+    NotekeaPreviewThemes {
+        NotekeaTabRow(selectedTabIndex = 0) {
+            NotekeaTab(text = PREVIEW_RELATED, selected = true, onClick = {})
+            NotekeaTab(text = PREVIEW_BACKLINKS, selected = false, onClick = {}, badgeCount = PREVIEW_BADGE_COUNT)
         }
     }
 }

@@ -5,6 +5,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import app.notekea.core.presentation.theme.NotekeaDimensions
+
+private const val PREVIEW_PLACEHOLDER = "Search notes…"
+private const val PREVIEW_VALUE = "pricing"
 
 /** Single- or multi-line text input with an optional placeholder, styled with the Notekea theme. */
 @Composable
@@ -24,4 +32,15 @@ fun NotekeaTextField(
         singleLine = singleLine,
         shape = MaterialTheme.shapes.small
     )
+}
+
+@Preview
+@Composable
+private fun NotekeaTextFieldPreview() {
+    NotekeaPreviewThemes {
+        Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+            NotekeaTextField(value = "", onValueChange = {}, placeholder = PREVIEW_PLACEHOLDER)
+            NotekeaTextField(value = PREVIEW_VALUE, onValueChange = {}, placeholder = PREVIEW_PLACEHOLDER)
+        }
+    }
 }

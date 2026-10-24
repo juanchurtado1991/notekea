@@ -15,6 +15,16 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.resources.Res
 import app.notekea.resources.error_banner_dismiss
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.unit.dp
+
+private const val PREVIEW_ACTION = "Load theirs"
+private const val PREVIEW_MESSAGE = "This note changed outside Notekea."
+private const val PREVIEW_WIDTH_DP = 480
 
 /**
  * Inline error that keeps the content around it visible: a message, an optional action slot (e.g. "Retry",
@@ -45,6 +55,24 @@ fun ErrorBanner(
             onDismiss?.let {
                 TextButton(onClick = it) { Text(text = stringResource(resource = Res.string.error_banner_dismiss)) }
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ErrorBannerPreview() {
+    NotekeaPreviewThemes {
+        Column(
+            modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp),
+            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
+        ) {
+            ErrorBanner(
+                message = PREVIEW_MESSAGE,
+                onDismiss = {},
+                action = { NotekeaButton(text = PREVIEW_ACTION, onClick = {}, style = NotekeaButtonStyle.SECONDARY) }
+            )
+            ErrorBanner(message = PREVIEW_MESSAGE)
         }
     }
 }
