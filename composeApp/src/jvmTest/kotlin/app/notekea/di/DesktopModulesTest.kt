@@ -1,6 +1,8 @@
 package app.notekea.di
 
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.db.NotekeaDatabase
 import app.notekea.notes.domain.Trash
 import app.notekea.notes.presentation.tree.VaultTreeViewModel
 import app.notekea.vault.domain.RecentVaultsStore
@@ -24,11 +26,19 @@ import kotlin.test.assertTrue
 
 /**
  * Builds the real desktop dependency graph (no global Koin) and resolves its root bindings. The settings file is
- * replaced by in-memory settings and the main dispatcher is never advanced, so nothing touches the user's data.
+ * and database are replaced by in-memory ones and the main dispatcher is never advanced, so nothing touches the user's
+ * data.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class DesktopModulesTest {
-    private val inMemorySettings = module { single<Settings> { MapSettings() } }
+    private val inMemorySettings = module {
+        single<Settings> { MapSettings() }
+        single<NotekeaDatabase> {
+            val driver = JdbcSqliteDriver(url = JdbcSqliteDriver.IN_MEMORY)
+            NotekeaDatabase.Schema.create(driver)
+            NotekeaDatabase(driver = driver)
+        }
+    }
     private val koinApplication = koinApplication {
         allowOverride(override = true)
         modules(desktopModules + inMemorySettings)
