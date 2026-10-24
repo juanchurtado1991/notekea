@@ -1,0 +1,123 @@
+package app.notekea.notes.data
+
+import app.notekea.core.domain.AppDispatchers
+import app.notekea.notes.domain.FileWatcher
+import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.VaultChange
+import io.methvin.watcher.DirectoryChangeEvent
+import io.methvin.watcher.DirectoryWatcher
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOn
+import org.slf4j.helpers.NOPLogger
+import java.io.IOException
+import java.nio.file.Path
+import java.util.concurrent.Executors
+import kotlin.io.path.Path
+import kotlin.io.path.isDirectory
+
+/**
+ * [FileWatcher] on directory-watcher, which uses native events on every desktop (FSEvents on macOS, where the JDK
+ * would poll). Collecting the flow starts watching and returns once every folder is registered, so no change made
+ * after that is missed; cancelling it stops the watcher. Hidden entries are never reported, other files only when
+ * deleted (they may have been notes), and a watcher that loses events or fails reports [VaultChange.Overflow] so the
+ * vault is scanned again. A vault that is not a folder (anymore) reports it at once.
+ */
+class DirectoryWatcherFileWatcher(private val dispatchers: AppDispatchers) : FileWatcher {
+    override fun watch(
+        vaultPath: String
+    ): Flow<VaultChange> = callbackFlow {
+        val root = Path(vaultPath)
+        val watcher = if (root.isDirectory()) buildWatcher(root = root) { trySend(element = it) } else null
+        val eventLoop = Executors.newSingleThreadExecutor { task ->
+            Thread(task, THREAD_NAME).apply { isDaemon = true }
+        }
+        watcher?.watchAsync(eventLoop)?.whenComplete { _, error ->
+            if (error !=
+                null
+            ) {
+                trySend(element = VaultChange.Overflow)
+            }
+        }
+            ?: trySend(element = VaultChange.Overflow)
+        awaitClose {
+            watcher?.close()
+            eventLoop.shutdown()
+        }
+    }.buffer(capacity = Channel.UNLIMITED).flowOn(context = dispatchers.io)
+
+    private fun buildWatcher(
+        root: Path,
+        onChange: (VaultChange) -> Unit
+    ): DirectoryWatcher? = try {
+        DirectoryWatcher
+            .builder()
+            .path(root)
+            .fileHashing(false)
+            .fileTreeVisitor(HiddenSkippingFileTreeVisitor())
+            .logger(NOPLogger.NOP_LOGGER)
+            .listener { event -> changeOf(root = root, event = event)?.let(onChange) }
+            .build()
+    } catch (_: IOException) {
+        null
+    }
+
+    private fun changeOf(
+        root: Path,
+        event: DirectoryChangeEvent
+    ): VaultChange? {
+        if (event.eventType() == DirectoryChangeEvent.EventType.OVERFLOW) return VaultChange.Overflow
+        val path = relativePathOf(root = root, path = event.path() ?: return null) ?: return VaultChange.Overflow
+        val isNoteOrFolder = event.isDirectory || path.isMarkdown
+        val isHidden = path.value.split(RelativePath.SEPARATOR).any { it.startsWith(prefix = HIDDEN_PREFIX) }
+        return when {
+            isHidden -> {
+                null
+            }
+
+            event.eventType() == DirectoryChangeEvent.EventType.DELETE -> {
+                VaultChange.Deleted(path = path)
+            }
+
+            !isNoteOrFolder -> {
+                null
+            }
+
+            event.eventType() == DirectoryChangeEvent.EventType.CREATE -> {
+                VaultChange.Created(path = path, isFolder = event.isDirectory)
+            }
+
+            event.isDirectory -> {
+                null
+            }
+
+            else -> {
+                VaultChange.Modified(path = path)
+            }
+        }
+    }
+
+    /** The path inside the vault with `/` separators; null for the vault folder itself, which only a rescan can judge. */
+    private fun relativePathOf(
+        root: Path,
+        path: Path
+    ): RelativePath? {
+        val relative = root.relativize(path)
+        val segments = relative.map { it.toString() }.filter { it.isNotEmpty() }
+        return if (segments.isEmpty()) {
+            null
+        } else {
+            RelativePath(
+                value = segments.joinToString(separator = RelativePath.SEPARATOR)
+            )
+        }
+    }
+
+    companion object {
+        private const val HIDDEN_PREFIX = "."
+        private const val THREAD_NAME = "notekea-file-watcher"
+    }
+}
