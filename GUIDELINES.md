@@ -119,16 +119,34 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   - `feature/<short-description>` for new features
   - `fix/<short-description>` for bug fixes
   - `chore/<short-description>` for tooling, build or documentation changes
-- Changes reach `main` through a pull request. CI runs on every pull request and every merge to `main`.
-- **One branch and one pull request per feature, with granular commits inside.** Prefer several small commits,
-  each doing one logical step (e.g. `feat: add Platform interface`, `test: cover shortcut mapping`,
-  `feat: bind JVM platform in Koin`), over one large commit. Every commit must leave the build green (the
-  pre-commit hook enforces it), so history stays readable, reviewable and bisectable.
-- The feature's tests and its `CHANGELOG.md` entry are part of the same pull request (in any of its commits).
-- Pull requests are merged with **rebase merging**, so the granular commits land on `main` as they are and history
-  stays linear.
+- Changes reach `main` through a pull request. CI runs on every pull request (to `main` or to a feature branch) and
+  every merge to `main`.
+- **A feature is reviewed one step at a time** (`feature/` and `fix/` branches with more than one step), because a
+  whole feature is too large to review well:
+  1. Create the feature branch from `main` (`feature/note-editor`). Nothing is committed to it directly.
+  2. For each step of the plan, create a step branch **from the feature branch**, named
+     `step/<feature>/<nn>-<short-description>` (`step/note-editor/01-editor-state`; Git cannot nest a branch under
+     another branch's name, hence the `step/` prefix). A step is one logical change, usually one or a few small
+     commits, that leaves the build green and can be reviewed on its own.
+  3. Push the step and open its pull request **into the feature branch**. The developer reviews it; after approval
+     it is merged with rebase merging and the step branch is deleted. The next step starts from the updated
+     feature branch (or, to keep working during a review, from the previous step's branch, retargeted after it
+     merges).
+  4. When every step is merged, the developer runs the manual smoke test on the feature branch. Fixes it needs are
+     steps too.
+  5. The feature branch then reaches `main` through one last pull request, which records the smoke test results,
+     marks the feature ✅ in `ROADMAP.md` and is merged with rebase merging once CI is green.
+
+  A small fix or chore that is a single step goes straight from its branch to `main` in one pull request.
+- **Granular commits inside each step.** Prefer several small commits, each doing one logical change (e.g.
+  `feat: add Platform interface`, `test: cover shortcut mapping`, `feat: bind JVM platform in Koin`), over one large
+  commit. Every commit must leave the build green (the pre-commit hook enforces it), so history stays readable,
+  reviewable and bisectable.
+- The feature's tests and its `CHANGELOG.md` entry are part of the feature (in the step that adds the behavior).
+- Pull requests are merged with **rebase merging**, so the granular commits land as they are and history stays
+  linear, both in the feature branch and in `main`.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`.
-- **Manual smoke test before every pull request of a `feature/` or `fix/` branch.** Automated tests do not prove the
+- **Manual smoke test before a `feature/` or `fix/` branch reaches `main`.** Automated tests do not prove the
   app works as a whole, so the developer runs the app (`./gradlew :composeApp:run`) on **at least one OS** and checks:
   1. The app starts and the main window renders without errors in the log.
   2. The new or fixed behavior works end to end, including its empty, loading and error states
@@ -141,17 +159,17 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   whenever Git can hold it (`smoke-data/vaults/`), and otherwise as a step of `smoke-data/smoke.sh` and
   `smoke.ps1`; `smoke-data/README.md` lists what each feature uses. The developer never has to invent test data.
 
-  The pull request records the OS and version used and what was checked. Changes that are platform-specific
+  The pull request to `main` records the OS and version used and what was checked. Changes that are platform-specific
   (file system, shortcuts, menus, packaging, Git credentials) must be smoke tested on **each affected OS**.
   `chore/` branches that do not change runtime behavior (docs, CI, tooling) are exempt.
-- **Every `feature/` and `fix/` pull request adds its cases to `MVP_SMOKE_TEST.md`**: what a person must check on
+- **Every `feature/` and `fix/` branch adds its cases to `MVP_SMOKE_TEST.md`** (in a step): what a person must check on
   each OS before the release, including cases that only become testable with later features. That file is run in
   full on Windows, macOS and Linux before v0.1.0 and is the main source of bugs before release.
-- **The same pull request revises the existing cases its change makes outdated.** The file describes the app as it
+- **The same branch revises the existing cases its change makes outdated.** The file describes the app as it
   is after the change, not as it was: when a feature replaces or extends behavior an earlier case checks (the note
   tree replacing the "12 notes found" summary), that case is rewritten in place, keeping its ID, so the release
   run never tests something that no longer exists. Cases that a later feature will change carry a note naming
-  that feature, and that feature's pull request removes the note when it revises them.
+  that feature, and that feature's branch removes the note when it revises them.
 - **Dependabot pull requests** are exempt from the `CHANGELOG.md` entry and from the manual smoke test when they
   only update GitHub Actions, Gradle plugins or build/test tooling; green CI on the three OSes is enough. When they
   update a library used at runtime (Compose, Koin, Ktor, Okio, Lucene, java-llama.cpp, JGit, SQLDelight, Ghost…),
