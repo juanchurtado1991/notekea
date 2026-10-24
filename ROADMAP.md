@@ -75,21 +75,21 @@ One main window with three resizable panes, a status bar, and the native window 
 
 ### Design tokens
 
-Notekea has its own visual identity, identical on every platform. The "refined kea" palette is inspired by the kea
-parrot (sage green feathers, terracotta underwings) on a warm paper background that is easy on the eyes in long
-writing sessions. All values live in the theme; composables never hard-code colors. Typefaces approved on
-2026-10-23; the palette was refined the same day (it replaced a more saturated olive and orange first version).
+Notekea has its own visual identity, identical on every platform: a vivid **cobalt blue** for actions and selection
+and a **tangerine** accent, its complementary color, that keeps a nod to the kea's orange underwings. All values live
+in the theme; composables never hard-code colors. Typefaces approved on 2026-10-23; the palette was chosen the same
+day after two earlier versions (saturated olive and orange, then sage and terracotta) were judged too dull.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `primary` | Sage `#4A6B4F` | `#9EBFA0` | Primary buttons, selection, focus ring |
-| `primaryContainer` | `#E2EBDD` | `#2C3A2D` | Selected list items |
-| `accent` | Terracotta `#C8684A` | `#E3916F` | Citations, highlights, "new" badges (dark text on it) |
-| `background` | Paper `#F6F3EC` | `#151714` | Window background |
-| `surface` | `#FFFFFF` | `#1C1F1B` | Panes, cards |
-| `onSurface` | `#24261F` | `#E6E7E0` | Body text |
-| `muted` | `#6B6A60` | `#9C9D93` | Secondary text, placeholders |
-| `outline` | `#D8D4C8` | `#363A35` | Borders, dividers |
+| `primary` | Cobalt `#1F5BD8` | `#7FB0FF` (dark text on it) | Primary buttons, selection, focus ring, links |
+| `primaryContainer` | `#DCE7FD` | `#16294D` | Selected list items |
+| `accent` | Tangerine `#FF7A45` | `#FF9A6B` | Citations, highlights, "new" badges (dark text on it) |
+| `background` | `#F7F9FC` | `#0C111A` | Window background |
+| `surface` | `#FFFFFF` | `#141B26` | Panes, cards |
+| `onSurface` | `#141A24` | `#E6EBF3` | Body text |
+| `muted` | `#5D6676` | `#94A0B3` | Secondary text, placeholders |
+| `outline` | `#D6DDE8` | `#273142` | Borders, dividers |
 | `error` | `#B3261E` | `#F2B8B5` | Errors, conflicts |
 
 - **Typography:** one bundled UI typeface (Inter, SIL OFL) for UI and editor body; a bundled monospaced typeface
