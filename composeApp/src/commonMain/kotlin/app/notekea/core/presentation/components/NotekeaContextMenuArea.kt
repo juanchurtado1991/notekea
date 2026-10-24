@@ -48,7 +48,8 @@ private const val SHORTCUT_MIN_WIDTH_DP = 48
 
 /**
  * Wraps [content] with a context menu of [sections] (separated by dividers) that opens at the pointer on a right
- * click, or wherever [state] is opened from the keyboard. Choosing an action closes the menu first. The menu is
+ * click, or wherever [state] is opened from the keyboard. [onOpenByPointer] runs on that right click, so the clicked
+ * item can be selected first, as file managers do. Choosing an action closes the menu first. The menu is
  * themed like the rest of the app (surface, outline border, 6 dp corners) on every platform, with the 32 dp rows of
  * desktop menus and shortcuts aligned at the end.
  */
@@ -57,13 +58,17 @@ fun NotekeaContextMenuArea(
     sections: List<List<NotekeaMenuItem>>,
     modifier: Modifier = Modifier,
     state: NotekeaContextMenuState = remember { NotekeaContextMenuState() },
+    onOpenByPointer: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     var areaHeight by remember { mutableIntStateOf(value = 0) }
     Box(
         modifier = modifier
             .onSizeChanged { areaHeight = it.height }
-            .onSecondaryPress { state.open(at = it) }
+            .onSecondaryPress {
+                onOpenByPointer()
+                state.open(at = it)
+            }
     ) {
         content()
         val position = state.position
