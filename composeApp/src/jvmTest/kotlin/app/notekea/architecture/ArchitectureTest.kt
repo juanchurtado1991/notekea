@@ -130,6 +130,20 @@ class ArchitectureTest {
     }
 
     @Test
+    fun `every UI composable has a preview in its file`() {
+        productionScope.files
+            .filterNot { file -> PREVIEW_EXEMPT_PACKAGES.any { file.packagee?.name?.startsWith(prefix = it) == true } }
+            .assertTrue(additionalMessage = "GUIDELINES.md §6: add a @Preview named <Composable>…Preview") { file ->
+                val functions = file.functions(includeNested = false, includeLocal = false)
+                val previews = functions.filter { it.hasAnnotationWithName(PREVIEW_ANNOTATION) }
+                functions
+                    .filter { it.hasAnnotationWithName(COMPOSABLE_ANNOTATION) && !it.hasPrivateModifier }
+                    .filterNot { it.hasAnnotationWithName(PREVIEW_ANNOTATION) }
+                    .all { composable -> previews.any { it.name.startsWith(prefix = composable.name) } }
+            }
+    }
+
+    @Test
     fun `hard-coded colors only live in the theme`() {
         productionScope.files
             .filterNot { it.packagee?.name?.startsWith(prefix = THEME_PACKAGE) == true }
@@ -289,8 +303,17 @@ class ArchitectureTest {
         private const val PRESENTATION_LAYER = "presentation"
         private const val SYSTEM_CLOCK = "Clock.System"
         private const val SYSTEM_ENVIRONMENT_IMPLEMENTATION = "JvmSystemEnvironment"
+        private const val COMPOSABLE_ANNOTATION = "Composable"
         private const val MATERIAL3_PACKAGE = "androidx.compose.material3"
+        private const val PREVIEW_ANNOTATION = "Preview"
         private const val THEME_PACKAGE = "app.notekea.core.presentation.theme"
         private val DESIGN_SYSTEM_PACKAGES = listOf("app.notekea.core.presentation.components", THEME_PACKAGE)
+
+        // Theme functions, the preview helper and the developer gallery are tooling, not UI elements.
+        private val PREVIEW_EXEMPT_PACKAGES = listOf(
+            THEME_PACKAGE,
+            "app.notekea.core.presentation.gallery",
+            "app.notekea.core.presentation.preview"
+        )
     }
 }

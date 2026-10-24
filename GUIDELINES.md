@@ -78,6 +78,12 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
 - Long or multi-line conditions go into a well-named `val` (e.g. `val isExpressionOnNextLine = ...`) instead of
   being inlined in the `if`.
 - Prefer names over comments: `tryAddKspDependency()` instead of `addKspDependency() // returns false if...`.
+- **Every UI element and every screen has a `@Preview`** in its own file, at the end, `private`, named
+  `<Composable>…Preview`, and wrapped in `NotekeaPreviewThemes` so it shows the light and dark themes side by side.
+  Components get one preview per meaningful variant (e.g. primary, secondary, destructive, disabled). Screens get
+  **one preview per UI state**: the stateless `<Screen>Content` receives a sample `<Screen>State` for each case
+  (empty, loading, error, content, and any feature-specific state). Enforced by Konsist; theme functions, the
+  preview helper and the developer gallery are exempt.
 - **Parameters go one per line**, in functions and constructors. Exception: a class whose primary constructor has
   a **single parameter** keeps it on the class line when the line fits in 120 columns:
   `class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnvironment) {`.
