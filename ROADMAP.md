@@ -161,10 +161,12 @@ Pick a folder with the native picker (FileKit); remember the last vault (Multipl
 - Shortcut: `Mod+O` opens a folder.
 - **Done when:** a vault opens, survives restart, and missing folders are handled.
 
-### ⬜ 1.4 Vault tree and note list — `feature/vault-tree`
+### 🚧 1.4 Vault tree and note list — `feature/vault-tree`
 
 Read the folder recursively (Okio), only `.md` files, ignoring `.git`, `.obsidian`, `.trash` and hidden folders.
-Parse frontmatter (title, tags, aliases) with Ghost YAML. Live updates through `FileWatcher`.
+Parse frontmatter (title, tags, aliases) with Ghost YAML. Live updates through `FileWatcher`. Metadata is cached in
+SQLite (SQLDelight, `notekea.db` in the app data directory) so a known vault opens from the cache and only changed
+notes are read again.
 
 **UI — Sidebar:**
 - Folder tree with expand/collapse, note count per folder.
@@ -173,8 +175,14 @@ Parse frontmatter (title, tags, aliases) with Ghost YAML. Live updates through `
   with "Delete note" button, platform button order).
 - States: empty vault ("This folder has no notes yet" + "New note" button), loading skeleton, error banner.
 - Shortcuts: `Mod+N` new note, `F2` / `Enter` (macOS) rename, `Delete` / `Mod+Backspace` (macOS) delete.
+- Sidebar resizable (200–480 dp, 260 by default) and hideable with `Mod+\`; expanded folders remembered per vault,
+  sort, width and visibility for all vaults.
+- Delete moves to the system trash (`gio trash` on Linux), falling back to the vault's `.trash` folder.
+- Rename offers to update the `[[wiki links]]`, embeds and Markdown links that point to the entry ("Update links?"),
+  rewriting only notes unchanged since the question was asked.
+- Until the editor (1.5), the main area shows the selected note's title, folder, tags and aliases.
 - **Done when:** a 5,000-note vault lists in under 1 s after the first scan, external changes appear within 1 s.
-- Smoke test: rewrite 1.3-02, 1.3-04 and 1.3-07 (marked "Revised by 1.4" in `MVP_SMOKE_TEST.md`).
+- Smoke test: cases 1.4-01 to 1.4-12; 1.3-02, 1.3-04 and 1.3-07 rewritten for the tree.
 
 ### ⬜ 1.5 Editor — `feature/editor`
 
