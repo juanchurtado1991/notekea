@@ -36,14 +36,15 @@ private const val PREVIEW_DISABLED = "Disabled"
 private const val PREVIEW_OPEN = "Open folder…"
 private const val PREVIEW_REMOVE = "Remove"
 private const val PREVIEW_SHORTCUT = "Ctrl+O"
-private const val FOCUS_RING_GAP_DP = 2
+private const val FOCUS_HALO_ALPHA = 0.45f
+private const val FOCUS_HALO_WIDTH_DP = 3
 private const val SHORTCUT_HINT_ALPHA = 0.72f
 
 /**
  * Text button in the four Notekea weights with the 6 dp control radius; colors come from semantic roles.
  * [shortcutHint] shows the keyboard shortcut ("Ctrl+O", "⌘O") as a muted label after the text, so power users
  * discover it without it being the only way in (`GUIDELINES.md`, product principle). A focused button shows a focus
- * ring around it.
+ * halo around it.
  */
 @Composable
 fun NotekeaButton(
@@ -102,8 +103,8 @@ private fun rememberFocusRing(): Modifier {
 }
 
 /**
- * A ring drawn just outside the button while it has focus, so the dialog's initial focus and Tab moves can be seen
- * (Material's own focus hint is a faint overlay). It does not change the layout.
+ * A soft halo hugging the button while it has focus, as desktop systems show keyboard focus, so the dialog's initial
+ * focus and Tab moves can be seen (Material's own focus hint is a faint overlay). It does not change the layout.
  */
 private fun Modifier.focusRing(
     isFocused: Boolean,
@@ -111,12 +112,12 @@ private fun Modifier.focusRing(
 ): Modifier = drawWithContent {
     drawContent()
     if (isFocused) {
-        val width = NotekeaDimensions.FocusRingWidth.toPx()
-        val outset = FOCUS_RING_GAP_DP.dp.toPx() + width / 2
+        val width = FOCUS_HALO_WIDTH_DP.dp.toPx()
+        val outset = width / 2
         drawRoundRect(
-            color = color,
+            color = color.copy(alpha = FOCUS_HALO_ALPHA),
             topLeft = Offset(x = -outset, y = -outset),
-            size = Size(width = size.width + outset * 2, height = size.height + outset * 2),
+            size = Size(width = size.width + width, height = size.height + width),
             cornerRadius = CornerRadius(x = NotekeaDimensions.ControlRadius.toPx() + outset),
             style = Stroke(width = width)
         )
