@@ -208,3 +208,41 @@ themselves.
   `Checkbox`, `Switch`, `DropdownMenu`, `Snackbar`… or `androidx.compose.material3.*`) fails the build.
 - Layout primitives and plain content stay allowed everywhere: `Text`, `Surface`, `Icon`, `MaterialTheme`, and the
   foundation layouts (`Row`, `Column`, `Box`, lazy lists).
+
+## 12. Answer pipeline (M3)
+
+Local models are small (about 2B, 4B or 8B), so precision comes from the steps around the model, not from the model
+alone (`ROADMAP.md` M3). The pipeline below is the design of 3.5 and 3.6; its numbers (slot count, latency budget)
+come from the 3.0 spike.
+
+```
+question ─▶ 1 Rewrite ─▶ Search ×queries ─▶ 2 Rerank ─▶ 3 Extract evidence ×chunks
+                          (parallel)                     (parallel)
+         ─▶ 4 Answer ─▶ 5 Verify ×sentences ─▶ answer
+                          (parallel)
+Deep answer: 4 Answer ×drafts (parallel) ─▶ 5 Verify each ─▶ the draft with the most supported sentences
+```
+
+- **One use case per step** in `chat.domain` (`RewriteQuestionUseCase`, `RerankChunksUseCase`,
+  `ExtractEvidenceUseCase`, `WriteAnswerUseCase`, `VerifyAnswerUseCase`), composed by `AnswerQuestionUseCase`;
+  `DeepAnswerUseCase` reuses the same steps with several drafts. Each step is unit tested with `FakeLlmEngine`
+  scripted outputs.
+- **Ports:** `LlmEngine` (generation, streaming and grammar-constrained JSON) and a separate `Reranker`, both
+  implemented in `jvmMain` with java-llama.cpp. One chat model is loaded once with several parallel slots; the
+  reranker is a second, small model.
+- **Parallelism with coroutines:** independent work runs with `async` + `awaitAll`, bounded by a `Semaphore` sized to
+  the engine's slot count, so a burst never queues more generations than the engine can serve. Cancelling the
+  answer (Stop) cancels every running step. Koog is not used for this pipeline: plain coroutines are simpler to test
+  with fakes; Koog stays for extensions after the MVP.
+- **Structured steps never parse free text:** rewrite, evidence and verification outputs are JSON constrained by a
+  grammar (`jsonSchemaToGrammar`) and parsed with Ghost; only the final answer is free text.
+- **Deterministic checks first:** a cited quote must appear in its note (after normalizing whitespace) before the
+  model is asked whether it supports the sentence. Unsupported sentences are removed, never kept with a warning;
+  an empty result becomes "I couldn't find this in your notes".
+- **Progress is part of the contract:** the pipeline emits a `Flow` of plain-language steps (searching, reading N
+  notes, checking sources, writing N drafts, comparing drafts) that the chat panel shows instead of a bare spinner.
+- **Options for measurement:** `AnswerPipelineOptions` switches each step on or off for the evaluation (3.4); users
+  only see the Deep answer toggle.
+- **Rules:** no loop where a model critiques or debates its own output without evidence from the notes; a new step
+  or prompt change ships only with an evaluation run showing better citation accuracy within the latency budget for
+  every model size.
