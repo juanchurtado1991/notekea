@@ -204,6 +204,9 @@ themselves.
   menus (nestable, with checked choices) and menu buttons, confirmation dialogs and a resizable split pane already
   exist (see the gallery:
   `./gradlew :composeApp:run -Pgallery`).
+- **Keyboard focus looks the same everywhere:** a 2 dp primary border on the component's own shape, with no gap
+  (`Modifier.focusBorder` in `core.presentation.components`; `NotekeaButton` draws it as its border, in the text
+  color on filled buttons). A new clickable component applies it before its `clickable`.
 - **Icons come from `NotekeaIcons`** (`core.presentation.theme`), named by meaning (`NewNote`, `Delete`); only that
   file imports the icon library (Lucide, `LIBRARIES.md` §2). Enforced by Konsist.
 - **Missing piece? Add it to the design system**, not to the feature: a new file in `core.presentation.components`

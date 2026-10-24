@@ -88,7 +88,11 @@ private fun BannerButtons(
 ) {
     action?.invoke()
     onDismiss?.let {
-        TextButton(onClick = it) { Text(text = stringResource(resource = Res.string.error_banner_dismiss)) }
+        NotekeaButton(
+            text = stringResource(resource = Res.string.error_banner_dismiss),
+            onClick = it,
+            style = NotekeaButtonStyle.TEXT
+        )
     }
 }
 

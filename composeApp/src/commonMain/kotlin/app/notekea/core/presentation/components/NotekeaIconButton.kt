@@ -57,6 +57,7 @@ fun NotekeaIconButton(
         Box(
             modifier = modifier
                 .size(size = NotekeaDimensions.CompactControlSize)
+                .focusBorder(color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.small)
                 .clip(shape = MaterialTheme.shapes.small)
                 .clickable(enabled = enabled, onClickLabel = label, role = Role.Button, onClick = onClick),
             contentAlignment = Alignment.Center

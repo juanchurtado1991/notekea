@@ -33,7 +33,7 @@ fun NotekeaTab(
     Tab(
         selected = selected,
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.focusBorder(color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.small),
         selectedContentColor = MaterialTheme.colorScheme.primary,
         unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
     ) {
