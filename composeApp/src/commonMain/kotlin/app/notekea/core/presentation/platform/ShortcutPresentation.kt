@@ -16,15 +16,23 @@ import app.notekea.core.platform.domain.ShortcutModifier
 
 /*
  * Domain shortcuts in the UI: labels written the way each operating system writes them (⌘O on macOS, Ctrl+O
- * elsewhere, modifiers in the platform's canonical order) and matching against Compose key events.
+ * elsewhere, modifiers in the platform's canonical order, named keys as their symbols on macOS) and matching against
+ * Compose key events.
  */
 
 private const val ALT_NAME = "Alt"
+private const val BACKSLASH_NAME = "\\"
+private const val BACKSPACE_NAME = "Backspace"
 private const val CONTROL_NAME = "Ctrl"
+private const val DELETE_NAME = "Delete"
+private const val ENTER_NAME = "Enter"
 private const val KEY_SEPARATOR = "+"
 private const val MAC_ALT_SYMBOL = "⌥"
+private const val MAC_BACKSPACE_SYMBOL = "⌫"
 private const val MAC_COMMAND_SYMBOL = "⌘"
 private const val MAC_CONTROL_SYMBOL = "⌃"
+private const val MAC_DELETE_SYMBOL = "⌦"
+private const val MAC_ENTER_SYMBOL = "↩"
 private const val MAC_SHIFT_SYMBOL = "⇧"
 private const val SHIFT_NAME = "Shift"
 private const val WINDOWS_KEY_NAME = "Win"
@@ -41,11 +49,11 @@ fun Shortcut.label(
     val ordered = MODIFIER_ORDER.filter { it in modifiers }
     return when (operatingSystem) {
         OperatingSystem.MACOS -> {
-            ordered.joinToString(separator = "") { it.macSymbol() } + key.name
+            ordered.joinToString(separator = "") { it.macSymbol() } + key.macLabel()
         }
 
         OperatingSystem.LINUX, OperatingSystem.WINDOWS -> {
-            (ordered.map { it.displayName() } + key.name).joinToString(separator = KEY_SEPARATOR)
+            (ordered.map { it.displayName() } + key.displayName()).joinToString(separator = KEY_SEPARATOR)
         }
     }
 }
@@ -67,9 +75,30 @@ private fun KeyEvent.pressedModifiers(): Set<ShortcutModifier> = buildSet {
 }
 
 private fun ShortcutKey.composeKey(): Key = when (this) {
+    ShortcutKey.BACKSLASH -> Key.Backslash
+    ShortcutKey.BACKSPACE -> Key.Backspace
+    ShortcutKey.DELETE -> Key.Delete
+    ShortcutKey.ENTER -> Key.Enter
+    ShortcutKey.F2 -> Key.F2
     ShortcutKey.F4 -> Key.F4
+    ShortcutKey.N -> Key.N
     ShortcutKey.O -> Key.O
     ShortcutKey.Q -> Key.Q
+}
+
+private fun ShortcutKey.displayName(): String = when (this) {
+    ShortcutKey.BACKSLASH -> BACKSLASH_NAME
+    ShortcutKey.BACKSPACE -> BACKSPACE_NAME
+    ShortcutKey.DELETE -> DELETE_NAME
+    ShortcutKey.ENTER -> ENTER_NAME
+    ShortcutKey.F2, ShortcutKey.F4, ShortcutKey.N, ShortcutKey.O, ShortcutKey.Q -> name
+}
+
+private fun ShortcutKey.macLabel(): String = when (this) {
+    ShortcutKey.BACKSPACE -> MAC_BACKSPACE_SYMBOL
+    ShortcutKey.DELETE -> MAC_DELETE_SYMBOL
+    ShortcutKey.ENTER -> MAC_ENTER_SYMBOL
+    ShortcutKey.BACKSLASH, ShortcutKey.F2, ShortcutKey.F4, ShortcutKey.N, ShortcutKey.O, ShortcutKey.Q -> displayName()
 }
 
 private fun ShortcutModifier.displayName(): String = when (this) {

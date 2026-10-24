@@ -22,6 +22,46 @@ class ShortcutPresentationTest {
     }
 
     @Test
+    fun `named keys use symbols on macOS and words elsewhere`() {
+        val shortcuts = listOf(
+            Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet()),
+            Shortcut(key = ShortcutKey.BACKSPACE, modifiers = setOf(ShortcutModifier.COMMAND)),
+            Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
+            Shortcut(key = ShortcutKey.BACKSLASH, modifiers = setOf(ShortcutModifier.COMMAND)),
+            Shortcut(key = ShortcutKey.F2, modifiers = emptySet())
+        )
+
+        assertEquals(
+            expected = listOf("↩", "⌘⌫", "⌦", "⌘\\", "F2"),
+            actual = shortcuts.map { it.label(operatingSystem = OperatingSystem.MACOS) }
+        )
+        assertEquals(
+            expected = listOf("Enter", "Win+Backspace", "Delete", "Win+\\", "F2"),
+            actual = shortcuts.map { it.label(operatingSystem = OperatingSystem.WINDOWS) }
+        )
+    }
+
+    @Test
+    fun `tree shortcut keys match their compose keys`() {
+        val pressed = listOf(Key.Backslash, Key.Backspace, Key.Delete, Key.Enter, Key.F2, Key.N)
+        val keys = listOf(
+            ShortcutKey.BACKSLASH,
+            ShortcutKey.BACKSPACE,
+            ShortcutKey.DELETE,
+            ShortcutKey.ENTER,
+            ShortcutKey.F2,
+            ShortcutKey.N
+        )
+
+        assertEquals(
+            expected = List(size = keys.size) { true },
+            actual = keys.zip(pressed).map { (key, composeKey) ->
+                Shortcut(key = key, modifiers = emptySet()).matches(key = composeKey, pressedModifiers = emptySet())
+            }
+        )
+    }
+
+    @Test
     fun `a shortcut matches only its key with exactly its modifiers`() {
         val openFolder = Shortcut(key = ShortcutKey.O, modifiers = setOf(ShortcutModifier.CONTROL))
         val control = setOf(ShortcutModifier.CONTROL)
