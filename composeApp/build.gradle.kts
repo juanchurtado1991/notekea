@@ -55,6 +55,7 @@ kotlin {
             implementation(libs.jetbrains.markdown)
             implementation(libs.kermit)
             implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)
             implementation(libs.koog.agents.core)
             implementation(libs.koog.agents.tools)
@@ -70,6 +71,8 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.multiplatform.settings.test)
+            implementation(libs.okio.fakefilesystem)
             implementation(libs.turbine)
         }
 

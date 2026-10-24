@@ -95,7 +95,7 @@ MVP behavior:
 | Library | Coordinates | Version | Purpose |
 |---|---|---|---|
 | SQLDelight | `app.cash.sqldelight` (+ `sqlite-driver` on JVM) | 2.4.1 | Index state (file, hash, date) so only changed files are re-indexed (KMP) |
-| Koin | `io.insert-koin:koin-core` / `koin-compose` | 4.2.2 | **Mandatory** dependency injection (see `GUIDELINES.md`): one module per feature, platform modules bind the platform implementations |
+| Koin | `io.insert-koin:koin-core` / `koin-compose` / `koin-compose-viewmodel` | 4.2.2 | **Mandatory** dependency injection (see `GUIDELINES.md`): one module per feature, platform modules bind the platform implementations |
 | Multiplatform Settings | `com.russhwolf:multiplatform-settings` | 1.3.0 | Simple preferences (last vault, theme, selected model) |
 | Kermit | `co.touchlab:kermit` | 2.2.0 | Logging |
 
@@ -106,6 +106,8 @@ MVP behavior:
 | Kotlin Test | `org.jetbrains.kotlin:kotlin-test` | (from Kotlin) | Unit tests |
 | Coroutines Test | `org.jetbrains.kotlinx:kotlinx-coroutines-test` | 1.11.0 | Testing asynchronous code |
 | Turbine | `app.cash.turbine:turbine` | 1.2.1 | Testing `Flow` (indexing progress, chat streaming) |
+| Okio FakeFileSystem | `com.squareup.okio:okio-fakefilesystem` | 3.18.2 | In-memory file system for `data` tests |
+| Multiplatform Settings Test | `com.russhwolf:multiplatform-settings-test` | 1.3.0 | In-memory `MapSettings` for settings adapters |
 | Konsist | `com.lemonappdev:konsist` | 0.18.1 | Architecture tests (`jvmTest`): layer boundaries and the conventions of `ARCHITECTURE.md` |
 | JUnit Jupiter | `org.junit.jupiter:junit-jupiter` (+ `junit-platform-launcher` 6.1.3) | 6.1.3 | Test runner of `:ktlint-rules` |
 | ktlint test | `com.pinterest.ktlint:ktlint-test` | 1.8.0 | Assertions for the custom ktlint rules |
