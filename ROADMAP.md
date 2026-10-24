@@ -25,7 +25,7 @@ branch name is given next to it. Estimates assume one developer and are meant fo
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 2 / 16 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 3 / 16 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations | 2 weeks | 0 / 4 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -137,7 +137,7 @@ status bar item, empty state, error banner.
   dimensions) and `core.presentation.components`; a test gates WCAG AA contrast for every text pair. The gallery
   opens with `./gradlew :composeApp:run -Pgallery`.
 
-### 🚧 1.3 Open a vault — `feature/vault-open`
+### ✅ 1.3 Open a vault — `feature/vault-open` — [notekea#19](https://github.com/juanchurtado1991/notekea/pull/19)
 
 Pick a folder with the native picker (FileKit); remember the last vault (Multiplatform Settings); recent vaults list.
 
