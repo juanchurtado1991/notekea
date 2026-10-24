@@ -142,7 +142,7 @@ Packages follow Clean Architecture by feature (`app.notekea.<feature>.{domain,da
 commonMain → Ghost, Okio, JetBrains Markdown, SQLDelight, Koin, Settings, Kermit,
              Koog (agents-core, agents-tools), Compose UI, ViewModel
              + domain interfaces: llm.domain.LlmEngine, index.domain.VectorIndex,
-               sync.domain.GitSync, vault.domain.FileWatcher
+               sync.domain.GitSync, notes.domain.FileWatcher
 
 jvmMain    → java-llama.cpp, Lucene, JGit (+SSH), Java Keyring, directory-watcher,
              Ktor OkHttp, SQLDelight SQLite driver
