@@ -42,6 +42,11 @@ sealed interface VaultTreeIntent {
 
     data object OnSelectNext : VaultTreeIntent
 
+    /** The user finished dragging the sidebar edge to [widthDp]. */
+    data class OnSidebarResize(val widthDp: Int) : VaultTreeIntent
+
+    data object OnSidebarToggle : VaultTreeIntent
+
     data object OnSelectPrevious : VaultTreeIntent
 
     data object OnSortToggle : VaultTreeIntent

@@ -224,6 +224,25 @@ class VaultTreeViewModelTest {
     }
 
     @Test
+    fun `the sidebar can be hidden and resized within bounds, and both are remembered`() = runTreeTest {
+        val viewModel = startedViewModel()
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
+        viewModel.onIntent(intent = VaultTreeIntent.OnSidebarResize(widthDp = 120))
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = TreePreferences(
+                expandedFolders = emptySet(),
+                sort = TreeSort.NAME,
+                sidebarWidthDp = TreePreferences.MIN_SIDEBAR_WIDTH_DP,
+                isSidebarCollapsed = true
+            ),
+            actual = preferences.saved.last()
+        )
+    }
+
+    @Test
     fun `keyboard moves select rows in order`() = runTreeTest {
         val viewModel = startedViewModel()
 
