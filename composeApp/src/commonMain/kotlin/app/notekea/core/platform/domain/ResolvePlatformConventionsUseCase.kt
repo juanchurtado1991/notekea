@@ -2,21 +2,24 @@ package app.notekea.core.platform.domain
 
 /**
  * Maps the raw [SystemEnvironment] to the [PlatformConventions] defined in `PLATFORM_GUIDELINES.md`:
- * primary modifier (Cmd on macOS, Ctrl elsewhere), quit shortcut (Cmd+Q, Alt+F4 on Windows, Ctrl+Q on Linux),
- * dialog button order and the standard per-user application data directory, honoring `APPDATA` and
- * `XDG_DATA_HOME` when they are set.
+ * primary modifier (Cmd on macOS, Ctrl elsewhere), open-folder shortcut (primary modifier + O), quit shortcut
+ * (Cmd+Q, Alt+F4 on Windows, Ctrl+Q on Linux), dialog button order, the user's home folder and the standard per-user
+ * application data directory, honoring `APPDATA` and `XDG_DATA_HOME` when they are set.
  */
 class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnvironment) {
     private val macosNamePattern = Regex(pattern = MACOS_NAME_MARKERS)
 
     operator fun invoke(): PlatformConventions {
         val operatingSystem = detectOperatingSystem(name = systemEnvironment.operatingSystemName)
+        val primaryModifier = primaryModifierFor(operatingSystem = operatingSystem)
         return PlatformConventions(
             operatingSystem = operatingSystem,
-            primaryModifier = primaryModifierFor(operatingSystem = operatingSystem),
+            primaryModifier = primaryModifier,
+            openFolderShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(primaryModifier)),
             quitShortcut = quitShortcutFor(operatingSystem = operatingSystem),
             dialogButtonOrder = dialogButtonOrderFor(operatingSystem = operatingSystem),
-            appDataDirectory = appDataDirectoryFor(operatingSystem = operatingSystem)
+            appDataDirectory = appDataDirectoryFor(operatingSystem = operatingSystem),
+            homeDirectory = systemEnvironment.userHome
         )
     }
 

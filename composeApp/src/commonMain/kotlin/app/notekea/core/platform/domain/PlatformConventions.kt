@@ -7,7 +7,9 @@ package app.notekea.core.platform.domain
 data class PlatformConventions(
     val operatingSystem: OperatingSystem,
     val primaryModifier: ShortcutModifier,
+    val openFolderShortcut: Shortcut,
     val quitShortcut: Shortcut,
     val dialogButtonOrder: DialogButtonOrder,
-    val appDataDirectory: String
+    val appDataDirectory: String,
+    val homeDirectory: String
 )
