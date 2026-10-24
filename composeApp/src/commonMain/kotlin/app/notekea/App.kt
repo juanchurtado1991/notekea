@@ -28,6 +28,6 @@ fun App(
 @Composable
 private fun AppPreview() {
     App {
-        WelcomeContent(state = WelcomePreviewData.state(), onIntent = {})
+        WelcomeContent(state = WelcomePreviewData.state(), onIntent = {}, openedVaultContent = { _, _ -> })
     }
 }

@@ -1,6 +1,8 @@
 package app.notekea.di
 
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.notes.domain.Trash
+import app.notekea.notes.presentation.tree.VaultTreeViewModel
 import app.notekea.vault.domain.RecentVaultsStore
 import app.notekea.vault.presentation.welcome.WelcomeViewModel
 import com.russhwolf.settings.MapSettings
@@ -10,6 +12,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import org.koin.core.parameter.parametersOf
 import org.koin.dsl.koinApplication
 import org.koin.dsl.module
 import kotlin.test.AfterTest
@@ -56,6 +59,17 @@ class DesktopModulesTest {
     }
 
     @Test
+    fun `the vault tree resolves for a vault path with all its adapters`() {
+        val koin = koinApplication.koin
+
+        assertNotNull(actual = koin.get<VaultTreeViewModel> { parametersOf(VAULT_PATH) })
+        assertSame(
+            expected = koin.get<Trash>(),
+            actual = koin.get<Trash>()
+        )
+    }
+
+    @Test
     fun `the welcome flow resolves with all its use cases`() {
         val koin = koinApplication.koin
 
@@ -64,5 +78,10 @@ class DesktopModulesTest {
             expected = koin.get<RecentVaultsStore>(),
             actual = koin.get<RecentVaultsStore>()
         )
+    }
+
+    companion object {
+        // Never read: the main dispatcher is not advanced, so the ViewModel never starts scanning.
+        private const val VAULT_PATH = "notekea-unused-vault"
     }
 }

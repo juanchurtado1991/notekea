@@ -85,14 +85,6 @@
     <string name="tree_untitled_folder">Untitled folder</string>
     <string name="tree_untitled_note">Untitled</string>
 
-    <string name="vault_home_message">Notekea works with your Markdown files where they are. Nothing is moved or changed.</string>
-    <plurals name="vault_home_note_count">
-        <item quantity="one">1 note found</item>
-        <item quantity="other">%1$d notes found</item>
-    </plurals>
-    <string name="vault_home_no_notes">No notes yet</string>
-    <string name="vault_home_switch">Open another vault</string>
-
     <string name="welcome_busy">Opening vault…</string>
     <string name="welcome_create_vault">Create new vault</string>
     <string name="welcome_new_vault_cancel">Cancel</string>

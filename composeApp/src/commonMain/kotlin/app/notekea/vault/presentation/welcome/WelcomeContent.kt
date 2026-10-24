@@ -38,7 +38,7 @@ import app.notekea.resources.welcome_open_hint
 import app.notekea.resources.welcome_recent_title
 import app.notekea.resources.welcome_tagline
 import app.notekea.vault.domain.VaultError
-import app.notekea.vault.presentation.home.VaultHomeContent
+import app.notekea.vault.domain.Vault
 import org.jetbrains.compose.resources.stringResource
 
 private const val CONTENT_MAX_WIDTH_DP = 560
@@ -48,12 +48,14 @@ private const val TOP_SPACE_DP = 72
 
 /**
  * Stateless welcome flow: nothing but the wordmark while the last vault is restored, the open vault once there is
- * one, and otherwise the welcome screen (`ROADMAP.md` 1.3) centered in a column narrow enough to read at a glance.
+ * one (drawn by [openedVaultContent], which the app provides so this feature does not depend on the notes one), and
+ * otherwise the welcome screen (`ROADMAP.md` 1.3) centered in a column narrow enough to read at a glance.
  */
 @Composable
 fun WelcomeContent(
     state: WelcomeState,
     onIntent: (WelcomeIntent) -> Unit,
+    openedVaultContent: @Composable (Vault, onSwitchVault: () -> Unit) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -66,11 +68,9 @@ fun WelcomeContent(
             when {
                 state.isLoading -> NotekeaWordmark(modifier = Modifier.align(alignment = Alignment.Center))
 
-                openedVault != null -> VaultHomeContent(
-                    openedVault = openedVault,
-                    platformConventions = state.platformConventions,
-                    onSwitchVault = { onIntent(WelcomeIntent.OnSwitchVaultClick) }
-                )
+                openedVault != null -> openedVaultContent(
+                    openedVault.vault
+                ) { onIntent(WelcomeIntent.OnSwitchVaultClick) }
 
                 else -> WelcomeHome(state = state, onIntent = onIntent)
             }
@@ -230,7 +230,17 @@ private fun WelcomeContentPreviewFrame(
     state: WelcomeState
 ) {
     NotekeaPreviewThemes {
-        WelcomeContent(state = state, onIntent = {}, modifier = Modifier.height(height = PREVIEW_HEIGHT_DP.dp))
+        WelcomeContent(
+            state = state,
+            onIntent = {},
+            openedVaultContent = {
+                vault,
+                _
+                ->
+                Text(text = vault.name, modifier = Modifier.padding(all = NotekeaDimensions.SpacingXl))
+            },
+            modifier = Modifier.height(height = PREVIEW_HEIGHT_DP.dp)
+        )
     }
 }
 
