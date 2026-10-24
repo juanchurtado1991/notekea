@@ -75,18 +75,21 @@ One main window with three resizable panes, a status bar, and the native window 
 
 ### Design tokens
 
-Notekea has its own visual identity, identical on every platform. The palette is inspired by the kea parrot
-(olive green feathers, orange underwings). All values live in the theme; composables never hard-code colors.
-Palette and typefaces approved on 2026-10-23.
+Notekea has its own visual identity, identical on every platform. The "refined kea" palette is inspired by the kea
+parrot (sage green feathers, terracotta underwings) on a warm paper background that is easy on the eyes in long
+writing sessions. All values live in the theme; composables never hard-code colors. Typefaces approved on
+2026-10-23; the palette was refined the same day (it replaced a more saturated olive and orange first version).
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `primary` | Kea olive `#4F6B3A` | `#A9C48F` | Primary buttons, selection, focus ring |
-| `accent` | Underwing orange `#E2703A` | `#F29A6B` | Citations, highlights, "new" badges |
-| `background` | `#FBFAF7` | `#16181A` | Window background |
-| `surface` | `#FFFFFF` | `#1E2124` | Panes, cards |
-| `onSurface` | `#1D1F1C` | `#E6E8E3` | Body text |
-| `muted` | `#6B7068` | `#9AA096` | Secondary text, placeholders |
+| `primary` | Sage `#4A6B4F` | `#9EBFA0` | Primary buttons, selection, focus ring |
+| `primaryContainer` | `#E2EBDD` | `#2C3A2D` | Selected list items |
+| `accent` | Terracotta `#C8684A` | `#E3916F` | Citations, highlights, "new" badges (dark text on it) |
+| `background` | Paper `#F6F3EC` | `#151714` | Window background |
+| `surface` | `#FFFFFF` | `#1C1F1B` | Panes, cards |
+| `onSurface` | `#24261F` | `#E6E7E0` | Body text |
+| `muted` | `#6B6A60` | `#9C9D93` | Secondary text, placeholders |
+| `outline` | `#D8D4C8` | `#363A35` | Borders, dividers |
 | `error` | `#B3261E` | `#F2B8B5` | Errors, conflicts |
 
 - **Typography:** one bundled UI typeface (Inter, SIL OFL) for UI and editor body; a bundled monospaced typeface
