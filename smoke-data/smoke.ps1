@@ -1,10 +1,10 @@
 # Prepares the smoke-test scenarios that cannot live in the repository (Windows).
 # Git cannot store a folder without read permission, and a moved vault must not change tracked files, so this script
 # builds them in smoke-data\scratch (ignored by Git), next to the sample vaults. It never touches smoke-data\vaults.
-# Usage: powershell -ExecutionPolicy Bypass -File smoke-data\smoke.ps1 prepare|move|first-launch|restore-settings|clean
+# Usage: powershell -ExecutionPolicy Bypass -File smoke-data\smoke.ps1 prepare|move|lock|first-launch|restore-settings|clean
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("prepare", "move", "first-launch", "restore-settings", "clean")]
+    [ValidateSet("prepare", "move", "lock", "first-launch", "restore-settings", "clean")]
     [string]$Command
 )
 $ErrorActionPreference = "Stop"
@@ -28,12 +28,16 @@ switch ($Command) {
         Copy-Item -Recurse (Join-Path $SmokeRoot "vaults\Personal Notes") (Join-Path $Scratch "Movable Vault")
         Set-Content (Join-Path $Scratch "New Vault Location\My Notes\Existing note.md") "# Existing note"
         Set-Content (Join-Path $Locked "Locked note.md") "# Locked note"
-        icacls $Locked /deny "${env:USERNAME}:(RX)" | Out-Null
         Write-Output "Smoke scenarios ready in $Scratch (Movable Vault, Locked Vault, New Vault Location)"
     }
     "move" {
         Rename-Item (Join-Path $Scratch "Movable Vault") "Moved Vault"
         Write-Output "Moved to $(Join-Path $Scratch 'Moved Vault')"
+    }
+    "lock" {
+        # Native folder pickers refuse to select a folder they cannot read, so it is locked after it is in Recent.
+        icacls $Locked /deny "${env:USERNAME}:(RX)" | Out-Null
+        Write-Output "Locked $Locked"
     }
     "first-launch" {
         if (Test-Path $Settings) { Move-Item -Force $Settings $Backup }

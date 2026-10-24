@@ -21,11 +21,15 @@ list proves the **app** works for a real person on a real machine. It is the mai
 
 ## Test environment (fill in for the release run)
 
-| OS | Version | Hardware (CPU / RAM / GPU) | Build | Tester | Date |
-|---|---|---|---|---|---|
-| Windows | | | | | |
-| macOS | | | | | |
-| Linux | | | | | |
+| OS | Version | Desktop environment | Hardware (CPU / RAM / GPU) | Build | Tester | Date |
+|---|---|---|---|---|---|---|
+| Windows | | — | | | | |
+| macOS | | — | | | | |
+| Linux | | | | | | |
+
+On Linux the folder picker is drawn by the desktop through the XDG portal (GNOME, KDE, COSMIC…), so its look,
+shortcuts and rules differ between desktops; record the desktop environment. Pop!_OS with COSMIC was used while
+building 1.3. Test data comes from `smoke-data/` (see its README); run its scripts from a normal user account.
 
 ## General
 
@@ -66,15 +70,15 @@ list proves the **app** works for a real person on a real machine. It is the mai
 
 | ID | Steps | Expected | Testable from | Win | macOS | Linux |
 |---|---|---|---|---|---|---|
-| 1.3-01 | Run `smoke.sh first-launch`, then start the app | Welcome screen: "Notekea" wordmark, tagline, "Open folder…" (with the Ctrl+O / ⌘O hint) and "Create new vault"; no recent list | 1.3 | | | |
+| 1.3-01 | Run `smoke.sh first-launch` (`smoke.ps1 first-launch` on Windows), then start the app | Welcome screen: "Notekea" wordmark, tagline, "Open folder…" (with the Ctrl+O / ⌘O hint) and "Create new vault"; no recent list | 1.3 | | | |
 | 1.3-02 | Click "Open folder…" and choose `smoke-data/vaults/Personal Notes` | The native folder picker opens; the vault opens as "Personal Notes" in the window title with "12 notes found" (`.obsidian`, `.trash` and the `.txt` file are not counted) | 1.3 | | | |
 | 1.3-03 | Quit and relaunch the app | The last vault reopens directly, without flashing the welcome screen | 1.3 | | | |
 | 1.3-04 | Click "Open another vault", open `Work Obsidian` and `Empty Vault` ("No notes yet"), then check the recent list | Vaults appear most recent first with their folder (`~/…` on macOS and Linux) and when they were opened ("Just now", "2 days ago"…) | 1.3 | | | |
-| 1.3-05 | Press Ctrl+O (⌘O on macOS) on the welcome screen and inside an open vault | The folder picker opens in both places; cancelling it changes nothing | 1.3 | | | |
-| 1.3-06 | Run `smoke.sh prepare`, open `Movable Vault`, quit, run `smoke.sh move` and relaunch | The vault is muted with "Folder not found", "Remove" and "Locate…"; "Locate…" lets you pick its new place and opens it; "Remove" only removes it from the list | 1.3 | | | |
+| 1.3-05 | Press Ctrl+O (⌘O on macOS) on the welcome screen and inside an open vault | The folder picker opens in both places, also right after clicking elsewhere or opening a vault; cancelling it changes nothing | 1.3 | | | |
+| 1.3-06 | Run `smoke.sh prepare` (`smoke.ps1 prepare` on Windows), open `smoke-data/scratch/Movable Vault`, quit, run `smoke.sh move` (`smoke.ps1 move`) and relaunch | The vault is muted with "Folder not found", "Remove" and "Locate…"; "Locate…" lets you pick its new place and opens it; "Remove" only removes it from the list | 1.3 | | | |
 | 1.3-07 | Click "Create new vault", keep the suggested name and location, and create it | A "My Notes" folder is created in Documents (or the home folder) and opens empty ("No notes yet"); nothing else is written inside it | 1.3 | | | |
 | 1.3-08 | Create "My Notes" in `New Vault Location` (from `prepare`), then a vault named `a/b` | Each problem is explained in plain language under the name field, keeping what you typed; typing again clears the message | 1.3 | | | |
-| 1.3-09 | Open `Locked Vault` (from `prepare`) | An error banner names the folder and says to check its permissions; "Dismiss" hides it | 1.3 | | | |
+| 1.3-09 | Open `smoke-data/scratch/Locked Vault` (from `prepare`), click "Open another vault", run `smoke.sh lock` (`smoke.ps1 lock` on Windows), then click "Locked Vault" in Recent | An error banner names the folder and says to check its permissions; "Dismiss" hides it. (Native pickers do not let you select an unreadable folder, so it is locked after it is known.) | 1.3 | | | |
 | 1.3-10 | Click "Create new vault" and use only the keyboard | The name field has focus; Enter creates the vault, Esc closes the panel; while a vault opens, "Opening vault…" shows a spinner without moving the buttons | 1.3 | | | |
 
 > **Revised by 1.4 (vault tree):** 1.3-02, 1.3-04 and 1.3-07 check the "N notes found" / "No notes yet" summary of

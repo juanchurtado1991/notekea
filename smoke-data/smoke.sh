@@ -3,7 +3,7 @@
 # Git cannot store a folder without read permission, and a moved vault must not change tracked files, so this script
 # builds them in smoke-data/scratch (ignored by Git). It lives in the repository, not in /tmp, because sandboxed
 # terminals and the native folder picker may each see a different /tmp. It never touches smoke-data/vaults.
-# Usage: smoke-data/smoke.sh prepare | move | first-launch | restore-settings | clean
+# Usage: smoke-data/smoke.sh prepare | move | lock | first-launch | restore-settings | clean
 set -euo pipefail
 
 SMOKE_ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -33,12 +33,10 @@ prepare() {
     cp -R "$SMOKE_ROOT/vaults/Personal Notes" "$SCRATCH/Movable Vault"
     echo "# Existing note" > "$SCRATCH/New Vault Location/My Notes/Existing note.md"
     echo "# Locked note" > "$SCRATCH/Locked Vault/Locked note.md"
-    chmod 000 "$SCRATCH/Locked Vault"
     echo "Smoke scenarios ready in $SCRATCH:"
     echo "  Movable Vault       open it, quit, run 'move', relaunch: folder not found, Locate…"
-    echo "  Locked Vault        no read permission: permission error"
+    echo "  Locked Vault        open it, then run 'lock' and open it from Recent: permission error"
     echo "  New Vault Location  already has a 'My Notes' folder with a note: create-vault error"
-    if [ "$(id -u)" -eq 0 ]; then echo "Warning: as root, 'Locked Vault' stays readable." >&2; fi
 }
 
 settings_path() {
@@ -52,6 +50,13 @@ case "${1:-}" in
     move)
         mv "$SCRATCH/Movable Vault" "$SCRATCH/Moved Vault"
         echo "Moved to $SCRATCH/Moved Vault"
+        ;;
+    lock)
+        # Native folder pickers refuse to select a folder they cannot read, so the folder is locked after it is in
+        # Notekea's recent list, like a vault whose permissions change or whose drive becomes unreadable.
+        chmod 000 "$SCRATCH/Locked Vault"
+        echo "Locked $SCRATCH/Locked Vault"
+        if [ "$(id -u)" -eq 0 ]; then echo "Warning: as root, 'Locked Vault' stays readable." >&2; fi
         ;;
     first-launch)
         settings="$(settings_path)"
@@ -68,7 +73,7 @@ case "${1:-}" in
         echo "Removed $SCRATCH"
         ;;
     *)
-        echo "Usage: $0 prepare | move | first-launch | restore-settings | clean" >&2
+        echo "Usage: $0 prepare | move | lock | first-launch | restore-settings | clean" >&2
         exit 1
         ;;
 esac

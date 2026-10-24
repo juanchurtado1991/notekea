@@ -23,18 +23,21 @@ folder picker reaches them the same way. Not in `/tmp`: a sandboxed terminal and
 different `/tmp`.
 
 ```bash
-smoke-data/smoke.sh prepare           # Movable Vault, Locked Vault (no permission), New Vault Location
+smoke-data/smoke.sh prepare           # Movable Vault, Locked Vault, New Vault Location (all readable)
 smoke-data/smoke.sh move              # renames Movable Vault to Moved Vault, to test "Folder not found"
+smoke-data/smoke.sh lock              # removes read permission from Locked Vault, to test the permission error
 smoke-data/smoke.sh first-launch      # backs up Notekea's settings so the next start is a first launch
 smoke-data/smoke.sh restore-settings  # puts the backed-up settings back
 smoke-data/smoke.sh clean             # removes the scratch folder
 ```
 
 On Windows: `powershell -ExecutionPolicy Bypass -File smoke-data\smoke.ps1 prepare` (same commands).
-Run them as a normal user: as root (or an administrator) the locked folder stays readable.
+Native folder pickers refuse to select a folder they cannot read, so `Locked Vault` is opened first and locked
+afterwards (`lock`), like a known vault whose permissions change. Run the scripts as a normal user: as root (or an
+administrator) the locked folder stays readable.
 
 ## Data per feature
 
 | Feature | Smoke cases | Data |
 |---|---|---|
-| 1.3 Open a vault | 1.3-01 … 1.3-09, 1.1-04, 1.2-04 | All three vaults; `prepare`, `move`, `first-launch` |
+| 1.3 Open a vault | 1.3-01 … 1.3-10, 1.1-04, 1.2-04 | All three vaults; `prepare`, `move`, `lock`, `first-launch` |
