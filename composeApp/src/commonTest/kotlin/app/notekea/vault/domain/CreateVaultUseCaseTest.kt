@@ -14,7 +14,7 @@ class CreateVaultUseCaseTest {
 
         val expectedPath = FakeVaultFileSystem.DEFAULT_PARENT + FakeVaultFileSystem.SEPARATOR + NAME
         assertEquals(
-            expected = Outcome.Success(value = OpenedVault(vault = Vault.fromPath(path = expectedPath), noteCount = 0)),
+            expected = Outcome.Success(value = Vault.fromPath(path = expectedPath)),
             actual = outcome
         )
         assertEquals(

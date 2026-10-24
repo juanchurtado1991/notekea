@@ -36,17 +36,6 @@ class OkioVaultFileSystemTest {
     }
 
     @Test
-    fun `notes are counted recursively, skipping hidden folders and other files`() = runVaultTest {
-        listOf("$NOTES/a.md", "$NOTES/B.MD", "$NOTES/projects/c.md", "$NOTES/image.png", "$NOTES/.obsidian/d.md")
-            .forEach { writeFile(path = it) }
-
-        assertEquals(
-            expected = 3,
-            actual = vaultFileSystem().countNotes(path = NOTES)
-        )
-    }
-
-    @Test
     fun `a new folder is created, or reused when it exists and is empty`() = runVaultTest {
         fakeFileSystem.createDirectories(dir = DOCUMENTS.toPath())
 

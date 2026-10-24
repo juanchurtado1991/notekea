@@ -69,7 +69,7 @@ fun WelcomeContent(
                 state.isLoading -> NotekeaWordmark(modifier = Modifier.align(alignment = Alignment.Center))
 
                 openedVault != null -> openedVaultContent(
-                    openedVault.vault
+                    openedVault
                 ) { onIntent(WelcomeIntent.OnSwitchVaultClick) }
 
                 else -> WelcomeHome(state = state, onIntent = onIntent)
@@ -279,7 +279,7 @@ private fun WelcomeContentPermissionErrorPreview() {
     WelcomeContentPreviewFrame(
         state = WelcomePreviewData.state().copy(
             recentVaults = WelcomePreviewData.recentVaults,
-            error = VaultError.PermissionDenied(path = WelcomePreviewData.openedVault.vault.path)
+            error = VaultError.PermissionDenied(path = WelcomePreviewData.openedVault.path)
         )
     )
 }

@@ -10,7 +10,7 @@ class LocateVaultUseCase(
     suspend operator fun invoke(
         missingPath: String,
         newPath: String
-    ): Outcome<OpenedVault, VaultError> {
+    ): Outcome<Vault, VaultError> {
         val opened = openVault(path = newPath)
         if (opened is Outcome.Success && newPath != missingPath) removeRecentVault(path = missingPath)
         return opened

@@ -32,11 +32,9 @@ class VaultFixture {
 
     fun addFolder(
         path: String,
-        access: FolderAccess = FolderAccess.AVAILABLE,
-        noteCount: Int = 0
+        access: FolderAccess = FolderAccess.AVAILABLE
     ) {
         fileSystem.folders[path] = access
-        fileSystem.noteCounts[path] = noteCount
     }
 
     fun recent(

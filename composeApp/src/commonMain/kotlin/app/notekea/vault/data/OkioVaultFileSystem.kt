@@ -13,8 +13,7 @@ import okio.Path.Companion.toPath
 
 /**
  * [VaultFileSystem] on Okio. A path that exists but is a file counts as a missing folder, and a folder that cannot be
- * listed counts as not readable. Note counting skips hidden folders (`.obsidian`, `.git`, `.trash`) and does not
- * follow symbolic links, so a link pointing back up the tree cannot loop forever.
+ * listed counts as not readable.
  */
 class OkioVaultFileSystem(
     private val fileSystem: FileSystem,
@@ -24,10 +23,6 @@ class OkioVaultFileSystem(
     override suspend fun access(
         path: String
     ): FolderAccess = withContext(context = dispatchers.io) { accessOf(folder = path.toPath()) }
-
-    override suspend fun countNotes(
-        path: String
-    ): Int = withContext(context = dispatchers.io) { countNotesIn(folder = path.toPath()) }
 
     override suspend fun createFolder(
         parentPath: String,
@@ -67,12 +62,6 @@ class OkioVaultFileSystem(
         FolderAccess.NOT_READABLE
     }
 
-    private fun countNotesIn(
-        folder: Path
-    ): Int = listOrEmpty(folder = folder)
-        .filterNot { it.name.startsWith(prefix = HIDDEN_PREFIX) }
-        .sumOf { noteCountOf(entry = it) }
-
     private fun createDirectories(
         folder: Path
     ): Outcome<String, VaultError> = try {
@@ -94,21 +83,7 @@ class OkioVaultFileSystem(
         folder: Path
     ): List<Path> = fileSystem.listOrNull(dir = folder).orEmpty()
 
-    private fun noteCountOf(
-        entry: Path
-    ): Int = try {
-        when {
-            isDirectory(path = entry) -> countNotesIn(folder = entry)
-            entry.name.endsWith(suffix = MARKDOWN_EXTENSION, ignoreCase = true) -> 1
-            else -> 0
-        }
-    } catch (_: IOException) {
-        0
-    }
-
     companion object {
         private const val DOCUMENTS_FOLDER = "Documents"
-        private const val HIDDEN_PREFIX = "."
-        private const val MARKDOWN_EXTENSION = ".md"
     }
 }

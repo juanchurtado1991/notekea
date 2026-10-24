@@ -8,10 +8,6 @@ interface VaultFileSystem {
         path: String
     ): FolderAccess
 
-    suspend fun countNotes(
-        path: String
-    ): Int
-
     /** Creates `parentPath/name`, or reuses it when it exists and is empty, and returns its path. */
     suspend fun createFolder(
         parentPath: String,

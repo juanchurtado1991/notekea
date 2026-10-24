@@ -4,7 +4,7 @@ import app.notekea.core.domain.Outcome
 import kotlin.time.Clock
 
 /**
- * Opens the folder at a path as a vault: checks it can be read, counts its notes and moves it to the top of the
+ * Opens the folder at a path as a vault: checks it can be read and moves it to the top of the
  * recent vaults, keeping at most [MAX_RECENT_VAULTS] so the list stays short enough to scan at a glance.
  */
 class OpenVaultUseCase(
@@ -14,14 +14,10 @@ class OpenVaultUseCase(
 ) {
     suspend operator fun invoke(
         path: String
-    ): Outcome<OpenedVault, VaultError> = when (vaultFileSystem.access(path = path)) {
+    ): Outcome<Vault, VaultError> = when (vaultFileSystem.access(path = path)) {
         FolderAccess.AVAILABLE -> {
             rememberAsMostRecent(path = path)
-            val opened = OpenedVault(
-                vault = Vault.fromPath(path = path),
-                noteCount = vaultFileSystem.countNotes(path = path)
-            )
-            Outcome.Success(value = opened)
+            Outcome.Success(value = Vault.fromPath(path = path))
         }
 
         FolderAccess.MISSING -> {

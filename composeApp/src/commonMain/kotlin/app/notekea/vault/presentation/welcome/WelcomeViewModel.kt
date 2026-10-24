@@ -1,19 +1,19 @@
 package app.notekea.vault.presentation.welcome
 
 import app.notekea.core.domain.Outcome
-import co.touchlab.kermit.Logger
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.vault.domain.CreateVaultUseCase
 import app.notekea.vault.domain.GetRecentVaultsUseCase
 import app.notekea.vault.domain.LocateVaultUseCase
 import app.notekea.vault.domain.OpenVaultUseCase
-import app.notekea.vault.domain.OpenedVault
 import app.notekea.vault.domain.PickFolderUseCase
 import app.notekea.vault.domain.RemoveRecentVaultUseCase
 import app.notekea.vault.domain.RestoreLastVaultUseCase
 import app.notekea.vault.domain.SuggestVaultLocationUseCase
+import app.notekea.vault.domain.Vault
 import app.notekea.vault.domain.VaultError
+import co.touchlab.kermit.Logger
 
 /**
  * Welcome flow (`ROADMAP.md` 1.3), the MVI reference screen (`ARCHITECTURE.md` §10): restores the last vault at
@@ -85,7 +85,7 @@ class WelcomeViewModel(
     }
 
     private suspend fun openNow(
-        open: suspend () -> Outcome<OpenedVault, VaultError>
+        open: suspend () -> Outcome<Vault, VaultError>
     ) {
         reduce { it.copy(isBusy = true, error = null, hasUnexpectedError = false) }
         val outcome = open()
@@ -94,7 +94,7 @@ class WelcomeViewModel(
     }
 
     private fun openWith(
-        open: suspend () -> Outcome<OpenedVault, VaultError>
+        open: suspend () -> Outcome<Vault, VaultError>
     ) {
         launchGuarded(onError = ::showUnexpectedError) { openNow(open = open) }
     }

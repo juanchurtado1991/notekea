@@ -2,7 +2,6 @@ package app.notekea.vault.presentation.welcome
 
 import app.notekea.core.domain.time.ElapsedTime
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
-import app.notekea.vault.domain.OpenedVault
 import app.notekea.vault.domain.RecentVaultStatus
 import app.notekea.vault.domain.Vault
 
@@ -12,14 +11,13 @@ internal object WelcomePreviewData {
     private const val ARCHIVE_PATH = "/home/ana/Old/Archive"
     private const val DOCUMENTS_PATH = "/home/ana/Documents"
     private const val NEW_VAULT_NAME = "My Notes"
-    private const val NOTES_COUNT = 128
     private const val NOTES_PATH = "/home/ana/Notes"
     private const val RECENT_DAYS = 2
     private const val WORK_PATH = "/home/ana/Work/Obsidian"
 
     val platformConventions = PreviewPlatformConventions.linux
 
-    val openedVault = OpenedVault(vault = Vault.fromPath(path = NOTES_PATH), noteCount = NOTES_COUNT)
+    val openedVault = Vault.fromPath(path = NOTES_PATH)
 
     val recentVaults = listOf(
         RecentVaultStatus(

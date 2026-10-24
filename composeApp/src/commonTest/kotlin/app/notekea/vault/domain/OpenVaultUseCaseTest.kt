@@ -10,14 +10,14 @@ class OpenVaultUseCaseTest {
 
     @Test
     fun `an available folder opens with its note count and becomes the most recent vault`() = runTest {
-        fixture.addFolder(path = VaultFixture.NOTES, noteCount = NOTE_COUNT)
+        fixture.addFolder(path = VaultFixture.NOTES)
         fixture.store.recentVaults = listOf(fixture.recent(path = VaultFixture.WORK))
 
         val outcome = fixture.openVault(path = VaultFixture.NOTES)
 
         assertEquals(
             expected = Outcome.Success(
-                value = OpenedVault(vault = Vault.fromPath(path = VaultFixture.NOTES), noteCount = NOTE_COUNT)
+                value = Vault.fromPath(path = VaultFixture.NOTES)
             ),
             actual = outcome
         )
@@ -86,7 +86,6 @@ class OpenVaultUseCaseTest {
     }
 
     companion object {
-        private const val NOTE_COUNT = 42
         private const val OLD_PREFIX = "/old/"
     }
 }
