@@ -39,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   folders and Markdown notes, note counts, natural sorting by name or date, keyboard navigation, a context menu and
   shortcuts (Mod+N new note, F2 / Enter on macOS rename, Delete / Cmd+Backspace on macOS delete). Notes and folders
   are created, renamed in place and deleted to the system trash (`gio trash` on Linux), falling back to the vault's
-  `.trash` folder; renaming offers to update the wiki and Markdown links of the notes that point to the entry. The
+  `.trash` folder; renaming updates the wiki and Markdown links of the notes that point to the entry and says how many changed. The
   tree follows outside changes through a file watcher, reads frontmatter titles, tags and aliases with Ghost, and
   opens 5,000 notes in under a second from a SQLite cache (`notekea.db` in the app data directory). Expanded
   folders are remembered per vault; sort, sidebar width and visibility for all vaults.

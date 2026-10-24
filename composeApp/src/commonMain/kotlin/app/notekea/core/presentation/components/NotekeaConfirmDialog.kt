@@ -27,9 +27,8 @@ private const val PREVIEW_TITLE = "Delete this note?"
  * A question that needs an answer before going on (deleting a note). The buttons follow the platform's order
  * ([buttonOrder]: Cancel first on macOS and Linux, last on Windows, `PLATFORM_GUIDELINES.md` §5) and the confirm
  * button says what it does ("Delete note", never "OK"). A destructive confirm button uses the error color and focus
- * starts on Cancel, so a quick Enter never destroys anything; otherwise focus starts on the confirm button unless
- * [isCancelFocused]. A dialog that opens right after Enter (the rename that asks to update links) must focus Cancel:
- * the key may still be held and repeat into the focused button. Esc and clicking outside cancel.
+ * starts on Cancel, so a quick Enter never destroys anything; otherwise focus starts on the confirm button. Esc and
+ * clicking outside cancel.
  */
 @Composable
 fun NotekeaConfirmDialog(
@@ -41,8 +40,7 @@ fun NotekeaConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    isDestructive: Boolean = false,
-    isCancelFocused: Boolean = isDestructive
+    isDestructive: Boolean = false
 ) {
     val colors = MaterialTheme.colorScheme
     AlertDialog(
@@ -54,8 +52,7 @@ fun NotekeaConfirmDialog(
                 buttonOrder = buttonOrder,
                 onConfirm = onConfirm,
                 onDismiss = onDismiss,
-                isDestructive = isDestructive,
-                isCancelFocused = isCancelFocused
+                isDestructive = isDestructive
             )
         },
         modifier = modifier.border(
@@ -78,8 +75,7 @@ private fun DialogButtons(
     buttonOrder: DialogButtonOrder,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    isDestructive: Boolean,
-    isCancelFocused: Boolean
+    isDestructive: Boolean
 ) {
     val initialFocus = remember { FocusRequester() }
     LaunchedEffect(key1 = initialFocus) { initialFocus.requestFocus() }
@@ -87,7 +83,7 @@ private fun DialogButtons(
         NotekeaButton(
             text = confirmLabel,
             onClick = onConfirm,
-            modifier = if (isCancelFocused) Modifier else Modifier.focusRequester(focusRequester = initialFocus),
+            modifier = if (isDestructive) Modifier else Modifier.focusRequester(focusRequester = initialFocus),
             style = if (isDestructive) NotekeaButtonStyle.DESTRUCTIVE else NotekeaButtonStyle.PRIMARY
         )
     }
@@ -95,7 +91,7 @@ private fun DialogButtons(
         NotekeaButton(
             text = cancelLabel,
             onClick = onDismiss,
-            modifier = if (isCancelFocused) Modifier.focusRequester(focusRequester = initialFocus) else Modifier,
+            modifier = if (isDestructive) Modifier.focusRequester(focusRequester = initialFocus) else Modifier,
             style = NotekeaButtonStyle.SECONDARY
         )
     }
