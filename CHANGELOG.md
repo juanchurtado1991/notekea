@@ -20,8 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Theme and design system (ROADMAP 1.2): "refined kea" palette (sage, terracotta, warm paper) with light and
-  dark schemes, bundled Inter and JetBrains Mono,
+- Theme and design system (ROADMAP 1.2): "cobalt and tangerine" palette with light and dark schemes, bundled Inter and JetBrains Mono,
   type scale, 6 dp / 10 dp shapes, spacing and motion tokens; components `NotekeaButton`, `NotekeaTextField`,
   `NotekeaListItem`, `NotekeaTab`, `StatusBarItem`, `EmptyState` and `ErrorBanner`; a WCAG AA contrast test for the
   palette; and a developer gallery (`./gradlew :composeApp:run -Pgallery`).
