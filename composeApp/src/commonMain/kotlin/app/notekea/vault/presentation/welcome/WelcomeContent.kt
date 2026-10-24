@@ -233,10 +233,7 @@ private fun WelcomeContentPreviewFrame(
         WelcomeContent(
             state = state,
             onIntent = {},
-            openedVaultContent = {
-                vault,
-                _
-                ->
+            openedVaultContent = { vault, _ ->
                 Text(text = vault.name, modifier = Modifier.padding(all = NotekeaDimensions.SpacingXl))
             },
             modifier = Modifier.height(height = PREVIEW_HEIGHT_DP.dp)

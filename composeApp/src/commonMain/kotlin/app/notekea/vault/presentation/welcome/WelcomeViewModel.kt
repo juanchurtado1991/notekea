@@ -32,8 +32,8 @@ class WelcomeViewModel(
     private val restoreLastVault: RestoreLastVaultUseCase,
     private val suggestVaultLocation: SuggestVaultLocationUseCase
 ) : BaseViewModel<WelcomeState, WelcomeIntent, Nothing>(
-        initialState = WelcomeState(platformConventions = platformConventions)
-    ) {
+    initialState = WelcomeState(platformConventions = platformConventions)
+) {
     private val logger = Logger.withTag(tag = LOG_TAG)
 
     init {

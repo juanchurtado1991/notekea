@@ -65,12 +65,8 @@ fun NotekeaSplitPane(
     )
     val density = LocalDensity.current
     val dragState = rememberDraggableState { delta ->
-        draggedWidth =
-            (
-                draggedWidth + with(
-                    density
-                ) { delta.toDp() }
-            ).coerceIn(minimumValue = minStartWidth, maximumValue = maxStartWidth)
+        val dragged = draggedWidth + with(density) { delta.toDp() }
+        draggedWidth = dragged.coerceIn(minimumValue = minStartWidth, maximumValue = maxStartWidth)
     }
     Row(modifier = modifier.fillMaxSize()) {
         Box(
