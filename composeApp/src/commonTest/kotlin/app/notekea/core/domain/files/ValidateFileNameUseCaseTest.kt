@@ -1,4 +1,4 @@
-package app.notekea.vault.domain
+package app.notekea.core.domain.files
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

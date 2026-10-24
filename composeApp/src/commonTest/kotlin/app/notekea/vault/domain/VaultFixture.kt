@@ -1,6 +1,7 @@
 package app.notekea.vault.domain
 
 import app.notekea.core.domain.FakeClock
+import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.domain.time.DescribeElapsedTimeUseCase
 import kotlin.time.Instant
 

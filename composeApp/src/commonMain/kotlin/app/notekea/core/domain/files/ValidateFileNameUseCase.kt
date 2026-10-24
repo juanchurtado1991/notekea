@@ -1,9 +1,9 @@
-package app.notekea.vault.domain
+package app.notekea.core.domain.files
 
 /**
  * Whether [name] can be a file or folder name on every supported operating system: not empty, not `.`/`..`, and
- * without the characters Windows forbids. Shared by every place that names something inside a vault, so a vault
- * created or edited on Linux still syncs to Windows.
+ * without the characters Windows forbids. Shared by every feature that names a file or folder (vaults, notes),
+ * so a vault created or edited on Linux still syncs to Windows.
  */
 class ValidateFileNameUseCase {
     operator fun invoke(
