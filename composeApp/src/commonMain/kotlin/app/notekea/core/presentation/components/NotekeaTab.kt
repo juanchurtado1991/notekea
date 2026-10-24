@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
@@ -17,7 +18,10 @@ private const val PREVIEW_BACKLINKS = "Backlinks"
 private const val PREVIEW_BADGE_COUNT = 12
 private const val PREVIEW_RELATED = "Related"
 
-/** Tab for the right panel (Related, Backlinks, Outline, Chat) with an optional count badge. */
+/**
+ * Tab for the right panel (Related, Backlinks, Outline, Chat) with an optional count badge. In a narrow panel the
+ * label is ellipsized first; the badge number never wraps.
+ */
 @Composable
 fun NotekeaTab(
     text: String,
@@ -37,13 +41,19 @@ fun NotekeaTab(
             modifier = Modifier.padding(vertical = NotekeaDimensions.SpacingS),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = text, style = MaterialTheme.typography.labelLarge)
+            Text(
+                text = text,
+                modifier = Modifier.weight(weight = 1f, fill = false),
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
             badgeCount?.let {
                 Badge(
                     modifier = Modifier.padding(start = NotekeaDimensions.SpacingXs),
                     containerColor = MaterialTheme.colorScheme.tertiary,
                     contentColor = MaterialTheme.colorScheme.onTertiary
-                ) { Text(text = it.toString()) }
+                ) { Text(text = it.toString(), maxLines = 1, softWrap = false) }
             }
         }
     }
