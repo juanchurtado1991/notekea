@@ -52,6 +52,7 @@ kotlin {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.filekit.dialogs.compose)
             implementation(libs.ghost.ktor)
+            implementation(libs.icons.lucide.cmp)
             implementation(libs.jetbrains.markdown)
             implementation(libs.kermit)
             implementation(libs.koin.compose)

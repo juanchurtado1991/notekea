@@ -131,6 +131,17 @@ class ArchitectureTest {
     }
 
     @Test
+    fun `icons come from NotekeaIcons, never from the icon library`() {
+        productionScope.files
+            .filterNot { it.name == ICONS_FILE }
+            .assertFalse(
+                additionalMessage = "LIBRARIES.md §2: add the icon to NotekeaIcons and use it from there"
+            ) { file ->
+                file.imports.any { it.name.startsWith(prefix = ICON_LIBRARY_PACKAGE) }
+            }
+    }
+
+    @Test
     fun `every UI composable has a preview in its file`() {
         productionScope.files
             .filterNot { file -> PREVIEW_EXEMPT_PACKAGES.any { file.packagee?.name?.startsWith(prefix = it) == true } }
@@ -331,6 +342,8 @@ class ArchitectureTest {
         private const val DIRECT_DISPATCHER_PATTERN = "Dispatchers\\.(IO|Default|Main|Unconfined)"
         private const val DISPATCHERS_IMPLEMENTATION = "JvmAppDispatchers"
         private const val DOMAIN_LAYER = "domain"
+        private const val ICON_LIBRARY_PACKAGE = "com.composables.icons"
+        private const val ICONS_FILE = "NotekeaIcons"
         private const val KTLINT_RULES_MODULE_NAME = "ktlint-rules"
         private const val KOIN_COMPONENT_IMPORT = "org.koin.core.component.KoinComponent"
         private const val MODULE_NAME = "composeApp"
