@@ -33,7 +33,7 @@ data class VaultTree(
             .filter { it.isWithin(folder = from) }
             .fold(
                 initial = without(path = from)
-            ) { tree, folder -> tree.withFolder(path = moved(path = folder, from = from, to = to)) }
+            ) { tree, folder -> tree.withFolder(path = folder.rebased(from = from, to = to)) }
         return notes.values
             .filter {
                 it.file.path.isWithin(
@@ -41,7 +41,7 @@ data class VaultTree(
                 )
             }.fold(initial = withMovedFolders) { tree, note ->
                 tree.withNote(
-                    note = note.copy(file = note.file.copy(path = moved(path = note.file.path, from = from, to = to)))
+                    note = note.copy(file = note.file.copy(path = note.file.path.rebased(from = from, to = to)))
                 )
             }
     }
@@ -52,12 +52,6 @@ data class VaultTree(
         folders = folders.filterNot { it.isWithin(folder = path) }.toSet(),
         notes = notes.filterKeys { !it.isWithin(folder = path) }
     )
-
-    private fun moved(
-        path: RelativePath,
-        from: RelativePath,
-        to: RelativePath
-    ): RelativePath = RelativePath(value = to.value + path.value.removePrefix(prefix = from.value))
 
     private fun ancestorsAndSelf(
         path: RelativePath
