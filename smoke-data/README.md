@@ -1,0 +1,38 @@
+# Smoke test data
+
+Ready-made data for the manual smoke tests (`GUIDELINES.md` §8, `MVP_SMOKE_TEST.md`). Every feature that needs
+data to be smoke tested adds it here, in the same pull request, and lists it below. All content is fictional.
+
+## Vaults (`vaults/`)
+
+Open them with **Open folder…**. Notekea never writes inside a vault, so opening them leaves the repository clean.
+
+| Vault | Notes counted | What it covers |
+|---|---|---|
+| `Personal Notes` | 12 | Nested folders (three levels in `Projects/Garden`), wiki links, tags, YAML front matter, tasks, a table, a non-ASCII file name (`Café con leche.md`), a folder name with a space; files that must **not** count: `.obsidian/`, `.trash/` and `attachments/shopping.txt` |
+| `Work Obsidian` | 6 | A second vault in Obsidian format, to switch between vaults and fill the recent list |
+| `Empty Vault` | 0 | Shows "No notes yet" (it only holds a hidden `.gitkeep` so Git keeps the folder) |
+
+`SmokeDataTest` (composeApp `jvmTest`) fails if these counts change, so this table stays true.
+
+## Scenarios outside the repository (`smoke.sh`, `smoke.ps1`)
+
+Some cases cannot live in Git: a folder without read permission, a vault that moves, or a first launch with no
+saved settings. The scripts build them in a scratch folder (`$TMPDIR/notekea-smoke`, `%TEMP%\notekea-smoke`).
+
+```bash
+smoke-data/smoke.sh prepare           # Movable Vault, Locked Vault (no permission), New Vault Location
+smoke-data/smoke.sh move              # renames Movable Vault to Moved Vault, to test "Folder not found"
+smoke-data/smoke.sh first-launch      # backs up Notekea's settings so the next start is a first launch
+smoke-data/smoke.sh restore-settings  # puts the backed-up settings back
+smoke-data/smoke.sh clean             # removes the scratch folder
+```
+
+On Windows: `powershell -ExecutionPolicy Bypass -File smoke-data\smoke.ps1 prepare` (same commands).
+Run them as a normal user: as root (or an administrator) the locked folder stays readable.
+
+## Data per feature
+
+| Feature | Smoke cases | Data |
+|---|---|---|
+| 1.3 Open a vault | 1.3-01 … 1.3-09, 1.1-04, 1.2-04 | All three vaults; `prepare`, `move`, `first-launch` |

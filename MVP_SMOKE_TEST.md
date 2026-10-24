@@ -12,6 +12,8 @@ list proves the **app** works for a real person on a real machine. It is the mai
   forgotten.
 - Before the release, the whole list is run on **Windows, macOS and Linux** with a packaged build (not
   `./gradlew run`). Each OS column gets ✅, ❌ (with a link to the bug issue) or — (not applicable).
+- Test data lives in `smoke-data/` (sample vaults plus `smoke.sh` / `smoke.ps1` for scenarios Git cannot hold);
+  every case that needs data names it there.
 - Bugs found are filed as issues, fixed on `fix/` branches, and the failing case is run again.
 
 ## Test environment (fill in for the release run)
@@ -61,12 +63,12 @@ list proves the **app** works for a real person on a real machine. It is the mai
 
 | ID | Steps | Expected | Testable from | Win | macOS | Linux |
 |---|---|---|---|---|---|---|
-| 1.3-01 | First launch with no saved data | Welcome screen: "Notekea" wordmark, tagline, "Open folder…" (with the Ctrl+O / ⌘O hint) and "Create new vault"; no recent list | 1.3 | | | |
-| 1.3-02 | Click "Open folder…" and choose a folder of Markdown notes (an Obsidian vault works) | The native folder picker opens; the vault opens with its name in the window title and the number of notes found (hidden folders such as `.obsidian` are not counted) | 1.3 | | | |
+| 1.3-01 | Run `smoke.sh first-launch`, then start the app | Welcome screen: "Notekea" wordmark, tagline, "Open folder…" (with the Ctrl+O / ⌘O hint) and "Create new vault"; no recent list | 1.3 | | | |
+| 1.3-02 | Click "Open folder…" and choose `smoke-data/vaults/Personal Notes` | The native folder picker opens; the vault opens as "Personal Notes" in the window title with "12 notes found" (`.obsidian`, `.trash` and the `.txt` file are not counted) | 1.3 | | | |
 | 1.3-03 | Quit and relaunch the app | The last vault reopens directly, without flashing the welcome screen | 1.3 | | | |
-| 1.3-04 | Click "Open another vault", then check the recent list | Vaults appear most recent first with their folder (`~/…` on macOS and Linux) and when they were opened ("Just now", "2 days ago"…) | 1.3 | | | |
+| 1.3-04 | Click "Open another vault", open `Work Obsidian` and `Empty Vault` ("No notes yet"), then check the recent list | Vaults appear most recent first with their folder (`~/…` on macOS and Linux) and when they were opened ("Just now", "2 days ago"…) | 1.3 | | | |
 | 1.3-05 | Press Ctrl+O (⌘O on macOS) on the welcome screen and inside an open vault | The folder picker opens in both places; cancelling it changes nothing | 1.3 | | | |
-| 1.3-06 | Rename or move a recent vault's folder outside the app, then relaunch | The vault is muted with "Folder not found", "Remove" and "Locate…"; "Locate…" lets you pick its new place and opens it; "Remove" only removes it from the list | 1.3 | | | |
+| 1.3-06 | Run `smoke.sh prepare`, open `Movable Vault`, quit, run `smoke.sh move` and relaunch | The vault is muted with "Folder not found", "Remove" and "Locate…"; "Locate…" lets you pick its new place and opens it; "Remove" only removes it from the list | 1.3 | | | |
 | 1.3-07 | Click "Create new vault", keep the suggested name and location, and create it | A "My Notes" folder is created in Documents (or the home folder) and opens empty ("No notes yet"); nothing else is written inside it | 1.3 | | | |
-| 1.3-08 | Create a vault with a name that already exists with files, then one with `a/b` as its name | A plain-language error explains each problem and the form stays open with the name to fix | 1.3 | | | |
-| 1.3-09 | Open a folder you have no permission to read | An error banner names the folder and says to check its permissions; "Dismiss" hides it | 1.3 | | | |
+| 1.3-08 | Create "My Notes" in `New Vault Location` (from `prepare`), then a vault named `a/b` | A plain-language error explains each problem and the form stays open with the name to fix | 1.3 | | | |
+| 1.3-09 | Open `Locked Vault` (from `prepare`) | An error banner names the folder and says to check its permissions; "Dismiss" hides it | 1.3 | | | |

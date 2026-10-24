@@ -32,3 +32,4 @@ A `feature/` or `fix/` branch is not done until the developer has run the manual
 Every feature also adds its release test cases to `MVP_SMOKE_TEST.md` (`GUIDELINES.md` §8).
 Agents cannot replace the smoke test: when the automated checks pass, hand over a short smoke test script based on the
 feature's "Done when" criteria in `ROADMAP.md`, and wait for the developer's result before opening the pull request.
+The script uses the data in `smoke-data/` (add what the feature needs there first; see its README).
