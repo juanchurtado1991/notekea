@@ -34,6 +34,11 @@ switch ($Command) {
         New-Item -ItemType Directory -Force $Locked | Out-Null
         Copy-Item -Recurse (Join-Path $SmokeRoot "vaults\Personal Notes") (Join-Path $Scratch "Movable Vault")
         Copy-Item -Recurse (Join-Path $SmokeRoot "vaults\Personal Notes") $Playground
+        # Dates that differ from the name order, so sorting Recipes by date modified visibly changes it.
+        (Get-Item (Join-Path $Playground "Recipes\Pasta e fagioli.md")).LastWriteTime = [datetime]"2026-10-20 09:00"
+        (Get-Item (Join-Path $Playground "Recipes\Arepas.md")).LastWriteTime = [datetime]"2026-10-10 09:00"
+        # A wildcard instead of the accent: Windows PowerShell reads this file without a BOM as ANSI.
+        (Get-Item (Join-Path $Playground "Recipes\Caf* con leche.md")).LastWriteTime = [datetime]"2026-10-01 09:00"
         Set-Content (Join-Path $Scratch "New Vault Location\My Notes\Existing note.md") "# Existing note"
         Set-Content (Join-Path $Locked "Locked note.md") "# Locked note"
         Write-Output "Smoke scenarios ready in $Scratch (Movable Vault, Locked Vault, New Vault Location, Playground Vault)"
