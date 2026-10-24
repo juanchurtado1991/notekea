@@ -35,6 +35,56 @@
     <string name="error_vault_invalid_name">Enter a name without characters like / : * ? or quotes.</string>
     <string name="error_vault_permission_denied">Notekea doesn’t have permission to open %1$s. Check the folder’s permissions and try again.</string>
 
+    <string name="error_notes_entry_missing">%1$s was moved or deleted outside Notekea.</string>
+    <string name="error_notes_hidden_name">Names can’t start with a dot, or the note would be hidden.</string>
+    <string name="error_notes_invalid_name">Enter a name without characters like / : * ? or quotes.</string>
+    <string name="error_notes_name_taken">There’s already something named %1$s here. Choose another name.</string>
+    <string name="error_notes_operation_failed">Notekea couldn’t change %1$s. Check that you can edit this folder and that the file isn’t locked by another app.</string>
+    <string name="error_notes_permission_denied">Notekea doesn’t have permission to read %1$s. Check the folder’s permissions and try again.</string>
+    <string name="error_notes_reveal_failed">Notekea couldn’t open the file manager for %1$s.</string>
+    <string name="error_notes_vault_missing">Notekea can’t find %1$s. It may have been moved, renamed or deleted.</string>
+
+    <string name="note_panel_aliases">Also known as</string>
+    <plurals name="note_panel_folder_notes">
+        <item quantity="one">1 note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
+    <string name="note_panel_empty_message">Pick a note in the sidebar to see it here.</string>
+    <string name="note_panel_empty_title">No note selected</string>
+    <string name="note_panel_tags">Tags</string>
+
+    <string name="tree_cancel">Cancel</string>
+    <string name="tree_delete_folder">Delete folder</string>
+    <string name="tree_delete_folder_title">Delete this folder?</string>
+    <string name="tree_delete_message">“%1$s” will be moved to the trash. You can restore it from there.</string>
+    <plurals name="tree_delete_folder_message">
+        <item quantity="one">“%1$s” and the note in it will be moved to the trash. You can restore them from there.</item>
+        <item quantity="other">“%1$s” and the %2$d notes in it will be moved to the trash. You can restore them from there.</item>
+    </plurals>
+    <string name="tree_delete_note">Delete note</string>
+    <string name="tree_delete_note_title">Delete this note?</string>
+    <string name="tree_empty_message">Create a note here, or add Markdown files to the folder and they’ll appear.</string>
+    <string name="tree_empty_title">This folder has no notes yet</string>
+    <string name="tree_hide_sidebar">Hide sidebar</string>
+    <string name="tree_loading">Loading notes…</string>
+    <string name="tree_moved_to_vault_trash">“%1$s” is in this vault’s .trash folder, because the system trash isn’t available.</string>
+    <string name="tree_new_folder">New folder</string>
+    <string name="tree_new_note">New note</string>
+    <string name="tree_notice_dismiss">OK</string>
+    <string name="tree_open_folder">Open or close folder</string>
+    <string name="tree_rename">Rename</string>
+    <string name="tree_retry">Try again</string>
+    <string name="tree_reveal_explorer">Show in File Explorer</string>
+    <string name="tree_reveal_files">Show in Files</string>
+    <string name="tree_reveal_finder">Show in Finder</string>
+    <string name="tree_select_note">Select note</string>
+    <string name="tree_show_sidebar">Show sidebar</string>
+    <string name="tree_sort_by_date">Sort by date modified</string>
+    <string name="tree_sort_by_name">Sort by name</string>
+    <string name="tree_switch_vault">Open another vault</string>
+    <string name="tree_untitled_folder">Untitled folder</string>
+    <string name="tree_untitled_note">Untitled</string>
+
     <string name="vault_home_message">Notekea works with your Markdown files where they are. Nothing is moved or changed.</string>
     <plurals name="vault_home_note_count">
         <item quantity="one">1 note found</item>

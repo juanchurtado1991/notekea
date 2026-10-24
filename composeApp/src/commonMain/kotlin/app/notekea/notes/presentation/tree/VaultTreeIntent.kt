@@ -40,6 +40,9 @@ sealed interface VaultTreeIntent {
 
     data class OnRowClick(val path: RelativePath) : VaultTreeIntent
 
+    /** Selects without opening or closing a folder (a right click before its menu). */
+    data class OnRowSelect(val path: RelativePath) : VaultTreeIntent
+
     data object OnSelectNext : VaultTreeIntent
 
     /** The user finished dragging the sidebar edge to [widthDp]. */
