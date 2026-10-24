@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,11 +24,13 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaCard
+import app.notekea.core.presentation.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.components.NotekeaWordmark
 import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.resources.Res
+import app.notekea.resources.welcome_busy
 import app.notekea.resources.welcome_create_vault
 import app.notekea.resources.welcome_new_vault_default_name
 import app.notekea.resources.welcome_open_folder
@@ -39,6 +42,7 @@ import app.notekea.vault.presentation.home.VaultHomeContent
 import org.jetbrains.compose.resources.stringResource
 
 private const val CONTENT_MAX_WIDTH_DP = 560
+private const val HINT_HEIGHT_DP = 20
 private const val PREVIEW_HEIGHT_DP = 640
 private const val TOP_SPACE_DP = 72
 
@@ -94,12 +98,13 @@ private fun WelcomeHome(
             Spacer(modifier = Modifier.height(height = TOP_SPACE_DP.dp))
             WelcomeHeader()
             Spacer(modifier = Modifier.height(height = NotekeaDimensions.SpacingS))
-            val showError = state.error != null || state.hasUnexpectedError
-            if (showError) {
+            val showBanner = state.hasUnexpectedError || (state.error != null && state.newVaultForm == null)
+            if (showBanner) {
                 WelcomeErrorBanner(
                     platformConventions = state.platformConventions,
-                    onIntent = onIntent,
-                    error = state.error,
+                    onDismiss = { onIntent(WelcomeIntent.OnErrorDismiss) },
+                    onLocate = { onIntent(WelcomeIntent.OnLocateVaultClick(missingPath = it)) },
+                    error = state.error.takeUnless { state.hasUnexpectedError },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -129,14 +134,30 @@ private fun WelcomeStart(
         NewVaultPanel(
             form = form,
             platformConventions = state.platformConventions,
-            onIntent = onIntent,
-            enabled = !state.isBusy
+            onNameChange = { onIntent(WelcomeIntent.OnNewVaultNameChange(name = it)) },
+            onChangeLocation = { onIntent(WelcomeIntent.OnNewVaultLocationClick) },
+            onCancel = { onIntent(WelcomeIntent.OnNewVaultCancel) },
+            onConfirm = { onIntent(WelcomeIntent.OnNewVaultConfirm) },
+            error = state.error,
+            isBusy = state.isBusy
         )
         return
     }
+    StartActions(state = state, onIntent = onIntent)
+    StartHint(isBusy = state.isBusy)
+}
+
+@Composable
+private fun StartActions(
+    state: WelcomeState,
+    onIntent: (WelcomeIntent) -> Unit
+) {
     val conventions = state.platformConventions
     val suggestedName = stringResource(resource = Res.string.welcome_new_vault_default_name)
-    Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         NotekeaButton(
             text = stringResource(resource = Res.string.welcome_open_folder),
             onClick = { onIntent(WelcomeIntent.OnOpenFolderClick) },
@@ -150,11 +171,25 @@ private fun WelcomeStart(
             enabled = !state.isBusy
         )
     }
-    Text(
-        text = stringResource(resource = Res.string.welcome_open_hint),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+}
+
+@Composable
+private fun StartHint(
+    isBusy: Boolean
+) {
+    Row(
+        modifier = Modifier.height(height = HINT_HEIGHT_DP.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val busyText = stringResource(resource = Res.string.welcome_busy)
+        if (isBusy) NotekeaProgressIndicator(label = busyText)
+        Text(
+            text = if (isBusy) busyText else stringResource(resource = Res.string.welcome_open_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 @Composable
@@ -173,13 +208,18 @@ private fun RecentVaultsSection(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         NotekeaCard(modifier = Modifier.fillMaxWidth()) {
-            state.recentVaults.forEach {
-                RecentVaultRow(
-                    recentVault = it,
-                    platformConventions = state.platformConventions,
-                    onIntent = onIntent,
-                    enabled = !state.isBusy
-                )
+            state.recentVaults.forEach { recentVault ->
+                val path = recentVault.vault.path
+                key(path) {
+                    RecentVaultRow(
+                        recentVault = recentVault,
+                        platformConventions = state.platformConventions,
+                        onOpen = { onIntent(WelcomeIntent.OnRecentVaultClick(path = path)) },
+                        onLocate = { onIntent(WelcomeIntent.OnLocateVaultClick(missingPath = path)) },
+                        onRemove = { onIntent(WelcomeIntent.OnRemoveRecentVaultClick(path = path)) },
+                        enabled = !state.isBusy
+                    )
+                }
             }
         }
     }
@@ -238,4 +278,12 @@ private fun WelcomeContentPermissionErrorPreview() {
 @Composable
 private fun WelcomeContentVaultOpenedPreview() {
     WelcomeContentPreviewFrame(state = WelcomePreviewData.state().copy(openedVault = WelcomePreviewData.openedVault))
+}
+
+@Preview
+@Composable
+private fun WelcomeContentBusyPreview() {
+    WelcomeContentPreviewFrame(
+        state = WelcomePreviewData.state().copy(recentVaults = WelcomePreviewData.recentVaults, isBusy = true)
+    )
 }

@@ -19,6 +19,7 @@ import app.notekea.vault.domain.VaultError
  * Welcome flow (`ROADMAP.md` 1.3), the MVI reference screen (`ARCHITECTURE.md` §10): restores the last vault at
  * startup, opens, creates and locates vaults, and keeps the recent list fresh after every change. It has no one-shot
  * effects, so its effect type is [Nothing]. Picking a folder is a suspend call to the native dialog, not an effect.
+ * Editing the new vault form clears its error, so a message never outlives the input it was about.
  */
 class WelcomeViewModel(
     platformConventions: PlatformConventions,
@@ -142,7 +143,7 @@ class WelcomeViewModel(
     private fun updateNewVaultForm(
         transform: (NewVaultForm) -> NewVaultForm
     ) {
-        reduce { state -> state.copy(newVaultForm = state.newVaultForm?.let(transform)) }
+        reduce { state -> state.copy(newVaultForm = state.newVaultForm?.let(transform), error = null) }
     }
 
     companion object {

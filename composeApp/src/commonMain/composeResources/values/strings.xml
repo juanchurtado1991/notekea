@@ -32,7 +32,7 @@
     <string name="error_vault_creation_failed">Notekea couldn’t create a folder at %1$s. Check that you can save files there and try again.</string>
     <string name="error_vault_folder_exists">%1$s already has files in it. Choose another name, or open it with Open folder….</string>
     <string name="error_vault_folder_missing">Notekea can’t find %1$s. It may have been moved, renamed or deleted.</string>
-    <string name="error_vault_invalid_name">Choose a name without characters like / : * ? or quotes.</string>
+    <string name="error_vault_invalid_name">Enter a name without characters like / : * ? or quotes.</string>
     <string name="error_vault_permission_denied">Notekea doesn’t have permission to open %1$s. Check the folder’s permissions and try again.</string>
 
     <string name="vault_home_message">Notekea works with your Markdown files where they are. Nothing is moved or changed.</string>
@@ -43,6 +43,7 @@
     <string name="vault_home_no_notes">No notes yet</string>
     <string name="vault_home_switch">Open another vault</string>
 
+    <string name="welcome_busy">Opening vault…</string>
     <string name="welcome_create_vault">Create new vault</string>
     <string name="welcome_new_vault_cancel">Cancel</string>
     <string name="welcome_new_vault_change_location">Change…</string>
@@ -56,6 +57,7 @@
     <string name="welcome_open_hint">Any folder of Markdown files works, including Obsidian vaults.</string>
     <string name="welcome_recent_locate">Locate…</string>
     <string name="welcome_recent_missing">Folder not found</string>
+    <string name="welcome_recent_open">Open vault</string>
     <string name="welcome_recent_remove">Remove</string>
     <string name="welcome_recent_title">Recent</string>
     <string name="welcome_tagline">Your notes, connected by local AI.</string>

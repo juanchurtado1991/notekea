@@ -29,6 +29,7 @@ import app.notekea.resources.elapsed_weeks
 import app.notekea.resources.elapsed_years
 import app.notekea.resources.welcome_recent_locate
 import app.notekea.resources.welcome_recent_missing
+import app.notekea.resources.welcome_recent_open
 import app.notekea.resources.welcome_recent_remove
 import app.notekea.vault.domain.RecentVaultStatus
 import org.jetbrains.compose.resources.PluralStringResource
@@ -45,22 +46,25 @@ private const val PREVIEW_WIDTH_DP = 520
 internal fun RecentVaultRow(
     recentVault: RecentVaultStatus,
     platformConventions: PlatformConventions,
-    onIntent: (WelcomeIntent) -> Unit,
+    onOpen: () -> Unit,
+    onLocate: () -> Unit,
+    onRemove: () -> Unit,
     enabled: Boolean = true
 ) {
     val path = recentVault.vault.path
     NotekeaListItem(
         title = recentVault.vault.name,
-        onClick = { onIntent(WelcomeIntent.OnRecentVaultClick(path = path)) },
+        onClick = onOpen,
         supportingText = if (recentVault.isMissing) {
             stringResource(resource = Res.string.welcome_recent_missing)
         } else {
             displayPath(path = path, platformConventions = platformConventions)
         },
         enabled = enabled && !recentVault.isMissing,
+        onClickLabel = stringResource(resource = Res.string.welcome_recent_open),
         trailingContent = {
             if (recentVault.isMissing) {
-                MissingVaultActions(path = path, enabled = enabled, onIntent = onIntent)
+                MissingVaultActions(enabled = enabled, onLocate = onLocate, onRemove = onRemove)
             } else {
                 Text(
                     text = elapsedTimeText(elapsed = recentVault.lastOpened),
@@ -74,9 +78,9 @@ internal fun RecentVaultRow(
 
 @Composable
 private fun MissingVaultActions(
-    path: String,
     enabled: Boolean,
-    onIntent: (WelcomeIntent) -> Unit
+    onLocate: () -> Unit,
+    onRemove: () -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
@@ -84,13 +88,13 @@ private fun MissingVaultActions(
     ) {
         NotekeaButton(
             text = stringResource(resource = Res.string.welcome_recent_remove),
-            onClick = { onIntent(WelcomeIntent.OnRemoveRecentVaultClick(path = path)) },
+            onClick = onRemove,
             style = NotekeaButtonStyle.TEXT,
             enabled = enabled
         )
         NotekeaButton(
             text = stringResource(resource = Res.string.welcome_recent_locate),
-            onClick = { onIntent(WelcomeIntent.OnLocateVaultClick(missingPath = path)) },
+            onClick = onLocate,
             style = NotekeaButtonStyle.SECONDARY,
             enabled = enabled
         )
@@ -125,7 +129,9 @@ private fun RecentVaultRowPreview() {
                 RecentVaultRow(
                     recentVault = it,
                     platformConventions = WelcomePreviewData.platformConventions,
-                    onIntent = {}
+                    onOpen = {},
+                    onLocate = {},
+                    onRemove = {}
                 )
             }
         }
