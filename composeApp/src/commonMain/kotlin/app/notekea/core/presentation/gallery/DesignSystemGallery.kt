@@ -10,7 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.PrimaryTabRow
+
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +25,7 @@ import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaListItem
 import app.notekea.core.presentation.components.NotekeaTab
+import app.notekea.core.presentation.components.NotekeaTabRow
 import app.notekea.core.presentation.components.NotekeaTextField
 import app.notekea.core.presentation.components.StatusBarItem
 import app.notekea.core.presentation.components.StatusIndicator
@@ -133,7 +134,7 @@ private fun InputsSection() {
 @Composable
 private fun TabsSection() {
     var selectedTab by remember { mutableIntStateOf(value = 0) }
-    PrimaryTabRow(selectedTabIndex = selectedTab, containerColor = MaterialTheme.colorScheme.surface) {
+    NotekeaTabRow(selectedTabIndex = selectedTab) {
         SAMPLE_TABS.forEachIndexed { index, label ->
             NotekeaTab(
                 text = label,
