@@ -95,10 +95,7 @@ class SqlDelightNoteMetadataCache(
             modified_at = entry.file.modifiedAt?.toEpochMilliseconds(),
             title = entry.metadata.title
         )
-        entry.metadata.tags.forEachIndexed {
-            index,
-            tag
-            ->
+        entry.metadata.tags.forEachIndexed { index, tag ->
             queries.insertTag(vault = vaultPath, path = path, position = index.toLong(), tag = tag)
         }
         entry.metadata.aliases.forEachIndexed { index, alias ->

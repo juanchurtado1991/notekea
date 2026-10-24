@@ -160,9 +160,9 @@ class VaultTreeViewModelTest {
         viewModel.onIntent(intent = VaultTreeIntent.OnSortChange(sort = TreeSort.MODIFIED))
         advanceUntilIdle()
 
+        val modified = TreePreferences(expandedFolders = emptySet(), sort = TreeSort.MODIFIED)
         assertEquals(
-            expected =
-                TreeSort.MODIFIED to listOf(TreePreferences(expandedFolders = emptySet(), sort = TreeSort.MODIFIED)),
+            expected = TreeSort.MODIFIED to listOf(modified),
             actual = viewModel.state.value.sort to preferences.saved
         )
     }

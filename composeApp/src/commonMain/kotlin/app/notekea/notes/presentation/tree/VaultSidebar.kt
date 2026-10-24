@@ -139,10 +139,11 @@ private fun SidebarMessages(
         top = NotekeaDimensions.SpacingS
     )
     if (actionError != null || state.hasUnexpectedError) {
+        val actionMessage = actionError?.let {
+            notesErrorMessage(error = it, platformConventions = state.platformConventions)
+        }
         ErrorBanner(
-            message =
-                actionError?.let { notesErrorMessage(error = it, platformConventions = state.platformConventions) }
-                    ?: stringResource(resource = Res.string.error_unexpected),
+            message = actionMessage ?: stringResource(resource = Res.string.error_unexpected),
             modifier = messageModifier,
             onDismiss = { onIntent(VaultTreeIntent.OnErrorDismiss) }
         )

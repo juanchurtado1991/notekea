@@ -7,6 +7,12 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 
 [*.{kt,kts}]
+# IntelliJ's Kotlin style, so ktlint and Reformat Code (Ctrl+Alt+L) agree; e.g. a superclass call indents its
+# arguments one level and closes at the class's indentation:
+#   ) : BaseViewModel<State, Intent, Nothing>(
+#       initialState = State()
+#   ) {
+ktlint_code_style = intellij_idea
 indent_size = 4
 indent_style = space
 max_line_length = 120

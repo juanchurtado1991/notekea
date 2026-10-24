@@ -188,11 +188,11 @@ class ObserveVaultTreeUseCaseTest {
                 expected = listOf(RelativePath(value = LISBON)),
                 actual = reader.reads
             )
+            val arepas = scanned.notes.getValue(RelativePath(value = AREPAS))
+            val lisbon = scanned.notes.getValue(RelativePath(value = LISBON))
             assertEquals(
                 expected = tags("recipe") to file(path = LISBON, modifiedOffsetMillis = 1L),
-                actual =
-                    scanned.notes.getValue(RelativePath(value = AREPAS)).metadata to
-                        scanned.notes.getValue(RelativePath(value = LISBON)).file
+                actual = arepas.metadata to lisbon.file
             )
             assertEquals(
                 expected = setOf(RelativePath(value = "Recipes"), RelativePath(value = "Travel")),

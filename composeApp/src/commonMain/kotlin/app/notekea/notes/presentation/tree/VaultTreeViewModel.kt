@@ -43,8 +43,8 @@ class VaultTreeViewModel(
     private val getTreePreferences: GetTreePreferencesUseCase,
     private val saveTreePreferences: SaveTreePreferencesUseCase
 ) : BaseViewModel<VaultTreeState, VaultTreeIntent, Nothing>(
-        initialState = VaultTreeState(vaultPath = vaultPath, platformConventions = platformConventions)
-    ) {
+    initialState = VaultTreeState(vaultPath = vaultPath, platformConventions = platformConventions)
+) {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private var renameJob: Job? = null
 

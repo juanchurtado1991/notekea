@@ -135,8 +135,7 @@ private fun DetailsColumn(
             .widthIn(max = CONTENT_MAX_WIDTH_DP.dp)
             .padding(
                 horizontal = NotekeaDimensions.SpacingXxl,
-                vertical =
-                    NotekeaDimensions.SpacingXxl + NotekeaDimensions.SpacingL
+                vertical = NotekeaDimensions.SpacingXxl + NotekeaDimensions.SpacingL
             ),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
     ) { content() }

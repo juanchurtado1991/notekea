@@ -36,11 +36,8 @@ fun resolvedFrom(
     target: String
 ): RelativePath? {
     val segments = mutableListOf<String>()
-    (
-        folder.value.split(
-            RelativePath.SEPARATOR
-        ) + target.split(RelativePath.SEPARATOR)
-    ).filter { it.isNotEmpty() }.forEach { segment ->
+    val parts = folder.value.split(RelativePath.SEPARATOR) + target.split(RelativePath.SEPARATOR)
+    parts.filter { it.isNotEmpty() }.forEach { segment ->
         when (segment) {
             CURRENT -> Unit
             PARENT -> segments.removeLastOrNull() ?: return null
@@ -58,9 +55,6 @@ fun relativeTo(
     val from = folder.value.split(RelativePath.SEPARATOR).filter { it.isNotEmpty() }
     val to = target.value.split(RelativePath.SEPARATOR)
     val shared = from.zip(to).takeWhile { (a, b) -> a == b }.size
-    return (
-        List(size = from.size - shared) {
-            PARENT
-        } + to.drop(n = shared)
-    ).joinToString(separator = RelativePath.SEPARATOR)
+    val climbs = List(size = from.size - shared) { PARENT }
+    return (climbs + to.drop(n = shared)).joinToString(separator = RelativePath.SEPARATOR)
 }

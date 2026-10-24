@@ -44,10 +44,7 @@ value class RelativePath(val value: String) {
         from: RelativePath,
         to: RelativePath
     ): RelativePath = if (isWithin(folder = from)) {
-        RelativePath(
-            value =
-                to.value + value.removePrefix(prefix = from.value)
-        )
+        RelativePath(value = to.value + value.removePrefix(prefix = from.value))
     } else {
         this
     }
