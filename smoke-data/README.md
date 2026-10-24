@@ -11,9 +11,10 @@ Open them with **Open folder…**. Notekea never writes inside a vault, so openi
 |---|---|---|
 | `Personal Notes` | 12 | Nested folders (three levels in `Projects/Garden`), wiki links, tags, YAML front matter, tasks, a table, a non-ASCII file name (`Café con leche.md`), a folder name with a space; files that must **not** count: `.obsidian/`, `.trash/` and `attachments/shopping.txt` |
 | `Work Obsidian` | 6 | A second vault in Obsidian format, to switch between vaults and fill the recent list |
-| `Empty Vault` | 0 | Shows "No notes yet" (it only holds a hidden `.gitkeep` so Git keeps the folder) |
+| `Empty Vault` | 0 | Shows "This folder has no notes yet" (it only holds a hidden `.gitkeep` so Git keeps the folder) |
 
-`SmokeDataTest` (composeApp `jvmTest`) fails if these counts change, so this table stays true.
+`SmokeDataTest` (composeApp `jvmTest`) fails if these counts change, so this table stays true; `SmokeVaultTreeTest`
+checks the tags the tree reads from `Personal Notes`.
 
 ## Scenarios Git cannot hold (`smoke.sh`, `smoke.ps1`)
 
@@ -23,9 +24,12 @@ folder picker reaches them the same way. Not in `/tmp`: a sandboxed terminal and
 different `/tmp`.
 
 ```bash
-smoke-data/smoke.sh prepare           # Movable Vault, Locked Vault, New Vault Location (all readable)
+smoke-data/smoke.sh prepare           # Movable Vault, Locked Vault, New Vault Location, Playground Vault (all readable)
 smoke-data/smoke.sh move              # renames Movable Vault to Moved Vault, to test "Folder not found"
 smoke-data/smoke.sh lock              # removes read permission from Locked Vault, to test the permission error
+smoke-data/smoke.sh outside           # creates, edits and deletes notes in Playground Vault, as another app would
+smoke-data/smoke.sh large             # creates Large Vault: 5,000 notes in 50 folders, to time the tree
+smoke-data/smoke.sh clear-cache       # deletes Notekea's note cache, so the next open is a full first scan
 smoke-data/smoke.sh first-launch      # backs up Notekea's settings so the next start is a first launch
 smoke-data/smoke.sh restore-settings  # puts the backed-up settings back
 smoke-data/smoke.sh clean             # removes the scratch folder
@@ -41,3 +45,4 @@ administrator) the locked folder stays readable.
 | Feature | Smoke cases | Data |
 |---|---|---|
 | 1.3 Open a vault | 1.3-01 … 1.3-10, 1.1-04, 1.2-04 | All three vaults; `prepare`, `move`, `lock`, `first-launch` |
+| 1.4 Vault tree | 1.4-01 … 1.4-12, 1.3-02, 1.3-04, 1.3-07, 1.1-03 | `Personal Notes`, `Empty Vault`; `prepare` (Playground Vault, Movable Vault), `outside`, `large`, `clear-cache`, `move` |
