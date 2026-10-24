@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -25,13 +27,16 @@ import app.notekea.core.presentation.components.ErrorBanner
 import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaCard
 import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.core.presentation.components.NotekeaInlineTextField
 import app.notekea.core.presentation.components.NotekeaWordmark
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaListItem
 import app.notekea.core.presentation.components.NotekeaProgressIndicator
+import app.notekea.core.presentation.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.components.NotekeaTab
 import app.notekea.core.presentation.components.NotekeaTabRow
 import app.notekea.core.presentation.components.NotekeaTextField
+import app.notekea.core.presentation.components.NotekeaTreeItem
 import app.notekea.core.presentation.components.StatusBarItem
 import app.notekea.core.presentation.components.StatusIndicator
 import app.notekea.core.presentation.theme.LocalNotekeaCodeTextStyle
@@ -77,6 +82,14 @@ private const val SAMPLE_PLACEHOLDER = "Search notes…"
 private const val STATUS_INDEXED = "Indexed 1,204 notes"
 private const val STATUS_MODEL = "Model: ready"
 private const val STATUS_SYNC = "Sync: conflict"
+private const val SKELETON_LONG_FRACTION = 0.7f
+private const val SKELETON_SHORT_FRACTION = 0.5f
+private const val TREE_COUNT_PROJECTS = "12"
+private const val TREE_FOLDER_GARDEN = "Garden"
+private const val TREE_FOLDER_PROJECTS = "Projects"
+private const val TREE_NOTE_RENAMED = "Tomato plan 2027"
+private const val TREE_NOTE_TOMATO = "Tomato plan"
+private const val TREE_WIDTH_DP = 260
 private val SAMPLE_TABS = listOf("Related", "Backlinks", "Outline", "Chat")
 
 @Composable
@@ -105,6 +118,7 @@ private fun GalleryColumn(
                 NotekeaWordmark()
                 ButtonsSection()
                 InputsSection()
+                TreeSection()
                 TabsSection()
                 FeedbackSection()
                 Text(text = CODE_SAMPLE, style = LocalNotekeaCodeTextStyle.current)
@@ -171,6 +185,48 @@ private fun InputsSection() {
             }
         )
     }
+}
+
+@Composable
+private fun TreeSection() {
+    var isExpanded by remember { mutableStateOf(value = true) }
+    Column(modifier = Modifier.width(width = TREE_WIDTH_DP.dp)) {
+        NotekeaTreeItem(
+            label = TREE_FOLDER_PROJECTS,
+            icon = if (isExpanded) NotekeaIcons.FolderOpen else NotekeaIcons.Folder,
+            depth = 0,
+            onClick = { isExpanded = !isExpanded },
+            isExpanded = isExpanded,
+            onToggleExpanded = { isExpanded = !isExpanded },
+            trailingText = TREE_COUNT_PROJECTS
+        )
+        if (isExpanded) TreeSectionChildren()
+        NotekeaSkeletonRow(widthFraction = SKELETON_SHORT_FRACTION)
+        NotekeaSkeletonRow(widthFraction = SKELETON_LONG_FRACTION, depth = 1)
+    }
+}
+
+@Composable
+private fun TreeSectionChildren() {
+    var renamed by remember { mutableStateOf(value = TREE_NOTE_RENAMED) }
+    NotekeaTreeItem(label = TREE_FOLDER_GARDEN, icon = NotekeaIcons.Folder, depth = 1, onClick = {}, isExpanded = false)
+    NotekeaTreeItem(
+        label = TREE_NOTE_TOMATO,
+        icon = NotekeaIcons.Note,
+        depth = 1,
+        onClick = {},
+        selected = true,
+        focused = true
+    )
+    NotekeaTreeItem(
+        label = TREE_NOTE_TOMATO,
+        icon = NotekeaIcons.Note,
+        depth = 1,
+        onClick = {},
+        labelContent = {
+            NotekeaInlineTextField(value = renamed, onValueChange = { renamed = it }, onSubmit = {}, onCancel = {})
+        }
+    )
 }
 
 @Composable
