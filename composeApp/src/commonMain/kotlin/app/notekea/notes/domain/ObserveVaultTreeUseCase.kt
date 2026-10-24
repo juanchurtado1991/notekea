@@ -15,8 +15,9 @@ import kotlinx.coroutines.sync.withPermit
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * The notes and folders of a vault, kept up to date while collected. The watcher starts before the first scan, so
- * changes made while scanning are not lost; the first scan reads every note's frontmatter, at most
+ * The notes and folders of a vault, kept up to date while collected. What the cache remembers is shown at once, then
+ * the vault is scanned and only notes whose size or date changed are read again; every update is saved back to the
+ * cache. The watcher starts before the first scan, so changes made while scanning are not lost; notes are read at most
  * [MAX_PARALLEL_READS] at a time. Changes are applied in batches gathered for [BATCH_WINDOW], so a burst (a sync, a
  * `git checkout`) produces one update instead of hundreds. A new folder or lost events cause a rescan, which reads
  * again only the notes whose size or date changed. A scan that fails emits the error and ends the flow; collecting
@@ -25,16 +26,22 @@ import kotlin.time.Duration.Companion.milliseconds
 class ObserveVaultTreeUseCase(
     private val noteScanner: NoteScanner,
     private val noteMetadataReader: NoteMetadataReader,
-    private val fileWatcher: FileWatcher
+    private val fileWatcher: FileWatcher,
+    private val noteMetadataCache: NoteMetadataCache
 ) {
     operator fun invoke(
         vaultPath: String
     ): Flow<Outcome<VaultTree, NotesError>> = channelFlow {
         val changes = Channel<VaultChange>(capacity = Channel.UNLIMITED)
         val watching = launch { fileWatcher.watch(vaultPath = vaultPath).collect { changes.send(element = it) } }
-        var tree = scanOrReport(vaultPath = vaultPath, previous = VaultTree.EMPTY)
+        val cached = VaultTree.fromNotes(notes = noteMetadataCache.read(vaultPath = vaultPath))
+        if (cached.notes.isNotEmpty()) send(element = Outcome.Success(value = cached))
+        var saved = cached
+        var tree = scanOrReport(vaultPath = vaultPath, previous = cached)
         while (tree != null) {
             send(element = Outcome.Success(value = tree))
+            saveChanges(vaultPath = vaultPath, saved = saved, current = tree)
+            saved = tree
             val batch = receiveBatch(changes = changes)
             tree = if (needsRescan(batch = batch)) {
                 scanOrReport(vaultPath = vaultPath, previous = tree)
@@ -63,10 +70,17 @@ class ObserveVaultTreeUseCase(
     private suspend fun entryOf(
         vaultPath: String,
         file: NoteFile
-    ): NoteEntry = NoteEntry(
-        file = file,
-        metadata = noteMetadataReader.read(vaultPath = vaultPath, path = file.path) ?: NoteMetadata.NONE
-    )
+    ): NoteEntry {
+        val metadata = noteMetadataReader.read(vaultPath = vaultPath, path = file.path)
+        // A note that could not be read is kept without its size, so it is never trusted as unchanged and is read again.
+        return if (metadata !=
+            null
+        ) {
+            NoteEntry(file = file, metadata = metadata)
+        } else {
+            NoteEntry(file = file.copy(size = null), metadata = NoteMetadata.NONE)
+        }
+    }
 
     private fun needsRescan(
         batch: List<VaultChange>
@@ -94,6 +108,19 @@ class ObserveVaultTreeUseCase(
                     known ?: permits.withPermit { entryOf(vaultPath = vaultPath, file = file) }
                 }
             }.awaitAll()
+    }
+
+    /** Stores in the cache only what changed since [saved], the tree the cache already holds. */
+    private suspend fun saveChanges(
+        vaultPath: String,
+        saved: VaultTree,
+        current: VaultTree
+    ) {
+        val upserted = current.notes.values.filter { saved.notes[it.file.path] != it }
+        val removed = saved.notes.keys.filterNot { it in current.notes }
+        if (upserted.isNotEmpty() || removed.isNotEmpty()) {
+            noteMetadataCache.update(vaultPath = vaultPath, upserted = upserted, removed = removed)
+        }
     }
 
     /** The first change, plus every change that arrives within [BATCH_WINDOW] after it. */
