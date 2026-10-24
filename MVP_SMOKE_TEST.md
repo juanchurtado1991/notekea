@@ -55,3 +55,4 @@ list proves the **app** works for a real person on a real machine. It is the mai
 | 1.2-04 | Navigate the main window with Tab / Shift+Tab only | Every interactive element gets a visible focus ring and can be activated from the keyboard | 1.3 | | | |
 | 1.2-05 | With a screen reader (Narrator, VoiceOver, Orca), move through a screen | Buttons, tabs and list items are announced with their text and role | 1.3 | | | |
 | 1.2-06 | Run the packaged app | There is no way to open the design system gallery | 5.3 | | | |
+| 1.2-07 | Make the window as narrow as possible | Status bar items and tab labels stay on one line and end with "…"; badge numbers never split; nothing is clipped | 1.2 | | | |
