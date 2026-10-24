@@ -4,6 +4,20 @@ These rules apply to every change in this repository. Code, identifiers, comment
 UI behavior per operating system (window frame, shortcuts, menus, dialogs) is defined in `PLATFORM_GUIDELINES.md`.
 The concrete patterns that implement these rules (naming, errors, MVI base class, DI, tests) are in `ARCHITECTURE.md`.
 
+## Product principle: friendly first, powerful underneath
+
+Notekea is built for everyday users, without giving up the power it offers. Every user-facing decision follows it:
+
+- **Plain language.** The UI speaks in tasks ("Create a vault", "Find the folder"), never in implementation terms;
+  errors say what happened and what to do next, in one sentence, and show the path or name involved.
+- **The common path needs no knowledge.** Sensible defaults (a suggested name and location, the last vault reopened
+  on launch) so a first-time user succeeds without reading anything.
+- **Power is discoverable, not required.** Shortcuts, advanced options and file paths are visible as secondary hints
+  (a shortcut next to its button, a muted path under a name), never as the only way to do something.
+- **Nothing is a dead end.** Every error or missing state offers an action (locate, remove, retry).
+- **Polished by default.** Screens are composed from the design system (§2, `ARCHITECTURE.md` §11) with generous
+  spacing and a clear hierarchy; a screen is not done until its previews look right in light and dark.
+
 ## 1. SOLID
 
 - **Single responsibility:** one reason to change per class. Split a class when its name needs "and".
