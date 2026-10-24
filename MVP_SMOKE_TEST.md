@@ -8,6 +8,9 @@ list proves the **app** works for a real person on a real machine. It is the mai
 - **Every feature pull request adds its cases here**, under its milestone, in the same pull request
   (`GUIDELINES.md` §8). A case is something a person can do and see, written so that someone who never saw the
   feature can follow it.
+- **Every feature pull request also revises the cases it makes outdated**, in place and keeping their IDs, so the
+  file always describes the current app. A case that a later feature will change says so in a note under its table
+  ("Revised by 1.4"); that feature's pull request rewrites the case and removes the note.
 - Cases that depend on a feature not built yet say so in **Testable from**; they still go in now, so nothing is
   forgotten.
 - Before the release, the whole list is run on **Windows, macOS and Linux** with a packaged build (not
@@ -73,3 +76,7 @@ list proves the **app** works for a real person on a real machine. It is the mai
 | 1.3-08 | Create "My Notes" in `New Vault Location` (from `prepare`), then a vault named `a/b` | Each problem is explained in plain language under the name field, keeping what you typed; typing again clears the message | 1.3 | | | |
 | 1.3-09 | Open `Locked Vault` (from `prepare`) | An error banner names the folder and says to check its permissions; "Dismiss" hides it | 1.3 | | | |
 | 1.3-10 | Click "Create new vault" and use only the keyboard | The name field has focus; Enter creates the vault, Esc closes the panel; while a vault opens, "Opening vault…" shows a spinner without moving the buttons | 1.3 | | | |
+
+> **Revised by 1.4 (vault tree):** 1.3-02, 1.3-04 and 1.3-07 check the "N notes found" / "No notes yet" summary of
+> the open vault, which the note tree replaces. 1.4 rewrites them to check the tree (12 notes in `Personal Notes`,
+> the empty state in `Empty Vault`).
