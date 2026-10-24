@@ -2,6 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.ksp)
@@ -14,6 +15,9 @@ plugins {
 private val appPackageName = "Notekea"
 private val appPackageVersion = "1.0.0"
 private val jdkVersion = 21
+private val androidCompileSdk = 36
+private val androidMinSdk = 26
+private val androidNamespace = "app.notekea"
 private val galleryGradleProperty = "gallery"
 private val gallerySystemProperty = "notekea.gallery"
 private val mainClassName = "app.notekea.MainKt"
@@ -27,6 +31,16 @@ kotlin {
     }
 
     jvm()
+
+    // Android target only so Android Studio can render the common @Previews (no Android app yet).
+    android {
+        namespace = androidNamespace
+        compileSdk = androidCompileSdk
+        minSdk = androidMinSdk
+        androidResources {
+            enable = true
+        }
+    }
 
     sourceSets {
         commonMain.dependencies {
@@ -81,6 +95,8 @@ kotlin {
 
 dependencies {
     ktlintRuleset(project(":ktlint-rules"))
+    // Preview rendering for Android Studio; on the KMP library plugin it goes on the runtime classpath.
+    "androidRuntimeClasspath"(libs.compose.ui.tooling)
 }
 
 sqldelight {
