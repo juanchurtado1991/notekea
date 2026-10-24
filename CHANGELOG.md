@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Android target in `composeApp` (AGP 9.4.1 KMP library plugin, no Android app yet) so Android Studio renders the
+  common `@Preview`s; all common code now also compiles for Android, an early check for the mobile phase.
+
 - Theme and design system (ROADMAP 1.2): "cobalt and tangerine" palette with light and dark schemes, bundled Inter and JetBrains Mono,
   type scale, 6 dp / 10 dp shapes, spacing and motion tokens; components `NotekeaButton`, `NotekeaTextField`,
   `NotekeaListItem`, `NotekeaTab`, `StatusBarItem`, `EmptyState` and `ErrorBanner`; a WCAG AA contrast test for the
