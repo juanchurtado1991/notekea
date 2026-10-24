@@ -15,6 +15,7 @@ import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.deleteRecursively
+import kotlin.io.path.moveTo
 import kotlin.io.path.writeText
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -30,7 +31,10 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(kotlin.io.path.ExperimentalPathApi::class)
 class DirectoryWatcherFileWatcherTest {
     private val vault: Path = Files.createTempDirectory(TEMP_PREFIX)
-    private val watcher = DirectoryWatcherFileWatcher(dispatchers = JvmAppDispatchers())
+    private val watcher = DirectoryWatcherFileWatcher(
+        dispatchers = JvmAppDispatchers(),
+        rootCheckInterval = ROOT_CHECK_INTERVAL
+    )
 
     @AfterTest
     fun deleteVault() {
@@ -71,6 +75,17 @@ class DirectoryWatcherFileWatcherTest {
             expected = emptyList(),
             actual = beforeSentinel.filterNot { isCreatedOrModified(change = it, path = PROBE) }
         )
+    }
+
+    @Test
+    fun `a vault folder moved away while watched asks for a rescan`() = watching { changes ->
+        vault.moveTo(target = vault.resolveSibling(vault.fileName.toString() + MOVED_SUFFIX))
+
+        try {
+            awaitChange(changes = changes) { it == VaultChange.Overflow }
+        } finally {
+            vault.resolveSibling(vault.fileName.toString() + MOVED_SUFFIX).moveTo(target = vault)
+        }
     }
 
     @Test
@@ -127,6 +142,8 @@ class DirectoryWatcherFileWatcherTest {
     companion object {
         private const val CONTENT = "# Note\n"
         private const val IDEAS = "Ideas"
+        private const val MOVED_SUFFIX = "-moved"
+        private val ROOT_CHECK_INTERVAL = 100.milliseconds
         private const val NEW_NOTE = "Ideas/New note.md"
         private const val OBSIDIAN = ".obsidian"
         private const val PROBE = "probe.md"

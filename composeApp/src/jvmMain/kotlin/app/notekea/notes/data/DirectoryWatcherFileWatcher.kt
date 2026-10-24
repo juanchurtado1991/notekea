@@ -7,6 +7,8 @@ import app.notekea.notes.domain.VaultChange
 import io.methvin.watcher.DirectoryChangeEvent
 import io.methvin.watcher.DirectoryWatcher
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
@@ -18,15 +20,22 @@ import java.nio.file.Path
 import java.util.concurrent.Executors
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * [FileWatcher] on directory-watcher, which uses native events on every desktop (FSEvents on macOS, where the JDK
  * would poll). Collecting the flow starts watching and returns once every folder is registered, so no change made
  * after that is missed; cancelling it stops the watcher. Hidden entries are never reported, other files only when
  * deleted (they may have been notes), and a watcher that loses events or fails reports [VaultChange.Overflow] so the
- * vault is scanned again. A vault that is not a folder (anymore) reports it at once.
+ * vault is scanned again. A vault that is not a folder reports it at once. Native watchers say nothing when the vault
+ * folder itself is moved or renamed (inotify keeps watching it at its new place), so the folder is also checked every
+ * [rootCheckInterval] and its disappearance reported the same way: the rescan then finds the vault missing.
  */
-class DirectoryWatcherFileWatcher(private val dispatchers: AppDispatchers) : FileWatcher {
+class DirectoryWatcherFileWatcher(
+    private val dispatchers: AppDispatchers,
+    private val rootCheckInterval: Duration = ROOT_CHECK_INTERVAL
+) : FileWatcher {
     override fun watch(
         vaultPath: String
     ): Flow<VaultChange> = callbackFlow {
@@ -43,6 +52,12 @@ class DirectoryWatcherFileWatcher(private val dispatchers: AppDispatchers) : Fil
             }
         }
             ?: trySend(element = VaultChange.Overflow)
+        if (watcher != null) {
+            launch {
+                while (root.isDirectory()) delay(duration = rootCheckInterval)
+                trySend(element = VaultChange.Overflow)
+            }
+        }
         awaitClose {
             watcher?.close()
             eventLoop.shutdown()
@@ -119,5 +134,6 @@ class DirectoryWatcherFileWatcher(private val dispatchers: AppDispatchers) : Fil
     companion object {
         private const val HIDDEN_PREFIX = "."
         private const val THREAD_NAME = "notekea-file-watcher"
+        private val ROOT_CHECK_INTERVAL = 2.seconds
     }
 }
