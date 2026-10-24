@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import app.notekea.core.presentation.components.EmptyState
 import app.notekea.core.presentation.components.ErrorBanner
@@ -26,6 +27,7 @@ import app.notekea.core.presentation.components.NotekeaCard
 import app.notekea.core.presentation.components.NotekeaWordmark
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaListItem
+import app.notekea.core.presentation.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.components.NotekeaTab
 import app.notekea.core.presentation.components.NotekeaTabRow
 import app.notekea.core.presentation.components.NotekeaTextField
@@ -64,6 +66,7 @@ private const val NOTE_FOLDER_PROJECTS = "Projects/Notekea"
 private const val NOTE_MEETING = "Meeting with Ana"
 private const val NOTE_MISSING = "Folder not found"
 private const val NOTE_PRICING = "Pricing ideas"
+private const val PROGRESS_LABEL = "Opening vault…"
 private const val SAMPLE_ERROR = "This note changed outside Notekea."
 private const val SAMPLE_PLACEHOLDER = "Search notes…"
 private const val STATUS_INDEXED = "Indexed 1,204 notes"
@@ -176,6 +179,13 @@ private fun FeedbackSection() {
         StatusBarItem(label = STATUS_INDEXED, onClick = {}, indicator = StatusIndicator.ACTIVE)
         StatusBarItem(label = STATUS_MODEL, onClick = {})
         StatusBarItem(label = STATUS_SYNC, onClick = {}, indicator = StatusIndicator.ERROR)
+    }
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        NotekeaProgressIndicator(label = PROGRESS_LABEL)
+        Text(text = PROGRESS_LABEL, style = MaterialTheme.typography.bodySmall)
     }
     ErrorBanner(
         message = SAMPLE_ERROR,
