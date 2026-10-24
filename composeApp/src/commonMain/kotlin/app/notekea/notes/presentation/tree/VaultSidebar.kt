@@ -32,6 +32,8 @@ import app.notekea.resources.Res
 import app.notekea.resources.error_unexpected
 import app.notekea.resources.tree_empty_message
 import app.notekea.resources.tree_empty_title
+import app.notekea.resources.tree_links_skipped
+import app.notekea.resources.tree_links_updated
 import app.notekea.resources.tree_loading
 import app.notekea.resources.tree_moved_to_vault_trash
 import app.notekea.resources.tree_new_note
@@ -40,8 +42,10 @@ import app.notekea.resources.tree_retry
 import app.notekea.resources.tree_switch_vault
 import app.notekea.resources.tree_untitled_folder
 import app.notekea.resources.tree_untitled_note
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
+private const val NOTICE_SEPARATOR = " "
 private const val PREVIEW_HEIGHT_DP = 520
 private val SKELETON_ROWS = listOf(0 to 0.55f, 0 to 0.4f, 1 to 0.6f, 1 to 0.5f, 0 to 0.45f, 0 to 0.65f, 1 to 0.5f)
 
@@ -143,10 +147,10 @@ private fun SidebarMessages(
             onDismiss = { onIntent(VaultTreeIntent.OnErrorDismiss) }
         )
     }
-    (state.notice as? TreeNotice.MovedToVaultTrash)?.let { notice ->
+    state.notice?.let { notice ->
         Row(modifier = messageModifier, verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = stringResource(Res.string.tree_moved_to_vault_trash, notice.name),
+                text = noticeText(notice = notice),
                 modifier = Modifier.weight(weight = 1f),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -158,6 +162,18 @@ private fun SidebarMessages(
             )
         }
     }
+}
+
+@Composable
+private fun noticeText(
+    notice: TreeNotice
+): String = when (notice) {
+    is TreeNotice.LinksUpdated -> listOfNotNull(
+        pluralStringResource(Res.plurals.tree_links_updated, notice.updatedCount, notice.updatedCount),
+        notice.skippedCount.takeIf { it > 0 }?.let { pluralStringResource(Res.plurals.tree_links_skipped, it, it) }
+    ).joinToString(separator = NOTICE_SEPARATOR)
+
+    is TreeNotice.MovedToVaultTrash -> stringResource(Res.string.tree_moved_to_vault_trash, notice.name)
 }
 
 @Composable

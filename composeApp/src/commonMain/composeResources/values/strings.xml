@@ -66,6 +66,21 @@
     <string name="tree_empty_message">Create a note here, or add Markdown files to the folder and they’ll appear.</string>
     <string name="tree_empty_title">This folder has no notes yet</string>
     <string name="tree_hide_sidebar">Hide sidebar</string>
+    <string name="tree_links_dont_update">Don’t update</string>
+    <plurals name="tree_links_message">
+        <item quantity="one">1 note links to “%2$s”. Update its links to “%3$s”?</item>
+        <item quantity="other">%1$d notes link to “%2$s”. Update their links to “%3$s”?</item>
+    </plurals>
+    <string name="tree_links_title">Update links?</string>
+    <string name="tree_links_update">Update links</string>
+    <plurals name="tree_links_skipped">
+        <item quantity="one">1 note changed in the meantime and was left as it was.</item>
+        <item quantity="other">%1$d notes changed in the meantime and were left as they were.</item>
+    </plurals>
+    <plurals name="tree_links_updated">
+        <item quantity="one">Links updated in 1 note.</item>
+        <item quantity="other">Links updated in %1$d notes.</item>
+    </plurals>
     <string name="tree_loading">Loading notes…</string>
     <string name="tree_moved_to_vault_trash">“%1$s” is in this vault’s .trash folder, because the system trash isn’t available.</string>
     <string name="tree_new_folder">New folder</string>

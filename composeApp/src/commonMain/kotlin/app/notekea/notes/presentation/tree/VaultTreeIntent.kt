@@ -18,6 +18,10 @@ sealed interface VaultTreeIntent {
 
     data object OnExpandSelected : VaultTreeIntent
 
+    data object OnLinkUpdateCancel : VaultTreeIntent
+
+    data object OnLinkUpdateConfirm : VaultTreeIntent
+
     /** [baseName] is the localized name of a new folder ("Untitled folder"). */
     data class OnNewFolderClick(val baseName: String) : VaultTreeIntent
 
