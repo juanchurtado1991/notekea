@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
@@ -22,7 +23,10 @@ private const val PREVIEW_INDEXED = "Indexed 1,204 notes"
 private const val PREVIEW_MODEL = "Model: ready"
 private const val PREVIEW_SYNC = "Sync: conflict"
 
-/** Clickable status bar entry: a colored state dot and a short label ("Indexed 1,204 notes"). */
+/**
+ * Clickable status bar entry: a colored state dot and a short label ("Indexed 1,204 notes"). The bar has a fixed
+ * height, so the label stays on one line and is ellipsized when the window is too narrow.
+ */
 @Composable
 fun StatusBarItem(
     label: String,
@@ -46,7 +50,9 @@ fun StatusBarItem(
             text = label,
             modifier = Modifier.padding(start = NotekeaDimensions.SpacingXs),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
