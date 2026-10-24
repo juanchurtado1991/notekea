@@ -14,10 +14,12 @@ class ObserveVaultTreeUseCaseTest {
     private val scanner = FakeNoteScanner()
     private val reader = FakeNoteMetadataReader()
     private val watcher = FakeFileWatcher()
+    private val cache = FakeNoteMetadataCache()
     private val observeVaultTree = ObserveVaultTreeUseCase(
         noteScanner = scanner,
         noteMetadataReader = reader,
-        fileWatcher = watcher
+        fileWatcher = watcher,
+        noteMetadataCache = cache
     )
 
     @Test
@@ -168,6 +170,72 @@ class ObserveVaultTreeUseCaseTest {
                 actual = awaitItem()
             )
             awaitComplete()
+        }
+    }
+
+    @Test
+    fun `the cached tree shows first and only notes that changed are read again`() = runTest {
+        cache.entries[RelativePath(value = AREPAS)] = entry(path = AREPAS, metadata = tags("recipe"))
+        cache.entries[RelativePath(value = LISBON)] = entry(path = LISBON)
+        scanner.addNote(file = file(path = AREPAS))
+        scanner.addNote(file = file(path = LISBON, modifiedOffsetMillis = 1L))
+
+        observeVaultTree(vaultPath = VAULT).test {
+            val cached = (awaitItem() as Outcome.Success).value
+            val scanned = (awaitItem() as Outcome.Success).value
+
+            assertEquals(
+                expected = listOf(RelativePath(value = LISBON)),
+                actual = reader.reads
+            )
+            assertEquals(
+                expected = tags("recipe") to file(path = LISBON, modifiedOffsetMillis = 1L),
+                actual =
+                    scanned.notes.getValue(RelativePath(value = AREPAS)).metadata to
+                        scanned.notes.getValue(RelativePath(value = LISBON)).file
+            )
+            assertEquals(
+                expected = setOf(RelativePath(value = "Recipes"), RelativePath(value = "Travel")),
+                actual = cached.folders
+            )
+        }
+    }
+
+    @Test
+    fun `only what changed is saved to the cache`() = runTest {
+        scanner.addNote(file = file(path = AREPAS))
+        scanner.addNote(file = file(path = LISBON))
+
+        observeVaultTree(vaultPath = VAULT).test {
+            awaitItem()
+            scanner.files.remove(RelativePath(value = LISBON))
+            watcher.emit(change = VaultChange.Deleted(path = RelativePath(value = LISBON)))
+            awaitItem()
+
+            assertEquals(
+                expected = listOf(
+                    listOf(RelativePath(value = AREPAS), RelativePath(value = LISBON)) to emptyList(),
+                    emptyList<RelativePath>() to listOf(RelativePath(value = LISBON))
+                ),
+                actual = cache.updates.map { (upserted, removed) -> upserted.sortedBy { it.value } to removed }
+            )
+        }
+    }
+
+    @Test
+    fun `a note that cannot be read is cached without its size, so it is read again next time`() = runTest {
+        scanner.addNote(file = file(path = AREPAS))
+        reader.metadata[RelativePath(value = AREPAS)] = null
+
+        observeVaultTree(vaultPath = VAULT).test {
+            awaitItem()
+
+            assertEquals(
+                expected = null,
+                actual = cache.entries
+                    .getValue(RelativePath(value = AREPAS))
+                    .file.size
+            )
         }
     }
 

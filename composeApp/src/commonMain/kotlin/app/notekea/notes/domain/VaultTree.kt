@@ -59,5 +59,15 @@ data class VaultTree(
 
     companion object {
         val EMPTY = VaultTree(folders = emptySet(), notes = emptyMap())
+
+        /** The tree that holds [notes] and the folders above them, built in one pass (no empty folders). */
+        fun fromNotes(
+            notes: List<NoteEntry>
+        ): VaultTree {
+            val folders = notes.flatMap { note ->
+                generateSequence(seed = note.file.path.parent) { it.parent }.takeWhile { !it.isRoot }.toList()
+            }
+            return VaultTree(folders = folders.toSet(), notes = notes.associateBy { it.file.path })
+        }
     }
 }

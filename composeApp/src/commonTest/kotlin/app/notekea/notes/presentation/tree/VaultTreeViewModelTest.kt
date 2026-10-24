@@ -9,6 +9,7 @@ import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.FakeFileRevealer
 import app.notekea.notes.domain.FakeFileWatcher
 import app.notekea.notes.domain.FakeNoteFileOperations
+import app.notekea.notes.domain.FakeNoteMetadataCache
 import app.notekea.notes.domain.FakeNoteMetadataReader
 import app.notekea.notes.domain.FakeNoteScanner
 import app.notekea.notes.domain.FakeTrash
@@ -284,7 +285,8 @@ class VaultTreeViewModelTest {
             observeVaultTree = ObserveVaultTreeUseCase(
                 noteScanner = scanner,
                 noteMetadataReader = FakeNoteMetadataReader(),
-                fileWatcher = FakeFileWatcher()
+                fileWatcher = FakeFileWatcher(),
+                noteMetadataCache = FakeNoteMetadataCache()
             ),
             flattenTree = FlattenTreeUseCase(naturalNameComparator = NaturalNameComparator()),
             createNote = CreateNoteUseCase(noteFileOperations = operations),

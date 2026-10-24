@@ -3,6 +3,7 @@ package app.notekea.notes.data
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.notes.domain.FakeFileWatcher
+import app.notekea.notes.domain.FakeNoteMetadataCache
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.VaultTree
@@ -59,7 +60,8 @@ class SmokeVaultTreeTest {
                 dispatchers = dispatchers,
                 parser = GhostFrontmatterParser()
             ),
-            fileWatcher = FakeFileWatcher()
+            fileWatcher = FakeFileWatcher(),
+            noteMetadataCache = FakeNoteMetadataCache()
         )
         val outcome = observeVaultTree(vaultPath = (VAULTS_DIRECTORY.toPath() / PERSONAL).toString()).first()
         return (outcome as Outcome.Success).value
