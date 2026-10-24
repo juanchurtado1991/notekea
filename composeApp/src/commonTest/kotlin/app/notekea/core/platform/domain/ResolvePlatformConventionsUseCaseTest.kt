@@ -19,7 +19,7 @@ class ResolvePlatformConventionsUseCaseTest {
     }
 
     @Test
-    fun `linux uses ctrl, ctrl+q and cancel first with the default data home`() {
+    fun `linux uses ctrl, ctrl+o, ctrl+q and cancel first with the default data home`() {
         val conventions = resolve(
             operatingSystemName = LINUX_NAME,
             userHome = LINUX_HOME
@@ -29,12 +29,17 @@ class ResolvePlatformConventionsUseCaseTest {
             expected = PlatformConventions(
                 operatingSystem = OperatingSystem.LINUX,
                 primaryModifier = ShortcutModifier.CONTROL,
+                openFolderShortcut = Shortcut(
+                    key = ShortcutKey.O,
+                    modifiers = setOf(ShortcutModifier.CONTROL)
+                ),
                 quitShortcut = Shortcut(
                     key = ShortcutKey.Q,
                     modifiers = setOf(ShortcutModifier.CONTROL)
                 ),
                 dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
-                appDataDirectory = "/home/ana/.local/share/notekea"
+                appDataDirectory = "/home/ana/.local/share/notekea",
+                homeDirectory = LINUX_HOME
             ),
             actual = conventions
         )
@@ -55,7 +60,7 @@ class ResolvePlatformConventionsUseCaseTest {
     }
 
     @Test
-    fun `macos uses cmd, cmd+q, cancel first and application support`() {
+    fun `macos uses cmd, cmd+o, cmd+q, cancel first and application support`() {
         val conventions = resolve(
             operatingSystemName = MACOS_NAME,
             userHome = MACOS_HOME
@@ -65,12 +70,17 @@ class ResolvePlatformConventionsUseCaseTest {
             expected = PlatformConventions(
                 operatingSystem = OperatingSystem.MACOS,
                 primaryModifier = ShortcutModifier.COMMAND,
+                openFolderShortcut = Shortcut(
+                    key = ShortcutKey.O,
+                    modifiers = setOf(ShortcutModifier.COMMAND)
+                ),
                 quitShortcut = Shortcut(
                     key = ShortcutKey.Q,
                     modifiers = setOf(ShortcutModifier.COMMAND)
                 ),
                 dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
-                appDataDirectory = "/Users/ana/Library/Application Support/Notekea"
+                appDataDirectory = "/Users/ana/Library/Application Support/Notekea",
+                homeDirectory = MACOS_HOME
             ),
             actual = conventions
         )
@@ -121,7 +131,7 @@ class ResolvePlatformConventionsUseCaseTest {
     }
 
     @Test
-    fun `windows uses ctrl, alt+f4, primary first and APPDATA`() {
+    fun `windows uses ctrl, ctrl+o, alt+f4, primary first and APPDATA`() {
         val conventions = resolve(
             operatingSystemName = WINDOWS_NAME,
             userHome = WINDOWS_HOME,
@@ -132,12 +142,17 @@ class ResolvePlatformConventionsUseCaseTest {
             expected = PlatformConventions(
                 operatingSystem = OperatingSystem.WINDOWS,
                 primaryModifier = ShortcutModifier.CONTROL,
+                openFolderShortcut = Shortcut(
+                    key = ShortcutKey.O,
+                    modifiers = setOf(ShortcutModifier.CONTROL)
+                ),
                 quitShortcut = Shortcut(
                     key = ShortcutKey.F4,
                     modifiers = setOf(ShortcutModifier.ALT)
                 ),
                 dialogButtonOrder = DialogButtonOrder.PRIMARY_THEN_CANCEL,
-                appDataDirectory = "D:\\Profiles\\ana\\Roaming\\Notekea"
+                appDataDirectory = "D:\\Profiles\\ana\\Roaming\\Notekea",
+                homeDirectory = WINDOWS_HOME
             ),
             actual = conventions
         )
