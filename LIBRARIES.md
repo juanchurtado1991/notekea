@@ -52,7 +52,7 @@ Decisions:
 
 | Library | Coordinates | Version | Purpose |
 |---|---|---|---|
-| java-llama.cpp | `de.kherud:llama` | 4.2.0 | A single engine for embeddings (GGUF such as nomic-embed / bge) and chat (3B–4B model). Avoids a separate ONNX Runtime and tokenizer stack |
+| java-llama.cpp | `de.kherud:llama` | 4.2.0 | A single engine for embeddings (GGUF such as nomic-embed / bge), chat (~2B, ~4B or ~8B model) and reranking (`rerank()`). Parallel slots (`setParallel` + continuous batching) share one loaded model; grammars (`jsonSchemaToGrammar`) constrain structured output (`ARCHITECTURE.md` §12). Avoids a separate ONNX Runtime and tokenizer stack |
 | Lucene | `org.apache.lucene:lucene-core` | 10.5.2 | Hybrid search: vectors (HNSW) + keywords (BM25). Requires Java 21 |
 | Ktor Client | `io.ktor:ktor-client-core` + `io.ktor:ktor-client-okhttp` | 3.6.0 | Downloads the model (~2 GB) with progress and resume |
 
@@ -67,7 +67,8 @@ Decisions:
 - Only the core modules are used, not the `ai.koog:koog-agents` umbrella: it bundles cloud clients (OpenAI, Anthropic, Bedrock…) that Notekea does not need.
 - Koog has no in-process llama.cpp client; a custom client wrapping `LlmEngine` is required.
 - Extensions are planned as MCP servers via `ai.koog:agents-mcp`, added once it ships a stable release (only `1.3.0-beta` as of 2026-10-23).
-- Small local models (3B–4B) are unreliable at tool calling; agent features stay out of the MVP UI until tested.
+- Small local models (2B–8B) are unreliable at tool calling; agent features stay out of the MVP UI until tested.
+  The MVP answer pipeline uses plain coroutines, not Koog (`ARCHITECTURE.md` §12).
 
 Known limitation (spike of 2026-10-23, `docs/spikes/2026-10-23-ghost-llama.md`): java-llama.cpp bundles natives
 for Linux x64/arm64, macOS x64/arm64 and Windows x64/x86, but **not Windows ARM64**; those users would need a
