@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Smoke test data in `smoke-data/`: sample vaults (`Personal Notes`, `Work Obsidian`, `Empty Vault`) and
+  `smoke.sh` / `smoke.ps1` for scenarios Git cannot hold (moved and unreadable folders, first launch); a rule in
+  `GUIDELINES.md` §8 requires every feature to ship the data its smoke test needs.
 - Open a vault (ROADMAP 1.3): a welcome screen to open a folder with the native picker (Ctrl+O / ⌘O anywhere) or
   create a new vault with a suggested name and location; the last vault reopens on launch; recent vaults show
   their folder and when they were opened, and a moved folder can be located or removed. Settings live in

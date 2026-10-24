@@ -128,8 +128,13 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   1. The app starts and the main window renders without errors in the log.
   2. The new or fixed behavior works end to end, including its empty, loading and error states
      (use the "Done when" criteria of the feature in `ROADMAP.md` as the script).
-  3. Nothing nearby broke: open the sample vault, open and edit a note, and use the features the change touches.
+  3. Nothing nearby broke: open a sample vault from `smoke-data/vaults`, open and edit a note, and use the features the change touches.
   4. UI changes follow `PLATFORM_GUIDELINES.md` on the OS tested (shortcuts, menus, dialogs).
+
+  **Smoke tests always have data ready.** A feature that needs data to be smoke tested (vaults, notes, conflicts,
+  models, a moved or locked folder…) adds it to `smoke-data/` in the same pull request, inside the repository
+  whenever Git can hold it (`smoke-data/vaults/`), and otherwise as a step of `smoke-data/smoke.sh` and
+  `smoke.ps1`; `smoke-data/README.md` lists what each feature uses. The developer never has to invent test data.
 
   The pull request records the OS and version used and what was checked. Changes that are platform-specific
   (file system, shortcuts, menus, packaging, Git credentials) must be smoke tested on **each affected OS**.
