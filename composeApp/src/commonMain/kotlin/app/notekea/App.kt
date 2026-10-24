@@ -1,40 +1,33 @@
 package app.notekea
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.vault.presentation.welcome.WelcomeContent
+import app.notekea.vault.presentation.welcome.WelcomePreviewData
 
-private const val APP_NAME = "Notekea"
-
+/** Root of the window: the Notekea theme and background around the current screen. */
 @Composable
-fun App() {
+fun App(
+    content: @Composable () -> Unit
+) {
     NotekeaTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Box(
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = APP_NAME,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
+            color = MaterialTheme.colorScheme.background,
+            content = content
+        )
     }
 }
 
 @Preview
 @Composable
 private fun AppPreview() {
-    App()
+    App {
+        WelcomeContent(state = WelcomePreviewData.state(), onIntent = {})
+    }
 }

@@ -1,19 +1,45 @@
 package app.notekea.di
 
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.vault.domain.RecentVaultsStore
+import app.notekea.vault.presentation.welcome.WelcomeViewModel
+import com.russhwolf.settings.MapSettings
+import com.russhwolf.settings.Settings
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
 import org.koin.dsl.koinApplication
+import org.koin.dsl.module
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-/** Builds the real desktop dependency graph (no global Koin) and resolves its root bindings. */
+/**
+ * Builds the real desktop dependency graph (no global Koin) and resolves its root bindings. The settings file is
+ * replaced by in-memory settings and the main dispatcher is never advanced, so nothing touches the user's data.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
 class DesktopModulesTest {
-    private val koinApplication = koinApplication { modules(desktopModules) }
+    private val inMemorySettings = module { single<Settings> { MapSettings() } }
+    private val koinApplication = koinApplication {
+        allowOverride(override = true)
+        modules(desktopModules + inMemorySettings)
+    }
+
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(dispatcher = StandardTestDispatcher())
+    }
 
     @AfterTest
     fun tearDown() {
         koinApplication.close()
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -27,5 +53,16 @@ class DesktopModulesTest {
             actual = second
         )
         assertTrue(actual = first.appDataDirectory.isNotBlank())
+    }
+
+    @Test
+    fun `the welcome flow resolves with all its use cases`() {
+        val koin = koinApplication.koin
+
+        assertNotNull(actual = koin.get<WelcomeViewModel>())
+        assertSame(
+            expected = koin.get<RecentVaultsStore>(),
+            actual = koin.get<RecentVaultsStore>()
+        )
     }
 }
