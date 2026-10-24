@@ -25,7 +25,7 @@ branch name is given next to it. Estimates assume one developer and are meant fo
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 3 / 16 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 4 / 16 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -161,7 +161,7 @@ Pick a folder with the native picker (FileKit); remember the last vault (Multipl
 - Shortcut: `Mod+O` opens a folder.
 - **Done when:** a vault opens, survives restart, and missing folders are handled.
 
-### 🚧 1.4 Vault tree and note list — `feature/vault-tree`
+### ✅ 1.4 Vault tree and note list — `feature/vault-tree` — [notekea#21](https://github.com/juanchurtado1991/notekea/pull/21)
 
 Read the folder recursively (Okio), only `.md` files, ignoring `.git`, `.obsidian`, `.trash` and hidden folders.
 Parse frontmatter (title, tags, aliases) with Ghost YAML. Live updates through `FileWatcher`. Metadata is cached in
