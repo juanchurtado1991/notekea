@@ -24,7 +24,7 @@ folder picker reaches them the same way. Not in `/tmp`: a sandboxed terminal and
 different `/tmp`.
 
 ```bash
-smoke-data/smoke.sh prepare           # Movable Vault, Locked Vault, New Vault Location, Playground Vault (all readable)
+smoke-data/smoke.sh prepare           # Movable Vault, Locked Vault, New Vault Location, Playground Vault (all readable; its Recipes have distinct dates)
 smoke-data/smoke.sh move              # renames Movable Vault to Moved Vault, to test "Folder not found"
 smoke-data/smoke.sh lock              # removes read permission from Locked Vault, to test the permission error
 smoke-data/smoke.sh outside           # creates, edits and deletes notes in Playground Vault, as another app would

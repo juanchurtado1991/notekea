@@ -35,6 +35,10 @@ prepare() {
     mkdir -p "$SCRATCH/New Vault Location/My Notes" "$SCRATCH/Locked Vault"
     cp -R "$SMOKE_ROOT/vaults/Personal Notes" "$SCRATCH/Movable Vault"
     cp -R "$SMOKE_ROOT/vaults/Personal Notes" "$SCRATCH/Playground Vault"
+    # Dates that differ from the name order, so sorting Recipes by date modified visibly changes it.
+    touch -t 202610200900 "$SCRATCH/Playground Vault/Recipes/Pasta e fagioli.md"
+    touch -t 202610100900 "$SCRATCH/Playground Vault/Recipes/Arepas.md"
+    touch -t 202610010900 "$SCRATCH/Playground Vault/Recipes/Café con leche.md"
     echo "# Existing note" > "$SCRATCH/New Vault Location/My Notes/Existing note.md"
     echo "# Locked note" > "$SCRATCH/Locked Vault/Locked note.md"
     echo "Smoke scenarios ready in $SCRATCH:"
