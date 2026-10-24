@@ -26,6 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Open a vault (ROADMAP 1.3): a welcome screen to open a folder with the native picker (Ctrl+O / ⌘O anywhere) or
+  create a new vault with a suggested name and location; the last vault reopens on launch; recent vaults show
+  their folder and when they were opened, and a moved folder can be located or removed. Settings live in
+  `settings.properties` in the app data directory. It is the reference MVI screen (`ARCHITECTURE.md` §10).
+- Product principle in `GUIDELINES.md`: friendly first, powerful underneath (plain language, sensible defaults,
+  shortcuts as visible hints, no dead ends).
+- Design system: `NotekeaCard`, `NotekeaWordmark`, a low-emphasis `TEXT` button style, shortcut hints on buttons,
+  and disabled rows with trailing content in `NotekeaListItem`.
+
 - Android target in `composeApp` (AGP 9.4.1 KMP library plugin, no Android app yet) so Android Studio renders the
   common `@Preview`s; all common code now also compiles for Android, an early check for the mobile phase.
 
