@@ -12,7 +12,12 @@ class VaultFixture {
     val store = FakeRecentVaultsStore()
 
     val openVault = OpenVaultUseCase(vaultFileSystem = fileSystem, recentVaultsStore = store, clock = clock)
-    val createVault = CreateVaultUseCase(vaultFileSystem = fileSystem, openVault = openVault)
+    val validateFileName = ValidateFileNameUseCase()
+    val createVault = CreateVaultUseCase(
+        vaultFileSystem = fileSystem,
+        validateFileName = validateFileName,
+        openVault = openVault
+    )
     val getRecentVaults = GetRecentVaultsUseCase(
         recentVaultsStore = store,
         vaultFileSystem = fileSystem,
