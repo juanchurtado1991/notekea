@@ -33,7 +33,8 @@ private const val PREVIEW_WIDTH_DP = 360
 /**
  * Selectable row with a title and optional supporting text (folder, snippet); selection uses the primary container.
  * A row that is not [enabled] cannot be clicked and shows its title muted (a recent vault whose folder is gone);
- * [trailingContent] holds secondary text or actions at the end of the row.
+ * [trailingContent] holds secondary text or actions at the end of the row; [onClickLabel] tells screen readers what a
+ * click does ("Open vault").
  */
 @Composable
 fun NotekeaListItem(
@@ -43,6 +44,7 @@ fun NotekeaListItem(
     supportingText: String? = null,
     selected: Boolean = false,
     enabled: Boolean = true,
+    onClickLabel: String? = null,
     trailingContent: (@Composable () -> Unit)? = null
 ) {
     val colors = MaterialTheme.colorScheme
@@ -54,7 +56,7 @@ fun NotekeaListItem(
     ) {
         Row(
             modifier = Modifier
-                .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+                .clickable(enabled = enabled, onClickLabel = onClickLabel, role = Role.Button, onClick = onClick)
                 .padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingS),
             verticalAlignment = Alignment.CenterVertically
         ) {
