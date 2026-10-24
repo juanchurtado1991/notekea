@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.TextRange
@@ -39,7 +40,8 @@ private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
  * Single-line field that edits a name in place (renaming in the tree). It takes focus and selects the whole text when
  * it appears, so typing replaces the name; Enter submits and Esc cancels. [onFocusLost] runs when the user clicks
  * elsewhere (renaming submits then, as file managers do). [isError] outlines the field in the error color; the message
- * is shown by the caller next to it. The text belongs to the caller; only the selection is kept here.
+ * is shown by the caller next to it. Space keys stop at the field, so it can sit inside a clickable row. The text
+ * belongs to the caller; only the selection is kept here.
  */
 @Composable
 fun NotekeaInlineTextField(
@@ -68,7 +70,10 @@ fun NotekeaInlineTextField(
             .onFocusChanged { state ->
                 if (state.isFocused) hasHadFocus = true
                 if (!state.isFocused && hasHadFocus) onFocusLost?.invoke()
-            }.submitOrCancelOnKeys(onSubmit = onSubmit, onCancel = onCancel),
+            }.submitOrCancelOnKeys(onSubmit = onSubmit, onCancel = onCancel)
+            // Space is typed as text; its key events must not reach a clickable parent (a tree row), where Space
+            // clicks, which would take focus from the field and end the edit.
+            .onKeyEvent { it.key == Key.Spacebar },
         textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.onSurface),
         singleLine = true,
         cursorBrush = SolidColor(value = colors.primary),
