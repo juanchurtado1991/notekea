@@ -27,7 +27,7 @@ branch name is given next to it. Estimates assume one developer and are meant fo
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 3 / 16 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
-| M3 — Chat with citations | Local LLM, model download, RAG chat with citations | 2 weeks | 0 / 4 |
+| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
 | M5 — Release | Onboarding polish, packaging, signing, first public release | 1 week | 0 / 4 |
 | Post-MVP | Extensions (Koog + MCP), mobile, more | — |
@@ -278,10 +278,12 @@ Frontmatter shown as a compact form above the note content.
 
 ### ⬜ 1.16 Sample vault — `chore/sample-vault`
 
-`samples/vault/` with 40 Markdown notes on varied topics (projects, journal, books, recipes, meeting notes), with
-frontmatter, wiki links and some deliberately related notes without links. It also covers every feature above:
-tasks, all callout types, images and attachments, daily notes, templates, embeds (including a circular one) and a
-`.obsidian/` folder with non-default settings. Used by tests, manual QA and demos.
+`smoke-data/vaults/Sample Vault/`, next to the smoke test vaults (one dataset for smoke tests, unit tests,
+evaluation and demos; `SmokeDataTest` and `smoke-data/README.md` are updated with it), with 40 Markdown notes on
+varied topics (projects, journal, books, recipes, meeting notes), with frontmatter, wiki links and some deliberately
+related notes without links. It also covers every feature above: tasks, all callout types, images and attachments,
+daily notes, templates, embeds (including a circular one) and a `.obsidian/` folder with non-default settings. Used
+by tests, manual QA and demos.
 
 ---
 
@@ -354,26 +356,49 @@ A link graph built from `[[wiki links]]`, Markdown links, embeds and frontmatter
 
 ### ⬜ 2.8 Retrieval evaluation set — `chore/rag-eval`
 
-`samples/eval/retrieval.json` (fixtures from 1.16): 50 questions over the sample vault with the expected note and heading. A test
-reports recall@5 and fails below the agreed baseline, so changes to chunking, models or ranking are measured.
+`smoke-data/eval/retrieval.json` (over the 1.16 sample vault): 50 questions over the sample vault with the expected
+note and heading. A test reports recall@5 and fails below the agreed baseline, so changes to chunking, models or
+ranking are measured.
 
 ---
 
 ## M3 — Chat with citations
 
+Local models are small (about 2B, 4B or 8B parameters), so answer quality comes from **what reaches the model and
+from checking the answer against the notes**, not from model size: retrieval is reranked, evidence is extracted
+before answering, and every sentence of the answer must be backed by a quote that exists in a note. Parallel
+generation (several llama.cpp slots sharing one loaded model) runs the independent steps at the same time. Models
+critiquing or debating their own answers without evidence from the notes are not used: small models judge no
+better than they answer, and each round adds waiting time. Every step is measured with the evaluation set (3.4)
+and kept only if it improves citation accuracy within the latency budget (`ARCHITECTURE.md` §12).
+
+### ⬜ 3.0 Parallel inference spike — `chore/llm-parallel-spike`
+
+Before 3.2, measure with real 2B, 4B and 8B chat models on the reference machines (Windows, macOS, Linux):
+- java-llama.cpp `setParallel(n)` with continuous batching, called concurrently from coroutines: does each call get
+  its own slot, and is the output identical to a single call with the same seed?
+- RAM per extra slot (KV cache) and tokens/s with 1, 2 and 4 slots, on CPU only and with GPU offload.
+- `rerank()` with a small GGUF reranker (bge-reranker class): quality on the sample vault and time per 20 chunks.
+- Grammar-constrained output (`jsonSchemaToGrammar`): valid JSON every time, cost in tokens/s.
+
+Result: `docs/spikes/<date>-llm-parallel.md` with the numbers, the default slot count per RAM size and the
+latency budget used by 3.5 and 3.6.
+
 ### ⬜ 3.1 Model manager — `feature/model-manager`
 
-Catalog of tested chat models (JSON parsed with Ghost; 3B–4B GGUF, ~2 GB), download with Ktor (progress, pause,
-resume), SHA-256 verification, delete. Hardware check: warns when RAM is below the model's requirement.
+Catalog of tested chat models (JSON parsed with Ghost): **Small (~2B)**, **Medium (~4B)** and **Large (~8B)** GGUF,
+plus the reranker model (3.0), which is downloaded with whichever chat model is chosen. Download with Ktor
+(progress, pause, resume), SHA-256 verification, delete. Hardware check: warns when RAM is below the model's
+requirement, including the KV cache of its parallel slots (3.0). Sizes below are placeholders until 3.0 measures them.
 
 **UI — Model manager** (opened from Settings or the status bar):
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ AI model                                                 │
-│ ○ Small  (1.2 GB) · fast, basic answers                  │
-│ ● Medium (2.3 GB) · recommended for 16 GB RAM  [Active]  │
-│ ○ Large  (4.9 GB) · best answers, needs 32 GB RAM        │
+│ ○ Small  (~2B, 1.5 GB) · fast, basic answers             │
+│ ● Medium (~4B, 2.5 GB) · recommended for 16 GB  [Active] │
+│ ○ Large  (~8B, 5 GB) · best answers, needs 16 GB or more │
 │                                                          │
 │ Downloading Medium ▓▓▓▓▓▓░░░░ 61% · 1.4 / 2.3 GB  [Pause]│
 │ Models are stored in ~/Library/Application Support/...   │
@@ -385,7 +410,9 @@ resume), SHA-256 verification, delete. Hardware check: warns when RAM is below t
 
 ### ⬜ 3.2 Chat engine — `feature/chat-engine`
 
-`LlmEngine.generate` with java-llama.cpp, streaming tokens as a `Flow`, cancellable. Prompts are built with
+`LlmEngine.generate` with java-llama.cpp, streaming tokens as a `Flow`, cancellable. The engine loads the model once
+with the slot count chosen by 3.0 and accepts concurrent generations (a `Semaphore` caps them at the slot count);
+structured steps use grammar-constrained JSON output. Prompts are built with
 `LlamaModel.applyTemplate` (passing messages with an empty prompt returns nothing), and integration tests exit the
 process explicitly because llama.cpp keeps native threads alive (spike of 2026-10-23). RAG pipeline: retrieve top
 chunks (hybrid index), build a prompt that requires citing chunk ids, parse citations from the answer, drop
@@ -401,13 +428,46 @@ citations that do not match a retrieved chunk.
 - Scope selector above the input: **Whole vault** / **This note** / **This folder**.
 - Input: multiline, `Enter` sends, `Shift+Enter` new line; `Mod+L` focuses the chat from anywhere.
 - When nothing relevant is found the assistant says so instead of guessing ("I couldn't find this in your notes").
+- While an answer is prepared, one line shows the current step in plain language ("Searching your notes…",
+  "Reading 6 notes…", "Checking sources…"), never a bare spinner.
+- **Deep answer** toggle next to the input (3.6), off by default, with a one-line hint: "Takes longer, checks more
+  drafts against your notes."
 - States: model not downloaded (inline card with "Download model"), index not ready, generating, error with retry.
 - Chat history per vault, stored as JSON (Ghost) in the app data directory, with "Clear history".
 
 ### ⬜ 3.4 Answer evaluation — `chore/answer-eval`
 
 Extends the eval set with expected facts per question; a manual-run task reports citation accuracy
-(cited paragraph actually contains the fact) for the active model.
+(cited paragraph actually contains the fact) for the active model. It also reports latency per step, so 3.5
+and 3.6 compare quality and speed for each model size.
+
+### ⬜ 3.5 Answer pipeline — `feature/answer-pipeline`
+
+Replaces the single "retrieve and answer" call of 3.2 with steps that make small models precise
+(`ARCHITECTURE.md` §12):
+1. **Rewrite:** the question becomes 2–3 search queries (grammar-constrained JSON), searched in parallel and merged.
+2. **Rerank:** the reranker keeps the most relevant chunks for the question.
+3. **Extract evidence (parallel):** one slot per chunk copies the sentences that answer the question, or "none";
+   irrelevant chunks never reach the answer.
+4. **Answer:** written only from the extracted quotes, citing each one.
+5. **Verify (parallel):** every cited quote must exist word for word in its note (deterministic check), and the
+   model confirms, sentence by sentence, that the quote supports it. Unsupported sentences are removed; when nothing
+   is left the assistant says "I couldn't find this in your notes".
+
+Each step sits behind an option so 3.4 can measure it alone and in combination.
+- **Done when:** on the evaluation set, citation accuracy beats 3.2 for Small, Medium and Large, and the median
+  answer time stays within the budget set by 3.0.
+
+### ⬜ 3.6 Deep answer mode — `feature/deep-answer`
+
+An opt-in mode for when precision matters more than speed. Several drafts are written in parallel (different
+seeds, same evidence), each goes through the verification of 3.5, and the draft with the most supported sentences
+wins; ties go to the shorter draft. It is chosen by verified support, not by majority vote.
+- **UI:** the **Deep answer** toggle of the chat panel (3.3); the step line shows "Writing 3 drafts…" and
+  "Comparing drafts…"; Stop (`Esc`) keeps the best verified draft so far.
+- Draft count follows the slot count measured in 3.0 for the machine's RAM.
+- **Done when:** on the evaluation set it beats the normal mode's citation accuracy for every model size, and it is
+  cancellable at any moment.
 
 ---
 

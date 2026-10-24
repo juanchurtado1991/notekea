@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Plan for M3: answers from small local models (~2B, ~4B, ~8B) are made precise by a pipeline that reranks
+  retrieval, extracts evidence in parallel and verifies every sentence against the notes, plus an opt-in Deep
+  answer mode that writes several drafts in parallel and keeps the best verified one (`ROADMAP.md` 3.0, 3.5, 3.6;
+  `ARCHITECTURE.md` §12). The sample vault (1.16) and evaluation sets move to `smoke-data/`.
 - Contribution workflow: a feature is one branch and one pull request made of granular commits (each keeping the
   build green), merged with rebase merging, instead of a single commit per feature.
 - Dependabot pull requests that only touch CI or build tooling are exempt from changelog entries and smoke tests;
