@@ -5,6 +5,12 @@ sealed interface NotesError {
     /** The note or folder was moved or deleted outside Notekea before the action ran. */
     data class EntryMissing(val path: String) : NotesError
 
+    /** A name starting with a dot would hide the entry from the tree (and from Obsidian). */
+    data object HiddenName : NotesError
+
+    /** A name that cannot be a file on every supported system (empty, `..`, or with `/ \ : * ? " < > |`). */
+    data object InvalidName : NotesError
+
     data class NameTaken(val name: String) : NotesError
 
     /** The file system refused the change (read-only disk, permissions, file in use…). */
