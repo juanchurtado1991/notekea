@@ -55,7 +55,7 @@ sealed interface Outcome<out T, out E> {
 }
 
 sealed interface VaultError {
-    data object FolderMissing : VaultError
+    data class FolderMissing(val path: String) : VaultError
     data class PermissionDenied(val path: String) : VaultError
 }
 
@@ -99,6 +99,9 @@ abstract class BaseViewModel<S, I, E>(
 - `State` models the UI states explicitly (`isLoading`, `error: <Feature>Error?`, content), so empty, loading,
   error and content are all representable and testable.
 - `reduce` lambdas are pure; complex transitions are extracted into pure functions and unit tested directly.
+- A screen without one-shot events uses `Nothing` as its effect type instead of an empty `Effect` interface.
+  Native dialogs that return a value (the folder picker) are suspend calls behind a domain port, not effects, so
+  the ViewModel handles the result and tests use a fake.
 - Composables: `<Screen>Screen` collects `state` and `effects` and passes them to `<Screen>Content`, which is
   stateless (`state` + `onIntent`). `<Screen>Content` has one `@Preview` per UI state (empty, loading, error,
   content…) built from sample `<Screen>State` values (`GUIDELINES.md` §6).
@@ -179,7 +182,9 @@ New code copies the structure of these features instead of inventing its own. Re
 | Unit tests with fakes | `commonTest` `core.platform.domain` | `FakeSystemEnvironment`, `ResolvePlatformConventionsUseCaseTest` |
 | Dependency graph test | `jvmTest` `di` | `DesktopModulesTest` |
 | Theme tokens and shared UI components (§11) | `core.presentation.theme`, `core.presentation.components` | `NotekeaTheme`, `NotekeaColorSchemes`, `NotekeaDimensions`, `NotekeaButton`, `NotekeaTabRow`, `EmptyState`, `ErrorBanner`… |
-| MVI screen (State, Intent, Effect, ViewModel, Screen) | Pending: `ROADMAP.md` 1.3 (Welcome screen) | Added here when 1.3 is merged |
+| MVI screen (State, Intent, ViewModel, Screen, Content) | `vault.presentation.welcome` | `WelcomeState`, `WelcomeIntent`, `WelcomeViewModel`, `WelcomeReducers`, `WelcomeScreen`, `WelcomeContent` (one preview per state) |
+| Data adapters on KMP libraries, tested with in-memory fakes | `vault.data` | `OkioVaultFileSystem` (Okio `FakeFileSystem`), `SettingsRecentVaultsStore` (`MapSettings`) |
+| ViewModel tests over real use cases and fake ports | `commonTest` `vault` | `VaultFixture`, `WelcomeViewModelTest` |
 
 The pattern in short: a **port** (interface) in `domain` for anything the platform provides, its **adapter** in `data`
 of the platform source set, **all decisions in a use case** in `commonMain` tested with a hand-written **fake**, and

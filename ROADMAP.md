@@ -137,7 +137,7 @@ status bar item, empty state, error banner.
   dimensions) and `core.presentation.components`; a test gates WCAG AA contrast for every text pair. The gallery
   opens with `./gradlew :composeApp:run -Pgallery`.
 
-### ⬜ 1.3 Open a vault — `feature/vault-open`
+### 🚧 1.3 Open a vault — `feature/vault-open`
 
 Pick a folder with the native picker (FileKit); remember the last vault (Multiplatform Settings); recent vaults list.
 

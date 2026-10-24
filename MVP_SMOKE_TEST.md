@@ -50,9 +50,23 @@ list proves the **app** works for a real person on a real machine. It is the mai
 | ID | Steps | Expected | Testable from | Win | macOS | Linux |
 |---|---|---|---|---|---|---|
 | 1.2-01 | Look at any screen text and at a code block | UI text uses Inter and code uses JetBrains Mono on every OS (not the system font) | 1.2 | | | |
-| 1.2-02 | Compare the app in light and dark mode | Kea palette: olive primary, orange accents (citations, badges); all text is readable, nothing low-contrast | 1.2 | | | |
+| 1.2-02 | Compare the app in light and dark mode | Cobalt and tangerine palette: cobalt primary, tangerine accents (citations, badges); all text is readable, nothing low-contrast | 1.2 | | | |
 | 1.2-03 | Check buttons, text fields and list items | Controls have small rounded corners (6 dp), not pill shapes; cards 10 dp | 1.2 | | | |
 | 1.2-04 | Navigate the main window with Tab / Shift+Tab only | Every interactive element gets a visible focus ring and can be activated from the keyboard | 1.3 | | | |
 | 1.2-05 | With a screen reader (Narrator, VoiceOver, Orca), move through a screen | Buttons, tabs and list items are announced with their text and role | 1.3 | | | |
 | 1.2-06 | Run the packaged app | There is no way to open the design system gallery | 5.3 | | | |
 | 1.2-07 | Make the window as narrow as possible | Status bar items and tab labels stay on one line and end with "…"; badge numbers never split; nothing is clipped | 1.2 | | | |
+
+### 1.3 Open a vault
+
+| ID | Steps | Expected | Testable from | Win | macOS | Linux |
+|---|---|---|---|---|---|---|
+| 1.3-01 | First launch with no saved data | Welcome screen: "Notekea" wordmark, tagline, "Open folder…" (with the Ctrl+O / ⌘O hint) and "Create new vault"; no recent list | 1.3 | | | |
+| 1.3-02 | Click "Open folder…" and choose a folder of Markdown notes (an Obsidian vault works) | The native folder picker opens; the vault opens with its name in the window title and the number of notes found (hidden folders such as `.obsidian` are not counted) | 1.3 | | | |
+| 1.3-03 | Quit and relaunch the app | The last vault reopens directly, without flashing the welcome screen | 1.3 | | | |
+| 1.3-04 | Click "Open another vault", then check the recent list | Vaults appear most recent first with their folder (`~/…` on macOS and Linux) and when they were opened ("Just now", "2 days ago"…) | 1.3 | | | |
+| 1.3-05 | Press Ctrl+O (⌘O on macOS) on the welcome screen and inside an open vault | The folder picker opens in both places; cancelling it changes nothing | 1.3 | | | |
+| 1.3-06 | Rename or move a recent vault's folder outside the app, then relaunch | The vault is muted with "Folder not found", "Remove" and "Locate…"; "Locate…" lets you pick its new place and opens it; "Remove" only removes it from the list | 1.3 | | | |
+| 1.3-07 | Click "Create new vault", keep the suggested name and location, and create it | A "My Notes" folder is created in Documents (or the home folder) and opens empty ("No notes yet"); nothing else is written inside it | 1.3 | | | |
+| 1.3-08 | Create a vault with a name that already exists with files, then one with `a/b` as its name | A plain-language error explains each problem and the form stays open with the name to fix | 1.3 | | | |
+| 1.3-09 | Open a folder you have no permission to read | An error banner names the folder and says to check its permissions; "Dismiss" hides it | 1.3 | | | |
