@@ -100,7 +100,8 @@ abstract class BaseViewModel<S, I, E>(
   error and content are all representable and testable.
 - `reduce` lambdas are pure; complex transitions are extracted into pure functions and unit tested directly.
 - Composables: `<Screen>Screen` collects `state` and `effects` and passes them to `<Screen>Content`, which is
-  stateless (`state` + `onIntent`) and previewable.
+  stateless (`state` + `onIntent`). `<Screen>Content` has one `@Preview` per UI state (empty, loading, error,
+  content…) built from sample `<Screen>State` values (`GUIDELINES.md` §6).
 
 ## 5. Coroutines and time
 
@@ -150,7 +151,7 @@ abstract class BaseViewModel<S, I, E>(
   no `Impl` classes; use cases live in domain with a single `operator fun invoke`; ViewModels extend
   `BaseViewModel` and live in presentation; no `KoinComponent`; no direct `Dispatchers.*` outside
   `JvmAppDispatchers`; no `Clock.System` outside `di`; no `Color(0x…)` outside the theme package; no Material 3 component
-  outside the design system (§11); one top-level
+  outside the design system (§11); every UI composable has a `@Preview` in its file; one top-level
   class, interface or object per file; no public top-level functions in files that declare a type; constants in
   the class's `companion object`, which is the last element of the class (these file-structure rules also cover
   tests and the `:ktlint-rules` module).
@@ -194,7 +195,8 @@ themselves.
   and error banners already exist (see the gallery: `./gradlew :composeApp:run -Pgallery`).
 - **Missing piece? Add it to the design system**, not to the feature: a new file in `core.presentation.components`
   named `Notekea<Element>` (or a descriptive name such as `EmptyState`), colors and sizes from the theme, optional
-  parts as nullable slots, and a sample in the gallery in the same pull request. Examples still to come: dialogs,
+  parts as nullable slots, a `@Preview` of its variants in the same file, and a sample in the gallery in the same
+  pull request. Examples still to come: dialogs,
   chips, cards, menus, checkboxes, snackbars, the citation chip.
 - **Enforced by Konsist:** outside `core.presentation.components` and `core.presentation.theme`, importing a
   Material 3 component (`Button`, `OutlinedTextField`, `Tab`, `TabRow`, `Badge`, `AlertDialog`, `Card`, chips,

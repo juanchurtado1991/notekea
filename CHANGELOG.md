@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   palette; and a developer gallery (`./gradlew :composeApp:run -Pgallery`).
 - Design system rule: every reusable UI element comes from `core.presentation.components` (`NotekeaTabRow` added);
   a Konsist test fails the build if a screen imports a Material 3 component directly.
+- IDE previews: every design system component and `App` have `@Preview`s in the light and dark themes
+  (`NotekeaPreviewThemes`); a Konsist test requires a preview for every UI composable, and screens preview each
+  UI state.
 
 - Platform conventions (ROADMAP 1.1): `PlatformConventions` resolved at startup with the primary shortcut modifier,
   quit shortcut, dialog button order and per-user application data directory for Windows, macOS and Linux;
