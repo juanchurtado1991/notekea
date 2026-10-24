@@ -48,10 +48,10 @@ private const val SHORTCUT_MIN_WIDTH_DP = 48
 
 /**
  * Wraps [content] with a context menu of [sections] (separated by dividers) that opens at the pointer on a right
- * click, or wherever [state] is opened from the keyboard. [onOpenByPointer] runs on that right click, so the clicked
- * item can be selected first, as file managers do. Choosing an action closes the menu first. The menu is
- * themed like the rest of the app (surface, outline border, 6 dp corners) on every platform, with the 32 dp rows of
- * desktop menus and shortcuts aligned at the end.
+ * click, or wherever [state] is opened from the keyboard. Areas can nest: a right click opens only the innermost
+ * menu. [onOpenByPointer] runs on that right click, so the clicked item can be selected first, as file managers do.
+ * Choosing an action closes the menu first. The menu is themed like the rest of the app (surface, outline border,
+ * 6 dp corners) on every platform, with the 32 dp rows of desktop menus and shortcuts aligned at the end.
  */
 @Composable
 fun NotekeaContextMenuArea(
@@ -149,7 +149,9 @@ private fun Modifier.onSecondaryPress(
 ): Modifier = pointerInput(onPress) {
     awaitEachGesture {
         val event = awaitPointerEvent()
-        if (event.type == PointerEventType.Press && event.buttons.isSecondaryPressed) {
+        // A nested area (a row inside a list that has its own menu) handles the press first and consumes it.
+        val isUnhandled = event.changes.none { it.isConsumed }
+        if (event.type == PointerEventType.Press && event.buttons.isSecondaryPressed && isUnhandled) {
             event.changes.forEach { it.consume() }
             onPress(event.changes.first().position)
         }

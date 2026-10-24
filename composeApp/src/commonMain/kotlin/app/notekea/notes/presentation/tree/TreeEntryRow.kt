@@ -26,28 +26,26 @@ import app.notekea.notes.domain.TreeRow
 import app.notekea.resources.Res
 import app.notekea.resources.tree_delete_folder
 import app.notekea.resources.tree_delete_note
-import app.notekea.resources.tree_new_folder
-import app.notekea.resources.tree_new_note
 import app.notekea.resources.tree_open_folder
 import app.notekea.resources.tree_rename
 import app.notekea.resources.tree_reveal_explorer
 import app.notekea.resources.tree_reveal_files
 import app.notekea.resources.tree_reveal_finder
 import app.notekea.resources.tree_select_note
-import app.notekea.resources.tree_untitled_folder
-import app.notekea.resources.tree_untitled_note
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_WIDTH_DP = 260
 
 /**
- * One entry of the tree with its context menu (create here, rename, show in the file manager, delete) and, while it is
+ * One entry of the tree with its context menu ([createItems], the tree's New note and New folder, then rename, show in
+ * the file manager, delete) and, while it is
  * renamed, the name field with the reason a name was refused below it. A right click selects the entry first.
  */
 @Composable
 internal fun TreeEntryRow(
     row: TreeRow,
     state: VaultTreeState,
+    createItems: List<NotekeaMenuItem>,
     isFocused: Boolean,
     isMenuRequested: Boolean,
     onMenuShown: () -> Unit,
@@ -62,7 +60,7 @@ internal fun TreeEntryRow(
         }
     }
     NotekeaContextMenuArea(
-        sections = menuSections(row = row, state = state, onIntent = onIntent),
+        sections = menuSections(row = row, state = state, createItems = createItems, onIntent = onIntent),
         state = menuState,
         onOpenByPointer = { onIntent(VaultTreeIntent.OnRowSelect(path = row.path)) }
     ) {
@@ -143,9 +141,10 @@ private fun RenameField(
 private fun menuSections(
     row: TreeRow,
     state: VaultTreeState,
+    createItems: List<NotekeaMenuItem>,
     onIntent: (VaultTreeIntent) -> Unit
 ): List<List<NotekeaMenuItem>> = listOf(
-    createSection(state = state, onIntent = onIntent),
+    createItems,
     editSection(row = row, state = state, onIntent = onIntent),
     listOf(
         NotekeaMenuItem(
@@ -161,30 +160,6 @@ private fun menuSections(
         )
     )
 )
-
-@Composable
-private fun createSection(
-    state: VaultTreeState,
-    onIntent: (VaultTreeIntent) -> Unit
-): List<NotekeaMenuItem> {
-    val untitledNote = stringResource(resource = Res.string.tree_untitled_note)
-    val untitledFolder = stringResource(resource = Res.string.tree_untitled_folder)
-    return listOf(
-        NotekeaMenuItem(
-            label = stringResource(resource = Res.string.tree_new_note),
-            onClick = { onIntent(VaultTreeIntent.OnNewNoteClick(baseName = untitledNote)) },
-            icon = NotekeaIcons.NewNote,
-            shortcutHint = state.platformConventions.newNoteShortcut.label(
-                operatingSystem = state.platformConventions.operatingSystem
-            )
-        ),
-        NotekeaMenuItem(
-            label = stringResource(resource = Res.string.tree_new_folder),
-            onClick = { onIntent(VaultTreeIntent.OnNewFolderClick(baseName = untitledFolder)) },
-            icon = NotekeaIcons.NewFolder
-        )
-    )
-}
 
 @Composable
 private fun editSection(
@@ -228,6 +203,7 @@ private fun TreeEntryRowPreview() {
                 TreeEntryRow(
                     row = row,
                     state = state,
+                    createItems = emptyList(),
                     isFocused = false,
                     isMenuRequested = false,
                     onMenuShown = {},

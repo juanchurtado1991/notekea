@@ -141,6 +141,18 @@ class VaultTreeViewModelTest {
     }
 
     @Test
+    fun `clearing the selection sends a new folder to the vault root`() = runTreeTest {
+        val viewModel = startedViewModel()
+        viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(ROADMAP)))
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnSelectionClear)
+        viewModel.onIntent(intent = VaultTreeIntent.OnNewFolderClick(baseName = UNTITLED))
+        advanceUntilIdle()
+
+        assertTrue(actual = path(UNTITLED) in operations.existing)
+    }
+
+    @Test
     fun `confirming a rename twice at once moves the entry once`() = runTreeTest {
         val viewModel = startedViewModel()
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(WELCOME)))

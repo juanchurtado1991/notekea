@@ -83,6 +83,7 @@ class VaultTreeViewModel(
             is VaultTreeIntent.OnRevealRequest -> reveal(path = intent.path)
             is VaultTreeIntent.OnRowClick -> updateTree { reduceRowClick(state = it, path = intent.path) }
             is VaultTreeIntent.OnRowSelect -> reduce { it.copy(selectedPath = intent.path) }
+            VaultTreeIntent.OnSelectionClear -> reduce { it.copy(selectedPath = null) }
             VaultTreeIntent.OnSelectNext -> reduce { reduceSelectionMove(state = it, step = 1) }
             VaultTreeIntent.OnSelectPrevious -> reduce { reduceSelectionMove(state = it, step = -1) }
             is VaultTreeIntent.OnSidebarResize -> resizeSidebar(widthDp = intent.widthDp)
