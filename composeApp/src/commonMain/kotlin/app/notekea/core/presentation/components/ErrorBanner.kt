@@ -1,6 +1,7 @@
 package app.notekea.core.presentation.components
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,11 +25,14 @@ import androidx.compose.ui.unit.dp
 
 private const val PREVIEW_ACTION = "Load theirs"
 private const val PREVIEW_MESSAGE = "This note changed outside Notekea."
+private const val PREVIEW_NARROW_WIDTH_DP = 240
 private const val PREVIEW_WIDTH_DP = 480
+private const val STACKED_BELOW_DP = 360
 
 /**
  * Inline error that keeps the content around it visible: a message, an optional action slot (e.g. "Retry",
- * "Locate…") and an optional dismiss button.
+ * "Locate…") and an optional dismiss button. Narrower than [STACKED_BELOW_DP] (a sidebar), the buttons move below the
+ * message, so the message keeps the full width instead of wrapping into a thin column.
  */
 @Composable
 fun ErrorBanner(
@@ -46,16 +50,45 @@ fun ErrorBanner(
         color = colors.surface,
         contentColor = colors.error
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingS),
-            verticalAlignment = Alignment.CenterVertically
+        BoxWithConstraints(
+            modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingS)
         ) {
-            Text(text = message, modifier = Modifier.weight(weight = 1f), style = MaterialTheme.typography.bodyMedium)
-            action?.invoke()
-            onDismiss?.let {
-                TextButton(onClick = it) { Text(text = stringResource(resource = Res.string.error_banner_dismiss)) }
+            val buttons: @Composable () -> Unit = { BannerButtons(onDismiss = onDismiss, action = action) }
+            if (maxWidth < STACKED_BELOW_DP.dp) {
+                Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+                    BannerMessage(message = message, modifier = Modifier)
+                    if (action != null ||
+                        onDismiss != null
+                    ) {
+                        Row(modifier = Modifier.align(alignment = Alignment.End)) { buttons() }
+                    }
+                }
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    BannerMessage(message = message, modifier = Modifier.weight(weight = 1f))
+                    buttons()
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun BannerMessage(
+    message: String,
+    modifier: Modifier
+) {
+    Text(text = message, modifier = modifier, style = MaterialTheme.typography.bodyMedium)
+}
+
+@Composable
+private fun BannerButtons(
+    onDismiss: (() -> Unit)?,
+    action: (@Composable () -> Unit)?
+) {
+    action?.invoke()
+    onDismiss?.let {
+        TextButton(onClick = it) { Text(text = stringResource(resource = Res.string.error_banner_dismiss)) }
     }
 }
 
@@ -73,6 +106,20 @@ private fun ErrorBannerPreview() {
                 action = { NotekeaButton(text = PREVIEW_ACTION, onClick = {}, style = NotekeaButtonStyle.SECONDARY) }
             )
             ErrorBanner(message = PREVIEW_MESSAGE)
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ErrorBannerNarrowPreview() {
+    NotekeaPreviewThemes {
+        Column(modifier = Modifier.width(width = PREVIEW_NARROW_WIDTH_DP.dp)) {
+            ErrorBanner(
+                message = PREVIEW_MESSAGE,
+                onDismiss = {},
+                action = { NotekeaButton(text = PREVIEW_ACTION, onClick = {}, style = NotekeaButtonStyle.SECONDARY) }
+            )
         }
     }
 }
