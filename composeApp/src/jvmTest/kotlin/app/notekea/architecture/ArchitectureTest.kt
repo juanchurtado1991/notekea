@@ -223,6 +223,18 @@ class ArchitectureTest {
     }
 
     @Test
+    fun `features do not depend on each other`() {
+        productionScope.files
+            .filter { featureOf(packageName = it.packagee?.name) != null }
+            .assertFalse(
+                additionalMessage = "ARCHITECTURE.md §1: share through core, or let the app compose the features"
+            ) { file ->
+                val feature = featureOf(packageName = file.packagee?.name)
+                file.imports.any { import -> featureOf(packageName = import.name).let { it != null && it != feature } }
+            }
+    }
+
+    @Test
     fun `presentation does not depend on data`() {
         filesInLayer(layer = PRESENTATION_LAYER).assertFalse(additionalMessage = "ARCHITECTURE.md §1") { file ->
             file.imports.any {
@@ -312,6 +324,14 @@ class ArchitectureTest {
         file.interfaces(includeNested = false).size +
         file.objects(includeNested = false).size
 
+    /** The feature a package belongs to (`vault`, `notes`…), or null for core, the app root and generated code. */
+    private fun featureOf(
+        packageName: String?
+    ): String? {
+        val segments = packageName?.removePrefix(prefix = APP_PACKAGE_PREFIX)?.takeIf { it != packageName }?.split(".")
+        return segments?.takeIf { it.size > 1 }?.first()?.takeUnless { it in NON_FEATURE_PACKAGES }
+    }
+
     private fun filesInLayer(
         layer: String
     ): List<KoFileDeclaration> = productionScope.files.filter {
@@ -335,6 +355,7 @@ class ArchitectureTest {
         ?.contains(element = layer) == true
 
     companion object {
+        private const val APP_PACKAGE_PREFIX = "app.notekea."
         private const val BASE_VIEW_MODEL = "BaseViewModel"
         private const val COLOR_LITERAL = "Color(0x"
         private const val DATA_LAYER = "data"
@@ -355,6 +376,7 @@ class ArchitectureTest {
         private const val MATERIAL3_PACKAGE = "androidx.compose.material3"
         private const val PREVIEW_ANNOTATION = "Preview"
         private const val THEME_PACKAGE = "app.notekea.core.presentation.theme"
+        private val NON_FEATURE_PACKAGES = setOf("architecture", "core", "db", "di", "resources")
         private val DESIGN_SYSTEM_PACKAGES = listOf("app.notekea.core.presentation.components", THEME_PACKAGE)
 
         // Theme functions, the preview helper and the developer gallery are tooling, not UI elements.

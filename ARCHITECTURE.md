@@ -15,7 +15,7 @@ app.notekea
 │   ├── presentation    BaseViewModel, design system (theme, tokens, components)
 │   └── platform        Platform abstraction (PLATFORM_GUIDELINES.md)
 ├── di                  App-level Koin module that includes every feature module
-└── <feature>           vault, editor, index, llm, chat, sync, …
+└── <feature>           vault, notes, editor, index, llm, chat, sync, …
     ├── domain          Entities, <Feature>Error, repository interfaces, use cases
     ├── data            Implementations of the domain interfaces, DTOs and mappers
     ├── presentation    <Screen>State, <Screen>Intent, <Screen>Effect, <Screen>ViewModel, <Screen>Screen
@@ -25,6 +25,9 @@ app.notekea
 - `domain` depends on nothing but `core.domain` and the Kotlin standard library / coroutines.
 - `data` depends on `domain`; platform implementations live in `jvmMain` under the same package.
 - `presentation` depends on `domain` (use cases), never on `data`.
+- **Features never depend on each other.** What two features share lives in `core`; when one feature's screen shows
+  another's (the open vault showing the notes tree), it takes a composable slot and the app fills it in `main.kt`
+  (`WelcomeScreen(openedVaultContent = …)`). Enforced by Konsist.
 - One top-level class, interface or object per file, named after it; DTOs, interfaces and utility functions each in
   their own file (`GUIDELINES.md` §2, "File organization").
 
@@ -196,13 +199,16 @@ Every reusable UI element comes from the design system in `core.presentation.com
 theme tokens of `core.presentation.theme`. Screens compose these components; they never style Material components
 themselves.
 
-- **Use before you write.** Buttons, text fields, list items, tabs and tab rows, badges, status items, empty states
-  and error banners already exist (see the gallery: `./gradlew :composeApp:run -Pgallery`).
+- **Use before you write.** Buttons and compact icon buttons, text fields and inline text fields, list items, tree
+  items and skeleton rows, tabs and tab rows, badges, status items, cards, empty states, error banners, context
+  menus, confirmation dialogs and a resizable split pane already exist (see the gallery:
+  `./gradlew :composeApp:run -Pgallery`).
+- **Icons come from `NotekeaIcons`** (`core.presentation.theme`), named by meaning (`NewNote`, `Delete`); only that
+  file imports the icon library (Lucide, `LIBRARIES.md` §2). Enforced by Konsist.
 - **Missing piece? Add it to the design system**, not to the feature: a new file in `core.presentation.components`
   named `Notekea<Element>` (or a descriptive name such as `EmptyState`), colors and sizes from the theme, optional
   parts as nullable slots, a `@Preview` of its variants in the same file, and a sample in the gallery in the same
-  pull request. Examples still to come: dialogs,
-  chips, cards, menus, checkboxes, snackbars, the citation chip.
+  pull request. Examples still to come: chips, checkboxes, snackbars, the citation chip.
 - **Enforced by Konsist:** outside `core.presentation.components` and `core.presentation.theme`, importing a
   Material 3 component (`Button`, `OutlinedTextField`, `Tab`, `TabRow`, `Badge`, `AlertDialog`, `Card`, chips,
   `Checkbox`, `Switch`, `DropdownMenu`, `Snackbar`… or `androidx.compose.material3.*`) fails the build.

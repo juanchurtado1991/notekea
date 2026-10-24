@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The open vault shows its notes in a sidebar tree instead of the "N notes found" summary, and opening a vault no
+  longer walks it twice.
+- Features never depend on each other: the app composes them through slots (`ARCHITECTURE.md` §1, enforced by
+  Konsist).
+
 - Plan for M3: answers from small local models (~2B, ~4B, ~8B) are made precise by a pipeline that reranks
   retrieval, extracts evidence in parallel and verifies every sentence against the notes, plus an opt-in Deep
   answer mode that writes several drafts in parallel and keeps the best verified one (`ROADMAP.md` 3.0, 3.5, 3.6;
@@ -29,6 +34,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Component previews stack the light and dark themes vertically, so Android Studio's limited preview width shows both.
 
 ### Added
+
+- Vault tree and note list (ROADMAP 1.4): a resizable (200–480 dp) and hideable (`Mod+\`) sidebar with the vault's
+  folders and Markdown notes, note counts, natural sorting by name or date, keyboard navigation, a context menu and
+  shortcuts (Mod+N new note, F2 / Enter on macOS rename, Delete / Cmd+Backspace on macOS delete). Notes and folders
+  are created, renamed in place and deleted to the system trash (`gio trash` on Linux), falling back to the vault's
+  `.trash` folder; renaming offers to update the wiki and Markdown links of the notes that point to the entry. The
+  tree follows outside changes through a file watcher, reads frontmatter titles, tags and aliases with Ghost, and
+  opens 5,000 notes in under a second from a SQLite cache (`notekea.db` in the app data directory). Expanded
+  folders are remembered per vault; sort, sidebar width and visibility for all vaults.
+- Design system: `NotekeaIconButton`, `NotekeaTreeItem`, `NotekeaInlineTextField`, `NotekeaSkeletonRow`,
+  `NotekeaContextMenuArea`, `NotekeaConfirmDialog` (platform button order) and `NotekeaSplitPane`; error banners
+  stack their buttons when narrow; icons from Lucide through `NotekeaIcons` (a Konsist rule keeps the library there).
+- Smoke data for 1.4: a Playground Vault to change freely, simulated outside changes, a generated 5,000-note vault
+  and a cache reset in `smoke.sh` / `smoke.ps1`.
 
 - Smoke test data in `smoke-data/`: sample vaults (`Personal Notes`, `Work Obsidian`, `Empty Vault`) and
   `smoke.sh` / `smoke.ps1` for scenarios Git cannot hold (moved and unreadable folders, first launch); a rule in
