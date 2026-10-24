@@ -201,7 +201,8 @@ themselves.
 
 - **Use before you write.** Buttons and compact icon buttons, text fields and inline text fields, list items, tree
   items and skeleton rows, tabs and tab rows, badges, status items, cards, empty states, error banners, context
-  menus, confirmation dialogs and a resizable split pane already exist (see the gallery:
+  menus (nestable, with checked choices) and menu buttons, confirmation dialogs and a resizable split pane already
+  exist (see the gallery:
   `./gradlew :composeApp:run -Pgallery`).
 - **Icons come from `NotekeaIcons`** (`core.presentation.theme`), named by meaning (`NewNote`, `Delete`); only that
   file imports the icon library (Lucide, `LIBRARIES.md` §2). Enforced by Konsist.

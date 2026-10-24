@@ -35,6 +35,7 @@ import app.notekea.core.presentation.components.NotekeaInlineTextField
 import app.notekea.core.presentation.components.NotekeaWordmark
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaListItem
+import app.notekea.core.presentation.components.NotekeaMenuButton
 import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
@@ -75,6 +76,10 @@ private const val MENU_DELETE_SHORTCUT = "Delete"
 private const val MENU_RENAME = "Rename"
 private const val MENU_RENAME_SHORTCUT = "F2"
 private const val MENU_REVEAL = "Show in Files"
+private const val MENU_SORTED_BY_DATE = "Sort notes: date modified"
+private const val MENU_SORTED_BY_NAME = "Sort notes: name"
+private const val MENU_SORT_DATE = "Date modified, newest first"
+private const val MENU_SORT_NAME = "Name"
 private const val DIALOG_MESSAGE = "“Tomato plan” will be moved to the trash. You can restore it from there."
 private const val DIALOG_OPEN = "Delete note…"
 private const val DIALOG_TITLE = "Delete this note?"
@@ -287,6 +292,22 @@ private fun ContextMenuSection() {
             Text(text = MENU_AREA, modifier = Modifier.padding(all = NotekeaDimensions.SpacingM))
         }
     }
+    MenuButtonSample()
+}
+
+@Composable
+private fun MenuButtonSample() {
+    var isByName by remember { mutableStateOf(value = true) }
+    NotekeaMenuButton(
+        icon = if (isByName) NotekeaIcons.SortByName else NotekeaIcons.SortByModified,
+        label = if (isByName) MENU_SORTED_BY_NAME else MENU_SORTED_BY_DATE,
+        sections = listOf(
+            listOf(
+                NotekeaMenuItem(label = MENU_SORT_NAME, onClick = { isByName = true }, isChecked = isByName),
+                NotekeaMenuItem(label = MENU_SORT_DATE, onClick = { isByName = false }, isChecked = !isByName)
+            )
+        )
+    )
 }
 
 @Composable

@@ -94,8 +94,10 @@
     <string name="tree_reveal_finder">Show in Finder</string>
     <string name="tree_select_note">Select note</string>
     <string name="tree_show_sidebar">Show sidebar</string>
-    <string name="tree_sort_by_date">Sort by date modified</string>
-    <string name="tree_sort_by_name">Sort by name</string>
+    <string name="tree_sort_by_date">Date modified, newest first</string>
+    <string name="tree_sort_by_name">Name</string>
+    <string name="tree_sorted_by_date">Sort notes: date modified</string>
+    <string name="tree_sorted_by_name">Sort notes: name</string>
     <string name="tree_switch_vault">Open another vault</string>
     <string name="tree_untitled_folder">Untitled folder</string>
     <string name="tree_untitled_note">Untitled</string>

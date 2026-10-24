@@ -153,6 +153,21 @@ class VaultTreeViewModelTest {
     }
 
     @Test
+    fun `choosing a sort reorders the notes and is remembered`() = runTreeTest {
+        val viewModel = startedViewModel()
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnSortChange(sort = TreeSort.MODIFIED))
+        viewModel.onIntent(intent = VaultTreeIntent.OnSortChange(sort = TreeSort.MODIFIED))
+        advanceUntilIdle()
+
+        assertEquals(
+            expected =
+                TreeSort.MODIFIED to listOf(TreePreferences(expandedFolders = emptySet(), sort = TreeSort.MODIFIED)),
+            actual = viewModel.state.value.sort to preferences.saved
+        )
+    }
+
+    @Test
     fun `confirming a rename twice at once moves the entry once`() = runTreeTest {
         val viewModel = startedViewModel()
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(WELCOME)))

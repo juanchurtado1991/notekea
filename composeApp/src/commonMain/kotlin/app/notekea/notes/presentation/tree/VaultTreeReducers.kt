@@ -77,10 +77,6 @@ internal fun reduceRowClick(
     return if (path in state.tree.folders) reduceToggleFolder(state = selected, folder = path) else selected
 }
 
-internal fun reduceSortToggle(
-    state: VaultTreeState
-): VaultTreeState = state.copy(sort = if (state.sort == TreeSort.NAME) TreeSort.MODIFIED else TreeSort.NAME)
-
 internal fun reduceSelectionMove(
     state: VaultTreeState,
     step: Int

@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
@@ -101,16 +102,7 @@ private fun MenuRow(
             item.onClick()
         },
         modifier = Modifier.height(height = NotekeaDimensions.MenuItemHeight),
-        leadingIcon = item.icon?.let { icon ->
-            {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-                    tint = color
-                )
-            }
-        },
+        leadingIcon = leadingIconOf(item = item, color = color),
         trailingIcon = item.shortcutHint?.let { hint ->
             {
                 Text(
@@ -124,6 +116,23 @@ private fun MenuRow(
         },
         enabled = item.enabled
     )
+}
+
+/** The item's icon, or for a choice its check mark (an empty slot of the same size when it is not chosen). */
+private fun leadingIconOf(
+    item: NotekeaMenuItem,
+    color: Color
+): (@Composable () -> Unit)? {
+    val icon = if (item.isChecked != null) NotekeaIcons.Checked.takeIf { item.isChecked == true } else item.icon
+    if (icon == null && item.isChecked == null) return null
+    return {
+        val iconModifier = Modifier.size(size = NotekeaDimensions.IconSize)
+        if (icon != null) {
+            Icon(imageVector = icon, contentDescription = null, modifier = iconModifier, tint = color)
+        } else {
+            Box(modifier = iconModifier)
+        }
+    }
 }
 
 @Composable

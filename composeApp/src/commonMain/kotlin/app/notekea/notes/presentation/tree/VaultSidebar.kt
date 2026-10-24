@@ -72,7 +72,7 @@ internal fun VaultSidebar(
                 platformConventions = state.platformConventions,
                 onNewNote = { onIntent(VaultTreeIntent.OnNewNoteClick(baseName = untitledNote)) },
                 onNewFolder = { onIntent(VaultTreeIntent.OnNewFolderClick(baseName = untitledFolder)) },
-                onSortToggle = { onIntent(VaultTreeIntent.OnSortToggle) },
+                onSortChange = { onIntent(VaultTreeIntent.OnSortChange(sort = it)) },
                 onHideSidebar = { onIntent(VaultTreeIntent.OnSidebarToggle) }
             )
             SidebarMessages(state = state, onIntent = onIntent)

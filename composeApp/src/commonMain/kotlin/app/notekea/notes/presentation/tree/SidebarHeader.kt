@@ -17,6 +17,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.core.presentation.components.NotekeaMenuButton
+import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.platform.displayPath
 import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
@@ -30,13 +32,15 @@ import app.notekea.resources.tree_new_folder
 import app.notekea.resources.tree_new_note
 import app.notekea.resources.tree_sort_by_date
 import app.notekea.resources.tree_sort_by_name
+import app.notekea.resources.tree_sorted_by_date
+import app.notekea.resources.tree_sorted_by_name
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_WIDTH_DP = 260
 
 /**
  * Top of the sidebar: the vault's name and folder, and the actions on the tree. Every icon has a tooltip with its
- * name and shortcut. The sort button shows what clicking it does (sort by date when notes are sorted by name).
+ * name and shortcut. The sort button shows the current sort and opens a menu with both choices.
  */
 @Composable
 internal fun SidebarHeader(
@@ -46,7 +50,7 @@ internal fun SidebarHeader(
     platformConventions: PlatformConventions,
     onNewNote: () -> Unit,
     onNewFolder: () -> Unit,
-    onSortToggle: () -> Unit,
+    onSortChange: (TreeSort) -> Unit,
     onHideSidebar: () -> Unit
 ) {
     Column(
@@ -67,7 +71,7 @@ internal fun SidebarHeader(
             platformConventions = platformConventions,
             onNewNote = onNewNote,
             onNewFolder = onNewFolder,
-            onSortToggle = onSortToggle
+            onSortChange = onSortChange
         )
     }
 }
@@ -112,7 +116,7 @@ private fun TreeToolbar(
     platformConventions: PlatformConventions,
     onNewNote: () -> Unit,
     onNewFolder: () -> Unit,
-    onSortToggle: () -> Unit
+    onSortChange: (TreeSort) -> Unit
 ) {
     Row(
         modifier = Modifier.padding(top = NotekeaDimensions.SpacingS),
@@ -132,28 +136,32 @@ private fun TreeToolbar(
             onClick = onNewFolder
         )
         Spacer(modifier = Modifier.weight(weight = 1f))
-        SortButton(sort = sort, onSortToggle = onSortToggle)
+        SortButton(sort = sort, onSortChange = onSortChange)
     }
 }
 
+/** Shows the current sort (icon and tooltip) and opens the choices, the current one checked. */
 @Composable
 private fun SortButton(
     sort: TreeSort,
-    onSortToggle: () -> Unit
+    onSortChange: (TreeSort) -> Unit
 ) {
-    when (sort) {
-        TreeSort.NAME -> NotekeaIconButton(
-            icon = NotekeaIcons.SortByModified,
-            label = stringResource(resource = Res.string.tree_sort_by_date),
-            onClick = onSortToggle
-        )
-
-        TreeSort.MODIFIED -> NotekeaIconButton(
-            icon = NotekeaIcons.SortByName,
-            label = stringResource(resource = Res.string.tree_sort_by_name),
-            onClick = onSortToggle
+    val choices = listOf(TreeSort.NAME, TreeSort.MODIFIED).map { choice ->
+        NotekeaMenuItem(
+            label = stringResource(
+                resource = if (choice == TreeSort.NAME) Res.string.tree_sort_by_name else Res.string.tree_sort_by_date
+            ),
+            onClick = { onSortChange(choice) },
+            isChecked = choice == sort
         )
     }
+    NotekeaMenuButton(
+        icon = if (sort == TreeSort.NAME) NotekeaIcons.SortByName else NotekeaIcons.SortByModified,
+        label = stringResource(
+            resource = if (sort == TreeSort.NAME) Res.string.tree_sorted_by_name else Res.string.tree_sorted_by_date
+        ),
+        sections = listOf(choices)
+    )
 }
 
 @Preview
@@ -168,7 +176,7 @@ private fun SidebarHeaderPreview() {
                 platformConventions = PreviewPlatformConventions.linux,
                 onNewNote = {},
                 onNewFolder = {},
-                onSortToggle = {},
+                onSortChange = {},
                 onHideSidebar = {}
             )
         }
