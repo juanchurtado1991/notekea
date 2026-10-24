@@ -22,10 +22,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.presentation.components.EmptyState
 import app.notekea.core.presentation.components.ErrorBanner
 import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaCard
+import app.notekea.core.presentation.components.NotekeaConfirmDialog
 import app.notekea.core.presentation.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaInlineTextField
@@ -71,6 +73,9 @@ private const val MENU_DELETE_SHORTCUT = "Delete"
 private const val MENU_RENAME = "Rename"
 private const val MENU_RENAME_SHORTCUT = "F2"
 private const val MENU_REVEAL = "Show in Files"
+private const val DIALOG_MESSAGE = "“Tomato plan” will be moved to the trash. You can restore it from there."
+private const val DIALOG_OPEN = "Delete note…"
+private const val DIALOG_TITLE = "Delete this note?"
 private const val CODE_SAMPLE = "fun main() = println(\"Notekea\")"
 private const val DARK_TITLE = "Dark"
 private const val EMPTY_MESSAGE = "Create your first note to get started."
@@ -127,6 +132,7 @@ private fun GalleryColumn(
                 InputsSection()
                 TreeSection()
                 ContextMenuSection()
+                ConfirmDialogSection()
                 TabsSection()
                 FeedbackSection()
                 Text(text = CODE_SAMPLE, style = LocalNotekeaCodeTextStyle.current)
@@ -271,6 +277,24 @@ private fun ContextMenuSection() {
         NotekeaCard {
             Text(text = MENU_AREA, modifier = Modifier.padding(all = NotekeaDimensions.SpacingM))
         }
+    }
+}
+
+@Composable
+private fun ConfirmDialogSection() {
+    var isOpen by remember { mutableStateOf(value = false) }
+    NotekeaButton(text = DIALOG_OPEN, onClick = { isOpen = true }, style = NotekeaButtonStyle.SECONDARY)
+    if (isOpen) {
+        NotekeaConfirmDialog(
+            title = DIALOG_TITLE,
+            message = DIALOG_MESSAGE,
+            confirmLabel = BUTTON_DELETE,
+            cancelLabel = BUTTON_CANCEL,
+            buttonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
+            onConfirm = { isOpen = false },
+            onDismiss = { isOpen = false },
+            isDestructive = true
+        )
     }
 }
 
