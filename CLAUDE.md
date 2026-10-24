@@ -28,9 +28,22 @@ When a skill disagrees with the project documents above, **the project documents
 ./gradlew check koverVerify
 ```
 
-A `feature/` or `fix/` branch is not done until the developer has run the manual smoke test (`GUIDELINES.md` §8).
-Every feature also adds its release test cases to `MVP_SMOKE_TEST.md` and rewrites the existing cases its change
-makes outdated, including those marked "Revised by <feature>" (`GUIDELINES.md` §8).
-Agents cannot replace the smoke test: when the automated checks pass, hand over a short smoke test script based on the
-feature's "Done when" criteria in `ROADMAP.md`, and wait for the developer's result before opening the pull request.
-The script uses the data in `smoke-data/` (add what the feature needs there first; see its README).
+## Smoke tests (`GUIDELINES.md` §8)
+
+A `feature/` or `fix/` branch is not done until the developer has run the manual smoke test. Agents cannot replace
+it: when the automated checks pass, hand over a short smoke test script based on the feature's "Done when" criteria
+in `ROADMAP.md`, and wait for the developer's result before opening the pull request. In the same pull request:
+
+1. **Data:** add what the smoke test needs to `smoke-data/` (inside the repository when Git can hold it, otherwise
+   as a step of `smoke.sh` and `smoke.ps1`) and list it in `smoke-data/README.md`. The developer never invents data.
+2. **New cases:** add the feature's release cases to `MVP_SMOKE_TEST.md`, written so they can be reproduced on
+   Windows, macOS and Linux (name both `smoke.sh` and `smoke.ps1`, and the shortcut on each platform).
+3. **Outdated cases:** rewrite in place, keeping their IDs, the existing cases the change makes outdated, including
+   those marked "Revised by <feature>"; mark the cases a later feature will change with a "Revised by" note.
+4. **Results:** the developer's results go in the pull request description (OS, version, what was checked); the OS
+   columns of `MVP_SMOKE_TEST.md` are only filled in the release run with a packaged build.
+
+## Skills from another working directory
+
+When a session works on Notekea from another folder, `.claude/skills` is not loaded automatically: read the
+relevant `SKILL.md` files and references from disk before the work they cover, including `compose-ui` before any UI.
