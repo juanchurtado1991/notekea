@@ -3,6 +3,7 @@ package app.notekea.core.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,18 +36,17 @@ abstract class BaseViewModel<S, I, E>(initialState: S) : ViewModel() {
         effectChannel.trySend(element = effect)
     }
 
+    /** Returns the launched job, so a caller can skip a second submit while the first one runs. */
     protected fun launchGuarded(
         onError: (Throwable) -> Unit,
         block: suspend () -> Unit
-    ) {
-        viewModelScope.launch {
-            try {
-                block()
-            } catch (cancellation: CancellationException) {
-                throw cancellation
-            } catch (throwable: Throwable) {
-                onError(throwable)
-            }
+    ): Job = viewModelScope.launch {
+        try {
+            block()
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (throwable: Throwable) {
+            onError(throwable)
         }
     }
 
