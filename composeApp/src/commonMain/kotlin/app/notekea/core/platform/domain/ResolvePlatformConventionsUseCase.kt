@@ -3,8 +3,10 @@ package app.notekea.core.platform.domain
 /**
  * Maps the raw [SystemEnvironment] to the [PlatformConventions] defined in `PLATFORM_GUIDELINES.md`:
  * primary modifier (Cmd on macOS, Ctrl elsewhere), open-folder shortcut (primary modifier + O), quit shortcut
- * (Cmd+Q, Alt+F4 on Windows, Ctrl+Q on Linux), dialog button order, the user's home folder and the standard per-user
- * application data directory, honoring `APPDATA` and `XDG_DATA_HOME` when they are set.
+ * (Cmd+Q, Alt+F4 on Windows, Ctrl+Q on Linux), the vault tree shortcuts (new note with primary modifier + N, rename
+ * with Enter on macOS and F2 elsewhere, delete with Cmd+Backspace on macOS and Delete elsewhere, toggle the sidebar
+ * with primary modifier + \), dialog button order, the user's home folder and the standard per-user application data
+ * directory, honoring `APPDATA` and `XDG_DATA_HOME` when they are set.
  */
 class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnvironment) {
     private val macosNamePattern = Regex(pattern = MACOS_NAME_MARKERS)
@@ -17,6 +19,10 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             primaryModifier = primaryModifier,
             openFolderShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(primaryModifier)),
             quitShortcut = quitShortcutFor(operatingSystem = operatingSystem),
+            newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(primaryModifier)),
+            renameShortcut = renameShortcutFor(operatingSystem = operatingSystem),
+            deleteShortcut = deleteShortcutFor(operatingSystem = operatingSystem),
+            toggleSidebarShortcut = Shortcut(key = ShortcutKey.BACKSLASH, modifiers = setOf(primaryModifier)),
             dialogButtonOrder = dialogButtonOrderFor(operatingSystem = operatingSystem),
             appDataDirectory = appDataDirectoryFor(operatingSystem = operatingSystem),
             homeDirectory = systemEnvironment.userHome
@@ -35,6 +41,13 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
         )
 
         OperatingSystem.WINDOWS -> windowsAppDataDirectory()
+    }
+
+    private fun deleteShortcutFor(
+        operatingSystem: OperatingSystem
+    ): Shortcut = when (operatingSystem) {
+        OperatingSystem.MACOS -> Shortcut(key = ShortcutKey.BACKSPACE, modifiers = setOf(ShortcutModifier.COMMAND))
+        OperatingSystem.LINUX, OperatingSystem.WINDOWS -> Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet())
     }
 
     private fun detectOperatingSystem(
@@ -97,6 +110,13 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             key = ShortcutKey.F4,
             modifiers = setOf(ShortcutModifier.ALT)
         )
+    }
+
+    private fun renameShortcutFor(
+        operatingSystem: OperatingSystem
+    ): Shortcut = when (operatingSystem) {
+        OperatingSystem.MACOS -> Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet())
+        OperatingSystem.LINUX, OperatingSystem.WINDOWS -> Shortcut(key = ShortcutKey.F2, modifiers = emptySet())
     }
 
     private fun windowsAppDataDirectory(): String {

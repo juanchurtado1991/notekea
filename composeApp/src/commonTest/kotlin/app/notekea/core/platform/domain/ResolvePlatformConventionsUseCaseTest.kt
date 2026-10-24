@@ -19,7 +19,7 @@ class ResolvePlatformConventionsUseCaseTest {
     }
 
     @Test
-    fun `linux uses ctrl, ctrl+o, ctrl+q and cancel first with the default data home`() {
+    fun `linux uses ctrl, ctrl+o, ctrl+q, f2, delete and cancel first with the default data home`() {
         val conventions = resolve(
             operatingSystemName = LINUX_NAME,
             userHome = LINUX_HOME
@@ -35,6 +35,13 @@ class ResolvePlatformConventionsUseCaseTest {
                 ),
                 quitShortcut = Shortcut(
                     key = ShortcutKey.Q,
+                    modifiers = setOf(ShortcutModifier.CONTROL)
+                ),
+                newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(ShortcutModifier.CONTROL)),
+                renameShortcut = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
+                deleteShortcut = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
+                toggleSidebarShortcut = Shortcut(
+                    key = ShortcutKey.BACKSLASH,
                     modifiers = setOf(ShortcutModifier.CONTROL)
                 ),
                 dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
@@ -60,7 +67,7 @@ class ResolvePlatformConventionsUseCaseTest {
     }
 
     @Test
-    fun `macos uses cmd, cmd+o, cmd+q, cancel first and application support`() {
+    fun `macos uses cmd, cmd+o, cmd+q, enter, cmd+backspace, cancel first and application support`() {
         val conventions = resolve(
             operatingSystemName = MACOS_NAME,
             userHome = MACOS_HOME
@@ -76,6 +83,13 @@ class ResolvePlatformConventionsUseCaseTest {
                 ),
                 quitShortcut = Shortcut(
                     key = ShortcutKey.Q,
+                    modifiers = setOf(ShortcutModifier.COMMAND)
+                ),
+                newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(ShortcutModifier.COMMAND)),
+                renameShortcut = Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet()),
+                deleteShortcut = Shortcut(key = ShortcutKey.BACKSPACE, modifiers = setOf(ShortcutModifier.COMMAND)),
+                toggleSidebarShortcut = Shortcut(
+                    key = ShortcutKey.BACKSLASH,
                     modifiers = setOf(ShortcutModifier.COMMAND)
                 ),
                 dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
@@ -131,7 +145,7 @@ class ResolvePlatformConventionsUseCaseTest {
     }
 
     @Test
-    fun `windows uses ctrl, ctrl+o, alt+f4, primary first and APPDATA`() {
+    fun `windows uses ctrl, ctrl+o, alt+f4, f2, delete, primary first and APPDATA`() {
         val conventions = resolve(
             operatingSystemName = WINDOWS_NAME,
             userHome = WINDOWS_HOME,
@@ -149,6 +163,13 @@ class ResolvePlatformConventionsUseCaseTest {
                 quitShortcut = Shortcut(
                     key = ShortcutKey.F4,
                     modifiers = setOf(ShortcutModifier.ALT)
+                ),
+                newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(ShortcutModifier.CONTROL)),
+                renameShortcut = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
+                deleteShortcut = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
+                toggleSidebarShortcut = Shortcut(
+                    key = ShortcutKey.BACKSLASH,
+                    modifiers = setOf(ShortcutModifier.CONTROL)
                 ),
                 dialogButtonOrder = DialogButtonOrder.PRIMARY_THEN_CANCEL,
                 appDataDirectory = "D:\\Profiles\\ana\\Roaming\\Notekea",

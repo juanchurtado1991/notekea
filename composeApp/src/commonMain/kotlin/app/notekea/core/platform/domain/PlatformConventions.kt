@@ -9,6 +9,10 @@ data class PlatformConventions(
     val primaryModifier: ShortcutModifier,
     val openFolderShortcut: Shortcut,
     val quitShortcut: Shortcut,
+    val newNoteShortcut: Shortcut,
+    val renameShortcut: Shortcut,
+    val deleteShortcut: Shortcut,
+    val toggleSidebarShortcut: Shortcut,
     val dialogButtonOrder: DialogButtonOrder,
     val appDataDirectory: String,
     val homeDirectory: String

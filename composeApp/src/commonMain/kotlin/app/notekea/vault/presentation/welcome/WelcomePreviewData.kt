@@ -29,6 +29,10 @@ internal object WelcomePreviewData {
         primaryModifier = ShortcutModifier.CONTROL,
         openFolderShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(ShortcutModifier.CONTROL)),
         quitShortcut = Shortcut(key = ShortcutKey.Q, modifiers = setOf(ShortcutModifier.CONTROL)),
+        newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(ShortcutModifier.CONTROL)),
+        renameShortcut = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
+        deleteShortcut = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
+        toggleSidebarShortcut = Shortcut(key = ShortcutKey.BACKSLASH, modifiers = setOf(ShortcutModifier.CONTROL)),
         dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
         appDataDirectory = APP_DATA,
         homeDirectory = HOME
