@@ -9,12 +9,15 @@ import app.notekea.notes.domain.RelativePath
 import kotlinx.coroutines.withContext
 import java.nio.file.Path
 import kotlin.io.path.Path
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
 
 /**
  * [FileRevealer] with each system's own command: `open -R` on macOS and `explorer /select,` on Windows select the
  * entry in Finder and File Explorer. On Linux the freedesktop.org `FileManager1.ShowItems` D-Bus call selects it in
  * the user's file manager when it supports the call (Nautilus, Dolphin, Nemo…); otherwise `xdg-open` opens the
  * containing folder. File Explorer exits with 1 even when it worked, so on Windows starting it counts as success.
+ * An entry that no longer exists is reported instead of opening the file manager somewhere else.
  * [runCommand] runs a command and returns its exit code, or null when it could not run (see `ProcessCommands.kt`).
  */
 class ProcessFileRevealer(
@@ -27,6 +30,11 @@ class ProcessFileRevealer(
         path: RelativePath
     ): Outcome<Unit, NotesError> = withContext(context = dispatchers.io) {
         val entry = if (path.isRoot) Path(vaultPath) else Path(vaultPath, path.value)
+        if (!entry.exists()) {
+            return@withContext Outcome.Failure(
+                error = missingError(vaultPath = vaultPath, path = path)
+            )
+        }
         val isRevealed = when (operatingSystem) {
             OperatingSystem.LINUX -> revealOnLinux(entry = entry)
             OperatingSystem.MACOS -> runCommand(listOf(OPEN, OPEN_REVEAL, entry.toString())) == SUCCESS
@@ -39,6 +47,16 @@ class ProcessFileRevealer(
         } else {
             Outcome.Failure(error = NotesError.RevealFailed(path = path.value))
         }
+    }
+
+    /** The vault itself when its folder is gone (moved or renamed while open), otherwise the entry. */
+    private fun missingError(
+        vaultPath: String,
+        path: RelativePath
+    ): NotesError = if (Path(vaultPath).isDirectory()) {
+        NotesError.EntryMissing(path = path.value)
+    } else {
+        NotesError.VaultMissing(path = vaultPath)
     }
 
     private fun revealOnLinux(
