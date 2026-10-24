@@ -4,4 +4,10 @@ package app.notekea.notes.presentation.tree
 sealed interface TreeNotice {
     /** The system trash was not available, so the entry went to the vault's `.trash` folder instead. */
     data class MovedToVaultTrash(val name: String) : TreeNotice
+
+    /** Links were updated after a rename; [skippedCount] notes changed meanwhile and were left as they were. */
+    data class LinksUpdated(
+        val updatedCount: Int,
+        val skippedCount: Int
+    ) : TreeNotice
 }

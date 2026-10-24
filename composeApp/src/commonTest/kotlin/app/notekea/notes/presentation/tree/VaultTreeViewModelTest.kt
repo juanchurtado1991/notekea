@@ -3,11 +3,14 @@ package app.notekea.notes.presentation.tree
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
+import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
+import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.FakeFileRevealer
 import app.notekea.notes.domain.FakeFileWatcher
+import app.notekea.notes.domain.FakeNoteContentStore
 import app.notekea.notes.domain.FakeNoteFileOperations
 import app.notekea.notes.domain.FakeNoteMetadataCache
 import app.notekea.notes.domain.FakeNoteMetadataReader
@@ -21,6 +24,7 @@ import app.notekea.notes.domain.NoteFixtures.VAULT
 import app.notekea.notes.domain.NoteFixtures.file
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
+import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.RevealEntryUseCase
@@ -51,6 +55,7 @@ class VaultTreeViewModelTest {
     private val trash = FakeTrash()
     private val revealer = FakeFileRevealer()
     private val preferences = FakeTreePreferencesStore()
+    private val contents = FakeNoteContentStore()
 
     @BeforeTest
     fun setUp() {
@@ -152,6 +157,49 @@ class VaultTreeViewModelTest {
         assertEquals(
             expected = path("Start here.md") to null,
             actual = viewModel.state.value.selectedPath to viewModel.state.value.renaming
+        )
+    }
+
+    @Test
+    fun `renaming a linked note asks before updating the notes that link to it`() = runTreeTest {
+        contents.texts[path("Start here.md")] = ""
+        contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
+        val viewModel = startedViewModel()
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(WELCOME)))
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameTextChange(text = "Start here"))
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameConfirm)
+        advanceUntilIdle()
+        val prompt = viewModel.state.value.linkUpdatePrompt
+        viewModel.onIntent(intent = VaultTreeIntent.OnLinkUpdateConfirm)
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = LinkUpdatePrompt(oldName = "Welcome", newName = "Start here", noteCount = 1),
+            actual = prompt
+        )
+        assertEquals(
+            expected = "Begin with [[Start here]]." to TreeNotice.LinksUpdated(updatedCount = 1, skippedCount = 0),
+            actual = contents.texts.getValue(path(ROADMAP)) to viewModel.state.value.notice
+        )
+    }
+
+    @Test
+    fun `declining the link update changes no note`() = runTreeTest {
+        contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
+        val viewModel = startedViewModel()
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(WELCOME)))
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameTextChange(text = "Start here"))
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameConfirm)
+        advanceUntilIdle()
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnLinkUpdateCancel)
+        viewModel.onIntent(intent = VaultTreeIntent.OnLinkUpdateConfirm)
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = "Begin with [[Welcome]]." to null,
+            actual = contents.texts.getValue(path(ROADMAP)) to viewModel.state.value.linkUpdatePrompt
         )
     }
 
@@ -297,6 +345,11 @@ class VaultTreeViewModelTest {
             ),
             deleteEntry = DeleteEntryUseCase(trash = trash),
             revealEntry = RevealEntryUseCase(fileRevealer = revealer),
+            planLinkUpdates = PlanLinkUpdatesUseCase(
+                noteContentStore = contents,
+                linkFinder = JetBrainsMarkdownLinkFinder()
+            ),
+            applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = contents),
             getTreePreferences = GetTreePreferencesUseCase(treePreferencesStore = preferences),
             saveTreePreferences = SaveTreePreferencesUseCase(treePreferencesStore = preferences)
         )

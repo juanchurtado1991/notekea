@@ -20,7 +20,7 @@ private const val PREVIEW_WIDTH_DP = 900
 
 /**
  * Stateless vault workspace: the resizable, hideable sidebar with the tree and, beside it, the selected note. The
- * delete confirmation is shown over both while an entry waits for an answer.
+ * delete and link update questions are shown over both while they wait for an answer.
  */
 @Composable
 fun VaultTreeContent(
@@ -50,6 +50,22 @@ fun VaultTreeContent(
                 )
             },
             end = { NoteDetailsPanel(state = state, onShowSidebar = { onIntent(VaultTreeIntent.OnSidebarToggle) }) }
+        )
+    }
+    TreeQuestions(state = state, onIntent = onIntent)
+}
+
+@Composable
+private fun TreeQuestions(
+    state: VaultTreeState,
+    onIntent: (VaultTreeIntent) -> Unit
+) {
+    state.linkUpdatePrompt?.let { prompt ->
+        LinkUpdateDialog(
+            prompt = prompt,
+            buttonOrder = state.platformConventions.dialogButtonOrder,
+            onConfirm = { onIntent(VaultTreeIntent.OnLinkUpdateConfirm) },
+            onDismiss = { onIntent(VaultTreeIntent.OnLinkUpdateCancel) }
         )
     }
     state.pendingDelete?.let { path ->
@@ -100,6 +116,16 @@ private fun VaultTreeContentEmptyPreview() {
 @Composable
 private fun VaultTreeContentSidebarHiddenPreview() {
     VaultTreeContentPreviewFrame(state = TreePreviewData.state().copy(isSidebarCollapsed = true))
+}
+
+@Preview
+@Composable
+private fun VaultTreeContentLinkUpdatePreview() {
+    VaultTreeContentPreviewFrame(
+        state = TreePreviewData.state().copy(
+            linkUpdatePrompt = LinkUpdatePrompt(oldName = "Arepas", newName = "Arepas reina", noteCount = 4)
+        )
+    )
 }
 
 @Preview

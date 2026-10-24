@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.tree
 
 import app.notekea.core.domain.Outcome
+import app.notekea.notes.domain.LinkUpdateResult
 import app.notekea.notes.domain.NoteEntry
 import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.NoteMetadata
@@ -191,6 +192,14 @@ internal fun reduceDeleted(
         )
     }
 }
+
+internal fun reduceLinksUpdated(
+    state: VaultTreeState,
+    result: LinkUpdateResult
+): VaultTreeState = state.copy(
+    linkUpdatePrompt = null,
+    notice = TreeNotice.LinksUpdated(updatedCount = result.updatedCount, skippedCount = result.skipped.size)
+)
 
 /** The row a selection moves to when [path] goes away: the next one outside it, else the one before it. */
 private fun neighborOf(

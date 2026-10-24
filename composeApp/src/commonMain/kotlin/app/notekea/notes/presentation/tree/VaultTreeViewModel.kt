@@ -3,12 +3,15 @@ package app.notekea.notes.presentation.tree
 import app.notekea.core.domain.Outcome
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
+import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.GetTreePreferencesUseCase
+import app.notekea.notes.domain.NoteRewrite
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
+import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.RevealEntryUseCase
@@ -22,7 +25,8 @@ import kotlin.time.TimeSource
  * Vault sidebar (`ROADMAP.md` 1.4): shows the vault tree, kept up to date by the file watcher, and runs the actions
  * on its entries. The expanded folders and the sort are restored when the vault opens and saved on every change. The
  * rows are flattened again whenever the tree, the expanded folders or the sort change. Renaming can be confirmed twice
- * at once (Enter and the field losing focus); only the first confirmation runs.
+ * at once (Enter and the field losing focus); only the first confirmation runs. After a rename, the notes that link to
+ * the entry are found in the background and, if there are any, the user is asked before any of them is changed.
  */
 class VaultTreeViewModel(
     private val vaultPath: String,
@@ -34,6 +38,8 @@ class VaultTreeViewModel(
     private val renameEntry: RenameEntryUseCase,
     private val deleteEntry: DeleteEntryUseCase,
     private val revealEntry: RevealEntryUseCase,
+    private val planLinkUpdates: PlanLinkUpdatesUseCase,
+    private val applyLinkUpdates: ApplyLinkUpdatesUseCase,
     private val getTreePreferences: GetTreePreferencesUseCase,
     private val saveTreePreferences: SaveTreePreferencesUseCase
 ) : BaseViewModel<VaultTreeState, VaultTreeIntent, Nothing>(
@@ -41,6 +47,9 @@ class VaultTreeViewModel(
     ) {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private var renameJob: Job? = null
+
+    // The planned rewrites behind linkUpdatePrompt: working data for the next step, not something the UI renders.
+    private var pendingLinkRewrites: List<NoteRewrite> = emptyList()
 
     init {
         launchGuarded(onError = ::showUnexpectedError) {
@@ -61,6 +70,8 @@ class VaultTreeViewModel(
             is VaultTreeIntent.OnDeleteRequest -> reduce { it.copy(pendingDelete = intent.path ?: it.selectedPath) }
             VaultTreeIntent.OnErrorDismiss -> reduce { it.copy(actionError = null, hasUnexpectedError = false) }
             VaultTreeIntent.OnExpandSelected -> updateTree(transform = ::reduceExpandSelected)
+            VaultTreeIntent.OnLinkUpdateCancel -> cancelLinkUpdate()
+            VaultTreeIntent.OnLinkUpdateConfirm -> updateLinks()
             is VaultTreeIntent.OnNewFolderClick -> create(baseName = intent.baseName, isFolder = true)
             is VaultTreeIntent.OnNewNoteClick -> create(baseName = intent.baseName, isFolder = false)
             VaultTreeIntent.OnNoticeDismiss -> reduce { it.copy(notice = null) }
@@ -135,8 +146,42 @@ class VaultTreeViewModel(
         val draft = state.value.renaming ?: return
         if (renameJob?.isActive == true) return
         renameJob = launchGuarded(onError = ::showUnexpectedError) {
+            val notesBefore = state.value.tree.notes.keys
             val outcome = renameEntry(vaultPath = vaultPath, path = draft.path, newName = draft.text)
             updateTree { reduceRenameOutcome(state = it, from = draft.path, outcome = outcome) }
+            if (outcome is Outcome.Success && outcome.value != draft.path) {
+                offerLinkUpdate(notesBefore = notesBefore, from = draft.path, to = outcome.value)
+            }
+        }
+    }
+
+    private fun cancelLinkUpdate() {
+        pendingLinkRewrites = emptyList()
+        reduce { it.copy(linkUpdatePrompt = null) }
+    }
+
+    private suspend fun offerLinkUpdate(
+        notesBefore: Set<RelativePath>,
+        from: RelativePath,
+        to: RelativePath
+    ) {
+        val rewrites = planLinkUpdates(vaultPath = vaultPath, notesBefore = notesBefore, from = from, to = to)
+        if (rewrites.isEmpty()) return
+        pendingLinkRewrites = rewrites
+        val prompt = LinkUpdatePrompt(
+            oldName = from.nameWithoutExtension,
+            newName = to.nameWithoutExtension,
+            noteCount = rewrites.size
+        )
+        reduce { it.copy(linkUpdatePrompt = prompt) }
+    }
+
+    private fun updateLinks() {
+        val rewrites = pendingLinkRewrites.takeIf { it.isNotEmpty() } ?: return
+        pendingLinkRewrites = emptyList()
+        launchGuarded(onError = ::showUnexpectedError) {
+            val result = applyLinkUpdates(vaultPath = vaultPath, rewrites = rewrites)
+            reduce { reduceLinksUpdated(state = it, result = result) }
         }
     }
 
