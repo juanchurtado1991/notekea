@@ -2,6 +2,7 @@ package app.notekea.core.presentation.theme
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.composables.icons.lucide.ArrowDownAZ
+import com.composables.icons.lucide.Check
 import com.composables.icons.lucide.ChevronDown
 import com.composables.icons.lucide.ChevronRight
 import com.composables.icons.lucide.ClockArrowDown
@@ -23,6 +24,7 @@ import com.composables.icons.lucide.Trash2
  * glyph can change here alone. They come from Lucide, the set Obsidian users already know (`LIBRARIES.md` §2).
  */
 object NotekeaIcons {
+    val Checked: ImageVector get() = Lucide.Check
     val Collapse: ImageVector get() = Lucide.ChevronDown
     val Delete: ImageVector get() = Lucide.Trash2
     val Expand: ImageVector get() = Lucide.ChevronRight

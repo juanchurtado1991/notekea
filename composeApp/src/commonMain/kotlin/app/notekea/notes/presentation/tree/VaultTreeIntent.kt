@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.tree
 
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.TreeSort
 
 /** What the user did in the vault sidebar. Actions without a path apply to the selected entry. */
 sealed interface VaultTreeIntent {
@@ -59,5 +60,5 @@ sealed interface VaultTreeIntent {
 
     data object OnSelectPrevious : VaultTreeIntent
 
-    data object OnSortToggle : VaultTreeIntent
+    data class OnSortChange(val sort: TreeSort) : VaultTreeIntent
 }

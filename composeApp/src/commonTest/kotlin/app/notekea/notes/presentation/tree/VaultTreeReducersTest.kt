@@ -118,17 +118,6 @@ class VaultTreeReducersTest {
     }
 
     @Test
-    fun `the sort toggles between name and date`() {
-        assertEquals(
-            expected = listOf(TreeSort.MODIFIED, TreeSort.NAME),
-            actual = listOf(
-                reduceSortToggle(state = state()).sort,
-                reduceSortToggle(state = reduceSortToggle(state = state())).sort
-            )
-        )
-    }
-
-    @Test
     fun `a created note appears at once, revealed and being renamed`() {
         val created = reduceCreated(
             state = state(),

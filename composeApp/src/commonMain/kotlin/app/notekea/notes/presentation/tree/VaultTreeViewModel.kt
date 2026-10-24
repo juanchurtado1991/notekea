@@ -88,7 +88,7 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnSelectPrevious -> reduce { reduceSelectionMove(state = it, step = -1) }
             is VaultTreeIntent.OnSidebarResize -> resizeSidebar(widthDp = intent.widthDp)
             VaultTreeIntent.OnSidebarToggle -> updateTree { it.copy(isSidebarCollapsed = !it.isSidebarCollapsed) }
-            VaultTreeIntent.OnSortToggle -> updateTree(transform = ::reduceSortToggle)
+            is VaultTreeIntent.OnSortChange -> updateTree { it.copy(sort = intent.sort) }
         }
     }
 
