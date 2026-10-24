@@ -39,6 +39,19 @@ value class RelativePath(val value: String) {
         folder: RelativePath
     ): Boolean = folder.isRoot || value == folder.value || value.startsWith(prefix = folder.value + SEPARATOR)
 
+    /** This path after [from] was renamed or moved to [to]; paths outside [from] stay as they are. */
+    fun rebased(
+        from: RelativePath,
+        to: RelativePath
+    ): RelativePath = if (isWithin(folder = from)) {
+        RelativePath(
+            value =
+                to.value + value.removePrefix(prefix = from.value)
+        )
+    } else {
+        this
+    }
+
     companion object {
         const val MARKDOWN_EXTENSION = ".md"
         const val SEPARATOR = "/"
