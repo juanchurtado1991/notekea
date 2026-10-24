@@ -151,7 +151,7 @@ abstract class BaseViewModel<S, I, E>(
 - **Architecture tests** (`composeApp/src/jvmTest/.../architecture/ArchitectureTest.kt`) enforce: domain imports
   no other layer and no framework (Compose, Koin, Okio, Ktor, JGit, Lucene, llama.cpp, `java.io`/`java.nio`);
   presentation does not import data; `<Feature>Error` types are sealed and live in domain; DTOs live in data;
-  no `Impl` classes; use cases live in domain with a single `operator fun invoke`; ViewModels extend
+  no `Impl` classes; interfaces have no default bodies and are not extended with extension functions or properties; use cases live in domain with a single `operator fun invoke`; ViewModels extend
   `BaseViewModel` and live in presentation; no `KoinComponent`; no direct `Dispatchers.*` outside
   `JvmAppDispatchers`; no `Clock.System` outside `di`; no `Color(0x…)` outside the theme package; no Material 3 component
   outside the design system (§11); every UI composable has a `@Preview` in its file; one top-level
