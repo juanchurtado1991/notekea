@@ -1,23 +1,23 @@
 package app.notekea.vault.presentation.welcome
 
-import androidx.compose.foundation.focusable
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.platform.domain.Shortcut
+import app.notekea.core.presentation.platform.LocalShortcutDispatcher
+import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.matches
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Welcome flow entry point: collects [WelcomeViewModel] and renders [WelcomeContent]. The root takes focus at start
- * so the open-folder shortcut works before anything is clicked; key events from focused children pass through it.
+ * Welcome flow entry point: collects [WelcomeViewModel] and renders [WelcomeContent]. The open-folder shortcut is
+ * registered with the window's [ShortcutDispatcher] while the screen is shown, so it works whatever has focus.
  * [onVaultNameChange] reports the open vault's name (or null) so the window title can show it.
  */
 @Composable
@@ -28,20 +28,33 @@ fun WelcomeScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val vaultName = state.openedVault?.vault?.name
-    val focusRequester = remember { FocusRequester() }
     LaunchedEffect(key1 = vaultName) { onVaultNameChange(vaultName) }
-    LaunchedEffect(key1 = Unit) { focusRequester.requestFocus() }
+    OpenFolderShortcut(
+        shortcut = state.platformConventions.openFolderShortcut,
+        onTrigger = { viewModel.onIntent(intent = WelcomeIntent.OnOpenFolderClick) }
+    )
     WelcomeContent(
         state = state,
         onIntent = viewModel::onIntent,
         modifier = modifier
-            .onPreviewKeyEvent { event ->
-                val isOpenFolder = state.platformConventions.openFolderShortcut.matches(event = event)
-                if (isOpenFolder) viewModel.onIntent(intent = WelcomeIntent.OnOpenFolderClick)
-                isOpenFolder
-            }.focusRequester(focusRequester = focusRequester)
-            .focusable()
     )
+}
+
+@Composable
+private fun OpenFolderShortcut(
+    shortcut: Shortcut,
+    onTrigger: () -> Unit
+) {
+    val dispatcher = LocalShortcutDispatcher.current
+    val currentOnTrigger by rememberUpdatedState(newValue = onTrigger)
+    DisposableEffect(dispatcher, shortcut) {
+        val unregister = dispatcher.register { event ->
+            val isOpenFolder = shortcut.matches(event = event)
+            if (isOpenFolder) currentOnTrigger()
+            isOpenFolder
+        }
+        onDispose { unregister() }
+    }
 }
 
 @Preview
