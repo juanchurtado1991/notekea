@@ -12,17 +12,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
@@ -36,15 +31,13 @@ private const val PREVIEW_DISABLED = "Disabled"
 private const val PREVIEW_OPEN = "Open folder…"
 private const val PREVIEW_REMOVE = "Remove"
 private const val PREVIEW_SHORTCUT = "Ctrl+O"
-private const val FOCUS_HALO_ALPHA = 0.45f
-private const val FOCUS_HALO_WIDTH_DP = 3
 private const val SHORTCUT_HINT_ALPHA = 0.72f
 
 /**
  * Text button in the four Notekea weights with the 6 dp control radius; colors come from semantic roles.
  * [shortcutHint] shows the keyboard shortcut ("Ctrl+O", "⌘O") as a muted label after the text, so power users
- * discover it without it being the only way in (`GUIDELINES.md`, product principle). A focused button shows a focus
- * halo around it.
+ * discover it without it being the only way in (`GUIDELINES.md`, product principle). A focused button shows its focus
+ * as a border.
  */
 @Composable
 fun NotekeaButton(
@@ -59,68 +52,79 @@ fun NotekeaButton(
         Text(text = text, style = MaterialTheme.typography.labelLarge)
         shortcutHint?.let { ShortcutHint(text = it) }
     }
-    val modifier = modifier.then(other = rememberFocusRing())
-    when (style) {
-        NotekeaButtonStyle.DESTRUCTIVE -> Button(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled,
-            shape = MaterialTheme.shapes.small,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error,
-                contentColor = MaterialTheme.colorScheme.onError
-            )
-        ) { label() }
-
-        NotekeaButtonStyle.PRIMARY -> Button(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled,
-            shape = MaterialTheme.shapes.small
-        ) { label() }
-
-        NotekeaButtonStyle.SECONDARY -> OutlinedButton(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled,
-            shape = MaterialTheme.shapes.small
-        ) { label() }
-
-        NotekeaButtonStyle.TEXT -> TextButton(
-            onClick = onClick,
-            modifier = modifier,
-            enabled = enabled,
-            shape = MaterialTheme.shapes.small
-        ) { label() }
-    }
+    // Read from the focus modifier, not from interactions: a dialog may focus the button before it collects them.
+    var isFocused by remember { mutableStateOf(value = false) }
+    StyledButton(
+        style = style,
+        onClick = onClick,
+        modifier = modifier.onFocusChanged { isFocused = it.isFocused },
+        enabled = enabled,
+        border = borderOf(style = style, enabled = enabled, isFocused = isFocused),
+        label = label
+    )
 }
 
 @Composable
-private fun rememberFocusRing(): Modifier {
-    var isFocused by remember { mutableStateOf(value = false) }
-    val color = MaterialTheme.colorScheme.primary
-    return Modifier.onFocusChanged { isFocused = it.isFocused }.focusRing(isFocused = isFocused, color = color)
+private fun StyledButton(
+    style: NotekeaButtonStyle,
+    onClick: () -> Unit,
+    modifier: Modifier,
+    enabled: Boolean,
+    border: BorderStroke?,
+    label: @Composable RowScope.() -> Unit
+) {
+    val shape = MaterialTheme.shapes.small
+    when (style) {
+        NotekeaButtonStyle.DESTRUCTIVE -> {
+            Button(
+                onClick = onClick,
+                modifier = modifier,
+                enabled = enabled,
+                shape = shape,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                ),
+                border = border
+            ) { label() }
+        }
+
+        NotekeaButtonStyle.PRIMARY -> {
+            Button(onClick = onClick, modifier = modifier, enabled = enabled, shape = shape, border = border) {
+                label()
+            }
+        }
+
+        NotekeaButtonStyle.SECONDARY -> {
+            OutlinedButton(onClick = onClick, modifier = modifier, enabled = enabled, shape = shape, border = border) {
+                label()
+            }
+        }
+
+        NotekeaButtonStyle.TEXT -> {
+            TextButton(onClick = onClick, modifier = modifier, enabled = enabled, shape = shape, border = border) {
+                label()
+            }
+        }
+    }
 }
 
 /**
- * A soft halo hugging the button while it has focus, as desktop systems show keyboard focus, so the dialog's initial
- * focus and Tab moves can be seen (Material's own focus hint is a faint overlay). It does not change the layout.
+ * Keyboard focus is drawn as the button's own border (2 dp, on its shape, no gap): primary, or the text color on
+ * filled buttons, where primary would not show. Unfocused, only the outlined button keeps its 1 dp outline.
  */
-private fun Modifier.focusRing(
-    isFocused: Boolean,
-    color: Color
-): Modifier = drawWithContent {
-    drawContent()
-    if (isFocused) {
-        val width = FOCUS_HALO_WIDTH_DP.dp.toPx()
-        val outset = width / 2
-        drawRoundRect(
-            color = color.copy(alpha = FOCUS_HALO_ALPHA),
-            topLeft = Offset(x = -outset, y = -outset),
-            size = Size(width = size.width + width, height = size.height + width),
-            cornerRadius = CornerRadius(x = NotekeaDimensions.ControlRadius.toPx() + outset),
-            style = Stroke(width = width)
-        )
+@Composable
+private fun borderOf(
+    style: NotekeaButtonStyle,
+    enabled: Boolean,
+    isFocused: Boolean
+): BorderStroke? {
+    val isFilled = style == NotekeaButtonStyle.PRIMARY || style == NotekeaButtonStyle.DESTRUCTIVE
+    val focusColor = if (isFilled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary
+    return when {
+        isFocused -> BorderStroke(width = NotekeaDimensions.FocusRingWidth, color = focusColor)
+        style == NotekeaButtonStyle.SECONDARY -> ButtonDefaults.outlinedButtonBorder(enabled = enabled)
+        else -> null
     }
 }
 
