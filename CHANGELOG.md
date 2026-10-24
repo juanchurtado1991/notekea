@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dependencies: Kotlin 2.4.21, ktlint 1.8.0 (Gradle plugin 14.2.0), Gradle 9.8.2, JUnit 6.1.3, slf4j 2.0.20;
   CI actions `checkout` v7, `setup-java` v6, `setup-gradle` v6 and `upload-artifact` v7.
 
+### Fixed
+
+- Status bar items and tab labels stay on one line with an ellipsis in narrow windows instead of wrapping and being
+  clipped; tab badge numbers never split across lines.
+- Component previews stack the light and dark themes vertically, so Android Studio's limited preview width shows both.
+
 ### Added
 
 - Android target in `composeApp` (AGP 9.4.1 KMP library plugin, no Android app yet) so Android Studio renders the
