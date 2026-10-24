@@ -157,6 +157,7 @@ class VaultTreeViewModel(
     }
 
     private fun cancelLinkUpdate() {
+        logger.i { "Link update declined: ${pendingLinkRewrites.size} notes left unchanged" }
         pendingLinkRewrites = emptyList()
         reduce { it.copy(linkUpdatePrompt = null) }
     }
@@ -169,6 +170,7 @@ class VaultTreeViewModel(
         val rewrites = planLinkUpdates(vaultPath = vaultPath, notesBefore = notesBefore, from = from, to = to)
         if (rewrites.isEmpty()) return
         pendingLinkRewrites = rewrites
+        logger.i { "Link update offered: ${rewrites.size} notes link to the renamed entry" }
         val prompt = LinkUpdatePrompt(
             oldName = from.nameWithoutExtension,
             newName = to.nameWithoutExtension,
@@ -182,6 +184,7 @@ class VaultTreeViewModel(
         pendingLinkRewrites = emptyList()
         launchGuarded(onError = ::showUnexpectedError) {
             val result = applyLinkUpdates(vaultPath = vaultPath, rewrites = rewrites)
+            logger.i { "Link update confirmed: ${result.updatedCount} notes updated, ${result.skipped.size} skipped" }
             reduce { reduceLinksUpdated(state = it, result = result) }
         }
     }
