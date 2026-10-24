@@ -217,7 +217,8 @@ class ArchitectureTest {
             .withNameEndingWith("ViewModel")
             .filterNot { it.name == BASE_VIEW_MODEL }
             .assertTrue(additionalMessage = "ARCHITECTURE.md §4") { viewModel ->
-                val extendsBase = viewModel.parents().any { it.name == BASE_VIEW_MODEL }
+                val parentNames = viewModel.parents().map { it.name.substringBefore(delimiter = '<') }
+                val extendsBase = BASE_VIEW_MODEL in parentNames
                 extendsBase && viewModel.resideInPackage(name = "..$PRESENTATION_LAYER..")
             }
     }
