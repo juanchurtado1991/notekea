@@ -69,6 +69,43 @@ class VaultTreeTest {
         )
     }
 
+    @Test
+    fun `a renamed note keeps its metadata at the new path`() {
+        val tagged = note(path = TOMATO_PLAN).copy(metadata = NoteMetadata.NONE.copy(title = TITLE))
+
+        val tree = VaultTree.EMPTY
+            .withNote(
+                note = tagged
+            ).renamed(from = path(value = TOMATO_PLAN), to = path(value = "$GARDEN/Tomatoes.md"))
+
+        assertEquals(
+            expected = mapOf(
+                path(value = "$GARDEN/Tomatoes.md") to
+                    tagged.copy(file = tagged.file.copy(path = path(value = "$GARDEN/Tomatoes.md")))
+            ),
+            actual = tree.notes
+        )
+    }
+
+    @Test
+    fun `a renamed folder takes its subfolders and notes along, and nothing with a similar name`() {
+        val tree = VaultTree.EMPTY
+            .withNote(note = note(path = TOMATO_PLAN))
+            .withNote(note = note(path = PROJECTS_PLAN))
+            .withFolder(path = path(value = "Projects/Empty"))
+
+        val renamed = tree.renamed(from = path(value = PROJECTS), to = path(value = "Work"))
+
+        assertEquals(
+            expected = setOf(path(value = "Work"), path(value = "Work/Garden"), path(value = "Work/Empty")),
+            actual = renamed.folders
+        )
+        assertEquals(
+            expected = setOf(path(value = "Work/Garden/Tomato plan.md"), path(value = PROJECTS_PLAN)),
+            actual = renamed.notes.keys
+        )
+    }
+
     private fun note(
         path: String
     ): NoteEntry = NoteEntry(
