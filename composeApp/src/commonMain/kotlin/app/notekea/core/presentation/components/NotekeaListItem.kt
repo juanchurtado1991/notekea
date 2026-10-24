@@ -49,7 +49,7 @@ fun NotekeaListItem(
 ) {
     val colors = MaterialTheme.colorScheme
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().focusBorder(color = colors.primary, shape = MaterialTheme.shapes.small),
         shape = MaterialTheme.shapes.small,
         color = if (selected) colors.primaryContainer else colors.surface,
         contentColor = if (selected) colors.onPrimaryContainer else colors.onSurface

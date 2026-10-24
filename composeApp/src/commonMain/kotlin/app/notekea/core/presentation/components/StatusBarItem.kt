@@ -37,6 +37,7 @@ fun StatusBarItem(
     Row(
         modifier = modifier
             .height(NotekeaDimensions.StatusBarHeight)
+            .focusBorder(color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.small)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = NotekeaDimensions.SpacingS),
         verticalAlignment = Alignment.CenterVertically
