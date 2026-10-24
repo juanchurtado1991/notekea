@@ -57,7 +57,7 @@ class SettingsTreePreferencesStoreTest {
         settings.putString(key = "tree.sort", value = "SIZE")
 
         assertEquals(
-            expected = setOf("tree.sort"),
+            expected = setOf("tree.sort", "tree.sidebar.width", "tree.sidebar.collapsed"),
             actual = settings.keys
         )
         assertEquals(
@@ -74,8 +74,30 @@ class SettingsTreePreferencesStoreTest {
         )
 
         assertEquals(
-            expected = setOf("tree.af63dc4c8601ec8c.expanded", "tree.sort"),
+            expected = setOf(
+                "tree.af63dc4c8601ec8c.expanded",
+                "tree.sort",
+                "tree.sidebar.width",
+                "tree.sidebar.collapsed"
+            ),
             actual = settings.keys
+        )
+    }
+
+    @Test
+    fun `the sidebar width and visibility are kept, and a width out of bounds is clamped`() = runTest(
+        context = testDispatcher
+    ) {
+        store.write(
+            vaultPath = NOTES,
+            preferences = TreePreferences.DEFAULT.copy(sidebarWidthDp = 320, isSidebarCollapsed = true)
+        )
+        val kept = store.read(vaultPath = WORK)
+        settings.putInt(key = "tree.sidebar.width", value = 5_000)
+
+        assertEquals(
+            expected = listOf(320 to true, TreePreferences.MAX_SIDEBAR_WIDTH_DP to true),
+            actual = listOf(kept, store.read(vaultPath = NOTES)).map { it.sidebarWidthDp to it.isSidebarCollapsed }
         )
     }
 

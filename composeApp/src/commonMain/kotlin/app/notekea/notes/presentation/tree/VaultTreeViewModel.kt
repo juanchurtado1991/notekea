@@ -45,7 +45,7 @@ class VaultTreeViewModel(
     init {
         launchGuarded(onError = ::showUnexpectedError) {
             val preferences = getTreePreferences(vaultPath = vaultPath)
-            updateTree { it.copy(expandedFolders = preferences.expandedFolders, sort = preferences.sort) }
+            updateTree { restorePreferences(state = it, preferences = preferences) }
             observe()
         }
     }
@@ -73,6 +73,8 @@ class VaultTreeViewModel(
             is VaultTreeIntent.OnRowClick -> updateTree { reduceRowClick(state = it, path = intent.path) }
             VaultTreeIntent.OnSelectNext -> reduce { reduceSelectionMove(state = it, step = 1) }
             VaultTreeIntent.OnSelectPrevious -> reduce { reduceSelectionMove(state = it, step = -1) }
+            is VaultTreeIntent.OnSidebarResize -> resizeSidebar(widthDp = intent.widthDp)
+            VaultTreeIntent.OnSidebarToggle -> updateTree { it.copy(isSidebarCollapsed = !it.isSidebarCollapsed) }
             VaultTreeIntent.OnSortToggle -> updateTree(transform = ::reduceSortToggle)
         }
     }
@@ -137,6 +139,12 @@ class VaultTreeViewModel(
         }
     }
 
+    private fun resizeSidebar(
+        widthDp: Int
+    ) {
+        updateTree { it.copy(sidebarWidthDp = TreePreferences.clampSidebarWidth(widthDp = widthDp)) }
+    }
+
     private fun retry() {
         if (state.value.loadError == null) return
         reduce { it.copy(isLoading = it.tree.notes.isEmpty() && it.tree.folders.isEmpty(), loadError = null) }
@@ -177,9 +185,8 @@ class VaultTreeViewModel(
             next.copy(rows = flattenTree(tree = next.tree, expandedFolders = next.expandedFolders, sort = next.sort))
         }
         val after = state.value
-        val hasPreferencesChanged = before.expandedFolders != after.expandedFolders || before.sort != after.sort
-        if (hasPreferencesChanged && !after.isLoading) {
-            val preferences = TreePreferences(expandedFolders = after.expandedFolders, sort = after.sort)
+        val preferences = preferencesOf(state = after)
+        if (preferences != preferencesOf(state = before) && !after.isLoading) {
             launchGuarded(
                 onError = ::showUnexpectedError
             ) { saveTreePreferences(vaultPath = vaultPath, preferences = preferences) }

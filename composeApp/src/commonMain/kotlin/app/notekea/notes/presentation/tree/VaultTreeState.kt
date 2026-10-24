@@ -4,6 +4,7 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeRow
+import app.notekea.notes.domain.TreePreferences
 import app.notekea.notes.domain.TreeSort
 import app.notekea.notes.domain.VaultTree
 
@@ -11,7 +12,7 @@ import app.notekea.notes.domain.VaultTree
  * State of the vault sidebar. [isLoading] covers the first scan only; later changes keep the rows on screen.
  * [rows] are [tree] flattened with [expandedFolders] and [sort]. [loadError] means the vault could not be read (retry
  * scans again); [actionError] is a failed create, delete or reveal, shown in a dismissible banner; a refused rename
- * stays in [renaming], next to the field.
+ * stays in [renaming], next to the field. [sidebarWidthDp] changes when a resize ends, not on every dragged frame.
  */
 data class VaultTreeState(
     val vaultPath: String,
@@ -21,6 +22,8 @@ data class VaultTreeState(
     val rows: List<TreeRow> = emptyList(),
     val expandedFolders: Set<RelativePath> = emptySet(),
     val sort: TreeSort = TreeSort.NAME,
+    val sidebarWidthDp: Int = TreePreferences.DEFAULT_SIDEBAR_WIDTH_DP,
+    val isSidebarCollapsed: Boolean = false,
     val selectedPath: RelativePath? = null,
     val renaming: RenameDraft? = null,
     val pendingDelete: RelativePath? = null,

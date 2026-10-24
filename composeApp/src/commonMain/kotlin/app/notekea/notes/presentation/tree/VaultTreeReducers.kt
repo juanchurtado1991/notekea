@@ -7,6 +7,7 @@ import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeRow
+import app.notekea.notes.domain.TreePreferences
 import app.notekea.notes.domain.TreeSort
 import app.notekea.notes.domain.TrashLocation
 import app.notekea.notes.domain.VaultTree
@@ -21,6 +22,25 @@ internal fun targetFolder(
     val selected = state.selectedPath ?: return RelativePath.ROOT
     return if (selected in state.tree.folders) selected else selected.parent ?: RelativePath.ROOT
 }
+
+internal fun preferencesOf(
+    state: VaultTreeState
+): TreePreferences = TreePreferences(
+    expandedFolders = state.expandedFolders,
+    sort = state.sort,
+    sidebarWidthDp = state.sidebarWidthDp,
+    isSidebarCollapsed = state.isSidebarCollapsed
+)
+
+internal fun restorePreferences(
+    state: VaultTreeState,
+    preferences: TreePreferences
+): VaultTreeState = state.copy(
+    expandedFolders = preferences.expandedFolders,
+    sort = preferences.sort,
+    sidebarWidthDp = preferences.sidebarWidthDp,
+    isSidebarCollapsed = preferences.isSidebarCollapsed
+)
 
 internal fun reduceTreeLoaded(
     state: VaultTreeState,
