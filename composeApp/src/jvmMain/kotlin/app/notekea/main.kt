@@ -5,17 +5,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import app.notekea.core.presentation.gallery.DesignSystemGallery
+import app.notekea.core.presentation.platform.LocalResizePointerIcon
 import app.notekea.core.presentation.platform.LocalShortcutDispatcher
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.di.desktopModules
 import app.notekea.vault.presentation.welcome.WelcomeScreen
 import io.github.vinceglb.filekit.FileKit
 import org.koin.core.context.startKoin
+import java.awt.Cursor
 
 private const val APP_ID = "Notekea"
 private const val GALLERY_HEIGHT_DP = 900
@@ -49,7 +52,10 @@ fun main() {
                 state = rememberWindowState(width = WINDOW_WIDTH_DP.dp, height = WINDOW_HEIGHT_DP.dp),
                 onPreviewKeyEvent = shortcutDispatcher::dispatch
             ) {
-                CompositionLocalProvider(LocalShortcutDispatcher provides shortcutDispatcher) {
+                CompositionLocalProvider(
+                    LocalShortcutDispatcher provides shortcutDispatcher,
+                    LocalResizePointerIcon provides PointerIcon(cursor = Cursor(Cursor.E_RESIZE_CURSOR))
+                ) {
                     App {
                         WelcomeScreen(onVaultNameChange = { name -> title = windowTitle(vaultName = name) })
                     }
