@@ -1,5 +1,6 @@
 package app.notekea
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -9,6 +10,8 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import app.notekea.core.presentation.gallery.DesignSystemGallery
+import app.notekea.core.presentation.platform.LocalShortcutDispatcher
+import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.di.desktopModules
 import app.notekea.vault.presentation.welcome.WelcomeScreen
 import io.github.vinceglb.filekit.FileKit
@@ -39,13 +42,17 @@ fun main() {
             }
         } else {
             var title by remember { mutableStateOf(value = WINDOW_TITLE) }
+            val shortcutDispatcher = remember { ShortcutDispatcher() }
             Window(
                 onCloseRequest = ::exitApplication,
                 title = title,
-                state = rememberWindowState(width = WINDOW_WIDTH_DP.dp, height = WINDOW_HEIGHT_DP.dp)
+                state = rememberWindowState(width = WINDOW_WIDTH_DP.dp, height = WINDOW_HEIGHT_DP.dp),
+                onPreviewKeyEvent = shortcutDispatcher::dispatch
             ) {
-                App {
-                    WelcomeScreen(onVaultNameChange = { name -> title = windowTitle(vaultName = name) })
+                CompositionLocalProvider(LocalShortcutDispatcher provides shortcutDispatcher) {
+                    App {
+                        WelcomeScreen(onVaultNameChange = { name -> title = windowTitle(vaultName = name) })
+                    }
                 }
             }
         }
