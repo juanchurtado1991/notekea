@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import app.notekea.core.presentation.components.EmptyState
 import app.notekea.core.presentation.components.ErrorBanner
 import app.notekea.core.presentation.components.NotekeaButton
+import app.notekea.core.presentation.components.NotekeaCard
+import app.notekea.core.presentation.components.NotekeaWordmark
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaListItem
 import app.notekea.core.presentation.components.NotekeaTab
@@ -45,16 +47,22 @@ private const val BUTTON_CANCEL = "Cancel"
 private const val BUTTON_DELETE = "Delete note"
 private const val BUTTON_DISABLED = "Disabled"
 private const val BUTTON_LOAD_THEIRS = "Load theirs"
+private const val BUTTON_LOCATE = "Locate…"
 private const val BUTTON_NEW_NOTE = "New note"
 private const val BUTTON_OPEN_FOLDER = "Open folder…"
+private const val BUTTON_OPEN_SHORTCUT = "Ctrl+O"
+private const val BUTTON_REMOVE = "Remove"
 private const val CODE_SAMPLE = "fun main() = println(\"Notekea\")"
 private const val DARK_TITLE = "Dark"
 private const val EMPTY_MESSAGE = "Create your first note to get started."
 private const val EMPTY_TITLE = "This folder has no notes yet"
 private const val LIGHT_TITLE = "Light"
+private const val NOTE_ARCHIVE = "Archive"
+private const val NOTE_EDITED = "2 days ago"
 private const val NOTE_FOLDER_JOURNAL = "Journal"
 private const val NOTE_FOLDER_PROJECTS = "Projects/Notekea"
 private const val NOTE_MEETING = "Meeting with Ana"
+private const val NOTE_MISSING = "Folder not found"
 private const val NOTE_PRICING = "Pricing ideas"
 private const val SAMPLE_ERROR = "This note changed outside Notekea."
 private const val SAMPLE_PLACEHOLDER = "Search notes…"
@@ -86,6 +94,7 @@ private fun GalleryColumn(
                 verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingL)
             ) {
                 Text(text = title, style = MaterialTheme.typography.headlineMedium)
+                NotekeaWordmark()
                 ButtonsSection()
                 InputsSection()
                 TabsSection()
@@ -99,9 +108,10 @@ private fun GalleryColumn(
 @Composable
 private fun ButtonsSection() {
     Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-        NotekeaButton(text = BUTTON_OPEN_FOLDER, onClick = {})
+        NotekeaButton(text = BUTTON_OPEN_FOLDER, onClick = {}, shortcutHint = BUTTON_OPEN_SHORTCUT)
         NotekeaButton(text = BUTTON_CANCEL, onClick = {}, style = NotekeaButtonStyle.SECONDARY)
         NotekeaButton(text = BUTTON_DELETE, onClick = {}, style = NotekeaButtonStyle.DESTRUCTIVE)
+        NotekeaButton(text = BUTTON_REMOVE, onClick = {}, style = NotekeaButtonStyle.TEXT)
         NotekeaButton(text = BUTTON_DISABLED, onClick = {}, enabled = false)
     }
 }
@@ -115,7 +125,7 @@ private fun InputsSection() {
         onValueChange = { query = it },
         placeholder = SAMPLE_PLACEHOLDER
     )
-    Column {
+    NotekeaCard {
         NotekeaListItem(
             title = NOTE_PRICING,
             onClick = { selectedNote = 0 },
@@ -126,7 +136,21 @@ private fun InputsSection() {
             title = NOTE_MEETING,
             onClick = { selectedNote = 1 },
             supportingText = NOTE_FOLDER_JOURNAL,
-            selected = selectedNote == 1
+            selected = selectedNote == 1,
+            trailingContent = { Text(text = NOTE_EDITED, style = MaterialTheme.typography.bodySmall) }
+        )
+        NotekeaListItem(
+            title = NOTE_ARCHIVE,
+            onClick = {},
+            supportingText = NOTE_MISSING,
+            enabled = false,
+            trailingContent = {
+                NotekeaButton(
+                    text = BUTTON_LOCATE,
+                    onClick = {},
+                    style = NotekeaButtonStyle.SECONDARY
+                )
+            }
         )
     }
 }
