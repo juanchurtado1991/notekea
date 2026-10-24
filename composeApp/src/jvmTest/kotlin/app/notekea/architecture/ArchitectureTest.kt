@@ -1,6 +1,7 @@
 package app.notekea.architecture
 
 import com.lemonappdev.konsist.api.Konsist
+import com.lemonappdev.konsist.api.declaration.type.KoTypeDeclaration
 import com.lemonappdev.konsist.api.declaration.KoFileDeclaration
 import com.lemonappdev.konsist.api.declaration.KoObjectDeclaration
 import com.lemonappdev.konsist.api.ext.list.withNameEndingWith
@@ -158,6 +159,39 @@ class ArchitectureTest {
             .classes()
             .assertFalse(additionalMessage = "ARCHITECTURE.md §2: name it after the technology") {
                 it.name.endsWith(suffix = "Impl")
+            }
+    }
+
+    @Test
+    fun `interfaces are fully abstract`() {
+        allCodeScope
+            .interfaces()
+            .assertFalse(
+                additionalMessage = "GUIDELINES.md §1: move shared behavior to an abstract class"
+            ) { declaration ->
+                val hasFunctionBody = declaration.functions(includeNested = false).any {
+                    it.hasBlockBody || it.hasExpressionBody
+                }
+                val hasPropertyGetter = declaration.properties(includeNested = false).any { it.hasGetter }
+                hasFunctionBody || hasPropertyGetter
+            }
+    }
+
+    @Test
+    fun `interfaces are not extended with extension functions or properties`() {
+        val interfaceNames = allCodeScope.interfaces().map { it.name }.toSet()
+        val extendedTypeName: (KoTypeDeclaration?) -> String? = { type ->
+            type?.name?.substringBefore(delimiter = '<')?.removeSuffix(suffix = "?")
+        }
+        allCodeScope
+            .functions(includeNested = true, includeLocal = true)
+            .assertFalse(additionalMessage = "GUIDELINES.md §1: declare it in the interface or a class") {
+                extendedTypeName(it.receiverType) in interfaceNames
+            }
+        allCodeScope
+            .properties(includeNested = true)
+            .assertFalse(additionalMessage = "GUIDELINES.md §1: declare it in the interface or a class") {
+                extendedTypeName(it.receiverType) in interfaceNames
             }
     }
 

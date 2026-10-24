@@ -25,6 +25,11 @@ Notekea is built for everyday users, without giving up the power it offers. Ever
 - **Liskov substitution:** every implementation of a contract must be usable wherever the contract is expected, with no special cases in callers.
 - **Interface segregation:** small, focused interfaces (`GitSync`, `VectorIndex`), never a single "god" service.
 - **Dependency inversion:** high-level code depends on interfaces declared in `domain`; concrete libraries (JGit, Lucene, llama.cpp) only appear in `data` implementations.
+- **Interfaces are 100% abstract**: no method or property with a default body, not even a trivial one (`= false`,
+  `{}`), and no extension functions or properties whose receiver is an interface of this project. An interface is
+  only a contract; behavior lives in its implementations. When implementers must share default behavior, it goes in
+  an abstract class that implements the interface (the `AbstractList` pattern): implement the interface for full
+  control, extend the abstract class for the convenience. Enforced by Konsist.
 
 ## 2. Clean Architecture
 

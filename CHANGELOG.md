@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   create a new vault with a suggested name and location; the last vault reopens on launch; recent vaults show
   their folder and when they were opened, and a moved folder can be located or removed. Settings live in
   `settings.properties` in the app data directory. It is the reference MVI screen (`ARCHITECTURE.md` §10).
+- Code rule: interfaces are fully abstract, with no default bodies and no extension functions or properties on them
+  (enforced by Konsist).
 - Product principle in `GUIDELINES.md`: friendly first, powerful underneath (plain language, sensible defaults,
   shortcuts as visible hints, no dead ends).
 - Design system: `NotekeaCard`, `NotekeaWordmark`, a low-emphasis `TEXT` button style, shortcut hints on buttons,

@@ -85,7 +85,7 @@ internal fun NewVaultPanel(
                 platformConventions = platformConventions,
                 focusRequester = nameFocus,
                 onNameChange = onNameChange,
-                error = error?.takeIf { it.isAboutName() },
+                error = error?.takeIf { isAboutName(error = it) },
                 onSubmit = onConfirm.takeIf { !isBusy }
             )
             FieldLabel(text = stringResource(resource = Res.string.welcome_new_vault_location_label))
@@ -94,7 +94,7 @@ internal fun NewVaultPanel(
                 platformConventions = platformConventions,
                 onChangeLocation = onChangeLocation,
                 enabled = !isBusy,
-                error = error?.takeUnless { it.isAboutName() }
+                error = error?.takeUnless { isAboutName(error = it) }
             )
             PanelButtons(
                 dialogButtonOrder = platformConventions.dialogButtonOrder,
@@ -217,7 +217,9 @@ private fun Modifier.cancelOnEscape(
     isEscape
 }
 
-private fun VaultError.isAboutName(): Boolean = this is VaultError.InvalidName || this is VaultError.FolderAlreadyExists
+private fun isAboutName(
+    error: VaultError
+): Boolean = error is VaultError.InvalidName || error is VaultError.FolderAlreadyExists
 
 private fun newFolderPath(
     form: NewVaultForm,
