@@ -12,5 +12,8 @@ sealed interface NotesError {
 
     data class PermissionDenied(val path: String) : NotesError
 
+    /** The system file manager could not be opened on the entry. */
+    data class RevealFailed(val path: String) : NotesError
+
     data class VaultMissing(val path: String) : NotesError
 }
