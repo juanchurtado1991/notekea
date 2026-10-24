@@ -14,6 +14,7 @@ object NotekeaDimensions {
     val ControlRadius = 6.dp
     val FocusRingWidth = 2.dp
     val IconSize = 16.dp
+    val MenuItemHeight = 32.dp
     val SpacingL = 16.dp
     val SpacingM = 12.dp
     val SpacingS = 8.dp

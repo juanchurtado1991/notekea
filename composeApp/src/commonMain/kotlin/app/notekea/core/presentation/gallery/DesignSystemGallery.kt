@@ -26,11 +26,13 @@ import app.notekea.core.presentation.components.EmptyState
 import app.notekea.core.presentation.components.ErrorBanner
 import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaCard
+import app.notekea.core.presentation.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaInlineTextField
 import app.notekea.core.presentation.components.NotekeaWordmark
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaListItem
+import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.components.NotekeaTab
@@ -64,6 +66,11 @@ private const val BUTTON_OPEN_FOLDER = "Open folder…"
 private const val BUTTON_OPEN_SHORTCUT = "Ctrl+O"
 private const val BUTTON_REMOVE = "Remove"
 private const val BUTTON_SORT = "Sort by name"
+private const val MENU_AREA = "Right-click for the context menu"
+private const val MENU_DELETE_SHORTCUT = "Delete"
+private const val MENU_RENAME = "Rename"
+private const val MENU_RENAME_SHORTCUT = "F2"
+private const val MENU_REVEAL = "Show in Files"
 private const val CODE_SAMPLE = "fun main() = println(\"Notekea\")"
 private const val DARK_TITLE = "Dark"
 private const val EMPTY_MESSAGE = "Create your first note to get started."
@@ -119,6 +126,7 @@ private fun GalleryColumn(
                 ButtonsSection()
                 InputsSection()
                 TreeSection()
+                ContextMenuSection()
                 TabsSection()
                 FeedbackSection()
                 Text(text = CODE_SAMPLE, style = LocalNotekeaCodeTextStyle.current)
@@ -227,6 +235,43 @@ private fun TreeSectionChildren() {
             NotekeaInlineTextField(value = renamed, onValueChange = { renamed = it }, onSubmit = {}, onCancel = {})
         }
     )
+}
+
+@Composable
+private fun ContextMenuSection() {
+    val sections = listOf(
+        listOf(
+            NotekeaMenuItem(
+                label = BUTTON_NEW_NOTE,
+                onClick = {},
+                icon = NotekeaIcons.NewNote,
+                shortcutHint = BUTTON_NEW_NOTE_SHORTCUT
+            )
+        ),
+        listOf(
+            NotekeaMenuItem(
+                label = MENU_RENAME,
+                onClick = {},
+                icon = NotekeaIcons.Rename,
+                shortcutHint = MENU_RENAME_SHORTCUT
+            ),
+            NotekeaMenuItem(label = MENU_REVEAL, onClick = {}, icon = NotekeaIcons.Reveal)
+        ),
+        listOf(
+            NotekeaMenuItem(
+                label = BUTTON_DELETE,
+                onClick = {},
+                icon = NotekeaIcons.Delete,
+                shortcutHint = MENU_DELETE_SHORTCUT,
+                isDestructive = true
+            )
+        )
+    )
+    NotekeaContextMenuArea(sections = sections) {
+        NotekeaCard {
+            Text(text = MENU_AREA, modifier = Modifier.padding(all = NotekeaDimensions.SpacingM))
+        }
+    }
 }
 
 @Composable
