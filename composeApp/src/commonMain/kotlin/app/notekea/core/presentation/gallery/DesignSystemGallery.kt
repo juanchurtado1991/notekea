@@ -24,6 +24,7 @@ import app.notekea.core.presentation.components.EmptyState
 import app.notekea.core.presentation.components.ErrorBanner
 import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaCard
+import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaWordmark
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaListItem
@@ -35,6 +36,7 @@ import app.notekea.core.presentation.components.StatusBarItem
 import app.notekea.core.presentation.components.StatusIndicator
 import app.notekea.core.presentation.theme.LocalNotekeaCodeTextStyle
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.core.presentation.theme.NotekeaTheme
 
 /*
@@ -50,10 +52,13 @@ private const val BUTTON_DELETE = "Delete note"
 private const val BUTTON_DISABLED = "Disabled"
 private const val BUTTON_LOAD_THEIRS = "Load theirs"
 private const val BUTTON_LOCATE = "Locate…"
+private const val BUTTON_NEW_FOLDER = "New folder"
 private const val BUTTON_NEW_NOTE = "New note"
+private const val BUTTON_NEW_NOTE_SHORTCUT = "Ctrl+N"
 private const val BUTTON_OPEN_FOLDER = "Open folder…"
 private const val BUTTON_OPEN_SHORTCUT = "Ctrl+O"
 private const val BUTTON_REMOVE = "Remove"
+private const val BUTTON_SORT = "Sort by name"
 private const val CODE_SAMPLE = "fun main() = println(\"Notekea\")"
 private const val DARK_TITLE = "Dark"
 private const val EMPTY_MESSAGE = "Create your first note to get started."
@@ -116,6 +121,16 @@ private fun ButtonsSection() {
         NotekeaButton(text = BUTTON_DELETE, onClick = {}, style = NotekeaButtonStyle.DESTRUCTIVE)
         NotekeaButton(text = BUTTON_REMOVE, onClick = {}, style = NotekeaButtonStyle.TEXT)
         NotekeaButton(text = BUTTON_DISABLED, onClick = {}, enabled = false)
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)) {
+        NotekeaIconButton(
+            icon = NotekeaIcons.NewNote,
+            label = BUTTON_NEW_NOTE,
+            onClick = {},
+            shortcutHint = BUTTON_NEW_NOTE_SHORTCUT
+        )
+        NotekeaIconButton(icon = NotekeaIcons.NewFolder, label = BUTTON_NEW_FOLDER, onClick = {})
+        NotekeaIconButton(icon = NotekeaIcons.SortByName, label = BUTTON_SORT, onClick = {}, enabled = false)
     }
 }
 
