@@ -11,7 +11,8 @@ Before changing anything, read and follow:
   When a feature's pull request is ready, mark it ✅ with the PR link and update the milestone count.
 
 **Before writing a feature, read the reference implementations in `ARCHITECTURE.md` §10 and mirror their
-structure** (port in domain, adapter in data, logic in a use case tested with a fake, Koin modules).
+structure**. Build every screen from the design system components (`ARCHITECTURE.md` §11); add missing ones there.
+The rest of the pattern: port in domain, adapter in data, logic in a use case tested with a fake, Koin modules.
 
 Everything written into this repository (code, comments, docs) is in English.
 

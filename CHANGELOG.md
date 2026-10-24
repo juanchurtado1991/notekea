@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   type scale, 6 dp / 10 dp shapes, spacing and motion tokens; components `NotekeaButton`, `NotekeaTextField`,
   `NotekeaListItem`, `NotekeaTab`, `StatusBarItem`, `EmptyState` and `ErrorBanner`; a WCAG AA contrast test for the
   palette; and a developer gallery (`./gradlew :composeApp:run -Pgallery`).
+- Design system rule: every reusable UI element comes from `core.presentation.components` (`NotekeaTabRow` added);
+  a Konsist test fails the build if a screen imports a Material 3 component directly.
 
 - Platform conventions (ROADMAP 1.1): `PlatformConventions` resolved at startup with the primary shortcut modifier,
   quit shortcut, dialog button order and per-user application data directory for Windows, macOS and Linux;

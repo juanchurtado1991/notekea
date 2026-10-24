@@ -18,6 +18,49 @@ class ArchitectureTest {
         Konsist.scopeFromModule(moduleName = KTLINT_RULES_MODULE_NAME)
     private val productionScope = Konsist.scopeFromProduction(moduleName = MODULE_NAME)
 
+    private val designSystemOnlyImports = listOf(
+        "AlertDialog",
+        "AssistChip",
+        "Badge",
+        "BadgedBox",
+        "BasicAlertDialog",
+        "Button",
+        "Card",
+        "Checkbox",
+        "DropdownMenu",
+        "DropdownMenuItem",
+        "ElevatedButton",
+        "ElevatedCard",
+        "ExtendedFloatingActionButton",
+        "FilledIconButton",
+        "FilledTonalButton",
+        "FilterChip",
+        "FloatingActionButton",
+        "IconButton",
+        "InputChip",
+        "LeadingIconTab",
+        "ListItem",
+        "ModalBottomSheet",
+        "NavigationRail",
+        "NavigationRailItem",
+        "OutlinedButton",
+        "OutlinedCard",
+        "OutlinedTextField",
+        "PrimaryTabRow",
+        "RadioButton",
+        "ScrollableTabRow",
+        "SecondaryTabRow",
+        "Slider",
+        "Snackbar",
+        "SuggestionChip",
+        "Switch",
+        "Tab",
+        "TabRow",
+        "TextButton",
+        "TextField",
+        "TooltipBox"
+    ).map { "$MATERIAL3_PACKAGE.$it" }
+
     private val forbiddenDomainImportPrefixes = listOf(
         "androidx.",
         "de.kherud.",
@@ -70,6 +113,20 @@ class ArchitectureTest {
             .classes()
             .withNameEndingWith("Dto")
             .assertTrue(additionalMessage = "ARCHITECTURE.md §2") { it.resideInPackage(name = "..$DATA_LAYER..") }
+    }
+
+    @Test
+    fun `reusable material components are only used inside the design system`() {
+        productionScope.files
+            .filterNot { file -> DESIGN_SYSTEM_PACKAGES.any { file.packagee?.name?.startsWith(prefix = it) == true } }
+            .assertFalse(
+                additionalMessage = "ARCHITECTURE.md §11: use or add a component in core.presentation.components"
+            ) { file ->
+                file.imports.any {
+                    val isMaterialWildcard = it.text.trim().endsWith(suffix = "$MATERIAL3_PACKAGE.*")
+                    isMaterialWildcard || it.name in designSystemOnlyImports
+                }
+            }
     }
 
     @Test
@@ -232,6 +289,8 @@ class ArchitectureTest {
         private const val PRESENTATION_LAYER = "presentation"
         private const val SYSTEM_CLOCK = "Clock.System"
         private const val SYSTEM_ENVIRONMENT_IMPLEMENTATION = "JvmSystemEnvironment"
+        private const val MATERIAL3_PACKAGE = "androidx.compose.material3"
         private const val THEME_PACKAGE = "app.notekea.core.presentation.theme"
+        private val DESIGN_SYSTEM_PACKAGES = listOf("app.notekea.core.presentation.components", THEME_PACKAGE)
     }
 }

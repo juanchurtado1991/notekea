@@ -26,6 +26,9 @@ app.notekea.<feature>
 - **Dependency rule:** `presentation → domain ← data`. `domain` never imports from `data` or `presentation`.
 - `domain` lives in `commonMain`. `data` lives in `commonMain` when it only uses KMP libraries, and in `jvmMain` (or another platform source set) when it needs a platform library.
 - No library type crosses a layer boundary: map library objects to domain models inside `data`.
+- **Every reusable UI element comes from the design system** (`core.presentation.components`): screens use
+  `NotekeaButton`, `NotekeaTextField`, `NotekeaTab`…, and a missing element is added there, with a gallery sample,
+  instead of styling a Material component inside a feature (`ARCHITECTURE.md` §11, enforced by Konsist).
 
 **File organization**
 

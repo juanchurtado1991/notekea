@@ -149,7 +149,8 @@ abstract class BaseViewModel<S, I, E>(
   presentation does not import data; `<Feature>Error` types are sealed and live in domain; DTOs live in data;
   no `Impl` classes; use cases live in domain with a single `operator fun invoke`; ViewModels extend
   `BaseViewModel` and live in presentation; no `KoinComponent`; no direct `Dispatchers.*` outside
-  `JvmAppDispatchers`; no `Clock.System` outside `di`; no `Color(0x…)` outside the theme package; one top-level
+  `JvmAppDispatchers`; no `Clock.System` outside `di`; no `Color(0x…)` outside the theme package; no Material 3 component
+  outside the design system (§11); one top-level
   class, interface or object per file; no public top-level functions in files that declare a type; constants in
   the class's `companion object`, which is the last element of the class (these file-structure rules also cover
   tests and the `:ktlint-rules` module).
@@ -176,9 +177,27 @@ New code copies the structure of these features instead of inventing its own. Re
 | Koin wiring | `core.platform.di`, `di` | `platformModule`, `jvmPlatformModule`, `appModule`, `desktopModules`, `main.kt` |
 | Unit tests with fakes | `commonTest` `core.platform.domain` | `FakeSystemEnvironment`, `ResolvePlatformConventionsUseCaseTest` |
 | Dependency graph test | `jvmTest` `di` | `DesktopModulesTest` |
-| Theme tokens and shared UI components | `core.presentation.theme`, `core.presentation.components` | `NotekeaTheme`, `NotekeaColorSchemes`, `NotekeaDimensions`, `NotekeaButton`, `EmptyState`, `ErrorBanner`… |
+| Theme tokens and shared UI components (§11) | `core.presentation.theme`, `core.presentation.components` | `NotekeaTheme`, `NotekeaColorSchemes`, `NotekeaDimensions`, `NotekeaButton`, `NotekeaTabRow`, `EmptyState`, `ErrorBanner`… |
 | MVI screen (State, Intent, Effect, ViewModel, Screen) | Pending: `ROADMAP.md` 1.3 (Welcome screen) | Added here when 1.3 is merged |
 
 The pattern in short: a **port** (interface) in `domain` for anything the platform provides, its **adapter** in `data`
 of the platform source set, **all decisions in a use case** in `commonMain` tested with a hand-written **fake**, and
 **Koin modules** that bind the adapter to the port.
+
+## 11. Design system
+
+Every reusable UI element comes from the design system in `core.presentation.components`, styled only with the
+theme tokens of `core.presentation.theme`. Screens compose these components; they never style Material components
+themselves.
+
+- **Use before you write.** Buttons, text fields, list items, tabs and tab rows, badges, status items, empty states
+  and error banners already exist (see the gallery: `./gradlew :composeApp:run -Pgallery`).
+- **Missing piece? Add it to the design system**, not to the feature: a new file in `core.presentation.components`
+  named `Notekea<Element>` (or a descriptive name such as `EmptyState`), colors and sizes from the theme, optional
+  parts as nullable slots, and a sample in the gallery in the same pull request. Examples still to come: dialogs,
+  chips, cards, menus, checkboxes, snackbars, the citation chip.
+- **Enforced by Konsist:** outside `core.presentation.components` and `core.presentation.theme`, importing a
+  Material 3 component (`Button`, `OutlinedTextField`, `Tab`, `TabRow`, `Badge`, `AlertDialog`, `Card`, chips,
+  `Checkbox`, `Switch`, `DropdownMenu`, `Snackbar`… or `androidx.compose.material3.*`) fails the build.
+- Layout primitives and plain content stay allowed everywhere: `Text`, `Surface`, `Icon`, `MaterialTheme`, and the
+  foundation layouts (`Row`, `Column`, `Box`, lazy lists).
