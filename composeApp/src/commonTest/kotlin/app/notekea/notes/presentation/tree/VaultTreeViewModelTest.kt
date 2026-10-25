@@ -205,7 +205,8 @@ class VaultTreeViewModelTest {
         advanceUntilIdle()
 
         assertEquals(
-            expected = "Begin with [[Start here]]." to TreeNotice.LinksUpdated(updatedCount = 1, skippedCount = 0),
+            expected =
+            "Begin with [[Start here]]." to TreeNotice.LinksUpdated(notes = listOf("Roadmap"), skippedCount = 0),
             actual = contents.texts.getValue(path(ROADMAP)) to viewModel.state.value.notice
         )
     }
@@ -221,9 +222,9 @@ class VaultTreeViewModelTest {
 
         assertEquals(
             expected = Triple(
-                TreeNotice.LinksUpdated(updatedCount = 1, skippedCount = 0),
+                TreeNotice.LinksUpdated(notes = listOf("Roadmap"), skippedCount = 0),
                 "Begin with [[Begin]].",
-                TreeNotice.LinksUpdated(updatedCount = 1, skippedCount = 0)
+                TreeNotice.LinksUpdated(notes = listOf("Roadmap"), skippedCount = 0)
             ),
             actual = Triple(first, contents.texts.getValue(path(ROADMAP)), viewModel.state.value.notice)
         )
@@ -275,13 +276,14 @@ class VaultTreeViewModelTest {
             intent = VaultTreeIntent.OnEntryRenamed(
                 from = path(WELCOME),
                 to = path("Start here.md"),
-                links = LinkUpdateResult(updatedCount = 2, skipped = emptyList())
+                links = LinkUpdateResult(updated = listOf(path(ROADMAP), path("Ideas/Plan.md")), skipped = emptyList())
             )
         )
         advanceUntilIdle()
 
         assertEquals(
-            expected = path("Start here.md") to TreeNotice.LinksUpdated(updatedCount = 2, skippedCount = 0),
+            expected =
+            path("Start here.md") to TreeNotice.LinksUpdated(notes = listOf("Plan", "Roadmap"), skippedCount = 0),
             actual = viewModel.state.value.selectedPath to viewModel.state.value.notice
         )
         assertTrue(actual = path("Start here.md") in viewModel.state.value.tree.notes)

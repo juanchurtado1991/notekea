@@ -37,7 +37,7 @@ class RenameAndUpdateLinksUseCaseTest {
             expected = Outcome.Success(
                 value = RenamedEntry(
                     path = RelativePath(value = "Recipes/Arepas reina.md"),
-                    links = LinkUpdateResult(updatedCount = 1, skipped = emptyList())
+                    links = LinkUpdateResult(updated = listOf(RelativePath(value = WELCOME)), skipped = emptyList())
                 )
             ),
             actual = outcome
