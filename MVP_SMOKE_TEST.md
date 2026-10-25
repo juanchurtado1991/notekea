@@ -1,7 +1,8 @@
 # Notekea — MVP Smoke Test
 
-The full manual test run before releasing v0.1.0 (`ROADMAP.md` 5.4). Unit tests and CI prove the parts work; this
-list proves the **app** works for a real person on a real machine. It is the main source of bugs before release.
+The manual cases every milestone QA run executes on Windows, macOS and Linux (`qa/README.md`), and the full run before
+releasing v0.1.0 (`ROADMAP.md` 5.4). Unit tests, UI tests and CI prove the parts work; this list proves the **app**
+works for a real person on a real machine. It is the main source of bugs before release.
 
 ## How this file works
 
@@ -13,13 +14,15 @@ list proves the **app** works for a real person on a real machine. It is the mai
   ("Revised by 1.4"); that feature's pull request rewrites the case and removes the note.
 - Cases that depend on a feature not built yet say so in **Testable from**; they still go in now, so nothing is
   forgotten.
-- Before the release, the whole list is run on **Windows, macOS and Linux** with a packaged build (not
-  `./gradlew run`). Each OS column gets ✅, ❌ (with a link to the bug issue) or — (not applicable).
+- At the end of every milestone, the cases testable so far (the "General" section and every milestone up to that
+  one) are run on **Windows, macOS and Linux** with packaged builds, and the results go to `qa/runs/M<N>.md`. The
+  M1 run is the first and covers everything since M0. Before the release, the whole list is run the same way and
+  each OS column below gets ✅, ❌ (with a link to the bug issue) or — (not applicable).
 - Test data lives in `smoke-data/` (sample vaults plus `smoke.sh` / `smoke.ps1` for scenarios Git cannot hold);
   every case that needs data names it there.
 - Bugs found are filed as issues, fixed on `fix/` branches, and the failing case is run again.
 
-## Test environment (fill in for the release run)
+## Test environment (fill in for the release run; milestone runs record theirs in `qa/runs/`)
 
 | OS | Version | Desktop environment | Hardware (CPU / RAM / GPU) | Build | Tester | Date |
 |---|---|---|---|---|---|---|

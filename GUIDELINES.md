@@ -146,6 +146,19 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
 - Pull requests are merged with **rebase merging**, so the granular commits land as they are and history stays
   linear, both in the feature branch and in `main`.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`.
+- **Three levels of testing beyond unit tests**, from the smallest to the largest:
+  1. **Feature smoke test** (below): the developer, with the agent's help, before each `feature/` or `fix/` branch
+     reaches `main`. One OS is enough unless the change is platform-specific.
+  2. **Milestone QA run** (`qa/README.md`): when the last feature of a milestone is on `main`, testers run the
+     automated UI tests and then the manual cases of `MVP_SMOKE_TEST.md` accumulated so far, on **Windows, macOS and
+     Linux**, with packaged builds published as a GitHub pre-release. The milestone is closed only when the three
+     OSes pass. The first run, at the end of M1, is retroactive: it covers everything since M0.
+  3. **Release run**: the milestone QA run of M5, with signed builds (`ROADMAP.md` 5.3, 5.4).
+- **Automated UI tests** (Compose `ui-test`, `runComposeUiTest`) cover every screen and its states: they run in CI on
+  the three OSes on every pull request and block the merge when they fail, and they are packaged as the
+  **Notekea Self-Test** app that testers run first in a milestone QA run. Every step that adds or changes UI brings
+  its UI tests in the same pull request. Status: the infrastructure is planned in `qa/README.md` ("Before the first
+  run"); until it lands, UI is reviewed headless with `ImageComposeScene` and by the feature smoke test.
 - **Manual smoke test before a `feature/` or `fix/` branch reaches `main`.** Automated tests do not prove the
   app works as a whole, so the developer runs the app (`./gradlew :composeApp:run`) on **at least one OS** and checks:
   1. The app starts and the main window renders without errors in the log.
@@ -163,8 +176,9 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   (file system, shortcuts, menus, packaging, Git credentials) must be smoke tested on **each affected OS**.
   `chore/` branches that do not change runtime behavior (docs, CI, tooling) are exempt.
 - **Every `feature/` and `fix/` branch adds its cases to `MVP_SMOKE_TEST.md`** (in a step): what a person must check on
-  each OS before the release, including cases that only become testable with later features. That file is run in
-  full on Windows, macOS and Linux before v0.1.0 and is the main source of bugs before release.
+  each OS, including cases that only become testable with later features. Every milestone QA run executes all the
+  cases testable so far on Windows, macOS and Linux, and the release run executes the whole file; it is the main
+  source of bugs before release.
 - **The same branch revises the existing cases its change makes outdated.** The file describes the app as it
   is after the change, not as it was: when a feature replaces or extends behavior an earlier case checks (the note
   tree replacing the "12 notes found" summary), that case is rewritten in place, keeping its ID, so the release
