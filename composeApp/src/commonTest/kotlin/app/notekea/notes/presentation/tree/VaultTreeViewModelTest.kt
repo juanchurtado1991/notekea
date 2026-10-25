@@ -35,10 +35,13 @@ import app.notekea.notes.domain.TreeRow
 import app.notekea.notes.domain.TreeSort
 import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import app.notekea.notes.domain.LinkUpdateResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -219,6 +222,48 @@ class VaultTreeViewModelTest {
             expected = "No links here." to null,
             actual = contents.texts.getValue(path(ROADMAP)) to viewModel.state.value.notice
         )
+    }
+
+    @Test
+    fun `a rename in the tree tells the editor where the note went`() = runTreeTest {
+        val viewModel = startedViewModel()
+        val effects = mutableListOf<VaultTreeEffect>()
+        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+        runCurrent()
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(WELCOME)))
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameTextChange(text = "Start here"))
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameConfirm)
+        advanceUntilIdle()
+        runCurrent()
+
+        assertEquals(
+            expected = listOf<VaultTreeEffect>(
+                VaultTreeEffect.EntryRenamed(from = path(WELCOME), to = path("Start here.md"))
+            ),
+            actual = effects
+        )
+    }
+
+    @Test
+    fun `a rename from the editor selects the note at its new path and reports the links`() = runTreeTest {
+        val viewModel = startedViewModel()
+        viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(WELCOME)))
+
+        viewModel.onIntent(
+            intent = VaultTreeIntent.OnEntryRenamed(
+                from = path(WELCOME),
+                to = path("Start here.md"),
+                links = LinkUpdateResult(updatedCount = 2, skipped = emptyList())
+            )
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = path("Start here.md") to TreeNotice.LinksUpdated(updatedCount = 2, skippedCount = 0),
+            actual = viewModel.state.value.selectedPath to viewModel.state.value.notice
+        )
+        assertTrue(actual = path("Start here.md") in viewModel.state.value.tree.notes)
     }
 
     @Test

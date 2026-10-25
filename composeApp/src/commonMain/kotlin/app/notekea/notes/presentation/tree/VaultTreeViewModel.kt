@@ -40,7 +40,7 @@ class VaultTreeViewModel(
     private val updateLinksAfterRename: UpdateLinksAfterRenameUseCase,
     private val getTreePreferences: GetTreePreferencesUseCase,
     private val saveTreePreferences: SaveTreePreferencesUseCase
-) : BaseViewModel<VaultTreeState, VaultTreeIntent, Nothing>(
+) : BaseViewModel<VaultTreeState, VaultTreeIntent, VaultTreeEffect>(
     initialState = VaultTreeState(vaultPath = vaultPath, platformConventions = platformConventions)
 ) {
     private val logger = Logger.withTag(tag = LOG_TAG)
@@ -62,6 +62,7 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnCollapseSelected -> updateTree(transform = ::reduceCollapseSelected)
             VaultTreeIntent.OnDeleteCancel -> reduce { it.copy(pendingDelete = null) }
             VaultTreeIntent.OnDeleteConfirm -> delete()
+            is VaultTreeIntent.OnEntryRenamed -> entryRenamed(intent = intent)
             is VaultTreeIntent.OnDeleteRequest -> reduce { it.copy(pendingDelete = intent.path ?: it.selectedPath) }
             VaultTreeIntent.OnErrorDismiss -> reduce { it.copy(actionError = null, hasUnexpectedError = false) }
             VaultTreeIntent.OnExpandSelected -> updateTree(transform = ::reduceExpandSelected)
@@ -142,11 +143,19 @@ class VaultTreeViewModel(
         renameJob = launchGuarded(onError = ::showUnexpectedError) {
             val notesBefore = state.value.tree.notes.keys
             val outcome = renameEntry(vaultPath = vaultPath, path = draft.path, newName = draft.text)
+            val isMoved = outcome is Outcome.Success && outcome.value != draft.path
+            if (isMoved) emit(effect = VaultTreeEffect.EntryRenamed(from = draft.path, to = outcome.value))
             updateTree { reduceRenameOutcome(state = it, from = draft.path, outcome = outcome) }
-            if (outcome is Outcome.Success && outcome.value != draft.path) {
-                updateLinks(notesBefore = notesBefore, from = draft.path, to = outcome.value)
-            }
+            if (isMoved) updateLinks(notesBefore = notesBefore, from = draft.path, to = outcome.value)
         }
+    }
+
+    /** The editor's title renamed a note: the tree selects it at its new path and reports the links it updated. */
+    private fun entryRenamed(
+        intent: VaultTreeIntent.OnEntryRenamed
+    ) {
+        updateTree { reduceRenameOutcome(state = it, from = intent.from, outcome = Outcome.Success(value = intent.to)) }
+        intent.links?.let { result -> reduce { reduceLinksUpdated(state = it, result = result) } }
     }
 
     /** Rewrites the links to [from] in the notes that had them, now that it is [to]; nothing when none link to it. */
