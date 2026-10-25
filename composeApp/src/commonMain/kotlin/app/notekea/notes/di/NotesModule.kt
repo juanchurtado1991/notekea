@@ -14,7 +14,10 @@ import app.notekea.notes.domain.LinkFinder
 import app.notekea.notes.domain.NoteMetadataCache
 import app.notekea.notes.domain.NaturalNameComparator
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
+import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
+import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
+import app.notekea.notes.domain.SaveNoteUseCase
 import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.RevealEntryUseCase
@@ -43,7 +46,10 @@ val notesModule = module {
     factoryOf(::GhostFrontmatterParser)
     factoryOf(::NaturalNameComparator)
     factoryOf(::ObserveVaultTreeUseCase)
+    factoryOf(::ObserveNoteOnDiskUseCase)
+    factoryOf(::OpenNoteUseCase)
     factoryOf(::PlanLinkUpdatesUseCase)
+    factoryOf(::SaveNoteUseCase)
     factoryOf(::UpdateLinksAfterRenameUseCase)
     factoryOf(::RenameEntryUseCase)
     factoryOf(::RevealEntryUseCase)

@@ -35,6 +35,7 @@
     <string name="error_vault_invalid_name">Enter a name without characters like / : * ? or quotes.</string>
     <string name="error_vault_permission_denied">Notekea doesn’t have permission to open %1$s. Check the folder’s permissions and try again.</string>
 
+    <string name="error_notes_changed_on_disk">“%1$s” changed outside Notekea since it was opened.</string>
     <string name="error_notes_entry_missing">%1$s was moved or deleted outside Notekea.</string>
     <string name="error_notes_hidden_name">Names can’t start with a dot, or the note would be hidden.</string>
     <string name="error_notes_invalid_name">Enter a name without characters like / : * ? or quotes.</string>
