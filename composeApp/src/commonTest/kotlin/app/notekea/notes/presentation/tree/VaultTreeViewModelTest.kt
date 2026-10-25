@@ -18,6 +18,8 @@ import app.notekea.notes.domain.FakeNoteScanner
 import app.notekea.notes.domain.FakeTrash
 import app.notekea.notes.domain.FakeTreePreferencesStore
 import app.notekea.notes.domain.FlattenTreeUseCase
+import app.notekea.notes.domain.LinkKind
+import app.notekea.notes.domain.FollowLinkUseCase
 import app.notekea.notes.domain.GetTreePreferencesUseCase
 import app.notekea.notes.domain.NaturalNameComparator
 import app.notekea.notes.domain.NoteFixtures.VAULT
@@ -267,6 +269,55 @@ class VaultTreeViewModelTest {
     }
 
     @Test
+    fun `a clicked link selects its note and opens the folders above it`() = runTreeTest {
+        val viewModel = startedViewModel()
+
+        viewModel.onIntent(
+            intent = VaultTreeIntent.OnFollowLink(source = path(WELCOME), target = "roadmap", kind = LinkKind.WIKI)
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = path(ROADMAP) to setOf(path(PROJECTS)),
+            actual = viewModel.state.value.selectedPath to viewModel.state.value.expandedFolders
+        )
+    }
+
+    @Test
+    fun `a wiki link to a missing note creates it at the root and selects it`() = runTreeTest {
+        val viewModel = startedViewModel()
+
+        viewModel.onIntent(
+            intent = VaultTreeIntent.OnFollowLink(source = path(WELCOME), target = "Ideas", kind = LinkKind.WIKI)
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = path("Ideas.md") to true,
+            actual = viewModel.state.value.selectedPath to (path("Ideas.md") in viewModel.state.value.tree.notes)
+        )
+    }
+
+    @Test
+    fun `a markdown link to a missing file shows why nothing opened`() = runTreeTest {
+        val viewModel = startedViewModel()
+
+        viewModel.onIntent(
+            intent = VaultTreeIntent.OnFollowLink(
+                source = path(WELCOME),
+                target = "Missing.md",
+                kind = LinkKind.MARKDOWN_ENCODED
+            )
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = NotesError.EntryMissing(path = "Missing.md"),
+            actual = viewModel.state.value.actionError
+        )
+    }
+
+    @Test
     fun `a refused name stays in the field with its reason`() = runTreeTest {
         val viewModel = startedViewModel()
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(WELCOME)))
@@ -415,6 +466,7 @@ class VaultTreeViewModelTest {
                 ),
                 applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = contents)
             ),
+            followLink = FollowLinkUseCase(createNote = CreateNoteUseCase(noteFileOperations = operations)),
             getTreePreferences = GetTreePreferencesUseCase(treePreferencesStore = preferences),
             saveTreePreferences = SaveTreePreferencesUseCase(treePreferencesStore = preferences)
         )
