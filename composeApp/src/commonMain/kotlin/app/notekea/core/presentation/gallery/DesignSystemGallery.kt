@@ -43,6 +43,7 @@ import app.notekea.core.presentation.components.NotekeaSplitPane
 import app.notekea.core.presentation.components.NotekeaTab
 import app.notekea.core.presentation.components.NotekeaTabRow
 import app.notekea.core.presentation.components.NotekeaTextField
+import app.notekea.core.presentation.components.NotekeaTitleField
 import app.notekea.core.presentation.components.NotekeaTreeItem
 import app.notekea.core.presentation.components.StatusBarItem
 import app.notekea.core.presentation.components.StatusIndicator
@@ -180,6 +181,8 @@ private fun ButtonsSection() {
 private fun InputsSection() {
     var query by remember { mutableStateOf(value = "") }
     var selectedNote by remember { mutableIntStateOf(value = 0) }
+    var title by remember { mutableStateOf(value = NOTE_PRICING) }
+    NotekeaTitleField(value = title, onCommit = { title = it }, label = NOTE_PRICING)
     NotekeaTextField(
         value = query,
         onValueChange = { query = it },
