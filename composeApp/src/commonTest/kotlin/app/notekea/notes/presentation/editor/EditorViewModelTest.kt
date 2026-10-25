@@ -74,6 +74,8 @@ class EditorViewModelTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher = testDispatcher)
+        // Like the real store, which switches to the IO dispatcher: a save that cancels itself is stopped there.
+        store.suspendsLikeDisk = true
         putOnDisk(path = AREPAS, text = AREPAS_TEXT)
         putOnDisk(path = WELCOME, text = "# Welcome\n")
     }

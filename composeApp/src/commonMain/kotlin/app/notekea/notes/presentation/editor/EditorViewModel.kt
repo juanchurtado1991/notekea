@@ -103,6 +103,9 @@ class EditorViewModel(
         reduce { it.copy(saveStatus = SaveStatus.UNSAVED) }
         autosaveJob = launchGuarded(onError = ::showUnexpectedError) {
             delay(duration = AUTOSAVE_DELAY)
+            // From here the save runs to its end: a keystroke during the write schedules the next autosave instead of
+            // cancelling this one, which would stop it at the disk with nothing written.
+            autosaveJob = null
             saveLock.withLock { saveNow() }
         }
     }
@@ -141,7 +144,6 @@ class EditorViewModel(
 
     /** Saves the edits, unless there is nothing new or the user has a question to answer first. */
     private suspend fun saveNow() {
-        autosaveJob?.cancel()
         val path = state.value.notePath ?: return
         val document = opened ?: return
         val body = buffer.text.toString()
