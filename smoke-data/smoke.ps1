@@ -1,10 +1,12 @@
 # Prepares the smoke-test scenarios that cannot live in the repository (Windows).
 # Git cannot store a folder without read permission, and a moved vault must not change tracked files, so this script
 # builds them in smoke-data\scratch (ignored by Git), next to the sample vaults. It never touches smoke-data\vaults.
-# Usage: powershell -ExecutionPolicy Bypass -File smoke-data\smoke.ps1 prepare|move|lock|outside|large|clear-cache|first-launch|restore-settings|clean
+# Usage: powershell -ExecutionPolicy Bypass -File smoke-data\smoke.ps1
+#        prepare|move|lock|outside|large|edit-note|delete-note|check-note|clear-cache|first-launch|restore-settings|clean
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("prepare", "move", "lock", "outside", "large", "clear-cache", "first-launch", "restore-settings", "clean")]
+    [ValidateSet("prepare", "move", "lock", "outside", "large", "edit-note", "delete-note", "check-note", "clear-cache",
+        "first-launch", "restore-settings", "clean")]
     [string]$Command
 )
 $ErrorActionPreference = "Stop"
@@ -17,9 +19,58 @@ $Backup = "$Settings.smoke-backup"
 $Database = Join-Path (Join-Path $env:APPDATA "Notekea") "notekea.db"
 $Playground = Join-Path $Scratch "Playground Vault"
 $Utf8 = New-Object System.Text.UTF8Encoding($false)
+$Editor = Join-Path $Playground "Editor"
+$SharedNote = Join-Path $Editor "Shared note.md"
+$WindowsNote = Join-Path $Editor "Windows line endings.md"
+$WindowsHeader = "---`r`ntitle: Written on Windows`r`ntags: [crlf]`r`n---`r`n"
 
 function Write-Note($Path, $Text) {
     [System.IO.File]::WriteAllText($Path, $Text, $Utf8)
+}
+
+# Notes for the editor cases (1.5): every Markdown element Read mode shows, a note other apps change, and a note with
+# Windows line breaks and frontmatter that must be written back unchanged. The accent of "Cafe" is added as a character
+# code because Windows PowerShell reads this file without a BOM as ANSI.
+function Write-EditorNotes {
+    New-Item -ItemType Directory -Force $Editor | Out-Null
+    $readMode = @'
+---
+tags: [editor, smoke]
+---
+# Read mode
+
+## Links
+
+Cook [[Arepas]], see [[CAFE_ACCENT con leche|the coffee]], open [[A note that does not exist yet]].
+A Markdown link to [Pasta e fagioli](../Recipes/Pasta%20e%20fagioli.md) and to [the web](https://example.com).
+
+## Text
+
+Some **bold**, some *italic*, some `inline code` and a #smoke-tag.
+
+> A quote with [[Welcome]] inside.
+
+- [x] A finished task
+- [ ] A task to do
+
+## Code
+
+```kotlin
+fun servings(people: Int): Int {
+    val perPerson = 2 // arepas per person
+    return people * perPerson
+}
+```
+
+```python
+def greet(name):
+    return f"Hello, {name}"  # [[not a link inside code]]
+```
+'@
+    $readMode = ($readMode -replace "`r`n", "`n").Replace("CAFE_ACCENT", "Caf" + [char]0x00E9)
+    Write-Note (Join-Path $Editor "Read mode.md") ($readMode + "`n")
+    Write-Note $SharedNote "# Shared note`n`nAnother app changes or deletes this note while it is open in Notekea.`n"
+    Write-Note $WindowsNote ($WindowsHeader + "# Windows line endings`r`n`r`nEvery line ends with CR LF.`r`n")
 }
 
 function Clear-Scratch {
@@ -41,7 +92,8 @@ switch ($Command) {
         (Get-Item (Join-Path $Playground "Recipes\Caf* con leche.md")).LastWriteTime = [datetime]"2026-10-01 09:00"
         Set-Content (Join-Path $Scratch "New Vault Location\My Notes\Existing note.md") "# Existing note"
         Set-Content (Join-Path $Locked "Locked note.md") "# Locked note"
-        Write-Output "Smoke scenarios ready in $Scratch (Movable Vault, Locked Vault, New Vault Location, Playground Vault)"
+        Write-EditorNotes
+        Write-Output "Smoke scenarios ready in $Scratch (Movable Vault, Locked Vault, New Vault Location, Playground Vault with its Editor folder)"
     }
     "move" {
         Rename-Item (Join-Path $Scratch "Movable Vault") "Moved Vault"
@@ -73,6 +125,26 @@ switch ($Command) {
             }
         }
         Write-Output "Created $Large with 5000 notes"
+    }
+    "edit-note" {
+        [System.IO.File]::AppendAllText($SharedNote, "`nEdited outside Notekea at $(Get-Date -Format HH:mm:ss).`n", $Utf8)
+        Write-Output "Added a line to Editor\Shared note.md, as another app would"
+    }
+    "delete-note" {
+        Remove-Item -Force -ErrorAction SilentlyContinue $SharedNote
+        Write-Output "Deleted Editor\Shared note.md, as another app would"
+    }
+    "check-note" {
+        # Every line must still end with CR LF and the frontmatter must be exactly as prepare wrote it.
+        $text = [System.IO.File]::ReadAllText($WindowsNote, $Utf8)
+        $lines = ([regex]::Matches($text, "`n")).Count
+        $crlf = ([regex]::Matches($text, "`r`n")).Count
+        if ($lines -eq $crlf -and $text.StartsWith($WindowsHeader)) {
+            Write-Output "OK: every line ends with CR LF and the frontmatter is unchanged"
+        } else {
+            Write-Output "CHANGED: $crlf of $lines lines end with CR LF; the note starts with:"
+            Write-Output ($text.Substring(0, [Math]::Min(80, $text.Length)).Replace("`r", "\r").Replace("`n", "\n"))
+        }
     }
     "clear-cache" {
         Remove-Item -Force -ErrorAction SilentlyContinue $Database
