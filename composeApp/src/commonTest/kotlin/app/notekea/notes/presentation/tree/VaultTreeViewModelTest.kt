@@ -211,6 +211,25 @@ class VaultTreeViewModelTest {
     }
 
     @Test
+    fun `a shown links notice never blocks the next rename, its links or its notice`() = runTreeTest {
+        contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
+        val viewModel = startedViewModel()
+        rename(viewModel = viewModel, from = WELCOME, to = "Start here")
+        val first = viewModel.state.value.notice
+
+        rename(viewModel = viewModel, from = "Start here.md", to = "Begin")
+
+        assertEquals(
+            expected = Triple(
+                TreeNotice.LinksUpdated(updatedCount = 1, skippedCount = 0),
+                "Begin with [[Begin]].",
+                TreeNotice.LinksUpdated(updatedCount = 1, skippedCount = 0)
+            ),
+            actual = Triple(first, contents.texts.getValue(path(ROADMAP)), viewModel.state.value.notice)
+        )
+    }
+
+    @Test
     fun `renaming a note nothing links to changes no other note and says nothing`() = runTreeTest {
         contents.texts[path(ROADMAP)] = "No links here."
         val viewModel = startedViewModel()
@@ -435,6 +454,18 @@ class VaultTreeViewModelTest {
     private fun path(
         value: String
     ): RelativePath = RelativePath(value = value)
+
+    private fun TestScope.rename(
+        viewModel: VaultTreeViewModel,
+        from: String,
+        to: String
+    ) {
+        contents.texts.getOrPut(key = path("$to.md")) { "" }
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(from)))
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameTextChange(text = to))
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameConfirm)
+        advanceUntilIdle()
+    }
 
     private fun runTreeTest(
         block: suspend TestScope.() -> Unit
