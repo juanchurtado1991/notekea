@@ -33,9 +33,11 @@ shows related notes and answers questions citing the exact paragraph. Everything
 | FileKit | `io.github.vinceglb:filekit-dialogs-compose` | 0.16.0 | Native folder picker for the vault |
 | Lucide icons | `com.composables:icons-lucide-cmp` | 2.2.1 | UI icons as `ImageVector`s (MIT wrapper, ISC icons). Lucide is the icon set of Obsidian, so its users recognize folders, notes and actions at a glance; ~5.7 MB on the JVM against ~38 MB for the frozen `material-icons-extended`. Only `NotekeaIcons` imports it (Konsist) |
 | Markdown renderer | `com.mikepenz:multiplatform-markdown-renderer-m3` | 0.46.0 | Renders notes and chat answers |
+| Markdown renderer code | `com.mikepenz:multiplatform-markdown-renderer-code` | 0.46.0 | Colors code blocks by language in Read mode, like GitHub's preview; brings `dev.snipme:highlights` 1.1.0 (Apache-2.0, ~15 languages). Edit mode keeps code plain on purpose |
 
 Decisions:
-- The MVP editor is a `BasicTextField` with custom highlighting (no library).
+- The MVP editor is a `BasicTextField` with custom highlighting (no library); Read mode renders with the Markdown
+  renderer through the design system's `NotekeaMarkdown`.
 - No Navigation library: with 3–4 screens it is not worth it.
 - Icons come from Lucide through `core.presentation.theme.NotekeaIcons`, never from the library directly, so the set
   can change in one file. `material-icons-extended` is not used: JetBrains stopped publishing it after 1.7.3.
