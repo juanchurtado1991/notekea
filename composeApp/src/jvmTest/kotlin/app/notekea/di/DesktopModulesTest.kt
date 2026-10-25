@@ -4,6 +4,7 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.db.NotekeaDatabase
 import app.notekea.notes.domain.Trash
+import app.notekea.notes.presentation.editor.EditorViewModel
 import app.notekea.notes.presentation.tree.VaultTreeViewModel
 import app.notekea.vault.domain.RecentVaultsStore
 import app.notekea.vault.presentation.welcome.WelcomeViewModel
@@ -69,10 +70,11 @@ class DesktopModulesTest {
     }
 
     @Test
-    fun `the vault tree resolves for a vault path with all its adapters`() {
+    fun `the vault tree and the editor resolve for a vault path with all their adapters`() {
         val koin = koinApplication.koin
 
         assertNotNull(actual = koin.get<VaultTreeViewModel> { parametersOf(VAULT_PATH) })
+        assertNotNull(actual = koin.get<EditorViewModel> { parametersOf(VAULT_PATH) })
         assertSame(
             expected = koin.get<Trash>(),
             actual = koin.get<Trash>()
