@@ -177,9 +177,14 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   `chore/` branches that do not change runtime behavior (docs, CI, tooling) are exempt.
 
   **Before handing the smoke test over, the agent runs a pre-smoke** so the developer's run finds what only a
-  person can: it runs headless every case it can (screen tests on the feature's smoke data, the `smoke.sh` commands
-  with `SMOKE_SCRATCH=scratch-agent`, never the developer's `smoke-data/scratch`), and checks every expected value
-  the guide states (names, counts, file contents) against the data in `smoke-data/`. Screens rendered while
+  person can. Every case that can run headless becomes a test committed in the step that adds the cases: a screen
+  or integration test on the feature's smoke data, named after the case (``fun `1.5-04 renaming from the title
+  updates the links`()``) and listed in the case's **Automated** column of `MVP_SMOKE_TEST.md`. The tests stay and
+  run in `check` and CI, so the cases accumulate feature after feature, and a feature that changes a case updates
+  its test. The agent also runs the `smoke.sh` commands with `SMOKE_SCRATCH=scratch-agent` (never the developer's
+  `smoke-data/scratch`) and checks every expected value the guide states (names, counts, file contents) against
+  the data in `smoke-data/`. The cases of 1.1 to 1.5, written before this rule, are automated by the backfill of
+  `qa/README.md` before the M1 run. Screens rendered while
   developing are shown to the developer in the conversation, never committed or attached to pull requests: design
   decisions are made in the smoke test, using the app.
 - **Every `feature/` and `fix/` branch adds its cases to `MVP_SMOKE_TEST.md`** (in a step): what a person must check on

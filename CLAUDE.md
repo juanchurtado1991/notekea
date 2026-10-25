@@ -48,7 +48,8 @@ A `feature/` or `fix/` branch is not done until the developer has run the manual
 it: when every step is merged into the feature branch, hand over a short smoke test script based on the feature's
 "Done when" criteria in `ROADMAP.md`, and wait for the developer's result before opening the pull request to
 `main`. Fixes the smoke test needs are new steps. Before handing it over, run the pre-smoke of `GUIDELINES.md` §8:
-every case you can run headless, and every expected value of the script checked against `smoke-data/`. Run the
+every case you can run headless becomes a committed test named after the case ID and listed in the **Automated**
+column of `MVP_SMOKE_TEST.md`, and every expected value of the script is checked against `smoke-data/`. Run the
 scripts only as `SMOKE_SCRATCH=scratch-agent smoke-data/smoke.sh <command>`; never run them on the developer's
 `smoke-data/scratch`, and never run `clear-cache`, `first-launch` or `restore-settings`, which change the app's real
 data folder. Within the feature's steps:
