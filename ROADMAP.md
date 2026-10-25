@@ -18,6 +18,10 @@ branch name is given next to it. Estimates assume one developer and are meant fo
   its settings for attachments, daily notes and templates folders are honored (read-only).
 - **Local only:** see the privacy rules in `GUIDELINES.md`.
 
+**Closing a milestone:** a milestone is done when all its features are ✅ **and** its QA run passes on Windows,
+macOS and Linux (`qa/README.md`); only then does the next milestone start. The M1 run also covers M0, which never
+had one. The M5 run is the release run.
+
 **Status tracking:** features are never removed from this file. Each feature title carries its status —
 ⬜ not started, 🚧 in progress (branch open), ✅ done (with its pull request) — and the table below counts them.
 `CHANGELOG.md` records what changed; this file records what is planned and what is left.
