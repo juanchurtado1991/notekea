@@ -573,9 +573,23 @@ r/LocalLLaMA, Kotlin Slack). Measure: stars in the first month, issues from real
 2. **Mobile (Android first, then iOS)** — `LlmEngine` via Llamatik, `VectorIndex` via SQLite + sqlite-vec,
    `GitSync` via libgit2 on iOS (see "Mobile risks" in `LIBRARIES.md`).
 3. **More sources** — PDFs and web clippings inside the vault, indexed like notes.
-4. **More than two split panes** and detachable windows.
-5. **Custom title bar** with the tabs inside it (JetBrains Jewel `DecoratedWindow`).
-6. **Screenshot tests** for UI regressions (Roborazzi).
+4. **Repositories** — a code repository becomes part of the vault, so the graph and the chat cover it. Separate from
+   Git sync (4.1), which only versions the vault itself; it reuses its JGit clone and pull. In three steps, each
+   worth shipping on its own:
+   1. **Repository docs:** clone a repository into a read-only vault folder with only its Markdown (README,
+      `docs/`, ADRs, CHANGELOG), and update it with "Update" (pull). Indexing, links, graph and chat then work
+      unchanged.
+   2. **Module graph from a parser:** a parser (for example tree-sitter, to be approved in `LIBRARIES.md`) writes
+      one note per module or package, with its imports as links. The graph is exact and repeatable, and takes
+      seconds, with no model involved.
+   3. **Summaries and chat over the code:** optional summaries per module from the local model, marked as
+      generated, and chat over code chunked by function or class, with citations to `file:line` and never to a
+      generated note, so verified answers (3.5) check against the code itself. Only if an evaluation set like 2.8
+      shows small local models (and a code embedding model) are good enough: a medium repository can take hours
+      on a laptop.
+5. **More than two split panes** and detachable windows.
+6. **Custom title bar** with the tabs inside it (JetBrains Jewel `DecoratedWindow`).
+7. **Screenshot tests** for UI regressions (Roborazzi).
 
 ## Out of scope for the MVP
 
