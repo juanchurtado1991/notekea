@@ -2,12 +2,21 @@ package app.notekea.notes.presentation.editor
 
 import androidx.compose.runtime.snapshots.Snapshot
 import app.notekea.notes.domain.FakeNoteContentStore
+import app.notekea.notes.domain.FakeNoteFileOperations
 import app.notekea.notes.domain.FakeNoteScanner
+import app.notekea.notes.domain.LinkUpdateResult
 import app.notekea.notes.domain.NoteFixtures.VAULT
 import app.notekea.notes.domain.NoteFixtures.file
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
+import app.notekea.notes.domain.PlanLinkUpdatesUseCase
+import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
+import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
+import app.notekea.notes.domain.RenameEntryUseCase
+import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
+import app.notekea.core.domain.files.ValidateFileNameUseCase
+import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.SaveNoteUseCase
 import androidx.lifecycle.viewModelScope
@@ -36,12 +45,27 @@ class EditorViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val scanner = FakeNoteScanner()
     private val store = FakeNoteContentStore()
+    private val operations = FakeNoteFileOperations()
     private val viewModel by lazy {
         EditorViewModel(
             vaultPath = VAULT,
             openNote = OpenNoteUseCase(noteContentStore = store),
             saveNote = SaveNoteUseCase(noteContentStore = store),
-            observeNoteOnDisk = ObserveNoteOnDiskUseCase(noteScanner = scanner, noteContentStore = store)
+            observeNoteOnDisk = ObserveNoteOnDiskUseCase(noteScanner = scanner, noteContentStore = store),
+            renameAndUpdateLinks = RenameAndUpdateLinksUseCase(
+                noteScanner = scanner,
+                renameEntry = RenameEntryUseCase(
+                    noteFileOperations = operations,
+                    validateFileName = ValidateFileNameUseCase()
+                ),
+                updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
+                    planLinkUpdates = PlanLinkUpdatesUseCase(
+                        noteContentStore = store,
+                        linkFinder = JetBrainsMarkdownLinkFinder()
+                    ),
+                    applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store)
+                )
+            )
         )
     }
 
@@ -260,6 +284,85 @@ class EditorViewModelTest {
     }
 
     @Test
+    fun `the title renames the note after saving it, and the notes that link to it follow`() = runEditorTest {
+        val effects = collectEffects()
+        store.texts[WELCOME] = "Cook [[Arepas]]."
+        open(path = AREPAS)
+        type(text = "Saved before the rename")
+
+        viewModel.onIntent(intent = EditorIntent.OnTitleCommit(name = "Arepas reina"))
+        runCurrent()
+
+        val renamed = RelativePath(value = "Recipes/Arepas reina.md")
+        assertEquals(
+            expected = listOf(
+                "---\ntags: [recipe]\n---\nSaved before the rename",
+                "Cook [[Arepas reina]]."
+            ),
+            actual = listOf(store.texts.getValue(AREPAS), store.texts.getValue(WELCOME))
+        )
+        assertEquals<Triple<Any?, Any?, Any?>>(
+            expected = Triple(
+                renamed,
+                listOf(AREPAS to renamed),
+                listOf<EditorEffect>(
+                    EditorEffect.Renamed(
+                        from = AREPAS,
+                        to = renamed,
+                        links = LinkUpdateResult(updatedCount = 1, skipped = emptyList())
+                    )
+                )
+            ),
+            actual = Triple(viewModel.state.value.notePath, operations.moves, effects)
+        )
+    }
+
+    @Test
+    fun `a refused title is explained until it is edited, and the same title changes nothing`() = runEditorTest {
+        open(path = AREPAS)
+
+        viewModel.onIntent(intent = EditorIntent.OnTitleCommit(name = " Arepas "))
+        viewModel.onIntent(intent = EditorIntent.OnTitleCommit(name = "a/b"))
+        runCurrent()
+        val refused = viewModel.state.value.titleError
+        viewModel.onIntent(intent = EditorIntent.OnTitleErrorDismiss)
+
+        assertEquals<Triple<Any?, Any?, Any?>>(
+            expected = Triple(NotesError.InvalidName, null, emptyList<Pair<RelativePath, RelativePath>>()),
+            actual = Triple(refused, viewModel.state.value.titleError, operations.moves)
+        )
+    }
+
+    @Test
+    fun `leaving the text saves at once`() = runEditorTest {
+        open(path = AREPAS)
+        type(text = "Saved on focus loss")
+
+        viewModel.onIntent(intent = EditorIntent.OnFocusLost)
+        runCurrent()
+
+        assertEquals(
+            expected = "---\ntags: [recipe]\n---\nSaved on focus loss",
+            actual = store.texts.getValue(AREPAS)
+        )
+    }
+
+    @Test
+    fun `a save never brings back a note that is gone, it offers to restore it`() = runEditorTest {
+        open(path = AREPAS)
+        type(text = "Edited")
+        store.texts.remove(AREPAS)
+
+        viewModel.onIntent(intent = EditorIntent.OnSaveShortcut)
+        runCurrent()
+
+        assertEquals(
+            expected = null to true,
+            actual = store.texts[AREPAS] to viewModel.state.value.isDeleted
+        )
+    }
+
+    @Test
     fun `a note that cannot be read shows the error until a retry opens it`() = runEditorTest {
         val missing = RelativePath(value = "Missing.md")
         open(path = missing)
@@ -349,6 +452,7 @@ class EditorViewModelTest {
     ) {
         store.texts[path] = text
         scanner.addNote(file = file(path = path.value))
+        operations.existing += path
     }
 
     companion object {

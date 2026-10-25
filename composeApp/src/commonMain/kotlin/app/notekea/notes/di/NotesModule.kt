@@ -19,6 +19,7 @@ import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
 import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
+import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.RevealEntryUseCase
 import app.notekea.notes.domain.SaveTreePreferencesUseCase
@@ -52,6 +53,7 @@ val notesModule = module {
     factoryOf(::PlanLinkUpdatesUseCase)
     factoryOf(::SaveNoteUseCase)
     factoryOf(::UpdateLinksAfterRenameUseCase)
+    factoryOf(::RenameAndUpdateLinksUseCase)
     factoryOf(::RenameEntryUseCase)
     factoryOf(::RevealEntryUseCase)
     factoryOf(::SaveTreePreferencesUseCase)
@@ -76,7 +78,8 @@ val notesModule = module {
             vaultPath = parameters.get(),
             openNote = get(),
             saveNote = get(),
-            observeNoteOnDisk = get()
+            observeNoteOnDisk = get(),
+            renameAndUpdateLinks = get()
         )
     }
 }

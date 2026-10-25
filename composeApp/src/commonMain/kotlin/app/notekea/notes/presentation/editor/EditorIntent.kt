@@ -10,6 +10,9 @@ sealed interface EditorIntent {
     /** Save now and report [EditorEffect.Flushed], before the window closes. */
     data object OnFlushRequest : EditorIntent
 
+    /** The text left the keyboard focus (the user clicked the tree, for instance): save now. */
+    data object OnFocusLost : EditorIntent
+
     /** Overwrite the outside change with the editor's text. */
     data object OnKeepMine : EditorIntent
 
@@ -29,4 +32,10 @@ sealed interface EditorIntent {
 
     /** Mod+S: save at once instead of waiting for the autosave. */
     data object OnSaveShortcut : EditorIntent
+
+    /** The title field was confirmed with [name]: rename the note, and the links to it. */
+    data class OnTitleCommit(val name: String) : EditorIntent
+
+    /** The title is being edited again after a refused name. */
+    data object OnTitleErrorDismiss : EditorIntent
 }
