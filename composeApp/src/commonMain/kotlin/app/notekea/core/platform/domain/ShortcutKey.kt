@@ -5,6 +5,7 @@ enum class ShortcutKey {
     BACKSLASH,
     BACKSPACE,
     DELETE,
+    E,
     ENTER,
     F,
     F2,
