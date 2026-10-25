@@ -35,6 +35,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Editor (ROADMAP 1.5): selecting a note opens it beside the tree with its folder, an editable title that renames it
+  and updates the links to it, and its tags and aliases. The body is a text field with Markdown highlighting
+  (headings, emphasis, code, links, wiki links, tags) whose frontmatter is kept byte for byte, Windows line breaks
+  included. Edits save a second after the last keystroke, at once with Mod+S, and before switching notes, leaving the
+  text or closing the window. An outside change reloads the note, or asks Keep mine / Load theirs when there are
+  unsaved edits; a note deleted while open offers Restore or Close. Mod+F finds in the note; Mod+E switches to Read
+  mode, rendered with code blocks colored by language and clickable links (a missing wiki link's note is created).
+- Design system: `NotekeaTitleField`, `NotekeaFindBar`, `NotekeaMarkdown` and `Modifier.focusBorder`, the one focus
+  style of every clickable component; the window waits for screens to save before it closes.
+- Libraries: `multiplatform-markdown-renderer-code` with `dev.snipme:highlights`, for code colors in Read mode.
+- Smoke data for 1.5: an Editor folder in the Playground Vault and `edit-note`, `delete-note` and `check-note` in
+  `smoke.sh` / `smoke.ps1`.
 - Vault tree and note list (ROADMAP 1.4): a resizable (200–480 dp) and hideable (`Mod+\`) sidebar with the vault's
   folders and Markdown notes, note counts, natural sorting by name or date, keyboard navigation, a context menu and
   shortcuts (Mod+N new note, F2 / Enter on macOS rename, Delete / Cmd+Backspace on macOS delete). Notes and folders

@@ -185,23 +185,31 @@ notes are read again.
 - **Done when:** a 5,000-note vault lists in under 1 s after the first scan, external changes appear within 1 s.
 - Smoke test: cases 1.4-01 to 1.4-12; 1.3-02, 1.3-04 and 1.3-07 rewritten for the tree.
 
-### ⬜ 1.5 Editor — `feature/editor`
+### 🚧 1.5 Editor — `feature/editor`
 
-`BasicTextField` with Markdown highlighting (headings, bold, italic, code, links, `[[wiki links]]`), autosave
-(debounced 1 s), Read mode with the Markdown renderer, clickable `[[links]]` and `#tags`.
+`BasicTextField` with Markdown highlighting (headings, bold, italic, code, links, `[[wiki links]]`, `#tags`),
+autosave (debounced 1 s), Read mode with the Markdown renderer and clickable `[[links]]`. Only the body is edited:
+the frontmatter is kept byte for byte, and its tags and aliases show read-only in the header. `#tags` are
+highlighted; clicking one searches it in 1.6. Every note opens in Edit mode.
 
 **UI — Editor pane:**
-- Header: note title (editable, renames the file), path breadcrumb, Edit / Read toggle (`Mod+E`).
-- Unsaved indicator in the header while the debounce is pending; "Saved" fades after 1 s.
+- Header: note title (editable, renames the file and updates the links to it), path breadcrumb, Edit / Read toggle
+  (`Mod+E`).
+- Unsaved indicator in the header while the debounce is pending; "Saved" fades after 1 s. `Mod+S` saves at once;
+  leaving the text, opening another note and closing the window save first.
 - Conflict banner if the file changed on disk while editing: "This note changed outside Notekea —
-  Keep mine / Load theirs".
+  Keep mine / Load theirs"; a note without unsaved edits reloads by itself. A note deleted while open offers
+  Restore / Close; a save never recreates a note that was moved or deleted.
 - Find in note: `Mod+F` opens an inline bar with match count and next/previous (`Enter` / `Shift+Enter`).
+- Read mode: code blocks colored by language (Edit mode keeps code plain); `[[links]]` and links to notes open the
+  note, a missing wiki link's note is created at the vault root, web links open the browser.
 - **Done when:** typing never loses text, external changes are detected, frontmatter is preserved untouched.
+- Smoke test: cases 1.5-01 to 1.5-11; 1.4-01 rewritten for the editor.
 
 ### ⬜ 1.6 Quick switcher and search — `feature/quick-switcher`
 
 `Mod+P` opens a palette with fuzzy search over note titles and aliases; `Mod+Shift+F` searches note content
-(plain text in M1, upgraded to hybrid search in M2).
+(plain text in M1, upgraded to hybrid search in M2). Clicking a `#tag` in Read mode searches that tag.
 
 **UI — Palette:** centered overlay 560 dp wide, input on top, up to 10 results with title, folder and matching
 snippet; arrows to move, `Enter` to open, `Esc` to close. Empty state: "No notes match".
