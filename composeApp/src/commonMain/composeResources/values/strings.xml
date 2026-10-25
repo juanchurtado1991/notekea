@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="editor_body_label">Note text</string>
+    <string name="editor_close">Close</string>
+    <string name="editor_conflict_message">This note changed outside Notekea while you were editing it.</string>
+    <string name="editor_deleted_message">This note was moved or deleted outside Notekea.</string>
+    <string name="editor_keep_mine">Keep mine</string>
+    <string name="editor_load_failed">This note couldn’t be opened.</string>
+    <string name="editor_load_theirs">Load theirs</string>
+    <string name="editor_restore">Restore</string>
+    <string name="editor_retry">Try again</string>
+    <string name="editor_save_failed">Not saved yet: %1$s</string>
+    <string name="editor_saved">Saved</string>
+    <string name="editor_title_label">Note title</string>
+    <string name="editor_unsaved">Unsaved</string>
+
     <string name="error_banner_dismiss">Dismiss</string>
 
     <string name="elapsed_just_now">Just now</string>
@@ -45,14 +59,12 @@
     <string name="error_notes_reveal_failed">Notekea couldn’t open the file manager for %1$s.</string>
     <string name="error_notes_vault_missing">Notekea can’t find %1$s. It may have been moved, renamed or deleted.</string>
 
-    <string name="note_panel_aliases">Also known as</string>
     <plurals name="note_panel_folder_notes">
         <item quantity="one">1 note</item>
         <item quantity="other">%1$d notes</item>
     </plurals>
     <string name="note_panel_empty_message">Pick a note in the sidebar to see it here.</string>
     <string name="note_panel_empty_title">No note selected</string>
-    <string name="note_panel_tags">Tags</string>
 
     <string name="tree_cancel">Cancel</string>
     <string name="tree_delete_folder">Delete folder</string>

@@ -24,30 +24,27 @@ import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.NoteEntry
 import app.notekea.notes.domain.RelativePath
 import app.notekea.resources.Res
-import app.notekea.resources.note_panel_aliases
 import app.notekea.resources.note_panel_empty_message
 import app.notekea.resources.note_panel_empty_title
 import app.notekea.resources.note_panel_folder_notes
-import app.notekea.resources.note_panel_tags
 import app.notekea.resources.tree_show_sidebar
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val CONTENT_MAX_WIDTH_DP = 640
-private const val LIST_SEPARATOR = ", "
 private const val PREVIEW_HEIGHT_DP = 320
 private const val PREVIEW_WIDTH_DP = 520
-private const val TAG_PREFIX = "#"
 
 /**
- * The main area beside the sidebar. Until the editor exists it shows what Notekea read from the selected note (its
- * title, folder, tags and aliases) or how many notes the selected folder holds, so the user can see the vault was
- * understood. It stays blank while the vault loads. When the sidebar is hidden, a button brings it back.
+ * The main area beside the sidebar: the selected note in [noteContent] (the editor), how many notes the selected
+ * folder holds, or a hint when nothing is selected. It stays blank while the vault loads. When the sidebar is hidden,
+ * a button brings it back.
  */
 @Composable
 internal fun NoteDetailsPanel(
     state: VaultTreeState,
-    onShowSidebar: () -> Unit
+    onShowSidebar: () -> Unit,
+    noteContent: @Composable (NoteEntry) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         val selected = state.selectedPath
@@ -55,7 +52,7 @@ internal fun NoteDetailsPanel(
         when {
             state.isLoading -> Unit
 
-            note != null -> NoteDetails(note = note)
+            note != null -> noteContent(note)
 
             selected != null && selected in state.tree.folders -> FolderDetails(
                 folder = selected,
@@ -80,32 +77,6 @@ internal fun NoteDetailsPanel(
                 shortcutHint = state.platformConventions.toggleSidebarShortcut.label(
                     operatingSystem = state.platformConventions.operatingSystem
                 )
-            )
-        }
-    }
-}
-
-@Composable
-private fun NoteDetails(
-    note: NoteEntry
-) {
-    val path = note.file.path
-    DetailsColumn {
-        Text(text = note.metadata.title ?: path.nameWithoutExtension, style = MaterialTheme.typography.headlineSmall)
-        FolderLine(path = path)
-        if (note.metadata.tags.isNotEmpty()) {
-            DetailLine(
-                label = stringResource(resource = Res.string.note_panel_tags),
-                value = note.metadata.tags.joinToString(separator = " ") {
-                    TAG_PREFIX +
-                        it
-                }
-            )
-        }
-        if (note.metadata.aliases.isNotEmpty()) {
-            DetailLine(
-                label = stringResource(resource = Res.string.note_panel_aliases),
-                value = note.metadata.aliases.joinToString(separator = LIST_SEPARATOR)
             )
         }
     }
@@ -155,27 +126,12 @@ private fun FolderLine(
 }
 
 @Composable
-private fun DetailLine(
-    label: String,
-    value: String
-) {
-    Column(modifier = Modifier.padding(top = NotekeaDimensions.SpacingS)) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(text = value, style = MaterialTheme.typography.bodyMedium)
-    }
-}
-
-@Composable
 private fun NoteDetailsPanelPreviewFrame(
     state: VaultTreeState
 ) {
     NotekeaPreviewThemes {
         Box(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp).height(height = PREVIEW_HEIGHT_DP.dp)) {
-            NoteDetailsPanel(state = state, onShowSidebar = {})
+            NoteDetailsPanel(state = state, onShowSidebar = {}, noteContent = { PreviewNoteContent(note = it) })
         }
     }
 }
