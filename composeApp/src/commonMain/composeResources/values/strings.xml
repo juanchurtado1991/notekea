@@ -4,6 +4,8 @@
     <string name="editor_close">Close</string>
     <string name="editor_conflict_message">This note changed outside Notekea while you were editing it.</string>
     <string name="editor_deleted_message">This note was moved or deleted outside Notekea.</string>
+    <string name="editor_find_count">%1$d of %2$d</string>
+    <string name="editor_find_none">No results</string>
     <string name="editor_keep_mine">Keep mine</string>
     <string name="editor_load_failed">This note couldn’t be opened.</string>
     <string name="editor_load_theirs">Load theirs</string>
@@ -13,6 +15,11 @@
     <string name="editor_saved">Saved</string>
     <string name="editor_title_label">Note title</string>
     <string name="editor_unsaved">Unsaved</string>
+
+    <string name="find_bar_close">Close find</string>
+    <string name="find_bar_next">Next match</string>
+    <string name="find_bar_placeholder">Find in note</string>
+    <string name="find_bar_previous">Previous match</string>
 
     <string name="error_banner_dismiss">Dismiss</string>
 
