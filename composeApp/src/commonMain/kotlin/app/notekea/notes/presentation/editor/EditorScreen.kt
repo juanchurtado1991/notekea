@@ -24,7 +24,8 @@ private const val PREVIEW_HEIGHT_DP = 420
 private const val PREVIEW_WIDTH_DP = 720
 
 /**
- * Editor entry point for [notePath]: opens it (saving the previous note first), saves with the save shortcut, saves
+ * Editor entry point for [notePath]: opens it (saving the previous note first), opens Find with its shortcut, saves
+ * with the save shortcut, saves
  * before the window closes and when the editor leaves the screen (a folder selected, another vault opened), and
  * reports a rename from the title ([onRenamed]) or a deleted note closed ([onClosed]) to the panes around it. The
  * [viewModel] belongs to the vault, so it outlives one note.
@@ -56,6 +57,9 @@ fun EditorScreen(
     DisposableEffect(viewModel) { onDispose { viewModel.onIntent(intent = EditorIntent.OnFlushRequest) } }
     WindowShortcut(shortcut = platformConventions.saveShortcut) {
         viewModel.onIntent(intent = EditorIntent.OnSaveShortcut)
+    }
+    WindowShortcut(shortcut = platformConventions.findShortcut) {
+        viewModel.onIntent(intent = EditorIntent.OnFindOpen)
     }
     BeforeWindowClose {
         while (flushed.tryReceive().isSuccess) {

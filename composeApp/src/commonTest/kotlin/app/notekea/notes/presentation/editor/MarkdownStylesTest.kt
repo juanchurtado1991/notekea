@@ -34,6 +34,21 @@ class MarkdownStylesTest {
     }
 
     @Test
+    fun `find matches use the accent, the current one stronger`() {
+        val match = styles.findMatch.background
+        val current = styles.currentFindMatch.background
+
+        assertEquals(
+            expected = listOf(colors.tertiary.red, colors.tertiary.red),
+            actual = listOf(match.red, current.red)
+        )
+        assertEquals(
+            expected = true,
+            actual = current.alpha > match.alpha
+        )
+    }
+
+    @Test
     fun `headings follow the type scale, largest first`() {
         assertEquals(
             expected = listOf(
