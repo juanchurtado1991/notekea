@@ -9,7 +9,8 @@ import app.notekea.notes.domain.RelativePath
  * open. [loadError] means the note could not be read (retry opens it again); [saveError] is a failed save, retried by
  * the next edit or Save. [hasConflict] means the file changed outside Notekea while there were unsaved edits (Keep
  * mine / Load theirs); [isDeleted] means the file disappeared while open (Restore / Close). Autosave waits while
- * either is shown, so nothing is overwritten or lost without the user's answer.
+ * either is shown, so nothing is overwritten or lost without the user's answer. [titleError] is why a new title was
+ * refused (invalid, hidden or taken name), shown under the title until it is edited again.
  */
 data class EditorState(
     val notePath: RelativePath? = null,
@@ -18,5 +19,6 @@ data class EditorState(
     val saveStatus: SaveStatus = SaveStatus.NONE,
     val saveError: NotesError? = null,
     val hasConflict: Boolean = false,
-    val isDeleted: Boolean = false
+    val isDeleted: Boolean = false,
+    val titleError: NotesError? = null
 )
