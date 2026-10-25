@@ -24,10 +24,13 @@ folder picker reaches them the same way. Not in `/tmp`: a sandboxed terminal and
 different `/tmp`.
 
 ```bash
-smoke-data/smoke.sh prepare           # Movable Vault, Locked Vault, New Vault Location, Playground Vault (all readable; its Recipes have distinct dates)
+smoke-data/smoke.sh prepare           # Movable Vault, Locked Vault, New Vault Location, Playground Vault (all readable; its Recipes have distinct dates, its Editor folder has the editor's notes)
 smoke-data/smoke.sh move              # renames Movable Vault to Moved Vault, to test "Folder not found"
 smoke-data/smoke.sh lock              # removes read permission from Locked Vault, to test the permission error
 smoke-data/smoke.sh outside           # creates, edits and deletes notes in Playground Vault, as another app would
+smoke-data/smoke.sh edit-note         # adds a line to Playground Vault/Editor/Shared note.md, as another app would
+smoke-data/smoke.sh delete-note       # deletes Playground Vault/Editor/Shared note.md, as another app would
+smoke-data/smoke.sh check-note        # says whether Editor/Windows line endings.md kept its CR LF and frontmatter
 smoke-data/smoke.sh large             # creates Large Vault: 5,000 notes in 50 folders, to time the tree
 smoke-data/smoke.sh clear-cache       # deletes Notekea's note cache, so the next open is a full first scan
 smoke-data/smoke.sh first-launch      # backs up Notekea's settings so the next start is a first launch
@@ -46,3 +49,4 @@ administrator) the locked folder stays readable.
 |---|---|---|
 | 1.3 Open a vault | 1.3-01 … 1.3-10, 1.1-04, 1.2-04 | All three vaults; `prepare`, `move`, `lock`, `first-launch` |
 | 1.4 Vault tree | 1.4-01 … 1.4-12, 1.3-02, 1.3-04, 1.3-07, 1.1-03 | `Personal Notes`, `Empty Vault`; `prepare` (Playground Vault, Movable Vault), `outside`, `large`, `clear-cache`, `move` |
+| 1.5 Editor | 1.5-01 … 1.5-11, 1.4-01 | `prepare` (Playground Vault and its `Editor` folder), `edit-note`, `delete-note`, `check-note` |
