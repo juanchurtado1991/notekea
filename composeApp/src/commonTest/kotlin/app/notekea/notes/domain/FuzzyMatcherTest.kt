@@ -6,7 +6,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class FuzzyMatcherTest {
-    private val matcher = FuzzyMatcher()
+    private val matcher = FuzzyMatcher(textFolder = TextFolder())
 
     @Test
     fun `the letters must appear in order, not necessarily together`() {
