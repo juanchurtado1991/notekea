@@ -12,8 +12,17 @@ param(
 )
 $ErrorActionPreference = "Stop"
 
+# $env:SMOKE_SCRATCH = "scratch-<name>" builds everything in smoke-data\scratch-<name> instead, so an agent's checks
+# never touch the developer's smoke-data\scratch. It changes only that folder: clear-cache, first-launch and
+# restore-settings still use the app's real data folder.
+$ScratchName = if ($env:SMOKE_SCRATCH) { $env:SMOKE_SCRATCH } else { "scratch" }
+if ($ScratchName -notmatch '^scratch(-[A-Za-z0-9]+)?$') {
+    Write-Error "SMOKE_SCRATCH must be scratch or scratch-<letters and digits>, not a path: $ScratchName"
+    exit 2
+}
+
 $SmokeRoot = $PSScriptRoot
-$Scratch = Join-Path $SmokeRoot "scratch"
+$Scratch = Join-Path $SmokeRoot $ScratchName
 $Locked = Join-Path $Scratch "Locked Vault"
 $Settings = Join-Path (Join-Path $env:APPDATA "Notekea") "settings.properties"
 $Backup = "$Settings.smoke-backup"

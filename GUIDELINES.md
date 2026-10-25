@@ -175,6 +175,13 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   The pull request to `main` records the OS and version used and what was checked. Changes that are platform-specific
   (file system, shortcuts, menus, packaging, Git credentials) must be smoke tested on **each affected OS**.
   `chore/` branches that do not change runtime behavior (docs, CI, tooling) are exempt.
+
+  **Before handing the smoke test over, the agent runs a pre-smoke** so the developer's run finds what only a
+  person can: it runs headless every case it can (screen tests on the feature's smoke data, the `smoke.sh` commands
+  with `SMOKE_SCRATCH=scratch-agent`, never the developer's `smoke-data/scratch`), and checks every expected value
+  the guide states (names, counts, file contents) against the data in `smoke-data/`. Screens rendered while
+  developing are shown to the developer in the conversation, never committed or attached to pull requests: design
+  decisions are made in the smoke test, using the app.
 - **Every `feature/` and `fix/` branch adds its cases to `MVP_SMOKE_TEST.md`** (in a step): what a person must check on
   each OS, including cases that only become testable with later features. Every milestone QA run executes all the
   cases testable so far on Windows, macOS and Linux, and the release run executes the whole file; it is the main
@@ -210,6 +217,18 @@ The commit is blocked if any step fails. `git commit --no-verify` is for emergen
 - Tests must be **useful**: they verify behavior and edge cases (empty input, errors, conflicts, cancellation), not getters or trivial mappings.
 - Test `domain` use cases and MVI reducers first; they hold the logic.
 - Prefer hand-written fakes over mocks. Use Turbine for `Flow` and `kotlinx-coroutines-test` for coroutines.
+- **Fakes behave like the real thing:** a fake that stands for the disk, the network or a model suspends, takes time
+  and fails the way the real one does. A fake that answers at once hides races: the 1.5 autosave cancelled itself
+  and every test passed until the fake store suspended like a disk.
+- **Each step also tests the real thing,** because the bugs the 1.5 smoke test found were real-world ones (timing,
+  line endings, parallel work), not logic: an integration test of the real adapters on real files in a temporary
+  directory (`jvmTest`, like `EditorOnDiskTest`), and for a step with UI a headless screen test with
+  `ImageComposeScene` that drives the screen through its states (until the UI tests of §8 exist).
+- **A library is tested the way we use it:** when a step adds a library, it brings a test of our use of it with real
+  data and, where the library works in the background, under concurrency (the 1.5 Read mode crash came from a
+  highlighter that is not safe to share between threads).
+- **Every bug found by a smoke test or a QA run gets a regression test** that fails without the fix (checked by
+  running it before the fix) and passes with it, in the same pull request as the fix.
 - Test names describe the behavior: ``fun `sync keeps both versions when the remote has a conflicting change`()``.
 
 ## 11. Changelog

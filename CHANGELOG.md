@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ARCHITECTURE.md` §12). The sample vault (1.16) and evaluation sets move to `smoke-data/`.
 - Post-MVP plan for repositories (`ROADMAP.md`): a code repository's docs in the vault first, then a module graph
   from a parser, then summaries and chat over the code once an evaluation shows small local models can do it.
+- Testing rules learned from the editor's smoke test (`GUIDELINES.md` §8, §10): fakes behave like the disk or the
+  network, every step adds an integration test on real files and a screen test for its UI, a new library is tested
+  the way Notekea uses it, every smoke bug gets a regression test, and the agent runs a pre-smoke before the
+  developer's smoke test. `smoke.sh` and `smoke.ps1` accept `SMOKE_SCRATCH=scratch-<name>` so the agent's checks
+  never touch the developer's scratch folder.
 - Contribution workflow: a feature is one branch and one pull request made of granular commits (each keeping the
   build green), merged with rebase merging, instead of a single commit per feature.
 - Dependabot pull requests that only touch CI or build tooling are exempt from changelog entries and smoke tests;
