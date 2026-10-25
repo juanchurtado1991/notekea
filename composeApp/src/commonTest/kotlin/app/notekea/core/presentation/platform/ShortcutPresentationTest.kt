@@ -43,7 +43,7 @@ class ShortcutPresentationTest {
 
     @Test
     fun `tree and editor shortcut keys match their compose keys`() {
-        val pressed = listOf(Key.Backslash, Key.Backspace, Key.Delete, Key.Enter, Key.F2, Key.N, Key.S, Key.F)
+        val pressed = listOf(Key.Backslash, Key.Backspace, Key.Delete, Key.Enter, Key.F2, Key.N, Key.S, Key.F, Key.E)
         val keys = listOf(
             ShortcutKey.BACKSLASH,
             ShortcutKey.BACKSPACE,
@@ -52,7 +52,8 @@ class ShortcutPresentationTest {
             ShortcutKey.F2,
             ShortcutKey.N,
             ShortcutKey.S,
-            ShortcutKey.F
+            ShortcutKey.F,
+            ShortcutKey.E
         )
 
         assertEquals(
