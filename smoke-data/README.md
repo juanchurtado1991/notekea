@@ -29,6 +29,7 @@ smoke-data/smoke.sh move              # renames Movable Vault to Moved Vault, to
 smoke-data/smoke.sh lock              # removes read permission from Locked Vault, to test the permission error
 smoke-data/smoke.sh outside           # creates, edits and deletes notes in Playground Vault, as another app would
 smoke-data/smoke.sh edit-note         # adds a line to Playground Vault/Editor/Shared note.md, as another app would
+smoke-data/smoke.sh edit-note-soon    # the same after 3 seconds, so the change lands while you type in Notekea
 smoke-data/smoke.sh delete-note       # deletes Playground Vault/Editor/Shared note.md, as another app would
 smoke-data/smoke.sh check-note        # says whether Editor/Windows line endings.md kept its CR LF and frontmatter
 smoke-data/smoke.sh large             # creates Large Vault: 5,000 notes in 50 folders, to time the tree
@@ -49,4 +50,4 @@ administrator) the locked folder stays readable.
 |---|---|---|
 | 1.3 Open a vault | 1.3-01 … 1.3-10, 1.1-04, 1.2-04 | All three vaults; `prepare`, `move`, `lock`, `first-launch` |
 | 1.4 Vault tree | 1.4-01 … 1.4-12, 1.3-02, 1.3-04, 1.3-07, 1.1-03 | `Personal Notes`, `Empty Vault`; `prepare` (Playground Vault, Movable Vault), `outside`, `large`, `clear-cache`, `move` |
-| 1.5 Editor | 1.5-01 … 1.5-11, 1.4-01 | `prepare` (Playground Vault and its `Editor` folder), `edit-note`, `delete-note`, `check-note` |
+| 1.5 Editor | 1.5-01 … 1.5-11, 1.4-01 | `prepare` (Playground Vault and its `Editor` folder), `edit-note`, `edit-note-soon`, `delete-note`, `check-note` |
