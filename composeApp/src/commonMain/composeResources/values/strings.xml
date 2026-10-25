@@ -93,9 +93,13 @@
         <item quantity="one">1 note couldn’t be updated and was left as it was.</item>
         <item quantity="other">%1$d notes couldn’t be updated and were left as they were.</item>
     </plurals>
+    <plurals name="tree_links_more">
+        <item quantity="one">%1$s and 1 more</item>
+        <item quantity="other">%1$s and %2$d more</item>
+    </plurals>
     <plurals name="tree_links_updated">
-        <item quantity="one">Links updated in 1 note.</item>
-        <item quantity="other">Links updated in %1$d notes.</item>
+        <item quantity="one">Links updated in 1 note: %2$s.</item>
+        <item quantity="other">Links updated in %1$d notes: %2$s.</item>
     </plurals>
     <string name="tree_loading">Loading notes…</string>
     <string name="tree_moved_to_vault_trash">“%1$s” is in this vault’s .trash folder, because the system trash isn’t available.</string>

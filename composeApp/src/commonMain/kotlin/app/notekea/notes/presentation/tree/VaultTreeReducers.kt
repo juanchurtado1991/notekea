@@ -211,7 +211,10 @@ internal fun reduceLinksUpdated(
     state: VaultTreeState,
     result: LinkUpdateResult
 ): VaultTreeState = state.copy(
-    notice = TreeNotice.LinksUpdated(updatedCount = result.updatedCount, skippedCount = result.skipped.size)
+    notice = TreeNotice.LinksUpdated(
+        notes = result.updated.map { it.nameWithoutExtension }.sorted(),
+        skippedCount = result.skipped.size
+    )
 )
 
 /** The row a selection moves to when [path] goes away: the next one outside it, else the one before it. */

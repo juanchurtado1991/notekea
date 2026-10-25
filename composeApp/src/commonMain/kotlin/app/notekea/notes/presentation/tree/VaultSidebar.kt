@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -32,6 +33,7 @@ import app.notekea.resources.Res
 import app.notekea.resources.error_unexpected
 import app.notekea.resources.tree_empty_message
 import app.notekea.resources.tree_empty_title
+import app.notekea.resources.tree_links_more
 import app.notekea.resources.tree_links_skipped
 import app.notekea.resources.tree_links_updated
 import app.notekea.resources.tree_loading
@@ -42,10 +44,14 @@ import app.notekea.resources.tree_retry
 import app.notekea.resources.tree_switch_vault
 import app.notekea.resources.tree_untitled_folder
 import app.notekea.resources.tree_untitled_note
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
+private const val NAMED_NOTES = 3
+private const val NAME_SEPARATOR = ", "
 private const val NOTICE_SEPARATOR = " "
+private const val NOTICE_VISIBLE_MILLIS = 10_000L
 private const val PREVIEW_HEIGHT_DP = 520
 private val SKELETON_ROWS = listOf(0 to 0.55f, 0 to 0.4f, 1 to 0.6f, 1 to 0.5f, 0 to 0.45f, 0 to 0.65f, 1 to 0.5f)
 
@@ -149,6 +155,11 @@ private fun SidebarMessages(
         )
     }
     state.notice?.let { notice ->
+        // A notice reports something that went well: it leaves by itself, and OK closes it sooner.
+        LaunchedEffect(notice) {
+            delay(timeMillis = NOTICE_VISIBLE_MILLIS)
+            onIntent(VaultTreeIntent.OnNoticeDismiss)
+        }
         Row(modifier = messageModifier, verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = noticeText(notice = notice),
@@ -165,12 +176,27 @@ private fun SidebarMessages(
     }
 }
 
+/** Up to three note names (`Welcome, 2026-10-20, Read mode`), then how many more. */
+@Composable
+private fun namedNotes(
+    notes: List<String>
+): String {
+    val shown = notes.take(n = NAMED_NOTES).joinToString(separator = NAME_SEPARATOR)
+    val more = notes.size - NAMED_NOTES
+    return if (more > 0) pluralStringResource(Res.plurals.tree_links_more, more, shown, more) else shown
+}
+
 @Composable
 private fun noticeText(
     notice: TreeNotice
 ): String = when (notice) {
     is TreeNotice.LinksUpdated -> listOfNotNull(
-        pluralStringResource(Res.plurals.tree_links_updated, notice.updatedCount, notice.updatedCount),
+        pluralStringResource(
+            Res.plurals.tree_links_updated,
+            notice.notes.size,
+            notice.notes.size,
+            namedNotes(notes = notice.notes)
+        ),
         notice.skippedCount.takeIf { it > 0 }?.let { pluralStringResource(Res.plurals.tree_links_skipped, it, it) }
     ).joinToString(separator = NOTICE_SEPARATOR)
 
