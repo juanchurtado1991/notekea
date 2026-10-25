@@ -18,6 +18,7 @@ import com.composables.icons.lucide.FolderPlus
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.PanelLeftClose
 import com.composables.icons.lucide.PanelLeftOpen
+import com.composables.icons.lucide.Search
 import com.composables.icons.lucide.Pen
 import com.composables.icons.lucide.Pencil
 import com.composables.icons.lucide.SquareArrowOutUpRight
@@ -37,6 +38,7 @@ object NotekeaIcons {
     val Expand: ImageVector get() = Lucide.ChevronRight
     val Folder: ImageVector get() = Lucide.Folder
     val FolderOpen: ImageVector get() = Lucide.FolderOpen
+    val Find: ImageVector get() = Lucide.Search
     val FindNext: ImageVector get() = Lucide.ArrowDown
     val FindPrevious: ImageVector get() = Lucide.ArrowUp
     val HideSidebar: ImageVector get() = Lucide.PanelLeftClose
