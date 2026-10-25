@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.runtime.snapshots.Snapshot
+import androidx.compose.ui.text.TextRange
 import app.notekea.notes.domain.FakeNoteContentStore
 import app.notekea.notes.domain.FakeNoteFileOperations
 import app.notekea.notes.domain.FakeNoteScanner
@@ -359,6 +360,64 @@ class EditorViewModelTest {
         assertEquals(
             expected = null to true,
             actual = store.texts[AREPAS] to viewModel.state.value.isDeleted
+        )
+    }
+
+    @Test
+    fun `find counts the matches and moves through them in both directions, wrapping around`() = runEditorTest {
+        open(path = AREPAS)
+        type(text = "Arepas, arepas and more AREPAS")
+
+        viewModel.onIntent(intent = EditorIntent.OnFindOpen)
+        viewModel.onIntent(intent = EditorIntent.OnFindQueryChange(query = "arepas"))
+        val first = viewModel.state.value.find
+        viewModel.onIntent(intent = EditorIntent.OnFindPrevious)
+        val wrapped = viewModel.state.value.find?.current
+        viewModel.onIntent(intent = EditorIntent.OnFindNext)
+
+        assertEquals(
+            expected = FindState(query = "arepas", matches = listOf(0..5, 8..13, 24..29), current = 0),
+            actual = first
+        )
+        assertEquals(
+            expected = 2 to 0,
+            actual = wrapped to viewModel.state.value.find?.current
+        )
+    }
+
+    @Test
+    fun `closing find leaves the current match selected, and edits keep the matches up to date`() = runEditorTest {
+        open(path = AREPAS)
+        type(text = "one two one")
+        viewModel.onIntent(intent = EditorIntent.OnFindOpen)
+        viewModel.onIntent(intent = EditorIntent.OnFindQueryChange(query = "one"))
+        viewModel.onIntent(intent = EditorIntent.OnFindNext)
+
+        type(text = "one two one one")
+        val afterEdit = viewModel.state.value.find
+        viewModel.onIntent(intent = EditorIntent.OnFindClose)
+
+        assertEquals(
+            expected = FindState(query = "one", matches = listOf(0..2, 8..10, 12..14), current = 1),
+            actual = afterEdit
+        )
+        assertEquals(
+            expected = null to TextRange(start = 8, end = 11),
+            actual = viewModel.state.value.find to viewModel.buffer.selection
+        )
+    }
+
+    @Test
+    fun `a query that is not in the note has no current match`() = runEditorTest {
+        open(path = AREPAS)
+
+        viewModel.onIntent(intent = EditorIntent.OnFindOpen)
+        viewModel.onIntent(intent = EditorIntent.OnFindQueryChange(query = "pizza"))
+        viewModel.onIntent(intent = EditorIntent.OnFindNext)
+
+        assertEquals(
+            expected = FindState(query = "pizza", matches = emptyList(), current = null),
+            actual = viewModel.state.value.find
         )
     }
 
