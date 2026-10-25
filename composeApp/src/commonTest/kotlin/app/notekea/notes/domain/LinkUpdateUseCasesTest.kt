@@ -112,7 +112,7 @@ class LinkUpdateUseCasesTest {
         val result = applyLinkUpdates(vaultPath = VAULT, rewrites = rewrites)
 
         assertEquals(
-            expected = LinkUpdateResult(updatedCount = 1, skipped = listOf(path("B.md"), path("C.md"))),
+            expected = LinkUpdateResult(updated = listOf(path("A.md")), skipped = listOf(path("B.md"), path("C.md"))),
             actual = result
         )
         assertEquals(

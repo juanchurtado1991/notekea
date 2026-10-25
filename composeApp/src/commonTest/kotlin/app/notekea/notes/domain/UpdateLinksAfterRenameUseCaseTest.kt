@@ -22,7 +22,10 @@ class UpdateLinksAfterRenameUseCaseTest {
         val result = rename()
 
         assertEquals(
-            expected = LinkUpdateResult(updatedCount = 2, skipped = emptyList()),
+            expected = LinkUpdateResult(
+                updated = listOf(RelativePath(value = WELCOME), RelativePath(value = JOURNAL)),
+                skipped = emptyList()
+            ),
             actual = result
         )
         assertEquals(
