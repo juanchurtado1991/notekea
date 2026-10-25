@@ -2,6 +2,9 @@ package app.notekea.notes.domain
 
 /** Expected failures while reading or changing the notes of a vault; each one has a plain-language message. */
 sealed interface NotesError {
+    /** The note changed outside Notekea since the editor last read or saved it, so saving would overwrite that. */
+    data class ChangedOnDisk(val path: String) : NotesError
+
     /** The note or folder was moved or deleted outside Notekea before the action ran. */
     data class EntryMissing(val path: String) : NotesError
 
