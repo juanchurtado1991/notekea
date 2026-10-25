@@ -123,7 +123,9 @@ private fun VaultTreeContentSidebarHiddenPreview() {
 @Composable
 private fun VaultTreeContentLinksUpdatedPreview() {
     VaultTreeContentPreviewFrame(
-        state = TreePreviewData.state().copy(notice = TreeNotice.LinksUpdated(updatedCount = 2, skippedCount = 0))
+        state = TreePreviewData.state().copy(
+            notice = TreeNotice.LinksUpdated(notes = listOf("2026-10-20", "Welcome"), skippedCount = 0)
+        )
     )
 }
 
