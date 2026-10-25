@@ -59,6 +59,11 @@ fun VaultTreeScreen(
                     )
                 },
                 onClosed = { viewModel.onIntent(intent = VaultTreeIntent.OnSelectionClear) },
+                onOpenLink = {
+                    viewModel.onIntent(
+                        intent = VaultTreeIntent.OnFollowLink(source = it.source, target = it.target, kind = it.kind)
+                    )
+                },
                 properties = note.metadata
             )
         },

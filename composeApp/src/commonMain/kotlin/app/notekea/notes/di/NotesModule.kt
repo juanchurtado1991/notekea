@@ -9,6 +9,7 @@ import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.FlattenTreeUseCase
+import app.notekea.notes.domain.FollowLinkUseCase
 import app.notekea.notes.domain.GetTreePreferencesUseCase
 import app.notekea.notes.domain.LinkFinder
 import app.notekea.notes.domain.NoteMetadataCache
@@ -44,6 +45,7 @@ val notesModule = module {
     factoryOf(::CreateNoteUseCase)
     factoryOf(::DeleteEntryUseCase)
     factoryOf(::FlattenTreeUseCase)
+    factoryOf(::FollowLinkUseCase)
     factoryOf(::GetTreePreferencesUseCase)
     factoryOf(::GhostFrontmatterParser)
     factoryOf(::NaturalNameComparator)
@@ -69,6 +71,7 @@ val notesModule = module {
             deleteEntry = get(),
             revealEntry = get(),
             updateLinksAfterRename = get(),
+            followLink = get(),
             getTreePreferences = get(),
             saveTreePreferences = get()
         )

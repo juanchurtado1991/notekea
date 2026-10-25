@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.LinkKind
 import app.notekea.notes.domain.LinkUpdateResult
 import app.notekea.notes.domain.RelativePath
 
@@ -10,6 +11,13 @@ sealed interface EditorEffect {
 
     /** Everything pending was saved (or could not be), so the window may close. */
     data object Flushed : EditorEffect
+
+    /** A link to [target] was clicked in [source]: the panes around the editor open the note it leads to. */
+    data class OpenLink(
+        val source: RelativePath,
+        val target: String,
+        val kind: LinkKind
+    ) : EditorEffect
 
     /** The title renamed the note from [from] to [to]; [links] is how the links to it were updated, if any. */
     data class Renamed(

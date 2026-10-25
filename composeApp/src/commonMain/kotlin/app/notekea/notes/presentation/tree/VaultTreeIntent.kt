@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.tree
 
+import app.notekea.notes.domain.LinkKind
 import app.notekea.notes.domain.LinkUpdateResult
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeSort
@@ -26,6 +27,13 @@ sealed interface VaultTreeIntent {
     data object OnErrorDismiss : VaultTreeIntent
 
     data object OnExpandSelected : VaultTreeIntent
+
+    /** A link in the open note [source] was clicked: select the note it leads to, creating a missing wiki link's. */
+    data class OnFollowLink(
+        val source: RelativePath,
+        val target: String,
+        val kind: LinkKind
+    ) : VaultTreeIntent
 
     /** [baseName] is the localized name of a new folder ("Untitled folder"). */
     data class OnNewFolderClick(val baseName: String) : VaultTreeIntent

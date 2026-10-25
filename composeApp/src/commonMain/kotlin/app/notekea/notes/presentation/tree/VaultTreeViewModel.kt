@@ -7,6 +7,7 @@ import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.FlattenTreeUseCase
+import app.notekea.notes.domain.FollowLinkUseCase
 import app.notekea.notes.domain.GetTreePreferencesUseCase
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
 import app.notekea.notes.domain.RelativePath
@@ -38,6 +39,7 @@ class VaultTreeViewModel(
     private val deleteEntry: DeleteEntryUseCase,
     private val revealEntry: RevealEntryUseCase,
     private val updateLinksAfterRename: UpdateLinksAfterRenameUseCase,
+    private val followLink: FollowLinkUseCase,
     private val getTreePreferences: GetTreePreferencesUseCase,
     private val saveTreePreferences: SaveTreePreferencesUseCase
 ) : BaseViewModel<VaultTreeState, VaultTreeIntent, VaultTreeEffect>(
@@ -66,6 +68,7 @@ class VaultTreeViewModel(
             is VaultTreeIntent.OnDeleteRequest -> reduce { it.copy(pendingDelete = intent.path ?: it.selectedPath) }
             VaultTreeIntent.OnErrorDismiss -> reduce { it.copy(actionError = null, hasUnexpectedError = false) }
             VaultTreeIntent.OnExpandSelected -> updateTree(transform = ::reduceExpandSelected)
+            is VaultTreeIntent.OnFollowLink -> follow(intent = intent)
             is VaultTreeIntent.OnNewFolderClick -> create(baseName = intent.baseName, isFolder = true)
             is VaultTreeIntent.OnNewNoteClick -> create(baseName = intent.baseName, isFolder = false)
             VaultTreeIntent.OnNoticeDismiss -> reduce { it.copy(notice = null) }
@@ -147,6 +150,22 @@ class VaultTreeViewModel(
             if (isMoved) emit(effect = VaultTreeEffect.EntryRenamed(from = draft.path, to = outcome.value))
             updateTree { reduceRenameOutcome(state = it, from = draft.path, outcome = outcome) }
             if (isMoved) updateLinks(notesBefore = notesBefore, from = draft.path, to = outcome.value)
+        }
+    }
+
+    /** Selects the note a clicked link leads to; a created note joins the tree at once, before the watcher sees it. */
+    private fun follow(
+        intent: VaultTreeIntent.OnFollowLink
+    ) {
+        launchGuarded(onError = ::showUnexpectedError) {
+            val outcome = followLink(
+                vaultPath = vaultPath,
+                notes = state.value.tree.notes.keys,
+                source = intent.source,
+                target = intent.target,
+                kind = intent.kind
+            )
+            updateTree { reduceFollowedLink(state = it, outcome = outcome) }
         }
     }
 

@@ -5,6 +5,7 @@ import androidx.compose.ui.text.TextRange
 import app.notekea.notes.domain.FakeNoteContentStore
 import app.notekea.notes.domain.FakeNoteFileOperations
 import app.notekea.notes.domain.FakeNoteScanner
+import app.notekea.notes.domain.LinkKind
 import app.notekea.notes.domain.LinkUpdateResult
 import app.notekea.notes.domain.NoteFixtures.VAULT
 import app.notekea.notes.domain.NoteFixtures.file
@@ -433,6 +434,24 @@ class EditorViewModelTest {
         assertEquals(
             expected = Triple(true, null, false),
             actual = Triple(reading.isReading, reading.find, viewModel.state.value.isReading)
+        )
+    }
+
+    @Test
+    fun `a link clicked in read mode asks to open its note from the open one`() = runEditorTest {
+        val effects = collectEffects()
+        open(path = AREPAS)
+
+        viewModel.onIntent(
+            intent = EditorIntent.OnLinkClick(link = ReadLink.Note(target = "Welcome", kind = LinkKind.WIKI))
+        )
+        runCurrent()
+
+        assertEquals(
+            expected = listOf<EditorEffect>(
+                EditorEffect.OpenLink(source = AREPAS, target = "Welcome", kind = LinkKind.WIKI)
+            ),
+            actual = effects
         )
     }
 

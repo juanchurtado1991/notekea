@@ -6,6 +6,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextLayoutResult
 import app.notekea.core.presentation.components.NotekeaFindBar
 import app.notekea.resources.editor_read_mode
@@ -124,10 +125,7 @@ fun EditorContent(
                     if (state.isLoading) {
                         EditorSkeleton()
                     } else if (state.isReading) {
-                        NotekeaMarkdown(
-                            content = buffer.text.toString(),
-                            modifier = Modifier.padding(top = NotekeaDimensions.SpacingL)
-                        )
+                        ReadView(text = buffer.text.toString(), onIntent = onIntent)
                     } else {
                         EditorBody(buffer = buffer, scrollState = scrollState, onIntent = onIntent, find = state.find)
                     }
@@ -335,6 +333,28 @@ private fun ScrollToCurrentMatch(
         val lineTop = result.getLineTop(lineIndex = result.getLineForOffset(offset = match.first))
         scrollState.animateScrollTo(value = (top() + lineTop - margin).roundToInt().coerceAtLeast(minimumValue = 0))
     }
+}
+
+/** The note rendered: wiki links become links; a click opens the note, or the browser for a web address. */
+@Composable
+private fun ReadView(
+    text: String,
+    onIntent: (EditorIntent) -> Unit
+) {
+    val readLinks = remember { ReadModeLinks() }
+    val content = remember(text) { readLinks.prepare(body = text) }
+    val systemUriHandler = LocalUriHandler.current
+    NotekeaMarkdown(
+        content = content,
+        modifier = Modifier.padding(top = NotekeaDimensions.SpacingL),
+        onLinkClick = { uri ->
+            when (val link = readLinks.classify(uri = uri)) {
+                is ReadLink.Note -> onIntent(EditorIntent.OnLinkClick(link = link))
+                is ReadLink.External -> systemUriHandler.openUri(uri = link.uri)
+                null -> Unit
+            }
+        }
+    )
 }
 
 @Composable
