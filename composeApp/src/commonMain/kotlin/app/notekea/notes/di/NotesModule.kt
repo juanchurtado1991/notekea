@@ -2,6 +2,7 @@ package app.notekea.notes.di
 
 import app.notekea.notes.data.GhostFrontmatterParser
 import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
+import app.notekea.notes.data.SettingsEditorPreferencesStore
 import app.notekea.notes.data.SettingsTreePreferencesStore
 import app.notekea.notes.data.SqlDelightNoteMetadataCache
 import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
@@ -24,6 +25,9 @@ import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.RevealEntryUseCase
 import app.notekea.notes.domain.SaveTreePreferencesUseCase
+import app.notekea.notes.domain.EditorPreferencesStore
+import app.notekea.notes.domain.GetEditorModeUseCase
+import app.notekea.notes.domain.SaveEditorModeUseCase
 import app.notekea.notes.domain.TreePreferencesStore
 import app.notekea.notes.presentation.editor.EditorViewModel
 import app.notekea.notes.presentation.tree.VaultTreeViewModel
@@ -40,6 +44,9 @@ val notesModule = module {
     single<LinkFinder> { JetBrainsMarkdownLinkFinder() }
     single<NoteMetadataCache> { SqlDelightNoteMetadataCache(database = get(), dispatchers = get()) }
     single<TreePreferencesStore> { SettingsTreePreferencesStore(settings = get(), dispatchers = get()) }
+    single<EditorPreferencesStore> { SettingsEditorPreferencesStore(settings = get(), dispatchers = get()) }
+    factoryOf(::GetEditorModeUseCase)
+    factoryOf(::SaveEditorModeUseCase)
     factoryOf(::ApplyLinkUpdatesUseCase)
     factoryOf(::CreateFolderUseCase)
     factoryOf(::CreateNoteUseCase)
@@ -82,7 +89,9 @@ val notesModule = module {
             openNote = get(),
             saveNote = get(),
             observeNoteOnDisk = get(),
-            renameAndUpdateLinks = get()
+            renameAndUpdateLinks = get(),
+            getEditorMode = get(),
+            saveEditorMode = get()
         )
     }
 }

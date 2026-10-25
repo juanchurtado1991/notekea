@@ -11,7 +11,9 @@ import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
+import app.notekea.notes.domain.SaveEditorModeUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
 import androidx.compose.ui.text.TextRange
 import co.touchlab.kermit.Logger
@@ -29,13 +31,16 @@ import kotlin.time.Duration.Companion.seconds
  * recognized, an outside change reloads a note without unsaved edits and otherwise asks (Keep mine / Load theirs), and
  * a deleted file offers Restore or Close. Saves never overwrite an outside change nor bring back a file that is gone
  * ([SaveNoteUseCase]). Leaving the text saves at once; the title renames the note and updates the links to it.
+ * Notes open in the mode the user last chose (Edit or Read), remembered between runs.
  */
 class EditorViewModel(
     private val vaultPath: String,
     private val openNote: OpenNoteUseCase,
     private val saveNote: SaveNoteUseCase,
     private val observeNoteOnDisk: ObserveNoteOnDiskUseCase,
-    private val renameAndUpdateLinks: RenameAndUpdateLinksUseCase
+    private val renameAndUpdateLinks: RenameAndUpdateLinksUseCase,
+    private val getEditorMode: GetEditorModeUseCase,
+    private val saveEditorMode: SaveEditorModeUseCase
 ) : BaseViewModel<EditorState, EditorIntent, EditorEffect>(initialState = EditorState()) {
     /** The body of the open note, edited in place by the text field. */
     val buffer = TextFieldState()
@@ -50,7 +55,14 @@ class EditorViewModel(
     private var opened: NoteDocument? = null
     private var onDisk: String? = null
 
+    // The mode every note opens in: the one the user last chose, here and in earlier runs.
+    private var isReadingChosen = false
+
     init {
+        launchGuarded(onError = ::showUnexpectedError) {
+            isReadingChosen = getEditorMode()
+            reduce { if (it.find == null) it.copy(isReading = isReadingChosen) else it }
+        }
         launchGuarded(onError = ::showUnexpectedError) {
             snapshotFlow { buffer.text.toString() }.collect { onBufferChanged(body = it) }
         }
@@ -64,7 +76,7 @@ class EditorViewModel(
             is EditorIntent.OnLinkClick -> openLink(link = intent.link)
             EditorIntent.OnFindClose -> closeFind()
             EditorIntent.OnFindNext -> moveToMatch(step = 1)
-            EditorIntent.OnFindOpen -> reduce { it.copy(find = it.find ?: FindState(), isReading = false) }
+            EditorIntent.OnFindOpen -> openFind()
             EditorIntent.OnFindPrevious -> moveToMatch(step = -1)
             is EditorIntent.OnFindQueryChange -> search(query = intent.query)
             EditorIntent.OnFlushRequest -> runSave { flush() }
@@ -73,13 +85,29 @@ class EditorViewModel(
             EditorIntent.OnLoadTheirs -> runSave { loadTheirs() }
             is EditorIntent.OnNoteMoved -> moveTo(path = intent.path)
             is EditorIntent.OnOpen -> runSave { open(path = intent.path) }
-            EditorIntent.OnReadModeToggle -> reduce { it.copy(isReading = !it.isReading, find = null) }
+            EditorIntent.OnReadModeToggle -> chooseMode(isReading = !state.value.isReading)
             EditorIntent.OnRestore -> runSave { restore() }
             EditorIntent.OnRetryOpen -> runSave { open(path = state.value.notePath, isRetry = true) }
             EditorIntent.OnSaveShortcut -> runSave { saveNow() }
             is EditorIntent.OnTitleCommit -> runSave { rename(name = intent.name) }
             EditorIntent.OnTitleErrorDismiss -> reduce { it.copy(titleError = null) }
         }
+    }
+
+    /** Find works on the Markdown, so it switches to Edit mode, which is then the mode remembered. */
+    private fun openFind() {
+        reduce { it.copy(find = it.find ?: FindState()) }
+        chooseMode(isReading = false)
+    }
+
+    /** Shows [isReading]'s mode and remembers it for the next notes and runs. */
+    private fun chooseMode(
+        isReading: Boolean
+    ) {
+        reduce { it.copy(isReading = isReading, find = if (isReading) null else it.find) }
+        if (isReading == isReadingChosen) return
+        isReadingChosen = isReading
+        launchGuarded(onError = ::showUnexpectedError) { saveEditorMode(isReading = isReading) }
     }
 
     /** Asks the panes around the editor to open the note a Read mode link leads to, from the open note. */
@@ -126,7 +154,7 @@ class EditorViewModel(
         watchJob?.cancel()
         opened = null
         onDisk = null
-        reduce { EditorState(notePath = path, isLoading = path != null) }
+        reduce { EditorState(notePath = path, isLoading = path != null, isReading = isReadingChosen) }
         if (path == null) {
             replaceBuffer(body = "", isNewNote = true)
             return

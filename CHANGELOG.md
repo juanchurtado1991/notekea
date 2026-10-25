@@ -40,8 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (headings, emphasis, code, links, wiki links, tags) whose frontmatter is kept byte for byte, Windows line breaks
   included. Edits save a second after the last keystroke, at once with Mod+S, and before switching notes, leaving the
   text or closing the window. An outside change reloads the note, or asks Keep mine / Load theirs when there are
-  unsaved edits; a note deleted while open offers Restore or Close. Mod+F finds in the note; Mod+E switches to Read
-  mode, rendered with code blocks colored by language and clickable links (a missing wiki link's note is created).
+  unsaved edits; a note deleted while open offers Restore or Close. Mod+F (or the magnifier) finds in the note; Mod+E
+  switches to Read mode, rendered with code blocks colored by language and clickable links (a missing wiki link's
+  note is created), and the chosen mode is remembered. After a rename, a notice names the notes whose links changed
+  and leaves by itself after 10 seconds.
 - Design system: `NotekeaTitleField`, `NotekeaFindBar`, `NotekeaMarkdown` and `Modifier.focusBorder`, the one focus
   style of every clickable component; the window waits for screens to save before it closes.
 - Libraries: `multiplatform-markdown-renderer-code` with `dev.snipme:highlights`, for code colors in Read mode.

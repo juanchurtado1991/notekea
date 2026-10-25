@@ -4,6 +4,9 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.text.TextRange
 import app.notekea.notes.domain.FakeNoteContentStore
 import app.notekea.notes.domain.FakeNoteFileOperations
+import app.notekea.notes.domain.SaveEditorModeUseCase
+import app.notekea.notes.domain.GetEditorModeUseCase
+import app.notekea.notes.domain.FakeEditorPreferencesStore
 import app.notekea.notes.domain.FakeNoteScanner
 import app.notekea.notes.domain.LinkKind
 import app.notekea.notes.domain.LinkUpdateResult
@@ -48,6 +51,7 @@ class EditorViewModelTest {
     private val scanner = FakeNoteScanner()
     private val store = FakeNoteContentStore()
     private val operations = FakeNoteFileOperations()
+    private val preferences = FakeEditorPreferencesStore()
     private val viewModel by lazy {
         EditorViewModel(
             vaultPath = VAULT,
@@ -67,7 +71,9 @@ class EditorViewModelTest {
                     ),
                     applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store)
                 )
-            )
+            ),
+            getEditorMode = GetEditorModeUseCase(editorPreferencesStore = preferences),
+            saveEditorMode = SaveEditorModeUseCase(editorPreferencesStore = preferences)
         )
     }
 
@@ -313,7 +319,7 @@ class EditorViewModelTest {
                     EditorEffect.Renamed(
                         from = AREPAS,
                         to = renamed,
-                        links = LinkUpdateResult(updatedCount = 1, skipped = emptyList())
+                        links = LinkUpdateResult(updated = listOf(WELCOME), skipped = emptyList())
                     )
                 )
             ),
@@ -425,17 +431,30 @@ class EditorViewModelTest {
     }
 
     @Test
-    fun `read mode toggles, closes find, and every note opens in edit mode`() = runEditorTest {
+    fun `the chosen mode closes find, is kept for the next note and is remembered for the next run`() = runEditorTest {
         open(path = AREPAS)
         viewModel.onIntent(intent = EditorIntent.OnFindOpen)
 
         viewModel.onIntent(intent = EditorIntent.OnReadModeToggle)
+        runCurrent()
         val reading = viewModel.state.value
         open(path = WELCOME)
 
         assertEquals(
-            expected = Triple(true, null, false),
-            actual = Triple(reading.isReading, reading.find, viewModel.state.value.isReading)
+            expected = listOf(true, null, true, true),
+            actual = listOf(reading.isReading, reading.find, viewModel.state.value.isReading, preferences.isReading)
+        )
+    }
+
+    @Test
+    fun `notes open in the mode remembered from an earlier run`() = runEditorTest {
+        preferences.isReading = true
+
+        open(path = AREPAS)
+
+        assertEquals(
+            expected = true,
+            actual = viewModel.state.value.isReading
         )
     }
 
@@ -458,15 +477,16 @@ class EditorViewModelTest {
     }
 
     @Test
-    fun `find switches back to edit mode`() = runEditorTest {
+    fun `find switches back to edit mode, which is then remembered`() = runEditorTest {
         open(path = AREPAS)
         viewModel.onIntent(intent = EditorIntent.OnReadModeToggle)
 
         viewModel.onIntent(intent = EditorIntent.OnFindOpen)
+        runCurrent()
 
         assertEquals(
-            expected = false to FindState(),
-            actual = viewModel.state.value.isReading to viewModel.state.value.find
+            expected = Triple(false, FindState(), false),
+            actual = Triple(viewModel.state.value.isReading, viewModel.state.value.find, preferences.isReading)
         )
     }
 
