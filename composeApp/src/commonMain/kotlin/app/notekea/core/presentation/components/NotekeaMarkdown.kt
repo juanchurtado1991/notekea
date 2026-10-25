@@ -6,9 +6,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontStyle
@@ -37,34 +40,56 @@ private const val PREVIEW_WIDTH_DP = 520
 /**
  * Markdown rendered with the Notekea theme (the note's Read mode, later chat answers): headings on the type scale,
  * links in the primary color, code in the bundled monospaced face, and code blocks colored by language like GitHub's
- * preview, with the syntax theme following the app's light or dark theme. Text can be selected and copied.
+ * preview, with the syntax theme following the app's light or dark theme. Text can be selected and copied. Clicked
+ * links open with the system (a web page in the browser) unless [onLinkClick] takes them all.
  */
 @Composable
 fun NotekeaMarkdown(
     content: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLinkClick: ((String) -> Unit)? = null
 ) {
     val colors = MaterialTheme.colorScheme
     val isDark = colors.background.luminance() < DARK_LUMINANCE
     val highlights = remember(isDark) { Highlights.Builder().theme(SyntaxThemes.default(darkMode = isDark)) }
-    SelectionContainer(modifier = modifier) {
-        Markdown(
-            content = content,
-            colors = markdownColor(
-                text = colors.onSurface,
-                codeBackground = colors.surfaceVariant,
-                inlineCodeBackground = colors.surfaceVariant,
-                dividerColor = colors.outline
-            ),
-            typography = notekeaMarkdownTypography(),
-            modifier = Modifier.fillMaxWidth(),
-            components = markdownComponents(
-                codeBlock = { MarkdownHighlightedCodeBlock(it.content, it.node, it.typography.code, highlights) },
-                codeFence = { MarkdownHighlightedCodeFence(it.content, it.node, it.typography.code, highlights) },
-                checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) }
-            )
-        )
+    val systemUriHandler = LocalUriHandler.current
+    val uriHandler = remember(onLinkClick, systemUriHandler) {
+        onLinkClick?.let { onClick ->
+            // Every clicked link goes to onLinkClick, which decides what opens (a note, or the browser).
+            object : UriHandler {
+                override fun openUri(
+                    uri: String
+                ) = onClick(uri)
+            }
+        } ?: systemUriHandler
     }
+    CompositionLocalProvider(LocalUriHandler provides uriHandler) {
+        SelectionContainer(modifier = modifier) { ThemedMarkdown(content = content, highlights = highlights) }
+    }
+}
+
+@Composable
+private fun ThemedMarkdown(
+    content: String,
+    highlights: Highlights.Builder
+) {
+    val colors = MaterialTheme.colorScheme
+    Markdown(
+        content = content,
+        colors = markdownColor(
+            text = colors.onSurface,
+            codeBackground = colors.surfaceVariant,
+            inlineCodeBackground = colors.surfaceVariant,
+            dividerColor = colors.outline
+        ),
+        typography = notekeaMarkdownTypography(),
+        modifier = Modifier.fillMaxWidth(),
+        components = markdownComponents(
+            codeBlock = { MarkdownHighlightedCodeBlock(it.content, it.node, it.typography.code, highlights) },
+            codeFence = { MarkdownHighlightedCodeFence(it.content, it.node, it.typography.code, highlights) },
+            checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) }
+        )
+    )
 }
 
 /** The editor's type scale (28 / 20 / 16 sp headings, 16 sp text) so a note reads the same in both modes. */
