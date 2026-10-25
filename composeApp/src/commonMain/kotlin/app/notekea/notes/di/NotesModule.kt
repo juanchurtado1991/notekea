@@ -15,6 +15,7 @@ import app.notekea.notes.domain.NoteMetadataCache
 import app.notekea.notes.domain.NaturalNameComparator
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
+import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.RevealEntryUseCase
 import app.notekea.notes.domain.SaveTreePreferencesUseCase
@@ -43,6 +44,7 @@ val notesModule = module {
     factoryOf(::NaturalNameComparator)
     factoryOf(::ObserveVaultTreeUseCase)
     factoryOf(::PlanLinkUpdatesUseCase)
+    factoryOf(::UpdateLinksAfterRenameUseCase)
     factoryOf(::RenameEntryUseCase)
     factoryOf(::RevealEntryUseCase)
     factoryOf(::SaveTreePreferencesUseCase)
@@ -57,8 +59,7 @@ val notesModule = module {
             renameEntry = get(),
             deleteEntry = get(),
             revealEntry = get(),
-            planLinkUpdates = get(),
-            applyLinkUpdates = get(),
+            updateLinksAfterRename = get(),
             getTreePreferences = get(),
             saveTreePreferences = get()
         )

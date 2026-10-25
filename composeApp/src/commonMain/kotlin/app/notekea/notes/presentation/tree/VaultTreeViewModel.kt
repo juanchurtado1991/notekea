@@ -3,19 +3,18 @@ package app.notekea.notes.presentation.tree
 import app.notekea.core.domain.Outcome
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
-import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.GetTreePreferencesUseCase
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
-import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.RevealEntryUseCase
 import app.notekea.notes.domain.SaveTreePreferencesUseCase
 import app.notekea.notes.domain.TreePreferences
+import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlin.time.TimeSource
@@ -38,8 +37,7 @@ class VaultTreeViewModel(
     private val renameEntry: RenameEntryUseCase,
     private val deleteEntry: DeleteEntryUseCase,
     private val revealEntry: RevealEntryUseCase,
-    private val planLinkUpdates: PlanLinkUpdatesUseCase,
-    private val applyLinkUpdates: ApplyLinkUpdatesUseCase,
+    private val updateLinksAfterRename: UpdateLinksAfterRenameUseCase,
     private val getTreePreferences: GetTreePreferencesUseCase,
     private val saveTreePreferences: SaveTreePreferencesUseCase
 ) : BaseViewModel<VaultTreeState, VaultTreeIntent, Nothing>(
@@ -157,9 +155,8 @@ class VaultTreeViewModel(
         from: RelativePath,
         to: RelativePath
     ) {
-        val rewrites = planLinkUpdates(vaultPath = vaultPath, notesBefore = notesBefore, from = from, to = to)
-        if (rewrites.isEmpty()) return
-        val result = applyLinkUpdates(vaultPath = vaultPath, rewrites = rewrites)
+        val result = updateLinksAfterRename(vaultPath = vaultPath, notesBefore = notesBefore, from = from, to = to)
+            ?: return
         logger.i { "Links updated after a rename: ${result.updatedCount} notes, ${result.skipped.size} skipped" }
         reduce { reduceLinksUpdated(state = it, result = result) }
     }
