@@ -79,6 +79,7 @@ private fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.BACKSPACE -> Key.Backspace
     ShortcutKey.DELETE -> Key.Delete
     ShortcutKey.ENTER -> Key.Enter
+    ShortcutKey.F -> Key.F
     ShortcutKey.F2 -> Key.F2
     ShortcutKey.F4 -> Key.F4
     ShortcutKey.N -> Key.N
@@ -92,7 +93,7 @@ private fun ShortcutKey.displayName(): String = when (this) {
     ShortcutKey.BACKSPACE -> BACKSPACE_NAME
     ShortcutKey.DELETE -> DELETE_NAME
     ShortcutKey.ENTER -> ENTER_NAME
-    ShortcutKey.F2, ShortcutKey.F4, ShortcutKey.N, ShortcutKey.O, ShortcutKey.Q, ShortcutKey.S -> name
+    ShortcutKey.F, ShortcutKey.F2, ShortcutKey.F4, ShortcutKey.N, ShortcutKey.O, ShortcutKey.Q, ShortcutKey.S -> name
 }
 
 private fun ShortcutKey.macLabel(): String = when (this) {
@@ -103,6 +104,7 @@ private fun ShortcutKey.macLabel(): String = when (this) {
     ShortcutKey.ENTER -> MAC_ENTER_SYMBOL
 
     ShortcutKey.BACKSLASH,
+    ShortcutKey.F,
     ShortcutKey.F2,
     ShortcutKey.F4,
     ShortcutKey.N,
