@@ -11,6 +11,7 @@ import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
@@ -25,13 +26,15 @@ import kotlin.time.Duration.Companion.seconds
  * does it at once, and opening another note or closing the window saves first, so typing never loses text. The header
  * (frontmatter) is kept apart and written back untouched. The open file is watched: the editor's own saves are
  * recognized, an outside change reloads a note without unsaved edits and otherwise asks (Keep mine / Load theirs), and
- * a deleted file offers Restore or Close. Saves never overwrite an outside change ([SaveNoteUseCase]).
+ * a deleted file offers Restore or Close. Saves never overwrite an outside change nor bring back a file that is gone
+ * ([SaveNoteUseCase]). Leaving the text saves at once; the title renames the note and updates the links to it.
  */
 class EditorViewModel(
     private val vaultPath: String,
     private val openNote: OpenNoteUseCase,
     private val saveNote: SaveNoteUseCase,
-    private val observeNoteOnDisk: ObserveNoteOnDiskUseCase
+    private val observeNoteOnDisk: ObserveNoteOnDiskUseCase,
+    private val renameAndUpdateLinks: RenameAndUpdateLinksUseCase
 ) : BaseViewModel<EditorState, EditorIntent, EditorEffect>(initialState = EditorState()) {
     /** The body of the open note, edited in place by the text field. */
     val buffer = TextFieldState()
@@ -57,6 +60,7 @@ class EditorViewModel(
         when (intent) {
             EditorIntent.OnCloseDeleted -> closeDeleted()
             EditorIntent.OnFlushRequest -> runSave { flush() }
+            EditorIntent.OnFocusLost -> runSave { saveNow() }
             EditorIntent.OnKeepMine -> runSave { keepMine() }
             EditorIntent.OnLoadTheirs -> runSave { loadTheirs() }
             is EditorIntent.OnNoteMoved -> moveTo(path = intent.path)
@@ -64,6 +68,8 @@ class EditorViewModel(
             EditorIntent.OnRestore -> runSave { restore() }
             EditorIntent.OnRetryOpen -> runSave { open(path = state.value.notePath, isRetry = true) }
             EditorIntent.OnSaveShortcut -> runSave { saveNow() }
+            is EditorIntent.OnTitleCommit -> runSave { rename(name = intent.name) }
+            EditorIntent.OnTitleErrorDismiss -> reduce { it.copy(titleError = null) }
         }
     }
 
@@ -155,7 +161,31 @@ class EditorViewModel(
     ) {
         logger.w { "Note save failed: ${error::class.simpleName}" }
         reduce {
-            if (error is NotesError.ChangedOnDisk) it.copy(hasConflict = true) else it.copy(saveError = error)
+            when (error) {
+                is NotesError.ChangedOnDisk -> it.copy(hasConflict = true)
+                is NotesError.EntryMissing -> it.copy(isDeleted = true)
+                else -> it.copy(saveError = error)
+            }
+        }
+    }
+
+    /** Saves first, so the file that moves holds every edit; the links to the note follow the new name. */
+    private suspend fun rename(
+        name: String
+    ) {
+        val from = state.value.notePath ?: return
+        if (name.trim() == from.nameWithoutExtension) return
+        saveNow()
+        when (val outcome = renameAndUpdateLinks(vaultPath = vaultPath, path = from, newName = name)) {
+            is Outcome.Failure -> reduce { it.copy(titleError = outcome.error) }
+
+            is Outcome.Success -> {
+                val renamed = outcome.value
+                watchJob?.cancel()
+                reduce { it.copy(notePath = renamed.path, titleError = null) }
+                watch(path = renamed.path)
+                emit(effect = EditorEffect.Renamed(from = from, to = renamed.path, links = renamed.links))
+            }
         }
     }
 

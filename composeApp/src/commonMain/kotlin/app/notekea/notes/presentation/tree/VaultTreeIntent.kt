@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.tree
 
+import app.notekea.notes.domain.LinkUpdateResult
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeSort
 
@@ -14,6 +15,13 @@ sealed interface VaultTreeIntent {
     data object OnDeleteConfirm : VaultTreeIntent
 
     data class OnDeleteRequest(val path: RelativePath? = null) : VaultTreeIntent
+
+    /** The note editor renamed [from] to [to] and updated the links to it as [links] says. */
+    data class OnEntryRenamed(
+        val from: RelativePath,
+        val to: RelativePath,
+        val links: LinkUpdateResult?
+    ) : VaultTreeIntent
 
     data object OnErrorDismiss : VaultTreeIntent
 
