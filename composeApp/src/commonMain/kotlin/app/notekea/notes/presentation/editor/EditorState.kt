@@ -10,7 +10,8 @@ import app.notekea.notes.domain.RelativePath
  * the next edit or Save. [hasConflict] means the file changed outside Notekea while there were unsaved edits (Keep
  * mine / Load theirs); [isDeleted] means the file disappeared while open (Restore / Close). Autosave waits while
  * either is shown, so nothing is overwritten or lost without the user's answer. [titleError] is why a new title was
- * refused (invalid, hidden or taken name), shown under the title until it is edited again.
+ * refused (invalid, hidden or taken name), shown under the title until it is edited again. [find] is Find in note
+ * while its bar is open, and null when it is closed.
  */
 data class EditorState(
     val notePath: RelativePath? = null,
@@ -20,5 +21,6 @@ data class EditorState(
     val saveError: NotesError? = null,
     val hasConflict: Boolean = false,
     val isDeleted: Boolean = false,
-    val titleError: NotesError? = null
+    val titleError: NotesError? = null,
+    val find: FindState? = null
 )
