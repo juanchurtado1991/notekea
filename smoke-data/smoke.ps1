@@ -2,10 +2,11 @@
 # Git cannot store a folder without read permission, and a moved vault must not change tracked files, so this script
 # builds them in smoke-data\scratch (ignored by Git), next to the sample vaults. It never touches smoke-data\vaults.
 # Usage: powershell -ExecutionPolicy Bypass -File smoke-data\smoke.ps1
-#        prepare|move|lock|outside|large|edit-note|delete-note|check-note|clear-cache|first-launch|restore-settings|clean
+#        prepare|move|lock|outside|large|edit-note|edit-note-soon|delete-note|check-note|clear-cache|first-launch|restore-settings|clean
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("prepare", "move", "lock", "outside", "large", "edit-note", "delete-note", "check-note", "clear-cache",
+    [ValidateSet("prepare", "move", "lock", "outside", "large", "edit-note", "edit-note-soon", "delete-note", "check-note",
+        "clear-cache",
         "first-launch", "restore-settings", "clean")]
     [string]$Command
 )
@@ -129,6 +130,13 @@ switch ($Command) {
     "edit-note" {
         [System.IO.File]::AppendAllText($SharedNote, "`nEdited outside Notekea at $(Get-Date -Format HH:mm:ss).`n", $Utf8)
         Write-Output "Added a line to Editor\Shared note.md, as another app would"
+    }
+    "edit-note-soon" {
+        # Leaving Notekea for PowerShell makes the editor save, so the change must land while you type in Notekea.
+        Write-Output "In 3 seconds Editor\Shared note.md changes: go back to Notekea and keep typing in it"
+        Start-Sleep -Seconds 3
+        [System.IO.File]::AppendAllText($SharedNote, "`nEdited outside Notekea at $(Get-Date -Format HH:mm:ss).`n", $Utf8)
+        Write-Output "Changed Editor\Shared note.md"
     }
     "delete-note" {
         Remove-Item -Force -ErrorAction SilentlyContinue $SharedNote

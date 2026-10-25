@@ -3,8 +3,8 @@
 # Git cannot store a folder without read permission, and a moved vault must not change tracked files, so this script
 # builds them in smoke-data/scratch (ignored by Git). It lives in the repository, not in /tmp, because sandboxed
 # terminals and the native folder picker may each see a different /tmp. It never touches smoke-data/vaults.
-# Usage: smoke-data/smoke.sh prepare | move | lock | outside | large | edit-note | delete-note | check-note | clear-cache |
-#        first-launch | restore-settings | clean
+# Usage: smoke-data/smoke.sh prepare | move | lock | outside | large | edit-note | edit-note-soon | delete-note |
+#        check-note | clear-cache | first-launch | restore-settings | clean
 set -euo pipefail
 
 SMOKE_ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -188,6 +188,13 @@ case "${1:-}" in
         printf -- '\nEdited outside Notekea at %s.\n' "$(date +%H:%M:%S)" >> "$SCRATCH/Playground Vault/Editor/Shared note.md"
         echo "Added a line to Editor/Shared note.md, as another app would"
         ;;
+    edit-note-soon)
+        # Leaving Notekea for the terminal makes the editor save, so the change must land while you type in Notekea.
+        echo "In 3 seconds Editor/Shared note.md changes: go back to Notekea and keep typing in it"
+        sleep 3
+        printf -- '\nEdited outside Notekea at %s.\n' "$(date +%H:%M:%S)" >> "$SCRATCH/Playground Vault/Editor/Shared note.md"
+        echo "Changed Editor/Shared note.md"
+        ;;
     delete-note)
         rm -f "$SCRATCH/Playground Vault/Editor/Shared note.md"
         echo "Deleted Editor/Shared note.md, as another app would"
@@ -200,8 +207,8 @@ case "${1:-}" in
         echo "Removed $SCRATCH"
         ;;
     *)
-        echo "Usage: $0 prepare | move | lock | outside | large | edit-note | delete-note | check-note | clear-cache |" \
-            "first-launch | restore-settings | clean" >&2
+        echo "Usage: $0 prepare | move | lock | outside | large | edit-note | edit-note-soon | delete-note |" \
+            "check-note | clear-cache | first-launch | restore-settings | clean" >&2
         exit 1
         ;;
 esac
