@@ -33,6 +33,7 @@ import app.notekea.notes.domain.TrashLocation
 import app.notekea.notes.domain.TreePreferences
 import app.notekea.notes.domain.TreeRow
 import app.notekea.notes.domain.TreeSort
+import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -362,11 +363,13 @@ class VaultTreeViewModelTest {
             ),
             deleteEntry = DeleteEntryUseCase(trash = trash),
             revealEntry = RevealEntryUseCase(fileRevealer = revealer),
-            planLinkUpdates = PlanLinkUpdatesUseCase(
-                noteContentStore = contents,
-                linkFinder = JetBrainsMarkdownLinkFinder()
+            updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
+                planLinkUpdates = PlanLinkUpdatesUseCase(
+                    noteContentStore = contents,
+                    linkFinder = JetBrainsMarkdownLinkFinder()
+                ),
+                applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = contents)
             ),
-            applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = contents),
             getTreePreferences = GetTreePreferencesUseCase(treePreferencesStore = preferences),
             saveTreePreferences = SaveTreePreferencesUseCase(treePreferencesStore = preferences)
         )
