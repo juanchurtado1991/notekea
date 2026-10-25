@@ -72,6 +72,22 @@ class NoteEditingUseCasesTest {
     }
 
     @Test
+    fun `a save never brings back a note that was moved or deleted meanwhile`() = runTest {
+        val document = NoteDocument.fromText(text = ORIGINAL)
+
+        val saved = saveNote(vaultPath = VAULT, path = NOTE, document = document, expectedOnDisk = ORIGINAL)
+
+        assertEquals(
+            expected = Outcome.Failure(error = NotesError.EntryMissing(path = NOTE.value)),
+            actual = saved
+        )
+        assertEquals(
+            expected = null,
+            actual = store.texts[NOTE]
+        )
+    }
+
+    @Test
     fun `a deleted note can be written again, and a refused write is reported`() = runTest {
         val document = NoteDocument.fromText(text = ORIGINAL)
 
