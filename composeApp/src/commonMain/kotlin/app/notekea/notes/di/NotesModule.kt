@@ -23,6 +23,7 @@ import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.RevealEntryUseCase
 import app.notekea.notes.domain.SaveTreePreferencesUseCase
 import app.notekea.notes.domain.TreePreferencesStore
+import app.notekea.notes.presentation.editor.EditorViewModel
 import app.notekea.notes.presentation.tree.VaultTreeViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
@@ -68,6 +69,14 @@ val notesModule = module {
             updateLinksAfterRename = get(),
             getTreePreferences = get(),
             saveTreePreferences = get()
+        )
+    }
+    viewModel { parameters ->
+        EditorViewModel(
+            vaultPath = parameters.get(),
+            openNote = get(),
+            saveNote = get(),
+            observeNoteOnDisk = get()
         )
     }
 }

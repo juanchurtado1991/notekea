@@ -102,6 +102,10 @@ abstract class BaseViewModel<S, I, E>(
 - `State` models the UI states explicitly (`isLoading`, `error: <Feature>Error?`, content), so empty, loading,
   error and content are all representable and testable.
 - `reduce` lambdas are pure; complex transitions are extracted into pure functions and unit tested directly.
+- Long editable text is the one exception to "everything in `State`": the note editor's body lives in a
+  `TextFieldState` owned by the ViewModel (`EditorViewModel.buffer`), which the text field edits directly and the
+  ViewModel observes, so a keystroke does not copy the whole note into `State`. `State` keeps what the UI shows about
+  it (path, saved, conflict…).
 - A screen without one-shot events uses `Nothing` as its effect type instead of an empty `Effect` interface.
   Native dialogs that return a value (the folder picker) are suspend calls behind a domain port, not effects, so
   the ViewModel handles the result and tests use a fake.

@@ -1,0 +1,280 @@
+package app.notekea.notes.presentation.editor
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.runtime.snapshotFlow
+import app.notekea.core.domain.Outcome
+import app.notekea.core.presentation.BaseViewModel
+import app.notekea.notes.domain.NoteDiskChange
+import app.notekea.notes.domain.NoteDocument
+import app.notekea.notes.domain.NotesError
+import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
+import app.notekea.notes.domain.OpenNoteUseCase
+import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.SaveNoteUseCase
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlin.time.Duration.Companion.seconds
+
+/**
+ * The note editor (`ROADMAP.md` 1.5). [buffer] holds the body being edited; the text field edits it directly and this
+ * ViewModel watches it: an edit marks the note unsaved and saves it [AUTOSAVE_DELAY] after the last keystroke, Save
+ * does it at once, and opening another note or closing the window saves first, so typing never loses text. The header
+ * (frontmatter) is kept apart and written back untouched. The open file is watched: the editor's own saves are
+ * recognized, an outside change reloads a note without unsaved edits and otherwise asks (Keep mine / Load theirs), and
+ * a deleted file offers Restore or Close. Saves never overwrite an outside change ([SaveNoteUseCase]).
+ */
+class EditorViewModel(
+    private val vaultPath: String,
+    private val openNote: OpenNoteUseCase,
+    private val saveNote: SaveNoteUseCase,
+    private val observeNoteOnDisk: ObserveNoteOnDiskUseCase
+) : BaseViewModel<EditorState, EditorIntent, EditorEffect>(initialState = EditorState()) {
+    /** The body of the open note, edited in place by the text field. */
+    val buffer = TextFieldState()
+
+    private val logger = Logger.withTag(tag = LOG_TAG)
+    private val saveLock = Mutex()
+    private var autosaveJob: Job? = null
+    private var watchJob: Job? = null
+
+    // The note as last read from or written to disk: the header kept apart, and what the file holds.
+    private var opened: NoteDocument? = null
+    private var onDisk: String? = null
+
+    init {
+        launchGuarded(onError = ::showUnexpectedError) {
+            snapshotFlow { buffer.text.toString() }.collect { onBufferChanged(body = it) }
+        }
+    }
+
+    override fun onIntent(
+        intent: EditorIntent
+    ) {
+        when (intent) {
+            EditorIntent.OnCloseDeleted -> closeDeleted()
+            EditorIntent.OnFlushRequest -> runSave { flush() }
+            EditorIntent.OnKeepMine -> runSave { keepMine() }
+            EditorIntent.OnLoadTheirs -> runSave { loadTheirs() }
+            is EditorIntent.OnNoteMoved -> moveTo(path = intent.path)
+            is EditorIntent.OnOpen -> runSave { open(path = intent.path) }
+            EditorIntent.OnRestore -> runSave { restore() }
+            EditorIntent.OnRetryOpen -> runSave { open(path = state.value.notePath, isRetry = true) }
+            EditorIntent.OnSaveShortcut -> runSave { saveNow() }
+        }
+    }
+
+    private fun onBufferChanged(
+        body: String
+    ) {
+        val document = opened ?: return
+        autosaveJob?.cancel()
+        if (body == document.body) {
+            reduce { if (it.saveStatus == SaveStatus.UNSAVED) it.copy(saveStatus = SaveStatus.NONE) else it }
+            return
+        }
+        reduce { it.copy(saveStatus = SaveStatus.UNSAVED) }
+        autosaveJob = launchGuarded(onError = ::showUnexpectedError) {
+            delay(duration = AUTOSAVE_DELAY)
+            saveLock.withLock { saveNow() }
+        }
+    }
+
+    /** Runs [action] alone: saves, loads and answers to a conflict never interleave. */
+    private fun runSave(
+        action: suspend () -> Unit
+    ) {
+        launchGuarded(onError = ::showUnexpectedError) { saveLock.withLock { action() } }
+    }
+
+    private suspend fun open(
+        path: RelativePath?,
+        isRetry: Boolean = false
+    ) {
+        if (path == state.value.notePath && !isRetry) return
+        saveNow()
+        watchJob?.cancel()
+        opened = null
+        onDisk = null
+        reduce { EditorState(notePath = path, isLoading = path != null) }
+        if (path == null) {
+            replaceBuffer(body = "", isNewNote = true)
+            return
+        }
+        when (val outcome = openNote(vaultPath = vaultPath, path = path)) {
+            is Outcome.Failure -> reduce { it.copy(isLoading = false, loadError = outcome.error) }
+
+            is Outcome.Success -> {
+                show(document = outcome.value, isNewNote = true)
+                reduce { it.copy(isLoading = false) }
+                watch(path = path)
+            }
+        }
+    }
+
+    /** Saves the edits, unless there is nothing new or the user has a question to answer first. */
+    private suspend fun saveNow() {
+        autosaveJob?.cancel()
+        val path = state.value.notePath ?: return
+        val document = opened ?: return
+        val body = buffer.text.toString()
+        val blocked = state.value.hasConflict || state.value.isDeleted
+        if (body == document.body || blocked) return
+        write(path = path, document = document.copy(body = body), expectedOnDisk = onDisk)
+    }
+
+    private suspend fun write(
+        path: RelativePath,
+        document: NoteDocument,
+        expectedOnDisk: String?
+    ) {
+        when (val outcome = saveNote(vaultPath, path, document, expectedOnDisk)) {
+            is Outcome.Success -> {
+                opened = document
+                onDisk = outcome.value
+                val isCurrent = buffer.text.toString() == document.body
+                reduce {
+                    it.copy(
+                        saveStatus = if (isCurrent) SaveStatus.SAVED else SaveStatus.UNSAVED,
+                        saveError = null,
+                        hasConflict = false,
+                        isDeleted = false
+                    )
+                }
+            }
+
+            is Outcome.Failure -> reduceSaveFailure(error = outcome.error)
+        }
+    }
+
+    private fun reduceSaveFailure(
+        error: NotesError
+    ) {
+        logger.w { "Note save failed: ${error::class.simpleName}" }
+        reduce {
+            if (error is NotesError.ChangedOnDisk) it.copy(hasConflict = true) else it.copy(saveError = error)
+        }
+    }
+
+    private suspend fun flush() {
+        saveNow()
+        emit(effect = EditorEffect.Flushed)
+    }
+
+    /** Overwrites the outside change: the file's current text is what the save now expects to replace. */
+    private suspend fun keepMine() {
+        val path = state.value.notePath ?: return
+        val document = opened ?: return
+        val current = openNote(vaultPath = vaultPath, path = path)
+        val expected = (current as? Outcome.Success)?.value?.toText()
+        reduce { it.copy(hasConflict = false) }
+        write(path = path, document = document.copy(body = buffer.text.toString()), expectedOnDisk = expected)
+    }
+
+    private suspend fun loadTheirs() {
+        val path = state.value.notePath ?: return
+        when (val outcome = openNote(vaultPath = vaultPath, path = path)) {
+            is Outcome.Failure -> reduce { it.copy(hasConflict = false, isDeleted = true) }
+
+            is Outcome.Success -> {
+                show(document = outcome.value, isNewNote = false)
+                reduce { it.copy(hasConflict = false, saveStatus = SaveStatus.NONE, saveError = null) }
+            }
+        }
+    }
+
+    private suspend fun restore() {
+        val path = state.value.notePath ?: return
+        val document = opened ?: return
+        write(path = path, document = document.copy(body = buffer.text.toString()), expectedOnDisk = null)
+    }
+
+    private fun closeDeleted() {
+        runSave {
+            open(path = null)
+            emit(effect = EditorEffect.Closed)
+        }
+    }
+
+    private fun moveTo(
+        path: RelativePath
+    ) {
+        if (state.value.notePath == null) return
+        watchJob?.cancel()
+        reduce { it.copy(notePath = path, isDeleted = false) }
+        watch(path = path)
+    }
+
+    private fun watch(
+        path: RelativePath
+    ) {
+        watchJob = launchGuarded(onError = ::showUnexpectedError) {
+            observeNoteOnDisk(vaultPath = vaultPath, path = path).collect { change ->
+                saveLock.withLock { onDiskChange(change = change) }
+            }
+        }
+    }
+
+    /** The editor's own saves are recognized and ignored; anything else reloads or asks. */
+    private fun onDiskChange(
+        change: NoteDiskChange
+    ) {
+        when (change) {
+            NoteDiskChange.Deleted -> {
+                autosaveJob?.cancel()
+                reduce { it.copy(isDeleted = true) }
+            }
+
+            is NoteDiskChange.Changed -> {
+                if (change.text == onDisk && !state.value.isDeleted) return
+                val hasEdits = buffer.text.toString() != opened?.body
+                if (hasEdits || state.value.hasConflict) {
+                    reduce { it.copy(hasConflict = true, isDeleted = false) }
+                } else {
+                    show(document = NoteDocument.fromText(text = change.text), isNewNote = false)
+                    reduce { it.copy(isDeleted = false) }
+                }
+            }
+        }
+    }
+
+    /** Shows [document] as the saved state of the note; a new note starts at the top with a fresh undo history. */
+    private fun show(
+        document: NoteDocument,
+        isNewNote: Boolean
+    ) {
+        opened = document
+        onDisk = document.toText()
+        replaceBuffer(body = document.body, isNewNote = isNewNote)
+    }
+
+    // Clearing the undo history is still experimental; without it, Undo would bring back the previous note's text.
+    @OptIn(ExperimentalFoundationApi::class)
+    private fun replaceBuffer(
+        body: String,
+        isNewNote: Boolean
+    ) {
+        val cursor = buffer.selection.start.coerceAtMost(maximumValue = body.length)
+        buffer.edit {
+            replace(start = 0, end = length, text = body)
+            if (isNewNote) placeCursorBeforeCharAt(index = 0) else placeCursorBeforeCharAt(index = cursor)
+        }
+        if (isNewNote) buffer.undoState.clearHistory()
+    }
+
+    private fun showUnexpectedError(
+        throwable: Throwable
+    ) {
+        logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
+        reduce { it.copy(isLoading = false) }
+    }
+
+    companion object {
+        val AUTOSAVE_DELAY = 1.seconds
+        private const val LOG_TAG = "EditorViewModel"
+        private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the note editor"
+    }
+}
