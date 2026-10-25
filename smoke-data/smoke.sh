@@ -3,7 +3,8 @@
 # Git cannot store a folder without read permission, and a moved vault must not change tracked files, so this script
 # builds them in smoke-data/scratch (ignored by Git). It lives in the repository, not in /tmp, because sandboxed
 # terminals and the native folder picker may each see a different /tmp. It never touches smoke-data/vaults.
-# Usage: smoke-data/smoke.sh prepare | move | lock | outside | large | clear-cache | first-launch | restore-settings | clean
+# Usage: smoke-data/smoke.sh prepare | move | lock | outside | large | edit-note | delete-note | check-note | clear-cache |
+#        first-launch | restore-settings | clean
 set -euo pipefail
 
 SMOKE_ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -41,11 +42,83 @@ prepare() {
     touch -t 202610010900 "$SCRATCH/Playground Vault/Recipes/Café con leche.md"
     echo "# Existing note" > "$SCRATCH/New Vault Location/My Notes/Existing note.md"
     echo "# Locked note" > "$SCRATCH/Locked Vault/Locked note.md"
+    editor_notes "$SCRATCH/Playground Vault/Editor"
     echo "Smoke scenarios ready in $SCRATCH:"
     echo "  Movable Vault       open it, quit, run 'move', relaunch: folder not found, Locate…"
     echo "  Locked Vault        open it, then run 'lock' and open it from Recent: permission error"
     echo "  New Vault Location  already has a 'My Notes' folder with a note: create-vault error"
-    echo "  Playground Vault    a copy of Personal Notes to create, rename, delete and update links in"
+    echo "  Playground Vault    a copy of Personal Notes to create, rename, delete and update links in;"
+    echo "                      its Editor folder has notes for the editor cases (1.5)"
+}
+
+# Notes for the editor cases (1.5): every Markdown element Read mode shows, a note other apps change, and a note with
+# Windows line breaks and frontmatter that must be written back unchanged.
+editor_notes() {
+    local folder="$1"
+    mkdir -p "$folder"
+    cat > "$folder/Read mode.md" <<'NOTE'
+---
+tags: [editor, smoke]
+---
+# Read mode
+
+## Links
+
+Cook [[Arepas]], see [[Café con leche|the coffee]], open [[A note that does not exist yet]].
+A Markdown link to [Pasta e fagioli](../Recipes/Pasta%20e%20fagioli.md) and to [the web](https://example.com).
+
+## Text
+
+Some **bold**, some *italic*, some `inline code` and a #smoke-tag.
+
+> A quote with [[Welcome]] inside.
+
+- [x] A finished task
+- [ ] A task to do
+
+## Code
+
+```kotlin
+fun servings(people: Int): Int {
+    val perPerson = 2 // arepas per person
+    return people * perPerson
+}
+```
+
+```python
+def greet(name):
+    return f"Hello, {name}"  # [[not a link inside code]]
+```
+NOTE
+    printf -- '# Shared note
+
+Another app changes or deletes this note while it is open in Notekea.
+' > "$folder/Shared note.md"
+    printf -- '---
+title: Written on Windows
+tags: [crlf]
+---
+# Windows line endings
+
+Every line ends with CR LF.
+' \
+        > "$folder/Windows line endings.md"
+}
+
+# Checks that the Windows note still has CR LF on every line and its frontmatter exactly as prepare wrote it.
+check_note() {
+    local note="$SCRATCH/Playground Vault/Editor/Windows line endings.md"
+    local lines crlf header
+    # grep -c exits with 1 when it counts nothing, which set -e would treat as a failure.
+    lines=$(grep -c '' "$note" || true)
+    crlf=$(grep -c $'\r$' "$note" || true)
+    header=$(head -n 4 "$note")
+    if [ "$lines" -eq "$crlf" ] && [ "$header" = $'---\r\ntitle: Written on Windows\r\ntags: [crlf]\r\n---\r' ]; then
+        echo "OK: every line ends with CR LF and the frontmatter is unchanged"
+    else
+        echo "CHANGED: $crlf of $lines lines end with CR LF; frontmatter:"
+        echo "$header" | cat -vet
+    fi
 }
 
 # Changes Playground Vault the way another app or a sync would: one note created, one edited, one deleted.
@@ -111,12 +184,24 @@ case "${1:-}" in
         if [ -f "$settings$BACKUP_SUFFIX" ]; then mv "$settings$BACKUP_SUFFIX" "$settings"; fi
         echo "Settings restored"
         ;;
+    edit-note)
+        printf -- '\nEdited outside Notekea at %s.\n' "$(date +%H:%M:%S)" >> "$SCRATCH/Playground Vault/Editor/Shared note.md"
+        echo "Added a line to Editor/Shared note.md, as another app would"
+        ;;
+    delete-note)
+        rm -f "$SCRATCH/Playground Vault/Editor/Shared note.md"
+        echo "Deleted Editor/Shared note.md, as another app would"
+        ;;
+    check-note)
+        check_note
+        ;;
     clean)
         clean
         echo "Removed $SCRATCH"
         ;;
     *)
-        echo "Usage: $0 prepare | move | lock | outside | large | clear-cache | first-launch | restore-settings | clean" >&2
+        echo "Usage: $0 prepare | move | lock | outside | large | edit-note | delete-note | check-note | clear-cache |" \
+            "first-launch | restore-settings | clean" >&2
         exit 1
         ;;
 esac
