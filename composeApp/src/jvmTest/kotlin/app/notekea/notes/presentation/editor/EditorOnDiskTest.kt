@@ -8,7 +8,11 @@ import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.notes.data.OkioNoteContentStore
 import app.notekea.notes.data.OkioNoteFileOperations
 import app.notekea.notes.data.OkioNoteScanner
+import app.notekea.notes.data.SettingsEditorPreferencesStore
 import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
+import app.notekea.notes.domain.GetEditorModeUseCase
+import app.notekea.notes.domain.SaveEditorModeUseCase
+import com.russhwolf.settings.MapSettings
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
@@ -78,6 +82,7 @@ class EditorOnDiskTest {
         val dispatchers = JvmAppDispatchers()
         val store = OkioNoteContentStore(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
         val scanner = OkioNoteScanner(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
+        val preferences = SettingsEditorPreferencesStore(settings = MapSettings(), dispatchers = dispatchers)
         return EditorViewModel(
             vaultPath = vault.toString(),
             openNote = OpenNoteUseCase(noteContentStore = store),
@@ -99,7 +104,9 @@ class EditorOnDiskTest {
                     ),
                     applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store)
                 )
-            )
+            ),
+            getEditorMode = GetEditorModeUseCase(editorPreferencesStore = preferences),
+            saveEditorMode = SaveEditorModeUseCase(editorPreferencesStore = preferences)
         )
     }
 

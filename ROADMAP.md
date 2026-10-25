@@ -190,7 +190,8 @@ notes are read again.
 `BasicTextField` with Markdown highlighting (headings, bold, italic, code, links, `[[wiki links]]`, `#tags`),
 autosave (debounced 1 s), Read mode with the Markdown renderer and clickable `[[links]]`. Only the body is edited:
 the frontmatter is kept byte for byte, and its tags and aliases show read-only in the header. `#tags` are
-highlighted; clicking one searches it in 1.6. Every note opens in Edit mode.
+highlighted; clicking one searches it in 1.6. Notes open in the mode last chosen (Edit or Read), remembered
+between runs.
 
 **UI — Editor pane:**
 - Header: note title (editable, renames the file and updates the links to it), path breadcrumb, Edit / Read toggle

@@ -12,7 +12,7 @@ import app.notekea.notes.domain.RelativePath
  * either is shown, so nothing is overwritten or lost without the user's answer. [titleError] is why a new title was
  * refused (invalid, hidden or taken name), shown under the title until it is edited again. [find] is Find in note
  * while its bar is open, and null when it is closed. [isReading] shows the note rendered (Read mode) instead of its
- * Markdown; every note opens in Edit mode.
+ * Markdown; notes open in the mode the user last chose.
  */
 data class EditorState(
     val notePath: RelativePath? = null,
