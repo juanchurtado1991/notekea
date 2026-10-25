@@ -49,7 +49,11 @@ internal fun reduceTreeLoaded(
     tree: VaultTree
 ): VaultTreeState {
     // An entry being renamed is kept even when missing: a tree scanned just before it was created may arrive first.
-    val selected = state.selectedPath?.takeIf { it in tree.folders || it in tree.notes || it == state.renaming?.path }
+    // A selected note is kept too: it may be open in the editor, which shows that it is gone and offers Restore or
+    // Close, so its unsaved text is never dropped behind the user's back.
+    val selected = state.selectedPath?.takeIf {
+        it.isMarkdown || it in tree.folders || it in tree.notes || it == state.renaming?.path
+    }
     return state.copy(isLoading = false, tree = tree, selectedPath = selected, loadError = null)
 }
 

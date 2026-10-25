@@ -22,6 +22,20 @@ class VaultTreeReducersTest {
     }
 
     @Test
+    fun `a selected note that disappears stays selected for the editor, a folder does not`() {
+        val note = path(GARDEN + "/Tomato plan.md")
+        val withoutNote = state().copy(selectedPath = note)
+        val withoutFolder = state().copy(selectedPath = path(GARDEN))
+        val emptied = VaultTree(folders = emptySet(), notes = emptyMap())
+
+        assertEquals(
+            expected = note to null,
+            actual = reduceTreeLoaded(state = withoutNote, tree = emptied).selectedPath to
+                reduceTreeLoaded(state = withoutFolder, tree = emptied).selectedPath
+        )
+    }
+
+    @Test
     fun `new entries go to the selected folder, the selected note's folder or the top of the vault`() {
         assertEquals(
             expected = listOf(path(GARDEN), path(PROJECTS), RelativePath.ROOT),
@@ -30,7 +44,7 @@ class VaultTreeReducersTest {
     }
 
     @Test
-    fun `a loaded tree ends loading, drops a selection that no longer exists and keeps one being renamed`() {
+    fun `a loaded tree ends loading, drops a folder that no longer exists and keeps an entry being renamed`() {
         val renaming = state(
             selected = path(NEW_NOTE)
         ).copy(renaming = RenameDraft(path = path(NEW_NOTE), text = "New"))
@@ -38,7 +52,7 @@ class VaultTreeReducersTest {
         assertEquals(
             expected = listOf(null, path(NEW_NOTE)),
             actual = listOf(
-                reduceTreeLoaded(state = state(selected = path("Gone.md")), tree = tree).selectedPath,
+                reduceTreeLoaded(state = state(selected = path("Gone")), tree = tree).selectedPath,
                 reduceTreeLoaded(state = renaming, tree = tree).selectedPath
             )
         )
