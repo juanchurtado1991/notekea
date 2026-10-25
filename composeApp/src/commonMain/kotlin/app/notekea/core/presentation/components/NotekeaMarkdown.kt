@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,8 +22,9 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.notekeaCodeTextStyle
 import com.mikepenz.markdown.compose.components.markdownComponents
-import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
-import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
+import com.mikepenz.markdown.compose.elements.MarkdownCodeBlock
+import com.mikepenz.markdown.compose.elements.MarkdownCodeFence
+import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCode
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.elements.MarkdownCheckBox
 import com.mikepenz.markdown.m3.markdownColor
@@ -51,7 +53,6 @@ fun NotekeaMarkdown(
 ) {
     val colors = MaterialTheme.colorScheme
     val isDark = colors.background.luminance() < DARK_LUMINANCE
-    val highlights = remember(isDark) { Highlights.Builder().theme(SyntaxThemes.default(darkMode = isDark)) }
     val systemUriHandler = LocalUriHandler.current
     val uriHandler = remember(onLinkClick, systemUriHandler) {
         onLinkClick?.let { onClick ->
@@ -64,14 +65,14 @@ fun NotekeaMarkdown(
         } ?: systemUriHandler
     }
     CompositionLocalProvider(LocalUriHandler provides uriHandler) {
-        SelectionContainer(modifier = modifier) { ThemedMarkdown(content = content, highlights = highlights) }
+        SelectionContainer(modifier = modifier) { ThemedMarkdown(content = content, isDark = isDark) }
     }
 }
 
 @Composable
 private fun ThemedMarkdown(
     content: String,
-    highlights: Highlights.Builder
+    isDark: Boolean
 ) {
     val colors = MaterialTheme.colorScheme
     Markdown(
@@ -85,11 +86,35 @@ private fun ThemedMarkdown(
         typography = notekeaMarkdownTypography(),
         modifier = Modifier.fillMaxWidth(),
         components = markdownComponents(
-            codeBlock = { MarkdownHighlightedCodeBlock(it.content, it.node, it.typography.code, highlights) },
-            codeFence = { MarkdownHighlightedCodeFence(it.content, it.node, it.typography.code, highlights) },
+            codeBlock = {
+                MarkdownCodeBlock(it.content, it.node, it.typography.code) { code, language, style ->
+                    HighlightedCode(code = code, style = style, isDark = isDark, language = language)
+                }
+            },
+            codeFence = {
+                MarkdownCodeFence(it.content, it.node, it.typography.code) { code, language, style ->
+                    HighlightedCode(code = code, style = style, isDark = isDark, language = language)
+                }
+            },
             checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) }
         )
     )
+}
+
+/**
+ * One code block colored by language. The renderer colors every block in the background at the same time, and a
+ * highlights builder is mutable: shared by two blocks (or kept while a block's text changes), it mixes their texts and
+ * returns color ranges past the end of the code, which crashed Read mode. So each block and text gets its own.
+ */
+@Composable
+private fun HighlightedCode(
+    code: String,
+    style: TextStyle,
+    isDark: Boolean,
+    language: String?
+) {
+    val highlights = remember(code, isDark) { Highlights.Builder().theme(SyntaxThemes.default(darkMode = isDark)) }
+    MarkdownHighlightedCode(code = code, language = language, style = style, highlightsBuilder = highlights)
 }
 
 /** The editor's type scale (28 / 20 / 16 sp headings, 16 sp text) so a note reads the same in both modes. */
