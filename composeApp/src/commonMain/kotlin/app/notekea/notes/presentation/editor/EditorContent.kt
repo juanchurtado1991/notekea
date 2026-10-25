@@ -8,6 +8,12 @@ import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextLayoutResult
 import app.notekea.core.presentation.components.NotekeaFindBar
+import app.notekea.resources.editor_read_mode
+import app.notekea.resources.editor_edit_mode
+import app.notekea.core.presentation.theme.NotekeaIcons
+import app.notekea.core.presentation.platform.label
+import app.notekea.core.presentation.components.NotekeaMarkdown
+import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.resources.editor_find_count
 import app.notekea.resources.editor_find_none
 import kotlin.math.roundToInt
@@ -83,7 +89,7 @@ private val SKELETON_WIDTHS = listOf(0.9f, 0.75f, 0.85f, 0.6f, 0.8f, 0.4f)
  * save), then the note's folder, its title (editable: it renames the note), whether it is saved, its tags and aliases
  * from the frontmatter (read-only), and the body with its Markdown highlighted. The text is centred and limited to a
  * readable width; the header scrolls with it. Leaving the text saves at once. Find in note shows its bar above the
- * text, marks the matches and scrolls to the current one.
+ * text, marks the matches and scrolls to the current one. Read mode shows the note rendered instead of its Markdown.
  */
 @Composable
 fun EditorContent(
@@ -117,6 +123,11 @@ fun EditorContent(
                     )
                     if (state.isLoading) {
                         EditorSkeleton()
+                    } else if (state.isReading) {
+                        NotekeaMarkdown(
+                            content = buffer.text.toString(),
+                            modifier = Modifier.padding(top = NotekeaDimensions.SpacingL)
+                        )
                     } else {
                         EditorBody(buffer = buffer, scrollState = scrollState, onIntent = onIntent, find = state.find)
                     }
@@ -152,6 +163,7 @@ private fun EditorHeader(
             onEdit = { if (state.titleError != null) onIntent(EditorIntent.OnTitleErrorDismiss) }
         )
         SaveIndicator(status = state.saveStatus)
+        ModeToggle(isReading = state.isReading, platformConventions = platformConventions, onIntent = onIntent)
     }
     state.titleError?.let { error ->
         Text(
@@ -174,6 +186,24 @@ private fun propertiesLine(
     return listOf(tags, aliases).filter { it.isNotEmpty() }.joinToString(separator = PROPERTY_SEPARATOR).ifEmpty {
         null
     }
+}
+
+/** Switches between Edit and Read mode; the icon and tooltip name the mode it switches to, with its shortcut. */
+@Composable
+private fun ModeToggle(
+    isReading: Boolean,
+    platformConventions: PlatformConventions,
+    onIntent: (EditorIntent) -> Unit
+) {
+    NotekeaIconButton(
+        icon = if (isReading) NotekeaIcons.EditMode else NotekeaIcons.ReadMode,
+        label = stringResource(resource = if (isReading) Res.string.editor_edit_mode else Res.string.editor_read_mode),
+        onClick = { onIntent(EditorIntent.OnReadModeToggle) },
+        modifier = Modifier.padding(start = NotekeaDimensions.SpacingS),
+        shortcutHint = platformConventions.toggleReadModeShortcut.label(
+            operatingSystem = platformConventions.operatingSystem
+        )
+    )
 }
 
 /** "Unsaved" while edits wait for the autosave; "Saved" for a second after a save, then nothing. */
@@ -354,6 +384,12 @@ private fun EditorContentFindPreview() {
             find = FindState(query = "corn", matches = listOf(EditorPreviewData.CORN_MATCH), current = 0)
         )
     )
+}
+
+@Preview
+@Composable
+private fun EditorContentReadingPreview() {
+    EditorPreviewFrame(state = EditorPreviewData.state().copy(isReading = true))
 }
 
 @Preview

@@ -422,6 +422,34 @@ class EditorViewModelTest {
     }
 
     @Test
+    fun `read mode toggles, closes find, and every note opens in edit mode`() = runEditorTest {
+        open(path = AREPAS)
+        viewModel.onIntent(intent = EditorIntent.OnFindOpen)
+
+        viewModel.onIntent(intent = EditorIntent.OnReadModeToggle)
+        val reading = viewModel.state.value
+        open(path = WELCOME)
+
+        assertEquals(
+            expected = Triple(true, null, false),
+            actual = Triple(reading.isReading, reading.find, viewModel.state.value.isReading)
+        )
+    }
+
+    @Test
+    fun `find switches back to edit mode`() = runEditorTest {
+        open(path = AREPAS)
+        viewModel.onIntent(intent = EditorIntent.OnReadModeToggle)
+
+        viewModel.onIntent(intent = EditorIntent.OnFindOpen)
+
+        assertEquals(
+            expected = false to FindState(),
+            actual = viewModel.state.value.isReading to viewModel.state.value.find
+        )
+    }
+
+    @Test
     fun `a note that cannot be read shows the error until a retry opens it`() = runEditorTest {
         val missing = RelativePath(value = "Missing.md")
         open(path = missing)
