@@ -36,6 +36,7 @@ import app.notekea.core.presentation.components.NotekeaInlineTextField
 import app.notekea.core.presentation.components.NotekeaWordmark
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaListItem
+import app.notekea.core.presentation.components.NotekeaMarkdown
 import app.notekea.core.presentation.components.NotekeaMenuButton
 import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.NotekeaProgressIndicator
@@ -74,6 +75,9 @@ private const val BUTTON_OPEN_SHORTCUT = "Ctrl+O"
 private const val BUTTON_REMOVE = "Remove"
 private const val BUTTON_SORT = "Sort by name"
 private const val FIND_COUNT = "1 of 3"
+private const val MARKDOWN_SAMPLE =
+    "## Read mode\n\nRendered **Markdown** with a [link](https://example.com) and code:\n\n" +
+        "```kotlin\nfun greet(name: String) = \"Hello, ${'$'}name\"\n```\n"
 private const val MENU_AREA = "Right-click for the context menu"
 private const val MENU_DELETE_SHORTCUT = "Delete"
 private const val MENU_RENAME = "Rename"
@@ -147,6 +151,7 @@ private fun GalleryColumn(
                 ButtonsSection()
                 InputsSection()
                 TreeSection()
+                MarkdownSection()
                 ContextMenuSection()
                 ConfirmDialogSection()
                 SplitPaneSection()
@@ -275,6 +280,13 @@ private fun TreeSectionChildren() {
             NotekeaInlineTextField(value = renamed, onValueChange = { renamed = it }, onSubmit = {}, onCancel = {})
         }
     )
+}
+
+@Composable
+private fun MarkdownSection() {
+    NotekeaCard {
+        NotekeaMarkdown(content = MARKDOWN_SAMPLE, modifier = Modifier.padding(all = NotekeaDimensions.SpacingM))
+    }
 }
 
 @Composable
