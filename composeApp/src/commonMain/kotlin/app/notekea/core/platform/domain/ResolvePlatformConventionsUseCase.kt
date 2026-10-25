@@ -5,7 +5,7 @@ package app.notekea.core.platform.domain
  * primary modifier (Cmd on macOS, Ctrl elsewhere), open-folder shortcut (primary modifier + O), quit shortcut
  * (Cmd+Q, Alt+F4 on Windows, Ctrl+Q on Linux), the vault tree shortcuts (new note with primary modifier + N, rename
  * with Enter on macOS and F2 elsewhere, delete with Cmd+Backspace on macOS and Delete elsewhere, toggle the sidebar
- * with primary modifier + \), save with primary modifier + S, dialog button order, the user's home folder and the standard per-user application data
+ * with primary modifier + \), save with primary modifier + S, find in note with primary modifier + F, dialog button order, the user's home folder and the standard per-user application data
  * directory, honoring `APPDATA` and `XDG_DATA_HOME` when they are set.
  */
 class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnvironment) {
@@ -24,6 +24,7 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             deleteShortcut = deleteShortcutFor(operatingSystem = operatingSystem),
             toggleSidebarShortcut = Shortcut(key = ShortcutKey.BACKSLASH, modifiers = setOf(primaryModifier)),
             saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(primaryModifier)),
+            findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(primaryModifier)),
             dialogButtonOrder = dialogButtonOrderFor(operatingSystem = operatingSystem),
             appDataDirectory = appDataDirectoryFor(operatingSystem = operatingSystem),
             homeDirectory = systemEnvironment.userHome

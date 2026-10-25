@@ -14,6 +14,7 @@ data class PlatformConventions(
     val deleteShortcut: Shortcut,
     val toggleSidebarShortcut: Shortcut,
     val saveShortcut: Shortcut,
+    val findShortcut: Shortcut,
     val dialogButtonOrder: DialogButtonOrder,
     val appDataDirectory: String,
     val homeDirectory: String
