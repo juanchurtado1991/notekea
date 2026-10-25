@@ -15,6 +15,7 @@ import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.components.NotekeaMarkdown
 import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.resources.editor_find
 import app.notekea.resources.editor_find_count
 import app.notekea.resources.editor_find_none
 import kotlin.math.roundToInt
@@ -161,6 +162,7 @@ private fun EditorHeader(
             onEdit = { if (state.titleError != null) onIntent(EditorIntent.OnTitleErrorDismiss) }
         )
         SaveIndicator(status = state.saveStatus)
+        FindButton(platformConventions = platformConventions, onIntent = onIntent)
         ModeToggle(isReading = state.isReading, platformConventions = platformConventions, onIntent = onIntent)
     }
     state.titleError?.let { error ->
@@ -184,6 +186,21 @@ private fun propertiesLine(
     return listOf(tags, aliases).filter { it.isNotEmpty() }.joinToString(separator = PROPERTY_SEPARATOR).ifEmpty {
         null
     }
+}
+
+/** Opens Find in note, so it can be found without knowing its shortcut, which the tooltip teaches. */
+@Composable
+private fun FindButton(
+    platformConventions: PlatformConventions,
+    onIntent: (EditorIntent) -> Unit
+) {
+    NotekeaIconButton(
+        icon = NotekeaIcons.Find,
+        label = stringResource(resource = Res.string.editor_find),
+        onClick = { onIntent(EditorIntent.OnFindOpen) },
+        modifier = Modifier.padding(start = NotekeaDimensions.SpacingS),
+        shortcutHint = platformConventions.findShortcut.label(operatingSystem = platformConventions.operatingSystem)
+    )
 }
 
 /** Switches between Edit and Read mode; the icon and tooltip name the mode it switches to, with its shortcut. */
