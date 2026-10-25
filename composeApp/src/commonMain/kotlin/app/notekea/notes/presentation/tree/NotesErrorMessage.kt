@@ -13,6 +13,7 @@ import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.notes.domain.NotesError
 import app.notekea.resources.Res
+import app.notekea.resources.error_notes_changed_on_disk
 import app.notekea.resources.error_notes_entry_missing
 import app.notekea.resources.error_notes_hidden_name
 import app.notekea.resources.error_notes_invalid_name
@@ -38,6 +39,8 @@ internal fun notesErrorMessage(
 ): String {
     val shownVault: (String) -> String = { displayPath(path = it, platformConventions = platformConventions) }
     return when (error) {
+        is NotesError.ChangedOnDisk -> stringResource(Res.string.error_notes_changed_on_disk, error.path)
+
         is NotesError.EntryMissing -> stringResource(Res.string.error_notes_entry_missing, error.path)
 
         NotesError.HiddenName -> stringResource(resource = Res.string.error_notes_hidden_name)
@@ -63,6 +66,7 @@ internal fun notesErrorMessage(
 @Composable
 private fun notesErrorMessagePreview() {
     val errors = listOf(
+        NotesError.ChangedOnDisk(path = PREVIEW_ENTRY),
         NotesError.EntryMissing(path = PREVIEW_ENTRY),
         NotesError.HiddenName,
         NotesError.InvalidName,
