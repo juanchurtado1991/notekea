@@ -5,6 +5,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.unit.dp
@@ -15,11 +16,14 @@ import androidx.compose.ui.window.rememberWindowState
 import app.notekea.core.presentation.gallery.DesignSystemGallery
 import app.notekea.core.presentation.platform.LocalResizePointerIcon
 import app.notekea.core.presentation.platform.LocalShortcutDispatcher
+import app.notekea.core.presentation.platform.LocalWindowCloseGuard
 import app.notekea.core.presentation.platform.ShortcutDispatcher
+import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.di.desktopModules
 import app.notekea.notes.presentation.tree.VaultTreeScreen
 import app.notekea.vault.presentation.welcome.WelcomeScreen
 import io.github.vinceglb.filekit.FileKit
+import kotlinx.coroutines.launch
 import org.koin.core.context.startKoin
 import java.awt.Cursor
 
@@ -55,20 +59,33 @@ private fun ApplicationScope.GalleryWindow() {
 
 /**
  * The app window. Every key event goes through the [ShortcutDispatcher] first, the desktop resize cursor is provided
- * to the design system, and the welcome flow shows the vault workspace once a vault is open.
+ * to the design system, and the welcome flow shows the vault workspace once a vault is open. Closing the window first
+ * lets the [WindowCloseGuard] finish (the editor saving the note being typed), then quits.
  */
 @Composable
 private fun ApplicationScope.NotekeaWindow() {
     var title by remember { mutableStateOf(value = WINDOW_TITLE) }
     val shortcutDispatcher = remember { ShortcutDispatcher() }
+    val closeGuard = remember { WindowCloseGuard() }
+    val scope = rememberCoroutineScope()
+    var isClosing by remember { mutableStateOf(value = false) }
     Window(
-        onCloseRequest = ::exitApplication,
+        onCloseRequest = {
+            if (!isClosing) {
+                isClosing = true
+                scope.launch {
+                    closeGuard.beforeClose()
+                    exitApplication()
+                }
+            }
+        },
         title = title,
         state = rememberWindowState(width = WINDOW_WIDTH_DP.dp, height = WINDOW_HEIGHT_DP.dp),
         onPreviewKeyEvent = shortcutDispatcher::dispatch
     ) {
         CompositionLocalProvider(
             LocalShortcutDispatcher provides shortcutDispatcher,
+            LocalWindowCloseGuard provides closeGuard,
             LocalResizePointerIcon provides PointerIcon(cursor = Cursor(Cursor.E_RESIZE_CURSOR))
         ) {
             App {

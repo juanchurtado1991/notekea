@@ -11,6 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.components.NotekeaSplitPane
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.notes.domain.NoteEntry
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.TreePreferences
 import kotlin.math.roundToInt
@@ -19,8 +20,8 @@ private const val PREVIEW_HEIGHT_DP = 480
 private const val PREVIEW_WIDTH_DP = 900
 
 /**
- * Stateless vault workspace: the resizable, hideable sidebar with the tree and, beside it, the selected note. The
- * delete and link update questions are shown over both while they wait for an answer.
+ * Stateless vault workspace: the resizable, hideable sidebar with the tree and, beside it, the selected note shown by
+ * [noteContent] (the editor). The delete question is shown over both while it waits for an answer.
  */
 @Composable
 fun VaultTreeContent(
@@ -28,6 +29,7 @@ fun VaultTreeContent(
     vaultName: String,
     onIntent: (VaultTreeIntent) -> Unit,
     onSwitchVault: () -> Unit,
+    noteContent: @Composable (NoteEntry) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -49,7 +51,13 @@ fun VaultTreeContent(
                     onSwitchVault = onSwitchVault
                 )
             },
-            end = { NoteDetailsPanel(state = state, onShowSidebar = { onIntent(VaultTreeIntent.OnSidebarToggle) }) }
+            end = {
+                NoteDetailsPanel(
+                    state = state,
+                    onShowSidebar = { onIntent(VaultTreeIntent.OnSidebarToggle) },
+                    noteContent = noteContent
+                )
+            }
         )
     }
     TreeQuestions(state = state, onIntent = onIntent)
@@ -81,6 +89,7 @@ private fun VaultTreeContentPreviewFrame(
             vaultName = TreePreviewData.VAULT_NAME,
             onIntent = {},
             onSwitchVault = {},
+            noteContent = { PreviewNoteContent(note = it) },
             modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp).height(height = PREVIEW_HEIGHT_DP.dp)
         )
     }
