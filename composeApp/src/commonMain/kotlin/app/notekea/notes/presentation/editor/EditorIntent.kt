@@ -10,6 +10,21 @@ sealed interface EditorIntent {
     /** Save now and report [EditorEffect.Flushed], before the window closes. */
     data object OnFlushRequest : EditorIntent
 
+    /** Esc in the find bar: close it, leaving the current match selected in the text. */
+    data object OnFindClose : EditorIntent
+
+    /** Enter in the find bar, or its down arrow: the next match, after the last one the first. */
+    data object OnFindNext : EditorIntent
+
+    /** Mod+F: open the find bar (it keeps the last query while the note stays open). */
+    data object OnFindOpen : EditorIntent
+
+    /** Shift+Enter in the find bar, or its up arrow: the previous match, before the first one the last. */
+    data object OnFindPrevious : EditorIntent
+
+    /** The text searched for changed. */
+    data class OnFindQueryChange(val query: String) : EditorIntent
+
     /** The text left the keyboard focus (the user clicked the tree, for instance): save now. */
     data object OnFocusLost : EditorIntent
 
