@@ -10,6 +10,9 @@ internal object EditorPreviewData {
     private const val BODY = "# Arepas\n\n## Ingredients\n\n- 2 cups of **pre-cooked** corn flour\n" +
         "- 1 teaspoon of salt #shopping\n\nServe with [[Café con leche]].\n"
 
+    /** Where "corn" is in the sample body. */
+    val CORN_MATCH = BODY.indexOf(string = "corn").let { it until it + "corn".length }
+
     val platformConventions = PreviewPlatformConventions.linux
 
     val path = RelativePath(value = "Recipes/Arepas.md")

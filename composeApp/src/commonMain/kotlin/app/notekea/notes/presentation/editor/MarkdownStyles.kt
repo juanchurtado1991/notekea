@@ -10,14 +10,22 @@ import androidx.compose.ui.text.font.FontWeight
 /**
  * How the editor shows each [HighlightKind], from the theme: headings on the type scale (28 / 20 / 16 sp, semibold),
  * code in the bundled monospaced face on a subtle background, links and wiki links in the primary color, tags in the
- * accent color, and Markdown syntax muted so the text reads first.
+ * accent color, and Markdown syntax muted so the text reads first. Find in note marks every match with a light accent
+ * background and the current one with a stronger one.
  */
-class MarkdownStyles(private val byKind: Map<HighlightKind, SpanStyle>) {
+class MarkdownStyles(
+    private val byKind: Map<HighlightKind, SpanStyle>,
+    val findMatch: SpanStyle,
+    val currentFindMatch: SpanStyle
+) {
     fun of(
         kind: HighlightKind
     ): SpanStyle = byKind.getValue(key = kind)
 
     companion object {
+        private const val CURRENT_FIND_MATCH_ALPHA = 0.55f
+        private const val FIND_MATCH_ALPHA = 0.22f
+
         fun from(
             colorScheme: ColorScheme,
             typography: Typography,
@@ -48,7 +56,9 @@ class MarkdownStyles(private val byKind: Map<HighlightKind, SpanStyle>) {
                     HighlightKind.SYNTAX to SpanStyle(color = colorScheme.onSurfaceVariant),
                     HighlightKind.TAG to SpanStyle(color = colorScheme.tertiary),
                     HighlightKind.WIKI_LINK to SpanStyle(color = colorScheme.primary)
-                )
+                ),
+                findMatch = SpanStyle(background = colorScheme.tertiary.copy(alpha = FIND_MATCH_ALPHA)),
+                currentFindMatch = SpanStyle(background = colorScheme.tertiary.copy(alpha = CURRENT_FIND_MATCH_ALPHA))
             )
         }
     }
