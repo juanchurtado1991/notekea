@@ -10,6 +10,9 @@ sealed interface EditorIntent {
     /** Save now and report [EditorEffect.Flushed], before the window closes. */
     data object OnFlushRequest : EditorIntent
 
+    /** A link to a note was clicked in Read mode. */
+    data class OnLinkClick(val link: ReadLink.Note) : EditorIntent
+
     /** Esc in the find bar: close it, leaving the current match selected in the text. */
     data object OnFindClose : EditorIntent
 

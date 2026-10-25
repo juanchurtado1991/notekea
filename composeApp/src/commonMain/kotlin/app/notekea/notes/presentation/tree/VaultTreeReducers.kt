@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.tree
 
 import app.notekea.core.domain.Outcome
+import app.notekea.notes.domain.FollowedLink
 import app.notekea.notes.domain.LinkUpdateResult
 import app.notekea.notes.domain.NoteEntry
 import app.notekea.notes.domain.NoteFile
@@ -162,6 +163,19 @@ internal fun reduceCreated(
             state.tree.withNote(note = placeholderNote(path = path))
         }
         reduceRenameStart(state = reduceReveal(state = state.copy(tree = tree), path = path), path = path)
+    }
+}
+
+internal fun reduceFollowedLink(
+    state: VaultTreeState,
+    outcome: Outcome<FollowedLink, NotesError>
+): VaultTreeState = when (outcome) {
+    is Outcome.Failure -> state.copy(actionError = outcome.error)
+
+    is Outcome.Success -> {
+        val followed = outcome.value
+        val tree = if (followed.isNew) state.tree.withNote(note = placeholderNote(path = followed.path)) else state.tree
+        reduceReveal(state = state.copy(tree = tree), path = followed.path)
     }
 }
 

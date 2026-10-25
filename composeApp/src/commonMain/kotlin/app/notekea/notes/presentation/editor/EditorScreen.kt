@@ -28,7 +28,8 @@ private const val PREVIEW_WIDTH_DP = 720
  * with their shortcuts, saves
  * with the save shortcut, saves
  * before the window closes and when the editor leaves the screen (a folder selected, another vault opened), and
- * reports a rename from the title ([onRenamed]) or a deleted note closed ([onClosed]) to the panes around it. The
+ * reports a rename from the title ([onRenamed]), a deleted note closed ([onClosed]) or a link clicked in Read mode
+ * ([onOpenLink]) to the panes around it. The
  * [viewModel] belongs to the vault, so it outlives one note.
  */
 @Composable
@@ -38,6 +39,7 @@ fun EditorScreen(
     platformConventions: PlatformConventions,
     onRenamed: (EditorEffect.Renamed) -> Unit,
     onClosed: () -> Unit,
+    onOpenLink: (EditorEffect.OpenLink) -> Unit,
     modifier: Modifier = Modifier,
     properties: NoteMetadata? = null
 ) {
@@ -45,12 +47,14 @@ fun EditorScreen(
     val flushed = remember(viewModel) { Channel<Unit>(capacity = Channel.CONFLATED) }
     val currentOnRenamed by rememberUpdatedState(newValue = onRenamed)
     val currentOnClosed by rememberUpdatedState(newValue = onClosed)
+    val currentOnOpenLink by rememberUpdatedState(newValue = onOpenLink)
     LaunchedEffect(notePath) { viewModel.onIntent(intent = EditorIntent.OnOpen(path = notePath)) }
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 EditorEffect.Closed -> currentOnClosed()
                 EditorEffect.Flushed -> flushed.trySend(element = Unit)
+                is EditorEffect.OpenLink -> currentOnOpenLink(effect)
                 is EditorEffect.Renamed -> currentOnRenamed(effect)
             }
         }
