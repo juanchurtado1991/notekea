@@ -45,6 +45,7 @@ class ResolvePlatformConventionsUseCaseTest {
                     modifiers = setOf(ShortcutModifier.CONTROL)
                 ),
                 saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(ShortcutModifier.CONTROL)),
+                findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(ShortcutModifier.CONTROL)),
                 dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
                 appDataDirectory = "/home/ana/.local/share/notekea",
                 homeDirectory = LINUX_HOME
@@ -94,6 +95,7 @@ class ResolvePlatformConventionsUseCaseTest {
                     modifiers = setOf(ShortcutModifier.COMMAND)
                 ),
                 saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(ShortcutModifier.COMMAND)),
+                findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(ShortcutModifier.COMMAND)),
                 dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
                 appDataDirectory = "/Users/ana/Library/Application Support/Notekea",
                 homeDirectory = MACOS_HOME
@@ -174,6 +176,7 @@ class ResolvePlatformConventionsUseCaseTest {
                     modifiers = setOf(ShortcutModifier.CONTROL)
                 ),
                 saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(ShortcutModifier.CONTROL)),
+                findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(ShortcutModifier.CONTROL)),
                 dialogButtonOrder = DialogButtonOrder.PRIMARY_THEN_CANCEL,
                 appDataDirectory = "D:\\Profiles\\ana\\Roaming\\Notekea",
                 homeDirectory = WINDOWS_HOME
