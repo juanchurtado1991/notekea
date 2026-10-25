@@ -63,7 +63,7 @@ class EditorViewModel(
             EditorIntent.OnCloseDeleted -> closeDeleted()
             EditorIntent.OnFindClose -> closeFind()
             EditorIntent.OnFindNext -> moveToMatch(step = 1)
-            EditorIntent.OnFindOpen -> reduce { it.copy(find = it.find ?: FindState()) }
+            EditorIntent.OnFindOpen -> reduce { it.copy(find = it.find ?: FindState(), isReading = false) }
             EditorIntent.OnFindPrevious -> moveToMatch(step = -1)
             is EditorIntent.OnFindQueryChange -> search(query = intent.query)
             EditorIntent.OnFlushRequest -> runSave { flush() }
@@ -72,6 +72,7 @@ class EditorViewModel(
             EditorIntent.OnLoadTheirs -> runSave { loadTheirs() }
             is EditorIntent.OnNoteMoved -> moveTo(path = intent.path)
             is EditorIntent.OnOpen -> runSave { open(path = intent.path) }
+            EditorIntent.OnReadModeToggle -> reduce { it.copy(isReading = !it.isReading, find = null) }
             EditorIntent.OnRestore -> runSave { restore() }
             EditorIntent.OnRetryOpen -> runSave { open(path = state.value.notePath, isRetry = true) }
             EditorIntent.OnSaveShortcut -> runSave { saveNow() }

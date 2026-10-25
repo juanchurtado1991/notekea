@@ -24,7 +24,8 @@ private const val PREVIEW_HEIGHT_DP = 420
 private const val PREVIEW_WIDTH_DP = 720
 
 /**
- * Editor entry point for [notePath]: opens it (saving the previous note first), opens Find with its shortcut, saves
+ * Editor entry point for [notePath]: opens it (saving the previous note first), opens Find and switches Edit / Read
+ * with their shortcuts, saves
  * with the save shortcut, saves
  * before the window closes and when the editor leaves the screen (a folder selected, another vault opened), and
  * reports a rename from the title ([onRenamed]) or a deleted note closed ([onClosed]) to the panes around it. The
@@ -55,12 +56,7 @@ fun EditorScreen(
         }
     }
     DisposableEffect(viewModel) { onDispose { viewModel.onIntent(intent = EditorIntent.OnFlushRequest) } }
-    WindowShortcut(shortcut = platformConventions.saveShortcut) {
-        viewModel.onIntent(intent = EditorIntent.OnSaveShortcut)
-    }
-    WindowShortcut(shortcut = platformConventions.findShortcut) {
-        viewModel.onIntent(intent = EditorIntent.OnFindOpen)
-    }
+    EditorShortcuts(platformConventions = platformConventions, onIntent = viewModel::onIntent)
     BeforeWindowClose {
         while (flushed.tryReceive().isSuccess) {
             // A flush from an earlier save is not this one: wait for the save asked for now.
@@ -76,6 +72,17 @@ fun EditorScreen(
         modifier = modifier,
         properties = properties
     )
+}
+
+/** Save, Find in note and Edit / Read work whatever has focus while the editor is shown. */
+@Composable
+private fun EditorShortcuts(
+    platformConventions: PlatformConventions,
+    onIntent: (EditorIntent) -> Unit
+) {
+    WindowShortcut(shortcut = platformConventions.saveShortcut) { onIntent(EditorIntent.OnSaveShortcut) }
+    WindowShortcut(shortcut = platformConventions.findShortcut) { onIntent(EditorIntent.OnFindOpen) }
+    WindowShortcut(shortcut = platformConventions.toggleReadModeShortcut) { onIntent(EditorIntent.OnReadModeToggle) }
 }
 
 @Preview

@@ -11,7 +11,8 @@ import app.notekea.notes.domain.RelativePath
  * mine / Load theirs); [isDeleted] means the file disappeared while open (Restore / Close). Autosave waits while
  * either is shown, so nothing is overwritten or lost without the user's answer. [titleError] is why a new title was
  * refused (invalid, hidden or taken name), shown under the title until it is edited again. [find] is Find in note
- * while its bar is open, and null when it is closed.
+ * while its bar is open, and null when it is closed. [isReading] shows the note rendered (Read mode) instead of its
+ * Markdown; every note opens in Edit mode.
  */
 data class EditorState(
     val notePath: RelativePath? = null,
@@ -22,5 +23,6 @@ data class EditorState(
     val hasConflict: Boolean = false,
     val isDeleted: Boolean = false,
     val titleError: NotesError? = null,
-    val find: FindState? = null
+    val find: FindState? = null,
+    val isReading: Boolean = false
 )
