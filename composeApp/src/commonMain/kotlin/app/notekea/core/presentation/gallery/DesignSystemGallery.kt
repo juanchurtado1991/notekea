@@ -30,6 +30,7 @@ import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaCard
 import app.notekea.core.presentation.components.NotekeaConfirmDialog
 import app.notekea.core.presentation.components.NotekeaContextMenuArea
+import app.notekea.core.presentation.components.NotekeaFindBar
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaInlineTextField
 import app.notekea.core.presentation.components.NotekeaWordmark
@@ -72,6 +73,7 @@ private const val BUTTON_OPEN_FOLDER = "Open folder…"
 private const val BUTTON_OPEN_SHORTCUT = "Ctrl+O"
 private const val BUTTON_REMOVE = "Remove"
 private const val BUTTON_SORT = "Sort by name"
+private const val FIND_COUNT = "1 of 3"
 private const val MENU_AREA = "Right-click for the context menu"
 private const val MENU_DELETE_SHORTCUT = "Delete"
 private const val MENU_RENAME = "Rename"
@@ -177,12 +179,27 @@ private fun ButtonsSection() {
     }
 }
 
+/** The inputs of a note page: its editable title and the Find in note bar. */
+@Composable
+private fun PageInputsSamples() {
+    var title by remember { mutableStateOf(value = NOTE_PRICING) }
+    var findQuery by remember { mutableStateOf(value = "") }
+    NotekeaTitleField(value = title, onCommit = { title = it }, label = NOTE_PRICING)
+    NotekeaFindBar(
+        query = findQuery,
+        onQueryChange = { findQuery = it },
+        matchLabel = if (findQuery.isEmpty()) "" else FIND_COUNT,
+        onNext = {},
+        onPrevious = {},
+        onClose = { findQuery = "" }
+    )
+}
+
 @Composable
 private fun InputsSection() {
     var query by remember { mutableStateOf(value = "") }
     var selectedNote by remember { mutableIntStateOf(value = 0) }
-    var title by remember { mutableStateOf(value = NOTE_PRICING) }
-    NotekeaTitleField(value = title, onCommit = { title = it }, label = NOTE_PRICING)
+    PageInputsSamples()
     NotekeaTextField(
         value = query,
         onValueChange = { query = it },
