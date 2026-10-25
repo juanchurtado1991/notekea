@@ -63,6 +63,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.client.core)
             implementation(libs.lifecycle.viewmodel.compose)
+            implementation(libs.markdown.renderer.code)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.multiplatform.settings)
             implementation(libs.okio)

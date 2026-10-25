@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.composables.icons.lucide.ArrowDown
 import com.composables.icons.lucide.ArrowDownAZ
 import com.composables.icons.lucide.ArrowUp
+import com.composables.icons.lucide.Book
 import com.composables.icons.lucide.Check
 import com.composables.icons.lucide.ChevronDown
 import com.composables.icons.lucide.ChevronRight
@@ -17,6 +18,7 @@ import com.composables.icons.lucide.FolderPlus
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.PanelLeftClose
 import com.composables.icons.lucide.PanelLeftOpen
+import com.composables.icons.lucide.Pen
 import com.composables.icons.lucide.Pencil
 import com.composables.icons.lucide.SquareArrowOutUpRight
 import com.composables.icons.lucide.Trash2
@@ -31,6 +33,7 @@ object NotekeaIcons {
     val Close: ImageVector get() = Lucide.X
     val Collapse: ImageVector get() = Lucide.ChevronDown
     val Delete: ImageVector get() = Lucide.Trash2
+    val EditMode: ImageVector get() = Lucide.Pen
     val Expand: ImageVector get() = Lucide.ChevronRight
     val Folder: ImageVector get() = Lucide.Folder
     val FolderOpen: ImageVector get() = Lucide.FolderOpen
@@ -41,6 +44,7 @@ object NotekeaIcons {
     val NewFolder: ImageVector get() = Lucide.FolderPlus
     val NewNote: ImageVector get() = Lucide.FilePlus
     val Note: ImageVector get() = Lucide.FileText
+    val ReadMode: ImageVector get() = Lucide.Book
     val Rename: ImageVector get() = Lucide.Pencil
     val Reveal: ImageVector get() = Lucide.SquareArrowOutUpRight
     val ShowSidebar: ImageVector get() = Lucide.PanelLeftOpen
