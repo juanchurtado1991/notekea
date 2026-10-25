@@ -22,6 +22,8 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.NoteEntry
+import app.notekea.notes.domain.NoteFile
+import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.RelativePath
 import app.notekea.resources.Res
 import app.notekea.resources.note_panel_empty_message
@@ -48,7 +50,8 @@ internal fun NoteDetailsPanel(
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         val selected = state.selectedPath
-        val note = selected?.let { state.tree.notes[it] }
+        // A selected note that is gone (deleted or moved outside Notekea) still reaches the editor, which explains it.
+        val note = selected?.let { state.tree.notes[it] ?: missingNote(path = it) }
         when {
             state.isLoading -> Unit
 
@@ -80,6 +83,14 @@ internal fun NoteDetailsPanel(
             )
         }
     }
+}
+
+private fun missingNote(
+    path: RelativePath
+): NoteEntry? = if (path.isMarkdown) {
+    NoteEntry(file = NoteFile(path = path, size = null, modifiedAt = null), metadata = NoteMetadata.NONE)
+} else {
+    null
 }
 
 @Composable
