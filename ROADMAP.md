@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 4 / 16 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 5 / 16 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -189,7 +189,7 @@ notes are read again.
 - **Done when:** a 5,000-note vault lists in under 1 s after the first scan, external changes appear within 1 s.
 - Smoke test: cases 1.4-01 to 1.4-12; 1.3-02, 1.3-04 and 1.3-07 rewritten for the tree.
 
-### 🚧 1.5 Editor — `feature/editor`
+### ✅ 1.5 Editor — `feature/editor` — [notekea#39](https://github.com/juanchurtado1991/notekea/pull/39)
 
 `BasicTextField` with Markdown highlighting (headings, bold, italic, code, links, `[[wiki links]]`, `#tags`),
 autosave (debounced 1 s), Read mode with the Markdown renderer and clickable `[[links]]`. Only the body is edited:
@@ -207,9 +207,10 @@ between runs.
   Restore / Close; a save never recreates a note that was moved or deleted.
 - Find in note: `Mod+F` opens an inline bar with match count and next/previous (`Enter` / `Shift+Enter`).
 - Read mode: code blocks colored by language (Edit mode keeps code plain); `[[links]]` and links to notes open the
-  note, a missing wiki link's note is created at the vault root, web links open the browser.
+  note, a missing wiki link's note is created at the vault root, a name several notes share opens the closest one
+  (same folder, then nearest the vault root), web links open the browser.
 - **Done when:** typing never loses text, external changes are detected, frontmatter is preserved untouched.
-- Smoke test: cases 1.5-01 to 1.5-11; 1.4-01 rewritten for the editor.
+- Smoke test: cases 1.5-01 to 1.5-11; 1.4-01 and 1.4-06 rewritten for the editor.
 
 ### ⬜ 1.6 Quick switcher and search — `feature/quick-switcher`
 
