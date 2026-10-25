@@ -94,14 +94,8 @@ NOTE
 
 Another app changes or deletes this note while it is open in Notekea.
 ' > "$folder/Shared note.md"
-    printf -- '---
-title: Written on Windows
-tags: [crlf]
----
-# Windows line endings
-
-Every line ends with CR LF.
-' \
+    # Escapes, not real CR characters: Git stores this script with LF only (.gitattributes) and would drop them.
+    printf -- '---\r\ntitle: Written on Windows\r\ntags: [crlf]\r\n---\r\n# Windows line endings\r\n\r\nEvery line ends with CR LF.\r\n' \
         > "$folder/Windows line endings.md"
 }
 
