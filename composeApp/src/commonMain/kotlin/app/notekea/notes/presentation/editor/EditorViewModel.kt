@@ -61,6 +61,7 @@ class EditorViewModel(
     ) {
         when (intent) {
             EditorIntent.OnCloseDeleted -> closeDeleted()
+            is EditorIntent.OnLinkClick -> openLink(link = intent.link)
             EditorIntent.OnFindClose -> closeFind()
             EditorIntent.OnFindNext -> moveToMatch(step = 1)
             EditorIntent.OnFindOpen -> reduce { it.copy(find = it.find ?: FindState(), isReading = false) }
@@ -79,6 +80,14 @@ class EditorViewModel(
             is EditorIntent.OnTitleCommit -> runSave { rename(name = intent.name) }
             EditorIntent.OnTitleErrorDismiss -> reduce { it.copy(titleError = null) }
         }
+    }
+
+    /** Asks the panes around the editor to open the note a Read mode link leads to, from the open note. */
+    private fun openLink(
+        link: ReadLink.Note
+    ) {
+        val source = state.value.notePath ?: return
+        emit(effect = EditorEffect.OpenLink(source = source, target = link.target, kind = link.kind))
     }
 
     private fun onBufferChanged(
