@@ -8,14 +8,14 @@ package app.notekea.notes.domain
  * character scores a little lower (up to a point before the first letter), so for `are` "Arepas" ranks above
  * "Café con leche y arepas", which ranks above "Prepare dough".
  */
-class FuzzyMatcher {
+class FuzzyMatcher(private val textFolder: TextFolder) {
     fun match(
         query: String,
         text: String
     ): FuzzyMatch? {
-        val pattern = folded(text = query).filterNot { it.isWhitespace() }
+        val pattern = textFolder.fold(text = query).filterNot { it.isWhitespace() }
         if (pattern.isEmpty()) return FuzzyMatch.EVERYTHING
-        val target = folded(text = text)
+        val target = textFolder.fold(text = text)
         if (!isSubsequence(pattern = pattern, target = target)) return null
         return bestMatch(pattern = pattern, target = target, text = text)
     }
@@ -115,16 +115,6 @@ class FuzzyMatcher {
         runs
     }
 
-    /** Lowercase without accents, one character for one character so matched positions stay those of the text. */
-    private fun folded(
-        text: String
-    ): String = buildString(capacity = text.length) {
-        text.forEach { char ->
-            val lower = char.lowercaseChar()
-            append(UNACCENTED[lower] ?: lower)
-        }
-    }
-
     companion object {
         private const val MATCH = 16
         private const val START = 12
@@ -138,17 +128,5 @@ class FuzzyMatcher {
         private const val MAX_LEADING_GAP = 8
         private const val TRAILING_GAP = 1
         private const val NO_MATCH = Int.MIN_VALUE
-        private val UNACCENTED: Map<Char, Char> = mapOf(
-            'a' to "àáâãäåāăą",
-            'c' to "çćĉċč",
-            'e' to "èéêëēĕėęě",
-            'i' to "ìíîïĩīĭįı",
-            'n' to "ñńņňŉ",
-            'o' to "òóôõöøōŏő",
-            'u' to "ùúûüũūŭůűų",
-            'y' to "ýÿŷ",
-            's' to "śŝşš",
-            'z' to "źżž"
-        ).flatMap { (plain, accented) -> accented.map { it to plain } }.toMap()
     }
 }
