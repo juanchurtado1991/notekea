@@ -24,6 +24,34 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
         LinkKind.MARKDOWN_ENCODED -> resolveMarkdown(target = percentDecoded(target = link.target), source = source)
     }
 
+    /**
+     * The note a clicked wiki link to [target] opens when [resolve] finds no single one because several notes share its
+     * name: the one in [source]'s folder, else the one closest to the vault root, else the first by path. Null when no
+     * note matches. Only for following a link: an ambiguous link is still never rewritten.
+     */
+    fun closestWiki(
+        target: String,
+        source: RelativePath
+    ): RelativePath? {
+        val name = withoutMarkdownExtension(target = target.trim()).lowercase()
+        val candidates = if (RelativePath.SEPARATOR in name) {
+            val withExtension = name + RelativePath.MARKDOWN_EXTENSION
+            notes.filter {
+                val path = it.value.lowercase()
+                path == withExtension || path.endsWith(suffix = RelativePath.SEPARATOR + withExtension)
+            }
+        } else {
+            byLowerName[name].orEmpty()
+        }
+        return candidates.minWithOrNull(
+            comparator = compareBy<RelativePath>(
+                { it.parent != source.parent },
+                { path -> path.value.count { it == RelativePath.SEPARATOR.single() } },
+                { it.value.lowercase() }
+            )
+        )
+    }
+
     /** Whether a bare `[[name]]` would point to exactly one note. */
     fun isUniqueName(
         name: String
