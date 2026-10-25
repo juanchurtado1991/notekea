@@ -369,13 +369,35 @@ A link graph built from `[[wiki links]]`, Markdown links, embeds and frontmatter
 
 ### ⬜ 2.7 Graph view — `feature/graph-view`
 
+A map of how notes connect, made to be understood at a glance by someone who is not technical: it opens small
+(the current note and its neighbors), colors itself, and has no physics settings. Only notes are nodes; tags and
+attachments never are, so the graph never turns into a hairball of everything in the vault.
+
 **UI — Graph** (opened with `Mod+G` or from the sidebar, as an editor tab):
-- Notes as nodes, sized by number of links; `[[links]]` as solid edges and semantic relations (above a similarity
-  threshold) as dashed edges in `accent`, toggleable.
-- Local graph mode (the current note and its neighbors up to depth 2) and global mode.
-- Filters: folder, tag, show orphans. Pan, zoom and drag; click opens the note.
-- Force-directed layout computed off the UI thread; with more than 2,000 nodes it starts in local mode.
-- States: empty vault, index not ready (only link edges, with a hint), too large (local mode suggestion).
+- **Local first:** opened from a note, the graph is local: that note and its direct neighbors (depth 1), with a
+  1 / 2 depth selector. The global graph is an explicit choice ("Whole vault"), and the default when no note is open.
+  With more than 2,000 nodes the global graph suggests local mode.
+- **Nodes and edges:** nodes sized by number of links; `[[links]]` as solid edges; semantic relations (above a
+  similarity threshold) as dashed edges in `accent`, labeled "Related by meaning" and toggleable: on by default in
+  local mode, off in global mode.
+- **Automatic colors:** nodes colored by top-level folder from the design system palette, with a legend, and no
+  setup needed. Custom color groups by tag are a later option.
+- **Focus on hover:** hovering a note highlights it, its edges and its neighbors and dims the rest.
+- **Labels:** always shown in local mode; in global mode only once zoomed in enough to read them.
+- **Filters:** exclude folders (for example templates or an archive), remembered per vault; orphans are hidden by
+  default in global mode ("Show orphans").
+- **Layout:** force-directed, computed off the UI thread, with tuned defaults (checked on the `smoke-data` vaults)
+  and no physics sliders; at most one "Closer / More spread out" control.
+- **Interaction:** pan, zoom and drag; clicking a node opens the note. Keyboard: arrow keys move between connected
+  nodes, `Enter` opens the focused note, `Esc` returns to the note.
+- **States:**
+  - Empty vault, or a note with no links: a hint that teaches ("Link notes with `[[ ]]` to see them connected
+    here").
+  - Index not ready: only link edges, with a hint.
+  - Too large: local mode suggestion.
+- **Out of scope:** Canvas-style whiteboards (see "Out of scope for the MVP").
+- **Done when:** opening the graph from a note shows a readable local graph without any setup, the global graph
+  stays responsive on a 2,000-note vault, and every node can be reached and opened with the keyboard.
 
 ### ⬜ 2.8 Retrieval evaluation set — `chore/rag-eval`
 

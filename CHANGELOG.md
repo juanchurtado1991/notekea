@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Features never depend on each other: the app composes them through slots (`ARCHITECTURE.md` §1, enforced by
   Konsist).
 
+- Plan for the graph view (`ROADMAP.md` 2.7): it opens as a local graph of the current note, colors notes by
+  folder without setup, focuses a note's links on hover, has no physics settings and can be used with the keyboard.
 - Plan for M3: answers from small local models (~2B, ~4B, ~8B) are made precise by a pipeline that reranks
   retrieval, extracts evidence in parallel and verifies every sentence against the notes, plus an opt-in Deep
   answer mode that writes several drafts in parallel and keeps the best verified one (`ROADMAP.md` 3.0, 3.5, 3.6;
