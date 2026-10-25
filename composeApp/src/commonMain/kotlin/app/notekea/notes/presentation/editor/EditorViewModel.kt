@@ -13,6 +13,7 @@ import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
+import androidx.compose.ui.text.TextRange
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -40,6 +41,7 @@ class EditorViewModel(
     val buffer = TextFieldState()
 
     private val logger = Logger.withTag(tag = LOG_TAG)
+    private val noteSearch = NoteSearch()
     private val saveLock = Mutex()
     private var autosaveJob: Job? = null
     private var watchJob: Job? = null
@@ -59,6 +61,11 @@ class EditorViewModel(
     ) {
         when (intent) {
             EditorIntent.OnCloseDeleted -> closeDeleted()
+            EditorIntent.OnFindClose -> closeFind()
+            EditorIntent.OnFindNext -> moveToMatch(step = 1)
+            EditorIntent.OnFindOpen -> reduce { it.copy(find = it.find ?: FindState()) }
+            EditorIntent.OnFindPrevious -> moveToMatch(step = -1)
+            is EditorIntent.OnFindQueryChange -> search(query = intent.query)
             EditorIntent.OnFlushRequest -> runSave { flush() }
             EditorIntent.OnFocusLost -> runSave { saveNow() }
             EditorIntent.OnKeepMine -> runSave { keepMine() }
@@ -76,6 +83,7 @@ class EditorViewModel(
     private fun onBufferChanged(
         body: String
     ) {
+        state.value.find?.let { find -> updateMatches(query = find.query, body = body, keepCurrent = true) }
         val document = opened ?: return
         autosaveJob?.cancel()
         if (body == document.body) {
@@ -293,6 +301,58 @@ class EditorViewModel(
             if (isNewNote) placeCursorBeforeCharAt(index = 0) else placeCursorBeforeCharAt(index = cursor)
         }
         if (isNewNote) buffer.undoState.clearHistory()
+    }
+
+    private fun search(
+        query: String
+    ) {
+        updateMatches(query = query, body = buffer.text.toString(), keepCurrent = false)
+        selectCurrentMatch()
+    }
+
+    /** Finds [query] again; after an edit the current match stays the same one when it still exists. */
+    private fun updateMatches(
+        query: String,
+        body: String,
+        keepCurrent: Boolean
+    ) {
+        val matches = noteSearch.matches(text = body, query = query)
+        reduce { state ->
+            val previous = state.find?.current?.takeIf { keepCurrent }
+            val current = if (matches.isEmpty()) {
+                null
+            } else {
+                (previous ?: 0).coerceAtMost(
+                    maximumValue = matches.lastIndex
+                )
+            }
+            state.copy(find = FindState(query = query, matches = matches, current = current))
+        }
+    }
+
+    private fun moveToMatch(
+        step: Int
+    ) {
+        reduce { state ->
+            val find = state.find ?: return@reduce state
+            val count = find.matches.size
+            if (count == 0) return@reduce state
+            val next = ((find.current ?: 0) + step + count) % count
+            state.copy(find = find.copy(current = next))
+        }
+        selectCurrentMatch()
+    }
+
+    /** Selects the current match in the text, so closing the bar leaves the cursor on it. */
+    private fun selectCurrentMatch() {
+        val find = state.value.find ?: return
+        val match = find.current?.let { find.matches.getOrNull(index = it) } ?: return
+        buffer.edit { selection = TextRange(start = match.first, end = match.last + 1) }
+    }
+
+    private fun closeFind() {
+        selectCurrentMatch()
+        reduce { it.copy(find = null) }
     }
 
     private fun showUnexpectedError(
