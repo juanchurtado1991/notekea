@@ -5,10 +5,18 @@
 # terminals and the native folder picker may each see a different /tmp. It never touches smoke-data/vaults.
 # Usage: smoke-data/smoke.sh prepare | move | lock | outside | large | edit-note | edit-note-soon | delete-note |
 #        check-note | clear-cache | first-launch | restore-settings | clean
+# SMOKE_SCRATCH=scratch-<name> builds everything in smoke-data/scratch-<name> instead, so an agent's checks never touch
+# the developer's smoke-data/scratch. It changes only that folder: clear-cache, first-launch and restore-settings
+# still use the app's real data folder.
 set -euo pipefail
 
 SMOKE_ROOT="$(cd "$(dirname "$0")" && pwd)"
-SCRATCH="$SMOKE_ROOT/scratch"
+SCRATCH_NAME="${SMOKE_SCRATCH:-scratch}"
+if ! [[ "$SCRATCH_NAME" =~ ^scratch(-[A-Za-z0-9]+)?$ ]]; then
+    echo "SMOKE_SCRATCH must be scratch or scratch-<letters and digits>, not a path: $SCRATCH_NAME" >&2
+    exit 2
+fi
+SCRATCH="$SMOKE_ROOT/$SCRATCH_NAME"
 SETTINGS_FILE="settings.properties"
 DATABASE_FILE="notekea.db"
 LARGE_FOLDERS=50
@@ -26,7 +34,7 @@ app_data_dir() {
 clean() {
     if [ -d "$SCRATCH/Locked Vault" ]; then chmod 755 "$SCRATCH/Locked Vault"; fi
     if [ -d "$SCRATCH" ]; then
-        # Only ever deletes smoke-data/scratch, next to this script.
+        # Only ever deletes smoke-data/scratch (or the scratch-<name> SMOKE_SCRATCH names), next to this script.
         find "$SCRATCH" -depth -delete
     fi
 }

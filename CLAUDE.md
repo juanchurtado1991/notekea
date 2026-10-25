@@ -19,6 +19,11 @@ stop and wait for the developer's review; they merge it (rebase merging), or ask
 branch. Only when every step is merged does the smoke test run, and then one pull request takes the feature branch
 to `main`. Never merge a pull request yourself.
 
+While building UI, render its states headless (`ImageComposeScene`, in a temporary test you delete afterwards) and
+show them to the developer in the conversation; never commit screenshots or attach them to pull requests. Every
+step brings the tests of `GUIDELINES.md` §10: fakes that behave like the real thing, an integration test on real
+files, a screen test for UI, and a regression test for every smoke bug.
+
 **Before writing a feature, read the reference implementations in `ARCHITECTURE.md` §10 and mirror their
 structure**. Build every screen from the design system components (`ARCHITECTURE.md` §11); add missing ones there.
 The rest of the pattern: port in domain, adapter in data, logic in a use case tested with a fake, Koin modules.
@@ -42,7 +47,11 @@ When a skill disagrees with the project documents above, **the project documents
 A `feature/` or `fix/` branch is not done until the developer has run the manual smoke test. Agents cannot replace
 it: when every step is merged into the feature branch, hand over a short smoke test script based on the feature's
 "Done when" criteria in `ROADMAP.md`, and wait for the developer's result before opening the pull request to
-`main`. Fixes the smoke test needs are new steps. Within the feature's steps:
+`main`. Fixes the smoke test needs are new steps. Before handing it over, run the pre-smoke of `GUIDELINES.md` §8:
+every case you can run headless, and every expected value of the script checked against `smoke-data/`. Run the
+scripts only as `SMOKE_SCRATCH=scratch-agent smoke-data/smoke.sh <command>`; never run them on the developer's
+`smoke-data/scratch`, and never run `clear-cache`, `first-launch` or `restore-settings`, which change the app's real
+data folder. Within the feature's steps:
 
 1. **Data:** add what the smoke test needs to `smoke-data/` (inside the repository when Git can hold it, otherwise
    as a step of `smoke.sh` and `smoke.ps1`) and list it in `smoke-data/README.md`. The developer never invents data.

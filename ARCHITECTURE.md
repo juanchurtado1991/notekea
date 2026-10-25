@@ -152,6 +152,8 @@ abstract class BaseViewModel<S, I, E>(
 | `domain` | Use cases, pure logic (chunking, link resolution, date formats) | `commonTest`, fakes for every interface |
 | `data` | Mapping, file system behavior, error mapping | `commonTest` with Okio `FakeFileSystem`; `jvmTest` only for JVM libraries (Lucene, JGit) using temporary directories |
 | `presentation` | ViewModels and reducers: every intent, every state transition, every error case | `commonTest`, `kotlinx-coroutines-test` + Turbine, fake use cases |
+| Integration | The real adapters together, on real files: saving, watching, line endings, links on disk | `jvmTest` with a temporary directory (`EditorOnDiskTest`), every step (`GUIDELINES.md` §10) |
+| Screens | A screen driven through its states, including fast or repeated input | `jvmTest` with `ImageComposeScene` (`NotekeaMarkdownCodeTest`), until Compose `ui-test` lands (`qa/README.md`) |
 | Architecture | Layer boundaries and conventions in this document | Konsist tests in `jvmTest` |
 | AI quality | Retrieval recall and citation accuracy | Evaluation sets (`ROADMAP.md` 2.8, 3.4), run on demand |
 

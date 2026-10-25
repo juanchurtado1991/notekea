@@ -40,6 +40,10 @@ smoke-data/smoke.sh clean             # removes the scratch folder
 ```
 
 On Windows: `powershell -ExecutionPolicy Bypass -File smoke-data\smoke.ps1 prepare` (same commands).
+`SMOKE_SCRATCH=scratch-<name>` (`$env:SMOKE_SCRATCH` on Windows) builds the scenarios in `smoke-data/scratch-<name>/`
+instead, also ignored by Git: the agent's pre-smoke uses `scratch-agent`, so it never changes the developer's
+`scratch`. It accepts only that form of name, never a path, and does not change `clear-cache`, `first-launch` or
+`restore-settings`, which always use the app's real data folder.
 Native folder pickers refuse to select a folder they cannot read, so `Locked Vault` is opened first and locked
 afterwards (`lock`), like a known vault whose permissions change. Run the scripts as a normal user: as root (or an
 administrator) the locked folder stays readable.
