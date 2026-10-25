@@ -40,6 +40,9 @@ sealed interface EditorIntent {
     /** Open [path], saving the current note first; null closes the editor. */
     data class OnOpen(val path: RelativePath?) : EditorIntent
 
+    /** Mod+E or the header button: switch between Edit and Read mode. */
+    data object OnReadModeToggle : EditorIntent
+
     /** Write the deleted note back with the editor's text. */
     data object OnRestore : EditorIntent
 

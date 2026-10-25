@@ -4,11 +4,13 @@
     <string name="editor_close">Close</string>
     <string name="editor_conflict_message">This note changed outside Notekea while you were editing it.</string>
     <string name="editor_deleted_message">This note was moved or deleted outside Notekea.</string>
+    <string name="editor_edit_mode">Edit</string>
     <string name="editor_find_count">%1$d of %2$d</string>
     <string name="editor_find_none">No results</string>
     <string name="editor_keep_mine">Keep mine</string>
     <string name="editor_load_failed">This note couldn’t be opened.</string>
     <string name="editor_load_theirs">Load theirs</string>
+    <string name="editor_read_mode">Reading view</string>
     <string name="editor_restore">Restore</string>
     <string name="editor_retry">Try again</string>
     <string name="editor_save_failed">Not saved yet: %1$s</string>
