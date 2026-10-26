@@ -339,8 +339,10 @@ same Markdown a person would type, so notes stay readable in any app.
   `[[Note]]`, the selection becoming its label), **Web link** (`Mod+Shift+K`), **Tag** (the tag picker: the vault's
   tags, in the frontmatter or written in the text, the most used first; typing finds any of them or offers it as a new
   tag, which is found like the others once the note is saved; the selected text is the first search), **Bulleted
-  list**, **Numbered list**, **Checklist**, **Callout** (menu of types with their icons in plain words, and "Folded"),
-  **Table** (3 × 3, ready to fill) and **More** (Quote, Code block, Divider).
+  list**, **Numbered list**, **Checklist**, **Callout** (menu of types with their icons in plain words, and "Start
+  folded", explained in the menu), **Code block** (menu: Plain text and the ten most used languages Preview colors:
+  Python, JavaScript, TypeScript, Java, Kotlin, C#, C++, Go, Rust, Shell) and **More** (Quote, Divider and Table, its
+  size picked on a grid of up to 8 × 6 cells, with sample text in every cell).
 - With a selection, a button formats it (bold wraps it, a list prefixes its lines); bold and italic format the word
   the cursor is in; elsewhere a button inserts an example with the placeholder text selected, ready to type over.
   Pressing a toggle again on formatted text removes it (bold, lists, quote, heading). The toolbar never takes the
@@ -348,8 +350,9 @@ same Markdown a person would type, so notes stay readable in any app.
 - Lists work as in other editors: Enter continues a bulleted, numbered or checklist item (an empty one ends the list)
   and a quote, Tab and Shift+Tab nest an item under the one above and take it back, and Backspace right after a
   marker removes it.
-- The text shows what is typed: no ligatures (`->` stays `->`, in code too), and clicking or typing never scrolls the
-  note unless the cursor would leave the view; the toolbar stays at the top while scrolling.
+- The text shows what is typed: no ligatures (`->` stays `->`, in code too), a code block is shaded as a block and
+  the cursor moves past the spaces typed in it, and clicking or typing never scrolls the note unless the cursor would
+  leave the view; the toolbar stays at the top while scrolling.
 - **Find in note** stays at the end of the toolbar; the formatting buttons hide in Preview.
 - Aliases and frontmatter tags are edited in 1.14 Properties view (the frontmatter stays read-only in the editor).
 - **Done when:** a person who never wrote Markdown can make a heading, a checklist, a callout, a table and a link to

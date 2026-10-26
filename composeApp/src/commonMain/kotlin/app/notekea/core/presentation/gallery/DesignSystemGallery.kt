@@ -47,6 +47,7 @@ import app.notekea.core.presentation.components.NotekeaSearchButton
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.components.NotekeaSplitPane
 import app.notekea.core.presentation.components.NotekeaCompactTabs
+import app.notekea.core.presentation.components.NotekeaGridSizePicker
 import app.notekea.core.presentation.components.NotekeaTab
 import app.notekea.core.presentation.components.NotekeaTabRow
 import app.notekea.core.presentation.components.NotekeaTextField
@@ -124,6 +125,10 @@ private const val STATUS_INDEXED = "Indexed 1,204 notes"
 private const val STATUS_MODEL = "Model: ready"
 private const val STATUS_SYNC = "Sync: conflict"
 private const val TABS_SHORTCUT = "Ctrl+E"
+private const val GRID_COLUMNS = 8
+private const val GRID_ROWS = 6
+private const val MENU_TABLE = "Insert table"
+private const val MENU_TABLE_HINT = "A submenu with a size picker"
 private const val SKELETON_LONG_FRACTION = 0.7f
 private const val SKELETON_SHORT_FRACTION = 0.5f
 private const val TREE_COUNT_PROJECTS = "12"
@@ -357,6 +362,21 @@ private fun MenuButtonSample() {
             listOf(
                 NotekeaMenuItem(label = MENU_SORT_NAME, onClick = { isByName = true }, isChecked = isByName),
                 NotekeaMenuItem(label = MENU_SORT_DATE, onClick = { isByName = false }, isChecked = !isByName)
+            ),
+            listOf(
+                NotekeaMenuItem(
+                    label = MENU_TABLE,
+                    onClick = {},
+                    supportingText = MENU_TABLE_HINT,
+                    submenu = { onChosen ->
+                        NotekeaGridSizePicker(
+                            columns = GRID_COLUMNS,
+                            rows = GRID_ROWS,
+                            label = { columns, rows -> "$columns × $rows" },
+                            onPick = { _, _ -> onChosen() }
+                        )
+                    }
+                )
             )
         )
     )

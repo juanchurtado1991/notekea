@@ -31,10 +31,18 @@ sealed interface FormatAction {
         val isFolded: Boolean
     ) : FormatAction
 
-    /** A 3 × 3 table whose header cells are [columnNames]. */
-    data class Table(val columnNames: List<String>) : FormatAction
+    /** A table with a header of [columnNames] and [rows] rows of [cellText], the first header selected to type over. */
+    data class Table(
+        val columnNames: List<String>,
+        val rows: Int,
+        val cellText: String
+    ) : FormatAction
 
-    data class CodeBlock(val placeholder: String) : FormatAction
+    /** A fenced code block in [language] (its name after the fence, empty for plain text). */
+    data class CodeBlock(
+        val placeholder: String,
+        val language: String = ""
+    ) : FormatAction
 
     data object Divider : FormatAction
 

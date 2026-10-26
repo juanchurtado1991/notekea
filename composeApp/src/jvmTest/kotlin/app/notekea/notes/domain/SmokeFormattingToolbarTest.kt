@@ -143,29 +143,30 @@ class SmokeFormattingToolbarTest {
     }
 
     @Test
-    fun `1_17-07 a table, a divider, a code block and a quote each go on lines of their own`() {
+    fun `1_17-07 a 3 x 2 table, a kotlin code block, a divider and a quote each go on lines of their own`() {
         val steps = Steps(text = practice)
         steps.at(
             index = steps.text.length,
-            action = FormatAction.Table(columnNames = listOf("Column 1", "Column 2", "Column 3"))
+            action = FormatAction.Table(
+                columnNames = listOf("Column 1", "Column 2", "Column 3"),
+                rows = 2,
+                cellText = "Text"
+            )
         )
-        val cell = steps.cursor
-        steps.at(index = steps.text.length, action = FormatAction.Divider)
-        steps.at(index = steps.text.length, action = FormatAction.CodeBlock(placeholder = "code"))
+        val header = steps.selected()
+        steps.at(index = steps.text.length, action = FormatAction.CodeBlock(placeholder = "code", language = "kotlin"))
         val code = steps.selected()
+        steps.at(index = steps.text.length, action = FormatAction.Divider)
         steps.at(index = steps.text.length, action = FormatAction.Quote(placeholder = "Quote"))
 
         assertEquals(
             expected = Triple(
-                "| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n|   |   |   |\n|   |   |   |\n\n---\n\n```\ncode\n```\n> Quote",
-                "|   |",
+                "| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n" +
+                    "| Text | Text | Text |\n| Text | Text | Text |\n\n```kotlin\ncode\n```\n\n---\n> Quote",
+                "Column 1",
                 "code"
             ),
-            actual = Triple(
-                steps.text.substringAfter(delimiter = "$REMINDER\n\n"),
-                steps.text.substring(startIndex = cell - 2, endIndex = cell + 3),
-                code
-            )
+            actual = Triple(steps.text.substringAfter(delimiter = "$REMINDER\n\n"), header, code)
         )
     }
 
