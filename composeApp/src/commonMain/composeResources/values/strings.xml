@@ -133,8 +133,8 @@
     <string name="format_web_link">Web link</string>
     <string name="format_web_link_placeholder">link text</string>
     <plurals name="note_panel_folder_notes">
-        <item quantity="one">1 note</item>
-        <item quantity="other">%1$d notes</item>
+        <item quantity="one">1 file</item>
+        <item quantity="other">%1$d files</item>
     </plurals>
     <string name="file_panel_open">Open with its app</string>
     <string name="file_panel_unreadable">Notekea can’t show this file here. Open it with its app to see it.</string>
@@ -169,8 +169,8 @@
     <string name="tree_delete_folder_title">Delete this folder?</string>
     <string name="tree_delete_message">“%1$s” will be moved to the trash. You can restore it from there.</string>
     <plurals name="tree_delete_folder_message">
-        <item quantity="one">“%1$s” and the note in it will be moved to the trash. You can restore them from there.</item>
-        <item quantity="other">“%1$s” and the %2$d notes in it will be moved to the trash. You can restore them from there.</item>
+        <item quantity="one">“%1$s” and the file in it will be moved to the trash. You can restore them from there.</item>
+        <item quantity="other">“%1$s” and the %2$d files in it will be moved to the trash. You can restore them from there.</item>
     </plurals>
     <string name="tree_delete_note">Delete note</string>
     <string name="tree_delete_note_title">Delete this note?</string>

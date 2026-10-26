@@ -100,7 +100,7 @@ class FlattenTreeUseCaseTest {
     }
 
     @Test
-    fun `files that are not notes are listed with the notes by name, with their extension, and by date too`() {
+    fun `other files are listed with the notes by name or date, with their extension, and counted`() {
         val photos = VaultTree.EMPTY
             .withNote(note = entry(path = "Recipes/Arepas.md", modifiedOffsetMillis = 10L))
             .withAttachment(file = NoteFixtures.file(path = "Recipes/Zucchini.png", modifiedOffsetMillis = 30L))
@@ -111,7 +111,7 @@ class FlattenTreeUseCaseTest {
 
         assertEquals(
             expected = listOf(
-                folder(path = "Recipes", depth = 0, count = 1, isExpanded = true),
+                folder(path = "Recipes", depth = 0, count = 3, isExpanded = true),
                 note(path = "Recipes/Arepas.md", depth = 1),
                 TreeRow.File(path = RelativePath(value = "Recipes/Banana.pdf"), depth = 1, modifiedAt = null),
                 TreeRow.File(path = RelativePath(value = "Recipes/Zucchini.png"), depth = 1, modifiedAt = null)
@@ -132,7 +132,7 @@ class FlattenTreeUseCaseTest {
     ): TreeRow = TreeRow.Folder(
         path = RelativePath(value = path),
         depth = depth,
-        noteCount = count,
+        fileCount = count,
         isExpanded = isExpanded
     )
 
