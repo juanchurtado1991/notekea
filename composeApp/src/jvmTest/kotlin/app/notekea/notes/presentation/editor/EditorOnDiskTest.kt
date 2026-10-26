@@ -20,6 +20,8 @@ import app.notekea.notes.data.OkioNoteScanner
 import app.notekea.notes.data.SettingsEditorPreferencesStore
 import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.GetEditorModeUseCase
+import app.notekea.notes.domain.GetSidePanelUseCase
+import app.notekea.notes.domain.SaveSidePanelUseCase
 import app.notekea.notes.domain.SaveEditorModeUseCase
 import com.russhwolf.settings.MapSettings
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
@@ -85,6 +87,29 @@ class EditorOnDiskTest {
         assertEquals(
             expected = WINDOWS_NOTE + "Added line.\r\n",
             actual = note.readText()
+        )
+    }
+
+    @Test
+    fun `a note on disk opens with the outline of its body, which follows a heading typed into it`() {
+        vault.resolve(NOTE).writeText(text = WINDOWS_NOTE)
+        val viewModel = editor()
+        runBlocking(context = main) {
+            viewModel.onIntent(intent = EditorIntent.OnOpen(path = RelativePath(value = NOTE)))
+        }
+        awaitUntil { viewModel.state.value.outline.isNotEmpty() }
+        val opened = viewModel.state.value.outline.map { it.text to it.offset }
+
+        runBlocking(context = main) {
+            viewModel.buffer.edit { append(text = "## Added heading\n") }
+            Snapshot.sendApplyNotifications()
+        }
+        awaitUntil { viewModel.state.value.outline.size == 2 }
+        runBlocking(context = main) { viewModel.viewModelScope.cancel() }
+
+        assertEquals(
+            expected = listOf("Windows line endings" to 0) to listOf("Windows line endings", "Added heading"),
+            actual = opened to viewModel.state.value.outline.map { it.text }
         )
     }
 
@@ -170,6 +195,8 @@ class EditorOnDiskTest {
             ),
             getEditorMode = GetEditorModeUseCase(editorPreferencesStore = preferences),
             saveEditorMode = SaveEditorModeUseCase(editorPreferencesStore = preferences),
+            getSidePanel = GetSidePanelUseCase(editorPreferencesStore = preferences),
+            saveSidePanel = SaveSidePanelUseCase(editorPreferencesStore = preferences),
             attachmentTools = attachmentTools(dispatchers = dispatchers)
         )
     }

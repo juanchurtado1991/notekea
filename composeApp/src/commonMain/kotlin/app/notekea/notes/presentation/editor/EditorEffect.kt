@@ -2,6 +2,7 @@ package app.notekea.notes.presentation.editor
 
 import app.notekea.notes.domain.LinkKind
 import app.notekea.notes.domain.LinkUpdateResult
+import app.notekea.notes.domain.OutlineHeading
 import app.notekea.notes.domain.RelativePath
 
 /** One-shot events of the note editor for the window around it. */
@@ -21,6 +22,12 @@ sealed interface EditorEffect {
 
     /** The text of the open note should take the keyboard (in Edit mode; Read mode has no cursor). */
     data object FocusText : EditorEffect
+
+    /** The outline should take the keyboard (`Mod+Shift+O`). */
+    data object FocusOutline : EditorEffect
+
+    /** An outline [heading] was chosen: the editor scrolls so it sits at the top of the note's view. */
+    data class RevealHeading(val heading: OutlineHeading) : EditorEffect
 
     /** Link to a note was asked for: the window opens the palette to pick it, then sends a note link to format. */
     data object RequestNoteLink : EditorEffect

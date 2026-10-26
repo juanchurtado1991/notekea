@@ -101,6 +101,18 @@ sealed interface EditorIntent {
     /** Mod+S: save at once instead of waiting for the autosave. */
     data object OnSaveShortcut : EditorIntent
 
+    /** A heading of the outline was clicked or chosen with Enter: the editor goes to the [index]th heading. */
+    data class OnHeadingClick(val index: Int) : EditorIntent
+
+    /** `Mod+Shift+O`: the outline takes the keyboard, showing the side panel first if it was hidden. */
+    data object OnOutlineFocusRequest : EditorIntent
+
+    /** `Mod+Shift+\` or the panel's button: show or hide the panel on the right of the editor. */
+    data object OnSidePanelToggle : EditorIntent
+
+    /** The user finished dragging the side panel's edge to [widthDp]. */
+    data class OnSidePanelResize(val widthDp: Int) : EditorIntent
+
     /** The title field was confirmed with [name]: rename the note, and the links to it. */
     data class OnTitleCommit(val name: String) : EditorIntent
 

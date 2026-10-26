@@ -41,6 +41,7 @@ import app.notekea.notes.domain.FormatAction
 import app.notekea.resources.Res
 import app.notekea.resources.editor_edit_mode
 import app.notekea.resources.editor_find
+import app.notekea.resources.editor_outline
 import app.notekea.resources.editor_preview_mode
 import app.notekea.resources.editor_toolbar_label
 import app.notekea.resources.format_attach
@@ -89,9 +90,9 @@ private val CODE_LANGUAGES = listOf(
 /**
  * The editor toolbar (`ROADMAP.md` 1.17), under the title: Edit | Preview tabs (switched with their shortcut too), the
  * formatting buttons in groups (text, links and tags, lists, blocks), each with a plain-language tooltip and its
- * shortcut, and Find in note at the end. Preview shows the note as it reads, so it keeps only the tabs and Find. The
- * buttons move to a line of their own above the tabs when the editor is too narrow for one line. the Tag button opens the
- * tag picker.
+ * shortcut, and at the end Find in note and Outline, which shows or hides the side panel (`ROADMAP.md` 1.9). Preview
+ * shows the note as it reads, so it keeps only the tabs, Find and Outline. The buttons move to a line of their own
+ * above the tabs when the editor is too narrow for one line. The Tag button opens the tag picker.
  */
 @Composable
 fun EditorToolbar(
@@ -116,14 +117,7 @@ fun EditorToolbar(
                         groups()
                         Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingM))
                     }
-                    ToolbarButton(
-                        icon = NotekeaIcons.Find,
-                        label = Res.string.editor_find,
-                        onClick = { onIntent(EditorIntent.OnFindOpen) },
-                        shortcutHint = platformConventions.findShortcut.label(
-                            operatingSystem = platformConventions.operatingSystem
-                        )
-                    )
+                    EndButtons(platformConventions = platformConventions, onIntent = onIntent)
                 }
             }
         }
@@ -134,6 +128,27 @@ fun EditorToolbar(
                 .background(color = MaterialTheme.colorScheme.outlineVariant)
         )
     }
+}
+
+/** Find in note and Outline (the side panel), at the end in both modes. */
+@Composable
+private fun EndButtons(
+    platformConventions: PlatformConventions,
+    onIntent: (EditorIntent) -> Unit
+) {
+    val operatingSystem = platformConventions.operatingSystem
+    ToolbarButton(
+        icon = NotekeaIcons.Find,
+        label = Res.string.editor_find,
+        onClick = { onIntent(EditorIntent.OnFindOpen) },
+        shortcutHint = platformConventions.findShortcut.label(operatingSystem = operatingSystem)
+    )
+    ToolbarButton(
+        icon = NotekeaIcons.Outline,
+        label = Res.string.editor_outline,
+        onClick = { onIntent(EditorIntent.OnSidePanelToggle) },
+        shortcutHint = platformConventions.toggleSidePanelShortcut.label(operatingSystem = operatingSystem)
+    )
 }
 
 /** Edit | Preview, like GitHub's; the tooltip teaches the shortcut that switches them. */

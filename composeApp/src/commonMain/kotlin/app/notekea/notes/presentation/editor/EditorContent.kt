@@ -35,10 +35,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -93,6 +94,7 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.notekeaCodeTextStyle
 import app.notekea.notes.domain.NoteMetadata
+import androidx.compose.runtime.DisposableEffect
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.TaskFinder
@@ -116,6 +118,7 @@ private const val TASK_CHECKBOX_RATIO = 0.8f
 private const val BODY_MIN_HEIGHT_DP = 320
 private const val CONTENT_MAX_WIDTH_DP = 760
 private const val MATCH_SCROLL_MARGIN_DP = 96
+private const val HEADING_MARGIN_DP = 8
 internal const val NO_LIGATURES = "liga 0, calt 0"
 private const val PATH_SEPARATOR = " / "
 private const val PREVIEW_HEIGHT_DP = 520
@@ -131,6 +134,7 @@ private val SKELETON_WIDTHS = listOf(0.9f, 0.75f, 0.85f, 0.6f, 0.8f, 0.4f)
  * from the frontmatter (read-only), and the body with its Markdown highlighted. The text is centred and limited to a
  * readable width; the header scrolls with it. Leaving the text saves at once. Find in note shows its bar above the
  * text, marks the matches and scrolls to the current one. Read mode shows the note rendered instead of its Markdown.
+ * The [outlineTracker] learns which heading the view is in and scrolls to the headings the outline asks for.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -141,42 +145,77 @@ fun EditorContent(
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier = Modifier,
     properties: NoteMetadata? = null,
-    textFocusRequester: FocusRequester? = null
+    textFocusRequester: FocusRequester? = null,
+    outlineTracker: OutlineTracker? = null
 ) {
     val scrollState = rememberScrollState()
     // Read only when the toolbar is placed, never in composition, so updating it recomposes nothing.
     val viewport = remember { mutableStateOf<LayoutCoordinates?>(value = null) }
+    val positions = rememberHeadingPositions(viewport = viewport, scrollState = scrollState)
     val keepInView = remember { EditorBringIntoViewSpec() }
-    val defaultBringIntoView = LocalBringIntoViewSpec.current
     // Files dropped anywhere on the editor are attached at the cursor, in Edit mode.
     val fileDrop = LocalFileDrop.current { paths -> onIntent(EditorIntent.OnFilesDrop(paths = paths)) }
+    FollowOutline(
+        state = state,
+        tracker = outlineTracker ?: remember { OutlineTracker() },
+        positions = positions,
+        scrollState = scrollState,
+        toolbarHeight = { keepInView.topInset }
+    )
     Surface(modifier = modifier.fillMaxSize().then(other = fileDrop), color = MaterialTheme.colorScheme.surface) {
         Column {
             EditorBanners(state = state, platformConventions = platformConventions, onIntent = onIntent)
             state.find?.let { find -> EditorFindBar(find = find, onIntent = onIntent) }
-            CompositionLocalProvider(LocalBringIntoViewSpec provides keepInView) {
-                Box(
-                    modifier = Modifier.fillMaxSize().onPlaced {
-                        viewport.value = it
-                    }.verticalScroll(state = scrollState),
-                    contentAlignment = Alignment.TopCenter
-                ) {
-                    // Only the editor's scroll keeps things below the toolbar; the fields inside scroll as usual.
-                    CompositionLocalProvider(LocalBringIntoViewSpec provides defaultBringIntoView) {
-                        EditorPage(
-                            state = state,
-                            buffer = buffer,
-                            scrollState = scrollState,
-                            viewport = { viewport.value },
-                            platformConventions = platformConventions,
-                            onIntent = onIntent,
-                            properties = properties,
-                            textFocusRequester = textFocusRequester,
-                            onToolbarHeight = { keepInView.topInset = it.toFloat() }
-                        )
-                    }
-                }
+            ScrollingPage(scrollState = scrollState, viewport = viewport, keepInView = keepInView) {
+                EditorPage(
+                    state = state,
+                    buffer = buffer,
+                    scrollState = scrollState,
+                    viewport = { viewport.value },
+                    platformConventions = platformConventions,
+                    onIntent = onIntent,
+                    positions = positions,
+                    properties = properties,
+                    textFocusRequester = textFocusRequester,
+                    onToolbarHeight = { keepInView.topInset = it.toFloat() }
+                )
             }
+        }
+    }
+}
+
+/** Where the outline's headings are, measured from the [viewport], in which the page scrolls by [scrollState]. */
+@Composable
+private fun rememberHeadingPositions(
+    viewport: State<LayoutCoordinates?>,
+    scrollState: ScrollState
+): HeadingPositions = remember(viewport, scrollState) {
+    HeadingPositions { coordinates ->
+        viewport.value?.takeIf { it.isAttached }?.let {
+            it.localPositionOf(sourceCoordinates = coordinates).y + scrollState.value
+        }
+    }
+}
+
+/**
+ * The [page] scrolled in the editor's viewport (reported to [viewport]). Only the editor's scroll keeps things below the
+ * toolbar ([keepInView]); the fields inside scroll as usual.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ScrollingPage(
+    scrollState: ScrollState,
+    viewport: MutableState<LayoutCoordinates?>,
+    keepInView: EditorBringIntoViewSpec,
+    page: @Composable () -> Unit
+) {
+    val defaultBringIntoView = LocalBringIntoViewSpec.current
+    CompositionLocalProvider(LocalBringIntoViewSpec provides keepInView) {
+        Box(
+            modifier = Modifier.fillMaxSize().onPlaced { viewport.value = it }.verticalScroll(state = scrollState),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            CompositionLocalProvider(LocalBringIntoViewSpec provides defaultBringIntoView) { page() }
         }
     }
 }
@@ -190,6 +229,7 @@ private fun EditorPage(
     viewport: () -> LayoutCoordinates?,
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
+    positions: HeadingPositions,
     properties: NoteMetadata?,
     textFocusRequester: FocusRequester?,
     onToolbarHeight: (Int) -> Unit
@@ -225,6 +265,7 @@ private fun EditorPage(
             scrollState = scrollState,
             platformConventions = platformConventions,
             onIntent = onIntent,
+            positions = positions,
             textFocusRequester = textFocusRequester
         )
     }
@@ -238,12 +279,18 @@ private fun NoteText(
     scrollState: ScrollState,
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
+    positions: HeadingPositions,
     textFocusRequester: FocusRequester?
 ) {
     if (state.isLoading) {
         EditorSkeleton()
     } else if (state.isReading) {
-        ReadingView(text = buffer.text.toString(), attachments = state.attachments, onIntent = onIntent)
+        ReadingView(
+            text = buffer.text.toString(),
+            attachments = state.attachments,
+            onIntent = onIntent,
+            onHeadingPlaced = { index, coordinates -> positions.inReading[index] = coordinates }
+        )
     } else {
         EditorBody(
             buffer = buffer,
@@ -251,6 +298,7 @@ private fun NoteText(
             platformConventions = platformConventions,
             onIntent = onIntent,
             attachments = state.attachments,
+            outline = OutlinePlacement(headings = state.outline, positions = positions),
             find = state.find,
             focusRequester = textFocusRequester
         )
@@ -393,6 +441,7 @@ private fun EditorBody(
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
     attachments: List<AttachmentView>,
+    outline: OutlinePlacement,
     find: FindState?,
     focusRequester: FocusRequester?
 ) {
@@ -401,15 +450,17 @@ private fun EditorBody(
     val highlighting = rememberHighlighting(find = find, paragraphs = room.paragraphs)
     var hasFocus by remember { mutableStateOf(value = false) }
     var layout by remember { mutableStateOf<() -> TextLayoutResult?>(value = { null }) }
-    var top by remember { mutableFloatStateOf(value = 0f) }
+    var textPlace by remember { mutableStateOf<LayoutCoordinates?>(value = null) }
     val label = stringResource(resource = Res.string.editor_body_label)
     val onKey = rememberEditorKeys(buffer = buffer, platformConventions = platformConventions, onIntent = onIntent)
-    ScrollToCurrentMatch(scrollState = scrollState, layout = { layout() }, top = { top }, find = find)
+    val top = { textPlace?.takeIf { it.isAttached }?.positionInParent()?.y ?: 0f }
+    ScrollToCurrentMatch(scrollState = scrollState, layout = { layout() }, top = top, find = find)
+    PlaceHeadings(outline = outline, layout = { layout() }, textPlace = { textPlace })
     BasicTextField(
         state = buffer,
         modifier = Modifier
             .fillMaxWidth()
-            .onGloballyPositioned { top = it.positionInParent().y }
+            .onGloballyPositioned { textPlace = it }
             // A short note still leaves room to click below its last line and keep typing.
             .defaultMinSize(minHeight = BODY_MIN_HEIGHT_DP.dp)
             .padding(top = NotekeaDimensions.SpacingL)
@@ -604,6 +655,74 @@ private fun BoxScope.CodeBlockBackgrounds(
                 cornerRadius = CornerRadius(x = radius, y = radius)
             )
         }
+    }
+}
+
+/**
+ * Tells [OutlinePlacement.positions] where each heading of the text is, from its layout: the text's place in the page
+ * ([textPlace], above its top padding), plus the heading's line.
+ */
+@Composable
+private fun PlaceHeadings(
+    outline: OutlinePlacement,
+    layout: () -> TextLayoutResult?,
+    textPlace: () -> LayoutCoordinates?
+) {
+    val padding = with(LocalDensity.current) { NotekeaDimensions.SpacingL.toPx() }
+    val headings by rememberUpdatedState(newValue = outline.headings)
+    DisposableEffect(outline.positions) {
+        outline.positions.inText = { index ->
+            val result = layout()
+            val offset = headings.getOrNull(index = index)?.offset
+            val textTop = textPlace()?.let { outline.positions.pageTopOf(coordinates = it) }
+            if (result == null || offset == null || textTop == null || offset > result.layoutInput.text.length) {
+                null
+            } else {
+                textTop + padding + result.getLineTop(lineIndex = result.getLineForOffset(offset = offset))
+            }
+        }
+        onDispose { outline.positions.inText = { null } }
+    }
+}
+
+/**
+ * Follows the view for the outline: the [tracker]'s current heading is the last one at or above the top of the view
+ * (below the toolbar), or the first one while it is in view below it, and a heading the outline asks for is scrolled to
+ * the top of the view at once. A heading just revealed
+ * stays the current one while the view stays where it put it, even when the note ends too soon to bring it up there.
+ */
+@Composable
+private fun FollowOutline(
+    state: EditorState,
+    tracker: OutlineTracker,
+    positions: HeadingPositions,
+    scrollState: ScrollState,
+    toolbarHeight: () -> Float
+) {
+    val margin = with(LocalDensity.current) { HEADING_MARGIN_DP.dp.toPx() }
+    val currentState = rememberUpdatedState(newValue = state)
+    val revealed = remember { mutableStateOf<Pair<Int, Int>?>(value = null) }
+    LaunchedEffect(tracker) {
+        tracker.onReveal { heading ->
+            val index = currentState.value.outline.indexOf(element = heading)
+            val top = positions.top(index = index, isReading = currentState.value.isReading) ?: return@onReveal
+            scrollState.scrollTo(value = (top - toolbarHeight() - margin).roundToInt().coerceAtLeast(minimumValue = 0))
+            revealed.value = index to scrollState.value
+        }
+    }
+    LaunchedEffect(tracker) {
+        snapshotFlow {
+            val shown = currentState.value
+            val line = scrollState.value + toolbarHeight() + margin + 1
+            val top = { index: Int -> positions.top(index = index, isReading = shown.isReading) }
+            revealed.value?.takeIf { it.second == scrollState.value && it.first in shown.outline.indices }?.first
+                ?: shown.outline.indices.lastOrNull { index -> top(index)?.let { it <= line } == true }
+                // Above the first heading, it is the current one once it can be seen.
+                ?: shown.outline.indices.firstOrNull()?.takeIf { index ->
+                    top(index)?.let { it < scrollState.value + scrollState.viewportSize } == true
+                }
+                ?: OutlineTracker.NONE
+        }.collect { tracker.current = it }
     }
 }
 

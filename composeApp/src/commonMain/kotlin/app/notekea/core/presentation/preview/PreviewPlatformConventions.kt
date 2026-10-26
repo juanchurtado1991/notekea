@@ -38,6 +38,14 @@ object PreviewPlatformConventions {
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
         pasteShortcut = Shortcut(key = ShortcutKey.V, modifiers = setOf(ShortcutModifier.CONTROL)),
+        toggleSidePanelShortcut = Shortcut(
+            key = ShortcutKey.BACKSLASH,
+            modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
+        ),
+        outlineShortcut = Shortcut(
+            key = ShortcutKey.O,
+            modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
+        ),
         dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
         appDataDirectory = APP_DATA,
         homeDirectory = HOME

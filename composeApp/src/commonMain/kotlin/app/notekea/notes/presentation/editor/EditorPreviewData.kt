@@ -3,6 +3,7 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.foundation.text.input.TextFieldState
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.notes.domain.NoteMetadata
+import app.notekea.notes.domain.OutlineFinder
 import app.notekea.notes.domain.RelativePath
 
 /** Sample values shared by the editor's previews: the Arepas recipe of the smoke vault. */
@@ -21,5 +22,8 @@ internal object EditorPreviewData {
 
     fun buffer(): TextFieldState = TextFieldState(initialText = BODY)
 
-    fun state(): EditorState = EditorState(notePath = path)
+    /** The headings of the sample body. */
+    val outline = OutlineFinder().headings(text = BODY)
+
+    fun state(): EditorState = EditorState(notePath = path, outline = outline)
 }

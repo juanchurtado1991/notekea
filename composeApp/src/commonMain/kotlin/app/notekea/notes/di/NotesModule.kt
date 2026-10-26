@@ -11,6 +11,8 @@ import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.EditorPreferencesStore
+import app.notekea.notes.domain.GetSidePanelUseCase
+import app.notekea.notes.domain.SaveSidePanelUseCase
 import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.FollowLinkUseCase
 import app.notekea.notes.domain.FuzzyMatcher
@@ -57,6 +59,8 @@ val notesModule = module {
     single<EditorPreferencesStore> { SettingsEditorPreferencesStore(settings = get(), dispatchers = get()) }
     factoryOf(::GetEditorModeUseCase)
     factoryOf(::SaveEditorModeUseCase)
+    factoryOf(::GetSidePanelUseCase)
+    factoryOf(::SaveSidePanelUseCase)
     factoryOf(::ApplyLinkUpdatesUseCase)
     factoryOf(::AttachFileUseCase)
     factoryOf(::AttachmentTools)
@@ -113,6 +117,8 @@ val notesModule = module {
             renameAndUpdateLinks = get(),
             getEditorMode = get(),
             saveEditorMode = get(),
+            getSidePanel = get(),
+            saveSidePanel = get(),
             attachmentTools = get()
         )
     }
