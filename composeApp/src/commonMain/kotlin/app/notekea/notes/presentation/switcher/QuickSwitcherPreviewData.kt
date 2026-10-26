@@ -29,9 +29,9 @@ internal object QuickSwitcherPreviewData {
         QuickSwitcherRow(
             path = RelativePath(value = "Recipes/Arepas.md"),
             name = "Arepas",
-            detailRanges = listOf(27..30),
+            detailRanges = listOf(21..24),
             folder = "Recipes",
-            detail = "- 2 cups of **pre-cooked** corn flour"
+            detail = "2 cups of pre-cooked corn flour"
         ),
         QuickSwitcherRow(
             path = RelativePath(value = "Recipes/Pasta e fagioli.md"),
