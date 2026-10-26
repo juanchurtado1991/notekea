@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.ListAction
 import app.notekea.notes.domain.RelativePath
@@ -71,6 +72,23 @@ sealed interface EditorIntent {
 
     /** The toolbar's Tag button: choose a tag in the tag picker. */
     data object OnTagRequest : EditorIntent
+
+    /** Mod+V in the text: a copied image is attached and embedded at the cursor, copied text is pasted. */
+    data object OnPaste : EditorIntent
+
+    /** Files dropped on the text, by their paths on the computer: each is attached and embedded at the cursor. */
+    data class OnFilesDrop(val paths: List<String>) : EditorIntent
+
+    /** The toolbar's Image or file: a file chosen in the system's picker is attached and embedded at the cursor. */
+    data object OnAttachmentPick : EditorIntent
+
+    /** A file chip was clicked: open the file with the system's app. */
+    data class OnAttachmentOpen(val path: RelativePath) : EditorIntent
+
+    /** Locate… on a missing file: the file chosen in the picker takes the embed's place. */
+    data class OnAttachmentLocate(val embed: Embed) : EditorIntent
+
+    data object OnAttachmentErrorDismiss : EditorIntent
 
     /** Mod+E or the header button: switch between Edit and Read mode. */
     data object OnReadModeToggle : EditorIntent

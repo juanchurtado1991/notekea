@@ -1,5 +1,14 @@
 package app.notekea.notes.presentation.editor
 
+import androidx.compose.ui.text.TextRange
+import kotlin.time.Clock
+import app.notekea.notes.domain.FakeFileOpener
+import app.notekea.notes.domain.FakeClipboardReader
+import app.notekea.notes.domain.FakeAttachmentPicker
+import app.notekea.notes.domain.AttachFileUseCase
+import app.notekea.notes.data.OkioAttachmentStore
+import app.notekea.notes.data.ObsidianVaultSettingsReader
+import app.notekea.core.data.JvmLocalTimeFormatter
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.data.JvmAppDispatchers
@@ -45,6 +54,8 @@ import kotlin.test.assertEquals
  */
 @OptIn(ExperimentalCoroutinesApi::class, kotlin.io.path.ExperimentalPathApi::class)
 class EditorOnDiskTest {
+    private val picker = FakeAttachmentPicker()
+    private val clipboard = FakeClipboardReader()
     private val main = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     private val vault: Path = Files.createTempDirectory(TEMP_PREFIX)
 
@@ -77,6 +88,58 @@ class EditorOnDiskTest {
         )
     }
 
+    @Test
+    fun `a file dropped from outside the vault is copied into attachments and embedded, then shown as found`() {
+        vault.resolve(NOTE).writeText(text = "Intro\n")
+        val outside = Files.createTempFile(TEMP_PREFIX, ".pdf").apply { writeText(text = "%PDF") }
+        val viewModel = editor()
+        runBlocking(context = main) {
+            viewModel.onIntent(intent = EditorIntent.OnOpen(path = RelativePath(value = NOTE)))
+        }
+        awaitUntil { viewModel.buffer.text.isNotEmpty() }
+
+        runBlocking(context = main) {
+            viewModel.buffer.edit { selection = TextRange(index = length) }
+            viewModel.onIntent(intent = EditorIntent.OnFilesDrop(paths = listOf(outside.toString())))
+        }
+        awaitUntil { viewModel.state.value.attachments.singleOrNull()?.path != null }
+        runBlocking(context = main) { viewModel.viewModelScope.cancel() }
+
+        val copied = "attachments/" + outside.fileName
+        assertEquals(
+            expected = Triple("Intro\n\n![[${outside.fileName}]]\n", copied, "%PDF"),
+            actual = Triple(
+                viewModel.buffer.text.toString(),
+                viewModel.state.value.attachments.single().path?.value,
+                vault.resolve(copied).readText()
+            )
+        )
+        Files.delete(outside)
+    }
+
+    /** The real attachment adapters on the temporary vault; the system's picker and clipboard are fakes. */
+    private fun attachmentTools(
+        dispatchers: JvmAppDispatchers
+    ): AttachmentTools {
+        val attachmentStore = OkioAttachmentStore(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
+        val settings = ObsidianVaultSettingsReader(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
+        return AttachmentTools(
+            attachmentStore = attachmentStore,
+            vaultSettingsReader = settings,
+            attachFile = AttachFileUseCase(
+                attachmentStore = attachmentStore,
+                vaultSettingsReader = settings,
+                noteFileOperations = OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers),
+                localTimeFormatter = JvmLocalTimeFormatter(),
+                clock = Clock.System
+            ),
+            fileOpener = FakeFileOpener(),
+            attachmentPicker = picker,
+            clipboardReader = clipboard,
+            dispatchers = dispatchers
+        )
+    }
+
     private fun editor(): EditorViewModel {
         Dispatchers.setMain(dispatcher = main)
         val dispatchers = JvmAppDispatchers()
@@ -106,7 +169,8 @@ class EditorOnDiskTest {
                 )
             ),
             getEditorMode = GetEditorModeUseCase(editorPreferencesStore = preferences),
-            saveEditorMode = SaveEditorModeUseCase(editorPreferencesStore = preferences)
+            saveEditorMode = SaveEditorModeUseCase(editorPreferencesStore = preferences),
+            attachmentTools = attachmentTools(dispatchers = dispatchers)
         )
     }
 
@@ -116,6 +180,8 @@ class EditorOnDiskTest {
         val deadline = System.currentTimeMillis() + TIMEOUT_MILLIS
         while (!condition()) {
             check(System.currentTimeMillis() < deadline) { "Timed out waiting for the editor" }
+            // Edits the ViewModel makes reach its own text observer once the snapshot is applied, as a frame does.
+            runBlocking(context = main) { Snapshot.sendApplyNotifications() }
             Thread.sleep(POLL_MILLIS)
         }
     }

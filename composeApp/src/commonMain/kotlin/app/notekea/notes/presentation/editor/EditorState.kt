@@ -12,7 +12,8 @@ import app.notekea.notes.domain.RelativePath
  * either is shown, so nothing is overwritten or lost without the user's answer. [titleError] is why a new title was
  * refused (invalid, hidden or taken name), shown under the title until it is edited again. [find] is Find in note
  * while its bar is open, and null when it is closed. [isReading] shows the note rendered (Read mode) instead of its
- * Markdown; notes open in the mode the user last chose.
+ * Markdown; notes open in the mode the user last chose. [attachments] are the files the note embeds, in text order
+ * ([AttachmentView]), and [attachmentError] why attaching, opening or locating one failed, until it is dismissed.
  */
 data class EditorState(
     val notePath: RelativePath? = null,
@@ -24,5 +25,7 @@ data class EditorState(
     val isDeleted: Boolean = false,
     val titleError: NotesError? = null,
     val find: FindState? = null,
-    val isReading: Boolean = false
+    val isReading: Boolean = false,
+    val attachments: List<AttachmentView> = emptyList(),
+    val attachmentError: NotesError? = null
 )

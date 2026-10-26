@@ -36,6 +36,7 @@ import app.notekea.notes.domain.SearchNotesUseCase
 import app.notekea.notes.domain.TextFolder
 import app.notekea.notes.domain.TreePreferencesStore
 import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
+import app.notekea.notes.presentation.editor.AttachmentTools
 import app.notekea.notes.presentation.editor.EditorViewModel
 import app.notekea.notes.presentation.switcher.QuickSwitcherViewModel
 import app.notekea.notes.presentation.tags.TagPickerViewModel
@@ -58,6 +59,7 @@ val notesModule = module {
     factoryOf(::SaveEditorModeUseCase)
     factoryOf(::ApplyLinkUpdatesUseCase)
     factoryOf(::AttachFileUseCase)
+    factoryOf(::AttachmentTools)
     factoryOf(::CreateFolderUseCase)
     factoryOf(::CreateNoteUseCase)
     factoryOf(::DeleteEntryUseCase)
@@ -107,7 +109,8 @@ val notesModule = module {
             observeNoteOnDisk = get(),
             renameAndUpdateLinks = get(),
             getEditorMode = get(),
-            saveEditorMode = get()
+            saveEditorMode = get(),
+            attachmentTools = get()
         )
     }
     viewModel { TagPickerViewModel() }

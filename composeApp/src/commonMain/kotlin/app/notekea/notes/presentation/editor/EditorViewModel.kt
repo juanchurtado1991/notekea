@@ -1,5 +1,10 @@
 package app.notekea.notes.presentation.editor
 
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.withContext
+import app.notekea.core.domain.StringPatterns.NEW_LINE
+import app.notekea.notes.domain.Embed
+import app.notekea.notes.domain.AttachmentSource
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -48,7 +53,8 @@ class EditorViewModel(
     private val observeNoteOnDisk: ObserveNoteOnDiskUseCase,
     private val renameAndUpdateLinks: RenameAndUpdateLinksUseCase,
     private val getEditorMode: GetEditorModeUseCase,
-    private val saveEditorMode: SaveEditorModeUseCase
+    private val saveEditorMode: SaveEditorModeUseCase,
+    private val attachmentTools: AttachmentTools
 ) : BaseViewModel<EditorState, EditorIntent, EditorEffect>(initialState = EditorState()) {
     /** The body of the open note, edited in place by the text field. */
     val buffer = TextFieldState()
@@ -71,6 +77,15 @@ class EditorViewModel(
 
     // A note whose text takes the keyboard as soon as it finishes opening; dropped if another note opens instead.
     private var focusPending: RelativePath? = null
+
+    private val attachments = EditorAttachments(
+        vaultPath = vaultPath,
+        attachmentStore = attachmentTools.attachmentStore,
+        vaultSettingsReader = attachmentTools.vaultSettingsReader,
+        attachFile = attachmentTools.attachFile,
+        dispatchers = attachmentTools.dispatchers
+    )
+    private var attachmentsJob: Job? = null
 
     // The selection when a picker (the note to link, the tag) took the keyboard, which clears it in the text field: what is
     // chosen formats it, and closing the picker puts it back.
@@ -117,6 +132,7 @@ class EditorViewModel(
             EditorIntent.OnSaveShortcut -> runSave { saveNow() }
             is EditorIntent.OnTitleCommit -> runSave { rename(name = intent.name) }
             EditorIntent.OnTitleErrorDismiss -> reduce { it.copy(titleError = null) }
+            else -> onAttachmentIntent(intent = intent)
         }
     }
 
@@ -148,6 +164,7 @@ class EditorViewModel(
         body: String
     ) {
         state.value.find?.let { find -> updateMatches(query = find.query, body = body, keepCurrent = true) }
+        updateAttachments(body = body)
         val document = opened ?: return
         autosaveJob?.cancel()
         if (body == document.body) {
@@ -178,6 +195,7 @@ class EditorViewModel(
         if (path == state.value.notePath && !isRetry) return
         if (path != focusPending) focusPending = null
         pickerSelection = null
+        attachments.forgetFiles()
         saveNow()
         watchJob?.cancel()
         opened = null
@@ -269,6 +287,132 @@ class EditorViewModel(
         val selection = buffer.selection
         val selected = buffer.text.substring(startIndex = selection.min, endIndex = selection.max).trim()
         return selected.takeIf { NEW_LINE_CHAR !in it && it.length <= MAX_TAG_QUERY }.orEmpty()
+    }
+
+    private fun onAttachmentIntent(
+        intent: EditorIntent
+    ) {
+        when (intent) {
+            EditorIntent.OnPaste -> paste()
+            is EditorIntent.OnFilesDrop -> drop(paths = intent.paths)
+            EditorIntent.OnAttachmentPick -> pick()
+            is EditorIntent.OnAttachmentOpen -> openAttachment(path = intent.path)
+            is EditorIntent.OnAttachmentLocate -> locate(embed = intent.embed)
+            EditorIntent.OnAttachmentErrorDismiss -> reduce { it.copy(attachmentError = null) }
+            else -> Unit
+        }
+    }
+
+    /** The files [body] embeds, resolved and read a moment after the last change, so typing is never held up. */
+    private fun updateAttachments(
+        body: String
+    ) {
+        val note = state.value.notePath ?: return
+        attachmentsJob?.cancel()
+        attachmentsJob = launchGuarded(onError = ::showUnexpectedError) {
+            delay(duration = ATTACHMENTS_DELAY)
+            val views = attachments.viewsOf(note = note, text = body)
+            reduce { if (it.notePath == note) it.copy(attachments = views) else it }
+        }
+    }
+
+    /** Mod+V: a copied image is attached and embedded; copied text replaces the selection, as a paste does. */
+    private fun paste() {
+        if (!isEditable()) return
+        launchGuarded(onError = ::showUnexpectedError) {
+            val image =
+                withContext(context = attachmentTools.dispatchers.io) { attachmentTools.clipboardReader.image() }
+            if (image != null) {
+                attachAndEmbed(sources = listOf(attachments.pastedImage(bytes = image)))
+                return@launchGuarded
+            }
+            val text = withContext(context = attachmentTools.dispatchers.io) { attachmentTools.clipboardReader.text() }
+            text?.let { pasted ->
+                buffer.edit {
+                    val start = selection.min
+                    replace(start = start, end = selection.max, text = pasted)
+                    selection = TextRange(index = start + pasted.length)
+                }
+            }
+        }
+    }
+
+    private fun drop(
+        paths: List<String>
+    ) {
+        if (!isEditable() || paths.isEmpty()) return
+        launchGuarded(onError = ::showUnexpectedError) {
+            attachAndEmbed(sources = paths.map { AttachmentSource.File(absolutePath = it) })
+        }
+    }
+
+    /** Image or file: the system's picker takes the keyboard, so the selection is kept for the embed. */
+    private fun pick() {
+        if (!isEditable()) return
+        pickerSelection = buffer.selection
+        launchGuarded(onError = ::showUnexpectedError) {
+            val picked = attachmentTools.attachmentPicker.pickFile()
+            if (picked == null) {
+                requestFocus(path = null)
+            } else {
+                attachAndEmbed(sources = listOf(AttachmentSource.File(absolutePath = picked)))
+            }
+        }
+    }
+
+    /** Attaches every source and writes their embeds, one per line, in place of the selection. */
+    private suspend fun attachAndEmbed(
+        sources: List<AttachmentSource>
+    ) {
+        val note = state.value.notePath ?: return
+        val embeds = mutableListOf<String>()
+        for (source in sources) {
+            when (val attached = attachments.attach(note = note, source = source)) {
+                is Outcome.Success -> embeds += attached.value
+                is Outcome.Failure -> reduce { it.copy(attachmentError = attached.error) }
+            }
+        }
+        if (embeds.isNotEmpty()) {
+            format(
+                action = FormatAction.Embed(markdown = embeds.joinToString(separator = NEW_LINE))
+            )
+        }
+    }
+
+    private fun openAttachment(
+        path: RelativePath
+    ) {
+        launchGuarded(onError = ::showUnexpectedError) {
+            val opened = attachmentTools.fileOpener.open(vaultPath = vaultPath, path = path)
+            if (opened is Outcome.Failure) reduce { it.copy(attachmentError = opened.error) }
+        }
+    }
+
+    /** Locate…: the chosen file, copied into the vault when it is outside it, takes the missing embed's place. */
+    private fun locate(
+        embed: Embed
+    ) {
+        val note = state.value.notePath ?: return
+        val written = buffer.text.toString().substring(range = embed.range)
+        launchGuarded(onError = ::showUnexpectedError) {
+            val picked = attachmentTools.attachmentPicker.pickFile() ?: return@launchGuarded
+            val source = AttachmentSource.File(absolutePath = picked)
+            when (val attached = attachments.attach(note = note, source = source, width = embed.width)) {
+                is Outcome.Failure -> reduce { it.copy(attachmentError = attached.error) }
+                is Outcome.Success -> replaceEmbed(embed = embed, written = written, replacement = attached.value)
+            }
+        }
+    }
+
+    /** Writes [replacement] where [embed] was, unless the text there changed meanwhile. */
+    private fun replaceEmbed(
+        embed: Embed,
+        written: String,
+        replacement: String
+    ) {
+        val text = buffer.text.toString()
+        if (embed.range.last >= text.length || text.substring(range = embed.range) != written) return
+        buffer.edit { replace(start = embed.range.first, end = embed.range.last + 1, text = replacement) }
     }
 
     /** Whether the text can be changed now: a note is open and loaded, in Edit mode. */
@@ -538,6 +682,7 @@ class EditorViewModel(
         private val TASK_STATES = MarkdownSyntax.TASK_OPEN_STATE.toString() + MarkdownSyntax.TASK_DONE_STATES
         val AUTOSAVE_DELAY = 1.seconds
         private const val LOG_TAG = "EditorViewModel"
+        private val ATTACHMENTS_DELAY = 150.milliseconds
         private const val MAX_TAG_QUERY = 40
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the note editor"
     }

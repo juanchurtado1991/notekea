@@ -46,6 +46,9 @@ sealed interface FormatAction {
 
     data object Divider : FormatAction
 
+    /** An embedded file, [markdown] written as it is (`![[photo.png]]`) on a line of its own, in place of the selection. */
+    data class Embed(val markdown: String) : FormatAction
+
     /** A wiki link to [target], the note's name (or path when its name is not unique). */
     data class NoteLink(val target: String) : FormatAction
 
