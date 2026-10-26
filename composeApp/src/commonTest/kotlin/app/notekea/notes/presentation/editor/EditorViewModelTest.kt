@@ -50,34 +50,12 @@ import kotlin.test.assertEquals
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditorViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
-    private val scanner = FakeNoteScanner()
-    private val store = FakeNoteContentStore()
-    private val operations = FakeNoteFileOperations()
-    private val preferences = FakeEditorPreferencesStore()
-    private val viewModel by lazy {
-        EditorViewModel(
-            vaultPath = VAULT,
-            openNote = OpenNoteUseCase(noteContentStore = store),
-            saveNote = SaveNoteUseCase(noteContentStore = store),
-            observeNoteOnDisk = ObserveNoteOnDiskUseCase(noteScanner = scanner, noteContentStore = store),
-            renameAndUpdateLinks = RenameAndUpdateLinksUseCase(
-                noteScanner = scanner,
-                renameEntry = RenameEntryUseCase(
-                    noteFileOperations = operations,
-                    validateFileName = ValidateFileNameUseCase()
-                ),
-                updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
-                    planLinkUpdates = PlanLinkUpdatesUseCase(
-                        noteContentStore = store,
-                        linkFinder = JetBrainsMarkdownLinkFinder()
-                    ),
-                    applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store)
-                )
-            ),
-            getEditorMode = GetEditorModeUseCase(editorPreferencesStore = preferences),
-            saveEditorMode = SaveEditorModeUseCase(editorPreferencesStore = preferences)
-        )
-    }
+    private val fixture = EditorViewModels(dispatcher = testDispatcher)
+    private val scanner = fixture.scanner
+    private val store = fixture.store
+    private val operations = fixture.operations
+    private val preferences = fixture.preferences
+    private val viewModel by lazy { fixture.create() }
 
     @BeforeTest
     fun setUp() {

@@ -24,7 +24,12 @@ class MarkdownFormatter {
         lineStyleOf(action = action)?.let { (style, placeholder) ->
             return styleLines(text = text, start = start, end = end, style = style, placeholder = placeholder)
         }
-        blockOf(action = action)?.let { build -> return block(text = text, start = start, end = end, build = build) }
+        blockOf(action = action)?.let { build ->
+            val edit = block(text = text, start = start, end = end, build = build)
+            // After an embedded file, typing goes on below it.
+            val after = edit.start + edit.replacement.length
+            return if (action is FormatAction.Embed) edit.copy(selectionStart = after, selectionEnd = after) else edit
+        }
         return inline(text = text, start = start, end = end, action = action)
     }
 
@@ -49,6 +54,8 @@ class MarkdownFormatter {
         is FormatAction.Table -> { _ -> table(action = action) }
 
         is FormatAction.CodeBlock -> { selected -> code(action = action, selected = selected) }
+
+        is FormatAction.Embed -> { _ -> action.markdown to (action.markdown.length until action.markdown.length) }
 
         FormatAction.Divider -> { _ ->
             MarkdownSyntax.DIVIDER to
