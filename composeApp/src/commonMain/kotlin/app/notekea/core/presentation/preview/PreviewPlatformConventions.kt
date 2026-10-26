@@ -24,6 +24,11 @@ object PreviewPlatformConventions {
         saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(ShortcutModifier.CONTROL)),
         findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(ShortcutModifier.CONTROL)),
         toggleReadModeShortcut = Shortcut(key = ShortcutKey.E, modifiers = setOf(ShortcutModifier.CONTROL)),
+        quickSwitcherShortcut = Shortcut(key = ShortcutKey.P, modifiers = setOf(ShortcutModifier.CONTROL)),
+        searchNotesShortcut = Shortcut(
+            key = ShortcutKey.F,
+            modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
+        ),
         dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
         appDataDirectory = APP_DATA,
         homeDirectory = HOME

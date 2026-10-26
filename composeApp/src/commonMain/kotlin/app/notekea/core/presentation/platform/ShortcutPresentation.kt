@@ -85,6 +85,7 @@ private fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.F4 -> Key.F4
     ShortcutKey.N -> Key.N
     ShortcutKey.O -> Key.O
+    ShortcutKey.P -> Key.P
     ShortcutKey.Q -> Key.Q
     ShortcutKey.S -> Key.S
 }
@@ -104,6 +105,7 @@ private fun ShortcutKey.displayName(): String = when (this) {
     ShortcutKey.F4,
     ShortcutKey.N,
     ShortcutKey.O,
+    ShortcutKey.P,
     ShortcutKey.Q,
     ShortcutKey.S -> name
 }
@@ -122,6 +124,7 @@ private fun ShortcutKey.macLabel(): String = when (this) {
     ShortcutKey.F4,
     ShortcutKey.N,
     ShortcutKey.O,
+    ShortcutKey.P,
     ShortcutKey.Q,
     ShortcutKey.S -> displayName()
 }

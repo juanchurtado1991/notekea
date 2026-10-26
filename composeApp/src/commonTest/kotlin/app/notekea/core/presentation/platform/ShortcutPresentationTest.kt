@@ -22,6 +22,21 @@ class ShortcutPresentationTest {
     }
 
     @Test
+    fun `search in all notes reads as each platform writes it`() {
+        val search = { modifier: ShortcutModifier ->
+            Shortcut(key = ShortcutKey.F, modifiers = setOf(modifier, ShortcutModifier.SHIFT))
+        }
+
+        assertEquals(
+            expected = listOf("⇧⌘F", "Ctrl+Shift+F"),
+            actual = listOf(
+                search(ShortcutModifier.COMMAND).label(operatingSystem = OperatingSystem.MACOS),
+                search(ShortcutModifier.CONTROL).label(operatingSystem = OperatingSystem.LINUX)
+            )
+        )
+    }
+
+    @Test
     fun `named keys use symbols on macOS and words elsewhere`() {
         val shortcuts = listOf(
             Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet()),
@@ -43,7 +58,8 @@ class ShortcutPresentationTest {
 
     @Test
     fun `tree and editor shortcut keys match their compose keys`() {
-        val pressed = listOf(Key.Backslash, Key.Backspace, Key.Delete, Key.Enter, Key.F2, Key.N, Key.S, Key.F, Key.E)
+        val pressed =
+            listOf(Key.Backslash, Key.Backspace, Key.Delete, Key.Enter, Key.F2, Key.N, Key.S, Key.F, Key.E, Key.P)
         val keys = listOf(
             ShortcutKey.BACKSLASH,
             ShortcutKey.BACKSPACE,
@@ -53,7 +69,8 @@ class ShortcutPresentationTest {
             ShortcutKey.N,
             ShortcutKey.S,
             ShortcutKey.F,
-            ShortcutKey.E
+            ShortcutKey.E,
+            ShortcutKey.P
         )
 
         assertEquals(
