@@ -29,7 +29,6 @@ import app.notekea.resources.format_italic_placeholder
 import app.notekea.resources.format_list_placeholder
 import app.notekea.resources.format_quote_placeholder
 import app.notekea.resources.format_table_column
-import app.notekea.resources.format_tag_placeholder
 import app.notekea.resources.format_web_link_placeholder
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -49,14 +48,9 @@ data class FormatActions(
     val quote: FormatAction.Quote,
     val codeBlock: FormatAction.CodeBlock,
     val table: FormatAction.Table,
-    val tagPlaceholder: String,
     val calloutPlaceholder: String,
     val calloutTitles: Map<CalloutKind, String>
 ) {
-    fun tag(
-        name: String
-    ): FormatAction.Tag = FormatAction.Tag(name = name, placeholder = tagPlaceholder)
-
     fun callout(
         kind: CalloutKind,
         isFolded: Boolean

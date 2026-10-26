@@ -119,8 +119,6 @@
     <string name="format_table">Table</string>
     <string name="format_table_column">Column %1$d</string>
     <string name="format_tag">Tag</string>
-    <string name="format_tag_new">New tag</string>
-    <string name="format_tag_placeholder">tag</string>
     <string name="format_web_link">Web link</string>
     <string name="format_web_link_placeholder">link text</string>
     <plurals name="note_panel_folder_notes">
@@ -144,6 +142,12 @@
     <string name="switcher_placeholder_link">Choose a note to link</string>
     <string name="switcher_placeholder_notes">Find a note by name or alias</string>
     <string name="switcher_searching">Searching</string>
+    <string name="tag_picker_empty_message">Type a name to create the first tag.</string>
+    <string name="tag_picker_empty_title">No tags yet</string>
+    <string name="tag_picker_new">New tag: #%1$s</string>
+    <string name="tag_picker_no_match_message">A tag uses letters, digits, -, _ and /, and is not only digits.</string>
+    <string name="tag_picker_no_match_title">No tags match</string>
+    <string name="tag_picker_placeholder">Find or create a tag</string>
     <string name="tree_cancel">Cancel</string>
     <string name="tree_delete_folder">Delete folder</string>
     <string name="tree_delete_folder_title">Delete this folder?</string>

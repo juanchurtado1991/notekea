@@ -29,7 +29,6 @@ import app.notekea.resources.format_italic_placeholder
 import app.notekea.resources.format_list_placeholder
 import app.notekea.resources.format_quote_placeholder
 import app.notekea.resources.format_table_column
-import app.notekea.resources.format_tag_placeholder
 import app.notekea.resources.format_web_link_placeholder
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -56,7 +55,6 @@ fun formatActions(): FormatActions {
         table = FormatAction.Table(
             columnNames = (1..TABLE_COLUMNS).map { stringResource(Res.string.format_table_column, it) }
         ),
-        tagPlaceholder = stringResource(resource = Res.string.format_tag_placeholder),
         calloutPlaceholder = stringResource(resource = Res.string.format_callout_placeholder),
         calloutTitles = CalloutKind.entries.associateWith { stringResource(resource = calloutTitle(kind = it)) }
     )

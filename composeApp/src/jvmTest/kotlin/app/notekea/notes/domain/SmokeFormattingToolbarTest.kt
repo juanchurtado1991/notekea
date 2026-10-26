@@ -11,6 +11,7 @@ import kotlin.test.assertEquals
  */
 class SmokeFormattingToolbarTest {
     private val formatter = MarkdownFormatter()
+    private val listEditing = ListEditing()
     private val practice = File(SMOKE_NOTE).readText()
 
     @Test
@@ -31,7 +32,11 @@ class SmokeFormattingToolbarTest {
         assertEquals(
             expected = listOf(
                 listOf("# Weekend arepas", "Weekend arepas", "## Weekend arepas"),
-                listOf("Buy **corn flour**", "Buy corn flour", "Buy *fresh* cheese"),
+                listOf(
+                    "Buy **corn flour**",
+                    "Buy corn flour",
+                    "Buy *fresh* cheese"
+                ),
                 listOf("bold text", "Plain text to format with the toolbar: nothing below is Markdown yet.**soft**")
             ),
             actual = listOf(
@@ -39,6 +44,19 @@ class SmokeFormattingToolbarTest {
                 listOf(bold, steps.lineWith(part = "corn flour"), steps.lineWith(part = "cheese")),
                 listOf(inserted, steps.lineWith(part = "Plain text"))
             )
+        )
+    }
+
+    @Test
+    fun `1_17-02 with the cursor in a word, bold makes it bold and takes it off again`() {
+        val steps = Steps(text = practice)
+        steps.at(index = steps.text.indexOf(string = "beans") + 2, action = BOLD)
+        val bold = steps.lineWith(part = "beans")
+        steps.at(index = steps.text.indexOf(string = "beans") + 2, action = BOLD)
+
+        assertEquals(
+            expected = "Soak the **beans**" to "Soak the beans",
+            actual = bold to steps.lineWith(part = "beans")
         )
     }
 
@@ -90,25 +108,22 @@ class SmokeFormattingToolbarTest {
     }
 
     @Test
-    fun `1_17-05 a web link selects its address to type, and two tags end the heading line`() {
+    fun `1_17-05 a web link selects its address to type, and a vault tag and a new one end the heading line`() {
         val steps = Steps(text = practice)
         steps.atLineOf(line = "Weekend arepas", action = FormatAction.Heading(level = 2, placeholder = HEADING))
         steps.select(part = "hot pan", action = FormatAction.WebLink(placeholder = "link text"))
         val address = steps.selected()
         steps.type(text = "https://example.com")
         steps.at(index = steps.text.indexOf(string = "arepas\n") + "arepas".length, action = steps.tag(name = "recipe"))
-        steps.at(index = steps.cursor, action = steps.tag(name = ""))
-        val newTag = steps.selected()
-        steps.type(text = "weekend")
+        steps.at(index = steps.cursor, action = steps.tag(name = "weekend"))
 
         assertEquals(
             expected = listOf(
                 "https://",
                 "Fry the arepas in a [hot pan](https://example.com) and serve them with coffee.",
-                "tag",
-                "## Weekend arepas #recipe #weekend"
+                "## Weekend arepas #recipe #weekend "
             ),
-            actual = listOf(address, steps.lineWith(part = "Fry"), newTag, steps.lineWith(part = "Weekend"))
+            actual = listOf(address, steps.lineWith(part = "Fry"), steps.lineWith(part = "Weekend"))
         )
     }
 
@@ -154,6 +169,41 @@ class SmokeFormattingToolbarTest {
         )
     }
 
+    @Test
+    fun `1_17-10 enter continues and ends a checklist, tab nests, backspace removes a marker, quotes continue`() {
+        val steps = Steps(text = practice)
+        steps.select(
+            part = steps.text.substring(range = steps.rangeOfLines(first = "corn flour", last = "beans")),
+            action = CHECKLIST
+        )
+        steps.atEndOf(line = "Soak the beans", key = ListAction.NEW_ITEM)
+        steps.type(text = "Buy salt")
+        steps.key(action = ListAction.NEW_ITEM)
+        val emptyItem = steps.lineAtCursor()
+        steps.key(action = ListAction.NEW_ITEM)
+        val ended = steps.lineAtCursor()
+        steps.atEndOf(line = "Buy fresh cheese", key = ListAction.INDENT)
+        val nested = steps.lineWith(part = "cheese")
+        steps.key(action = ListAction.OUTDENT)
+        steps.at(index = steps.text.indexOf(string = "Buy salt"), action = null)
+        steps.key(action = ListAction.REMOVE_MARKER)
+        steps.atEndOf(line = REMINDER, key = null)
+        steps.select(part = REMINDER, action = callout(type = "tip", title = "Tip", isFolded = false))
+        steps.atEndOf(line = REMINDER, key = ListAction.NEW_ITEM)
+
+        assertEquals(
+            expected = listOf("- [ ] ", "", "  - [ ] Buy fresh cheese", "- [ ] Buy fresh cheese", "Buy salt", "> "),
+            actual = listOf(
+                emptyItem,
+                ended,
+                nested,
+                steps.lineWith(part = "cheese"),
+                steps.lineWith(part = "salt"),
+                steps.lineAtCursor()
+            )
+        )
+    }
+
     private fun callout(
         type: String,
         title: String,
@@ -182,8 +232,39 @@ class SmokeFormattingToolbarTest {
 
         fun at(
             index: Int,
-            action: FormatAction
-        ) = apply(start = index, end = index, action = action)
+            action: FormatAction?
+        ) {
+            if (action == null) selection = index..<index else apply(start = index, end = index, action = action)
+        }
+
+        /** The cursor at the end of [line], then [key] pressed there, if any. */
+        fun atEndOf(
+            line: String,
+            key: ListAction?
+        ) {
+            val end = text.indexOf(string = line) + line.length
+            selection = end..<end
+            key?.let { key(action = it) }
+        }
+
+        fun key(
+            action: ListAction
+        ) {
+            val edit = listEditing.edit(
+                text = text,
+                selectionStart = selection.first,
+                selectionEnd = selection.last + 1,
+                action = action
+            ) ?: return
+            text = text.replaceRange(startIndex = edit.start, endIndex = edit.end, replacement = edit.replacement)
+            selection = edit.selectionStart..<edit.selectionEnd
+        }
+
+        fun lineAtCursor(): String {
+            val start = text.lastIndexOf(char = '\n', startIndex = selection.first - 1) + 1
+            val end = text.indexOf(char = '\n', startIndex = selection.first).takeIf { it >= 0 } ?: text.length
+            return text.substring(startIndex = start, endIndex = end)
+        }
 
         fun atLineOf(
             line: String,
@@ -215,7 +296,7 @@ class SmokeFormattingToolbarTest {
 
         fun tag(
             name: String
-        ): FormatAction.Tag = FormatAction.Tag(name = name, placeholder = "tag")
+        ): FormatAction.Tag = FormatAction.Tag(name = name)
 
         private fun apply(
             start: Int,

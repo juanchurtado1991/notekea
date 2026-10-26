@@ -336,12 +336,20 @@ same Markdown a person would type, so notes stay readable in any app.
 - **Edit | Preview** tabs, like GitHub's, switched with `Mod+E` (Preview is Read mode).
 - Buttons with an icon, a plain-language tooltip and its shortcut: **Heading** (menu: Large, Medium, Small heading),
   **Bold** (`Mod+B`), **Italic** (`Mod+I`), **Link to a note** (`Mod+K`, picks the note in the quick switcher and writes
-  `[[Note]]`, the selection becoming its label), **Web link** (`Mod+Shift+K`), **Tag** (menu of the vault's tags plus
-  "New tag"), **Bulleted list**, **Numbered list**, **Checklist**, **Callout** (menu of types with their icons in plain
-  words, and "Folded"), **Table** (3 × 3, ready to fill) and **More** (Quote, Code block, Divider).
-- With a selection, a button formats it (bold wraps it, a list prefixes its lines); without one, it inserts an
-  example with the placeholder text selected, ready to type over. Pressing a toggle again on formatted text removes it
-  (bold, lists, quote, heading).
+  `[[Note]]`, the selection becoming its label), **Web link** (`Mod+Shift+K`), **Tag** (the tag picker: the vault's
+  tags, in the frontmatter or written in the text, the most used first; typing finds any of them or offers it as a new
+  tag, which is found like the others once the note is saved; the selected text is the first search), **Bulleted
+  list**, **Numbered list**, **Checklist**, **Callout** (menu of types with their icons in plain words, and "Folded"),
+  **Table** (3 × 3, ready to fill) and **More** (Quote, Code block, Divider).
+- With a selection, a button formats it (bold wraps it, a list prefixes its lines); bold and italic format the word
+  the cursor is in; elsewhere a button inserts an example with the placeholder text selected, ready to type over.
+  Pressing a toggle again on formatted text removes it (bold, lists, quote, heading). The toolbar never takes the
+  keyboard from the text, so the selection stays for the next button.
+- Lists work as in other editors: Enter continues a bulleted, numbered or checklist item (an empty one ends the list)
+  and a quote, Tab and Shift+Tab nest an item under the one above and take it back, and Backspace right after a
+  marker removes it.
+- The text shows what is typed: no ligatures (`->` stays `->`, in code too), and clicking or typing never scrolls the
+  note unless the cursor would leave the view; the toolbar stays at the top while scrolling.
 - **Find in note** stays at the end of the toolbar; the formatting buttons hide in Preview.
 - Aliases and frontmatter tags are edited in 1.14 Properties view (the frontmatter stays read-only in the editor).
 - **Done when:** a person who never wrote Markdown can make a heading, a checklist, a callout, a table and a link to

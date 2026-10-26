@@ -58,14 +58,13 @@ class EditorToolbarTest {
     }
 
     @Test
-    fun `menus write a heading, a tag of the vault and a folded callout of the chosen type`() {
+    fun `menus write a heading and a folded callout of the chosen type, and tag asks for the tag picker`() {
         val intents = clickAll(
             isReading = false,
             positions = listOf(
                 HEADING,
                 MEDIUM_HEADING,
                 TAG,
-                FIRST_TAG,
                 CALLOUT,
                 FOLDED,
                 TIP_WITH_FOLDED_CHECKED
@@ -75,7 +74,7 @@ class EditorToolbarTest {
         assertEquals(
             expected = listOf<EditorIntent>(
                 EditorIntent.OnFormat(action = FormatAction.Heading(level = 2, placeholder = "Heading")),
-                EditorIntent.OnFormat(action = FormatAction.Tag(name = "recipe", placeholder = "tag")),
+                EditorIntent.OnTagRequest,
                 EditorIntent.OnFormat(
                     action = FormatAction.Callout(
                         type = "tip",
@@ -251,8 +250,7 @@ class EditorToolbarTest {
                         buffer = buffer,
                         platformConventions = PreviewPlatformConventions.linux,
                         onIntent = { intents += it },
-                        properties = EditorPreviewData.properties,
-                        vaultTags = listOf("recipe", "venezuelan")
+                        properties = EditorPreviewData.properties
                     )
                 }
             }.use { scene ->
@@ -313,7 +311,6 @@ class EditorToolbarTest {
         private val CHECKLIST = Offset(x = 885f, y = 186f)
         private val EDIT_TAB = Offset(x = 115f, y = 183f)
         private val FIND = Offset(x = 1101f, y = 186f)
-        private val FIRST_TAG = Offset(x = 800f, y = 243f)
         private val FOLDED = Offset(x = 1020f, y = 36f)
         private val HEADING = Offset(x = 477f, y = 186f)
         private val MEDIUM_HEADING = Offset(x = 560f, y = 291f)

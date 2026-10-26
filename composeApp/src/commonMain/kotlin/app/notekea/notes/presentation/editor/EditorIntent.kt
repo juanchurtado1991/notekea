@@ -69,6 +69,9 @@ sealed interface EditorIntent {
     /** Enter, Tab, Shift+Tab or Backspace in a list item or a quote, which edit the list (`ListEditing`). */
     data class OnListKey(val action: ListAction) : EditorIntent
 
+    /** The toolbar's Tag button: choose a tag in the tag picker. */
+    data object OnTagRequest : EditorIntent
+
     /** Mod+E or the header button: switch between Edit and Read mode. */
     data object OnReadModeToggle : EditorIntent
 

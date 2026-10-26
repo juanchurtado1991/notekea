@@ -43,9 +43,6 @@ sealed interface FormatAction {
 
     data class WebLink(val placeholder: String) : FormatAction
 
-    /** A `#tag`; an empty [name] inserts `#` and the [placeholder] to type over. */
-    data class Tag(
-        val name: String,
-        val placeholder: String
-    ) : FormatAction
+    /** A `#tag` named [name], chosen in the tag picker, in place of the selection. */
+    data class Tag(val name: String) : FormatAction
 }
