@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.domain.markdown.ReadingMarkdown
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.notekeaCodeTextStyle
 import com.mikepenz.markdown.compose.components.markdownComponents
@@ -32,6 +33,9 @@ import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.MarkdownTypography
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
+import org.intellij.markdown.MarkdownElementTypes
+import org.intellij.markdown.ast.ASTNode
+import org.intellij.markdown.flavours.gfm.GFMElementTypes
 
 private const val DARK_LUMINANCE = 0.5f
 private const val PREVIEW_MARKDOWN =
@@ -41,8 +45,9 @@ private const val PREVIEW_WIDTH_DP = 520
 
 /**
  * Markdown rendered with the Notekea theme (the note's Read mode, later chat answers): headings on the type scale,
- * links in the primary color, code in the bundled monospaced face, and code blocks colored by language like GitHub's
- * preview, with the syntax theme following the app's light or dark theme. Text can be selected and copied. Clicked
+ * links in the primary color, code in the bundled monospaced face, code blocks colored by language like GitHub's
+ * preview, with the syntax theme following the app's light or dark theme, and Obsidian callouts as cards
+ * ([MarkdownQuoteOrCallout]). Text can be selected and copied. Clicked
  * links open with the system (a web page in the browser) unless [onLinkClick] takes them all.
  */
 @Composable
@@ -64,8 +69,10 @@ fun NotekeaMarkdown(
             }
         } ?: systemUriHandler
     }
+    val readingMarkdown = remember { ReadingMarkdown() }
+    val prepared = remember(content) { readingMarkdown.prepare(markdown = content) }
     CompositionLocalProvider(LocalUriHandler provides uriHandler) {
-        SelectionContainer(modifier = modifier) { ThemedMarkdown(content = content, isDark = isDark) }
+        SelectionContainer(modifier = modifier) { ThemedMarkdown(content = prepared, isDark = isDark) }
     }
 }
 
@@ -75,6 +82,7 @@ private fun ThemedMarkdown(
     isDark: Boolean
 ) {
     val colors = MaterialTheme.colorScheme
+    val readingMarkdown = remember { ReadingMarkdown() }
     Markdown(
         content = content,
         colors = markdownColor(
@@ -87,16 +95,22 @@ private fun ThemedMarkdown(
         modifier = Modifier.fillMaxWidth(),
         components = markdownComponents(
             codeBlock = {
+                val depth = quoteDepth(node = it.node)
                 MarkdownCodeBlock(it.content, it.node, it.typography.code) { code, language, style ->
-                    HighlightedCode(code = code, style = style, isDark = isDark, language = language)
+                    val unquoted = readingMarkdown.unquoted(code = code, depth = depth)
+                    HighlightedCode(code = unquoted, style = style, isDark = isDark, language = language)
                 }
             },
             codeFence = {
+                val depth = quoteDepth(node = it.node)
                 MarkdownCodeFence(it.content, it.node, it.typography.code) { code, language, style ->
-                    HighlightedCode(code = code, style = style, isDark = isDark, language = language)
+                    val unquoted = readingMarkdown.unquoted(code = code, depth = depth)
+                    HighlightedCode(code = unquoted, style = style, isDark = isDark, language = language)
                 }
             },
-            checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) }
+            checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) },
+            blockQuote = { MarkdownQuoteOrCallout(content = it.content, node = it.node) },
+            alert = { MarkdownQuoteOrCallout(content = it.content, node = it.node) }
         )
     )
 }
@@ -115,6 +129,13 @@ private fun HighlightedCode(
 ) {
     val highlights = remember(code, isDark) { Highlights.Builder().theme(SyntaxThemes.default(darkMode = isDark)) }
     MarkdownHighlightedCode(code = code, language = language, style = style, highlightsBuilder = highlights)
+}
+
+/** How many quotes or callouts hold [node]: the renderer leaves that many `>` marks in a code block's lines. */
+private fun quoteDepth(
+    node: ASTNode
+): Int = generateSequence(seed = node.parent) { it.parent }.count {
+    it.type == MarkdownElementTypes.BLOCK_QUOTE || it.type == GFMElementTypes.ALERT
 }
 
 /** The editor's type scale (28 / 20 / 16 sp headings, 16 sp text) so a note reads the same in both modes. */
