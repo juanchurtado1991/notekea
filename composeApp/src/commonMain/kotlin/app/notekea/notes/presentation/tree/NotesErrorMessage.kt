@@ -20,6 +20,7 @@ import app.notekea.resources.error_notes_invalid_name
 import app.notekea.resources.error_notes_name_taken
 import app.notekea.resources.error_notes_operation_failed
 import app.notekea.resources.error_notes_permission_denied
+import app.notekea.resources.error_notes_open_failed
 import app.notekea.resources.error_notes_reveal_failed
 import app.notekea.resources.error_notes_vault_missing
 import org.jetbrains.compose.resources.stringResource
@@ -58,6 +59,8 @@ internal fun notesErrorMessage(
 
         is NotesError.RevealFailed -> stringResource(Res.string.error_notes_reveal_failed, error.path)
 
+        is NotesError.OpenFailed -> stringResource(Res.string.error_notes_open_failed, error.path)
+
         is NotesError.VaultMissing -> stringResource(Res.string.error_notes_vault_missing, shownVault(error.path))
     }
 }
@@ -74,6 +77,7 @@ private fun notesErrorMessagePreview() {
         NotesError.OperationFailed(path = PREVIEW_ENTRY),
         NotesError.PermissionDenied(path = PREVIEW_VAULT),
         NotesError.RevealFailed(path = PREVIEW_ENTRY),
+        NotesError.OpenFailed(path = PREVIEW_ENTRY),
         NotesError.VaultMissing(path = PREVIEW_VAULT)
     )
     NotekeaPreviewThemes {

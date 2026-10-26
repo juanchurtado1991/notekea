@@ -9,10 +9,16 @@ import app.notekea.notes.data.OkioAttachmentStore
 import app.notekea.notes.data.OkioNoteFileOperations
 import app.notekea.notes.data.OkioNoteMetadataReader
 import app.notekea.notes.data.OkioNoteScanner
+import app.notekea.notes.data.AwtClipboardReader
+import app.notekea.notes.data.FileKitAttachmentPicker
+import app.notekea.notes.data.ProcessFileOpener
 import app.notekea.notes.data.ProcessFileRevealer
 import app.notekea.notes.data.SystemFirstTrash
 import app.notekea.notes.data.VaultFolderTrash
 import app.notekea.notes.data.runCommand
+import app.notekea.notes.domain.AttachmentPicker
+import app.notekea.notes.domain.ClipboardReader
+import app.notekea.notes.domain.FileOpener
 import app.notekea.notes.domain.FileRevealer
 import app.notekea.notes.domain.FileWatcher
 import app.notekea.notes.domain.NoteContentStore
@@ -37,6 +43,15 @@ val jvmNotesModule = module {
             dispatchers = get()
         )
     }
+    single<FileOpener> {
+        ProcessFileOpener(
+            operatingSystem = get<PlatformConventions>().operatingSystem,
+            runCommand = ::runCommand,
+            dispatchers = get()
+        )
+    }
+    single<AttachmentPicker> { FileKitAttachmentPicker() }
+    single<ClipboardReader> { AwtClipboardReader() }
     single<FileWatcher> { DirectoryWatcherFileWatcher(dispatchers = get()) }
     single<NoteContentStore> { OkioNoteContentStore(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
     single<NoteFileOperations> { OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }

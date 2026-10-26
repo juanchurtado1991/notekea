@@ -19,6 +19,9 @@ sealed interface NotesError {
     /** The file system refused the change (read-only disk, permissions, file in use…). */
     data class OperationFailed(val path: String) : NotesError
 
+    /** A file could not be opened with the system's app for it. */
+    data class OpenFailed(val path: String) : NotesError
+
     data class PermissionDenied(val path: String) : NotesError
 
     /** The system file manager could not be opened on the entry. */
