@@ -32,7 +32,9 @@ class FollowLinkUseCase(private val createNote: CreateNoteUseCase) {
         vaultPath: String,
         target: String
     ): Outcome<FollowedLink, NotesError> {
-        val name = LinkResolver.withoutMarkdownExtension(target = target.trim()).substringAfterLast(delimiter = '/')
+        val name = LinkResolver.withoutMarkdownExtension(
+            target = target.trim()
+        ).substringAfterLast(delimiter = RelativePath.SEPARATOR)
         return when (val created = createNote(vaultPath = vaultPath, folder = RelativePath.ROOT, baseName = name)) {
             is Outcome.Failure -> created
             is Outcome.Success -> Outcome.Success(value = FollowedLink(path = created.value, isNew = true))

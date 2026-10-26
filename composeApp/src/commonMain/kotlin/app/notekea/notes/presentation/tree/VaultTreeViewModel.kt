@@ -130,9 +130,7 @@ class VaultTreeViewModel(
 
                 is Outcome.Success -> {
                     if (isFirstTree) {
-                        logger.i {
-                            "Vault tree loaded: ${outcome.value.notes.size} notes in ${start.elapsedNow()}"
-                        }
+                        logger.i { TREE_LOADED_MESSAGE + outcome.value.notes.size + NOTES_IN + start.elapsedNow() }
                     }
                     isFirstTree = false
                     updateTree { reduceTreeLoaded(state = it, tree = outcome.value) }
@@ -186,7 +184,7 @@ class VaultTreeViewModel(
     ) {
         val result = updateLinksAfterRename(vaultPath = vaultPath, notesBefore = notesBefore, from = from, to = to)
             ?: return
-        logger.i { "Links updated after a rename: ${result.updatedCount} notes, ${result.skipped.size} skipped" }
+        logger.i { LINKS_UPDATED_MESSAGE + result.updatedCount + NOTES_SKIPPED + result.skipped.size }
         reduce { reduceLinksUpdated(state = it, result = result) }
     }
 
@@ -245,6 +243,10 @@ class VaultTreeViewModel(
     }
 
     companion object {
+        private const val LINKS_UPDATED_MESSAGE = "Links updated after a rename: "
+        private const val NOTES_IN = " notes in "
+        private const val NOTES_SKIPPED = " notes, skipped: "
+        private const val TREE_LOADED_MESSAGE = "Vault tree loaded: "
         private const val LOG_TAG = "VaultTreeViewModel"
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the vault tree"
     }

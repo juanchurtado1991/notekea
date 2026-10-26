@@ -1,5 +1,6 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.Outcome
 
 /*
@@ -19,7 +20,7 @@ suspend fun createUnderFreeName(
     createAt: suspend (RelativePath) -> Outcome<Unit, NotesError>
 ): Outcome<RelativePath, NotesError> {
     for (number in 0 until MAX_CANDIDATES) {
-        val name = if (number == 0) baseName + extension else "$baseName $number$extension"
+        val name = if (number == 0) baseName + extension else baseName + StringPatterns.SPACE + number + extension
         val path = folder.child(name = name)
         if (noteFileOperations.exists(vaultPath = vaultPath, path = path)) continue
         when (val created = createAt(path)) {

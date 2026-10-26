@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Code: Markdown marks and shared text pieces are named once (`MarkdownSyntax`, `StringPatterns`) instead of
+  being written as literals, and the fence and tag patterns are no longer duplicated (`GUIDELINES.md` §5).
 - The open vault shows its notes in a sidebar tree instead of the "N notes found" summary, and opening a vault no
   longer walks it twice.
 - Features never depend on each other: the app composes them through slots (`ARCHITECTURE.md` §1, enforced by

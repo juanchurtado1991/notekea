@@ -1,5 +1,8 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+
 /**
  * Finds what to highlight in a note's body, line by line, fast enough to run on every keystroke: fenced code blocks,
  * headings, quote and list markers, and inline code, `[[wiki links]]`, Markdown links, bold, italic and `#tags`. The
@@ -14,10 +17,10 @@ class MarkdownHighlighter {
         var fence: String? = null
         var lineStart = 0
         while (lineStart <= text.length) {
-            val newline = text.indexOf(char = '\n', startIndex = lineStart)
+            val newline = text.indexOf(char = NEW_LINE_CHAR, startIndex = lineStart)
             val lineEnd = if (newline < 0) text.length else newline
             val line = text.substring(startIndex = lineStart, endIndex = lineEnd)
-            val opening = FENCE.find(input = line)?.groupValues?.get(index = 1)
+            val opening = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)
             // Spaces ending a code line keep the text's font: with another font, the cursor does not move past them.
             val codeEnd = lineStart + line.trimEnd().length
             when {
@@ -48,10 +51,10 @@ class MarkdownHighlighter {
         var blockStart = 0
         var lineStart = 0
         while (lineStart <= text.length) {
-            val newline = text.indexOf(char = '\n', startIndex = lineStart)
+            val newline = text.indexOf(char = NEW_LINE_CHAR, startIndex = lineStart)
             val lineEnd = if (newline < 0) text.length else newline
             val line = text.substring(startIndex = lineStart, endIndex = lineEnd)
-            val opening = FENCE.find(input = line)?.groupValues?.get(index = 1)
+            val opening = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)
             val open = fence
             if (open != null && closesFence(line = line, fence = open)) {
                 blocks += blockStart until lineEnd
@@ -121,7 +124,7 @@ class MarkdownHighlighter {
             matches(regex = ITALIC, from = from).forEach { match ->
                 wrapped(match = match, kind = HighlightKind.ITALIC)
             }
-            matches(regex = TAG, from = from).forEach { match ->
+            matches(regex = MarkdownSyntax.TAG, from = from).forEach { match ->
                 spans += span(kind = HighlightKind.TAG, range = match.range)
             }
         }
@@ -165,7 +168,6 @@ class MarkdownHighlighter {
     companion object {
         private val BLOCK_MARKER = Regex(pattern = "^(\\s{0,3}>\\s?|\\s*(?:[-*+]|\\d+[.)])\\s+(?:\\[[ xX]]\\s+)?)")
         private val BOLD = Regex(pattern = "(\\*\\*|__)(?=\\S)(.+?)(?<=\\S)(\\1)")
-        private val FENCE = Regex(pattern = "^\\s{0,3}(`{3,}|~{3,})")
         private val HEADING = Regex(pattern = "^(#{1,6})(\\s+)")
         private val HEADING_LEVELS = listOf(
             HighlightKind.HEADING_1,
@@ -179,7 +181,6 @@ class MarkdownHighlighter {
         private val ITALIC =
             Regex(pattern = "((?<![*\\w])\\*(?![*\\s])|(?<![_\\w])_(?![_\\s]))(.+?)((?<=\\S)\\1(?![*\\w]))")
         private val MARKDOWN_LINK = Regex(pattern = "(!?\\[)([^\\]\\n]*)]\\([^)\\n]*\\)")
-        private val TAG = Regex(pattern = "(?<![\\w#/&])#[\\p{L}\\p{N}_/-]*[\\p{L}_/-][\\p{L}\\p{N}_/-]*")
         private val WIKI_LINK = Regex(pattern = "(!?\\[\\[)([^\\]\\n]+)(]])")
 
         private fun syntax(

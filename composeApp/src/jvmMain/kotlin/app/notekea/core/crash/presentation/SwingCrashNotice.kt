@@ -1,5 +1,7 @@
 package app.notekea.core.crash.presentation
 
+import app.notekea.core.domain.StringPatterns.NEW_LINE
+import app.notekea.core.domain.StringPatterns.BLANK_LINE
 import app.notekea.core.crash.domain.RecordedCrash
 import app.notekea.resources.Res
 import app.notekea.resources.crash_close
@@ -22,7 +24,7 @@ class SwingCrashNotice(private val actions: CrashReportActions) : CrashNotice {
         crash: RecordedCrash
     ) {
         val texts = runBlocking { loadTexts() }
-        val message = texts.message + "\n\n" + (crash.path?.let { texts.saved + "\n" + it } ?: texts.notSaved)
+        val message = texts.message + BLANK_LINE + (crash.path?.let { texts.saved + NEW_LINE + it } ?: texts.notSaved)
         val options = arrayOf(texts.copy, texts.report, texts.close)
         while (true) {
             val choice = JOptionPane.showOptionDialog(

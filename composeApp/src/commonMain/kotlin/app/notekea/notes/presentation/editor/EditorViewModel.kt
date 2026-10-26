@@ -1,5 +1,7 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
@@ -206,7 +208,7 @@ class EditorViewModel(
     ) {
         val state = buffer.text.getOrNull(index = stateIndex) ?: return
         if (state !in TASK_STATES) return
-        val toggled = if (state == ' ') DONE_STATE else OPEN_STATE
+        val toggled = if (state == MarkdownSyntax.TASK_OPEN_STATE) DONE_STATE else OPEN_STATE
         buffer.edit { replace(start = stateIndex, end = stateIndex + 1, text = toggled) }
     }
 
@@ -266,7 +268,7 @@ class EditorViewModel(
     private fun selectedForTag(): String {
         val selection = buffer.selection
         val selected = buffer.text.substring(startIndex = selection.min, endIndex = selection.max).trim()
-        return selected.takeIf { '\n' !in it && it.length <= MAX_TAG_QUERY }.orEmpty()
+        return selected.takeIf { NEW_LINE_CHAR !in it && it.length <= MAX_TAG_QUERY }.orEmpty()
     }
 
     /** Whether the text can be changed now: a note is open and loaded, in Edit mode. */
@@ -334,7 +336,7 @@ class EditorViewModel(
     private fun reduceSaveFailure(
         error: NotesError
     ) {
-        logger.w { "Note save failed: ${error::class.simpleName}" }
+        logger.w { SAVE_FAILED_MESSAGE + error::class.simpleName }
         reduce {
             when (error) {
                 is NotesError.ChangedOnDisk -> it.copy(hasConflict = true)
@@ -530,9 +532,10 @@ class EditorViewModel(
     }
 
     companion object {
-        private const val DONE_STATE = "x"
-        private const val OPEN_STATE = " "
-        private const val TASK_STATES = " xX"
+        private val DONE_STATE = MarkdownSyntax.TASK_DONE_STATE.toString()
+        private val OPEN_STATE = MarkdownSyntax.TASK_OPEN_STATE.toString()
+        private const val SAVE_FAILED_MESSAGE = "Note save failed: "
+        private val TASK_STATES = MarkdownSyntax.TASK_OPEN_STATE.toString() + MarkdownSyntax.TASK_DONE_STATES
         val AUTOSAVE_DELAY = 1.seconds
         private const val LOG_TAG = "EditorViewModel"
         private const val MAX_TAG_QUERY = 40

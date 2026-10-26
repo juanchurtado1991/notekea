@@ -1,5 +1,11 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.domain.StringPatterns
+import app.notekea.core.domain.StringPatterns.BLANK_LINE
+import app.notekea.core.domain.StringPatterns.NEW_LINE
+import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.markdown.MarkdownSyntax
+
 /**
  * What a formatting toolbar button does to a note's text (`ROADMAP.md` 1.17), as the single [TextEdit] a person would
  * type. With a selection, it formats it: bold and italic wrap it (or unwrap it when it already is), line styles apply
@@ -39,9 +45,16 @@ class MarkdownFormatter {
         action: FormatAction
     ): ((String?) -> Pair<String, IntRange>)? = when (action) {
         is FormatAction.Callout -> { selected -> callout(action = action, selected = selected) }
+
         is FormatAction.Table -> { _ -> table(action = action) }
+
         is FormatAction.CodeBlock -> { selected -> code(action = action, selected = selected) }
-        FormatAction.Divider -> { _ -> DIVIDER to (DIVIDER.length until DIVIDER.length) }
+
+        FormatAction.Divider -> { _ ->
+            MarkdownSyntax.DIVIDER to
+                (MarkdownSyntax.DIVIDER.length until MarkdownSyntax.DIVIDER.length)
+        }
+
         else -> null
     }
 
@@ -55,7 +68,7 @@ class MarkdownFormatter {
             text = text,
             start = start,
             end = end,
-            mark = BOLD,
+            mark = MarkdownSyntax.BOLD,
             placeholder = action.placeholder
         )
 
@@ -63,7 +76,7 @@ class MarkdownFormatter {
             text = text,
             start = start,
             end = end,
-            mark = ITALIC,
+            mark = MarkdownSyntax.ITALIC,
             placeholder = action.placeholder
         )
 
@@ -73,7 +86,7 @@ class MarkdownFormatter {
 
         is FormatAction.Tag -> tag(text = text, start = start, end = end, action = action)
 
-        else -> error("Not an inline action: $action")
+        else -> error(NOT_INLINE_MESSAGE + action)
     }
 
     /**
@@ -94,16 +107,10 @@ class MarkdownFormatter {
         val selected = text.substring(startIndex = from, endIndex = to)
         if (isMarkedInside(selected = selected, mark = mark)) {
             val inner = selected.substring(startIndex = mark.length, endIndex = selected.length - mark.length)
-            return insert(start = from, end = to, before = "", selected = inner, after = "")
+            return insert(start = from, end = to, selected = inner)
         }
         if (isMarkedAround(text = text, start = from, end = to, mark = mark)) {
-            return insert(
-                start = from - mark.length,
-                end = to + mark.length,
-                before = "",
-                selected = selected,
-                after = ""
-            )
+            return insert(start = from - mark.length, end = to + mark.length, selected = selected)
         }
         return insert(start = from, end = to, before = mark, selected = selected, after = mark)
     }
@@ -113,7 +120,7 @@ class MarkdownFormatter {
         text: String,
         offset: Int
     ): IntRange? {
-        val isWord = { char: Char -> char.isLetterOrDigit() || char == '_' }
+        val isWord = { char: Char -> char.isLetterOrDigit() || char == StringPatterns.UNDERSCORE_CHAR }
         if (offset == 0 || offset == text.length || !isWord(text[offset - 1]) || !isWord(text[offset])) return null
         var from = offset
         while (from > 0 && isWord(text[from - 1])) from--
@@ -129,7 +136,8 @@ class MarkdownFormatter {
     ): Boolean {
         val isMarked = selected.length > 2 * mark.length && selected.startsWith(prefix = mark) &&
             selected.endsWith(suffix = mark)
-        val isBoldOnly = mark == ITALIC && selected.startsWith(prefix = BOLD) && !selected.startsWith(prefix = "***")
+        val isBoldOnly = mark == MarkdownSyntax.ITALIC && selected.startsWith(prefix = MarkdownSyntax.BOLD) &&
+            !selected.startsWith(prefix = MarkdownSyntax.BOLD_ITALIC)
         return isMarked && !isBoldOnly
     }
 
@@ -141,7 +149,12 @@ class MarkdownFormatter {
     ): Boolean =
         text.regionMatches(thisOffset = start - mark.length, other = mark, otherOffset = 0, length = mark.length) &&
             text.regionMatches(thisOffset = end, other = mark, otherOffset = 0, length = mark.length) &&
-            (mark != ITALIC || (text.getOrNull(index = start - 2) != '*' && text.getOrNull(index = end + 1) != '*'))
+            (
+                mark != MarkdownSyntax.ITALIC || (
+                    text.getOrNull(index = start - 2) != MarkdownSyntax.ITALIC_CHAR &&
+                        text.getOrNull(index = end + 1) != MarkdownSyntax.ITALIC_CHAR
+                    )
+                )
 
     /** [style] on every line the selection touches, or off when every non-empty one already has it. */
     private fun styleLines(
@@ -151,17 +164,16 @@ class MarkdownFormatter {
         style: LineStyle,
         placeholder: String
     ): TextEdit {
-        val lineStart = text.lastIndexOf(char = '\n', startIndex = start - 1) + 1
-        val lastLineEnd = if (end > start && text.getOrNull(index = end - 1) == '\n') end - 1 else end
-        val lineEnd = text.indexOf(char = '\n', startIndex = lastLineEnd).takeIf { it >= 0 } ?: text.length
-        val lines = text.substring(startIndex = lineStart, endIndex = lineEnd).split('\n')
+        val lineStart = text.lastIndexOf(char = NEW_LINE_CHAR, startIndex = start - 1) + 1
+        val lastLineEnd = if (end > start && text.getOrNull(index = end - 1) == NEW_LINE_CHAR) end - 1 else end
+        val lineEnd = text.indexOf(char = NEW_LINE_CHAR, startIndex = lastLineEnd).takeIf { it >= 0 } ?: text.length
+        val lines = text.substring(startIndex = lineStart, endIndex = lineEnd).split(NEW_LINE_CHAR)
         if (start == end && lines.single().isBlank()) {
             return insert(
                 start = lineStart,
                 end = lineEnd,
-                before = style.add(line = "", number = 1),
-                selected = placeholder,
-                after = ""
+                before = style.add(line = StringPatterns.EMPTY, number = 1),
+                selected = placeholder
             )
         }
         val filled = lines.filter { it.isNotBlank() }
@@ -174,7 +186,7 @@ class MarkdownFormatter {
                 else -> style.add(line = line, number = ++number)
             }
         }
-        val replacement = styled.joinToString(separator = "\n")
+        val replacement = styled.joinToString(separator = NEW_LINE)
         if (start != end) return TextEdit(lineStart, lineEnd, replacement, lineStart, lineStart + replacement.length)
         val cursor = (start + styled.first().length - lines.first().length).coerceAtLeast(minimumValue = lineStart)
         return TextEdit(
@@ -195,16 +207,16 @@ class MarkdownFormatter {
     ): TextEdit {
         val selected = text.substring(startIndex = start, endIndex = end).takeIf { it.isNotEmpty() }
         val before = when {
-            start == 0 -> ""
-            text[start - 1] != '\n' -> "\n\n"
-            start >= 2 && text[start - 2] != '\n' -> "\n"
-            else -> ""
+            start == 0 -> StringPatterns.EMPTY
+            text[start - 1] != NEW_LINE_CHAR -> BLANK_LINE
+            start >= 2 && text[start - 2] != NEW_LINE_CHAR -> NEW_LINE
+            else -> StringPatterns.EMPTY
         }
         val rest = text.substring(startIndex = end)
         val after = when {
-            rest.startsWith(prefix = "\n\n") -> ""
-            rest.startsWith(prefix = "\n") || rest.isEmpty() -> "\n"
-            else -> "\n\n"
+            rest.startsWith(prefix = BLANK_LINE) -> StringPatterns.EMPTY
+            rest.startsWith(prefix = NEW_LINE) || rest.isEmpty() -> NEW_LINE
+            else -> BLANK_LINE
         }
         val (content, selection) = build(selected)
         val offset = start + before.length
@@ -215,28 +227,33 @@ class MarkdownFormatter {
         action: FormatAction.Callout,
         selected: String?
     ): Pair<String, IntRange> {
-        val header = "> [!" + action.type + "]" + (if (action.isFolded) "-" else "") + " " + action.title + "\n"
-        val body = (selected ?: action.placeholder).split('\n').joinToString(separator = "\n") { "> $it" }
-        val bodyStart = header.length + QUOTE_PREFIX.length
-        val selection = if (selected ==
-            null
-        ) {
-            bodyStart until bodyStart + action.placeholder.length
-        } else {
-            bodyStart until bodyStart
+        val fold = if (action.isFolded) MarkdownSyntax.CALLOUT_FOLDED else StringPatterns.EMPTY
+        val header = MarkdownSyntax.QUOTE + MarkdownSyntax.CALLOUT_OPEN + action.type + MarkdownSyntax.CALLOUT_CLOSE +
+            fold + StringPatterns.SPACE + action.title + NEW_LINE
+        val body = (selected ?: action.placeholder).split(NEW_LINE_CHAR).joinToString(separator = NEW_LINE) {
+            MarkdownSyntax.QUOTE + it
         }
-        return header + body to selection
+        val bodyStart = header.length + MarkdownSyntax.QUOTE.length
+        val selectedLength = if (selected == null) action.placeholder.length else 0
+        return header + body to (bodyStart until bodyStart + selectedLength)
     }
 
     private fun table(
         action: FormatAction.Table
     ): Pair<String, IntRange> {
-        val line = { cells: List<String> -> cells.joinToString(separator = " | ", prefix = "| ", postfix = " |") }
-        val divider = line(action.columnNames.map { "---" })
+        val line = { cells: List<String> ->
+            cells.joinToString(
+                separator = MarkdownSyntax.TABLE_CELL_SEPARATOR,
+                prefix = MarkdownSyntax.TABLE_ROW_START,
+                postfix = MarkdownSyntax.TABLE_ROW_END
+            )
+        }
+        val divider = line(action.columnNames.map { MarkdownSyntax.TABLE_DIVIDER_CELL })
         val row = line(action.columnNames.map { action.cellText })
         val lines = listOf(line(action.columnNames), divider) + List(size = action.rows) { row }
+        val headerStart = MarkdownSyntax.TABLE_ROW_START.length
         val firstHeader = action.columnNames.firstOrNull().orEmpty()
-        return lines.joinToString(separator = "\n") to (2 until 2 + firstHeader.length)
+        return lines.joinToString(separator = NEW_LINE) to (headerStart until headerStart + firstHeader.length)
     }
 
     private fun code(
@@ -244,10 +261,10 @@ class MarkdownFormatter {
         selected: String?
     ): Pair<String, IntRange> {
         val body = selected ?: action.placeholder
-        val opening = FENCE + action.language
-        val start = opening.length + 1
-        return opening + "\n" + body + "\n" + FENCE to
-            (if (selected == null) start until start + body.length else start until start)
+        val opening = MarkdownSyntax.FENCE + action.language
+        val start = opening.length + NEW_LINE.length
+        val selectedLength = if (selected == null) body.length else 0
+        return opening + NEW_LINE + body + NEW_LINE + MarkdownSyntax.FENCE to (start until start + selectedLength)
     }
 
     private fun noteLink(
@@ -257,17 +274,12 @@ class MarkdownFormatter {
         target: String
     ): TextEdit {
         val label = text.substring(startIndex = start, endIndex = end).takeIf { it.isNotBlank() && it != target }
-        val link = "[[" + target + (label?.let { "|$it" }.orEmpty()) + "]]"
-        return TextEdit(
-            start = start,
-            end = end,
-            replacement = link,
-            selectionStart = start + link.length,
-            selectionEnd =
-            start + link.length
-        )
+        val labelPart = label?.let { MarkdownSyntax.LINK_LABEL_SEPARATOR + it }.orEmpty()
+        val link = MarkdownSyntax.WIKI_LINK_OPEN + target + labelPart + MarkdownSyntax.WIKI_LINK_CLOSE
+        return TextEdit(start, end, link, start + link.length, start + link.length)
     }
 
+    /** `[text](https://)`: the selection or [placeholder] as the text, the address selected when there is text. */
     private fun webLink(
         text: String,
         start: Int,
@@ -275,17 +287,21 @@ class MarkdownFormatter {
         placeholder: String
     ): TextEdit {
         val selected = text.substring(startIndex = start, endIndex = end)
+        val target = MarkdownSyntax.LINK_TEXT_CLOSE + MarkdownSyntax.LINK_TARGET_OPEN + MarkdownSyntax.WEB_ADDRESS +
+            MarkdownSyntax.LINK_TARGET_CLOSE
         if (selected.isEmpty()) {
             return insert(
                 start = start,
                 end = end,
-                before = "[",
+                before = MarkdownSyntax.LINK_TEXT_OPEN,
                 selected = placeholder,
-                after = "]($WEB_ADDRESS)"
+                after = target
             )
         }
-        val addressStart = start + selected.length + 3
-        return TextEdit(start, end, "[$selected]($WEB_ADDRESS)", addressStart, addressStart + WEB_ADDRESS.length)
+        val link = MarkdownSyntax.LINK_TEXT_OPEN + selected + target
+        val addressStart = start + MarkdownSyntax.LINK_TEXT_OPEN.length + selected.length +
+            MarkdownSyntax.LINK_TEXT_CLOSE.length + MarkdownSyntax.LINK_TARGET_OPEN.length
+        return TextEdit(start, end, link, addressStart, addressStart + MarkdownSyntax.WEB_ADDRESS.length)
     }
 
     /** The tag in place of the selection, with a space before it when needed and one after it to keep typing. */
@@ -295,8 +311,8 @@ class MarkdownFormatter {
         end: Int,
         action: FormatAction.Tag
     ): TextEdit {
-        val space = if (start > 0 && !text[start - 1].isWhitespace()) " " else ""
-        val tag = "$space#${action.name} "
+        val space = if (start > 0 && !text[start - 1].isWhitespace()) StringPatterns.SPACE else StringPatterns.EMPTY
+        val tag = space + MarkdownSyntax.TAG_MARK + action.name + StringPatterns.SPACE
         return TextEdit(start, end, tag, start + tag.length, start + tag.length)
     }
 
@@ -304,9 +320,9 @@ class MarkdownFormatter {
     private fun insert(
         start: Int,
         end: Int,
-        before: String,
         selected: String,
-        after: String
+        before: String = StringPatterns.EMPTY,
+        after: String = StringPatterns.EMPTY
     ): TextEdit = TextEdit(
         start = start,
         end = end,
@@ -316,11 +332,6 @@ class MarkdownFormatter {
     )
 
     companion object {
-        private const val BOLD = "**"
-        private const val DIVIDER = "---"
-        private const val FENCE = "```"
-        private const val ITALIC = "*"
-        private const val QUOTE_PREFIX = "> "
-        private const val WEB_ADDRESS = "https://"
+        private const val NOT_INLINE_MESSAGE = "Not an inline action: "
     }
 }

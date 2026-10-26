@@ -85,7 +85,10 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
 ## 5. DRY
 
 - Do not duplicate logic. Extract shared behavior into a function, extension or `domain` use case.
-- Constants instead of magic strings and numbers.
+- Constants instead of magic strings and numbers, also for single characters, spaces and line breaks. Text pieces
+  shared across features live in `core.domain.StringPatterns` (space, line break, empty, whitespace) and Markdown's
+  marks and shared patterns in `core.domain.markdown.MarkdownSyntax` (list markers, fences, tags, links); a constant
+  used by one class stays in its `companion object`.
 - Duplication is only acceptable when it is intentional and documented with the reason (e.g. a measured performance trade-off).
 
 ## 6. Granular, self-descriptive functions

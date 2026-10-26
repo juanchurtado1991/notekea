@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.core.domain.StringPatterns.SPACE
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -88,6 +89,7 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.notekeaCodeTextStyle
 import app.notekea.notes.domain.NoteMetadata
+import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.TaskFinder
 import app.notekea.notes.presentation.tree.notesErrorMessage
@@ -259,7 +261,7 @@ private fun EditorHeader(
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     path.parent?.takeUnless { it.isRoot }?.let { folder ->
         Text(
-            text = folder.value.split('/').joinToString(separator = PATH_SEPARATOR),
+            text = folder.value.split(RelativePath.SEPARATOR).joinToString(separator = PATH_SEPARATOR),
             style = MaterialTheme.typography.bodySmall,
             color = muted
         )
@@ -291,7 +293,7 @@ private fun EditorHeader(
 private fun propertiesLine(
     properties: NoteMetadata?
 ): String? {
-    val tags = properties?.tags.orEmpty().joinToString(separator = " ") { TAG_PREFIX + it }
+    val tags = properties?.tags.orEmpty().joinToString(separator = SPACE) { TAG_PREFIX + it }
     val aliases = properties?.aliases.orEmpty().joinToString(separator = PROPERTY_SEPARATOR)
     return listOf(tags, aliases).filter { it.isNotEmpty() }.joinToString(separator = PROPERTY_SEPARATOR).ifEmpty {
         null

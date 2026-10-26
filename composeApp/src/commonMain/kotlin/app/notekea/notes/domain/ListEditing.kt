@@ -1,5 +1,9 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.domain.StringPatterns.NEW_LINE
+import app.notekea.core.domain.StringPatterns
 /**
  * Lists and quotes behave as in other editors (`ROADMAP.md` 1.17), as one [TextEdit] per key, or null where the key
  * keeps its usual meaning (plain text, code blocks, the cursor inside a marker, a selection for Enter):
@@ -18,7 +22,7 @@ class ListEditing {
     ): TextEdit? {
         val start = minOf(selectionStart, selectionEnd).coerceIn(range = 0..text.length)
         val end = maxOf(selectionStart, selectionEnd).coerceIn(range = 0..text.length)
-        val lines = text.split('\n')
+        val lines = text.split(NEW_LINE_CHAR)
         val first = lineIndexOf(text = text, offset = start)
         if (isInCode(lines = lines, index = first)) return null
         return when (action) {
@@ -33,13 +37,13 @@ class ListEditing {
         text: String,
         cursor: Int
     ): TextEdit? {
-        val lineStart = text.lastIndexOf(char = '\n', startIndex = cursor - 1) + 1
-        val lineEnd = text.indexOf(char = '\n', startIndex = cursor).takeIf { it >= 0 } ?: text.length
+        val lineStart = text.lastIndexOf(char = NEW_LINE_CHAR, startIndex = cursor - 1) + 1
+        val lineEnd = text.indexOf(char = NEW_LINE_CHAR, startIndex = cursor).takeIf { it >= 0 } ?: text.length
         val line = ListLine.of(line = text.substring(startIndex = lineStart, endIndex = lineEnd))
         val markerEnd = lineStart + line.prefix.length + line.marker.length
         if ((!line.isItem && !line.isQuote) || cursor < markerEnd) return null
-        if (line.content.isBlank()) return TextEdit(lineStart, lineEnd, "", lineStart, lineStart)
-        val next = "\n" + line.prefix + (if (line.isItem) line.nextMarker() else "")
+        if (line.content.isBlank()) return TextEdit(lineStart, lineEnd, StringPatterns.EMPTY, lineStart, lineStart)
+        val next = NEW_LINE + line.prefix + (if (line.isItem) line.nextMarker() else StringPatterns.EMPTY)
         return TextEdit(cursor, cursor, next, cursor + next.length, cursor + next.length)
     }
 
@@ -47,12 +51,12 @@ class ListEditing {
         text: String,
         cursor: Int
     ): TextEdit? {
-        val lineStart = text.lastIndexOf(char = '\n', startIndex = cursor - 1) + 1
-        val lineEnd = text.indexOf(char = '\n', startIndex = cursor).takeIf { it >= 0 } ?: text.length
+        val lineStart = text.lastIndexOf(char = NEW_LINE_CHAR, startIndex = cursor - 1) + 1
+        val lineEnd = text.indexOf(char = NEW_LINE_CHAR, startIndex = cursor).takeIf { it >= 0 } ?: text.length
         val line = ListLine.of(line = text.substring(startIndex = lineStart, endIndex = lineEnd))
         val markerStart = lineStart + line.prefix.length
         if (!line.isItem || cursor != markerStart + line.marker.length) return null
-        return TextEdit(markerStart, cursor, "", markerStart, markerStart)
+        return TextEdit(markerStart, cursor, StringPatterns.EMPTY, markerStart, markerStart)
     }
 
     /** Tab and Shift+Tab: every list item the selection touches moves by the step the first one takes. */
@@ -62,9 +66,18 @@ class ListEditing {
         end: Int,
         isIndent: Boolean
     ): TextEdit? {
-        val text = lines.joinToString(separator = "\n")
+        val text = lines.joinToString(separator = NEW_LINE)
         val first = lineIndexOf(text = text, offset = start)
-        val last = lineIndexOf(text = text, offset = if (end > start && text[end - 1] == '\n') end - 1 else end)
+        val last = lineIndexOf(
+            text = text,
+            offset = if (end > start &&
+                text[end - 1] == NEW_LINE_CHAR
+            ) {
+                end - 1
+            } else {
+                end
+            }
+        )
         val items = (first..last).filter { ListLine.of(line = lines[it]).isItem }
         if (items.isEmpty()) return null
         val firstItem = ListLine.of(line = lines[items.first()])
@@ -85,7 +98,7 @@ class ListEditing {
         }
         val firstStart = lineStartOf(lines = lines, index = first)
         val lastEnd = lineStartOf(lines = lines, index = last) + lines[last].length
-        val replacement = shifted.subList(fromIndex = first, toIndex = last + 1).joinToString(separator = "\n")
+        val replacement = shifted.subList(fromIndex = first, toIndex = last + 1).joinToString(separator = NEW_LINE)
         val newStart = mapOffset(lines = lines, shifted = shifted, offset = start, items = items, step = step)
         val newEnd = mapOffset(lines = lines, shifted = shifted, offset = end, items = items, step = step)
         return TextEdit(firstStart, lastEnd, replacement, newStart, newEnd)
@@ -122,8 +135,8 @@ class ListEditing {
         line: String,
         step: Int
     ): String {
-        if (step >= 0) return " ".repeat(n = step) + line
-        val removable = line.takeWhile { it == ' ' || it == '\t' }.length
+        if (step >= 0) return StringPatterns.SPACE.repeat(n = step) + line
+        val removable = line.takeWhile { StringPatterns.isIndent(char = it) }.length
         return line.substring(startIndex = minOf(-step, removable))
     }
 
@@ -135,7 +148,7 @@ class ListEditing {
         items: List<Int>,
         step: Int
     ): Int {
-        val text = lines.joinToString(separator = "\n")
+        val text = lines.joinToString(separator = NEW_LINE)
         val index = lineIndexOf(text = text, offset = offset)
         val column = offset - lineStartOf(lines = lines, index = index)
         val moved = if (index in items) column + (shifted[index].length - lines[index].length) else column
@@ -146,7 +159,7 @@ class ListEditing {
     private fun lineIndexOf(
         text: String,
         offset: Int
-    ): Int = text.substring(startIndex = 0, endIndex = offset).count { it == '\n' }
+    ): Int = text.substring(startIndex = 0, endIndex = offset).count { it == NEW_LINE_CHAR }
 
     private fun lineStartOf(
         lines: List<String>,
@@ -160,16 +173,12 @@ class ListEditing {
     ): Boolean {
         var fence: Char? = null
         for (line in lines.take(n = index + 1)) {
-            val marker = FENCE.find(input = line)?.groupValues?.get(index = 1)?.first()
+            val marker = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)?.first()
             fence = when {
                 fence != null -> if (marker == fence) null else fence
                 else -> marker
             }
         }
-        return fence != null && FENCE.find(input = lines[index]) == null
-    }
-
-    companion object {
-        private val FENCE = Regex(pattern = "^\\s{0,3}(`{3,}|~{3,})")
+        return fence != null && MarkdownSyntax.FENCE_LINE.find(input = lines[index]) == null
     }
 }

@@ -1,5 +1,9 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.core.domain.StringPatterns
+import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.StringPatterns.NEW_LINE
 import app.notekea.notes.domain.LinkKind
 import app.notekea.notes.domain.percentDecoded
 
@@ -15,13 +19,12 @@ class ReadModeLinks {
         body: String
     ): String {
         var fence: Char? = null
-        return body.split('\n').joinToString(separator = "\n") { line ->
-            val opening = FENCE.find(input = line)?.groupValues?.get(index = 1)
+        return body.split(NEW_LINE_CHAR).joinToString(separator = NEW_LINE) { line ->
+            val opening = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)
             when {
                 fence != null -> line.also {
-                    if (line.trim().let { it.length >= 3 && it.all { c -> c == fence } }) {
-                        fence =
-                            null
+                    if (line.trim().let { it.length >= MarkdownSyntax.FENCE.length && it.all { c -> c == fence } }) {
+                        fence = null
                     }
                 }
 
@@ -44,11 +47,14 @@ class ReadModeLinks {
             kind = LinkKind.WIKI
         )
 
-        uri.startsWith(prefix = "#") -> null
+        uri.startsWith(char = MarkdownSyntax.HEADING_ANCHOR_CHAR) -> null
 
         OTHER_SCHEME.containsMatchIn(input = uri) -> ReadLink.External(uri = uri)
 
-        else -> ReadLink.Note(target = uri.substringBefore(delimiter = '#'), kind = LinkKind.MARKDOWN_ENCODED)
+        else -> ReadLink.Note(
+            target = uri.substringBefore(delimiter = MarkdownSyntax.HEADING_ANCHOR_CHAR),
+            kind = LinkKind.MARKDOWN_ENCODED
+        )
     }
 
     /** Rewrites the tags and wiki links of one line that are not inside inline code. */
@@ -70,14 +76,12 @@ class ReadModeLinks {
         val protected = listOf(INLINE_CODE, WIKI_LINK, MARKDOWN_LINK, AUTOLINK, WEB_ADDRESS).flatMap { pattern ->
             pattern.findAll(input = line).map { it.range }
         }
-        return TAG.replace(input = line) { match ->
+        return MarkdownSyntax.TAG.replace(input = line) { match ->
             val isProtected = protected.any { it.first <= match.range.first && match.range.last <= it.last }
             if (isProtected) {
                 match.value
             } else {
-                "[" + match.value + "](" + TAG_SCHEME +
-                    encoded(text = match.groupValues[1]) +
-                    ")"
+                link(text = match.value, address = TAG_SCHEME + encoded(text = match.groupValues[1]))
             }
         }
     }
@@ -86,23 +90,38 @@ class ReadModeLinks {
     private fun markdownLink(
         inner: String
     ): String? {
-        val written = inner.substringBefore(delimiter = '|')
-        val label = inner.substringAfter(delimiter = '|', missingDelimiterValue = written).trim()
-        val target = written.substringBefore(delimiter = '#').substringBefore(delimiter = '^').trim()
+        val written = inner.substringBefore(delimiter = MarkdownSyntax.LINK_LABEL_SEPARATOR_CHAR)
+        val label = inner.substringAfter(
+            delimiter = MarkdownSyntax.LINK_LABEL_SEPARATOR_CHAR,
+            missingDelimiterValue = written
+        )
+            .trim()
+        val target = written.substringBefore(delimiter = MarkdownSyntax.HEADING_ANCHOR_CHAR)
+            .substringBefore(delimiter = MarkdownSyntax.BLOCK_ANCHOR_CHAR)
+            .trim()
         if (target.isEmpty()) return null
-        return "[" + label.replace(oldValue = "]", newValue = "\\]") + "](" + SCHEME + encoded(text = target) + ")"
+        val escaped = label.replace(oldValue = MarkdownSyntax.LINK_TEXT_CLOSE, newValue = ESCAPED_LINK_TEXT_CLOSE)
+        return link(text = escaped, address = SCHEME + encoded(text = target))
     }
+
+    /** A Markdown link `[text](address)`. */
+    private fun link(
+        text: String,
+        address: String
+    ): String =
+        MarkdownSyntax.LINK_TEXT_OPEN + text + MarkdownSyntax.LINK_TEXT_CLOSE + MarkdownSyntax.LINK_TARGET_OPEN +
+            address + MarkdownSyntax.LINK_TARGET_CLOSE
 
     /** Percent-encodes everything but unreserved characters and `/`, so the renderer keeps the address whole. */
     private fun encoded(
         text: String
-    ): String = text.encodeToByteArray().joinToString(separator = "") { byte ->
+    ): String = text.encodeToByteArray().joinToString(separator = StringPatterns.EMPTY) { byte ->
         val char = (byte.toInt() and BYTE_MASK).toChar()
         if (byte >= 0 && (char.isLetterOrDigit() || char in UNRESERVED)) {
             char.toString()
         } else {
-            "%" +
-                (byte.toInt() and BYTE_MASK).toString(radix = HEX_RADIX).uppercase().padStart(length = 2, padChar = '0')
+            PERCENT + (byte.toInt() and BYTE_MASK).toString(radix = HEX_RADIX).uppercase()
+                .padStart(length = HEX_DIGITS, padChar = StringPatterns.ZERO_CHAR)
         }
     }
 
@@ -113,17 +132,16 @@ class ReadModeLinks {
         /** The address scheme of a link to search a tag, as rewritten by [prepare]. */
         const val TAG_SCHEME = "notekea-tag:"
         private const val BYTE_MASK = 0xFF
+        private const val ESCAPED_LINK_TEXT_CLOSE = "\\]"
+        private const val HEX_DIGITS = 2
+        private const val PERCENT = "%"
         private const val HEX_RADIX = 16
         private const val UNRESERVED = "-._~/"
-        private val FENCE = Regex(pattern = "^\\s{0,3}(`{3,}|~{3,})")
         private val INLINE_CODE = Regex(pattern = "(`+).+?\\1")
         private val OTHER_SCHEME = Regex(pattern = "^[a-zA-Z][a-zA-Z0-9+.-]+:")
         private val WIKI_LINK = Regex(pattern = "!?\\[\\[([^\\]\\n]+)]]")
         private val MARKDOWN_LINK = Regex(pattern = "!?\\[[^\\]\\n]*]\\([^)\\n]*\\)")
         private val AUTOLINK = Regex(pattern = "<[^>\\s]+>")
         private val WEB_ADDRESS = Regex(pattern = "[a-zA-Z][a-zA-Z0-9+.-]*://\\S+")
-
-        /** A tag as Obsidian reads it: `#` not after a letter, `#`, `/` or `&`, and not only digits. */
-        private val TAG = Regex(pattern = "(?<![\\w#/&])#([\\p{L}\\p{N}_/-]*[\\p{L}_/-][\\p{L}\\p{N}_/-]*)")
     }
 }

@@ -1,5 +1,9 @@
 package app.notekea.core.domain.markdown
 
+import app.notekea.core.domain.StringPatterns
+import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.StringPatterns.NEW_LINE
+
 /**
  * A note's Markdown prepared for a renderer that knows less than Obsidian (Read mode). Every callout's first line
  * (`> [!type] Title`, nested ones included) gets an empty quoted line after it, so the header is a paragraph of its own
@@ -12,13 +16,13 @@ class ReadingMarkdown {
         markdown: String
     ): String {
         var fence: Char? = null
-        return markdown.split('\n').joinToString(separator = "\n") { line ->
-            val marker = FENCE.find(input = line)?.groupValues?.get(index = 1)?.first()
+        return markdown.split(NEW_LINE_CHAR).joinToString(separator = NEW_LINE) { line ->
+            val marker = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)?.first()
             val calloutHeader = QUOTED_CALLOUT_HEADER.matchEntire(input = line)
             when {
                 fence != null -> line.also { if (marker == fence) fence = null }
                 marker != null -> line.also { fence = marker }
-                calloutHeader != null -> line + "\n" + calloutHeader.groupValues[1].trimEnd()
+                calloutHeader != null -> line + NEW_LINE + calloutHeader.groupValues[1].trimEnd()
                 else -> UPPERCASE_TASK.replace(input = line) { it.groupValues[1] + CHECKED_TASK }
             }
         }
@@ -33,13 +37,18 @@ class ReadingMarkdown {
         depth: Int
     ): String {
         if (depth == 0) return code
-        val marks = Regex(pattern = "^(?:[ \\t]*>[ ]?){1,$depth}")
-        return code.split('\n').joinToString(separator = "\n") { marks.replace(input = it, replacement = "") }
+        val marks = Regex(pattern = QUOTE_MARKS_UP_TO + depth + QUOTE_MARKS_END)
+        return code.split(NEW_LINE_CHAR).joinToString(separator = NEW_LINE) {
+            marks.replace(input = it, replacement = StringPatterns.EMPTY)
+        }
     }
 
     companion object {
         private const val CHECKED_TASK = "[x]"
-        private val FENCE = Regex(pattern = "^\\s{0,3}(`{3,}|~{3,})")
+
+        /** Up to a number of quote marks at the start of a line: `^(?:[ \t]*>[ ]?){1,` + depth + `}`. */
+        private const val QUOTE_MARKS_UP_TO = "^(?:[ \\t]*>[ ]?){1,"
+        private const val QUOTE_MARKS_END = "}"
         private val QUOTED_CALLOUT_HEADER = Regex(pattern = "(\\s*(?:>\\s?)+)\\[![^\\]\\s]+][+-]?.*")
         private val UPPERCASE_TASK = Regex(pattern = "^(\\s*(?:>\\s*)*(?:[-*+]|\\d+[.)])\\s+)\\[X](?=\\s|$)")
     }
