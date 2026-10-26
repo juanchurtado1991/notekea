@@ -4,6 +4,8 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.notes.data.DirectoryWatcherFileWatcher
 import app.notekea.notes.data.JvmSystemTrash
 import app.notekea.notes.data.OkioNoteContentStore
+import app.notekea.notes.data.ObsidianVaultSettingsReader
+import app.notekea.notes.data.OkioAttachmentStore
 import app.notekea.notes.data.OkioNoteFileOperations
 import app.notekea.notes.data.OkioNoteMetadataReader
 import app.notekea.notes.data.OkioNoteScanner
@@ -18,6 +20,8 @@ import app.notekea.notes.domain.NoteFileOperations
 import app.notekea.notes.domain.NoteMetadataReader
 import app.notekea.notes.domain.NoteScanner
 import app.notekea.notes.domain.Trash
+import app.notekea.notes.domain.AttachmentStore
+import app.notekea.notes.domain.VaultSettingsReader
 import okio.FileSystem
 import org.koin.dsl.module
 
@@ -36,6 +40,8 @@ val jvmNotesModule = module {
     single<FileWatcher> { DirectoryWatcherFileWatcher(dispatchers = get()) }
     single<NoteContentStore> { OkioNoteContentStore(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
     single<NoteFileOperations> { OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
+    single<AttachmentStore> { OkioAttachmentStore(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
+    single<VaultSettingsReader> { ObsidianVaultSettingsReader(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
     single<NoteMetadataReader> {
         OkioNoteMetadataReader(fileSystem = FileSystem.SYSTEM, dispatchers = get(), parser = get())
     }
