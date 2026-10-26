@@ -12,6 +12,7 @@ enum class ShortcutKey {
     F4,
     N,
     O,
+    P,
     Q,
     S
 }
