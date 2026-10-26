@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,11 +14,13 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.TextFieldDecorator
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,8 +50,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.presentation.components.NotekeaCheckbox
 import app.notekea.core.presentation.components.NotekeaFindBar
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaMarkdown
@@ -60,6 +66,7 @@ import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.core.presentation.theme.notekeaCodeTextStyle
 import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.NotesError
+import app.notekea.notes.domain.TaskFinder
 import app.notekea.notes.presentation.tree.notesErrorMessage
 import app.notekea.resources.Res
 import app.notekea.resources.editor_body_label
@@ -69,6 +76,7 @@ import app.notekea.resources.editor_find_count
 import app.notekea.resources.editor_find_none
 import app.notekea.resources.editor_read_mode
 import app.notekea.resources.editor_saved
+import app.notekea.resources.editor_task
 import app.notekea.resources.editor_title_label
 import app.notekea.resources.editor_unsaved
 import kotlin.math.roundToInt
@@ -77,6 +85,8 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.stringResource
 
+private const val TASK_CHECKBOX_DP = 16
+private const val TASK_CHECKBOX_RATIO = 0.8f
 private const val BODY_MIN_HEIGHT_DP = 320
 private const val CONTENT_MAX_WIDTH_DP = 760
 private const val MATCH_SCROLL_MARGIN_DP = 96
@@ -339,8 +349,56 @@ private fun EditorBody(
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface),
         cursorBrush = SolidColor(value = colors.primary),
         onTextLayout = { getResult -> layout = getResult },
-        outputTransformation = highlighting
+        outputTransformation = highlighting,
+        decorator = TextFieldDecorator { innerTextField ->
+            Box {
+                innerTextField()
+                TaskCheckboxes(buffer = buffer, layout = { layout() }, onIntent = onIntent)
+            }
+        }
     )
+}
+
+/**
+ * A clickable checkbox over the `[ ]` / `[x]` of every task of the text (`ROADMAP.md` 1.7), placed with the text's
+ * layout, so tasks can be checked in Edit mode as in Read mode; a click toggles the character in the file. The box
+ * covers the brackets with the editor's background. It recomposes on every keystroke, which only moves these boxes.
+ */
+@Composable
+private fun TaskCheckboxes(
+    buffer: TextFieldState,
+    layout: () -> TextLayoutResult?,
+    onIntent: (EditorIntent) -> Unit
+) {
+    val taskFinder = remember { TaskFinder() }
+    val text = buffer.text
+    val tasks = remember(text) { taskFinder.tasks(text = text.toString()) }
+    val result = layout() ?: return
+    val density = LocalDensity.current
+    val label = stringResource(resource = Res.string.editor_task)
+    val background = MaterialTheme.colorScheme.surface
+    tasks.filter { it.stateIndex + 1 < result.layoutInput.text.length }.forEach { task ->
+        val open = result.getBoundingBox(offset = task.stateIndex - 1)
+        val close = result.getBoundingBox(offset = task.stateIndex + 1)
+        val width = with(density) { (close.right - open.left).toDp() }
+        val height = with(density) { (open.bottom - open.top).toDp() }
+        key(task.stateIndex) {
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset(x = open.left.roundToInt(), y = open.top.roundToInt()) }
+                    .size(width = width, height = height)
+                    .background(color = background),
+                contentAlignment = Alignment.Center
+            ) {
+                NotekeaCheckbox(
+                    checked = task.isDone,
+                    onClick = { onIntent(EditorIntent.OnTaskToggle(stateIndex = task.stateIndex)) },
+                    label = label,
+                    size = minOf(TASK_CHECKBOX_DP, (height.value * TASK_CHECKBOX_RATIO).roundToInt())
+                )
+            }
+        }
+    }
 }
 
 /** Scrolls so the current match sits a little below the top of the editor, whenever it changes. */

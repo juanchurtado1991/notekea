@@ -24,6 +24,7 @@
     <string name="editor_retry">Try again</string>
     <string name="editor_save_failed">Not saved yet: %1$s</string>
     <string name="editor_saved">Saved</string>
+    <string name="editor_task">Task</string>
     <string name="editor_title_label">Note title</string>
     <string name="editor_unsaved">Unsaved</string>
 
