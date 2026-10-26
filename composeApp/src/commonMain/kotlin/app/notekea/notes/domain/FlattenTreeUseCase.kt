@@ -6,7 +6,7 @@ import kotlin.time.Instant
  * Turns the vault tree into the rows the sidebar shows: inside each folder, subfolders first by name, then notes and
  * other files together (as Obsidian lists them) by name or most recently modified first (entries without a date
  * last); a note is named without `.md`, another file with its extension. Only the contents of expanded folders are
- * listed. Each folder shows how many notes it holds, counting its subfolders.
+ * listed. Each folder shows how many files it holds, notes and others, counting its subfolders.
  */
 class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparator) {
     operator fun invoke(
@@ -18,7 +18,7 @@ class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparato
             foldersByParent = tree.folders.groupBy { it.parent ?: RelativePath.ROOT },
             notesByParent = tree.notes.values.groupBy { it.file.path.parent ?: RelativePath.ROOT },
             attachmentsByParent = tree.attachments.values.groupBy { it.path.parent ?: RelativePath.ROOT },
-            noteCounts = noteCountsOf(tree = tree)
+            fileCounts = fileCountsOf(tree = tree)
         )
         return buildList {
             addChildren(
@@ -44,7 +44,7 @@ class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparato
                 TreeRow.Folder(
                     path = child,
                     depth = depth,
-                    noteCount = index.noteCounts[child] ?: 0,
+                    fileCount = index.fileCounts[child] ?: 0,
                     isExpanded = isExpanded
                 )
             )
@@ -67,11 +67,11 @@ class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparato
         addAll(elements = (notes + files).sortedWith(entryOrder(sort = sort)))
     }
 
-    private fun noteCountsOf(
+    private fun fileCountsOf(
         tree: VaultTree
     ): Map<RelativePath, Int> {
         val counts = mutableMapOf<RelativePath, Int>()
-        tree.notes.keys.forEach { path ->
+        (tree.notes.keys + tree.attachments.keys).forEach { path ->
             generateSequence(seed = path.parent) { it.parent }
                 .takeWhile { !it.isRoot }
                 .forEach { counts[it] = (counts[it] ?: 0) + 1 }
@@ -117,6 +117,6 @@ class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparato
         val foldersByParent: Map<RelativePath, List<RelativePath>>,
         val notesByParent: Map<RelativePath, List<NoteEntry>>,
         val attachmentsByParent: Map<RelativePath, List<NoteFile>>,
-        val noteCounts: Map<RelativePath, Int>
+        val fileCounts: Map<RelativePath, Int>
     )
 }

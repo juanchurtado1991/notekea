@@ -108,7 +108,7 @@ private fun EntryItem(
         focused = isFocused && draft == null,
         isExpanded = folder?.isExpanded,
         onToggleExpanded = folder?.let { { onIntent(VaultTreeIntent.OnChevronClick(path = it.path)) } },
-        trailingText = folder?.noteCount?.takeIf { it > 0 }?.toString(),
+        trailingText = folder?.fileCount?.takeIf { it > 0 }?.toString(),
         onClickLabel = stringResource(
             resource = when (row) {
                 is TreeRow.Folder -> Res.string.tree_open_folder

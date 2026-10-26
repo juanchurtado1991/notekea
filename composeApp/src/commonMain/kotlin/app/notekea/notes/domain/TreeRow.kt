@@ -10,7 +10,8 @@ sealed interface TreeRow {
     data class Folder(
         override val path: RelativePath,
         override val depth: Int,
-        val noteCount: Int,
+        /** The notes and other files inside, counting subfolders. */
+        val fileCount: Int,
         val isExpanded: Boolean
     ) : TreeRow
 

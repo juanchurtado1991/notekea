@@ -92,7 +92,7 @@ private fun BoxScope.SelectedContent(
 
         selected != null && selected in state.tree.folders -> FolderDetails(
             folder = selected,
-            noteCount = state.tree.notes.keys
+            fileCount = (state.tree.notes.keys + state.tree.attachments.keys)
                 .count {
                     it.isWithin(folder = selected)
                 }
@@ -117,13 +117,13 @@ private fun missingNote(
 @Composable
 private fun FolderDetails(
     folder: RelativePath,
-    noteCount: Int
+    fileCount: Int
 ) {
     DetailsColumn {
         Text(text = folder.name, style = MaterialTheme.typography.headlineSmall)
         FolderLine(path = folder)
         Text(
-            text = pluralStringResource(Res.plurals.note_panel_folder_notes, noteCount, noteCount),
+            text = pluralStringResource(Res.plurals.note_panel_folder_notes, fileCount, fileCount),
             style = MaterialTheme.typography.bodyMedium
         )
     }

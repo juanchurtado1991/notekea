@@ -21,8 +21,8 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Asks before moving [path] to the trash. A folder says how many notes go with it, so nobody deletes a folder full of
- * notes thinking it is empty; an empty folder reads like a single note, and a file that is not a note is named with
+ * Asks before moving [path] to the trash. A folder says how many files go with it (notes, images…), so nobody deletes
+ * a folder full of them thinking it is empty; an empty folder reads like a single note, and a file that is not a note is named with
  * its extension.
  */
 @Composable
@@ -35,7 +35,7 @@ internal fun DeleteEntryDialog(
 ) {
     val isFolder = path in tree.folders
     val isFile = path in tree.attachments
-    val noteCount = if (isFolder) tree.notes.keys.count { it.isWithin(folder = path) } else 0
+    val fileCount = if (isFolder) (tree.notes.keys + tree.attachments.keys).count { it.isWithin(folder = path) } else 0
     val name = if (isFile) path.name else path.nameWithoutExtension
     NotekeaConfirmDialog(
         title = stringResource(
@@ -45,8 +45,8 @@ internal fun DeleteEntryDialog(
                 else -> Res.string.tree_delete_note_title
             }
         ),
-        message = if (noteCount > 0) {
-            pluralStringResource(Res.plurals.tree_delete_folder_message, noteCount, name, noteCount)
+        message = if (fileCount > 0) {
+            pluralStringResource(Res.plurals.tree_delete_folder_message, fileCount, name, fileCount)
         } else {
             stringResource(Res.string.tree_delete_message, name)
         },
