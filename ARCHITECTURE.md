@@ -206,10 +206,9 @@ theme tokens of `core.presentation.theme`. Screens compose these components; the
 themselves.
 
 - **Use before you write.** Buttons and compact icon buttons, text fields and inline text fields, list items, tree
-  items and skeleton rows, tabs and tab rows, badges, status items, cards, empty states, error banners, context
-  menus (nestable, with checked choices) and menu buttons, confirmation dialogs and a resizable split pane already
-  exist (see the gallery:
-  `./gradlew :composeApp:run -Pgallery`).
+  items and skeleton rows, tabs, tab rows and compact tabs, badges, status items, cards, empty states, error banners,
+  context menus (nestable, with checked choices) and menu buttons, confirmation dialogs and a resizable split pane
+  already exist (see the gallery: `./gradlew :composeApp:run -Pgallery`).
 - **Keyboard focus looks the same everywhere:** a 2 dp primary border on the component's own shape, with no gap
   (`Modifier.focusBorder` in `core.presentation.components`; `NotekeaButton` draws it as its border, in the text
   color on filled buttons). A new clickable component applies it before its `clickable`.

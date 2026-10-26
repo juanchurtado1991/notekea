@@ -58,6 +58,6 @@ class ReadModeTagClickTest {
         private const val PARSE_PAUSE_MILLIS = 30L
         private const val WINDOW_HEIGHT = 500
         private const val WINDOW_WIDTH = 900
-        private val TAG_POSITION = Offset(x = 225f, y = 235f)
+        private val TAG_POSITION = Offset(x = 225f, y = 305f)
     }
 }

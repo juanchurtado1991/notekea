@@ -46,6 +46,7 @@ import app.notekea.core.presentation.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.components.NotekeaSearchButton
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.components.NotekeaSplitPane
+import app.notekea.core.presentation.components.NotekeaCompactTabs
 import app.notekea.core.presentation.components.NotekeaTab
 import app.notekea.core.presentation.components.NotekeaTabRow
 import app.notekea.core.presentation.components.NotekeaTextField
@@ -122,6 +123,7 @@ private const val SAMPLE_PLACEHOLDER = "Search notes…"
 private const val STATUS_INDEXED = "Indexed 1,204 notes"
 private const val STATUS_MODEL = "Model: ready"
 private const val STATUS_SYNC = "Sync: conflict"
+private const val TABS_SHORTCUT = "Ctrl+E"
 private const val SKELETON_LONG_FRACTION = 0.7f
 private const val SKELETON_SHORT_FRACTION = 0.5f
 private const val TREE_COUNT_PROJECTS = "12"
@@ -135,6 +137,7 @@ private val PALETTE_RESULTS = listOf(
     NOTE_MEETING to NOTE_FOLDER_JOURNAL,
     NOTE_ARCHIVE to null
 )
+private val SAMPLE_COMPACT_TABS = listOf("Edit", "Preview")
 private val SAMPLE_TABS = listOf("Related", "Backlinks", "Outline", "Chat")
 
 @Composable
@@ -409,6 +412,13 @@ private fun TabsSection() {
             )
         }
     }
+    var selectedCompactTab by remember { mutableIntStateOf(value = 0) }
+    NotekeaCompactTabs(
+        labels = SAMPLE_COMPACT_TABS,
+        selectedIndex = selectedCompactTab,
+        onSelect = { selectedCompactTab = it },
+        shortcutHint = TABS_SHORTCUT
+    )
 }
 
 /** The palette inside a card instead of over the window; arrows move the selection, Enter and Esc do nothing here. */

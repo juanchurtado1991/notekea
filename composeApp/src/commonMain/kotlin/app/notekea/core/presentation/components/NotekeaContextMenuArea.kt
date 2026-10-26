@@ -51,7 +51,7 @@ private const val SHORTCUT_MIN_WIDTH_DP = 48
  * Wraps [content] with a context menu of [sections] (separated by dividers) that opens at the pointer on a right
  * click, or wherever [state] is opened from the keyboard. Areas can nest: a right click opens only the innermost
  * menu. [onOpenByPointer] runs on that right click, so the clicked item can be selected first, as file managers do.
- * Choosing an action closes the menu first. The menu is themed like the rest of the app (surface, outline border,
+ * Choosing an action closes the menu first, unless it [NotekeaMenuItem.keepsMenuOpen]. The menu is themed like the rest of the app (surface, outline border,
  * 6 dp corners) on every platform, with the 32 dp rows of desktop menus and shortcuts aligned at the end.
  */
 @Composable
@@ -98,7 +98,7 @@ private fun MenuRow(
     DropdownMenuItem(
         text = { Text(text = item.label, style = MaterialTheme.typography.bodyMedium, color = color) },
         onClick = {
-            onChosen()
+            if (!item.keepsMenuOpen) onChosen()
             item.onClick()
         },
         modifier = Modifier.height(height = NotekeaDimensions.MenuItemHeight),
