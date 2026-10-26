@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import app.notekea.notes.domain.OutlineFinder
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.components.NotekeaMarkdown
@@ -22,17 +25,21 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 /**
  * The note rendered (Read mode): its Markdown, with wiki links and tags as links, and its embedded files in their
  * place ([AttachmentBlock]). A click opens a note, searches a tag, opens a file with its app (or offers to locate a
- * missing one), or opens the browser for a web address.
+ * missing one), or opens the browser for a web address. Each heading of the outline starts a piece of its own, whose
+ * place is told to [onHeadingPlaced] with the heading's index, so the outline can scroll to it (`ROADMAP.md` 1.9).
  */
 @Composable
 fun ReadingView(
     text: String,
     attachments: List<AttachmentView>,
     onIntent: (EditorIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onHeadingPlaced: (Int, LayoutCoordinates) -> Unit = { _, _ -> }
 ) {
     val readLinks = remember { ReadModeLinks() }
-    val segments = remember(text, attachments) { ReadingSegment.of(text = text, attachments = attachments) }
+    val segments = remember(text, attachments) {
+        ReadingSegment.of(text = text, attachments = attachments, headings = OutlineFinder().headings(text = text))
+    }
     val systemUriHandler = LocalUriHandler.current
     val density = LocalDensity.current
     val imagePainter = remember(attachments, density) {
@@ -58,7 +65,8 @@ fun ReadingView(
                 is ReadingSegment.Markdown -> NotekeaMarkdown(
                     content = remember(segment.text) { readLinks.prepare(body = segment.text) },
                     onLinkClick = onLinkClick,
-                    imagePainter = imagePainter
+                    imagePainter = imagePainter,
+                    modifier = headingPlace(heading = segment.heading, onHeadingPlaced = onHeadingPlaced)
                 )
 
                 is ReadingSegment.Attachment -> AttachmentBlock(view = segment.view, onIntent = onIntent)
@@ -98,6 +106,12 @@ private fun inlineImage(
         )
     )
 }
+
+/** For a piece that starts with the outline's [heading], tells [onHeadingPlaced] where it is laid out. */
+private fun headingPlace(
+    heading: Int?,
+    onHeadingPlaced: (Int, LayoutCoordinates) -> Unit
+): Modifier = heading?.let { Modifier.onGloballyPositioned { onHeadingPlaced(heading, it) } } ?: Modifier
 
 /** A file link in a paragraph opens its file, or offers to locate it when it is missing. */
 private fun openFile(

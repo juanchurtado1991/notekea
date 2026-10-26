@@ -1,6 +1,13 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.runtime.SideEffect
+import androidx.compose.foundation.text.input.TextFieldState
+import app.notekea.core.presentation.components.NotekeaSplitPane
+import app.notekea.core.presentation.components.PaneSide
+import app.notekea.notes.domain.SidePanelPreferences
+import kotlin.math.roundToInt
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -22,7 +29,9 @@ import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.RelativePath
 import kotlinx.coroutines.channels.Channel
 
+private const val EDITOR_MIN_WIDTH_DP = 480
 private const val PREVIEW_HEIGHT_DP = 420
+private const val PREVIEW_PANEL_WIDTH_DP = 1100
 private const val PREVIEW_WIDTH_DP = 720
 
 /**
@@ -32,7 +41,8 @@ private const val PREVIEW_WIDTH_DP = 720
  * before the window closes and when the editor leaves the screen (a folder selected, another vault opened), and
  * reports a rename from the title ([onRenamed]), a deleted note closed ([onClosed]) or a link clicked in Read mode
  * ([onOpenLink]) to the panes around it. The
- * [viewModel] belongs to the vault, so it outlives one note.
+ * [viewModel] belongs to the vault, so it outlives one note. The side panel with the note's outline sits on its right
+ * (`ROADMAP.md` 1.9), or floats over it when the window has no room for both.
  */
 @Composable
 fun EditorScreen(
@@ -51,6 +61,7 @@ fun EditorScreen(
     val state by viewModel.state.collectAsState()
     val flushed = remember(viewModel) { Channel<Unit>(capacity = Channel.CONFLATED) }
     val textFocusRequester = remember { FocusRequester() }
+    val sidePanel = remember(viewModel) { SidePanelHost(send = viewModel::onIntent) }
     LaunchedEffect(notePath) { viewModel.onIntent(intent = EditorIntent.OnOpen(path = notePath)) }
     EditorEffects(
         viewModel = viewModel,
@@ -61,10 +72,11 @@ fun EditorScreen(
         onOpenLink = onOpenLink,
         onSearchTag = onSearchTag,
         onRequestNoteLink = onRequestNoteLink,
-        onRequestTag = onRequestTag
+        onRequestTag = onRequestTag,
+        sidePanel = sidePanel
     )
     DisposableEffect(viewModel) { onDispose { viewModel.onIntent(intent = EditorIntent.OnFlushRequest) } }
-    EditorShortcuts(platformConventions = platformConventions, onIntent = viewModel::onIntent)
+    EditorShortcuts(platformConventions = platformConventions, onIntent = sidePanel::onIntent)
     BeforeWindowClose {
         while (flushed.tryReceive().isSuccess) {
             // A flush from an earlier save is not this one: wait for the save asked for now.
@@ -72,15 +84,71 @@ fun EditorScreen(
         viewModel.onIntent(intent = EditorIntent.OnFlushRequest)
         flushed.receive()
     }
-    EditorContent(
+    EditorWithSidePanel(
         state = state,
         buffer = viewModel.buffer,
         platformConventions = platformConventions,
-        onIntent = viewModel::onIntent,
+        onIntent = sidePanel::onIntent,
+        sidePanel = sidePanel,
         modifier = modifier,
-        properties = properties,
-        textFocusRequester = textFocusRequester
+        textFocusRequester = textFocusRequester,
+        properties = properties
     )
+}
+
+/**
+ * The editor with the side panel on its right, as wide as the user left it but never leaving the editor narrower than
+ * [EDITOR_MIN_WIDTH_DP]; when not even its narrowest width fits, the panel floats over the note instead, open only
+ * while it is used.
+ */
+@Composable
+internal fun EditorWithSidePanel(
+    state: EditorState,
+    buffer: TextFieldState,
+    platformConventions: PlatformConventions,
+    onIntent: (EditorIntent) -> Unit,
+    sidePanel: SidePanelHost,
+    modifier: Modifier,
+    textFocusRequester: FocusRequester,
+    properties: NoteMetadata?
+) {
+    BoxWithConstraints(modifier = modifier) {
+        val room = maxWidth - EDITOR_MIN_WIDTH_DP.dp
+        val isOverlay = room < SidePanelPreferences.MIN_WIDTH_DP.dp
+        val maxPanelWidth = minOf(SidePanelPreferences.MAX_WIDTH_DP.dp, if (isOverlay) maxWidth else room)
+        SideEffect {
+            sidePanel.isOverlay = isOverlay
+            if (!isOverlay) sidePanel.isOverlayOpen = false
+        }
+        NotekeaSplitPane(
+            panelWidth = minOf(state.sidePanel.widthDp.dp, maxPanelWidth),
+            onPanelWidthChange = { onIntent(EditorIntent.OnSidePanelResize(widthDp = it.value.roundToInt())) },
+            isPanelVisible = if (isOverlay) sidePanel.isOverlayOpen else state.sidePanel.isVisible,
+            minPanelWidth = SidePanelPreferences.MIN_WIDTH_DP.dp,
+            maxPanelWidth = maxPanelWidth,
+            panel = {
+                OutlinePanel(
+                    state = state,
+                    sidePanel = sidePanel,
+                    platformConventions = platformConventions,
+                    onIntent = onIntent
+                )
+            },
+            content = {
+                EditorContent(
+                    state = state,
+                    buffer = buffer,
+                    platformConventions = platformConventions,
+                    onIntent = onIntent,
+                    properties = properties,
+                    textFocusRequester = textFocusRequester,
+                    outlineTracker = sidePanel.tracker
+                )
+            },
+            panelSide = PaneSide.END,
+            isOverlay = isOverlay
+        )
+    }
 }
 
 /** What the editor asks of the window around it: the callbacks, the end of a flush, and the keyboard for its text. */
@@ -94,7 +162,8 @@ private fun EditorEffects(
     onOpenLink: (EditorEffect.OpenLink) -> Unit,
     onSearchTag: (String) -> Unit,
     onRequestNoteLink: () -> Unit,
-    onRequestTag: (String) -> Unit
+    onRequestTag: (String) -> Unit,
+    sidePanel: SidePanelHost
 ) {
     val currentOnRequestNoteLink by rememberUpdatedState(newValue = onRequestNoteLink)
     val currentOnRequestTag by rememberUpdatedState(newValue = onRequestTag)
@@ -123,6 +192,13 @@ private fun EditorEffects(
                     requester = textFocusRequester,
                     isReading = viewModel.state.value.isReading
                 )
+
+                EditorEffect.FocusOutline -> focusOutline(sidePanel = sidePanel)
+
+                is EditorEffect.RevealHeading -> {
+                    sidePanel.isOverlayOpen = false
+                    sidePanel.tracker.reveal(heading = effect.heading)
+                }
             }
         }
     }
@@ -145,7 +221,45 @@ private suspend fun focusText(
     }
 }
 
-/** Save, Find in note, Edit / Read and toggling a task work whatever has focus while the editor is shown. */
+/** The side panel showing [state]'s outline; leaving it with Esc closes it if it floats and goes back to the note. */
+@Composable
+private fun OutlinePanel(
+    state: EditorState,
+    sidePanel: SidePanelHost,
+    platformConventions: PlatformConventions,
+    onIntent: (EditorIntent) -> Unit
+) {
+    SidePanel(
+        outline = state.outline,
+        current = sidePanel.tracker.current,
+        platformConventions = platformConventions,
+        onHeadingClick = { onIntent(EditorIntent.OnHeadingClick(index = it)) },
+        onHide = { onIntent(EditorIntent.OnSidePanelToggle) },
+        onLeave = {
+            sidePanel.isOverlayOpen = false
+            onIntent(EditorIntent.OnFocusRequest())
+        },
+        outlineFocus = sidePanel.outlineFocus
+    )
+}
+
+/** Opens the floating panel if the panel floats, then gives its outline the keyboard once it is laid out. */
+private suspend fun focusOutline(
+    sidePanel: SidePanelHost
+) {
+    if (sidePanel.isOverlay) sidePanel.isOverlayOpen = true
+    withFrameNanos { }
+    try {
+        sidePanel.outlineFocus.requestFocus()
+    } catch (_: IllegalStateException) {
+        // The note has no headings, so there is no list to focus.
+    }
+}
+
+/**
+ * Save, Find in note, Edit / Read, toggling a task, the side panel and the outline work whatever has focus while the
+ * editor is shown.
+ */
 @Composable
 private fun EditorShortcuts(
     platformConventions: PlatformConventions,
@@ -155,6 +269,8 @@ private fun EditorShortcuts(
     WindowShortcut(shortcut = platformConventions.findShortcut) { onIntent(EditorIntent.OnFindOpen) }
     WindowShortcut(shortcut = platformConventions.toggleReadModeShortcut) { onIntent(EditorIntent.OnReadModeToggle) }
     WindowShortcut(shortcut = platformConventions.toggleTaskShortcut) { onIntent(EditorIntent.OnTaskToggleShortcut) }
+    WindowShortcut(shortcut = platformConventions.toggleSidePanelShortcut) { onIntent(EditorIntent.OnSidePanelToggle) }
+    WindowShortcut(shortcut = platformConventions.outlineShortcut) { onIntent(EditorIntent.OnOutlineFocusRequest) }
 }
 
 @Preview
@@ -167,6 +283,25 @@ private fun EditorScreenPreview() {
                 buffer = EditorPreviewData.buffer(),
                 platformConventions = EditorPreviewData.platformConventions,
                 onIntent = {},
+                properties = EditorPreviewData.properties
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun EditorWithSidePanelPreview() {
+    NotekeaPreviewThemes {
+        Box(modifier = Modifier.size(width = PREVIEW_PANEL_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
+            EditorWithSidePanel(
+                state = EditorPreviewData.state(),
+                buffer = EditorPreviewData.buffer(),
+                platformConventions = EditorPreviewData.platformConventions,
+                onIntent = {},
+                sidePanel = remember { SidePanelHost(send = {}) },
+                modifier = Modifier,
+                textFocusRequester = remember { FocusRequester() },
                 properties = EditorPreviewData.properties
             )
         }

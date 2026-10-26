@@ -48,6 +48,8 @@ primary modifier and resolved per platform.
 | Italic | `Cmd+I` | `Ctrl+I` |
 | Link to a note | `Cmd+K` | `Ctrl+K` |
 | Web link | `Cmd+Shift+K` | `Ctrl+Shift+K` |
+| Show or hide the side panel | `Cmd+Shift+\` | `Ctrl+Shift+\` |
+| Go to the outline | `Cmd+Shift+O` | `Ctrl+Shift+O` |
 | Settings | `Cmd+,` | `Ctrl+,` |
 | Close tab | `Cmd+W` | `Ctrl+W` |
 | Close window | `Cmd+Shift+W` | `Ctrl+Shift+W` |

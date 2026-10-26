@@ -40,6 +40,11 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             noteLinkShortcut = Shortcut(key = ShortcutKey.K, modifiers = setOf(primaryModifier)),
             webLinkShortcut = Shortcut(key = ShortcutKey.K, modifiers = setOf(primaryModifier, ShortcutModifier.SHIFT)),
             pasteShortcut = Shortcut(key = ShortcutKey.V, modifiers = setOf(primaryModifier)),
+            toggleSidePanelShortcut = Shortcut(
+                key = ShortcutKey.BACKSLASH,
+                modifiers = setOf(primaryModifier, ShortcutModifier.SHIFT)
+            ),
+            outlineShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(primaryModifier, ShortcutModifier.SHIFT)),
             dialogButtonOrder = dialogButtonOrderFor(operatingSystem = operatingSystem),
             appDataDirectory = appDataDirectoryFor(operatingSystem = operatingSystem),
             homeDirectory = systemEnvironment.userHome

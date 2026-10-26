@@ -1,7 +1,9 @@
 package app.notekea.notes.presentation.editor
 
 import app.notekea.notes.domain.NotesError
+import app.notekea.notes.domain.OutlineHeading
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.SidePanelPreferences
 
 /**
  * State of the note editor (`ROADMAP.md` 1.5). The text itself is not here: it lives in the ViewModel's text buffer,
@@ -14,6 +16,8 @@ import app.notekea.notes.domain.RelativePath
  * while its bar is open, and null when it is closed. [isReading] shows the note rendered (Read mode) instead of its
  * Markdown; notes open in the mode the user last chose. [attachments] are the files the note embeds, in text order
  * ([AttachmentView]), and [attachmentError] why attaching, opening or locating one failed, until it is dismissed.
+ * [outline] is the note's headings in text order (`ROADMAP.md` 1.9), and [sidePanel] how the panel on the right that
+ * shows them is left (its width, whether it is shown).
  */
 data class EditorState(
     val notePath: RelativePath? = null,
@@ -27,5 +31,7 @@ data class EditorState(
     val find: FindState? = null,
     val isReading: Boolean = false,
     val attachments: List<AttachmentView> = emptyList(),
-    val attachmentError: NotesError? = null
+    val attachmentError: NotesError? = null,
+    val outline: List<OutlineHeading> = emptyList(),
+    val sidePanel: SidePanelPreferences = SidePanelPreferences.DEFAULT
 )

@@ -24,6 +24,8 @@ data class PlatformConventions(
     val noteLinkShortcut: Shortcut,
     val webLinkShortcut: Shortcut,
     val pasteShortcut: Shortcut,
+    val toggleSidePanelShortcut: Shortcut,
+    val outlineShortcut: Shortcut,
     val dialogButtonOrder: DialogButtonOrder,
     val appDataDirectory: String,
     val homeDirectory: String

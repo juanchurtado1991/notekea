@@ -178,6 +178,8 @@ class ResolvePlatformConventionsUseCaseTest {
             noteLinkShortcut = withPrimary(ShortcutKey.K),
             webLinkShortcut = withPrimaryAndShift(ShortcutKey.K),
             pasteShortcut = withPrimary(ShortcutKey.V),
+            toggleSidePanelShortcut = withPrimaryAndShift(ShortcutKey.BACKSLASH),
+            outlineShortcut = withPrimaryAndShift(ShortcutKey.O),
             dialogButtonOrder = buttonOrder,
             appDataDirectory = appDataDirectory,
             homeDirectory = homeDirectory

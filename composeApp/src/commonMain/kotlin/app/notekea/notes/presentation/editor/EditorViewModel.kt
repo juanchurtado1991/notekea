@@ -28,6 +28,10 @@ import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.SaveEditorModeUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
 import app.notekea.notes.domain.TaskFinder
+import app.notekea.notes.domain.GetSidePanelUseCase
+import app.notekea.notes.domain.OutlineFinder
+import app.notekea.notes.domain.SaveSidePanelUseCase
+import app.notekea.notes.domain.SidePanelPreferences
 import co.touchlab.kermit.Logger
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Job
@@ -44,7 +48,8 @@ import kotlinx.coroutines.sync.withLock
  * a deleted file offers Restore or Close. Saves never overwrite an outside change nor bring back a file that is gone
  * ([SaveNoteUseCase]). Leaving the text saves at once; the title renames the note and updates the links to it.
  * Notes open in the mode the user last chose (Edit or Read), remembered between runs. A focus request gives the
- * keyboard back to the text once its note is open (after the quick switcher closes).
+ * keyboard back to the text once its note is open (after the quick switcher closes). The note's headings are kept as
+ * its outline (`ROADMAP.md` 1.9), shown in the panel on the right, whose width and visibility are remembered too.
  */
 class EditorViewModel(
     private val vaultPath: String,
@@ -54,6 +59,8 @@ class EditorViewModel(
     private val renameAndUpdateLinks: RenameAndUpdateLinksUseCase,
     private val getEditorMode: GetEditorModeUseCase,
     private val saveEditorMode: SaveEditorModeUseCase,
+    private val getSidePanel: GetSidePanelUseCase,
+    private val saveSidePanel: SaveSidePanelUseCase,
     private val attachmentTools: AttachmentTools
 ) : BaseViewModel<EditorState, EditorIntent, EditorEffect>(initialState = EditorState()) {
     /** The body of the open note, edited in place by the text field. */
@@ -64,6 +71,8 @@ class EditorViewModel(
     private val taskFinder = TaskFinder()
     private val markdownFormatter = MarkdownFormatter()
     private val listEditing = ListEditing()
+    private val outlineFinder = OutlineFinder()
+    private var outlineJob: Job? = null
     private val saveLock = Mutex()
     private var autosaveJob: Job? = null
     private var watchJob: Job? = null
@@ -95,6 +104,10 @@ class EditorViewModel(
         launchGuarded(onError = ::showUnexpectedError) {
             isReadingChosen = getEditorMode()
             reduce { if (it.find == null) it.copy(isReading = isReadingChosen) else it }
+        }
+        launchGuarded(onError = ::showUnexpectedError) {
+            val panel = getSidePanel()
+            reduce { it.copy(sidePanel = panel) }
         }
         launchGuarded(onError = ::showUnexpectedError) {
             snapshotFlow { buffer.text.toString() }.collect { onBufferChanged(body = it) }
@@ -132,6 +145,10 @@ class EditorViewModel(
             EditorIntent.OnSaveShortcut -> runSave { saveNow() }
             is EditorIntent.OnTitleCommit -> runSave { rename(name = intent.name) }
             EditorIntent.OnTitleErrorDismiss -> reduce { it.copy(titleError = null) }
+            is EditorIntent.OnHeadingClick -> revealHeading(index = intent.index)
+            EditorIntent.OnOutlineFocusRequest -> focusOutline()
+            EditorIntent.OnSidePanelToggle -> updateSidePanel { it.copy(isVisible = !it.isVisible) }
+            is EditorIntent.OnSidePanelResize -> updateSidePanel { it.copy(widthDp = intent.widthDp) }
             else -> onAttachmentIntent(intent = intent)
         }
     }
@@ -165,6 +182,7 @@ class EditorViewModel(
     ) {
         state.value.find?.let { find -> updateMatches(query = find.query, body = body, keepCurrent = true) }
         updateAttachments(body = body)
+        updateOutline(body = body)
         val document = opened ?: return
         autosaveJob?.cancel()
         if (body == document.body) {
@@ -200,7 +218,14 @@ class EditorViewModel(
         watchJob?.cancel()
         opened = null
         onDisk = null
-        reduce { EditorState(notePath = path, isLoading = path != null, isReading = isReadingChosen) }
+        reduce {
+            EditorState(
+                notePath = path,
+                isLoading = path != null,
+                isReading = isReadingChosen,
+                sidePanel = it.sidePanel
+            )
+        }
         if (path == null) {
             replaceBuffer(body = "", isNewNote = true)
             return
@@ -314,6 +339,53 @@ class EditorViewModel(
             val views = attachments.viewsOf(note = note, text = body)
             reduce { if (it.notePath == note) it.copy(attachments = views) else it }
         }
+    }
+
+    /** The headings of [body], found a moment after the last change, so typing is never held up. */
+    private fun updateOutline(
+        body: String
+    ) {
+        val note = state.value.notePath ?: return
+        outlineJob?.cancel()
+        outlineJob = launchGuarded(onError = ::showUnexpectedError) {
+            delay(duration = OUTLINE_DELAY)
+            val outline = outlineFinder.headings(text = body)
+            reduce { if (it.notePath == note) it.copy(outline = outline) else it }
+        }
+    }
+
+    /**
+     * An outline heading was chosen: the editor scrolls to it and, in Edit mode, puts the cursor at the end of its line
+     * and takes the keyboard, so typing goes on there.
+     */
+    private fun revealHeading(
+        index: Int
+    ) {
+        val heading = state.value.outline.getOrNull(index = index) ?: return
+        val text = buffer.text
+        if (heading.offset > text.length) return
+        if (isEditable()) {
+            val lineEnd = text.indexOf(char = NEW_LINE_CHAR, startIndex = heading.offset).takeIf { it >= 0 }
+                ?: text.length
+            buffer.edit { selection = TextRange(index = lineEnd) }
+        }
+        emit(effect = EditorEffect.RevealHeading(heading = heading))
+        if (isEditable()) focusText()
+    }
+
+    /** `Mod+Shift+O`: the side panel is shown if it was hidden, and its outline takes the keyboard. */
+    private fun focusOutline() {
+        if (!state.value.sidePanel.isVisible) updateSidePanel { it.copy(isVisible = true) }
+        emit(effect = EditorEffect.FocusOutline)
+    }
+
+    /** Shows the side panel as [change] says and remembers it for the next notes and runs. */
+    private fun updateSidePanel(
+        change: (SidePanelPreferences) -> SidePanelPreferences
+    ) {
+        val panel = change(state.value.sidePanel)
+        reduce { it.copy(sidePanel = panel) }
+        launchGuarded(onError = ::showUnexpectedError) { saveSidePanel(preferences = panel) }
     }
 
     /** Mod+V: a copied image is attached and embedded; copied text replaces the selection, as a paste does. */
@@ -691,6 +763,7 @@ class EditorViewModel(
         val AUTOSAVE_DELAY = 1.seconds
         private const val LOG_TAG = "EditorViewModel"
         private val ATTACHMENTS_DELAY = 150.milliseconds
+        private val OUTLINE_DELAY = 150.milliseconds
         private const val MAX_TAG_QUERY = 40
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the note editor"
     }

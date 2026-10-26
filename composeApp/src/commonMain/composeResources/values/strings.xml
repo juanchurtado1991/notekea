@@ -22,6 +22,7 @@
     <string name="editor_keep_mine">Keep mine</string>
     <string name="editor_load_failed">This note couldn’t be opened.</string>
     <string name="editor_load_theirs">Load theirs</string>
+    <string name="editor_outline">Outline</string>
     <string name="editor_preview_mode">Preview</string>
     <string name="editor_restore">Restore</string>
     <string name="editor_retry">Try again</string>
@@ -143,6 +144,11 @@
     <string name="note_panel_empty_message">Pick a note in the sidebar to see it here.</string>
     <string name="note_panel_empty_title">No note selected</string>
 
+    <string name="outline_empty_message">Start a line with # and a space to add a heading. Headings show up here, and a click takes you to one.</string>
+    <string name="outline_empty_title">This note has no headings</string>
+    <string name="outline_label">Headings of this note</string>
+    <string name="outline_tab">Outline</string>
+    <string name="side_panel_hide">Hide side panel</string>
     <string name="switcher_content_hint_message">Type words or a #tag.</string>
     <string name="switcher_content_hint_title">Search inside your notes</string>
     <string name="switcher_empty_vault_message">Create a note and find it here.</string>
