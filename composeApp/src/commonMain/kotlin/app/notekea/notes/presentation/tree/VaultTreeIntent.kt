@@ -79,4 +79,10 @@ sealed interface VaultTreeIntent {
     data object OnSelectPrevious : VaultTreeIntent
 
     data class OnSortChange(val sort: TreeSort) : VaultTreeIntent
+
+    /** "Today" or `Mod+D`: today's daily note is selected, created first if needed. */
+    data object OnTodayClick : VaultTreeIntent
+
+    /** The daily note before ([step] -1) or after ([step] 1) the selected one is selected, when there is one. */
+    data class OnDayStep(val step: Int) : VaultTreeIntent
 }

@@ -26,6 +26,9 @@ data class PlatformConventions(
     val pasteShortcut: Shortcut,
     val toggleSidePanelShortcut: Shortcut,
     val outlineShortcut: Shortcut,
+    val todayShortcut: Shortcut,
+    val previousDayShortcut: Shortcut,
+    val nextDayShortcut: Shortcut,
     val dialogButtonOrder: DialogButtonOrder,
     val appDataDirectory: String,
     val homeDirectory: String

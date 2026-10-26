@@ -27,6 +27,8 @@ private const val CONTROL_NAME = "Ctrl"
 private const val DELETE_NAME = "Delete"
 private const val ENTER_NAME = "Enter"
 private const val KEY_SEPARATOR = "+"
+private const val LEFT_ARROW = "←"
+private const val RIGHT_ARROW = "→"
 private const val MAC_ALT_SYMBOL = "⌥"
 private const val MAC_BACKSPACE_SYMBOL = "⌫"
 private const val MAC_COMMAND_SYMBOL = "⌘"
@@ -78,6 +80,7 @@ private fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.B -> Key.B
     ShortcutKey.BACKSLASH -> Key.Backslash
     ShortcutKey.BACKSPACE -> Key.Backspace
+    ShortcutKey.D -> Key.D
     ShortcutKey.DELETE -> Key.Delete
     ShortcutKey.E -> Key.E
     ShortcutKey.ENTER -> Key.Enter
@@ -86,10 +89,12 @@ private fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.F4 -> Key.F4
     ShortcutKey.I -> Key.I
     ShortcutKey.K -> Key.K
+    ShortcutKey.LEFT -> Key.DirectionLeft
     ShortcutKey.N -> Key.N
     ShortcutKey.O -> Key.O
     ShortcutKey.P -> Key.P
     ShortcutKey.Q -> Key.Q
+    ShortcutKey.RIGHT -> Key.DirectionRight
     ShortcutKey.S -> Key.S
     ShortcutKey.V -> Key.V
 }
@@ -103,7 +108,12 @@ private fun ShortcutKey.displayName(): String = when (this) {
 
     ShortcutKey.ENTER -> ENTER_NAME
 
+    ShortcutKey.LEFT -> LEFT_ARROW
+
+    ShortcutKey.RIGHT -> RIGHT_ARROW
+
     ShortcutKey.B,
+    ShortcutKey.D,
     ShortcutKey.E,
     ShortcutKey.F,
     ShortcutKey.F2,
@@ -125,7 +135,12 @@ private fun ShortcutKey.macLabel(): String = when (this) {
 
     ShortcutKey.ENTER -> MAC_ENTER_SYMBOL
 
+    ShortcutKey.LEFT -> LEFT_ARROW
+
+    ShortcutKey.RIGHT -> RIGHT_ARROW
+
     ShortcutKey.BACKSLASH,
+    ShortcutKey.D,
     ShortcutKey.B,
     ShortcutKey.E,
     ShortcutKey.F,

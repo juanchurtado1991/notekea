@@ -2,6 +2,8 @@ package app.notekea.core.presentation.theme
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.composables.icons.lucide.ArrowDown
+import com.composables.icons.lucide.CalendarDays
+import com.composables.icons.lucide.ChevronLeft
 import com.composables.icons.lucide.ListTree
 import com.composables.icons.lucide.PanelRightClose
 import com.composables.icons.lucide.PanelRightOpen
@@ -104,11 +106,13 @@ object NotekeaIcons {
     val NewFolder: ImageVector get() = Lucide.FolderPlus
     val NewNote: ImageVector get() = Lucide.FilePlus
     val NewTag: ImageVector get() = Lucide.Plus
+    val NextDay: ImageVector get() = Lucide.ChevronRight
     val Note: ImageVector get() = Lucide.FileText
     val OtherFile: ImageVector get() = Lucide.File
     val NoteLink: ImageVector get() = Lucide.Link
     val NumberedList: ImageVector get() = Lucide.ListOrdered
     val Outline: ImageVector get() = Lucide.ListTree
+    val PreviousDay: ImageVector get() = Lucide.ChevronLeft
     val Quote: ImageVector get() = Lucide.TextQuote
     val Rename: ImageVector get() = Lucide.Pencil
     val Reveal: ImageVector get() = Lucide.SquareArrowOutUpRight
@@ -117,6 +121,7 @@ object NotekeaIcons {
     val SortByModified: ImageVector get() = Lucide.ClockArrowDown
     val SortByName: ImageVector get() = Lucide.ArrowDownAZ
     val Table: ImageVector get() = Lucide.Table
+    val Today: ImageVector get() = Lucide.CalendarDays
     val Tag: ImageVector get() = Lucide.Hash
     val WebLink: ImageVector get() = Lucide.Globe
 }

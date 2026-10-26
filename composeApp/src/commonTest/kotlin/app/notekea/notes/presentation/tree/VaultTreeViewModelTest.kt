@@ -1,6 +1,15 @@
 package app.notekea.notes.presentation.tree
 
 import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.core.domain.FakeClock
+import app.notekea.core.domain.time.CalendarDate
+import app.notekea.core.domain.time.FakeLocalCalendar
+import app.notekea.notes.domain.DailyNoteSettings
+import app.notekea.notes.domain.DayNeighbors
+import app.notekea.notes.domain.FakeVaultSettingsReader
+import app.notekea.notes.domain.GetDailyNoteSettingsUseCase
+import app.notekea.notes.domain.OpenDailyNoteUseCase
+import kotlin.time.Instant
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
@@ -69,6 +78,7 @@ class VaultTreeViewModelTest {
     private val contents = FakeNoteContentStore()
     private val opener = FakeFileOpener()
     private val attachmentStore = FakeAttachmentStore()
+    private val vaultSettings = FakeVaultSettingsReader()
 
     @BeforeTest
     fun setUp() {
@@ -521,9 +531,90 @@ class VaultTreeViewModelTest {
         )
     }
 
+    @Test
+    fun `today creates today's daily note where the user is, selects it in its open folder, then opens it as it is`() =
+        runTreeTest {
+            val viewModel = startedViewModel()
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnTodayClick)
+            advanceUntilIdle()
+            val first = viewModel.state.value
+            viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(WELCOME)))
+            viewModel.onIntent(intent = VaultTreeIntent.OnTodayClick)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = listOf(path(TODAY), true, path(TODAY), 1),
+                actual = listOf(
+                    first.selectedPath,
+                    path("Journal") in first.expandedFolders,
+                    viewModel.state.value.selectedPath,
+                    operations.existing.count { it == path(TODAY) }
+                )
+            )
+        }
+
+    @Test
+    fun `a selected daily note knows the closest daily notes on each side and steps to them, others have none`() =
+        runTreeTest {
+            listOf("Journal/2026-10-20.md", "Journal/2026-10-22.md", TODAY, WELCOME).forEach {
+                scanner.addNote(file = file(path = it))
+            }
+            val viewModel = startedViewModel()
+            viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path("Journal/2026-10-22.md")))
+            val middle = viewModel.state.value.dayNeighbors
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnDayStep(step = 1))
+            viewModel.onIntent(intent = VaultTreeIntent.OnDayStep(step = 1))
+            val last = viewModel.state.value.selectedPath
+            viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(WELCOME)))
+            viewModel.onIntent(intent = VaultTreeIntent.OnDayStep(step = -1))
+
+            assertEquals(
+                expected = listOf(
+                    DayNeighbors(
+                        date = CalendarDate(year = 2026, month = 10, day = 22),
+                        previous = path("Journal/2026-10-20.md"),
+                        next = path(TODAY)
+                    ),
+                    path(TODAY),
+                    null,
+                    path(WELCOME)
+                ),
+                actual = listOf(middle, last, viewModel.state.value.dayNeighbors, viewModel.state.value.selectedPath)
+            )
+        }
+
+    @Test
+    fun `daily notes follow the folder and format of the vault's Obsidian settings`() = runTreeTest {
+        vaultSettings.dailyNotes = DailyNoteSettings(folder = "Diary", format = "DD.MM.YYYY", template = null)
+        listOf("Diary/25.10.2026.md", "Journal/2026-10-22.md").forEach { scanner.addNote(file = file(path = it)) }
+        val viewModel = startedViewModel()
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnTodayClick)
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = path("Diary/27.10.2026.md") to path("Diary/25.10.2026.md"),
+            actual = viewModel.state.value.selectedPath to viewModel.state.value.dayNeighbors?.previous
+        )
+    }
+
     private fun path(
         value: String
     ): RelativePath = RelativePath(value = value)
+
+    /** Daily notes over the fakes, at [NOW] for a user two hours east of UTC, where it is already the next day. */
+    private fun dailyNoteTools(): DailyNoteTools = DailyNoteTools(
+        getDailyNoteSettings = GetDailyNoteSettingsUseCase(vaultSettingsReader = vaultSettings),
+        openDailyNote = OpenDailyNoteUseCase(
+            vaultSettingsReader = vaultSettings,
+            noteFileOperations = operations,
+            noteContentStore = contents,
+            localCalendar = FakeLocalCalendar(offsetHours = 2),
+            clock = FakeClock(currentTime = Instant.parse(input = NOW))
+        )
+    )
 
     private fun TestScope.rename(
         viewModel: VaultTreeViewModel,
@@ -561,6 +652,7 @@ class VaultTreeViewModelTest {
             deleteEntry = DeleteEntryUseCase(trash = trash),
             revealEntry = RevealEntryUseCase(fileRevealer = revealer),
             fileOpener = opener,
+            days = dailyNoteTools(),
             attachmentStore = attachmentStore,
             dispatchers = FakeAppDispatchers(dispatcher = testDispatcher),
             updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
@@ -580,6 +672,8 @@ class VaultTreeViewModelTest {
 
     companion object {
         private const val BUG = "bug"
+        private const val NOW = "2026-10-26T23:30:00Z"
+        private const val TODAY = "Journal/2026-10-27.md"
         private const val MENU = "attachments/Weekly menu.pdf"
         private const val PLATE = "attachments/Arepas plate.png"
         private const val PNG_BASE64 =

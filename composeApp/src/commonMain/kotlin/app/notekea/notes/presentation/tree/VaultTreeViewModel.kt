@@ -7,6 +7,8 @@ import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.AttachmentStore
 import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
+import app.notekea.notes.domain.DailyNoteSettings
+import app.notekea.notes.domain.DailyNotes
 import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.FileOpener
 import app.notekea.notes.domain.FlattenTreeUseCase
@@ -32,7 +34,8 @@ import kotlin.time.TimeSource
  * the entry are updated in the background, as Obsidian does by default, so no link breaks; a notice says how many
  * notes changed. A choice to keep old links ("Update links when renaming") belongs to Settings (`ROADMAP.md` 5.2).
  * A selected file that is not a note (an image, a PDF) is read and shown beside the tree, and opens with its app
- * (`ROADMAP.md` 1.8).
+ * (`ROADMAP.md` 1.8). "Today" opens today's daily note, creating it first if needed, and a selected daily note knows the
+ * daily notes before and after it, to step through them (`ROADMAP.md` 1.10).
  */
 class VaultTreeViewModel(
     private val vaultPath: String,
@@ -49,6 +52,7 @@ class VaultTreeViewModel(
     private val getTreePreferences: GetTreePreferencesUseCase,
     private val saveTreePreferences: SaveTreePreferencesUseCase,
     private val fileOpener: FileOpener,
+    private val days: DailyNoteTools,
     attachmentStore: AttachmentStore,
     dispatchers: AppDispatchers
 ) : BaseViewModel<VaultTreeState, VaultTreeIntent, VaultTreeEffect>(
@@ -60,11 +64,18 @@ class VaultTreeViewModel(
         TreeFilePreviews(vaultPath = vaultPath, attachmentStore = attachmentStore, dispatchers = dispatchers)
     private var previewJob: Job? = null
     private var previewed: NoteFile? = null
+    private val dailyNotes = DailyNotes()
+    private var dailySettings = DailyNoteSettings.DEFAULT
+
+    // What the day neighbors were last found for (the notes by identity), so moving through the tree does not read
+    // every note name again.
+    private var dayInputs: Triple<RelativePath?, Any?, DailyNoteSettings>? = null
 
     init {
         launchGuarded(onError = ::showUnexpectedError) {
             val preferences = getTreePreferences(vaultPath = vaultPath)
             updateTree { restorePreferences(state = it, preferences = preferences) }
+            dailySettings = days.getDailyNoteSettings(vaultPath = vaultPath)
             observe()
         }
     }
@@ -101,8 +112,42 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnSidebarToggle -> updateTree { it.copy(isSidebarCollapsed = !it.isSidebarCollapsed) }
             is VaultTreeIntent.OnSortChange -> updateTree { it.copy(sort = intent.sort) }
             is VaultTreeIntent.OnFileOpen -> openFile(path = intent.path)
+            VaultTreeIntent.OnTodayClick -> openToday()
+            is VaultTreeIntent.OnDayStep -> stepDay(step = intent.step)
         }
         updatePreview()
+        updateDay()
+    }
+
+    /** Today's daily note, with the settings read again: Obsidian may have changed them since the vault opened. */
+    private fun openToday() {
+        launchGuarded(onError = ::showUnexpectedError) {
+            dailySettings = days.getDailyNoteSettings(vaultPath = vaultPath)
+            val outcome = days.openDailyNote(vaultPath = vaultPath)
+            updateTree { reduceFollowedLink(state = it, outcome = outcome) }
+        }
+    }
+
+    private fun stepDay(
+        step: Int
+    ) {
+        val neighbors = state.value.dayNeighbors ?: return
+        val target = (if (step < 0) neighbors.previous else neighbors.next) ?: return
+        updateTree { reduceReveal(state = it, path = target) }
+    }
+
+    /** Finds the selected note's day neighbors when the selection, the notes or the settings changed. */
+    private fun updateDay() {
+        val current = state.value
+        val last = dayInputs
+        val isSame = last != null && last.first == current.selectedPath && last.second === current.tree.notes &&
+            last.third == dailySettings
+        if (isSame) return
+        dayInputs = Triple(current.selectedPath, current.tree.notes, dailySettings)
+        val neighbors = current.selectedPath?.let {
+            dailyNotes.neighborsOf(path = it, notes = current.tree.notes.keys, settings = dailySettings)
+        }
+        if (neighbors != current.dayNeighbors) reduce { it.copy(dayNeighbors = neighbors) }
     }
 
     private fun openFile(
@@ -276,6 +321,7 @@ class VaultTreeViewModel(
             next.copy(rows = flattenTree(tree = next.tree, expandedFolders = next.expandedFolders, sort = next.sort))
         }
         val after = state.value
+        updateDay()
         val preferences = preferencesOf(state = after)
         if (preferences != preferencesOf(state = before) && !after.isLoading) {
             launchGuarded(

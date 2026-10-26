@@ -180,6 +180,9 @@ class ResolvePlatformConventionsUseCaseTest {
             pasteShortcut = withPrimary(ShortcutKey.V),
             toggleSidePanelShortcut = withPrimaryAndShift(ShortcutKey.BACKSLASH),
             outlineShortcut = withPrimaryAndShift(ShortcutKey.O),
+            todayShortcut = withPrimary(ShortcutKey.D),
+            previousDayShortcut = Shortcut(key = ShortcutKey.LEFT, modifiers = setOf(primary, ShortcutModifier.ALT)),
+            nextDayShortcut = Shortcut(key = ShortcutKey.RIGHT, modifiers = setOf(primary, ShortcutModifier.ALT)),
             dialogButtonOrder = buttonOrder,
             appDataDirectory = appDataDirectory,
             homeDirectory = homeDirectory

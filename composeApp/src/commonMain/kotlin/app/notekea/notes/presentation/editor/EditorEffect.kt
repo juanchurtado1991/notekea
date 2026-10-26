@@ -23,6 +23,9 @@ sealed interface EditorEffect {
     /** The text of the open note should take the keyboard (in Edit mode; Read mode has no cursor). */
     data object FocusText : EditorEffect
 
+    /** A daily note's arrow was clicked: the window opens the daily note before ([step] -1) or after ([step] 1). */
+    data class DayStep(val step: Int) : EditorEffect
+
     /** The outline should take the keyboard (`Mod+Shift+O`). */
     data object FocusOutline : EditorEffect
 

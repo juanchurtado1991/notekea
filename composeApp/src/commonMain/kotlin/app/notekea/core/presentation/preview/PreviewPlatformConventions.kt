@@ -46,6 +46,15 @@ object PreviewPlatformConventions {
             key = ShortcutKey.O,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
+        todayShortcut = Shortcut(key = ShortcutKey.D, modifiers = setOf(ShortcutModifier.CONTROL)),
+        previousDayShortcut = Shortcut(
+            key = ShortcutKey.LEFT,
+            modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.ALT)
+        ),
+        nextDayShortcut = Shortcut(
+            key = ShortcutKey.RIGHT,
+            modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.ALT)
+        ),
         dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
         appDataDirectory = APP_DATA,
         homeDirectory = HOME

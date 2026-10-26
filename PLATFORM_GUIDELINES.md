@@ -50,6 +50,8 @@ primary modifier and resolved per platform.
 | Web link | `Cmd+Shift+K` | `Ctrl+Shift+K` |
 | Show or hide the side panel | `Cmd+Shift+\` | `Ctrl+Shift+\` |
 | Go to the outline | `Cmd+Shift+O` | `Ctrl+Shift+O` |
+| Today's daily note | `Cmd+D` | `Ctrl+D` |
+| Previous / next daily note | `Cmd+Option+←` / `Cmd+Option+→` | `Ctrl+Alt+←` / `Ctrl+Alt+→` |
 | Settings | `Cmd+,` | `Ctrl+,` |
 | Close tab | `Cmd+W` | `Ctrl+W` |
 | Close window | `Cmd+Shift+W` | `Ctrl+Shift+W` |

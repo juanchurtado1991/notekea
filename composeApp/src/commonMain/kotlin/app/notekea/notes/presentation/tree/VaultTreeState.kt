@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.tree
 
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.notes.domain.DayNeighbors
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeRow
@@ -14,7 +15,8 @@ import app.notekea.notes.domain.VaultTree
  * scans again); [actionError] is a failed create, delete or reveal, shown in a dismissible banner; a refused rename
  * stays in [renaming], next to the field. [notice] reports a finished action
  * (links updated after a rename). [sidebarWidthDp] changes when a resize ends, not on every dragged frame. A selected
- * file that is not a note is shown beside the tree as [filePreview].
+ * file that is not a note is shown beside the tree as [filePreview]. When the selected note is a daily note,
+ * [dayNeighbors] holds its date and the daily notes before and after it (`ROADMAP.md` 1.10).
  */
 data class VaultTreeState(
     val vaultPath: String,
@@ -28,6 +30,7 @@ data class VaultTreeState(
     val isSidebarCollapsed: Boolean = false,
     val selectedPath: RelativePath? = null,
     val filePreview: FilePreview? = null,
+    val dayNeighbors: DayNeighbors? = null,
     val renaming: RenameDraft? = null,
     val pendingDelete: RelativePath? = null,
     val notice: TreeNotice? = null,

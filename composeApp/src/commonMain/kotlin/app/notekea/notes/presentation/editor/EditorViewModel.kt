@@ -146,6 +146,7 @@ class EditorViewModel(
             is EditorIntent.OnTitleCommit -> runSave { rename(name = intent.name) }
             EditorIntent.OnTitleErrorDismiss -> reduce { it.copy(titleError = null) }
             is EditorIntent.OnHeadingClick -> revealHeading(index = intent.index)
+            is EditorIntent.OnDayStep -> emit(effect = EditorEffect.DayStep(step = intent.step))
             EditorIntent.OnOutlineFocusRequest -> focusOutline()
             EditorIntent.OnSidePanelToggle -> updateSidePanel { it.copy(isVisible = !it.isVisible) }
             is EditorIntent.OnSidePanelResize -> updateSidePanel { it.copy(widthDp = intent.widthDp) }

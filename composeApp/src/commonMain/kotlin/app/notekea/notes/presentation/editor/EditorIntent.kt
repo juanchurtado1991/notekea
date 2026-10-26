@@ -113,6 +113,9 @@ sealed interface EditorIntent {
     /** The user finished dragging the side panel's edge to [widthDp]. */
     data class OnSidePanelResize(val widthDp: Int) : EditorIntent
 
+    /** The header's arrows of a daily note: the daily note before ([step] -1) or after ([step] 1) is opened. */
+    data class OnDayStep(val step: Int) : EditorIntent
+
     /** The title field was confirmed with [name]: rename the note, and the links to it. */
     data class OnTitleCommit(val name: String) : EditorIntent
 
