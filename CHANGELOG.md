@@ -52,6 +52,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Images and attachments (ROADMAP 1.8): images embedded with `![[image.png]]` or `![alt](path.png)` show in Preview
+  and under their line in Edit, at their own size or the width the note asks for (`|300`), never wider than the note.
+  Other files show as a chip that opens them with the system's app, and a missing file offers Locate…, which rewrites
+  the link to the chosen file. Pasting an image (Mod+V), dropping files or choosing Image or file in the toolbar saves
+  them into the attachments folder (Obsidian's `attachmentFolderPath`, otherwise `attachments/`) and embeds them.
+  Images also show inside table cells (`![[image.png\|80]]`) and sentences in Preview, and a file inserted on a
+  table row goes into its cell.
+- Design system: `NotekeaAttachmentImage`, `NotekeaFileChip` and `NotekeaMissingFile`.
 - Formatting toolbar (ROADMAP 1.17): under the note's title, Edit | Preview tabs (Mod+E; Preview is Read mode) and
   buttons with plain-language tooltips for Heading (Large, Medium, Small), Bold (Mod+B), Italic (Mod+I), Link to a
   note (Mod+K, chosen in the quick switcher, the selection becoming its label), Web link (Mod+Shift+K), Tag (a picker

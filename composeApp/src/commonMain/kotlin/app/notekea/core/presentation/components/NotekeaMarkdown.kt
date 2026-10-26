@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -54,7 +55,8 @@ private const val PREVIEW_WIDTH_DP = 520
 fun NotekeaMarkdown(
     content: String,
     modifier: Modifier = Modifier,
-    onLinkClick: ((String) -> Unit)? = null
+    onLinkClick: ((String) -> Unit)? = null,
+    imagePainter: (String) -> Painter? = { null }
 ) {
     val colors = MaterialTheme.colorScheme
     val isDark = colors.background.luminance() < DARK_LUMINANCE
@@ -72,18 +74,23 @@ fun NotekeaMarkdown(
     val readingMarkdown = remember { ReadingMarkdown() }
     val prepared = remember(content) { readingMarkdown.prepare(markdown = content) }
     CompositionLocalProvider(LocalUriHandler provides uriHandler) {
-        SelectionContainer(modifier = modifier) { ThemedMarkdown(content = prepared, isDark = isDark) }
+        SelectionContainer(modifier = modifier) {
+            ThemedMarkdown(content = prepared, isDark = isDark, imagePainter = imagePainter)
+        }
     }
 }
 
 @Composable
 private fun ThemedMarkdown(
     content: String,
-    isDark: Boolean
+    isDark: Boolean,
+    imagePainter: (String) -> Painter?
 ) {
     val colors = MaterialTheme.colorScheme
     val readingMarkdown = remember { ReadingMarkdown() }
+    val images = remember(imagePainter) { NotekeaImageTransformer(painterOf = imagePainter) }
     Markdown(
+        imageTransformer = images,
         content = content,
         colors = markdownColor(
             text = colors.onSurface,

@@ -41,4 +41,14 @@ class EmbedFinderTest {
             actual = embeds.map { text.substring(range = it.range) }
         )
     }
+
+    @Test
+    fun `an embed in a table cell, its pipe escaped, keeps its file and width`() {
+        val embeds = finder.embeds(text = "| Dish | Photo |\n| --- | --- |\n| Arepas | ![[Arepas plate.png\\|80]] |")
+
+        assertEquals(
+            expected = listOf(Triple("Arepas plate.png", 80 as Int?, false)),
+            actual = embeds.map { Triple(it.target, it.width, it.isOwnLine) }
+        )
+    }
 }

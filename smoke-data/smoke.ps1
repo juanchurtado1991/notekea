@@ -107,7 +107,14 @@ switch ($Command) {
         # tests read the same text.
         Copy-Item (Join-Path $SmokeRoot "notes\Tasks and callouts.md") $Editor
         Copy-Item (Join-Path $SmokeRoot "notes\Formatting practice.md") $Editor
-        Write-Output "Smoke scenarios ready in $Scratch (Movable Vault, Locked Vault, New Vault Location, Playground Vault with its Editor folder)"
+        # Images and attachments (1.8): the note, its files in the vault's attachments folder, and files outside the
+        # vault to pick, drop or locate.
+        Copy-Item (Join-Path $SmokeRoot "notes\Images and files.md") $Editor
+        Copy-Item (Join-Path $SmokeRoot "attachments\*") (Join-Path $Playground "attachments")
+        $Outside = Join-Path $Scratch "Outside files"
+        New-Item -ItemType Directory -Force $Outside | Out-Null
+        Copy-Item (Join-Path $SmokeRoot "outside\*") $Outside
+        Write-Output "Smoke scenarios ready in $Scratch (Movable Vault, Locked Vault, New Vault Location, Playground Vault with its Editor folder, Outside files)"
     }
     "move" {
         Rename-Item (Join-Path $Scratch "Movable Vault") "Moved Vault"

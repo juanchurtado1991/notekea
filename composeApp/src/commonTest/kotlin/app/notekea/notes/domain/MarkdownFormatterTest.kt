@@ -195,6 +195,39 @@ class MarkdownFormatterTest {
         )
     }
 
+    @Test
+    fun `a file is embedded on a line of its own, or inside the cell of a table row with its pipe escaped`() {
+        val row = "| Dish | Photo |\n| --- | --- |\n| Arepas |  |"
+        val cell = row.lastIndexOf(string = "|") - 1
+
+        assertEquals(
+            expected = listOf(
+                "Intro\n\n![[a.png]]\n" to "Intro\n\n![[a.png]]\n".length,
+                "| Dish | Photo |\n| --- | --- |\n| Arepas | ![[a.png\\|80]] |" to cell + 14
+            ),
+            actual = listOf(
+                embed(text = "Intro", cursor = 5, markdown = "![[a.png]]"),
+                embed(text = row, cursor = cell, markdown = "![[a.png|80]]")
+            )
+        )
+    }
+
+    /** The text after embedding [markdown] at [cursor], and where the cursor ends up. */
+    private fun embed(
+        text: String,
+        cursor: Int,
+        markdown: String
+    ): Pair<String, Int> {
+        val edit = formatter.format(
+            text = text,
+            selectionStart = cursor,
+            selectionEnd = cursor,
+            action = FormatAction.Embed(markdown = markdown)
+        )
+        return text.replaceRange(startIndex = edit.start, endIndex = edit.end, replacement = edit.replacement) to
+            edit.selectionStart
+    }
+
     /** The text after [action] and what ends up selected, from a [selected] text or a [cursor] position. */
     private fun apply(
         text: String,

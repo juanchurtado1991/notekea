@@ -69,4 +69,25 @@ class ReadModeLinksTest {
             ).map { links.classify(uri = it) }
         )
     }
+
+    @Test
+    fun `files embedded in a paragraph or a table cell become images with their width, or links that open them`() {
+        assertEquals(
+            expected = "| Arepas | ![Arepas plate.png](notekea-file:Arepas%20plate.png?width=80) |\n" +
+                "See ![img/a.png](notekea-file:img/a.png) and [the menu](notekea-file:Weekly%20menu.pdf).",
+            actual = links.prepare(
+                body = "| Arepas | ![[Arepas plate.png\\|80]] |\nSee ![[img/a.png]] and ![[Weekly menu.pdf|the menu]]."
+            )
+        )
+        assertEquals(
+            expected = listOf("Arepas plate.png" to 80, "Weekly menu.pdf" to null),
+            actual = listOf("notekea-file:Arepas%20plate.png?width=80", "notekea-file:Weekly%20menu.pdf").map {
+                links.fileOf(address = it)
+            }
+        )
+        assertEquals(
+            expected = ReadLink.File(target = "Arepas plate.png"),
+            actual = links.classify(uri = "notekea-file:Arepas%20plate.png?width=80")
+        )
+    }
 }

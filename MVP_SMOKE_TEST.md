@@ -167,6 +167,26 @@ Cmd on macOS and Ctrl on Windows and Linux; Mod+Enter is ⌘↩ or Ctrl+Enter.
 | 1.7-05 | In the Folding section, click the title of "A folded question (click to open)" twice, then the title of "An open tip (click to fold)" | The folded question starts closed with a chevron and opens and closes with each click (the title is not selected); the open tip starts open and folds | 1.7 | `NotekeaMarkdownCalloutTest` | | | |
 | 1.7-06 | Look at the Nesting section and the Example callout | "Level one" holds "Level two", which holds "Level three", each with its own color; the Example callout shows `val servings = 6` as colored code without `>` marks; the last quote is a plain quote with a bar | 1.7 | `NotekeaMarkdownCalloutTest`, `ReadingMarkdownTest` | | | |
 
+### 1.8 Images and attachments
+
+Run `smoke.sh prepare` (`smoke.ps1 prepare` on Windows) and open `smoke-data/scratch/Playground Vault`: its
+`Editor/Images and files` note embeds the files of its `attachments` folder (copied from `smoke-data/attachments/`),
+and `smoke-data/scratch/Outside files` holds files outside the vault to locate, pick and drop. Run the cases in order.
+"Mod" is Cmd on macOS and Ctrl on Windows and Linux.
+
+| ID | Steps | Expected | Testable from | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|
+| 1.8-01 | Open Editor/Images and files in Preview and scroll through it | The orange and blue plate shows three times: at its own size (480 wide, or the note's width if narrower), 200 wide, and from the Markdown link; Weekly menu.pdf and broken.png are file chips with a paperclip and "Opens with its app"; Lost photo.png shows "This file is missing" with its name and Locate…; in the last paragraph "the menu" is a link | 1.8 | `SmokeAttachmentsTest` 1_8-01, `EditorAttachmentsScreenTest` | | | |
+| 1.8-02 | Switch to Edit (Mod+E); type a line at the top of the note | Every embed line keeps its text as written (`![[Arepas plate.png|200]]`…) and shows its picture, chip or missing file right under it; typing above moves them along with their lines | 1.8 | `EditorAttachmentsScreenTest` | | | |
+| 1.8-03 | Click the Weekly menu.pdf chip; in Preview click "the menu" | The PDF ("Weekly menu: arepas") opens in the system's PDF viewer, both times | 1.8 | `ProcessFileOpenerTest`, `EditorAttachmentsTest` | | | |
+| 1.8-04 | Click Locate… under Lost photo.png and choose `Outside files/Found plate.png` | The line becomes `![[Found plate.png]]` and the green plate shows under it; Found plate.png is now in the vault's attachments folder | 1.8 | `EditorAttachmentsTest` | | | |
+| 1.8-05 | Click at the end of the note, click Image or file in the toolbar (its tooltip explains it) and choose `Outside files/Shopping list.pdf` | `![[Shopping list.pdf]]` is written on a line of its own with its chip under it, the cursor on the next line; the PDF is copied into the vault's attachments folder | 1.8 | `EditorAttachmentsTest`, `EditorAttachmentsScreenTest` | | | |
+| 1.8-06 | Drag `Found plate.png` from `Outside files` in the system's file manager and drop it on the note; then drag `Arepas plate.png` from the vault's `attachments` folder and drop it | The first is copied as `Found plate 1.png` (the name is taken) and embedded; the second is already in the vault, so it is embedded as `![[Arepas plate.png]]` without a copy | 1.8 | `EditorAttachmentsTest`, `AttachFileUseCaseTest` | | | |
+| 1.8-07 | Copy a screenshot to the clipboard (Windows: Win+Shift+S; macOS: Ctrl+Shift+Cmd+4; Linux: the desktop's screenshot tool, copy to clipboard), click on an empty line and press Mod+V; then copy a word and press Mod+V | `![[Pasted image <date and time>.png]]` is written with the screenshot under it, and the file is in the attachments folder; the copied word is pasted as text | 1.8 | `EditorAttachmentsTest`, manual (clipboard) | | | |
+| 1.8-08 | Close Notekea, add `"attachmentFolderPath": "./"` to `Playground Vault/.obsidian/app.json`, open the vault again and paste a screenshot into Editor/Images and files | The pasted image is saved next to the note, in `Editor/`, as Obsidian would | 1.8 | `AttachmentRulesTest`, `AttachmentsOnDiskTest` | | | |
+| 1.8-09 | If Obsidian is installed, open the Playground Vault there and look at Editor/Images and files | The text is unchanged and every picture, the PDFs and the pasted screenshot show as in Notekea; only Lost photo.png is gone, replaced by Found plate.png | 1.8 | manual (Obsidian) | | | |
+| 1.8-10 | In Preview, scroll to the table at the end of Editor/Images and files; then in Edit put the cursor in the empty Photo cell of a new row `| Cachapa |  |` and click Image or file, choosing `Outside files/Found plate.png` | The plate shows 80 wide inside the Photo cell, not the text "80"; the new embed is written inside the cell (`![[Found plate.png]]`), the row keeps its two columns, and Preview shows the green plate in it | 1.8 | `SmokeAttachmentsTest` 1_8-10, `ReadModeLinksTest`, `MarkdownFormatterTest` | | | |
+
 ### 1.17 Formatting toolbar
 
 Run `smoke.sh prepare` (`smoke.ps1 prepare` on Windows) and open `smoke-data/scratch/Playground Vault`: its
