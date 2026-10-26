@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 9 / 17 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 10 / 17 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -277,7 +277,7 @@ Obsidian-flavored Markdown blocks that most vaults use.
   attachments folder when it is outside the vault, and rewrites the link to it), unsupported format (file chip).
 - **Done when:** pasting a screenshot works on the three OSes and the result opens unchanged in Obsidian.
 
-### ⬜ 1.9 Outline — `feature/outline`
+### ✅ 1.9 Outline — `feature/outline` — [notekea#57](https://github.com/juanchurtado1991/notekea/pull/57)
 
 **UI — Right panel, Outline tab:** the headings of the current note as an indented tree; click scrolls the editor
 to that heading; the heading under the cursor is highlighted while scrolling. Empty state: "This note has no
