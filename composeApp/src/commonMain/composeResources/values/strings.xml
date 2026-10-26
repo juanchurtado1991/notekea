@@ -76,6 +76,19 @@
     <string name="note_panel_empty_message">Pick a note in the sidebar to see it here.</string>
     <string name="note_panel_empty_title">No note selected</string>
 
+    <string name="switcher_content_hint_message">Type words or a #tag.</string>
+    <string name="switcher_content_hint_title">Search inside your notes</string>
+    <string name="switcher_empty_vault_message">Create a note and find it here.</string>
+    <string name="switcher_empty_vault_title">No notes yet</string>
+    <string name="switcher_error">The search could not finish. Close the palette and try again.</string>
+    <string name="switcher_mode_content">Content</string>
+    <string name="switcher_mode_notes">Notes</string>
+    <string name="switcher_no_match_content">Try other words, or a #tag.</string>
+    <string name="switcher_no_match_notes">Try fewer letters, or press Tab to search inside notes.</string>
+    <string name="switcher_no_match_title">No notes match</string>
+    <string name="switcher_placeholder_content">Search the text of your notes</string>
+    <string name="switcher_placeholder_notes">Find a note by name or alias</string>
+    <string name="switcher_searching">Searching</string>
     <string name="tree_cancel">Cancel</string>
     <string name="tree_delete_folder">Delete folder</string>
     <string name="tree_delete_folder_title">Delete this folder?</string>
