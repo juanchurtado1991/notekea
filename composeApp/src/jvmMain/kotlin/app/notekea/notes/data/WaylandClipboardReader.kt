@@ -6,16 +6,17 @@ import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 
 /**
- * [ClipboardReader] on a Wayland desktop. Java reads the clipboard through XWayland, which passes text on but not
- * images, so when [primary] finds no image a copied screenshot is read with `wl-paste` (wl-clipboard), PNG first,
- * other image types turned into PNG. [readCommand] runs a command and returns its output, or null when it could not
- * run (see `ProcessCommands.kt`). Text comes from [primary].
+ * [ClipboardReader] on a Wayland desktop. Java reads the clipboard through XWayland, which does not pass images on:
+ * without focus it offers none, with focus it offers one and Java waits seconds for it until the owner times out. So a
+ * copied screenshot is read with `wl-paste` (wl-clipboard) first, PNG first, other image types turned into PNG, and
+ * [primary] is asked only when `wl-paste` finds no image or is not installed. [readCommand] runs a command and returns
+ * its output, or null when it could not run (see `ProcessCommands.kt`). Text comes from [primary].
  */
 class WaylandClipboardReader(
     private val primary: ClipboardReader,
     private val readCommand: (List<String>) -> ByteArray?
 ) : ClipboardReader {
-    override fun image(): ByteArray? = primary.image() ?: waylandImage()
+    override fun image(): ByteArray? = waylandImage() ?: primary.image()
 
     override fun text(): String? = primary.text()
 

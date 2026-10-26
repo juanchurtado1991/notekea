@@ -1,5 +1,6 @@
 package app.notekea.notes.data
 
+import app.notekea.notes.domain.ClipboardReader
 import app.notekea.notes.domain.FakeClipboardReader
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
@@ -12,17 +13,18 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * Smoke finding of 1.8-07 on COSMIC (Wayland): Mod+V with a screenshot copied did nothing, because Java reads the
- * clipboard through XWayland, which passes on text only. The screenshot is read with `wl-paste` instead.
+ * Smoke findings of 1.8-07 on COSMIC (Wayland): Mod+V with a screenshot copied did nothing, then took seconds, because
+ * Java reads the clipboard through XWayland, which passes on text only or times out. `wl-paste` reads it first.
  */
 class WaylandClipboardReaderTest {
     private val png = encoded(format = "png")
     private val jpeg = encoded(format = "jpg")
 
     @Test
-    fun `a screenshot that Java cannot see is read with wl-paste, as PNG`() {
+    fun `a screenshot is read with wl-paste, as PNG, before Java, which would wait seconds for it`() {
         val commands = mutableListOf<List<String>>()
-        val reader = WaylandClipboardReader(primary = FakeClipboardReader(text = "word")) { command ->
+        val java = WaitingClipboardReader(text = "word")
+        val reader = WaylandClipboardReader(primary = java) { command ->
             commands += command
             if (command.last() == "--list-types") "text/plain\nimage/png\n".encodeToByteArray() else png
         }
@@ -35,11 +37,12 @@ class WaylandClipboardReaderTest {
             ),
             actual = commands
         )
+        assertEquals(expected = 0, actual = java.imageReads)
         assertEquals(expected = "word", actual = reader.text())
     }
 
     @Test
-    fun `another image type becomes PNG, and no image, no wl-paste or an image Java sees need nothing more`() {
+    fun `another image type becomes PNG, and with no image or no wl-paste Java is asked`() {
         val jpegOnly = WaylandClipboardReader(primary = FakeClipboardReader()) { command ->
             if (command.last() == "--list-types") "image/jpeg".encodeToByteArray() else jpeg
         }
@@ -54,7 +57,7 @@ class WaylandClipboardReaderTest {
         assertNull(actual = WaylandClipboardReader(primary = FakeClipboardReader()) { null }.image())
         assertContentEquals(
             expected = png,
-            actual = WaylandClipboardReader(primary = FakeClipboardReader(image = png)) { error("not needed") }.image()
+            actual = WaylandClipboardReader(primary = FakeClipboardReader(image = png)) { null }.image()
         )
     }
 
@@ -72,5 +75,19 @@ class WaylandClipboardReaderTest {
     ): ByteArray = ByteArrayOutputStream().use { output ->
         ImageIO.write(BufferedImage(4, 3, BufferedImage.TYPE_INT_RGB), format, output)
         output.toByteArray()
+    }
+
+    /** Java's clipboard on XWayland with the window focused: it offers the image, then times out reading it. */
+    private class WaitingClipboardReader(
+        private val text: String
+    ) : ClipboardReader {
+        var imageReads = 0
+
+        override fun image(): ByteArray? {
+            imageReads++
+            return null
+        }
+
+        override fun text(): String = text
     }
 }
