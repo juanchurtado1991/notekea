@@ -6,16 +6,17 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
+import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.notes.domain.RelativePath
-import javax.swing.SwingUtilities
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
  * The palette rendered headless and clicked like a user would, in every state it can show. Every scene runs on the
  * AWT event thread, as in the app: Compose may resume effects there (the scroll to the selection), and a scene measured
- * from another thread then fails with a multithreaded access error that surfaces in whichever test runs next.
+ * from another thread then fails with a multithreaded access error that surfaces in whichever test runs next
+ * ([UiThread]).
  */
 class QuickSwitcherContentTest {
     private val intents = mutableListOf<QuickSwitcherIntent>()
@@ -23,7 +24,7 @@ class QuickSwitcherContentTest {
 
     @Test
     fun `clicking a result opens it and clicking outside the palette closes it`() {
-        onUiThread {
+        UiThread.run {
             palette(height = WINDOW_HEIGHT).use { scene ->
                 settle(scene = scene)
                 click(scene = scene, at = Offset(x = ROW_X, y = SECOND_ROW_Y))
@@ -46,7 +47,7 @@ class QuickSwitcherContentTest {
             QuickSwitcherRow(path = RelativePath(value = "Note $it.md"), name = "Note $it")
         }
         state.value = QuickSwitcherState(isOpen = true, query = "note", rows = rows, selectedIndex = rows.lastIndex)
-        onUiThread {
+        UiThread.run {
             palette(height = SHORT_WINDOW_HEIGHT).use { scene ->
                 settle(scene = scene)
                 click(scene = scene, at = Offset(x = ROW_X, y = SHORT_WINDOW_LAST_ROW_Y))
@@ -71,7 +72,7 @@ class QuickSwitcherContentTest {
             QuickSwitcherState(isOpen = true, query = "corn", hasUnexpectedError = true),
             QuickSwitcherState()
         )
-        onUiThread {
+        UiThread.run {
             palette(height = WINDOW_HEIGHT).use { scene ->
                 states.forEachIndexed { index, next ->
                     state.value = next
@@ -84,21 +85,6 @@ class QuickSwitcherContentTest {
             expected = emptyList<QuickSwitcherIntent>(),
             actual = intents
         )
-    }
-
-    /** Runs [block] on the AWT event thread and rethrows what it threw, so a failed assertion still fails the test. */
-    private fun onUiThread(
-        block: () -> Unit
-    ) {
-        var failure: Throwable? = null
-        SwingUtilities.invokeAndWait {
-            try {
-                block()
-            } catch (throwable: Throwable) {
-                failure = throwable
-            }
-        }
-        failure?.let { throw it }
     }
 
     private fun palette(
