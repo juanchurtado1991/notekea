@@ -1,5 +1,6 @@
 ---
 tags: [recipe, venezuelan]
+aliases: [Arepa, Corn cakes]
 servings: 6
 ---
 
