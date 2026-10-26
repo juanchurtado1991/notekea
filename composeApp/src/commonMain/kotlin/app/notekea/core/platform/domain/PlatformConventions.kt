@@ -19,6 +19,10 @@ data class PlatformConventions(
     val quickSwitcherShortcut: Shortcut,
     val searchNotesShortcut: Shortcut,
     val toggleTaskShortcut: Shortcut,
+    val boldShortcut: Shortcut,
+    val italicShortcut: Shortcut,
+    val noteLinkShortcut: Shortcut,
+    val webLinkShortcut: Shortcut,
     val dialogButtonOrder: DialogButtonOrder,
     val appDataDirectory: String,
     val homeDirectory: String

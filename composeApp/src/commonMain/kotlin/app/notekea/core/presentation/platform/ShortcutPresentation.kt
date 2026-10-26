@@ -75,6 +75,7 @@ private fun KeyEvent.pressedModifiers(): Set<ShortcutModifier> = buildSet {
 }
 
 private fun ShortcutKey.composeKey(): Key = when (this) {
+    ShortcutKey.B -> Key.B
     ShortcutKey.BACKSLASH -> Key.Backslash
     ShortcutKey.BACKSPACE -> Key.Backspace
     ShortcutKey.DELETE -> Key.Delete
@@ -83,6 +84,8 @@ private fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.F -> Key.F
     ShortcutKey.F2 -> Key.F2
     ShortcutKey.F4 -> Key.F4
+    ShortcutKey.I -> Key.I
+    ShortcutKey.K -> Key.K
     ShortcutKey.N -> Key.N
     ShortcutKey.O -> Key.O
     ShortcutKey.P -> Key.P
@@ -99,10 +102,13 @@ private fun ShortcutKey.displayName(): String = when (this) {
 
     ShortcutKey.ENTER -> ENTER_NAME
 
+    ShortcutKey.B,
     ShortcutKey.E,
     ShortcutKey.F,
     ShortcutKey.F2,
     ShortcutKey.F4,
+    ShortcutKey.I,
+    ShortcutKey.K,
     ShortcutKey.N,
     ShortcutKey.O,
     ShortcutKey.P,
@@ -118,10 +124,13 @@ private fun ShortcutKey.macLabel(): String = when (this) {
     ShortcutKey.ENTER -> MAC_ENTER_SYMBOL
 
     ShortcutKey.BACKSLASH,
+    ShortcutKey.B,
     ShortcutKey.E,
     ShortcutKey.F,
     ShortcutKey.F2,
     ShortcutKey.F4,
+    ShortcutKey.I,
+    ShortcutKey.K,
     ShortcutKey.N,
     ShortcutKey.O,
     ShortcutKey.P,

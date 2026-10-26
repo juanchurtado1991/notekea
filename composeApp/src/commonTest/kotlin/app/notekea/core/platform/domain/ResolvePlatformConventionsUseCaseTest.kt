@@ -26,28 +26,13 @@ class ResolvePlatformConventionsUseCaseTest {
         )
 
         assertEquals(
-            expected = PlatformConventions(
+            expected = expectedConventions(
                 operatingSystem = OperatingSystem.LINUX,
-                primaryModifier = ShortcutModifier.CONTROL,
-                openFolderShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(ShortcutModifier.CONTROL)),
-                quitShortcut = Shortcut(key = ShortcutKey.Q, modifiers = setOf(ShortcutModifier.CONTROL)),
-                newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(ShortcutModifier.CONTROL)),
-                renameShortcut = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
-                deleteShortcut = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
-                toggleSidebarShortcut = Shortcut(
-                    key = ShortcutKey.BACKSLASH,
-                    modifiers = setOf(ShortcutModifier.CONTROL)
-                ),
-                saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(ShortcutModifier.CONTROL)),
-                findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(ShortcutModifier.CONTROL)),
-                toggleReadModeShortcut = Shortcut(key = ShortcutKey.E, modifiers = setOf(ShortcutModifier.CONTROL)),
-                quickSwitcherShortcut = Shortcut(key = ShortcutKey.P, modifiers = setOf(ShortcutModifier.CONTROL)),
-                searchNotesShortcut = Shortcut(
-                    key = ShortcutKey.F,
-                    modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
-                ),
-                toggleTaskShortcut = Shortcut(key = ShortcutKey.ENTER, modifiers = setOf(ShortcutModifier.CONTROL)),
-                dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
+                primary = ShortcutModifier.CONTROL,
+                quit = Shortcut(key = ShortcutKey.Q, modifiers = setOf(ShortcutModifier.CONTROL)),
+                rename = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
+                delete = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
+                buttonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
                 appDataDirectory = "/home/ana/.local/share/notekea",
                 homeDirectory = LINUX_HOME
             ),
@@ -77,28 +62,13 @@ class ResolvePlatformConventionsUseCaseTest {
         )
 
         assertEquals(
-            expected = PlatformConventions(
+            expected = expectedConventions(
                 operatingSystem = OperatingSystem.MACOS,
-                primaryModifier = ShortcutModifier.COMMAND,
-                openFolderShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(ShortcutModifier.COMMAND)),
-                quitShortcut = Shortcut(key = ShortcutKey.Q, modifiers = setOf(ShortcutModifier.COMMAND)),
-                newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(ShortcutModifier.COMMAND)),
-                renameShortcut = Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet()),
-                deleteShortcut = Shortcut(key = ShortcutKey.BACKSPACE, modifiers = setOf(ShortcutModifier.COMMAND)),
-                toggleSidebarShortcut = Shortcut(
-                    key = ShortcutKey.BACKSLASH,
-                    modifiers = setOf(ShortcutModifier.COMMAND)
-                ),
-                saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(ShortcutModifier.COMMAND)),
-                findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(ShortcutModifier.COMMAND)),
-                toggleReadModeShortcut = Shortcut(key = ShortcutKey.E, modifiers = setOf(ShortcutModifier.COMMAND)),
-                quickSwitcherShortcut = Shortcut(key = ShortcutKey.P, modifiers = setOf(ShortcutModifier.COMMAND)),
-                searchNotesShortcut = Shortcut(
-                    key = ShortcutKey.F,
-                    modifiers = setOf(ShortcutModifier.COMMAND, ShortcutModifier.SHIFT)
-                ),
-                toggleTaskShortcut = Shortcut(key = ShortcutKey.ENTER, modifiers = setOf(ShortcutModifier.COMMAND)),
-                dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
+                primary = ShortcutModifier.COMMAND,
+                quit = Shortcut(key = ShortcutKey.Q, modifiers = setOf(ShortcutModifier.COMMAND)),
+                rename = Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet()),
+                delete = Shortcut(key = ShortcutKey.BACKSPACE, modifiers = setOf(ShortcutModifier.COMMAND)),
+                buttonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
                 appDataDirectory = "/Users/ana/Library/Application Support/Notekea",
                 homeDirectory = MACOS_HOME
             ),
@@ -159,32 +129,57 @@ class ResolvePlatformConventionsUseCaseTest {
         )
 
         assertEquals(
-            expected = PlatformConventions(
+            expected = expectedConventions(
                 operatingSystem = OperatingSystem.WINDOWS,
-                primaryModifier = ShortcutModifier.CONTROL,
-                openFolderShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(ShortcutModifier.CONTROL)),
-                quitShortcut = Shortcut(key = ShortcutKey.F4, modifiers = setOf(ShortcutModifier.ALT)),
-                newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(ShortcutModifier.CONTROL)),
-                renameShortcut = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
-                deleteShortcut = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
-                toggleSidebarShortcut = Shortcut(
-                    key = ShortcutKey.BACKSLASH,
-                    modifiers = setOf(ShortcutModifier.CONTROL)
-                ),
-                saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(ShortcutModifier.CONTROL)),
-                findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(ShortcutModifier.CONTROL)),
-                toggleReadModeShortcut = Shortcut(key = ShortcutKey.E, modifiers = setOf(ShortcutModifier.CONTROL)),
-                quickSwitcherShortcut = Shortcut(key = ShortcutKey.P, modifiers = setOf(ShortcutModifier.CONTROL)),
-                searchNotesShortcut = Shortcut(
-                    key = ShortcutKey.F,
-                    modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
-                ),
-                toggleTaskShortcut = Shortcut(key = ShortcutKey.ENTER, modifiers = setOf(ShortcutModifier.CONTROL)),
-                dialogButtonOrder = DialogButtonOrder.PRIMARY_THEN_CANCEL,
+                primary = ShortcutModifier.CONTROL,
+                quit = Shortcut(key = ShortcutKey.F4, modifiers = setOf(ShortcutModifier.ALT)),
+                rename = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
+                delete = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
+                buttonOrder = DialogButtonOrder.PRIMARY_THEN_CANCEL,
                 appDataDirectory = "D:\\Profiles\\ana\\Roaming\\Notekea",
                 homeDirectory = WINDOWS_HOME
             ),
             actual = conventions
+        )
+    }
+
+    /** The conventions of an operating system: what differs is given, every other shortcut uses [primary]. */
+    private fun expectedConventions(
+        operatingSystem: OperatingSystem,
+        primary: ShortcutModifier,
+        quit: Shortcut,
+        rename: Shortcut,
+        delete: Shortcut,
+        buttonOrder: DialogButtonOrder,
+        appDataDirectory: String,
+        homeDirectory: String
+    ): PlatformConventions {
+        val withPrimary = { key: ShortcutKey -> Shortcut(key = key, modifiers = setOf(primary)) }
+        val withPrimaryAndShift = { key: ShortcutKey ->
+            Shortcut(key = key, modifiers = setOf(primary, ShortcutModifier.SHIFT))
+        }
+        return PlatformConventions(
+            operatingSystem = operatingSystem,
+            primaryModifier = primary,
+            openFolderShortcut = withPrimary(ShortcutKey.O),
+            quitShortcut = quit,
+            newNoteShortcut = withPrimary(ShortcutKey.N),
+            renameShortcut = rename,
+            deleteShortcut = delete,
+            toggleSidebarShortcut = withPrimary(ShortcutKey.BACKSLASH),
+            saveShortcut = withPrimary(ShortcutKey.S),
+            findShortcut = withPrimary(ShortcutKey.F),
+            toggleReadModeShortcut = withPrimary(ShortcutKey.E),
+            quickSwitcherShortcut = withPrimary(ShortcutKey.P),
+            searchNotesShortcut = withPrimaryAndShift(ShortcutKey.F),
+            toggleTaskShortcut = withPrimary(ShortcutKey.ENTER),
+            boldShortcut = withPrimary(ShortcutKey.B),
+            italicShortcut = withPrimary(ShortcutKey.I),
+            noteLinkShortcut = withPrimary(ShortcutKey.K),
+            webLinkShortcut = withPrimaryAndShift(ShortcutKey.K),
+            dialogButtonOrder = buttonOrder,
+            appDataDirectory = appDataDirectory,
+            homeDirectory = homeDirectory
         )
     }
 

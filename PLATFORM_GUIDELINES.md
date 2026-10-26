@@ -44,6 +44,10 @@ primary modifier and resolved per platform.
 | Quick switcher (find a note by name) | `Cmd+P` | `Ctrl+P` |
 | Search all notes | `Cmd+Shift+F` | `Ctrl+Shift+F` |
 | Toggle the task on the cursor line | `Cmd+Enter` | `Ctrl+Enter` |
+| Bold | `Cmd+B` | `Ctrl+B` |
+| Italic | `Cmd+I` | `Ctrl+I` |
+| Link to a note | `Cmd+K` | `Ctrl+K` |
+| Web link | `Cmd+Shift+K` | `Ctrl+Shift+K` |
 | Settings | `Cmd+,` | `Ctrl+,` |
 | Close tab | `Cmd+W` | `Ctrl+W` |
 | Close window | `Cmd+Shift+W` | `Ctrl+Shift+W` |
