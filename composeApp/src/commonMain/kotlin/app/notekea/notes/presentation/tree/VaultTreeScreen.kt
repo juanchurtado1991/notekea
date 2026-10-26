@@ -60,7 +60,12 @@ fun VaultTreeScreen(
     LaunchedEffect(viewModel, editorViewModel) {
         viewModel.effects.collect { effect -> followRename(effect = effect, editorViewModel = editorViewModel) }
     }
-    FollowQuickSwitcher(switcherViewModel = switcherViewModel, viewModel = viewModel, notes = state.tree.notes)
+    FollowQuickSwitcher(
+        switcherViewModel = switcherViewModel,
+        viewModel = viewModel,
+        editorViewModel = editorViewModel,
+        notes = state.tree.notes
+    )
     Box(modifier = modifier) {
         Workspace(
             state = state,
@@ -78,22 +83,29 @@ fun VaultTreeScreen(
     }
 }
 
-/** The palette searches the tree's notes as they change, and a note chosen in it is selected in the tree. */
+/**
+ * The palette searches the tree's notes as they change. A note chosen in it is selected in the tree, and its text
+ * takes the keyboard once it opens; closing the palette without choosing gives the keyboard back to the open note.
+ */
 @Composable
 private fun FollowQuickSwitcher(
     switcherViewModel: QuickSwitcherViewModel,
     viewModel: VaultTreeViewModel,
+    editorViewModel: EditorViewModel,
     notes: Map<RelativePath, NoteEntry>
 ) {
     LaunchedEffect(switcherViewModel, notes) {
         switcherViewModel.onIntent(intent = QuickSwitcherIntent.OnNotesChange(notes = notes.values))
     }
-    LaunchedEffect(switcherViewModel, viewModel) {
+    LaunchedEffect(switcherViewModel, viewModel, editorViewModel) {
         switcherViewModel.effects.collect { effect ->
             when (effect) {
-                is QuickSwitcherEffect.OpenNote -> viewModel.onIntent(
-                    intent = VaultTreeIntent.OnRevealNote(path = effect.path)
-                )
+                is QuickSwitcherEffect.OpenNote -> {
+                    viewModel.onIntent(intent = VaultTreeIntent.OnRevealNote(path = effect.path))
+                    editorViewModel.onIntent(intent = EditorIntent.OnFocusRequest(path = effect.path))
+                }
+
+                QuickSwitcherEffect.Dismissed -> editorViewModel.onIntent(intent = EditorIntent.OnFocusRequest())
             }
         }
     }

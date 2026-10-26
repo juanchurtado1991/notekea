@@ -9,7 +9,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
@@ -46,22 +48,17 @@ fun EditorScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val flushed = remember(viewModel) { Channel<Unit>(capacity = Channel.CONFLATED) }
-    val currentOnRenamed by rememberUpdatedState(newValue = onRenamed)
-    val currentOnClosed by rememberUpdatedState(newValue = onClosed)
-    val currentOnOpenLink by rememberUpdatedState(newValue = onOpenLink)
-    val currentOnSearchTag by rememberUpdatedState(newValue = onSearchTag)
+    val textFocusRequester = remember { FocusRequester() }
     LaunchedEffect(notePath) { viewModel.onIntent(intent = EditorIntent.OnOpen(path = notePath)) }
-    LaunchedEffect(viewModel) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                EditorEffect.Closed -> currentOnClosed()
-                EditorEffect.Flushed -> flushed.trySend(element = Unit)
-                is EditorEffect.OpenLink -> currentOnOpenLink(effect)
-                is EditorEffect.Renamed -> currentOnRenamed(effect)
-                is EditorEffect.SearchTag -> currentOnSearchTag(effect.tag)
-            }
-        }
-    }
+    EditorEffects(
+        viewModel = viewModel,
+        flushed = flushed,
+        textFocusRequester = textFocusRequester,
+        onRenamed = onRenamed,
+        onClosed = onClosed,
+        onOpenLink = onOpenLink,
+        onSearchTag = onSearchTag
+    )
     DisposableEffect(viewModel) { onDispose { viewModel.onIntent(intent = EditorIntent.OnFlushRequest) } }
     EditorShortcuts(platformConventions = platformConventions, onIntent = viewModel::onIntent)
     BeforeWindowClose {
@@ -77,8 +74,63 @@ fun EditorScreen(
         platformConventions = platformConventions,
         onIntent = viewModel::onIntent,
         modifier = modifier,
-        properties = properties
+        properties = properties,
+        textFocusRequester = textFocusRequester
     )
+}
+
+/** What the editor asks of the window around it: the callbacks, the end of a flush, and the keyboard for its text. */
+@Composable
+private fun EditorEffects(
+    viewModel: EditorViewModel,
+    flushed: Channel<Unit>,
+    textFocusRequester: FocusRequester,
+    onRenamed: (EditorEffect.Renamed) -> Unit,
+    onClosed: () -> Unit,
+    onOpenLink: (EditorEffect.OpenLink) -> Unit,
+    onSearchTag: (String) -> Unit
+) {
+    val currentOnRenamed by rememberUpdatedState(newValue = onRenamed)
+    val currentOnClosed by rememberUpdatedState(newValue = onClosed)
+    val currentOnOpenLink by rememberUpdatedState(newValue = onOpenLink)
+    val currentOnSearchTag by rememberUpdatedState(newValue = onSearchTag)
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                EditorEffect.Closed -> currentOnClosed()
+
+                EditorEffect.Flushed -> flushed.trySend(element = Unit)
+
+                is EditorEffect.OpenLink -> currentOnOpenLink(effect)
+
+                is EditorEffect.Renamed -> currentOnRenamed(effect)
+
+                is EditorEffect.SearchTag -> currentOnSearchTag(effect.tag)
+
+                EditorEffect.FocusText -> focusText(
+                    requester = textFocusRequester,
+                    isReading = viewModel.state.value.isReading
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Gives the keyboard to the note's text one frame later, once the text field that replaced the loading skeleton is
+ * laid out. Read mode has no cursor, so nothing takes focus there.
+ */
+private suspend fun focusText(
+    requester: FocusRequester,
+    isReading: Boolean
+) {
+    if (isReading) return
+    withFrameNanos { }
+    try {
+        requester.requestFocus()
+    } catch (_: IllegalStateException) {
+        // The text is not shown (the note failed to open or was closed meanwhile): there is nothing to focus.
+    }
 }
 
 /** Save, Find in note and Edit / Read work whatever has focus while the editor is shown. */

@@ -19,6 +19,9 @@ sealed interface EditorEffect {
         val kind: LinkKind
     ) : EditorEffect
 
+    /** The text of the open note should take the keyboard (in Edit mode; Read mode has no cursor). */
+    data object FocusText : EditorEffect
+
     /** A `#tag` was clicked in Read mode: the window searches it in all notes. */
     data class SearchTag(val tag: String) : EditorEffect
 
