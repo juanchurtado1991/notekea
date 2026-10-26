@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 6 / 16 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 7 / 16 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -234,7 +234,7 @@ an empty content search, and an empty vault.
   notes, and typing stays fluid on a 5,000-note vault.
 - Smoke test: cases 1.6-01 to 1.6-12; 1.4-01 and 1.5-01 revised for the aliases added to the sample vault.
 
-### 🚧 1.7 Tasks and callouts — `feature/markdown-extensions`
+### ✅ 1.7 Tasks and callouts — `feature/markdown-extensions` — [notekea#54](https://github.com/juanchurtado1991/notekea/pull/54)
 
 Obsidian-flavored Markdown blocks that most vaults use.
 
