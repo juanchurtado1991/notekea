@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 7 / 16 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 7 / 17 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -326,6 +326,26 @@ varied topics (projects, journal, books, recipes, meeting notes), with frontmatt
 related notes without links. It also covers every feature above: tasks, all callout types, images and attachments,
 daily notes, templates, embeds (including a circular one) and a `.obsidian/` folder with non-default settings. Used
 by tests, manual QA and demos.
+
+### 🚧 1.17 Formatting toolbar — `feature/formatting-toolbar`
+
+A toolbar above the note, so people who do not know Markdown can format, link and tag in plain words; it writes the
+same Markdown a person would type, so notes stay readable in any app.
+
+**UI — Editor toolbar** (under the title, replacing the Edit / Read icon):
+- **Edit | Preview** tabs, like GitHub's, switched with `Mod+E` (Preview is Read mode).
+- Buttons with an icon, a plain-language tooltip and its shortcut: **Heading** (menu: Large, Medium, Small heading),
+  **Bold** (`Mod+B`), **Italic** (`Mod+I`), **Link to a note** (`Mod+K`, picks the note in the quick switcher and writes
+  `[[Note]]`, the selection becoming its label), **Web link** (`Mod+Shift+K`), **Tag** (menu of the vault's tags plus
+  "New tag"), **Bulleted list**, **Numbered list**, **Checklist**, **Callout** (menu of types with their icons in plain
+  words, and "Folded"), **Table** (3 × 3, ready to fill) and **More** (Quote, Code block, Divider).
+- With a selection, a button formats it (bold wraps it, a list prefixes its lines); without one, it inserts an
+  example with the placeholder text selected, ready to type over. Pressing a toggle again on formatted text removes it
+  (bold, lists, quote, heading).
+- **Find in note** stays at the end of the toolbar; the formatting buttons hide in Preview.
+- Aliases and frontmatter tags are edited in 1.14 Properties view (the frontmatter stays read-only in the editor).
+- **Done when:** a person who never wrote Markdown can make a heading, a checklist, a callout, a table and a link to
+  another note with the mouse alone, and every result reads the same in Preview and in Obsidian.
 
 ---
 
