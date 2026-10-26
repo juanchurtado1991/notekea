@@ -56,7 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and under their line in Edit, at their own size or the width the note asks for (`|300`), never wider than the note.
   Other files show as a chip that opens them with the system's app, and a missing file offers Locate…, which rewrites
   the link to the chosen file. Pasting an image (Mod+V), dropping files or choosing Image or file in the toolbar saves
-  them into the attachments folder (Obsidian's `attachmentFolderPath`, otherwise `attachments/`) and embeds them.
+  them into the attachments folder (Obsidian's `attachmentFolderPath`, otherwise `attachments/`) and embeds them; a new
+  image gets a width to see and change (`|400`, or its own when narrower).
   Images also show inside table cells (`![[image.png\|80]]`) and sentences in Preview, and a file inserted on a
   table row goes into its cell.
   On Linux Wayland desktops a pasted image is read with `wl-paste` (wl-clipboard), since Java only sees text there;

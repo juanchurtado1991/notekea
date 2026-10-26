@@ -260,7 +260,8 @@ Obsidian-flavored Markdown blocks that most vaults use.
   sentence shows inline in Preview at its width; inserting a file with the cursor on a table row puts it in the cell.
 - **Paste or drop an image** (`Mod+V`, drag and drop) saves it into the attachments folder (`Pasted image
   <date and time>.png` for a pasted one) and inserts the link at the cursor; a dropped file of any kind is copied the
-  same way. **Image or file** in the toolbar does it with the system's file picker. Attachments folder: `.obsidian/
+  same way. **Image or file** in the toolbar does it with the system's file picker. A new image is embedded with a
+  width the user sees and can change (`![[photo.png|400]]`: its own width, at most 400). Attachments folder: `.obsidian/
   app.json` `attachmentFolderPath` when present (the vault root, the note's folder, a subfolder of it or a fixed
   folder, as Obsidian), otherwise `attachments/`; a Notekea setting comes with the Settings screen.
 - Non-image attachments (PDF, audio, other files) show as a file chip that opens with the system default app.

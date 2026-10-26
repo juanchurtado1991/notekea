@@ -368,14 +368,14 @@ class EditorViewModel(
         }
     }
 
-    /** Attaches every source and writes their embeds, one per line, in place of the selection. */
+    /** Attaches every source and writes their embeds, one per line, in place of the selection; images get a width. */
     private suspend fun attachAndEmbed(
         sources: List<AttachmentSource>
     ) {
         val note = state.value.notePath ?: return
         val embeds = mutableListOf<String>()
         for (source in sources) {
-            when (val attached = attachments.attach(note = note, source = source)) {
+            when (val attached = attachments.attach(note = note, source = source, withDefaultWidth = true)) {
                 is Outcome.Success -> embeds += attached.value
                 is Outcome.Failure -> reduce { it.copy(attachmentError = attached.error) }
             }
