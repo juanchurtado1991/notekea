@@ -19,7 +19,8 @@ sealed interface QuickSwitcherIntent {
     /** `Mod+P`, `Mod+Shift+F` or a clicked `#tag`, which opens content search with the tag already typed. */
     data class OnOpen(
         val mode: QuickSwitcherMode,
-        val query: String = ""
+        val query: String = "",
+        val purpose: QuickSwitcherPurpose = QuickSwitcherPurpose.OPEN
     ) : QuickSwitcherIntent
 
     data class OnQueryChange(val query: String) : QuickSwitcherIntent

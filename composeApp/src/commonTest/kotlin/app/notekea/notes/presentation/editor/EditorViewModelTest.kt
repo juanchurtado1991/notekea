@@ -2,6 +2,7 @@ package app.notekea.notes.presentation.editor
 
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.text.TextRange
+import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.FakeNoteContentStore
 import app.notekea.notes.domain.FakeNoteFileOperations
 import app.notekea.notes.domain.SaveEditorModeUseCase
@@ -550,6 +551,52 @@ class EditorViewModelTest {
         assertEquals(
             expected = TASKS_TEXT,
             actual = viewModel.buffer.text.toString()
+        )
+    }
+
+    @Test
+    fun `a toolbar action formats the selection as one edit, saved like typing, and gives the text the keyboard`() =
+        runEditorTest {
+            val effects = collectEffects()
+            putOnDisk(path = TASKS, text = TASKS_TEXT)
+            open(path = TASKS)
+            val flour = TASKS_TEXT.indexOf(string = "flour")
+            viewModel.buffer.edit { selection = TextRange(start = flour, end = flour + "flour".length) }
+
+            viewModel.onIntent(intent = EditorIntent.OnFormat(action = FormatAction.Bold(placeholder = "bold text")))
+            runCurrent()
+            val selected = viewModel.buffer.selection
+            Snapshot.sendApplyNotifications()
+            advanceTimeBy(delayTimeMillis = TWO_SECONDS_MILLIS)
+            runCurrent()
+
+            assertEquals(
+                expected = Triple(
+                    "- [ ] Buy **flour**\n- [x] Soak beans\n",
+                    TextRange(start = flour + 2, end = flour + 2 + "flour".length),
+                    listOf<EditorEffect>(EditorEffect.FocusText)
+                ),
+                actual = Triple(store.texts.getValue(TASKS), selected, effects.toList())
+            )
+        }
+
+    @Test
+    fun `formatting and asking for a note to link work in edit mode only`() = runEditorTest {
+        val effects = collectEffects()
+        putOnDisk(path = TASKS, text = TASKS_TEXT)
+        open(path = TASKS)
+
+        viewModel.onIntent(intent = EditorIntent.OnNoteLinkRequest)
+        runCurrent()
+        viewModel.onIntent(intent = EditorIntent.OnReadModeToggle)
+        runCurrent()
+        viewModel.onIntent(intent = EditorIntent.OnNoteLinkRequest)
+        viewModel.onIntent(intent = EditorIntent.OnFormat(action = FormatAction.Divider))
+        runCurrent()
+
+        assertEquals(
+            expected = TASKS_TEXT to listOf<EditorEffect>(EditorEffect.RequestNoteLink),
+            actual = viewModel.buffer.text.toString() to effects.toList()
         )
     }
 

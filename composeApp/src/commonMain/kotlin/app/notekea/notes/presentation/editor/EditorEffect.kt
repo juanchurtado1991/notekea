@@ -22,6 +22,9 @@ sealed interface EditorEffect {
     /** The text of the open note should take the keyboard (in Edit mode; Read mode has no cursor). */
     data object FocusText : EditorEffect
 
+    /** Link to a note was asked for: the window opens the palette to pick it, then sends a note link to format. */
+    data object RequestNoteLink : EditorEffect
+
     /** A `#tag` was clicked in Read mode: the window searches it in all notes. */
     data class SearchTag(val tag: String) : EditorEffect
 

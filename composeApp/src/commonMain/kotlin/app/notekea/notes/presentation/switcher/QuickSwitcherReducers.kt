@@ -10,8 +10,9 @@ import app.notekea.notes.domain.RelativePath
 internal fun reduceOpened(
     state: QuickSwitcherState,
     mode: QuickSwitcherMode,
-    query: String
-): QuickSwitcherState = state.copy(isOpen = true, mode = mode, query = query, selectedIndex = 0)
+    query: String,
+    purpose: QuickSwitcherPurpose
+): QuickSwitcherState = state.copy(isOpen = true, mode = mode, query = query, selectedIndex = 0, purpose = purpose)
 
 /** Moves the selection by [step], wrapping around at both ends as `Enter` / `Shift+Enter` do in Find in note. */
 internal fun reduceSelectionMove(

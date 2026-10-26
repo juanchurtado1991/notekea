@@ -37,7 +37,7 @@ class QuickSwitcherViewModel(
             QuickSwitcherIntent.OnConfirm -> confirm()
             QuickSwitcherIntent.OnModeSwitch -> switchMode()
             is QuickSwitcherIntent.OnNotesChange -> changeNotes(notes = intent.notes)
-            is QuickSwitcherIntent.OnOpen -> openPalette(mode = intent.mode, query = intent.query)
+            is QuickSwitcherIntent.OnOpen -> openPalette(intent = intent)
             is QuickSwitcherIntent.OnQueryChange -> changeQuery(query = intent.query)
             is QuickSwitcherIntent.OnRowClick -> clickRow(path = intent.path)
             QuickSwitcherIntent.OnSelectNext -> reduce { reduceSelectionMove(state = it, step = 1) }
@@ -46,10 +46,9 @@ class QuickSwitcherViewModel(
     }
 
     private fun openPalette(
-        mode: QuickSwitcherMode,
-        query: String
+        intent: QuickSwitcherIntent.OnOpen
     ) {
-        reduce { reduceOpened(state = it, mode = mode, query = query) }
+        reduce { reduceOpened(state = it, mode = intent.mode, query = intent.query, purpose = intent.purpose) }
         search(debounce = false)
     }
 
@@ -76,8 +75,13 @@ class QuickSwitcherViewModel(
     private fun open(
         row: QuickSwitcherRow
     ) {
+        val purpose = state.value.purpose
         close()
-        emit(effect = QuickSwitcherEffect.OpenNote(path = row.path))
+        val effect = when (purpose) {
+            QuickSwitcherPurpose.OPEN -> QuickSwitcherEffect.OpenNote(path = row.path)
+            QuickSwitcherPurpose.LINK -> QuickSwitcherEffect.LinkNote(path = row.path)
+        }
+        emit(effect = effect)
     }
 
     private fun changeQuery(
@@ -89,6 +93,8 @@ class QuickSwitcherViewModel(
     }
 
     private fun switchMode() {
+        // Linking picks a note by name: there is no content search to switch to.
+        if (state.value.purpose == QuickSwitcherPurpose.LINK) return
         val next = if (state.value.mode ==
             QuickSwitcherMode.NOTES
         ) {

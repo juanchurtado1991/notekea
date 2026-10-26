@@ -204,6 +204,25 @@ class QuickSwitcherViewModelTest {
     }
 
     @Test
+    fun `a note chosen to link is linked instead of opened, and linking stays on names`() = runSwitcherTest {
+        val effects = collectEffects()
+        send(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES, query = "cafe", purpose = LINK))
+        send(QuickSwitcherIntent.OnModeSwitch)
+        val mode = viewModel.state.value.mode
+        send(QuickSwitcherIntent.OnConfirm)
+        send(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES))
+
+        assertEquals(
+            expected = Triple(
+                QuickSwitcherMode.NOTES,
+                listOf(QuickSwitcherEffect.LinkNote(path = RelativePath(value = CAFE))),
+                QuickSwitcherPurpose.OPEN
+            ),
+            actual = Triple(mode, effects.toList(), viewModel.state.value.purpose)
+        )
+    }
+
+    @Test
     fun `notes that change while the palette is open update the results`() = runSwitcherTest {
         send(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES, query = "ideas"))
         val before = names()
@@ -253,6 +272,7 @@ class QuickSwitcherViewModelTest {
     }
 
     companion object {
+        private val LINK = QuickSwitcherPurpose.LINK
         private const val AFTER_DEBOUNCE_MILLIS = 151L
         private const val AREPAS = "Recipes/Arepas.md"
         private const val CAFE = "Recipes/Café con leche.md"

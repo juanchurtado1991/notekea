@@ -96,6 +96,7 @@
     <string name="switcher_no_match_notes">Try fewer letters, or press Tab to search inside notes.</string>
     <string name="switcher_no_match_title">No notes match</string>
     <string name="switcher_placeholder_content">Search the text of your notes</string>
+    <string name="switcher_placeholder_link">Choose a note to link</string>
     <string name="switcher_placeholder_notes">Find a note by name or alias</string>
     <string name="switcher_searching">Searching</string>
     <string name="tree_cancel">Cancel</string>
