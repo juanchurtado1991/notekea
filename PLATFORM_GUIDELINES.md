@@ -43,6 +43,7 @@ primary modifier and resolved per platform.
 | Find in note | `Cmd+F` | `Ctrl+F` |
 | Quick switcher (find a note by name) | `Cmd+P` | `Ctrl+P` |
 | Search all notes | `Cmd+Shift+F` | `Ctrl+Shift+F` |
+| Toggle the task on the cursor line | `Cmd+Enter` | `Ctrl+Enter` |
 | Settings | `Cmd+,` | `Ctrl+,` |
 | Close tab | `Cmd+W` | `Ctrl+W` |
 | Close window | `Cmd+Shift+W` | `Ctrl+Shift+W` |

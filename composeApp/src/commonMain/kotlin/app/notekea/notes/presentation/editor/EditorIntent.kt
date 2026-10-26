@@ -19,6 +19,12 @@ sealed interface EditorIntent {
      */
     data class OnFocusRequest(val path: RelativePath? = null) : EditorIntent
 
+    /** A task's checkbox was clicked in Edit mode: the task at [stateIndex] of the text is checked or unchecked. */
+    data class OnTaskToggle(val stateIndex: Int) : EditorIntent
+
+    /** `Mod+Enter`: the task on the cursor's line, if any, is checked or unchecked (Edit mode only). */
+    data object OnTaskToggleShortcut : EditorIntent
+
     /** A `#tag` clicked in Read mode: it is searched in all notes. */
     data class OnTagClick(val tag: String) : EditorIntent
 

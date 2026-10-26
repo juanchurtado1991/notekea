@@ -3,25 +3,26 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.text.TextRange
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
+import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.NoteDiskChange
 import app.notekea.notes.domain.NoteDocument
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.SaveEditorModeUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
-import androidx.compose.ui.text.TextRange
+import app.notekea.notes.domain.TaskFinder
 import co.touchlab.kermit.Logger
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * The note editor (`ROADMAP.md` 1.5). [buffer] holds the body being edited; the text field edits it directly and this
@@ -48,6 +49,7 @@ class EditorViewModel(
 
     private val logger = Logger.withTag(tag = LOG_TAG)
     private val noteSearch = NoteSearch()
+    private val taskFinder = TaskFinder()
     private val saveLock = Mutex()
     private var autosaveJob: Job? = null
     private var watchJob: Job? = null
@@ -80,6 +82,8 @@ class EditorViewModel(
             is EditorIntent.OnLinkClick -> openLink(link = intent.link)
             is EditorIntent.OnTagClick -> emit(effect = EditorEffect.SearchTag(tag = intent.tag))
             is EditorIntent.OnFocusRequest -> requestFocus(path = intent.path)
+            is EditorIntent.OnTaskToggle -> toggleTask(stateIndex = intent.stateIndex)
+            EditorIntent.OnTaskToggleShortcut -> toggleTaskAtCursor()
             EditorIntent.OnFindClose -> closeFind()
             EditorIntent.OnFindNext -> moveToMatch(step = 1)
             EditorIntent.OnFindOpen -> openFind()
@@ -176,6 +180,25 @@ class EditorViewModel(
                 watch(path = path)
             }
         }
+    }
+
+    /**
+     * Checks or unchecks the task whose state is at [stateIndex], by editing the text like a keystroke would, so it is
+     * saved as any edit and can be undone. Nothing happens when that character is no longer a task's state.
+     */
+    private fun toggleTask(
+        stateIndex: Int
+    ) {
+        val state = buffer.text.getOrNull(index = stateIndex) ?: return
+        if (state !in TASK_STATES) return
+        val toggled = if (state == ' ') DONE_STATE else OPEN_STATE
+        buffer.edit { replace(start = stateIndex, end = stateIndex + 1, text = toggled) }
+    }
+
+    private fun toggleTaskAtCursor() {
+        if (state.value.isReading || state.value.notePath == null) return
+        val text = buffer.text.toString()
+        taskFinder.taskAt(text = text, offset = buffer.selection.start)?.let { toggleTask(stateIndex = it.stateIndex) }
     }
 
     /** The text of [path] (the open note when null) takes the keyboard now if it is open, or once it opens. */
@@ -425,6 +448,9 @@ class EditorViewModel(
     }
 
     companion object {
+        private const val DONE_STATE = "x"
+        private const val OPEN_STATE = " "
+        private const val TASK_STATES = " xX"
         val AUTOSAVE_DELAY = 1.seconds
         private const val LOG_TAG = "EditorViewModel"
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the note editor"

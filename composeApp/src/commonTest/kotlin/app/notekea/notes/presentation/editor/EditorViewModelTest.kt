@@ -505,6 +505,55 @@ class EditorViewModelTest {
     }
 
     @Test
+    fun `clicking a task checks it in the text, which is saved like any edit`() = runEditorTest {
+        putOnDisk(path = TASKS, text = TASKS_TEXT)
+        open(path = TASKS)
+        val flour = viewModel.buffer.text.indexOf(string = "[ ] Buy flour") + 1
+
+        viewModel.onIntent(intent = EditorIntent.OnTaskToggle(stateIndex = flour))
+        Snapshot.sendApplyNotifications()
+        advanceTimeBy(delayTimeMillis = TWO_SECONDS_MILLIS)
+        runCurrent()
+
+        assertEquals(
+            expected = "- [x] Buy flour\n- [x] Soak beans\n",
+            actual = store.texts.getValue(TASKS)
+        )
+    }
+
+    @Test
+    fun `mod+enter toggles the task on the cursor line in edit mode only`() = runEditorTest {
+        putOnDisk(path = TASKS, text = TASKS_TEXT)
+        open(path = TASKS)
+        viewModel.buffer.edit { selection = TextRange(index = length - 2) }
+
+        viewModel.onIntent(intent = EditorIntent.OnTaskToggleShortcut)
+        val inEditMode = viewModel.buffer.text.toString()
+        viewModel.onIntent(intent = EditorIntent.OnReadModeToggle)
+        runCurrent()
+        viewModel.onIntent(intent = EditorIntent.OnTaskToggleShortcut)
+
+        assertEquals(
+            expected = listOf("- [ ] Buy flour\n- [ ] Soak beans\n", "- [ ] Buy flour\n- [ ] Soak beans\n"),
+            actual = listOf(inEditMode, viewModel.buffer.text.toString())
+        )
+    }
+
+    @Test
+    fun `a click on what is no longer a task changes nothing`() = runEditorTest {
+        putOnDisk(path = TASKS, text = TASKS_TEXT)
+        open(path = TASKS)
+
+        viewModel.onIntent(intent = EditorIntent.OnTaskToggle(stateIndex = 0))
+        viewModel.onIntent(intent = EditorIntent.OnTaskToggle(stateIndex = TASKS_TEXT.length + 5))
+
+        assertEquals(
+            expected = TASKS_TEXT,
+            actual = viewModel.buffer.text.toString()
+        )
+    }
+
+    @Test
     fun `a tag clicked in read mode asks to search it`() = runEditorTest {
         val effects = collectEffects()
         open(path = AREPAS)
@@ -644,11 +693,13 @@ class EditorViewModelTest {
     }
 
     companion object {
+        private const val TASKS_TEXT = "- [ ] Buy flour\n- [x] Soak beans\n"
         private const val AREPAS_TEXT = "---\ntags: [recipe]\n---\n# Arepas\n"
         private const val HALF_SECOND_MILLIS = 500L
         private const val SECOND_MILLIS = 1_000L
         private const val TWO_SECONDS_MILLIS = 2_000L
         private val AREPAS = RelativePath(value = "Recipes/Arepas.md")
+        private val TASKS = RelativePath(value = "Tasks.md")
         private val WELCOME = RelativePath(value = "Welcome.md")
     }
 }
