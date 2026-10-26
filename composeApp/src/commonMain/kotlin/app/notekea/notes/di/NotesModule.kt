@@ -9,27 +9,33 @@ import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
+import app.notekea.notes.domain.EditorPreferencesStore
 import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.FollowLinkUseCase
+import app.notekea.notes.domain.FuzzyMatcher
+import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.GetTreePreferencesUseCase
 import app.notekea.notes.domain.LinkFinder
-import app.notekea.notes.domain.NoteMetadataCache
 import app.notekea.notes.domain.NaturalNameComparator
-import app.notekea.notes.domain.ObserveVaultTreeUseCase
+import app.notekea.notes.domain.NoteMetadataCache
+import app.notekea.notes.domain.NoteTextCache
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
+import app.notekea.notes.domain.ObserveVaultTreeUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
-import app.notekea.notes.domain.SaveNoteUseCase
-import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.RevealEntryUseCase
-import app.notekea.notes.domain.SaveTreePreferencesUseCase
-import app.notekea.notes.domain.EditorPreferencesStore
-import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.SaveEditorModeUseCase
+import app.notekea.notes.domain.SaveNoteUseCase
+import app.notekea.notes.domain.SaveTreePreferencesUseCase
+import app.notekea.notes.domain.SearchNoteContentUseCase
+import app.notekea.notes.domain.SearchNotesUseCase
+import app.notekea.notes.domain.TextFolder
 import app.notekea.notes.domain.TreePreferencesStore
+import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import app.notekea.notes.presentation.editor.EditorViewModel
+import app.notekea.notes.presentation.switcher.QuickSwitcherViewModel
 import app.notekea.notes.presentation.tree.VaultTreeViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
@@ -52,10 +58,12 @@ val notesModule = module {
     factoryOf(::CreateNoteUseCase)
     factoryOf(::DeleteEntryUseCase)
     factoryOf(::FlattenTreeUseCase)
+    factoryOf(::FuzzyMatcher)
     factoryOf(::FollowLinkUseCase)
     factoryOf(::GetTreePreferencesUseCase)
     factoryOf(::GhostFrontmatterParser)
     factoryOf(::NaturalNameComparator)
+    factoryOf(::NoteTextCache)
     factoryOf(::ObserveVaultTreeUseCase)
     factoryOf(::ObserveNoteOnDiskUseCase)
     factoryOf(::OpenNoteUseCase)
@@ -66,6 +74,9 @@ val notesModule = module {
     factoryOf(::RenameEntryUseCase)
     factoryOf(::RevealEntryUseCase)
     factoryOf(::SaveTreePreferencesUseCase)
+    factoryOf(::SearchNoteContentUseCase)
+    factoryOf(::SearchNotesUseCase)
+    factoryOf(::TextFolder)
     viewModel { parameters ->
         VaultTreeViewModel(
             vaultPath = parameters.get(),
@@ -92,6 +103,14 @@ val notesModule = module {
             renameAndUpdateLinks = get(),
             getEditorMode = get(),
             saveEditorMode = get()
+        )
+    }
+    viewModel { parameters ->
+        QuickSwitcherViewModel(
+            vaultPath = parameters.get(),
+            searchNotes = get(),
+            searchNoteContent = get(),
+            dispatchers = get()
         )
     }
 }
