@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.RelativePath
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.MarkdownSyntax
@@ -12,8 +13,9 @@ import app.notekea.notes.domain.percentDecoded
  * Links in Read mode. The renderer knows Markdown links but not Obsidian's `[[wiki links]]` or `#tags`, so [prepare]
  * rewrites each wiki link (outside code) as a Markdown link to `notekea:<target>`, shown with its alias or as written,
  * and each `#tag` (outside code, links and web addresses) as a link to `notekea-tag:<tag>` that searches it
- * (`ROADMAP.md` 1.6); an embed (`![[…]]`) becomes a plain link until images render (`ROADMAP.md` 1.8). [classify]
- * turns a clicked link back into a note to open, a tag to search or an external address.
+ * (`ROADMAP.md` 1.6); an embedded note (`![[…]]`) becomes a plain link, and a file embedded in a paragraph or a table
+ * cell an image or a link that opens it (`ROADMAP.md` 1.8). [classify] turns a clicked link back into a note to open,
+ * a tag to search, a file or an external address.
  */
 class ReadModeLinks {
     fun prepare(
@@ -43,9 +45,7 @@ class ReadModeLinks {
             prefix = TAG_SCHEME
         ) -> ReadLink.Tag(name = percentDecoded(target = uri.removePrefix(prefix = TAG_SCHEME)))
 
-        uri.startsWith(prefix = FILE_SCHEME) -> ReadLink.File(
-            target = percentDecoded(target = uri.removePrefix(prefix = FILE_SCHEME))
-        )
+        uri.startsWith(prefix = FILE_SCHEME) -> ReadLink.File(target = fileOf(address = uri).first)
 
         uri.startsWith(prefix = SCHEME) -> ReadLink.Note(
             target = percentDecoded(target = uri.removePrefix(prefix = SCHEME)),
@@ -70,13 +70,13 @@ class ReadModeLinks {
         val code = INLINE_CODE.findAll(input = withTags).map { it.range }.toList()
         return WIKI_LINK.replace(input = withTags) { match ->
             val inCode = code.any { it.first <= match.range.first && match.range.last <= it.last }
+            val inner = match.groupValues[1].replace(
+                oldValue = ESCAPED_SEPARATOR,
+                newValue = MarkdownSyntax.LINK_LABEL_SEPARATOR
+            )
             when {
                 inCode -> match.value
-
-                match.value.startsWith(prefix = EMBED_MARK) && isFile(inner = match.groupValues[1]) -> fileLink(
-                    inner = match.groupValues[1]
-                )
-
+                match.value.startsWith(prefix = EMBED_MARK) && isFile(inner = inner) -> fileEmbed(inner = inner)
                 else -> markdownLink(inner = match.groupValues[1]) ?: match.value
             }
         }
@@ -117,17 +117,34 @@ class ReadModeLinks {
         return link(text = escaped, address = SCHEME + encoded(text = target))
     }
 
-    /** `menu.pdf|The menu` → `[The menu](notekea-file:menu.pdf)`: a file embedded in a paragraph opens when clicked. */
-    private fun fileLink(
+    /**
+     * A file embedded in a paragraph or a table cell: an image becomes a Markdown image (`photo.png|80` →
+     * `![photo.png](notekea-file:photo.png?width=80)`), drawn by Read mode at that width; any other file a link that
+     * opens it (`menu.pdf|The menu` → `[The menu](notekea-file:menu.pdf)`).
+     */
+    private fun fileEmbed(
         inner: String
     ): String {
         val target = inner.substringBefore(delimiter = MarkdownSyntax.LINK_LABEL_SEPARATOR_CHAR).trim()
         val option = inner.substringAfter(
             delimiter = MarkdownSyntax.LINK_LABEL_SEPARATOR_CHAR,
             missingDelimiterValue = target
-        )
-        val label = option.takeUnless { WIDTH.matches(input = it.trim()) }?.trim() ?: target
-        return link(text = label, address = FILE_SCHEME + encoded(text = target))
+        ).trim()
+        val width = option.takeIf { WIDTH.matches(input = it) }?.substringBefore(delimiter = WIDTH_HEIGHT_SEPARATOR)
+        val label = if (width != null || option == target) target else option
+        val address = FILE_SCHEME + encoded(text = target)
+        if (AttachmentKind.of(name = target) != AttachmentKind.IMAGE) return link(text = label, address = address)
+        return EMBED_MARK + link(text = label, address = address + (width?.let { WIDTH_QUERY + it }.orEmpty()))
+    }
+
+    /** The file and the width a file address of [prepare] names, from `notekea-file:photo.png?width=80`. */
+    fun fileOf(
+        address: String
+    ): Pair<String, Int?> {
+        val written = address.removePrefix(prefix = FILE_SCHEME)
+        val target = percentDecoded(target = written.substringBefore(delimiter = WIDTH_QUERY))
+        val width = written.substringAfter(delimiter = WIDTH_QUERY, missingDelimiterValue = StringPatterns.EMPTY)
+        return target to width.toIntOrNull()
     }
 
     /** Whether an embed's [inner] text names a file, not a note: its name has an extension other than `.md`. */
@@ -173,6 +190,9 @@ class ReadModeLinks {
         const val TAG_SCHEME = "notekea-tag:"
         private const val BYTE_MASK = 0xFF
         private const val EMBED_MARK = "!"
+        private const val ESCAPED_SEPARATOR = "\\|"
+        private const val WIDTH_HEIGHT_SEPARATOR = "x"
+        private const val WIDTH_QUERY = "?width="
         private val FILE_EXTENSION = Regex(pattern = "\\.[A-Za-z0-9]{1,8}$")
         private val WIDTH = Regex(pattern = "\\d{1,5}(?:x\\d{1,5})?")
         private const val ESCAPED_LINK_TEXT_CLOSE = "\\]"

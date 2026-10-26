@@ -1,5 +1,12 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.percentDecoded
+import app.notekea.core.presentation.components.attachmentImageSize
+import app.notekea.core.presentation.components.ScaledBitmapPainter
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -27,6 +34,12 @@ fun ReadingView(
     val readLinks = remember { ReadModeLinks() }
     val segments = remember(text, attachments) { ReadingSegment.of(text = text, attachments = attachments) }
     val systemUriHandler = LocalUriHandler.current
+    val density = LocalDensity.current
+    val imagePainter = remember(attachments, density) {
+        { address: String ->
+            inlineImage(address = address, attachments = attachments, readLinks = readLinks, density = density)
+        }
+    }
     val onLinkClick = { uri: String ->
         when (val link = readLinks.classify(uri = uri)) {
             is ReadLink.Note -> onIntent(EditorIntent.OnLinkClick(link = link))
@@ -44,13 +57,46 @@ fun ReadingView(
             when (segment) {
                 is ReadingSegment.Markdown -> NotekeaMarkdown(
                     content = remember(segment.text) { readLinks.prepare(body = segment.text) },
-                    onLinkClick = onLinkClick
+                    onLinkClick = onLinkClick,
+                    imagePainter = imagePainter
                 )
 
                 is ReadingSegment.Attachment -> AttachmentBlock(view = segment.view, onIntent = onIntent)
             }
         }
     }
+}
+
+/**
+ * An image inside a paragraph or a table cell, drawn from the picture already read for its embed, at the width the
+ * note asks for or its own (one image pixel per dp), never wider than [MAX_INLINE_WIDTH_DP]; null when it is not ready.
+ */
+private fun inlineImage(
+    address: String,
+    attachments: List<AttachmentView>,
+    readLinks: ReadModeLinks,
+    density: Density
+): Painter? {
+    val (target, width) = if (address.startsWith(prefix = ReadModeLinks.FILE_SCHEME)) {
+        readLinks.fileOf(address = address)
+    } else {
+        percentDecoded(target = address) to null
+    }
+    val image = attachments.firstOrNull { it.embed.target == target && it.isPicture }?.image ?: return null
+    val size = attachmentImageSize(
+        imageWidth = image.width,
+        imageHeight = image.height,
+        maxWidth = MAX_INLINE_WIDTH_DP,
+        requestedWidth = width?.toFloat()
+    )
+    return ScaledBitmapPainter(
+        bitmap = image,
+        size = Size(
+            width = size.width * density.density,
+            height =
+            size.height * density.density
+        )
+    )
 }
 
 /** A file link in a paragraph opens its file, or offers to locate it when it is missing. */
@@ -80,4 +126,5 @@ private fun ReadingViewPreview() {
     }
 }
 
+private const val MAX_INLINE_WIDTH_DP = 600f
 private const val PREVIEW_TEXT = "# Arepas\n\nMix the corn flour.\n"

@@ -50,6 +50,9 @@ object MarkdownSyntax {
     const val CALLOUT_OPEN = "[!"
     const val CALLOUT_CLOSE = "]"
     const val CALLOUT_FOLDED = "-"
+
+    /** What starts a table row and separates its cells. */
+    const val TABLE_COLUMN = "|"
     const val TABLE_ROW_START = "| "
     const val TABLE_CELL_SEPARATOR = " | "
     const val TABLE_ROW_END = " |"

@@ -256,6 +256,8 @@ Obsidian-flavored Markdown blocks that most vaults use.
   width. In Preview they take their place; in Edit the link stays as written and the image shows under its line, so
   what was pasted is seen without switching modes. Links resolve as in Obsidian: a path, or a file name found in the
   note's folder, the attachments folder or anywhere in the vault.
+- **Images in tables and paragraphs:** an embed inside a table cell (its pipe escaped, `![[image.png\|80]]`) or a
+  sentence shows inline in Preview at its width; inserting a file with the cursor on a table row puts it in the cell.
 - **Paste or drop an image** (`Mod+V`, drag and drop) saves it into the attachments folder (`Pasted image
   <date and time>.png` for a pasted one) and inserts the link at the cursor; a dropped file of any kind is copied the
   same way. **Image or file** in the toolbar does it with the system's file picker. Attachments folder: `.obsidian/

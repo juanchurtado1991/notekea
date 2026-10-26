@@ -6,7 +6,7 @@ import app.notekea.core.domain.markdown.MarkdownSyntax
 /**
  * The embedded files of a note's text (`ROADMAP.md` 1.8), as Obsidian reads them: `![[file]]` with an optional
  * `|300` width or `|caption`, and `![alt](path)` (a path in `<…>` or percent-encoded, an optional `|300` after the
- * alt). Embeds of notes (`![[Other note]]`, a name without an extension or ending in `.md`) are links, not files, and
+ * alt; `\|` inside a table). Embeds of notes (`![[Other note]]`, a name without an extension or ending in `.md`) are links, not files, and
  * are left out; so is anything in code.
  */
 class EmbedFinder {
@@ -48,7 +48,8 @@ class EmbedFinder {
         val option = match.groupValues[2].takeIf { match.groups[2] != null }
         return Embed(
             range = match.range.first + offset..match.range.last + offset,
-            target = match.groupValues[1].trim(),
+            // In a table the `|` before a width is escaped (`![[photo.png\|80]]`), so the target ends with the `\`.
+            target = match.groupValues[1].removeSuffix(suffix = TABLE_ESCAPE).trim(),
             kind = EmbedKind.WIKI,
             isOwnLine = line.trim() == match.value,
             label = option?.takeIf { WIDTH.matchEntire(input = it) == null },
@@ -92,6 +93,7 @@ class EmbedFinder {
     companion object {
         private const val ANGLE_CLOSE = ">"
         private const val ANGLE_OPEN = "<"
+        private const val TABLE_ESCAPE = "\\"
         private val EXTENSION = Regex(pattern = "\\.[A-Za-z0-9]{1,8}$")
         private val INLINE_CODE = Regex(pattern = "(`+).+?\\1")
         private val MARKDOWN_EMBED = Regex(pattern = "!\\[([^\\]\\n]*)]\\(([^)\\n]+)\\)")

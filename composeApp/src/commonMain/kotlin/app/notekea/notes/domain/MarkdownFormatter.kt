@@ -24,6 +24,14 @@ class MarkdownFormatter {
         lineStyleOf(action = action)?.let { (style, placeholder) ->
             return styleLines(text = text, start = start, end = end, style = style, placeholder = placeholder)
         }
+        if (action is FormatAction.Embed && isTableRow(text = text, offset = start)) {
+            // In a table the file goes into the cell, its `|` escaped so the row keeps its columns.
+            val markdown = action.markdown.replace(
+                oldValue = MarkdownSyntax.LINK_LABEL_SEPARATOR,
+                newValue = ESCAPED_SEPARATOR
+            )
+            return TextEdit(start, end, markdown, start + markdown.length, start + markdown.length)
+        }
         blockOf(action = action)?.let { build ->
             val edit = block(text = text, start = start, end = end, build = build)
             // After an embedded file, typing goes on below it.
@@ -31,6 +39,19 @@ class MarkdownFormatter {
             return if (action is FormatAction.Embed) edit.copy(selectionStart = after, selectionEnd = after) else edit
         }
         return inline(text = text, start = start, end = end, action = action)
+    }
+
+    /** Whether the line holding [offset] is a row of a table (`| a | b |`). */
+    private fun isTableRow(
+        text: String,
+        offset: Int
+    ): Boolean {
+        val lineStart = text.lastIndexOf(char = NEW_LINE_CHAR, startIndex = offset - 1) + 1
+        val lineEnd = text.indexOf(char = NEW_LINE_CHAR, startIndex = offset).takeIf { it >= 0 } ?: text.length
+        return text.substring(
+            startIndex = lineStart,
+            endIndex = lineEnd
+        ).trimStart().startsWith(prefix = MarkdownSyntax.TABLE_COLUMN)
     }
 
     /** The line style a line action applies, with its placeholder; null for other actions. */
@@ -339,6 +360,7 @@ class MarkdownFormatter {
     )
 
     companion object {
+        private const val ESCAPED_SEPARATOR = "\\|"
         private const val NOT_INLINE_MESSAGE = "Not an inline action: "
     }
 }
