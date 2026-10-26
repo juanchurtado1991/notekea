@@ -1,6 +1,8 @@
 package app.notekea.notes.di
 
+import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.platform.domain.SystemEnvironment
 import app.notekea.notes.data.DirectoryWatcherFileWatcher
 import app.notekea.notes.data.JvmSystemTrash
 import app.notekea.notes.data.OkioNoteContentStore
@@ -15,6 +17,8 @@ import app.notekea.notes.data.ProcessFileOpener
 import app.notekea.notes.data.ProcessFileRevealer
 import app.notekea.notes.data.SystemFirstTrash
 import app.notekea.notes.data.VaultFolderTrash
+import app.notekea.notes.data.WaylandClipboardReader
+import app.notekea.notes.data.readCommand
 import app.notekea.notes.data.runCommand
 import app.notekea.notes.domain.AttachmentPicker
 import app.notekea.notes.domain.ClipboardReader
@@ -51,7 +55,15 @@ val jvmNotesModule = module {
         )
     }
     single<AttachmentPicker> { FileKitAttachmentPicker() }
-    single<ClipboardReader> { AwtClipboardReader() }
+    single<ClipboardReader> {
+        val isWayland = get<PlatformConventions>().operatingSystem == OperatingSystem.LINUX &&
+            get<SystemEnvironment>().environmentVariable(name = WaylandClipboardReader.WAYLAND_DISPLAY) != null
+        if (isWayland) {
+            WaylandClipboardReader(primary = AwtClipboardReader(), readCommand = ::readCommand)
+        } else {
+            AwtClipboardReader()
+        }
+    }
     single<FileWatcher> { DirectoryWatcherFileWatcher(dispatchers = get()) }
     single<NoteContentStore> { OkioNoteContentStore(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
     single<NoteFileOperations> { OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }

@@ -1,6 +1,7 @@
 package app.notekea.notes.data
 
 import app.notekea.notes.domain.ClipboardReader
+import java.awt.HeadlessException
 import java.awt.Image
 import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
@@ -40,6 +41,8 @@ class AwtClipboardReader : ClipboardReader {
         val clipboard = Toolkit.getDefaultToolkit().systemClipboard
         if (clipboard.isDataFlavorAvailable(flavor)) clipboard.getData(flavor) else null
     } catch (_: IllegalStateException) {
+        null
+    } catch (_: HeadlessException) {
         null
     } catch (_: UnsupportedFlavorException) {
         null

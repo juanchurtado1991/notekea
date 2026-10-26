@@ -59,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   them into the attachments folder (Obsidian's `attachmentFolderPath`, otherwise `attachments/`) and embeds them.
   Images also show inside table cells (`![[image.png\|80]]`) and sentences in Preview, and a file inserted on a
   table row goes into its cell.
+  On Linux Wayland desktops a pasted image is read with `wl-paste` (wl-clipboard), since Java only sees text there.
 - Design system: `NotekeaAttachmentImage`, `NotekeaFileChip` and `NotekeaMissingFile`.
 - Formatting toolbar (ROADMAP 1.17): under the note's title, Edit | Preview tabs (Mod+E; Preview is Read mode) and
   buttons with plain-language tooltips for Heading (Large, Medium, Small), Bold (Mod+B), Italic (Mod+I), Link to a
