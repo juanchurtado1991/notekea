@@ -90,6 +90,20 @@ class EditorAttachmentsTest {
         }
 
     @Test
+    fun `an image the clipboard cannot give is explained, and nothing is pasted`() = runAttachmentsTest {
+        open(text = "Intro")
+        fixture.clipboard.text = "stale text"
+        fixture.clipboard.imageError = NotesError.ClipboardToolMissing(tool = "wl-clipboard")
+
+        send(intent = EditorIntent.OnPaste)
+
+        assertEquals(
+            expected = "Intro" to NotesError.ClipboardToolMissing(tool = "wl-clipboard"),
+            actual = viewModel.buffer.text.toString() to viewModel.state.value.attachmentError
+        )
+    }
+
+    @Test
     fun `dropped and picked files are copied in and embedded, a cancelled pick changes nothing`() = runAttachmentsTest {
         open(text = "")
         fixture.attachmentStore.outside[OUTSIDE] = PDF

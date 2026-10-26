@@ -14,6 +14,8 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.notes.domain.NotesError
 import app.notekea.resources.Res
 import app.notekea.resources.error_notes_changed_on_disk
+import app.notekea.resources.error_notes_clipboard_image_unreadable
+import app.notekea.resources.error_notes_clipboard_tool_missing
 import app.notekea.resources.error_notes_entry_missing
 import app.notekea.resources.error_notes_hidden_name
 import app.notekea.resources.error_notes_invalid_name
@@ -27,6 +29,7 @@ import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_ENTRY = "Recipes/Arepas.md"
 private const val PREVIEW_NAME = "Arepas.md"
+private const val PREVIEW_TOOL = "wl-clipboard"
 private const val PREVIEW_VAULT = "/home/ana/Notes"
 
 /**
@@ -61,6 +64,10 @@ internal fun notesErrorMessage(
 
         is NotesError.OpenFailed -> stringResource(Res.string.error_notes_open_failed, error.path)
 
+        NotesError.ClipboardImageUnreadable -> stringResource(Res.string.error_notes_clipboard_image_unreadable)
+
+        is NotesError.ClipboardToolMissing -> stringResource(Res.string.error_notes_clipboard_tool_missing, error.tool)
+
         is NotesError.VaultMissing -> stringResource(Res.string.error_notes_vault_missing, shownVault(error.path))
     }
 }
@@ -78,6 +85,8 @@ private fun notesErrorMessagePreview() {
         NotesError.PermissionDenied(path = PREVIEW_VAULT),
         NotesError.RevealFailed(path = PREVIEW_ENTRY),
         NotesError.OpenFailed(path = PREVIEW_ENTRY),
+        NotesError.ClipboardImageUnreadable,
+        NotesError.ClipboardToolMissing(tool = PREVIEW_TOOL),
         NotesError.VaultMissing(path = PREVIEW_VAULT)
     )
     NotekeaPreviewThemes {

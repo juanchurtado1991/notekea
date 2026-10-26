@@ -88,6 +88,10 @@ Never reuse a shortcut the operating system reserves (e.g. `Cmd+H` / `Cmd+M` on 
 - Notifications through the tray API, only for events the user asked for (e.g. sync conflicts).
 - Application data in the platform's standard location (macOS `~/Library/Application Support/Notekea`,
   Windows `%APPDATA%\Notekea`, Linux `$XDG_DATA_HOME/notekea`), never next to the executable.
+- Pasting images: Java's clipboard works on Windows, macOS and Linux on X11. On Linux Wayland desktops (GNOME, KDE,
+  COSMIC) Java reads the clipboard through XWayland, which does not pass images on, so they are read with `wl-paste`
+  first and Java waits one second at most; without wl-clipboard (GNOME does not install it) the editor says to
+  install it.
 
 ## Implementation
 
