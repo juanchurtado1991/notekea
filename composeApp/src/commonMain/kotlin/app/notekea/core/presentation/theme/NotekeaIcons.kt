@@ -16,13 +16,16 @@ import com.composables.icons.lucide.ClockArrowDown
 import com.composables.icons.lucide.Ellipsis
 import com.composables.icons.lucide.FilePlus
 import com.composables.icons.lucide.FileText
+import com.composables.icons.lucide.FileX
 import com.composables.icons.lucide.Flame
 import com.composables.icons.lucide.Folder
 import com.composables.icons.lucide.FolderOpen
 import com.composables.icons.lucide.FolderPlus
+import com.composables.icons.lucide.FolderSearch
 import com.composables.icons.lucide.Globe
 import com.composables.icons.lucide.Hash
 import com.composables.icons.lucide.Heading
+import com.composables.icons.lucide.ImagePlus
 import com.composables.icons.lucide.Info
 import com.composables.icons.lucide.Italic
 import com.composables.icons.lucide.Link
@@ -33,6 +36,7 @@ import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.MessageSquareQuote
 import com.composables.icons.lucide.PanelLeftClose
 import com.composables.icons.lucide.PanelLeftOpen
+import com.composables.icons.lucide.Paperclip
 import com.composables.icons.lucide.Pencil
 import com.composables.icons.lucide.Plus
 import com.composables.icons.lucide.Quote
@@ -52,6 +56,8 @@ import com.composables.icons.lucide.Zap
  * glyph can change here alone. They come from Lucide, the set Obsidian users already know (`LIBRARIES.md` §2).
  */
 object NotekeaIcons {
+    val AttachFile: ImageVector get() = Lucide.ImagePlus
+    val Attachment: ImageVector get() = Lucide.Paperclip
     val Bold: ImageVector get() = Lucide.Bold
     val BulletList: ImageVector get() = Lucide.List
     val Callout: ImageVector get() = Lucide.MessageSquareQuote
@@ -85,6 +91,8 @@ object NotekeaIcons {
     val Heading: ImageVector get() = Lucide.Heading
     val HideSidebar: ImageVector get() = Lucide.PanelLeftClose
     val Italic: ImageVector get() = Lucide.Italic
+    val Locate: ImageVector get() = Lucide.FolderSearch
+    val MissingFile: ImageVector get() = Lucide.FileX
     val More: ImageVector get() = Lucide.Ellipsis
     val NewFolder: ImageVector get() = Lucide.FolderPlus
     val NewNote: ImageVector get() = Lucide.FilePlus

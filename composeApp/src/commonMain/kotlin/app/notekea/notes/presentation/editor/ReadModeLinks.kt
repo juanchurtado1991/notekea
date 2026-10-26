@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.RelativePath
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
@@ -42,6 +43,10 @@ class ReadModeLinks {
             prefix = TAG_SCHEME
         ) -> ReadLink.Tag(name = percentDecoded(target = uri.removePrefix(prefix = TAG_SCHEME)))
 
+        uri.startsWith(prefix = FILE_SCHEME) -> ReadLink.File(
+            target = percentDecoded(target = uri.removePrefix(prefix = FILE_SCHEME))
+        )
+
         uri.startsWith(prefix = SCHEME) -> ReadLink.Note(
             target = percentDecoded(target = uri.removePrefix(prefix = SCHEME)),
             kind = LinkKind.WIKI
@@ -65,7 +70,15 @@ class ReadModeLinks {
         val code = INLINE_CODE.findAll(input = withTags).map { it.range }.toList()
         return WIKI_LINK.replace(input = withTags) { match ->
             val inCode = code.any { it.first <= match.range.first && match.range.last <= it.last }
-            if (inCode) match.value else markdownLink(inner = match.groupValues[1]) ?: match.value
+            when {
+                inCode -> match.value
+
+                match.value.startsWith(prefix = EMBED_MARK) && isFile(inner = match.groupValues[1]) -> fileLink(
+                    inner = match.groupValues[1]
+                )
+
+                else -> markdownLink(inner = match.groupValues[1]) ?: match.value
+            }
         }
     }
 
@@ -104,6 +117,30 @@ class ReadModeLinks {
         return link(text = escaped, address = SCHEME + encoded(text = target))
     }
 
+    /** `menu.pdf|The menu` → `[The menu](notekea-file:menu.pdf)`: a file embedded in a paragraph opens when clicked. */
+    private fun fileLink(
+        inner: String
+    ): String {
+        val target = inner.substringBefore(delimiter = MarkdownSyntax.LINK_LABEL_SEPARATOR_CHAR).trim()
+        val option = inner.substringAfter(
+            delimiter = MarkdownSyntax.LINK_LABEL_SEPARATOR_CHAR,
+            missingDelimiterValue = target
+        )
+        val label = option.takeUnless { WIDTH.matches(input = it.trim()) }?.trim() ?: target
+        return link(text = label, address = FILE_SCHEME + encoded(text = target))
+    }
+
+    /** Whether an embed's [inner] text names a file, not a note: its name has an extension other than `.md`. */
+    private fun isFile(
+        inner: String
+    ): Boolean {
+        val name = inner.substringBefore(delimiter = MarkdownSyntax.LINK_LABEL_SEPARATOR_CHAR)
+            .substringBefore(delimiter = MarkdownSyntax.HEADING_ANCHOR_CHAR)
+            .substringAfterLast(delimiter = RelativePath.SEPARATOR)
+        return FILE_EXTENSION.containsMatchIn(input = name) &&
+            !name.endsWith(suffix = RelativePath.MARKDOWN_EXTENSION, ignoreCase = true)
+    }
+
     /** A Markdown link `[text](address)`. */
     private fun link(
         text: String,
@@ -129,9 +166,15 @@ class ReadModeLinks {
         /** The address scheme of a link to a note, as rewritten by [prepare]. */
         const val SCHEME = "notekea:"
 
+        /** The address scheme of a link to a file embedded in a paragraph, as rewritten by [prepare]. */
+        const val FILE_SCHEME = "notekea-file:"
+
         /** The address scheme of a link to search a tag, as rewritten by [prepare]. */
         const val TAG_SCHEME = "notekea-tag:"
         private const val BYTE_MASK = 0xFF
+        private const val EMBED_MARK = "!"
+        private val FILE_EXTENSION = Regex(pattern = "\\.[A-Za-z0-9]{1,8}$")
+        private val WIDTH = Regex(pattern = "\\d{1,5}(?:x\\d{1,5})?")
         private const val ESCAPED_LINK_TEXT_CLOSE = "\\]"
         private const val HEX_DIGITS = 2
         private const val PERCENT = "%"

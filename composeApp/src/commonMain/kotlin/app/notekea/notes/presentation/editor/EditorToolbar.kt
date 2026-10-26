@@ -43,6 +43,7 @@ import app.notekea.resources.editor_edit_mode
 import app.notekea.resources.editor_find
 import app.notekea.resources.editor_preview_mode
 import app.notekea.resources.editor_toolbar_label
+import app.notekea.resources.format_attach
 import app.notekea.resources.format_bold
 import app.notekea.resources.format_bullet_list
 import app.notekea.resources.format_callout
@@ -177,7 +178,7 @@ private fun FormattingGroups(
             onIntent = onIntent
         )
         ListGroup(actions = actions, format = format)
-        BlockGroup(actions = actions, format = format)
+        BlockGroup(actions = actions, format = format, onAttach = { onIntent(EditorIntent.OnAttachmentPick) })
     }
 }
 
@@ -291,15 +292,17 @@ private fun ListGroup(
     }
 }
 
-/** Callout (a menu of its types), Code block (a menu of languages) and More (Quote, Divider, Table). */
+/** Callout (a menu of its types), Code block (a menu of languages), Image or file, and More (Quote, Divider, Table). */
 @Composable
 private fun BlockGroup(
     actions: FormatActions,
-    format: (FormatAction) -> Unit
+    format: (FormatAction) -> Unit,
+    onAttach: () -> Unit
 ) {
     ToolbarGroup {
         CalloutMenu(actions = actions, format = format)
         CodeBlockMenu(actions = actions, format = format)
+        ToolbarButton(icon = NotekeaIcons.AttachFile, label = Res.string.format_attach, onClick = onAttach)
         MoreMenu(actions = actions, format = format)
     }
 }

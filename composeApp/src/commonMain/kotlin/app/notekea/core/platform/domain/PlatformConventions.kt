@@ -23,6 +23,7 @@ data class PlatformConventions(
     val italicShortcut: Shortcut,
     val noteLinkShortcut: Shortcut,
     val webLinkShortcut: Shortcut,
+    val pasteShortcut: Shortcut,
     val dialogButtonOrder: DialogButtonOrder,
     val appDataDirectory: String,
     val homeDirectory: String

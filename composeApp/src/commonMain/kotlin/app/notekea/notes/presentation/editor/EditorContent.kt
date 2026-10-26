@@ -1,5 +1,9 @@
 package app.notekea.notes.presentation.editor
 
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.runtime.mutableStateMapOf
+import app.notekea.core.presentation.platform.LocalFileDrop
 import app.notekea.core.domain.StringPatterns.SPACE
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -144,7 +148,9 @@ fun EditorContent(
     val viewport = remember { mutableStateOf<LayoutCoordinates?>(value = null) }
     val keepInView = remember { EditorBringIntoViewSpec() }
     val defaultBringIntoView = LocalBringIntoViewSpec.current
-    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+    // Files dropped anywhere on the editor are attached at the cursor, in Edit mode.
+    val fileDrop = LocalFileDrop.current { paths -> onIntent(EditorIntent.OnFilesDrop(paths = paths)) }
+    Surface(modifier = modifier.fillMaxSize().then(other = fileDrop), color = MaterialTheme.colorScheme.surface) {
         Column {
             EditorBanners(state = state, platformConventions = platformConventions, onIntent = onIntent)
             state.find?.let { find -> EditorFindBar(find = find, onIntent = onIntent) }
@@ -237,13 +243,14 @@ private fun NoteText(
     if (state.isLoading) {
         EditorSkeleton()
     } else if (state.isReading) {
-        ReadView(text = buffer.text.toString(), onIntent = onIntent)
+        ReadingView(text = buffer.text.toString(), attachments = state.attachments, onIntent = onIntent)
     } else {
         EditorBody(
             buffer = buffer,
             scrollState = scrollState,
             platformConventions = platformConventions,
             onIntent = onIntent,
+            attachments = state.attachments,
             find = state.find,
             focusRequester = textFocusRequester
         )
@@ -359,7 +366,8 @@ private fun EditorFindBar(
 /** Markdown highlighting plus the find matches, which are read inside the transformation so they restyle at once. */
 @Composable
 private fun rememberHighlighting(
-    find: FindState?
+    find: FindState?,
+    paragraphs: (String) -> List<Pair<IntRange, ParagraphStyle>>
 ): MarkdownOutputTransformation {
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
@@ -372,7 +380,8 @@ private fun rememberHighlighting(
                 typography = typography,
                 codeFontFamily = codeFontFamily
             ),
-            findState = { currentFind.value }
+            findState = { currentFind.value },
+            paragraphs = paragraphs
         )
     }
 }
@@ -383,11 +392,13 @@ private fun EditorBody(
     scrollState: ScrollState,
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
+    attachments: List<AttachmentView>,
     find: FindState?,
     focusRequester: FocusRequester?
 ) {
     val colors = MaterialTheme.colorScheme
-    val highlighting = rememberHighlighting(find = find)
+    val room = AttachmentRoom.remember(attachments = attachments)
+    val highlighting = rememberHighlighting(find = find, paragraphs = room.paragraphs)
     var hasFocus by remember { mutableStateOf(value = false) }
     var layout by remember { mutableStateOf<() -> TextLayoutResult?>(value = { null }) }
     var top by remember { mutableFloatStateOf(value = 0f) }
@@ -417,7 +428,9 @@ private fun EditorBody(
         cursorBrush = SolidColor(value = colors.primary),
         onTextLayout = { getResult -> layout = getResult },
         outputTransformation = highlighting,
-        decorator = decoratorOf(buffer = buffer, layout = { layout() }, onIntent = onIntent)
+        decorator = decoratorOf(buffer = buffer, layout = { layout() }, onIntent = onIntent) {
+            room.Overlay(buffer = buffer, attachments = attachments, layout = { layout() }, onIntent = onIntent)
+        }
     )
 }
 
@@ -428,9 +441,16 @@ private fun formatShortcut(
     formats: FormatActions
 ): EditorIntent? = when {
     platformConventions.boldShortcut.matches(event = event) -> EditorIntent.OnFormat(action = formats.bold)
+
     platformConventions.italicShortcut.matches(event = event) -> EditorIntent.OnFormat(action = formats.italic)
+
     platformConventions.noteLinkShortcut.matches(event = event) -> EditorIntent.OnNoteLinkRequest
+
     platformConventions.webLinkShortcut.matches(event = event) -> EditorIntent.OnFormat(action = formats.webLink)
+
+    // A copied image is attached; copied text is pasted by the editor too, so both behave the same.
+    platformConventions.pasteShortcut.matches(event = event) -> EditorIntent.OnPaste
+
     else -> null
 }
 
@@ -543,12 +563,14 @@ private fun TaskCheckboxes(
 private fun decoratorOf(
     buffer: TextFieldState,
     layout: () -> TextLayoutResult?,
-    onIntent: (EditorIntent) -> Unit
+    onIntent: (EditorIntent) -> Unit,
+    overlay: @Composable () -> Unit
 ): TextFieldDecorator = TextFieldDecorator { innerTextField ->
     Box {
         CodeBlockBackgrounds(buffer = buffer, layout = layout)
         innerTextField()
         TaskCheckboxes(buffer = buffer, layout = layout, onIntent = onIntent)
+        overlay()
     }
 }
 
@@ -603,29 +625,6 @@ private fun ScrollToCurrentMatch(
         val lineTop = result.getLineTop(lineIndex = result.getLineForOffset(offset = match.first))
         scrollState.animateScrollTo(value = (top() + lineTop - margin).roundToInt().coerceAtLeast(minimumValue = 0))
     }
-}
-
-/** The note rendered: wiki links become links; a click opens the note, or the browser for a web address. */
-@Composable
-private fun ReadView(
-    text: String,
-    onIntent: (EditorIntent) -> Unit
-) {
-    val readLinks = remember { ReadModeLinks() }
-    val content = remember(text) { readLinks.prepare(body = text) }
-    val systemUriHandler = LocalUriHandler.current
-    NotekeaMarkdown(
-        content = content,
-        modifier = Modifier.padding(top = NotekeaDimensions.SpacingL),
-        onLinkClick = { uri ->
-            when (val link = readLinks.classify(uri = uri)) {
-                is ReadLink.Note -> onIntent(EditorIntent.OnLinkClick(link = link))
-                is ReadLink.External -> systemUriHandler.openUri(uri = link.uri)
-                is ReadLink.Tag -> onIntent(EditorIntent.OnTagClick(tag = link.name))
-                null -> Unit
-            }
-        }
-    )
 }
 
 @Composable

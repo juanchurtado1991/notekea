@@ -1,5 +1,9 @@
 package app.notekea.core.presentation.gallery
 
+import androidx.compose.ui.graphics.ImageBitmap
+import app.notekea.core.presentation.components.NotekeaMissingFile
+import app.notekea.core.presentation.components.NotekeaFileChip
+import app.notekea.core.presentation.components.NotekeaAttachmentImage
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -125,6 +129,13 @@ private const val STATUS_INDEXED = "Indexed 1,204 notes"
 private const val STATUS_MODEL = "Model: ready"
 private const val STATUS_SYNC = "Sync: conflict"
 private const val TABS_SHORTCUT = "Ctrl+E"
+private const val SAMPLE_FILE = "Menu for the week.pdf"
+private const val SAMPLE_FILE_HINT = "Opens with its app"
+private const val SAMPLE_IMAGE_HEIGHT = 80
+private const val SAMPLE_IMAGE_WIDTH = 240
+private const val SAMPLE_LOCATE = "Locate…"
+private const val SAMPLE_MISSING = "This file is missing"
+private const val SAMPLE_MISSING_PATH = "attachments/plate.png"
 private const val GRID_COLUMNS = 8
 private const val GRID_ROWS = 6
 private const val MENU_TABLE = "Insert table"
@@ -179,6 +190,7 @@ private fun GalleryColumn(
                 TabsSection()
                 PaletteSection()
                 FeedbackSection()
+                AttachmentsSection()
                 Text(text = CODE_SAMPLE, style = LocalNotekeaCodeTextStyle.current)
             }
         }
@@ -493,4 +505,17 @@ private fun FeedbackSection() {
         message = EMPTY_MESSAGE,
         action = { NotekeaButton(text = BUTTON_NEW_NOTE, onClick = {}) }
     )
+}
+
+@Composable
+private fun AttachmentsSection() {
+    Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+        NotekeaAttachmentImage(
+            bitmap = ImageBitmap(width = SAMPLE_IMAGE_WIDTH, height = SAMPLE_IMAGE_HEIGHT),
+            contentDescription = null
+        )
+        NotekeaFileChip(name = SAMPLE_FILE, hint = SAMPLE_FILE_HINT, onOpen = {})
+        NotekeaMissingFile(title = SAMPLE_MISSING, path = SAMPLE_MISSING_PATH, locateLabel = SAMPLE_LOCATE, onLocate = {
+        })
+    }
 }
