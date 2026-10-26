@@ -250,15 +250,20 @@ Obsidian-flavored Markdown blocks that most vaults use.
 - **Done when:** every callout type and nesting level in the sample vault renders correctly in Read mode.
 - Smoke test: cases 1.7-01 to 1.7-06; 1.5-08 revised for the checkboxes in Edit mode.
 
-### ⬜ 1.8 Images and attachments — `feature/attachments`
+### 🚧 1.8 Images and attachments — `feature/attachments`
 
-- Render images (`![[image.png]]`, `![alt](path.png)`) inline, scaled to the editor width; `![[image.png|300]]`
-  sets the width.
-- **Paste or drop an image** (`Mod+V`, drag and drop) saves it into the attachments folder and inserts the link.
-  Attachments folder: `.obsidian/app.json` `attachmentFolderPath` when present, otherwise `attachments/`
-  (configurable in Settings).
+- Render images (`![[image.png]]`, `![alt](path.png)`), scaled to the editor width; `![[image.png|300]]` sets the
+  width. In Preview they take their place; in Edit the link stays as written and the image shows under its line, so
+  what was pasted is seen without switching modes. Links resolve as in Obsidian: a path, or a file name found in the
+  note's folder, the attachments folder or anywhere in the vault.
+- **Paste or drop an image** (`Mod+V`, drag and drop) saves it into the attachments folder (`Pasted image
+  <date and time>.png` for a pasted one) and inserts the link at the cursor; a dropped file of any kind is copied the
+  same way. **Image or file** in the toolbar does it with the system's file picker. Attachments folder: `.obsidian/
+  app.json` `attachmentFolderPath` when present (the vault root, the note's folder, a subfolder of it or a fixed
+  folder, as Obsidian), otherwise `attachments/`; a Notekea setting comes with the Settings screen.
 - Non-image attachments (PDF, audio, other files) show as a file chip that opens with the system default app.
-- States: missing file (placeholder with the broken path and "Locate…"), unsupported format (file chip).
+- States: missing file (placeholder with the broken path and **Locate…**, which picks the file, copies it into the
+  attachments folder when it is outside the vault, and rewrites the link to it), unsupported format (file chip).
 - **Done when:** pasting a screenshot works on the three OSes and the result opens unchanged in Obsidian.
 
 ### ⬜ 1.9 Outline — `feature/outline`
