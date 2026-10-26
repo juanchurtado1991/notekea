@@ -178,8 +178,9 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
 
   **Before handing the smoke test over, the agent runs a pre-smoke** so the developer's run finds what only a
   person can. Every case that can run headless becomes a test committed in the step that adds the cases: a screen
-  or integration test on the feature's smoke data, named after the case (``fun `1.5-04 renaming from the title
-  updates the links`()``) and listed in the case's **Automated** column of `MVP_SMOKE_TEST.md`. The tests stay and
+  or integration test on the feature's smoke data, named after the case with `_` for `.`, which JVM names cannot
+  hold (``fun `1_5-04 renaming from the title updates the links`()``), and listed in the case's **Automated**
+  column of `MVP_SMOKE_TEST.md`. The tests stay and
   run in `check` and CI, so the cases accumulate feature after feature, and a feature that changes a case updates
   its test. The agent also runs the `smoke.sh` commands with `SMOKE_SCRATCH=scratch-agent` (never the developer's
   `smoke-data/scratch`) and checks every expected value the guide states (names, counts, file contents) against

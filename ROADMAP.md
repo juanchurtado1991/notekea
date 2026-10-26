@@ -212,13 +212,23 @@ between runs.
 - **Done when:** typing never loses text, external changes are detected, frontmatter is preserved untouched.
 - Smoke test: cases 1.5-01 to 1.5-11; 1.4-01 and 1.4-06 rewritten for the editor.
 
-### ⬜ 1.6 Quick switcher and search — `feature/quick-switcher`
+### 🚧 1.6 Quick switcher and search — `feature/quick-switcher`
 
-`Mod+P` opens a palette with fuzzy search over note titles and aliases; `Mod+Shift+F` searches note content
-(plain text in M1, upgraded to hybrid search in M2). Clicking a `#tag` in Read mode searches that tag.
+`Mod+P` opens a palette with fuzzy search over note names, aliases, frontmatter titles and paths (a search with `/`
+matches the path), ignoring letter case and accents; `Mod+Shift+F` searches note content (plain text in M1, upgraded
+to hybrid search in M2). A `#tag` in the search finds notes tagged in their frontmatter or text, nested tags included,
+and clicking a `#tag` in Read mode searches that tag. Note texts stay in memory between searches, so only notes that
+changed are read again.
 
-**UI — Palette:** centered overlay 560 dp wide, input on top, up to 10 results with title, folder and matching
-snippet; arrows to move, `Enter` to open, `Esc` to close. Empty state: "No notes match".
+**UI — Palette:** centered overlay 560 dp wide over a dimmed window, with Notes / Content tabs (`Tab` switches,
+keeping the text), the input, and up to 10 results with title, folder and a matching line (the alias or path that
+matched, or the line of content), matches in bold. Before typing it lists the most recently changed notes. Arrows
+move the selection (wrapping around), `Enter` opens the note and selects it in the tree, `Esc` or a click outside
+closes. While content search runs the previous results stay with a small indicator. Empty states: "No notes match",
+a hint for an empty content search, and an empty vault.
+- **Done when:** a note is found by name, alias, path or content with the keyboard alone, a clicked tag lists its
+  notes, and typing stays fluid on a 5,000-note vault.
+- Smoke test: cases 1.6-01 to 1.6-10; 1.4-01 and 1.5-01 revised for the aliases added to the sample vault.
 
 ### ⬜ 1.7 Tasks and callouts — `feature/markdown-extensions`
 
