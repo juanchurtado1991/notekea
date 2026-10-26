@@ -73,6 +73,9 @@ fun VaultTreeScreen(
             viewModel = viewModel,
             editorViewModel = editorViewModel,
             onSwitchVault = onSwitchVault,
+            onSearch = {
+                switcherViewModel.onIntent(intent = QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES))
+            },
             onSearchTag = { tag ->
                 switcherViewModel.onIntent(
                     intent = QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.CONTENT, query = TAG_MARK + tag)
@@ -133,6 +136,7 @@ private fun Workspace(
     viewModel: VaultTreeViewModel,
     editorViewModel: EditorViewModel,
     onSwitchVault: () -> Unit,
+    onSearch: () -> Unit,
     onSearchTag: (String) -> Unit
 ) {
     VaultTreeContent(
@@ -140,6 +144,7 @@ private fun Workspace(
         vaultName = vaultName,
         onIntent = viewModel::onIntent,
         onSwitchVault = onSwitchVault,
+        onSearch = onSearch,
         noteContent = { note ->
             EditorScreen(
                 notePath = note.file.path,
@@ -193,6 +198,7 @@ private fun VaultTreeScreenPreview() {
             vaultName = TreePreviewData.VAULT_NAME,
             onIntent = {},
             onSwitchVault = {},
+            onSearch = {},
             noteContent = { PreviewNoteContent(note = it) }
         )
     }

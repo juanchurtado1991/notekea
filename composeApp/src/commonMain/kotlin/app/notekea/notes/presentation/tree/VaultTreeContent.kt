@@ -29,6 +29,7 @@ fun VaultTreeContent(
     vaultName: String,
     onIntent: (VaultTreeIntent) -> Unit,
     onSwitchVault: () -> Unit,
+    onSearch: () -> Unit,
     noteContent: @Composable (NoteEntry) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -48,7 +49,8 @@ fun VaultTreeContent(
                     state = state,
                     vaultName = vaultName,
                     onIntent = onIntent,
-                    onSwitchVault = onSwitchVault
+                    onSwitchVault = onSwitchVault,
+                    onSearch = onSearch
                 )
             },
             end = {
@@ -89,6 +91,7 @@ private fun VaultTreeContentPreviewFrame(
             vaultName = TreePreviewData.VAULT_NAME,
             onIntent = {},
             onSwitchVault = {},
+            onSearch = {},
             noteContent = { PreviewNoteContent(note = it) },
             modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp).height(height = PREVIEW_HEIGHT_DP.dp)
         )

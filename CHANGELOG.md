@@ -45,14 +45,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Quick switcher and search (ROADMAP 1.6): Mod+P opens a palette over the window that finds notes by name, alias,
-  frontmatter title or path (`gard/tom`) as you type, ignoring letter case and accents, with the matched letters in
-  bold and the most recently changed notes before you type. Mod+Shift+F (or Tab in the palette) searches the text of
-  the notes, showing the matching line; a `#tag` finds notes tagged in their frontmatter or text, nested tags
-  included, and clicking a `#tag` in Read mode searches it. Arrows, Enter and Esc work without leaving the field, and
-  the chosen note opens and is selected in the tree, with the keyboard in its text (closing the palette gives the
-  keyboard back to the open note). Note texts stay in memory between searches, so only changed notes are read again.
-- Design system: `NotekeaPalette` and `NotekeaPaletteItem`.
+- Quick switcher and search (ROADMAP 1.6): a "Search notes" button at the top of the sidebar (showing its shortcut) or
+  Mod+P opens a palette over the window that finds notes by name, alias, frontmatter title or path (`gard/tom`) as you
+  type, ignoring letter case and accents, with the matched letters in bold and the most recently changed notes before
+  you type. Mod+Shift+F (or Tab in the palette) searches the text of the notes, showing the matching line; a `#tag`
+  finds notes tagged in their frontmatter or text, nested tags included, and clicking a `#tag` in Read mode searches
+  it. Arrows, Enter and Esc work without leaving the field, and the chosen note opens and is selected in the tree,
+  with the keyboard in its text (closing the palette gives the keyboard back to the open note). Note texts stay in
+  memory between searches, so only changed notes are read again.
+- Design system: `NotekeaPalette`, `NotekeaPaletteItem` and `NotekeaSearchButton`.
 - Smoke data for 1.6: aliases for Arepas and a nested `#recipe/drinks` tag in the sample vault.
 - Editor (ROADMAP 1.5): selecting a note opens it beside the tree with its folder, an editable title that renames it
   and updates the links to it, and its tags and aliases. The body is a text field with Markdown highlighting

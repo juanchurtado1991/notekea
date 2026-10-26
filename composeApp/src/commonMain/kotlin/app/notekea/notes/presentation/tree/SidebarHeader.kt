@@ -19,6 +19,7 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaMenuButton
 import app.notekea.core.presentation.components.NotekeaMenuItem
+import app.notekea.core.presentation.components.NotekeaSearchButton
 import app.notekea.core.presentation.platform.displayPath
 import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
@@ -30,6 +31,7 @@ import app.notekea.resources.Res
 import app.notekea.resources.tree_hide_sidebar
 import app.notekea.resources.tree_new_folder
 import app.notekea.resources.tree_new_note
+import app.notekea.resources.tree_search
 import app.notekea.resources.tree_sort_by_date
 import app.notekea.resources.tree_sort_by_name
 import app.notekea.resources.tree_sorted_by_date
@@ -39,7 +41,8 @@ import org.jetbrains.compose.resources.stringResource
 private const val PREVIEW_WIDTH_DP = 260
 
 /**
- * Top of the sidebar: the vault's name and folder, and the actions on the tree. Every icon has a tooltip with its
+ * Top of the sidebar: the vault's name and folder, the search button that opens the quick switcher (`Mod+P`, shown on
+ * it), and the actions on the tree. Every icon has a tooltip with its
  * name and shortcut. The sort button shows the current sort and opens a menu with both choices.
  */
 @Composable
@@ -51,7 +54,8 @@ internal fun SidebarHeader(
     onNewNote: () -> Unit,
     onNewFolder: () -> Unit,
     onSortChange: (TreeSort) -> Unit,
-    onHideSidebar: () -> Unit
+    onHideSidebar: () -> Unit,
+    onSearch: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(
@@ -65,6 +69,14 @@ internal fun SidebarHeader(
             vaultPath = vaultPath,
             platformConventions = platformConventions,
             onHideSidebar = onHideSidebar
+        )
+        NotekeaSearchButton(
+            label = stringResource(resource = Res.string.tree_search),
+            onClick = onSearch,
+            modifier = Modifier.padding(top = NotekeaDimensions.SpacingS, end = NotekeaDimensions.SpacingXs),
+            shortcutHint = platformConventions.quickSwitcherShortcut.label(
+                operatingSystem = platformConventions.operatingSystem
+            )
         )
         TreeToolbar(
             sort = sort,
@@ -177,7 +189,8 @@ private fun SidebarHeaderPreview() {
                 onNewNote = {},
                 onNewFolder = {},
                 onSortChange = {},
-                onHideSidebar = {}
+                onHideSidebar = {},
+                onSearch = {}
             )
         }
     }

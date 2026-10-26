@@ -125,6 +125,7 @@
     <string name="tree_reveal_explorer">Show in File Explorer</string>
     <string name="tree_reveal_files">Show in Files</string>
     <string name="tree_reveal_finder">Show in Finder</string>
+    <string name="tree_search">Search notes</string>
     <string name="tree_select_note">Select note</string>
     <string name="tree_show_sidebar">Show sidebar</string>
     <string name="tree_sort_by_date">Date modified, newest first</string>
