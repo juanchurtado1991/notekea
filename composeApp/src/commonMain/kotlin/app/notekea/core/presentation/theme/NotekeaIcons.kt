@@ -18,11 +18,12 @@ import com.composables.icons.lucide.FolderPlus
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.PanelLeftClose
 import com.composables.icons.lucide.PanelLeftOpen
-import com.composables.icons.lucide.Search
 import com.composables.icons.lucide.Pen
 import com.composables.icons.lucide.Pencil
+import com.composables.icons.lucide.Search
 import com.composables.icons.lucide.SquareArrowOutUpRight
 import com.composables.icons.lucide.Trash2
+import com.composables.icons.lucide.TriangleAlert
 import com.composables.icons.lucide.X
 
 /**
@@ -33,6 +34,7 @@ object NotekeaIcons {
     val Checked: ImageVector get() = Lucide.Check
     val Close: ImageVector get() = Lucide.X
     val Collapse: ImageVector get() = Lucide.ChevronDown
+    val Crash: ImageVector get() = Lucide.TriangleAlert
     val Delete: ImageVector get() = Lucide.Trash2
     val EditMode: ImageVector get() = Lucide.Pen
     val Expand: ImageVector get() = Lucide.ChevronRight

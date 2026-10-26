@@ -46,8 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Crash reports: when Notekea fails, it saves a report in the `crashes` folder of the app data directory (the
-  last ten are kept; versions and the error, never note content) and shows "Notekea needs to close" with Copy
-  details and Report on GitHub, which opens a new Crash report issue form to paste it into, instead of Compose's raw
+  last ten are kept; versions and the error, never note content) and shows "Notekea needs to close" in its own
+  dialog window, in the app's theme, with Copy details and Report on GitHub, which opens a new Crash report issue form to paste it into, instead of Compose's raw
   error message. The open note is saved before the app closes. `NOTEKEA_CRASH_TEST=1` triggers a crash for testing.
 - Quick switcher and search (ROADMAP 1.6): a "Search notes" button at the top of the sidebar (showing its shortcut) or
   Mod+P opens a palette over the window that finds notes by name, alias, frontmatter title or path (`gard/tom`) as you

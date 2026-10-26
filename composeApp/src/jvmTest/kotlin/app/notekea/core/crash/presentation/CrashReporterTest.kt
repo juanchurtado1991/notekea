@@ -14,13 +14,13 @@ import kotlin.time.Instant
 class CrashReporterTest {
     private val store = FakeCrashReportStore()
     private val events = mutableListOf<String>()
-    private val shown = mutableListOf<RecordedCrash>()
-    private val notice = object : CrashNotice {
+    private val fallbackShown = mutableListOf<RecordedCrash>()
+    private val fallbackNotice = object : CrashNotice {
         override fun show(
             crash: RecordedCrash
         ) {
-            shown += crash
-            events += NOTICE
+            fallbackShown += crash
+            events += FALLBACK
         }
     }
     private val reporter = CrashReporter(
@@ -29,7 +29,7 @@ class CrashReporterTest {
             systemEnvironment = FakeSystemEnvironment(operatingSystemName = "Linux", userHome = "/home/ana"),
             clock = FakeClock(currentTime = Instant.parse(input = "2026-10-26T10:15:30Z"))
         ),
-        crashNotice = notice,
+        fallbackNotice = fallbackNotice,
         later = { it() }
     )
     private val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
@@ -40,20 +40,38 @@ class CrashReporterTest {
     }
 
     @Test
-    fun `a window crash is kept, shown, and only then the window closes, once`() {
-        repeat(times = 2) {
-            reporter.onWindowCrash(error = IllegalStateException("Layout failed"), threadName = UI_THREAD) {
-                events += CLOSE
-            }
-        }
+    fun `a window crash is kept and published, and the window closes only when the notice is closed`() {
+        crashWindow(window = MAIN_WINDOW)
+        val beforeClosing = events.toList()
+
+        reporter.close()
+        reporter.close()
 
         assertEquals(
-            expected = listOf(NOTICE, CLOSE) to 1,
+            expected = Triple(emptyList(), listOf(CLOSE), FakeCrashReportStore.FOLDER + REPORT_NAME),
+            actual = Triple(beforeClosing, events.toList(), reporter.crash.value?.path)
+        )
+    }
+
+    @Test
+    fun `the failed window failing again on every frame changes nothing`() {
+        repeat(times = 3) { crashWindow(window = MAIN_WINDOW) }
+
+        assertEquals(
+            expected = emptyList<String>() to 1,
             actual = events.toList() to store.reports.size
         )
+    }
+
+    @Test
+    fun `when the notice itself fails, the swing fallback says the same and the app closes`() {
+        crashWindow(window = MAIN_WINDOW)
+        crashWindow(window = NOTICE_WINDOW)
+        crashWindow(window = NOTICE_WINDOW)
+
         assertEquals(
-            expected = FakeCrashReportStore.FOLDER + "crash-2026-10-26T10-15-30Z.txt",
-            actual = shown.single().path
+            expected = listOf(FALLBACK, CLOSE) to reporter.crash.value,
+            actual = events.toList() to fallbackShown.single()
         )
     }
 
@@ -67,27 +85,42 @@ class CrashReporterTest {
         }
 
         assertEquals(
-            expected = 1 to emptyList<String>(),
-            actual = store.reports.size to events.toList()
+            expected = Triple(1, null, emptyList<String>()),
+            actual = Triple(store.reports.size, reporter.crash.value, events.toList())
         )
         assertTrue(actual = store.reports.values.single().contains(other = "Thread: $WORKER_THREAD"))
     }
 
     @Test
-    fun `a report that cannot be written is still shown, so it can be copied`() {
+    fun `a report that cannot be written is still published, so it can be copied`() {
         store.isBroken = true
 
-        reporter.onWindowCrash(error = IllegalStateException("Disk full"), threadName = UI_THREAD) {}
+        crashWindow(window = MAIN_WINDOW)
 
         assertEquals(
             expected = null to true,
-            actual = shown.single().let { it.path to it.text.contains(other = "Disk full") }
+            actual = reporter.crash.value?.let { it.path to it.text.contains(other = "Layout failed") }
         )
+    }
+
+    private fun crashWindow(
+        window: String
+    ) {
+        reporter.onWindowCrash(
+            error = IllegalStateException("Layout failed"),
+            threadName = UI_THREAD,
+            window = window
+        ) {
+            events += CLOSE
+        }
     }
 
     companion object {
         private const val CLOSE = "close"
-        private const val NOTICE = "notice"
+        private const val FALLBACK = "fallback"
+        private const val MAIN_WINDOW = "main"
+        private const val NOTICE_WINDOW = "notice"
+        private const val REPORT_NAME = "crash-2026-10-26T10-15-30Z.txt"
         private const val UI_THREAD = "AWT-EventQueue-0"
         private const val WORKER_THREAD = "worker"
     }
