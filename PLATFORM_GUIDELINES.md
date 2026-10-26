@@ -41,6 +41,7 @@ primary modifier and resolved per platform.
 | New note | `Cmd+N` | `Ctrl+N` |
 | Save | `Cmd+S` | `Ctrl+S` |
 | Find in note | `Cmd+F` | `Ctrl+F` |
+| Quick switcher (find a note by name) | `Cmd+P` | `Ctrl+P` |
 | Search all notes | `Cmd+Shift+F` | `Ctrl+Shift+F` |
 | Settings | `Cmd+,` | `Ctrl+,` |
 | Close tab | `Cmd+W` | `Ctrl+W` |

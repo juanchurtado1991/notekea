@@ -29,14 +29,8 @@ class ResolvePlatformConventionsUseCaseTest {
             expected = PlatformConventions(
                 operatingSystem = OperatingSystem.LINUX,
                 primaryModifier = ShortcutModifier.CONTROL,
-                openFolderShortcut = Shortcut(
-                    key = ShortcutKey.O,
-                    modifiers = setOf(ShortcutModifier.CONTROL)
-                ),
-                quitShortcut = Shortcut(
-                    key = ShortcutKey.Q,
-                    modifiers = setOf(ShortcutModifier.CONTROL)
-                ),
+                openFolderShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(ShortcutModifier.CONTROL)),
+                quitShortcut = Shortcut(key = ShortcutKey.Q, modifiers = setOf(ShortcutModifier.CONTROL)),
                 newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(ShortcutModifier.CONTROL)),
                 renameShortcut = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
                 deleteShortcut = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
@@ -47,6 +41,11 @@ class ResolvePlatformConventionsUseCaseTest {
                 saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(ShortcutModifier.CONTROL)),
                 findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(ShortcutModifier.CONTROL)),
                 toggleReadModeShortcut = Shortcut(key = ShortcutKey.E, modifiers = setOf(ShortcutModifier.CONTROL)),
+                quickSwitcherShortcut = Shortcut(key = ShortcutKey.P, modifiers = setOf(ShortcutModifier.CONTROL)),
+                searchNotesShortcut = Shortcut(
+                    key = ShortcutKey.F,
+                    modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
+                ),
                 dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
                 appDataDirectory = "/home/ana/.local/share/notekea",
                 homeDirectory = LINUX_HOME
@@ -80,14 +79,8 @@ class ResolvePlatformConventionsUseCaseTest {
             expected = PlatformConventions(
                 operatingSystem = OperatingSystem.MACOS,
                 primaryModifier = ShortcutModifier.COMMAND,
-                openFolderShortcut = Shortcut(
-                    key = ShortcutKey.O,
-                    modifiers = setOf(ShortcutModifier.COMMAND)
-                ),
-                quitShortcut = Shortcut(
-                    key = ShortcutKey.Q,
-                    modifiers = setOf(ShortcutModifier.COMMAND)
-                ),
+                openFolderShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(ShortcutModifier.COMMAND)),
+                quitShortcut = Shortcut(key = ShortcutKey.Q, modifiers = setOf(ShortcutModifier.COMMAND)),
                 newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(ShortcutModifier.COMMAND)),
                 renameShortcut = Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet()),
                 deleteShortcut = Shortcut(key = ShortcutKey.BACKSPACE, modifiers = setOf(ShortcutModifier.COMMAND)),
@@ -98,6 +91,11 @@ class ResolvePlatformConventionsUseCaseTest {
                 saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(ShortcutModifier.COMMAND)),
                 findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(ShortcutModifier.COMMAND)),
                 toggleReadModeShortcut = Shortcut(key = ShortcutKey.E, modifiers = setOf(ShortcutModifier.COMMAND)),
+                quickSwitcherShortcut = Shortcut(key = ShortcutKey.P, modifiers = setOf(ShortcutModifier.COMMAND)),
+                searchNotesShortcut = Shortcut(
+                    key = ShortcutKey.F,
+                    modifiers = setOf(ShortcutModifier.COMMAND, ShortcutModifier.SHIFT)
+                ),
                 dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
                 appDataDirectory = "/Users/ana/Library/Application Support/Notekea",
                 homeDirectory = MACOS_HOME
@@ -162,14 +160,8 @@ class ResolvePlatformConventionsUseCaseTest {
             expected = PlatformConventions(
                 operatingSystem = OperatingSystem.WINDOWS,
                 primaryModifier = ShortcutModifier.CONTROL,
-                openFolderShortcut = Shortcut(
-                    key = ShortcutKey.O,
-                    modifiers = setOf(ShortcutModifier.CONTROL)
-                ),
-                quitShortcut = Shortcut(
-                    key = ShortcutKey.F4,
-                    modifiers = setOf(ShortcutModifier.ALT)
-                ),
+                openFolderShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(ShortcutModifier.CONTROL)),
+                quitShortcut = Shortcut(key = ShortcutKey.F4, modifiers = setOf(ShortcutModifier.ALT)),
                 newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(ShortcutModifier.CONTROL)),
                 renameShortcut = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
                 deleteShortcut = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
@@ -180,6 +172,11 @@ class ResolvePlatformConventionsUseCaseTest {
                 saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(ShortcutModifier.CONTROL)),
                 findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(ShortcutModifier.CONTROL)),
                 toggleReadModeShortcut = Shortcut(key = ShortcutKey.E, modifiers = setOf(ShortcutModifier.CONTROL)),
+                quickSwitcherShortcut = Shortcut(key = ShortcutKey.P, modifiers = setOf(ShortcutModifier.CONTROL)),
+                searchNotesShortcut = Shortcut(
+                    key = ShortcutKey.F,
+                    modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
+                ),
                 dialogButtonOrder = DialogButtonOrder.PRIMARY_THEN_CANCEL,
                 appDataDirectory = "D:\\Profiles\\ana\\Roaming\\Notekea",
                 homeDirectory = WINDOWS_HOME
