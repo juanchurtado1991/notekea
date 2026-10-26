@@ -104,7 +104,7 @@ class EditorAttachmentsTest {
             send(intent = EditorIntent.OnPaste)
 
             assertEquals(
-                expected = "Intro\n\n![[Pasted image 20261026143005.png]]\nMore",
+                expected = "Intro\n\n![[Pasted image 20261026143005.png|1]]\nMore",
                 actual = viewModel.buffer.text.toString()
             )
             assertEquals(
@@ -114,6 +114,18 @@ class EditorAttachmentsTest {
                     fixture.attachmentStore.contents
             )
         }
+
+    @Test
+    fun `a new image gets a width to see and change, at most 400, and other files none`() = runAttachmentsTest {
+        open(text = "")
+        fixture.clipboard.image = Base64.decode(source = WIDE_PNG_BASE64)
+        send(intent = EditorIntent.OnPaste)
+
+        assertEquals(
+            expected = "![[Pasted image 20261026143005.png|400]]\n",
+            actual = viewModel.buffer.text.toString()
+        )
+    }
 
     @Test
     fun `an image the clipboard cannot give is explained, and nothing is pasted`() = runAttachmentsTest {
@@ -141,7 +153,7 @@ class EditorAttachmentsTest {
         send(intent = EditorIntent.OnAttachmentPick)
 
         assertEquals(
-            expected = "![[recipe.pdf]]\n![[plate.png]]\n\n![[recipe 1.pdf]]\n",
+            expected = "![[recipe.pdf]]\n![[plate.png|1]]\n\n![[recipe 1.pdf]]\n",
             actual = viewModel.buffer.text.toString()
         )
     }
@@ -213,6 +225,10 @@ class EditorAttachmentsTest {
         private const val PNG_BASE64 =
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
         private const val SETTLE_MILLIS = 400L
+
+        // A 500 x 2 picture, wider than the default width of a new image.
+        private const val WIDE_PNG_BASE64 =
+            "iVBORw0KGgoAAAANSUhEUgAAAfQAAAACCAIAAAAhCLltAAAAIElEQVR42u3QAREAAAQEMGQVViw9/rYI69sCIMwoAMjz4FkBMJDyS2EAAAAASUVORK5CYII="
         private val NOTE = RelativePath(value = "Recipes/Arepas.md")
         private val PDF = byteArrayOf(37, 80, 68, 70)
     }

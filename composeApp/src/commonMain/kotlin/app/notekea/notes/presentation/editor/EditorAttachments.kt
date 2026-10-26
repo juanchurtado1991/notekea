@@ -91,11 +91,16 @@ class EditorAttachments(
         return AttachmentView(embed = embed, kind = AttachmentKind.NOTE, path = path, noteText = shown)
     }
 
-    /** Attaches [source] to [note] and gives the embed to write for it, `![[name.png]]` or with its path. */
+    /**
+     * Attaches [source] to [note] and gives the embed to write for it, `![[name.png]]` or with its path, with [width]
+     * when given. A new image ([withDefaultWidth]) gets a width the user sees and can change: its own, at most
+     * [DEFAULT_IMAGE_WIDTH], so a small picture is never stretched.
+     */
     suspend fun attach(
         note: RelativePath,
         source: AttachmentSource,
-        width: Int? = null
+        width: Int? = null,
+        withDefaultWidth: Boolean = false
     ): Outcome<String, NotesError> = when (
         val attached = attachFile(
             vaultPath = vaultPath,
@@ -105,9 +110,21 @@ class EditorAttachments(
     ) {
         is Outcome.Failure -> attached
 
-        is Outcome.Success -> Outcome.Success(
-            value = EmbedText(files = vaultFiles(refresh = true)).of(path = attached.value, width = width)
-        )
+        is Outcome.Success -> {
+            val shownWidth = width ?: if (withDefaultWidth) defaultWidth(path = attached.value) else null
+            Outcome.Success(
+                value = EmbedText(files = vaultFiles(refresh = true)).of(path = attached.value, width = shownWidth)
+            )
+        }
+    }
+
+    /** The width a new image is embedded at: its own, at most [DEFAULT_IMAGE_WIDTH]; null for other files. */
+    private suspend fun defaultWidth(
+        path: RelativePath
+    ): Int? = if (AttachmentKind.of(name = path.name) == AttachmentKind.IMAGE) {
+        imageOf(path = path)?.width?.coerceAtMost(maximumValue = DEFAULT_IMAGE_WIDTH)
+    } else {
+        null
     }
 
     /** A pasted image, named as Obsidian names it. */
@@ -146,5 +163,10 @@ class EditorAttachments(
                 }
             }
         }
+    }
+
+    companion object {
+        /** The widest a new image is embedded, in the note's units (dp), so it fits beside the text it belongs to. */
+        const val DEFAULT_IMAGE_WIDTH = 400
     }
 }
