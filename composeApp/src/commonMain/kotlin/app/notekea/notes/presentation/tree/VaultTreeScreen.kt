@@ -14,6 +14,7 @@ import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.LinkResolver
+import app.notekea.notes.domain.TagRanking
 import app.notekea.notes.domain.NoteEntry
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.presentation.editor.EditorIntent
@@ -151,16 +152,6 @@ private fun FollowQuickSwitcher(
     }
 }
 
-/** The frontmatter tags of the vault, the most used first, for the toolbar's Tag menu. */
-private fun tagsByUse(
-    notes: Collection<NoteEntry>
-): List<String> = notes.flatMap { it.metadata.tags }
-    .groupingBy { it }
-    .eachCount()
-    .entries
-    .sortedWith(compareByDescending<Map.Entry<String, Int>> { it.value }.thenBy { it.key.lowercase() })
-    .map { it.key }
-
 /** `Mod+P` opens the palette on note names, `Mod+Shift+F` on note content, whatever has focus. */
 @Composable
 private fun QuickSwitcherShortcuts(
@@ -187,7 +178,7 @@ private fun Workspace(
     onRequestNoteLink: () -> Unit,
     onSearchTag: (String) -> Unit
 ) {
-    val vaultTags = remember(state.tree.notes) { tagsByUse(notes = state.tree.notes.values) }
+    val vaultTags = remember(state.tree.notes) { TagRanking().byUse(notes = state.tree.notes.values) }
     VaultTreeContent(
         state = state,
         vaultName = vaultName,
