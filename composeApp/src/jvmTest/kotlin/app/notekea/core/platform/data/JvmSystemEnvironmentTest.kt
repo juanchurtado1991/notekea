@@ -26,6 +26,14 @@ class JvmSystemEnvironmentTest {
         assertTrue(actual = environment.userHome.isNotBlank())
     }
 
+    @Test
+    fun `versions come from the JVM, and the app is in development when not packaged`() {
+        assertEquals(
+            expected = Triple(System.getProperty("os.version"), System.getProperty("java.version"), "development"),
+            actual = Triple(environment.operatingSystemVersion, environment.javaVersion, environment.appVersion)
+        )
+    }
+
     companion object {
         private const val MISSING_VARIABLE = "NOTEKEA_TEST_VARIABLE_THAT_DOES_NOT_EXIST"
         private const val OS_NAME_PROPERTY = "os.name"
