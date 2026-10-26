@@ -44,19 +44,20 @@ private const val PREVIEW_RENAMED = "Tomato plan 2027"
 private const val PREVIEW_WIDTH_DP = 260
 
 /**
- * One row of a tree (the vault sidebar): indentation by [depth], a chevron for folders ([isExpanded] is null for
- * leaves, which keep the chevron's space so names align), an icon, the [label] and optional [trailingText] (a note
- * count). Rows are not focus stops: the tree is one focusable element moved with the arrow keys, and the row it is on
- * draws the focus ring when [focused]. Rows are transparent, so they sit on the panel that holds the tree. [labelContent] replaces the label, for renaming in place; it must
- * keep its keys (a field consumes Space), or a key leaving it would click the row. Screen readers get
- * the selection and expand / collapse actions.
+ * One row of a tree (the vault sidebar, a note's outline): indentation by [depth], a chevron for folders
+ * ([isExpanded] is null for leaves, which keep the chevron's space so names align), an icon unless [icon] is null (an
+ * outline's headings), the [label] and optional [trailingText] (a note count). Rows are not focus stops: the tree is
+ * one focusable element moved with the arrow keys, and the row it is on draws the focus ring when [focused]. Rows are
+ * transparent, so they sit on the panel that holds the tree. [labelContent] replaces the label, for renaming in place;
+ * it must keep its keys (a field consumes Space), or a key leaving it would click the row. Screen readers get the
+ * selection and expand / collapse actions.
  */
 @Composable
 fun NotekeaTreeItem(
     label: String,
-    icon: ImageVector,
     depth: Int,
     onClick: () -> Unit,
+    icon: ImageVector?,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
     focused: Boolean = false,
@@ -88,13 +89,15 @@ fun NotekeaTreeItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Chevron(isExpanded = isExpanded, onToggleExpanded = onToggleExpanded)
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-                tint = if (selected) LocalContentColor.current else colors.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
+            icon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    modifier = Modifier.size(size = NotekeaDimensions.IconSize),
+                    tint = if (selected) LocalContentColor.current else colors.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
+            }
             Box(modifier = Modifier.weight(weight = 1f)) {
                 labelContent?.invoke() ?: TreeLabel(label = label)
             }

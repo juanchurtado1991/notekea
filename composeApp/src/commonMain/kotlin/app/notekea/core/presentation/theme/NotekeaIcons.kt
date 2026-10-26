@@ -2,6 +2,9 @@ package app.notekea.core.presentation.theme
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.composables.icons.lucide.ArrowDown
+import com.composables.icons.lucide.ListTree
+import com.composables.icons.lucide.PanelRightClose
+import com.composables.icons.lucide.PanelRightOpen
 import com.composables.icons.lucide.ArrowDownAZ
 import com.composables.icons.lucide.ArrowUp
 import com.composables.icons.lucide.Bold
@@ -92,6 +95,7 @@ object NotekeaIcons {
     val Folder: ImageVector get() = Lucide.Folder
     val FolderOpen: ImageVector get() = Lucide.FolderOpen
     val Heading: ImageVector get() = Lucide.Heading
+    val HideSidePanel: ImageVector get() = Lucide.PanelRightClose
     val HideSidebar: ImageVector get() = Lucide.PanelLeftClose
     val Italic: ImageVector get() = Lucide.Italic
     val Locate: ImageVector get() = Lucide.FolderSearch
@@ -104,9 +108,11 @@ object NotekeaIcons {
     val OtherFile: ImageVector get() = Lucide.File
     val NoteLink: ImageVector get() = Lucide.Link
     val NumberedList: ImageVector get() = Lucide.ListOrdered
+    val Outline: ImageVector get() = Lucide.ListTree
     val Quote: ImageVector get() = Lucide.TextQuote
     val Rename: ImageVector get() = Lucide.Pencil
     val Reveal: ImageVector get() = Lucide.SquareArrowOutUpRight
+    val ShowSidePanel: ImageVector get() = Lucide.PanelRightOpen
     val ShowSidebar: ImageVector get() = Lucide.PanelLeftOpen
     val SortByModified: ImageVector get() = Lucide.ClockArrowDown
     val SortByName: ImageVector get() = Lucide.ArrowDownAZ

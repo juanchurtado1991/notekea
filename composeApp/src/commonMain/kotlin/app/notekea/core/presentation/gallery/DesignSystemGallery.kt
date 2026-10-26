@@ -51,6 +51,7 @@ import app.notekea.core.presentation.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.components.NotekeaSearchButton
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.components.NotekeaSplitPane
+import app.notekea.core.presentation.components.PaneSide
 import app.notekea.core.presentation.components.NotekeaCompactTabs
 import app.notekea.core.presentation.components.NotekeaGridSizePicker
 import app.notekea.core.presentation.components.NotekeaTab
@@ -106,6 +107,8 @@ private const val SPLIT_END = "Editor"
 private const val SPLIT_HEIGHT_DP = 120
 private const val SPLIT_MAX_DP = 320
 private const val SPLIT_MIN_DP = 120
+private const val SPLIT_OVERLAY = "Float the panel over the content, or put it back beside it"
+private const val SPLIT_SIDE = "Move the panel to the other side"
 private const val SPLIT_START = "Sidebar — drag the edge"
 private const val SPLIT_TOGGLE = "Hide or show the sidebar"
 private const val CODE_SAMPLE = "fun main() = println(\"Notekea\")"
@@ -420,17 +423,29 @@ private fun ConfirmDialogSection() {
 private fun SplitPaneSection() {
     var isVisible by remember { mutableStateOf(value = true) }
     var width by remember { mutableStateOf(value = SPLIT_MIN_DP.dp) }
-    NotekeaIconButton(icon = NotekeaIcons.HideSidebar, label = SPLIT_TOGGLE, onClick = { isVisible = !isVisible })
+    var side by remember { mutableStateOf(value = PaneSide.START) }
+    var isOverlay by remember { mutableStateOf(value = false) }
+    Row {
+        NotekeaIconButton(icon = NotekeaIcons.HideSidebar, label = SPLIT_TOGGLE, onClick = { isVisible = !isVisible })
+        NotekeaIconButton(
+            icon = NotekeaIcons.ShowSidePanel,
+            label = SPLIT_SIDE,
+            onClick = { side = if (side == PaneSide.START) PaneSide.END else PaneSide.START }
+        )
+        NotekeaIconButton(icon = NotekeaIcons.Outline, label = SPLIT_OVERLAY, onClick = { isOverlay = !isOverlay })
+    }
     NotekeaCard {
         NotekeaSplitPane(
-            startWidth = width,
-            onStartWidthChange = { width = it },
-            isStartVisible = isVisible,
-            minStartWidth = SPLIT_MIN_DP.dp,
-            maxStartWidth = SPLIT_MAX_DP.dp,
-            start = { Text(text = SPLIT_START, modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)) },
-            end = { Text(text = SPLIT_END, modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)) },
-            modifier = Modifier.height(height = SPLIT_HEIGHT_DP.dp)
+            panelWidth = width,
+            onPanelWidthChange = { width = it },
+            isPanelVisible = isVisible,
+            minPanelWidth = SPLIT_MIN_DP.dp,
+            maxPanelWidth = SPLIT_MAX_DP.dp,
+            panel = { Text(text = SPLIT_START, modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)) },
+            content = { Text(text = SPLIT_END, modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)) },
+            modifier = Modifier.height(height = SPLIT_HEIGHT_DP.dp),
+            panelSide = side,
+            isOverlay = isOverlay
         )
     }
 }

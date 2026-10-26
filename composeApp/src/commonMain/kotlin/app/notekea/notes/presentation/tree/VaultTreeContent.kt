@@ -39,12 +39,12 @@ fun VaultTreeContent(
         contentColor = MaterialTheme.colorScheme.onBackground
     ) {
         NotekeaSplitPane(
-            startWidth = state.sidebarWidthDp.dp,
-            onStartWidthChange = { onIntent(VaultTreeIntent.OnSidebarResize(widthDp = it.value.roundToInt())) },
-            isStartVisible = !state.isSidebarCollapsed,
-            minStartWidth = TreePreferences.MIN_SIDEBAR_WIDTH_DP.dp,
-            maxStartWidth = TreePreferences.MAX_SIDEBAR_WIDTH_DP.dp,
-            start = {
+            panelWidth = state.sidebarWidthDp.dp,
+            onPanelWidthChange = { onIntent(VaultTreeIntent.OnSidebarResize(widthDp = it.value.roundToInt())) },
+            isPanelVisible = !state.isSidebarCollapsed,
+            minPanelWidth = TreePreferences.MIN_SIDEBAR_WIDTH_DP.dp,
+            maxPanelWidth = TreePreferences.MAX_SIDEBAR_WIDTH_DP.dp,
+            panel = {
                 VaultSidebar(
                     state = state,
                     vaultName = vaultName,
@@ -53,7 +53,7 @@ fun VaultTreeContent(
                     onSearch = onSearch
                 )
             },
-            end = {
+            content = {
                 NoteDetailsPanel(
                     state = state,
                     onShowSidebar = { onIntent(VaultTreeIntent.OnSidebarToggle) },
