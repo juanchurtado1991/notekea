@@ -3,6 +3,7 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.text.TextRange
 import app.notekea.notes.domain.FormatAction
+import app.notekea.notes.domain.ListAction
 import app.notekea.notes.domain.FakeNoteContentStore
 import app.notekea.notes.domain.FakeNoteFileOperations
 import app.notekea.notes.domain.SaveEditorModeUseCase
@@ -597,6 +598,48 @@ class EditorViewModelTest {
         assertEquals(
             expected = TASKS_TEXT to listOf<EditorEffect>(EditorEffect.RequestNoteLink),
             actual = viewModel.buffer.text.toString() to effects.toList()
+        )
+    }
+
+    @Test
+    fun `the selection is kept while the quick switcher picks a note, which links it, or comes back on closing`() =
+        runEditorTest {
+            putOnDisk(path = TASKS, text = TASKS_TEXT)
+            open(path = TASKS)
+            val flour = TASKS_TEXT.indexOf(string = "flour")
+            val select = {
+                viewModel.buffer.edit { selection = TextRange(start = flour, end = flour + "flour".length) }
+            }
+            // The palette takes the keyboard, and the text field drops its selection.
+            val pickerTakesFocus = { viewModel.buffer.edit { selection = TextRange(index = 0) } }
+
+            select()
+            viewModel.onIntent(intent = EditorIntent.OnNoteLinkRequest)
+            pickerTakesFocus()
+            viewModel.onIntent(intent = EditorIntent.OnFocusRequest())
+            val restored = viewModel.buffer.selection
+            viewModel.onIntent(intent = EditorIntent.OnNoteLinkRequest)
+            pickerTakesFocus()
+            viewModel.onIntent(intent = EditorIntent.OnFormat(action = FormatAction.NoteLink(target = "Flour")))
+
+            assertEquals(
+                expected = TextRange(start = flour, end = flour + "flour".length) to
+                    "- [ ] Buy [[Flour|flour]]\n- [x] Soak beans\n",
+                actual = restored to viewModel.buffer.text.toString()
+            )
+        }
+
+    @Test
+    fun `list keys edit the list at the cursor in edit mode`() = runEditorTest {
+        putOnDisk(path = TASKS, text = TASKS_TEXT)
+        open(path = TASKS)
+        viewModel.buffer.edit { selection = TextRange(index = TASKS_TEXT.indexOf(char = '\n')) }
+
+        viewModel.onIntent(intent = EditorIntent.OnListKey(action = ListAction.NEW_ITEM))
+
+        assertEquals(
+            expected = "- [ ] Buy flour\n- [ ] \n- [x] Soak beans\n",
+            actual = viewModel.buffer.text.toString()
         )
     }
 

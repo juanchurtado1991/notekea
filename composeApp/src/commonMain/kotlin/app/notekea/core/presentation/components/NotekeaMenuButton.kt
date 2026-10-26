@@ -23,19 +23,26 @@ private const val PREVIEW_WIDTH_DP = 260
 /**
  * An icon button that opens a menu of [sections] below itself, for a setting with a few choices (the tree's sort):
  * [icon] and [label] show the current choice, and items with [NotekeaMenuItem.isChecked] mark it in the menu.
- * The menu is a [NotekeaContextMenuArea], so it looks and closes like every other menu.
+ * The menu is a [NotekeaContextMenuArea], so it looks and closes like every other menu. With [takesFocus] false
+ * neither the button nor its menu take the keyboard (a text editor's toolbar), so the text keeps its selection.
  */
 @Composable
 fun NotekeaMenuButton(
     icon: ImageVector,
     label: String,
     sections: List<List<NotekeaMenuItem>>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    takesFocus: Boolean = true
 ) {
     val menuState = remember { NotekeaContextMenuState() }
     val belowButton = with(LocalDensity.current) { Offset(x = 0f, y = NotekeaDimensions.CompactControlSize.toPx()) }
-    NotekeaContextMenuArea(sections = sections, modifier = modifier, state = menuState) {
-        NotekeaIconButton(icon = icon, label = label, onClick = { menuState.open(at = belowButton) })
+    NotekeaContextMenuArea(sections = sections, modifier = modifier, state = menuState, takesFocus = takesFocus) {
+        NotekeaIconButton(
+            icon = icon,
+            label = label,
+            onClick = { menuState.open(at = belowButton) },
+            takesFocus = takesFocus
+        )
     }
 }
 

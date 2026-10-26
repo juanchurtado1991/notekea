@@ -136,7 +136,8 @@ private fun ModeTabs(
         onSelect = { index -> if ((index == 1) != isReading) onIntent(EditorIntent.OnReadModeToggle) },
         shortcutHint = platformConventions.toggleReadModeShortcut.label(
             operatingSystem = platformConventions.operatingSystem
-        )
+        ),
+        takesFocus = false
     )
 }
 
@@ -178,7 +179,8 @@ private fun ToolbarButton(
         icon = icon,
         label = stringResource(resource = label),
         onClick = onClick,
-        shortcutHint = shortcutHint
+        shortcutHint = shortcutHint,
+        takesFocus = false
     )
 }
 
@@ -201,6 +203,7 @@ private fun TextGroup(
         listOf(Res.string.format_heading_large, Res.string.format_heading_medium, Res.string.format_heading_small)
     ToolbarGroup {
         NotekeaMenuButton(
+            takesFocus = false,
             icon = NotekeaIcons.Heading,
             label = stringResource(resource = Res.string.format_heading),
             sections = listOf(
@@ -256,6 +259,7 @@ private fun LinkGroup(
             shortcutHint = platformConventions.webLinkShortcut.label(operatingSystem = os)
         )
         NotekeaMenuButton(
+            takesFocus = false,
             icon = NotekeaIcons.Tag,
             label = stringResource(resource = Res.string.format_tag),
             sections = listOf(tags, listOf(newTag)).filter { it.isNotEmpty() }
@@ -293,22 +297,24 @@ private fun BlockGroup(
     actions: FormatActions,
     format: (FormatAction) -> Unit
 ) {
-    var isFolded by remember { mutableStateOf(value = false) }
+    // Read when an item is clicked, never captured: the open menu may still hold the items of an earlier composition.
+    val isFolded = remember { mutableStateOf(value = false) }
     val callouts = CalloutKind.entries.map { kind ->
         NotekeaMenuItem(
             label = actions.calloutTitles.getValue(kind),
-            onClick = { format(actions.callout(kind = kind, isFolded = isFolded)) },
+            onClick = { format(actions.callout(kind = kind, isFolded = isFolded.value)) },
             icon = calloutIcon(kind = kind)
         )
     }
     val folded = NotekeaMenuItem(
         label = stringResource(resource = Res.string.format_callout_folded),
-        onClick = { isFolded = !isFolded },
-        isChecked = isFolded,
+        onClick = { isFolded.value = !isFolded.value },
+        isChecked = isFolded.value,
         keepsMenuOpen = true
     )
     ToolbarGroup {
         NotekeaMenuButton(
+            takesFocus = false,
             icon = NotekeaIcons.Callout,
             label = stringResource(resource = Res.string.format_callout),
             sections = listOf(listOf(folded), callouts)
@@ -329,6 +335,7 @@ private fun MoreMenu(
     format: (FormatAction) -> Unit
 ) {
     NotekeaMenuButton(
+        takesFocus = false,
         icon = NotekeaIcons.More,
         label = stringResource(resource = Res.string.format_more),
         sections = listOf(

@@ -34,6 +34,16 @@ class MarkdownStylesTest {
     }
 
     @Test
+    fun `code shows what is typed, without ligatures`() {
+        assertEquals(
+            expected = listOf(NO_LIGATURES, NO_LIGATURES),
+            actual = listOf(HighlightKind.CODE_BLOCK, HighlightKind.CODE_INLINE).map {
+                styles.of(kind = it).fontFeatureSettings
+            }
+        )
+    }
+
+    @Test
     fun `find matches use the accent, the current one stronger`() {
         val match = styles.findMatch.background
         val current = styles.currentFindMatch.background
