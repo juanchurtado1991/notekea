@@ -218,7 +218,7 @@ themselves.
 - **Missing piece? Add it to the design system**, not to the feature: a new file in `core.presentation.components`
   named `Notekea<Element>` (or a descriptive name such as `EmptyState`), colors and sizes from the theme, optional
   parts as nullable slots, a `@Preview` of its variants in the same file, and a sample in the gallery in the same
-  pull request. Examples still to come: chips, checkboxes, snackbars, the citation chip.
+  pull request. Examples still to come: chips, snackbars, the citation chip.
 - **Enforced by Konsist:** outside `core.presentation.components` and `core.presentation.theme`, importing a
   Material 3 component (`Button`, `OutlinedTextField`, `Tab`, `TabRow`, `Badge`, `AlertDialog`, `Card`, chips,
   `Checkbox`, `Switch`, `DropdownMenu`, `Snackbar`… or `androidx.compose.material3.*`) fails the build.

@@ -103,6 +103,8 @@ switch ($Command) {
         Set-Content (Join-Path $Scratch "New Vault Location\My Notes\Existing note.md") "# Existing note"
         Set-Content (Join-Path $Locked "Locked note.md") "# Locked note"
         Write-EditorNotes
+        # The tasks and callouts note (1.7) is a file of the repository, so tests render the same text.
+        Copy-Item (Join-Path $SmokeRoot "notes\Tasks and callouts.md") $Editor
         Write-Output "Smoke scenarios ready in $Scratch (Movable Vault, Locked Vault, New Vault Location, Playground Vault with its Editor folder)"
     }
     "move" {

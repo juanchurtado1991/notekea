@@ -56,3 +56,4 @@ administrator) the locked folder stays readable.
 | 1.4 Vault tree | 1.4-01 … 1.4-12, 1.3-02, 1.3-04, 1.3-07, 1.1-03 | `Personal Notes`, `Empty Vault`; `prepare` (Playground Vault, Movable Vault), `outside`, `large`, `clear-cache`, `move` |
 | 1.5 Editor | 1.5-01 … 1.5-11, 1.4-01 | `prepare` (Playground Vault and its `Editor` folder), `edit-note`, `edit-note-soon`, `delete-note`, `check-note` |
 | 1.6 Quick switcher and search | 1.6-01 … 1.6-12, 1.4-01, 1.5-01 | `prepare` (Playground Vault: Arepas' aliases `Arepa` and `Corn cakes`, `#recipe/drinks` in Café con leche, `#travel` in the journal and in Lisbon trip's frontmatter), `edit-note`, `large`; `SmokeQuickSwitcherTest` checks the expected results on `Personal Notes` |
+| 1.7 Tasks and callouts | 1.7-01 … 1.7-06, 1.5-08 | `prepare` (Playground Vault: `Editor/Tasks and callouts`, copied from `smoke-data/notes/Tasks and callouts.md`, which `SmokeTasksAndCalloutsTest` also reads) |

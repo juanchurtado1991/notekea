@@ -234,16 +234,21 @@ an empty content search, and an empty vault.
   notes, and typing stays fluid on a 5,000-note vault.
 - Smoke test: cases 1.6-01 to 1.6-12; 1.4-01 and 1.5-01 revised for the aliases added to the sample vault.
 
-### ⬜ 1.7 Tasks and callouts — `feature/markdown-extensions`
+### 🚧 1.7 Tasks and callouts — `feature/markdown-extensions`
 
 Obsidian-flavored Markdown blocks that most vaults use.
 
-- **Tasks:** `- [ ]` / `- [x]` rendered as checkboxes in Read mode and as clickable checkboxes in Edit mode;
-  clicking toggles the character in the file (explicit user action). `Mod+Enter` toggles the task on the cursor line.
-- **Callouts:** `> [!note]`, `[!tip]`, `[!warning]`, `[!danger]`, `[!info]`, `[!quote]` and their aliases, rendered
-  as cards with icon and theme color; foldable callouts (`[!note]-` / `[!note]+`) collapse in Read mode.
+- **Tasks:** `- [ ]` / `- [x]` (or `[X]`, any list marker, also inside quotes and callouts, never in code) rendered as
+  checkboxes in Read mode and as clickable checkboxes over the brackets in Edit mode; clicking toggles the character
+  in the file (explicit user action), saved and undone like any edit. `Mod+Enter` toggles the task on the cursor line.
+- **Callouts:** `> [!note]`, `[!tip]`, `[!warning]`, `[!danger]`, `[!info]`, `[!quote]`, every other Obsidian type
+  and their aliases, rendered in Read mode as cards with an icon per type and a theme color by urgency (warning in the
+  accent color; danger, failure and bug in the error color; quote muted; the rest primary); foldable callouts
+  (`[!note]-` / `[!note]+`) start closed or open and fold with a click on the title. A callout without a title shows
+  its type. Code blocks inside callouts show without `>` marks.
 - Unknown callout types render as `note`, never as broken text.
 - **Done when:** every callout type and nesting level in the sample vault renders correctly in Read mode.
+- Smoke test: cases 1.7-01 to 1.7-06; 1.5-08 revised for the checkboxes in Edit mode.
 
 ### ⬜ 1.8 Images and attachments — `feature/attachments`
 
