@@ -6,12 +6,13 @@ import app.notekea.core.domain.markdown.MarkdownSyntax
 /**
  * The embedded files of a note's text (`ROADMAP.md` 1.8), as Obsidian reads them: `![[file]]` with an optional
  * `|300` width or `|caption`, and `![alt](path)` (a path in `<…>` or percent-encoded, an optional `|300` after the
- * alt; `\|` inside a table). Embeds of notes (`![[Other note]]`, a name without an extension or ending in `.md`) are links, not files, and
- * are left out; so is anything in code.
+ * alt; `\|` inside a table). Embeds of notes (`![[Other note]]`, a name without an extension or ending in `.md`) are
+ * found only when asked for ([embeds] `includeNotes`), marked [Embed.isNote]; anything in code is left out.
  */
 class EmbedFinder {
     fun embeds(
-        text: String
+        text: String,
+        includeNotes: Boolean = false
     ): List<Embed> {
         val embeds = mutableListOf<Embed>()
         var fence: Char? = null
@@ -25,7 +26,7 @@ class EmbedFinder {
             }
             lineStart += line.length + 1
         }
-        return embeds.filter { isFile(target = it.target) }
+        return embeds.filter { if (it.isNote) includeNotes else isFile(target = it.target) }
     }
 
     private fun embedsOf(
@@ -46,14 +47,16 @@ class EmbedFinder {
         offset: Int
     ): Embed {
         val option = match.groupValues[2].takeIf { match.groups[2] != null }
+        val target = match.groupValues[1].removeSuffix(suffix = TABLE_ESCAPE).trim()
         return Embed(
             range = match.range.first + offset..match.range.last + offset,
             // In a table the `|` before a width is escaped (`![[photo.png\|80]]`), so the target ends with the `\`.
-            target = match.groupValues[1].removeSuffix(suffix = TABLE_ESCAPE).trim(),
+            target = target,
             kind = EmbedKind.WIKI,
             isOwnLine = line.trim() == match.value,
             label = option?.takeIf { WIDTH.matchEntire(input = it) == null },
-            width = option?.let { WIDTH.matchEntire(input = it)?.groupValues?.get(index = 1)?.toInt() }
+            width = option?.let { WIDTH.matchEntire(input = it)?.groupValues?.get(index = 1)?.toInt() },
+            isNote = !isFile(target = target)
         )
     }
 

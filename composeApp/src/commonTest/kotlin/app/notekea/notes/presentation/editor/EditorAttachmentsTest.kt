@@ -66,6 +66,32 @@ class EditorAttachmentsTest {
         }
 
     @Test
+    fun `an embedded note shows its text or one section, a missing note or the note itself stays a link`() =
+        runAttachmentsTest {
+            fixture.attachmentStore.contents[RelativePath(value = "Shopping.md")] =
+                "---\ntags: [a]\n---\n# Shopping\n\n## Dairy\n\nCheese".encodeToByteArray()
+            fixture.attachmentStore.contents[NOTE] = "".encodeToByteArray()
+            open(text = "![[Shopping]]\n![[Gone]]\n![[Arepas]]\n![[Shopping#Dairy]]\n![[plate.png]]\n")
+
+            assertEquals(
+                expected = listOf(
+                    Triple("Shopping", AttachmentKind.NOTE, "# Shopping\n\n## Dairy\n\nCheese"),
+                    Triple("Shopping#Dairy", AttachmentKind.NOTE, "## Dairy\n\nCheese"),
+                    Triple("plate.png", AttachmentKind.IMAGE, null)
+                ),
+                actual = viewModel.state.value.attachments.map { Triple(it.embed.target, it.kind, it.noteText) }
+            )
+            assertEquals(
+                expected = listOf("Shopping", "Shopping#Dairy", "plate.png"),
+                actual = AttachmentSpace.of(
+                    text = viewModel.buffer.text.toString(),
+                    views = viewModel.state.value.attachments,
+                    heights = emptyMap()
+                ).map { it.view.embed.target }
+            )
+        }
+
+    @Test
     fun `a pasted image is saved as Obsidian names it and embedded on its own line, pasted text goes in as text`() =
         runAttachmentsTest {
             open(text = "Intro")

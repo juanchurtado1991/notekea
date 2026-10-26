@@ -49,6 +49,25 @@ class SmokeAttachmentsTest {
         )
     }
 
+    @Test
+    fun `1_8-13 the note embeds Shopping basics whole and its Dairy section`() {
+        val shopping = File(SHOPPING_NOTE).readText()
+        val notes = EmbedFinder().embeds(text = File(SMOKE_NOTE).readText(), includeNotes = true).filter { it.isNote }
+
+        assertEquals(
+            expected = listOf("Shopping basics", "Shopping basics#Dairy"),
+            actual = notes.map { it.target }
+        )
+        assertEquals(
+            expected = "## Dairy\n\n- Fresh cheese\n- Butter",
+            actual = EmbeddedNoteText().of(text = shopping, target = notes.last().target)
+        )
+        assertEquals(
+            expected = false,
+            actual = EmbeddedNoteText().of(text = shopping, target = notes.first().target).orEmpty().contains("tags:")
+        )
+    }
+
     @OptIn(ExperimentalResourceApi::class)
     @Test
     fun `1_8-01 the plate is a picture of 480 x 240, the broken png cannot be drawn and shows as a file`() {
@@ -69,5 +88,6 @@ class SmokeAttachmentsTest {
         private const val PERSONAL_NOTES = "../smoke-data/vaults/Personal Notes"
         private const val SMOKE_ATTACHMENTS = "../smoke-data/attachments"
         private const val SMOKE_NOTE = "../smoke-data/notes/Images and files.md"
+        private const val SHOPPING_NOTE = "../smoke-data/notes/Shopping basics.md"
     }
 }

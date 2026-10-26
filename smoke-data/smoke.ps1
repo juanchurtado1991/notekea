@@ -107,9 +107,10 @@ switch ($Command) {
         # tests read the same text.
         Copy-Item (Join-Path $SmokeRoot "notes\Tasks and callouts.md") $Editor
         Copy-Item (Join-Path $SmokeRoot "notes\Formatting practice.md") $Editor
-        # Images and attachments (1.8): the note, its files in the vault's attachments folder, and files outside the
+        # Images and attachments (1.8): the note, the note it embeds, its files in the vault's attachments folder, and files outside the
         # vault to pick, drop or locate.
         Copy-Item (Join-Path $SmokeRoot "notes\Images and files.md") $Editor
+        Copy-Item (Join-Path $SmokeRoot "notes\Shopping basics.md") $Editor
         Copy-Item (Join-Path $SmokeRoot "attachments\*") (Join-Path $Playground "attachments")
         $Outside = Join-Path $Scratch "Outside files"
         New-Item -ItemType Directory -Force $Outside | Out-Null

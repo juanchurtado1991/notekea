@@ -44,7 +44,8 @@ data class AttachmentSpace(
 
         /**
          * The spaces of [text] as it is now, its embeds found again so lines never lag behind typing, matched with the
-         * [views] read a moment ago by their order and file; [heights] are what each one measured when drawn.
+         * [views] read a moment ago in order by their target (an embed without a view, a missing note, gets no space);
+         * [heights] are what each one measured when drawn.
          */
         fun of(
             text: String,
@@ -52,9 +53,14 @@ data class AttachmentSpace(
             heights: Map<String, Int>
         ): List<AttachmentSpace> {
             val shown = views.filter { it.embed.isOwnLine }
-            return embedFinder.embeds(text = text).filter { it.isOwnLine }.mapIndexedNotNull { index, embed ->
-                val view = shown.getOrNull(index = index)?.takeIf { it.embed.target == embed.target }
+            var next = 0
+            return embedFinder.embeds(text = text, includeNotes = true).filter { it.isOwnLine }.mapIndexedNotNull {
+                    index,
+                    embed
+                ->
+                val view = shown.getOrNull(index = next)?.takeIf { it.embed.target == embed.target }
                     ?: return@mapIndexedNotNull null
+                next++
                 val key = index.toString() + KEY_SEPARATOR + embed.target
                 val lineStart =
                     text.lastIndexOf(char = StringPatterns.NEW_LINE_CHAR, startIndex = embed.range.first - 1) + 1
