@@ -1,7 +1,9 @@
 package app.notekea.core.platform.di
 
 import app.notekea.core.data.JvmAppDispatchers
+import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.data.JvmLocalTimeFormatter
+import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.data.PropertiesFileSettingsFactory
 import app.notekea.core.data.SqliteDatabaseFactory
 import app.notekea.db.NotekeaDatabase
@@ -19,6 +21,7 @@ import org.koin.dsl.module
 val jvmPlatformModule = module {
     single<AppDispatchers> { JvmAppDispatchers() }
     single<LocalTimeFormatter> { JvmLocalTimeFormatter() }
+    single<LocalCalendar> { JvmLocalCalendar() }
     single<Settings> {
         PropertiesFileSettingsFactory(appDataDirectory = get<PlatformConventions>().appDataDirectory).create()
     }
