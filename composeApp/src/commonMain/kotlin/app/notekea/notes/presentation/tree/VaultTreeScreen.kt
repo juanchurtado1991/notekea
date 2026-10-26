@@ -102,6 +102,7 @@ private fun WorkspaceFollowers(
     WindowShortcut(shortcut = state.platformConventions.toggleSidebarShortcut) {
         viewModel.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
     }
+    DailyNoteShortcuts(platformConventions = state.platformConventions, onIntent = viewModel::onIntent)
     QuickSwitcherShortcuts(platformConventions = state.platformConventions, onIntent = switcherViewModel::onIntent)
     LaunchedEffect(viewModel, editorViewModel) {
         viewModel.effects.collect { effect -> followRename(effect = effect, editorViewModel = editorViewModel) }
@@ -148,6 +149,19 @@ private fun FollowQuickSwitcher(
             }
         }
     }
+}
+
+/** `Mod+D` opens today's daily note; `Mod+Alt+←` and `Mod+Alt+→` step to the daily note before or after the open one. */
+@Composable
+private fun DailyNoteShortcuts(
+    platformConventions: PlatformConventions,
+    onIntent: (VaultTreeIntent) -> Unit
+) {
+    WindowShortcut(shortcut = platformConventions.todayShortcut) { onIntent(VaultTreeIntent.OnTodayClick) }
+    WindowShortcut(shortcut = platformConventions.previousDayShortcut) {
+        onIntent(VaultTreeIntent.OnDayStep(step = -1))
+    }
+    WindowShortcut(shortcut = platformConventions.nextDayShortcut) { onIntent(VaultTreeIntent.OnDayStep(step = 1)) }
 }
 
 /** `Mod+P` opens the palette on note names, `Mod+Shift+F` on note content, whatever has focus. */
@@ -227,7 +241,9 @@ private fun NoteEditor(
             onSwitcher(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES, purpose = QuickSwitcherPurpose.LINK))
         },
         onRequestTag = { query -> onTagPicker(TagPickerIntent.OnOpen(query = query)) },
-        properties = note.metadata
+        onDayStep = { viewModel.onIntent(intent = VaultTreeIntent.OnDayStep(step = it)) },
+        properties = note.metadata,
+        dayNeighbors = state.dayNeighbors.takeIf { state.selectedPath == note.file.path }
     )
 }
 

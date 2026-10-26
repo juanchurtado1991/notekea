@@ -32,6 +32,8 @@ import app.notekea.resources.tree_hide_sidebar
 import app.notekea.resources.tree_new_folder
 import app.notekea.resources.tree_new_note
 import app.notekea.resources.tree_search
+import app.notekea.resources.tree_today
+import app.notekea.core.presentation.components.NotekeaTreeItem
 import app.notekea.resources.tree_sort_by_date
 import app.notekea.resources.tree_sort_by_name
 import app.notekea.resources.tree_sorted_by_date
@@ -42,7 +44,7 @@ private const val PREVIEW_WIDTH_DP = 260
 
 /**
  * Top of the sidebar: the vault's name and folder, the search button that opens the quick switcher (`Mod+P`, shown on
- * it), and the actions on the tree. Every icon has a tooltip with its
+ * it), "Today", which opens today's daily note (`Mod+D`, shown beside it), and the actions on the tree. Every icon has a tooltip with its
  * name and shortcut. The sort button shows the current sort and opens a menu with both choices.
  */
 @Composable
@@ -55,7 +57,8 @@ internal fun SidebarHeader(
     onNewFolder: () -> Unit,
     onSortChange: (TreeSort) -> Unit,
     onHideSidebar: () -> Unit,
-    onSearch: () -> Unit
+    onSearch: () -> Unit,
+    onToday: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(
@@ -78,6 +81,7 @@ internal fun SidebarHeader(
                 operatingSystem = platformConventions.operatingSystem
             )
         )
+        TodayRow(platformConventions = platformConventions, onToday = onToday)
         TreeToolbar(
             sort = sort,
             platformConventions = platformConventions,
@@ -86,6 +90,22 @@ internal fun SidebarHeader(
             onSortChange = onSortChange
         )
     }
+}
+
+/** "Today", which opens today's daily note, with its shortcut beside it (`ROADMAP.md` 1.10). */
+@Composable
+private fun TodayRow(
+    platformConventions: PlatformConventions,
+    onToday: () -> Unit
+) {
+    NotekeaTreeItem(
+        label = stringResource(resource = Res.string.tree_today),
+        depth = 0,
+        onClick = onToday,
+        icon = NotekeaIcons.Today,
+        modifier = Modifier.padding(top = NotekeaDimensions.SpacingXs, end = NotekeaDimensions.SpacingXs),
+        trailingText = platformConventions.todayShortcut.label(operatingSystem = platformConventions.operatingSystem)
+    )
 }
 
 @Composable
@@ -190,7 +210,8 @@ private fun SidebarHeaderPreview() {
                 onNewFolder = {},
                 onSortChange = {},
                 onHideSidebar = {},
-                onSearch = {}
+                onSearch = {},
+                onToday = {}
             )
         }
     }

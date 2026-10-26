@@ -25,6 +25,7 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.platform.BeforeWindowClose
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.notes.domain.DayNeighbors
 import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.RelativePath
 import kotlinx.coroutines.channels.Channel
@@ -55,8 +56,10 @@ fun EditorScreen(
     onSearchTag: (String) -> Unit,
     onRequestNoteLink: () -> Unit,
     onRequestTag: (String) -> Unit,
+    onDayStep: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    properties: NoteMetadata? = null
+    properties: NoteMetadata? = null,
+    dayNeighbors: DayNeighbors? = null
 ) {
     val state by viewModel.state.collectAsState()
     val flushed = remember(viewModel) { Channel<Unit>(capacity = Channel.CONFLATED) }
@@ -73,6 +76,7 @@ fun EditorScreen(
         onSearchTag = onSearchTag,
         onRequestNoteLink = onRequestNoteLink,
         onRequestTag = onRequestTag,
+        onDayStep = onDayStep,
         sidePanel = sidePanel
     )
     DisposableEffect(viewModel) { onDispose { viewModel.onIntent(intent = EditorIntent.OnFlushRequest) } }
@@ -92,7 +96,8 @@ fun EditorScreen(
         sidePanel = sidePanel,
         modifier = modifier,
         textFocusRequester = textFocusRequester,
-        properties = properties
+        properties = properties,
+        dayNeighbors = dayNeighbors
     )
 }
 
@@ -110,7 +115,8 @@ internal fun EditorWithSidePanel(
     sidePanel: SidePanelHost,
     modifier: Modifier,
     textFocusRequester: FocusRequester,
-    properties: NoteMetadata?
+    properties: NoteMetadata?,
+    dayNeighbors: DayNeighbors? = null
 ) {
     BoxWithConstraints(modifier = modifier) {
         val room = maxWidth - EDITOR_MIN_WIDTH_DP.dp
@@ -142,7 +148,8 @@ internal fun EditorWithSidePanel(
                     onIntent = onIntent,
                     properties = properties,
                     textFocusRequester = textFocusRequester,
-                    outlineTracker = sidePanel.tracker
+                    outlineTracker = sidePanel.tracker,
+                    dayNeighbors = dayNeighbors
                 )
             },
             panelSide = PaneSide.END,
@@ -163,6 +170,7 @@ private fun EditorEffects(
     onSearchTag: (String) -> Unit,
     onRequestNoteLink: () -> Unit,
     onRequestTag: (String) -> Unit,
+    onDayStep: (Int) -> Unit,
     sidePanel: SidePanelHost
 ) {
     val currentOnRequestNoteLink by rememberUpdatedState(newValue = onRequestNoteLink)
@@ -171,6 +179,7 @@ private fun EditorEffects(
     val currentOnClosed by rememberUpdatedState(newValue = onClosed)
     val currentOnOpenLink by rememberUpdatedState(newValue = onOpenLink)
     val currentOnSearchTag by rememberUpdatedState(newValue = onSearchTag)
+    val currentOnDayStep by rememberUpdatedState(newValue = onDayStep)
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
@@ -193,12 +202,9 @@ private fun EditorEffects(
                     isReading = viewModel.state.value.isReading
                 )
 
-                EditorEffect.FocusOutline -> focusOutline(sidePanel = sidePanel)
+                EditorEffect.FocusOutline, is EditorEffect.RevealHeading -> sidePanel.follow(effect = effect)
 
-                is EditorEffect.RevealHeading -> {
-                    sidePanel.isOverlayOpen = false
-                    sidePanel.tracker.reveal(heading = effect.heading)
-                }
+                is EditorEffect.DayStep -> currentOnDayStep(effect.step)
             }
         }
     }
@@ -241,19 +247,6 @@ private fun OutlinePanel(
         },
         outlineFocus = sidePanel.outlineFocus
     )
-}
-
-/** Opens the floating panel if the panel floats, then gives its outline the keyboard once it is laid out. */
-private suspend fun focusOutline(
-    sidePanel: SidePanelHost
-) {
-    if (sidePanel.isOverlay) sidePanel.isOverlayOpen = true
-    withFrameNanos { }
-    try {
-        sidePanel.outlineFocus.requestFocus()
-    } catch (_: IllegalStateException) {
-        // The note has no headings, so there is no list to focus.
-    }
 }
 
 /**

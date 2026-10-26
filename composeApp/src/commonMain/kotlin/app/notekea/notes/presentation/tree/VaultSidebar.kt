@@ -81,7 +81,8 @@ internal fun VaultSidebar(
                 onNewFolder = { onIntent(VaultTreeIntent.OnNewFolderClick(baseName = untitledFolder)) },
                 onSortChange = { onIntent(VaultTreeIntent.OnSortChange(sort = it)) },
                 onHideSidebar = { onIntent(VaultTreeIntent.OnSidebarToggle) },
-                onSearch = onSearch
+                onSearch = onSearch,
+                onToday = { onIntent(VaultTreeIntent.OnTodayClick) }
             )
             SidebarMessages(state = state, onIntent = onIntent)
             Box(modifier = Modifier.weight(weight = 1f).fillMaxWidth().padding(top = NotekeaDimensions.SpacingS)) {

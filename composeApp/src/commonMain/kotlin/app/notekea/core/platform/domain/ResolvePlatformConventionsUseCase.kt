@@ -8,8 +8,10 @@ package app.notekea.core.platform.domain
  * with primary modifier + \), save with primary modifier + S, find in note with primary modifier + F, Edit / Read
  * with primary modifier + E, the quick switcher with primary modifier + P and search in all notes with primary
  * modifier + Shift + F, toggling the task on the cursor line with primary modifier + Enter, bold, italic, a note link and a web link
- * with primary modifier + B, I, K and Shift + K, dialog button order, the user's home folder and the standard per-user application data
- * directory, honoring `APPDATA` and `XDG_DATA_HOME` when they are set.
+ * with primary modifier + B, I, K and Shift + K, the side panel and the outline with primary modifier + Shift + \ and
+ * Shift + O, today's daily note with primary modifier + D and the days around it with primary modifier + Alt + ← and →,
+ * dialog button order, the user's home folder and the standard per-user application data directory, honoring
+ * `APPDATA` and `XDG_DATA_HOME` when they are set.
  */
 class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnvironment) {
     private val macosNamePattern = Regex(pattern = MACOS_NAME_MARKERS)
@@ -17,34 +19,34 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
     operator fun invoke(): PlatformConventions {
         val operatingSystem = detectOperatingSystem(name = systemEnvironment.operatingSystemName)
         val primaryModifier = primaryModifierFor(operatingSystem = operatingSystem)
+        val primary = { key: ShortcutKey, extra: ShortcutModifier? ->
+            Shortcut(key = key, modifiers = setOfNotNull(primaryModifier, extra))
+        }
         return PlatformConventions(
             operatingSystem = operatingSystem,
             primaryModifier = primaryModifier,
-            openFolderShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(primaryModifier)),
+            openFolderShortcut = primary(ShortcutKey.O, null),
             quitShortcut = quitShortcutFor(operatingSystem = operatingSystem),
-            newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(primaryModifier)),
+            newNoteShortcut = primary(ShortcutKey.N, null),
             renameShortcut = renameShortcutFor(operatingSystem = operatingSystem),
             deleteShortcut = deleteShortcutFor(operatingSystem = operatingSystem),
-            toggleSidebarShortcut = Shortcut(key = ShortcutKey.BACKSLASH, modifiers = setOf(primaryModifier)),
-            saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(primaryModifier)),
-            findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(primaryModifier)),
-            toggleReadModeShortcut = Shortcut(key = ShortcutKey.E, modifiers = setOf(primaryModifier)),
-            quickSwitcherShortcut = Shortcut(key = ShortcutKey.P, modifiers = setOf(primaryModifier)),
-            searchNotesShortcut = Shortcut(
-                key = ShortcutKey.F,
-                modifiers = setOf(primaryModifier, ShortcutModifier.SHIFT)
-            ),
-            toggleTaskShortcut = Shortcut(key = ShortcutKey.ENTER, modifiers = setOf(primaryModifier)),
-            boldShortcut = Shortcut(key = ShortcutKey.B, modifiers = setOf(primaryModifier)),
-            italicShortcut = Shortcut(key = ShortcutKey.I, modifiers = setOf(primaryModifier)),
-            noteLinkShortcut = Shortcut(key = ShortcutKey.K, modifiers = setOf(primaryModifier)),
-            webLinkShortcut = Shortcut(key = ShortcutKey.K, modifiers = setOf(primaryModifier, ShortcutModifier.SHIFT)),
-            pasteShortcut = Shortcut(key = ShortcutKey.V, modifiers = setOf(primaryModifier)),
-            toggleSidePanelShortcut = Shortcut(
-                key = ShortcutKey.BACKSLASH,
-                modifiers = setOf(primaryModifier, ShortcutModifier.SHIFT)
-            ),
-            outlineShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(primaryModifier, ShortcutModifier.SHIFT)),
+            toggleSidebarShortcut = primary(ShortcutKey.BACKSLASH, null),
+            saveShortcut = primary(ShortcutKey.S, null),
+            findShortcut = primary(ShortcutKey.F, null),
+            toggleReadModeShortcut = primary(ShortcutKey.E, null),
+            quickSwitcherShortcut = primary(ShortcutKey.P, null),
+            searchNotesShortcut = primary(ShortcutKey.F, ShortcutModifier.SHIFT),
+            toggleTaskShortcut = primary(ShortcutKey.ENTER, null),
+            boldShortcut = primary(ShortcutKey.B, null),
+            italicShortcut = primary(ShortcutKey.I, null),
+            noteLinkShortcut = primary(ShortcutKey.K, null),
+            webLinkShortcut = primary(ShortcutKey.K, ShortcutModifier.SHIFT),
+            pasteShortcut = primary(ShortcutKey.V, null),
+            toggleSidePanelShortcut = primary(ShortcutKey.BACKSLASH, ShortcutModifier.SHIFT),
+            outlineShortcut = primary(ShortcutKey.O, ShortcutModifier.SHIFT),
+            todayShortcut = primary(ShortcutKey.D, null),
+            previousDayShortcut = primary(ShortcutKey.LEFT, ShortcutModifier.ALT),
+            nextDayShortcut = primary(ShortcutKey.RIGHT, ShortcutModifier.ALT),
             dialogButtonOrder = dialogButtonOrderFor(operatingSystem = operatingSystem),
             appDataDirectory = appDataDirectoryFor(operatingSystem = operatingSystem),
             homeDirectory = systemEnvironment.userHome

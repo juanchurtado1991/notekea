@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.focus.FocusRequester
 
 /**
@@ -29,5 +30,32 @@ internal class SidePanelHost(
         intent: EditorIntent
     ) {
         if (intent == EditorIntent.OnSidePanelToggle && isOverlay) isOverlayOpen = !isOverlayOpen else send(intent)
+    }
+
+    /**
+     * Follows the ViewModel's side panel [effect]s: a heading chosen closes the floating panel and is scrolled to;
+     * `Mod+Shift+O` opens the panel if it floats, then gives its outline the keyboard once it is laid out.
+     */
+    suspend fun follow(
+        effect: EditorEffect
+    ) {
+        when (effect) {
+            is EditorEffect.RevealHeading -> {
+                isOverlayOpen = false
+                tracker.reveal(heading = effect.heading)
+            }
+
+            EditorEffect.FocusOutline -> {
+                if (isOverlay) isOverlayOpen = true
+                withFrameNanos { }
+                try {
+                    outlineFocus.requestFocus()
+                } catch (_: IllegalStateException) {
+                    // The note has no headings, so there is no list to focus.
+                }
+            }
+
+            else -> Unit
+        }
     }
 }

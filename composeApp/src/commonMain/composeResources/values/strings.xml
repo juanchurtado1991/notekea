@@ -22,8 +22,10 @@
     <string name="editor_keep_mine">Keep mine</string>
     <string name="editor_load_failed">This note couldn’t be opened.</string>
     <string name="editor_load_theirs">Load theirs</string>
+    <string name="editor_next_day">Next daily note</string>
     <string name="editor_outline">Outline</string>
     <string name="editor_preview_mode">Preview</string>
+    <string name="editor_previous_day">Previous daily note</string>
     <string name="editor_restore">Restore</string>
     <string name="editor_retry">Try again</string>
     <string name="editor_save_failed">Not saved yet: %1$s</string>
@@ -216,6 +218,7 @@
     <string name="tree_sorted_by_date">Sort notes: date modified</string>
     <string name="tree_sorted_by_name">Sort notes: name</string>
     <string name="tree_switch_vault">Open another vault</string>
+    <string name="tree_today">Today</string>
     <string name="tree_untitled_folder">Untitled folder</string>
     <string name="tree_untitled_note">Untitled</string>
 

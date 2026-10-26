@@ -94,6 +94,12 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.notekeaCodeTextStyle
 import app.notekea.notes.domain.NoteMetadata
+import app.notekea.notes.domain.DayNeighbors
+import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.core.presentation.platform.label
+import app.notekea.core.presentation.theme.NotekeaIcons
+import app.notekea.resources.editor_next_day
+import app.notekea.resources.editor_previous_day
 import androidx.compose.runtime.DisposableEffect
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.NotesError
@@ -146,7 +152,8 @@ fun EditorContent(
     modifier: Modifier = Modifier,
     properties: NoteMetadata? = null,
     textFocusRequester: FocusRequester? = null,
-    outlineTracker: OutlineTracker? = null
+    outlineTracker: OutlineTracker? = null,
+    dayNeighbors: DayNeighbors? = null
 ) {
     val scrollState = rememberScrollState()
     // Read only when the toolbar is placed, never in composition, so updating it recomposes nothing.
@@ -175,7 +182,7 @@ fun EditorContent(
                     platformConventions = platformConventions,
                     onIntent = onIntent,
                     positions = positions,
-                    properties = properties,
+                    header = EditorHeaderData(properties = properties, dayNeighbors = dayNeighbors),
                     textFocusRequester = textFocusRequester,
                     onToolbarHeight = { keepInView.topInset = it.toFloat() }
                 )
@@ -230,7 +237,7 @@ private fun EditorPage(
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
     positions: HeadingPositions,
-    properties: NoteMetadata?,
+    header: EditorHeaderData,
     textFocusRequester: FocusRequester?,
     onToolbarHeight: (Int) -> Unit
 ) {
@@ -243,7 +250,7 @@ private fun EditorPage(
     ) {
         EditorHeader(
             state = state,
-            properties = properties,
+            header = header,
             platformConventions = platformConventions,
             onIntent = onIntent
         )
@@ -308,9 +315,9 @@ private fun NoteText(
 @Composable
 private fun EditorHeader(
     state: EditorState,
+    header: EditorHeaderData,
     platformConventions: PlatformConventions,
-    onIntent: (EditorIntent) -> Unit,
-    properties: NoteMetadata?
+    onIntent: (EditorIntent) -> Unit
 ) {
     val path = state.notePath ?: return
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
@@ -330,6 +337,9 @@ private fun EditorHeader(
             isError = state.titleError != null,
             onEdit = { if (state.titleError != null) onIntent(EditorIntent.OnTitleErrorDismiss) }
         )
+        header.dayNeighbors?.let {
+            DayArrows(neighbors = it, platformConventions = platformConventions, onIntent = onIntent)
+        }
         SaveIndicator(status = state.saveStatus)
     }
     state.titleError?.let { error ->
@@ -339,9 +349,35 @@ private fun EditorHeader(
             color = MaterialTheme.colorScheme.error
         )
     }
-    propertiesLine(properties = properties)?.let { line ->
+    propertiesLine(properties = header.properties)?.let { line ->
         Text(text = line, style = MaterialTheme.typography.bodySmall, color = muted)
     }
+}
+
+/** A daily note's arrows to the daily notes before and after it, each greyed out when there is none on its side. */
+@Composable
+private fun DayArrows(
+    neighbors: DayNeighbors,
+    platformConventions: PlatformConventions,
+    onIntent: (EditorIntent) -> Unit
+) {
+    val operatingSystem = platformConventions.operatingSystem
+    NotekeaIconButton(
+        icon = NotekeaIcons.PreviousDay,
+        label = stringResource(resource = Res.string.editor_previous_day),
+        onClick = { onIntent(EditorIntent.OnDayStep(step = -1)) },
+        enabled = neighbors.previous != null,
+        shortcutHint = platformConventions.previousDayShortcut.label(operatingSystem = operatingSystem),
+        takesFocus = false
+    )
+    NotekeaIconButton(
+        icon = NotekeaIcons.NextDay,
+        label = stringResource(resource = Res.string.editor_next_day),
+        onClick = { onIntent(EditorIntent.OnDayStep(step = 1)) },
+        enabled = neighbors.next != null,
+        shortcutHint = platformConventions.nextDayShortcut.label(operatingSystem = operatingSystem),
+        takesFocus = false
+    )
 }
 
 /** Tags and aliases on one line (`#recipe #venezuelan · Arepa`), or null when the note has neither. */

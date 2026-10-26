@@ -12,6 +12,9 @@ import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.EditorPreferencesStore
 import app.notekea.notes.domain.GetSidePanelUseCase
+import app.notekea.notes.domain.GetDailyNoteSettingsUseCase
+import app.notekea.notes.domain.OpenDailyNoteUseCase
+import app.notekea.notes.presentation.tree.DailyNoteTools
 import app.notekea.notes.domain.SaveSidePanelUseCase
 import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.FollowLinkUseCase
@@ -60,6 +63,9 @@ val notesModule = module {
     factoryOf(::GetEditorModeUseCase)
     factoryOf(::SaveEditorModeUseCase)
     factoryOf(::GetSidePanelUseCase)
+    factoryOf(::GetDailyNoteSettingsUseCase)
+    factoryOf(::OpenDailyNoteUseCase)
+    factoryOf(::DailyNoteTools)
     factoryOf(::SaveSidePanelUseCase)
     factoryOf(::ApplyLinkUpdatesUseCase)
     factoryOf(::AttachFileUseCase)
@@ -100,6 +106,7 @@ val notesModule = module {
             deleteEntry = get(),
             revealEntry = get(),
             fileOpener = get(),
+            days = get(),
             attachmentStore = get(),
             dispatchers = get(),
             updateLinksAfterRename = get(),
