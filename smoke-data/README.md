@@ -9,7 +9,7 @@ Open them with **Open folder…**. Notekea never writes inside a vault, so openi
 
 | Vault | Notes counted | What it covers |
 |---|---|---|
-| `Personal Notes` | 12 | Nested folders (three levels in `Projects/Garden`), wiki links, tags, YAML front matter, tasks, a table, a non-ASCII file name (`Café con leche.md`), a folder name with a space; files that must **not** count: `.obsidian/`, `.trash/` and `attachments/shopping.txt` |
+| `Personal Notes` | 12 | Nested folders (three levels in `Projects/Garden`), wiki links, tags (one nested), aliases, YAML front matter, tasks, a table, a non-ASCII file name (`Café con leche.md`), a folder name with a space; files that must **not** count: `.obsidian/`, `.trash/` and `attachments/shopping.txt` |
 | `Work Obsidian` | 6 | A second vault in Obsidian format, to switch between vaults and fill the recent list |
 | `Empty Vault` | 0 | Shows "This folder has no notes yet" (it only holds a hidden `.gitkeep` so Git keeps the folder) |
 
@@ -55,3 +55,4 @@ administrator) the locked folder stays readable.
 | 1.3 Open a vault | 1.3-01 … 1.3-10, 1.1-04, 1.2-04 | All three vaults; `prepare`, `move`, `lock`, `first-launch` |
 | 1.4 Vault tree | 1.4-01 … 1.4-12, 1.3-02, 1.3-04, 1.3-07, 1.1-03 | `Personal Notes`, `Empty Vault`; `prepare` (Playground Vault, Movable Vault), `outside`, `large`, `clear-cache`, `move` |
 | 1.5 Editor | 1.5-01 … 1.5-11, 1.4-01 | `prepare` (Playground Vault and its `Editor` folder), `edit-note`, `edit-note-soon`, `delete-note`, `check-note` |
+| 1.6 Quick switcher and search | 1.6-01 … 1.6-10, 1.4-01, 1.5-01 | `prepare` (Playground Vault: Arepas' aliases `Arepa` and `Corn cakes`, `#recipe/drinks` in Café con leche, `#travel` in the journal and in Lisbon trip's frontmatter), `edit-note`, `large`; `SmokeQuickSwitcherTest` checks the expected results on `Personal Notes` |
