@@ -48,6 +48,7 @@ building 1.3. Test data comes from `smoke-data/` (see its README); run its scrip
 | G-04 | Disconnect from the network and use the app (open vault, edit, related notes, chat with a downloaded model) | Everything works offline; only model download and Git sync report "offline" | 3.3 | | | | |
 | G-05 | Use the app for 10 minutes while watching outgoing connections (e.g. Little Snitch, Wireshark, `ss -tp`) | No network traffic except model download and Git sync started by the user | 3.3 | | | | |
 | G-06 | Switch the OS between light and dark mode while the app is open | The app follows the system theme (Linux: record whether the desktop environment's setting is detected; Compose support varies) | 1.2 | | | | |
+| G-07 | Start the app with `NOTEKEA_CRASH_TEST=1` (macOS and Linux: `NOTEKEA_CRASH_TEST=1 ./gradlew :composeApp:run`; Windows PowerShell: `$env:NOTEKEA_CRASH_TEST="1"; .\gradlew.bat :composeApp:run`), open a note and type a word, then wait | About 3 seconds after the window opens, the dialog "Notekea needs to close" names the report file in the app data folder (`crashes/crash-<date>.txt`); Copy details puts the report on the clipboard (it starts with "Notekea crash report" and has no note text); Report on GitHub opens the Crash report form; Close Notekea closes the app and the word typed is saved | 1.6 | `CrashReporterTest`, `RecordCrashUseCaseTest`, `CrashReportOnDiskTest` | | | |
 
 ## M1 — Vault and editor
 
