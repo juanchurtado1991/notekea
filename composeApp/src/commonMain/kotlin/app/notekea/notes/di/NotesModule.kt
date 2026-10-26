@@ -6,6 +6,7 @@ import app.notekea.notes.data.SettingsEditorPreferencesStore
 import app.notekea.notes.data.SettingsTreePreferencesStore
 import app.notekea.notes.data.SqlDelightNoteMetadataCache
 import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
+import app.notekea.notes.domain.AttachFileUseCase
 import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
@@ -56,6 +57,7 @@ val notesModule = module {
     factoryOf(::GetEditorModeUseCase)
     factoryOf(::SaveEditorModeUseCase)
     factoryOf(::ApplyLinkUpdatesUseCase)
+    factoryOf(::AttachFileUseCase)
     factoryOf(::CreateFolderUseCase)
     factoryOf(::CreateNoteUseCase)
     factoryOf(::DeleteEntryUseCase)
