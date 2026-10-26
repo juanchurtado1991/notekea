@@ -2,10 +2,14 @@ package app.notekea.notes.data
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.notes.domain.EditorPreferencesStore
+import app.notekea.notes.domain.SidePanelPreferences
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.withContext
 
-/** [EditorPreferencesStore] on Multiplatform Settings: one key for all vaults, `editor.read_mode`. */
+/**
+ * [EditorPreferencesStore] on Multiplatform Settings, the same keys for all vaults: `editor.read_mode`,
+ * `editor.side_panel_width` and `editor.side_panel_visible`.
+ */
 class SettingsEditorPreferencesStore(
     private val settings: Settings,
     private val dispatchers: AppDispatchers
@@ -20,7 +24,23 @@ class SettingsEditorPreferencesStore(
         settings.putBoolean(key = READ_MODE_KEY, value = isReading)
     }
 
+    override suspend fun sidePanel(): SidePanelPreferences = withContext(context = dispatchers.io) {
+        SidePanelPreferences(
+            widthDp = settings.getInt(key = SIDE_PANEL_WIDTH_KEY, defaultValue = SidePanelPreferences.DEFAULT_WIDTH_DP),
+            isVisible = settings.getBoolean(key = SIDE_PANEL_VISIBLE_KEY, defaultValue = true)
+        )
+    }
+
+    override suspend fun setSidePanel(
+        preferences: SidePanelPreferences
+    ) = withContext(context = dispatchers.io) {
+        settings.putInt(key = SIDE_PANEL_WIDTH_KEY, value = preferences.widthDp)
+        settings.putBoolean(key = SIDE_PANEL_VISIBLE_KEY, value = preferences.isVisible)
+    }
+
     companion object {
         private const val READ_MODE_KEY = "editor.read_mode"
+        private const val SIDE_PANEL_VISIBLE_KEY = "editor.side_panel_visible"
+        private const val SIDE_PANEL_WIDTH_KEY = "editor.side_panel_width"
     }
 }
