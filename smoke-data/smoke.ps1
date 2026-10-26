@@ -113,11 +113,13 @@ switch ($Command) {
         Copy-Item (Join-Path $SmokeRoot "notes\Shopping basics.md") $Editor
         # Outline (1.9): a long note with headings of every level, and lines that only look like headings.
         Copy-Item (Join-Path $SmokeRoot "notes\Outline practice.md") $Editor
+        # Daily notes (1.10): a vault with Obsidian's Daily notes settings, a template and two earlier days.
+        Copy-Item -Recurse (Join-Path $SmokeRoot "daily") (Join-Path $Scratch "Daily Vault")
         Copy-Item (Join-Path $SmokeRoot "attachments\*") (Join-Path $Playground "attachments")
         $Outside = Join-Path $Scratch "Outside files"
         New-Item -ItemType Directory -Force $Outside | Out-Null
         Copy-Item (Join-Path $SmokeRoot "outside\*") $Outside
-        Write-Output "Smoke scenarios ready in $Scratch (Movable Vault, Locked Vault, New Vault Location, Playground Vault with its Editor folder, Outside files)"
+        Write-Output "Smoke scenarios ready in $Scratch (Movable Vault, Locked Vault, New Vault Location, Playground Vault with its Editor folder, Outside files, Daily Vault)"
     }
     "move" {
         Rename-Item (Join-Path $Scratch "Movable Vault") "Moved Vault"

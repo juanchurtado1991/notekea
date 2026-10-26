@@ -1,0 +1,6 @@
+{
+  "folder": "Diary",
+  "format": "YYYY/MMMM/dddd, MMMM Do YYYY",
+  "template": "Templates/Daily",
+  "autorun": false
+}
