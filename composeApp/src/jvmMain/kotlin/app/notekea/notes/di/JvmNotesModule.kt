@@ -34,6 +34,10 @@ import app.notekea.notes.domain.AttachmentStore
 import app.notekea.notes.domain.VaultSettingsReader
 import okio.FileSystem
 import org.koin.dsl.module
+import kotlin.time.Duration.Companion.seconds
+
+// On Wayland the owner of a copied image never answers Java, so it gives up after a second instead of ten.
+private val WAYLAND_SELECTION_TIMEOUT = 1.seconds
 
 /**
  * Desktop implementations of the notes ports: the real file system through Okio, native change events, the system
@@ -59,7 +63,10 @@ val jvmNotesModule = module {
         val isWayland = get<PlatformConventions>().operatingSystem == OperatingSystem.LINUX &&
             get<SystemEnvironment>().environmentVariable(name = WaylandClipboardReader.WAYLAND_DISPLAY) != null
         if (isWayland) {
-            WaylandClipboardReader(primary = AwtClipboardReader(), readCommand = ::readCommand)
+            WaylandClipboardReader(
+                primary = AwtClipboardReader(selectionTimeout = WAYLAND_SELECTION_TIMEOUT),
+                readCommand = ::readCommand
+            )
         } else {
             AwtClipboardReader()
         }

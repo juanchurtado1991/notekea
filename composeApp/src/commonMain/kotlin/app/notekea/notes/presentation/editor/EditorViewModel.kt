@@ -322,9 +322,17 @@ class EditorViewModel(
         launchGuarded(onError = ::showUnexpectedError) {
             val image =
                 withContext(context = attachmentTools.dispatchers.io) { attachmentTools.clipboardReader.image() }
-            if (image != null) {
-                attachAndEmbed(sources = listOf(attachments.pastedImage(bytes = image)))
-                return@launchGuarded
+            when {
+                // An image the clipboard cannot give is explained, instead of pasting nothing or other text.
+                image is Outcome.Failure -> {
+                    reduce { it.copy(attachmentError = image.error) }
+                    return@launchGuarded
+                }
+
+                image is Outcome.Success && image.value != null -> {
+                    attachAndEmbed(sources = listOf(attachments.pastedImage(bytes = image.value)))
+                    return@launchGuarded
+                }
             }
             val text = withContext(context = attachmentTools.dispatchers.io) { attachmentTools.clipboardReader.text() }
             text?.let { pasted ->

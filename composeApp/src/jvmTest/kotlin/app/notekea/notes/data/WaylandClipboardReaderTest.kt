@@ -1,7 +1,9 @@
 package app.notekea.notes.data
 
+import app.notekea.core.domain.Outcome
 import app.notekea.notes.domain.ClipboardReader
 import app.notekea.notes.domain.FakeClipboardReader
+import app.notekea.notes.domain.NotesError
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -14,7 +16,8 @@ import kotlin.test.assertTrue
 
 /**
  * Smoke findings of 1.8-07 on COSMIC (Wayland): Mod+V with a screenshot copied did nothing, then took seconds, because
- * Java reads the clipboard through XWayland, which passes on text only or times out. `wl-paste` reads it first.
+ * Java reads the clipboard through XWayland, which passes on text only or times out. `wl-paste` reads it first, and
+ * when it is missing (GNOME does not install it) the user is told to install wl-clipboard.
  */
 class WaylandClipboardReaderTest {
     private val png = encoded(format = "png")
@@ -29,7 +32,7 @@ class WaylandClipboardReaderTest {
             if (command.last() == "--list-types") "text/plain\nimage/png\n".encodeToByteArray() else png
         }
 
-        assertContentEquals(expected = png, actual = reader.image())
+        assertContentEquals(expected = png, actual = bytesOf(image = reader.image()))
         assertEquals(
             expected = listOf(
                 listOf("wl-paste", "--list-types"),
@@ -46,18 +49,40 @@ class WaylandClipboardReaderTest {
         val jpegOnly = WaylandClipboardReader(primary = FakeClipboardReader()) { command ->
             if (command.last() == "--list-types") "image/jpeg".encodeToByteArray() else jpeg
         }
-        val converted = ImageIO.read(ByteArrayInputStream(jpegOnly.image()))
+        val converted = ImageIO.read(ByteArrayInputStream(bytesOf(image = jpegOnly.image())))
 
         assertEquals(expected = listOf(4, 3), actual = listOf(converted.width, converted.height))
         assertNull(
-            actual = WaylandClipboardReader(primary = FakeClipboardReader()) {
-                "text/plain".encodeToByteArray()
-            }.image()
+            actual = bytesOf(
+                image = WaylandClipboardReader(primary = FakeClipboardReader()) {
+                    "text/plain".encodeToByteArray()
+                }.image()
+            )
         )
-        assertNull(actual = WaylandClipboardReader(primary = FakeClipboardReader()) { null }.image())
+        assertNull(actual = bytesOf(image = WaylandClipboardReader(primary = FakeClipboardReader()) { null }.image()))
         assertContentEquals(
             expected = png,
-            actual = WaylandClipboardReader(primary = FakeClipboardReader(image = png)) { null }.image()
+            actual = bytesOf(
+                image = WaylandClipboardReader(primary = FakeClipboardReader(image = png)) {
+                    null
+                }.image()
+            )
+        )
+    }
+
+    @Test
+    fun `an image Java cannot give asks to install wl-clipboard when wl-paste is missing, else is unreadable`() {
+        val missing = WaylandClipboardReader(primary = WaitingClipboardReader(text = "word")) { null }
+        val installedButEmpty = WaylandClipboardReader(primary = WaitingClipboardReader(text = "word")) { command ->
+            if (command.last() == "--version") "wl-clipboard 2.2.1".encodeToByteArray() else null
+        }
+
+        assertEquals(
+            expected = listOf<Outcome<ByteArray?, NotesError>>(
+                Outcome.Failure(error = NotesError.ClipboardToolMissing(tool = "wl-clipboard")),
+                Outcome.Failure(error = NotesError.ClipboardImageUnreadable)
+            ),
+            actual = listOf(missing.image(), installedButEmpty.image())
         )
     }
 
@@ -69,6 +94,10 @@ class WaylandClipboardReaderTest {
         assertNull(actual = readCommand(command = listOf(java, "--no-such-option")))
         assertNull(actual = readCommand(command = listOf("notekea-no-such-command")))
     }
+
+    private fun bytesOf(
+        image: Outcome<ByteArray?, NotesError>
+    ): ByteArray? = (image as Outcome.Success).value
 
     private fun encoded(
         format: String
@@ -83,9 +112,9 @@ class WaylandClipboardReaderTest {
     ) : ClipboardReader {
         var imageReads = 0
 
-        override fun image(): ByteArray? {
+        override fun image(): Outcome<ByteArray?, NotesError> {
             imageReads++
-            return null
+            return Outcome.Failure(error = NotesError.ClipboardImageUnreadable)
         }
 
         override fun text(): String = text

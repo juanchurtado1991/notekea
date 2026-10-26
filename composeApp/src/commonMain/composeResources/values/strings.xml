@@ -32,6 +32,8 @@
     <string name="editor_toolbar_label">Formatting</string>
     <string name="editor_unsaved">Unsaved</string>
 
+    <string name="error_notes_clipboard_image_unreadable">The copied image could not be read. Copy it again and paste.</string>
+    <string name="error_notes_clipboard_tool_missing">To paste images on this desktop, install %1$s (for example: sudo apt install %1$s) and paste again.</string>
     <string name="error_notes_open_failed">“%1$s” could not be opened with its app.</string>
     <string name="find_bar_close">Close find</string>
     <string name="find_bar_next">Next match</string>

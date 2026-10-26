@@ -5,6 +5,12 @@ sealed interface NotesError {
     /** The note changed outside Notekea since the editor last read or saved it, so saving would overwrite that. */
     data class ChangedOnDisk(val path: String) : NotesError
 
+    /** The clipboard offers a copied image but did not give it in time. */
+    data object ClipboardImageUnreadable : NotesError
+
+    /** A copied image can only be read on this desktop with [tool], which is not installed. */
+    data class ClipboardToolMissing(val tool: String) : NotesError
+
     /** The note or folder was moved or deleted outside Notekea before the action ran. */
     data class EntryMissing(val path: String) : NotesError
 
