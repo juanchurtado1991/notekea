@@ -8,6 +8,8 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.GetEditorModeUseCase
+import app.notekea.notes.domain.ListAction
+import app.notekea.notes.domain.ListEditing
 import app.notekea.notes.domain.MarkdownFormatter
 import app.notekea.notes.domain.NoteDiskChange
 import app.notekea.notes.domain.NoteDocument
@@ -53,6 +55,7 @@ class EditorViewModel(
     private val noteSearch = NoteSearch()
     private val taskFinder = TaskFinder()
     private val markdownFormatter = MarkdownFormatter()
+    private val listEditing = ListEditing()
     private val saveLock = Mutex()
     private var autosaveJob: Job? = null
     private var watchJob: Job? = null
@@ -66,6 +69,10 @@ class EditorViewModel(
 
     // A note whose text takes the keyboard as soon as it finishes opening; dropped if another note opens instead.
     private var focusPending: RelativePath? = null
+
+    // The selection when a picker (the note to link) took the keyboard, which clears it in the text field: what is
+    // chosen formats it, and closing the picker puts it back.
+    private var pickerSelection: TextRange? = null
 
     init {
         launchGuarded(onError = ::showUnexpectedError) {
@@ -88,7 +95,8 @@ class EditorViewModel(
             is EditorIntent.OnTaskToggle -> toggleTask(stateIndex = intent.stateIndex)
             EditorIntent.OnTaskToggleShortcut -> toggleTaskAtCursor()
             is EditorIntent.OnFormat -> format(action = intent.action)
-            EditorIntent.OnNoteLinkRequest -> if (isEditable()) emit(effect = EditorEffect.RequestNoteLink)
+            is EditorIntent.OnListKey -> editList(action = intent.action)
+            EditorIntent.OnNoteLinkRequest -> requestNoteLink()
             EditorIntent.OnFindClose -> closeFind()
             EditorIntent.OnFindNext -> moveToMatch(step = 1)
             EditorIntent.OnFindOpen -> openFind()
@@ -166,6 +174,7 @@ class EditorViewModel(
     ) {
         if (path == state.value.notePath && !isRetry) return
         if (path != focusPending) focusPending = null
+        pickerSelection = null
         saveNow()
         watchJob?.cancel()
         opened = null
@@ -208,7 +217,10 @@ class EditorViewModel(
         action: FormatAction
     ) {
         if (!isEditable()) return
-        val selection = buffer.selection
+        val length = buffer.text.length
+        val selection = pickerSelection?.let { TextRange(it.start.coerceAtMost(length), it.end.coerceAtMost(length)) }
+            ?: buffer.selection
+        pickerSelection = null
         val edit = markdownFormatter.format(
             text = buffer.text.toString(),
             selectionStart = selection.start,
@@ -220,6 +232,30 @@ class EditorViewModel(
             this.selection = TextRange(start = edit.selectionStart, end = edit.selectionEnd)
         }
         emit(effect = EditorEffect.FocusText)
+    }
+
+    /** A key in a list item, as in other editors: the edit replaces what the key would have typed. */
+    private fun editList(
+        action: ListAction
+    ) {
+        if (!isEditable()) return
+        val selection = buffer.selection
+        val edit = listEditing.edit(
+            text = buffer.text.toString(),
+            selectionStart = selection.start,
+            selectionEnd = selection.end,
+            action = action
+        ) ?: return
+        buffer.edit {
+            replace(start = edit.start, end = edit.end, text = edit.replacement)
+            this.selection = TextRange(start = edit.selectionStart, end = edit.selectionEnd)
+        }
+    }
+
+    private fun requestNoteLink() {
+        if (!isEditable()) return
+        pickerSelection = buffer.selection
+        emit(effect = EditorEffect.RequestNoteLink)
     }
 
     /** Whether the text can be changed now: a note is open and loaded, in Edit mode. */
@@ -235,6 +271,11 @@ class EditorViewModel(
     private fun requestFocus(
         path: RelativePath?
     ) {
+        // A picker closed without a choice: the text gets back the selection it had.
+        pickerSelection?.takeIf { path == null && it.max <= buffer.text.length }?.let { kept ->
+            buffer.edit { selection = kept }
+        }
+        pickerSelection = null
         val target = path ?: state.value.notePath ?: return
         val isOpen = state.value.let { it.notePath == target && !it.isLoading && it.loadError == null }
         if (isOpen) focusText() else focusPending = target

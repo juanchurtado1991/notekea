@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
@@ -51,7 +52,8 @@ private const val SHORTCUT_MIN_WIDTH_DP = 48
  * Wraps [content] with a context menu of [sections] (separated by dividers) that opens at the pointer on a right
  * click, or wherever [state] is opened from the keyboard. Areas can nest: a right click opens only the innermost
  * menu. [onOpenByPointer] runs on that right click, so the clicked item can be selected first, as file managers do.
- * Choosing an action closes the menu first, unless it [NotekeaMenuItem.keepsMenuOpen]. The menu is themed like the rest of the app (surface, outline border,
+ * Choosing an action closes the menu first, unless it [NotekeaMenuItem.keepsMenuOpen]. With [takesFocus] false the
+ * menu does not take the keyboard, so a text field keeps its selection while it is open. The menu is themed like the rest of the app (surface, outline border,
  * 6 dp corners) on every platform, with the 32 dp rows of desktop menus and shortcuts aligned at the end.
  */
 @Composable
@@ -60,6 +62,7 @@ fun NotekeaContextMenuArea(
     modifier: Modifier = Modifier,
     state: NotekeaContextMenuState = remember { NotekeaContextMenuState() },
     onOpenByPointer: () -> Unit = {},
+    takesFocus: Boolean = true,
     content: @Composable () -> Unit
 ) {
     var areaHeight by remember { mutableIntStateOf(value = 0) }
@@ -77,6 +80,7 @@ fun NotekeaContextMenuArea(
             expanded = position != null,
             onDismissRequest = state::close,
             offset = menuOffset(position = position ?: Offset.Zero, areaHeight = areaHeight),
+            properties = PopupProperties(focusable = takesFocus),
             shape = MaterialTheme.shapes.small,
             containerColor = MaterialTheme.colorScheme.surface,
             border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = MaterialTheme.colorScheme.outline)

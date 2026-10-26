@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.editor
 
 import app.notekea.notes.domain.FormatAction
+import app.notekea.notes.domain.ListAction
 import app.notekea.notes.domain.RelativePath
 
 /** What the user (or the window around the editor) asked of the note editor. */
@@ -64,6 +65,9 @@ sealed interface EditorIntent {
 
     /** Open [path], saving the current note first; null closes the editor. */
     data class OnOpen(val path: RelativePath?) : EditorIntent
+
+    /** Enter, Tab, Shift+Tab or Backspace in a list item or a quote, which edit the list (`ListEditing`). */
+    data class OnListKey(val action: ListAction) : EditorIntent
 
     /** Mod+E or the header button: switch between Edit and Read mode. */
     data object OnReadModeToggle : EditorIntent

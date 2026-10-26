@@ -37,7 +37,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.Alignment
+import app.notekea.notes.domain.ListEditing
+import app.notekea.notes.domain.ListAction
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -91,6 +105,7 @@ private const val TASK_CHECKBOX_RATIO = 0.8f
 private const val BODY_MIN_HEIGHT_DP = 320
 private const val CONTENT_MAX_WIDTH_DP = 760
 private const val MATCH_SCROLL_MARGIN_DP = 96
+internal const val NO_LIGATURES = "liga 0, calt 0"
 private const val PATH_SEPARATOR = " / "
 private const val PREVIEW_HEIGHT_DP = 520
 private const val PREVIEW_WIDTH_DP = 760
@@ -106,6 +121,7 @@ private val SKELETON_WIDTHS = listOf(0.9f, 0.75f, 0.85f, 0.6f, 0.8f, 0.4f)
  * readable width; the header scrolls with it. Leaving the text saves at once. Find in note shows its bar above the
  * text, marks the matches and scrolls to the current one. Read mode shows the note rendered instead of its Markdown.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EditorContent(
     state: EditorState,
@@ -120,25 +136,35 @@ fun EditorContent(
     val scrollState = rememberScrollState()
     // Read only when the toolbar is placed, never in composition, so updating it recomposes nothing.
     val viewport = remember { mutableStateOf<LayoutCoordinates?>(value = null) }
+    val keepInView = remember { EditorBringIntoViewSpec() }
+    val defaultBringIntoView = LocalBringIntoViewSpec.current
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Column {
             EditorBanners(state = state, platformConventions = platformConventions, onIntent = onIntent)
             state.find?.let { find -> EditorFindBar(find = find, onIntent = onIntent) }
-            Box(
-                modifier = Modifier.fillMaxSize().onPlaced { viewport.value = it }.verticalScroll(state = scrollState),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                EditorPage(
-                    state = state,
-                    buffer = buffer,
-                    scrollState = scrollState,
-                    viewport = { viewport.value },
-                    platformConventions = platformConventions,
-                    onIntent = onIntent,
-                    vaultTags = vaultTags,
-                    properties = properties,
-                    textFocusRequester = textFocusRequester
-                )
+            CompositionLocalProvider(LocalBringIntoViewSpec provides keepInView) {
+                Box(
+                    modifier = Modifier.fillMaxSize().onPlaced {
+                        viewport.value = it
+                    }.verticalScroll(state = scrollState),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    // Only the editor's scroll keeps things below the toolbar; the fields inside scroll as usual.
+                    CompositionLocalProvider(LocalBringIntoViewSpec provides defaultBringIntoView) {
+                        EditorPage(
+                            state = state,
+                            buffer = buffer,
+                            scrollState = scrollState,
+                            viewport = { viewport.value },
+                            platformConventions = platformConventions,
+                            onIntent = onIntent,
+                            vaultTags = vaultTags,
+                            properties = properties,
+                            textFocusRequester = textFocusRequester,
+                            onToolbarHeight = { keepInView.topInset = it.toFloat() }
+                        )
+                    }
+                }
             }
         }
     }
@@ -155,7 +181,8 @@ private fun EditorPage(
     onIntent: (EditorIntent) -> Unit,
     vaultTags: List<String>,
     properties: NoteMetadata?,
-    textFocusRequester: FocusRequester?
+    textFocusRequester: FocusRequester?,
+    onToolbarHeight: (Int) -> Unit
 ) {
     var toolbarTop by remember { mutableIntStateOf(value = 0) }
     Column(
@@ -175,9 +202,11 @@ private fun EditorPage(
                 isReading = state.isReading,
                 platformConventions = platformConventions,
                 onIntent = onIntent,
-                modifier = Modifier.stickyAtTop(scrollState = scrollState, viewport = viewport, top = { toolbarTop }) {
-                    toolbarTop = it
-                },
+                modifier = Modifier
+                    .onSizeChanged { onToolbarHeight(it.height) }
+                    .stickyAtTop(scrollState = scrollState, viewport = viewport, top = {
+                        toolbarTop
+                    }) { toolbarTop = it },
                 vaultTags = vaultTags
             )
         }
@@ -360,7 +389,7 @@ private fun EditorBody(
     var layout by remember { mutableStateOf<() -> TextLayoutResult?>(value = { null }) }
     var top by remember { mutableFloatStateOf(value = 0f) }
     val label = stringResource(resource = Res.string.editor_body_label)
-    val formats = formatActions()
+    val onKey = rememberEditorKeys(buffer = buffer, platformConventions = platformConventions, onIntent = onIntent)
     ScrollToCurrentMatch(scrollState = scrollState, layout = { layout() }, top = { top }, find = find)
     BasicTextField(
         state = buffer,
@@ -372,15 +401,16 @@ private fun EditorBody(
             .padding(top = NotekeaDimensions.SpacingL)
             .semantics { contentDescription = label }
             .then(other = focusRequester?.let { Modifier.focusRequester(focusRequester = it) } ?: Modifier)
-            .onPreviewKeyEvent { event ->
-                formatShortcut(event = event, platformConventions = platformConventions, formats = formats)
-                    ?.let { onIntent(it) } != null
-            }
+            .onPreviewKeyEvent(onPreviewKeyEvent = onKey)
             .onFocusChanged {
                 if (hasFocus && !it.isFocused) onIntent(EditorIntent.OnFocusLost)
                 hasFocus = it.isFocused
             },
-        textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface),
+        // Ligatures would turn what is typed into other glyphs (`->` into an arrow): the editor shows the characters.
+        textStyle = MaterialTheme.typography.bodyLarge.copy(
+            color = colors.onSurface,
+            fontFeatureSettings = NO_LIGATURES
+        ),
         cursorBrush = SolidColor(value = colors.primary),
         onTextLayout = { getResult -> layout = getResult },
         outputTransformation = highlighting,
@@ -404,6 +434,53 @@ private fun formatShortcut(
     platformConventions.noteLinkShortcut.matches(event = event) -> EditorIntent.OnNoteLinkRequest
     platformConventions.webLinkShortcut.matches(event = event) -> EditorIntent.OnFormat(action = formats.webLink)
     else -> null
+}
+
+/**
+ * The keys pressed in the text that the editor handles itself, the formatting shortcuts and the list keys, sent as
+ * intents; it returns false for the text field to handle every other key.
+ */
+@Composable
+private fun rememberEditorKeys(
+    buffer: TextFieldState,
+    platformConventions: PlatformConventions,
+    onIntent: (EditorIntent) -> Unit
+): (KeyEvent) -> Boolean {
+    val formats = formatActions()
+    val listEditing = remember { ListEditing() }
+    return { event ->
+        val intent = formatShortcut(event = event, platformConventions = platformConventions, formats = formats)
+            ?: listKey(event = event, buffer = buffer, listEditing = listEditing)
+        intent?.let { onIntent(it) } != null
+    }
+}
+
+/**
+ * Enter, Tab, Shift+Tab or Backspace where they edit a list (`ListEditing`); null where the key types as usual, so the
+ * text field handles it.
+ */
+private fun listKey(
+    event: KeyEvent,
+    buffer: TextFieldState,
+    listEditing: ListEditing
+): EditorIntent? {
+    if (event.type != KeyEventType.KeyDown || event.isCtrlPressed || event.isMetaPressed || event.isAltPressed) {
+        return null
+    }
+    val action = when (event.key) {
+        Key.Enter, Key.NumPadEnter -> ListAction.NEW_ITEM.takeUnless { event.isShiftPressed }
+        Key.Tab -> if (event.isShiftPressed) ListAction.OUTDENT else ListAction.INDENT
+        Key.Backspace -> ListAction.REMOVE_MARKER.takeUnless { event.isShiftPressed }
+        else -> null
+    } ?: return null
+    val selection = buffer.selection
+    val edit = listEditing.edit(
+        text = buffer.text.toString(),
+        selectionStart = selection.start,
+        selectionEnd = selection.end,
+        action = action
+    )
+    return edit?.let { EditorIntent.OnListKey(action = action) }
 }
 
 /**

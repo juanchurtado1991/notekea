@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,7 +36,8 @@ private const val TOOLTIP_SEPARATOR = "  "
 /**
  * Compact icon-only button for dense desktop toolbars (the sidebar header), 28 dp with the 6 dp control radius.
  * [label] is what screen readers announce and what the tooltip shows on hover, followed by [shortcutHint] when there
- * is one, so an icon is never the only way to learn what a button does.
+ * is one, so an icon is never the only way to learn what a button does. With [takesFocus] false a click leaves the
+ * keyboard where it was, as in a text editor's toolbar, so the text keeps its cursor and selection.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +47,8 @@ fun NotekeaIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shortcutHint: String? = null
+    shortcutHint: String? = null,
+    takesFocus: Boolean = true
 ) {
     val tooltipText = listOfNotNull(label, shortcutHint).joinToString(separator = TOOLTIP_SEPARATOR)
     TooltipBox(
@@ -57,6 +60,7 @@ fun NotekeaIconButton(
         Box(
             modifier = modifier
                 .size(size = NotekeaDimensions.CompactControlSize)
+                .focusProperties { canFocus = takesFocus }
                 .focusBorder(color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.small)
                 .clip(shape = MaterialTheme.shapes.small)
                 .clickable(enabled = enabled, onClickLabel = label, role = Role.Button, onClick = onClick),

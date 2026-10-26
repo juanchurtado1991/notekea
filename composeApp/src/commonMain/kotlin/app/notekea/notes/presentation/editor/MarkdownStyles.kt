@@ -31,7 +31,12 @@ class MarkdownStyles(
             typography: Typography,
             codeFontFamily: FontFamily?
         ): MarkdownStyles {
-            val code = SpanStyle(fontFamily = codeFontFamily, background = colorScheme.surfaceVariant)
+            // Code shows each typed character as it is: no ligatures (`->`, `//`, `!=`) and no contextual alternates.
+            val code = SpanStyle(
+                fontFamily = codeFontFamily,
+                fontFeatureSettings = NO_LIGATURES,
+                background = colorScheme.surfaceVariant
+            )
             val headings = listOf(
                 typography.headlineMedium,
                 typography.titleLarge,
