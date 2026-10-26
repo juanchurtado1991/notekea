@@ -459,6 +459,20 @@ class EditorViewModelTest {
     }
 
     @Test
+    fun `a tag clicked in read mode asks to search it`() = runEditorTest {
+        val effects = collectEffects()
+        open(path = AREPAS)
+
+        viewModel.onIntent(intent = EditorIntent.OnTagClick(tag = "recipe/venezuelan"))
+        runCurrent()
+
+        assertEquals(
+            expected = listOf<EditorEffect>(EditorEffect.SearchTag(tag = "recipe/venezuelan")),
+            actual = effects
+        )
+    }
+
+    @Test
     fun `a link clicked in read mode asks to open its note from the open one`() = runEditorTest {
         val effects = collectEffects()
         open(path = AREPAS)

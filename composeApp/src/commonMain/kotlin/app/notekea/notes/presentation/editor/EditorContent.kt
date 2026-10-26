@@ -368,6 +368,7 @@ private fun ReadView(
             when (val link = readLinks.classify(uri = uri)) {
                 is ReadLink.Note -> onIntent(EditorIntent.OnLinkClick(link = link))
                 is ReadLink.External -> systemUriHandler.openUri(uri = link.uri)
+                is ReadLink.Tag -> onIntent(EditorIntent.OnTagClick(tag = link.name))
                 null -> Unit
             }
         }

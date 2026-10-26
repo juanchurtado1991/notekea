@@ -74,6 +74,7 @@ class EditorViewModel(
         when (intent) {
             EditorIntent.OnCloseDeleted -> closeDeleted()
             is EditorIntent.OnLinkClick -> openLink(link = intent.link)
+            is EditorIntent.OnTagClick -> emit(effect = EditorEffect.SearchTag(tag = intent.tag))
             EditorIntent.OnFindClose -> closeFind()
             EditorIntent.OnFindNext -> moveToMatch(step = 1)
             EditorIntent.OnFindOpen -> openFind()
