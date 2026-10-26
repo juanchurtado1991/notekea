@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="crash_close">Close Notekea</string>
+    <string name="crash_copy">Copy details</string>
+    <string name="crash_message">Something went wrong and Notekea has to close. Your open note is saved before it closes.\n\nTo help fix it, click Report on GitHub and paste the details (already copied) into the form, or copy them and send them to us.</string>
+    <string name="crash_report_github">Report on GitHub</string>
+    <string name="crash_report_not_saved">The report could not be saved, but you can still copy it.</string>
+    <string name="crash_report_saved">A report was saved to:</string>
+    <string name="crash_title">Notekea needs to close</string>
     <string name="editor_body_label">Note text</string>
     <string name="editor_close">Close</string>
     <string name="editor_conflict_message">This note changed outside Notekea while you were editing it.</string>
