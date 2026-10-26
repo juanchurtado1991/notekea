@@ -89,7 +89,7 @@
     <string name="format_callout_example">Example</string>
     <string name="format_callout_failure">Failure</string>
     <string name="format_callout_folded">Start folded</string>
-    <string name="format_callout_folded_hint">Shows only the title until it is clicked</string>
+    <string name="format_callout_folded_hint">Check it, then choose a type below: the callout shows only its title until it is clicked</string>
     <string name="format_callout_info">Info</string>
     <string name="format_callout_note">Note</string>
     <string name="format_callout_placeholder">Write here</string>
