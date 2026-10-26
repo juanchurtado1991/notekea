@@ -70,7 +70,7 @@ class EditorViewModel(
     // A note whose text takes the keyboard as soon as it finishes opening; dropped if another note opens instead.
     private var focusPending: RelativePath? = null
 
-    // The selection when a picker (the note to link) took the keyboard, which clears it in the text field: what is
+    // The selection when a picker (the note to link, the tag) took the keyboard, which clears it in the text field: what is
     // chosen formats it, and closing the picker puts it back.
     private var pickerSelection: TextRange? = null
 
@@ -96,7 +96,8 @@ class EditorViewModel(
             EditorIntent.OnTaskToggleShortcut -> toggleTaskAtCursor()
             is EditorIntent.OnFormat -> format(action = intent.action)
             is EditorIntent.OnListKey -> editList(action = intent.action)
-            EditorIntent.OnNoteLinkRequest -> requestNoteLink()
+            EditorIntent.OnNoteLinkRequest -> requestPicker(effect = EditorEffect.RequestNoteLink)
+            EditorIntent.OnTagRequest -> requestPicker(effect = EditorEffect.RequestTag(query = selectedForTag()))
             EditorIntent.OnFindClose -> closeFind()
             EditorIntent.OnFindNext -> moveToMatch(step = 1)
             EditorIntent.OnFindOpen -> openFind()
@@ -252,10 +253,20 @@ class EditorViewModel(
         }
     }
 
-    private fun requestNoteLink() {
+    /** A picker is opened ([effect]) and will take the keyboard: the selection is kept for what it chooses. */
+    private fun requestPicker(
+        effect: EditorEffect
+    ) {
         if (!isEditable()) return
         pickerSelection = buffer.selection
-        emit(effect = EditorEffect.RequestNoteLink)
+        emit(effect = effect)
+    }
+
+    /** The selected text as the tag picker's first search, when it is a short phrase on one line. */
+    private fun selectedForTag(): String {
+        val selection = buffer.selection
+        val selected = buffer.text.substring(startIndex = selection.min, endIndex = selection.max).trim()
+        return selected.takeIf { '\n' !in it && it.length <= MAX_TAG_QUERY }.orEmpty()
     }
 
     /** Whether the text can be changed now: a note is open and loaded, in Edit mode. */
@@ -524,6 +535,7 @@ class EditorViewModel(
         private const val TASK_STATES = " xX"
         val AUTOSAVE_DELAY = 1.seconds
         private const val LOG_TAG = "EditorViewModel"
+        private const val MAX_TAG_QUERY = 40
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the note editor"
     }
 }

@@ -630,6 +630,27 @@ class EditorViewModelTest {
         }
 
     @Test
+    fun `tag opens the tag picker with the selected text typed, and the chosen tag takes the selection's place`() =
+        runEditorTest {
+            val effects = collectEffects()
+            putOnDisk(path = TASKS, text = TASKS_TEXT)
+            open(path = TASKS)
+            val flour = TASKS_TEXT.indexOf(string = "flour")
+            viewModel.buffer.edit { selection = TextRange(start = flour, end = flour + "flour".length) }
+
+            viewModel.onIntent(intent = EditorIntent.OnTagRequest)
+            runCurrent()
+            viewModel.buffer.edit { selection = TextRange(index = 0) }
+            viewModel.onIntent(intent = EditorIntent.OnFormat(action = FormatAction.Tag(name = "flour")))
+            runCurrent()
+
+            assertEquals(
+                expected = EditorEffect.RequestTag(query = "flour") to "- [ ] Buy #flour \n- [x] Soak beans\n",
+                actual = effects.first() to viewModel.buffer.text.toString()
+            )
+        }
+
+    @Test
     fun `list keys edit the list at the cursor in edit mode`() = runEditorTest {
         putOnDisk(path = TASKS, text = TASKS_TEXT)
         open(path = TASKS)

@@ -169,18 +169,18 @@ class MarkdownFormatterTest {
     }
 
     @Test
-    fun `a tag gets a space before it when needed, a new one selects its placeholder, a selection becomes the tag`() {
+    fun `a tag gets a space before it when needed and one after it, in place of the selection`() {
         assertEquals(
-            expected = listOf("Dinner #recipe " to "", "Dinner #tag" to "tag", "Dinner #weekly-plan" to ""),
+            expected = listOf("Dinner #recipe ", "Dinner #weekend ", "Dinner #weekly-plan "),
             actual = listOf(
-                apply(text = "Dinner", cursor = 6, action = FormatAction.Tag(name = "recipe", placeholder = "tag")),
-                apply(text = "Dinner ", cursor = 7, action = FormatAction.Tag(name = "", placeholder = "tag")),
+                apply(text = "Dinner", cursor = 6, action = FormatAction.Tag(name = "recipe")).first,
+                apply(text = "Dinner ", cursor = 7, action = FormatAction.Tag(name = "weekend")).first,
                 apply(
                     text = "Dinner weekly plan",
                     selected = "weekly plan",
-                    action = FormatAction.Tag(name = "", placeholder = "tag")
+                    action = FormatAction.Tag(name = "weekly-plan")
                 )
-                    .let { (text, selection) -> text.trimEnd() to selection }
+                    .first
             )
         )
     }

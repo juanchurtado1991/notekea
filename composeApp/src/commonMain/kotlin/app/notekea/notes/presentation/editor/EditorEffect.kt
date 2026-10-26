@@ -25,6 +25,9 @@ sealed interface EditorEffect {
     /** Link to a note was asked for: the window opens the palette to pick it, then sends a note link to format. */
     data object RequestNoteLink : EditorEffect
 
+    /** Tag was asked for: the window opens the tag picker with [query] (the selected text) typed, then sends a tag. */
+    data class RequestTag(val query: String) : EditorEffect
+
     /** A `#tag` was clicked in Read mode: the window searches it in all notes. */
     data class SearchTag(val tag: String) : EditorEffect
 

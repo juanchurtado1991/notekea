@@ -20,6 +20,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -131,6 +136,7 @@ private fun PaletteCard(
     }
 }
 
+/** The search field; text given from outside (a `#tag` to search, the text to tag) puts the cursor after it. */
 @Composable
 private fun PaletteField(
     query: String,
@@ -140,10 +146,17 @@ private fun PaletteField(
 ) {
     val colors = MaterialTheme.colorScheme
     val focusRequester = remember { FocusRequester() }
+    var field by remember {
+        mutableStateOf(value = TextFieldValue(text = query, selection = TextRange(index = query.length)))
+    }
+    if (field.text != query) field = TextFieldValue(text = query, selection = TextRange(index = query.length))
     LaunchedEffect(focusRequester) { focusRequester.requestFocus() }
     BasicTextField(
-        value = query,
-        onValueChange = onQueryChange,
+        value = field,
+        onValueChange = {
+            field = it
+            if (it.text != query) onQueryChange(it.text)
+        },
         modifier = modifier
             .fillMaxWidth()
             .focusRequester(focusRequester = focusRequester)

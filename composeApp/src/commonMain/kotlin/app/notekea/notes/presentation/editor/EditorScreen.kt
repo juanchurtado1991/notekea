@@ -44,9 +44,9 @@ fun EditorScreen(
     onOpenLink: (EditorEffect.OpenLink) -> Unit,
     onSearchTag: (String) -> Unit,
     onRequestNoteLink: () -> Unit,
+    onRequestTag: (String) -> Unit,
     modifier: Modifier = Modifier,
-    properties: NoteMetadata? = null,
-    vaultTags: List<String> = emptyList()
+    properties: NoteMetadata? = null
 ) {
     val state by viewModel.state.collectAsState()
     val flushed = remember(viewModel) { Channel<Unit>(capacity = Channel.CONFLATED) }
@@ -60,7 +60,8 @@ fun EditorScreen(
         onClosed = onClosed,
         onOpenLink = onOpenLink,
         onSearchTag = onSearchTag,
-        onRequestNoteLink = onRequestNoteLink
+        onRequestNoteLink = onRequestNoteLink,
+        onRequestTag = onRequestTag
     )
     DisposableEffect(viewModel) { onDispose { viewModel.onIntent(intent = EditorIntent.OnFlushRequest) } }
     EditorShortcuts(platformConventions = platformConventions, onIntent = viewModel::onIntent)
@@ -78,8 +79,7 @@ fun EditorScreen(
         onIntent = viewModel::onIntent,
         modifier = modifier,
         properties = properties,
-        textFocusRequester = textFocusRequester,
-        vaultTags = vaultTags
+        textFocusRequester = textFocusRequester
     )
 }
 
@@ -93,9 +93,11 @@ private fun EditorEffects(
     onClosed: () -> Unit,
     onOpenLink: (EditorEffect.OpenLink) -> Unit,
     onSearchTag: (String) -> Unit,
-    onRequestNoteLink: () -> Unit
+    onRequestNoteLink: () -> Unit,
+    onRequestTag: (String) -> Unit
 ) {
     val currentOnRequestNoteLink by rememberUpdatedState(newValue = onRequestNoteLink)
+    val currentOnRequestTag by rememberUpdatedState(newValue = onRequestTag)
     val currentOnRenamed by rememberUpdatedState(newValue = onRenamed)
     val currentOnClosed by rememberUpdatedState(newValue = onClosed)
     val currentOnOpenLink by rememberUpdatedState(newValue = onOpenLink)
@@ -114,6 +116,8 @@ private fun EditorEffects(
                 is EditorEffect.SearchTag -> currentOnSearchTag(effect.tag)
 
                 EditorEffect.RequestNoteLink -> currentOnRequestNoteLink()
+
+                is EditorEffect.RequestTag -> currentOnRequestTag(effect.query)
 
                 EditorEffect.FocusText -> focusText(
                     requester = textFocusRequester,

@@ -130,8 +130,7 @@ fun EditorContent(
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier = Modifier,
     properties: NoteMetadata? = null,
-    textFocusRequester: FocusRequester? = null,
-    vaultTags: List<String> = emptyList()
+    textFocusRequester: FocusRequester? = null
 ) {
     val scrollState = rememberScrollState()
     // Read only when the toolbar is placed, never in composition, so updating it recomposes nothing.
@@ -158,7 +157,6 @@ fun EditorContent(
                             viewport = { viewport.value },
                             platformConventions = platformConventions,
                             onIntent = onIntent,
-                            vaultTags = vaultTags,
                             properties = properties,
                             textFocusRequester = textFocusRequester,
                             onToolbarHeight = { keepInView.topInset = it.toFloat() }
@@ -179,7 +177,6 @@ private fun EditorPage(
     viewport: () -> LayoutCoordinates?,
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
-    vaultTags: List<String>,
     properties: NoteMetadata?,
     textFocusRequester: FocusRequester?,
     onToolbarHeight: (Int) -> Unit
@@ -206,8 +203,7 @@ private fun EditorPage(
                     .onSizeChanged { onToolbarHeight(it.height) }
                     .stickyAtTop(scrollState = scrollState, viewport = viewport, top = {
                         toolbarTop
-                    }) { toolbarTop = it },
-                vaultTags = vaultTags
+                    }) { toolbarTop = it }
             )
         }
         NoteText(

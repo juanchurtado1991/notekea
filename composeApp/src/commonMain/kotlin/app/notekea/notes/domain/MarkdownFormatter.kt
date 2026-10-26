@@ -286,6 +286,7 @@ class MarkdownFormatter {
         return TextEdit(start, end, "[$selected]($WEB_ADDRESS)", addressStart, addressStart + WEB_ADDRESS.length)
     }
 
+    /** The tag in place of the selection, with a space before it when needed and one after it to keep typing. */
     private fun tag(
         text: String,
         start: Int,
@@ -293,29 +294,8 @@ class MarkdownFormatter {
         action: FormatAction.Tag
     ): TextEdit {
         val space = if (start > 0 && !text[start - 1].isWhitespace()) " " else ""
-        val selected = text.substring(
-            startIndex = start,
-            endIndex = end
-        ).trim().replace(regex = SPACES, replacement = "-")
-        val name = action.name.ifBlank { selected }
-        if (name.isEmpty()) {
-            return insert(
-                start = start,
-                end = end,
-                before = "$space#",
-                selected = action.placeholder,
-                after = ""
-            )
-        }
-        val tag = "$space#$name "
-        return TextEdit(
-            start = start,
-            end = end,
-            replacement = tag,
-            selectionStart = start + tag.length,
-            selectionEnd =
-            start + tag.length
-        )
+        val tag = "$space#${action.name} "
+        return TextEdit(start, end, tag, start + tag.length, start + tag.length)
     }
 
     /** [selected] between [before] and [after] in place of [start] until [end], with [selected] selected. */
@@ -340,6 +320,5 @@ class MarkdownFormatter {
         private const val ITALIC = "*"
         private const val QUOTE_PREFIX = "> "
         private const val WEB_ADDRESS = "https://"
-        private val SPACES = Regex(pattern = "\\s+")
     }
 }

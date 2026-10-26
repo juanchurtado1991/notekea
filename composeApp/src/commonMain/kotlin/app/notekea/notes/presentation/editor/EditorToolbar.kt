@@ -60,32 +60,29 @@ import app.notekea.resources.format_numbered_list
 import app.notekea.resources.format_quote
 import app.notekea.resources.format_table
 import app.notekea.resources.format_tag
-import app.notekea.resources.format_tag_new
 import app.notekea.resources.format_web_link
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val ONE_LINE_MIN_WIDTH_DP = 680
 private const val PREVIEW_WIDTH_DP = 760
-private const val TAGS_IN_MENU = 8
 
 /**
  * The editor toolbar (`ROADMAP.md` 1.17), under the title: Edit | Preview tabs (switched with their shortcut too), the
  * formatting buttons in groups (text, links and tags, lists, blocks), each with a plain-language tooltip and its
  * shortcut, and Find in note at the end. Preview shows the note as it reads, so it keeps only the tabs and Find. The
- * buttons move to a line of their own above the tabs when the editor is too narrow for one line. [vaultTags] fill the
- * Tag menu, the most used first.
+ * buttons move to a line of their own above the tabs when the editor is too narrow for one line. the Tag button opens the
+ * tag picker.
  */
 @Composable
 fun EditorToolbar(
     isReading: Boolean,
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
-    modifier: Modifier = Modifier,
-    vaultTags: List<String> = emptyList()
+    modifier: Modifier = Modifier
 ) {
     val groups = @Composable {
-        FormattingGroups(platformConventions = platformConventions, onIntent = onIntent, vaultTags = vaultTags)
+        FormattingGroups(platformConventions = platformConventions, onIntent = onIntent)
     }
     Column(modifier = modifier.background(color = MaterialTheme.colorScheme.surface)) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(top = NotekeaDimensions.SpacingS)) {
@@ -145,8 +142,7 @@ private fun ModeTabs(
 @Composable
 private fun FormattingGroups(
     platformConventions: PlatformConventions,
-    onIntent: (EditorIntent) -> Unit,
-    vaultTags: List<String>
+    onIntent: (EditorIntent) -> Unit
 ) {
     val format = { action: FormatAction -> onIntent(EditorIntent.OnFormat(action = action)) }
     val actions = formatActions()
@@ -160,7 +156,6 @@ private fun FormattingGroups(
         LinkGroup(
             actions = actions,
             platformConventions = platformConventions,
-            vaultTags = vaultTags,
             onIntent = onIntent
         )
         ListGroup(actions = actions, format = format)
@@ -227,24 +222,14 @@ private fun TextGroup(
     }
 }
 
-/** Link to a note (chosen in the quick switcher), Web link and Tag (a menu of the vault's tags and New tag). */
+/** Link to a note (chosen in the quick switcher), Web link and Tag (chosen in the tag picker). */
 @Composable
 private fun LinkGroup(
     actions: FormatActions,
     platformConventions: PlatformConventions,
-    vaultTags: List<String>,
     onIntent: (EditorIntent) -> Unit
 ) {
     val os = platformConventions.operatingSystem
-    val format = { action: FormatAction -> onIntent(EditorIntent.OnFormat(action = action)) }
-    val tags = vaultTags.take(n = TAGS_IN_MENU).map { tag ->
-        NotekeaMenuItem(label = tag, onClick = { format(actions.tag(name = tag)) }, icon = NotekeaIcons.Tag)
-    }
-    val newTag = NotekeaMenuItem(
-        label = stringResource(resource = Res.string.format_tag_new),
-        onClick = { format(actions.tag(name = "")) },
-        icon = NotekeaIcons.NewTag
-    )
     ToolbarGroup {
         ToolbarButton(
             icon = NotekeaIcons.NoteLink,
@@ -255,15 +240,12 @@ private fun LinkGroup(
         ToolbarButton(
             icon = NotekeaIcons.WebLink,
             label = Res.string.format_web_link,
-            onClick = { format(actions.webLink) },
+            onClick = { onIntent(EditorIntent.OnFormat(action = actions.webLink)) },
             shortcutHint = platformConventions.webLinkShortcut.label(operatingSystem = os)
         )
-        NotekeaMenuButton(
-            takesFocus = false,
-            icon = NotekeaIcons.Tag,
-            label = stringResource(resource = Res.string.format_tag),
-            sections = listOf(tags, listOf(newTag)).filter { it.isNotEmpty() }
-        )
+        ToolbarButton(icon = NotekeaIcons.Tag, label = Res.string.format_tag, onClick = {
+            onIntent(EditorIntent.OnTagRequest)
+        })
     }
 }
 
@@ -367,8 +349,7 @@ private fun EditorToolbarPreview() {
             EditorToolbar(
                 isReading = false,
                 platformConventions = EditorPreviewData.platformConventions,
-                onIntent = {},
-                vaultTags = listOf("recipe", "venezuelan")
+                onIntent = {}
             )
             EditorToolbar(
                 isReading = true,

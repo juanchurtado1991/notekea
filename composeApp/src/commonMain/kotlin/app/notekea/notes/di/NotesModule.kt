@@ -37,6 +37,7 @@ import app.notekea.notes.domain.TreePreferencesStore
 import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import app.notekea.notes.presentation.editor.EditorViewModel
 import app.notekea.notes.presentation.switcher.QuickSwitcherViewModel
+import app.notekea.notes.presentation.tags.TagPickerViewModel
 import app.notekea.notes.presentation.tree.VaultTreeViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
@@ -107,6 +108,7 @@ val notesModule = module {
             saveEditorMode = get()
         )
     }
+    viewModel { TagPickerViewModel() }
     viewModel { parameters ->
         QuickSwitcherViewModel(
             vaultPath = parameters.get(),
