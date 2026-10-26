@@ -76,6 +76,10 @@ class MarkdownFormatter {
         else -> error("Not an inline action: $action")
     }
 
+    /**
+     * Bold or italic: wraps the selection, or the word the cursor is in, and unwraps it when the marks are around it
+     * or selected with it; with the cursor outside a word it inserts [placeholder] to type over.
+     */
     private fun wrap(
         text: String,
         start: Int,
@@ -83,23 +87,61 @@ class MarkdownFormatter {
         mark: String,
         placeholder: String
     ): TextEdit {
-        if (start == end) return insert(start = start, end = end, before = mark, selected = placeholder, after = mark)
-        val selected = text.substring(startIndex = start, endIndex = end)
-        val isWrappedAround =
-            text.regionMatches(thisOffset = start - mark.length, other = mark, otherOffset = 0, length = mark.length) &&
-                text.regionMatches(thisOffset = end, other = mark, otherOffset = 0, length = mark.length) &&
-                (mark != ITALIC || (text.getOrNull(index = start - 2) != '*' && text.getOrNull(index = end + 1) != '*'))
-        if (isWrappedAround) {
+        val word = if (start == end) wordAround(text = text, offset = start) else start until end
+        if (word == null) return insert(start = start, end = end, before = mark, selected = placeholder, after = mark)
+        val from = word.first
+        val to = word.last + 1
+        val selected = text.substring(startIndex = from, endIndex = to)
+        if (isMarkedInside(selected = selected, mark = mark)) {
+            val inner = selected.substring(startIndex = mark.length, endIndex = selected.length - mark.length)
+            return insert(start = from, end = to, before = "", selected = inner, after = "")
+        }
+        if (isMarkedAround(text = text, start = from, end = to, mark = mark)) {
             return insert(
-                start = start - mark.length,
-                end = end + mark.length,
+                start = from - mark.length,
+                end = to + mark.length,
                 before = "",
                 selected = selected,
                 after = ""
             )
         }
-        return insert(start = start, end = end, before = mark, selected = selected, after = mark)
+        return insert(start = from, end = to, before = mark, selected = selected, after = mark)
     }
+
+    /** The word [offset] is inside (letters or digits on both sides), or null between words. */
+    private fun wordAround(
+        text: String,
+        offset: Int
+    ): IntRange? {
+        val isWord = { char: Char -> char.isLetterOrDigit() || char == '_' }
+        if (offset == 0 || offset == text.length || !isWord(text[offset - 1]) || !isWord(text[offset])) return null
+        var from = offset
+        while (from > 0 && isWord(text[from - 1])) from--
+        var to = offset
+        while (to < text.length && isWord(text[to])) to++
+        return from until to
+    }
+
+    /** Whether the selection itself starts and ends with [mark] (`**corn**` selected whole), italic not taking bold. */
+    private fun isMarkedInside(
+        selected: String,
+        mark: String
+    ): Boolean {
+        val isMarked = selected.length > 2 * mark.length && selected.startsWith(prefix = mark) &&
+            selected.endsWith(suffix = mark)
+        val isBoldOnly = mark == ITALIC && selected.startsWith(prefix = BOLD) && !selected.startsWith(prefix = "***")
+        return isMarked && !isBoldOnly
+    }
+
+    private fun isMarkedAround(
+        text: String,
+        start: Int,
+        end: Int,
+        mark: String
+    ): Boolean =
+        text.regionMatches(thisOffset = start - mark.length, other = mark, otherOffset = 0, length = mark.length) &&
+            text.regionMatches(thisOffset = end, other = mark, otherOffset = 0, length = mark.length) &&
+            (mark != ITALIC || (text.getOrNull(index = start - 2) != '*' && text.getOrNull(index = end + 1) != '*'))
 
     /** [style] on every line the selection touches, or off when every non-empty one already has it. */
     private fun styleLines(

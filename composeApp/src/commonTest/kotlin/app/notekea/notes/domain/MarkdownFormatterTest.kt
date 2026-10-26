@@ -23,6 +23,24 @@ class MarkdownFormatterTest {
     }
 
     @Test
+    fun `with the cursor in a word bold formats the word, and a selection holding the marks is unwrapped`() {
+        assertEquals(
+            expected = listOf(
+                "Mix **corn** flour" to "corn",
+                "Mix corn flour" to "corn",
+                "Mix corn flour" to "corn",
+                "Mix corn flour" to "corn"
+            ),
+            actual = listOf(
+                apply(text = "Mix corn flour", cursor = 6, action = BOLD),
+                apply(text = "Mix **corn** flour", cursor = 8, action = BOLD),
+                apply(text = "Mix **corn** flour", selected = "**corn**", action = BOLD),
+                apply(text = "Mix *corn* flour", cursor = 7, action = FormatAction.Italic(placeholder = "x"))
+            )
+        )
+    }
+
+    @Test
     fun `italic does not take the stars of bold as its own`() {
         assertEquals(
             expected = "Mix ***corn*** flour" to "corn",
