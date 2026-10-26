@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.domain.StringPatterns
 /**
  * A way to start a line in Markdown, which a toolbar button adds or removes: a heading of a level, a bulleted or
  * numbered list item, a checklist item or a quote. A list item style replaces another list marker on the line.
@@ -29,11 +31,11 @@ sealed interface LineStyle {
         override fun add(
             line: String,
             number: Int
-        ): String = "#".repeat(n = level) + " " + remove(line = line)
+        ): String = MarkdownSyntax.HEADING_MARK.repeat(n = level) + StringPatterns.SPACE + remove(line = line)
 
         override fun remove(
             line: String
-        ): String = line.replaceFirst(regex = HEADING, replacement = "")
+        ): String = line.replaceFirst(regex = HEADING, replacement = StringPatterns.EMPTY)
     }
 
     data object Bullet : LineStyle {
@@ -44,7 +46,7 @@ sealed interface LineStyle {
         override fun add(
             line: String,
             number: Int
-        ): String = listItem(line = line, marker = "- ")
+        ): String = listItem(line = line, marker = MarkdownSyntax.BULLET)
 
         override fun remove(
             line: String
@@ -59,7 +61,11 @@ sealed interface LineStyle {
         override fun add(
             line: String,
             number: Int
-        ): String = listItem(line = line, marker = "$number. ")
+        ): String = listItem(
+            line = line,
+            marker =
+            number.toString() + MarkdownSyntax.NUMBER_DELIMITER + StringPatterns.SPACE
+        )
 
         override fun remove(
             line: String
@@ -74,7 +80,7 @@ sealed interface LineStyle {
         override fun add(
             line: String,
             number: Int
-        ): String = listItem(line = line, marker = "- [ ] ")
+        ): String = listItem(line = line, marker = MarkdownSyntax.BULLET + MarkdownSyntax.TASK_BOX)
 
         override fun remove(
             line: String
@@ -84,20 +90,19 @@ sealed interface LineStyle {
     data object Quote : LineStyle {
         override fun matches(
             line: String
-        ): Boolean = line.startsWith(prefix = QUOTE_MARK)
+        ): Boolean = line.startsWith(char = MarkdownSyntax.QUOTE_MARK)
 
         override fun add(
             line: String,
             number: Int
-        ): String = "> $line"
+        ): String = MarkdownSyntax.QUOTE + line
 
         override fun remove(
             line: String
-        ): String = line.replaceFirst(regex = QUOTE, replacement = "")
+        ): String = line.replaceFirst(regex = QUOTE, replacement = StringPatterns.EMPTY)
     }
 
     companion object {
-        private const val QUOTE_MARK = ">"
         private val BULLET = Regex(pattern = "^\\s*[-*+] ")
         private val CHECKLIST = Regex(pattern = "^\\s*[-*+] \\[[ xX]] ")
         private val HEADING = Regex(pattern = "^(#{1,6}) ")

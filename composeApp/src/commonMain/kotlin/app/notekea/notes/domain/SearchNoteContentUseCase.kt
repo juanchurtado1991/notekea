@@ -1,5 +1,6 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.AppDispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -90,7 +91,7 @@ class SearchNoteContentUseCase(
         val tags = mutableListOf<InlineTag>()
         var fence: Char? = null
         var lineStart = 0
-        body.split('\n').forEach { line ->
+        body.split(NEW_LINE_CHAR).forEach { line ->
             val marker = FENCE.find(input = line)?.groupValues?.get(index = 1)?.first()
             when {
                 fence != null -> if (marker == fence) fence = null
@@ -121,8 +122,8 @@ class SearchNoteContentUseCase(
         hits: List<IntRange>,
         first: Int
     ): Pair<String, List<IntRange>> {
-        val lineStart = body.lastIndexOf(char = '\n', startIndex = first - 1) + 1
-        val lineEnd = body.indexOf(char = '\n', startIndex = first).takeIf { it >= 0 } ?: body.length
+        val lineStart = body.lastIndexOf(char = NEW_LINE_CHAR, startIndex = first - 1) + 1
+        val lineEnd = body.indexOf(char = NEW_LINE_CHAR, startIndex = first).takeIf { it >= 0 } ?: body.length
         val plain = markdownLineStripper.strip(
             line = body.substring(startIndex = lineStart, endIndex = lineEnd),
             ranges = hits.filter {

@@ -1,5 +1,6 @@
 package app.notekea.notes.data
 
+import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.notes.domain.NotesError
@@ -45,7 +46,11 @@ class VaultFolderTrash(
         val extension = path.name.removePrefix(prefix = path.nameWithoutExtension)
         return generateSequence(seed = FIRST_SUFFIX) { it + 1 }
             .map { number ->
-                val name = if (number == FIRST_SUFFIX) path.name else "${path.nameWithoutExtension} $number$extension"
+                val name = if (number == FIRST_SUFFIX) {
+                    path.name
+                } else {
+                    path.nameWithoutExtension + StringPatterns.SPACE + number + extension
+                }
                 trashFolder / name
             }.first { fileSystem.metadataOrNull(path = it) == null }
     }
