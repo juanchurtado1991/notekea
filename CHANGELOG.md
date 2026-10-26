@@ -52,6 +52,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Outline (ROADMAP 1.9): a side panel on the right of the editor lists the note's headings as an indented tree. A
+  click (or Enter) goes to the heading, in Edit mode with the cursor on it, and the heading the view is in is
+  highlighted while scrolling, in Edit and Preview. A note without headings says how to add one. Mod+Shift+O moves
+  the keyboard to the outline (arrows move, Enter goes, Esc returns to the note); Mod+Shift+\ or the toolbar's
+  Outline button shows or hides the panel, whose width and visibility are remembered. When the window is too narrow
+  for both, the panel floats over the note while it is used.
 - Images and attachments (ROADMAP 1.8): images embedded with `![[image.png]]` or `![alt](path.png)` show in Preview
   and under their line in Edit, at their own size or the width the note asks for (`|300`), never wider than the note.
   Other files show as a chip that opens them with the system's app, and a missing file offers Locate…, which rewrites

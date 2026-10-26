@@ -59,6 +59,8 @@ prepare() {
     # to pick, drop or locate.
     cp "$SMOKE_ROOT/notes/Images and files.md" "$SCRATCH/Playground Vault/Editor/"
     cp "$SMOKE_ROOT/notes/Shopping basics.md" "$SCRATCH/Playground Vault/Editor/"
+    # Outline (1.9): a long note with headings of every level, and lines that only look like headings.
+    cp "$SMOKE_ROOT/notes/Outline practice.md" "$SCRATCH/Playground Vault/Editor/"
     cp "$SMOKE_ROOT/attachments/"* "$SCRATCH/Playground Vault/attachments/"
     mkdir -p "$SCRATCH/Outside files"
     cp "$SMOKE_ROOT/outside/"* "$SCRATCH/Outside files/"
