@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.unit.dp
@@ -39,6 +41,8 @@ import app.notekea.core.presentation.components.NotekeaListItem
 import app.notekea.core.presentation.components.NotekeaMarkdown
 import app.notekea.core.presentation.components.NotekeaMenuButton
 import app.notekea.core.presentation.components.NotekeaMenuItem
+import app.notekea.core.presentation.components.NotekeaPalette
+import app.notekea.core.presentation.components.NotekeaPaletteItem
 import app.notekea.core.presentation.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.components.NotekeaSplitPane
@@ -108,6 +112,7 @@ private const val NOTE_FOLDER_PROJECTS = "Projects/Notekea"
 private const val NOTE_MEETING = "Meeting with Ana"
 private const val NOTE_MISSING = "Folder not found"
 private const val NOTE_PRICING = "Pricing ideas"
+private const val PALETTE_HEIGHT_DP = 300
 private const val PROGRESS_LABEL = "Opening vault…"
 private const val SAMPLE_ERROR = "This note changed outside Notekea."
 private const val SAMPLE_PLACEHOLDER = "Search notes…"
@@ -122,6 +127,11 @@ private const val TREE_FOLDER_PROJECTS = "Projects"
 private const val TREE_NOTE_RENAMED = "Tomato plan 2027"
 private const val TREE_NOTE_TOMATO = "Tomato plan"
 private const val TREE_WIDTH_DP = 260
+private val PALETTE_RESULTS = listOf(
+    NOTE_PRICING to NOTE_FOLDER_PROJECTS,
+    NOTE_MEETING to NOTE_FOLDER_JOURNAL,
+    NOTE_ARCHIVE to null
+)
 private val SAMPLE_TABS = listOf("Related", "Backlinks", "Outline", "Chat")
 
 @Composable
@@ -156,6 +166,7 @@ private fun GalleryColumn(
                 ConfirmDialogSection()
                 SplitPaneSection()
                 TabsSection()
+                PaletteSection()
                 FeedbackSection()
                 Text(text = CODE_SAMPLE, style = LocalNotekeaCodeTextStyle.current)
             }
@@ -390,6 +401,34 @@ private fun TabsSection() {
                 onClick = { selectedTab = index },
                 badgeCount = BADGE_SAMPLE_COUNT.takeIf { index == BADGE_TAB_INDEX }
             )
+        }
+    }
+}
+
+/** The palette inside a card instead of over the window; arrows move the selection, Enter and Esc do nothing here. */
+@Composable
+private fun PaletteSection() {
+    var query by remember { mutableStateOf(value = "") }
+    var selected by remember { mutableIntStateOf(value = 0) }
+    NotekeaCard {
+        Box(modifier = Modifier.fillMaxWidth().height(height = PALETTE_HEIGHT_DP.dp)) {
+            NotekeaPalette(
+                query = query,
+                onQueryChange = { query = it },
+                placeholder = SAMPLE_PLACEHOLDER,
+                onMove = { selected = (selected + it).mod(other = PALETTE_RESULTS.size) },
+                onConfirm = {},
+                onDismiss = { query = "" }
+            ) {
+                PALETTE_RESULTS.forEachIndexed { index, (title, folder) ->
+                    NotekeaPaletteItem(
+                        title = title,
+                        onClick = { selected = index },
+                        selected = index == selected,
+                        supportingText = folder
+                    )
+                }
+            }
         }
     }
 }
