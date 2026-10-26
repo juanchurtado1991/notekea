@@ -45,6 +45,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Tasks and callouts (ROADMAP 1.7): tasks show a clickable checkbox over their `[ ]` in Edit mode, and Mod+Enter
+  toggles the task on the cursor line; the change is written to the file like any edit. In Read mode, Obsidian callouts
+  (every type and alias, unknown types as notes) are cards with an icon and a color by urgency, fold with `-` / `+`
+  and a click on the title, and nest at any depth; tasks checked with a capital `[X]` show as checked.
+- Design system: `NotekeaCheckbox` and `NotekeaCallout`.
 - Crash reports: when Notekea fails, it saves a report in the `crashes` folder of the app data directory (the
   last ten are kept; versions and the error, never note content) and shows "Notekea needs to close" in its own
   dialog window, in the app's theme, with Copy details and Report on GitHub, which opens a new Crash report issue form to paste it into, instead of Compose's raw
