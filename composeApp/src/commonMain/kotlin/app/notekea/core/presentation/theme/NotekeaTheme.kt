@@ -13,12 +13,13 @@ import androidx.compose.ui.text.TextStyle
 val LocalNotekeaCodeTextStyle = staticCompositionLocalOf { TextStyle.Default }
 
 /**
- * Root theme of the app: kea color scheme (following the system light/dark setting by default), bundled typography,
+ * Root theme of the app: kea color scheme (following the system light/dark setting by default, [LocalSystemDarkTheme]
+ * where Compose cannot read it), bundled typography,
  * 6 dp control and 10 dp card corners. Every screen and the component gallery render inside it.
  */
 @Composable
 fun NotekeaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = LocalSystemDarkTheme.current ?: isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     val shapes = Shapes(

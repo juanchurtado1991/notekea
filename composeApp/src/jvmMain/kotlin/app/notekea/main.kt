@@ -26,6 +26,7 @@ import app.notekea.core.crash.presentation.CrashReportActions
 import app.notekea.core.crash.presentation.CrashReporter
 import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.platform.domain.SystemAppearance
 import app.notekea.core.platform.domain.SystemEnvironment
 import app.notekea.core.presentation.gallery.DesignSystemGallery
 import app.notekea.core.presentation.platform.LocalResizePointerIcon
@@ -33,6 +34,7 @@ import app.notekea.core.presentation.platform.LocalShortcutDispatcher
 import app.notekea.core.presentation.platform.LocalWindowCloseGuard
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.WindowCloseGuard
+import app.notekea.core.presentation.theme.LocalSystemDarkTheme
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.di.desktopModules
 import app.notekea.notes.presentation.tree.VaultTreeScreen
@@ -77,8 +79,13 @@ fun main() {
     val isCrashTest = koin.get<SystemEnvironment>().environmentVariable(name = CRASH_TEST_VARIABLE) == CRASH_TEST_ON
     val crashActions = koin.get<CrashReportActions>()
     val buttonOrder = koin.get<PlatformConventions>().dialogButtonOrder
+    val systemDarkTheme = koin.get<SystemAppearance>().observeDarkTheme()
     application {
-        CompositionLocalProvider(LocalWindowExceptionHandlerFactory provides crashReporter.windowExceptionHandlers()) {
+        val isSystemDark by systemDarkTheme.collectAsState(initial = null)
+        CompositionLocalProvider(
+            LocalWindowExceptionHandlerFactory provides crashReporter.windowExceptionHandlers(),
+            LocalSystemDarkTheme provides isSystemDark
+        ) {
             if (showGallery) GalleryWindow() else NotekeaWindow(isCrashTest = isCrashTest)
             val crash by crashReporter.crash.collectAsState()
             crash?.let {
