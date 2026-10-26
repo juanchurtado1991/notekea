@@ -39,6 +39,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.Canvas
 import app.notekea.notes.domain.ListEditing
 import app.notekea.notes.domain.ListAction
 import androidx.compose.ui.input.key.type
@@ -410,12 +415,7 @@ private fun EditorBody(
         cursorBrush = SolidColor(value = colors.primary),
         onTextLayout = { getResult -> layout = getResult },
         outputTransformation = highlighting,
-        decorator = TextFieldDecorator { innerTextField ->
-            Box {
-                innerTextField()
-                TaskCheckboxes(buffer = buffer, layout = { layout() }, onIntent = onIntent)
-            }
-        }
+        decorator = decoratorOf(buffer = buffer, layout = { layout() }, onIntent = onIntent)
     )
 }
 
@@ -533,6 +533,52 @@ private fun TaskCheckboxes(
                     size = minOf(TASK_CHECKBOX_DP, (height.value * TASK_CHECKBOX_RATIO).roundToInt())
                 )
             }
+        }
+    }
+}
+
+/** The code blocks' backgrounds behind the text, and the tasks' checkboxes over it. */
+private fun decoratorOf(
+    buffer: TextFieldState,
+    layout: () -> TextLayoutResult?,
+    onIntent: (EditorIntent) -> Unit
+): TextFieldDecorator = TextFieldDecorator { innerTextField ->
+    Box {
+        CodeBlockBackgrounds(buffer = buffer, layout = layout)
+        innerTextField()
+        TaskCheckboxes(buffer = buffer, layout = layout, onIntent = onIntent)
+    }
+}
+
+/**
+ * The background of every fenced code block, behind its whole lines from one fence to the other and a little beyond
+ * the text on each side, as a block: shading only the characters left a ragged edge and hid the spaces ending a line.
+ */
+@Composable
+private fun BoxScope.CodeBlockBackgrounds(
+    buffer: TextFieldState,
+    layout: () -> TextLayoutResult?
+) {
+    val highlighter = remember { MarkdownHighlighter() }
+    val text = buffer.text
+    val blocks = remember(text) { highlighter.codeBlocks(text = text) }
+    val color = MaterialTheme.colorScheme.surfaceVariant
+    val padding = with(LocalDensity.current) { NotekeaDimensions.SpacingXs.toPx() }
+    val radius = with(LocalDensity.current) { NotekeaDimensions.ControlRadius.toPx() }
+    Canvas(modifier = Modifier.matchParentSize()) {
+        val result = layout() ?: return@Canvas
+        val length = result.layoutInput.text.length
+        blocks.filter { it.first <= length }.forEach { block ->
+            val top = result.getLineTop(lineIndex = result.getLineForOffset(offset = block.first))
+            val bottom = result.getLineBottom(
+                lineIndex = result.getLineForOffset(offset = minOf(block.last + 1, length))
+            )
+            drawRoundRect(
+                color = color,
+                topLeft = Offset(x = -padding, y = top),
+                size = Size(width = size.width + 2 * padding, height = bottom - top),
+                cornerRadius = CornerRadius(x = radius, y = radius)
+            )
         }
     }
 }

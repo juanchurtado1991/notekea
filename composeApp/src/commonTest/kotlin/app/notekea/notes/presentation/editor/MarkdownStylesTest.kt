@@ -2,6 +2,7 @@ package app.notekea.notes.presentation.editor
 
 import androidx.compose.material3.Typography
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import kotlin.test.Test
@@ -28,8 +29,10 @@ class MarkdownStylesTest {
             ).map { styles.of(kind = it).color }
         )
         assertEquals(
-            expected = FontFamily.Monospace to colors.surfaceVariant,
-            actual = styles.of(kind = HighlightKind.CODE_BLOCK).let { it.fontFamily to it.background }
+            expected = listOf(FontFamily.Monospace to Color.Unspecified, FontFamily.Monospace to colors.surfaceVariant),
+            actual = listOf(HighlightKind.CODE_BLOCK, HighlightKind.CODE_INLINE).map { kind ->
+                styles.of(kind = kind).let { it.fontFamily to it.background }
+            }
         )
     }
 
