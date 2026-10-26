@@ -31,3 +31,11 @@ In a table each picture sits in its cell:
 | Dish | Photo |
 | --- | --- |
 | Arepas | ![[Arepas plate.png\|80]] |
+
+A note shown inside this one, as Obsidian shows it:
+
+![[Shopping basics]]
+
+Only one section of it:
+
+![[Shopping basics#Dairy]]

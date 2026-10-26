@@ -32,6 +32,17 @@ class EmbedFinderTest {
     }
 
     @Test
+    fun `embedded notes are found when asked for, marked as notes, with or without a section`() {
+        val text = "![[Arepas]]\n![[Recipes/Arepas.md#Dough]]\n![[plate.png]]"
+
+        assertEquals(
+            expected = listOf("Arepas" to true, "Recipes/Arepas.md#Dough" to true, "plate.png" to false),
+            actual = finder.embeds(text = text, includeNotes = true).map { it.target to it.isNote }
+        )
+        assertEquals(expected = listOf("plate.png"), actual = finder.embeds(text = text).map { it.target })
+    }
+
+    @Test
     fun `embeds of notes and anything in code are left out, and ranges point at the embed in the text`() {
         val text = "![[Other note]] ![[Recipe.md]]\n`![[inline.png]]`\n```\n![[fenced.png]]\n```\nEnd ![[end.png]]"
         val embeds = finder.embeds(text = text)

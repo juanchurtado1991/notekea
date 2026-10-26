@@ -61,6 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   table row goes into its cell.
   On Linux Wayland desktops a pasted image is read with `wl-paste` (wl-clipboard), since Java only sees text there;
   without wl-clipboard the editor says how to install it instead of waiting seconds and pasting nothing.
+- Embedded notes: `![[Note]]` shows the note's text in place and `![[Note#Heading]]` one section of it, in Preview
+  and under its line in Edit, as Obsidian does; the title opens the note.
 - The sidebar lists the vault's other files (images, PDFs…) with their extension and an icon; selecting one shows the
   picture beside the tree, with Open with its app and Show in Files. Folder numbers count every file, not only notes.
 - Design system: `NotekeaAttachmentImage`, `NotekeaFileChip` and `NotekeaMissingFile`.

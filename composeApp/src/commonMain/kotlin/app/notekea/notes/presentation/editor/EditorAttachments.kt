@@ -9,7 +9,11 @@ import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.AttachmentResolver
 import app.notekea.notes.domain.AttachmentSource
 import app.notekea.notes.domain.AttachmentStore
+import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.EmbedFinder
+import app.notekea.notes.domain.EmbeddedNoteText
+import app.notekea.notes.domain.LinkResolver
+import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.notes.domain.EmbedText
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
@@ -19,9 +23,10 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.decodeToImageBitmap
 
 /**
- * The files embedded in the open note of the vault at [vaultPath] (`ROADMAP.md` 1.8), for the editor: it finds them
- * in the text, resolves them among the vault's files (listed once and again after a change), reads and decodes the
- * images, keeping each decoded picture until its file changes, and attaches new files, giving the embed to write.
+ * The files and notes embedded in the open note of the vault at [vaultPath] (`ROADMAP.md` 1.8), for the editor: it
+ * finds them in the text, resolves them among the vault's files (listed once and again after a change), reads and
+ * decodes the images, keeping each decoded picture until its file changes, reads the text an embedded note shows, and
+ * attaches new files, giving the embed to write. A note that embeds itself, or a missing note or heading, stays a link.
  */
 class EditorAttachments(
     private val vaultPath: String,
@@ -31,6 +36,7 @@ class EditorAttachments(
     private val dispatchers: AppDispatchers
 ) {
     private val embedFinder = EmbedFinder()
+    private val embeddedNoteText = EmbeddedNoteText()
     private var files: List<RelativePath>? = null
     private var folderSetting: String? = null
     private val images = mutableMapOf<RelativePath, ImageBitmap?>()
@@ -40,7 +46,7 @@ class EditorAttachments(
         note: RelativePath,
         text: String
     ): List<AttachmentView> {
-        val embeds = embedFinder.embeds(text = text)
+        val embeds = embedFinder.embeds(text = text, includeNotes = true)
         if (embeds.isEmpty()) return emptyList()
         var vaultFiles = vaultFiles()
         val resolver = { files: List<RelativePath> ->
@@ -50,11 +56,13 @@ class EditorAttachments(
             )
         }
         // A file added outside Notekea since the last listing is found by listing again once.
-        if (embeds.any { resolver(vaultFiles).resolve(embed = it, note = note) == null }) {
+        if (embeds.any { !it.isNote && resolver(vaultFiles).resolve(embed = it, note = note) == null }) {
             vaultFiles =
                 vaultFiles(refresh = true)
         }
-        return embeds.map { embed ->
+        val notes = LinkResolver(notePaths = vaultFiles.filter { it.isMarkdown })
+        return embeds.mapNotNull { embed ->
+            if (embed.isNote) return@mapNotNull noteView(embed = embed, note = note, notes = notes)
             val path = resolver(vaultFiles).resolve(embed = embed, note = note)
             val kind = AttachmentKind.of(name = path?.name ?: embed.target)
             val image = if (path != null && kind == AttachmentKind.IMAGE) imageOf(path = path) else null
@@ -66,6 +74,21 @@ class EditorAttachments(
                 isUnreadable = path != null && kind == AttachmentKind.IMAGE && image == null
             )
         }
+    }
+
+    /** The note [embed] shows in [note], with the text it shows; null when it is missing or [note] itself. */
+    private suspend fun noteView(
+        embed: Embed,
+        note: RelativePath,
+        notes: LinkResolver
+    ): AttachmentView? {
+        val name = embed.target.substringBefore(delimiter = MarkdownSyntax.HEADING_ANCHOR_CHAR)
+        if (name.isBlank()) return null
+        val path = notes.closestWiki(target = name, source = note)?.takeIf { it != note } ?: return null
+        val text = (attachmentStore.read(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
+            ?.decodeToString() ?: return null
+        val shown = embeddedNoteText.of(text = text, target = embed.target) ?: return null
+        return AttachmentView(embed = embed, kind = AttachmentKind.NOTE, path = path, noteText = shown)
     }
 
     /** Attaches [source] to [note] and gives the embed to write for it, `![[name.png]]` or with its path. */

@@ -55,9 +55,10 @@ prepare() {
     # read the same text.
     cp "$SMOKE_ROOT/notes/Tasks and callouts.md" "$SCRATCH/Playground Vault/Editor/"
     cp "$SMOKE_ROOT/notes/Formatting practice.md" "$SCRATCH/Playground Vault/Editor/"
-    # Images and attachments (1.8): the note, its files in the vault's attachments folder, and files outside the vault
+    # Images and attachments (1.8): the note, the note it embeds, its files in the vault's attachments folder, and files outside the vault
     # to pick, drop or locate.
     cp "$SMOKE_ROOT/notes/Images and files.md" "$SCRATCH/Playground Vault/Editor/"
+    cp "$SMOKE_ROOT/notes/Shopping basics.md" "$SCRATCH/Playground Vault/Editor/"
     cp "$SMOKE_ROOT/attachments/"* "$SCRATCH/Playground Vault/attachments/"
     mkdir -p "$SCRATCH/Outside files"
     cp "$SMOKE_ROOT/outside/"* "$SCRATCH/Outside files/"

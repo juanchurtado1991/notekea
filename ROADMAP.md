@@ -264,6 +264,10 @@ Obsidian-flavored Markdown blocks that most vaults use.
   app.json` `attachmentFolderPath` when present (the vault root, the note's folder, a subfolder of it or a fixed
   folder, as Obsidian), otherwise `attachments/`; a Notekea setting comes with the Settings screen.
 - Non-image attachments (PDF, audio, other files) show as a file chip that opens with the system default app.
+- **Embedded notes:** `![[Note]]` on a line of its own shows the note's text in place (without its frontmatter), in a
+  frame whose title opens it; `![[Note#Heading]]` shows only that section, down to the next heading of its level. In
+  Preview and under its line in Edit, as Obsidian does. A missing note or heading, a block (`#^id`), the note itself
+  or an embed inside a sentence stay links.
 - **Files in the sidebar:** the tree lists files that are not notes too, with their extension and an image or file
   icon, among the notes by name; a folder's number counts all its files, notes and others. Selecting one shows it beside the tree: the
   picture with its size, or its name; with **Open with its app** and **Show in Files/Finder/File Explorer**. Rename
