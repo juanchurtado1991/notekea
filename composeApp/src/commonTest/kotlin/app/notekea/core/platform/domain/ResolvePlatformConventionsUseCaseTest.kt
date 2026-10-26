@@ -177,6 +177,7 @@ class ResolvePlatformConventionsUseCaseTest {
             italicShortcut = withPrimary(ShortcutKey.I),
             noteLinkShortcut = withPrimary(ShortcutKey.K),
             webLinkShortcut = withPrimaryAndShift(ShortcutKey.K),
+            pasteShortcut = withPrimary(ShortcutKey.V),
             dialogButtonOrder = buttonOrder,
             appDataDirectory = appDataDirectory,
             homeDirectory = homeDirectory

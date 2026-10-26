@@ -323,20 +323,20 @@ class EditorToolbarTest {
         private const val WINDOW_HEIGHT = 640
         private const val WINDOW_WIDTH = 1200
         private val BODY = "# Arepas\n\n" + (1..40).joinToString(separator = "") { "Step $it of the recipe.\n" }
-        private val BOLD = Offset(x = 525f, y = 186f)
-        private val CALLOUT = Offset(x = 944f, y = 186f)
-        private val CHECKLIST = Offset(x = 885f, y = 186f)
+        private val BOLD = Offset(x = 477f, y = 186f)
+        private val CALLOUT = Offset(x = 896f, y = 186f)
+        private val CHECKLIST = Offset(x = 837f, y = 186f)
         private val EDIT_TAB = Offset(x = 115f, y = 183f)
         private val FIND = Offset(x = 1101f, y = 186f)
-        private val FOLDED = Offset(x = 700f, y = 45f)
-        private val HEADING = Offset(x = 477f, y = 186f)
-        private val MEDIUM_HEADING = Offset(x = 560f, y = 291f)
-        private val NOTE_LINK = Offset(x = 633f, y = 186f)
+        private val FOLDED = Offset(x = 652f, y = 45f)
+        private val HEADING = Offset(x = 429f, y = 186f)
+        private val MEDIUM_HEADING = Offset(x = 512f, y = 291f)
+        private val NOTE_LINK = Offset(x = 585f, y = 186f)
         private val PREVIEW_TAB = Offset(x = 211f, y = 183f)
-        private val TAG = Offset(x = 729f, y = 186f)
-        private val CODE_BLOCK = Offset(x = 993f, y = 186f)
+        private val TAG = Offset(x = 681f, y = 186f)
+        private val CODE_BLOCK = Offset(x = 945f, y = 186f)
         private val FOUR_BY_THREE = Offset(x = 704f, y = 406f)
-        private val KOTLIN = Offset(x = 1018f, y = 327f)
+        private val KOTLIN = Offset(x = 970f, y = 327f)
         private val MORE = Offset(x = 1041f, y = 186f)
         private val TABLE_ROW = Offset(x = 960f, y = 339f)
         private const val LINE_END_X = 700f
@@ -344,6 +344,6 @@ class EditorToolbarTest {
         private val TOOLBAR_GAP = Offset(x = 350f, y = 186f)
         private val THIRD_STEP = Offset(x = 140f, y = 402f)
         private val TEXT = Offset(x = 300f, y = 330f)
-        private val TIP_WITH_FOLDED_CHECKED = Offset(x = 700f, y = 332f)
+        private val TIP_WITH_FOLDED_CHECKED = Offset(x = 652f, y = 332f)
     }
 }

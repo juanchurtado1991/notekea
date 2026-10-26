@@ -17,5 +17,6 @@ enum class ShortcutKey {
     O,
     P,
     Q,
-    S
+    S,
+    V
 }

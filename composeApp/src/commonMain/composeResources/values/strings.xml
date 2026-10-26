@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="attachment_locate">Locate…</string>
+    <string name="attachment_missing">This file is missing</string>
+    <string name="attachment_open_hint">Opens with its app</string>
     <string name="crash_close">Close Notekea</string>
     <string name="crash_copied">Copied to the clipboard</string>
     <string name="crash_copy">Copy details</string>
@@ -80,6 +83,7 @@
     <string name="error_notes_reveal_failed">Notekea couldn’t open the file manager for %1$s.</string>
     <string name="error_notes_vault_missing">Notekea can’t find %1$s. It may have been moved, renamed or deleted.</string>
 
+    <string name="format_attach">Image or file: from your computer, also by pasting or dropping it here</string>
     <string name="format_bold">Bold</string>
     <string name="format_bold_placeholder">bold text</string>
     <string name="format_bullet_list">Bulleted list</string>

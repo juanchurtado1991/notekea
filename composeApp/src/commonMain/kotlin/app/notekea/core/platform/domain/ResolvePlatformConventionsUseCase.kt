@@ -39,6 +39,7 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             italicShortcut = Shortcut(key = ShortcutKey.I, modifiers = setOf(primaryModifier)),
             noteLinkShortcut = Shortcut(key = ShortcutKey.K, modifiers = setOf(primaryModifier)),
             webLinkShortcut = Shortcut(key = ShortcutKey.K, modifiers = setOf(primaryModifier, ShortcutModifier.SHIFT)),
+            pasteShortcut = Shortcut(key = ShortcutKey.V, modifiers = setOf(primaryModifier)),
             dialogButtonOrder = dialogButtonOrderFor(operatingSystem = operatingSystem),
             appDataDirectory = appDataDirectoryFor(operatingSystem = operatingSystem),
             homeDirectory = systemEnvironment.userHome

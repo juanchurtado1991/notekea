@@ -33,7 +33,7 @@ private const val PREVIEW_WIDTH_DP = 720
 /**
  * The editor's questions and problems, above the note: a note that could not be opened (Try again), an outside change
  * while there were unsaved edits (Keep mine / Load theirs), a note that disappeared (Restore / Close) and a save that
- * failed (the next edit or Save tries again). Each one says what happened and what the buttons do.
+ * failed (the next edit or Save tries again), or a file could not be attached, opened or located (Close). Each one says what happened and what the buttons do.
  */
 @Composable
 internal fun EditorBanners(
@@ -61,6 +61,13 @@ internal fun EditorBanners(
                     notesErrorMessage(error = error, platformConventions = platformConventions)
                 )
             )
+        }
+        state.attachmentError?.let { error ->
+            ErrorBanner(message = notesErrorMessage(error = error, platformConventions = platformConventions)) {
+                BannerAction(text = stringResource(resource = Res.string.editor_close)) {
+                    onIntent(EditorIntent.OnAttachmentErrorDismiss)
+                }
+            }
         }
     }
 }

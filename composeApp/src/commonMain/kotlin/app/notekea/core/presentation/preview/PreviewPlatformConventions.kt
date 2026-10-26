@@ -37,6 +37,7 @@ object PreviewPlatformConventions {
             key = ShortcutKey.K,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
+        pasteShortcut = Shortcut(key = ShortcutKey.V, modifiers = setOf(ShortcutModifier.CONTROL)),
         dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
         appDataDirectory = APP_DATA,
         homeDirectory = HOME
