@@ -1,0 +1,37 @@
+name: Crash report
+description: Notekea closed with "Notekea needs to close"
+labels:
+  - bug
+  - crash
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Clicking **Report on GitHub** in Notekea already copied the crash details: paste them
+        below. They hold versions and the error, never note content, but read them before submitting.
+  - type: textarea
+    id: crash-report
+    attributes:
+      label: Crash details
+      description: Paste what Notekea copied (it starts with "Notekea crash report").
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What were you doing?
+      description: The last things you did before it closed, as far as you remember.
+      placeholder: |
+        1. Opened the note...
+        2. Pressed...
+    validations:
+      required: true
+  - type: dropdown
+    id: again
+    attributes:
+      label: Does it happen again?
+      options:
+        - Every time I repeat those steps
+        - Sometimes
+        - Only once so far
