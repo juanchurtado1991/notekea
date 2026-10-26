@@ -132,14 +132,24 @@ class MarkdownFormatterTest {
     fun `a table, a code block and a divider are blocks too`() {
         assertEquals(
             expected = listOf(
-                "| A | B | C |\n| --- | --- | --- |\n|   |   |   |\n|   |   |   |\n",
-                "```\ncode\n```\n",
-                "Intro\n\n---\n"
+                "| A | B |\n| --- | --- |\n| Text | Text |\n| Text | Text |\n| Text | Text |\n" to "A",
+                "```\ncode\n```\n" to "code",
+                "```kotlin\ncode\n```\n" to "code",
+                "Intro\n\n---\n" to ""
             ),
             actual = listOf(
-                apply(text = "", cursor = 0, action = FormatAction.Table(columnNames = listOf("A", "B", "C"))).first,
-                apply(text = "", cursor = 0, action = FormatAction.CodeBlock(placeholder = "code")).first,
-                apply(text = "Intro", cursor = 5, action = FormatAction.Divider).first
+                apply(
+                    text = "",
+                    cursor = 0,
+                    action = FormatAction.Table(columnNames = listOf("A", "B"), rows = 3, cellText = "Text")
+                ),
+                apply(text = "", cursor = 0, action = FormatAction.CodeBlock(placeholder = "code")),
+                apply(
+                    text = "",
+                    cursor = 0,
+                    action = FormatAction.CodeBlock(placeholder = "code", language = "kotlin")
+                ),
+                apply(text = "Intro", cursor = 5, action = FormatAction.Divider)
             )
         )
     }

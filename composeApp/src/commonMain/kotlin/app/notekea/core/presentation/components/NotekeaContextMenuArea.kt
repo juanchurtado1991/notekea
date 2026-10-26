@@ -4,6 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,6 +22,13 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.window.Popup
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.hoverable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -85,9 +94,18 @@ fun NotekeaContextMenuArea(
             containerColor = MaterialTheme.colorScheme.surface,
             border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = MaterialTheme.colorScheme.outline)
         ) {
+            // The item whose submenu is open; hovering another item closes it, moving into the submenu does not.
+            var openSubmenu by remember { mutableStateOf<NotekeaMenuItem?>(value = null) }
             sections.forEachIndexed { index, items ->
                 if (index > 0) MenuDivider()
-                items.forEach { MenuRow(item = it, onChosen = state::close) }
+                items.forEach { item ->
+                    MenuRow(
+                        item = item,
+                        onChosen = state::close,
+                        isSubmenuOpen = openSubmenu == item,
+                        onHover = { openSubmenu = item.takeIf { it.submenu != null } }
+                    )
+                }
             }
         }
     }
@@ -96,30 +114,109 @@ fun NotekeaContextMenuArea(
 @Composable
 private fun MenuRow(
     item: NotekeaMenuItem,
-    onChosen: () -> Unit
+    onChosen: () -> Unit,
+    isSubmenuOpen: Boolean,
+    onHover: () -> Unit
 ) {
     val color = if (item.isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-    DropdownMenuItem(
-        text = { Text(text = item.label, style = MaterialTheme.typography.bodyMedium, color = color) },
-        onClick = {
-            if (!item.keepsMenuOpen) onChosen()
-            item.onClick()
-        },
-        modifier = Modifier.height(height = NotekeaDimensions.MenuItemHeight),
-        leadingIcon = leadingIconOf(item = item, color = color),
-        trailingIcon = item.shortcutHint?.let { hint ->
-            {
-                Text(
-                    text = hint,
-                    modifier = Modifier.widthIn(min = SHORTCUT_MIN_WIDTH_DP.dp),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.End
-                )
-            }
-        },
-        enabled = item.enabled
-    )
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    LaunchedEffect(isHovered) { if (isHovered) onHover() }
+    Box {
+        DropdownMenuItem(
+            text = { MenuRowText(item = item, color = color) },
+            onClick = {
+                if (item.submenu != null) {
+                    onHover()
+                } else {
+                    if (!item.keepsMenuOpen) onChosen()
+                    item.onClick()
+                }
+            },
+            modifier = menuRowHeight(item = item).hoverable(interactionSource = interactionSource),
+            leadingIcon = leadingIconOf(item = item, color = color),
+            trailingIcon = trailingOf(item = item),
+            enabled = item.enabled,
+            interactionSource = interactionSource
+        )
+        val submenu = item.submenu
+        if (isSubmenuOpen && submenu != null) Submenu(onChosen = onChosen, content = submenu)
+    }
+}
+
+@Composable
+private fun MenuRowText(
+    item: NotekeaMenuItem,
+    color: Color
+) {
+    Column {
+        Text(text = item.label, style = MaterialTheme.typography.bodyMedium, color = color)
+        item.supportingText?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/** Desktop menus have 32 dp rows; a row with a second line grows to hold it. */
+private fun menuRowHeight(
+    item: NotekeaMenuItem
+): Modifier = if (item.supportingText == null) {
+    Modifier.height(height = NotekeaDimensions.MenuItemHeight)
+} else {
+    Modifier.heightIn(min = NotekeaDimensions.MenuItemHeight).padding(vertical = NotekeaDimensions.SpacingXs)
+}
+
+/** The shortcut at the end of the row, or a chevron for an item that opens a submenu. */
+private fun trailingOf(
+    item: NotekeaMenuItem
+): (@Composable () -> Unit)? = when {
+    item.submenu != null -> {
+        {
+            Icon(
+                imageVector = NotekeaIcons.Expand,
+                contentDescription = null,
+                modifier = Modifier.size(size = NotekeaDimensions.IconSize),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+
+    item.shortcutHint != null -> {
+        {
+            Text(
+                text = item.shortcutHint,
+                modifier = Modifier.widthIn(min = SHORTCUT_MIN_WIDTH_DP.dp),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End
+            )
+        }
+    }
+
+    else -> null
+}
+
+/** A submenu's panel, beside its row, themed like the menu; it does not take the keyboard from the menu's owner. */
+@Composable
+private fun Submenu(
+    onChosen: () -> Unit,
+    content: @Composable (onChosen: () -> Unit) -> Unit
+) {
+    val position = remember { SubmenuPositionProvider() }
+    Popup(popupPositionProvider = position, properties = PopupProperties(focusable = false)) {
+        Surface(
+            shape = MaterialTheme.shapes.small,
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = MaterialTheme.colorScheme.outline),
+            shadowElevation = NotekeaDimensions.SpacingXs
+        ) {
+            Box(modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)) { content(onChosen) }
+        }
+    }
 }
 
 /** The item's icon, or for a choice its check mark (an empty slot of the same size when it is not chosen). */

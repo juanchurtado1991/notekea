@@ -82,13 +82,14 @@
     <string name="format_bold">Bold</string>
     <string name="format_bold_placeholder">bold text</string>
     <string name="format_bullet_list">Bulleted list</string>
-    <string name="format_callout">Callout</string>
+    <string name="format_callout">Callout: a colored box for a tip, a warning…</string>
     <string name="format_callout_abstract">Summary</string>
     <string name="format_callout_bug">Bug</string>
     <string name="format_callout_danger">Danger</string>
     <string name="format_callout_example">Example</string>
     <string name="format_callout_failure">Failure</string>
-    <string name="format_callout_folded">Folded</string>
+    <string name="format_callout_folded">Start folded</string>
+    <string name="format_callout_folded_hint">Shows only the title until it is clicked</string>
     <string name="format_callout_info">Info</string>
     <string name="format_callout_note">Note</string>
     <string name="format_callout_placeholder">Write here</string>
@@ -102,6 +103,7 @@
     <string name="format_checklist_placeholder">To do</string>
     <string name="format_code_block">Code block</string>
     <string name="format_code_placeholder">code</string>
+    <string name="format_code_plain">Plain text</string>
     <string name="format_divider">Divider</string>
     <string name="format_heading">Heading</string>
     <string name="format_heading_large">Large heading</string>
@@ -117,7 +119,9 @@
     <string name="format_quote">Quote</string>
     <string name="format_quote_placeholder">Quote</string>
     <string name="format_table">Table</string>
+    <string name="format_table_cell">Text</string>
     <string name="format_table_column">Column %1$d</string>
+    <string name="format_table_size">%1$d × %2$d table</string>
     <string name="format_tag">Tag</string>
     <string name="format_web_link">Web link</string>
     <string name="format_web_link_placeholder">link text</string>

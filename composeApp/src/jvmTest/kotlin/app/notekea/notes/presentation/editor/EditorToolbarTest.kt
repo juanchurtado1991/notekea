@@ -29,7 +29,7 @@ class EditorToolbarTest {
     fun `buttons ask for their formatting, link to a note asks to choose one, and the tabs switch modes`() {
         val intents = clickAll(
             isReading = false,
-            positions = listOf(BOLD, NOTE_LINK, CHECKLIST, TABLE, EDIT_TAB, PREVIEW_TAB, FIND)
+            positions = listOf(BOLD, NOTE_LINK, CHECKLIST, EDIT_TAB, PREVIEW_TAB, FIND)
         )
 
         assertEquals(
@@ -37,9 +37,6 @@ class EditorToolbarTest {
                 EditorIntent.OnFormat(action = FormatAction.Bold(placeholder = "bold text")),
                 EditorIntent.OnNoteLinkRequest,
                 EditorIntent.OnFormat(action = FormatAction.Checklist(placeholder = "To do")),
-                EditorIntent.OnFormat(
-                    action = FormatAction.Table(columnNames = listOf("Column 1", "Column 2", "Column 3"))
-                ),
                 EditorIntent.OnReadModeToggle,
                 EditorIntent.OnFindOpen
             ),
@@ -48,8 +45,28 @@ class EditorToolbarTest {
     }
 
     @Test
+    fun `code block writes the chosen language, and the table picked on the grid has that size`() {
+        val intents =
+            clickAll(isReading = false, positions = listOf(CODE_BLOCK, KOTLIN, MORE, TABLE_ROW, FOUR_BY_THREE))
+
+        assertEquals(
+            expected = listOf<EditorIntent>(
+                EditorIntent.OnFormat(action = FormatAction.CodeBlock(placeholder = "code", language = "kotlin")),
+                EditorIntent.OnFormat(
+                    action = FormatAction.Table(
+                        columnNames = listOf("Column 1", "Column 2", "Column 3", "Column 4"),
+                        rows = 3,
+                        cellText = "Text"
+                    )
+                )
+            ),
+            actual = intents
+        )
+    }
+
+    @Test
     fun `preview keeps only the tabs and find`() {
-        val intents = clickAll(isReading = true, positions = listOf(BOLD, TABLE, EDIT_TAB, FIND))
+        val intents = clickAll(isReading = true, positions = listOf(BOLD, CODE_BLOCK, EDIT_TAB, FIND))
 
         assertEquals(
             expected = listOf(EditorIntent.OnReadModeToggle, EditorIntent.OnFindOpen),
@@ -311,18 +328,22 @@ class EditorToolbarTest {
         private val CHECKLIST = Offset(x = 885f, y = 186f)
         private val EDIT_TAB = Offset(x = 115f, y = 183f)
         private val FIND = Offset(x = 1101f, y = 186f)
-        private val FOLDED = Offset(x = 1020f, y = 36f)
+        private val FOLDED = Offset(x = 700f, y = 45f)
         private val HEADING = Offset(x = 477f, y = 186f)
         private val MEDIUM_HEADING = Offset(x = 560f, y = 291f)
         private val NOTE_LINK = Offset(x = 633f, y = 186f)
         private val PREVIEW_TAB = Offset(x = 211f, y = 183f)
         private val TAG = Offset(x = 729f, y = 186f)
-        private val TABLE = Offset(x = 993f, y = 186f)
+        private val CODE_BLOCK = Offset(x = 993f, y = 186f)
+        private val FOUR_BY_THREE = Offset(x = 704f, y = 406f)
+        private val KOTLIN = Offset(x = 1018f, y = 327f)
+        private val MORE = Offset(x = 1041f, y = 186f)
+        private val TABLE_ROW = Offset(x = 960f, y = 339f)
         private const val LINE_END_X = 700f
         private const val TEXT_LEFT = 78f
         private val TOOLBAR_GAP = Offset(x = 350f, y = 186f)
         private val THIRD_STEP = Offset(x = 140f, y = 402f)
         private val TEXT = Offset(x = 300f, y = 330f)
-        private val TIP_WITH_FOLDED_CHECKED = Offset(x = 1020f, y = 290f)
+        private val TIP_WITH_FOLDED_CHECKED = Offset(x = 700f, y = 332f)
     }
 }

@@ -39,6 +39,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The app follows the system's dark mode on Linux (read from the desktop portal: GNOME, KDE, COSMIC); it always
+  showed the light theme there.
+- A space typed at the end of a line in a code block now moves the cursor, and the block is shaded as a whole.
 - The editor no longer scrolls the note when the text is clicked, and shows typed characters without ligatures
   (`->` stayed an arrow in the editor and in code). Palettes opened with text (a `#tag` search) put the cursor after it.
 - Status bar items and tab labels stay on one line with an ellipsis in narrow windows instead of wrapping and being
@@ -51,14 +54,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   buttons with plain-language tooltips for Heading (Large, Medium, Small), Bold (Mod+B), Italic (Mod+I), Link to a
   note (Mod+K, chosen in the quick switcher, the selection becoming its label), Web link (Mod+Shift+K), Tag (a picker
   that searches the vault's tags, in the frontmatter or the text, and creates new ones), Bulleted list, Numbered
-  list, Checklist, Callout (every type, optionally Folded), Table and More (Quote, Code block, Divider). A button
+  list, Checklist, Callout (every type, optionally started folded, explained in the menu), Code block (plain text or
+  one of ten languages) and More (Quote, Divider, and Table with its size picked on a grid). A button
   formats the selection (which stays selected) or the word at the cursor, and pressing it again removes the
   formatting; elsewhere it inserts an example to type over. Lists continue with Enter, nest with Tab and Shift+Tab,
   and lose their marker with Backspace. The toolbar stays in view while scrolling, Find in note sits at its end, and
   Preview keeps only the tabs and Find.
 - The vault index also reads the `#tags` written in each note's text (the note cache is rebuilt once).
-- Design system: `NotekeaCompactTabs`, menu items that keep their menu open (`keepsMenuOpen`), and buttons, menus
-  and tabs that leave the keyboard in the text (`takesFocus`).
+- Design system: `NotekeaCompactTabs`, `NotekeaGridSizePicker`, menu items that keep their menu open
+  (`keepsMenuOpen`), explain themselves (`supportingText`) or open a submenu (`submenu`), and buttons, menus and tabs
+  that leave the keyboard in the text (`takesFocus`).
 - Tasks and callouts (ROADMAP 1.7): tasks show a clickable checkbox over their `[ ]` in Edit mode, and Mod+Enter
   toggles the task on the cursor line; the change is written to the file like any edit. In Read mode, Obsidian callouts
   (every type and alias, unknown types as notes) are cards with an icon and a color by urgency, fold with `-` / `+`

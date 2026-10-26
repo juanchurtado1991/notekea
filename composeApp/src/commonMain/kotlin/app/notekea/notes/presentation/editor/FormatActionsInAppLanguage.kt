@@ -28,12 +28,11 @@ import app.notekea.resources.format_heading_placeholder
 import app.notekea.resources.format_italic_placeholder
 import app.notekea.resources.format_list_placeholder
 import app.notekea.resources.format_quote_placeholder
+import app.notekea.resources.format_table_cell
 import app.notekea.resources.format_table_column
 import app.notekea.resources.format_web_link_placeholder
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-
-private const val TABLE_COLUMNS = 3
 
 /** The [FormatActions] in the app's language. */
 @Composable
@@ -51,10 +50,11 @@ fun formatActions(): FormatActions {
             placeholder = stringResource(resource = Res.string.format_checklist_placeholder)
         ),
         quote = FormatAction.Quote(placeholder = stringResource(resource = Res.string.format_quote_placeholder)),
-        codeBlock = FormatAction.CodeBlock(placeholder = stringResource(resource = Res.string.format_code_placeholder)),
-        table = FormatAction.Table(
-            columnNames = (1..TABLE_COLUMNS).map { stringResource(Res.string.format_table_column, it) }
-        ),
+        codePlaceholder = stringResource(resource = Res.string.format_code_placeholder),
+        tableColumnNames = (1..FormatActions.TABLE_MAX_COLUMNS).map {
+            stringResource(Res.string.format_table_column, it)
+        },
+        tableCellText = stringResource(resource = Res.string.format_table_cell),
         calloutPlaceholder = stringResource(resource = Res.string.format_callout_placeholder),
         calloutTitles = CalloutKind.entries.associateWith { stringResource(resource = calloutTitle(kind = it)) }
     )

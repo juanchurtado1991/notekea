@@ -39,8 +39,8 @@ class MarkdownFormatter {
         action: FormatAction
     ): ((String?) -> Pair<String, IntRange>)? = when (action) {
         is FormatAction.Callout -> { selected -> callout(action = action, selected = selected) }
-        is FormatAction.Table -> { _ -> table(columnNames = action.columnNames) }
-        is FormatAction.CodeBlock -> { selected -> code(placeholder = action.placeholder, selected = selected) }
+        is FormatAction.Table -> { _ -> table(action = action) }
+        is FormatAction.CodeBlock -> { selected -> code(action = action, selected = selected) }
         FormatAction.Divider -> { _ -> DIVIDER to (DIVIDER.length until DIVIDER.length) }
         else -> null
     }
@@ -229,22 +229,24 @@ class MarkdownFormatter {
     }
 
     private fun table(
-        columnNames: List<String>
+        action: FormatAction.Table
     ): Pair<String, IntRange> {
-        val header = columnNames.joinToString(separator = " | ", prefix = "| ", postfix = " |")
-        val divider = columnNames.joinToString(separator = " | ", prefix = "| ", postfix = " |") { "---" }
-        val row = columnNames.joinToString(separator = " | ", prefix = "| ", postfix = " |") { " " }
-        val firstCell = header.length + 1 + divider.length + 1 + 2
-        return listOf(header, divider, row, row).joinToString(separator = "\n") to (firstCell until firstCell)
+        val line = { cells: List<String> -> cells.joinToString(separator = " | ", prefix = "| ", postfix = " |") }
+        val divider = line(action.columnNames.map { "---" })
+        val row = line(action.columnNames.map { action.cellText })
+        val lines = listOf(line(action.columnNames), divider) + List(size = action.rows) { row }
+        val firstHeader = action.columnNames.firstOrNull().orEmpty()
+        return lines.joinToString(separator = "\n") to (2 until 2 + firstHeader.length)
     }
 
     private fun code(
-        placeholder: String,
+        action: FormatAction.CodeBlock,
         selected: String?
     ): Pair<String, IntRange> {
-        val body = selected ?: placeholder
-        val start = FENCE.length + 1
-        return FENCE + "\n" + body + "\n" + FENCE to
+        val body = selected ?: action.placeholder
+        val opening = FENCE + action.language
+        val start = opening.length + 1
+        return opening + "\n" + body + "\n" + FENCE to
             (if (selected == null) start until start + body.length else start until start)
     }
 

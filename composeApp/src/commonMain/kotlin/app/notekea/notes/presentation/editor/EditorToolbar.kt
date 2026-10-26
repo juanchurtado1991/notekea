@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.markdown.CalloutKind
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaCompactTabs
+import app.notekea.core.presentation.components.NotekeaGridSizePicker
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaMenuButton
 import app.notekea.core.presentation.components.NotekeaMenuItem
@@ -46,8 +47,10 @@ import app.notekea.resources.format_bold
 import app.notekea.resources.format_bullet_list
 import app.notekea.resources.format_callout
 import app.notekea.resources.format_callout_folded
+import app.notekea.resources.format_callout_folded_hint
 import app.notekea.resources.format_checklist
 import app.notekea.resources.format_code_block
+import app.notekea.resources.format_code_plain
 import app.notekea.resources.format_divider
 import app.notekea.resources.format_heading
 import app.notekea.resources.format_heading_large
@@ -59,6 +62,7 @@ import app.notekea.resources.format_note_link
 import app.notekea.resources.format_numbered_list
 import app.notekea.resources.format_quote
 import app.notekea.resources.format_table
+import app.notekea.resources.format_table_size
 import app.notekea.resources.format_tag
 import app.notekea.resources.format_web_link
 import org.jetbrains.compose.resources.StringResource
@@ -66,6 +70,20 @@ import org.jetbrains.compose.resources.stringResource
 
 private const val ONE_LINE_MIN_WIDTH_DP = 680
 private const val PREVIEW_WIDTH_DP = 760
+
+/** The languages of the Code block menu, by name and as written after the fence (the names Preview colors). */
+private val CODE_LANGUAGES = listOf(
+    "Python" to "python",
+    "JavaScript" to "javascript",
+    "TypeScript" to "typescript",
+    "Java" to "java",
+    "Kotlin" to "kotlin",
+    "C#" to "csharp",
+    "C++" to "cpp",
+    "Go" to "go",
+    "Rust" to "rust",
+    "Shell" to "shell"
+)
 
 /**
  * The editor toolbar (`ROADMAP.md` 1.17), under the title: Edit | Preview tabs (switched with their shortcut too), the
@@ -273,9 +291,22 @@ private fun ListGroup(
     }
 }
 
-/** Callout (a menu of its types, Folded first so it is in view in a short window), Table and More (Quote, Code block, Divider). */
+/** Callout (a menu of its types), Code block (a menu of languages) and More (Quote, Divider, Table). */
 @Composable
 private fun BlockGroup(
+    actions: FormatActions,
+    format: (FormatAction) -> Unit
+) {
+    ToolbarGroup {
+        CalloutMenu(actions = actions, format = format)
+        CodeBlockMenu(actions = actions, format = format)
+        MoreMenu(actions = actions, format = format)
+    }
+}
+
+/** The callout types with their icons, "Start folded" first, explained, so it is in view in a short window. */
+@Composable
+private fun CalloutMenu(
     actions: FormatActions,
     format: (FormatAction) -> Unit
 ) {
@@ -291,46 +322,74 @@ private fun BlockGroup(
     val folded = NotekeaMenuItem(
         label = stringResource(resource = Res.string.format_callout_folded),
         onClick = { isFolded.value = !isFolded.value },
+        supportingText = stringResource(resource = Res.string.format_callout_folded_hint),
         isChecked = isFolded.value,
         keepsMenuOpen = true
     )
-    ToolbarGroup {
-        NotekeaMenuButton(
-            takesFocus = false,
-            icon = NotekeaIcons.Callout,
-            label = stringResource(resource = Res.string.format_callout),
-            sections = listOf(listOf(folded), callouts)
-        )
-        ToolbarButton(
-            icon = NotekeaIcons.Table,
-            label = Res.string.format_table,
-            onClick = { format(actions.table) }
-        )
-        MoreMenu(actions = actions, format = format)
-    }
+    NotekeaMenuButton(
+        icon = NotekeaIcons.Callout,
+        label = stringResource(resource = Res.string.format_callout),
+        sections = listOf(listOf(folded), callouts),
+        takesFocus = false
+    )
 }
 
-/** Quote, Code block and Divider, used less often than the other buttons. */
+/** Plain text, then the most used languages, which Preview colors; the language is written after the fence. */
+@Composable
+private fun CodeBlockMenu(
+    actions: FormatActions,
+    format: (FormatAction) -> Unit
+) {
+    val plain = NotekeaMenuItem(
+        label = stringResource(resource = Res.string.format_code_plain),
+        onClick = { format(actions.codeBlock(language = "")) }
+    )
+    val languages = CODE_LANGUAGES.map { (name, fence) ->
+        NotekeaMenuItem(label = name, onClick = { format(actions.codeBlock(language = fence)) })
+    }
+    NotekeaMenuButton(
+        icon = NotekeaIcons.CodeBlock,
+        label = stringResource(resource = Res.string.format_code_block),
+        sections = listOf(listOf(plain), languages),
+        takesFocus = false
+    )
+}
+
+/** Quote, Divider and Table (its size picked on a grid beside the menu), used less often than the other buttons. */
 @Composable
 private fun MoreMenu(
     actions: FormatActions,
     format: (FormatAction) -> Unit
 ) {
+    val table = NotekeaMenuItem(
+        label = stringResource(resource = Res.string.format_table),
+        onClick = {},
+        icon = NotekeaIcons.Table,
+        submenu = { onChosen ->
+            NotekeaGridSizePicker(
+                columns = FormatActions.TABLE_MAX_COLUMNS,
+                rows = FormatActions.TABLE_MAX_ROWS,
+                label = { columns, rows -> stringResource(Res.string.format_table_size, columns, rows) },
+                onPick = { columns, rows ->
+                    onChosen()
+                    format(actions.table(columns = columns, rows = rows))
+                }
+            )
+        }
+    )
     NotekeaMenuButton(
-        takesFocus = false,
         icon = NotekeaIcons.More,
         label = stringResource(resource = Res.string.format_more),
         sections = listOf(
             listOf(
                 moreItem(icon = NotekeaIcons.Quote, label = Res.string.format_quote) { format(actions.quote) },
-                moreItem(icon = NotekeaIcons.CodeBlock, label = Res.string.format_code_block) {
-                    format(actions.codeBlock)
-                },
                 moreItem(icon = NotekeaIcons.Divider, label = Res.string.format_divider) {
                     format(FormatAction.Divider)
-                }
+                },
+                table
             )
-        )
+        ),
+        takesFocus = false
     )
 }
 
