@@ -11,20 +11,13 @@ import app.notekea.resources.crash_report_saved
 import app.notekea.resources.crash_title
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.getString
-import java.awt.Desktop
-import java.awt.Toolkit
-import java.awt.datatransfer.StringSelection
-import java.io.IOException
-import java.net.URI
 import javax.swing.JOptionPane
 
 /**
- * The crash notice as a native Swing dialog: when Compose is what failed, a Compose dialog could fail too. It says
- * Notekea must close and where the report is, and offers Copy details (the report to the clipboard, the dialog stays),
- * Report on GitHub (copies the report and opens the crash report form, where it is pasted: nothing leaves the
- * computer until the person submits it) and Close Notekea.
+ * The crash notice as a plain Swing dialog, only when the Compose notice itself fails: it looks foreign to the app,
+ * but it does not depend on Compose. Same texts and actions as [CrashNoticeContent]; it returns once Close is chosen.
  */
-class SwingCrashNotice : CrashNotice {
+class SwingCrashNotice(private val actions: CrashReportActions) : CrashNotice {
     override fun show(
         crash: RecordedCrash
     ) {
@@ -43,13 +36,8 @@ class SwingCrashNotice : CrashNotice {
                 options[CLOSE_OPTION]
             )
             when (choice) {
-                COPY_OPTION -> copy(text = crash.text)
-
-                REPORT_OPTION -> {
-                    copy(text = crash.text)
-                    openInBrowser(address = ISSUE_FORM)
-                }
-
+                COPY_OPTION -> actions.copy(text = crash.text)
+                REPORT_OPTION -> actions.report(text = crash.text)
                 else -> return
             }
         }
@@ -65,24 +53,6 @@ class SwingCrashNotice : CrashNotice {
         close = getString(resource = Res.string.crash_close)
     )
 
-    private fun copy(
-        text: String
-    ) {
-        Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
-    }
-
-    /** The system browser through the desktop API, or `xdg-open` where that is missing (some Linux desktops). */
-    private fun openInBrowser(
-        address: String
-    ) {
-        val canBrowse = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)
-        try {
-            if (canBrowse) Desktop.getDesktop().browse(URI(address)) else ProcessBuilder(XDG_OPEN, address).start()
-        } catch (_: IOException) {
-            // No browser could be opened; the report is on the clipboard, and Copy details is still there.
-        }
-    }
-
     /** The dialog's texts, read once per crash. */
     private class Texts(
         val title: String,
@@ -95,11 +65,8 @@ class SwingCrashNotice : CrashNotice {
     )
 
     companion object {
-        /** GitHub's form for a crash report (`.github/ISSUE_TEMPLATE/crash_report.yml`). */
-        const val ISSUE_FORM = "https://github.com/juanchurtado1991/notekea/issues/new?template=crash_report.yml"
         private const val CLOSE_OPTION = 2
         private const val COPY_OPTION = 0
         private const val REPORT_OPTION = 1
-        private const val XDG_OPEN = "xdg-open"
     }
 }

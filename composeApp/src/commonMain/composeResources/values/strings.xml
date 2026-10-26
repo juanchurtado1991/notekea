@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="crash_close">Close Notekea</string>
+    <string name="crash_copied">Copied to the clipboard</string>
     <string name="crash_copy">Copy details</string>
     <string name="crash_message">Something went wrong and Notekea has to close. Your open note is saved before it closes.\n\nTo help fix it, click Report on GitHub and paste the details (already copied) into the form, or copy them and send them to us.</string>
     <string name="crash_report_github">Report on GitHub</string>
