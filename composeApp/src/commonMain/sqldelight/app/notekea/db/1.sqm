@@ -1,0 +1,15 @@
+-- 1.17: the cache also keeps the `#tags` written in each note's text. Notes cached before were read without them, so
+-- the cache is emptied (it only holds what can be read again from the vaults) and the next scan reads every note.
+CREATE TABLE note_cache_text_tag (
+    vault TEXT NOT NULL,
+    path TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    tag TEXT NOT NULL,
+    PRIMARY KEY (vault, path, position)
+);
+
+DELETE FROM note_cache;
+
+DELETE FROM note_cache_tag;
+
+DELETE FROM note_cache_alias;
