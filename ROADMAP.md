@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 7 / 17 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 8 / 17 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -327,7 +327,7 @@ related notes without links. It also covers every feature above: tasks, all call
 daily notes, templates, embeds (including a circular one) and a `.obsidian/` folder with non-default settings. Used
 by tests, manual QA and demos.
 
-### 🚧 1.17 Formatting toolbar — `feature/formatting-toolbar`
+### ✅ 1.17 Formatting toolbar — `feature/formatting-toolbar` — [notekea#55](https://github.com/juanchurtado1991/notekea/pull/55)
 
 A toolbar above the note, so people who do not know Markdown can format, link and tag in plain words; it writes the
 same Markdown a person would type, so notes stay readable in any app.
