@@ -20,6 +20,15 @@ CREATE TABLE note_cache_tag (
 
 CREATE INDEX note_cache_tag_by_tag ON note_cache_tag (vault, tag);
 
+-- The `#tags` written in each note's text, apart from its frontmatter tags, in the order they first appear.
+CREATE TABLE note_cache_text_tag (
+    vault TEXT NOT NULL,
+    path TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    tag TEXT NOT NULL,
+    PRIMARY KEY (vault, path, position)
+);
+
 CREATE TABLE note_cache_alias (
     vault TEXT NOT NULL,
     path TEXT NOT NULL,
@@ -34,6 +43,9 @@ SELECT path, size, modified_at, title FROM note_cache WHERE vault = ?;
 selectTags:
 SELECT path, tag FROM note_cache_tag WHERE vault = ? ORDER BY path, position;
 
+selectTextTags:
+SELECT path, tag FROM note_cache_text_tag WHERE vault = ? ORDER BY path, position;
+
 selectAliases:
 SELECT path, alias FROM note_cache_alias WHERE vault = ? ORDER BY path, position;
 
@@ -43,6 +55,9 @@ INSERT OR REPLACE INTO note_cache (vault, path, size, modified_at, title) VALUES
 insertTag:
 INSERT INTO note_cache_tag (vault, path, position, tag) VALUES (?, ?, ?, ?);
 
+insertTextTag:
+INSERT INTO note_cache_text_tag (vault, path, position, tag) VALUES (?, ?, ?, ?);
+
 insertAlias:
 INSERT INTO note_cache_alias (vault, path, position, alias) VALUES (?, ?, ?, ?);
 
@@ -51,6 +66,9 @@ DELETE FROM note_cache WHERE vault = ? AND path = ?;
 
 deleteTags:
 DELETE FROM note_cache_tag WHERE vault = ? AND path = ?;
+
+deleteTextTags:
+DELETE FROM note_cache_text_tag WHERE vault = ? AND path = ?;
 
 deleteAliases:
 DELETE FROM note_cache_alias WHERE vault = ? AND path = ?;

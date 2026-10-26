@@ -30,6 +30,7 @@ class SqlDelightNoteMetadataCache(
         guarded(fallback = emptyList(), failureMessage = READ_FAILED) {
             val tags = queries.selectTags(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.tag })
             val aliases = queries.selectAliases(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.alias })
+            val textTags = queries.selectTextTags(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.tag })
             queries.selectNotes(vault = vaultPath).executeAsList().map { row ->
                 NoteEntry(
                     file = NoteFile(
@@ -40,7 +41,8 @@ class SqlDelightNoteMetadataCache(
                     metadata = NoteMetadata(
                         tags = tags[row.path].orEmpty(),
                         aliases = aliases[row.path].orEmpty(),
-                        title = row.title
+                        title = row.title,
+                        textTags = textTags[row.path].orEmpty()
                     )
                 )
             }
@@ -67,6 +69,7 @@ class SqlDelightNoteMetadataCache(
         queries.deleteNote(vault = vaultPath, path = path)
         queries.deleteTags(vault = vaultPath, path = path)
         queries.deleteAliases(vault = vaultPath, path = path)
+        queries.deleteTextTags(vault = vaultPath, path = path)
     }
 
     private fun <T> guarded(
@@ -100,6 +103,9 @@ class SqlDelightNoteMetadataCache(
         }
         entry.metadata.aliases.forEachIndexed { index, alias ->
             queries.insertAlias(vault = vaultPath, path = path, position = index.toLong(), alias = alias)
+        }
+        entry.metadata.textTags.forEachIndexed { index, tag ->
+            queries.insertTextTag(vault = vaultPath, path = path, position = index.toLong(), tag = tag)
         }
     }
 

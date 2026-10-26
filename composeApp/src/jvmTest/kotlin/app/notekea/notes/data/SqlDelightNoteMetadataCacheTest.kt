@@ -39,7 +39,9 @@ class SqlDelightNoteMetadataCacheTest {
     @Test
     fun `a changed note replaces its tags and a removed one is forgotten`() = runTest(context = testDispatcher) {
         cache.update(vaultPath = NOTES, upserted = listOf(AREPAS, LISBON), removed = emptyList())
-        val retagged = AREPAS.copy(metadata = AREPAS.metadata.copy(tags = listOf("dinner"), aliases = emptyList()))
+        val retagged = AREPAS.copy(
+            metadata = AREPAS.metadata.copy(tags = listOf("dinner"), aliases = emptyList(), textTags = listOf("lunch"))
+        )
 
         cache.update(vaultPath = NOTES, upserted = listOf(retagged), removed = listOf(LISBON.file.path))
 
@@ -74,7 +76,8 @@ class SqlDelightNoteMetadataCacheTest {
             metadata = NoteMetadata(
                 tags = listOf("recipe", "venezuelan"),
                 aliases = listOf("Arepa", "Corn bread"),
-                title = "Arepas"
+                title = "Arepas",
+                textTags = listOf("weekend", "recipe/drinks")
             )
         )
         private val LISBON = NoteEntry(

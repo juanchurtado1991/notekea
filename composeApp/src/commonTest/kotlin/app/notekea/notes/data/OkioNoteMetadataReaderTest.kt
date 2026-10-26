@@ -21,12 +21,27 @@ class OkioNoteMetadataReaderTest {
     )
 
     @Test
-    fun `frontmatter at the top of a note is read and the body is ignored`() = runReaderTest {
-        writeNote(content = "---\ntags: [travel]\n---\n\n# Lisbon trip\n\n---\ntags: [body]\n---\n")
+    fun `frontmatter at the top of a note is read, and the body only for its tags`() = runReaderTest {
+        writeNote(content = "---\ntags: [travel]\n---\n\n# Lisbon trip #trip\n\n---\ntags: [body]\n---\n")
 
         assertEquals(
-            expected = NoteMetadata(tags = listOf("travel"), aliases = emptyList(), title = null),
+            expected = NoteMetadata(
+                tags = listOf("travel"),
+                aliases = emptyList(),
+                title = null,
+                textTags = listOf("trip")
+            ),
             actual = readNote()
+        )
+    }
+
+    @Test
+    fun `a note without frontmatter keeps the tags of its first line`() = runReaderTest {
+        writeNote(content = "#inbox to sort\nThen #later.\n")
+
+        assertEquals(
+            expected = listOf("inbox", "later"),
+            actual = readNote()?.textTags
         )
     }
 
