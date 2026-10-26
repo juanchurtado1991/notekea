@@ -5,32 +5,54 @@ import com.composables.icons.lucide.ArrowDown
 import com.composables.icons.lucide.ArrowDownAZ
 import com.composables.icons.lucide.ArrowUp
 import com.composables.icons.lucide.Book
+import com.composables.icons.lucide.Bug
 import com.composables.icons.lucide.Check
 import com.composables.icons.lucide.ChevronDown
 import com.composables.icons.lucide.ChevronRight
+import com.composables.icons.lucide.CircleCheck
+import com.composables.icons.lucide.CircleQuestionMark
+import com.composables.icons.lucide.ClipboardList
 import com.composables.icons.lucide.ClockArrowDown
 import com.composables.icons.lucide.Ellipsis
 import com.composables.icons.lucide.FilePlus
 import com.composables.icons.lucide.FileText
+import com.composables.icons.lucide.Flame
 import com.composables.icons.lucide.Folder
 import com.composables.icons.lucide.FolderOpen
 import com.composables.icons.lucide.FolderPlus
+import com.composables.icons.lucide.Info
+import com.composables.icons.lucide.List
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.PanelLeftClose
 import com.composables.icons.lucide.PanelLeftOpen
 import com.composables.icons.lucide.Pen
 import com.composables.icons.lucide.Pencil
+import com.composables.icons.lucide.Quote
 import com.composables.icons.lucide.Search
 import com.composables.icons.lucide.SquareArrowOutUpRight
 import com.composables.icons.lucide.Trash2
 import com.composables.icons.lucide.TriangleAlert
 import com.composables.icons.lucide.X
+import com.composables.icons.lucide.Zap
 
 /**
  * Every icon of the app, named by what it means rather than how it looks, so a screen asks for [NewNote] and the
  * glyph can change here alone. They come from Lucide, the set Obsidian users already know (`LIBRARIES.md` §2).
  */
 object NotekeaIcons {
+    val CalloutAbstract: ImageVector get() = Lucide.ClipboardList
+    val CalloutBug: ImageVector get() = Lucide.Bug
+    val CalloutDanger: ImageVector get() = Lucide.Zap
+    val CalloutExample: ImageVector get() = Lucide.List
+    val CalloutFailure: ImageVector get() = Lucide.X
+    val CalloutInfo: ImageVector get() = Lucide.Info
+    val CalloutNote: ImageVector get() = Lucide.Pencil
+    val CalloutQuestion: ImageVector get() = Lucide.CircleQuestionMark
+    val CalloutQuote: ImageVector get() = Lucide.Quote
+    val CalloutSuccess: ImageVector get() = Lucide.Check
+    val CalloutTip: ImageVector get() = Lucide.Flame
+    val CalloutTodo: ImageVector get() = Lucide.CircleCheck
+    val CalloutWarning: ImageVector get() = Lucide.TriangleAlert
     val Checked: ImageVector get() = Lucide.Check
     val Close: ImageVector get() = Lucide.X
     val Collapse: ImageVector get() = Lucide.ChevronDown
