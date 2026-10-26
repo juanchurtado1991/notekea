@@ -18,6 +18,7 @@ data class PlatformConventions(
     val toggleReadModeShortcut: Shortcut,
     val quickSwitcherShortcut: Shortcut,
     val searchNotesShortcut: Shortcut,
+    val toggleTaskShortcut: Shortcut,
     val dialogButtonOrder: DialogButtonOrder,
     val appDataDirectory: String,
     val homeDirectory: String

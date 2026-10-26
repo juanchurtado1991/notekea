@@ -22,6 +22,19 @@ class ShortcutPresentationTest {
     }
 
     @Test
+    fun `toggling a task reads as each platform writes it`() {
+        assertEquals(
+            expected = listOf("⌘↩", "Ctrl+Enter"),
+            actual = listOf(
+                Shortcut(key = ShortcutKey.ENTER, modifiers = setOf(ShortcutModifier.COMMAND))
+                    .label(operatingSystem = OperatingSystem.MACOS),
+                Shortcut(key = ShortcutKey.ENTER, modifiers = setOf(ShortcutModifier.CONTROL))
+                    .label(operatingSystem = OperatingSystem.WINDOWS)
+            )
+        )
+    }
+
+    @Test
     fun `search in all notes reads as each platform writes it`() {
         val search = { modifier: ShortcutModifier ->
             Shortcut(key = ShortcutKey.F, modifiers = setOf(modifier, ShortcutModifier.SHIFT))

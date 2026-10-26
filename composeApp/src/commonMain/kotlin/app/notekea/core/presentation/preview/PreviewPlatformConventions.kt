@@ -29,6 +29,7 @@ object PreviewPlatformConventions {
             key = ShortcutKey.F,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
+        toggleTaskShortcut = Shortcut(key = ShortcutKey.ENTER, modifiers = setOf(ShortcutModifier.CONTROL)),
         dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
         appDataDirectory = APP_DATA,
         homeDirectory = HOME

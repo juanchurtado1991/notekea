@@ -133,7 +133,7 @@ private suspend fun focusText(
     }
 }
 
-/** Save, Find in note and Edit / Read work whatever has focus while the editor is shown. */
+/** Save, Find in note, Edit / Read and toggling a task work whatever has focus while the editor is shown. */
 @Composable
 private fun EditorShortcuts(
     platformConventions: PlatformConventions,
@@ -142,6 +142,7 @@ private fun EditorShortcuts(
     WindowShortcut(shortcut = platformConventions.saveShortcut) { onIntent(EditorIntent.OnSaveShortcut) }
     WindowShortcut(shortcut = platformConventions.findShortcut) { onIntent(EditorIntent.OnFindOpen) }
     WindowShortcut(shortcut = platformConventions.toggleReadModeShortcut) { onIntent(EditorIntent.OnReadModeToggle) }
+    WindowShortcut(shortcut = platformConventions.toggleTaskShortcut) { onIntent(EditorIntent.OnTaskToggleShortcut) }
 }
 
 @Preview
