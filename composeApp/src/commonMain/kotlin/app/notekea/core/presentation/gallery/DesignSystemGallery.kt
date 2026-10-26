@@ -30,6 +30,7 @@ import app.notekea.core.presentation.components.ErrorBanner
 import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaCard
+import app.notekea.core.presentation.components.NotekeaCheckbox
 import app.notekea.core.presentation.components.NotekeaConfirmDialog
 import app.notekea.core.presentation.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.components.NotekeaFindBar
@@ -204,6 +205,8 @@ private fun PageInputsSamples() {
     var findQuery by remember { mutableStateOf(value = "") }
     NotekeaTitleField(value = title, onCommit = { title = it }, label = NOTE_PRICING)
     NotekeaSearchButton(label = SEARCH_LABEL, onClick = {}, shortcutHint = SEARCH_SHORTCUT)
+    var isTaskDone by remember { mutableStateOf(value = false) }
+    NotekeaCheckbox(checked = isTaskDone, onClick = { isTaskDone = !isTaskDone }, label = SEARCH_LABEL)
     NotekeaFindBar(
         query = findQuery,
         onQueryChange = { findQuery = it },
