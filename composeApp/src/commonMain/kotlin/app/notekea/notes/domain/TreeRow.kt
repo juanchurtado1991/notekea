@@ -19,4 +19,11 @@ sealed interface TreeRow {
         override val depth: Int,
         val modifiedAt: Instant?
     ) : TreeRow
+
+    /** A file that is not a note (an image, a PDF…), shown with its extension. */
+    data class File(
+        override val path: RelativePath,
+        override val depth: Int,
+        val modifiedAt: Instant?
+    ) : TreeRow
 }

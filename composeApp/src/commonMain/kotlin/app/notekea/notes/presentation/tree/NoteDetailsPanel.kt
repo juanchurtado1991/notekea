@@ -2,6 +2,7 @@ package app.notekea.notes.presentation.tree
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -38,39 +39,19 @@ private const val PREVIEW_HEIGHT_DP = 320
 private const val PREVIEW_WIDTH_DP = 520
 
 /**
- * The main area beside the sidebar: the selected note in [noteContent] (the editor), how many notes the selected
- * folder holds, or a hint when nothing is selected. It stays blank while the vault loads. When the sidebar is hidden,
+ * The main area beside the sidebar: the selected note in [noteContent] (the editor), the selected file that is not a
+ * note ([FileDetails]), how many notes the selected folder holds, or a hint when nothing is selected. It stays blank while the vault loads. When the sidebar is hidden,
  * a button brings it back.
  */
 @Composable
 internal fun NoteDetailsPanel(
     state: VaultTreeState,
     onShowSidebar: () -> Unit,
-    noteContent: @Composable (NoteEntry) -> Unit
+    noteContent: @Composable (NoteEntry) -> Unit,
+    onIntent: (VaultTreeIntent) -> Unit = {}
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        val selected = state.selectedPath
-        // A selected note that is gone (deleted or moved outside Notekea) still reaches the editor, which explains it.
-        val note = selected?.let { state.tree.notes[it] ?: missingNote(path = it) }
-        when {
-            state.isLoading -> Unit
-
-            note != null -> noteContent(note)
-
-            selected != null && selected in state.tree.folders -> FolderDetails(
-                folder = selected,
-                noteCount = state.tree.notes.keys
-                    .count {
-                        it.isWithin(folder = selected)
-                    }
-            )
-
-            else -> EmptyState(
-                title = stringResource(resource = Res.string.note_panel_empty_title),
-                message = stringResource(resource = Res.string.note_panel_empty_message),
-                modifier = Modifier.align(alignment = Alignment.Center)
-            )
-        }
+        SelectedContent(state = state, noteContent = noteContent, onIntent = onIntent)
         if (state.isSidebarCollapsed) {
             NotekeaIconButton(
                 icon = NotekeaIcons.ShowSidebar,
@@ -82,6 +63,46 @@ internal fun NoteDetailsPanel(
                 )
             )
         }
+    }
+}
+
+/** What the selection shows: a note in the editor, a file, a folder's note count, or a hint when nothing is selected. */
+@Composable
+private fun BoxScope.SelectedContent(
+    state: VaultTreeState,
+    noteContent: @Composable (NoteEntry) -> Unit,
+    onIntent: (VaultTreeIntent) -> Unit
+) {
+    val selected = state.selectedPath
+    // A selected note that is gone (deleted or moved outside Notekea) still reaches the editor, which explains it.
+    val note = selected?.let { state.tree.notes[it] ?: missingNote(path = it) }
+    val filePreview = state.filePreview?.takeIf { it.file.path == selected }
+    when {
+        state.isLoading -> Unit
+
+        note != null -> noteContent(note)
+
+        filePreview != null -> FileDetails(
+            preview = filePreview,
+            platformConventions = state.platformConventions,
+            onIntent = onIntent
+        )
+
+        selected != null && selected in state.tree.attachments -> Unit
+
+        selected != null && selected in state.tree.folders -> FolderDetails(
+            folder = selected,
+            noteCount = state.tree.notes.keys
+                .count {
+                    it.isWithin(folder = selected)
+                }
+        )
+
+        else -> EmptyState(
+            title = stringResource(resource = Res.string.note_panel_empty_title),
+            message = stringResource(resource = Res.string.note_panel_empty_message),
+            modifier = Modifier.align(alignment = Alignment.Center)
+        )
     }
 }
 

@@ -1,5 +1,6 @@
 package app.notekea.notes.domain
 
+import app.notekea.notes.domain.NoteFixtures.file
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
@@ -16,6 +17,29 @@ class VaultTreeTest {
         assertEquals(
             expected = setOf(path(value = TOMATO_PLAN)),
             actual = tree.notes.keys
+        )
+    }
+
+    @Test
+    fun `files that are not notes join with their folders, move with a renamed folder and leave with a removed one`() {
+        val plate = file(path = "Recipes/attachments/plate.png")
+        val tree = VaultTree.EMPTY.withAttachment(file = plate)
+        val moved = tree.renamed(from = RelativePath(value = "Recipes"), to = RelativePath(value = "Food"))
+
+        assertEquals(
+            expected = setOf(RelativePath(value = "Recipes"), RelativePath(value = "Recipes/attachments")),
+            actual = tree.folders
+        )
+        assertEquals(
+            expected = mapOf(
+                RelativePath(value = "Food/attachments/plate.png") to
+                    plate.copy(path = RelativePath(value = "Food/attachments/plate.png"))
+            ),
+            actual = moved.attachments
+        )
+        assertEquals(
+            expected = emptyMap(),
+            actual = tree.without(path = RelativePath(value = "Recipes/attachments")).attachments
         )
     }
 

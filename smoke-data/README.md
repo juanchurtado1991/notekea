@@ -9,7 +9,7 @@ Open them with **Open folder…**. Notekea never writes inside a vault, so openi
 
 | Vault | Notes counted | What it covers |
 |---|---|---|
-| `Personal Notes` | 12 | Nested folders (three levels in `Projects/Garden`), wiki links, tags (one nested), aliases, YAML front matter, tasks, a table, a non-ASCII file name (`Café con leche.md`), a folder name with a space; files that must **not** count: `.obsidian/`, `.trash/` and `attachments/shopping.txt` |
+| `Personal Notes` | 12 | Nested folders (three levels in `Projects/Garden`), wiki links, tags (one nested), aliases, YAML front matter, tasks, a table, a non-ASCII file name (`Café con leche.md`), a folder name with a space; files that must **not** count as notes: `.obsidian/` and `.trash/` (hidden) and `attachments/shopping.txt` (shown in the tree as a file) |
 | `Work Obsidian` | 6 | A second vault in Obsidian format, to switch between vaults and fill the recent list |
 | `Empty Vault` | 0 | Shows "This folder has no notes yet" (it only holds a hidden `.gitkeep` so Git keeps the folder) |
 

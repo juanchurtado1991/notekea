@@ -26,9 +26,9 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * [FileWatcher] on directory-watcher, which uses native events on every desktop (FSEvents on macOS, where the JDK
  * would poll). Collecting the flow starts watching and returns once every folder is registered, so no change made
- * after that is missed; cancelling it stops the watcher. Hidden entries are never reported, other files only when
- * deleted (they may have been notes), and a watcher that loses events or fails reports [VaultChange.Overflow] so the
- * vault is scanned again. A vault that is not a folder reports it at once. Native watchers say nothing when the vault
+ * after that is missed; cancelling it stops the watcher. Hidden entries are never reported, notes and other files
+ * (images, PDFs, which the tree shows too) are, and a watcher that loses events or fails reports
+ * [VaultChange.Overflow] so the vault is scanned again. A vault that is not a folder reports it at once. Native watchers say nothing when the vault
  * folder itself is moved or renamed (inotify keeps watching it at its new place), so the folder is also checked every
  * [rootCheckInterval] and its disappearance reported the same way: the rescan then finds the vault missing.
  */
@@ -86,7 +86,6 @@ class DirectoryWatcherFileWatcher(
     ): VaultChange? {
         if (event.eventType() == DirectoryChangeEvent.EventType.OVERFLOW) return VaultChange.Overflow
         val path = relativePathOf(root = root, path = event.path() ?: return null) ?: return VaultChange.Overflow
-        val isNoteOrFolder = event.isDirectory || path.isMarkdown
         val isHidden = path.value.split(RelativePath.SEPARATOR).any { it.startsWith(prefix = HIDDEN_PREFIX) }
         return when {
             isHidden -> {
@@ -95,10 +94,6 @@ class DirectoryWatcherFileWatcher(
 
             event.eventType() == DirectoryChangeEvent.EventType.DELETE -> {
                 VaultChange.Deleted(path = path)
-            }
-
-            !isNoteOrFolder -> {
-                null
             }
 
             event.eventType() == DirectoryChangeEvent.EventType.CREATE -> {

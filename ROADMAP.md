@@ -264,6 +264,10 @@ Obsidian-flavored Markdown blocks that most vaults use.
   app.json` `attachmentFolderPath` when present (the vault root, the note's folder, a subfolder of it or a fixed
   folder, as Obsidian), otherwise `attachments/`; a Notekea setting comes with the Settings screen.
 - Non-image attachments (PDF, audio, other files) show as a file chip that opens with the system default app.
+- **Files in the sidebar:** the tree lists files that are not notes too, with their extension and an image or file
+  icon, among the notes by name (folders still count notes only). Selecting one shows it beside the tree: the
+  picture with its size, or its name; with **Open with its app** and **Show in Files/Finder/File Explorer**. Rename
+  keeps the extension; delete asks first ("Delete this file?").
 - States: missing file (placeholder with the broken path and **Locate…**, which picks the file, copies it into the
   attachments folder when it is outside the vault, and rewrites the link to it), unsupported format (file chip).
 - **Done when:** pasting a screenshot works on the three OSes and the result opens unchanged in Obsidian.

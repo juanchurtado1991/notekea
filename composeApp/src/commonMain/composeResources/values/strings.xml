@@ -136,6 +136,9 @@
         <item quantity="one">1 note</item>
         <item quantity="other">%1$d notes</item>
     </plurals>
+    <string name="file_panel_open">Open with its app</string>
+    <string name="file_panel_unreadable">Notekea can’t show this file here. Open it with its app to see it.</string>
+    <string name="file_panel_image_size">Image · %1$d × %2$d</string>
     <string name="note_panel_empty_message">Pick a note in the sidebar to see it here.</string>
     <string name="note_panel_empty_title">No note selected</string>
 
@@ -160,6 +163,8 @@
     <string name="tag_picker_no_match_title">No tags match</string>
     <string name="tag_picker_placeholder">Find or create a tag</string>
     <string name="tree_cancel">Cancel</string>
+    <string name="tree_delete_file">Delete file</string>
+    <string name="tree_delete_file_title">Delete this file?</string>
     <string name="tree_delete_folder">Delete folder</string>
     <string name="tree_delete_folder_title">Delete this folder?</string>
     <string name="tree_delete_message">“%1$s” will be moved to the trash. You can restore it from there.</string>
@@ -196,6 +201,7 @@
     <string name="tree_reveal_files">Show in Files</string>
     <string name="tree_reveal_finder">Show in Finder</string>
     <string name="tree_search">Search notes</string>
+    <string name="tree_select_file">Show file</string>
     <string name="tree_select_note">Select note</string>
     <string name="tree_show_sidebar">Show sidebar</string>
     <string name="tree_sort_by_date">Date modified, newest first</string>

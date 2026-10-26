@@ -43,7 +43,7 @@ class OkioNoteScannerTest {
     }
 
     @Test
-    fun `hidden entries, other files and symbolic links are skipped, empty folders are kept`() = runScannerTest {
+    fun `hidden entries and links are skipped, other files listed apart, empty folders kept`() = runScannerTest {
         listOf(".obsidian/app.md", ".trash/old.md", "Ideas/.draft.md", "attachments/shopping.txt").forEach {
             writeNote(path = it)
         }
@@ -59,7 +59,8 @@ class OkioNoteScannerTest {
             expected = Outcome.Success(
                 value = VaultListing(
                     folders = paths("Empty", "Ideas", "attachments"),
-                    files = listOf(expectedNoteFile(path = "Ideas/Reading list.md"))
+                    files = listOf(expectedNoteFile(path = "Ideas/Reading list.md")),
+                    attachments = listOf(expectedNoteFile(path = "attachments/shopping.txt"))
                 )
             ),
             actual = sortedFiles(outcome = scanner().scan(vaultPath = VAULT))
@@ -119,6 +120,19 @@ class OkioNoteScannerTest {
             expected = listOf(expectedNoteFile(path = "Welcome.md"), null, null, null, null),
             actual = listOf("Welcome.md", ".obsidian/app.md", "attachments/shopping.txt", "Folder.md", "Gone.md").map {
                 scanner().stat(vaultPath = VAULT, path = RelativePath(value = it))
+            }
+        )
+    }
+
+    @Test
+    fun `statAttachment describes a visible file that is not a note and nothing else`() = runScannerTest {
+        listOf("Welcome.md", ".obsidian/app.json", "attachments/plate.png").forEach { writeNote(path = it) }
+        fakeFileSystem.createDirectories(dir = vaultPath(path = "Photos.png"))
+
+        assertEquals(
+            expected = listOf(expectedNoteFile(path = "attachments/plate.png"), null, null, null, null),
+            actual = listOf("attachments/plate.png", "Welcome.md", ".obsidian/app.json", "Photos.png", "Gone.png").map {
+                scanner().statAttachment(vaultPath = VAULT, path = RelativePath(value = it))
             }
         )
     }

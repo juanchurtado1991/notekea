@@ -28,6 +28,9 @@ sealed interface VaultTreeIntent {
 
     data object OnExpandSelected : VaultTreeIntent
 
+    /** Opens a file that is not a note with the system's app for it; null opens the selected one. */
+    data class OnFileOpen(val path: RelativePath? = null) : VaultTreeIntent
+
     /** A link in the open note [source] was clicked: select the note it leads to, creating a missing wiki link's. */
     data class OnFollowLink(
         val source: RelativePath,

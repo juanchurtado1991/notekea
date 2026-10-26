@@ -13,7 +13,8 @@ import app.notekea.notes.domain.VaultTree
  * [rows] are [tree] flattened with [expandedFolders] and [sort]. [loadError] means the vault could not be read (retry
  * scans again); [actionError] is a failed create, delete or reveal, shown in a dismissible banner; a refused rename
  * stays in [renaming], next to the field. [notice] reports a finished action
- * (links updated after a rename). [sidebarWidthDp] changes when a resize ends, not on every dragged frame.
+ * (links updated after a rename). [sidebarWidthDp] changes when a resize ends, not on every dragged frame. A selected
+ * file that is not a note is shown beside the tree as [filePreview].
  */
 data class VaultTreeState(
     val vaultPath: String,
@@ -26,6 +27,7 @@ data class VaultTreeState(
     val sidebarWidthDp: Int = TreePreferences.DEFAULT_SIDEBAR_WIDTH_DP,
     val isSidebarCollapsed: Boolean = false,
     val selectedPath: RelativePath? = null,
+    val filePreview: FilePreview? = null,
     val renaming: RenameDraft? = null,
     val pendingDelete: RelativePath? = null,
     val notice: TreeNotice? = null,

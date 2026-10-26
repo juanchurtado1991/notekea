@@ -1,14 +1,18 @@
 package app.notekea.notes.presentation.tree
 
+import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
+import app.notekea.notes.domain.AttachmentStore
 import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
+import app.notekea.notes.domain.FileOpener
 import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.FollowLinkUseCase
 import app.notekea.notes.domain.GetTreePreferencesUseCase
+import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.RenameEntryUseCase
@@ -27,6 +31,8 @@ import kotlin.time.TimeSource
  * at once (Enter and the field losing focus); only the first confirmation runs. After a rename, the notes that link to
  * the entry are updated in the background, as Obsidian does by default, so no link breaks; a notice says how many
  * notes changed. A choice to keep old links ("Update links when renaming") belongs to Settings (`ROADMAP.md` 5.2).
+ * A selected file that is not a note (an image, a PDF) is read and shown beside the tree, and opens with its app
+ * (`ROADMAP.md` 1.8).
  */
 class VaultTreeViewModel(
     private val vaultPath: String,
@@ -41,12 +47,19 @@ class VaultTreeViewModel(
     private val updateLinksAfterRename: UpdateLinksAfterRenameUseCase,
     private val followLink: FollowLinkUseCase,
     private val getTreePreferences: GetTreePreferencesUseCase,
-    private val saveTreePreferences: SaveTreePreferencesUseCase
+    private val saveTreePreferences: SaveTreePreferencesUseCase,
+    private val fileOpener: FileOpener,
+    attachmentStore: AttachmentStore,
+    dispatchers: AppDispatchers
 ) : BaseViewModel<VaultTreeState, VaultTreeIntent, VaultTreeEffect>(
     initialState = VaultTreeState(vaultPath = vaultPath, platformConventions = platformConventions)
 ) {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private var renameJob: Job? = null
+    private val filePreviews =
+        TreeFilePreviews(vaultPath = vaultPath, attachmentStore = attachmentStore, dispatchers = dispatchers)
+    private var previewJob: Job? = null
+    private var previewed: NoteFile? = null
 
     init {
         launchGuarded(onError = ::showUnexpectedError) {
@@ -87,6 +100,34 @@ class VaultTreeViewModel(
             is VaultTreeIntent.OnSidebarResize -> resizeSidebar(widthDp = intent.widthDp)
             VaultTreeIntent.OnSidebarToggle -> updateTree { it.copy(isSidebarCollapsed = !it.isSidebarCollapsed) }
             is VaultTreeIntent.OnSortChange -> updateTree { it.copy(sort = intent.sort) }
+            is VaultTreeIntent.OnFileOpen -> openFile(path = intent.path)
+        }
+        updatePreview()
+    }
+
+    private fun openFile(
+        path: RelativePath?
+    ) {
+        val target = path ?: state.value.selectedPath ?: return
+        launchGuarded(onError = ::showUnexpectedError) {
+            val outcome = fileOpener.open(vaultPath = vaultPath, path = target)
+            if (outcome is Outcome.Failure) reduce { it.copy(actionError = outcome.error) }
+        }
+    }
+
+    /** Reads the selected file that is not a note, again when it changed on disk; clears it when none is selected. */
+    private fun updatePreview() {
+        val file = state.value.selectedPath?.let { state.value.tree.attachments[it] }
+        if (file == previewed) return
+        previewed = file
+        previewJob?.cancel()
+        if (file == null) {
+            reduce { it.copy(filePreview = null) }
+            return
+        }
+        previewJob = launchGuarded(onError = ::showUnexpectedError) {
+            val preview = filePreviews.of(file = file)
+            reduce { if (it.selectedPath == file.path) it.copy(filePreview = preview) else it }
         }
     }
 
@@ -134,6 +175,7 @@ class VaultTreeViewModel(
                     }
                     isFirstTree = false
                     updateTree { reduceTreeLoaded(state = it, tree = outcome.value) }
+                    updatePreview()
                 }
             }
         }

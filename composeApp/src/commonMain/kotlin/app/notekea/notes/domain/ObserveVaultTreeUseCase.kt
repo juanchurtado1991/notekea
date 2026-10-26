@@ -15,7 +15,7 @@ import kotlinx.coroutines.sync.withPermit
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * The notes and folders of a vault, kept up to date while collected. What the cache remembers is shown at once, then
+ * The notes, other files and folders of a vault, kept up to date while collected. What the cache remembers is shown at once, then
  * the vault is scanned and only notes whose size or date changed are read again; every update is saved back to the
  * cache. The watcher starts before the first scan, so changes made while scanning are not lost; notes are read at most
  * [MAX_PARALLEL_READS] at a time. Changes are applied in batches gathered for [BATCH_WINDOW], so a burst (a sync, a
@@ -57,13 +57,12 @@ class ObserveVaultTreeUseCase(
         tree: VaultTree,
         batch: List<VaultChange>
     ): VaultTree = batch.mapNotNull { pathOf(change = it) }.distinct().fold(initial = tree) { current, path ->
-        val file = noteScanner.stat(vaultPath = vaultPath, path = path)
-        if (file ==
-            null
-        ) {
-            current.without(path = path)
-        } else {
-            current.withNote(note = entryOf(vaultPath = vaultPath, file = file))
+        val note = if (path.isMarkdown) noteScanner.stat(vaultPath = vaultPath, path = path) else null
+        val attachment = if (path.isMarkdown) null else noteScanner.statAttachment(vaultPath = vaultPath, path = path)
+        when {
+            note != null -> current.withNote(note = entryOf(vaultPath = vaultPath, file = note))
+            attachment != null -> current.withAttachment(file = attachment)
+            else -> current.without(path = path)
         }
     }
 
@@ -143,7 +142,11 @@ class ObserveVaultTreeUseCase(
 
         is Outcome.Success -> {
             val entries = readEntries(vaultPath = vaultPath, files = scanned.value.files, previous = previous)
-            VaultTree(folders = scanned.value.folders, notes = entries.associateBy { it.file.path })
+            VaultTree(
+                folders = scanned.value.folders,
+                notes = entries.associateBy { it.file.path },
+                attachments = scanned.value.attachments.associateBy { it.path }
+            )
         }
     }
 

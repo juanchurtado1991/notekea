@@ -97,6 +97,26 @@ class ObserveVaultTreeUseCaseTest {
     }
 
     @Test
+    fun `files that are not notes are listed, and added and removed as they change`() = runTest {
+        scanner.addNote(file = file(path = AREPAS))
+        scanner.addAttachment(file = file(path = PLATE))
+
+        observeVaultTree(vaultPath = VAULT).test {
+            val first = (awaitItem() as Outcome.Success).value
+            scanner.attachments.remove(RelativePath(value = PLATE))
+            scanner.addAttachment(file = file(path = MENU))
+            watcher.emit(change = VaultChange.Deleted(path = RelativePath(value = PLATE)))
+            watcher.emit(change = VaultChange.Created(path = RelativePath(value = MENU), isFolder = false))
+
+            assertEquals(
+                expected = listOf(setOf(RelativePath(value = PLATE)), setOf(RelativePath(value = MENU))),
+                actual = listOf(first.attachments.keys, (awaitItem() as Outcome.Success).value.attachments.keys)
+            )
+            assertEquals(expected = setOf(RelativePath(value = AREPAS)), actual = first.notes.keys)
+        }
+    }
+
+    @Test
     fun `a deleted folder takes its notes with it`() = runTest {
         scanner.addNote(file = file(path = AREPAS))
         scanner.folders += RelativePath(value = RECIPES)
@@ -244,6 +264,8 @@ class ObserveVaultTreeUseCaseTest {
     ): Outcome<VaultTree, NotesError> = Outcome.Success(value = tree)
 
     companion object {
+        private const val MENU = "Recipes/attachments/menu.pdf"
+        private const val PLATE = "Recipes/attachments/plate.png"
         private const val AREPAS = "Recipes/Arepas.md"
         private const val LISBON = "Travel/Lisbon trip.md"
         private const val NEW_NOTE = "New note.md"

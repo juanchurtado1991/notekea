@@ -17,7 +17,7 @@ import okio.Path.Companion.toPath
 import kotlin.time.Instant
 
 /**
- * [NoteScanner] on Okio. The vault folder must be listable; a subfolder that cannot be listed is shown empty instead
+ * [NoteScanner] on Okio, listing notes and every other visible file. The vault folder must be listable; a subfolder that cannot be listed is shown empty instead
  * of failing the whole scan. Metadata is read without following symbolic links, so links are neither folders nor
  * notes.
  */
@@ -43,20 +43,37 @@ class OkioNoteScanner(
         metadata?.takeIf { it.isRegularFile }?.let { noteFileOf(path = path, metadata = it) }
     }
 
+    override suspend fun statAttachment(
+        vaultPath: String,
+        path: RelativePath
+    ): NoteFile? = withContext(context = dispatchers.io) {
+        val isVisible = !path.isMarkdown && path.value.split(RelativePath.SEPARATOR).none { isHidden(name = it) }
+        val metadata = if (isVisible) metadataOrNull(path = vaultPath.toPath() / path.value) else null
+        metadata?.takeIf { it.isRegularFile }?.let { noteFileOf(path = path, metadata = it) }
+    }
+
     private fun collect(
         folder: RelativePath,
         entries: List<Path>,
         folders: MutableSet<RelativePath>,
-        files: MutableList<NoteFile>
+        files: MutableList<NoteFile>,
+        attachments: MutableList<NoteFile>
     ) {
         entries.filterNot { isHidden(name = it.name) }.forEach { entry ->
             val path = folder.child(name = entry.name)
             val metadata = metadataOrNull(path = entry) ?: return@forEach
             if (metadata.isDirectory) {
                 folders += path
-                collect(folder = path, entries = listOrEmpty(folder = entry), folders = folders, files = files)
-            } else if (metadata.isRegularFile && path.isMarkdown) {
-                files += noteFileOf(path = path, metadata = metadata)
+                collect(
+                    folder = path,
+                    entries = listOrEmpty(folder = entry),
+                    folders = folders,
+                    files = files,
+                    attachments = attachments
+                )
+            } else if (metadata.isRegularFile) {
+                val target = if (path.isMarkdown) files else attachments
+                target += noteFileOf(path = path, metadata = metadata)
             }
         }
     }
@@ -70,8 +87,15 @@ class OkioNoteScanner(
     ): VaultListing {
         val folders = mutableSetOf<RelativePath>()
         val files = mutableListOf<NoteFile>()
-        collect(folder = RelativePath.ROOT, entries = rootEntries, folders = folders, files = files)
-        return VaultListing(folders = folders, files = files)
+        val attachments = mutableListOf<NoteFile>()
+        collect(
+            folder = RelativePath.ROOT,
+            entries = rootEntries,
+            folders = folders,
+            files = files,
+            attachments = attachments
+        )
+        return VaultListing(folders = folders, files = files, attachments = attachments)
     }
 
     private fun listOrEmpty(

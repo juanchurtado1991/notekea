@@ -99,6 +99,31 @@ class FlattenTreeUseCaseTest {
         )
     }
 
+    @Test
+    fun `files that are not notes are listed with the notes by name, with their extension, and by date too`() {
+        val photos = VaultTree.EMPTY
+            .withNote(note = entry(path = "Recipes/Arepas.md", modifiedOffsetMillis = 10L))
+            .withAttachment(file = NoteFixtures.file(path = "Recipes/Zucchini.png", modifiedOffsetMillis = 30L))
+            .withAttachment(file = NoteFixtures.file(path = "Recipes/Banana.pdf", modifiedOffsetMillis = 20L))
+        val rows = { sort: TreeSort ->
+            flattenTree(tree = photos, expandedFolders = setOf(RelativePath(value = "Recipes")), sort = sort)
+        }
+
+        assertEquals(
+            expected = listOf(
+                folder(path = "Recipes", depth = 0, count = 1, isExpanded = true),
+                note(path = "Recipes/Arepas.md", depth = 1),
+                TreeRow.File(path = RelativePath(value = "Recipes/Banana.pdf"), depth = 1, modifiedAt = null),
+                TreeRow.File(path = RelativePath(value = "Recipes/Zucchini.png"), depth = 1, modifiedAt = null)
+            ),
+            actual = rows(TreeSort.NAME).map(::withoutDates)
+        )
+        assertEquals(
+            expected = listOf("Recipes", "Recipes/Zucchini.png", "Recipes/Banana.pdf", "Recipes/Arepas.md"),
+            actual = rows(TreeSort.MODIFIED).map { it.path.value }
+        )
+    }
+
     private fun folder(
         path: String,
         depth: Int,
@@ -118,5 +143,9 @@ class FlattenTreeUseCaseTest {
 
     private fun withoutDates(
         row: TreeRow
-    ): TreeRow = if (row is TreeRow.Note) row.copy(modifiedAt = null) else row
+    ): TreeRow = when (row) {
+        is TreeRow.Note -> row.copy(modifiedAt = null)
+        is TreeRow.File -> row.copy(modifiedAt = null)
+        is TreeRow.Folder -> row
+    }
 }

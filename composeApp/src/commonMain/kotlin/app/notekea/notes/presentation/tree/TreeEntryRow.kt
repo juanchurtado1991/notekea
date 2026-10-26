@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.OperatingSystem
@@ -21,9 +22,11 @@ import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
+import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.TreeRow
 import app.notekea.resources.Res
+import app.notekea.resources.tree_delete_file
 import app.notekea.resources.tree_delete_folder
 import app.notekea.resources.tree_delete_note
 import app.notekea.resources.tree_open_folder
@@ -31,6 +34,7 @@ import app.notekea.resources.tree_rename
 import app.notekea.resources.tree_reveal_explorer
 import app.notekea.resources.tree_reveal_files
 import app.notekea.resources.tree_reveal_finder
+import app.notekea.resources.tree_select_file
 import app.notekea.resources.tree_select_note
 import org.jetbrains.compose.resources.stringResource
 
@@ -93,12 +97,8 @@ private fun EntryItem(
     val draft = state.renaming?.takeIf { it.path == row.path }
     val folder = row as? TreeRow.Folder
     NotekeaTreeItem(
-        label = if (folder != null) row.path.name else row.path.nameWithoutExtension,
-        icon = when {
-            folder == null -> NotekeaIcons.Note
-            folder.isExpanded -> NotekeaIcons.FolderOpen
-            else -> NotekeaIcons.Folder
-        },
+        label = if (row is TreeRow.Note) row.path.nameWithoutExtension else row.path.name,
+        icon = iconOf(row = row),
         depth = row.depth,
         onClick = {
             onIntent(VaultTreeIntent.OnRowClick(path = row.path))
@@ -110,16 +110,29 @@ private fun EntryItem(
         onToggleExpanded = folder?.let { { onIntent(VaultTreeIntent.OnChevronClick(path = it.path)) } },
         trailingText = folder?.noteCount?.takeIf { it > 0 }?.toString(),
         onClickLabel = stringResource(
-            resource = if (folder !=
-                null
-            ) {
-                Res.string.tree_open_folder
-            } else {
-                Res.string.tree_select_note
+            resource = when (row) {
+                is TreeRow.Folder -> Res.string.tree_open_folder
+                is TreeRow.Note -> Res.string.tree_select_note
+                is TreeRow.File -> Res.string.tree_select_file
             }
         ),
         labelContent = draft?.let { { RenameField(draft = it, onIntent = onIntent) } }
     )
+}
+
+/** A folder open or closed, a note, or another file by its kind: a picture or anything else. */
+private fun iconOf(
+    row: TreeRow
+): ImageVector = when (row) {
+    is TreeRow.Folder -> if (row.isExpanded) NotekeaIcons.FolderOpen else NotekeaIcons.Folder
+
+    is TreeRow.Note -> NotekeaIcons.Note
+
+    is TreeRow.File -> if (AttachmentKind.of(name = row.path.name) == AttachmentKind.IMAGE) {
+        NotekeaIcons.ImageFile
+    } else {
+        NotekeaIcons.OtherFile
+    }
 }
 
 @Composable
@@ -149,7 +162,11 @@ private fun menuSections(
     listOf(
         NotekeaMenuItem(
             label = stringResource(
-                resource = if (row is TreeRow.Folder) Res.string.tree_delete_folder else Res.string.tree_delete_note
+                resource = when (row) {
+                    is TreeRow.Folder -> Res.string.tree_delete_folder
+                    is TreeRow.Note -> Res.string.tree_delete_note
+                    is TreeRow.File -> Res.string.tree_delete_file
+                }
             ),
             onClick = { onIntent(VaultTreeIntent.OnDeleteRequest(path = row.path)) },
             icon = NotekeaIcons.Delete,
@@ -183,7 +200,7 @@ private fun editSection(
     )
 }
 
-private fun revealLabel(
+internal fun revealLabel(
     operatingSystem: OperatingSystem
 ) = when (operatingSystem) {
     OperatingSystem.LINUX -> Res.string.tree_reveal_files

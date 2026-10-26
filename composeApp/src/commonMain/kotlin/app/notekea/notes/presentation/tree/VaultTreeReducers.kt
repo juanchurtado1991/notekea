@@ -52,7 +52,7 @@ internal fun reduceTreeLoaded(
     // A selected note is kept too: it may be open in the editor, which shows that it is gone and offers Restore or
     // Close, so its unsaved text is never dropped behind the user's back.
     val selected = state.selectedPath?.takeIf {
-        it.isMarkdown || it in tree.folders || it in tree.notes || it == state.renaming?.path
+        it.isMarkdown || it in tree.folders || it in tree.notes || it in tree.attachments || it == state.renaming?.path
     }
     return state.copy(isLoading = false, tree = tree, selectedPath = selected, loadError = null)
 }
