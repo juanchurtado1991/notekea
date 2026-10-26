@@ -1,21 +1,19 @@
 package app.notekea.core.presentation.gallery
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,18 +23,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.presentation.components.EmptyState
 import app.notekea.core.presentation.components.ErrorBanner
 import app.notekea.core.presentation.components.NotekeaButton
+import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaCard
 import app.notekea.core.presentation.components.NotekeaConfirmDialog
 import app.notekea.core.presentation.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.components.NotekeaFindBar
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaInlineTextField
-import app.notekea.core.presentation.components.NotekeaWordmark
-import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaListItem
 import app.notekea.core.presentation.components.NotekeaMarkdown
 import app.notekea.core.presentation.components.NotekeaMenuButton
@@ -44,6 +42,7 @@ import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.NotekeaPalette
 import app.notekea.core.presentation.components.NotekeaPaletteItem
 import app.notekea.core.presentation.components.NotekeaProgressIndicator
+import app.notekea.core.presentation.components.NotekeaSearchButton
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.components.NotekeaSplitPane
 import app.notekea.core.presentation.components.NotekeaTab
@@ -51,6 +50,7 @@ import app.notekea.core.presentation.components.NotekeaTabRow
 import app.notekea.core.presentation.components.NotekeaTextField
 import app.notekea.core.presentation.components.NotekeaTitleField
 import app.notekea.core.presentation.components.NotekeaTreeItem
+import app.notekea.core.presentation.components.NotekeaWordmark
 import app.notekea.core.presentation.components.StatusBarItem
 import app.notekea.core.presentation.components.StatusIndicator
 import app.notekea.core.presentation.theme.LocalNotekeaCodeTextStyle
@@ -115,6 +115,8 @@ private const val NOTE_PRICING = "Pricing ideas"
 private const val PALETTE_HEIGHT_DP = 300
 private const val PROGRESS_LABEL = "Opening vault…"
 private const val SAMPLE_ERROR = "This note changed outside Notekea."
+private const val SEARCH_LABEL = "Search notes"
+private const val SEARCH_SHORTCUT = "Ctrl+P"
 private const val SAMPLE_PLACEHOLDER = "Search notes…"
 private const val STATUS_INDEXED = "Indexed 1,204 notes"
 private const val STATUS_MODEL = "Model: ready"
@@ -201,6 +203,7 @@ private fun PageInputsSamples() {
     var title by remember { mutableStateOf(value = NOTE_PRICING) }
     var findQuery by remember { mutableStateOf(value = "") }
     NotekeaTitleField(value = title, onCommit = { title = it }, label = NOTE_PRICING)
+    NotekeaSearchButton(label = SEARCH_LABEL, onClick = {}, shortcutHint = SEARCH_SHORTCUT)
     NotekeaFindBar(
         query = findQuery,
         onQueryChange = { findQuery = it },
