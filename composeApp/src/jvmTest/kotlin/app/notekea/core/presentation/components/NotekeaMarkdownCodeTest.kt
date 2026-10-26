@@ -3,25 +3,31 @@ package app.notekea.core.presentation.components
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.use
+import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.theme.NotekeaTheme
 import kotlin.test.Test
 
-/** Read mode toggled quickly on a note with code blocks crashed with a color range past the end of a block (1.5 smoke). */
+/**
+ * Read mode toggled quickly on a note with code blocks crashed with a color range past the end of a block (1.5 smoke).
+ * The scene runs on the AWT event thread, as in the app ([UiThread]).
+ */
 class NotekeaMarkdownCodeTest {
     @Test
     fun `code blocks colored at the same time never mix their texts`() {
         val isShown = mutableStateOf(value = true)
-        ImageComposeScene(width = SCENE_WIDTH, height = SCENE_HEIGHT) {
-            NotekeaTheme {
-                if (isShown.value) NotekeaMarkdown(content = NOTE)
-            }
-        }.use { scene ->
-            repeat(times = TOGGLES) { toggle ->
-                isShown.value = toggle % 2 == 0
-                // Several frames per toggle: the renderer parses, then every block is colored in the background.
-                repeat(times = FRAMES_PER_TOGGLE) { frame ->
-                    scene.render(nanoTime = (toggle * FRAMES_PER_TOGGLE + frame) * FRAME_NANOS)
-                    Thread.sleep(COLORING_MILLIS)
+        UiThread.run {
+            ImageComposeScene(width = SCENE_WIDTH, height = SCENE_HEIGHT) {
+                NotekeaTheme {
+                    if (isShown.value) NotekeaMarkdown(content = NOTE)
+                }
+            }.use { scene ->
+                repeat(times = TOGGLES) { toggle ->
+                    isShown.value = toggle % 2 == 0
+                    // Several frames per toggle: the renderer parses, then every block is colored in the background.
+                    repeat(times = FRAMES_PER_TOGGLE) { frame ->
+                        scene.render(nanoTime = (toggle * FRAMES_PER_TOGGLE + frame) * FRAME_NANOS)
+                        Thread.sleep(COLORING_MILLIS)
+                    }
                 }
             }
         }
