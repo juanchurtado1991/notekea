@@ -31,7 +31,9 @@ import app.notekea.core.platform.domain.SystemEnvironment
 import app.notekea.core.presentation.gallery.DesignSystemGallery
 import app.notekea.core.presentation.platform.LocalResizePointerIcon
 import app.notekea.core.presentation.platform.LocalShortcutDispatcher
+import app.notekea.core.presentation.platform.LocalFileDrop
 import app.notekea.core.presentation.platform.LocalWindowCloseGuard
+import app.notekea.core.presentation.platform.awtFileDrop
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.core.presentation.theme.LocalSystemDarkTheme
@@ -84,7 +86,8 @@ fun main() {
         val isSystemDark by systemDarkTheme.collectAsState(initial = null)
         CompositionLocalProvider(
             LocalWindowExceptionHandlerFactory provides crashReporter.windowExceptionHandlers(),
-            LocalSystemDarkTheme provides isSystemDark
+            LocalSystemDarkTheme provides isSystemDark,
+            LocalFileDrop provides ::awtFileDrop
         ) {
             if (showGallery) GalleryWindow() else NotekeaWindow(isCrashTest = isCrashTest)
             val crash by crashReporter.crash.collectAsState()
