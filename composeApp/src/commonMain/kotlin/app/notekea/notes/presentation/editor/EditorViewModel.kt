@@ -31,7 +31,8 @@ import kotlin.time.Duration.Companion.seconds
  * recognized, an outside change reloads a note without unsaved edits and otherwise asks (Keep mine / Load theirs), and
  * a deleted file offers Restore or Close. Saves never overwrite an outside change nor bring back a file that is gone
  * ([SaveNoteUseCase]). Leaving the text saves at once; the title renames the note and updates the links to it.
- * Notes open in the mode the user last chose (Edit or Read), remembered between runs.
+ * Notes open in the mode the user last chose (Edit or Read), remembered between runs. A focus request gives the
+ * keyboard back to the text once its note is open (after the quick switcher closes).
  */
 class EditorViewModel(
     private val vaultPath: String,
@@ -58,6 +59,9 @@ class EditorViewModel(
     // The mode every note opens in: the one the user last chose, here and in earlier runs.
     private var isReadingChosen = false
 
+    // A note whose text takes the keyboard as soon as it finishes opening; dropped if another note opens instead.
+    private var focusPending: RelativePath? = null
+
     init {
         launchGuarded(onError = ::showUnexpectedError) {
             isReadingChosen = getEditorMode()
@@ -75,6 +79,7 @@ class EditorViewModel(
             EditorIntent.OnCloseDeleted -> closeDeleted()
             is EditorIntent.OnLinkClick -> openLink(link = intent.link)
             is EditorIntent.OnTagClick -> emit(effect = EditorEffect.SearchTag(tag = intent.tag))
+            is EditorIntent.OnFocusRequest -> requestFocus(path = intent.path)
             EditorIntent.OnFindClose -> closeFind()
             EditorIntent.OnFindNext -> moveToMatch(step = 1)
             EditorIntent.OnFindOpen -> openFind()
@@ -151,6 +156,7 @@ class EditorViewModel(
         isRetry: Boolean = false
     ) {
         if (path == state.value.notePath && !isRetry) return
+        if (path != focusPending) focusPending = null
         saveNow()
         watchJob?.cancel()
         opened = null
@@ -166,9 +172,24 @@ class EditorViewModel(
             is Outcome.Success -> {
                 show(document = outcome.value, isNewNote = true)
                 reduce { it.copy(isLoading = false) }
+                if (focusPending == path) focusText()
                 watch(path = path)
             }
         }
+    }
+
+    /** The text of [path] (the open note when null) takes the keyboard now if it is open, or once it opens. */
+    private fun requestFocus(
+        path: RelativePath?
+    ) {
+        val target = path ?: state.value.notePath ?: return
+        val isOpen = state.value.let { it.notePath == target && !it.isLoading && it.loadError == null }
+        if (isOpen) focusText() else focusPending = target
+    }
+
+    private fun focusText() {
+        focusPending = null
+        emit(effect = EditorEffect.FocusText)
     }
 
     /** Saves the edits, unless there is nothing new or the user has a question to answer first. */

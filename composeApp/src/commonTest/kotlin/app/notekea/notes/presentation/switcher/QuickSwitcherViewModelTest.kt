@@ -157,6 +157,18 @@ class QuickSwitcherViewModelTest {
     }
 
     @Test
+    fun `closing without choosing says so, so the keyboard can go back to the note`() = runSwitcherTest {
+        val effects = collectEffects()
+        send(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES))
+        send(QuickSwitcherIntent.OnClose)
+
+        assertEquals(
+            expected = listOf<QuickSwitcherEffect>(QuickSwitcherEffect.Dismissed),
+            actual = effects
+        )
+    }
+
+    @Test
     fun `tab switches between names and content, keeping the text`() = runSwitcherTest {
         send(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES, query = "corn"))
         val byName = names()

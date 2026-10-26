@@ -33,7 +33,7 @@ class QuickSwitcherViewModel(
         intent: QuickSwitcherIntent
     ) {
         when (intent) {
-            QuickSwitcherIntent.OnClose -> close()
+            QuickSwitcherIntent.OnClose -> dismiss()
             QuickSwitcherIntent.OnConfirm -> confirm()
             QuickSwitcherIntent.OnModeSwitch -> switchMode()
             is QuickSwitcherIntent.OnNotesChange -> changeNotes(notes = intent.notes)
@@ -51,6 +51,11 @@ class QuickSwitcherViewModel(
     ) {
         reduce { reduceOpened(state = it, mode = mode, query = query) }
         search(debounce = false)
+    }
+
+    private fun dismiss() {
+        close()
+        emit(effect = QuickSwitcherEffect.Dismissed)
     }
 
     private fun close() {

@@ -1,31 +1,10 @@
 package app.notekea.notes.presentation.editor
 
-import androidx.compose.foundation.ScrollState
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.TextLayoutResult
-import app.notekea.core.presentation.components.NotekeaFindBar
-import app.notekea.resources.editor_read_mode
-import app.notekea.resources.editor_edit_mode
-import app.notekea.core.presentation.theme.NotekeaIcons
-import app.notekea.core.presentation.platform.label
-import app.notekea.core.presentation.components.NotekeaMarkdown
-import app.notekea.core.presentation.components.NotekeaIconButton
-import app.notekea.resources.editor_find
-import app.notekea.resources.editor_find_count
-import app.notekea.resources.editor_find_none
-import kotlin.math.roundToInt
-import androidx.compose.runtime.snapshotFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,32 +26,55 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.presentation.components.NotekeaFindBar
+import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.core.presentation.components.NotekeaMarkdown
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.components.NotekeaTitleField
+import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.core.presentation.theme.notekeaCodeTextStyle
 import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.presentation.tree.notesErrorMessage
 import app.notekea.resources.Res
 import app.notekea.resources.editor_body_label
+import app.notekea.resources.editor_edit_mode
+import app.notekea.resources.editor_find
+import app.notekea.resources.editor_find_count
+import app.notekea.resources.editor_find_none
+import app.notekea.resources.editor_read_mode
 import app.notekea.resources.editor_saved
 import app.notekea.resources.editor_title_label
 import app.notekea.resources.editor_unsaved
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.stringResource
 
 private const val BODY_MIN_HEIGHT_DP = 320
@@ -100,7 +102,8 @@ fun EditorContent(
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier = Modifier,
-    properties: NoteMetadata? = null
+    properties: NoteMetadata? = null,
+    textFocusRequester: FocusRequester? = null
 ) {
     val scrollState = rememberScrollState()
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
@@ -128,7 +131,13 @@ fun EditorContent(
                     } else if (state.isReading) {
                         ReadView(text = buffer.text.toString(), onIntent = onIntent)
                     } else {
-                        EditorBody(buffer = buffer, scrollState = scrollState, onIntent = onIntent, find = state.find)
+                        EditorBody(
+                            buffer = buffer,
+                            scrollState = scrollState,
+                            onIntent = onIntent,
+                            find = state.find,
+                            focusRequester = textFocusRequester
+                        )
                     }
                 }
             }
@@ -303,7 +312,8 @@ private fun EditorBody(
     buffer: TextFieldState,
     scrollState: ScrollState,
     onIntent: (EditorIntent) -> Unit,
-    find: FindState?
+    find: FindState?,
+    focusRequester: FocusRequester?
 ) {
     val colors = MaterialTheme.colorScheme
     val highlighting = rememberHighlighting(find = find)
@@ -321,6 +331,7 @@ private fun EditorBody(
             .defaultMinSize(minHeight = BODY_MIN_HEIGHT_DP.dp)
             .padding(top = NotekeaDimensions.SpacingL)
             .semantics { contentDescription = label }
+            .then(other = focusRequester?.let { Modifier.focusRequester(focusRequester = it) } ?: Modifier)
             .onFocusChanged {
                 if (hasFocus && !it.isFocused) onIntent(EditorIntent.OnFocusLost)
                 hasFocus = it.isFocused
