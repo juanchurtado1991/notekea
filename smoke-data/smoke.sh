@@ -51,8 +51,10 @@ prepare() {
     echo "# Existing note" > "$SCRATCH/New Vault Location/My Notes/Existing note.md"
     echo "# Locked note" > "$SCRATCH/Locked Vault/Locked note.md"
     editor_notes "$SCRATCH/Playground Vault/Editor"
-    # The tasks and callouts note (1.7) is a file of the repository, so tests render the same text.
+    # The tasks and callouts note (1.7) and the formatting practice note (1.17) are files of the repository, so tests
+    # read the same text.
     cp "$SMOKE_ROOT/notes/Tasks and callouts.md" "$SCRATCH/Playground Vault/Editor/"
+    cp "$SMOKE_ROOT/notes/Formatting practice.md" "$SCRATCH/Playground Vault/Editor/"
     echo "Smoke scenarios ready in $SCRATCH:"
     echo "  Movable Vault       open it, quit, run 'move', relaunch: folder not found, Locate…"
     echo "  Locked Vault        open it, then run 'lock' and open it from Recent: permission error"
