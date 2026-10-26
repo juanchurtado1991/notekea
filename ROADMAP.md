@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 5 / 16 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 6 / 16 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -212,7 +212,7 @@ between runs.
 - **Done when:** typing never loses text, external changes are detected, frontmatter is preserved untouched.
 - Smoke test: cases 1.5-01 to 1.5-11; 1.4-01 and 1.4-06 rewritten for the editor.
 
-### 🚧 1.6 Quick switcher and search — `feature/quick-switcher`
+### ✅ 1.6 Quick switcher and search — `feature/quick-switcher` — [notekea#52](https://github.com/juanchurtado1991/notekea/pull/52)
 
 `Mod+P` opens a palette with fuzzy search over note names, aliases, frontmatter titles and paths (a search with `/`
 matches the path), ignoring letter case and accents; `Mod+Shift+F` searches note content (plain text in M1, upgraded
