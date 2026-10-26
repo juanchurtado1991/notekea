@@ -15,7 +15,9 @@ import com.composables.icons.lucide.ClipboardList
 import com.composables.icons.lucide.ClockArrowDown
 import com.composables.icons.lucide.Ellipsis
 import com.composables.icons.lucide.FilePlus
+import com.composables.icons.lucide.File
 import com.composables.icons.lucide.FileText
+import com.composables.icons.lucide.Image
 import com.composables.icons.lucide.FileX
 import com.composables.icons.lucide.Flame
 import com.composables.icons.lucide.Folder
@@ -86,6 +88,7 @@ object NotekeaIcons {
     val Find: ImageVector get() = Lucide.Search
     val FindNext: ImageVector get() = Lucide.ArrowDown
     val FindPrevious: ImageVector get() = Lucide.ArrowUp
+    val ImageFile: ImageVector get() = Lucide.Image
     val Folder: ImageVector get() = Lucide.Folder
     val FolderOpen: ImageVector get() = Lucide.FolderOpen
     val Heading: ImageVector get() = Lucide.Heading
@@ -98,6 +101,7 @@ object NotekeaIcons {
     val NewNote: ImageVector get() = Lucide.FilePlus
     val NewTag: ImageVector get() = Lucide.Plus
     val Note: ImageVector get() = Lucide.FileText
+    val OtherFile: ImageVector get() = Lucide.File
     val NoteLink: ImageVector get() = Lucide.Link
     val NumberedList: ImageVector get() = Lucide.ListOrdered
     val Quote: ImageVector get() = Lucide.TextQuote

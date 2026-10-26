@@ -16,4 +16,10 @@ interface NoteScanner {
         vaultPath: String,
         path: RelativePath
     ): NoteFile?
+
+    /** The current state of one file that is not a note, or null when it no longer exists, is hidden or is a note. */
+    suspend fun statAttachment(
+        vaultPath: String,
+        path: RelativePath
+    ): NoteFile?
 }

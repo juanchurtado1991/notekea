@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.tree
 
+import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
@@ -8,6 +9,8 @@ import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
+import app.notekea.notes.domain.FakeAttachmentStore
+import app.notekea.notes.domain.FakeFileOpener
 import app.notekea.notes.domain.FakeFileRevealer
 import app.notekea.notes.domain.FakeFileWatcher
 import app.notekea.notes.domain.FakeNoteContentStore
@@ -47,13 +50,15 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalEncodingApi::class)
 class VaultTreeViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val scanner = FakeNoteScanner()
@@ -62,6 +67,8 @@ class VaultTreeViewModelTest {
     private val revealer = FakeFileRevealer()
     private val preferences = FakeTreePreferencesStore()
     private val contents = FakeNoteContentStore()
+    private val opener = FakeFileOpener()
+    private val attachmentStore = FakeAttachmentStore()
 
     @BeforeTest
     fun setUp() {
@@ -466,6 +473,54 @@ class VaultTreeViewModelTest {
         )
     }
 
+    @Test
+    fun `a selected picture shows beside the tree, a PDF opens with its app, a note clears it`() = runTreeTest {
+        scanner.addAttachment(file = file(path = PLATE))
+        scanner.addAttachment(file = file(path = MENU))
+        attachmentStore.contents[path(PLATE)] = Base64.decode(source = PNG_BASE64)
+        val viewModel = startedViewModel()
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(PLATE)))
+        advanceUntilIdle()
+        val picture = viewModel.state.value.filePreview
+        viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(MENU)))
+        advanceUntilIdle()
+        val pdf = viewModel.state.value.filePreview
+        viewModel.onIntent(intent = VaultTreeIntent.OnFileOpen())
+        advanceUntilIdle()
+        viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(WELCOME)))
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = listOf(PLATE to (1 to false), MENU to (null to false)),
+            actual = listOf(picture, pdf).map { it!!.file.path.value to (it.image?.width to it.isUnreadable) }
+        )
+        assertEquals(
+            expected = listOf(path(MENU)) to null,
+            actual = opener.opened.toList() to viewModel.state.value.filePreview
+        )
+        viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path("attachments")))
+        advanceUntilIdle()
+        assertTrue(actual = viewModel.state.value.rows.any { it is TreeRow.File && it.path == path(PLATE) })
+    }
+
+    @Test
+    fun `an image that cannot be read says so, and a file that cannot be opened shows the error`() = runTreeTest {
+        scanner.addAttachment(file = file(path = PLATE))
+        attachmentStore.contents[path(PLATE)] = "not a picture".encodeToByteArray()
+        opener.failure = NotesError.OpenFailed(path = PLATE)
+        val viewModel = startedViewModel()
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(PLATE)))
+        viewModel.onIntent(intent = VaultTreeIntent.OnFileOpen(path = path(PLATE)))
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = true to NotesError.OpenFailed(path = PLATE),
+            actual = viewModel.state.value.filePreview?.isUnreadable to viewModel.state.value.actionError
+        )
+    }
+
     private fun path(
         value: String
     ): RelativePath = RelativePath(value = value)
@@ -505,6 +560,9 @@ class VaultTreeViewModelTest {
             ),
             deleteEntry = DeleteEntryUseCase(trash = trash),
             revealEntry = RevealEntryUseCase(fileRevealer = revealer),
+            fileOpener = opener,
+            attachmentStore = attachmentStore,
+            dispatchers = FakeAppDispatchers(dispatcher = testDispatcher),
             updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
                 planLinkUpdates = PlanLinkUpdatesUseCase(
                     noteContentStore = contents,
@@ -522,6 +580,10 @@ class VaultTreeViewModelTest {
 
     companion object {
         private const val BUG = "bug"
+        private const val MENU = "attachments/Weekly menu.pdf"
+        private const val PLATE = "attachments/Arepas plate.png"
+        private const val PNG_BASE64 =
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
         private const val PROJECTS = "Projects"
         private const val ROADMAP = "Projects/Roadmap.md"
         private const val UNTITLED = "Untitled"

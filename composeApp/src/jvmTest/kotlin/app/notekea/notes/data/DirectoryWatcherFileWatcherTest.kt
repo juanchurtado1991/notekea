@@ -59,7 +59,7 @@ class DirectoryWatcherFileWatcherTest {
     }
 
     @Test
-    fun `hidden entries and files that are not notes are not reported`() = watching { changes ->
+    fun `hidden entries are not reported, files that are not notes are`() = watching { changes ->
         vault.resolve(OBSIDIAN).createDirectories()
         vault.resolve("$OBSIDIAN/workspace.md").writeText(text = CONTENT)
         vault.resolve(".draft.md").writeText(text = CONTENT)
@@ -72,8 +72,10 @@ class DirectoryWatcherFileWatcherTest {
         }
 
         assertEquals(
-            expected = emptyList(),
+            expected = setOf(RelativePath(value = "image.png")),
             actual = beforeSentinel.filterNot { isCreatedOrModified(change = it, path = PROBE) }
+                .mapNotNull { (it as? VaultChange.Created)?.path ?: (it as? VaultChange.Modified)?.path }
+                .toSet()
         )
     }
 

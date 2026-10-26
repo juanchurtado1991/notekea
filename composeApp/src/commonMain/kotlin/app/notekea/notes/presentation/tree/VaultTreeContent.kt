@@ -57,7 +57,8 @@ fun VaultTreeContent(
                 NoteDetailsPanel(
                     state = state,
                     onShowSidebar = { onIntent(VaultTreeIntent.OnSidebarToggle) },
-                    noteContent = noteContent
+                    noteContent = noteContent,
+                    onIntent = onIntent
                 )
             }
         )
