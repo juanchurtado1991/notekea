@@ -45,6 +45,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Formatting toolbar (ROADMAP 1.17): under the note's title, Edit | Preview tabs (Mod+E; Preview is Read mode) and
+  buttons with plain-language tooltips for Heading (Large, Medium, Small), Bold (Mod+B), Italic (Mod+I), Link to a
+  note (Mod+K, chosen in the quick switcher, the selection becoming its label), Web link (Mod+Shift+K), Tag (the
+  vault's tags or a new one), Bulleted list, Numbered list, Checklist, Callout (every type, optionally Folded), Table
+  and More (Quote, Code block, Divider). With a selection a button formats it, and pressing it again removes the
+  formatting; without one it inserts an example to type over. The toolbar stays in view while scrolling, Find in
+  note sits at its end, and Preview keeps only the tabs and Find.
+- Design system: `NotekeaCompactTabs`, and menu items that keep their menu open (`keepsMenuOpen`).
 - Tasks and callouts (ROADMAP 1.7): tasks show a clickable checkbox over their `[ ]` in Edit mode, and Mod+Enter
   toggles the task on the cursor line; the change is written to the file like any edit. In Read mode, Obsidian callouts
   (every type and alias, unknown types as notes) are cards with an icon and a color by urgency, fold with `-` / `+`

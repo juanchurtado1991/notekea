@@ -78,7 +78,8 @@ fun EditorScreen(
         onIntent = viewModel::onIntent,
         modifier = modifier,
         properties = properties,
-        textFocusRequester = textFocusRequester
+        textFocusRequester = textFocusRequester,
+        vaultTags = vaultTags
     )
 }
 

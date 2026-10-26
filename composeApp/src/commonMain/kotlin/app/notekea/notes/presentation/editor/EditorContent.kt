@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -43,7 +44,13 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.zIndex
+import app.notekea.core.presentation.platform.matches
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.contentDescription
@@ -55,14 +62,11 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaCheckbox
 import app.notekea.core.presentation.components.NotekeaFindBar
-import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaMarkdown
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.components.NotekeaTitleField
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.core.presentation.theme.notekeaCodeTextStyle
 import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.NotesError
@@ -70,11 +74,8 @@ import app.notekea.notes.domain.TaskFinder
 import app.notekea.notes.presentation.tree.notesErrorMessage
 import app.notekea.resources.Res
 import app.notekea.resources.editor_body_label
-import app.notekea.resources.editor_edit_mode
-import app.notekea.resources.editor_find
 import app.notekea.resources.editor_find_count
 import app.notekea.resources.editor_find_none
-import app.notekea.resources.editor_read_mode
 import app.notekea.resources.editor_saved
 import app.notekea.resources.editor_task
 import app.notekea.resources.editor_title_label
@@ -113,45 +114,107 @@ fun EditorContent(
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier = Modifier,
     properties: NoteMetadata? = null,
-    textFocusRequester: FocusRequester? = null
+    textFocusRequester: FocusRequester? = null,
+    vaultTags: List<String> = emptyList()
 ) {
     val scrollState = rememberScrollState()
+    // Read only when the toolbar is placed, never in composition, so updating it recomposes nothing.
+    val viewport = remember { mutableStateOf<LayoutCoordinates?>(value = null) }
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Column {
             EditorBanners(state = state, platformConventions = platformConventions, onIntent = onIntent)
             state.find?.let { find -> EditorFindBar(find = find, onIntent = onIntent) }
             Box(
-                modifier = Modifier.fillMaxSize().verticalScroll(state = scrollState),
+                modifier = Modifier.fillMaxSize().onPlaced { viewport.value = it }.verticalScroll(state = scrollState),
                 contentAlignment = Alignment.TopCenter
             ) {
-                Column(
-                    modifier = Modifier
-                        .widthIn(max = CONTENT_MAX_WIDTH_DP.dp)
-                        .fillMaxWidth()
-                        .padding(horizontal = NotekeaDimensions.SpacingXxl, vertical = NotekeaDimensions.SpacingXl)
-                ) {
-                    EditorHeader(
-                        state = state,
-                        properties = properties,
-                        platformConventions = platformConventions,
-                        onIntent = onIntent
-                    )
-                    if (state.isLoading) {
-                        EditorSkeleton()
-                    } else if (state.isReading) {
-                        ReadView(text = buffer.text.toString(), onIntent = onIntent)
-                    } else {
-                        EditorBody(
-                            buffer = buffer,
-                            scrollState = scrollState,
-                            onIntent = onIntent,
-                            find = state.find,
-                            focusRequester = textFocusRequester
-                        )
-                    }
-                }
+                EditorPage(
+                    state = state,
+                    buffer = buffer,
+                    scrollState = scrollState,
+                    viewport = { viewport.value },
+                    platformConventions = platformConventions,
+                    onIntent = onIntent,
+                    vaultTags = vaultTags,
+                    properties = properties,
+                    textFocusRequester = textFocusRequester
+                )
             }
         }
+    }
+}
+
+/** The note's page, centred at a readable width: its header, the toolbar (kept in view) and its text or rendering. */
+@Composable
+private fun EditorPage(
+    state: EditorState,
+    buffer: TextFieldState,
+    scrollState: ScrollState,
+    viewport: () -> LayoutCoordinates?,
+    platformConventions: PlatformConventions,
+    onIntent: (EditorIntent) -> Unit,
+    vaultTags: List<String>,
+    properties: NoteMetadata?,
+    textFocusRequester: FocusRequester?
+) {
+    var toolbarTop by remember { mutableIntStateOf(value = 0) }
+    Column(
+        modifier = Modifier
+            .widthIn(max = CONTENT_MAX_WIDTH_DP.dp)
+            .fillMaxWidth()
+            .padding(horizontal = NotekeaDimensions.SpacingXxl, vertical = NotekeaDimensions.SpacingXl)
+    ) {
+        EditorHeader(
+            state = state,
+            properties = properties,
+            platformConventions = platformConventions,
+            onIntent = onIntent
+        )
+        if (state.notePath != null) {
+            EditorToolbar(
+                isReading = state.isReading,
+                platformConventions = platformConventions,
+                onIntent = onIntent,
+                modifier = Modifier.stickyAtTop(scrollState = scrollState, viewport = viewport, top = { toolbarTop }) {
+                    toolbarTop = it
+                },
+                vaultTags = vaultTags
+            )
+        }
+        NoteText(
+            state = state,
+            buffer = buffer,
+            scrollState = scrollState,
+            platformConventions = platformConventions,
+            onIntent = onIntent,
+            textFocusRequester = textFocusRequester
+        )
+    }
+}
+
+/** The note's text with its Markdown highlighted, its rendering in Read mode, or a skeleton while it loads. */
+@Composable
+private fun NoteText(
+    state: EditorState,
+    buffer: TextFieldState,
+    scrollState: ScrollState,
+    platformConventions: PlatformConventions,
+    onIntent: (EditorIntent) -> Unit,
+    textFocusRequester: FocusRequester?
+) {
+    if (state.isLoading) {
+        EditorSkeleton()
+    } else if (state.isReading) {
+        ReadView(text = buffer.text.toString(), onIntent = onIntent)
+    } else {
+        EditorBody(
+            buffer = buffer,
+            scrollState = scrollState,
+            platformConventions = platformConventions,
+            onIntent = onIntent,
+            find = state.find,
+            focusRequester = textFocusRequester
+        )
     }
 }
 
@@ -181,8 +244,6 @@ private fun EditorHeader(
             onEdit = { if (state.titleError != null) onIntent(EditorIntent.OnTitleErrorDismiss) }
         )
         SaveIndicator(status = state.saveStatus)
-        FindButton(platformConventions = platformConventions, onIntent = onIntent)
-        ModeToggle(isReading = state.isReading, platformConventions = platformConventions, onIntent = onIntent)
     }
     state.titleError?.let { error ->
         Text(
@@ -205,39 +266,6 @@ private fun propertiesLine(
     return listOf(tags, aliases).filter { it.isNotEmpty() }.joinToString(separator = PROPERTY_SEPARATOR).ifEmpty {
         null
     }
-}
-
-/** Opens Find in note, so it can be found without knowing its shortcut, which the tooltip teaches. */
-@Composable
-private fun FindButton(
-    platformConventions: PlatformConventions,
-    onIntent: (EditorIntent) -> Unit
-) {
-    NotekeaIconButton(
-        icon = NotekeaIcons.Find,
-        label = stringResource(resource = Res.string.editor_find),
-        onClick = { onIntent(EditorIntent.OnFindOpen) },
-        modifier = Modifier.padding(start = NotekeaDimensions.SpacingS),
-        shortcutHint = platformConventions.findShortcut.label(operatingSystem = platformConventions.operatingSystem)
-    )
-}
-
-/** Switches between Edit and Read mode; the icon and tooltip name the mode it switches to, with its shortcut. */
-@Composable
-private fun ModeToggle(
-    isReading: Boolean,
-    platformConventions: PlatformConventions,
-    onIntent: (EditorIntent) -> Unit
-) {
-    NotekeaIconButton(
-        icon = if (isReading) NotekeaIcons.EditMode else NotekeaIcons.ReadMode,
-        label = stringResource(resource = if (isReading) Res.string.editor_edit_mode else Res.string.editor_read_mode),
-        onClick = { onIntent(EditorIntent.OnReadModeToggle) },
-        modifier = Modifier.padding(start = NotekeaDimensions.SpacingS),
-        shortcutHint = platformConventions.toggleReadModeShortcut.label(
-            operatingSystem = platformConventions.operatingSystem
-        )
-    )
 }
 
 /** "Unsaved" while edits wait for the autosave; "Saved" for a second after a save, then nothing. */
@@ -321,6 +349,7 @@ private fun rememberHighlighting(
 private fun EditorBody(
     buffer: TextFieldState,
     scrollState: ScrollState,
+    platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
     find: FindState?,
     focusRequester: FocusRequester?
@@ -331,6 +360,7 @@ private fun EditorBody(
     var layout by remember { mutableStateOf<() -> TextLayoutResult?>(value = { null }) }
     var top by remember { mutableFloatStateOf(value = 0f) }
     val label = stringResource(resource = Res.string.editor_body_label)
+    val formats = formatActions()
     ScrollToCurrentMatch(scrollState = scrollState, layout = { layout() }, top = { top }, find = find)
     BasicTextField(
         state = buffer,
@@ -342,6 +372,10 @@ private fun EditorBody(
             .padding(top = NotekeaDimensions.SpacingL)
             .semantics { contentDescription = label }
             .then(other = focusRequester?.let { Modifier.focusRequester(focusRequester = it) } ?: Modifier)
+            .onPreviewKeyEvent { event ->
+                formatShortcut(event = event, platformConventions = platformConventions, formats = formats)
+                    ?.let { onIntent(it) } != null
+            }
             .onFocusChanged {
                 if (hasFocus && !it.isFocused) onIntent(EditorIntent.OnFocusLost)
                 hasFocus = it.isFocused
@@ -358,6 +392,35 @@ private fun EditorBody(
         }
     )
 }
+
+/** The toolbar action of a formatting shortcut pressed in the text (bold, italic, links), or null for any other key. */
+private fun formatShortcut(
+    event: KeyEvent,
+    platformConventions: PlatformConventions,
+    formats: FormatActions
+): EditorIntent? = when {
+    platformConventions.boldShortcut.matches(event = event) -> EditorIntent.OnFormat(action = formats.bold)
+    platformConventions.italicShortcut.matches(event = event) -> EditorIntent.OnFormat(action = formats.italic)
+    platformConventions.noteLinkShortcut.matches(event = event) -> EditorIntent.OnNoteLinkRequest
+    platformConventions.webLinkShortcut.matches(event = event) -> EditorIntent.OnFormat(action = formats.webLink)
+    else -> null
+}
+
+/**
+ * Keeps the toolbar in view: it scrolls with the note until it reaches the top of the editor, then stays there over
+ * the text. [onTop] reports where it sits in the scrolled content (measured from the [viewport] that scrolls), which
+ * [top] reads back while scrolling.
+ */
+private fun Modifier.stickyAtTop(
+    scrollState: ScrollState,
+    viewport: () -> LayoutCoordinates?,
+    top: () -> Int,
+    onTop: (Int) -> Unit
+): Modifier = onPlaced { coordinates ->
+    viewport()?.let { onTop((it.localPositionOf(sourceCoordinates = coordinates).y + scrollState.value).roundToInt()) }
+}
+    .zIndex(zIndex = 1f)
+    .offset { IntOffset(x = 0, y = (scrollState.value - top()).coerceAtLeast(minimumValue = 0)) }
 
 /**
  * A clickable checkbox over the `[ ]` / `[x]` of every task of the text (`ROADMAP.md` 1.7), placed with the text's

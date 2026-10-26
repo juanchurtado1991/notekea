@@ -53,7 +53,7 @@ class EditorTaskCheckboxTest {
         private const val NOTE = "Projects/Groceries.md"
         private const val WINDOW_HEIGHT = 520
         private const val WINDOW_WIDTH = 900
-        private val FLOUR_CHECKBOX = Offset(x = 80f, y = 247f)
-        private val FLOUR_TEXT = Offset(x = 160f, y = 247f)
+        private val FLOUR_CHECKBOX = Offset(x = 80f, y = 354f)
+        private val FLOUR_TEXT = Offset(x = 160f, y = 354f)
     }
 }
