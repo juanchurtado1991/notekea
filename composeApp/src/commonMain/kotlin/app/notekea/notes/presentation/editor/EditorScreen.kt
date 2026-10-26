@@ -43,8 +43,10 @@ fun EditorScreen(
     onClosed: () -> Unit,
     onOpenLink: (EditorEffect.OpenLink) -> Unit,
     onSearchTag: (String) -> Unit,
+    onRequestNoteLink: () -> Unit,
     modifier: Modifier = Modifier,
-    properties: NoteMetadata? = null
+    properties: NoteMetadata? = null,
+    vaultTags: List<String> = emptyList()
 ) {
     val state by viewModel.state.collectAsState()
     val flushed = remember(viewModel) { Channel<Unit>(capacity = Channel.CONFLATED) }
@@ -57,7 +59,8 @@ fun EditorScreen(
         onRenamed = onRenamed,
         onClosed = onClosed,
         onOpenLink = onOpenLink,
-        onSearchTag = onSearchTag
+        onSearchTag = onSearchTag,
+        onRequestNoteLink = onRequestNoteLink
     )
     DisposableEffect(viewModel) { onDispose { viewModel.onIntent(intent = EditorIntent.OnFlushRequest) } }
     EditorShortcuts(platformConventions = platformConventions, onIntent = viewModel::onIntent)
@@ -88,8 +91,10 @@ private fun EditorEffects(
     onRenamed: (EditorEffect.Renamed) -> Unit,
     onClosed: () -> Unit,
     onOpenLink: (EditorEffect.OpenLink) -> Unit,
-    onSearchTag: (String) -> Unit
+    onSearchTag: (String) -> Unit,
+    onRequestNoteLink: () -> Unit
 ) {
+    val currentOnRequestNoteLink by rememberUpdatedState(newValue = onRequestNoteLink)
     val currentOnRenamed by rememberUpdatedState(newValue = onRenamed)
     val currentOnClosed by rememberUpdatedState(newValue = onClosed)
     val currentOnOpenLink by rememberUpdatedState(newValue = onOpenLink)
@@ -106,6 +111,8 @@ private fun EditorEffects(
                 is EditorEffect.Renamed -> currentOnRenamed(effect)
 
                 is EditorEffect.SearchTag -> currentOnSearchTag(effect.tag)
+
+                EditorEffect.RequestNoteLink -> currentOnRequestNoteLink()
 
                 EditorEffect.FocusText -> focusText(
                     requester = textFocusRequester,

@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.RelativePath
 
 /** What the user (or the window around the editor) asked of the note editor. */
@@ -24,6 +25,12 @@ sealed interface EditorIntent {
 
     /** `Mod+Enter`: the task on the cursor's line, if any, is checked or unchecked (Edit mode only). */
     data object OnTaskToggleShortcut : EditorIntent
+
+    /** A formatting toolbar button or shortcut: [action] is applied to the selection (Edit mode only). */
+    data class OnFormat(val action: FormatAction) : EditorIntent
+
+    /** The toolbar's Link to a note (`Mod+K`): the window lets the person pick the note to link. */
+    data object OnNoteLinkRequest : EditorIntent
 
     /** A `#tag` clicked in Read mode: it is searched in all notes. */
     data class OnTagClick(val tag: String) : EditorIntent

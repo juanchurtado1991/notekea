@@ -3,13 +3,17 @@ package app.notekea.notes.presentation.tree
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.notes.domain.FormatAction
+import app.notekea.notes.domain.LinkResolver
 import app.notekea.notes.domain.NoteEntry
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.presentation.editor.EditorIntent
@@ -19,6 +23,7 @@ import app.notekea.notes.presentation.switcher.QuickSwitcherContent
 import app.notekea.notes.presentation.switcher.QuickSwitcherEffect
 import app.notekea.notes.presentation.switcher.QuickSwitcherIntent
 import app.notekea.notes.presentation.switcher.QuickSwitcherMode
+import app.notekea.notes.presentation.switcher.QuickSwitcherPurpose
 import app.notekea.notes.presentation.switcher.QuickSwitcherViewModel
 import app.notekea.resources.Res
 import app.notekea.resources.tree_untitled_note
@@ -49,6 +54,48 @@ fun VaultTreeScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val switcherState by switcherViewModel.state.collectAsState()
+    WorkspaceFollowers(
+        state = state,
+        viewModel = viewModel,
+        editorViewModel = editorViewModel,
+        switcherViewModel = switcherViewModel
+    )
+    Box(modifier = modifier) {
+        Workspace(
+            state = state,
+            vaultName = vaultName,
+            viewModel = viewModel,
+            editorViewModel = editorViewModel,
+            onSwitchVault = onSwitchVault,
+            onSearch = {
+                switcherViewModel.onIntent(intent = QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES))
+            },
+            onRequestNoteLink = {
+                switcherViewModel.onIntent(
+                    intent = QuickSwitcherIntent.OnOpen(
+                        mode = QuickSwitcherMode.NOTES,
+                        purpose = QuickSwitcherPurpose.LINK
+                    )
+                )
+            },
+            onSearchTag = { tag ->
+                switcherViewModel.onIntent(
+                    intent = QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.CONTENT, query = TAG_MARK + tag)
+                )
+            }
+        )
+        QuickSwitcherContent(state = switcherState, onIntent = switcherViewModel::onIntent)
+    }
+}
+
+/** The window shortcuts of the workspace, and the view models following each other's effects. */
+@Composable
+private fun WorkspaceFollowers(
+    state: VaultTreeState,
+    viewModel: VaultTreeViewModel,
+    editorViewModel: EditorViewModel,
+    switcherViewModel: QuickSwitcherViewModel
+) {
     val untitledNote = stringResource(resource = Res.string.tree_untitled_note)
     WindowShortcut(shortcut = state.platformConventions.newNoteShortcut) {
         viewModel.onIntent(intent = VaultTreeIntent.OnNewNoteClick(baseName = untitledNote))
@@ -66,24 +113,6 @@ fun VaultTreeScreen(
         editorViewModel = editorViewModel,
         notes = state.tree.notes
     )
-    Box(modifier = modifier) {
-        Workspace(
-            state = state,
-            vaultName = vaultName,
-            viewModel = viewModel,
-            editorViewModel = editorViewModel,
-            onSwitchVault = onSwitchVault,
-            onSearch = {
-                switcherViewModel.onIntent(intent = QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES))
-            },
-            onSearchTag = { tag ->
-                switcherViewModel.onIntent(
-                    intent = QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.CONTENT, query = TAG_MARK + tag)
-                )
-            }
-        )
-        QuickSwitcherContent(state = switcherState, onIntent = switcherViewModel::onIntent)
-    }
 }
 
 /**
@@ -100,6 +129,7 @@ private fun FollowQuickSwitcher(
     LaunchedEffect(switcherViewModel, notes) {
         switcherViewModel.onIntent(intent = QuickSwitcherIntent.OnNotesChange(notes = notes.values))
     }
+    val currentNotes by rememberUpdatedState(newValue = notes)
     LaunchedEffect(switcherViewModel, viewModel, editorViewModel) {
         switcherViewModel.effects.collect { effect ->
             when (effect) {
@@ -108,11 +138,28 @@ private fun FollowQuickSwitcher(
                     editorViewModel.onIntent(intent = EditorIntent.OnFocusRequest(path = effect.path))
                 }
 
+                is QuickSwitcherEffect.LinkNote -> {
+                    val target = LinkResolver(notePaths = currentNotes.keys).wikiTarget(path = effect.path)
+                    editorViewModel.onIntent(
+                        intent = EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target))
+                    )
+                }
+
                 QuickSwitcherEffect.Dismissed -> editorViewModel.onIntent(intent = EditorIntent.OnFocusRequest())
             }
         }
     }
 }
+
+/** The frontmatter tags of the vault, the most used first, for the toolbar's Tag menu. */
+private fun tagsByUse(
+    notes: Collection<NoteEntry>
+): List<String> = notes.flatMap { it.metadata.tags }
+    .groupingBy { it }
+    .eachCount()
+    .entries
+    .sortedWith(compareByDescending<Map.Entry<String, Int>> { it.value }.thenBy { it.key.lowercase() })
+    .map { it.key }
 
 /** `Mod+P` opens the palette on note names, `Mod+Shift+F` on note content, whatever has focus. */
 @Composable
@@ -137,8 +184,10 @@ private fun Workspace(
     editorViewModel: EditorViewModel,
     onSwitchVault: () -> Unit,
     onSearch: () -> Unit,
+    onRequestNoteLink: () -> Unit,
     onSearchTag: (String) -> Unit
 ) {
+    val vaultTags = remember(state.tree.notes) { tagsByUse(notes = state.tree.notes.values) }
     VaultTreeContent(
         state = state,
         vaultName = vaultName,
@@ -162,7 +211,9 @@ private fun Workspace(
                     )
                 },
                 onSearchTag = onSearchTag,
-                properties = note.metadata
+                onRequestNoteLink = onRequestNoteLink,
+                properties = note.metadata,
+                vaultTags = vaultTags
             )
         }
     )

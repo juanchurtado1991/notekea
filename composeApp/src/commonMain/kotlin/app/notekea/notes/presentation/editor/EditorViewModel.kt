@@ -6,7 +6,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.TextRange
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
+import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.GetEditorModeUseCase
+import app.notekea.notes.domain.MarkdownFormatter
 import app.notekea.notes.domain.NoteDiskChange
 import app.notekea.notes.domain.NoteDocument
 import app.notekea.notes.domain.NotesError
@@ -50,6 +52,7 @@ class EditorViewModel(
     private val logger = Logger.withTag(tag = LOG_TAG)
     private val noteSearch = NoteSearch()
     private val taskFinder = TaskFinder()
+    private val markdownFormatter = MarkdownFormatter()
     private val saveLock = Mutex()
     private var autosaveJob: Job? = null
     private var watchJob: Job? = null
@@ -84,6 +87,8 @@ class EditorViewModel(
             is EditorIntent.OnFocusRequest -> requestFocus(path = intent.path)
             is EditorIntent.OnTaskToggle -> toggleTask(stateIndex = intent.stateIndex)
             EditorIntent.OnTaskToggleShortcut -> toggleTaskAtCursor()
+            is EditorIntent.OnFormat -> format(action = intent.action)
+            EditorIntent.OnNoteLinkRequest -> if (isEditable()) emit(effect = EditorEffect.RequestNoteLink)
             EditorIntent.OnFindClose -> closeFind()
             EditorIntent.OnFindNext -> moveToMatch(step = 1)
             EditorIntent.OnFindOpen -> openFind()
@@ -194,6 +199,31 @@ class EditorViewModel(
         val toggled = if (state == ' ') DONE_STATE else OPEN_STATE
         buffer.edit { replace(start = stateIndex, end = stateIndex + 1, text = toggled) }
     }
+
+    /**
+     * Applies a toolbar [action] to the selection as one edit (undone in one step, saved like typing), selects what it
+     * says, and gives the keyboard back to the text, which the toolbar button took.
+     */
+    private fun format(
+        action: FormatAction
+    ) {
+        if (!isEditable()) return
+        val selection = buffer.selection
+        val edit = markdownFormatter.format(
+            text = buffer.text.toString(),
+            selectionStart = selection.start,
+            selectionEnd = selection.end,
+            action = action
+        )
+        buffer.edit {
+            replace(start = edit.start, end = edit.end, text = edit.replacement)
+            this.selection = TextRange(start = edit.selectionStart, end = edit.selectionEnd)
+        }
+        emit(effect = EditorEffect.FocusText)
+    }
+
+    /** Whether the text can be changed now: a note is open and loaded, in Edit mode. */
+    private fun isEditable(): Boolean = state.value.let { it.notePath != null && !it.isLoading && !it.isReading }
 
     private fun toggleTaskAtCursor() {
         if (state.value.isReading || state.value.notePath == null) return

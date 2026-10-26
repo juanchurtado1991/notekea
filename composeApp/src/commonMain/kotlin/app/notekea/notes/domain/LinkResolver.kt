@@ -52,6 +52,15 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
         )
     }
 
+    /** How a new wiki link to [path] is written: its name when that is unique in the vault, else its path. */
+    fun wikiTarget(
+        path: RelativePath
+    ): String = if (isUniqueName(name = path.nameWithoutExtension)) {
+        path.nameWithoutExtension
+    } else {
+        withoutMarkdownExtension(target = path.value)
+    }
+
     /** Whether a bare `[[name]]` would point to exactly one note. */
     fun isUniqueName(
         name: String

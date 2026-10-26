@@ -37,8 +37,10 @@ import app.notekea.resources.switcher_no_match_content
 import app.notekea.resources.switcher_no_match_notes
 import app.notekea.resources.switcher_no_match_title
 import app.notekea.resources.switcher_placeholder_content
+import app.notekea.resources.switcher_placeholder_link
 import app.notekea.resources.switcher_placeholder_notes
 import app.notekea.resources.switcher_searching
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_HEIGHT_DP = 520
@@ -59,40 +61,60 @@ fun QuickSwitcherContent(
     modifier: Modifier = Modifier
 ) {
     if (!state.isOpen) return
-    val isNotes = state.mode == QuickSwitcherMode.NOTES
+    val isLinking = state.purpose == QuickSwitcherPurpose.LINK
+    val header: (@Composable () -> Unit)? = if (isLinking) {
+        null
+    } else {
+        { ModeTabs(mode = state.mode, isSearching = state.isSearching, onIntent = onIntent) }
+    }
     NotekeaPalette(
         query = state.query,
         onQueryChange = { onIntent(QuickSwitcherIntent.OnQueryChange(query = it)) },
-        placeholder = stringResource(
-            resource = if (isNotes) Res.string.switcher_placeholder_notes else Res.string.switcher_placeholder_content
-        ),
+        placeholder = stringResource(resource = placeholderOf(state = state)),
         onMove = { step ->
             onIntent(if (step > 0) QuickSwitcherIntent.OnSelectNext else QuickSwitcherIntent.OnSelectPrevious)
         },
         onConfirm = { onIntent(QuickSwitcherIntent.OnConfirm) },
         onDismiss = { onIntent(QuickSwitcherIntent.OnClose) },
         modifier = modifier,
-        onTab = { onIntent(QuickSwitcherIntent.OnModeSwitch) },
-        header = { ModeTabs(mode = state.mode, isSearching = state.isSearching, onIntent = onIntent) }
+        onTab = if (isLinking) null else ({ onIntent(QuickSwitcherIntent.OnModeSwitch) }),
+        header = header
     ) {
-        when {
-            state.hasUnexpectedError -> Text(
-                text = stringResource(resource = Res.string.switcher_error),
-                modifier = Modifier.padding(all = NotekeaDimensions.SpacingM),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error
-            )
+        SwitcherBody(state = state, onIntent = onIntent)
+    }
+}
 
-            state.rows.isNotEmpty() -> Results(
-                rows = state.rows,
-                selectedIndex = state.selectedIndex,
-                onIntent = onIntent
-            )
+/** What the search field invites to type: a note to link, a note name, or text inside notes. */
+private fun placeholderOf(
+    state: QuickSwitcherState
+): StringResource = when {
+    state.purpose == QuickSwitcherPurpose.LINK -> Res.string.switcher_placeholder_link
+    state.mode == QuickSwitcherMode.NOTES -> Res.string.switcher_placeholder_notes
+    else -> Res.string.switcher_placeholder_content
+}
 
-            state.isSearching -> Unit
+@Composable
+private fun SwitcherBody(
+    state: QuickSwitcherState,
+    onIntent: (QuickSwitcherIntent) -> Unit
+) {
+    when {
+        state.hasUnexpectedError -> Text(
+            text = stringResource(resource = Res.string.switcher_error),
+            modifier = Modifier.padding(all = NotekeaDimensions.SpacingM),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error
+        )
 
-            else -> NoResults(state = state)
-        }
+        state.rows.isNotEmpty() -> Results(
+            rows = state.rows,
+            selectedIndex = state.selectedIndex,
+            onIntent = onIntent
+        )
+
+        state.isSearching -> Unit
+
+        else -> NoResults(state = state)
     }
 }
 
