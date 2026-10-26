@@ -459,6 +459,52 @@ class EditorViewModelTest {
     }
 
     @Test
+    fun `a focus request for the open note gives its text the keyboard at once`() = runEditorTest {
+        val effects = collectEffects()
+        open(path = AREPAS)
+
+        viewModel.onIntent(intent = EditorIntent.OnFocusRequest())
+        runCurrent()
+
+        assertEquals(
+            expected = listOf<EditorEffect>(EditorEffect.FocusText),
+            actual = effects
+        )
+    }
+
+    @Test
+    fun `a focus request for a note chosen in the quick switcher waits until it has opened`() = runEditorTest {
+        val effects = collectEffects()
+        open(path = AREPAS)
+
+        viewModel.onIntent(intent = EditorIntent.OnFocusRequest(path = WELCOME))
+        runCurrent()
+        val beforeOpening = effects.toList()
+        open(path = WELCOME)
+
+        assertEquals(
+            expected = emptyList<EditorEffect>() to listOf<EditorEffect>(EditorEffect.FocusText),
+            actual = beforeOpening to effects
+        )
+    }
+
+    @Test
+    fun `a focus request is dropped when another note opens instead`() = runEditorTest {
+        val effects = collectEffects()
+        open(path = AREPAS)
+
+        viewModel.onIntent(intent = EditorIntent.OnFocusRequest(path = WELCOME))
+        runCurrent()
+        open(path = RelativePath(value = "Other.md"))
+        open(path = WELCOME)
+
+        assertEquals(
+            expected = emptyList<EditorEffect>(),
+            actual = effects
+        )
+    }
+
+    @Test
     fun `a tag clicked in read mode asks to search it`() = runEditorTest {
         val effects = collectEffects()
         open(path = AREPAS)

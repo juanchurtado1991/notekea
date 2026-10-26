@@ -50,8 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   bold and the most recently changed notes before you type. Mod+Shift+F (or Tab in the palette) searches the text of
   the notes, showing the matching line; a `#tag` finds notes tagged in their frontmatter or text, nested tags
   included, and clicking a `#tag` in Read mode searches it. Arrows, Enter and Esc work without leaving the field, and
-  the chosen note opens and is selected in the tree. Note texts stay in memory between searches, so only changed
-  notes are read again.
+  the chosen note opens and is selected in the tree, with the keyboard in its text (closing the palette gives the
+  keyboard back to the open note). Note texts stay in memory between searches, so only changed notes are read again.
 - Design system: `NotekeaPalette` and `NotekeaPaletteItem`.
 - Smoke data for 1.6: aliases for Arepas and a nested `#recipe/drinks` tag in the sample vault.
 - Editor (ROADMAP 1.5): selecting a note opens it beside the tree with its folder, an editable title that renames it

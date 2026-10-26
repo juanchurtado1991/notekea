@@ -13,6 +13,12 @@ sealed interface EditorIntent {
     /** A link to a note was clicked in Read mode. */
     data class OnLinkClick(val link: ReadLink.Note) : EditorIntent
 
+    /**
+     * Asks for the keyboard in the text of [path] (the note open now when null), as soon as it is open: after the
+     * quick switcher closes, typing goes on in the note that was open or the one just chosen.
+     */
+    data class OnFocusRequest(val path: RelativePath? = null) : EditorIntent
+
     /** A `#tag` clicked in Read mode: it is searched in all notes. */
     data class OnTagClick(val tag: String) : EditorIntent
 
