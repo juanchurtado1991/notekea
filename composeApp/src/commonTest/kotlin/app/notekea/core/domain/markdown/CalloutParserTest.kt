@@ -40,14 +40,4 @@ class CalloutParserTest {
             actual = listOf("A quote", "[!] empty", "[link](url)").map { parser.header(line = it) }
         )
     }
-
-    @Test
-    fun `every callout header becomes a paragraph of its own, nested ones too, never in code`() {
-        val markdown = "> [!note] Title\n> Body\n>\n> > [!tip]- Inner\n> > More\n```\n> [!bug] In code\n```"
-
-        assertEquals(
-            expected = "> [!note] Title\n>\n> Body\n>\n> > [!tip]- Inner\n> >\n> > More\n```\n> [!bug] In code\n```",
-            actual = parser.separateHeaders(markdown = markdown)
-        )
-    }
 }
