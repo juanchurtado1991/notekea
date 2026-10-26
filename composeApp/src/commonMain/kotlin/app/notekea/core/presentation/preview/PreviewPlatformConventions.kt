@@ -30,6 +30,13 @@ object PreviewPlatformConventions {
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
         toggleTaskShortcut = Shortcut(key = ShortcutKey.ENTER, modifiers = setOf(ShortcutModifier.CONTROL)),
+        boldShortcut = Shortcut(key = ShortcutKey.B, modifiers = setOf(ShortcutModifier.CONTROL)),
+        italicShortcut = Shortcut(key = ShortcutKey.I, modifiers = setOf(ShortcutModifier.CONTROL)),
+        noteLinkShortcut = Shortcut(key = ShortcutKey.K, modifiers = setOf(ShortcutModifier.CONTROL)),
+        webLinkShortcut = Shortcut(
+            key = ShortcutKey.K,
+            modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
+        ),
         dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
         appDataDirectory = APP_DATA,
         homeDirectory = HOME
