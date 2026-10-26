@@ -2,6 +2,7 @@ package app.notekea.notes.presentation.editor
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Typography
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -9,7 +10,7 @@ import androidx.compose.ui.text.font.FontWeight
 
 /**
  * How the editor shows each [HighlightKind], from the theme: headings on the type scale (28 / 20 / 16 sp, semibold),
- * code in the bundled monospaced face on a subtle background, links and wiki links in the primary color, tags in the
+ * code in the bundled monospaced face on a subtle background (behind a code block's whole lines), links and wiki links in the primary color, tags in the
  * accent color, and Markdown syntax muted so the text reads first. Find in note marks every match with a light accent
  * background and the current one with a stronger one.
  */
@@ -48,7 +49,8 @@ class MarkdownStyles(
             return MarkdownStyles(
                 byKind = mapOf(
                     HighlightKind.BOLD to SpanStyle(fontWeight = FontWeight.Bold),
-                    HighlightKind.CODE_BLOCK to code,
+                    // A code block's background is drawn behind its whole lines, as a block, by the editor.
+                    HighlightKind.CODE_BLOCK to code.copy(background = Color.Unspecified),
                     HighlightKind.CODE_INLINE to code,
                     HighlightKind.HEADING_1 to headings[0],
                     HighlightKind.HEADING_2 to headings[1],

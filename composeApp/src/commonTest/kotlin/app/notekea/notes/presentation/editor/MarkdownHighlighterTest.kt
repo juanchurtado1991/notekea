@@ -80,6 +80,24 @@ class MarkdownHighlighterTest {
     }
 
     @Test
+    fun `spaces ending a code line keep the text's font, so the cursor moves past them`() {
+        assertEquals(
+            expected = listOf("```" to HighlightKind.CODE_BLOCK, "val" to HighlightKind.CODE_BLOCK),
+            actual = shown(text = "```\nval \n").filter { it.second == HighlightKind.CODE_BLOCK }
+        )
+    }
+
+    @Test
+    fun `code blocks span from fence to fence, an unclosed one to the end`() {
+        val text = "Intro\n```\nval a\n\n```\nText\n~~~\nopen"
+
+        assertEquals(
+            expected = listOf("```\nval a\n\n```", "~~~\nopen"),
+            actual = highlighter.codeBlocks(text = text).map { text.substring(range = it) }
+        )
+    }
+
+    @Test
     fun `quote, list and task markers are muted`() {
         assertEquals(
             expected = listOf(

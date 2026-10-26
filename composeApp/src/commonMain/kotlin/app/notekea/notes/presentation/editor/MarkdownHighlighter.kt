@@ -18,14 +18,16 @@ class MarkdownHighlighter {
             val lineEnd = if (newline < 0) text.length else newline
             val line = text.substring(startIndex = lineStart, endIndex = lineEnd)
             val opening = FENCE.find(input = line)?.groupValues?.get(index = 1)
+            // Spaces ending a code line keep the text's font: with another font, the cursor does not move past them.
+            val codeEnd = lineStart + line.trimEnd().length
             when {
                 fence != null -> {
-                    spans += HighlightSpan(kind = HighlightKind.CODE_BLOCK, start = lineStart, end = lineEnd)
+                    spans += HighlightSpan(kind = HighlightKind.CODE_BLOCK, start = lineStart, end = codeEnd)
                     if (closesFence(line = line, fence = fence)) fence = null
                 }
 
                 opening != null -> {
-                    spans += HighlightSpan(kind = HighlightKind.CODE_BLOCK, start = lineStart, end = lineEnd)
+                    spans += HighlightSpan(kind = HighlightKind.CODE_BLOCK, start = lineStart, end = codeEnd)
                     fence = opening
                 }
 
@@ -35,6 +37,34 @@ class MarkdownHighlighter {
             lineStart = newline + 1
         }
         return spans.filter { it.end > it.start }
+    }
+
+    /** The fenced code blocks of [text], each from its opening fence to its closing one (or the end of the text). */
+    fun codeBlocks(
+        text: CharSequence
+    ): List<IntRange> {
+        val blocks = mutableListOf<IntRange>()
+        var fence: String? = null
+        var blockStart = 0
+        var lineStart = 0
+        while (lineStart <= text.length) {
+            val newline = text.indexOf(char = '\n', startIndex = lineStart)
+            val lineEnd = if (newline < 0) text.length else newline
+            val line = text.substring(startIndex = lineStart, endIndex = lineEnd)
+            val opening = FENCE.find(input = line)?.groupValues?.get(index = 1)
+            val open = fence
+            if (open != null && closesFence(line = line, fence = open)) {
+                blocks += blockStart until lineEnd
+                fence = null
+            } else if (open == null && opening != null) {
+                fence = opening
+                blockStart = lineStart
+            }
+            if (newline < 0) break
+            lineStart = newline + 1
+        }
+        if (fence != null) blocks += blockStart until text.length
+        return blocks
     }
 
     private fun closesFence(

@@ -25,9 +25,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -44,7 +44,7 @@ private const val TOOLTIP_SEPARATOR = "  "
 
 /**
  * Tabs as wide as their labels, for a toolbar (the editor's Edit | Preview, like GitHub's): the [selectedIndex] one in
- * the primary color with a line under it. The tooltip of each tab shows [shortcutHint] when there is one, so the
+ * the primary color with a square-cornered line under it. The tooltip of each tab shows [shortcutHint] when there is one, so the
  * shortcut that switches them is learned from the tabs themselves. With [takesFocus] false a click leaves the keyboard
  * where it was, so a shortcut and a click never leave the focus ring on a tab that is no longer selected.
  */
@@ -92,8 +92,8 @@ private fun CompactTab(
         Column(
             modifier = Modifier
                 .focusProperties { canFocus = takesFocus }
-                .focusBorder(color = colors.primary, shape = MaterialTheme.shapes.small)
-                .clip(shape = MaterialTheme.shapes.small)
+                // Square corners, so the line under the selected tab meets the toolbar's line edge to edge.
+                .focusBorder(color = colors.primary, shape = RectangleShape)
                 .semantics { selected = isSelected }
                 .clickable(role = Role.Tab, onClick = onClick)
                 .width(intrinsicSize = IntrinsicSize.Max)
