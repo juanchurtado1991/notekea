@@ -65,7 +65,8 @@ internal fun VaultSidebar(
     state: VaultTreeState,
     vaultName: String,
     onIntent: (VaultTreeIntent) -> Unit,
-    onSwitchVault: () -> Unit
+    onSwitchVault: () -> Unit,
+    onSearch: () -> Unit
 ) {
     val untitledNote = stringResource(resource = Res.string.tree_untitled_note)
     val untitledFolder = stringResource(resource = Res.string.tree_untitled_folder)
@@ -79,7 +80,8 @@ internal fun VaultSidebar(
                 onNewNote = { onIntent(VaultTreeIntent.OnNewNoteClick(baseName = untitledNote)) },
                 onNewFolder = { onIntent(VaultTreeIntent.OnNewFolderClick(baseName = untitledFolder)) },
                 onSortChange = { onIntent(VaultTreeIntent.OnSortChange(sort = it)) },
-                onHideSidebar = { onIntent(VaultTreeIntent.OnSidebarToggle) }
+                onHideSidebar = { onIntent(VaultTreeIntent.OnSidebarToggle) },
+                onSearch = onSearch
             )
             SidebarMessages(state = state, onIntent = onIntent)
             Box(modifier = Modifier.weight(weight = 1f).fillMaxWidth().padding(top = NotekeaDimensions.SpacingS)) {
@@ -227,7 +229,13 @@ private fun SidebarPreviewFrame(
 ) {
     NotekeaPreviewThemes {
         Box(modifier = Modifier.width(width = state.sidebarWidthDp.dp).height(height = PREVIEW_HEIGHT_DP.dp)) {
-            VaultSidebar(state = state, vaultName = TreePreviewData.VAULT_NAME, onIntent = {}, onSwitchVault = {})
+            VaultSidebar(
+                state = state,
+                vaultName = TreePreviewData.VAULT_NAME,
+                onIntent = {},
+                onSwitchVault = {},
+                onSearch = {}
+            )
         }
     }
 }

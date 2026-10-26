@@ -220,6 +220,9 @@ to hybrid search in M2). A `#tag` in the search finds notes tagged in their fron
 and clicking a `#tag` in Read mode searches that tag. Note texts stay in memory between searches, so only notes that
 changed are read again.
 
+**UI — Sidebar:** a "Search notes" button drawn like a search field under the vault name, with the `Mod+P` shortcut
+shown on it, opens the palette, so search is in sight without knowing the shortcut.
+
 **UI — Palette:** centered overlay 560 dp wide over a dimmed window, with Notes / Content tabs (`Tab` switches,
 keeping the text), the input, and up to 10 results with title, folder and a matching line (the alias or path that
 matched, or the line of content), matches in bold. Before typing it lists the most recently changed notes. Arrows
@@ -229,7 +232,7 @@ previous results stay with a small indicator. Empty states: "No notes match", a 
 and an empty vault.
 - **Done when:** a note is found by name, alias, path or content with the keyboard alone, a clicked tag lists its
   notes, and typing stays fluid on a 5,000-note vault.
-- Smoke test: cases 1.6-01 to 1.6-11; 1.4-01 and 1.5-01 revised for the aliases added to the sample vault.
+- Smoke test: cases 1.6-01 to 1.6-12; 1.4-01 and 1.5-01 revised for the aliases added to the sample vault.
 
 ### ⬜ 1.7 Tasks and callouts — `feature/markdown-extensions`
 
