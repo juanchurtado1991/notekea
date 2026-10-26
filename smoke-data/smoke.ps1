@@ -111,6 +111,8 @@ switch ($Command) {
         # vault to pick, drop or locate.
         Copy-Item (Join-Path $SmokeRoot "notes\Images and files.md") $Editor
         Copy-Item (Join-Path $SmokeRoot "notes\Shopping basics.md") $Editor
+        # Outline (1.9): a long note with headings of every level, and lines that only look like headings.
+        Copy-Item (Join-Path $SmokeRoot "notes\Outline practice.md") $Editor
         Copy-Item (Join-Path $SmokeRoot "attachments\*") (Join-Path $Playground "attachments")
         $Outside = Join-Path $Scratch "Outside files"
         New-Item -ItemType Directory -Force $Outside | Out-Null

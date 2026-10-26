@@ -283,6 +283,21 @@ Obsidian-flavored Markdown blocks that most vaults use.
 to that heading; the heading under the cursor is highlighted while scrolling. Empty state: "This note has no
 headings". Shortcut: `Mod+Shift+O` focuses the outline.
 
+- **Headings:** lines starting with one to six `#` and a space, as the editor highlights them, outside code blocks;
+  shown as they read (no `#`, emphasis or link brackets). A heading is indented one step under the nearest heading of
+  a lower level above it, as in Obsidian.
+- **Going to a heading:** a click, or Enter in the outline, scrolls the heading to the top of the editor's view in
+  Edit and Preview; in Edit mode the cursor goes to the end of its line and the text takes the keyboard.
+- **Current heading:** the last heading at or above the top of the view (the first one while it is in view below
+  it) is highlighted, and the outline keeps it in view; a heading just chosen stays highlighted even when the note
+  ends too soon to bring it to the top.
+- **Keyboard:** `Mod+Shift+O` shows the panel if hidden and focuses the outline at the current heading; arrows,
+  Home and End move, Enter goes, Esc returns to the note.
+- **The panel:** 340 dp by default (280–560, resized by dragging its edge), shown or hidden with `Mod+Shift+\`, the
+  toolbar's Outline button or its own hide button; width and visibility are remembered for every vault. It never
+  leaves the editor narrower than 480 dp; when not even its narrowest width fits, it floats over the note instead and
+  closes after a heading is chosen or with Esc.
+
 ### ⬜ 1.10 Daily notes — `feature/daily-notes`
 
 - "Today" in the sidebar and `Mod+D` open today's note, creating it if needed.
