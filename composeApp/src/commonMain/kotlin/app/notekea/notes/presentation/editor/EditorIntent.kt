@@ -13,6 +13,9 @@ sealed interface EditorIntent {
     /** A link to a note was clicked in Read mode. */
     data class OnLinkClick(val link: ReadLink.Note) : EditorIntent
 
+    /** A `#tag` clicked in Read mode: it is searched in all notes. */
+    data class OnTagClick(val tag: String) : EditorIntent
+
     /** Esc in the find bar: close it, leaving the current match selected in the text. */
     data object OnFindClose : EditorIntent
 

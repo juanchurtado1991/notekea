@@ -305,6 +305,19 @@ class VaultTreeViewModelTest {
     }
 
     @Test
+    fun `a note chosen in the quick switcher is selected with the folders above it open`() = runTreeTest {
+        val viewModel = startedViewModel()
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnRevealNote(path = path(ROADMAP)))
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = path(ROADMAP) to setOf(path(PROJECTS)),
+            actual = viewModel.state.value.selectedPath to viewModel.state.value.expandedFolders
+        )
+    }
+
+    @Test
     fun `a wiki link to a missing note creates it at the root and selects it`() = runTreeTest {
         val viewModel = startedViewModel()
 

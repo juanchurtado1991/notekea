@@ -40,6 +40,7 @@ fun EditorScreen(
     onRenamed: (EditorEffect.Renamed) -> Unit,
     onClosed: () -> Unit,
     onOpenLink: (EditorEffect.OpenLink) -> Unit,
+    onSearchTag: (String) -> Unit,
     modifier: Modifier = Modifier,
     properties: NoteMetadata? = null
 ) {
@@ -48,6 +49,7 @@ fun EditorScreen(
     val currentOnRenamed by rememberUpdatedState(newValue = onRenamed)
     val currentOnClosed by rememberUpdatedState(newValue = onClosed)
     val currentOnOpenLink by rememberUpdatedState(newValue = onOpenLink)
+    val currentOnSearchTag by rememberUpdatedState(newValue = onSearchTag)
     LaunchedEffect(notePath) { viewModel.onIntent(intent = EditorIntent.OnOpen(path = notePath)) }
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -56,6 +58,7 @@ fun EditorScreen(
                 EditorEffect.Flushed -> flushed.trySend(element = Unit)
                 is EditorEffect.OpenLink -> currentOnOpenLink(effect)
                 is EditorEffect.Renamed -> currentOnRenamed(effect)
+                is EditorEffect.SearchTag -> currentOnSearchTag(effect.tag)
             }
         }
     }

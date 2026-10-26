@@ -4,10 +4,11 @@ import app.notekea.notes.domain.LinkKind
 import app.notekea.notes.domain.percentDecoded
 
 /**
- * Links in Read mode. The renderer knows Markdown links but not Obsidian's `[[wiki links]]`, so [prepare] rewrites
- * each one (outside code) as a Markdown link to `notekea:<target>`, shown with its alias or as written; an embed
- * (`![[…]]`) becomes a plain link until images render (`ROADMAP.md` 1.8). [classify] turns a clicked link back into a
- * note to open or an external address.
+ * Links in Read mode. The renderer knows Markdown links but not Obsidian's `[[wiki links]]` or `#tags`, so [prepare]
+ * rewrites each wiki link (outside code) as a Markdown link to `notekea:<target>`, shown with its alias or as written,
+ * and each `#tag` (outside code, links and web addresses) as a link to `notekea-tag:<tag>` that searches it
+ * (`ROADMAP.md` 1.6); an embed (`![[…]]`) becomes a plain link until images render (`ROADMAP.md` 1.8). [classify]
+ * turns a clicked link back into a note to open, a tag to search or an external address.
  */
 class ReadModeLinks {
     fun prepare(
@@ -34,6 +35,10 @@ class ReadModeLinks {
     fun classify(
         uri: String
     ): ReadLink? = when {
+        uri.startsWith(
+            prefix = TAG_SCHEME
+        ) -> ReadLink.Tag(name = percentDecoded(target = uri.removePrefix(prefix = TAG_SCHEME)))
+
         uri.startsWith(prefix = SCHEME) -> ReadLink.Note(
             target = percentDecoded(target = uri.removePrefix(prefix = SCHEME)),
             kind = LinkKind.WIKI
@@ -46,14 +51,34 @@ class ReadModeLinks {
         else -> ReadLink.Note(target = uri.substringBefore(delimiter = '#'), kind = LinkKind.MARKDOWN_ENCODED)
     }
 
-    /** Rewrites the wiki links of one line that are not inside inline code. */
+    /** Rewrites the tags and wiki links of one line that are not inside inline code. */
     private fun linkLine(
         line: String
     ): String {
-        val code = INLINE_CODE.findAll(input = line).map { it.range }.toList()
-        return WIKI_LINK.replace(input = line) { match ->
+        val withTags = tagLine(line = line)
+        val code = INLINE_CODE.findAll(input = withTags).map { it.range }.toList()
+        return WIKI_LINK.replace(input = withTags) { match ->
             val inCode = code.any { it.first <= match.range.first && match.range.last <= it.last }
             if (inCode) match.value else markdownLink(inner = match.groupValues[1]) ?: match.value
+        }
+    }
+
+    /** Rewrites each `#tag` of one line as a link, leaving alone those inside code, links and web addresses. */
+    private fun tagLine(
+        line: String
+    ): String {
+        val protected = listOf(INLINE_CODE, WIKI_LINK, MARKDOWN_LINK, AUTOLINK, WEB_ADDRESS).flatMap { pattern ->
+            pattern.findAll(input = line).map { it.range }
+        }
+        return TAG.replace(input = line) { match ->
+            val isProtected = protected.any { it.first <= match.range.first && match.range.last <= it.last }
+            if (isProtected) {
+                match.value
+            } else {
+                "[" + match.value + "](" + TAG_SCHEME +
+                    encoded(text = match.groupValues[1]) +
+                    ")"
+            }
         }
     }
 
@@ -84,6 +109,9 @@ class ReadModeLinks {
     companion object {
         /** The address scheme of a link to a note, as rewritten by [prepare]. */
         const val SCHEME = "notekea:"
+
+        /** The address scheme of a link to search a tag, as rewritten by [prepare]. */
+        const val TAG_SCHEME = "notekea-tag:"
         private const val BYTE_MASK = 0xFF
         private const val HEX_RADIX = 16
         private const val UNRESERVED = "-._~/"
@@ -91,5 +119,11 @@ class ReadModeLinks {
         private val INLINE_CODE = Regex(pattern = "(`+).+?\\1")
         private val OTHER_SCHEME = Regex(pattern = "^[a-zA-Z][a-zA-Z0-9+.-]+:")
         private val WIKI_LINK = Regex(pattern = "!?\\[\\[([^\\]\\n]+)]]")
+        private val MARKDOWN_LINK = Regex(pattern = "!?\\[[^\\]\\n]*]\\([^)\\n]*\\)")
+        private val AUTOLINK = Regex(pattern = "<[^>\\s]+>")
+        private val WEB_ADDRESS = Regex(pattern = "[a-zA-Z][a-zA-Z0-9+.-]*://\\S+")
+
+        /** A tag as Obsidian reads it: `#` not after a letter, `#`, `/` or `&`, and not only digits. */
+        private val TAG = Regex(pattern = "(?<![\\w#/&])#([\\p{L}\\p{N}_/-]*[\\p{L}_/-][\\p{L}\\p{N}_/-]*)")
     }
 }
