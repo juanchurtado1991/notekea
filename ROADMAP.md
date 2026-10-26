@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 8 / 17 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 9 / 17 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -250,7 +250,7 @@ Obsidian-flavored Markdown blocks that most vaults use.
 - **Done when:** every callout type and nesting level in the sample vault renders correctly in Read mode.
 - Smoke test: cases 1.7-01 to 1.7-06; 1.5-08 revised for the checkboxes in Edit mode.
 
-### 🚧 1.8 Images and attachments — `feature/attachments`
+### ✅ 1.8 Images and attachments — `feature/attachments` — [notekea#56](https://github.com/juanchurtado1991/notekea/pull/56)
 
 - Render images (`![[image.png]]`, `![alt](path.png)`), scaled to the editor width; `![[image.png|300]]` sets the
   width. In Preview they take their place; in Edit the link stays as written and the image shows under its line, so
