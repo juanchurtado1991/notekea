@@ -29,9 +29,30 @@ class ReadModeLinksTest {
     }
 
     @Test
+    fun `tags become links that search them, nested and accented tags too`() {
+        assertEquals(
+            expected = "Dinner [#recipe](notekea-tag:recipe) and [#café/morning](notekea-tag:caf%C3%A9/morning).",
+            actual = links.prepare(body = "Dinner #recipe and #café/morning.")
+        )
+    }
+
+    @Test
+    fun `tags inside code, links and web addresses, headings and numbers stay as they are`() {
+        val body = "`#code` [#label](https://a.com) [[Note#Part]] <https://a.com/#x> https://a.com/#y\n" +
+            "# Heading\n#2026 and issue#5\n```\n#fenced\n```"
+
+        assertEquals(
+            expected = "`#code` [#label](https://a.com) [Note#Part](notekea:Note) <https://a.com/#x> " +
+                "https://a.com/#y\n# Heading\n#2026 and issue#5\n```\n#fenced\n```",
+            actual = links.prepare(body = body)
+        )
+    }
+
+    @Test
     fun `a clicked link is a note, a note path or an external address`() {
         assertEquals(
             expected = listOf(
+                ReadLink.Tag(name = "café/morning"),
                 ReadLink.Note(target = "Café con leche", kind = LinkKind.WIKI),
                 ReadLink.Note(target = "Recipes/Arepas%20reina.md", kind = LinkKind.MARKDOWN_ENCODED),
                 ReadLink.External(uri = "https://example.com/a#b"),
@@ -39,6 +60,7 @@ class ReadModeLinksTest {
                 null
             ),
             actual = listOf(
+                "notekea-tag:caf%C3%A9/morning",
                 "notekea:Caf%C3%A9%20con%20leche",
                 "Recipes/Arepas%20reina.md#Dough",
                 "https://example.com/a#b",

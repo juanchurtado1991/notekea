@@ -77,6 +77,7 @@ class VaultTreeViewModel(
             is VaultTreeIntent.OnRenameRequest -> startRename(path = intent.path)
             is VaultTreeIntent.OnRenameTextChange -> changeRenameText(text = intent.text)
             VaultTreeIntent.OnRetryClick -> retry()
+            is VaultTreeIntent.OnRevealNote -> updateTree { reduceReveal(state = it, path = intent.path) }
             is VaultTreeIntent.OnRevealRequest -> reveal(path = intent.path)
             is VaultTreeIntent.OnRowClick -> updateTree { reduceRowClick(state = it, path = intent.path) }
             is VaultTreeIntent.OnRowSelect -> reduce { it.copy(selectedPath = intent.path) }
