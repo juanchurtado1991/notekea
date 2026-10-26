@@ -211,6 +211,24 @@ Ctrl+Shift+O, Mod+Shift+\ is ⇧⌘\ or Ctrl+Shift+\.
 
 Revised by 2.4: 1.9-01 and 1.9-06 name the Outline tab alone; the Related (2.4), Backlinks (2.5) and Chat tabs join it.
 
+### 1.10 Daily notes
+
+Run `smoke.sh prepare` (`smoke.ps1 prepare` on Windows). `smoke-data/scratch/Playground Vault` has no Obsidian
+settings for daily notes, so they go to `Journal` as `YYYY-MM-DD` (it already holds 2026-10-20, -21 and -22);
+`smoke-data/scratch/Daily Vault` has Obsidian's `.obsidian/daily-notes.json` (folder `Diary`, names like
+`2026/October/Tuesday, October 27th 2026`, template `Templates/Daily`) and two earlier days. "Today" means the date on
+your computer's clock. Run the cases in order. "Mod" is Cmd on macOS and Ctrl on Windows and Linux: Mod+D is ⌘D or
+Ctrl+D, Mod+Alt+← is ⌥⌘← or Ctrl+Alt+←.
+
+| ID | Steps | Expected | Testable from | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|
+| 1.10-01 | Open the Playground Vault, hover "Today" under Search notes and click it; click Welcome, then "Today" again | "Today" shows Mod+D beside it; the first click creates today's note in Journal (named like `2026-10-27`), opens Journal in the tree, selects the note and opens it empty in the editor; Journal's number grows by one; the second click opens the same note, no second one is made | 1.10 | `VaultTreeViewModelTest`, `OpenDailyNoteUseCaseTest`, `DailyNoteScreenTest` | | | |
+| 1.10-02 | Click in Welcome's text and type a word; press Mod+D | Today's note opens at once, whatever had the keyboard; the word stays saved in Welcome | 1.10 | `VaultTreeViewModelTest` | | | |
+| 1.10-03 | Open Journal/2026-10-21; click the left arrow beside the title, then the right arrow twice; press Mod+Alt+← and Mod+Alt+→; open Welcome and press Mod+Alt+← | A daily note shows ‹ and › beside its title, with "Previous daily note" and "Next daily note" and their shortcuts as tooltips; ‹ opens 2026-10-20, where ‹ is greyed out; › twice reaches 2026-10-22 (the 21st, then the 22nd), and from the 22nd › opens today's note, where › is greyed out; the shortcuts step the same way and the tree follows; Welcome shows no arrows and the shortcut does nothing. If your desktop uses Ctrl+Alt+arrows to switch workspaces or rotate the screen, write it in the results | 1.10 | `SmokeDailyNotesTest` 1_10-03, `DailyNotesTest`, `VaultTreeViewModelTest`, `DailyNoteScreenTest` | | | |
+| 1.10-04 | Open `smoke-data/scratch/Daily Vault` and press Mod+D | Today's note is created in Diary, in a folder for the year and one for the month (`Diary/2026/October/Tuesday, October 27th 2026` for the 27th), made if missing; its text is the template filled in: the note's name as its heading, "Created at" the time it was made (`HH:mm`), "Plan for" today's weekday, and an empty task | 1.10 | `SmokeDailyNotesTest` 1_10-04, `DailyNotesOnDiskTest`, `DailyNoteTemplateTest` | | | |
+| 1.10-05 | In the Daily Vault, press Mod+Alt+← from today's note until the arrow is greyed out; open Diary/Ideas | The days go back to Thursday, October 22nd 2026, then Monday, October 19th 2026, skipping the days without a note; Ideas is not a daily note: no arrows | 1.10 | `SmokeDailyNotesTest` 1_10-04, `DailyNotesTest` | | | |
+| 1.10-06 | Open the Daily Vault in Obsidian and run "Open today's daily note" (Daily notes core plugin on) | Obsidian opens the note Notekea created, with the same name and folder, instead of making another | 1.10 | manual | | | |
+
 ### 1.17 Formatting toolbar
 
 Run `smoke.sh prepare` (`smoke.ps1 prepare` on Windows) and open `smoke-data/scratch/Playground Vault`: its

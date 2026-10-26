@@ -305,6 +305,17 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
   optional template (see 1.12).
 - Previous / next day navigation in the note header (`Mod+Alt+←` / `Mod+Alt+→`).
 - **Done when:** the date format, folder and template are honored and covered by tests, including timezones.
+- **Today:** a row under Search notes, with its shortcut beside it. It selects today's note in the tree (opening
+  its folders) and creates it first when it is missing, folders included; "today" is the date of the computer's time
+  zone at that moment. An existing note opens as it is.
+- **Obsidian's settings:** `folder`, `format` (Moment.js, English names, `/` makes subfolders, as in
+  `YYYY/MMMM/dddd, MMMM Do YYYY`) and `template` of `.obsidian/daily-notes.json`, read again at every Today; blank
+  fields mean the vault root, `YYYY-MM-DD` and no template, as in Obsidian. The template fills `{{date}}`,
+  `{{time}}`, `{{title}}` and `{{date:FORMAT}}` / `{{time:FORMAT}}`; a template that cannot be read leaves the note
+  empty. Templates in general come with 1.12.
+- **Previous / next:** a note whose path is the folder plus a name in the format is a daily note; its header shows
+  ‹ and › to the closest daily notes before and after it that exist (days without a note are skipped, nothing is
+  created), greyed out when there is none on that side.
 
 ### ⬜ 1.11 Tabs and split panes — `feature/editor-tabs`
 

@@ -52,6 +52,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Daily notes (ROADMAP 1.10): "Today" in the sidebar and Mod+D open today's note, creating it if needed, in the folder,
+  name format and template of Obsidian's Daily notes settings (`.obsidian/daily-notes.json`), or in `Journal/` as
+  `YYYY-MM-DD` without them. Today is the date in the computer's time zone. A daily note's header has arrows
+  (Mod+Alt+← / Mod+Alt+→) to the daily notes before and after it.
 - Outline (ROADMAP 1.9): a side panel on the right of the editor lists the note's headings as an indented tree. A
   click (or Enter) goes to the heading, in Edit mode with the cursor on it, and the heading the view is in is
   highlighted while scrolling, in Edit and Preview. A note without headings says how to add one. Mod+Shift+O moves
