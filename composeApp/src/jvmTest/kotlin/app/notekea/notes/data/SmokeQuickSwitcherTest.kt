@@ -5,6 +5,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.notes.domain.FakeFileWatcher
 import app.notekea.notes.domain.FakeNoteMetadataCache
 import app.notekea.notes.domain.FuzzyMatcher
+import app.notekea.notes.domain.MarkdownLineStripper
 import app.notekea.notes.domain.NaturalNameComparator
 import app.notekea.notes.domain.NoteEntry
 import app.notekea.notes.domain.NoteMatchField
@@ -42,6 +43,7 @@ class SmokeQuickSwitcherTest {
         ),
         textFolder = folder,
         naturalNameComparator = naturalNames,
+        markdownLineStripper = MarkdownLineStripper(),
         dispatchers = dispatchers
     )
 
@@ -81,7 +83,7 @@ class SmokeQuickSwitcherTest {
     }
 
     @Test
-    fun `1_6-04 content search finds the word inside longer words too, most matches first`() = runTest(
+    fun `1_6-04 content search finds the word inside longer words, most matches first, lines as plain text`() = runTest(
         context = testDispatcher
     ) {
         val results = searchContent(VAULT, loadNotes(), "tomato")
@@ -91,11 +93,11 @@ class SmokeQuickSwitcherTest {
                 Triple(
                     JOURNAL_20,
                     2,
-                    "Planted the last tomato seedlings; notes in [[Tomato plan]]. Cooked " +
-                        "[[Arepas]] for dinner, the cheese ones were best."
+                    "Planted the last tomato seedlings; notes in Tomato plan. Cooked " +
+                        "Arepas for dinner, the cheese ones were best."
                 ),
-                Triple(PASTA, 1, "- Add tomatoes, cooked borlotti beans and stock; simmer 20 minutes."),
-                Triple(TOMATO_PLAN, 1, "# Tomato plan")
+                Triple(PASTA, 1, "Add tomatoes, cooked borlotti beans and stock; simmer 20 minutes."),
+                Triple(TOMATO_PLAN, 1, "Tomato plan")
             ),
             actual = results.map { Triple(it.note.file.path.value, it.matchCount, it.snippet) }
         )

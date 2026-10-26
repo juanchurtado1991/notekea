@@ -225,11 +225,11 @@ shown on it, opens the palette, so search is in sight without knowing the shortc
 
 **UI — Palette:** centered overlay 560 dp wide over a dimmed window, with Notes / Content tabs (`Tab` switches,
 keeping the text), the input, and up to 10 results with title, folder and a matching line (the alias or path that
-matched, or the line of content), matches in bold. Before typing it lists the most recently changed notes. Arrows
-move the selection (wrapping around), `Enter` opens the note and selects it in the tree with the keyboard in its
-text, `Esc` or a click outside closes and gives the keyboard back to the open note. While content search runs the
-previous results stay with a small indicator. Empty states: "No notes match", a hint for an empty content search,
-and an empty vault.
+matched, or the line of content as plain text, without Markdown marks), matches in bold. Before typing it lists the
+most recently changed notes. Arrows move the selection (wrapping around), `Enter` opens the note and selects it in the
+tree with the keyboard in its text, `Esc` or a click outside closes and gives the keyboard back to the open note.
+While content search runs the previous results stay with a small indicator. Empty states: "No notes match", a hint for
+an empty content search, and an empty vault.
 - **Done when:** a note is found by name, alias, path or content with the keyboard alone, a clicked tag lists its
   notes, and typing stays fluid on a 5,000-note vault.
 - Smoke test: cases 1.6-01 to 1.6-12; 1.4-01 and 1.5-01 revised for the aliases added to the sample vault.

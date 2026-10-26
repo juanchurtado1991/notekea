@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.notes.domain.FakeNoteContentStore
 import app.notekea.notes.domain.FuzzyMatcher
+import app.notekea.notes.domain.MarkdownLineStripper
 import app.notekea.notes.domain.NaturalNameComparator
 import app.notekea.notes.domain.NoteEntry
 import app.notekea.notes.domain.NoteFixtures.VAULT
@@ -55,6 +56,7 @@ class QuickSwitcherViewModelTest {
                 noteTextCache = NoteTextCache(contentStore = store, textFolder = folder),
                 textFolder = folder,
                 naturalNameComparator = naturalNames,
+                markdownLineStripper = MarkdownLineStripper(),
                 dispatchers = dispatchers
             ),
             dispatchers = dispatchers

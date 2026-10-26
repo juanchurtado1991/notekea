@@ -4,6 +4,7 @@ import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.notes.domain.FakeFileWatcher
 import app.notekea.notes.domain.FakeNoteMetadataCache
+import app.notekea.notes.domain.MarkdownLineStripper
 import app.notekea.notes.domain.NaturalNameComparator
 import app.notekea.notes.domain.NoteContentStore
 import app.notekea.notes.domain.NoteTextCache
@@ -42,6 +43,7 @@ class ContentSearchOnDiskTest {
         noteTextCache = NoteTextCache(contentStore = store, textFolder = folder),
         textFolder = folder,
         naturalNameComparator = NaturalNameComparator(),
+        markdownLineStripper = MarkdownLineStripper(),
         dispatchers = dispatchers
     )
 

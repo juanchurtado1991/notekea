@@ -136,6 +136,7 @@ class SearchNoteContentUseCaseTest {
             noteTextCache = NoteTextCache(contentStore = store, textFolder = folder),
             textFolder = folder,
             naturalNameComparator = NaturalNameComparator(),
+            markdownLineStripper = MarkdownLineStripper(),
             dispatchers = FakeAppDispatchers(dispatcher = StandardTestDispatcher(scheduler = testScheduler))
         )
     }

@@ -13,6 +13,7 @@ import app.notekea.notes.domain.EditorPreferencesStore
 import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.FollowLinkUseCase
 import app.notekea.notes.domain.FuzzyMatcher
+import app.notekea.notes.domain.MarkdownLineStripper
 import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.GetTreePreferencesUseCase
 import app.notekea.notes.domain.LinkFinder
@@ -59,6 +60,7 @@ val notesModule = module {
     factoryOf(::DeleteEntryUseCase)
     factoryOf(::FlattenTreeUseCase)
     factoryOf(::FuzzyMatcher)
+    factoryOf(::MarkdownLineStripper)
     factoryOf(::FollowLinkUseCase)
     factoryOf(::GetTreePreferencesUseCase)
     factoryOf(::GhostFrontmatterParser)

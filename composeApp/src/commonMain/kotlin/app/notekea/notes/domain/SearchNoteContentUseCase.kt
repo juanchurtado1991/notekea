@@ -8,7 +8,8 @@ import kotlinx.coroutines.withContext
  * Content search (`ROADMAP.md` 1.6, `Mod+Shift+F`; plain text until hybrid search in 2.6). Every word of [query] must
  * appear in the note's body, ignoring letter case and accents; a `#tag` in the query must be a tag of the note, in its
  * frontmatter or in its text outside code blocks, and also finds nested tags (`#recipe` finds `#recipe/venezuelan`).
- * Notes where the search appears most come first, then by name. Texts come from [NoteTextCache], so only changed notes
+ * Notes where the search appears most come first, then by name. The matching line reads as plain text, without
+ * Markdown syntax. Texts come from [NoteTextCache], so only changed notes
  * are read again; matching runs on the default dispatcher and stops as soon as the caller is cancelled (the next
  * keystroke). An empty query finds nothing.
  */
@@ -16,6 +17,7 @@ class SearchNoteContentUseCase(
     private val noteTextCache: NoteTextCache,
     private val textFolder: TextFolder,
     private val naturalNameComparator: NaturalNameComparator,
+    private val markdownLineStripper: MarkdownLineStripper,
     private val dispatchers: AppDispatchers
 ) {
     suspend operator fun invoke(
@@ -110,7 +112,10 @@ class SearchNoteContentUseCase(
         tag: String
     ): Boolean = name == tag || name.startsWith(prefix = tag + NESTED_TAG_SEPARATOR)
 
-    /** The line of [body] that holds [first], shortened around it when long, and [hits] moved into that snippet. */
+    /**
+     * The line of [body] that holds [first] as plain text ([MarkdownLineStripper]), shortened around the first match
+     * when long, and [hits] moved into that snippet.
+     */
     private fun snippetAround(
         body: String,
         hits: List<IntRange>,
@@ -118,17 +123,22 @@ class SearchNoteContentUseCase(
     ): Pair<String, List<IntRange>> {
         val lineStart = body.lastIndexOf(char = '\n', startIndex = first - 1) + 1
         val lineEnd = body.indexOf(char = '\n', startIndex = first).takeIf { it >= 0 } ?: body.length
-        val line = body.substring(startIndex = lineStart, endIndex = lineEnd)
-        val indent = line.indexOfFirst { !it.isWhitespace() }.coerceAtLeast(minimumValue = 0)
-        val start = maxOf(indent, first - lineStart - CONTEXT_BEFORE)
-        val end = minOf(line.length, start + MAX_SNIPPET_LENGTH)
-        val prefix = if (start > indent) ELLIPSIS else ""
-        val suffix = if (end < line.length) ELLIPSIS else ""
-        val shift = lineStart + start - prefix.length
-        val ranges = hits
-            .filter { it.first >= lineStart + start && it.last < lineStart + end }
-            .map { it.first - shift..it.last - shift }
-        return prefix + line.substring(startIndex = start, endIndex = end) + suffix to ranges
+        val plain = markdownLineStripper.strip(
+            line = body.substring(startIndex = lineStart, endIndex = lineEnd),
+            ranges = hits.filter {
+                it.first >= lineStart && it.last < lineEnd
+            }.map { it.first - lineStart..it.last - lineStart }
+        )
+        val firstInLine = plain.ranges.firstOrNull()?.first ?: 0
+        val start = maxOf(0, firstInLine - CONTEXT_BEFORE)
+        val end = minOf(plain.text.length, start + MAX_SNIPPET_LENGTH)
+        val prefix = if (start > 0) ELLIPSIS else ""
+        val suffix = if (end < plain.text.length) ELLIPSIS else ""
+        val shift = start - prefix.length
+        val ranges = plain.ranges.filter {
+            it.first >= start && it.last < end
+        }.map { it.first - shift..it.last - shift }
+        return prefix + plain.text.substring(startIndex = start, endIndex = end) + suffix to ranges
     }
 
     /** The search split into plain [words] and [tags] (without `#`), both folded. */
