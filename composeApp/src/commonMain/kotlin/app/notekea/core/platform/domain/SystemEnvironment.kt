@@ -6,7 +6,14 @@ package app.notekea.core.platform.domain
  */
 interface SystemEnvironment {
     val operatingSystemName: String
+    val operatingSystemVersion: String
     val userHome: String
+
+    /** The Java runtime the app runs on. */
+    val javaVersion: String
+
+    /** The packaged app's version, or "development" when it runs from the source tree. */
+    val appVersion: String
 
     fun environmentVariable(
         name: String
