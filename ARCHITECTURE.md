@@ -208,7 +208,7 @@ themselves.
 - **Use before you write.** Buttons and compact icon buttons, text fields and inline text fields, list items, tree
   items (with or without an icon) and skeleton rows, tabs, tab rows, compact tabs and document tab strips (closable,
   draggable, with a menu), tool rails, grid cards with a picture, toolbar capsules, chips, property fields edited in
-  place, date fields with a calendar, badges, status items, cards,
+  place, date fields with a compact month calendar, badges, status items, cards,
   empty states, error banners, context menus (nestable, with checked choices, explained options and submenus) and menu
   buttons, a grid size picker, attachments (image, file chip, missing file, embedded note), confirmation dialogs and a
   resizable split pane (its panel at the start or the end, floating over the content when there is no room) already

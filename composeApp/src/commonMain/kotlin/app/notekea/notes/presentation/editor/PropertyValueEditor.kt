@@ -3,6 +3,7 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.domain.time.MomentFormat
 import app.notekea.core.presentation.components.NotekeaCheckbox
@@ -23,6 +25,7 @@ import app.notekea.core.presentation.components.NotekeaPropertyField
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.notes.domain.NoteProperty
+import app.notekea.notes.domain.PropertyKeys
 import app.notekea.notes.domain.PropertyValue
 import app.notekea.resources.Res
 import app.notekea.resources.properties_add_item
@@ -35,17 +38,20 @@ import org.jetbrains.compose.resources.stringResource
 private const val ITEM_FIELD_WIDTH_DP = 120
 private const val OTHER_MAX_LINES = 2
 private const val PREVIEW_WIDTH_DP = 420
+private const val READABLE_DATE = "MMM D, YYYY"
 private const val TAG_MARK = "#"
 private val NUMBER = Regex(pattern = "-?\\d+(\\.\\d+)?")
 
 /**
  * A property's value edited in place, by its type (`ROADMAP.md` 1.14): text and numbers as fields, a checkbox, a date
- * typed or picked on a calendar, a list as chips with a field that adds one, and a value the form does not edit as it
- * is written, with a note to edit it in the source. Each change goes to the note at once.
+ * typed or picked on a calendar that marks [today] (shown as people write it until it is edited), a list as chips with
+ * a field that adds one, and a value the form does not edit as it is written, with a note to edit it in the source.
+ * Each change goes to the note at once.
  */
 @Composable
 internal fun PropertyValueEditor(
     property: NoteProperty,
+    today: CalendarDate?,
     onIntent: (EditorIntent) -> Unit
 ) {
     val change = { value: PropertyValue -> onIntent(PropertyIntent.OnValueChange(key = property.key, value = value)) }
@@ -65,10 +71,11 @@ internal fun PropertyValueEditor(
         is PropertyValue.Checkbox -> NotekeaCheckbox(
             checked = value.isChecked,
             onClick = { change(PropertyValue.Checkbox(isChecked = !value.isChecked)) },
-            label = property.key
+            label = property.key,
+            modifier = Modifier.padding(start = NotekeaDimensions.SpacingXs)
         )
 
-        is PropertyValue.Date -> DateEditor(value = value, change = change)
+        is PropertyValue.Date -> DateEditor(value = value, today = today, change = change)
 
         is PropertyValue.Items -> ItemsEditor(property = property, items = value.items, change = change)
 
@@ -79,6 +86,7 @@ internal fun PropertyValueEditor(
 @Composable
 private fun DateEditor(
     value: PropertyValue.Date,
+    today: CalendarDate?,
     change: (PropertyValue) -> Unit
 ) {
     val format = remember { MomentFormat() }
@@ -92,6 +100,8 @@ private fun DateEditor(
         },
         onDatePick = { change(PropertyValue.Date(date = it)) },
         calendarLabel = stringResource(resource = Res.string.properties_calendar),
+        displayText = format.format(moment = LocalMoment(date = value.date), pattern = READABLE_DATE),
+        today = today,
         isValid = { format.parseDate(text = it, pattern = MomentFormat.ISO_DATE) != null }
     )
 }
@@ -103,7 +113,7 @@ private fun ItemsEditor(
     items: List<String>,
     change: (PropertyValue) -> Unit
 ) {
-    val isTags = property.key.lowercase() == TAGS_KEY
+    val isTags = PropertyKeys.isTags(key = property.key)
     val removeLabel = stringResource(resource = Res.string.properties_remove_item)
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
@@ -114,7 +124,8 @@ private fun ItemsEditor(
             NotekeaChip(
                 label = if (isTags) TAG_MARK + item else item,
                 onRemove = { change(PropertyValue.Items(items = items - item)) },
-                removeLabel = removeLabel
+                removeLabel = removeLabel,
+                containerColor = MaterialTheme.colorScheme.surface
             )
         }
         // A new field after each change, so what was typed does not stay once it is added.
@@ -141,7 +152,8 @@ private fun OtherValue(
     Text(
         text = source.substringAfter(delimiter = SOURCE_KEY_SEPARATOR).trim()
             .ifEmpty { stringResource(resource = Res.string.properties_other) },
-        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.padding(start = NotekeaDimensions.SpacingXs),
+        style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         maxLines = OTHER_MAX_LINES,
         overflow = TextOverflow.Ellipsis
@@ -149,14 +161,17 @@ private fun OtherValue(
 }
 
 private const val SOURCE_KEY_SEPARATOR = ":"
-private const val TAGS_KEY = "tags"
 
 @Preview
 @Composable
 private fun PropertyValueEditorPreview() {
     NotekeaPreviewThemes {
         Box(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
-            PropertyValueEditor(property = EditorPreviewData.typedProperties.properties.first(), onIntent = {})
+            PropertyValueEditor(
+                property = EditorPreviewData.typedProperties.properties.first(),
+                today = null,
+                onIntent = {}
+            )
         }
     }
 }

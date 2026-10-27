@@ -354,7 +354,7 @@ class EditorViewModel(
         val path = state.value.notePath ?: return
         val document = opened ?: return
         if (state.value.isLoading || state.value.hasConflict || state.value.isDeleted) return
-        val today = propertyTools.localCalendar.momentOf(instant = propertyTools.clock.now()).date
+        val today = today()
         val lineBreak = if (document.usesCrLf) StringPatterns.WINDOWS_NEW_LINE else StringPatterns.NEW_LINE
         val header = propertyEditing.headerAfter(intent, document.header, state.value.properties, today, lineBreak)
         if (header == null || header == document.header) return
@@ -364,6 +364,8 @@ class EditorViewModel(
             expectedOnDisk = onDisk
         )
     }
+
+    private fun today() = propertyTools.localCalendar.momentOf(instant = propertyTools.clock.now()).date
 
     /** The star beside the title: the window bookmarks this note, or removes its bookmark. */
     private fun toggleBookmark() {
@@ -663,6 +665,7 @@ class EditorViewModel(
                     it.copy(
                         properties = frontmatterReader.read(header = document.header),
                         propertiesSource = propertyEditing.sourceOf(header = document.header),
+                        today = today(),
                         saveStatus = if (isCurrent) SaveStatus.SAVED else SaveStatus.UNSAVED,
                         saveError = null,
                         hasConflict = false,
@@ -800,7 +803,8 @@ class EditorViewModel(
         reduce {
             it.copy(
                 properties = frontmatterReader.read(header = document.header),
-                propertiesSource = propertyEditing.sourceOf(header = document.header)
+                propertiesSource = propertyEditing.sourceOf(header = document.header),
+                today = today()
             )
         }
         replaceBuffer(body = document.body, isNewNote = isNewNote)

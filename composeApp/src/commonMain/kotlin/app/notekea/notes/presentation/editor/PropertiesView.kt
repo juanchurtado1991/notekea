@@ -1,12 +1,18 @@
 package app.notekea.notes.presentation.editor
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -14,19 +20,29 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.presentation.components.ErrorBanner
+import app.notekea.core.presentation.components.NotekeaChip
+import app.notekea.core.presentation.components.NotekeaContextMenuArea
+import app.notekea.core.presentation.components.NotekeaContextMenuState
 import app.notekea.core.presentation.components.NotekeaIconButton
-import app.notekea.core.presentation.components.NotekeaMenuButton
 import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.NotekeaPropertyField
 import app.notekea.core.presentation.components.NotekeaTextField
@@ -47,16 +63,18 @@ import app.notekea.resources.properties_show_source
 import app.notekea.resources.properties_title
 import org.jetbrains.compose.resources.stringResource
 
-private const val KEY_WIDTH_DP = 140
+private const val CARD_ALPHA = 0.55f
+private const val HOVER_ALPHA = 0.05f
+private const val KEY_WIDTH_DP = 150
 private const val PREVIEW_WIDTH_DP = 640
 private const val SOURCE_LINE = "status: draft"
-private const val COUNT_SEPARATOR = " "
 
 /**
- * The note's properties under its title (`ROADMAP.md` 1.14): a "Properties" header that folds them, then one row per
- * property (its type's icon, its name, its value edited in place, and a ✕), and "Add property", whose menu picks the
- * type. "Show source" swaps the form for the YAML as written, which can be edited too; frontmatter the form cannot read
- * is shown that way with an explanation, so nothing is lost. A note without properties shows only "Add property".
+ * The note's properties under its title (`ROADMAP.md` 1.14), on a soft card: a "Properties" header with their number,
+ * which folds them, then one row per property (its type's icon, its muted name renamed in place, its value edited in
+ * place, and a ✕ shown while the row is hovered), and "Add property", whose menu picks the type. "Show source" swaps the
+ * form for the YAML as written, which can be edited too; frontmatter the form cannot read is shown that way with an
+ * explanation, so nothing is lost. A note without properties shows nothing.
  */
 @Composable
 internal fun PropertiesView(
@@ -67,7 +85,14 @@ internal fun PropertiesView(
     val content = state.properties
     if (content == FrontmatterContent.None && !state.isSourceShown) return
     val properties = (content as? FrontmatterContent.Properties)?.properties.orEmpty()
-    Column(modifier = modifier.fillMaxWidth()) {
+    val shape = MaterialTheme.shapes.medium
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape = shape)
+            .background(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = CARD_ALPHA), shape = shape)
+            .padding(all = NotekeaDimensions.SpacingXs)
+    ) {
         PropertiesHeader(state = state, count = properties.size, onIntent = onIntent)
         if (!state.isPropertiesExpanded) return@Column
         val isInvalid = content is FrontmatterContent.Invalid
@@ -78,10 +103,9 @@ internal fun PropertiesView(
                 onIntent = onIntent
             )
         } else {
-            properties.forEach {
-                PropertyRow(property = it, keys = properties.map(NoteProperty::key), onIntent = onIntent)
-            }
-            AddPropertyButton(onIntent = onIntent)
+            val keys = properties.map(NoteProperty::key)
+            properties.forEach { PropertyRow(property = it, keys = keys, today = state.today, onIntent = onIntent) }
+            AddPropertyRow(onIntent = onIntent)
         }
     }
 }
@@ -102,7 +126,7 @@ private fun PropertiesHeader(
     }
 }
 
-/** The chevron and "Properties" with their number; a click folds or opens the form. */
+/** The chevron, "Properties" and their number in a small pill; a click folds or opens the form. */
 @Composable
 private fun FoldTitle(
     isExpanded: Boolean,
@@ -110,13 +134,14 @@ private fun FoldTitle(
     onIntent: (EditorIntent) -> Unit
 ) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    val title = stringResource(resource = Res.string.properties_title)
     Row(
         modifier = Modifier
+            .clip(shape = MaterialTheme.shapes.small)
             .focusProperties { canFocus = false }
             .clickable { onIntent(PropertyIntent.OnFoldToggle) }
-            .padding(vertical = NotekeaDimensions.SpacingXs),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = NotekeaDimensions.SpacingXs, vertical = NotekeaDimensions.SpacingXs),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
     ) {
         Icon(
             imageVector = if (isExpanded) NotekeaIcons.Collapse else NotekeaIcons.Expand,
@@ -124,9 +149,12 @@ private fun FoldTitle(
             modifier = Modifier.size(size = NotekeaDimensions.IconSize),
             tint = muted
         )
-        Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingXs))
-        val label = if (count > 0) title + COUNT_SEPARATOR + count else title
-        Text(text = label, style = MaterialTheme.typography.labelMedium, color = muted)
+        Text(
+            text = stringResource(resource = Res.string.properties_title),
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+            color = muted
+        )
+        if (count > 0) NotekeaChip(label = count.toString(), containerColor = MaterialTheme.colorScheme.surface)
     }
 }
 
@@ -145,60 +173,122 @@ private fun SourceToggle(
     )
 }
 
-/** One property: its type's icon, its name (renamed in place), its value, and a ✕ that removes it. */
+/**
+ * One property: its type's icon, its name (muted, renamed in place), its value, and a ✕ that removes it, shown while the
+ * row is hovered or being edited; the hovered row is lightly highlighted.
+ */
 @Composable
 private fun PropertyRow(
     property: NoteProperty,
     keys: List<String>,
+    today: CalendarDate?,
     onIntent: (EditorIntent) -> Unit
 ) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = iconOf(value = property.value),
-            contentDescription = null,
-            modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Box(modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingXs).width(width = KEY_WIDTH_DP.dp)) {
-            NotekeaPropertyField(
-                value = property.key,
-                onCommit = { onIntent(PropertyIntent.OnRename(from = property.key, to = it)) },
-                placeholder = stringResource(resource = Res.string.properties_key_label),
-                isValid = { PropertyKeys.isValid(key = it, existing = keys, renaming = property.key) }
-            )
-        }
+    val hover = remember { MutableInteractionSource() }
+    val isHovered by hover.collectIsHoveredAsState()
+    var isEditing by remember { mutableStateOf(value = false) }
+    RowFrame(
+        isHighlighted = isHovered,
+        modifier = Modifier.hoverable(interactionSource = hover).onFocusChanged { isEditing = it.hasFocus }
+    ) {
+        PropertyKey(property = property, keys = keys, onIntent = onIntent)
         Box(modifier = Modifier.weight(weight = 1f)) {
-            PropertyValueEditor(property = property, onIntent = onIntent)
+            PropertyValueEditor(property = property, today = today, onIntent = onIntent)
         }
         NotekeaIconButton(
             icon = NotekeaIcons.Close,
             label = stringResource(resource = Res.string.properties_remove),
             onClick = { onIntent(PropertyIntent.OnRemove(key = property.key)) },
+            modifier = Modifier.alpha(alpha = if (isHovered || isEditing) 1f else 0f),
             takesFocus = false
         )
     }
 }
 
-/** "Add property", whose menu picks the new property's type; it gets a free name, renamed in its row. */
+/** A row of the card: at least a menu row high, with rounded corners, highlighted while [isHighlighted]. */
 @Composable
-private fun AddPropertyButton(
+private fun RowFrame(
+    isHighlighted: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit
+) {
+    val shape = MaterialTheme.shapes.small
+    val highlight = MaterialTheme.colorScheme.onSurface.copy(alpha = HOVER_ALPHA)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = NotekeaDimensions.MenuItemHeight)
+            .clip(shape = shape)
+            .background(color = if (isHighlighted) highlight else Color.Transparent, shape = shape)
+            .padding(horizontal = NotekeaDimensions.SpacingXs),
+        verticalAlignment = Alignment.CenterVertically,
+        content = content
+    )
+}
+
+/** The type's icon and the property's name in the muted color, renamed in place. */
+@Composable
+private fun PropertyKey(
+    property: NoteProperty,
+    keys: List<String>,
     onIntent: (EditorIntent) -> Unit
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
+    Row(modifier = Modifier.width(width = KEY_WIDTH_DP.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = iconOf(property = property),
+            contentDescription = null,
+            modifier = Modifier.padding(start = NotekeaDimensions.SpacingXs).size(size = NotekeaDimensions.IconSize),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Box(modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingXs)) {
+            NotekeaPropertyField(
+                value = property.key,
+                onCommit = { onIntent(PropertyIntent.OnRename(from = property.key, to = it)) },
+                placeholder = stringResource(resource = Res.string.properties_key_label),
+                textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                isValid = { PropertyKeys.isValid(key = it, existing = keys, renaming = property.key) }
+            )
+        }
+    }
+}
+
+/** "Add property" as the card's last row; its menu picks the new property's type, which gets a free name. */
+@Composable
+private fun AddPropertyRow(
+    onIntent: (EditorIntent) -> Unit
+) {
+    val menuState = remember { NotekeaContextMenuState() }
+    val hover = remember { MutableInteractionSource() }
+    val isHovered by hover.collectIsHoveredAsState()
+    val belowRow = with(LocalDensity.current) { Offset(x = 0f, y = NotekeaDimensions.MenuItemHeight.toPx()) }
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    NotekeaContextMenuArea(
+        sections = listOf(propertyTypeItems(onIntent = onIntent)),
+        state = menuState,
+        takesFocus = false
     ) {
-        NotekeaMenuButton(
-            icon = NotekeaIcons.AddProperty,
-            label = stringResource(resource = Res.string.properties_add),
-            sections = listOf(propertyTypeItems(onIntent = onIntent)),
-            takesFocus = false
-        )
-        Text(
-            text = stringResource(resource = Res.string.properties_add),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        RowFrame(
+            isHighlighted = isHovered,
+            modifier = Modifier
+                .hoverable(interactionSource = hover)
+                .focusProperties { canFocus = false }
+                .clickable(role = Role.Button) { menuState.open(at = belowRow) }
+        ) {
+            Icon(
+                imageVector = NotekeaIcons.AddProperty,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(start = NotekeaDimensions.SpacingXs)
+                    .size(size = NotekeaDimensions.IconSize),
+                tint = muted
+            )
+            Text(
+                text = stringResource(resource = Res.string.properties_add),
+                modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingS),
+                style = MaterialTheme.typography.bodyMedium,
+                color = muted
+            )
+        }
     }
 }
 
@@ -249,11 +339,16 @@ private fun PropertiesSourceField(
     }
 }
 
+/** Tags keep the `#` of the tags written in the text (the toolbar's Tag); other lists show a list. */
+private fun listIconOf(
+    key: String
+) = if (PropertyKeys.isTags(key = key)) NotekeaIcons.Tag else NotekeaIcons.PropertyList
+
 private fun iconOf(
-    value: PropertyValue
-) = when (value) {
+    property: NoteProperty
+) = when (val value = property.value) {
+    is PropertyValue.Items -> listIconOf(key = property.key)
     is PropertyValue.Text -> NotekeaIcons.PropertyText
-    is PropertyValue.Items -> NotekeaIcons.PropertyList
     is PropertyValue.Number -> NotekeaIcons.PropertyNumber
     is PropertyValue.Checkbox -> NotekeaIcons.PropertyCheckbox
     is PropertyValue.Date -> NotekeaIcons.PropertyDate

@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
@@ -28,22 +29,24 @@ private const val PREVIEW_REMOVE = "Remove"
 private val PREVIEW_ITEMS = listOf("recipe", "venezuelan", "breakfast")
 
 /**
- * One item of a list shown as a pill (a tag, an alias): its [label] on the theme's soft surface, and a small ✕ when
- * [onRemove] is given, named [removeLabel] for screen readers. The ✕ is not a focus stop: the list's field is.
+ * One item of a list shown as a pill (a tag, an alias): its [label] on the theme's soft surface ([containerColor], to
+ * stand out on a background that is already soft), and a small ✕ when [onRemove] is given, named [removeLabel] for
+ * screen readers. The ✕ is not a focus stop: the list's field is.
  */
 @Composable
 fun NotekeaChip(
     label: String,
     modifier: Modifier = Modifier,
     onRemove: (() -> Unit)? = null,
-    removeLabel: String? = null
+    removeLabel: String? = null,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceVariant
 ) {
     val shape = RoundedCornerShape(percent = FULL_ROUND)
     val endPadding = if (onRemove == null) NotekeaDimensions.SpacingS else 0.dp
     Row(
         modifier = modifier
             .clip(shape = shape)
-            .background(color = MaterialTheme.colorScheme.surfaceVariant, shape = shape)
+            .background(color = containerColor, shape = shape)
             .padding(start = NotekeaDimensions.SpacingS, end = endPadding),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs / 2),
         verticalAlignment = Alignment.CenterVertically
