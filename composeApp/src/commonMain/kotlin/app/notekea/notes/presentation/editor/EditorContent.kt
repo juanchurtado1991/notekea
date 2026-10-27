@@ -401,7 +401,7 @@ private fun EditorHeader(
     }
 }
 
-/** The star beside the title: filled in the accent color while the note is bookmarked (`ROADMAP.md` 1.13). */
+/** The star beside the title: in the accent color while the note is bookmarked (`ROADMAP.md` 1.13). */
 @Composable
 private fun BookmarkStar(
     isBookmarked: Boolean,
