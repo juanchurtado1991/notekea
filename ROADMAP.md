@@ -353,10 +353,20 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 
 ### ⬜ 1.12 Templates — `feature/templates`
 
-- Templates folder: `.obsidian/templates.json` when present, otherwise `Templates/`.
-- `Mod+T` opens a picker of templates and inserts the chosen one at the cursor (or into a new note).
-- Variables: `{{title}}`, `{{date}}`, `{{time}}`, with optional format (`{{date:YYYY-MM-DD}}`).
-- States: no templates folder ("Create a Templates folder to add templates" with a "Create" button).
+- **Templates folder:** the folder of `.obsidian/templates.json` when present (with its date and time formats),
+  otherwise `Templates/` with `YYYY-MM-DD` and `HH:mm`, read again at every opening of the picker. Every note in it
+  and its subfolders is a template, named by its path inside it (`Work/Weekly review`).
+- **Insert:** `Mod+T` or the toolbar's Insert template opens a picker of templates, found by name as in the quick
+  switcher; the chosen one is filled in and written at the cursor (in place of the selection), as one edit that one
+  Undo removes. A note without text yet becomes the template whole. Read mode switches to Edit first.
+- **New note from a template:** a folder's menu in the tree has "New note from template"; `Mod+T` with no note in
+  the active tab does the same in the folder it shows (the vault root without tabs). The note is made with its name
+  ready to type and filled once it is named, so `{{title}}` is its name.
+- **Variables:** `{{title}}`, `{{date}}`, `{{time}}`, with optional format (`{{date:YYYY-MM-DD}}`), as in Obsidian.
+- **Properties:** the template's frontmatter merges into the note's, as Obsidian does: missing properties are added,
+  existing ones keep their value, and tags, aliases and CSS classes gain the items they lack.
+- **States:** no templates folder ("Create a Templates folder to add templates" with a "Create" button, which makes
+  it with an example template, "Meeting notes"); an empty folder and a search that matches nothing say what to do.
 
 ### ⬜ 1.13 Bookmarks — `feature/bookmarks`
 

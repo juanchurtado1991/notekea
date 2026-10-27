@@ -63,6 +63,8 @@ prepare() {
     cp "$SMOKE_ROOT/notes/Outline practice.md" "$SCRATCH/Playground Vault/Editor/"
     # Daily notes (1.10): a vault with Obsidian's Daily notes settings, a template and two earlier days.
     cp -R "$SMOKE_ROOT/daily" "$SCRATCH/Daily Vault"
+    # Templates (1.12): a vault whose Obsidian settings put templates in Snippets, with notes to insert them in.
+    cp -R "$SMOKE_ROOT/templates" "$SCRATCH/Templates Vault"
     cp "$SMOKE_ROOT/attachments/"* "$SCRATCH/Playground Vault/attachments/"
     mkdir -p "$SCRATCH/Outside files"
     cp "$SMOKE_ROOT/outside/"* "$SCRATCH/Outside files/"
@@ -72,6 +74,7 @@ prepare() {
     echo "  New Vault Location  already has a 'My Notes' folder with a note: create-vault error"
     echo "  Outside files       files outside the vault to drop, pick or locate (1.8)"
     echo "  Daily Vault         daily notes in Diary/, named and filled in by its Obsidian settings (1.10)"
+    echo "  Templates Vault     templates in Snippets/, as its Obsidian settings say (1.12)"
     echo "  Playground Vault    a copy of Personal Notes to create, rename, delete and update links in;"
     echo "                      its Editor folder has notes for the editor cases (1.5)"
 }

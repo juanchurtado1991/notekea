@@ -56,6 +56,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Templates (ROADMAP 1.12): Mod+T or the toolbar's Insert template opens a picker of the notes in the templates
+  folder (Obsidian's `templates.json`, or `Templates`), and the chosen one is written at the cursor, or as the whole
+  of a note without text yet, with `{{title}}`, `{{date}}` and `{{time}}` filled in and its properties merged into
+  the note's. "New note from template" in a folder's menu makes a note filled once it is named. Without a templates
+  folder, Create makes one with an example template.
 - Tabs and split panes (ROADMAP 1.11): every note, file or folder opened gets its own tab (an open one goes to its
   tab); Mod+click or the middle button opens it behind the current tab. Tabs close with ✕, the middle button or Mod+W,
   cycle with Ctrl+Tab / Ctrl+Shift+Tab and jump with Mod+1…9. Split right (Mod+Shift+D or the tab menu) shows two

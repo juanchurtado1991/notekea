@@ -52,6 +52,7 @@ primary modifier and resolved per platform.
 | Go to the outline | `Cmd+Shift+O` | `Ctrl+Shift+O` |
 | Today's daily note | `Cmd+D` | `Ctrl+D` |
 | Previous / next daily note | `Cmd+Option+←` / `Cmd+Option+→` | `Ctrl+Alt+←` / `Ctrl+Alt+→` |
+| Insert template | `Cmd+T` | `Ctrl+T` |
 | Settings | `Cmd+,` | `Ctrl+,` |
 | Close tab | `Cmd+W` | `Ctrl+W` |
 | Next / previous tab | `Ctrl+Tab` / `Ctrl+Shift+Tab` | `Ctrl+Tab` / `Ctrl+Shift+Tab` |
