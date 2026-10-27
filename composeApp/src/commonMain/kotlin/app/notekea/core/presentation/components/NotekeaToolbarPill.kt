@@ -1,7 +1,6 @@
 package app.notekea.core.presentation.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -25,7 +24,8 @@ private const val PREVIEW_LINK = "Link to a note"
 private const val PREVIEW_MORE = "More"
 
 /**
- * A row of toolbar buttons in one capsule (the editor's formatting bar): a soft background with rounded ends, and
+ * A row of toolbar buttons in one capsule (the editor's formatting bar): the theme's soft surface with the 6 dp
+ * corners of the other controls, and
  * [groups] of related buttons separated by thin lines, so a long row reads as a few groups.
  */
 @Composable
@@ -33,15 +33,10 @@ fun NotekeaToolbarPill(
     groups: List<@Composable RowScope.() -> Unit>,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(size = NotekeaDimensions.CardRadius)
+    val shape = RoundedCornerShape(size = NotekeaDimensions.ControlRadius)
     Row(
         modifier = modifier
-            .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = shape)
-            .border(
-                width = NotekeaDimensions.BorderWidth,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = shape
-            )
+            .background(color = MaterialTheme.colorScheme.surfaceVariant, shape = shape)
             .padding(horizontal = NotekeaDimensions.SpacingXs, vertical = NotekeaDimensions.SpacingXs / 2),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
         verticalAlignment = Alignment.CenterVertically
@@ -61,7 +56,7 @@ private fun GroupDivider() {
             .padding(horizontal = NotekeaDimensions.SpacingXs / 2)
             .width(width = NotekeaDimensions.BorderWidth)
             .height(height = NotekeaDimensions.IconSize + NotekeaDimensions.SpacingXs)
-            .background(color = MaterialTheme.colorScheme.outlineVariant)
+            .background(color = MaterialTheme.colorScheme.outline)
     )
 }
 
