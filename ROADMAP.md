@@ -387,11 +387,13 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 
 Frontmatter shown as a compact form above the note content.
 
-- **The form:** a "Properties" block under the title with their number, open by default and folded with its header
-  (the fold is remembered); one row per property with its type's icon, its name (renamed in place) and its value
-  edited in place, and a ✕ that removes it. A note without properties shows nothing.
+- **The form:** a "Properties" card under the title (a soft background) with their number, open by default and folded
+  with its header (the fold is remembered); one row per property with its type's icon (`#` for tags, like the
+  toolbar's Tag), its muted name (renamed in place) and its value edited in place, highlighted while hovered, with a ✕
+  that removes it shown on hover. A note without properties shows nothing.
 - **Types** detected from the values, as Obsidian does: text, list (tags, aliases and CSS classes always; as chips
-  with a field that adds one), number, checkbox, date (typed or picked on a calendar). Nested and multi-line values
+  with a field that adds one), number, checkbox, date (shown as `Oct 27, 2026`, typed as `2026-10-27` or picked on a compact month calendar
+  whose weeks start on Monday, with Today). Nested and multi-line values
   are shown as written and edited in the source.
 - **Add property:** in the block and in the toolbar's More, its menu picks the type; the new property gets a free name
   (`property`) to rename.

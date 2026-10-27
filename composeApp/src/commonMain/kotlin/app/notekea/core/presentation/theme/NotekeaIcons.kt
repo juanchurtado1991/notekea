@@ -162,12 +162,14 @@ object NotekeaIcons {
     val NewTab: ImageVector get() = Lucide.Plus
     val NewTag: ImageVector get() = Lucide.Plus
     val NextDay: ImageVector get() = Lucide.ChevronRight
+    val NextMonth: ImageVector get() = Lucide.ChevronRight
     val Note: ImageVector get() = Lucide.FileText
     val OtherFile: ImageVector get() = Lucide.File
     val NoteLink: ImageVector get() = Lucide.Link
     val NumberedList: ImageVector get() = Lucide.ListOrdered
     val Outline: ImageVector get() = Lucide.ListTree
     val PreviousDay: ImageVector get() = Lucide.ChevronLeft
+    val PreviousMonth: ImageVector get() = Lucide.ChevronLeft
     val Properties: ImageVector get() = Lucide.SlidersHorizontal
     val PropertyCheckbox: ImageVector get() = Lucide.SquareCheck
     val PropertyDate: ImageVector get() = Lucide.Calendar

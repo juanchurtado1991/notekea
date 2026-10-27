@@ -21,6 +21,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -43,7 +44,9 @@ private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
  * A value edited in place, as in a form of properties: plain text until hovered (a faint border) or focused (the
  * primary border). What is typed is kept here and handed to [onCommit] when Enter is pressed or the field is left;
  * Esc puts [value] back. Text [isValid] rejects is outlined in the error color and not committed. [placeholder] shows
- * while it is empty.
+ * while it is empty. [displayValue], when given, is shown instead of [value] while the field is not focused (a date
+ * written for people), and [value] comes back to be edited. [textColor] replaces the ink color (a property's
+ * muted name).
  */
 @Composable
 fun NotekeaPropertyField(
@@ -51,6 +54,8 @@ fun NotekeaPropertyField(
     onCommit: (String) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: String? = null,
+    displayValue: String? = null,
+    textColor: Color = Color.Unspecified,
     isValid: (String) -> Boolean = { true }
 ) {
     var text by remember(value) { mutableStateOf(value = value) }
@@ -59,16 +64,19 @@ fun NotekeaPropertyField(
     val focusManager = LocalFocusManager.current
     val isError = !isValid(text)
     val commit = { if (text != value && isValid(text)) onCommit(text) }
+    val isShowingDisplay = !isFocused && displayValue != null && text == value
     BasicTextField(
-        value = text,
-        onValueChange = { text = it },
+        value = if (isShowingDisplay) displayValue.orEmpty() else text,
+        onValueChange = { if (!isShowingDisplay) text = it },
         modifier = modifier
             .fillMaxWidth()
             .onFocusChanged { if (!it.isFocused) commit() }
             .onPreviewKeyEvent { event ->
                 keyAction(event = event, focusManager = focusManager, onCancel = { text = value })
             },
-        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(
+            color = textColor.takeOrElse { MaterialTheme.colorScheme.onSurface }
+        ),
         singleLine = true,
         interactionSource = interactions,
         cursorBrush = SolidColor(value = MaterialTheme.colorScheme.primary),

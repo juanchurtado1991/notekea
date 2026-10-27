@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.notes.domain.FrontmatterContent
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.OutlineHeading
@@ -18,7 +19,8 @@ import app.notekea.notes.domain.RelativePath
  * ([AttachmentView]), and [actionError] why attaching, opening or locating one failed, until it is dismissed.
  * [outline] is the note's headings in text order (`ROADMAP.md` 1.9). [properties] is the note's frontmatter read as
  * properties, shown open while [isPropertiesExpanded], and as its YAML ([propertiesSource], the lines between the
- * `---`) while [isSourceShown] (`ROADMAP.md` 1.14).
+ * `---`) while [isSourceShown] (`ROADMAP.md` 1.14); [today] is
+ * the day the date calendars mark, read when the note was last shown or saved.
  */
 data class EditorState(
     val notePath: RelativePath? = null,
@@ -37,5 +39,6 @@ data class EditorState(
     val properties: FrontmatterContent = FrontmatterContent.None,
     val propertiesSource: String = "",
     val isPropertiesExpanded: Boolean = true,
-    val isSourceShown: Boolean = false
+    val isSourceShown: Boolean = false,
+    val today: CalendarDate? = null
 )

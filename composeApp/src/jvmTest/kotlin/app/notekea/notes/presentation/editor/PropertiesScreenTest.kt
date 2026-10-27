@@ -10,6 +10,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaTheme
@@ -23,7 +24,8 @@ import java.awt.event.KeyEvent as AwtKeyEvent
 
 /**
  * The properties under a note's title (`ROADMAP.md` 1.14), rendered headless: the header folds them, a checkbox, a
- * chip's ✕ and a row's ✕ edit at once, typed text is committed with Enter, and Show source swaps the form.
+ * chip's ✕ and a row's ✕ edit at once, typed text is committed with Enter, Show source swaps the form, and the
+ * calendar (above the date when there is no room below) picks a day, today, or a day of another month.
  */
 class PropertiesScreenTest {
     private var frame = 0L
@@ -55,6 +57,28 @@ class PropertiesScreenTest {
         )
     }
 
+    @Test
+    fun `the calendar picks a day, today and a day of the next month`() {
+        val intents = mutableListOf<EditorIntent>()
+        UiThread.run {
+            scene(intents = intents).use { scene ->
+                settle(scene = scene)
+                listOf(CALENDAR, OCTOBER_14, CALENDAR, TODAY, CALENDAR, NEXT_MONTH, NOVEMBER_2).forEach {
+                    click(scene, it)
+                }
+            }
+        }
+
+        assertEquals(
+            expected = listOf(
+                CalendarDate(year = 2026, month = 10, day = 14),
+                COOKED_TODAY,
+                CalendarDate(year = 2026, month = 11, day = 2)
+            ).map { PropertyIntent.OnValueChange(key = "cooked", value = PropertyValue.Date(date = it)) },
+            actual = intents.filterIsInstance<PropertyIntent>()
+        )
+    }
+
     private fun scene(
         intents: MutableList<EditorIntent>
     ) = ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
@@ -62,7 +86,8 @@ class PropertiesScreenTest {
             EditorContent(
                 state = EditorState(
                     notePath = RelativePath(value = NOTE),
-                    properties = FrontmatterReader().read(header = HEADER_TEXT)
+                    properties = FrontmatterReader().read(header = HEADER_TEXT),
+                    today = COOKED_TODAY
                 ),
                 buffer = TextFieldState(initialText = BODY),
                 platformConventions = PreviewPlatformConventions.linux,
@@ -122,11 +147,17 @@ class PropertiesScreenTest {
         private const val SETTLE_FRAMES = 4
         private const val TYPED = "!"
         private const val WIDTH = 900
-        private val FAVORITE_BOX = Offset(x = 273f, y = 213f)
-        private val HEADER = Offset(x = 150f, y = 101f)
-        private val RECIPE_REMOVE = Offset(x = 334f, y = 130f)
-        private val SOURCE_TOGGLE = Offset(x = 784f, y = 101f)
-        private val STATUS_FIELD_END = Offset(x = 600f, y = 157f)
-        private val STATUS_REMOVE = Offset(x = 784f, y = 157f)
+        private val CALENDAR = Offset(x = 406f, y = 264f)
+        private val COOKED_TODAY = CalendarDate(year = 2026, month = 10, day = 27)
+        private val NEXT_MONTH = Offset(x = 482f, y = 25f)
+        private val NOVEMBER_2 = Offset(x = 287f, y = 131f)
+        private val OCTOBER_14 = Offset(x = 351f, y = 167f)
+        private val TODAY = Offset(x = 304f, y = 292f)
+        private val FAVORITE_BOX = Offset(x = 268f, y = 232f)
+        private val HEADER = Offset(x = 150f, y = 105f)
+        private val RECIPE_REMOVE = Offset(x = 328f, y = 136f)
+        private val SOURCE_TOGGLE = Offset(x = 780f, y = 105f)
+        private val STATUS_FIELD_END = Offset(x = 600f, y = 168f)
+        private val STATUS_REMOVE = Offset(x = 776f, y = 168f)
     }
 }
