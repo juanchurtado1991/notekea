@@ -25,7 +25,8 @@ private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
 /**
  * Single- or multi-line text input with an optional placeholder, styled with the Notekea theme. [errorText] shows a
  * validation message under the field, next to what it is about, while keeping the typed value. [onSubmit] runs on
- * Enter in a single-line field (handled as a key event, so it behaves the same on every desktop platform).
+ * Enter in a single-line field (handled as a key event, so it behaves the same on every desktop platform). A field not
+ * [enabled] is shown dimmed and takes no input.
  */
 @Composable
 fun NotekeaTextField(
@@ -35,11 +36,13 @@ fun NotekeaTextField(
     placeholder: String? = null,
     singleLine: Boolean = true,
     errorText: String? = null,
-    onSubmit: (() -> Unit)? = null
+    onSubmit: (() -> Unit)? = null,
+    enabled: Boolean = true
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        enabled = enabled,
         modifier = modifier.onPreviewKeyEvent { event ->
             val isEnterDown = event.type == KeyEventType.KeyDown && event.key in SUBMIT_KEYS
             val isSubmit = singleLine && onSubmit != null && isEnterDown

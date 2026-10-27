@@ -6,6 +6,7 @@ import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.SidePanelMode
 import app.notekea.notes.domain.SidePanelPreferences
 import app.notekea.notes.domain.SidePanelSection
 import app.notekea.notes.domain.Workspace
@@ -99,13 +100,16 @@ class WorkspaceViewModel(
 
             WorkspaceIntent.OnOutlineFocusRequest -> {
                 val panel = state.value.sidePanel
-                if (!panel.isVisible || SidePanelSection.OUTLINE in panel.foldedSections) {
-                    updateSidePanel {
-                        it.copy(isVisible = true, foldedSections = it.foldedSections - SidePanelSection.OUTLINE)
-                    }
-                }
+                val shown = panel.copy(
+                    isVisible = true,
+                    mode = SidePanelMode.INSPECTOR,
+                    foldedSections = panel.foldedSections - SidePanelSection.OUTLINE
+                )
+                if (shown != panel) updateSidePanel { shown }
                 emit(effect = WorkspaceEffect.FocusOutline)
             }
+
+            is WorkspaceIntent.OnSidePanelModeSelect -> updateSidePanel { it.copy(mode = intent.mode) }
 
             is WorkspaceIntent.OnSidePanelSectionToggle -> updateSidePanel {
                 val folded = it.foldedSections

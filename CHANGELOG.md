@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The side panel is an inspector (ROADMAP 1.14): its Outline and Note info sections fold on their own, remembered, in
+  place of tabs; `Mod+Shift+O` opens a folded outline. An Inspector | Chat control at its top shows Chat as "Coming
+  soon" until the chat is built (ROADMAP 3.3).
   place of tabs; `Mod+Shift+O` opens a folded outline.
 - Plan for the editor's memory (`ROADMAP.md` 1.18): measure the editor alone on the three systems with a 5,000-note
   vault, check that opening and closing notes gives the memory back, and cut it to under 400 MB before M2.

@@ -63,7 +63,7 @@ fun WithSidePanel(
                 SidePanel(
                     outline = outline,
                     current = current,
-                    foldedSections = preferences.foldedSections,
+                    preferences = preferences,
                     platformConventions = platformConventions,
                     actions = actionsOf(sidePanel = sidePanel, onHeadingClick = onHeadingClick, onLeave = onLeave),
                     info = info,
@@ -77,13 +77,14 @@ fun WithSidePanel(
     }
 }
 
-/** The panel's controls: its sections and hide button go to [sidePanel]; Esc in the outline closes it if it floats. */
+/** The panel's controls: its modes, sections and minimize button go to [sidePanel]; Esc in the outline closes it if it floats. */
 private fun actionsOf(
     sidePanel: SidePanelHost,
     onHeadingClick: (Int) -> Unit,
     onLeave: () -> Unit
 ) = SidePanelActions(
     onHeadingClick = onHeadingClick,
+    onModeSelect = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelModeSelect(mode = it)) },
     onSectionToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelSectionToggle(section = it)) },
     onHide = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
     onLeave = {

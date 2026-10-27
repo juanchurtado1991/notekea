@@ -9,31 +9,33 @@ import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.notes.domain.OutlineFinder
+import app.notekea.notes.domain.SidePanelMode
+import app.notekea.notes.domain.SidePanelPreferences
 import app.notekea.notes.domain.SidePanelSection
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
  * The side panel as an inspector (`ROADMAP.md` 1.9, 1.14), rendered headless: each section's header folds it, a
- * heading is chosen in the outline, and the hide button hides the panel.
+ * heading is chosen in the outline, Chat is chosen, and the minimize button hides the panel.
  */
 class SidePanelScreenTest {
     private var frame = 0L
 
     @Test
-    fun `the section headers fold their sections, a heading is chosen and the panel is hidden`() {
+    fun `the headers fold their sections, a heading and Chat are chosen, and the panel is minimized`() {
         val actions = mutableListOf<Any>()
         UiThread.run {
             scene(actions = actions).use { scene ->
                 settle(scene = scene)
-                listOf(STEPS_ROW, NOTE_INFO_HEADER, OUTLINE_HEADER, HIDE).forEach {
+                listOf(STEPS_ROW, NOTE_INFO_HEADER, OUTLINE_HEADER, CHAT, HIDE).forEach {
                     click(scene = scene, position = it)
                 }
             }
         }
 
         assertEquals(
-            expected = listOf<Any>(3, SidePanelSection.NOTE_INFO, SidePanelSection.OUTLINE, HIDDEN),
+            expected = listOf<Any>(3, SidePanelSection.NOTE_INFO, SidePanelSection.OUTLINE, SidePanelMode.CHAT, HIDDEN),
             actual = actions
         )
     }
@@ -45,10 +47,11 @@ class SidePanelScreenTest {
             SidePanel(
                 outline = OutlineFinder().headings(text = BODY),
                 current = 0,
-                foldedSections = emptySet(),
+                preferences = SidePanelPreferences(),
                 platformConventions = PreviewPlatformConventions.linux,
                 actions = SidePanelActions(
                     onHeadingClick = { actions += it },
+                    onModeSelect = { actions += it },
                     onSectionToggle = { actions += it },
                     onHide = { actions += HIDDEN },
                     onLeave = {}
@@ -82,9 +85,10 @@ class SidePanelScreenTest {
         private const val HIDDEN = "hidden"
         private const val SETTLE_FRAMES = 4
         private const val WIDTH = 340
+        private val CHAT = Offset(x = 137f, y = 18f)
         private val HIDE = Offset(x = 322f, y = 18f)
-        private val NOTE_INFO_HEADER = Offset(x = 60f, y = 239f)
-        private val OUTLINE_HEADER = Offset(x = 60f, y = 18f)
-        private val STEPS_ROW = Offset(x = 80f, y = 133f)
+        private val NOTE_INFO_HEADER = Offset(x = 60f, y = 270f)
+        private val OUTLINE_HEADER = Offset(x = 60f, y = 49f)
+        private val STEPS_ROW = Offset(x = 80f, y = 165f)
     }
 }

@@ -8,6 +8,8 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
 import com.composables.icons.lucide.Type
+import com.composables.icons.lucide.MessagesSquare
+import com.composables.icons.lucide.Sparkles
 import com.composables.icons.lucide.Clock
 import com.composables.icons.lucide.CalendarPlus
 import com.composables.icons.lucide.Code
@@ -152,6 +154,9 @@ object NotekeaIcons {
     val Folder: ImageVector get() = Lucide.Folder
     val FolderOpen: ImageVector get() = Lucide.FolderOpen
     val Heading: ImageVector get() = Lucide.Heading
+    val Chat: ImageVector get() = Lucide.MessagesSquare
+    val ChatSoon: ImageVector get() = Lucide.Sparkles
+    val Inspector: ImageVector get() = Lucide.Info
     val InfoCreated: ImageVector get() = Lucide.CalendarPlus
     val InfoLinks: ImageVector get() = Lucide.Link
     val InfoModified: ImageVector get() = Lucide.Pencil

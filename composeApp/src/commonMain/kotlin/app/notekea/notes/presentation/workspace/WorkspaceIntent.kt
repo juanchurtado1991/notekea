@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.workspace
 
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.SidePanelMode
 import app.notekea.notes.domain.SidePanelSection
 import app.notekea.notes.domain.VaultTree
 
@@ -70,8 +71,10 @@ sealed interface WorkspaceIntent {
 
     data class OnSidePanelResize(val widthDp: Int) : WorkspaceIntent
 
+    data class OnSidePanelModeSelect(val mode: SidePanelMode) : WorkspaceIntent
+
     data class OnSidePanelSectionToggle(val section: SidePanelSection) : WorkspaceIntent
 
-    /** `Mod+Shift+O`: the outline takes the keyboard, the panel shown and the outline opened first if they were not. */
+    /** `Mod+Shift+O`: the outline takes the keyboard, the panel shown on the inspector and the outline opened first. */
     data object OnOutlineFocusRequest : WorkspaceIntent
 }

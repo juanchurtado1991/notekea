@@ -173,7 +173,7 @@ class OutlineScreenTest {
             append("### Cooking\n\n")
             repeat(times = 20) { append("More about cooking, line ${it + 1}.\n\n") }
         }
-        private val STEPS_ROW = Offset(x = 850f, y = 141f)
+        private val STEPS_ROW = Offset(x = 850f, y = 172f)
         private val TEXT = Offset(x = 300f, y = 400f)
     }
 }

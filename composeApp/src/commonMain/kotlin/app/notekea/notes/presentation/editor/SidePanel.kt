@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -51,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.core.presentation.components.NotekeaSegment
+import app.notekea.core.presentation.components.NotekeaSegmentedControl
 import app.notekea.core.presentation.components.NotekeaTooltip
 import app.notekea.core.presentation.components.NotekeaTreeItem
 import app.notekea.core.presentation.platform.label
@@ -58,6 +61,8 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.OutlineHeading
+import app.notekea.notes.domain.SidePanelMode
+import app.notekea.notes.domain.SidePanelPreferences
 import app.notekea.notes.domain.SidePanelSection
 import app.notekea.resources.Res
 import app.notekea.resources.note_info_title
@@ -65,6 +70,8 @@ import app.notekea.resources.outline_empty_message
 import app.notekea.resources.outline_empty_title
 import app.notekea.resources.outline_label
 import app.notekea.resources.outline_title
+import app.notekea.resources.side_panel_chat
+import app.notekea.resources.side_panel_inspector
 import app.notekea.resources.side_panel_minimize
 import org.jetbrains.compose.resources.stringResource
 
@@ -74,18 +81,19 @@ private const val SECTION_LETTER_SPACING_SP = 0.8
 private val LIST_PADDING = PaddingValues(all = NotekeaDimensions.SpacingXs)
 
 /**
- * The panel on the right of the editor (`ROADMAP.md` 1.9), an inspector of foldable sections ([foldedSections] are
- * folded; a header's click goes to [onSectionToggle]), with a button that hides it on the first. Outline lists the
- * note's headings as an indented tree, highlights [current], the one the editor's view is in, and goes to a heading when
- * it is clicked; a note without headings says how to add one. The list is one focus stop, taken with [outlineFocus]
- * (`Mod+Shift+O`): the arrows move, Enter goes to the heading and Esc gives the keyboard back to the note ([onLeave]).
- * Note info, shown while a note is open ([info]), says what it holds and when it was created and modified.
+ * The panel on the right of the editor (`ROADMAP.md` 1.9), in the mode [preferences] keep: Inspector | Chat chosen at
+ * its top beside the button that minimizes it. The inspector's sections fold on their own ([preferences]'s folded
+ * sections; a header's click goes to the actions). Outline lists the note's headings as an indented tree, highlights
+ * [current], the one the editor's view is in, and goes to a heading when it is clicked; a note without headings says
+ * how to add one. The list is one focus stop, taken with [outlineFocus] (`Mod+Shift+O`): the arrows move, Enter goes
+ * to the heading and Esc gives the keyboard back to the note. Note info, shown while a note is open ([info]), says what
+ * it holds and when it was created and modified. Chat says it is coming (`ROADMAP.md` 3.3).
  */
 @Composable
 fun SidePanel(
     outline: List<OutlineHeading>,
     current: Int,
-    foldedSections: Set<SidePanelSection>,
+    preferences: SidePanelPreferences,
     platformConventions: PlatformConventions,
     actions: SidePanelActions,
     info: NoteInfo?,
@@ -94,26 +102,85 @@ fun SidePanel(
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Column(modifier = Modifier.padding(vertical = NotekeaDimensions.SpacingXs)) {
-            val isOutlineOpen = SidePanelSection.OUTLINE !in foldedSections
-            SectionHeader(
-                title = stringResource(resource = Res.string.outline_title),
-                isOpen = isOutlineOpen,
-                onToggle = { actions.onSectionToggle(SidePanelSection.OUTLINE) },
-                shortcutHint = platformConventions.outlineShortcut.label(
-                    operatingSystem = platformConventions.operatingSystem
-                )
-            ) { HideButton(platformConventions = platformConventions, onHide = actions.onHide) }
-            if (isOutlineOpen) {
-                OutlineSection(
+            PanelHeader(mode = preferences.mode, platformConventions = platformConventions, actions = actions)
+            when (preferences.mode) {
+                SidePanelMode.INSPECTOR -> InspectorSections(
                     outline = outline,
                     current = current,
-                    focusRequester = outlineFocus,
+                    foldedSections = preferences.foldedSections,
+                    platformConventions = platformConventions,
                     actions = actions,
-                    modifier = Modifier.weight(weight = 1f, fill = false)
+                    outlineFocus = outlineFocus,
+                    info = info
                 )
+
+                SidePanelMode.CHAT -> SidePanelChat()
             }
-            info?.let { NoteInfoSection(info = it, isOpen = SidePanelSection.NOTE_INFO !in foldedSections, actions) }
         }
+    }
+}
+
+/** Inspector | Chat, and the button that minimizes the panel. */
+@Composable
+private fun PanelHeader(
+    mode: SidePanelMode,
+    platformConventions: PlatformConventions,
+    actions: SidePanelActions
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = NotekeaDimensions.SpacingS,
+                end = NotekeaDimensions.SpacingXs,
+                bottom = NotekeaDimensions.SpacingXs
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        NotekeaSegmentedControl(
+            segments = listOf(
+                NotekeaSegment(icon = NotekeaIcons.Inspector, label = stringResource(Res.string.side_panel_inspector)),
+                NotekeaSegment(icon = NotekeaIcons.Chat, label = stringResource(Res.string.side_panel_chat))
+            ),
+            selectedIndex = SidePanelMode.entries.indexOf(element = mode),
+            onSelect = { actions.onModeSelect(SidePanelMode.entries[it]) }
+        )
+        Spacer(modifier = Modifier.weight(weight = 1f))
+        MinimizeButton(platformConventions = platformConventions, onMinimize = actions.onHide)
+    }
+}
+
+/** The inspector's sections: Outline, and Note info while a note is open. */
+@Composable
+private fun InspectorSections(
+    outline: List<OutlineHeading>,
+    current: Int,
+    foldedSections: Set<SidePanelSection>,
+    platformConventions: PlatformConventions,
+    actions: SidePanelActions,
+    outlineFocus: FocusRequester,
+    info: NoteInfo?
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        val isOutlineOpen = SidePanelSection.OUTLINE !in foldedSections
+        SectionHeader(
+            title = stringResource(resource = Res.string.outline_title),
+            isOpen = isOutlineOpen,
+            onToggle = { actions.onSectionToggle(SidePanelSection.OUTLINE) },
+            shortcutHint = platformConventions.outlineShortcut.label(
+                operatingSystem = platformConventions.operatingSystem
+            )
+        )
+        if (isOutlineOpen) {
+            OutlineSection(
+                outline = outline,
+                current = current,
+                focusRequester = outlineFocus,
+                actions = actions,
+                modifier = Modifier.weight(weight = 1f, fill = false)
+            )
+        }
+        info?.let { NoteInfoSection(info = it, isOpen = SidePanelSection.NOTE_INFO !in foldedSections, actions) }
     }
 }
 
@@ -159,15 +226,14 @@ private fun OutlineSection(
 
 /**
  * A section's header, as desktop inspectors draw it: a chevron and its [title] in small capitals, a click folding or
- * opening it ([onToggle]), and [trailing] at the end. Its tooltip names the [shortcutHint] that goes to it, if any.
+ * opening it ([onToggle]). Its tooltip names the [shortcutHint] that goes to it, if any.
  */
 @Composable
 private fun SectionHeader(
     title: String,
     isOpen: Boolean,
     onToggle: () -> Unit,
-    shortcutHint: String? = null,
-    trailing: @Composable () -> Unit = {}
+    shortcutHint: String? = null
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(
@@ -181,7 +247,6 @@ private fun SectionHeader(
                 SectionTitle(title = title, isOpen = isOpen, onToggle = onToggle)
             }
         }
-        trailing()
     }
 }
 
@@ -222,14 +287,14 @@ private fun SectionTitle(
 }
 
 @Composable
-private fun HideButton(
+private fun MinimizeButton(
     platformConventions: PlatformConventions,
-    onHide: () -> Unit
+    onMinimize: () -> Unit
 ) {
     NotekeaIconButton(
         icon = NotekeaIcons.Minimize,
         label = stringResource(resource = Res.string.side_panel_minimize),
-        onClick = onHide,
+        onClick = onMinimize,
         shortcutHint = platformConventions.toggleSidePanelShortcut.label(
             operatingSystem = platformConventions.operatingSystem
         ),
@@ -368,16 +433,23 @@ private fun outlineKey(
 private fun SidePanelPreviewFrame(
     outline: List<OutlineHeading>,
     current: Int,
-    foldedSections: Set<SidePanelSection> = emptySet()
+    foldedSections: Set<SidePanelSection> = emptySet(),
+    mode: SidePanelMode = SidePanelMode.INSPECTOR
 ) {
     NotekeaPreviewThemes {
         Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
             SidePanel(
                 outline = outline,
                 current = current,
-                foldedSections = foldedSections,
+                preferences = SidePanelPreferences(mode = mode, foldedSections = foldedSections),
                 platformConventions = EditorPreviewData.platformConventions,
-                actions = SidePanelActions(onHeadingClick = {}, onSectionToggle = {}, onHide = {}, onLeave = {}),
+                actions = SidePanelActions(
+                    onHeadingClick = {},
+                    onModeSelect = {},
+                    onSectionToggle = {},
+                    onHide = {},
+                    onLeave = {}
+                ),
                 info = EditorPreviewData.info
             )
         }
@@ -394,6 +466,12 @@ private fun SidePanelPreview() {
 @Composable
 private fun SidePanelEmptyPreview() {
     SidePanelPreviewFrame(outline = emptyList(), current = OutlineTracker.NONE)
+}
+
+@Preview
+@Composable
+private fun SidePanelChatModePreview() {
+    SidePanelPreviewFrame(outline = EditorPreviewData.outline, current = 1, mode = SidePanelMode.CHAT)
 }
 
 @Preview

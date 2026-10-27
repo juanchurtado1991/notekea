@@ -4,6 +4,7 @@ import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.ListAction
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.SidePanelMode
 import app.notekea.notes.domain.SidePanelSection
 
 /** What the user (or the window around the editor) asked of the note editor. */
@@ -119,7 +120,7 @@ sealed interface EditorIntent {
 
     /**
      * `Mod+Shift+O`: the outline takes the keyboard, showing the side panel and opening the outline first if they were
-     * not. The side panel belongs to the tabs around the editor, which handle this and the next three.
+     * not. The side panel belongs to the tabs around the editor, which handle this and the next four.
      */
     data object OnOutlineFocusRequest : EditorIntent
 
@@ -128,6 +129,9 @@ sealed interface EditorIntent {
 
     /** The user finished dragging the side panel's edge to [widthDp]. */
     data class OnSidePanelResize(val widthDp: Int) : EditorIntent
+
+    /** The side panel's Inspector | Chat control: it shows [mode]. */
+    data class OnSidePanelModeSelect(val mode: SidePanelMode) : EditorIntent
 
     /** A side panel section's header: the section folds or opens. */
     data class OnSidePanelSectionToggle(val section: SidePanelSection) : EditorIntent
