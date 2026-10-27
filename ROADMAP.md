@@ -370,9 +370,17 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 
 ### ⬜ 1.13 Bookmarks — `feature/bookmarks`
 
-- Star a note from the header or the context menu (`Mod+Shift+B`); bookmarks section at the top of the sidebar,
-  reorderable by drag and drop.
-- Stored in the app data directory per vault, so the vault files are never touched.
+- **Bookmark:** the star beside the note's title, "Add to bookmarks" in a tree row's menu, or `Mod+Shift+B` (the
+  active tab's entry, or the selected one) bookmarks a note, a folder or another file; the same action removes it.
+  The star is filled in the accent color while the note is bookmarked.
+- **Bookmarks section:** above the tree, under a "Bookmarks" header with their number that folds them, hidden while
+  there are none. A bookmark opens its entry in a tab and selects it in the tree with its folders open; dragged up or
+  down, it moves among the others; its menu removes it.
+- **Changes:** a bookmark follows its entry when it is renamed or moved in Notekea (a folder takes the bookmarks
+  inside it along) and goes when the entry is deleted there. One whose entry is gone outside the app is greyed out
+  with a ✕ that removes it.
+- **Storage:** in the app's settings, per vault, in order: the vault's files are never touched, and Obsidian's own
+  bookmarks (`.obsidian/bookmarks.json`) are left alone.
 
 ### ⬜ 1.14 Properties view — `feature/properties`
 
