@@ -13,10 +13,13 @@ import java.util.Properties
 /**
  * App settings as `settings.properties` in the app data directory (`PLATFORM_GUIDELINES.md`). The JVM default,
  * `java.util.prefs`, would write outside it. Each change is written to a temporary file and moved into place, so a
- * crash never leaves a half-written file; an unreadable file is logged and replaced by empty settings.
+ * crash never leaves a half-written file; an unreadable file is logged and replaced by empty settings. Saves run one at
+ * a time: features save from several threads at once (the tree's open folders and the tabs, on one click), and two
+ * saves sharing the temporary file would move it away from each other.
  */
 class PropertiesFileSettingsFactory(private val appDataDirectory: String) {
     private val logger = Logger.withTag(tag = LOG_TAG)
+    private val saving = Any()
 
     fun create(): Settings {
         val file = Path.of(appDataDirectory, SETTINGS_FILE_NAME)
@@ -55,7 +58,7 @@ class PropertiesFileSettingsFactory(private val appDataDirectory: String) {
     private fun save(
         properties: Properties,
         file: Path
-    ) {
+    ) = synchronized(lock = saving) {
         Files.createDirectories(file.parent)
         val temporaryFile = file.resolveSibling(SETTINGS_FILE_NAME + TEMPORARY_SUFFIX)
         Files.newOutputStream(temporaryFile).use { properties.store(it, null) }
