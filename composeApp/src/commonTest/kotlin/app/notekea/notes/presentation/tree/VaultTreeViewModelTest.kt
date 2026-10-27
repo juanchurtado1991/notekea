@@ -506,6 +506,27 @@ class VaultTreeViewModelTest {
     }
 
     @Test
+    fun `expand all opens every folder and collapse all closes them, both remembered`() = runTreeTest {
+        listOf("Projects/Garden/Tomato plan.md", "Recipes/Arepas.md").forEach {
+            scanner.addNote(file = file(path = it))
+        }
+        val viewModel = startedViewModel()
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnExpandAll)
+        advanceUntilIdle()
+        val expanded = viewModel.state.value.expandedFolders to preferences.saved.lastOrNull()?.expandedFolders
+        viewModel.onIntent(intent = VaultTreeIntent.OnCollapseAll)
+        advanceUntilIdle()
+
+        val all = setOf(path("Projects"), path("Projects/Garden"), path("Recipes"))
+        assertEquals(
+            expected = (all to all) to (emptySet<RelativePath>() to emptySet<RelativePath>()),
+            actual =
+            expanded to (viewModel.state.value.expandedFolders to preferences.saved.lastOrNull()?.expandedFolders)
+        )
+    }
+
+    @Test
     fun `a file opens with its app, a failure is shown, and a deletion is told to the tabs`() = runTreeTest {
         scanner.addAttachment(file = file(path = PLATE))
         scanner.addAttachment(file = file(path = MENU))

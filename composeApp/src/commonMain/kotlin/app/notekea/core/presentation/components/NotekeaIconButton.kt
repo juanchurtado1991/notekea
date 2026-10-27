@@ -37,7 +37,8 @@ private const val TOOLTIP_SEPARATOR = "  "
  * Compact icon-only button for dense desktop toolbars (the sidebar header), 28 dp with the 6 dp control radius.
  * [label] is what screen readers announce and what the tooltip shows on hover, followed by [shortcutHint] when there
  * is one, so an icon is never the only way to learn what a button does. With [takesFocus] false a click leaves the
- * keyboard where it was, as in a text editor's toolbar, so the text keeps its cursor and selection.
+ * keyboard where it was, as in a text editor's toolbar, so the text keeps its cursor and selection. With
+ * [isTooltipBeside] the tooltip shows to its side instead of below, for a vertical strip of buttons (the tool rail).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,11 +49,14 @@ fun NotekeaIconButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     shortcutHint: String? = null,
-    takesFocus: Boolean = true
+    takesFocus: Boolean = true,
+    isTooltipBeside: Boolean = false
 ) {
     val tooltipText = listOfNotNull(label, shortcutHint).joinToString(separator = TOOLTIP_SEPARATOR)
     TooltipBox(
-        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(positioning = TooltipAnchorPosition.Below),
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+            positioning = if (isTooltipBeside) TooltipAnchorPosition.End else TooltipAnchorPosition.Below
+        ),
         tooltip = { PlainTooltip { Text(text = tooltipText) } },
         state = rememberTooltipState(),
         hasAction = false

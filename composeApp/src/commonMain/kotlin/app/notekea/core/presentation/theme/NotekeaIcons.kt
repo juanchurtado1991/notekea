@@ -2,6 +2,10 @@ package app.notekea.core.presentation.theme
 
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.composables.icons.lucide.ArrowDown
+import com.composables.icons.lucide.ChevronsDownUp
+import com.composables.icons.lucide.ChevronsUpDown
+import com.composables.icons.lucide.FolderTree
+import com.composables.icons.lucide.Minus
 import com.composables.icons.lucide.CalendarDays
 import com.composables.icons.lucide.ChevronLeft
 import com.composables.icons.lucide.ListTree
@@ -86,14 +90,18 @@ object NotekeaIcons {
     val Close: ImageVector get() = Lucide.X
     val CodeBlock: ImageVector get() = Lucide.SquareCode
     val Collapse: ImageVector get() = Lucide.ChevronDown
+    val CollapseAll: ImageVector get() = Lucide.ChevronsDownUp
     val Crash: ImageVector get() = Lucide.TriangleAlert
     val Delete: ImageVector get() = Lucide.Trash2
     val Divider: ImageVector get() = Lucide.SeparatorHorizontal
     val Expand: ImageVector get() = Lucide.ChevronRight
+    val ExpandAll: ImageVector get() = Lucide.ChevronsUpDown
+    val Files: ImageVector get() = Lucide.FolderTree
     val Find: ImageVector get() = Lucide.Search
     val FindNext: ImageVector get() = Lucide.ArrowDown
     val FindPrevious: ImageVector get() = Lucide.ArrowUp
     val ImageFile: ImageVector get() = Lucide.Image
+    val Minimize: ImageVector get() = Lucide.Minus
     val Folder: ImageVector get() = Lucide.Folder
     val FolderOpen: ImageVector get() = Lucide.FolderOpen
     val Heading: ImageVector get() = Lucide.Heading

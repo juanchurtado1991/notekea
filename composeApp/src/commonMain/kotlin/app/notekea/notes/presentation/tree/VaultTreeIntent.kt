@@ -28,6 +28,12 @@ sealed interface VaultTreeIntent {
 
     data object OnExpandSelected : VaultTreeIntent
 
+    /** The header's Expand all: every folder of the vault opens. */
+    data object OnExpandAll : VaultTreeIntent
+
+    /** The header's Collapse all: every folder closes. */
+    data object OnCollapseAll : VaultTreeIntent
+
     /** Opens a file that is not a note with the system's app for it; null opens the selected one. */
     data class OnFileOpen(val path: RelativePath? = null) : VaultTreeIntent
 

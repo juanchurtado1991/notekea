@@ -117,7 +117,7 @@ class TreeFilesScreenTest {
         private const val WINDOW_HEIGHT = 800
         private const val WINDOW_WIDTH = 1_300
         private val MENU = RelativePath(value = "attachments/Weekly menu.pdf")
-        private val MENU_ROW = Offset(x = 127f, y = 237f)
+        private val MENU_ROW = Offset(x = 168f, y = 126f)
         private val OPEN_BUTTON = Offset(x = 383f, y = 388f)
         private val PLATE = RelativePath(value = "attachments/Arepas plate.png")
         private val REVEAL_BUTTON = Offset(x = 543f, y = 388f)

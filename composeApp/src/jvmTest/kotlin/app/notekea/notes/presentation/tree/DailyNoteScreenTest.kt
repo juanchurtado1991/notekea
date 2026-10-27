@@ -89,6 +89,6 @@ class DailyNoteScreenTest {
         private const val WIDTH = 1100
         private val NEXT_ARROW = Offset(x = 1018f, y = 65f)
         private val PREVIOUS_ARROW = Offset(x = 990f, y = 65f)
-        private val TODAY_ROW = Offset(x = 80f, y = 105f)
+        private val TODAY_ROW = Offset(x = 20f, y = 150f)
     }
 }
