@@ -195,7 +195,6 @@ private fun treeIntentFor(
     state: VaultTreeState
 ): VaultTreeIntent? {
     val conventions = state.platformConventions
-    val selectedFolder = state.selectedPath?.takeIf { it in state.tree.folders }
     return when {
         event.key == Key.DirectionDown -> VaultTreeIntent.OnSelectNext
         event.key == Key.DirectionUp -> VaultTreeIntent.OnSelectPrevious
@@ -203,7 +202,7 @@ private fun treeIntentFor(
         event.key == Key.DirectionLeft -> VaultTreeIntent.OnCollapseSelected
         conventions.renameShortcut.matches(event = event) -> VaultTreeIntent.OnRenameRequest()
         conventions.deleteShortcut.matches(event = event) -> VaultTreeIntent.OnDeleteRequest()
-        event.key == Key.Enter && selectedFolder != null -> VaultTreeIntent.OnChevronClick(path = selectedFolder)
+        event.key == Key.Enter && state.selectedPath != null -> VaultTreeIntent.OnOpenSelected
         else -> null
     }
 }

@@ -12,6 +12,13 @@ import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.EditorPreferencesStore
 import app.notekea.notes.domain.GetSidePanelUseCase
+import app.notekea.notes.data.SettingsWorkspaceStore
+import app.notekea.notes.domain.GetNoteCoverUseCase
+import app.notekea.notes.domain.GetWorkspaceUseCase
+import app.notekea.notes.domain.SaveWorkspaceUseCase
+import app.notekea.notes.domain.WorkspaceStore
+import app.notekea.notes.presentation.workspace.WorkspaceTools
+import app.notekea.notes.presentation.workspace.WorkspaceViewModel
 import app.notekea.notes.domain.GetDailyNoteSettingsUseCase
 import app.notekea.notes.domain.OpenDailyNoteUseCase
 import app.notekea.notes.presentation.tree.DailyNoteTools
@@ -60,6 +67,11 @@ val notesModule = module {
     single<NoteMetadataCache> { SqlDelightNoteMetadataCache(database = get(), dispatchers = get()) }
     single<TreePreferencesStore> { SettingsTreePreferencesStore(settings = get(), dispatchers = get()) }
     single<EditorPreferencesStore> { SettingsEditorPreferencesStore(settings = get(), dispatchers = get()) }
+    single<WorkspaceStore> { SettingsWorkspaceStore(settings = get(), dispatchers = get()) }
+    factoryOf(::GetWorkspaceUseCase)
+    factoryOf(::SaveWorkspaceUseCase)
+    factoryOf(::GetNoteCoverUseCase)
+    factoryOf(::WorkspaceTools)
     factoryOf(::GetEditorModeUseCase)
     factoryOf(::SaveEditorModeUseCase)
     factoryOf(::GetSidePanelUseCase)
@@ -107,8 +119,6 @@ val notesModule = module {
             revealEntry = get(),
             fileOpener = get(),
             days = get(),
-            attachmentStore = get(),
-            dispatchers = get(),
             updateLinksAfterRename = get(),
             followLink = get(),
             getTreePreferences = get(),
@@ -124,12 +134,11 @@ val notesModule = module {
             renameAndUpdateLinks = get(),
             getEditorMode = get(),
             saveEditorMode = get(),
-            getSidePanel = get(),
-            saveSidePanel = get(),
             attachmentTools = get()
         )
     }
     viewModel { TagPickerViewModel() }
+    viewModel { parameters -> WorkspaceViewModel(vaultPath = parameters.get(), tools = get()) }
     viewModel { parameters ->
         QuickSwitcherViewModel(
             vaultPath = parameters.get(),

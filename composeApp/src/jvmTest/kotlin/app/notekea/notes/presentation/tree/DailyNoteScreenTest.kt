@@ -63,21 +63,20 @@ class DailyNoteScreenTest {
             vaultName = VAULT_NAME,
             onIntent = onTreeIntent,
             onSwitchVault = {},
-            onSearch = {},
-            noteContent = {
-                EditorContent(
-                    state = EditorState(notePath = RelativePath(value = NOTE)),
-                    buffer = TextFieldState(initialText = BODY),
-                    platformConventions = PreviewPlatformConventions.linux,
-                    onIntent = onEditorIntent,
-                    dayNeighbors = DayNeighbors(
-                        date = CalendarDate(year = 2026, month = 10, day = 22),
-                        previous = RelativePath(value = PREVIOUS),
-                        next = null
-                    )
+            onSearch = {}
+        ) {
+            EditorContent(
+                state = EditorState(notePath = RelativePath(value = NOTE)),
+                buffer = TextFieldState(initialText = BODY),
+                platformConventions = PreviewPlatformConventions.linux,
+                onIntent = onEditorIntent,
+                dayNeighbors = DayNeighbors(
+                    date = CalendarDate(year = 2026, month = 10, day = 22),
+                    previous = RelativePath(value = PREVIOUS),
+                    next = null
                 )
-            }
-        )
+            )
+        }
     }
 
     companion object {

@@ -13,11 +13,15 @@ sealed interface EditorEffect {
     /** Everything pending was saved (or could not be), so the window may close. */
     data object Flushed : EditorEffect
 
-    /** A link to [target] was clicked in [source]: the panes around the editor open the note it leads to. */
+    /**
+     * A link to [target] was clicked in [source]: the panes around the editor open the note it leads to, in a tab behind
+     * the current one when [inBackground].
+     */
     data class OpenLink(
         val source: RelativePath,
         val target: String,
-        val kind: LinkKind
+        val kind: LinkKind,
+        val inBackground: Boolean = false
     ) : EditorEffect
 
     /** The text of the open note should take the keyboard (in Edit mode; Read mode has no cursor). */
@@ -25,9 +29,6 @@ sealed interface EditorEffect {
 
     /** A daily note's arrow was clicked: the window opens the daily note before ([step] -1) or after ([step] 1). */
     data class DayStep(val step: Int) : EditorEffect
-
-    /** The outline should take the keyboard (`Mod+Shift+O`). */
-    data object FocusOutline : EditorEffect
 
     /** An outline [heading] was chosen: the editor scrolls so it sits at the top of the note's view. */
     data class RevealHeading(val heading: OutlineHeading) : EditorEffect

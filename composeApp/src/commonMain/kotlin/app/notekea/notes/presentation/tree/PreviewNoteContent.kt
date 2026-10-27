@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
-import app.notekea.notes.domain.NoteEntry
+import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.presentation.editor.EditorContent
 import app.notekea.notes.presentation.editor.EditorState
 
@@ -17,18 +17,18 @@ private const val PREVIEW_BODY = "Planting starts in March.\n\n- [ ] Buy **seeds
 private const val PREVIEW_HEIGHT_DP = 320
 private const val PREVIEW_WIDTH_DP = 560
 
-/** What the main area shows for a selected [note] in previews: the editor with sample text, no ViewModel. */
+/** What the main area shows for a note at [path] in previews: the editor with sample text, no ViewModel. */
 @Composable
 internal fun PreviewNoteContent(
-    note: NoteEntry
+    path: RelativePath?
 ) {
-    val buffer = remember(note) { TextFieldState(initialText = PREVIEW_BODY) }
+    val buffer = remember(path) { TextFieldState(initialText = PREVIEW_BODY) }
     EditorContent(
-        state = EditorState(notePath = note.file.path),
+        state = EditorState(notePath = path),
         buffer = buffer,
         platformConventions = PreviewPlatformConventions.linux,
         onIntent = {},
-        properties = note.metadata
+        properties = TreePreviewData.tree.notes[path]?.metadata
     )
 }
 
@@ -36,6 +36,6 @@ internal fun PreviewNoteContent(
 @Composable
 private fun PreviewNoteContentPreview() {
     Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
-        TreePreviewData.tree.notes.values.firstOrNull()?.let { PreviewNoteContent(note = it) }
+        PreviewNoteContent(path = TreePreviewData.tree.notes.keys.firstOrNull())
     }
 }

@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import app.notekea.notes.domain.NoteFixtures.file
 import app.notekea.notes.domain.OutlineHeading
 import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.SidePanelPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -23,7 +22,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** The open note's outline and the side panel that shows it (`ROADMAP.md` 1.9), over real use cases and fakes. */
+/** The open note's outline (`ROADMAP.md` 1.9), over real use cases and fakes, and the side panel's floating state. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditorOutlineTest {
     private val testDispatcher = StandardTestDispatcher()
@@ -99,42 +98,18 @@ class EditorOutlineTest {
         }
 
     @Test
-    fun `the side panel is shown at first, hides, keeps its width between notes and is remembered`() = runOutlineTest {
+    fun `going back to a note puts the cursor where it was left`() = runOutlineTest {
         open(path = AREPAS)
-        val first = viewModel.state.value.sidePanel
-        send(intent = EditorIntent.OnSidePanelToggle)
-        send(intent = EditorIntent.OnSidePanelResize(widthDp = 2_000))
+        viewModel.buffer.edit { selection = TextRange(start = 2, end = 8) }
         open(path = PLAIN)
+        val plain = viewModel.buffer.selection
+        open(path = AREPAS)
 
         assertEquals(
-            expected = listOf(
-                SidePanelPreferences(widthDp = 340, isVisible = true),
-                SidePanelPreferences(widthDp = 2_000, isVisible = false),
-                SidePanelPreferences(widthDp = 560, isVisible = false)
-            ),
-            actual = listOf(first, viewModel.state.value.sidePanel, fixture.preferences.sidePanel)
+            expected = TextRange(index = 0) to TextRange(start = 2, end = 8),
+            actual = plain to viewModel.buffer.selection
         )
     }
-
-    @Test
-    fun `a panel left hidden in an earlier run stays hidden, and the outline shortcut shows it and focuses it`() =
-        runOutlineTest {
-            fixture.preferences.sidePanel = SidePanelPreferences(widthDp = 300, isVisible = false)
-            open(path = AREPAS)
-            val hidden = viewModel.state.value.sidePanel
-            val effects = collectEffects()
-
-            send(intent = EditorIntent.OnOutlineFocusRequest)
-
-            assertEquals(
-                expected = Triple(
-                    SidePanelPreferences(widthDp = 300, isVisible = false),
-                    SidePanelPreferences(widthDp = 300, isVisible = true),
-                    listOf<EditorEffect>(EditorEffect.FocusOutline)
-                ),
-                actual = Triple(hidden, fixture.preferences.sidePanel, effects.toList())
-            )
-        }
 
     @Test
     fun `while the panel floats over a narrow window, its button opens and closes it there only`() {

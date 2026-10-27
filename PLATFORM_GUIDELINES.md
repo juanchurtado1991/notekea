@@ -54,6 +54,9 @@ primary modifier and resolved per platform.
 | Previous / next daily note | `Cmd+Option+←` / `Cmd+Option+→` | `Ctrl+Alt+←` / `Ctrl+Alt+→` |
 | Settings | `Cmd+,` | `Ctrl+,` |
 | Close tab | `Cmd+W` | `Ctrl+W` |
+| Next / previous tab | `Ctrl+Tab` / `Ctrl+Shift+Tab` | `Ctrl+Tab` / `Ctrl+Shift+Tab` |
+| Go to tab 1…8, last tab | `Cmd+1`…`Cmd+8`, `Cmd+9` | `Ctrl+1`…`Ctrl+8`, `Ctrl+9` |
+| Split right | `Cmd+Shift+D` | `Ctrl+Shift+D` |
 | Close window | `Cmd+Shift+W` | `Ctrl+Shift+W` |
 | Quit | `Cmd+Q` | `Alt+F4` on Windows, `Ctrl+Q` on Linux |
 

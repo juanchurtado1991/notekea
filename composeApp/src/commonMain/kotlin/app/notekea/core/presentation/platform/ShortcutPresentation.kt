@@ -27,7 +27,9 @@ private const val CONTROL_NAME = "Ctrl"
 private const val DELETE_NAME = "Delete"
 private const val ENTER_NAME = "Enter"
 private const val KEY_SEPARATOR = "+"
+private const val DIGIT_PREFIX = "DIGIT_"
 private const val LEFT_ARROW = "←"
+private const val MAC_TAB_SYMBOL = "⇥"
 private const val RIGHT_ARROW = "→"
 private const val MAC_ALT_SYMBOL = "⌥"
 private const val MAC_BACKSPACE_SYMBOL = "⌫"
@@ -37,6 +39,7 @@ private const val MAC_DELETE_SYMBOL = "⌦"
 private const val MAC_ENTER_SYMBOL = "↩"
 private const val MAC_SHIFT_SYMBOL = "⇧"
 private const val SHIFT_NAME = "Shift"
+private const val TAB_NAME = "Tab"
 private const val WINDOWS_KEY_NAME = "Win"
 private val MODIFIER_ORDER = listOf(
     ShortcutModifier.CONTROL,
@@ -77,6 +80,15 @@ private fun KeyEvent.pressedModifiers(): Set<ShortcutModifier> = buildSet {
 }
 
 private fun ShortcutKey.composeKey(): Key = when (this) {
+    ShortcutKey.DIGIT_1 -> Key.One
+    ShortcutKey.DIGIT_2 -> Key.Two
+    ShortcutKey.DIGIT_3 -> Key.Three
+    ShortcutKey.DIGIT_4 -> Key.Four
+    ShortcutKey.DIGIT_5 -> Key.Five
+    ShortcutKey.DIGIT_6 -> Key.Six
+    ShortcutKey.DIGIT_7 -> Key.Seven
+    ShortcutKey.DIGIT_8 -> Key.Eight
+    ShortcutKey.DIGIT_9 -> Key.Nine
     ShortcutKey.B -> Key.B
     ShortcutKey.BACKSLASH -> Key.Backslash
     ShortcutKey.BACKSPACE -> Key.Backspace
@@ -96,7 +108,9 @@ private fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.Q -> Key.Q
     ShortcutKey.RIGHT -> Key.DirectionRight
     ShortcutKey.S -> Key.S
+    ShortcutKey.TAB -> Key.Tab
     ShortcutKey.V -> Key.V
+    ShortcutKey.W -> Key.W
 }
 
 private fun ShortcutKey.displayName(): String = when (this) {
@@ -112,6 +126,8 @@ private fun ShortcutKey.displayName(): String = when (this) {
 
     ShortcutKey.RIGHT -> RIGHT_ARROW
 
+    ShortcutKey.TAB -> TAB_NAME
+
     ShortcutKey.B,
     ShortcutKey.D,
     ShortcutKey.E,
@@ -125,7 +141,17 @@ private fun ShortcutKey.displayName(): String = when (this) {
     ShortcutKey.P,
     ShortcutKey.Q,
     ShortcutKey.S,
-    ShortcutKey.V -> name
+    ShortcutKey.V,
+    ShortcutKey.W,
+    ShortcutKey.DIGIT_1,
+    ShortcutKey.DIGIT_2,
+    ShortcutKey.DIGIT_3,
+    ShortcutKey.DIGIT_4,
+    ShortcutKey.DIGIT_5,
+    ShortcutKey.DIGIT_6,
+    ShortcutKey.DIGIT_7,
+    ShortcutKey.DIGIT_8,
+    ShortcutKey.DIGIT_9 -> name.removePrefix(prefix = DIGIT_PREFIX)
 }
 
 private fun ShortcutKey.macLabel(): String = when (this) {
@@ -139,6 +165,17 @@ private fun ShortcutKey.macLabel(): String = when (this) {
 
     ShortcutKey.RIGHT -> RIGHT_ARROW
 
+    ShortcutKey.TAB -> MAC_TAB_SYMBOL
+
+    ShortcutKey.DIGIT_1,
+    ShortcutKey.DIGIT_2,
+    ShortcutKey.DIGIT_3,
+    ShortcutKey.DIGIT_4,
+    ShortcutKey.DIGIT_5,
+    ShortcutKey.DIGIT_6,
+    ShortcutKey.DIGIT_7,
+    ShortcutKey.DIGIT_8,
+    ShortcutKey.DIGIT_9,
     ShortcutKey.BACKSLASH,
     ShortcutKey.D,
     ShortcutKey.B,
@@ -153,7 +190,8 @@ private fun ShortcutKey.macLabel(): String = when (this) {
     ShortcutKey.P,
     ShortcutKey.Q,
     ShortcutKey.S,
-    ShortcutKey.V -> displayName()
+    ShortcutKey.V,
+    ShortcutKey.W -> displayName()
 }
 
 private fun ShortcutModifier.displayName(): String = when (this) {

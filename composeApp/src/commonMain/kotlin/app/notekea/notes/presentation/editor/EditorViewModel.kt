@@ -28,10 +28,7 @@ import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.SaveEditorModeUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
 import app.notekea.notes.domain.TaskFinder
-import app.notekea.notes.domain.GetSidePanelUseCase
 import app.notekea.notes.domain.OutlineFinder
-import app.notekea.notes.domain.SaveSidePanelUseCase
-import app.notekea.notes.domain.SidePanelPreferences
 import co.touchlab.kermit.Logger
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Job
@@ -59,8 +56,6 @@ class EditorViewModel(
     private val renameAndUpdateLinks: RenameAndUpdateLinksUseCase,
     private val getEditorMode: GetEditorModeUseCase,
     private val saveEditorMode: SaveEditorModeUseCase,
-    private val getSidePanel: GetSidePanelUseCase,
-    private val saveSidePanel: SaveSidePanelUseCase,
     private val attachmentTools: AttachmentTools
 ) : BaseViewModel<EditorState, EditorIntent, EditorEffect>(initialState = EditorState()) {
     /** The body of the open note, edited in place by the text field. */
@@ -84,6 +79,9 @@ class EditorViewModel(
     // The mode every note opens in: the one the user last chose, here and in earlier runs.
     private var isReadingChosen = false
 
+    // Where the cursor was in each note left in this pane, so going back to its tab puts it there again.
+    private val selections = mutableMapOf<RelativePath, TextRange>()
+
     // A note whose text takes the keyboard as soon as it finishes opening; dropped if another note opens instead.
     private var focusPending: RelativePath? = null
 
@@ -106,10 +104,6 @@ class EditorViewModel(
             reduce { if (it.find == null) it.copy(isReading = isReadingChosen) else it }
         }
         launchGuarded(onError = ::showUnexpectedError) {
-            val panel = getSidePanel()
-            reduce { it.copy(sidePanel = panel) }
-        }
-        launchGuarded(onError = ::showUnexpectedError) {
             snapshotFlow { buffer.text.toString() }.collect { onBufferChanged(body = it) }
         }
     }
@@ -119,7 +113,7 @@ class EditorViewModel(
     ) {
         when (intent) {
             EditorIntent.OnCloseDeleted -> closeDeleted()
-            is EditorIntent.OnLinkClick -> openLink(link = intent.link)
+            is EditorIntent.OnLinkClick -> openLink(link = intent.link, inBackground = intent.inBackground)
             is EditorIntent.OnTagClick -> emit(effect = EditorEffect.SearchTag(tag = intent.tag))
             is EditorIntent.OnFocusRequest -> requestFocus(path = intent.path)
             is EditorIntent.OnTaskToggle -> toggleTask(stateIndex = intent.stateIndex)
@@ -147,9 +141,6 @@ class EditorViewModel(
             EditorIntent.OnTitleErrorDismiss -> reduce { it.copy(titleError = null) }
             is EditorIntent.OnHeadingClick -> revealHeading(index = intent.index)
             is EditorIntent.OnDayStep -> emit(effect = EditorEffect.DayStep(step = intent.step))
-            EditorIntent.OnOutlineFocusRequest -> focusOutline()
-            EditorIntent.OnSidePanelToggle -> updateSidePanel { it.copy(isVisible = !it.isVisible) }
-            is EditorIntent.OnSidePanelResize -> updateSidePanel { it.copy(widthDp = intent.widthDp) }
             else -> onAttachmentIntent(intent = intent)
         }
     }
@@ -172,10 +163,18 @@ class EditorViewModel(
 
     /** Asks the panes around the editor to open the note a Read mode link leads to, from the open note. */
     private fun openLink(
-        link: ReadLink.Note
+        link: ReadLink.Note,
+        inBackground: Boolean
     ) {
         val source = state.value.notePath ?: return
-        emit(effect = EditorEffect.OpenLink(source = source, target = link.target, kind = link.kind))
+        emit(
+            effect = EditorEffect.OpenLink(
+                source = source,
+                target = link.target,
+                kind = link.kind,
+                inBackground = inBackground
+            )
+        )
     }
 
     private fun onBufferChanged(
@@ -219,14 +218,8 @@ class EditorViewModel(
         watchJob?.cancel()
         opened = null
         onDisk = null
-        reduce {
-            EditorState(
-                notePath = path,
-                isLoading = path != null,
-                isReading = isReadingChosen,
-                sidePanel = it.sidePanel
-            )
-        }
+        state.value.notePath?.let { selections[it] = buffer.selection }
+        reduce { EditorState(notePath = path, isLoading = path != null, isReading = isReadingChosen) }
         if (path == null) {
             replaceBuffer(body = "", isNewNote = true)
             return
@@ -236,6 +229,7 @@ class EditorViewModel(
 
             is Outcome.Success -> {
                 show(document = outcome.value, isNewNote = true)
+                restoreSelection(path = path)
                 reduce { it.copy(isLoading = false) }
                 if (focusPending == path) focusText()
                 watch(path = path)
@@ -374,19 +368,15 @@ class EditorViewModel(
         if (isEditable()) focusText()
     }
 
-    /** `Mod+Shift+O`: the side panel is shown if it was hidden, and its outline takes the keyboard. */
-    private fun focusOutline() {
-        if (!state.value.sidePanel.isVisible) updateSidePanel { it.copy(isVisible = true) }
-        emit(effect = EditorEffect.FocusOutline)
-    }
-
-    /** Shows the side panel as [change] says and remembers it for the next notes and runs. */
-    private fun updateSidePanel(
-        change: (SidePanelPreferences) -> SidePanelPreferences
+    /** Puts the cursor (or selection) back where it was when [path] was last left, kept within its text. */
+    private fun restoreSelection(
+        path: RelativePath
     ) {
-        val panel = change(state.value.sidePanel)
-        reduce { it.copy(sidePanel = panel) }
-        launchGuarded(onError = ::showUnexpectedError) { saveSidePanel(preferences = panel) }
+        val kept = selections[path] ?: return
+        val length = buffer.text.length
+        buffer.edit {
+            selection = TextRange(start = kept.start.coerceAtMost(length), end = kept.end.coerceAtMost(length))
+        }
     }
 
     /** Mod+V: a copied image is attached and embedded; copied text replaces the selection, as a paste does. */

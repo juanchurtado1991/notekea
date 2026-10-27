@@ -88,6 +88,8 @@
     <string name="error_notes_reveal_failed">Notekea couldn’t open the file manager for %1$s.</string>
     <string name="error_notes_vault_missing">Notekea can’t find %1$s. It may have been moved, renamed or deleted.</string>
 
+    <string name="folder_empty_message">Notes and files you add to it show up here as cards.</string>
+    <string name="folder_empty_title">This folder is empty</string>
     <string name="format_attach">Image or file: from your computer, also by pasting or dropping it here</string>
     <string name="format_bold">Bold</string>
     <string name="format_bold_placeholder">bold text</string>
@@ -165,6 +167,13 @@
     <string name="switcher_placeholder_link">Choose a note to link</string>
     <string name="switcher_placeholder_notes">Find a note by name or alias</string>
     <string name="switcher_searching">Searching</string>
+    <string name="tab_close">Close tab</string>
+    <string name="tab_close_others">Close other tabs</string>
+    <string name="tab_missing_message">It was moved or deleted outside Notekea. Close the tab, or find it in the sidebar.</string>
+    <string name="tab_missing_title">This file is no longer in the vault</string>
+    <string name="tab_move_to_other_pane">Move to the other pane</string>
+    <string name="tab_new">Open a note in a new tab</string>
+    <string name="tab_split_right">Split right</string>
     <string name="tag_picker_empty_message">Type a name to create the first tag.</string>
     <string name="tag_picker_empty_title">No tags yet</string>
     <string name="tag_picker_new">New tag: #%1$s</string>
@@ -240,4 +249,6 @@
     <string name="welcome_recent_remove">Remove</string>
     <string name="welcome_recent_title">Recent</string>
     <string name="welcome_tagline">Your notes, connected by local AI.</string>
+    <string name="workspace_empty_message">Choose a note, file or folder in the sidebar, or press %1$s to find a note. Each one opens in its own tab.</string>
+    <string name="workspace_empty_title">No open tabs</string>
 </resources>

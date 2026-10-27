@@ -1,5 +1,7 @@
 package app.notekea.notes.presentation.tree
 
+import app.notekea.core.presentation.platform.onMiddleClick
+import app.notekea.core.presentation.platform.PressedModifiers
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -95,14 +97,19 @@ private fun EntryItem(
     onFocusTree: () -> Unit
 ) {
     val draft = state.renaming?.takeIf { it.path == row.path }
+    // Mod+click or the middle button opens the entry in a tab behind the current one (`ROADMAP.md` 1.11).
+    val pressed = remember { PressedModifiers() }
     val folder = row as? TreeRow.Folder
     NotekeaTreeItem(
         label = if (row is TreeRow.Note) row.path.nameWithoutExtension else row.path.name,
         icon = iconOf(row = row),
         depth = row.depth,
         onClick = {
-            onIntent(VaultTreeIntent.OnRowClick(path = row.path))
+            onIntent(VaultTreeIntent.OnRowClick(path = row.path, inBackground = pressed.isModPressed))
             onFocusTree()
+        },
+        modifier = pressed.tracking().onMiddleClick {
+            onIntent(VaultTreeIntent.OnRowClick(path = row.path, inBackground = true))
         },
         selected = row.path == state.selectedPath,
         focused = isFocused && draft == null,

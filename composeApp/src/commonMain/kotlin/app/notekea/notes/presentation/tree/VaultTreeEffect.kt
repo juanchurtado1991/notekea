@@ -12,4 +12,17 @@ sealed interface VaultTreeEffect {
         val from: RelativePath,
         val to: RelativePath
     ) : VaultTreeEffect
+
+    /** [path] was moved to the trash from the tree: its tabs close. */
+    data class EntryDeleted(val path: RelativePath) : VaultTreeEffect
+
+    /**
+     * [path] (a note, another file or a folder) was opened: clicked or chosen with Enter in the tree, reached by a link,
+     * the quick switcher, Today or the day arrows, or just created. Its tab opens, behind the current one when
+     * [inBackground].
+     */
+    data class OpenEntry(
+        val path: RelativePath,
+        val inBackground: Boolean = false
+    ) : VaultTreeEffect
 }

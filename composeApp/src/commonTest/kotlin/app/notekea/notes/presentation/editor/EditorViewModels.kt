@@ -17,8 +17,6 @@ import app.notekea.notes.domain.FakeNoteFileOperations
 import app.notekea.notes.domain.FakeNoteScanner
 import app.notekea.notes.domain.FakeVaultSettingsReader
 import app.notekea.notes.domain.GetEditorModeUseCase
-import app.notekea.notes.domain.GetSidePanelUseCase
-import app.notekea.notes.domain.SaveSidePanelUseCase
 import app.notekea.notes.domain.NoteFixtures.VAULT
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
@@ -68,8 +66,6 @@ class EditorViewModels(dispatcher: CoroutineDispatcher) {
         ),
         getEditorMode = GetEditorModeUseCase(editorPreferencesStore = preferences),
         saveEditorMode = SaveEditorModeUseCase(editorPreferencesStore = preferences),
-        getSidePanel = GetSidePanelUseCase(editorPreferencesStore = preferences),
-        saveSidePanel = SaveSidePanelUseCase(editorPreferencesStore = preferences),
         attachmentTools = AttachmentTools(
             attachmentStore = attachmentStore,
             vaultSettingsReader = settings,
