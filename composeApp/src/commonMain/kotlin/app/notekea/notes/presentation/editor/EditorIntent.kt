@@ -76,6 +76,12 @@ sealed interface EditorIntent {
     /** The toolbar's Tag button: choose a tag in the tag picker. */
     data object OnTagRequest : EditorIntent
 
+    /** `Mod+T` or the toolbar's Insert template: the window opens the template picker, then sends a template. */
+    data object OnTemplateRequest : EditorIntent
+
+    /** The [template] chosen in the picker: filled in and inserted at the cursor, or as the whole of an empty note. */
+    data class OnTemplateInsert(val template: RelativePath) : EditorIntent
+
     /** Mod+V in the text: a copied image is attached and embedded at the cursor, copied text is pasted. */
     data object OnPaste : EditorIntent
 
@@ -91,7 +97,7 @@ sealed interface EditorIntent {
     /** Locate… on a missing file: the file chosen in the picker takes the embed's place. */
     data class OnAttachmentLocate(val embed: Embed) : EditorIntent
 
-    data object OnAttachmentErrorDismiss : EditorIntent
+    data object OnActionErrorDismiss : EditorIntent
 
     /** Mod+E or the header button: switch between Edit and Read mode. */
     data object OnReadModeToggle : EditorIntent

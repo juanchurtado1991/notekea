@@ -155,9 +155,7 @@ class ResolvePlatformConventionsUseCaseTest {
         homeDirectory: String
     ): PlatformConventions {
         val withPrimary = { key: ShortcutKey -> Shortcut(key = key, modifiers = setOf(primary)) }
-        val withPrimaryAndShift = { key: ShortcutKey ->
-            Shortcut(key = key, modifiers = setOf(primary, ShortcutModifier.SHIFT))
-        }
+        val withShift = { key: ShortcutKey -> Shortcut(key = key, modifiers = setOf(primary, ShortcutModifier.SHIFT)) }
         return PlatformConventions(
             operatingSystem = operatingSystem,
             primaryModifier = primary,
@@ -171,22 +169,23 @@ class ResolvePlatformConventionsUseCaseTest {
             findShortcut = withPrimary(ShortcutKey.F),
             toggleReadModeShortcut = withPrimary(ShortcutKey.E),
             quickSwitcherShortcut = withPrimary(ShortcutKey.P),
-            searchNotesShortcut = withPrimaryAndShift(ShortcutKey.F),
+            searchNotesShortcut = withShift(ShortcutKey.F),
             toggleTaskShortcut = withPrimary(ShortcutKey.ENTER),
             boldShortcut = withPrimary(ShortcutKey.B),
             italicShortcut = withPrimary(ShortcutKey.I),
             noteLinkShortcut = withPrimary(ShortcutKey.K),
-            webLinkShortcut = withPrimaryAndShift(ShortcutKey.K),
+            webLinkShortcut = withShift(ShortcutKey.K),
             pasteShortcut = withPrimary(ShortcutKey.V),
-            toggleSidePanelShortcut = withPrimaryAndShift(ShortcutKey.BACKSLASH),
-            outlineShortcut = withPrimaryAndShift(ShortcutKey.O),
+            toggleSidePanelShortcut = withShift(ShortcutKey.BACKSLASH),
+            outlineShortcut = withShift(ShortcutKey.O),
             todayShortcut = withPrimary(ShortcutKey.D),
             previousDayShortcut = Shortcut(key = ShortcutKey.LEFT, modifiers = setOf(primary, ShortcutModifier.ALT)),
             nextDayShortcut = Shortcut(key = ShortcutKey.RIGHT, modifiers = setOf(primary, ShortcutModifier.ALT)),
             closeTabShortcut = withPrimary(ShortcutKey.W),
             nextTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL),
             previousTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL + ShortcutModifier.SHIFT),
-            splitRightShortcut = withPrimaryAndShift(ShortcutKey.D),
+            splitRightShortcut = withShift(ShortcutKey.D),
+            templateShortcut = withPrimary(ShortcutKey.T),
             goToTabShortcuts = DIGITS.map(withPrimary),
             dialogButtonOrder = buttonOrder,
             appDataDirectory = appDataDirectory,

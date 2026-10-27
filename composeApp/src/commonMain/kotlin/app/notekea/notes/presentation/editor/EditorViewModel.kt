@@ -14,6 +14,8 @@ import androidx.compose.ui.text.TextRange
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.FormatAction
+import app.notekea.notes.domain.TemplateInsertion
+import app.notekea.notes.domain.FillTemplateUseCase
 import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.ListAction
 import app.notekea.notes.domain.ListEditing
@@ -56,7 +58,8 @@ class EditorViewModel(
     private val renameAndUpdateLinks: RenameAndUpdateLinksUseCase,
     private val getEditorMode: GetEditorModeUseCase,
     private val saveEditorMode: SaveEditorModeUseCase,
-    private val attachmentTools: AttachmentTools
+    private val attachmentTools: AttachmentTools,
+    private val fillTemplate: FillTemplateUseCase
 ) : BaseViewModel<EditorState, EditorIntent, EditorEffect>(initialState = EditorState()) {
     /** The body of the open note, edited in place by the text field. */
     val buffer = TextFieldState()
@@ -67,6 +70,7 @@ class EditorViewModel(
     private val markdownFormatter = MarkdownFormatter()
     private val listEditing = ListEditing()
     private val outlineFinder = OutlineFinder()
+    private val templateInsertion = TemplateInsertion()
     private var outlineJob: Job? = null
     private val saveLock = Mutex()
     private var autosaveJob: Job? = null
@@ -122,6 +126,8 @@ class EditorViewModel(
             is EditorIntent.OnListKey -> editList(action = intent.action)
             EditorIntent.OnNoteLinkRequest -> requestPicker(effect = EditorEffect.RequestNoteLink)
             EditorIntent.OnTagRequest -> requestPicker(effect = EditorEffect.RequestTag(query = selectedForTag()))
+            EditorIntent.OnTemplateRequest -> requestTemplate()
+            is EditorIntent.OnTemplateInsert -> runSave { insertTemplate(template = intent.template) }
             EditorIntent.OnFindClose -> closeFind()
             EditorIntent.OnFindNext -> moveToMatch(step = 1)
             EditorIntent.OnFindOpen -> openFind()
@@ -258,10 +264,7 @@ class EditorViewModel(
         action: FormatAction
     ) {
         if (!isEditable()) return
-        val length = buffer.text.length
-        val selection = pickerSelection?.let { TextRange(it.start.coerceAtMost(length), it.end.coerceAtMost(length)) }
-            ?: buffer.selection
-        pickerSelection = null
+        val selection = takePickerSelection()
         val edit = markdownFormatter.format(
             text = buffer.text.toString(),
             selectionStart = selection.start,
@@ -302,6 +305,63 @@ class EditorViewModel(
         emit(effect = effect)
     }
 
+    /** The template picker is opened for this note; Read mode turns to Edit first, so the template is seen going in. */
+    private fun requestTemplate() {
+        val current = state.value
+        if (current.notePath == null || current.isLoading) return
+        if (current.isReading) chooseMode(isReading = false)
+        requestPicker(effect = EditorEffect.RequestTemplate)
+    }
+
+    /**
+     * Fills [template] in for this note and inserts it where the picker found the selection, as one edit (undone in one
+     * step); its properties merge into the note's frontmatter, which is saved at once. A template that cannot be read
+     * says so in a banner.
+     */
+    private suspend fun insertTemplate(
+        template: RelativePath
+    ) {
+        val path = state.value.notePath ?: return
+        val document = opened ?: return
+        if (!isEditable() || state.value.hasConflict || state.value.isDeleted) return
+        val filled = when (val outcome = fillTemplate(vaultPath, template, title = path.nameWithoutExtension)) {
+            is Outcome.Failure -> {
+                reduce { it.copy(actionError = outcome.error) }
+                return
+            }
+
+            is Outcome.Success -> outcome.value
+        }
+        val selection = takePickerSelection()
+        val result = templateInsertion.insert(
+            note = document.copy(body = buffer.text.toString()),
+            selectionStart = selection.start,
+            selectionEnd = selection.end,
+            template = filled
+        )
+        buffer.edit {
+            replace(start = result.edit.start, end = result.edit.end, text = result.edit.replacement)
+            this.selection = TextRange(start = result.edit.selectionStart, end = result.edit.selectionEnd)
+        }
+        if (result.header != document.header) {
+            write(
+                path = path,
+                document = document.copy(header = result.header, body = buffer.text.toString()),
+                expectedOnDisk = onDisk
+            )
+        }
+        emit(effect = EditorEffect.FocusText)
+    }
+
+    /** The selection a picker found, within the text as it is now, or the current one; the picker's is used once. */
+    private fun takePickerSelection(): TextRange {
+        val length = buffer.text.length
+        val selection = pickerSelection?.let { TextRange(it.start.coerceAtMost(length), it.end.coerceAtMost(length)) }
+            ?: buffer.selection
+        pickerSelection = null
+        return selection
+    }
+
     /** The selected text as the tag picker's first search, when it is a short phrase on one line. */
     private fun selectedForTag(): String {
         val selection = buffer.selection
@@ -318,7 +378,7 @@ class EditorViewModel(
             EditorIntent.OnAttachmentPick -> pick()
             is EditorIntent.OnAttachmentOpen -> openAttachment(path = intent.path)
             is EditorIntent.OnAttachmentLocate -> locate(embed = intent.embed)
-            EditorIntent.OnAttachmentErrorDismiss -> reduce { it.copy(attachmentError = null) }
+            EditorIntent.OnActionErrorDismiss -> reduce { it.copy(actionError = null) }
             else -> Unit
         }
     }
@@ -388,7 +448,7 @@ class EditorViewModel(
             when {
                 // An image the clipboard cannot give is explained, instead of pasting nothing or other text.
                 image is Outcome.Failure -> {
-                    reduce { it.copy(attachmentError = image.error) }
+                    reduce { it.copy(actionError = image.error) }
                     return@launchGuarded
                 }
 
@@ -440,7 +500,7 @@ class EditorViewModel(
         for (source in sources) {
             when (val attached = attachments.attach(note = note, source = source, withDefaultWidth = true)) {
                 is Outcome.Success -> embeds += attached.value
-                is Outcome.Failure -> reduce { it.copy(attachmentError = attached.error) }
+                is Outcome.Failure -> reduce { it.copy(actionError = attached.error) }
             }
         }
         if (embeds.isNotEmpty()) {
@@ -455,7 +515,7 @@ class EditorViewModel(
     ) {
         launchGuarded(onError = ::showUnexpectedError) {
             val opened = attachmentTools.fileOpener.open(vaultPath = vaultPath, path = path)
-            if (opened is Outcome.Failure) reduce { it.copy(attachmentError = opened.error) }
+            if (opened is Outcome.Failure) reduce { it.copy(actionError = opened.error) }
         }
     }
 
@@ -469,7 +529,7 @@ class EditorViewModel(
             val picked = attachmentTools.attachmentPicker.pickFile() ?: return@launchGuarded
             val source = AttachmentSource.File(absolutePath = picked)
             when (val attached = attachments.attach(note = note, source = source, width = embed.width)) {
-                is Outcome.Failure -> reduce { it.copy(attachmentError = attached.error) }
+                is Outcome.Failure -> reduce { it.copy(actionError = attached.error) }
                 is Outcome.Success -> replaceEmbed(embed = embed, written = written, replacement = attached.value)
             }
         }

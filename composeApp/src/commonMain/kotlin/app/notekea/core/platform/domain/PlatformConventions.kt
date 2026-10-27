@@ -33,6 +33,7 @@ data class PlatformConventions(
     val nextTabShortcut: Shortcut,
     val previousTabShortcut: Shortcut,
     val splitRightShortcut: Shortcut,
+    val templateShortcut: Shortcut,
 
     /** `Mod+1` to `Mod+9`, in order: the first tabs, the last one for 9. */
     val goToTabShortcuts: List<Shortcut>,

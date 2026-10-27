@@ -14,7 +14,7 @@ import app.notekea.notes.domain.RelativePath
  * refused (invalid, hidden or taken name), shown under the title until it is edited again. [find] is Find in note
  * while its bar is open, and null when it is closed. [isReading] shows the note rendered (Read mode) instead of its
  * Markdown; notes open in the mode the user last chose. [attachments] are the files the note embeds, in text order
- * ([AttachmentView]), and [attachmentError] why attaching, opening or locating one failed, until it is dismissed.
+ * ([AttachmentView]), and [actionError] why attaching, opening or locating one failed, until it is dismissed.
  * [outline] is the note's headings in text order (`ROADMAP.md` 1.9).
  */
 data class EditorState(
@@ -29,6 +29,6 @@ data class EditorState(
     val find: FindState? = null,
     val isReading: Boolean = false,
     val attachments: List<AttachmentView> = emptyList(),
-    val attachmentError: NotesError? = null,
+    val actionError: NotesError? = null,
     val outline: List<OutlineHeading> = emptyList()
 )

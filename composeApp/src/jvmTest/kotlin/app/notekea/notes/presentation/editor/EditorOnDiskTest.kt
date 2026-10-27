@@ -1,5 +1,7 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.FillTemplateUseCase
+import app.notekea.core.domain.time.FakeLocalCalendar
 import androidx.compose.ui.text.TextRange
 import kotlin.time.Clock
 import app.notekea.notes.domain.FakeFileOpener
@@ -174,28 +176,53 @@ class EditorOnDiskTest {
             openNote = OpenNoteUseCase(noteContentStore = store),
             saveNote = SaveNoteUseCase(noteContentStore = store),
             observeNoteOnDisk = ObserveNoteOnDiskUseCase(noteScanner = scanner, noteContentStore = store),
-            renameAndUpdateLinks = RenameAndUpdateLinksUseCase(
-                noteScanner = scanner,
-                renameEntry = RenameEntryUseCase(
-                    noteFileOperations = OkioNoteFileOperations(
-                        fileSystem = FileSystem.SYSTEM,
-                        dispatchers = dispatchers
-                    ),
-                    validateFileName = ValidateFileNameUseCase()
-                ),
-                updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
-                    planLinkUpdates = PlanLinkUpdatesUseCase(
-                        noteContentStore = store,
-                        linkFinder = JetBrainsMarkdownLinkFinder()
-                    ),
-                    applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store)
-                )
-            ),
+            renameAndUpdateLinks = renameAndUpdateLinks(store = store, scanner = scanner, dispatchers = dispatchers),
             getEditorMode = GetEditorModeUseCase(editorPreferencesStore = preferences),
             saveEditorMode = SaveEditorModeUseCase(editorPreferencesStore = preferences),
-            attachmentTools = attachmentTools(dispatchers = dispatchers)
+            attachmentTools = attachmentTools(dispatchers = dispatchers),
+            fillTemplate = FillTemplateUseCase(
+                vaultSettingsReader = ObsidianVaultSettingsReader(
+                    fileSystem = FileSystem.SYSTEM,
+                    dispatchers = dispatchers
+                ),
+                noteContentStore = store,
+                localCalendar = FakeLocalCalendar(),
+                clock = Clock.System
+            )
         )
     }
+
+    private fun renameAndUpdateLinks(
+        store: OkioNoteContentStore,
+        scanner: OkioNoteScanner,
+        dispatchers: JvmAppDispatchers
+    ): RenameAndUpdateLinksUseCase = RenameAndUpdateLinksUseCase(
+        noteScanner = scanner,
+        renameEntry = RenameEntryUseCase(
+            noteFileOperations = OkioNoteFileOperations(
+                fileSystem = FileSystem.SYSTEM,
+                dispatchers = dispatchers
+            ),
+            validateFileName = ValidateFileNameUseCase()
+        ),
+        updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
+            planLinkUpdates = PlanLinkUpdatesUseCase(
+                noteContentStore = store,
+                linkFinder = JetBrainsMarkdownLinkFinder()
+            ),
+            applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store)
+        )
+    )
+
+    private fun fillTemplate(
+        store: OkioNoteContentStore,
+        dispatchers: JvmAppDispatchers
+    ): FillTemplateUseCase = FillTemplateUseCase(
+        vaultSettingsReader = ObsidianVaultSettingsReader(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers),
+        noteContentStore = store,
+        localCalendar = FakeLocalCalendar(),
+        clock = Clock.System
+    )
 
     private fun awaitUntil(
         condition: () -> Boolean

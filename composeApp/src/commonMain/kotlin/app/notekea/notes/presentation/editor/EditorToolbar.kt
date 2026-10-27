@@ -66,6 +66,7 @@ import app.notekea.resources.format_quote
 import app.notekea.resources.format_table
 import app.notekea.resources.format_table_size
 import app.notekea.resources.format_tag
+import app.notekea.resources.format_template
 import app.notekea.resources.format_web_link
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -193,7 +194,12 @@ private fun FormattingGroups(
             onIntent = onIntent
         )
         ListGroup(actions = actions, format = format)
-        BlockGroup(actions = actions, format = format, onAttach = { onIntent(EditorIntent.OnAttachmentPick) })
+        BlockGroup(
+            actions = actions,
+            platformConventions = platformConventions,
+            format = format,
+            onIntent = onIntent
+        )
     }
 }
 
@@ -307,17 +313,33 @@ private fun ListGroup(
     }
 }
 
-/** Callout (a menu of its types), Code block (a menu of languages), Image or file, and More (Quote, Divider, Table). */
+/**
+ * Callout (a menu of its types), Code block (a menu of languages), Image or file, Insert template (the template
+ * picker) and More (Quote, Divider, Table).
+ */
 @Composable
 private fun BlockGroup(
     actions: FormatActions,
+    platformConventions: PlatformConventions,
     format: (FormatAction) -> Unit,
-    onAttach: () -> Unit
+    onIntent: (EditorIntent) -> Unit
 ) {
     ToolbarGroup {
         CalloutMenu(actions = actions, format = format)
         CodeBlockMenu(actions = actions, format = format)
-        ToolbarButton(icon = NotekeaIcons.AttachFile, label = Res.string.format_attach, onClick = onAttach)
+        ToolbarButton(
+            icon = NotekeaIcons.AttachFile,
+            label = Res.string.format_attach,
+            onClick = { onIntent(EditorIntent.OnAttachmentPick) }
+        )
+        ToolbarButton(
+            icon = NotekeaIcons.Template,
+            label = Res.string.format_template,
+            onClick = { onIntent(EditorIntent.OnTemplateRequest) },
+            shortcutHint = platformConventions.templateShortcut.label(
+                operatingSystem = platformConventions.operatingSystem
+            )
+        )
         MoreMenu(actions = actions, format = format)
     }
 }

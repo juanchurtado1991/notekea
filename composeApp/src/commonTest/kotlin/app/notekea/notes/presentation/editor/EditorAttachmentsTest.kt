@@ -137,7 +137,7 @@ class EditorAttachmentsTest {
 
         assertEquals(
             expected = "Intro" to NotesError.ClipboardToolMissing(tool = "wl-clipboard"),
-            actual = viewModel.buffer.text.toString() to viewModel.state.value.attachmentError
+            actual = viewModel.buffer.text.toString() to viewModel.state.value.actionError
         )
     }
 
@@ -166,12 +166,12 @@ class EditorAttachmentsTest {
         send(intent = EditorIntent.OnAttachmentOpen(path = menu))
         fixture.opener.failure = NotesError.OpenFailed(path = menu.value)
         send(intent = EditorIntent.OnAttachmentOpen(path = menu))
-        val error = viewModel.state.value.attachmentError
-        send(intent = EditorIntent.OnAttachmentErrorDismiss)
+        val error = viewModel.state.value.actionError
+        send(intent = EditorIntent.OnActionErrorDismiss)
 
         assertEquals(
             expected = Triple(listOf(menu), NotesError.OpenFailed(path = menu.value), null),
-            actual = Triple(fixture.opener.opened.toList(), error, viewModel.state.value.attachmentError)
+            actual = Triple(fixture.opener.opened.toList(), error, viewModel.state.value.actionError)
         )
     }
 

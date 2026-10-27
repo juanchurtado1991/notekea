@@ -65,6 +65,7 @@ object PreviewPlatformConventions {
             key = ShortcutKey.D,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
+        templateShortcut = Shortcut(key = ShortcutKey.T, modifiers = setOf(ShortcutModifier.CONTROL)),
         goToTabShortcuts = ShortcutKey.entries.filter { it.name.startsWith(prefix = "DIGIT_") }.map {
             Shortcut(key = it, modifiers = setOf(ShortcutModifier.CONTROL))
         },

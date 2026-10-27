@@ -1,5 +1,9 @@
 package app.notekea.notes.presentation.tree
 
+import app.notekea.notes.domain.VaultTree
+import app.notekea.notes.presentation.templates.TemplatePickerEffect
+import app.notekea.notes.presentation.workspace.TabKind
+import app.notekea.notes.presentation.workspace.WorkspaceState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +35,10 @@ import app.notekea.notes.presentation.tags.TagPickerContent
 import app.notekea.notes.presentation.tags.TagPickerEffect
 import app.notekea.notes.presentation.tags.TagPickerIntent
 import app.notekea.notes.presentation.tags.TagPickerViewModel
+import app.notekea.notes.presentation.templates.TemplatePickerContent
+import app.notekea.notes.presentation.templates.TemplatePickerIntent
+import app.notekea.notes.presentation.templates.TemplatePickerViewModel
+import app.notekea.notes.presentation.templates.TemplateTarget
 import app.notekea.notes.presentation.workspace.WorkspaceEffect
 import app.notekea.notes.presentation.workspace.WorkspaceIntent
 import app.notekea.notes.presentation.workspace.WorkspaceShortcuts
@@ -44,10 +52,10 @@ import org.koin.core.parameter.parametersOf
 /**
  * Vault workspace entry point for the vault at [vaultPath]: one [VaultTreeViewModel], one [WorkspaceViewModel] for the
  * tabs and panes, one [EditorViewModel] per pane and one [QuickSwitcherViewModel] per vault (opening another vault
- * starts fresh), rendered by [VaultWorkspace] with the quick switcher palette and the tag picker over it. They follow
- * each other: what the tree opens (a click, a link, the quick switcher, Today) opens in a tab, and the tree selects the
- * active tab's file; a rename moves the tabs and the editors' notes, a deletion closes its tabs; the palette and the
- * tag picker work on the note of the active pane. The workspace shortcuts work whatever has focus.
+ * starts fresh), rendered by [VaultWorkspace] with the quick switcher palette, the tag picker and the template picker
+ * over it. They follow each other: what the tree opens (a click, a link, the quick switcher, Today) opens in a tab, and
+ * the tree selects the active tab's file; a rename moves the tabs and the editors' notes, a deletion closes its tabs;
+ * the palette and the pickers work on the note of the active pane. The workspace shortcuts work whatever has focus.
  */
 @Composable
 fun VaultTreeScreen(
@@ -65,12 +73,13 @@ fun VaultTreeScreen(
     switcherViewModel: QuickSwitcherViewModel = koinViewModel(
         key = SWITCHER_KEY_PREFIX + vaultPath
     ) { parametersOf(vaultPath) },
-    tagPickerViewModel: TagPickerViewModel = koinViewModel(key = TAG_PICKER_KEY_PREFIX + vaultPath)
+    tagPickerViewModel: TagPickerViewModel = koinViewModel(key = TAG_PICKER_KEY_PREFIX + vaultPath),
+    templatePickerViewModel: TemplatePickerViewModel = koinViewModel(
+        key = TEMPLATE_PICKER_KEY_PREFIX + vaultPath
+    ) { parametersOf(vaultPath) }
 ) {
     val state by viewModel.state.collectAsState()
     val workspaceState by workspaceViewModel.state.collectAsState()
-    val switcherState by switcherViewModel.state.collectAsState()
-    val tagPickerState by tagPickerViewModel.state.collectAsState()
     val activeEditor = editorViewModels[workspaceState.workspace.activePane]
     val panes = remember(vaultPath) { List(size = Workspace.MAX_PANES) { EditorPaneTools() } }
     val sidePanel = remember(workspaceViewModel) {
@@ -81,11 +90,10 @@ fun VaultTreeScreen(
         workspace = workspaceViewModel,
         editors = editorViewModels,
         onSwitcher = switcherViewModel::onIntent,
-        onTagPicker = tagPickerViewModel::onIntent
+        onTagPicker = tagPickerViewModel::onIntent,
+        onTemplatePicker = templatePickerViewModel::onIntent
     )
     WorkspaceFollowers(state = state, viewModels = viewModels, sidePanel = sidePanel)
-    FollowQuickSwitcher(switcher = switcherViewModel, tree = viewModel, editor = activeEditor, notes = state.tree.notes)
-    FollowTagPicker(tagPicker = tagPickerViewModel, editor = activeEditor, notes = state.tree.notes.values)
     Box(modifier = modifier) {
         VaultWorkspace(
             state = state,
@@ -96,9 +104,51 @@ fun VaultTreeScreen(
             sidePanel = sidePanel,
             onSwitchVault = onSwitchVault
         )
-        QuickSwitcherContent(state = switcherState, onIntent = switcherViewModel::onIntent)
-        TagPickerContent(state = tagPickerState, onIntent = tagPickerViewModel::onIntent)
+        Pickers(
+            state = state,
+            workspaceState = workspaceState,
+            tree = viewModel,
+            editor = activeEditor,
+            switcher = switcherViewModel,
+            tagPicker = tagPickerViewModel,
+            templatePicker = templatePickerViewModel
+        )
     }
+}
+
+/**
+ * The quick switcher palette, the tag picker and the template picker, over the workspace while open, following the
+ * tree and the active pane's [editor]; `Mod+T` opens the template picker.
+ */
+@Composable
+private fun Pickers(
+    state: VaultTreeState,
+    workspaceState: WorkspaceState,
+    tree: VaultTreeViewModel,
+    editor: EditorViewModel,
+    switcher: QuickSwitcherViewModel,
+    tagPicker: TagPickerViewModel,
+    templatePicker: TemplatePickerViewModel
+) {
+    FollowQuickSwitcher(switcher = switcher, tree = tree, editor = editor, notes = state.tree.notes)
+    FollowTagPicker(tagPicker = tagPicker, editor = editor, notes = state.tree.notes.values)
+    FollowTemplatePicker(templatePicker = templatePicker, tree = tree, editor = editor, state = state)
+    TemplateShortcut(
+        platformConventions = state.platformConventions,
+        workspaceState = workspaceState,
+        editor = editor,
+        onTemplatePicker = templatePicker::onIntent
+    )
+    val switcherState by switcher.state.collectAsState()
+    val tagPickerState by tagPicker.state.collectAsState()
+    val templatePickerState by templatePicker.state.collectAsState()
+    QuickSwitcherContent(state = switcherState, onIntent = switcher::onIntent)
+    TagPickerContent(state = tagPickerState, onIntent = tagPicker::onIntent)
+    TemplatePickerContent(
+        state = templatePickerState,
+        platformConventions = state.platformConventions,
+        onIntent = templatePicker::onIntent
+    )
 }
 
 /** The side panel's requests from the editor's toolbar and outline, as the tabs' intents. */
@@ -134,7 +184,7 @@ private fun WorkspaceFollowers(
         onIntent = workspace::onIntent,
         onSidePanelToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) }
     )
-    FollowTree(state = state, viewModel = tree, workspaceViewModel = workspace, editors = viewModels.editors)
+    FollowTree(state = state, viewModels = viewModels)
     LaunchedEffect(workspace) {
         workspace.effects.collect { effect ->
             when (effect) {
@@ -152,15 +202,14 @@ private fun WorkspaceFollowers(
 @Composable
 private fun FollowTree(
     state: VaultTreeState,
-    viewModel: VaultTreeViewModel,
-    workspaceViewModel: WorkspaceViewModel,
-    editors: List<EditorViewModel>
+    viewModels: WorkspaceViewModels
 ) {
+    val viewModel = viewModels.tree
+    val workspaceViewModel = viewModels.workspace
+    val editors = viewModels.editors
     val workspaceState by workspaceViewModel.state.collectAsState()
     LaunchedEffect(viewModel, workspaceViewModel) {
-        viewModel.effects.collect { effect ->
-            followTreeEffect(effect = effect, workspace = workspaceViewModel, editors = editors)
-        }
+        viewModel.effects.collect { effect -> followTreeEffect(effect = effect, viewModels = viewModels) }
     }
     LaunchedEffect(state.tree, state.isLoading) {
         workspaceViewModel.onIntent(
@@ -184,12 +233,12 @@ private fun FollowTree(
     }
 }
 
-/** What the tree did that the tabs and the editors follow. */
+/** What the tree did that the tabs, the editors and the template picker follow. */
 private fun followTreeEffect(
     effect: VaultTreeEffect,
-    workspace: WorkspaceViewModel,
-    editors: List<EditorViewModel>
+    viewModels: WorkspaceViewModels
 ) {
+    val workspace = viewModels.workspace
     when (effect) {
         is VaultTreeEffect.OpenEntry -> {
             workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = effect.path, inBackground = effect.inBackground))
@@ -199,13 +248,17 @@ private fun followTreeEffect(
 
         is VaultTreeEffect.EntryRenamed -> {
             workspace.onIntent(intent = WorkspaceIntent.OnRenamed(from = effect.from, to = effect.to))
-            editors.forEach { editor ->
+            viewModels.editors.forEach { editor ->
                 val open = editor.state.value.notePath ?: return@forEach
                 if (open.isWithin(folder = effect.from)) {
                     editor.onIntent(EditorIntent.OnNoteMoved(path = open.rebased(from = effect.from, to = effect.to)))
                 }
             }
         }
+
+        is VaultTreeEffect.ChooseTemplate -> viewModels.onTemplatePicker(
+            TemplatePickerIntent.OnOpen(target = TemplateTarget.NewNote(folder = effect.folder))
+        )
     }
 }
 
@@ -296,6 +349,82 @@ private fun FollowTagPicker(
     }
 }
 
+/**
+ * `Mod+T` (`ROADMAP.md` 1.12): with a note in the active tab, the template picker opens for it, through its editor so
+ * the selection is kept; otherwise for a new note, in the folder the active tab shows or holds (the vault root without
+ * tabs).
+ */
+@Composable
+private fun TemplateShortcut(
+    platformConventions: PlatformConventions,
+    workspaceState: WorkspaceState,
+    editor: EditorViewModel,
+    onTemplatePicker: (TemplatePickerIntent) -> Unit
+) {
+    val currentState by rememberUpdatedState(newValue = workspaceState)
+    val currentEditor by rememberUpdatedState(newValue = editor)
+    WindowShortcut(shortcut = platformConventions.templateShortcut) {
+        val active = currentState.workspace.activePath
+        val kind = active?.let { currentState.kindOf(path = it) }
+        if (kind == TabKind.NOTE) {
+            currentEditor.onIntent(intent = EditorIntent.OnTemplateRequest)
+        } else {
+            val folder = if (kind == TabKind.FOLDER) active else active?.parent
+            onTemplatePicker(
+                TemplatePickerIntent.OnOpen(
+                    target = TemplateTarget.NewNote(
+                        folder =
+                        folder ?: RelativePath.ROOT
+                    )
+                )
+            )
+        }
+    }
+}
+
+/**
+ * The template picker lists the vault tree's templates as it changes. A template chosen for the open note goes into it
+ * at the cursor; one chosen for a new note makes it in the tree, filled once it is named; closing the picker without
+ * choosing gives the keyboard back to the note.
+ */
+@Composable
+private fun FollowTemplatePicker(
+    templatePicker: TemplatePickerViewModel,
+    tree: VaultTreeViewModel,
+    editor: EditorViewModel,
+    state: VaultTreeState
+) {
+    val vaultTree = state.tree
+    val untitledNote = stringResource(resource = Res.string.tree_untitled_note)
+    LaunchedEffect(templatePicker, vaultTree) {
+        templatePicker.onIntent(intent = TemplatePickerIntent.OnTreeChange(tree = vaultTree))
+    }
+    val currentEditor by rememberUpdatedState(newValue = editor)
+    val currentUntitled by rememberUpdatedState(newValue = untitledNote)
+    LaunchedEffect(templatePicker, tree) {
+        templatePicker.effects.collect { effect ->
+            when (effect) {
+                is TemplatePickerEffect.TemplateChosen -> when (val target = effect.target) {
+                    TemplateTarget.CurrentNote -> {
+                        currentEditor.onIntent(intent = EditorIntent.OnTemplateInsert(template = effect.template))
+                    }
+
+                    is TemplateTarget.NewNote -> tree.onIntent(
+                        intent = VaultTreeIntent.OnNoteFromTemplate(
+                            folder = target.folder,
+                            template = effect.template,
+                            baseName = currentUntitled
+                        )
+                    )
+                }
+
+                TemplatePickerEffect.Dismissed -> currentEditor.onIntent(intent = EditorIntent.OnFocusRequest())
+            }
+        }
+    }
+}
+
+private const val TEMPLATE_PICKER_KEY_PREFIX = "templates:"
 private const val EDITOR_KEY_PREFIX = "editor:"
 private const val SWITCHER_KEY_PREFIX = "switcher:"
 private const val TAG_PICKER_KEY_PREFIX = "tags:"

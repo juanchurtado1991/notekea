@@ -46,16 +46,21 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             previousDayShortcut = primary(ShortcutKey.LEFT, ShortcutModifier.ALT),
             nextDayShortcut = primary(ShortcutKey.RIGHT, ShortcutModifier.ALT),
             closeTabShortcut = primary(ShortcutKey.W, null),
-            // Ctrl+Tab on every system, macOS included, as browsers and editors do.
-            nextTabShortcut = shortcut(ShortcutKey.TAB, ShortcutModifier.CONTROL, null),
-            previousTabShortcut = shortcut(ShortcutKey.TAB, ShortcutModifier.CONTROL, ShortcutModifier.SHIFT),
+            nextTabShortcut = controlTab(extra = null),
+            previousTabShortcut = controlTab(extra = ShortcutModifier.SHIFT),
             splitRightShortcut = primary(ShortcutKey.D, ShortcutModifier.SHIFT),
+            templateShortcut = primary(ShortcutKey.T, null),
             goToTabShortcuts = DIGITS.map { primary(it, null) },
             dialogButtonOrder = dialogButtonOrderFor(operatingSystem = operatingSystem),
             appDataDirectory = appDataDirectoryFor(operatingSystem = operatingSystem),
             homeDirectory = systemEnvironment.userHome
         )
     }
+
+    /** Ctrl+Tab on every system, macOS included, as browsers and editors do; with Shift ([extra]) the other way. */
+    private fun controlTab(
+        extra: ShortcutModifier?
+    ): Shortcut = shortcut(ShortcutKey.TAB, ShortcutModifier.CONTROL, extra)
 
     /** [key] with [modifier], and [extra] when there is one. */
     private fun shortcut(

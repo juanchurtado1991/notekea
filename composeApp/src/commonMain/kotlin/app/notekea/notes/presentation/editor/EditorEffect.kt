@@ -39,6 +39,9 @@ sealed interface EditorEffect {
     /** Tag was asked for: the window opens the tag picker with [query] (the selected text) typed, then sends a tag. */
     data class RequestTag(val query: String) : EditorEffect
 
+    /** Insert template was asked for: the window opens the template picker, then sends the template to insert. */
+    data object RequestTemplate : EditorEffect
+
     /** A `#tag` was clicked in Read mode: the window searches it in all notes. */
     data class SearchTag(val tag: String) : EditorEffect
 

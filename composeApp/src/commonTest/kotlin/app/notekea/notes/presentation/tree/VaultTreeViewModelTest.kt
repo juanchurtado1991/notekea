@@ -15,7 +15,9 @@ import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.CreateFolderUseCase
+import app.notekea.notes.domain.ApplyTemplateUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
+import app.notekea.notes.domain.FillTemplateUseCase
 import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.FakeFileOpener
 import app.notekea.notes.domain.FakeFileRevealer
@@ -157,6 +159,55 @@ class VaultTreeViewModelTest {
         )
         assertTrue(actual = path("$PROJECTS/Untitled.md") in operations.existing)
     }
+
+    @Test
+    fun `new note from template asks for a template for the selected folder, then makes the note to name`() =
+        runTreeTest {
+            contents.texts[path(MEETING_TEMPLATE)] = "# {{title}}\n{{date}}\n"
+            val viewModel = startedViewModel()
+            val effects = mutableListOf<VaultTreeEffect>()
+            backgroundScope.launch { viewModel.effects.collect { effects += it } }
+            viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(ROADMAP)))
+            advanceUntilIdle()
+            runCurrent()
+            effects.clear()
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnNewNoteFromTemplateClick)
+            viewModel.onIntent(intent = fromTemplate())
+            advanceUntilIdle()
+            runCurrent()
+            contents.texts[path("$PROJECTS/Kickoff.md")] = ""
+            viewModel.onIntent(intent = VaultTreeIntent.OnRenameTextChange(text = "Kickoff"))
+            viewModel.onIntent(intent = VaultTreeIntent.OnRenameConfirm)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = listOf(
+                    VaultTreeEffect.ChooseTemplate(folder = path(PROJECTS)),
+                    VaultTreeEffect.OpenEntry(path = path("$PROJECTS/Untitled.md")),
+                    "# Kickoff\n2026-10-27\n"
+                ),
+                actual = effects.take(n = 2) + contents.texts[path("$PROJECTS/Kickoff.md")]
+            )
+        }
+
+    @Test
+    fun `a note from a template keeps its first name when the rename is cancelled, and is filled with it`() =
+        runTreeTest {
+            contents.texts[path(MEETING_TEMPLATE)] = "# {{title}}\n"
+            val viewModel = startedViewModel()
+
+            viewModel.onIntent(intent = fromTemplate())
+            advanceUntilIdle()
+            contents.texts[path("$PROJECTS/Untitled.md")] = ""
+            viewModel.onIntent(intent = VaultTreeIntent.OnRenameCancel)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = null to "# Untitled\n",
+                actual = viewModel.state.value.renaming to contents.texts[path("$PROJECTS/Untitled.md")]
+            )
+        }
 
     @Test
     fun `clearing the selection sends a new folder to the vault root`() = runTreeTest {
@@ -644,6 +695,19 @@ class VaultTreeViewModelTest {
     ): RelativePath = RelativePath(value = value)
 
     /** Daily notes over the fakes, at [NOW] for a user two hours east of UTC, where it is already the next day. */
+    private fun newNoteTools(): NewNoteTools = NewNoteTools(
+        createNote = CreateNoteUseCase(noteFileOperations = operations),
+        applyTemplate = ApplyTemplateUseCase(
+            fillTemplate = FillTemplateUseCase(
+                vaultSettingsReader = vaultSettings,
+                noteContentStore = contents,
+                localCalendar = FakeLocalCalendar(offsetHours = 2),
+                clock = FakeClock(currentTime = Instant.parse(input = NOW))
+            ),
+            noteContentStore = contents
+        )
+    )
+
     private fun dailyNoteTools(): DailyNoteTools = DailyNoteTools(
         getDailyNoteSettings = GetDailyNoteSettingsUseCase(vaultSettingsReader = vaultSettings),
         openDailyNote = OpenDailyNoteUseCase(
@@ -653,6 +717,12 @@ class VaultTreeViewModelTest {
             localCalendar = FakeLocalCalendar(offsetHours = 2),
             clock = FakeClock(currentTime = Instant.parse(input = NOW))
         )
+    )
+
+    private fun fromTemplate(): VaultTreeIntent = VaultTreeIntent.OnNoteFromTemplate(
+        folder = path(PROJECTS),
+        template = path(MEETING_TEMPLATE),
+        baseName = UNTITLED
     )
 
     private fun TestScope.rename(
@@ -682,7 +752,7 @@ class VaultTreeViewModelTest {
                 noteMetadataCache = FakeNoteMetadataCache()
             ),
             flattenTree = FlattenTreeUseCase(naturalNameComparator = NaturalNameComparator()),
-            createNote = CreateNoteUseCase(noteFileOperations = operations),
+            newNotes = newNoteTools(),
             createFolder = CreateFolderUseCase(noteFileOperations = operations),
             renameEntry = RenameEntryUseCase(
                 noteFileOperations = operations,
@@ -711,6 +781,7 @@ class VaultTreeViewModelTest {
         private const val BUG = "bug"
         private const val NOW = "2026-10-26T23:30:00Z"
         private const val TODAY = "Journal/2026-10-27.md"
+        private const val MEETING_TEMPLATE = "Templates/Meeting.md"
         private const val MENU = "attachments/Weekly menu.pdf"
         private const val PLATE = "attachments/Arepas plate.png"
         private const val PROJECTS = "Projects"
