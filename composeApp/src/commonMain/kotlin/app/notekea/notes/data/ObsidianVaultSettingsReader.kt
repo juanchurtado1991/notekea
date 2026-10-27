@@ -4,6 +4,7 @@ import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.time.MomentFormat
 import app.notekea.notes.domain.DailyNoteSettings
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.TemplateSettings
 import app.notekea.notes.domain.VaultSettingsReader
 import co.touchlab.kermit.Logger
 import com.ghost.serialization.Ghost
@@ -13,7 +14,7 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 
 /**
- * [VaultSettingsReader] on Obsidian's `.obsidian/app.json` and `.obsidian/daily-notes.json`, decoded with Ghost. A
+ * [VaultSettingsReader] on Obsidian's `.obsidian/app.json`, `.obsidian/daily-notes.json` and `.obsidian/templates.json`, decoded with Ghost. A
  * vault without a file, or with one that cannot be read, simply has no setting: Notekea falls back to its defaults.
  */
 class ObsidianVaultSettingsReader(
@@ -36,6 +37,17 @@ class ObsidianVaultSettingsReader(
             folder = dto.folder?.trim().orEmpty().trim(RelativePath.SEPARATOR.single()),
             format = dto.format?.trim().orEmpty().ifEmpty { MomentFormat.ISO_DATE },
             template = dto.template?.trim()?.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION)?.ifEmpty { null }
+        )
+    }
+
+    override suspend fun templates(
+        vaultPath: String
+    ): TemplateSettings? = readJson(vaultPath = vaultPath, fileName = TEMPLATES_FILE) { json ->
+        val dto = Ghost.deserialize<ObsidianTemplatesDto>(json)
+        TemplateSettings(
+            folder = dto.folder?.trim().orEmpty().trim(RelativePath.SEPARATOR.single()),
+            dateFormat = dto.dateFormat?.trim().orEmpty().ifEmpty { MomentFormat.ISO_DATE },
+            timeFormat = dto.timeFormat?.trim().orEmpty().ifEmpty { MomentFormat.SHORT_TIME }
         )
     }
 
@@ -62,6 +74,7 @@ class ObsidianVaultSettingsReader(
         private const val SETTINGS_FILE = "app.json"
         private const val SETTINGS_FOLDER = ".obsidian"
         private const val DAILY_NOTES_FILE = "daily-notes.json"
+        private const val TEMPLATES_FILE = "templates.json"
         private const val UNREADABLE_MESSAGE = "A vault setting cannot be read, using the default instead: "
     }
 }

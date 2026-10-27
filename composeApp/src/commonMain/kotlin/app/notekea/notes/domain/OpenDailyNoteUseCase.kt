@@ -8,7 +8,7 @@ import kotlin.time.Clock
 /**
  * Opens the daily note of [date], today's where the user is when it is null (`ROADMAP.md` 1.10), creating it when it
  * does not exist yet: in the folder and with the name of the vault's Daily notes settings (`Journal/YYYY-MM-DD` without
- * them), its missing folders created too, starting from the settings' template filled in ([DailyNoteTemplate]), or
+ * them), its missing folders created too, starting from the settings' template filled in ([TemplateFiller]), or
  * empty when there is none or it cannot be read. An existing note is opened as it is.
  */
 class OpenDailyNoteUseCase(
@@ -19,7 +19,7 @@ class OpenDailyNoteUseCase(
     private val clock: Clock
 ) {
     private val dailyNotes = DailyNotes()
-    private val template = DailyNoteTemplate()
+    private val template = TemplateFiller()
 
     suspend operator fun invoke(
         vaultPath: String,
@@ -32,7 +32,11 @@ class OpenDailyNoteUseCase(
         if (noteFileOperations.exists(vaultPath = vaultPath, path = path)) {
             return Outcome.Success(value = FollowedLink(path = path, isNew = false))
         }
-        createFolders(vaultPath = vaultPath, folder = path.parent ?: RelativePath.ROOT)?.let { return it }
+        createMissingFolders(
+            noteFileOperations = noteFileOperations,
+            vaultPath = vaultPath,
+            folder = path.parent ?: RelativePath.ROOT
+        )?.let { return it }
         when (val created = noteFileOperations.createFile(vaultPath = vaultPath, path = path)) {
             is Outcome.Failure -> return if (created.error is NotesError.NameTaken) {
                 Outcome.Success(value = FollowedLink(path = path, isNew = false))
@@ -57,23 +61,6 @@ class OpenDailyNoteUseCase(
             if (written is Outcome.Failure) return written
         }
         return Outcome.Success(value = FollowedLink(path = path, isNew = true))
-    }
-
-    /** Creates [folder] and the folders above it that are missing; a failure, or null when they all exist. */
-    private suspend fun createFolders(
-        vaultPath: String,
-        folder: RelativePath
-    ): Outcome.Failure<NotesError>? {
-        val missing = generateSequence(seed = folder) { it.parent }
-            .filterNot { it.isRoot }
-            .toList()
-            .reversed()
-            .filterNot { noteFileOperations.exists(vaultPath = vaultPath, path = it) }
-        missing.forEach { path ->
-            val created = noteFileOperations.createFolder(vaultPath = vaultPath, path = path)
-            if (created is Outcome.Failure && created.error !is NotesError.NameTaken) return created
-        }
-        return null
     }
 
     companion object {
