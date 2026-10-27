@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Plan for memory (`ROADMAP.md` 3.0, 3.1, 3.2, 5.4): the inference spike measures memory per model and context and
+  whether a 1–2B model is good enough; the model manager recommends a model from the machine's RAM; the chat model is
+  loaded only while used; a new M5 feature sets memory budgets (editor < 400 MB, chatting on an 8 GB laptop < 2.5 GB)
+  and tunes the JVM. Using an installed Ollama is post-MVP.
 - The sidebar opens as wide as the outline panel (340 dp), so the note sits between two panels of the same width; a
   width the user set by dragging its edge is kept.
 - The editor's toolbar is a rounded capsule of groups with the most used buttons (Heading, Bold, Italic, Link to a

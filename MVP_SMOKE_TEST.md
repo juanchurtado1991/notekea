@@ -1,7 +1,7 @@
 # Notekea — MVP Smoke Test
 
 The manual cases every milestone QA run executes on Windows, macOS and Linux (`qa/README.md`), and the full run before
-releasing v0.1.0 (`ROADMAP.md` 5.4). Unit tests, UI tests and CI prove the parts work; this list proves the **app**
+releasing v0.1.0 (`ROADMAP.md` 5.5). Unit tests, UI tests and CI prove the parts work; this list proves the **app**
 works for a real person on a real machine. It is the main source of bugs before release.
 
 ## How this file works

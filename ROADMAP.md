@@ -33,7 +33,7 @@ had one. The M5 run is the release run.
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
-| M5 — Release | Onboarding polish, packaging, first public release | 1 week | 0 / 4 |
+| M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
 | Post-MVP | Extensions (Koog + MCP), mobile, more | — |
 
 ---
@@ -565,15 +565,22 @@ Before 3.2, measure with real 2B, 4B and 8B chat models on the reference machine
 - `rerank()` with a small GGUF reranker (bge-reranker class): quality on the sample vault and time per 20 chunks.
 - Grammar-constrained output (`jsonSchemaToGrammar`): valid JSON every time, cost in tokens/s.
 
-Result: `docs/spikes/<date>-llm-parallel.md` with the numbers, the default slot count per RAM size and the
-latency budget used by 3.5 and 3.6.
+- Memory of the whole process (editor included) with each model and a context of 2k, 4k and 8k tokens, and with the
+  KV cache in 8 bits instead of 16: what it saves and what it costs in quality on the 3.4 evaluation set.
+- Whether a 1–2B model with the pipeline of `ARCHITECTURE.md` §12 reaches the minimum quality of 3.4: if it does, it
+  is the default model, so chatting fits the memory budget of 5.4 on an 8 GB laptop.
+
+Result: `docs/spikes/<date>-llm-parallel.md` with the numbers, the default slot count per RAM size (likely one on
+8 GB, since every slot adds its own KV cache), the context size and the latency budget used by 3.5 and 3.6.
 
 ### ⬜ 3.1 Model manager — `feature/model-manager`
 
 Catalog of tested chat models (JSON parsed with Ghost): **Small (~2B)**, **Medium (~4B)** and **Large (~8B)** GGUF,
 plus the reranker model (3.0), which is downloaded with whichever chat model is chosen. Download with Ktor
 (progress, pause, resume), SHA-256 verification, delete. Hardware check: warns when RAM is below the model's
-requirement, including the KV cache of its parallel slots (3.0). Sizes below are placeholders until 3.0 measures them.
+requirement, including the KV cache of its parallel slots (3.0) and the editor itself. The model is recommended from
+the machine's RAM (Small on 8 GB, Medium on 16 GB), with nothing technical to choose. Sizes below are placeholders
+until 3.0 measures them.
 
 **UI — Model manager** (opened from Settings or the status bar):
 
@@ -601,6 +608,10 @@ structured steps use grammar-constrained JSON output. Prompts are built with
 process explicitly because llama.cpp keeps native threads alive (spike of 2026-10-23). RAG pipeline: retrieve top
 chunks (hybrid index), build a prompt that requires citing chunk ids, parse citations from the answer, drop
 citations that do not match a retrieved chunk.
+
+- **Memory:** the model is loaded when the chat opens and unloaded after a few minutes without use (5 by default,
+  in Settings), so writing notes never pays for it; its weights are read from disk with mmap, not locked in memory,
+  and the context size is the one 3.0 measured, not the model's maximum (budgets in 5.4).
 
 ### ⬜ 3.3 Chat panel — `feature/chat-panel`
 
@@ -705,7 +716,29 @@ Release with checksums.
 - **Later, when there are users to justify it:** free signing for open source projects (SignPath Foundation) for
   Windows, and an Apple Developer ID with notarization for macOS. Neither blocks the release.
 
-### ⬜ 5.4 Release v0.1.0
+### ⬜ 5.4 Performance and memory — `chore/performance`
+
+Notekea should run well on the laptop a non-technical person has (8 GB of RAM). With the whole app built, measure it
+on the reference machines (Windows, macOS, Linux) and cut what the numbers point at.
+
+- **Memory budgets** (whole process, the Sample Vault and a 1,000-note vault):
+
+  | Situation | Budget |
+  |---|---|
+  | Editor only | < 400 MB |
+  | Indexing or searching (embedding model loaded) | < 700 MB |
+  | Chatting with the Small model on an 8 GB laptop | < 2.5 GB |
+  | Chat closed for a few minutes | back to the editor-only level |
+
+- **Measure:** profile the editor with the Large Vault (`smoke.sh large`), the indexing and a chat session; record
+  memory, startup time and typing latency per OS in `docs/performance.md`.
+- **JVM:** a heap limit and a garbage collector suited to a desktop app, and a runtime trimmed with jlink to the
+  modules the app uses (5.3 packages it).
+- **Cuts the measurements point at:** caches that grow without bound, note texts held twice, the embedding model
+  kept loaded after indexing ends.
+- **Done when:** the release run (5.5) meets every budget on Windows, macOS and Linux.
+
+### ⬜ 5.5 Release v0.1.0
 
 Website `notekea.app` with download links, README screenshots, announcement (Hacker News, r/ObsidianMD,
 r/LocalLLaMA, Kotlin Slack). Measure: stars in the first month, issues from real users, retention feedback.
@@ -736,6 +769,8 @@ r/LocalLLaMA, Kotlin Slack). Measure: stars in the first month, issues from real
 5. **More than two split panes** and detachable windows.
 6. **Custom title bar** with the tabs inside it (JetBrains Jewel `DecoratedWindow`).
 7. **Screenshot tests** for UI regressions (Roborazzi).
+8. **Use an installed Ollama** — when the user already runs Ollama, Notekea can use its model instead of loading its
+   own, so the memory is not spent twice. For technical users; the bundled model stays the default.
 
 ## Out of scope for the MVP
 
