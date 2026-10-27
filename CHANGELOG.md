@@ -61,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Bookmarks (ROADMAP 1.13): the star beside a note's title, "Add to bookmarks" in a tree row's menu or Mod+Shift+B
+- Bookmarks (ROADMAP 1.13): the star beside a note's title, "Bookmark" in a tree row's menu or Mod+Shift+B
   bookmark a note, folder or file; the Bookmarks section above the tree opens them, folds, reorders them by dragging
   and removes those gone from the vault. They follow renames and deletions made in Notekea and are kept per vault in
   the app's settings, never in the vault.

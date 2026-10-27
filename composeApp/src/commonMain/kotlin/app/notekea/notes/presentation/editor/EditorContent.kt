@@ -99,6 +99,7 @@ import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.DayNeighbors
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.platform.label
+import app.notekea.core.presentation.theme.NotekeaColors
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.resources.editor_next_day
 import app.notekea.resources.editor_previous_day
@@ -401,7 +402,7 @@ private fun EditorHeader(
     }
 }
 
-/** The star beside the title: in the accent color while the note is bookmarked (`ROADMAP.md` 1.13). */
+/** The star beside the title: filled in yellow while the note is bookmarked (`ROADMAP.md` 1.13). */
 @Composable
 private fun BookmarkStar(
     isBookmarked: Boolean,
@@ -409,7 +410,7 @@ private fun BookmarkStar(
     onIntent: (EditorIntent) -> Unit
 ) {
     NotekeaIconButton(
-        icon = NotekeaIcons.Bookmark,
+        icon = if (isBookmarked) NotekeaIcons.Bookmarked else NotekeaIcons.Bookmark,
         label = stringResource(
             resource = if (isBookmarked) Res.string.editor_bookmark_remove else Res.string.editor_bookmark_add
         ),
@@ -418,7 +419,7 @@ private fun BookmarkStar(
             operatingSystem = platformConventions.operatingSystem
         ),
         takesFocus = false,
-        isOn = isBookmarked
+        tint = if (isBookmarked) NotekeaColors.bookmark else null
     )
 }
 

@@ -12,6 +12,8 @@ internal object NotekeaPalette {
     val AccentDark = Color(0xFFFF9A6B)
     val AccentLight = Color(0xFFFF7A45)
     val BackgroundDark = Color(0xFF0C111A)
+    val BookmarkDark = Color(0xFFF5C542)
+    val BookmarkLight = Color(0xFFE5A800)
     val BackgroundLight = Color(0xFFF7F9FC)
     val ErrorDark = Color(0xFFF2B8B5)
     val ErrorLight = Color(0xFFB3261E)

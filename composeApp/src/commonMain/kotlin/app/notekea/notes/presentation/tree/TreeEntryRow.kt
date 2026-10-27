@@ -1,5 +1,9 @@
 package app.notekea.notes.presentation.tree
 
+import app.notekea.resources.tree_bookmarked
+import app.notekea.core.presentation.theme.NotekeaColors
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import app.notekea.core.presentation.platform.onMiddleClick
 import app.notekea.core.presentation.platform.PressedModifiers
 import androidx.compose.foundation.layout.Column
@@ -125,7 +129,25 @@ private fun EntryItem(
                 is TreeRow.File -> Res.string.tree_select_file
             }
         ),
-        labelContent = draft?.let { { RenameField(draft = it, onIntent = onIntent) } }
+        labelContent = draft?.let { { RenameField(draft = it, onIntent = onIntent) } },
+        badge = if (row.path in state.bookmarks) {
+            { BookmarkBadge() }
+        } else {
+            null
+        }
+    )
+}
+
+/** The small yellow star after a bookmarked entry's name (`ROADMAP.md` 1.13). */
+@Composable
+private fun BookmarkBadge() {
+    Icon(
+        imageVector = NotekeaIcons.Bookmarked,
+        contentDescription = stringResource(resource = Res.string.tree_bookmarked),
+        modifier = Modifier.padding(
+            horizontal = NotekeaDimensions.SpacingXs
+        ).size(size = NotekeaDimensions.BadgeIconSize),
+        tint = NotekeaColors.bookmark
     )
 }
 

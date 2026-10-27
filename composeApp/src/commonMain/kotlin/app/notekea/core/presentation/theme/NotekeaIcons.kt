@@ -1,6 +1,12 @@
 package app.notekea.core.presentation.theme
 
+import app.notekea.core.domain.StringPatterns
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.addPathNodes
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.Color
 import com.composables.icons.lucide.ArrowDown
 import com.composables.icons.lucide.ChevronsDownUp
 import com.composables.icons.lucide.ChevronsUpDown
@@ -69,9 +75,37 @@ import com.composables.icons.lucide.Zap
  * glyph can change here alone. They come from Lucide, the set Obsidian users already know (`LIBRARIES.md` §2).
  */
 object NotekeaIcons {
+    private const val BOOKMARKED_NAME = "Bookmarked"
+    private const val ICON_SIZE_DP = 24
+    private const val ICON_VIEWPORT = 24f
+    private const val STAR_STROKE = 2f
+    private val STAR_PATH = listOf(
+        "M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904",
+        "l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0",
+        "L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906",
+        "l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
+    ).joinToString(separator = StringPatterns.EMPTY)
+
     val AttachFile: ImageVector get() = Lucide.ImagePlus
     val Attachment: ImageVector get() = Lucide.Paperclip
     val Bookmark: ImageVector get() = Lucide.Star
+
+    /** The bookmark star filled, for what is bookmarked: Lucide's star drawn with a fill. */
+    val Bookmarked: ImageVector by lazy {
+        ImageVector.Builder(
+            name = BOOKMARKED_NAME,
+            defaultWidth = ICON_SIZE_DP.dp,
+            defaultHeight = ICON_SIZE_DP.dp,
+            viewportWidth = ICON_VIEWPORT,
+            viewportHeight = ICON_VIEWPORT
+        ).addPath(
+            pathData = addPathNodes(pathStr = STAR_PATH),
+            fill = SolidColor(value = Color.Black),
+            stroke = SolidColor(value = Color.Black),
+            strokeLineWidth = STAR_STROKE,
+            strokeLineJoin = StrokeJoin.Round
+        ).build()
+    }
     val Bold: ImageVector get() = Lucide.Bold
     val BulletList: ImageVector get() = Lucide.List
     val Callout: ImageVector get() = Lucide.MessageSquareQuote

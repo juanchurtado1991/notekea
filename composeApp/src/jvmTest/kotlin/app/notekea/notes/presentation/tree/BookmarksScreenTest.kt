@@ -3,6 +3,7 @@ package app.notekea.notes.presentation.tree
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerButtons
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
@@ -48,6 +49,34 @@ class BookmarksScreenTest {
             ) to listOf<EditorIntent>(EditorIntent.OnBookmarkToggle),
             actual = treeIntents.filterIsInstance<BookmarkIntent>() to
                 editorIntents.filter { it == EditorIntent.OnBookmarkToggle }
+        )
+    }
+
+    @Test
+    fun `a bookmarked row's menu removes its bookmark with the whole label in view`() {
+        // 1.13 smoke: "Remove from bookmarks" did not fit in the menu; the label is now "Remove bookmark".
+        val treeIntents = mutableListOf<VaultTreeIntent>()
+        UiThread.run {
+            scene(treeIntents = treeIntents, editorIntents = mutableListOf()).use { scene ->
+                settle(scene = scene)
+                scene.sendPointerEvent(eventType = PointerEventType.Move, position = IDEAS_ROW)
+                settle(scene = scene)
+                listOf(PointerEventType.Press, PointerEventType.Release).forEach { type ->
+                    scene.sendPointerEvent(
+                        eventType = type,
+                        position = IDEAS_ROW,
+                        buttons = PointerButtons(isSecondaryPressed = type == PointerEventType.Press),
+                        button = PointerButton.Secondary
+                    )
+                    settle(scene = scene)
+                }
+                click(scene = scene, position = REMOVE_BOOKMARK_ITEM)
+            }
+        }
+
+        assertEquals(
+            expected = listOf<VaultTreeIntent>(BookmarkIntent.OnToggle(path = base.rows[0].path)),
+            actual = treeIntents.filterIsInstance<BookmarkIntent>()
         )
     }
 
@@ -117,6 +146,8 @@ class BookmarksScreenTest {
         private const val WIDTH = 1100
         private val FIRST_BOOKMARK = Offset(x = 140f, y = 93f)
         private val HEADER = Offset(x = 110f, y = 65f)
+        private val IDEAS_ROW = Offset(x = 110f, y = 189f)
+        private val REMOVE_BOOKMARK_ITEM = Offset(x = 220f, y = 317f)
         private val MISSING_REMOVE = Offset(x = 354f, y = 149f)
         private val SECOND_BOOKMARK = Offset(x = 140f, y = 121f)
         private val STAR = Offset(x = 1053f, y = 66f)

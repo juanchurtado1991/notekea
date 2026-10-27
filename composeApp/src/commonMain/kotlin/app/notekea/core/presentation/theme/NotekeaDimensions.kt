@@ -8,6 +8,7 @@ object NotekeaDimensions {
     const val MOTION_PANEL_MILLIS = 200
     const val MOTION_SHORT_MILLIS = 150
 
+    val BadgeIconSize = 12.dp
     val BorderWidth = 1.dp
     val CardRadius = 10.dp
     val CompactControlSize = 28.dp
