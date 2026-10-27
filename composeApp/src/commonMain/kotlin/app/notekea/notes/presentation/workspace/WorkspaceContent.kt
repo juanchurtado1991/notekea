@@ -61,9 +61,9 @@ private const val SPLIT_DROP_ZONE = 0.75f
 /**
  * The editor's panes side by side (`ROADMAP.md` 1.11), each with its tabs above what its active tab shows
  * ([paneContent]: a note's editor, a file's preview, a folder's grid). A click in a pane makes it the one the keyboard
- * works in. A tab dropped on the other pane moves there; dropped on the right quarter of a single pane, it splits it
- * and moves to the new pane. The "+" after the tabs finds a note to open in a new tab ([onNewTab]). Without any tab,
- * a hint says how to open one.
+ * works in. A tab dropped among its pane's tabs takes that place; dropped on the other pane, it moves there; dropped on
+ * the right quarter of a single pane, it splits it and moves to the new pane. The "+" after the tabs finds a note to
+ * open in a new tab ([onNewTab]). Without any tab, a hint says how to open one.
  */
 @Composable
 fun WorkspaceContent(
@@ -217,6 +217,9 @@ private fun PaneTabs(
         onSelect = { onIntent(WorkspaceIntent.OnTabSelect(pane = index, tab = it)) },
         onClose = { onIntent(WorkspaceIntent.OnTabClose(pane = index, tab = it)) },
         onDrop = { tab, position -> onDrop(pane.tabs[tab], position) },
+        onReorder = { from, to ->
+            onIntent(WorkspaceIntent.OnTabMove(path = pane.tabs[from], toPane = index, toIndex = to))
+        },
         menuOf = menu
     ) {
         NotekeaIconButton(
