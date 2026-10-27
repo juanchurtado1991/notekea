@@ -50,13 +50,11 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.OutlineHeading
-import app.notekea.notes.domain.SidePanelTab
 import app.notekea.resources.Res
 import app.notekea.resources.outline_empty_message
 import app.notekea.resources.outline_empty_title
 import app.notekea.resources.outline_label
 import app.notekea.resources.outline_tab
-import app.notekea.resources.properties_title
 import app.notekea.resources.side_panel_hide
 import org.jetbrains.compose.resources.stringResource
 
@@ -65,9 +63,8 @@ private const val PREVIEW_WIDTH_DP = 300
 private val LIST_PADDING = PaddingValues(all = NotekeaDimensions.SpacingXs)
 
 /**
- * The panel on the right of the editor (`ROADMAP.md` 1.9), with its tabs (Outline and Properties for now; Related,
- * Backlinks and Chat come later), [selectedTab] shown and a click on another going to [onTabSelect], and a button that
- * hides it. The Properties tab shows [properties] (`ROADMAP.md` 1.14). The Outline tab lists the note's headings as an indented tree, highlights
+ * The panel on the right of the editor (`ROADMAP.md` 1.9), with its tabs (Outline for now; Related, Backlinks and Chat
+ * come later) and a button that hides it. The Outline tab lists the note's headings as an indented tree, highlights
  * [current], the one the editor's view is in, and goes to a heading when it is clicked; a note without headings says
  * how to add one. The list is one focus stop, taken with [outlineFocus] (`Mod+Shift+O`): the arrows move, Enter goes to
  * the heading and Esc gives the keyboard back to the note ([onLeave]).
@@ -76,27 +73,17 @@ private val LIST_PADDING = PaddingValues(all = NotekeaDimensions.SpacingXs)
 fun SidePanel(
     outline: List<OutlineHeading>,
     current: Int,
-    selectedTab: SidePanelTab,
     platformConventions: PlatformConventions,
     onHeadingClick: (Int) -> Unit,
-    onTabSelect: (SidePanelTab) -> Unit,
     onHide: () -> Unit,
     onLeave: () -> Unit,
-    properties: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     outlineFocus: FocusRequester = remember { FocusRequester() }
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Column {
-            SidePanelHeader(
-                selectedTab = selectedTab,
-                platformConventions = platformConventions,
-                onTabSelect = onTabSelect,
-                onHide = onHide
-            )
-            if (selectedTab == SidePanelTab.PROPERTIES) {
-                properties()
-            } else if (outline.isEmpty()) {
+            SidePanelHeader(platformConventions = platformConventions, onHide = onHide)
+            if (outline.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                     EmptyState(
                         title = stringResource(resource = Res.string.outline_empty_title),
@@ -118,9 +105,7 @@ fun SidePanel(
 
 @Composable
 private fun SidePanelHeader(
-    selectedTab: SidePanelTab,
     platformConventions: PlatformConventions,
-    onTabSelect: (SidePanelTab) -> Unit,
     onHide: () -> Unit
 ) {
     val operatingSystem = platformConventions.operatingSystem
@@ -133,13 +118,10 @@ private fun SidePanelHeader(
         verticalAlignment = Alignment.Bottom
     ) {
         NotekeaCompactTabs(
-            labels = listOf(
-                stringResource(resource = Res.string.outline_tab),
-                stringResource(resource = Res.string.properties_title)
-            ),
-            selectedIndex = SidePanelTab.entries.indexOf(element = selectedTab),
-            onSelect = { onTabSelect(SidePanelTab.entries[it]) },
-            shortcutHints = listOf(platformConventions.outlineShortcut.label(operatingSystem = operatingSystem)),
+            labels = listOf(stringResource(resource = Res.string.outline_tab)),
+            selectedIndex = 0,
+            onSelect = {},
+            shortcutHint = platformConventions.outlineShortcut.label(operatingSystem = operatingSystem),
             takesFocus = false
         )
         Spacer(modifier = Modifier.weight(weight = 1f))
@@ -273,13 +255,10 @@ private fun SidePanelPreviewFrame(
             SidePanel(
                 outline = outline,
                 current = current,
-                selectedTab = SidePanelTab.OUTLINE,
                 platformConventions = EditorPreviewData.platformConventions,
                 onHeadingClick = {},
-                onTabSelect = {},
                 onHide = {},
-                onLeave = {},
-                properties = {}
+                onLeave = {}
             )
         }
     }

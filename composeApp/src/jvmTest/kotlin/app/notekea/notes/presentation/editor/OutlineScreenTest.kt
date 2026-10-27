@@ -121,8 +121,7 @@ class OutlineScreenTest {
                         current = tools.tracker.current,
                         platformConventions = PreviewPlatformConventions.linux,
                         onHeadingClick = { intents += EditorIntent.OnHeadingClick(index = it) },
-                        onLeave = { intents += EditorIntent.OnFocusRequest() },
-                        properties = {}
+                        onLeave = { intents += EditorIntent.OnFocusRequest() }
                     ) {
                         EditorContent(
                             state = state,

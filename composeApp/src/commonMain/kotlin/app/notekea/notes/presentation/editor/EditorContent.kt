@@ -94,6 +94,7 @@ import app.notekea.core.presentation.components.NotekeaTitleField
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.notekeaCodeTextStyle
+import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.DayNeighbors
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.platform.label
@@ -153,7 +154,7 @@ fun EditorContent(
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier = Modifier,
-    arePropertiesInNote: Boolean = true,
+    properties: NoteMetadata? = null,
     textFocusRequester: FocusRequester? = null,
     outlineTracker: OutlineTracker? = null,
     dayNeighbors: DayNeighbors? = null,
@@ -176,7 +177,7 @@ fun EditorContent(
         scrollState = scrollState,
         toolbarHeight = { keepInView.topInset }
     )
-    val header = EditorHeaderData(arePropertiesInNote, dayNeighbors, isBookmarked)
+    val header = EditorHeaderData(properties = properties, dayNeighbors = dayNeighbors, isBookmarked = isBookmarked)
     val surface = modifier.fillMaxSize().then(other = fileDrop).then(other = pressed.tracking())
     Surface(modifier = surface, color = MaterialTheme.colorScheme.surface) {
         Column {
@@ -393,13 +394,7 @@ private fun EditorHeader(
             color = MaterialTheme.colorScheme.error
         )
     }
-    if (header.arePropertiesInNote) {
-        PropertiesView(
-            state = state,
-            onIntent = onIntent,
-            modifier = Modifier.padding(top = NotekeaDimensions.SpacingXs)
-        )
-    }
+    PropertiesView(state = state, onIntent = onIntent, modifier = Modifier.padding(top = NotekeaDimensions.SpacingXs))
 }
 
 /** The star beside the title: filled in yellow while the note is bookmarked (`ROADMAP.md` 1.13). */
@@ -860,7 +855,8 @@ private fun EditorPreviewFrame(
                 state = state,
                 buffer = EditorPreviewData.buffer(),
                 platformConventions = EditorPreviewData.platformConventions,
-                onIntent = {}
+                onIntent = {},
+                properties = EditorPreviewData.properties
             )
         }
     }

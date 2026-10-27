@@ -1,7 +1,6 @@
 package app.notekea.notes.presentation.workspace
 
 import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.SidePanelTab
 import app.notekea.notes.domain.VaultTree
 
 /** What the user did with the tabs and panes, or what the panes around them report. */
@@ -69,15 +68,6 @@ sealed interface WorkspaceIntent {
     data object OnSidePanelToggle : WorkspaceIntent
 
     data class OnSidePanelResize(val widthDp: Int) : WorkspaceIntent
-
-    /** One of the side panel's tabs was chosen, or a property was added while they are only there: it is shown. */
-    data class OnSidePanelTabSelect(val tab: SidePanelTab) : WorkspaceIntent
-
-    /**
-     * The properties move between the note and the side panel (`ROADMAP.md` 1.14): moved to the panel, it shows its
-     * Properties tab.
-     */
-    data object OnPropertiesInNoteToggle : WorkspaceIntent
 
     /** `Mod+Shift+O`: the outline takes the keyboard, the panel shown first if it was hidden. */
     data object OnOutlineFocusRequest : WorkspaceIntent

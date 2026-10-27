@@ -44,9 +44,8 @@ private const val TOOLTIP_SEPARATOR = "  "
 
 /**
  * Tabs as wide as their labels, for a toolbar (the editor's Edit | Preview, like GitHub's): the [selectedIndex] one in
- * the primary color with a square-cornered line under it. The tooltip of each tab shows [shortcutHint] when there is
- * one, so the shortcut that switches them is learned from the tabs themselves; [shortcutHints] gives a tab its own
- * instead. With [takesFocus] false a click leaves the keyboard
+ * the primary color with a square-cornered line under it. The tooltip of each tab shows [shortcutHint] when there is one, so the
+ * shortcut that switches them is learned from the tabs themselves. With [takesFocus] false a click leaves the keyboard
  * where it was, so a shortcut and a click never leave the focus ring on a tab that is no longer selected.
  */
 @Composable
@@ -56,7 +55,6 @@ fun NotekeaCompactTabs(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
     shortcutHint: String? = null,
-    shortcutHints: List<String?> = emptyList(),
     takesFocus: Boolean = true
 ) {
     Row(modifier = modifier.selectableGroup()) {
@@ -66,7 +64,7 @@ fun NotekeaCompactTabs(
                 isSelected = index == selectedIndex,
                 onClick = { onSelect(index) },
                 takesFocus = takesFocus,
-                shortcutHint = shortcutHints.getOrNull(index = index) ?: shortcutHint
+                shortcutHint = shortcutHint
             )
         }
     }

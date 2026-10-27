@@ -7,7 +7,6 @@ import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.SidePanelPreferences
-import app.notekea.notes.domain.SidePanelTab
 import app.notekea.notes.domain.Workspace
 import app.notekea.notes.presentation.tree.TreeFilePreviews
 import co.touchlab.kermit.Logger
@@ -98,21 +97,8 @@ class WorkspaceViewModel(
             is WorkspaceIntent.OnSidePanelResize -> updateSidePanel { it.copy(widthDp = intent.widthDp) }
 
             WorkspaceIntent.OnOutlineFocusRequest -> {
-                val panel = state.value.sidePanel
-                if (!panel.isVisible || panel.tab != SidePanelTab.OUTLINE) {
-                    updateSidePanel { it.copy(isVisible = true, tab = SidePanelTab.OUTLINE) }
-                }
+                if (!state.value.sidePanel.isVisible) updateSidePanel { it.copy(isVisible = true) }
                 emit(effect = WorkspaceEffect.FocusOutline)
-            }
-
-            is WorkspaceIntent.OnSidePanelTabSelect -> updateSidePanel { it.copy(tab = intent.tab, isVisible = true) }
-
-            WorkspaceIntent.OnPropertiesInNoteToggle -> updateSidePanel { panel ->
-                if (panel.arePropertiesInNote) {
-                    panel.copy(arePropertiesInNote = false, isVisible = true, tab = SidePanelTab.PROPERTIES)
-                } else {
-                    panel.copy(arePropertiesInNote = true)
-                }
             }
 
             else -> Unit
