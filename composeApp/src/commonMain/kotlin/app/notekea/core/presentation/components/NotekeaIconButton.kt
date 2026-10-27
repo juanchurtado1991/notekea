@@ -17,6 +17,7 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -51,7 +52,7 @@ fun NotekeaIconButton(
     shortcutHint: String? = null,
     takesFocus: Boolean = true,
     isTooltipBeside: Boolean = false,
-    isOn: Boolean = false
+    tint: Color? = null
 ) {
     val tooltipText = listOfNotNull(label, shortcutHint).joinToString(separator = TOOLTIP_SEPARATOR)
     TooltipBox(
@@ -71,12 +72,12 @@ fun NotekeaIconButton(
                 .clickable(enabled = enabled, onClickLabel = label, role = Role.Button, onClick = onClick),
             contentAlignment = Alignment.Center
         ) {
-            val tint = if (isOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            val color = tint ?: MaterialTheme.colorScheme.onSurfaceVariant
             Icon(
                 imageVector = icon,
                 contentDescription = label,
                 modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-                tint = if (enabled) tint else tint.copy(alpha = DISABLED_ALPHA)
+                tint = if (enabled) color else color.copy(alpha = DISABLED_ALPHA)
             )
         }
     }

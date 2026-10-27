@@ -370,9 +370,10 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 
 ### ⬜ 1.13 Bookmarks — `feature/bookmarks`
 
-- **Bookmark:** the star beside the note's title, "Add to bookmarks" in a tree row's menu, or `Mod+Shift+B` (the
+- **Bookmark:** the star beside the note's title, "Bookmark" in a tree row's menu, or `Mod+Shift+B` (the
   active tab's entry, or the selected one) bookmarks a note, a folder or another file; the same action removes it.
-  The star turns the accent color while the note is bookmarked.
+  The star is filled in yellow while the note is bookmarked, and a small yellow star follows a bookmarked entry's
+  name in the tree.
 - **Bookmarks section:** above the tree, under a "Bookmarks" header with their number that folds them, hidden while
   there are none. A bookmark opens its entry in a tab and selects it in the tree with its folders open; dragged up or
   down, it moves among the others; its menu removes it.

@@ -48,7 +48,8 @@ private const val PREVIEW_WIDTH_DP = 260
  * ([isExpanded] is null for leaves, which keep the chevron's space so names align), an icon unless [icon] is null (an
  * outline's headings), the [label] and optional [trailingText] (a note count). Rows are not focus stops: the tree is
  * one focusable element moved with the arrow keys, and the row it is on draws the focus ring when [focused]. Rows are
- * transparent, so they sit on the panel that holds the tree. [labelContent] replaces the label, for renaming in place;
+ * transparent, so they sit on the panel that holds the tree. [badge] marks the row after its label (a bookmark's
+ * star). [labelContent] replaces the label, for renaming in place;
  * it must keep its keys (a field consumes Space), or a key leaving it would click the row. Screen readers get the
  * selection and expand / collapse actions.
  */
@@ -65,7 +66,8 @@ fun NotekeaTreeItem(
     onToggleExpanded: (() -> Unit)? = null,
     trailingText: String? = null,
     onClickLabel: String? = null,
-    labelContent: (@Composable () -> Unit)? = null
+    labelContent: (@Composable () -> Unit)? = null,
+    badge: (@Composable () -> Unit)? = null
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = MaterialTheme.shapes.small
@@ -101,6 +103,7 @@ fun NotekeaTreeItem(
             Box(modifier = Modifier.weight(weight = 1f)) {
                 labelContent?.invoke() ?: TreeLabel(label = label)
             }
+            badge?.invoke()
             trailingText?.let { TrailingText(text = it) }
         }
     }

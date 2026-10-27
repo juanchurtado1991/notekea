@@ -197,9 +197,10 @@
     <string name="template_picker_no_match_message">Try another name, or add the template to the %1$s folder.</string>
     <string name="template_picker_no_match_title">No templates match</string>
     <string name="template_picker_placeholder">Find a template to insert</string>
-    <string name="tree_bookmark_add">Add to bookmarks</string>
+    <string name="tree_bookmark_add">Bookmark</string>
     <string name="tree_bookmark_missing_remove">Remove: it is no longer in the vault</string>
-    <string name="tree_bookmark_remove">Remove from bookmarks</string>
+    <string name="tree_bookmark_remove">Remove bookmark</string>
+    <string name="tree_bookmarked">Bookmarked</string>
     <string name="tree_bookmarks">Bookmarks</string>
     <string name="tree_cancel">Cancel</string>
     <string name="tree_collapse_all">Collapse all folders</string>
