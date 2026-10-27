@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 /**
  * [TreePreferencesStore] on Multiplatform Settings. The sort order is one key for all vaults; the expanded folders of
  * each vault are one key named after a hash of the vault path (`tree.<hash>.expanded`), holding relative paths one per
- * line. The hash is FNV-1a, computed here so it is the same on every platform and run. The sort and the sidebar width
+ * line ([VaultKeyHash]). The sort and the sidebar width
  * and visibility are one key each for all vaults. An unknown sort falls back to sorting by name and a width out of
  * bounds is clamped.
  */
@@ -66,20 +66,10 @@ class SettingsTreePreferencesStore(
 
     private fun expandedKey(
         vaultPath: String
-    ): String = KEY_PREFIX + fnv1a(text = vaultPath).toULong().toString(radix = HEX_RADIX) + EXPANDED_SUFFIX
-
-    private fun fnv1a(
-        text: String
-    ): Long = text.encodeToByteArray().fold(initial = FNV_OFFSET_BASIS) { hash, byte ->
-        (hash xor (byte.toLong() and BYTE_MASK)) * FNV_PRIME
-    }
+    ): String = KEY_PREFIX + VaultKeyHash.of(vaultPath = vaultPath) + EXPANDED_SUFFIX
 
     companion object {
-        private const val BYTE_MASK = 0xFFL
         private const val EXPANDED_SUFFIX = ".expanded"
-        private const val FNV_OFFSET_BASIS = -0x340d631b7bdddcdbL
-        private const val FNV_PRIME = 0x100000001b3L
-        private const val HEX_RADIX = 16
         private const val KEY_PREFIX = "tree."
         private const val LINE_SEPARATOR = "\n"
         private const val SIDEBAR_COLLAPSED_KEY = "tree.sidebar.collapsed"
