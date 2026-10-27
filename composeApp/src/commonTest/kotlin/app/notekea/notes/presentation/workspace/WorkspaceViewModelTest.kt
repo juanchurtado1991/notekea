@@ -18,7 +18,6 @@ import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.SaveSidePanelUseCase
 import app.notekea.notes.domain.SaveWorkspaceUseCase
 import app.notekea.notes.domain.SidePanelPreferences
-import app.notekea.notes.domain.SidePanelTab
 import app.notekea.notes.domain.VaultTree
 import app.notekea.notes.domain.Workspace
 import kotlinx.coroutines.Dispatchers
@@ -176,33 +175,6 @@ class WorkspaceViewModelTest {
                     SidePanelPreferences(widthDp = 560, isVisible = true)
                 ) to listOf<WorkspaceEffect>(WorkspaceEffect.FocusOutline),
                 actual = listOf(first, hidden, preferences.sidePanel) to effects.toList()
-            )
-        }
-
-    @Test
-    fun `the properties move to the panel's Properties tab and back, and the outline shortcut shows the outline`() =
-        runWorkspaceTest {
-            val viewModel = started()
-            runCurrent()
-            viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelToggle)
-            viewModel.onIntent(intent = WorkspaceIntent.OnPropertiesInNoteToggle)
-            advanceUntilIdle()
-            val inPanel = preferences.sidePanel
-            viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelTabSelect(tab = SidePanelTab.OUTLINE))
-            viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelTabSelect(tab = SidePanelTab.PROPERTIES))
-            viewModel.onIntent(intent = WorkspaceIntent.OnPropertiesInNoteToggle)
-            advanceUntilIdle()
-            val backInNote = preferences.sidePanel
-            viewModel.onIntent(intent = WorkspaceIntent.OnOutlineFocusRequest)
-            advanceUntilIdle()
-
-            assertEquals(
-                expected = listOf(
-                    SidePanelPreferences(isVisible = true, tab = SidePanelTab.PROPERTIES, arePropertiesInNote = false),
-                    SidePanelPreferences(isVisible = true, tab = SidePanelTab.PROPERTIES, arePropertiesInNote = true),
-                    SidePanelPreferences(isVisible = true, tab = SidePanelTab.OUTLINE, arePropertiesInNote = true)
-                ),
-                actual = listOf(inPanel, backInNote, preferences.sidePanel)
             )
         }
 

@@ -71,7 +71,7 @@ One main window with three resizable panes, a status bar, and the native window 
 - **Editor** (flexible, min 480 dp): tab bar, title, properties, Edit / Read toggle, Markdown content.
   Can be split into two panes side by side.
 - **Right panel** (default 340 dp, min 280, collapsible with `Mod+Shift+\`): tabs **Related**, **Backlinks**,
-  **Outline**, **Properties** (1.14) and **Chat**; the chosen tab is remembered.
+  **Outline** and **Chat**.
 - **Status bar** (24 dp): indexing progress, model state and sync state. Each item is clickable and opens its
   detail (indexing log, model manager, sync panel).
 - Below 1000 dp of window width the right panel becomes an overlay; below 760 dp the sidebar does too.
@@ -392,14 +392,11 @@ Frontmatter shown as a compact form above the note content.
   toolbar's Tag), its muted name (renamed in place) and its value edited in place, highlighted while hovered, with a ✕
   that removes it shown on hover. A note without properties shows nothing.
 - **Types** detected from the values, as Obsidian does: text, list (tags, aliases and CSS classes always; as chips
-  with a field that adds one), number, checkbox, date (shown as `Oct 27, 2026`, typed as `2026-10-27` or picked on a
-  compact month calendar whose weeks start on Monday, with Today). Nested and multi-line values are shown as written
-  and edited in the source.
+  with a field that adds one), number, checkbox, date (shown as `Oct 27, 2026`, typed as `2026-10-27` or picked on a compact month calendar
+  whose weeks start on Monday, with Today). Nested and multi-line values
+  are shown as written and edited in the source.
 - **Add property:** in the block and in the toolbar's More, its menu picks the type; the new property gets a free name
   (`property`) to rename.
-- **Side panel:** a **Properties** tab beside Outline edits the active note's properties the same way. "Show in side
-  panel" on the card, or unchecking "Show in the note" in the tab, keeps them only in the panel, for a cleaner note
-  (remembered, like the chosen tab); a property added from the toolbar then opens that tab.
 - **Editing** a property patches only its lines of the raw frontmatter text, in the style it had (block or inline
   list, quotes), preserving key order, comments and unknown keys; the frontmatter is never encoded again as a whole
   (Ghost would drop unknown keys and re-quote strings, see `docs/spikes/2026-10-23-ghost-llama.md`). Each edit is saved

@@ -2,7 +2,6 @@ package app.notekea.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.notes.domain.SidePanelPreferences
-import app.notekea.notes.domain.SidePanelTab
 import com.russhwolf.settings.MapSettings
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -34,38 +33,20 @@ class SettingsEditorPreferencesStoreTest {
     }
 
     @Test
-    fun `the side panel is shown at its default width on Outline until it is changed, which is remembered`() =
+    fun `the side panel is shown at its default width until it is changed, which is remembered`() =
         runTest(context = testDispatcher) {
             val firstRun = store.sidePanel()
 
-            store.setSidePanel(preferences = CHANGED)
+            store.setSidePanel(preferences = SidePanelPreferences(widthDp = 420, isVisible = false))
             val nextStore = SettingsEditorPreferencesStore(
                 settings = settings,
                 dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
             )
 
             assertEquals(
-                expected = SidePanelPreferences(widthDp = 340, isVisible = true) to CHANGED,
+                expected = SidePanelPreferences(widthDp = 340, isVisible = true) to
+                    SidePanelPreferences(widthDp = 420, isVisible = false),
                 actual = firstRun to nextStore.sidePanel()
             )
         }
-
-    @Test
-    fun `an unknown side panel tab, from another version, opens the outline`() = runTest(context = testDispatcher) {
-        settings.putString(key = "editor.side_panel_tab", value = "GRAPH")
-
-        assertEquals(
-            expected = SidePanelTab.OUTLINE,
-            actual = store.sidePanel().tab
-        )
-    }
-
-    private companion object {
-        val CHANGED = SidePanelPreferences(
-            widthDp = 420,
-            isVisible = false,
-            tab = SidePanelTab.PROPERTIES,
-            arePropertiesInNote = false
-        )
-    }
 }

@@ -169,12 +169,6 @@
     <string name="properties_show_form">Show properties</string>
     <string name="properties_show_source">Show source</string>
     <string name="properties_title">Properties</string>
-    <string name="properties_in_note">Show in the note</string>
-    <string name="properties_no_note_message">Open a note to see its properties here.</string>
-    <string name="properties_no_note_title">No note open</string>
-    <string name="properties_none_message">Add one to give this note a status, a date or tags.</string>
-    <string name="properties_none_title">No properties</string>
-    <string name="properties_to_panel">Show in side panel</string>
     <string name="properties_type_checkbox">Checkbox</string>
     <string name="properties_type_date">Date</string>
     <string name="properties_type_list">List</string>

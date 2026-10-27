@@ -23,22 +23,12 @@ class SidePanelHost(
 
     /**
      * Sends a side panel request ([isRequest]) through [send], except showing or hiding the panel while it floats,
-     * which only opens or closes it here: the panel the user keeps beside the notes is the tabs'. A tab chosen opens the
-     * floating panel too.
+     * which only opens or closes it here: the panel the user keeps beside the notes is the tabs'.
      */
     fun onIntent(
         intent: EditorIntent
     ) {
-        when {
-            intent == EditorIntent.OnSidePanelToggle && isOverlay -> isOverlayOpen = !isOverlayOpen
-
-            intent is EditorIntent.OnSidePanelTabSelect && isOverlay -> {
-                isOverlayOpen = true
-                send(intent)
-            }
-
-            else -> send(intent)
-        }
+        if (intent == EditorIntent.OnSidePanelToggle && isOverlay) isOverlayOpen = !isOverlayOpen else send(intent)
     }
 
     /** Opens the panel if it floats, then gives its outline the keyboard once it is laid out. */
@@ -57,7 +47,6 @@ class SidePanelHost(
         fun isRequest(
             intent: EditorIntent
         ): Boolean = intent == EditorIntent.OnSidePanelToggle || intent == EditorIntent.OnOutlineFocusRequest ||
-            intent is EditorIntent.OnSidePanelResize || intent is EditorIntent.OnSidePanelTabSelect ||
-            intent == EditorIntent.OnPropertiesPlacementToggle
+            intent is EditorIntent.OnSidePanelResize
     }
 }
