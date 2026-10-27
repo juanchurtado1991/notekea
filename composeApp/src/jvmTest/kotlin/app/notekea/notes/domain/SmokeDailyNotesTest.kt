@@ -60,7 +60,7 @@ class SmokeDailyNotesTest {
                         settings = settings
                     )?.previous?.value,
                     dailyNotes.dateOf(path = RelativePath(value = "Diary/Ideas.md"), settings = settings),
-                    DailyNoteTemplate().fill(
+                    TemplateFiller().fill(
                         template = template,
                         moment = LocalMoment(date = today, hour = 9, minute = 15),
                         title = "Tuesday, October 27th 2026",

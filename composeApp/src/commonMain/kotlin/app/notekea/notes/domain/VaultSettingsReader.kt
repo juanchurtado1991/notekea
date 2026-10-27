@@ -14,4 +14,12 @@ interface VaultSettingsReader {
     suspend fun dailyNotes(
         vaultPath: String
     ): DailyNoteSettings?
+
+    /**
+     * The Templates plugin's settings (`.obsidian/templates.json`): blank fields as Obsidian reads them (the vault
+     * root, `YYYY-MM-DD`, `HH:mm`), and null when the vault has no such file or it cannot be read.
+     */
+    suspend fun templates(
+        vaultPath: String
+    ): TemplateSettings?
 }

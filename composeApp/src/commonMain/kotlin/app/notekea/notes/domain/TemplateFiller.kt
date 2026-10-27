@@ -4,23 +4,25 @@ import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.domain.time.MomentFormat
 
 /**
- * Fills the template a new daily note starts from, as Obsidian's Daily notes plugin does: `{{date}}` is the note's
- * date in [DailyNoteSettings.format], `{{time}}` the time it was created (`HH:mm`), `{{title}}` the note's name, and
- * `{{date:FORMAT}}` or `{{time:FORMAT}}` use their own Moment.js format. Any other text, other `{{…}}` included, stays.
+ * Fills a template in, as Obsidian's Templates and Daily notes plugins do (`ROADMAP.md` 1.10, 1.12): `{{date}}` is the
+ * date in `dateFormat` (a daily note's own date, or today's), `{{time}}` the time in `timeFormat`, `{{title}}` the
+ * note's name, and `{{date:FORMAT}}` or `{{time:FORMAT}}` use their own Moment.js format. Any other text, other `{{…}}`
+ * included, stays.
  */
-class DailyNoteTemplate {
+class TemplateFiller {
     private val momentFormat = MomentFormat()
 
     fun fill(
         template: String,
         moment: LocalMoment,
         title: String,
-        dateFormat: String
+        dateFormat: String,
+        timeFormat: String = MomentFormat.SHORT_TIME
     ): String = VARIABLE.replace(input = template) { match ->
         val format = match.groups[FORMAT_GROUP]?.value
         when (match.groupValues[NAME_GROUP].lowercase()) {
             TITLE -> title
-            TIME -> momentFormat.format(moment = moment, pattern = format ?: MomentFormat.SHORT_TIME)
+            TIME -> momentFormat.format(moment = moment, pattern = format ?: timeFormat)
             else -> momentFormat.format(moment = moment, pattern = format ?: dateFormat)
         }
     }
