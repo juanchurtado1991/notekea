@@ -52,6 +52,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Tabs and split panes (ROADMAP 1.11): every note, file or folder opened gets its own tab (an open one goes to its
+  tab); Mod+click or the middle button opens it behind the current tab. Tabs close with ✕, the middle button or Mod+W,
+  cycle with Ctrl+Tab / Ctrl+Shift+Tab and jump with Mod+1…9. Split right (Mod+Shift+D or the tab menu) shows two
+  panes side by side; tabs can be dragged between them. A folder opens as a grid of cards, a note's card showing the
+  first picture it embeds. Each note keeps its scroll and cursor while the app runs, and the tabs and split come
+  back when the vault is opened again.
 - Daily notes (ROADMAP 1.10): "Today" in the sidebar and Mod+D open today's note, creating it if needed, in the folder,
   name format and template of Obsidian's Daily notes settings (`.obsidian/daily-notes.json`), or in `Journal/` as
   `YYYY-MM-DD` without them. Today is the date in the computer's time zone. A daily note's header has arrows
