@@ -65,7 +65,7 @@ One main window with three resizable panes, a status bar, and the native window 
 └──────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Sidebar** (default 260 dp, min 200, collapsible with `Mod+\`): the vault's name with Sort, Expand all, Collapse
+- **Sidebar** (default 340 dp, as wide as the outline panel, min 200, collapsible with `Mod+\`): the vault's name with Sort, Expand all, Collapse
   all and Minimize, bookmarks, folder tree. A tool rail on its left (Files, Search notes, New note, New folder, Today)
   stays when it is hidden (1.11).
 - **Editor** (flexible, min 480 dp): tab bar, title, properties, Edit / Read toggle, Markdown content.

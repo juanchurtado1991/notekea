@@ -271,6 +271,7 @@ and Linux: Mod+T is ⌘T or Ctrl+T, Mod+Z is ⌘Z or Ctrl+Z.
 | 1.12-05 | In the Templates Vault, click the Projects folder (its tab shows the folder's cards) and press Mod+T; choose Work/Weekly review; press Escape to keep the name | The picker opens for a new note: an "Untitled" note is made in Projects and filled with "## Week of" today's month and day, then Done and Next | 1.12 | `VaultTreeViewModelTest` | | | |
 | 1.12-06 | Open Projects/Kickoff notes in Preview and press Mod+T, then Escape; select "Goals" and press Mod+T, choose Work/Weekly review; press Mod+Z | Mod+T switches the note to Edit; Escape closes the picker and gives the keyboard back to the text, the selection kept; the template replaces "Goals"; Mod+Z undoes the whole template in one step | 1.12 | `EditorTemplatesTest` | | | |
 | 1.12-07 | Open the Templates Vault in Obsidian and run "Templates: Insert template" in Projects/Kickoff notes (Templates core plugin on) | Obsidian lists the same templates of Snippets and fills in the date and time in the same formats as Notekea | 1.12 | manual | | | |
+| 1.12-08 | In `smoke-data/scratch/Playground Vault`, drag the sidebar's edge and the outline panel's edge to make each about as wide as the other; then on a first launch (or with a new data folder) open the vault | The sidebar and the outline panel both open 340 dp wide by default, the note between them; a width set by dragging stays after relaunch (1.12 smoke request) | 1.12 | `SettingsTreePreferencesStoreTest` | | | |
 
 ### 1.17 Formatting toolbar
 
