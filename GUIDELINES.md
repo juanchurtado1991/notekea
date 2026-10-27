@@ -157,7 +157,7 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
      Linux**, with packaged builds published as a GitHub pre-release. The milestone is closed only when the three
      OSes pass. The first run, at the end of M1, is retroactive: it covers everything since M0.
   3. **Release run**: the milestone QA run of M5, with the release builds, which are not signed (`ROADMAP.md` 5.3,
-     5.4).
+     5.5).
 - **Automated UI tests** (Compose `ui-test`, `runComposeUiTest`) cover every screen and its states: they run in CI on
   the three OSes on every pull request and block the merge when they fail, and they are packaged as the
   **Notekea Self-Test** app that testers run first in a milestone QA run. Every step that adds or changes UI brings
