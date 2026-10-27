@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Plan for the editor's memory (`ROADMAP.md` 1.18): measure the editor alone on the three systems with a 5,000-note
+  vault, check that opening and closing notes gives the memory back, and cut it to under 400 MB before M2.
 - Plan for memory (`ROADMAP.md` 3.0, 3.1, 3.2, 5.4): the inference spike measures memory per model and context and
   whether a 1–2B model is good enough; the model manager recommends a model from the machine's RAM; the chat model is
   loaded only while used; a new M5 feature sets memory budgets (editor < 400 MB, chatting on an 8 GB laptop < 2.5 GB)
