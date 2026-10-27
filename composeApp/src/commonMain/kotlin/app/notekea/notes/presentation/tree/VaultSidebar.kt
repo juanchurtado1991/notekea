@@ -25,6 +25,7 @@ import app.notekea.core.presentation.components.EmptyState
 import app.notekea.core.presentation.components.ErrorBanner
 import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaButtonStyle
+import app.notekea.core.presentation.components.NotekeaSectionHeader
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
@@ -33,6 +34,7 @@ import app.notekea.resources.Res
 import app.notekea.resources.error_unexpected
 import app.notekea.resources.tree_empty_message
 import app.notekea.resources.tree_empty_title
+import app.notekea.resources.tree_files
 import app.notekea.resources.tree_links_more
 import app.notekea.resources.tree_links_skipped
 import app.notekea.resources.tree_links_updated
@@ -85,7 +87,11 @@ internal fun VaultSidebar(
                 onIntent = onIntent,
                 modifier = Modifier.padding(top = NotekeaDimensions.SpacingS)
             )
-            Box(modifier = Modifier.weight(weight = 1f).fillMaxWidth().padding(top = NotekeaDimensions.SpacingS)) {
+            NotekeaSectionHeader(
+                title = stringResource(resource = Res.string.tree_files),
+                modifier = Modifier.padding(top = NotekeaDimensions.SpacingS, start = NotekeaDimensions.SpacingXs)
+            )
+            Box(modifier = Modifier.weight(weight = 1f).fillMaxWidth()) {
                 SidebarBody(state = state, onIntent = onIntent, untitledNote = untitledNote)
             }
         }

@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaLazyScrollArea
+import app.notekea.core.presentation.components.NotekeaSectionHeader
 import app.notekea.core.presentation.components.NotekeaSegment
 import app.notekea.core.presentation.components.NotekeaSegmentedControl
 import app.notekea.core.presentation.components.NotekeaTooltip
@@ -78,7 +79,6 @@ import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_HEIGHT_DP = 480
 private const val PREVIEW_WIDTH_DP = 300
-private const val SECTION_LETTER_SPACING_SP = 0.8
 private val LIST_PADDING = PaddingValues(all = NotekeaDimensions.SpacingXs)
 
 /**
@@ -164,7 +164,7 @@ private fun InspectorSections(
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         val isOutlineOpen = SidePanelSection.OUTLINE !in foldedSections
-        SectionHeader(
+        NotekeaSectionHeader(
             title = stringResource(resource = Res.string.outline_title),
             isOpen = isOutlineOpen,
             onToggle = { actions.onSectionToggle(SidePanelSection.OUTLINE) },
@@ -225,68 +225,6 @@ private fun OutlineSection(
     }
 }
 
-/**
- * A section's header, as desktop inspectors draw it: a chevron and its [title] in small capitals, a click folding or
- * opening it ([onToggle]). Its tooltip names the [shortcutHint] that goes to it, if any.
- */
-@Composable
-private fun SectionHeader(
-    title: String,
-    isOpen: Boolean,
-    onToggle: () -> Unit,
-    shortcutHint: String? = null
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(
-            start = NotekeaDimensions.SpacingXs,
-            end = NotekeaDimensions.SpacingXs
-        ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(modifier = Modifier.weight(weight = 1f)) {
-            NotekeaTooltip(label = title, shortcutHint = shortcutHint) {
-                SectionTitle(title = title, isOpen = isOpen, onToggle = onToggle)
-            }
-        }
-    }
-}
-
-/** The chevron and the title in small capitals; a click folds or opens the section. */
-@Composable
-private fun SectionTitle(
-    title: String,
-    isOpen: Boolean,
-    onToggle: () -> Unit
-) {
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = NotekeaDimensions.CompactControlSize)
-            .clip(shape = MaterialTheme.shapes.small)
-            .focusProperties { canFocus = false }
-            .clickable(role = Role.Button, onClick = onToggle)
-            .padding(horizontal = NotekeaDimensions.SpacingXs),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
-    ) {
-        Icon(
-            imageVector = if (isOpen) NotekeaIcons.Collapse else NotekeaIcons.Expand,
-            contentDescription = null,
-            modifier = Modifier.size(size = NotekeaDimensions.BadgeIconSize),
-            tint = muted
-        )
-        Text(
-            text = title.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = SECTION_LETTER_SPACING_SP.sp
-            ),
-            color = muted
-        )
-    }
-}
-
 @Composable
 private fun MinimizeButton(
     platformConventions: PlatformConventions,
@@ -317,7 +255,7 @@ private fun NoteInfoSection(
             .height(height = NotekeaDimensions.BorderWidth)
             .background(color = MaterialTheme.colorScheme.outline)
     )
-    SectionHeader(
+    NotekeaSectionHeader(
         title = stringResource(resource = Res.string.note_info_title),
         isOpen = isOpen,
         onToggle = { actions.onSectionToggle(SidePanelSection.NOTE_INFO) }

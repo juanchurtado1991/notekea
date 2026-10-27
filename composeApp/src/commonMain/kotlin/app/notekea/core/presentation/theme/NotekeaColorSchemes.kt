@@ -7,7 +7,8 @@ import app.notekea.core.presentation.theme.palette.NotekeaPalette
 
 /**
  * Semantic color roles for the light and dark themes. The roadmap's tokens map to Material 3 roles:
- * `accent` → `tertiary`, `muted` → `onSurfaceVariant`, `ink` → `onSurface` / `onBackground`.
+ * `accent` → `tertiary`, `muted` → `onSurfaceVariant`, `ink` → `onSurface` / `onBackground`, and the quiet hairlines
+ * inside a pane → `outlineVariant`.
  */
 object NotekeaColorSchemes {
     val dark: ColorScheme = darkColorScheme(
@@ -24,6 +25,7 @@ object NotekeaColorSchemes {
         surfaceVariant = NotekeaPalette.SurfaceVariantDark,
         onSurfaceVariant = NotekeaPalette.MutedDark,
         outline = NotekeaPalette.OutlineDark,
+        outlineVariant = NotekeaPalette.OutlineVariantDark,
         error = NotekeaPalette.ErrorDark,
         onError = NotekeaPalette.OnErrorDark
     )
@@ -42,6 +44,7 @@ object NotekeaColorSchemes {
         surfaceVariant = NotekeaPalette.SurfaceVariantLight,
         onSurfaceVariant = NotekeaPalette.MutedLight,
         outline = NotekeaPalette.OutlineLight,
+        outlineVariant = NotekeaPalette.OutlineVariantLight,
         error = NotekeaPalette.ErrorLight,
         onError = NotekeaPalette.OnErrorLight
     )

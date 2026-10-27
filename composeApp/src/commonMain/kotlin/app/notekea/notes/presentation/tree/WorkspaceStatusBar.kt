@@ -17,8 +17,11 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.presentation.editor.EditorState
+import app.notekea.notes.presentation.editor.SaveStatus
 import app.notekea.notes.presentation.workspace.TabKind
 import app.notekea.resources.Res
+import app.notekea.resources.editor_saved
+import app.notekea.resources.editor_unsaved
 import app.notekea.resources.status_crlf
 import app.notekea.resources.status_cursor
 import app.notekea.resources.status_cursor_tooltip
@@ -38,7 +41,7 @@ private const val PREVIEW_VAULT = "Playground Vault"
  * The workspace's status bar (`ROADMAP.md` 1.14), as Android Studio's: where the user is (the vault, the folders and
  * the open tab's file, [path] of [kind]) on the left; on the right the vault's first scan while it runs ([isLoading]),
  * then, for a note in Edit mode ([editor] and its [buffer]), the cursor's line and column in the file, its line endings
- * and encoding, and its words.
+ * and encoding, its words, and whether it is saved.
  */
 @Composable
 internal fun WorkspaceStatusBar(
@@ -94,7 +97,7 @@ private fun Chevron() {
     )
 }
 
-/** The cursor's line and column (in Edit mode), the line endings, the encoding and the words of the open note. */
+/** The cursor's line and column (in Edit mode), the line endings, the encoding, the words and the save state. */
 @Composable
 private fun NoteFacts(
     editor: EditorState,
@@ -122,6 +125,12 @@ private fun NoteFacts(
         NotekeaStatusSeparator()
         NotekeaStatusLabel(text = pluralStringResource(Res.plurals.status_words, stats.words, stats.words))
     }
+    NotekeaStatusSeparator()
+    val isUnsaved = editor.saveStatus == SaveStatus.UNSAVED
+    NotekeaStatusLabel(
+        text = stringResource(resource = if (isUnsaved) Res.string.editor_unsaved else Res.string.editor_saved),
+        icon = if (isUnsaved) NotekeaIcons.InfoModified else NotekeaIcons.Checked
+    )
 }
 
 /** The 1-based line and column of [offset] in [text]. */

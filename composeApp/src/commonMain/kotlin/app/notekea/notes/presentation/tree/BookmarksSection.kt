@@ -27,6 +27,7 @@ import androidx.compose.ui.zIndex
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.components.NotekeaMenuItem
+import app.notekea.core.presentation.components.NotekeaSectionHeader
 import app.notekea.core.presentation.components.NotekeaTreeItem
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
@@ -43,7 +44,7 @@ import kotlin.math.roundToInt
 private const val PREVIEW_WIDTH_DP = 300
 
 /**
- * The vault's bookmarks above the tree (`ROADMAP.md` 1.13), under a "Bookmarks" header that folds them; nothing while
+ * The vault's bookmarks above the tree (`ROADMAP.md` 1.13), under a BOOKMARKS header that folds them; nothing while
  * there are none. A bookmark opens its entry in a tab and selects it in the tree; dragged up or down, it moves among
  * the others; its menu removes it. One whose entry is no longer in the vault (moved or deleted outside Notekea) is
  * greyed out, with a ✕ that removes it.
@@ -57,14 +58,11 @@ internal fun BookmarksSection(
     val paths = state.bookmarks.paths
     if (paths.isEmpty()) return
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = NotekeaDimensions.SpacingXs)) {
-        NotekeaTreeItem(
-            label = stringResource(resource = Res.string.tree_bookmarks),
-            depth = 0,
-            onClick = { onIntent(BookmarkIntent.OnSectionToggle) },
-            icon = NotekeaIcons.Bookmark,
-            isExpanded = state.isBookmarksExpanded,
-            onToggleExpanded = { onIntent(BookmarkIntent.OnSectionToggle) },
-            trailingText = paths.size.toString()
+        NotekeaSectionHeader(
+            title = stringResource(resource = Res.string.tree_bookmarks),
+            isOpen = state.isBookmarksExpanded,
+            onToggle = { onIntent(BookmarkIntent.OnSectionToggle) },
+            count = paths.size
         )
         if (state.isBookmarksExpanded) {
             paths.forEachIndexed { index, path ->

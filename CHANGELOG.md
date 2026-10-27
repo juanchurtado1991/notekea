@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Polish (ROADMAP 1.14): one surface for the panes with quiet dividers, BOOKMARKS and FILES section headers, a quiet
+  selection while a list lacks the keyboard, tabs with a minimum width, a fade and a list of every open tab when they
+  overflow, roomier reading lines and header, brighter secondary text, the save state in the status bar.
 - Tabs (ROADMAP 1.14) look like a browser's: the open one rises into the note with rounded corners, the others stay
   quiet and show their close button on hover.
 - The tool rail (ROADMAP 1.14) keeps Files, Search notes, Today and a Side panel button at its top and Open another

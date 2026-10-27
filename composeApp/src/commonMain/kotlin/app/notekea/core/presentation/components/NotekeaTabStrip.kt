@@ -4,9 +4,11 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
@@ -17,7 +19,6 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -64,6 +65,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+private const val FADE_WIDTH_DP = 40
 private const val HOVER_ALPHA = 0.5f
 private const val LABEL_MAX_WIDTH_DP = 180
 private const val PREVIEW_CLOSE = "Close tab"
@@ -71,6 +73,7 @@ private const val SETTLE_MILLIS = 500L
 private const val SEPARATOR_HEIGHT_DP = 16
 private const val STRIP_HEIGHT_DP = 34
 private const val TAB_HEIGHT_DP = 30
+private const val TAB_MIN_WIDTH_DP = 96
 private const val TAB_RADIUS_DP = 8
 private val PREVIEW_TABS = listOf(
     NotekeaTabStripItem(key = "a", label = "Pricing ideas", icon = NotekeaIcons.Note),
@@ -86,8 +89,9 @@ private val PREVIEW_TABS = listOf(
  * middle button or the close button closes it ([onClose]), a right click opens [menuOf]'s sections. A tab dragged along
  * the row stays on its line while the others slide aside to open its place, and once let go it glides into that place
  * ([onReorder] with its new index among the others); dragged off the row, it follows the pointer, and once let go
- * reports where in the window ([onDrop]). The row scrolls sideways when the tabs do
- * not fit; [trailing] (a "+" button) follows the last tab. Tabs are not focus stops: the keyboard moves through them
+ * reports where in the window ([onDrop]). The row scrolls sideways when the tabs do not fit, fading out at its end
+ * while there is more, and a ⌄ button named [allTabsLabel] lists every tab to pick one; [trailing] (a "+" button)
+ * follows the last tab. Tabs are not focus stops: the keyboard moves through them
  * with the editor's shortcuts.
  */
 @Composable
@@ -102,46 +106,128 @@ fun NotekeaTabStrip(
     onReorder: (from: Int, to: Int) -> Unit,
     modifier: Modifier = Modifier,
     menuOf: (Int) -> List<List<NotekeaMenuItem>> = { emptyList() },
+    allTabsLabel: String? = null,
     trailing: @Composable () -> Unit = {}
 ) {
     val targets = remember { TabDropTargets() }
     val keys = tabs.map { it.key }
-    val drag = targets.dragOf(keys = keys)
     val release = rememberTabRelease(targets = targets, onReorder = onReorder, onDrop = onDrop)
     SettleTabDrag(targets = targets, keys = keys)
-    Column(modifier = modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.background)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(height = STRIP_HEIGHT_DP.dp)
-                .onGloballyPositioned { targets.row = it.boundsInWindow() }
-                .horizontalScroll(rememberScrollState()),
-            verticalAlignment = Alignment.Bottom
-        ) {
-            tabs.forEachIndexed { index, tab ->
-                key(tab.key) {
-                    DraggableTab(
-                        tab = tab,
-                        index = index,
-                        isSelected = index == selectedIndex,
-                        isActive = isActive,
-                        hasSeparator = index != selectedIndex && index + 1 != selectedIndex && index < tabs.lastIndex,
-                        closeLabel = closeLabel,
-                        targets = targets,
-                        sections = menuOf(index),
-                        onSelect = { onSelect(index) },
-                        onClose = { onClose(index) },
-                        onDrag = { start -> targets.drag = TabDrag(index = index, keys = keys, start = start) },
-                        onRelease = release,
-                        drag = drag
-                    )
-                }
-            }
-            Box(modifier = Modifier.height(height = STRIP_HEIGHT_DP.dp), contentAlignment = Alignment.Center) {
-                trailing()
-            }
+    val scroll = rememberScrollState()
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height = STRIP_HEIGHT_DP.dp)
+            .background(color = MaterialTheme.colorScheme.background),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier.weight(weight = 1f)) {
+            ScrollingTabs(
+                tabs = tabs,
+                look = StripLook(selectedIndex = selectedIndex, isActive = isActive, closeLabel = closeLabel),
+                targets = targets,
+                scroll = scroll,
+                menuOf = menuOf,
+                onSelect = onSelect,
+                onClose = onClose,
+                release = release,
+                trailing = trailing
+            )
+            if (scroll.canScrollForward) OverflowFade(modifier = Modifier.align(alignment = Alignment.CenterEnd))
+        }
+        if (allTabsLabel != null && (scroll.canScrollForward || scroll.canScrollBackward)) {
+            AllTabsButton(tabs = tabs, selectedIndex = selectedIndex, label = allTabsLabel, onSelect = onSelect)
         }
     }
+}
+
+/** The tabs in their scrolling row, the [trailing] button after the last one. */
+@Composable
+private fun ScrollingTabs(
+    tabs: List<NotekeaTabStripItem>,
+    look: StripLook,
+    targets: TabDropTargets,
+    scroll: ScrollState,
+    menuOf: (Int) -> List<List<NotekeaMenuItem>>,
+    onSelect: (Int) -> Unit,
+    onClose: (Int) -> Unit,
+    release: () -> Unit,
+    trailing: @Composable () -> Unit
+) {
+    val keys = tabs.map { it.key }
+    val drag = targets.dragOf(keys = keys)
+    val selectedIndex = look.selectedIndex
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height = STRIP_HEIGHT_DP.dp)
+            .onGloballyPositioned { targets.row = it.boundsInWindow() }
+            .horizontalScroll(state = scroll),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        tabs.forEachIndexed { index, tab ->
+            key(tab.key) {
+                DraggableTab(
+                    tab = tab,
+                    index = index,
+                    isSelected = index == selectedIndex,
+                    isActive = look.isActive,
+                    hasSeparator =
+                    index != selectedIndex && index + 1 != selectedIndex && index < tabs.lastIndex,
+                    closeLabel = look.closeLabel,
+                    targets = targets,
+                    sections = menuOf(index),
+                    onSelect = { onSelect(index) },
+                    onClose = { onClose(index) },
+                    onDrag = { start -> targets.drag = TabDrag(index = index, keys = keys, start = start) },
+                    onRelease = release,
+                    drag = drag
+                )
+            }
+        }
+        Box(modifier = Modifier.height(height = STRIP_HEIGHT_DP.dp), contentAlignment = Alignment.Center) {
+            trailing()
+        }
+    }
+}
+
+/** The strip's background fading in over the tabs' end, where more tabs are out of view. */
+@Composable
+private fun OverflowFade(
+    modifier: Modifier
+) {
+    val background = MaterialTheme.colorScheme.background
+    Box(
+        modifier = modifier
+            .width(width = FADE_WIDTH_DP.dp)
+            .height(height = STRIP_HEIGHT_DP.dp)
+            .background(brush = Brush.horizontalGradient(colors = listOf(background.copy(alpha = 0f), background)))
+    )
+}
+
+/** ⌄: the menu of every open tab, the selected one checked; picking one selects it. */
+@Composable
+private fun AllTabsButton(
+    tabs: List<NotekeaTabStripItem>,
+    selectedIndex: Int,
+    label: String,
+    onSelect: (Int) -> Unit
+) {
+    NotekeaMenuButton(
+        icon = NotekeaIcons.Collapse,
+        label = label,
+        sections = listOf(
+            tabs.mapIndexed { index, tab ->
+                NotekeaMenuItem(
+                    label = tab.label,
+                    onClick = { onSelect(index) },
+                    icon = tab.icon,
+                    isChecked = index == selectedIndex
+                )
+            }
+        ),
+        takesFocus = false
+    )
 }
 
 /** The tab at [index] with its menu, drawn where the drag in [targets] puts it, above the others while dragged. */
@@ -290,6 +376,7 @@ private fun StripTab(
     Row(
         modifier = Modifier
             .height(height = TAB_HEIGHT_DP.dp)
+            .widthIn(min = TAB_MIN_WIDTH_DP.dp)
             .offset { offset().let { IntOffset(x = it.x.roundToInt(), y = it.y.roundToInt()) } }
             .onGloballyPositioned { place = it }
             .clip(shape = shape)

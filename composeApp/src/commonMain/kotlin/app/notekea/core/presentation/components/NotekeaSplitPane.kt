@@ -181,6 +181,8 @@ private fun ResizeHandle(
         modifier = modifier
             .width(width = HANDLE_WIDTH_DP.dp)
             .fillMaxHeight()
+            // The panes' surface, so the handle reads as their hairline and not as a gap down to the window's background.
+            .background(color = MaterialTheme.colorScheme.surface)
             .pointerHoverIcon(icon = LocalResizePointerIcon.current),
         contentAlignment = Alignment.Center
     ) {

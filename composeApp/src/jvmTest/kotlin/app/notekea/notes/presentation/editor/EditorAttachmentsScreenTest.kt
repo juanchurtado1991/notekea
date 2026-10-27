@@ -142,13 +142,13 @@ class EditorAttachmentsScreenTest {
             "# Arepas\n\nThe plate:\n![[plate.png|300]]\nThe menu:\n![[menu.pdf]]\n![[gone.png]]\nEnd.\n"
         private const val WINDOW_HEIGHT = 900
         private const val WINDOW_WIDTH = 1200
-        private val ATTACH_ITEM = Offset(x = 842f, y = 488f)
-        private val MORE_BUTTON = Offset(x = 1035f, y = 161f)
-        private val EDIT_CHIP = Offset(x = 255f, y = 827f)
+        private val ATTACH_ITEM = Offset(x = 842f, y = 507f)
+        private val MORE_BUTTON = Offset(x = 1035f, y = 180f)
+        private val EDIT_CHIP = Offset(x = 255f, y = 871f)
         private val MENU = RelativePath(value = "Recipes/menu.pdf")
         private val NOTE = RelativePath(value = "Recipes/Arepas.md")
         private val READ_CHIP = Offset(x = 255f, y = 662f)
         private val READ_LOCATE = Offset(x = 1023f, y = 761f)
-        private val TEXT_LINE = Offset(x = 300f, y = 306f)
+        private val TEXT_LINE = Offset(x = 300f, y = 338f)
     }
 }

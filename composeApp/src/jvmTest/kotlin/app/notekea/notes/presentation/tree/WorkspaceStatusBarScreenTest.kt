@@ -26,7 +26,7 @@ import kotlin.test.assertEquals
  */
 class WorkspaceStatusBarScreenTest {
     @Test
-    fun `the bar says where the note is, the scan, the cursor in the file, its format and its words`() {
+    fun `the bar says where the note is, the scan, the cursor in the file, its format, words and save state`() {
         assertEquals(
             expected = listOf(
                 "Playground Vault",
@@ -36,8 +36,9 @@ class WorkspaceStatusBarScreenTest {
                 "6:6",
                 "CRLF",
                 "UTF-8",
-                "236 words"
-            ) to listOf("Playground Vault", "Editor", "Tasks and callouts", "LF", "UTF-8"),
+                "236 words",
+                "Saved"
+            ) to listOf("Playground Vault", "Editor", "Tasks and callouts", "LF", "UTF-8", "Saved"),
             actual = texts(isReading = false) to texts(isReading = true)
         )
     }
