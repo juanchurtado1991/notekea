@@ -65,6 +65,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Bookmarks (ROADMAP 1.13): the star beside a note's title, "Add to bookmarks" in a tree row's menu or Mod+Shift+B
+  bookmark a note, folder or file; the Bookmarks section above the tree opens them, folds, reorders them by dragging
+  and removes those gone from the vault. They follow renames and deletions made in Notekea and are kept per vault in
+  the app's settings, never in the vault.
 - Templates (ROADMAP 1.12): Mod+T or the toolbar's Insert template opens a picker of the notes in the templates
   folder (Obsidian's `templates.json`, or `Templates`), and the chosen one is written at the cursor, or as the whole
   of a note without text yet, with `{{title}}`, `{{date}}` and `{{time}}` filled in and its properties merged into
