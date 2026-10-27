@@ -19,7 +19,8 @@ import app.notekea.notes.domain.RelativePath
  * ([AttachmentView]), and [actionError] why attaching, opening or locating one failed, until it is dismissed.
  * [outline] is the note's headings in text order (`ROADMAP.md` 1.9). [properties] is the note's frontmatter read as
  * properties, shown open while [isPropertiesExpanded], and as its YAML ([propertiesSource], the lines between the
- * `---`) while [isSourceShown] (`ROADMAP.md` 1.14); [info] is what the side panel's Note info says about it; [today] is
+ * `---`) while [isSourceShown] (`ROADMAP.md` 1.14); [info] is what the side panel's Note info says about it; [usesCrLf] and [bodyStartLine] (the
+ * file's lines before the text, the frontmatter's) are what the status bar needs to say where the cursor is in the file; [today] is
  * the day the date calendars mark, read when the note was last shown or saved.
  */
 data class EditorState(
@@ -41,5 +42,7 @@ data class EditorState(
     val isPropertiesExpanded: Boolean = true,
     val isSourceShown: Boolean = false,
     val today: CalendarDate? = null,
-    val info: NoteInfo = NoteInfo()
+    val info: NoteInfo = NoteInfo(),
+    val usesCrLf: Boolean = false,
+    val bodyStartLine: Int = 0
 )

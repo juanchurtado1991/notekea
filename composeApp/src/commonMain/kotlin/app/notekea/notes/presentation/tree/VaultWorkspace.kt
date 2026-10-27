@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.tree
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,7 +46,7 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The vault's sidebar beside the editor's tabs and panes (`ROADMAP.md` 1.11), with the side panel of the active pane's
  * outline on the right (`ROADMAP.md` 1.9). Each tab shows a note in its pane's editor, a file's preview, a folder's grid
- * or, for a file that is gone, says so.
+ * or, for a file that is gone, says so. The status bar runs under all of it (`ROADMAP.md` 1.14).
  */
 @Composable
 internal fun VaultWorkspace(
@@ -57,11 +58,58 @@ internal fun VaultWorkspace(
     sidePanel: SidePanelHost,
     onSwitchVault: () -> Unit
 ) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        WorkspaceBody(
+            state = state,
+            workspaceState = workspaceState,
+            vaultName = vaultName,
+            context = PaneContext(state, workspaceState, viewModels, panes, sidePanel),
+            onSwitchVault = onSwitchVault,
+            modifier = Modifier.weight(weight = 1f)
+        )
+        ActiveStatusBar(state = state, workspaceState = workspaceState, vaultName = vaultName, viewModels = viewModels)
+    }
+}
+
+/** The status bar for the active pane's tab, and for its note's editor when it shows one. */
+@Composable
+private fun ActiveStatusBar(
+    state: VaultTreeState,
+    workspaceState: WorkspaceState,
+    vaultName: String,
+    viewModels: WorkspaceViewModels
+) {
+    val activeEditor = viewModels.editors[workspaceState.workspace.activePane]
+    val editorState by activeEditor.state.collectAsState()
+    val path = workspaceState.workspace.activePath
+    val kind = path?.let { workspaceState.kindOf(path = it) }
+    WorkspaceStatusBar(
+        vaultName = vaultName,
+        isLoading = state.isLoading,
+        path = path,
+        kind = kind,
+        editor = editorState.takeIf { kind == TabKind.NOTE },
+        buffer = activeEditor.buffer
+    )
+}
+
+/** The rail, the sidebar, the tabs and panes and the side panel, with About or Settings over them while open. */
+@Composable
+private fun WorkspaceBody(
+    state: VaultTreeState,
+    workspaceState: WorkspaceState,
+    vaultName: String,
+    context: PaneContext,
+    onSwitchVault: () -> Unit,
+    modifier: Modifier
+) {
+    val viewModels = context.viewModels
+    val panes = context.panes
+    val sidePanel = context.sidePanel
     val activePane = workspaceState.workspace.activePane
     val activeEditor = viewModels.editors[activePane]
     val activeEditorState by activeEditor.state.collectAsState()
     val isNoteShown = workspaceState.workspace.activePath?.let { workspaceState.kindOf(path = it) } == TabKind.NOTE
-    val context = PaneContext(state, workspaceState, viewModels, panes, sidePanel)
     val findNote = { viewModels.onSwitcher(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES)) }
     var dialog by remember { mutableStateOf<WorkspaceDialog?>(value = null) }
     VaultTreeContent(
@@ -69,6 +117,7 @@ internal fun VaultWorkspace(
         vaultName = vaultName,
         onIntent = viewModels.tree::onIntent,
         rail = railActionsOf(sidePanel = sidePanel, onSearch = findNote, onSwitchVault = onSwitchVault) { dialog = it },
+        modifier = modifier,
         isSidePanelVisible = if (sidePanel.isOverlay) sidePanel.isOverlayOpen else workspaceState.sidePanel.isVisible
     ) {
         WithSidePanel(

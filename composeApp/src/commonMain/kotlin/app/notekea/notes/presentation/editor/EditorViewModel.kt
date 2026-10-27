@@ -420,6 +420,11 @@ class EditorViewModel(
         else -> null
     }
 
+    /** How many lines of the file come before the note's text: its frontmatter's. */
+    private fun linesBeforeBody(
+        document: NoteDocument
+    ): Int = document.header.count { it == NEW_LINE_CHAR }
+
     private fun today() = propertyTools.localCalendar.momentOf(instant = propertyTools.clock.now()).date
 
     /** The star beside the title: the window bookmarks this note, or removes its bookmark. */
@@ -765,6 +770,8 @@ class EditorViewModel(
                         properties = frontmatterReader.read(header = document.header),
                         propertiesSource = propertyEditing.sourceOf(header = document.header),
                         info = it.info.copy(modifiedAt = momentOf(instant = propertyTools.clock.now())),
+                        usesCrLf = document.usesCrLf,
+                        bodyStartLine = linesBeforeBody(document = document),
                         today = today(),
                         saveStatus = if (isCurrent) SaveStatus.SAVED else SaveStatus.UNSAVED,
                         saveError = null,
@@ -906,6 +913,8 @@ class EditorViewModel(
             it.copy(
                 properties = frontmatterReader.read(header = document.header),
                 propertiesSource = propertyEditing.sourceOf(header = document.header),
+                usesCrLf = document.usesCrLf,
+                bodyStartLine = linesBeforeBody(document = document),
                 today = today()
             )
         }

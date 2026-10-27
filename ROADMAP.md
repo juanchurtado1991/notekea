@@ -74,7 +74,10 @@ One main window with three resizable panes, a status bar, and the native window 
   top (remembered). The inspector has sections that fold on their own (remembered): **Outline** and **Note info**
   (1.14), then **Related** and **Backlinks** (M2). **Chat** (3.3) fills the panel, since a conversation needs its full
   height; until it is built it says "Coming soon" (1.14).
-- **Status bar** (24 dp): indexing progress, model state and sync state. Each item is clickable and opens its
+- **Status bar** (24 dp, since 1.14): where the user is (the vault, the folders and the open file) on the left; on the
+  right the work in progress with a thin progress bar (the vault's first scan, then indexing), and for a note the
+  cursor's line:column in the file, its line endings, its encoding and its words. Then indexing progress, model state
+  and sync state join it (M2–M4). Each of those is clickable and opens its
   detail (indexing log, model manager, sync panel).
 - Below 1000 dp of window width the right panel becomes an overlay; below 760 dp the sidebar does too.
 
@@ -417,6 +420,9 @@ Frontmatter shown as a compact form above the note content.
   - **Settings:** a dialog with the sections to come, dimmed, and "Coming soon" until settings are built.
   - **Welcome screen:** two columns (stacked in a narrow window): the logo, the actions and any error, and beside them
     the recent vaults, at most five shown and the rest scrolling inside, or what Notekea is while there are none.
+  - **Status bar:** under the whole window, as Android Studio's: the vault › folders › file on the left; the vault's
+    scan with a thin progress bar while it runs, then the note's line:column (in Edit mode, counted in the file),
+    line endings (LF or CRLF), encoding and words on the right.
   - **Scrollbars:** a thin scrollbar shows on what scrolls (the tree, the outline, About's shortcuts, the recent
     vaults, the welcome screen), only while there is more to see.
   - **Logo:** a placeholder (a cobalt square with an "N") in the window, About and the welcome screen, until the

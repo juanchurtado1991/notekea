@@ -80,6 +80,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cannot read is shown that way with an explanation. Every edit rewrites only its property's lines.
 - About Notekea (ROADMAP 1.14): the logo, the version, a link to GitHub and every keyboard shortcut as keycaps; and a
   Settings dialog that says what is coming. A placeholder logo shows in the window, About and the welcome screen.
+- Status bar (ROADMAP 1.14): the vault and the open file's folders on the left; the vault's scan with a progress bar,
+  and the note's line:column, line endings, encoding and words on the right.
 - Note info (ROADMAP 1.14): a side panel section with the note's words, reading time, links, tags, tasks done and when
   its file was created and modified.
 - Bookmarks (ROADMAP 1.13): the star beside a note's title, "Bookmark" in a tree row's menu or Mod+Shift+B
