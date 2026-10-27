@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +21,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.notekea.core.presentation.components.NotekeaTextField
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
@@ -32,6 +32,7 @@ import app.notekea.resources.chat_soon_title
 import org.jetbrains.compose.resources.stringResource
 
 private const val BADGE_LETTER_SPACING_SP = 0.8
+private const val DIMMED_ALPHA = 0.6f
 private const val MARK_DP = 48
 private const val MARK_ICON_DP = 24
 private const val PREVIEW_HEIGHT_DP = 480
@@ -39,7 +40,8 @@ private const val PREVIEW_WIDTH_DP = 320
 
 /**
  * The side panel's Chat until the chat is built (`ROADMAP.md` 3.3): what it will do, marked "Coming soon", above the
- * question field it will have, shown disabled.
+ * question field it will have, drawn dimmed. That field is only a picture of one, never a text field: a disabled
+ * text field left stale pixels on Linux once the panel went back to the inspector.
  */
 @Composable
 internal fun SidePanelChat(
@@ -68,14 +70,24 @@ internal fun SidePanelChat(
             )
             SoonBadge()
         }
-        NotekeaTextField(
-            value = "",
-            onValueChange = {},
-            modifier = Modifier.fillMaxWidth().padding(all = NotekeaDimensions.SpacingS),
-            placeholder = stringResource(resource = Res.string.chat_soon_placeholder),
-            enabled = false
-        )
+        QuestionField()
     }
+}
+
+/** The question field the chat will have, dimmed: an outline with its placeholder, taking no input. */
+@Composable
+private fun QuestionField() {
+    val shape = MaterialTheme.shapes.medium
+    Text(
+        text = stringResource(resource = Res.string.chat_soon_placeholder),
+        modifier = Modifier
+            .padding(all = NotekeaDimensions.SpacingS)
+            .fillMaxWidth()
+            .border(width = NotekeaDimensions.BorderWidth, color = MaterialTheme.colorScheme.outline, shape = shape)
+            .padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingM),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = DIMMED_ALPHA)
+    )
 }
 
 /** The chat's mark: its icon on the primary container. */

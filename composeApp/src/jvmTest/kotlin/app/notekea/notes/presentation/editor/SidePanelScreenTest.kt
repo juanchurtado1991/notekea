@@ -1,6 +1,10 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.ui.ImageComposeScene
+import androidx.compose.ui.InternalComposeUiApi
+import androidx.compose.ui.semantics.SemanticsNode
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getAllSemanticsNodes
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
@@ -40,14 +44,34 @@ class SidePanelScreenTest {
         )
     }
 
+    // Smoke 1.14-09: a disabled text field in Chat left stale pixels on Linux once the panel went back to the inspector.
+    @OptIn(InternalComposeUiApi::class)
+    @Test
+    fun `Chat says it is coming soon and holds no text field`() {
+        var editable = emptyList<SemanticsNode>()
+        UiThread.run {
+            scene(actions = mutableListOf(), mode = SidePanelMode.CHAT).use { scene ->
+                settle(scene = scene)
+                editable = scene.semanticsOwners.flatMap { it.getAllSemanticsNodes(mergingEnabled = false) }
+                    .filter { SemanticsProperties.EditableText in it.config }
+            }
+        }
+
+        assertEquals(
+            expected = emptyList(),
+            actual = editable
+        )
+    }
+
     private fun scene(
-        actions: MutableList<Any>
+        actions: MutableList<Any>,
+        mode: SidePanelMode = SidePanelMode.INSPECTOR
     ) = ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
         NotekeaTheme(darkTheme = false) {
             SidePanel(
                 outline = OutlineFinder().headings(text = BODY),
                 current = 0,
-                preferences = SidePanelPreferences(),
+                preferences = SidePanelPreferences(mode = mode),
                 platformConventions = PreviewPlatformConventions.linux,
                 actions = SidePanelActions(
                     onHeadingClick = { actions += it },
