@@ -97,7 +97,9 @@ class FrontmatterPatch {
         quote: Char?,
         old: FrontmatterBlocks.Block?
     ): List<String> {
-        val written = items.map { YamlValues.written(text = it, quote = quote) }
+        // Items left as they were keep their quotes; only new ones are written, quoted when YAML needs it.
+        val kept = old?.let { YamlValues.writtenItems(block = it) }.orEmpty()
+        val written = items.map { kept[it] ?: YamlValues.written(text = it, quote = quote) }
         val inline = old?.inlineValue.orEmpty()
         val joined = written.joinToString(separator = ITEM_SEPARATOR)
         return when {

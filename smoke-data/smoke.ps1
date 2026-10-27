@@ -5,7 +5,7 @@
 #        prepare|move|lock|outside|large|edit-note|edit-note-soon|delete-note|check-note|clear-cache|first-launch|restore-settings|clean
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("prepare", "move", "lock", "outside", "large", "edit-note", "edit-note-soon", "delete-note", "check-note",
+    [ValidateSet("prepare", "move", "lock", "outside", "large", "edit-note", "edit-note-soon", "delete-note", "check-note", "diff-properties",
         "clear-cache",
         "first-launch", "restore-settings", "clean")]
     [string]$Command
@@ -113,6 +113,9 @@ switch ($Command) {
         Copy-Item (Join-Path $SmokeRoot "notes\Shopping basics.md") $Editor
         # Outline (1.9): a long note with headings of every level, and lines that only look like headings.
         Copy-Item (Join-Path $SmokeRoot "notes\Outline practice.md") $Editor
+        # Properties (1.14): one property of each type, and a note whose frontmatter is not valid YAML.
+        Copy-Item (Join-Path $SmokeRoot "notes\Properties practice.md") $Editor
+        Copy-Item (Join-Path $SmokeRoot "notes\Broken properties.md") $Editor
         # Daily notes (1.10): a vault with Obsidian's Daily notes settings, a template and two earlier days.
         Copy-Item -Recurse (Join-Path $SmokeRoot "daily") (Join-Path $Scratch "Daily Vault")
         # Templates (1.12): a vault whose Obsidian settings put templates in Snippets, with notes to insert them in.
@@ -180,6 +183,13 @@ switch ($Command) {
             Write-Output "CHANGED: $crlf of $lines lines end with CR LF; the note starts with:"
             Write-Output ($text.Substring(0, [Math]::Min(80, $text.Length)).Replace("`r", "\r").Replace("`n", "\n"))
         }
+    }
+    "diff-properties" {
+        # Only the lines of the edited properties should differ from the file prepare copied.
+        $original = Get-Content -Encoding UTF8 (Join-Path $SmokeRoot "notes\Properties practice.md")
+        $note = Get-Content -Encoding UTF8 (Join-Path $Scratch "Playground Vault\Editor\Properties practice.md")
+        $changes = Compare-Object $original $note
+        if ($changes) { $changes | Format-Table -AutoSize } else { Write-Output "No change: the note is as prepare wrote it" }
     }
     "clear-cache" {
         Remove-Item -Force -ErrorAction SilentlyContinue $Database

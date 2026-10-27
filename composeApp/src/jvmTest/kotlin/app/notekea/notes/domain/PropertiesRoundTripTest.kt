@@ -5,8 +5,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The "Done when" of `ROADMAP.md` 1.14 on every note of `smoke-data`: its frontmatter reads as properties, and writing
- * each property back with the value read changes not a byte.
+ * The "Done when" of `ROADMAP.md` 1.14 on every note of `smoke-data`: its frontmatter reads as properties (but the one
+ * broken on purpose), and writing each property back with the value read changes not a byte.
  */
 class PropertiesRoundTripTest {
     private val reader = FrontmatterReader()
@@ -20,7 +20,9 @@ class PropertiesRoundTripTest {
             val properties = (content as? FrontmatterContent.Properties)?.properties.orEmpty()
             val unchanged = listOf(FrontmatterBlocks.of(header = header)?.toHeader() ?: header) +
                 properties.map { patch.set(header = header, key = it.key, value = it.value) }
-            val invalid = listOfNotNull(file.path.takeIf { content is FrontmatterContent.Invalid })
+            val isBrokenOnPurpose = file.name == BROKEN_ON_PURPOSE
+            val invalid =
+                listOfNotNull(file.path.takeIf { content is FrontmatterContent.Invalid && !isBrokenOnPurpose })
             invalid + unchanged.filter { it != header }.map { file.path + ": " + it }
         }
 
@@ -33,6 +35,7 @@ class PropertiesRoundTripTest {
         .toList()
 
     companion object {
+        private const val BROKEN_ON_PURPOSE = "Broken properties.md"
         private const val SCRATCH = "scratch"
         private const val SMOKE_DATA = "../smoke-data"
     }
