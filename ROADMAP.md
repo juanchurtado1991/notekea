@@ -325,6 +325,21 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
   drag a tab between panes. Maximum two panes in the MVP.
 - Open tabs and splits are restored when the vault is reopened.
 - Tabs live inside the window content; the window keeps its native title bar (`PLATFORM_GUIDELINES.md`).
+- **Opening:** every note, file or folder opened (a click or Enter in the sidebar, a link, the quick switcher, Today,
+  the day arrows, a new note) gets a tab after the active one; one that is already open goes to its tab, in either
+  pane, so two editors never write the same note. `Mod+click` and the middle button open it in a tab behind the
+  current one. The arrow keys in the sidebar only move the selection. The tree selects the active tab's file.
+- **What a tab shows:** a note in its pane's editor (which remembers each note's scroll and cursor while the app runs),
+  another file's preview (Open with its app, Show in Files), or a folder as a grid of cards for what is directly in
+  it, subfolders first: a note's card shows the first picture it embeds, an image's card the image itself. A tab of a
+  file that is gone says so.
+- **Closing:** the tab's ✕, the middle button or `Mod+W`; the tab to the right becomes active. The tab menu also has
+  Close other tabs, and Split right (or Move to the other pane). The "+" after the tabs finds a note to open.
+- **Two panes:** Split right moves the active tab to a new pane on the right; a click in a pane makes it the active
+  one (its tabs' line is blue, the editor shortcuts and the outline follow it); a pane left without tabs closes. One
+  side panel serves both panes.
+- **Restore:** each vault's tabs, active tabs and split are saved on every change in the app settings and come back
+  when it opens again, without the tabs of files deleted meanwhile.
 
 ### ⬜ 1.12 Templates — `feature/templates`
 
