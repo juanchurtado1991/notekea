@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -61,8 +62,9 @@ private val PREVIEW_TABS = listOf(
  * A row of document tabs above an editor pane (`ROADMAP.md` 1.11), as browsers and code editors show them: each with
  * its icon, its label cut with an ellipsis when long, and a close button; the [selectedIndex] one sits on the
  * surface, with an accent line on top in the primary color while its pane is [isActive]. A click selects a tab, the
- * middle button or the close button closes it ([onClose]), a right click opens [menuOf]'s sections, and a tab dragged
- * and dropped reports where the pointer was let go in the window ([onDrop]). The row scrolls sideways when the tabs do
+ * middle button or the close button closes it ([onClose]), a right click opens [menuOf]'s sections. A tab dragged and
+ * dropped on the row moves among the tabs ([onReorder] with its new index among the others); dropped elsewhere, it
+ * reports where the pointer was let go in the window ([onDrop]). The row scrolls sideways when the tabs do
  * not fit; [trailing] (a "+" button) follows the last tab. Tabs are not focus stops: the keyboard moves through them
  * with the editor's shortcuts.
  */
@@ -75,19 +77,27 @@ fun NotekeaTabStrip(
     onSelect: (Int) -> Unit,
     onClose: (Int) -> Unit,
     onDrop: (index: Int, windowPosition: Offset) -> Unit,
+    onReorder: (from: Int, to: Int) -> Unit,
     modifier: Modifier = Modifier,
     menuOf: (Int) -> List<List<NotekeaMenuItem>> = { emptyList() },
     trailing: @Composable () -> Unit = {}
 ) {
+    val targets = remember { TabDropTargets() }
     Column(modifier = modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.background)) {
         Row(
-            modifier = Modifier.fillMaxWidth().height(
-                height = STRIP_HEIGHT_DP.dp
-            ).horizontalScroll(rememberScrollState()),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height = STRIP_HEIGHT_DP.dp)
+                .onGloballyPositioned { targets.row = it.boundsInWindow() }
+                .horizontalScroll(rememberScrollState()),
             verticalAlignment = Alignment.Bottom
         ) {
             tabs.forEachIndexed { index, tab ->
-                NotekeaContextMenuArea(sections = menuOf(index), takesFocus = false) {
+                NotekeaContextMenuArea(
+                    sections = menuOf(index),
+                    modifier = Modifier.onGloballyPositioned { targets.places[index] = it.boundsInWindow() },
+                    takesFocus = false
+                ) {
                     StripTab(
                         tab = tab,
                         isSelected = index == selectedIndex,
@@ -95,7 +105,7 @@ fun NotekeaTabStrip(
                         closeLabel = closeLabel,
                         onSelect = { onSelect(index) },
                         onClose = { onClose(index) },
-                        onDrop = { onDrop(index, it) }
+                        onDrop = { targets.drop(index, it, tabs.size, onReorder, onDrop) }
                     )
                 }
             }
@@ -104,10 +114,9 @@ fun NotekeaTabStrip(
             }
         }
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(height = NotekeaDimensions.BorderWidth)
-                .background(color = MaterialTheme.colorScheme.outlineVariant)
+            modifier = Modifier.fillMaxWidth().height(height = NotekeaDimensions.BorderWidth).background(
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
         )
     }
 }
@@ -237,7 +246,8 @@ private fun NotekeaTabStripPreview() {
             closeLabel = PREVIEW_CLOSE,
             onSelect = {},
             onClose = {},
-            onDrop = { _, _ -> }
+            onDrop = { _, _ -> },
+            onReorder = { _, _ -> }
         )
     }
 }
@@ -253,7 +263,8 @@ private fun NotekeaTabStripInactivePreview() {
             closeLabel = PREVIEW_CLOSE,
             onSelect = {},
             onClose = {},
-            onDrop = { _, _ -> }
+            onDrop = { _, _ -> },
+            onReorder = { _, _ -> }
         )
     }
 }

@@ -72,6 +72,17 @@ class TabsScreenTest {
         )
     }
 
+    @Test
+    fun `a tab dragged along its own row takes the place where it is dropped`() {
+        // 1.11 smoke: dragging a tab among the others of its pane did not reorder them.
+        val intents = scene(workspace = single) { scene -> drag(scene = scene, from = AREPAS_TAB, to = BEFORE_IDEAS) }
+
+        assertEquals(
+            expected = listOf<WorkspaceIntent>(WorkspaceIntent.OnTabMove(path = notes[0], toPane = 0, toIndex = 1)),
+            actual = intents.filter { it is WorkspaceIntent.OnTabMove }
+        )
+    }
+
     private fun scene(
         workspace: Workspace,
         actions: (ImageComposeScene) -> Unit
@@ -163,6 +174,7 @@ class TabsScreenTest {
         private const val WIDTH = 900
         private val AREPAS_CLOSE = Offset(x = 91f, y = 17f)
         private val AREPAS_TAB = Offset(x = 40f, y = 17f)
+        private val BEFORE_IDEAS = Offset(x = 230f, y = 17f)
         private val IDEAS_TAB = Offset(x = 268f, y = 17f)
         private val LEFT_PANE = Offset(x = 200f, y = 200f)
         private val RIGHT_EDGE = Offset(x = 820f, y = 200f)

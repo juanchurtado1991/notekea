@@ -57,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tabs and split panes (ROADMAP 1.11): every note, file or folder opened gets its own tab (an open one goes to its
   tab); Mod+click or the middle button opens it behind the current tab. Tabs close with ✕, the middle button or Mod+W,
   cycle with Ctrl+Tab / Ctrl+Shift+Tab and jump with Mod+1…9. Split right (Mod+Shift+D or the tab menu) shows two
-  panes side by side; tabs can be dragged between them. A folder opens as a grid of cards, a note's card showing the
+  panes side by side; tabs can be dragged to reorder them or between the panes. A folder opens as a grid of cards, a note's card showing the
   first picture it embeds. Each note keeps its scroll and cursor while the app runs, and the tabs and split come
   back when the vault is opened again.
 - A tool rail on the left edge, as in Android Studio, stays when the sidebar is hidden: Files, Search notes, New note,

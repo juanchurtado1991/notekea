@@ -495,7 +495,11 @@ private fun DocumentTabsSection() {
         closeLabel = DOCUMENT_CLOSE,
         onSelect = { selectedDocument = it },
         onClose = { closed -> documents = documents.filterIndexed { index, _ -> index != closed } },
-        onDrop = { _, _ -> }
+        onDrop = { _, _ -> },
+        onReorder = { from, to ->
+            documents = documents.toMutableList().apply { add(index = to, element = removeAt(index = from)) }
+            selectedDocument = to
+        }
     )
     Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)) {
         NotekeaToolRail(
