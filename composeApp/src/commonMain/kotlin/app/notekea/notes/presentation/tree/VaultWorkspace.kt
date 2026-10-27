@@ -156,7 +156,8 @@ private fun NoteEditor(
         sidePanel = context.sidePanel,
         isActive = context.workspaceState.workspace.activePane == pane,
         properties = state.tree.notes[path]?.metadata,
-        dayNeighbors = state.dayNeighbors.takeIf { state.selectedPath == path }
+        dayNeighbors = state.dayNeighbors.takeIf { state.selectedPath == path },
+        isBookmarked = path in state.bookmarks
     )
 }
 
@@ -192,6 +193,7 @@ private fun editorCallbacksOf(
             )
         },
         onRequestTag = { query -> viewModels.onTagPicker(TagPickerIntent.OnOpen(query = query)) },
+        onBookmarkToggle = { tree.onIntent(intent = BookmarkIntent.OnToggle(path = it)) },
         onRequestTemplate = {
             viewModels.onTemplatePicker(TemplatePickerIntent.OnOpen(target = TemplateTarget.CurrentNote))
         },

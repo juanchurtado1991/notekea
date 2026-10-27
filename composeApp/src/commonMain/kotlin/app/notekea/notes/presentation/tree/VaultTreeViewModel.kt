@@ -1,5 +1,8 @@
 package app.notekea.notes.presentation.tree
 
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.Mutex
+import app.notekea.notes.domain.Bookmarks
 import app.notekea.core.domain.Outcome
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
@@ -47,12 +50,14 @@ class VaultTreeViewModel(
     private val getTreePreferences: GetTreePreferencesUseCase,
     private val saveTreePreferences: SaveTreePreferencesUseCase,
     private val fileOpener: FileOpener,
-    private val days: DailyNoteTools
+    private val days: DailyNoteTools,
+    private val bookmarkTools: BookmarkTools
 ) : BaseViewModel<VaultTreeState, VaultTreeIntent, VaultTreeEffect>(
     initialState = VaultTreeState(vaultPath = vaultPath, platformConventions = platformConventions)
 ) {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private var renameJob: Job? = null
+    private val bookmarkSaving = Mutex()
 
     // A note made from a template, and the template it is filled from once its name is set.
     private var pendingTemplate: Pair<RelativePath, RelativePath>? = null
@@ -68,6 +73,8 @@ class VaultTreeViewModel(
             val preferences = getTreePreferences(vaultPath = vaultPath)
             updateTree { restorePreferences(state = it, preferences = preferences) }
             dailySettings = days.getDailyNoteSettings(vaultPath = vaultPath)
+            val bookmarks = bookmarkTools.getBookmarks(vaultPath = vaultPath)
+            reduce { it.copy(bookmarks = bookmarks) }
             observe()
         }
     }
@@ -109,10 +116,16 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnSidebarToggle -> updateTree { it.copy(isSidebarCollapsed = !it.isSidebarCollapsed) }
             is VaultTreeIntent.OnSortChange -> updateTree { it.copy(sort = intent.sort) }
             is VaultTreeIntent.OnFileOpen -> openFile(path = intent.path)
-            VaultTreeIntent.OnTodayClick -> openToday()
-            is VaultTreeIntent.OnDayStep -> stepDay(step = intent.step)
+            is BookmarkIntent -> onBookmarkIntent(intent = intent)
+            VaultTreeIntent.OnTodayClick, is VaultTreeIntent.OnDayStep -> onDayIntent(intent = intent)
         }
         updateDay()
+    }
+
+    private fun onDayIntent(
+        intent: VaultTreeIntent
+    ) {
+        if (intent is VaultTreeIntent.OnDayStep) stepDay(step = intent.step) else openToday()
     }
 
     /** Today's daily note, with the settings read again: Obsidian may have changed them since the vault opened. */
@@ -218,7 +231,10 @@ class VaultTreeViewModel(
         launchGuarded(onError = ::showUnexpectedError) {
             val outcome = deleteEntry(vaultPath = vaultPath, path = path)
             updateTree { reduceDeleted(state = it, path = path, outcome = outcome) }
-            if (outcome is Outcome.Success) emit(effect = VaultTreeEffect.EntryDeleted(path = path))
+            if (outcome is Outcome.Success) {
+                changeBookmarks { it.deleted(path = path) }
+                emit(effect = VaultTreeEffect.EntryDeleted(path = path))
+            }
         }
     }
 
@@ -251,7 +267,10 @@ class VaultTreeViewModel(
             val isMoved = outcome is Outcome.Success && outcome.value != draft.path
             if (isMoved) emit(effect = VaultTreeEffect.EntryRenamed(from = draft.path, to = outcome.value))
             updateTree { reduceRenameOutcome(state = it, from = draft.path, outcome = outcome) }
-            if (isMoved) updateLinks(notesBefore = notesBefore, from = draft.path, to = outcome.value)
+            if (isMoved) {
+                changeBookmarks { it.renamed(from = draft.path, to = outcome.value) }
+                updateLinks(notesBefore = notesBefore, from = draft.path, to = outcome.value)
+            }
             if (outcome is Outcome.Success) applyPendingTemplate(note = draft.path, named = outcome.value)
         }
     }
@@ -322,6 +341,7 @@ class VaultTreeViewModel(
         intent: VaultTreeIntent.OnEntryRenamed
     ) {
         updateTree { reduceRenameOutcome(state = it, from = intent.from, outcome = Outcome.Success(value = intent.to)) }
+        changeBookmarks { it.renamed(from = intent.from, to = intent.to) }
         intent.links?.let { result -> reduce { reduceLinksUpdated(state = it, result = result) } }
     }
 
@@ -335,6 +355,32 @@ class VaultTreeViewModel(
             ?: return
         logger.i { LINKS_UPDATED_MESSAGE + result.updatedCount + NOTES_SKIPPED + result.skipped.size }
         reduce { reduceLinksUpdated(state = it, result = result) }
+    }
+
+    private fun onBookmarkIntent(
+        intent: BookmarkIntent
+    ) {
+        when (intent) {
+            is BookmarkIntent.OnToggle -> changeBookmarks { it.toggled(path = intent.path) }
+            is BookmarkIntent.OnMove -> changeBookmarks { it.moved(from = intent.from, to = intent.to) }
+            is BookmarkIntent.OnRemove -> changeBookmarks { it.without(path = intent.path) }
+            is BookmarkIntent.OnClick -> reveal(path = intent.path)
+            BookmarkIntent.OnSectionToggle -> reduce { it.copy(isBookmarksExpanded = !it.isBookmarksExpanded) }
+        }
+    }
+
+    /** Changes the bookmarks and saves them, one save at a time, each writing the latest ones. */
+    private fun changeBookmarks(
+        transform: (Bookmarks) -> Bookmarks
+    ) {
+        val before = state.value.bookmarks
+        reduce { it.copy(bookmarks = transform(it.bookmarks)) }
+        if (state.value.bookmarks == before) return
+        launchGuarded(onError = ::showUnexpectedError) {
+            bookmarkSaving.withLock {
+                bookmarkTools.saveBookmarks(vaultPath = vaultPath, bookmarks = state.value.bookmarks)
+            }
+        }
     }
 
     private fun resizeSidebar(

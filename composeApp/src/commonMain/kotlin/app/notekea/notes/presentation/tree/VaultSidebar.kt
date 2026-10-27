@@ -82,6 +82,11 @@ internal fun VaultSidebar(
                 )
             )
             SidebarMessages(state = state, onIntent = onIntent)
+            BookmarksSection(
+                state = state,
+                onIntent = onIntent,
+                modifier = Modifier.padding(top = NotekeaDimensions.SpacingS)
+            )
             Box(modifier = Modifier.weight(weight = 1f).fillMaxWidth().padding(top = NotekeaDimensions.SpacingS)) {
                 SidebarBody(state = state, onIntent = onIntent, untitledNote = untitledNote)
             }

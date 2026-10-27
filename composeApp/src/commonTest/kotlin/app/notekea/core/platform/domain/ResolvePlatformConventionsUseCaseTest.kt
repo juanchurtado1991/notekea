@@ -186,6 +186,7 @@ class ResolvePlatformConventionsUseCaseTest {
             previousTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL + ShortcutModifier.SHIFT),
             splitRightShortcut = withShift(ShortcutKey.D),
             templateShortcut = withPrimary(ShortcutKey.T),
+            bookmarkShortcut = withShift(ShortcutKey.B),
             goToTabShortcuts = DIGITS.map(withPrimary),
             dialogButtonOrder = buttonOrder,
             appDataDirectory = appDataDirectory,

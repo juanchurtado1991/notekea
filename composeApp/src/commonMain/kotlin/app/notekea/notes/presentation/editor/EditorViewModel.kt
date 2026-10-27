@@ -127,6 +127,7 @@ class EditorViewModel(
             EditorIntent.OnNoteLinkRequest -> requestPicker(effect = EditorEffect.RequestNoteLink)
             EditorIntent.OnTagRequest -> requestPicker(effect = EditorEffect.RequestTag(query = selectedForTag()))
             EditorIntent.OnTemplateRequest -> requestTemplate()
+            EditorIntent.OnBookmarkToggle -> toggleBookmark()
             is EditorIntent.OnTemplateInsert -> runSave { insertTemplate(template = intent.template) }
             EditorIntent.OnFindClose -> closeFind()
             EditorIntent.OnFindNext -> moveToMatch(step = 1)
@@ -303,6 +304,11 @@ class EditorViewModel(
         if (!isEditable()) return
         pickerSelection = buffer.selection
         emit(effect = effect)
+    }
+
+    /** The star beside the title: the window bookmarks this note, or removes its bookmark. */
+    private fun toggleBookmark() {
+        state.value.notePath?.let { emit(effect = EditorEffect.ToggleBookmark(path = it)) }
     }
 
     /** The template picker is opened for this note; Read mode turns to Edit first, so the template is seen going in. */

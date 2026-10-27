@@ -10,6 +10,11 @@ data class VaultTree(
     val notes: Map<RelativePath, NoteEntry>,
     val attachments: Map<RelativePath, NoteFile> = emptyMap()
 ) {
+    /** Whether [path] is one of the vault's notes, other files or folders. */
+    operator fun contains(
+        path: RelativePath
+    ): Boolean = path in notes || path in attachments || path in folders
+
     fun withFolder(
         path: RelativePath
     ): VaultTree = copy(folders = folders + ancestorsAndSelf(path = path))

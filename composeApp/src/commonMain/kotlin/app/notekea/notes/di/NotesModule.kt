@@ -1,5 +1,10 @@
 package app.notekea.notes.di
 
+import app.notekea.notes.presentation.tree.BookmarkTools
+import app.notekea.notes.domain.SaveBookmarksUseCase
+import app.notekea.notes.domain.GetBookmarksUseCase
+import app.notekea.notes.data.SettingsBookmarkStore
+import app.notekea.notes.domain.BookmarkStore
 import app.notekea.notes.data.GhostFrontmatterParser
 import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.notes.data.SettingsEditorPreferencesStore
@@ -73,6 +78,7 @@ val notesModule = module {
     single<NoteMetadataCache> { SqlDelightNoteMetadataCache(database = get(), dispatchers = get()) }
     single<TreePreferencesStore> { SettingsTreePreferencesStore(settings = get(), dispatchers = get()) }
     single<EditorPreferencesStore> { SettingsEditorPreferencesStore(settings = get(), dispatchers = get()) }
+    single<BookmarkStore> { SettingsBookmarkStore(settings = get(), dispatchers = get()) }
     single<WorkspaceStore> { SettingsWorkspaceStore(settings = get(), dispatchers = get()) }
     factoryOf(::GetWorkspaceUseCase)
     factoryOf(::SaveWorkspaceUseCase)
@@ -89,6 +95,9 @@ val notesModule = module {
     factoryOf(::CreateTemplatesFolderUseCase)
     factoryOf(::DailyNoteTools)
     factoryOf(::NewNoteTools)
+    factoryOf(::BookmarkTools)
+    factoryOf(::GetBookmarksUseCase)
+    factoryOf(::SaveBookmarksUseCase)
     factoryOf(::SaveSidePanelUseCase)
     factoryOf(::ApplyLinkUpdatesUseCase)
     factoryOf(::AttachFileUseCase)
@@ -130,6 +139,7 @@ val notesModule = module {
             revealEntry = get(),
             fileOpener = get(),
             days = get(),
+            bookmarkTools = get(),
             updateLinksAfterRename = get(),
             followLink = get(),
             getTreePreferences = get(),

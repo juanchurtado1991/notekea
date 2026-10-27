@@ -1,5 +1,8 @@
 package app.notekea.notes.presentation.tree
 
+import app.notekea.notes.domain.SaveBookmarksUseCase
+import app.notekea.notes.domain.GetBookmarksUseCase
+import app.notekea.notes.domain.FakeBookmarkStore
 import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.FakeLocalCalendar
@@ -76,6 +79,7 @@ class VaultTreeViewModelTest {
     private val contents = FakeNoteContentStore()
     private val opener = FakeFileOpener()
     private val vaultSettings = FakeVaultSettingsReader()
+    private val bookmarkStore = FakeBookmarkStore()
 
     @BeforeTest
     fun setUp() {
@@ -208,6 +212,65 @@ class VaultTreeViewModelTest {
                 actual = viewModel.state.value.renaming to contents.texts[path("$PROJECTS/Untitled.md")]
             )
         }
+
+    @Test
+    fun `bookmarks are toggled and reordered, kept for the vault, and come back with it`() = runTreeTest {
+        val viewModel = startedViewModel()
+        listOf(WELCOME, PROJECTS, ROADMAP, WELCOME, WELCOME).forEach {
+            viewModel.onIntent(intent = BookmarkIntent.OnToggle(path = path(it)))
+        }
+        viewModel.onIntent(intent = BookmarkIntent.OnMove(from = 2, to = 0))
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = listOf(WELCOME, PROJECTS, ROADMAP).map(::path) to listOf(WELCOME, PROJECTS, ROADMAP).map(::path),
+            actual = viewModel.state.value.bookmarks.paths to startedViewModel().state.value.bookmarks.paths
+        )
+    }
+
+    @Test
+    fun `a bookmark follows a rename in the tree or the editor, and goes with a deleted entry`() = runTreeTest {
+        val viewModel = startedViewModel()
+        listOf(WELCOME, ROADMAP).forEach { viewModel.onIntent(intent = BookmarkIntent.OnToggle(path = path(it))) }
+
+        rename(viewModel = viewModel, from = PROJECTS, to = "Plans")
+        viewModel.onIntent(
+            intent = VaultTreeIntent.OnEntryRenamed(from = path(WELCOME), to = path("Start here.md"), links = null)
+        )
+        val renamed = viewModel.state.value.bookmarks.paths
+        viewModel.onIntent(intent = VaultTreeIntent.OnDeleteRequest(path = path("Plans")))
+        viewModel.onIntent(intent = VaultTreeIntent.OnDeleteConfirm)
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = listOf("Start here.md", "Plans/Roadmap.md").map(::path) to listOf(path("Start here.md")),
+            actual = renamed to bookmarkStore.saved.getValue(VAULT).paths
+        )
+    }
+
+    @Test
+    fun `a clicked bookmark is selected in the tree with its folders open and opens in a tab`() = runTreeTest {
+        val viewModel = startedViewModel()
+        val effects = mutableListOf<VaultTreeEffect>()
+        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+
+        viewModel.onIntent(intent = BookmarkIntent.OnClick(path = path(ROADMAP)))
+        advanceUntilIdle()
+        runCurrent()
+
+        assertEquals(
+            expected = Triple(
+                path(ROADMAP),
+                true,
+                listOf<VaultTreeEffect>(VaultTreeEffect.OpenEntry(path = path(ROADMAP)))
+            ),
+            actual = Triple(
+                viewModel.state.value.selectedPath,
+                path(PROJECTS) in viewModel.state.value.expandedFolders,
+                effects.toList()
+            )
+        )
+    }
 
     @Test
     fun `clearing the selection sends a new folder to the vault root`() = runTreeTest {
@@ -762,6 +825,10 @@ class VaultTreeViewModelTest {
             revealEntry = RevealEntryUseCase(fileRevealer = revealer),
             fileOpener = opener,
             days = dailyNoteTools(),
+            bookmarkTools = BookmarkTools(
+                getBookmarks = GetBookmarksUseCase(bookmarkStore = bookmarkStore),
+                saveBookmarks = SaveBookmarksUseCase(bookmarkStore = bookmarkStore)
+            ),
             updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
                 planLinkUpdates = PlanLinkUpdatesUseCase(
                     noteContentStore = contents,

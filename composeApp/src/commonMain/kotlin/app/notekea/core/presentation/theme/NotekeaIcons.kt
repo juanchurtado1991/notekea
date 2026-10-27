@@ -45,6 +45,7 @@ import com.composables.icons.lucide.ListOrdered
 import com.composables.icons.lucide.ListTodo
 import com.composables.icons.lucide.LayoutTemplate
 import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Star
 import com.composables.icons.lucide.MessageSquareQuote
 import com.composables.icons.lucide.PanelLeftClose
 import com.composables.icons.lucide.PanelLeftOpen
@@ -70,6 +71,7 @@ import com.composables.icons.lucide.Zap
 object NotekeaIcons {
     val AttachFile: ImageVector get() = Lucide.ImagePlus
     val Attachment: ImageVector get() = Lucide.Paperclip
+    val Bookmark: ImageVector get() = Lucide.Star
     val Bold: ImageVector get() = Lucide.Bold
     val BulletList: ImageVector get() = Lucide.List
     val Callout: ImageVector get() = Lucide.MessageSquareQuote
