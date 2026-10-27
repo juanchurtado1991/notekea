@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 10 / 17 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 11 / 17 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -298,7 +298,7 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
   leaves the editor narrower than 480 dp; when not even its narrowest width fits, it floats over the note instead and
   closes after a heading is chosen or with Esc.
 
-### ⬜ 1.10 Daily notes — `feature/daily-notes`
+### ✅ 1.10 Daily notes — `feature/daily-notes` — [notekea#58](https://github.com/juanchurtado1991/notekea/pull/58)
 
 - "Today" in the sidebar and `Mod+D` open today's note, creating it if needed.
 - Folder and date format from `.obsidian/daily-notes.json` when present, otherwise `Journal/` and `YYYY-MM-DD`;
