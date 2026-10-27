@@ -38,7 +38,18 @@ class SettingsEditorPreferencesStore(
         settings.putBoolean(key = SIDE_PANEL_VISIBLE_KEY, value = preferences.isVisible)
     }
 
+    override suspend fun isPropertiesExpanded(): Boolean = withContext(context = dispatchers.io) {
+        settings.getBoolean(key = PROPERTIES_EXPANDED_KEY, defaultValue = true)
+    }
+
+    override suspend fun setPropertiesExpanded(
+        isExpanded: Boolean
+    ) = withContext(context = dispatchers.io) {
+        settings.putBoolean(key = PROPERTIES_EXPANDED_KEY, value = isExpanded)
+    }
+
     companion object {
+        private const val PROPERTIES_EXPANDED_KEY = "editor.properties_expanded"
         private const val READ_MODE_KEY = "editor.read_mode"
         private const val SIDE_PANEL_VISIBLE_KEY = "editor.side_panel_visible"
         private const val SIDE_PANEL_WIDTH_KEY = "editor.side_panel_width"

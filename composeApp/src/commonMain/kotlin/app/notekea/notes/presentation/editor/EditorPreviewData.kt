@@ -2,7 +2,11 @@ package app.notekea.notes.presentation.editor
 
 import androidx.compose.foundation.text.input.TextFieldState
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
+import app.notekea.core.domain.time.CalendarDate
+import app.notekea.notes.domain.FrontmatterContent
 import app.notekea.notes.domain.NoteMetadata
+import app.notekea.notes.domain.NoteProperty
+import app.notekea.notes.domain.PropertyValue
 import app.notekea.notes.domain.OutlineFinder
 import app.notekea.notes.domain.RelativePath
 
@@ -19,6 +23,20 @@ internal object EditorPreviewData {
     val path = RelativePath(value = "Recipes/Arepas.md")
 
     val properties = NoteMetadata(title = null, tags = listOf("recipe", "venezuelan"), aliases = listOf("Arepa"))
+
+    /** The sample note's frontmatter as the properties view shows it: one property of each type. */
+    val typedProperties = FrontmatterContent.Properties(
+        properties = listOf(
+            NoteProperty(key = "tags", value = PropertyValue.Items(items = listOf("recipe", "venezuelan"))),
+            NoteProperty(key = "status", value = PropertyValue.Text(text = "Tested")),
+            NoteProperty(key = "servings", value = PropertyValue.Number(text = "4")),
+            NoteProperty(key = "favorite", value = PropertyValue.Checkbox(isChecked = true)),
+            NoteProperty(
+                key = "cooked",
+                value = PropertyValue.Date(date = CalendarDate(year = 2026, month = 10, day = 27))
+            )
+        )
+    )
 
     fun buffer(): TextFieldState = TextFieldState(initialText = BODY)
 

@@ -70,6 +70,7 @@ import app.notekea.resources.format_table
 import app.notekea.resources.format_table_size
 import app.notekea.resources.format_tag
 import app.notekea.resources.format_template
+import app.notekea.resources.properties_add
 import app.notekea.resources.format_web_link
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -340,6 +341,7 @@ private fun MoreMenu(
                     supportingText = stringResource(resource = Res.string.format_attach_hint)
                 )
             ),
+            listOf(addPropertyItem(onIntent = onIntent)),
             listOf(
                 moreItem(icon = NotekeaIcons.Quote, label = Res.string.format_quote) { format(actions.quote) },
                 moreItem(icon = NotekeaIcons.Divider, label = Res.string.format_divider) {
@@ -351,6 +353,25 @@ private fun MoreMenu(
         takesFocus = false
     )
 }
+
+/** Add property (`ROADMAP.md` 1.14): its types beside the menu, each adding a property of that type to the note. */
+@Composable
+private fun addPropertyItem(
+    onIntent: (EditorIntent) -> Unit
+): NotekeaMenuItem = NotekeaMenuItem(
+    label = stringResource(resource = Res.string.properties_add),
+    onClick = {},
+    icon = NotekeaIcons.AddProperty,
+    items = listOf(
+        PropertyTypes.all.map { (type, label, icon) ->
+            NotekeaMenuItem(
+                label = stringResource(resource = label),
+                onClick = { onIntent(PropertyIntent.OnAdd(type = type)) },
+                icon = icon
+            )
+        }
+    )
+)
 
 /** Callout: its types with their icons beside the menu, "Start folded" first, explained, so it is in view. */
 @Composable

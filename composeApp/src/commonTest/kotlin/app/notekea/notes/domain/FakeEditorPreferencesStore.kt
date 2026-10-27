@@ -1,9 +1,10 @@
 package app.notekea.notes.domain
 
-/** The editor's mode and side panel in memory. */
+/** The editor's mode, side panel and properties fold in memory. */
 class FakeEditorPreferencesStore : EditorPreferencesStore {
     var isReading = false
     var sidePanel = SidePanelPreferences.DEFAULT
+    var isPropertiesExpanded = true
 
     override suspend fun isReadMode(): Boolean = isReading
 
@@ -19,5 +20,13 @@ class FakeEditorPreferencesStore : EditorPreferencesStore {
         preferences: SidePanelPreferences
     ) {
         sidePanel = preferences
+    }
+
+    override suspend fun isPropertiesExpanded(): Boolean = isPropertiesExpanded
+
+    override suspend fun setPropertiesExpanded(
+        isExpanded: Boolean
+    ) {
+        isPropertiesExpanded = isExpanded
     }
 }

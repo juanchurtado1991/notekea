@@ -1,5 +1,7 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.core.domain.StringPatterns
+import app.notekea.notes.domain.FrontmatterReader
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.withContext
 import app.notekea.core.domain.StringPatterns.NEW_LINE
@@ -59,7 +61,8 @@ class EditorViewModel(
     private val getEditorMode: GetEditorModeUseCase,
     private val saveEditorMode: SaveEditorModeUseCase,
     private val attachmentTools: AttachmentTools,
-    private val fillTemplate: FillTemplateUseCase
+    private val fillTemplate: FillTemplateUseCase,
+    private val propertyTools: PropertyTools
 ) : BaseViewModel<EditorState, EditorIntent, EditorEffect>(initialState = EditorState()) {
     /** The body of the open note, edited in place by the text field. */
     val buffer = TextFieldState()
@@ -71,6 +74,11 @@ class EditorViewModel(
     private val listEditing = ListEditing()
     private val outlineFinder = OutlineFinder()
     private val templateInsertion = TemplateInsertion()
+    private val frontmatterReader = FrontmatterReader()
+    private val propertyEditing = PropertyEditing()
+
+    // Whether the properties above notes are open: the fold the user last chose, here and in earlier runs.
+    private var isPropertiesExpandedChosen = true
     private var outlineJob: Job? = null
     private val saveLock = Mutex()
     private var autosaveJob: Job? = null
@@ -105,7 +113,11 @@ class EditorViewModel(
     init {
         launchGuarded(onError = ::showUnexpectedError) {
             isReadingChosen = getEditorMode()
-            reduce { if (it.find == null) it.copy(isReading = isReadingChosen) else it }
+            isPropertiesExpandedChosen = propertyTools.getPropertiesFold()
+            reduce {
+                val opened = it.copy(isPropertiesExpanded = isPropertiesExpandedChosen)
+                if (it.find == null) opened.copy(isReading = isReadingChosen) else opened
+            }
         }
         launchGuarded(onError = ::showUnexpectedError) {
             snapshotFlow { buffer.text.toString() }.collect { onBufferChanged(body = it) }
@@ -128,6 +140,7 @@ class EditorViewModel(
             EditorIntent.OnTagRequest -> requestPicker(effect = EditorEffect.RequestTag(query = selectedForTag()))
             EditorIntent.OnTemplateRequest -> requestTemplate()
             EditorIntent.OnBookmarkToggle -> toggleBookmark()
+            is PropertyIntent -> onPropertyIntent(intent = intent)
             is EditorIntent.OnTemplateInsert -> runSave { insertTemplate(template = intent.template) }
             EditorIntent.OnFindClose -> closeFind()
             EditorIntent.OnFindNext -> moveToMatch(step = 1)
@@ -226,7 +239,14 @@ class EditorViewModel(
         opened = null
         onDisk = null
         state.value.notePath?.let { selections[it] = buffer.selection }
-        reduce { EditorState(notePath = path, isLoading = path != null, isReading = isReadingChosen) }
+        reduce {
+            EditorState(
+                notePath = path,
+                isLoading = path != null,
+                isReading = isReadingChosen,
+                isPropertiesExpanded = isPropertiesExpandedChosen
+            )
+        }
         if (path == null) {
             replaceBuffer(body = "", isNewNote = true)
             return
@@ -304,6 +324,45 @@ class EditorViewModel(
         if (!isEditable()) return
         pickerSelection = buffer.selection
         emit(effect = effect)
+    }
+
+    private fun onPropertyIntent(
+        intent: PropertyIntent
+    ) {
+        when (intent) {
+            PropertyIntent.OnFoldToggle -> toggleProperties()
+            PropertyIntent.OnSourceToggle -> reduce { it.copy(isSourceShown = !it.isSourceShown) }
+            else -> runSave { editProperties(intent = intent) }
+        }
+    }
+
+    private fun toggleProperties() {
+        isPropertiesExpandedChosen = !isPropertiesExpandedChosen
+        reduce { it.copy(isPropertiesExpanded = isPropertiesExpandedChosen) }
+        launchGuarded(onError = ::showUnexpectedError) {
+            propertyTools.savePropertiesFold(isExpanded = isPropertiesExpandedChosen)
+        }
+    }
+
+    /**
+     * Writes the frontmatter after a property edit at once, with the body as it is, so it is saved like any save (never
+     * over an outside change); nothing when the edit changes nothing or is not one to make.
+     */
+    private suspend fun editProperties(
+        intent: PropertyIntent
+    ) {
+        val path = state.value.notePath ?: return
+        val document = opened ?: return
+        if (state.value.isLoading || state.value.hasConflict || state.value.isDeleted) return
+        val today = propertyTools.localCalendar.momentOf(instant = propertyTools.clock.now()).date
+        val lineBreak = if (document.usesCrLf) StringPatterns.WINDOWS_NEW_LINE else StringPatterns.NEW_LINE
+        val header = propertyEditing.headerAfter(intent, document.header, state.value.properties, today, lineBreak)
+        if (header == null || header == document.header) return
+        write(
+            path = path,
+            document = document.copy(header = header, body = buffer.text.toString()),
+            expectedOnDisk = onDisk
+        )
     }
 
     /** The star beside the title: the window bookmarks this note, or removes its bookmark. */
@@ -602,6 +661,8 @@ class EditorViewModel(
                 val isCurrent = buffer.text.toString() == document.body
                 reduce {
                     it.copy(
+                        properties = frontmatterReader.read(header = document.header),
+                        propertiesSource = propertyEditing.sourceOf(header = document.header),
                         saveStatus = if (isCurrent) SaveStatus.SAVED else SaveStatus.UNSAVED,
                         saveError = null,
                         hasConflict = false,
@@ -736,6 +797,12 @@ class EditorViewModel(
     ) {
         opened = document
         onDisk = document.toText()
+        reduce {
+            it.copy(
+                properties = frontmatterReader.read(header = document.header),
+                propertiesSource = propertyEditing.sourceOf(header = document.header)
+            )
+        }
         replaceBuffer(body = document.body, isNewNote = isNewNote)
     }
 

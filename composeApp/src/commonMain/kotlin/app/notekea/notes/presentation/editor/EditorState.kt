@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.FrontmatterContent
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.OutlineHeading
 import app.notekea.notes.domain.RelativePath
@@ -15,7 +16,9 @@ import app.notekea.notes.domain.RelativePath
  * while its bar is open, and null when it is closed. [isReading] shows the note rendered (Read mode) instead of its
  * Markdown; notes open in the mode the user last chose. [attachments] are the files the note embeds, in text order
  * ([AttachmentView]), and [actionError] why attaching, opening or locating one failed, until it is dismissed.
- * [outline] is the note's headings in text order (`ROADMAP.md` 1.9).
+ * [outline] is the note's headings in text order (`ROADMAP.md` 1.9). [properties] is the note's frontmatter read as
+ * properties, shown open while [isPropertiesExpanded], and as its YAML ([propertiesSource], the lines between the
+ * `---`) while [isSourceShown] (`ROADMAP.md` 1.14).
  */
 data class EditorState(
     val notePath: RelativePath? = null,
@@ -30,5 +33,9 @@ data class EditorState(
     val isReading: Boolean = false,
     val attachments: List<AttachmentView> = emptyList(),
     val actionError: NotesError? = null,
-    val outline: List<OutlineHeading> = emptyList()
+    val outline: List<OutlineHeading> = emptyList(),
+    val properties: FrontmatterContent = FrontmatterContent.None,
+    val propertiesSource: String = "",
+    val isPropertiesExpanded: Boolean = true,
+    val isSourceShown: Boolean = false
 )
