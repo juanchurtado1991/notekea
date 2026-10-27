@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,14 +30,16 @@ private const val RAIL_WIDTH_DP = 40
 /**
  * A narrow strip of icon buttons along the window's edge that stays when the panel beside it is hidden, as in IDEs
  * (Android Studio, VS Code): the actions always at hand, each with a tooltip beside it, naming it and its shortcut. A
- * [NotekeaToolRailItem.isSelected] button (the panel it shows is open) sits on the selected color. [label] names the
+ * [NotekeaToolRailItem.isSelected] button (the panel it shows is open) sits on the selected color. [bottomItems] sit at
+ * the strip's bottom, apart from the daily ones, as Obsidian keeps its vault and settings there. [label] names the
  * strip for screen readers.
  */
 @Composable
 fun NotekeaToolRail(
     items: List<NotekeaToolRailItem>,
     label: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bottomItems: List<NotekeaToolRailItem> = emptyList()
 ) {
     val colors = MaterialTheme.colorScheme
     Row(modifier = modifier.fillMaxHeight()) {
@@ -52,6 +55,8 @@ fun NotekeaToolRail(
             verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
         ) {
             items.forEach { RailButton(item = it) }
+            Spacer(modifier = Modifier.weight(weight = 1f))
+            bottomItems.forEach { RailButton(item = it) }
         }
         Box(
             modifier = Modifier

@@ -38,8 +38,7 @@ class TreeFilesScreenTest {
                         state = state(),
                         vaultName = VAULT_NAME,
                         onIntent = { intents += it },
-                        onSwitchVault = {},
-                        onSearch = {}
+                        rail = SidebarRailActions()
                     ) { PlatePreview(onIntent = { intents += it }) }
                 }
             }.use { scene ->

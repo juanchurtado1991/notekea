@@ -11,8 +11,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The tool rail and the sidebar header (1.11 smoke request, as in Android Studio): the rail's Files, New note, New
- * folder and Today work with the sidebar shown or hidden, and the header expands, collapses and minimizes.
+ * The tool rail and the sidebar header (1.11 smoke request, as in Android Studio): the rail's Files, Search, Today,
+ * side panel, Open another vault, About and Settings work with the sidebar shown or hidden, and the header expands,
+ * collapses and minimizes.
  */
 class SidebarRailTest {
     @Test
@@ -20,11 +21,14 @@ class SidebarRailTest {
         val shown = clicks(isCollapsed = false, positions = RAIL + HEADER)
         val hidden = clicks(isCollapsed = true, positions = RAIL)
 
-        val railIntents = listOf(
+        val railIntents = listOf<Any>(
             VaultTreeIntent.OnSidebarToggle,
-            VaultTreeIntent.OnNewNoteClick(baseName = "Untitled"),
-            VaultTreeIntent.OnNewFolderClick(baseName = "Untitled folder"),
-            VaultTreeIntent.OnTodayClick
+            SEARCH,
+            VaultTreeIntent.OnTodayClick,
+            SIDE_PANEL,
+            SWITCH_VAULT,
+            ABOUT,
+            SETTINGS
         )
         assertEquals(
             expected = (
@@ -41,8 +45,8 @@ class SidebarRailTest {
     private fun clicks(
         isCollapsed: Boolean,
         positions: List<Offset>
-    ): List<VaultTreeIntent> {
-        val intents = mutableListOf<VaultTreeIntent>()
+    ): List<Any> {
+        val intents = mutableListOf<Any>()
         UiThread.run {
             ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
                 NotekeaTheme(darkTheme = false) {
@@ -50,8 +54,13 @@ class SidebarRailTest {
                         state = TreePreviewData.state().copy(isSidebarCollapsed = isCollapsed),
                         vaultName = TreePreviewData.VAULT_NAME,
                         onIntent = { intents += it },
-                        onSwitchVault = {},
-                        onSearch = {}
+                        rail = SidebarRailActions(
+                            onSearch = { intents += SEARCH },
+                            onSidePanelToggle = { intents += SIDE_PANEL },
+                            onSwitchVault = { intents += SWITCH_VAULT },
+                            onAbout = { intents += ABOUT },
+                            onSettings = { intents += SETTINGS }
+                        )
                     ) {}
                 }
             }.use { scene ->
@@ -71,11 +80,11 @@ class SidebarRailTest {
         private const val HEIGHT = 420
         private const val WIDTH = 1000
         private val HEADER = listOf(Offset(x = 307f, y = 26f), Offset(x = 335f, y = 26f), Offset(x = 363f, y = 26f))
-        private val RAIL = listOf(
-            Offset(x = 20f, y = 21f),
-            Offset(x = 20f, y = 86f),
-            Offset(x = 20f, y = 118f),
-            Offset(x = 20f, y = 150f)
-        )
+        private const val ABOUT = "about"
+        private const val SEARCH = "search"
+        private const val SETTINGS = "settings"
+        private const val SIDE_PANEL = "side panel"
+        private const val SWITCH_VAULT = "switch vault"
+        private val RAIL = listOf(21f, 53f, 86f, 118f, 334f, 366f, 398f).map { Offset(x = 20f, y = it) }
     }
 }

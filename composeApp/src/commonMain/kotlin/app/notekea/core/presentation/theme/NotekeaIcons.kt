@@ -26,7 +26,9 @@ import com.composables.icons.lucide.Calendar
 import com.composables.icons.lucide.CalendarDays
 import com.composables.icons.lucide.ChevronLeft
 import com.composables.icons.lucide.ListTree
-import com.composables.icons.lucide.PanelRightOpen
+import com.composables.icons.lucide.PanelRight
+import com.composables.icons.lucide.Settings
+import com.composables.icons.lucide.Library
 import com.composables.icons.lucide.ArrowDownAZ
 import com.composables.icons.lucide.ArrowUp
 import com.composables.icons.lucide.Bold
@@ -145,6 +147,7 @@ object NotekeaIcons {
     val Divider: ImageVector get() = Lucide.SeparatorHorizontal
     val Expand: ImageVector get() = Lucide.ChevronRight
     val ExpandAll: ImageVector get() = Lucide.ChevronsUpDown
+    val About: ImageVector get() = Lucide.Info
     val Files: ImageVector get() = Lucide.FolderTree
     val Find: ImageVector get() = Lucide.Search
     val FindNext: ImageVector get() = Lucide.ArrowDown
@@ -193,7 +196,9 @@ object NotekeaIcons {
     val Quote: ImageVector get() = Lucide.TextQuote
     val Rename: ImageVector get() = Lucide.Pencil
     val Reveal: ImageVector get() = Lucide.SquareArrowOutUpRight
-    val ShowSidePanel: ImageVector get() = Lucide.PanelRightOpen
+    val SidePanel: ImageVector get() = Lucide.PanelRight
+    val Settings: ImageVector get() = Lucide.Settings
+    val SwitchVault: ImageVector get() = Lucide.Library
     val ShowSidebar: ImageVector get() = Lucide.PanelLeftOpen
     val SortByModified: ImageVector get() = Lucide.ClockArrowDown
     val SortByName: ImageVector get() = Lucide.ArrowDownAZ

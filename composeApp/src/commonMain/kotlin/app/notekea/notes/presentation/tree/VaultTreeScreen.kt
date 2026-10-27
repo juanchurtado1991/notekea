@@ -444,8 +444,7 @@ private fun VaultTreeScreenPreview() {
             state = TreePreviewData.state(),
             vaultName = TreePreviewData.VAULT_NAME,
             onIntent = {},
-            onSwitchVault = {},
-            onSearch = {}
+            rail = SidebarRailActions()
         ) { PreviewNoteContent(path = TreePreviewData.state().selectedPath) }
     }
 }

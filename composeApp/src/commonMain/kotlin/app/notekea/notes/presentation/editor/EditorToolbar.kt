@@ -42,7 +42,6 @@ import app.notekea.notes.domain.FormatAction
 import app.notekea.resources.Res
 import app.notekea.resources.editor_edit_mode
 import app.notekea.resources.editor_find
-import app.notekea.resources.editor_outline
 import app.notekea.resources.editor_preview_mode
 import app.notekea.resources.editor_toolbar_label
 import app.notekea.resources.format_attach
@@ -141,7 +140,7 @@ fun EditorToolbar(
     }
 }
 
-/** Find in note and Outline (the side panel), at the end in both modes. */
+/** Find in note, at the end in both modes; the side panel is shown or hidden from the tool rail. */
 @Composable
 private fun EndButtons(
     platformConventions: PlatformConventions,
@@ -153,12 +152,6 @@ private fun EndButtons(
         label = Res.string.editor_find,
         onClick = { onIntent(EditorIntent.OnFindOpen) },
         shortcutHint = platformConventions.findShortcut.label(operatingSystem = operatingSystem)
-    )
-    ToolbarButton(
-        icon = NotekeaIcons.Outline,
-        label = Res.string.editor_outline,
-        onClick = { onIntent(EditorIntent.OnSidePanelToggle) },
-        shortcutHint = platformConventions.toggleSidePanelShortcut.label(operatingSystem = operatingSystem)
     )
 }
 

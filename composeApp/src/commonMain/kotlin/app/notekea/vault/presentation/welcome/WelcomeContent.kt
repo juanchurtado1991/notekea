@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaCard
+import app.notekea.core.presentation.components.NotekeaLogo
 import app.notekea.core.presentation.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.components.NotekeaWordmark
 import app.notekea.core.presentation.platform.label
@@ -116,6 +117,7 @@ private fun WelcomeHome(
 
 @Composable
 private fun WelcomeHeader() {
+    NotekeaLogo()
     NotekeaWordmark()
     Text(
         text = stringResource(resource = Res.string.welcome_tagline),

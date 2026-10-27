@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The tool rail (ROADMAP 1.14) keeps Files, Search notes, Today and a Side panel button at its top and Open another
+  vault, About and Settings at its bottom; New note and New folder leave it, Open another vault leaves the sidebar and
+  Outline leaves the editor's toolbar. The app shows its version as 0.1.0-alpha until its first public release.
 - The side panel is an inspector (ROADMAP 1.14): its Outline and Note info sections fold on their own, remembered, in
   place of tabs; `Mod+Shift+O` opens a folded outline. An Inspector | Chat control at its top shows Chat as "Coming
   soon" until the chat is built (ROADMAP 3.3).
@@ -75,6 +78,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (text, list, number, checkbox, date picked on a compact calendar) and edited in place on a soft card, with Add
   property (also in the toolbar's More), rename and remove; Show source edits the YAML as written, and YAML the form
   cannot read is shown that way with an explanation. Every edit rewrites only its property's lines.
+- About Notekea (ROADMAP 1.14): the logo, the version, a link to GitHub and every keyboard shortcut as keycaps; and a
+  Settings dialog that says what is coming. A placeholder logo shows in the window, About and the welcome screen.
 - Note info (ROADMAP 1.14): a side panel section with the note's words, reading time, links, tags, tasks done and when
   its file was created and modified.
 - Bookmarks (ROADMAP 1.13): the star beside a note's title, "Bookmark" in a tree row's menu or Mod+Shift+B

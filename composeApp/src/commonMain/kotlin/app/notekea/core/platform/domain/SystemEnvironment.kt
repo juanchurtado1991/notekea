@@ -12,7 +12,7 @@ interface SystemEnvironment {
     /** The Java runtime the app runs on. */
     val javaVersion: String
 
-    /** The packaged app's version, or "development" when it runs from the source tree. */
+    /** The version people see (About, crash reports), or "development" when the build did not set it, as in tests. */
     val appVersion: String
 
     fun environmentVariable(

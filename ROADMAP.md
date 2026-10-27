@@ -66,7 +66,7 @@ One main window with three resizable panes, a status bar, and the native window 
 ```
 
 - **Sidebar** (default 340 dp, as wide as the outline panel, min 200, collapsible with `Mod+\`): the vault's name with Sort, Expand all, Collapse
-  all and Minimize, bookmarks, folder tree. A tool rail on its left (Files, Search notes, New note, New folder, Today)
+  all and Minimize, bookmarks, folder tree. A tool rail on its left (Files, Search notes, Today, Side panel; Open another vault, About and Settings at its bottom; 1.14)
   stays when it is hidden (1.11).
 - **Editor** (flexible, min 480 dp): tab bar, title, properties, Edit / Read toggle, Markdown content.
   Can be split into two panes side by side.
@@ -297,7 +297,7 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 - **Keyboard:** `Mod+Shift+O` shows the panel if hidden and focuses the outline at the current heading; arrows,
   Home and End move, Enter goes, Esc returns to the note.
 - **The panel:** 340 dp by default (280–560, resized by dragging its edge), shown or hidden with `Mod+Shift+\`, the
-  toolbar's Outline button or its own hide button; width and visibility are remembered for every vault. It never
+  tool rail's Side panel button (the editor toolbar's Outline button until 1.14) or its own minimize button; width and visibility are remembered for every vault. It never
   leaves the editor narrower than 480 dp; when not even its narrowest width fits, it floats over the note instead and
   closes after a heading is chosen or with Esc.
 
@@ -345,7 +345,8 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
   side panel serves both panes.
 - **Tool rail:** a narrow strip of icons on the window's left edge, there whether the sidebar is shown or not, as in
   Android Studio: Files (shows or hides the sidebar), Search notes, New note, New folder and Today, each with a tooltip
-  beside it. The sidebar's header holds the vault's name, then Sort, Expand all, Collapse all and Minimize; the
+  beside it (revised by 1.14: Files, Search notes, Today and Side panel, then Open another vault, About and Settings
+  at the bottom; new notes and folders come from Mod+N and the tree's menu). The sidebar's header holds the vault's name, then Sort, Expand all, Collapse all and Minimize; the
   Search notes and Today rows and the New note / New folder buttons move to the rail.
 - **Window size:** the window opens large enough (1440 × 900 dp at most, never larger than the screen's usable area)
   to show the tool rail, the sidebar, a note and the outline beside it, which are open by default; the welcome screen
@@ -407,6 +408,18 @@ Frontmatter shown as a compact form above the note content.
   the text and the properties), tasks done of all, and when its file was created and last modified.
 - **Chat mode** (the right panel's Inspector | Chat control): until 3.3 builds it, Chat says what it will do, marked
   "Coming soon", above its question field shown disabled; `Mod+Shift+O` always comes back to the inspector.
+- **The workspace's frame** (decided with the developer while 1.14 was reviewed):
+  - **Tool rail:** Files, Search notes, Today and Side panel at the top; Open another vault, About and Settings at the
+    bottom, as in Obsidian. New note and New folder leave the rail (Mod+N and the tree's menu stay), "Open another
+    vault" leaves the sidebar's bottom, and the editor toolbar's Outline button leaves for the rail's Side panel.
+  - **About:** a dialog with the logo, the name, the version and a link to GitHub, and every keyboard shortcut of the
+    platform as keycaps, in groups from the most used (Notes, Writing, Workspace).
+  - **Settings:** a dialog with the sections to come, dimmed, and "Coming soon" until settings are built.
+  - **Logo:** a placeholder (a cobalt square with an "N") in the window, About and the welcome screen, until the
+    designed logo (an SVG of paths on a 1024 square, with and without its background) replaces it and the packaged
+    icons are drawn from it.
+  - **Version:** people see `0.1.0-alpha` (About, crash reports) until the first public release; the installers keep
+    a plain numeric version, which DMG and MSI require.
 - "Show source" toggles the raw YAML, editable and saved once typing pauses, like the text; YAML the form cannot read
   shows an error banner with its line and falls back to the raw view, never losing data.
 - **Done when:** round-tripping every sample-vault note through the properties view produces byte-identical
