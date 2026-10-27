@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Tabs (ROADMAP 1.14) look like a browser's: the open one rises into the note with rounded corners, the others stay
+  quiet and show their close button on hover.
 - The tool rail (ROADMAP 1.14) keeps Files, Search notes, Today and a Side panel button at its top and Open another
   vault, About and Settings at its bottom; New note and New folder leave it, Open another vault leaves the sidebar and
   Outline leaves the editor's toolbar. The app shows its version as 0.1.0-alpha until its first public release.

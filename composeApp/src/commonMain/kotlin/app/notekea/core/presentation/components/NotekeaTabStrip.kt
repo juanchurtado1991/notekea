@@ -6,11 +6,18 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,11 +64,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-private const val ACCENT_HEIGHT_DP = 2
+private const val HOVER_ALPHA = 0.5f
 private const val LABEL_MAX_WIDTH_DP = 180
 private const val PREVIEW_CLOSE = "Close tab"
 private const val SETTLE_MILLIS = 500L
+private const val SEPARATOR_HEIGHT_DP = 16
 private const val STRIP_HEIGHT_DP = 34
+private const val TAB_HEIGHT_DP = 30
+private const val TAB_RADIUS_DP = 8
 private val PREVIEW_TABS = listOf(
     NotekeaTabStripItem(key = "a", label = "Pricing ideas", icon = NotekeaIcons.Note),
     NotekeaTabStripItem(key = "b", label = "2026-10-23", icon = NotekeaIcons.Note),
@@ -70,8 +80,9 @@ private val PREVIEW_TABS = listOf(
 
 /**
  * A row of document tabs above an editor pane (`ROADMAP.md` 1.11), as browsers and code editors show them: each with
- * its icon, its label cut with an ellipsis when long, and a close button; the [selectedIndex] one sits on the
- * surface, with an accent line on top in the primary color while its pane is [isActive]. A click selects a tab, the
+ * its icon, its label cut with an ellipsis when long, and a close button; the [selectedIndex] one rises with rounded
+ * top corners into the pane's surface, its icon in the primary color while its pane is [isActive], and the others stay
+ * quiet on the strip, a faint fill under the pointer, a thin line between them, their close button shown on hover. A click selects a tab, the
  * middle button or the close button closes it ([onClose]), a right click opens [menuOf]'s sections. A tab dragged along
  * the row stays on its line while the others slide aside to open its place, and once let go it glides into that place
  * ([onReorder] with its new index among the others); dragged off the row, it follows the pointer, and once let go
@@ -114,6 +125,7 @@ fun NotekeaTabStrip(
                         index = index,
                         isSelected = index == selectedIndex,
                         isActive = isActive,
+                        hasSeparator = index != selectedIndex && index + 1 != selectedIndex && index < tabs.lastIndex,
                         closeLabel = closeLabel,
                         targets = targets,
                         sections = menuOf(index),
@@ -129,18 +141,7 @@ fun NotekeaTabStrip(
                 trailing()
             }
         }
-        StripBorder()
     }
-}
-
-/** The line under the tabs, that the selected tab's surface meets. */
-@Composable
-private fun StripBorder() {
-    Box(
-        modifier = Modifier.fillMaxWidth().height(height = NotekeaDimensions.BorderWidth).background(
-            color = MaterialTheme.colorScheme.outlineVariant
-        )
-    )
 }
 
 /** The tab at [index] with its menu, drawn where the drag in [targets] puts it, above the others while dragged. */
@@ -150,6 +151,7 @@ private fun DraggableTab(
     index: Int,
     isSelected: Boolean,
     isActive: Boolean,
+    hasSeparator: Boolean,
     closeLabel: String,
     targets: TabDropTargets,
     sections: List<List<NotekeaMenuItem>>,
@@ -171,6 +173,7 @@ private fun DraggableTab(
             tab = tab,
             isSelected = isSelected,
             isActive = isActive,
+            hasSeparator = hasSeparator,
             closeLabel = closeLabel,
             offset = offset,
             onSelect = onSelect,
@@ -261,11 +264,16 @@ private fun SettleTabDrag(
     }
 }
 
+/**
+ * One tab: on the surface with rounded top corners while [isSelected], a faint fill while hovered, quiet otherwise, a
+ * thin line at its end ([hasSeparator]) while neither it nor its neighbour is the selected one.
+ */
 @Composable
 private fun StripTab(
     tab: NotekeaTabStripItem,
     isSelected: Boolean,
     isActive: Boolean,
+    hasSeparator: Boolean,
     closeLabel: String,
     offset: () -> Offset,
     onSelect: () -> Unit,
@@ -275,20 +283,18 @@ private fun StripTab(
     onRelease: () -> Unit,
     onCancel: () -> Unit
 ) {
-    val colors = MaterialTheme.colorScheme
     var place by remember { mutableStateOf<LayoutCoordinates?>(value = null) }
-    val accent = when {
-        isSelected && isActive -> colors.primary
-        isSelected -> colors.outline
-        else -> colors.background
-    }
-    Column(
+    val hover = remember { MutableInteractionSource() }
+    val isHovered by hover.collectIsHoveredAsState()
+    val shape = RoundedCornerShape(topStart = TAB_RADIUS_DP.dp, topEnd = TAB_RADIUS_DP.dp)
+    Row(
         modifier = Modifier
-            // As wide as its label, so the accent line on top spans the tab inside the scrolling row.
-            .width(intrinsicSize = IntrinsicSize.Max)
+            .height(height = TAB_HEIGHT_DP.dp)
             .offset { offset().let { IntOffset(x = it.x.roundToInt(), y = it.y.roundToInt()) } }
             .onGloballyPositioned { place = it }
-            .background(color = if (isSelected) colors.surface else colors.background)
+            .clip(shape = shape)
+            .background(color = tabColor(isSelected = isSelected, isHovered = isHovered))
+            .hoverable(interactionSource = hover)
             .semantics { selected = isSelected }
             .onMiddleClick(onClick = onClose)
             .tabDrag(
@@ -302,29 +308,57 @@ private fun StripTab(
                 onCancel = onCancel
             )
             .focusProperties { canFocus = false }
-            .clickable(role = Role.Tab, onClick = onSelect)
+            .clickable(role = Role.Tab, onClick = onSelect),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(modifier = Modifier.fillMaxWidth().height(height = ACCENT_HEIGHT_DP.dp).background(color = accent))
-        TabLabel(tab = tab, isSelected = isSelected, closeLabel = closeLabel, onClose = onClose)
+        TabLabel(
+            tab = tab,
+            look = TabLook(isSelected = isSelected, isActive = isActive, isHovered = isHovered),
+            closeLabel = closeLabel,
+            onClose = onClose
+        )
+        Separator(isShown = hasSeparator && !isHovered)
     }
 }
 
-/** The tab's icon, its label cut with an ellipsis when long, and its close button. */
+/** The selected tab's surface, a faint fill under the pointer, or nothing. */
+@Composable
+private fun tabColor(
+    isSelected: Boolean,
+    isHovered: Boolean
+): Color = when {
+    isSelected -> MaterialTheme.colorScheme.surface
+    isHovered -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = HOVER_ALPHA)
+    else -> Color.Transparent
+}
+
+/** The thin line between two quiet tabs. */
+@Composable
+private fun Separator(
+    isShown: Boolean
+) {
+    Box(
+        modifier = Modifier
+            .width(width = NotekeaDimensions.BorderWidth)
+            .height(height = SEPARATOR_HEIGHT_DP.dp)
+            .background(color = if (isShown) MaterialTheme.colorScheme.outline else Color.Transparent)
+    )
+}
+
+/**
+ * The tab's icon (primary in the active pane's selected tab), its label cut with an ellipsis when long (semibold when
+ * selected), and its close button, seen on the selected or hovered tab and kept in place otherwise.
+ */
 @Composable
 private fun TabLabel(
     tab: NotekeaTabStripItem,
-    isSelected: Boolean,
+    look: TabLook,
     closeLabel: String,
     onClose: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
     Row(
-        modifier = Modifier.padding(
-            start = NotekeaDimensions.SpacingS,
-            end = NotekeaDimensions.SpacingXs,
-            top = NotekeaDimensions.SpacingXs,
-            bottom = NotekeaDimensions.SpacingXs
-        ),
+        modifier = Modifier.padding(start = NotekeaDimensions.SpacingM, end = NotekeaDimensions.SpacingXs),
         verticalAlignment = Alignment.CenterVertically
     ) {
         tab.icon?.let {
@@ -332,19 +366,27 @@ private fun TabLabel(
                 imageVector = it,
                 contentDescription = null,
                 modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-                tint = colors.onSurfaceVariant
+                tint = if (look.isSelected && look.isActive) colors.primary else colors.onSurfaceVariant
             )
             Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingXs))
         }
         Text(
             text = tab.label,
             modifier = Modifier.widthIn(max = LABEL_MAX_WIDTH_DP.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (isSelected) colors.onSurface else colors.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = if (look.isSelected) FontWeight.SemiBold else FontWeight.Normal
+            ),
+            color = if (look.isSelected) colors.onSurface else colors.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        NotekeaIconButton(icon = NotekeaIcons.Close, label = closeLabel, onClick = onClose, takesFocus = false)
+        NotekeaIconButton(
+            icon = NotekeaIcons.Close,
+            label = closeLabel,
+            onClick = onClose,
+            modifier = Modifier.alpha(alpha = if (look.isSelected || look.isHovered) 1f else 0f),
+            takesFocus = false
+        )
     }
 }
 
