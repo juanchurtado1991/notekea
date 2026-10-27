@@ -50,7 +50,7 @@ One main window with three resizable panes, a status bar, and the native window 
 │ (native title bar / menu bar)                                                    │
 ├──────────────┬──────────────────────────────────────────┬────────────────────────┤
 │ SIDEBAR      │ [Pricing ✕] [2026-10-23 ✕] [+]          │ RIGHT PANEL            │
-│ 🔍 Search    │──────────────────────────────────────────│ ▾ OUTLINE              │
+│ 🔍 Search    │──────────────────────────────────────────│ [Inspector][Chat]      │
 │ 📅 Today     │ Pricing ideas                 Edit|Read  │ ▾ RELATED              │
 │              │ tags: product · status: draft  (props)   │                        │
 │ ★ Bookmarks  │ ─────────────────────────────────────    │ Related notes          │
@@ -70,9 +70,10 @@ One main window with three resizable panes, a status bar, and the native window 
   stays when it is hidden (1.11).
 - **Editor** (flexible, min 480 dp): tab bar, title, properties, Edit / Read toggle, Markdown content.
   Can be split into two panes side by side.
-- **Right panel** (default 340 dp, min 280, collapsible with `Mod+Shift+\`): an inspector of sections that fold
-  on their own (remembered): **Outline** and **Note info** (1.14), then **Related** and **Backlinks** (M2). Where
-  **Chat** (3.3) lives is decided with it, since a conversation needs the panel's full height.
+- **Right panel** (default 340 dp, min 280, collapsible with `Mod+Shift+\`): an **Inspector | Chat** control at its
+  top (remembered). The inspector has sections that fold on their own (remembered): **Outline** and **Note info**
+  (1.14), then **Related** and **Backlinks** (M2). **Chat** (3.3) fills the panel, since a conversation needs its full
+  height; until it is built it says "Coming soon" (1.14).
 - **Status bar** (24 dp): indexing progress, model state and sync state. Each item is clickable and opens its
   detail (indexing log, model manager, sync panel).
 - Below 1000 dp of window width the right panel becomes an overlay; below 760 dp the sidebar does too.
@@ -404,6 +405,8 @@ Frontmatter shown as a compact form above the note content.
   at once, never over an outside change.
 - **Note info** (a section of the right panel, under Outline): the note's words, reading time, links, tags (from
   the text and the properties), tasks done of all, and when its file was created and last modified.
+- **Chat mode** (the right panel's Inspector | Chat control): until 3.3 builds it, Chat says what it will do, marked
+  "Coming soon", above its question field shown disabled; `Mod+Shift+O` always comes back to the inspector.
 - "Show source" toggles the raw YAML, editable and saved once typing pauses, like the text; YAML the form cannot read
   shows an error banner with its line and falls back to the raw view, never losing data.
 - **Done when:** round-tripping every sample-vault note through the properties view produces byte-identical
@@ -646,7 +649,7 @@ citations that do not match a retrieved chunk.
 
 ### ⬜ 3.3 Chat panel — `feature/chat-panel`
 
-**UI — Chat (beside the inspector; its exact place is decided with this feature):**
+**UI — Right panel, Chat mode** (its "Coming soon" screen and the Inspector | Chat control exist since 1.14)**:**
 - Message list; the answer streams token by token with a "Stop" button (`Esc`).
 - Citations rendered as `accent` chips `[1]`, `[2]`; hover shows the snippet, click opens the note scrolled to
   and highlighting the cited paragraph.

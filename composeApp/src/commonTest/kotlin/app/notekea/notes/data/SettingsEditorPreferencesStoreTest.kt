@@ -1,6 +1,7 @@
 package app.notekea.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.notes.domain.SidePanelMode
 import app.notekea.notes.domain.SidePanelPreferences
 import app.notekea.notes.domain.SidePanelSection
 import com.russhwolf.settings.MapSettings
@@ -51,12 +52,13 @@ class SettingsEditorPreferencesStoreTest {
         }
 
     @Test
-    fun `a folded section of another version is left out`() = runTest(context = testDispatcher) {
+    fun `a mode or folded section of another version is left out`() = runTest(context = testDispatcher) {
         settings.putString(key = "editor.side_panel_folded", value = "BACKLINKS,NOTE_INFO")
+        settings.putString(key = "editor.side_panel_mode", value = "GRAPH")
 
         assertEquals(
-            expected = setOf(SidePanelSection.NOTE_INFO),
-            actual = store.sidePanel().foldedSections
+            expected = SidePanelPreferences(foldedSections = setOf(SidePanelSection.NOTE_INFO)),
+            actual = store.sidePanel()
         )
     }
 
@@ -64,6 +66,7 @@ class SettingsEditorPreferencesStoreTest {
         val CHANGED = SidePanelPreferences(
             widthDp = 420,
             isVisible = false,
+            mode = SidePanelMode.CHAT,
             foldedSections = setOf(SidePanelSection.OUTLINE, SidePanelSection.NOTE_INFO)
         )
     }

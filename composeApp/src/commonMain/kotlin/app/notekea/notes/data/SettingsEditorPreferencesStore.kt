@@ -3,6 +3,7 @@ package app.notekea.notes.data
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.StringPatterns
 import app.notekea.notes.domain.EditorPreferencesStore
+import app.notekea.notes.domain.SidePanelMode
 import app.notekea.notes.domain.SidePanelPreferences
 import app.notekea.notes.domain.SidePanelSection
 import com.russhwolf.settings.Settings
@@ -10,7 +11,8 @@ import kotlinx.coroutines.withContext
 
 /**
  * [EditorPreferencesStore] on Multiplatform Settings, the same keys for all vaults: `editor.read_mode`,
- * `editor.side_panel_width`, `editor.side_panel_visible`, `editor.side_panel_folded` (the folded sections' names, those
+ * `editor.side_panel_width`, `editor.side_panel_visible`, `editor.side_panel_mode` (its mode's name, the inspector
+ * when it is unknown), `editor.side_panel_folded` (the folded sections' names, those
  * of other versions left out) and `editor.properties_expanded`.
  */
 class SettingsEditorPreferencesStore(
@@ -31,6 +33,8 @@ class SettingsEditorPreferencesStore(
         SidePanelPreferences(
             widthDp = settings.getInt(key = SIDE_PANEL_WIDTH_KEY, defaultValue = SidePanelPreferences.DEFAULT_WIDTH_DP),
             isVisible = settings.getBoolean(key = SIDE_PANEL_VISIBLE_KEY, defaultValue = true),
+            mode = settings.getStringOrNull(key = SIDE_PANEL_MODE_KEY)
+                .let { name -> SidePanelMode.entries.firstOrNull { it.name == name } } ?: SidePanelMode.INSPECTOR,
             foldedSections = settings.getString(key = SIDE_PANEL_FOLDED_KEY, defaultValue = StringPatterns.EMPTY)
                 .split(SECTION_SEPARATOR)
                 .mapNotNull { name -> SidePanelSection.entries.firstOrNull { it.name == name } }
@@ -43,6 +47,7 @@ class SettingsEditorPreferencesStore(
     ) = withContext(context = dispatchers.io) {
         settings.putInt(key = SIDE_PANEL_WIDTH_KEY, value = preferences.widthDp)
         settings.putBoolean(key = SIDE_PANEL_VISIBLE_KEY, value = preferences.isVisible)
+        settings.putString(key = SIDE_PANEL_MODE_KEY, value = preferences.mode.name)
         settings.putString(
             key = SIDE_PANEL_FOLDED_KEY,
             value = preferences.foldedSections.joinToString(separator = SECTION_SEPARATOR) { it.name }
@@ -64,6 +69,7 @@ class SettingsEditorPreferencesStore(
         private const val READ_MODE_KEY = "editor.read_mode"
         private const val SECTION_SEPARATOR = ","
         private const val SIDE_PANEL_FOLDED_KEY = "editor.side_panel_folded"
+        private const val SIDE_PANEL_MODE_KEY = "editor.side_panel_mode"
         private const val SIDE_PANEL_VISIBLE_KEY = "editor.side_panel_visible"
         private const val SIDE_PANEL_WIDTH_KEY = "editor.side_panel_width"
     }
