@@ -1,5 +1,7 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.FrontmatterContent
+import app.notekea.notes.domain.PropertyValue
 import app.notekea.notes.domain.SavePropertiesFoldUseCase
 import app.notekea.notes.domain.GetPropertiesFoldUseCase
 import app.notekea.notes.domain.FillTemplateUseCase
@@ -88,6 +90,31 @@ class EditorOnDiskTest {
 
         assertEquals(
             expected = WINDOWS_NOTE + "Added line.\r\n",
+            actual = note.readText()
+        )
+    }
+
+    @Test
+    fun `a property edited in the form rewrites only its line, the windows note otherwise byte for byte`() {
+        // `ROADMAP.md` 1.14: the frontmatter is patched, never encoded again as a whole.
+        val note = vault.resolve(NOTE).apply { writeText(text = WINDOWS_NOTE) }
+        val viewModel = editor()
+        runBlocking(context = main) {
+            viewModel.onIntent(intent = EditorIntent.OnOpen(path = RelativePath(value = NOTE)))
+        }
+        awaitUntil { viewModel.state.value.properties != FrontmatterContent.None }
+        val key = (viewModel.state.value.properties as FrontmatterContent.Properties).properties.first().key
+
+        runBlocking(context = main) {
+            viewModel.onIntent(
+                intent = PropertyIntent.OnValueChange(key = key, value = PropertyValue.Text(text = EDITED))
+            )
+        }
+        awaitUntil { note.readText() != WINDOWS_NOTE }
+        runBlocking(context = main) { viewModel.viewModelScope.cancel() }
+
+        assertEquals(
+            expected = WINDOWS_NOTE.replace(oldValue = "$key: Written on Windows", newValue = "$key: $EDITED"),
             actual = note.readText()
         )
     }
@@ -249,6 +276,7 @@ class EditorOnDiskTest {
     }
 
     companion object {
+        private const val EDITED = "Tested"
         private const val NOTE = "Windows note.md"
         private const val POLL_MILLIS = 20L
         private const val TEMP_PREFIX = "notekea-editor"
