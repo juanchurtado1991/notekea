@@ -11,8 +11,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The tool rail and the sidebar header (1.11 smoke request, as in Android Studio): the rail's Files, Search, Today,
- * side panel, Open another vault, About and Settings work with the sidebar shown or hidden, and the header expands,
+ * The tool rail and the sidebar header (1.11 smoke request, as in Android Studio): the rail's Files, side panel, Search,
+ * Today, Open another vault, About and Settings work with the sidebar shown or hidden, and the header expands,
  * collapses and minimizes.
  */
 class SidebarRailTest {
@@ -23,9 +23,9 @@ class SidebarRailTest {
 
         val railIntents = listOf<Any>(
             VaultTreeIntent.OnSidebarToggle,
+            SIDE_PANEL,
             SEARCH,
             VaultTreeIntent.OnTodayClick,
-            SIDE_PANEL,
             SWITCH_VAULT,
             ABOUT,
             SETTINGS
@@ -85,6 +85,6 @@ class SidebarRailTest {
         private const val SETTINGS = "settings"
         private const val SIDE_PANEL = "side panel"
         private const val SWITCH_VAULT = "switch vault"
-        private val RAIL = listOf(21f, 53f, 86f, 118f, 334f, 366f, 398f).map { Offset(x = 20f, y = it) }
+        private val RAIL = listOf(38f, 70f, 102f, 134f, 318f, 350f, 382f).map { Offset(x = 20f, y = it) }
     }
 }

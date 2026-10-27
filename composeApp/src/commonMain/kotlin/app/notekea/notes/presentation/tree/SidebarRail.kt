@@ -22,8 +22,8 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The vault's tool rail on the window's left edge (`ROADMAP.md` 1.11), there whether the sidebar is shown or not, as in
- * Android Studio: Files shows or hides the sidebar (selected while it is shown), then Search notes, Today and the side
- * panel (selected while [isSidePanelVisible]); at the bottom, as in Obsidian, Open another vault, About and Settings.
+ * Android Studio: the two panels first, Files (the sidebar, selected while it is shown) and the side panel (selected
+ * while [isSidePanelVisible]), then Search notes and Today; at the bottom, as in Obsidian, Open another vault, About and Settings.
  * Each has a tooltip naming it and its shortcut.
  */
 @Composable
@@ -47,7 +47,7 @@ internal fun SidebarRail(
     )
 }
 
-/** Files, Search notes, Today and the side panel, with their shortcuts. */
+/** Files and the side panel, then Search notes and Today, with their shortcuts. */
 @Composable
 private fun topItems(
     state: VaultTreeState,
@@ -66,6 +66,13 @@ private fun topItems(
             isSelected = !state.isSidebarCollapsed
         ),
         NotekeaToolRailItem(
+            icon = NotekeaIcons.SidePanel,
+            label = stringResource(resource = Res.string.rail_side_panel),
+            onClick = actions.onSidePanelToggle,
+            shortcutHint = shortcut(conventions.toggleSidePanelShortcut),
+            isSelected = isSidePanelVisible
+        ),
+        NotekeaToolRailItem(
             icon = NotekeaIcons.Find,
             label = stringResource(resource = Res.string.tree_search),
             onClick = actions.onSearch,
@@ -76,13 +83,6 @@ private fun topItems(
             label = stringResource(resource = Res.string.tree_today),
             onClick = { onIntent(VaultTreeIntent.OnTodayClick) },
             shortcutHint = shortcut(conventions.todayShortcut)
-        ),
-        NotekeaToolRailItem(
-            icon = NotekeaIcons.SidePanel,
-            label = stringResource(resource = Res.string.rail_side_panel),
-            onClick = actions.onSidePanelToggle,
-            shortcutHint = shortcut(conventions.toggleSidePanelShortcut),
-            isSelected = isSidePanelVisible
         )
     )
 }

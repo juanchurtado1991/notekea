@@ -148,8 +148,10 @@ class ArchitectureTest {
             .assertTrue(additionalMessage = "GUIDELINES.md §6: add a @Preview named <Composable>…Preview") { file ->
                 val functions = file.functions(includeNested = false, includeLocal = false)
                 val previews = functions.filter { it.hasAnnotationWithName(PREVIEW_ANNOTATION) }
+                // An actual's preview is its expect's, in the common file.
                 functions
                     .filter { it.hasAnnotationWithName(COMPOSABLE_ANNOTATION) && !it.hasPrivateModifier }
+                    .filterNot { it.hasActualModifier }
                     .filterNot { it.hasAnnotationWithName(PREVIEW_ANNOTATION) }
                     .all { composable -> previews.any { it.name.startsWith(prefix = composable.name) } }
             }

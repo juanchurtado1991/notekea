@@ -2,6 +2,9 @@ package app.notekea.vault.presentation.welcome
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import app.notekea.core.presentation.components.NotekeaScrollArea
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -42,15 +46,18 @@ import app.notekea.vault.domain.VaultError
 import app.notekea.vault.domain.Vault
 import org.jetbrains.compose.resources.stringResource
 
-private const val CONTENT_MAX_WIDTH_DP = 560
+private const val COLUMN_GAP_DP = 64
+private const val COLUMN_MAX_WIDTH_DP = 480
 private const val HINT_HEIGHT_DP = 20
 private const val PREVIEW_HEIGHT_DP = 640
-private const val TOP_SPACE_DP = 72
+private const val RECENT_ROW_HEIGHT_DP = 52
+private const val TWO_COLUMNS_MIN_WIDTH_DP = 820
+private const val VISIBLE_RECENTS = 5
 
 /**
  * Stateless welcome flow: nothing but the wordmark while the last vault is restored, the open vault once there is
  * one (drawn by [openedVaultContent], which the app provides so this feature does not depend on the notes one), and
- * otherwise the welcome screen (`ROADMAP.md` 1.3) centered in a column narrow enough to read at a glance.
+ * otherwise the welcome screen (`ROADMAP.md` 1.3, two columns since 1.14).
  */
 @Composable
 fun WelcomeContent(
@@ -79,38 +86,87 @@ fun WelcomeContent(
     }
 }
 
+/**
+ * The welcome screen in two columns (one, stacked, in a narrow window): the logo, the actions and any error on the
+ * start side; on the end side the recent vaults, or what Notekea is while there are none.
+ */
 @Composable
 private fun WelcomeHome(
     state: WelcomeState,
     onIntent: (WelcomeIntent) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(state = rememberScrollState())
-            .padding(horizontal = NotekeaDimensions.SpacingXl, vertical = NotekeaDimensions.SpacingXxl),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Column(
-            modifier = Modifier.widthIn(max = CONTENT_MAX_WIDTH_DP.dp).fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingL)
-        ) {
-            Spacer(modifier = Modifier.height(height = TOP_SPACE_DP.dp))
-            WelcomeHeader()
-            Spacer(modifier = Modifier.height(height = NotekeaDimensions.SpacingS))
-            val showBanner = state.hasUnexpectedError || (state.error != null && state.newVaultForm == null)
-            if (showBanner) {
-                WelcomeErrorBanner(
-                    platformConventions = state.platformConventions,
-                    onDismiss = { onIntent(WelcomeIntent.OnErrorDismiss) },
-                    onLocate = { onIntent(WelcomeIntent.OnLocateVaultClick(missingPath = it)) },
-                    error = state.error.takeUnless { state.hasUnexpectedError },
-                    modifier = Modifier.fillMaxWidth()
-                )
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val isWide = maxWidth >= TWO_COLUMNS_MIN_WIDTH_DP.dp
+        val scrollState = rememberScrollState()
+        val page = Modifier
+            .fillMaxWidth()
+            .heightIn(min = maxHeight)
+            .verticalScroll(state = scrollState)
+            .padding(horizontal = NotekeaDimensions.SpacingXxl, vertical = NotekeaDimensions.SpacingXxl)
+        NotekeaScrollArea(state = scrollState, modifier = Modifier.fillMaxSize()) {
+            if (isWide) {
+                Row(
+                    modifier = page.wrapContentWidth().widthIn(max = (COLUMN_MAX_WIDTH_DP * 2 + COLUMN_GAP_DP).dp),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        space = COLUMN_GAP_DP.dp,
+                        alignment = Alignment.CenterHorizontally
+                    ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    WelcomeStartColumn(state = state, onIntent = onIntent, modifier = Modifier.weight(weight = 1f))
+                    WelcomeEndColumn(state = state, onIntent = onIntent, modifier = Modifier.weight(weight = 1f))
+                }
+            } else {
+                Column(
+                    modifier = page,
+                    verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXl)
+                ) {
+                    WelcomeStartColumn(state = state, onIntent = onIntent)
+                    WelcomeEndColumn(state = state, onIntent = onIntent)
+                }
             }
-            WelcomeStart(state = state, onIntent = onIntent)
-            if (state.recentVaults.isNotEmpty()) RecentVaultsSection(state = state, onIntent = onIntent)
+        }
+    }
+}
+
+/** The logo, the name and the tagline, any error, then Open folder and Create vault or the new vault's form. */
+@Composable
+private fun WelcomeStartColumn(
+    state: WelcomeState,
+    onIntent: (WelcomeIntent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.widthIn(max = COLUMN_MAX_WIDTH_DP.dp),
+        verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingL)
+    ) {
+        WelcomeHeader()
+        val showBanner = state.hasUnexpectedError || (state.error != null && state.newVaultForm == null)
+        if (showBanner) {
+            WelcomeErrorBanner(
+                platformConventions = state.platformConventions,
+                onDismiss = { onIntent(WelcomeIntent.OnErrorDismiss) },
+                onLocate = { onIntent(WelcomeIntent.OnLocateVaultClick(missingPath = it)) },
+                error = state.error.takeUnless { state.hasUnexpectedError },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        WelcomeStart(state = state, onIntent = onIntent)
+    }
+}
+
+/** The recent vaults, or what Notekea is while there are none. */
+@Composable
+private fun WelcomeEndColumn(
+    state: WelcomeState,
+    onIntent: (WelcomeIntent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.widthIn(max = COLUMN_MAX_WIDTH_DP.dp)) {
+        if (state.recentVaults.isEmpty()) {
+            WelcomeFeatures(modifier = Modifier.fillMaxWidth())
+        } else {
+            RecentVaultsSection(state = state, onIntent = onIntent)
         }
     }
 }
@@ -200,7 +256,7 @@ private fun RecentVaultsSection(
     onIntent: (WelcomeIntent) -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(top = NotekeaDimensions.SpacingXl),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
     ) {
         Text(
@@ -209,20 +265,37 @@ private fun RecentVaultsSection(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        val scrollState = rememberScrollState()
         NotekeaCard(modifier = Modifier.fillMaxWidth()) {
-            state.recentVaults.forEach { recentVault ->
-                val path = recentVault.vault.path
-                key(path) {
-                    RecentVaultRow(
-                        recentVault = recentVault,
-                        platformConventions = state.platformConventions,
-                        onOpen = { onIntent(WelcomeIntent.OnRecentVaultClick(path = path)) },
-                        onLocate = { onIntent(WelcomeIntent.OnLocateVaultClick(missingPath = path)) },
-                        onRemove = { onIntent(WelcomeIntent.OnRemoveRecentVaultClick(path = path)) },
-                        enabled = !state.isBusy
-                    )
+            NotekeaScrollArea(
+                state = scrollState,
+                modifier = Modifier.heightIn(max = (VISIBLE_RECENTS * RECENT_ROW_HEIGHT_DP).dp)
+            ) {
+                Column(modifier = Modifier.verticalScroll(state = scrollState)) {
+                    RecentRows(state = state, onIntent = onIntent)
                 }
             }
+        }
+    }
+}
+
+/** One row per recent vault, most recent first. */
+@Composable
+private fun RecentRows(
+    state: WelcomeState,
+    onIntent: (WelcomeIntent) -> Unit
+) {
+    state.recentVaults.forEach { recentVault ->
+        val path = recentVault.vault.path
+        key(path) {
+            RecentVaultRow(
+                recentVault = recentVault,
+                platformConventions = state.platformConventions,
+                onOpen = { onIntent(WelcomeIntent.OnRecentVaultClick(path = path)) },
+                onLocate = { onIntent(WelcomeIntent.OnLocateVaultClick(missingPath = path)) },
+                onRemove = { onIntent(WelcomeIntent.OnRemoveRecentVaultClick(path = path)) },
+                enabled = !state.isBusy
+            )
         }
     }
 }

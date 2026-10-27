@@ -8,6 +8,8 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
 import com.composables.icons.lucide.Type
+import com.composables.icons.lucide.ShieldCheck
+import com.composables.icons.lucide.BookOpen
 import com.composables.icons.lucide.MessagesSquare
 import com.composables.icons.lucide.Sparkles
 import com.composables.icons.lucide.Clock
@@ -148,6 +150,10 @@ object NotekeaIcons {
     val Expand: ImageVector get() = Lucide.ChevronRight
     val ExpandAll: ImageVector get() = Lucide.ChevronsUpDown
     val About: ImageVector get() = Lucide.Info
+    val FeatureAi: ImageVector get() = Lucide.Sparkles
+    val FeatureMarkdown: ImageVector get() = Lucide.FileText
+    val FeatureObsidian: ImageVector get() = Lucide.BookOpen
+    val FeaturePrivate: ImageVector get() = Lucide.ShieldCheck
     val Files: ImageVector get() = Lucide.FolderTree
     val Find: ImageVector get() = Lucide.Search
     val FindNext: ImageVector get() = Lucide.ArrowDown
