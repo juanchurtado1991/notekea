@@ -173,7 +173,7 @@
     <string name="properties_type_number">Number</string>
     <string name="properties_type_text">Text</string>
     <string name="rail_label">Sidebar tools</string>
-    <string name="side_panel_hide">Hide side panel</string>
+    <string name="side_panel_minimize">Minimize side panel</string>
     <string name="note_info_created">Created</string>
     <string name="note_info_links">Links</string>
     <string name="note_info_modified">Modified</string>
