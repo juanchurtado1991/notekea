@@ -153,46 +153,50 @@ class ResolvePlatformConventionsUseCaseTest {
         buttonOrder: DialogButtonOrder,
         appDataDirectory: String,
         homeDirectory: String
-    ): PlatformConventions {
-        val withPrimary = { key: ShortcutKey -> Shortcut(key = key, modifiers = setOf(primary)) }
-        val withShift = { key: ShortcutKey -> Shortcut(key = key, modifiers = setOf(primary, ShortcutModifier.SHIFT)) }
-        return PlatformConventions(
-            operatingSystem = operatingSystem,
-            primaryModifier = primary,
-            openFolderShortcut = withPrimary(ShortcutKey.O),
-            quitShortcut = quit,
-            newNoteShortcut = withPrimary(ShortcutKey.N),
-            renameShortcut = rename,
-            deleteShortcut = delete,
-            toggleSidebarShortcut = withPrimary(ShortcutKey.BACKSLASH),
-            saveShortcut = withPrimary(ShortcutKey.S),
-            findShortcut = withPrimary(ShortcutKey.F),
-            toggleReadModeShortcut = withPrimary(ShortcutKey.E),
-            quickSwitcherShortcut = withPrimary(ShortcutKey.P),
-            searchNotesShortcut = withShift(ShortcutKey.F),
-            toggleTaskShortcut = withPrimary(ShortcutKey.ENTER),
-            boldShortcut = withPrimary(ShortcutKey.B),
-            italicShortcut = withPrimary(ShortcutKey.I),
-            noteLinkShortcut = withPrimary(ShortcutKey.K),
-            webLinkShortcut = withShift(ShortcutKey.K),
-            pasteShortcut = withPrimary(ShortcutKey.V),
-            toggleSidePanelShortcut = withShift(ShortcutKey.BACKSLASH),
-            outlineShortcut = withShift(ShortcutKey.O),
-            todayShortcut = withPrimary(ShortcutKey.D),
-            previousDayShortcut = Shortcut(key = ShortcutKey.LEFT, modifiers = setOf(primary, ShortcutModifier.ALT)),
-            nextDayShortcut = Shortcut(key = ShortcutKey.RIGHT, modifiers = setOf(primary, ShortcutModifier.ALT)),
-            closeTabShortcut = withPrimary(ShortcutKey.W),
-            nextTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL),
-            previousTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL + ShortcutModifier.SHIFT),
-            splitRightShortcut = withShift(ShortcutKey.D),
-            templateShortcut = withPrimary(ShortcutKey.T),
-            bookmarkShortcut = withShift(ShortcutKey.B),
-            goToTabShortcuts = DIGITS.map(withPrimary),
-            dialogButtonOrder = buttonOrder,
-            appDataDirectory = appDataDirectory,
-            homeDirectory = homeDirectory
-        )
-    }
+    ): PlatformConventions = PlatformConventions(
+        operatingSystem = operatingSystem,
+        primaryModifier = primary,
+        openFolderShortcut = primary.with(ShortcutKey.O),
+        quitShortcut = quit,
+        newNoteShortcut = primary.with(ShortcutKey.N),
+        renameShortcut = rename,
+        deleteShortcut = delete,
+        toggleSidebarShortcut = primary.with(ShortcutKey.BACKSLASH),
+        saveShortcut = primary.with(ShortcutKey.S),
+        findShortcut = primary.with(ShortcutKey.F),
+        toggleReadModeShortcut = primary.with(ShortcutKey.E),
+        quickSwitcherShortcut = primary.with(ShortcutKey.P),
+        searchNotesShortcut = primary.withShift(ShortcutKey.F),
+        toggleTaskShortcut = primary.with(ShortcutKey.ENTER),
+        boldShortcut = primary.with(ShortcutKey.B),
+        italicShortcut = primary.with(ShortcutKey.I),
+        noteLinkShortcut = primary.with(ShortcutKey.K),
+        webLinkShortcut = primary.withShift(ShortcutKey.K),
+        pasteShortcut = primary.with(ShortcutKey.V),
+        toggleSidePanelShortcut = primary.withShift(ShortcutKey.BACKSLASH),
+        outlineShortcut = primary.withShift(ShortcutKey.O),
+        todayShortcut = primary.with(ShortcutKey.D),
+        previousDayShortcut = Shortcut(key = ShortcutKey.LEFT, modifiers = setOf(primary, ShortcutModifier.ALT)),
+        nextDayShortcut = Shortcut(key = ShortcutKey.RIGHT, modifiers = setOf(primary, ShortcutModifier.ALT)),
+        closeTabShortcut = primary.with(ShortcutKey.W),
+        nextTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL),
+        previousTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL + ShortcutModifier.SHIFT),
+        splitRightShortcut = primary.withShift(ShortcutKey.D),
+        templateShortcut = primary.with(ShortcutKey.T),
+        bookmarkShortcut = primary.withShift(ShortcutKey.B),
+        goToTabShortcuts = DIGITS.map { primary.with(it) },
+        dialogButtonOrder = buttonOrder,
+        appDataDirectory = appDataDirectory,
+        homeDirectory = homeDirectory
+    )
+
+    private fun ShortcutModifier.with(
+        key: ShortcutKey
+    ) = Shortcut(key = key, modifiers = setOf(this))
+
+    private fun ShortcutModifier.withShift(
+        key: ShortcutKey
+    ) = Shortcut(key = key, modifiers = setOf(this, ShortcutModifier.SHIFT))
 
     private fun resolve(
         operatingSystemName: String,

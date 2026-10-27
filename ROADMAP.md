@@ -438,6 +438,10 @@ Frontmatter shown as a compact form above the note content.
   - **Logo:** a placeholder (a cobalt square with an "N") in the window, About and the welcome screen, until the
     designed logo (an SVG of paths on a 1024 square, with and without its background) replaces it and the packaged
     icons are drawn from it.
+  - **Page width:** the note's page takes 70 % of the editor pane, never narrower than 760 dp nor wider than 1100 dp
+    (nor wider than the pane), so a wide screen is used without lines too long to read.
+  - **Zoom:** `Mod+=` / `Mod+-` scale the whole window by 10 % steps between 80 % and 160 %, `Mod+0` goes back to
+    100 %; the scale is remembered and listed in About's Workspace shortcuts.
   - **Version:** people see `0.1.0-alpha` (About, crash reports) until the first public release; the installers keep
     a plain numeric version, which DMG and MSI require.
 - "Show source" toggles the raw YAML, editable and saved once typing pauses, like the text; YAML the form cannot read
