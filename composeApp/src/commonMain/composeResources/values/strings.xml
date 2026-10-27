@@ -30,6 +30,9 @@
     <string name="about_shortcut_template">Insert a template</string>
     <string name="about_shortcut_today">Today’s note</string>
     <string name="about_shortcut_web_link">Web link</string>
+    <string name="about_shortcut_zoom_in">Zoom in</string>
+    <string name="about_shortcut_zoom_out">Zoom out</string>
+    <string name="about_shortcut_zoom_reset">Actual size</string>
     <string name="about_shortcuts_title">Keyboard shortcuts</string>
     <string name="about_tagline">Your notes, on your computer, as plain Markdown.</string>
     <string name="about_version">Version %1$s</string>

@@ -172,7 +172,11 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
     }
 
     companion object {
-        private val DIGITS = ShortcutKey.entries.filter { it.name.startsWith(prefix = DIGIT_PREFIX) }
+        // Mod+1 to Mod+9 go to tabs; Mod+0 resets the zoom.
+        private val DIGITS = ShortcutKey.entries.filter {
+            it.name.startsWith(prefix = DIGIT_PREFIX) &&
+                it != ShortcutKey.DIGIT_0
+        }
         private const val DIGIT_PREFIX = "DIGIT_"
         private const val APP_DATA_FOLDER = "Notekea"
         private const val LINUX_APP_DATA_FOLDER = "notekea"

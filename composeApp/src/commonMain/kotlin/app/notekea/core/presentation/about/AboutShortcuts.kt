@@ -1,6 +1,9 @@
 package app.notekea.core.presentation.about
 
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.platform.domain.zoomInShortcut
+import app.notekea.core.platform.domain.zoomOutShortcut
+import app.notekea.core.platform.domain.zoomResetShortcut
 import app.notekea.resources.Res
 import app.notekea.resources.about_group_notes
 import app.notekea.resources.about_group_workspace
@@ -30,6 +33,9 @@ import app.notekea.resources.about_shortcut_task
 import app.notekea.resources.about_shortcut_template
 import app.notekea.resources.about_shortcut_today
 import app.notekea.resources.about_shortcut_web_link
+import app.notekea.resources.about_shortcut_zoom_in
+import app.notekea.resources.about_shortcut_zoom_out
+import app.notekea.resources.about_shortcut_zoom_reset
 
 /** About's shortcuts in three groups, each ordered from the most used: notes, writing, and the workspace. */
 object AboutShortcuts {
@@ -87,7 +93,10 @@ object AboutShortcuts {
                 AboutShortcut(label = Res.string.about_shortcut_close_tab, shortcut = closeTabShortcut),
                 AboutShortcut(label = Res.string.about_shortcut_next_tab, shortcut = nextTabShortcut),
                 AboutShortcut(label = Res.string.about_shortcut_previous_tab, shortcut = previousTabShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_split, shortcut = splitRightShortcut)
+                AboutShortcut(label = Res.string.about_shortcut_split, shortcut = splitRightShortcut),
+                AboutShortcut(label = Res.string.about_shortcut_zoom_in, shortcut = zoomInShortcut),
+                AboutShortcut(label = Res.string.about_shortcut_zoom_out, shortcut = zoomOutShortcut),
+                AboutShortcut(label = Res.string.about_shortcut_zoom_reset, shortcut = zoomResetShortcut)
             )
         )
     }

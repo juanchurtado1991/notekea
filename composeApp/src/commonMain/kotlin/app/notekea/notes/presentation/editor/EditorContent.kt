@@ -64,6 +64,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -126,7 +127,9 @@ import org.jetbrains.compose.resources.stringResource
 private const val TASK_CHECKBOX_DP = 16
 private const val TASK_CHECKBOX_RATIO = 0.8f
 private const val BODY_MIN_HEIGHT_DP = 320
-private const val CONTENT_MAX_WIDTH_DP = 760
+private const val PAGE_MAX_WIDTH_DP = 1100
+private const val PAGE_MIN_WIDTH_DP = 760
+private const val PAGE_SHARE = 0.7f
 private const val MATCH_SCROLL_MARGIN_DP = 96
 private const val HEADING_MARGIN_DP = 8
 private const val SCROLL_RESTORE_FRAMES = 30
@@ -269,6 +272,18 @@ private fun ScrollingPage(
     }
 }
 
+/**
+ * The page's width as the pane allows (`ROADMAP.md` 1.14): [PAGE_SHARE] of it, never narrower than [PAGE_MIN_WIDTH_DP]
+ * nor wider than [PAGE_MAX_WIDTH_DP] (lines stay readable on a wide screen), and never wider than the pane.
+ */
+private fun Modifier.readableWidth(): Modifier = layout { measurable, constraints ->
+    val width = (constraints.maxWidth * PAGE_SHARE).roundToInt()
+        .coerceIn(minimumValue = PAGE_MIN_WIDTH_DP.dp.roundToPx(), maximumValue = PAGE_MAX_WIDTH_DP.dp.roundToPx())
+        .coerceAtMost(maximumValue = constraints.maxWidth)
+    val placeable = measurable.measure(constraints = constraints.copy(minWidth = width, maxWidth = width))
+    layout(width = placeable.width, height = placeable.height) { placeable.place(x = 0, y = 0) }
+}
+
 /** The note's page, centred at a readable width: its header, the toolbar (kept in view) and its text or rendering. */
 @Composable
 private fun EditorPage(
@@ -286,8 +301,7 @@ private fun EditorPage(
     var toolbarTop by remember { mutableIntStateOf(value = 0) }
     Column(
         modifier = Modifier
-            .widthIn(max = CONTENT_MAX_WIDTH_DP.dp)
-            .fillMaxWidth()
+            .readableWidth()
             .padding(horizontal = NotekeaDimensions.SpacingXxl, vertical = NotekeaDimensions.SpacingXl)
     ) {
         EditorHeader(

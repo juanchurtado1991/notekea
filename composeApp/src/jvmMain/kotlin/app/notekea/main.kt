@@ -27,6 +27,8 @@ import app.notekea.core.presentation.platform.WindowSizes
 import app.notekea.core.presentation.theme.NotekeaBrand
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import app.notekea.core.presentation.platform.LocalAppVersion
+import app.notekea.core.presentation.platform.UiZoom
+import org.koin.core.Koin
 import app.notekea.core.crash.domain.RecordedCrash
 import app.notekea.core.crash.presentation.CrashNoticeContent
 import app.notekea.core.crash.presentation.CrashReportActions
@@ -95,7 +97,7 @@ fun main() {
             LocalFileDrop provides ::awtFileDrop,
             LocalAppVersion provides koin.get<SystemEnvironment>().appVersion
         ) {
-            if (showGallery) GalleryWindow() else NotekeaWindow(isCrashTest = isCrashTest)
+            if (showGallery) GalleryWindow() else NotekeaWindow(isCrashTest = isCrashTest, zoom = zoomOf(koin = koin))
             val crash by crashReporter.crash.collectAsState()
             crash?.let {
                 CrashDialog(
@@ -158,7 +160,8 @@ private fun ApplicationScope.GalleryWindow() {
  */
 @Composable
 private fun ApplicationScope.NotekeaWindow(
-    isCrashTest: Boolean
+    isCrashTest: Boolean,
+    zoom: WindowZoom
 ) {
     var vaultName by remember { mutableStateOf<String?>(value = null) }
     val shortcutDispatcher = remember { ShortcutDispatcher() }
@@ -190,10 +193,19 @@ private fun ApplicationScope.NotekeaWindow(
             LocalResizePointerIcon provides PointerIcon(cursor = Cursor(Cursor.E_RESIZE_CURSOR))
         ) {
             if (isCrashTest) CrashTest()
-            WindowContent(onVaultNameChange = { vaultName = it })
+            UiZoom(
+                platformConventions = zoom.platformConventions,
+                loadScale = { zoom.getUiScale() },
+                saveScale = { zoom.saveUiScale(scale = it) }
+            ) { WindowContent(onVaultNameChange = { vaultName = it }) }
         }
     }
 }
+
+/** What the window's zoom needs from Koin: the platform's shortcuts and where the zoom is kept. */
+private fun zoomOf(
+    koin: Koin
+) = WindowZoom(platformConventions = koin.get(), getUiScale = koin.get(), saveUiScale = koin.get())
 
 /** The app: the welcome screen, then the open vault's workspace; [onVaultNameChange] reports the open vault's name. */
 @Composable

@@ -26,6 +26,8 @@ private const val BACKSPACE_NAME = "Backspace"
 private const val CONTROL_NAME = "Ctrl"
 private const val DELETE_NAME = "Delete"
 private const val ENTER_NAME = "Enter"
+private const val EQUALS_NAME = "="
+private const val MINUS_NAME = "-"
 private const val KEY_SEPARATOR = "+"
 private const val DIGIT_PREFIX = "DIGIT_"
 private const val LEFT_ARROW = "←"
@@ -82,6 +84,7 @@ private fun KeyEvent.pressedModifiers(): Set<ShortcutModifier> = buildSet {
 }
 
 private fun ShortcutKey.composeKey(): Key = when (this) {
+    ShortcutKey.DIGIT_0 -> Key.Zero
     ShortcutKey.DIGIT_1 -> Key.One
     ShortcutKey.DIGIT_2 -> Key.Two
     ShortcutKey.DIGIT_3 -> Key.Three
@@ -98,12 +101,14 @@ private fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.DELETE -> Key.Delete
     ShortcutKey.E -> Key.E
     ShortcutKey.ENTER -> Key.Enter
+    ShortcutKey.EQUALS -> Key.Equals
     ShortcutKey.F -> Key.F
     ShortcutKey.F2 -> Key.F2
     ShortcutKey.F4 -> Key.F4
     ShortcutKey.I -> Key.I
     ShortcutKey.K -> Key.K
     ShortcutKey.LEFT -> Key.DirectionLeft
+    ShortcutKey.MINUS -> Key.Minus
     ShortcutKey.N -> Key.N
     ShortcutKey.O -> Key.O
     ShortcutKey.P -> Key.P
@@ -122,7 +127,9 @@ private val KEY_NAMES = mapOf(
     ShortcutKey.BACKSPACE to BACKSPACE_NAME,
     ShortcutKey.DELETE to DELETE_NAME,
     ShortcutKey.ENTER to ENTER_NAME,
+    ShortcutKey.EQUALS to EQUALS_NAME,
     ShortcutKey.LEFT to LEFT_ARROW,
+    ShortcutKey.MINUS to MINUS_NAME,
     ShortcutKey.RIGHT to RIGHT_ARROW,
     ShortcutKey.TAB to TAB_NAME
 )

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Wide screens (ROADMAP 1.14): the note's page takes 70 % of the editor pane, between 760 dp and 1100 dp, and
+  `Mod+=` / `Mod+-` / `Mod+0` zoom the whole window from 80 % to 160 %, remembered.
 - Polish (ROADMAP 1.14): one surface for the panes with quiet dividers, BOOKMARKS and FILES section headers, a quiet
   selection while a list lacks the keyboard, tabs with a minimum width, a fade and a list of every open tab when they
   overflow, roomier reading lines and header, brighter secondary text, the save state in the status bar.
