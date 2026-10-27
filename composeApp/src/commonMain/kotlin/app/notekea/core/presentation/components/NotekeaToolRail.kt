@@ -48,7 +48,7 @@ fun NotekeaToolRail(
                 .width(width = RAIL_WIDTH_DP.dp)
                 .fillMaxHeight()
                 .background(color = colors.background)
-                .padding(vertical = NotekeaDimensions.SpacingXl)
+                .padding(vertical = NotekeaDimensions.SpacingS)
                 .semantics { contentDescription = label }
                 .selectableGroup(),
             horizontalAlignment = Alignment.CenterHorizontally,
