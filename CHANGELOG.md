@@ -58,6 +58,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   panes side by side; tabs can be dragged between them. A folder opens as a grid of cards, a note's card showing the
   first picture it embeds. Each note keeps its scroll and cursor while the app runs, and the tabs and split come
   back when the vault is opened again.
+- A tool rail on the left edge, as in Android Studio, stays when the sidebar is hidden: Files, Search notes, New note,
+  New folder and Today. The sidebar's header gets Expand all, Collapse all and Minimize beside Sort. A hidden sidebar
+  no longer leaves a button over the tabs.
+- The window opens small on the welcome screen and grows, when a vault opens, to fit the sidebar, the note and the
+  outline.
 - Daily notes (ROADMAP 1.10): "Today" in the sidebar and Mod+D open today's note, creating it if needed, in the folder,
   name format and template of Obsidian's Daily notes settings (`.obsidian/daily-notes.json`), or in `Journal/` as
   `YYYY-MM-DD` without them. Today is the date in the computer's time zone. A daily note's header has arrows
