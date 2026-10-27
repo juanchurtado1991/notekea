@@ -141,7 +141,7 @@ class EditorAttachmentsScreenTest {
             "# Arepas\n\nThe plate:\n![[plate.png|300]]\nThe menu:\n![[menu.pdf]]\n![[gone.png]]\nEnd.\n"
         private const val WINDOW_HEIGHT = 900
         private const val WINDOW_WIDTH = 1200
-        private val ATTACH_BUTTON = Offset(x = 945f, y = 161f)
+        private val ATTACH_BUTTON = Offset(x = 897f, y = 161f)
         private val EDIT_CHIP = Offset(x = 255f, y = 827f)
         private val MENU = RelativePath(value = "Recipes/menu.pdf")
         private val NOTE = RelativePath(value = "Recipes/Arepas.md")

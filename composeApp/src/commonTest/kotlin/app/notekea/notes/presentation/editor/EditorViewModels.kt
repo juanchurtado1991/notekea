@@ -4,6 +4,7 @@ import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.FakeLocalTimeFormatter
 import app.notekea.core.domain.files.ValidateFileNameUseCase
+import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.AttachFileUseCase
@@ -16,6 +17,7 @@ import app.notekea.notes.domain.FakeNoteContentStore
 import app.notekea.notes.domain.FakeNoteFileOperations
 import app.notekea.notes.domain.FakeNoteScanner
 import app.notekea.notes.domain.FakeVaultSettingsReader
+import app.notekea.notes.domain.FillTemplateUseCase
 import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.NoteFixtures.VAULT
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
@@ -80,7 +82,15 @@ class EditorViewModels(dispatcher: CoroutineDispatcher) {
             attachmentPicker = picker,
             clipboardReader = clipboard,
             dispatchers = dispatchers
-        )
+        ),
+        fillTemplate = fillTemplate()
+    )
+
+    private fun fillTemplate(): FillTemplateUseCase = FillTemplateUseCase(
+        vaultSettingsReader = settings,
+        noteContentStore = store,
+        localCalendar = FakeLocalCalendar(),
+        clock = FakeClock(currentTime = Instant.parse(input = NOW))
     )
 
     companion object {

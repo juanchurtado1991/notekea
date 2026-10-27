@@ -131,6 +131,8 @@ private fun EditorEffects(
 
                 is EditorEffect.RequestTag -> current.onRequestTag(effect.query)
 
+                EditorEffect.RequestTemplate -> current.onRequestTemplate()
+
                 EditorEffect.FocusText -> focusText(
                     requester = textFocusRequester,
                     isReading = viewModel.state.value.isReading

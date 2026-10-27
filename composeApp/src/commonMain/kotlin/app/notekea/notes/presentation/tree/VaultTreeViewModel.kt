@@ -4,7 +4,6 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.CreateFolderUseCase
-import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DailyNoteSettings
 import app.notekea.notes.domain.DailyNotes
 import app.notekea.notes.domain.DeleteEntryUseCase
@@ -38,7 +37,7 @@ class VaultTreeViewModel(
     platformConventions: PlatformConventions,
     private val observeVaultTree: ObserveVaultTreeUseCase,
     private val flattenTree: FlattenTreeUseCase,
-    private val createNote: CreateNoteUseCase,
+    private val newNotes: NewNoteTools,
     private val createFolder: CreateFolderUseCase,
     private val renameEntry: RenameEntryUseCase,
     private val deleteEntry: DeleteEntryUseCase,
@@ -54,6 +53,9 @@ class VaultTreeViewModel(
 ) {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private var renameJob: Job? = null
+
+    // A note made from a template, and the template it is filled from once its name is set.
+    private var pendingTemplate: Pair<RelativePath, RelativePath>? = null
     private val dailyNotes = DailyNotes()
     private var dailySettings = DailyNoteSettings.DEFAULT
 
@@ -87,8 +89,10 @@ class VaultTreeViewModel(
             is VaultTreeIntent.OnFollowLink -> follow(intent = intent)
             is VaultTreeIntent.OnNewFolderClick -> create(baseName = intent.baseName, isFolder = true)
             is VaultTreeIntent.OnNewNoteClick -> create(baseName = intent.baseName, isFolder = false)
+            VaultTreeIntent.OnNewNoteFromTemplateClick -> chooseTemplate()
+            is VaultTreeIntent.OnNoteFromTemplate -> createFromTemplate(intent = intent)
             VaultTreeIntent.OnNoticeDismiss -> reduce { it.copy(notice = null) }
-            VaultTreeIntent.OnRenameCancel -> reduce { it.copy(renaming = null) }
+            VaultTreeIntent.OnRenameCancel -> cancelRename()
             VaultTreeIntent.OnRenameConfirm -> rename()
             is VaultTreeIntent.OnRenameRequest -> startRename(path = intent.path)
             is VaultTreeIntent.OnRenameTextChange -> changeRenameText(text = intent.text)
@@ -202,7 +206,7 @@ class VaultTreeViewModel(
             val outcome = if (isFolder) {
                 createFolder(vaultPath = vaultPath, folder = folder, baseName = baseName)
             } else {
-                createNote(vaultPath = vaultPath, folder = folder, baseName = baseName)
+                newNotes.createNote(vaultPath = vaultPath, folder = folder, baseName = baseName)
             }
             updateTree { reduceCreated(state = it, outcome = outcome, isFolder = isFolder) }
             if (!isFolder) open(path = (outcome as? Outcome.Success)?.value)
@@ -248,7 +252,52 @@ class VaultTreeViewModel(
             if (isMoved) emit(effect = VaultTreeEffect.EntryRenamed(from = draft.path, to = outcome.value))
             updateTree { reduceRenameOutcome(state = it, from = draft.path, outcome = outcome) }
             if (isMoved) updateLinks(notesBefore = notesBefore, from = draft.path, to = outcome.value)
+            if (outcome is Outcome.Success) applyPendingTemplate(note = draft.path, named = outcome.value)
         }
+    }
+
+    private fun cancelRename() {
+        val draft = state.value.renaming
+        reduce { it.copy(renaming = null) }
+        if (draft != null) {
+            launchGuarded(onError = ::showUnexpectedError) {
+                applyPendingTemplate(note = draft.path, named = draft.path)
+            }
+        }
+    }
+
+    /** The template picker opens for a new note in the selected folder. */
+    private fun chooseTemplate() {
+        emit(effect = VaultTreeEffect.ChooseTemplate(folder = targetFolder(state = state.value)))
+    }
+
+    /**
+     * Makes a note in the intent's folder with its name ready to type, opens it, and keeps its template for when the
+     * name is set ([applyPendingTemplate]); a hidden sidebar opens first, so the name can be typed.
+     */
+    private fun createFromTemplate(
+        intent: VaultTreeIntent.OnNoteFromTemplate
+    ) {
+        if (state.value.isSidebarCollapsed) updateTree { it.copy(isSidebarCollapsed = false) }
+        launchGuarded(onError = ::showUnexpectedError) {
+            val outcome = newNotes.createNote(vaultPath = vaultPath, folder = intent.folder, baseName = intent.baseName)
+            updateTree { reduceCreated(state = it, outcome = outcome, isFolder = false) }
+            val path = (outcome as? Outcome.Success)?.value ?: return@launchGuarded
+            pendingTemplate = path to intent.template
+            open(path = path)
+        }
+    }
+
+    /** Fills the note made from a template, now [named], when [note] is that note; a failure shows in the banner. */
+    private suspend fun applyPendingTemplate(
+        note: RelativePath,
+        named: RelativePath
+    ) {
+        val (pending, template) = pendingTemplate ?: return
+        if (pending != note) return
+        pendingTemplate = null
+        val outcome = newNotes.applyTemplate(vaultPath = vaultPath, note = named, template = template)
+        if (outcome is Outcome.Failure) reduce { it.copy(actionError = outcome.error) }
     }
 
     /** Selects the note a clicked link leads to; a created note joins the tree at once, before the watcher sees it. */

@@ -26,10 +26,10 @@ import kotlin.test.assertEquals
  */
 class EditorToolbarTest {
     @Test
-    fun `buttons ask for their formatting, link to a note asks to choose one, and the tabs switch modes`() {
+    fun `buttons format, link to a note and insert template ask to choose one, and the tabs switch modes`() {
         val intents = clickAll(
             isReading = false,
-            positions = listOf(BOLD, NOTE_LINK, CHECKLIST, EDIT_TAB, PREVIEW_TAB, FIND)
+            positions = listOf(BOLD, NOTE_LINK, CHECKLIST, TEMPLATE, EDIT_TAB, PREVIEW_TAB, FIND)
         )
 
         assertEquals(
@@ -37,6 +37,7 @@ class EditorToolbarTest {
                 EditorIntent.OnFormat(action = FormatAction.Bold(placeholder = "bold text")),
                 EditorIntent.OnNoteLinkRequest,
                 EditorIntent.OnFormat(action = FormatAction.Checklist(placeholder = "To do")),
+                EditorIntent.OnTemplateRequest,
                 EditorIntent.OnReadModeToggle,
                 EditorIntent.OnFindOpen
             ),
@@ -323,28 +324,29 @@ class EditorToolbarTest {
         private const val WINDOW_HEIGHT = 640
         private const val WINDOW_WIDTH = 1200
         private val BODY = "# Arepas\n\n" + (1..40).joinToString(separator = "") { "Step $it of the recipe.\n" }
-        private val BOLD = Offset(x = 429f, y = 186f)
-        private val CALLOUT = Offset(x = 848f, y = 186f)
-        private val CHECKLIST = Offset(x = 789f, y = 186f)
+        private val BOLD = Offset(x = 381f, y = 186f)
+        private val CALLOUT = Offset(x = 800f, y = 186f)
+        private val CHECKLIST = Offset(x = 741f, y = 186f)
         private val EDIT_TAB = Offset(x = 115f, y = 183f)
         private val FIND = Offset(x = 1053f, y = 186f)
         private val OUTLINE = Offset(x = 1101f, y = 186f)
-        private val FOLDED = Offset(x = 604f, y = 45f)
-        private val HEADING = Offset(x = 381f, y = 186f)
-        private val MEDIUM_HEADING = Offset(x = 464f, y = 291f)
-        private val NOTE_LINK = Offset(x = 537f, y = 186f)
+        private val FOLDED = Offset(x = 556f, y = 45f)
+        private val HEADING = Offset(x = 333f, y = 186f)
+        private val MEDIUM_HEADING = Offset(x = 416f, y = 291f)
+        private val NOTE_LINK = Offset(x = 489f, y = 186f)
         private val PREVIEW_TAB = Offset(x = 211f, y = 183f)
-        private val TAG = Offset(x = 633f, y = 186f)
-        private val CODE_BLOCK = Offset(x = 897f, y = 186f)
+        private val TEMPLATE = Offset(x = 945f, y = 186f)
+        private val TAG = Offset(x = 585f, y = 186f)
+        private val CODE_BLOCK = Offset(x = 849f, y = 186f)
         private val FOUR_BY_THREE = Offset(x = 820f, y = 406f)
-        private val KOTLIN = Offset(x = 922f, y = 327f)
+        private val KOTLIN = Offset(x = 874f, y = 327f)
         private val MORE = Offset(x = 993f, y = 186f)
         private val TABLE_ROW = Offset(x = 1060f, y = 339f)
         private const val LINE_END_X = 700f
         private const val TEXT_LEFT = 78f
-        private val TOOLBAR_GAP = Offset(x = 350f, y = 186f)
+        private val TOOLBAR_GAP = Offset(x = 290f, y = 186f)
         private val THIRD_STEP = Offset(x = 140f, y = 402f)
         private val TEXT = Offset(x = 300f, y = 330f)
-        private val TIP_WITH_FOLDED_CHECKED = Offset(x = 604f, y = 332f)
+        private val TIP_WITH_FOLDED_CHECKED = Offset(x = 556f, y = 332f)
     }
 }

@@ -62,10 +62,10 @@ internal fun EditorBanners(
                 )
             )
         }
-        state.attachmentError?.let { error ->
+        state.actionError?.let { error ->
             ErrorBanner(message = notesErrorMessage(error = error, platformConventions = platformConventions)) {
                 BannerAction(text = stringResource(resource = Res.string.editor_close)) {
-                    onIntent(EditorIntent.OnAttachmentErrorDismiss)
+                    onIntent(EditorIntent.OnActionErrorDismiss)
                 }
             }
         }

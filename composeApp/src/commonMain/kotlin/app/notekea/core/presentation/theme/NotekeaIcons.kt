@@ -43,6 +43,7 @@ import com.composables.icons.lucide.Link
 import com.composables.icons.lucide.List
 import com.composables.icons.lucide.ListOrdered
 import com.composables.icons.lucide.ListTodo
+import com.composables.icons.lucide.LayoutTemplate
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.MessageSquareQuote
 import com.composables.icons.lucide.PanelLeftClose
@@ -132,5 +133,6 @@ object NotekeaIcons {
     val Table: ImageVector get() = Lucide.Table
     val Today: ImageVector get() = Lucide.CalendarDays
     val Tag: ImageVector get() = Lucide.Hash
+    val Template: ImageVector get() = Lucide.LayoutTemplate
     val WebLink: ImageVector get() = Lucide.Globe
 }

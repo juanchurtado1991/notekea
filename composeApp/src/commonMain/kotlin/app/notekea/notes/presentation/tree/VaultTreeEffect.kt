@@ -25,4 +25,7 @@ sealed interface VaultTreeEffect {
         val path: RelativePath,
         val inBackground: Boolean = false
     ) : VaultTreeEffect
+
+    /** "New note from template" was chosen: the template picker opens for a new note in [folder]. */
+    data class ChooseTemplate(val folder: RelativePath) : VaultTreeEffect
 }

@@ -21,7 +21,13 @@ import app.notekea.notes.presentation.workspace.WorkspaceTools
 import app.notekea.notes.presentation.workspace.WorkspaceViewModel
 import app.notekea.notes.domain.GetDailyNoteSettingsUseCase
 import app.notekea.notes.domain.OpenDailyNoteUseCase
+import app.notekea.notes.presentation.templates.TemplatePickerViewModel
+import app.notekea.notes.domain.CreateTemplatesFolderUseCase
+import app.notekea.notes.domain.ApplyTemplateUseCase
+import app.notekea.notes.domain.FillTemplateUseCase
+import app.notekea.notes.domain.GetTemplateSettingsUseCase
 import app.notekea.notes.presentation.tree.DailyNoteTools
+import app.notekea.notes.presentation.tree.NewNoteTools
 import app.notekea.notes.domain.SaveSidePanelUseCase
 import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.FollowLinkUseCase
@@ -77,7 +83,12 @@ val notesModule = module {
     factoryOf(::GetSidePanelUseCase)
     factoryOf(::GetDailyNoteSettingsUseCase)
     factoryOf(::OpenDailyNoteUseCase)
+    factoryOf(::GetTemplateSettingsUseCase)
+    factoryOf(::FillTemplateUseCase)
+    factoryOf(::ApplyTemplateUseCase)
+    factoryOf(::CreateTemplatesFolderUseCase)
     factoryOf(::DailyNoteTools)
+    factoryOf(::NewNoteTools)
     factoryOf(::SaveSidePanelUseCase)
     factoryOf(::ApplyLinkUpdatesUseCase)
     factoryOf(::AttachFileUseCase)
@@ -112,7 +123,7 @@ val notesModule = module {
             platformConventions = get(),
             observeVaultTree = get(),
             flattenTree = get(),
-            createNote = get(),
+            newNotes = get(),
             createFolder = get(),
             renameEntry = get(),
             deleteEntry = get(),
@@ -134,10 +145,19 @@ val notesModule = module {
             renameAndUpdateLinks = get(),
             getEditorMode = get(),
             saveEditorMode = get(),
-            attachmentTools = get()
+            attachmentTools = get(),
+            fillTemplate = get()
         )
     }
     viewModel { TagPickerViewModel() }
+    viewModel { parameters ->
+        TemplatePickerViewModel(
+            vaultPath = parameters.get(),
+            getTemplateSettings = get(),
+            createTemplatesFolder = get(),
+            fuzzyMatcher = get()
+        )
+    }
     viewModel { parameters -> WorkspaceViewModel(vaultPath = parameters.get(), tools = get()) }
     viewModel { parameters ->
         QuickSwitcherViewModel(

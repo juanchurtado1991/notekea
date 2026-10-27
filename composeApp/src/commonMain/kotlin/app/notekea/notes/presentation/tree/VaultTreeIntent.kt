@@ -51,6 +51,19 @@ sealed interface VaultTreeIntent {
     /** [baseName] is the localized name of a new note ("Untitled"). */
     data class OnNewNoteClick(val baseName: String) : VaultTreeIntent
 
+    /** "New note from template" in the menu: the template picker opens for a new note in the selected folder. */
+    data object OnNewNoteFromTemplateClick : VaultTreeIntent
+
+    /**
+     * A [template] chosen for a new note in [folder]: the note is made (named after [baseName], the localized
+     * "Untitled") with its name ready to type, and filled from the template once it is named, so `{{title}}` is its name.
+     */
+    data class OnNoteFromTemplate(
+        val folder: RelativePath,
+        val template: RelativePath,
+        val baseName: String
+    ) : VaultTreeIntent
+
     data object OnNoticeDismiss : VaultTreeIntent
 
     data object OnRenameCancel : VaultTreeIntent

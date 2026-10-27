@@ -108,91 +108,34 @@ private fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.Q -> Key.Q
     ShortcutKey.RIGHT -> Key.DirectionRight
     ShortcutKey.S -> Key.S
+    ShortcutKey.T -> Key.T
     ShortcutKey.TAB -> Key.Tab
     ShortcutKey.V -> Key.V
     ShortcutKey.W -> Key.W
 }
 
-private fun ShortcutKey.displayName(): String = when (this) {
-    ShortcutKey.BACKSLASH -> BACKSLASH_NAME
+/** How keys with a name of their own are written; the others are written as their letter or digit. */
+private val KEY_NAMES = mapOf(
+    ShortcutKey.BACKSLASH to BACKSLASH_NAME,
+    ShortcutKey.BACKSPACE to BACKSPACE_NAME,
+    ShortcutKey.DELETE to DELETE_NAME,
+    ShortcutKey.ENTER to ENTER_NAME,
+    ShortcutKey.LEFT to LEFT_ARROW,
+    ShortcutKey.RIGHT to RIGHT_ARROW,
+    ShortcutKey.TAB to TAB_NAME
+)
 
-    ShortcutKey.BACKSPACE -> BACKSPACE_NAME
+/** How macOS writes keys as symbols; the others as on every system. */
+private val MAC_KEY_SYMBOLS = mapOf(
+    ShortcutKey.BACKSPACE to MAC_BACKSPACE_SYMBOL,
+    ShortcutKey.DELETE to MAC_DELETE_SYMBOL,
+    ShortcutKey.ENTER to MAC_ENTER_SYMBOL,
+    ShortcutKey.TAB to MAC_TAB_SYMBOL
+)
 
-    ShortcutKey.DELETE -> DELETE_NAME
+private fun ShortcutKey.displayName(): String = KEY_NAMES[this] ?: name.removePrefix(prefix = DIGIT_PREFIX)
 
-    ShortcutKey.ENTER -> ENTER_NAME
-
-    ShortcutKey.LEFT -> LEFT_ARROW
-
-    ShortcutKey.RIGHT -> RIGHT_ARROW
-
-    ShortcutKey.TAB -> TAB_NAME
-
-    ShortcutKey.B,
-    ShortcutKey.D,
-    ShortcutKey.E,
-    ShortcutKey.F,
-    ShortcutKey.F2,
-    ShortcutKey.F4,
-    ShortcutKey.I,
-    ShortcutKey.K,
-    ShortcutKey.N,
-    ShortcutKey.O,
-    ShortcutKey.P,
-    ShortcutKey.Q,
-    ShortcutKey.S,
-    ShortcutKey.V,
-    ShortcutKey.W,
-    ShortcutKey.DIGIT_1,
-    ShortcutKey.DIGIT_2,
-    ShortcutKey.DIGIT_3,
-    ShortcutKey.DIGIT_4,
-    ShortcutKey.DIGIT_5,
-    ShortcutKey.DIGIT_6,
-    ShortcutKey.DIGIT_7,
-    ShortcutKey.DIGIT_8,
-    ShortcutKey.DIGIT_9 -> name.removePrefix(prefix = DIGIT_PREFIX)
-}
-
-private fun ShortcutKey.macLabel(): String = when (this) {
-    ShortcutKey.BACKSPACE -> MAC_BACKSPACE_SYMBOL
-
-    ShortcutKey.DELETE -> MAC_DELETE_SYMBOL
-
-    ShortcutKey.ENTER -> MAC_ENTER_SYMBOL
-
-    ShortcutKey.LEFT -> LEFT_ARROW
-
-    ShortcutKey.RIGHT -> RIGHT_ARROW
-
-    ShortcutKey.TAB -> MAC_TAB_SYMBOL
-
-    ShortcutKey.DIGIT_1,
-    ShortcutKey.DIGIT_2,
-    ShortcutKey.DIGIT_3,
-    ShortcutKey.DIGIT_4,
-    ShortcutKey.DIGIT_5,
-    ShortcutKey.DIGIT_6,
-    ShortcutKey.DIGIT_7,
-    ShortcutKey.DIGIT_8,
-    ShortcutKey.DIGIT_9,
-    ShortcutKey.BACKSLASH,
-    ShortcutKey.D,
-    ShortcutKey.B,
-    ShortcutKey.E,
-    ShortcutKey.F,
-    ShortcutKey.F2,
-    ShortcutKey.F4,
-    ShortcutKey.I,
-    ShortcutKey.K,
-    ShortcutKey.N,
-    ShortcutKey.O,
-    ShortcutKey.P,
-    ShortcutKey.Q,
-    ShortcutKey.S,
-    ShortcutKey.V,
-    ShortcutKey.W -> displayName()
-}
+private fun ShortcutKey.macLabel(): String = MAC_KEY_SYMBOLS[this] ?: displayName()
 
 private fun ShortcutModifier.displayName(): String = when (this) {
     ShortcutModifier.ALT -> ALT_NAME

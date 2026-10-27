@@ -37,6 +37,7 @@ import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.resources.Res
 import app.notekea.resources.tree_new_folder
+import app.notekea.resources.tree_new_note_from_template
 import app.notekea.resources.tree_new_note
 import app.notekea.resources.tree_untitled_folder
 import app.notekea.resources.tree_untitled_note
@@ -153,6 +154,11 @@ private fun createMenuItems(
             shortcutHint = state.platformConventions.newNoteShortcut.label(
                 operatingSystem = state.platformConventions.operatingSystem
             )
+        ),
+        NotekeaMenuItem(
+            label = stringResource(resource = Res.string.tree_new_note_from_template),
+            onClick = { onIntent(VaultTreeIntent.OnNewNoteFromTemplateClick) },
+            icon = NotekeaIcons.Template
         ),
         NotekeaMenuItem(
             label = stringResource(resource = Res.string.tree_new_folder),

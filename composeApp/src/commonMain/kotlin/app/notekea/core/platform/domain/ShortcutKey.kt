@@ -30,6 +30,7 @@ enum class ShortcutKey {
     Q,
     RIGHT,
     S,
+    T,
     TAB,
     V,
     W

@@ -25,6 +25,8 @@ import app.notekea.notes.presentation.switcher.QuickSwitcherIntent
 import app.notekea.notes.presentation.switcher.QuickSwitcherMode
 import app.notekea.notes.presentation.switcher.QuickSwitcherPurpose
 import app.notekea.notes.presentation.tags.TagPickerIntent
+import app.notekea.notes.presentation.templates.TemplatePickerIntent
+import app.notekea.notes.presentation.templates.TemplateTarget
 import app.notekea.notes.presentation.workspace.FolderGrid
 import app.notekea.notes.presentation.workspace.TabKind
 import app.notekea.notes.presentation.workspace.WorkspaceContent
@@ -190,6 +192,9 @@ private fun editorCallbacksOf(
             )
         },
         onRequestTag = { query -> viewModels.onTagPicker(TagPickerIntent.OnOpen(query = query)) },
+        onRequestTemplate = {
+            viewModels.onTemplatePicker(TemplatePickerIntent.OnOpen(target = TemplateTarget.CurrentNote))
+        },
         onDayStep = { tree.onIntent(intent = VaultTreeIntent.OnDayStep(step = it)) }
     )
 }
