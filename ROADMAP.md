@@ -345,9 +345,9 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
   Android Studio: Files (shows or hides the sidebar), Search notes, New note, New folder and Today, each with a tooltip
   beside it. The sidebar's header holds the vault's name, then Sort, Expand all, Collapse all and Minimize; the
   Search notes and Today rows and the New note / New folder buttons move to the rail.
-- **Window size:** the welcome screen opens in a small window; a vault's workspace opens large enough (1440 × 900 dp
-  at most, never larger than the screen's usable area) to show the tool rail, the sidebar, a note and the outline
-  beside it, which are open by default. A maximized window, or one made larger, keeps its size.
+- **Window size:** the window opens large enough (1440 × 900 dp at most, never larger than the screen's usable area)
+  to show the tool rail, the sidebar, a note and the outline beside it, which are open by default; the welcome screen
+  and a vault's workspace share that size, so the window never resizes itself when a vault opens or closes.
 - **Restore:** each vault's tabs, active tabs and split are saved on every change in the app settings and come back
   when it opens again, without the tabs of files deleted meanwhile.
 
