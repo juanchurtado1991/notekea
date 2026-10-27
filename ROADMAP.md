@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 12 / 17 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 13 / 17 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -351,7 +351,7 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 - **Restore:** each vault's tabs, active tabs and split are saved on every change in the app settings and come back
   when it opens again, without the tabs of files deleted meanwhile.
 
-### ⬜ 1.12 Templates — `feature/templates`
+### ✅ 1.12 Templates — `feature/templates` — [notekea#61](https://github.com/juanchurtado1991/notekea/pull/61)
 
 - **Templates folder:** the folder of `.obsidian/templates.json` when present (with its date and time formats),
   otherwise `Templates/` with `YYYY-MM-DD` and `HH:mm`, read again at every opening of the picker. Every note in it
