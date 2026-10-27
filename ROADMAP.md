@@ -412,7 +412,10 @@ Frontmatter shown as a compact form above the note content.
 - **Chat mode** (the right panel's Inspector | Chat control): until 3.3 builds it, Chat says what it will do, marked
   "Coming soon", above its question field shown disabled; `Mod+Shift+O` always comes back to the inspector.
 - **The workspace's frame** (decided with the developer while 1.14 was reviewed):
-  - **Tool rail:** the two panels (Files, Side panel) then Search notes and Today at the top; Open another vault,
+  - **Tabs:** as a browser's: the open tab rises with rounded top corners into the note's surface, its icon in the
+    primary color; the others stay quiet, a faint fill under the pointer and a thin line between them, their close
+    button shown on hover.
+  - **Tool rail:** Notekea's logo on top, then the two panels (Files, Side panel), Search notes and Today; Open another vault,
     About and Settings at the bottom, as in Obsidian. New note and New folder leave the rail (Mod+N and the tree's menu stay), "Open another
     vault" leaves the sidebar's bottom, and the editor toolbar's Outline button leaves for the rail's Side panel.
   - **About:** a dialog with the logo, the name, the version and a link to GitHub, and every keyboard shortcut of the
