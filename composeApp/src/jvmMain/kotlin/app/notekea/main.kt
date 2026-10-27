@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.DialogWindow
+import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.LocalWindowExceptionHandlerFactory
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -51,6 +52,7 @@ import io.github.vinceglb.filekit.FileKit
 import java.awt.Cursor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.context.startKoin
 
@@ -156,7 +158,7 @@ private fun ApplicationScope.GalleryWindow() {
 private fun ApplicationScope.NotekeaWindow(
     isCrashTest: Boolean
 ) {
-    var title by remember { mutableStateOf(value = WINDOW_TITLE) }
+    var vaultName by remember { mutableStateOf<String?>(value = null) }
     val shortcutDispatcher = remember { ShortcutDispatcher() }
     val closeGuard = remember { WindowCloseGuard() }
     val scope = rememberCoroutineScope()
@@ -165,7 +167,6 @@ private fun ApplicationScope.NotekeaWindow(
         size = WindowSizes.system.welcome,
         position = WindowPosition.Aligned(alignment = Alignment.Center)
     )
-    val onVaultNameChange = remember(windowState) { followVault(state = windowState) { title = it } }
     Window(
         onCloseRequest = {
             if (!isClosing) {
@@ -176,7 +177,7 @@ private fun ApplicationScope.NotekeaWindow(
                 }
             }
         },
-        title = title,
+        title = windowTitle(vaultName = vaultName),
         state = windowState,
         onPreviewKeyEvent = shortcutDispatcher::dispatch
     ) {
@@ -186,7 +187,8 @@ private fun ApplicationScope.NotekeaWindow(
             LocalResizePointerIcon provides PointerIcon(cursor = Cursor(Cursor.E_RESIZE_CURSOR))
         ) {
             if (isCrashTest) CrashTest()
-            WindowContent(onVaultNameChange = onVaultNameChange)
+            FitWindowSize(state = windowState, isWorkspace = vaultName != null)
+            WindowContent(onVaultNameChange = { vaultName = it })
         }
     }
 }
@@ -207,20 +209,25 @@ private fun WindowContent(
 }
 
 /**
- * What the window does when the open vault changes: its title names the vault, and its size follows the screen, the
- * workspace large enough for the sidebar, the note and the outline, the welcome screen small ([WindowSizes]).
+ * The window's size follows what it shows ([WindowSizes]): the workspace large enough for the sidebar, the note and the
+ * outline, the welcome screen small; centred whenever it changes.
  */
-private fun followVault(
+@Composable
+private fun FrameWindowScope.FitWindowSize(
     state: WindowState,
-    onTitle: (String) -> Unit
-): (String?) -> Unit {
-    var isWorkspace = false
-    return { name ->
-        onTitle(windowTitle(vaultName = name))
-        if ((name != null) != isWorkspace) {
-            isWorkspace = name != null
-            WindowSizes.system.fit(state = state, isWorkspace = isWorkspace)
-        }
+    isWorkspace: Boolean
+) {
+    LaunchedEffect(isWorkspace) {
+        WindowSizes.system.fit(
+            state = state,
+            isWorkspace = isWorkspace,
+            shownSize = { DpSize(width = window.width.dp, height = window.height.dp) },
+            resize = { size ->
+                state.size = size
+                window.setSize(size.width.value.roundToInt(), size.height.value.roundToInt())
+                window.setLocationRelativeTo(null)
+            }
+        )
     }
 }
 
