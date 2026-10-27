@@ -207,7 +207,8 @@ themselves.
 
 - **Use before you write.** Buttons and compact icon buttons, text fields and inline text fields, list items, tree
   items (with or without an icon) and skeleton rows, tabs, tab rows, compact tabs and document tab strips (closable,
-  draggable, with a menu), tool rails, grid cards with a picture, badges, status items, cards,
+  draggable, with a menu), tool rails, grid cards with a picture, toolbar capsules, chips, property fields edited in
+  place, date fields with a calendar, badges, status items, cards,
   empty states, error banners, context menus (nestable, with checked choices, explained options and submenus) and menu
   buttons, a grid size picker, attachments (image, file chip, missing file, embedded note), confirmation dialogs and a
   resizable split pane (its panel at the start or the end, floating over the content when there is no room) already
@@ -220,7 +221,7 @@ themselves.
 - **Missing piece? Add it to the design system**, not to the feature: a new file in `core.presentation.components`
   named `Notekea<Element>` (or a descriptive name such as `EmptyState`), colors and sizes from the theme, optional
   parts as nullable slots, a `@Preview` of its variants in the same file, and a sample in the gallery in the same
-  pull request. Examples still to come: chips, snackbars, the citation chip.
+  pull request. Examples still to come: snackbars, the citation chip.
 - **Enforced by Konsist:** outside `core.presentation.components` and `core.presentation.theme`, importing a
   Material 3 component (`Button`, `OutlinedTextField`, `Tab`, `TabRow`, `Badge`, `AlertDialog`, `Card`, chips,
   `Checkbox`, `Switch`, `DropdownMenu`, `Snackbar`… or `androidx.compose.material3.*`) fails the build.

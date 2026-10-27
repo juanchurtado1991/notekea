@@ -387,12 +387,20 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 
 Frontmatter shown as a compact form above the note content.
 
-- Types detected from the values: text, list (tags, aliases as chips), number, checkbox, date.
-- Editing a property patches only the edited lines of the raw frontmatter text, preserving key order, quoting and
-  unknown keys. Ghost YAML is used only to read typed values: it drops unknown keys and re-quotes strings, so the
-  frontmatter is never re-encoded as a whole (see `docs/spikes/2026-10-23-ghost-llama.md`).
-- "Show source" toggles the raw YAML; invalid YAML shows an error banner and falls back to the raw view, never
-  losing data.
+- **The form:** a "Properties" block under the title with their number, open by default and folded with its header
+  (the fold is remembered); one row per property with its type's icon, its name (renamed in place) and its value
+  edited in place, and a ✕ that removes it. A note without properties shows nothing.
+- **Types** detected from the values, as Obsidian does: text, list (tags, aliases and CSS classes always; as chips
+  with a field that adds one), number, checkbox, date (typed or picked on a calendar). Nested and multi-line values
+  are shown as written and edited in the source.
+- **Add property:** in the block and in the toolbar's More, its menu picks the type; the new property gets a free name
+  (`property`) to rename.
+- **Editing** a property patches only its lines of the raw frontmatter text, in the style it had (block or inline
+  list, quotes), preserving key order, comments and unknown keys; the frontmatter is never encoded again as a whole
+  (Ghost would drop unknown keys and re-quote strings, see `docs/spikes/2026-10-23-ghost-llama.md`). Each edit is saved
+  at once, never over an outside change.
+- "Show source" toggles the raw YAML, editable; YAML the form cannot read shows an error banner with its line and
+  falls back to the raw view, never losing data.
 - **Done when:** round-tripping every sample-vault note through the properties view produces byte-identical
   files when nothing was edited.
 

@@ -43,6 +43,20 @@ internal object YamlValues {
         text: String
     ): List<String> = scalarItems(text = text.removePrefix(prefix = INLINE_OPEN).removeSuffix(suffix = INLINE_CLOSE))
 
+    /** Each item of a list property's [block] as written (quotes included), by its value. */
+    fun writtenItems(
+        block: FrontmatterBlocks.Block
+    ): Map<String, String> {
+        val inline = block.inlineValue
+        val raw = if (inline.isNotEmpty()) {
+            inline.removePrefix(prefix = INLINE_OPEN).removeSuffix(suffix = INLINE_CLOSE).split(ITEM_SEPARATOR)
+        } else {
+            block.continuation.map { it.trimStart() }.filter { it.startsWith(prefix = ITEM_MARK) }
+                .map { it.removePrefix(prefix = ITEM_MARK) }
+        }
+        return raw.map { it.trim() }.filter { it.isNotEmpty() }.associateBy { unquoted(text = it) }
+    }
+
     /** `a, b` as its items. */
     fun scalarItems(
         text: String

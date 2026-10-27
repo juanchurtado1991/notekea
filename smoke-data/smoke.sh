@@ -4,7 +4,7 @@
 # builds them in smoke-data/scratch (ignored by Git). It lives in the repository, not in /tmp, because sandboxed
 # terminals and the native folder picker may each see a different /tmp. It never touches smoke-data/vaults.
 # Usage: smoke-data/smoke.sh prepare | move | lock | outside | large | edit-note | edit-note-soon | delete-note |
-#        check-note | clear-cache | first-launch | restore-settings | clean
+#        check-note | diff-properties | clear-cache | first-launch | restore-settings | clean
 # SMOKE_SCRATCH=scratch-<name> builds everything in smoke-data/scratch-<name> instead, so an agent's checks never touch
 # the developer's smoke-data/scratch. It changes only that folder: clear-cache, first-launch and restore-settings
 # still use the app's real data folder.
@@ -61,6 +61,8 @@ prepare() {
     cp "$SMOKE_ROOT/notes/Shopping basics.md" "$SCRATCH/Playground Vault/Editor/"
     # Outline (1.9): a long note with headings of every level, and lines that only look like headings.
     cp "$SMOKE_ROOT/notes/Outline practice.md" "$SCRATCH/Playground Vault/Editor/"
+    # Properties (1.14): one property of each type, and a note whose frontmatter is not valid YAML.
+    cp "$SMOKE_ROOT/notes/Properties practice.md" "$SMOKE_ROOT/notes/Broken properties.md" "$SCRATCH/Playground Vault/Editor/"
     # Daily notes (1.10): a vault with Obsidian's Daily notes settings, a template and two earlier days.
     cp -R "$SMOKE_ROOT/daily" "$SCRATCH/Daily Vault"
     # Templates (1.12): a vault whose Obsidian settings put templates in Snippets, with notes to insert them in.
@@ -128,6 +130,13 @@ Another app changes or deletes this note while it is open in Notekea.
 }
 
 # Checks that the Windows note still has CR LF on every line and its frontmatter exactly as prepare wrote it.
+# Shows how Editor/Properties practice differs from the file prepare copied: only the edited properties' lines should.
+diff_properties() {
+    local original="$SMOKE_ROOT/notes/Properties practice.md"
+    local note="$SCRATCH/Playground Vault/Editor/Properties practice.md"
+    if diff -u "$original" "$note"; then echo "No change: the note is byte for byte as prepare wrote it"; fi
+}
+
 check_note() {
     local note="$SCRATCH/Playground Vault/Editor/Windows line endings.md"
     local lines crlf header
@@ -224,13 +233,16 @@ case "${1:-}" in
     check-note)
         check_note
         ;;
+    diff-properties)
+        diff_properties
+        ;;
     clean)
         clean
         echo "Removed $SCRATCH"
         ;;
     *)
         echo "Usage: $0 prepare | move | lock | outside | large | edit-note | edit-note-soon | delete-note |" \
-            "check-note | clear-cache | first-launch | restore-settings | clean" >&2
+            "check-note | diff-properties | clear-cache | first-launch | restore-settings | clean" >&2
         exit 1
         ;;
 esac
