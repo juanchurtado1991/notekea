@@ -162,7 +162,7 @@ private fun ApplicationScope.NotekeaWindow(
     val scope = rememberCoroutineScope()
     var isClosing by remember { mutableStateOf(value = false) }
     val windowState = rememberWindowState(
-        size = WindowSizes.welcome,
+        size = WindowSizes.system.welcome,
         position = WindowPosition.Aligned(alignment = Alignment.Center)
     )
     val onVaultNameChange = remember(windowState) { followVault(state = windowState) { title = it } }
@@ -219,7 +219,7 @@ private fun followVault(
         onTitle(windowTitle(vaultName = name))
         if ((name != null) != isWorkspace) {
             isWorkspace = name != null
-            WindowSizes.fit(state = state, isWorkspace = isWorkspace)
+            WindowSizes.system.fit(state = state, isWorkspace = isWorkspace)
         }
     }
 }
