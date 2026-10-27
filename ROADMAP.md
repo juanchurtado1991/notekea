@@ -65,8 +65,9 @@ One main window with three resizable panes, a status bar, and the native window 
 └──────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Sidebar** (default 260 dp, min 200, collapsible with `Mod+\`): search field, "Today" (daily note),
-  bookmarks, folder tree.
+- **Sidebar** (default 260 dp, min 200, collapsible with `Mod+\`): the vault's name with Sort, Expand all, Collapse
+  all and Minimize, bookmarks, folder tree. A tool rail on its left (Files, Search notes, New note, New folder, Today)
+  stays when it is hidden (1.11).
 - **Editor** (flexible, min 480 dp): tab bar, title, properties, Edit / Read toggle, Markdown content.
   Can be split into two panes side by side.
 - **Right panel** (default 340 dp, min 280, collapsible with `Mod+Shift+\`): tabs **Related**, **Backlinks**,
@@ -338,6 +339,13 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 - **Two panes:** Split right moves the active tab to a new pane on the right; a click in a pane makes it the active
   one (its tabs' line is blue, the editor shortcuts and the outline follow it); a pane left without tabs closes. One
   side panel serves both panes.
+- **Tool rail:** a narrow strip of icons on the window's left edge, there whether the sidebar is shown or not, as in
+  Android Studio: Files (shows or hides the sidebar), Search notes, New note, New folder and Today, each with a tooltip
+  beside it. The sidebar's header holds the vault's name, then Sort, Expand all, Collapse all and Minimize; the
+  Search notes and Today rows and the New note / New folder buttons move to the rail.
+- **Window size:** the welcome screen opens in a small window; a vault's workspace opens large enough (1440 × 900 dp
+  at most, never larger than the screen's usable area) to show the tool rail, the sidebar, a note and the outline
+  beside it, which are open by default. A maximized window, or one made larger, keeps its size.
 - **Restore:** each vault's tabs, active tabs and split are saved on every change in the app settings and come back
   when it opens again, without the tabs of files deleted meanwhile.
 
