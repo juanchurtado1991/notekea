@@ -74,7 +74,7 @@ data folder. Within the feature's steps:
    open `qa/runs/M<N>.md`, hand the testers their guide (`qa/GUIDE_*.md`), turn every failure in their reports into
    an issue and a `fix/` branch, publish the next release candidate and retest until Windows, macOS and Linux pass.
    The M1 run is retroactive: it covers everything since M0.
-3. **Release run** — the M5 milestone run with signed builds.
+3. **Release run** — the M5 milestone run with the release builds (unsigned, `ROADMAP.md` 5.3).
 
 **Automated UI tests** come with every step that adds or changes UI, once the UI test infrastructure of
 `qa/README.md` exists; until then, review UI headless with `ImageComposeScene`.

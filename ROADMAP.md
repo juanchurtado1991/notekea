@@ -33,7 +33,7 @@ had one. The M5 run is the release run.
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
-| M5 — Release | Onboarding polish, packaging, signing, first public release | 1 week | 0 / 4 |
+| M5 — Release | Onboarding polish, packaging, first public release | 1 week | 0 / 4 |
 | Post-MVP | Extensions (Koog + MCP), mobile, more | — |
 
 ---
@@ -645,11 +645,18 @@ spell check), Files (update links when renaming: always or ask, default always; 
 `.obsidian/` when present), AI (model manager, chat scope default), Sync (M4), Shortcuts (read-only list),
 About (version, licenses, privacy statement).
 
-### ⬜ 5.3 Packaging and signing — `chore/release-pipeline`
+### ⬜ 5.3 Packaging — `chore/release-pipeline`
 
-GitHub Actions on tag `v*`: build `.dmg` (macOS, signed and notarized), `.msi` (Windows, signed) and `.deb`
-(Linux), attach them to a GitHub Release with checksums. Requires an Apple Developer account and a Windows
-code-signing certificate.
+GitHub Actions on tag `v*`: build `.dmg` (macOS), `.msi` (Windows) and `.deb` (Linux), attach them to a GitHub
+Release with checksums.
+
+- **Unsigned builds:** the MVP is not code-signed, to keep it free of paid certificates (an Apple Developer account
+  and a Windows code-signing certificate cost about 300 USD a year together). Linux needs no signature.
+- **First launch:** the README has a "First launch" section per OS, with what the system shows and how to open the
+  app anyway: Windows SmartScreen ("More info" → "Run anyway") and macOS Gatekeeper (System Settings → Privacy &
+  Security → "Open Anyway"), as the QA guides (`qa/GUIDE_*.md`) explain it.
+- **Later, when there are users to justify it:** free signing for open source projects (SignPath Foundation) for
+  Windows, and an Apple Developer ID with notarization for macOS. Neither blocks the release.
 
 ### ⬜ 5.4 Release v0.1.0
 

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Plan for the release (`ROADMAP.md` 5.3): the MVP's builds are not code-signed; the README explains how to open
+  them the first time on Windows and macOS, and signing comes later, when there are users to justify it.
 - Code: Markdown marks and shared text pieces are named once (`MarkdownSyntax`, `StringPatterns`) instead of
   being written as literals, and the fence and tag patterns are no longer duplicated (`GUIDELINES.md` §5).
 - The open vault shows its notes in a sidebar tree instead of the "N notes found" summary, and opening a vault no

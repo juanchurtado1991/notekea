@@ -10,8 +10,8 @@ A link to a **release** on GitHub, named like `Notekea m1-rc1`. Under **Assets**
 ## 1. Install the app
 
 1. Open `Notekea-<version>.dmg` and drag **Notekea** to **Applications**.
-2. The first time, macOS may say Notekea **cannot be opened** because the developer cannot be verified (test builds
-   are not signed yet). In **Applications**, **right-click** Notekea → **Open** → **Open**. On macOS 15 or later, if
+2. The first time, macOS may say Notekea **cannot be opened** because the developer cannot be verified (Notekea's
+   builds are not signed). In **Applications**, **right-click** Notekea → **Open** → **Open**. On macOS 15 or later, if
    there is no Open button: **System Settings → Privacy & Security**, scroll down to the message about Notekea and
    click **Open Anyway**.
 
