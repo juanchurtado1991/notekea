@@ -156,6 +156,7 @@ private fun workspaceIntentOf(
     intent: EditorIntent
 ): WorkspaceIntent = when (intent) {
     is EditorIntent.OnSidePanelResize -> WorkspaceIntent.OnSidePanelResize(widthDp = intent.widthDp)
+    is EditorIntent.OnSidePanelSectionToggle -> WorkspaceIntent.OnSidePanelSectionToggle(section = intent.section)
     EditorIntent.OnOutlineFocusRequest -> WorkspaceIntent.OnOutlineFocusRequest
     else -> WorkspaceIntent.OnSidePanelToggle
 }

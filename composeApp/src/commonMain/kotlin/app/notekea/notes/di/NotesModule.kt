@@ -2,6 +2,7 @@ package app.notekea.notes.di
 
 import app.notekea.notes.domain.SavePropertiesFoldUseCase
 import app.notekea.notes.domain.GetPropertiesFoldUseCase
+import app.notekea.notes.presentation.editor.NoteInfoTools
 import app.notekea.notes.presentation.editor.PropertyTools
 import app.notekea.notes.presentation.tree.BookmarkTools
 import app.notekea.notes.domain.SaveBookmarksUseCase
@@ -43,6 +44,8 @@ import app.notekea.notes.domain.FuzzyMatcher
 import app.notekea.notes.domain.MarkdownLineStripper
 import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.GetTreePreferencesUseCase
+import app.notekea.notes.domain.GetNoteStatsUseCase
+import app.notekea.notes.domain.GetNoteTimesUseCase
 import app.notekea.notes.domain.LinkFinder
 import app.notekea.notes.domain.NaturalNameComparator
 import app.notekea.notes.domain.NoteMetadataCache
@@ -100,6 +103,9 @@ val notesModule = module {
     factoryOf(::NewNoteTools)
     factoryOf(::BookmarkTools)
     factoryOf(::PropertyTools)
+    factoryOf(::NoteInfoTools)
+    factoryOf(::GetNoteStatsUseCase)
+    factoryOf(::GetNoteTimesUseCase)
     factoryOf(::GetPropertiesFoldUseCase)
     factoryOf(::SavePropertiesFoldUseCase)
     factoryOf(::GetBookmarksUseCase)
@@ -163,7 +169,8 @@ val notesModule = module {
             saveEditorMode = get(),
             attachmentTools = get(),
             fillTemplate = get(),
-            propertyTools = get()
+            propertyTools = get(),
+            noteInfoTools = get()
         )
     }
     viewModel { TagPickerViewModel() }

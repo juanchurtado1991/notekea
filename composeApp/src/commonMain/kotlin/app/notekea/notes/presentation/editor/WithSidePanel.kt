@@ -24,7 +24,8 @@ private const val PREVIEW_HEIGHT_DP = 360
 private const val PREVIEW_WIDTH_DP = 1000
 
 /**
- * The [content] (the panes of notes) with the side panel on its right showing [outline] (`ROADMAP.md` 1.9), as wide as
+ * The [content] (the panes of notes) with the side panel on its right showing [outline] (`ROADMAP.md` 1.9) and the
+ * active note's [info] (null when no note is shown), its sections folded as [preferences] say, as wide as
  * [preferences] say but never leaving the notes narrower than [EDITOR_MIN_WIDTH_DP]; when not even its narrowest width
  * fits, the panel floats over them instead, open only while it is used ([sidePanel]). [current] is the heading the
  * active pane's view is in; a heading chosen goes to [onHeadingClick], and Esc in the outline to [onLeave].
@@ -38,6 +39,7 @@ fun WithSidePanel(
     platformConventions: PlatformConventions,
     onHeadingClick: (Int) -> Unit,
     onLeave: () -> Unit,
+    info: NoteInfo?,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -61,13 +63,10 @@ fun WithSidePanel(
                 SidePanel(
                     outline = outline,
                     current = current,
+                    foldedSections = preferences.foldedSections,
                     platformConventions = platformConventions,
-                    onHeadingClick = onHeadingClick,
-                    onHide = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
-                    onLeave = {
-                        sidePanel.isOverlayOpen = false
-                        onLeave()
-                    },
+                    actions = actionsOf(sidePanel = sidePanel, onHeadingClick = onHeadingClick, onLeave = onLeave),
+                    info = info,
                     outlineFocus = sidePanel.outlineFocus
                 )
             },
@@ -77,6 +76,21 @@ fun WithSidePanel(
         )
     }
 }
+
+/** The panel's controls: its sections and hide button go to [sidePanel]; Esc in the outline closes it if it floats. */
+private fun actionsOf(
+    sidePanel: SidePanelHost,
+    onHeadingClick: (Int) -> Unit,
+    onLeave: () -> Unit
+) = SidePanelActions(
+    onHeadingClick = onHeadingClick,
+    onSectionToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelSectionToggle(section = it)) },
+    onHide = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
+    onLeave = {
+        sidePanel.isOverlayOpen = false
+        onLeave()
+    }
+)
 
 @Preview
 @Composable
@@ -90,7 +104,8 @@ private fun WithSidePanelPreview() {
                 current = 0,
                 platformConventions = EditorPreviewData.platformConventions,
                 onHeadingClick = {},
-                onLeave = {}
+                onLeave = {},
+                info = EditorPreviewData.info
             ) { Text(text = PREVIEW_CONTENT) }
         }
     }

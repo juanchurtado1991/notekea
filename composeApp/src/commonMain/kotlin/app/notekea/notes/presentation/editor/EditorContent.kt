@@ -94,7 +94,6 @@ import app.notekea.core.presentation.components.NotekeaTitleField
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.notekeaCodeTextStyle
-import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.DayNeighbors
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.platform.label
@@ -154,7 +153,6 @@ fun EditorContent(
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier = Modifier,
-    properties: NoteMetadata? = null,
     textFocusRequester: FocusRequester? = null,
     outlineTracker: OutlineTracker? = null,
     dayNeighbors: DayNeighbors? = null,
@@ -177,7 +175,7 @@ fun EditorContent(
         scrollState = scrollState,
         toolbarHeight = { keepInView.topInset }
     )
-    val header = EditorHeaderData(properties = properties, dayNeighbors = dayNeighbors, isBookmarked = isBookmarked)
+    val header = EditorHeaderData(dayNeighbors = dayNeighbors, isBookmarked = isBookmarked)
     val surface = modifier.fillMaxSize().then(other = fileDrop).then(other = pressed.tracking())
     Surface(modifier = surface, color = MaterialTheme.colorScheme.surface) {
         Column {
@@ -855,8 +853,7 @@ private fun EditorPreviewFrame(
                 state = state,
                 buffer = EditorPreviewData.buffer(),
                 platformConventions = EditorPreviewData.platformConventions,
-                onIntent = {},
-                properties = EditorPreviewData.properties
+                onIntent = {}
             )
         }
     }

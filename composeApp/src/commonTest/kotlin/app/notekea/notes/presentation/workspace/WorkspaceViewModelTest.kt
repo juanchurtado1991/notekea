@@ -18,6 +18,7 @@ import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.SaveSidePanelUseCase
 import app.notekea.notes.domain.SaveWorkspaceUseCase
 import app.notekea.notes.domain.SidePanelPreferences
+import app.notekea.notes.domain.SidePanelSection
 import app.notekea.notes.domain.VaultTree
 import app.notekea.notes.domain.Workspace
 import kotlinx.coroutines.Dispatchers
@@ -177,6 +178,24 @@ class WorkspaceViewModelTest {
                 actual = listOf(first, hidden, preferences.sidePanel) to effects.toList()
             )
         }
+
+    @Test
+    fun `a section folds and opens again, and the outline shortcut opens a folded outline`() = runWorkspaceTest {
+        val viewModel = started()
+        runCurrent()
+        viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelSectionToggle(section = SidePanelSection.NOTE_INFO))
+        viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelSectionToggle(section = SidePanelSection.OUTLINE))
+        advanceUntilIdle()
+        val folded = preferences.sidePanel.foldedSections
+        viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelSectionToggle(section = SidePanelSection.NOTE_INFO))
+        viewModel.onIntent(intent = WorkspaceIntent.OnOutlineFocusRequest)
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = setOf(SidePanelSection.NOTE_INFO, SidePanelSection.OUTLINE) to emptySet(),
+            actual = folded to preferences.sidePanel.foldedSections
+        )
+    }
 
     private fun TestScope.started(
         isLoaded: Boolean = true

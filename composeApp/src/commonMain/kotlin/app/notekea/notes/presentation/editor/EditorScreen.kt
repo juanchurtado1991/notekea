@@ -19,7 +19,6 @@ import app.notekea.core.presentation.platform.BeforeWindowClose
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.notes.domain.DayNeighbors
-import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.OutlineHeading
 import app.notekea.notes.domain.RelativePath
 import kotlinx.coroutines.channels.Channel
@@ -45,7 +44,6 @@ fun EditorScreen(
     sidePanel: SidePanelHost,
     modifier: Modifier = Modifier,
     isActive: Boolean = true,
-    properties: NoteMetadata? = null,
     dayNeighbors: DayNeighbors? = null,
     isBookmarked: Boolean = false
 ) {
@@ -73,7 +71,6 @@ fun EditorScreen(
         platformConventions = platformConventions,
         onIntent = onIntent,
         modifier = modifier,
-        properties = properties,
         textFocusRequester = textFocusRequester,
         outlineTracker = pane.tracker,
         dayNeighbors = dayNeighbors,
@@ -188,8 +185,7 @@ private fun EditorScreenPreview() {
                 state = EditorPreviewData.state(),
                 buffer = EditorPreviewData.buffer(),
                 platformConventions = EditorPreviewData.platformConventions,
-                onIntent = {},
-                properties = EditorPreviewData.properties
+                onIntent = {}
             )
         }
     }

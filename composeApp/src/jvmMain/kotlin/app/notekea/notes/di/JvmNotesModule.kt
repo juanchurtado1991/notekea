@@ -6,6 +6,7 @@ import app.notekea.core.platform.domain.SystemEnvironment
 import app.notekea.notes.data.DirectoryWatcherFileWatcher
 import app.notekea.notes.data.JvmSystemTrash
 import app.notekea.notes.data.OkioNoteContentStore
+import app.notekea.notes.data.OkioNoteTimesReader
 import app.notekea.notes.data.ObsidianVaultSettingsReader
 import app.notekea.notes.data.OkioAttachmentStore
 import app.notekea.notes.data.OkioNoteFileOperations
@@ -26,6 +27,7 @@ import app.notekea.notes.domain.FileOpener
 import app.notekea.notes.domain.FileRevealer
 import app.notekea.notes.domain.FileWatcher
 import app.notekea.notes.domain.NoteContentStore
+import app.notekea.notes.domain.NoteTimesReader
 import app.notekea.notes.domain.NoteFileOperations
 import app.notekea.notes.domain.NoteMetadataReader
 import app.notekea.notes.domain.NoteScanner
@@ -72,6 +74,7 @@ val jvmNotesModule = module {
         }
     }
     single<FileWatcher> { DirectoryWatcherFileWatcher(dispatchers = get()) }
+    single<NoteTimesReader> { OkioNoteTimesReader(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
     single<NoteContentStore> { OkioNoteContentStore(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
     single<NoteFileOperations> { OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
     single<AttachmentStore> { OkioAttachmentStore(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }

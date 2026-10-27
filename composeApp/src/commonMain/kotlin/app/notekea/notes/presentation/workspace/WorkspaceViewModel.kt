@@ -7,6 +7,7 @@ import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.SidePanelPreferences
+import app.notekea.notes.domain.SidePanelSection
 import app.notekea.notes.domain.Workspace
 import app.notekea.notes.presentation.tree.TreeFilePreviews
 import co.touchlab.kermit.Logger
@@ -97,8 +98,26 @@ class WorkspaceViewModel(
             is WorkspaceIntent.OnSidePanelResize -> updateSidePanel { it.copy(widthDp = intent.widthDp) }
 
             WorkspaceIntent.OnOutlineFocusRequest -> {
-                if (!state.value.sidePanel.isVisible) updateSidePanel { it.copy(isVisible = true) }
+                val panel = state.value.sidePanel
+                if (!panel.isVisible || SidePanelSection.OUTLINE in panel.foldedSections) {
+                    updateSidePanel {
+                        it.copy(isVisible = true, foldedSections = it.foldedSections - SidePanelSection.OUTLINE)
+                    }
+                }
                 emit(effect = WorkspaceEffect.FocusOutline)
+            }
+
+            is WorkspaceIntent.OnSidePanelSectionToggle -> updateSidePanel {
+                val folded = it.foldedSections
+                it.copy(
+                    foldedSections = if (intent.section in
+                        folded
+                    ) {
+                        folded - intent.section
+                    } else {
+                        folded + intent.section
+                    }
+                )
             }
 
             else -> Unit

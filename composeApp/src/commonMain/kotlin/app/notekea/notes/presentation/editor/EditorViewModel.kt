@@ -1,5 +1,10 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.PropertyValue
+import app.notekea.notes.domain.PropertyKeys
+import app.notekea.notes.domain.FrontmatterContent
+import app.notekea.core.domain.time.LocalMoment
+import kotlin.time.Instant
 import app.notekea.core.domain.StringPatterns
 import app.notekea.notes.domain.FrontmatterReader
 import kotlin.time.Duration.Companion.milliseconds
@@ -62,7 +67,8 @@ class EditorViewModel(
     private val saveEditorMode: SaveEditorModeUseCase,
     private val attachmentTools: AttachmentTools,
     private val fillTemplate: FillTemplateUseCase,
-    private val propertyTools: PropertyTools
+    private val propertyTools: PropertyTools,
+    private val noteInfoTools: NoteInfoTools
 ) : BaseViewModel<EditorState, EditorIntent, EditorEffect>(initialState = EditorState()) {
     /** The body of the open note, edited in place by the text field. */
     val buffer = TextFieldState()
@@ -83,6 +89,7 @@ class EditorViewModel(
     private val saveLock = Mutex()
     private var autosaveJob: Job? = null
     private var sourceJob: Job? = null
+    private var statsJob: Job? = null
     private var pendingSource: PropertyIntent.OnSourceEdit? = null
     private var watchJob: Job? = null
 
@@ -205,6 +212,7 @@ class EditorViewModel(
         state.value.find?.let { find -> updateMatches(query = find.query, body = body, keepCurrent = true) }
         updateAttachments(body = body)
         updateOutline(body = body)
+        updateStats(body = body)
         val document = opened ?: return
         autosaveJob?.cancel()
         if (body == document.body) {
@@ -523,6 +531,47 @@ class EditorViewModel(
         }
     }
 
+    /** Counts what the note holds for Note info once typing pauses, away from the UI thread (links are parsed). */
+    private fun updateStats(
+        body: String
+    ) {
+        val note = state.value.notePath ?: return
+        statsJob?.cancel()
+        statsJob = launchGuarded(onError = ::showUnexpectedError) {
+            delay(duration = OUTLINE_DELAY)
+            val tags = propertyTagsOf(content = state.value.properties)
+            val stats = withContext(context = attachmentTools.dispatchers.default) {
+                noteInfoTools.getNoteStats(body = body, propertyTags = tags)
+            }
+            reduce { if (it.notePath == note) it.copy(info = it.info.copy(stats = stats)) else it }
+        }
+    }
+
+    /** The tags listed in the note's properties, which Note info counts with the text's. */
+    private fun propertyTagsOf(
+        content: FrontmatterContent
+    ): List<String> = (content as? FrontmatterContent.Properties)?.properties.orEmpty()
+        .filter { PropertyKeys.isTags(key = it.key) }
+        .flatMap { (it.value as? PropertyValue.Items)?.items.orEmpty() }
+
+    /** Reads when the note's file was created and modified, for Note info. */
+    private fun readTimes() {
+        val note = state.value.notePath ?: return
+        launchGuarded(onError = ::showUnexpectedError) {
+            val times = noteInfoTools.getNoteTimes(vaultPath = vaultPath, path = note)
+            reduce {
+                if (it.notePath != note) return@reduce it
+                it.copy(
+                    info = it.info.copy(createdAt = momentOf(times.createdAt), modifiedAt = momentOf(times.modifiedAt))
+                )
+            }
+        }
+    }
+
+    private fun momentOf(
+        instant: Instant?
+    ): LocalMoment? = instant?.let { propertyTools.localCalendar.momentOf(instant = it) }
+
     /**
      * An outline heading was chosen: the editor scrolls to it and, in Edit mode, puts the cursor at the end of its line
      * and takes the keyboard, so typing goes on there.
@@ -715,6 +764,7 @@ class EditorViewModel(
                     it.copy(
                         properties = frontmatterReader.read(header = document.header),
                         propertiesSource = propertyEditing.sourceOf(header = document.header),
+                        info = it.info.copy(modifiedAt = momentOf(instant = propertyTools.clock.now())),
                         today = today(),
                         saveStatus = if (isCurrent) SaveStatus.SAVED else SaveStatus.UNSAVED,
                         saveError = null,
@@ -722,6 +772,8 @@ class EditorViewModel(
                         isDeleted = false
                     )
                 }
+                // The properties' tags count in Note info.
+                updateStats(body = buffer.text.toString())
             }
 
             is Outcome.Failure -> reduceSaveFailure(error = outcome.error)
@@ -857,6 +909,7 @@ class EditorViewModel(
                 today = today()
             )
         }
+        readTimes()
         replaceBuffer(body = document.body, isNewNote = isNewNote)
     }
 
