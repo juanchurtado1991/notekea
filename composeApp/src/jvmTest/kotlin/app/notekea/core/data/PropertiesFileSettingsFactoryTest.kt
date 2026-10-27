@@ -1,6 +1,8 @@
 package app.notekea.core.data
 
 import java.nio.file.Files
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.Executors
 import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
@@ -53,7 +55,37 @@ class PropertiesFileSettingsFactoryTest {
         )
     }
 
+    @Test
+    fun `settings changed from several threads at once are all saved, none failing`() {
+        // 1.11 smoke: opening a folder saved the tree's open folders and the tabs at the same time, and one save moved
+        // the temporary file away while the other was still writing it ("Something went wrong").
+        val settings = PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create()
+        val pool = Executors.newFixedThreadPool(THREADS)
+        val failures = ConcurrentLinkedQueue<Throwable>()
+        val writes = (0 until THREADS).map { thread ->
+            pool.submit {
+                repeat(times = WRITES) { write ->
+                    try {
+                        settings.putString(key = "key.$thread.$write", value = VALUE)
+                    } catch (exception: Exception) {
+                        failures += exception
+                    }
+                }
+            }
+        }
+        writes.forEach { it.get() }
+        pool.shutdown()
+
+        val reloaded = PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create()
+        assertEquals(
+            expected = emptyList<Throwable>() to THREADS * WRITES,
+            actual = failures.toList() to reloaded.keys.size
+        )
+    }
+
     companion object {
+        private const val THREADS = 8
+        private const val WRITES = 50
         private const val APP_DATA_FOLDER = "notekea"
         private const val KEY = "vaults.recent.count"
         private const val MALFORMED = "broken=\\u12"
