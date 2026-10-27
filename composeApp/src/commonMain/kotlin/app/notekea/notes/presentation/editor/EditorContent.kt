@@ -108,6 +108,8 @@ import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.TaskFinder
 import app.notekea.notes.presentation.tree.notesErrorMessage
 import app.notekea.resources.Res
+import app.notekea.resources.editor_bookmark_remove
+import app.notekea.resources.editor_bookmark_add
 import app.notekea.resources.editor_body_label
 import app.notekea.resources.editor_find_count
 import app.notekea.resources.editor_find_none
@@ -143,7 +145,8 @@ private val SKELETON_WIDTHS = listOf(0.9f, 0.75f, 0.85f, 0.6f, 0.8f, 0.4f)
  * from the frontmatter (read-only), and the body with its Markdown highlighted. The text is centred and limited to a
  * readable width; the header scrolls with it. Leaving the text saves at once. Find in note shows its bar above the
  * text, marks the matches and scrolls to the current one. Read mode shows the note rendered instead of its Markdown.
- * The [outlineTracker] learns which heading the view is in and scrolls to the headings the outline asks for.
+ * The [outlineTracker] learns which heading the view is in and scrolls to the headings the outline asks for. Files
+ * dropped anywhere on the editor are attached at the cursor, in Edit mode.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -157,6 +160,7 @@ fun EditorContent(
     textFocusRequester: FocusRequester? = null,
     outlineTracker: OutlineTracker? = null,
     dayNeighbors: DayNeighbors? = null,
+    isBookmarked: Boolean = false,
     scrollMemory: ScrollMemory? = null
 ) {
     val scrollState = rememberScrollState()
@@ -166,7 +170,6 @@ fun EditorContent(
     val viewport = remember { mutableStateOf<LayoutCoordinates?>(value = null) }
     val positions = rememberHeadingPositions(viewport = viewport, scrollState = scrollState)
     val keepInView = remember { EditorBringIntoViewSpec() }
-    // Files dropped anywhere on the editor are attached at the cursor, in Edit mode.
     val fileDrop = LocalFileDrop.current { paths -> onIntent(EditorIntent.OnFilesDrop(paths = paths)) }
     val tracker = outlineTracker ?: remember { OutlineTracker() }
     FollowOutline(
@@ -176,6 +179,7 @@ fun EditorContent(
         scrollState = scrollState,
         toolbarHeight = { keepInView.topInset }
     )
+    val header = EditorHeaderData(properties = properties, dayNeighbors = dayNeighbors, isBookmarked = isBookmarked)
     val surface = modifier.fillMaxSize().then(other = fileDrop).then(other = pressed.tracking())
     Surface(modifier = surface, color = MaterialTheme.colorScheme.surface) {
         Column {
@@ -190,7 +194,7 @@ fun EditorContent(
                     platformConventions = platformConventions,
                     onIntent = withModClicks(pressed = pressed, onIntent = onIntent),
                     positions = positions,
-                    header = EditorHeaderData(properties = properties, dayNeighbors = dayNeighbors),
+                    header = header,
                     textFocusRequester = textFocusRequester,
                     onToolbarHeight = { keepInView.topInset = it.toFloat() }
                 )
@@ -379,6 +383,7 @@ private fun EditorHeader(
             isError = state.titleError != null,
             onEdit = { if (state.titleError != null) onIntent(EditorIntent.OnTitleErrorDismiss) }
         )
+        BookmarkStar(isBookmarked = header.isBookmarked, platformConventions = platformConventions, onIntent = onIntent)
         header.dayNeighbors?.let {
             DayArrows(neighbors = it, platformConventions = platformConventions, onIntent = onIntent)
         }
@@ -394,6 +399,27 @@ private fun EditorHeader(
     propertiesLine(properties = header.properties)?.let { line ->
         Text(text = line, style = MaterialTheme.typography.bodySmall, color = muted)
     }
+}
+
+/** The star beside the title: filled in the accent color while the note is bookmarked (`ROADMAP.md` 1.13). */
+@Composable
+private fun BookmarkStar(
+    isBookmarked: Boolean,
+    platformConventions: PlatformConventions,
+    onIntent: (EditorIntent) -> Unit
+) {
+    NotekeaIconButton(
+        icon = NotekeaIcons.Bookmark,
+        label = stringResource(
+            resource = if (isBookmarked) Res.string.editor_bookmark_remove else Res.string.editor_bookmark_add
+        ),
+        onClick = { onIntent(EditorIntent.OnBookmarkToggle) },
+        shortcutHint = platformConventions.bookmarkShortcut.label(
+            operatingSystem = platformConventions.operatingSystem
+        ),
+        takesFocus = false,
+        isOn = isBookmarked
+    )
 }
 
 /** A daily note's arrows to the daily notes before and after it, each greyed out when there is none on its side. */

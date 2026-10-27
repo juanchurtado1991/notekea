@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.tree
 
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.notes.domain.Bookmarks
 import app.notekea.notes.domain.DayNeighbors
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
@@ -16,7 +17,8 @@ import app.notekea.notes.domain.VaultTree
  * stays in [renaming], next to the field. [notice] reports a finished action
  * (links updated after a rename). [sidebarWidthDp] changes when a resize ends, not on every dragged frame. When the
  * selected note is a daily note,
- * [dayNeighbors] holds its date and the daily notes before and after it (`ROADMAP.md` 1.10).
+ * [dayNeighbors] holds its date and the daily notes before and after it (`ROADMAP.md` 1.10). [bookmarks] are the
+ * vault's bookmarks, listed above the tree while [isBookmarksExpanded] (`ROADMAP.md` 1.13).
  */
 data class VaultTreeState(
     val vaultPath: String,
@@ -30,6 +32,8 @@ data class VaultTreeState(
     val isSidebarCollapsed: Boolean = false,
     val selectedPath: RelativePath? = null,
     val dayNeighbors: DayNeighbors? = null,
+    val bookmarks: Bookmarks = Bookmarks(),
+    val isBookmarksExpanded: Boolean = true,
     val renaming: RenameDraft? = null,
     val pendingDelete: RelativePath? = null,
     val notice: TreeNotice? = null,

@@ -178,6 +178,10 @@ private fun WorkspaceFollowers(
         tree.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
     }
     DailyNoteShortcuts(platformConventions = conventions, onIntent = tree::onIntent)
+    WindowShortcut(shortcut = conventions.bookmarkShortcut) {
+        val path = workspace.state.value.workspace.activePath ?: tree.state.value.selectedPath
+        path?.let { tree.onIntent(intent = BookmarkIntent.OnToggle(path = it)) }
+    }
     QuickSwitcherShortcuts(platformConventions = conventions, onIntent = viewModels.onSwitcher)
     WorkspaceShortcuts(
         platformConventions = conventions,

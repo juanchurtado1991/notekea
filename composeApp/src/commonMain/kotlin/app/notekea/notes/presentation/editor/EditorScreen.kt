@@ -46,7 +46,8 @@ fun EditorScreen(
     modifier: Modifier = Modifier,
     isActive: Boolean = true,
     properties: NoteMetadata? = null,
-    dayNeighbors: DayNeighbors? = null
+    dayNeighbors: DayNeighbors? = null,
+    isBookmarked: Boolean = false
 ) {
     val state by viewModel.state.collectAsState()
     val flushed = remember(viewModel) { Channel<Unit>(capacity = Channel.CONFLATED) }
@@ -76,6 +77,7 @@ fun EditorScreen(
         textFocusRequester = textFocusRequester,
         outlineTracker = pane.tracker,
         dayNeighbors = dayNeighbors,
+        isBookmarked = isBookmarked,
         scrollMemory = pane.scrollMemory
     )
 }
@@ -132,6 +134,8 @@ private fun EditorEffects(
                 is EditorEffect.RequestTag -> current.onRequestTag(effect.query)
 
                 EditorEffect.RequestTemplate -> current.onRequestTemplate()
+
+                is EditorEffect.ToggleBookmark -> current.onBookmarkToggle(effect.path)
 
                 EditorEffect.FocusText -> focusText(
                     requester = textFocusRequester,

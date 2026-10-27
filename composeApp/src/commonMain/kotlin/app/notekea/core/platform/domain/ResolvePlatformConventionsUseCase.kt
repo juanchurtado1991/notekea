@@ -16,8 +16,13 @@ package app.notekea.core.platform.domain
 class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnvironment) {
     private val macosNamePattern = Regex(pattern = MACOS_NAME_MARKERS)
 
-    operator fun invoke(): PlatformConventions {
-        val operatingSystem = detectOperatingSystem(name = systemEnvironment.operatingSystemName)
+    operator fun invoke(): PlatformConventions =
+        conventionsFor(operatingSystem = detectOperatingSystem(name = systemEnvironment.operatingSystemName))
+
+    /** The shortcuts and conventions of [operatingSystem]: most shortcuts use its primary modifier (Cmd or Ctrl). */
+    private fun conventionsFor(
+        operatingSystem: OperatingSystem
+    ): PlatformConventions {
         val primaryModifier = primaryModifierFor(operatingSystem = operatingSystem)
         val primary = { key: ShortcutKey, extra: ShortcutModifier? -> shortcut(key, primaryModifier, extra) }
         return PlatformConventions(
@@ -50,6 +55,7 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             previousTabShortcut = controlTab(extra = ShortcutModifier.SHIFT),
             splitRightShortcut = primary(ShortcutKey.D, ShortcutModifier.SHIFT),
             templateShortcut = primary(ShortcutKey.T, null),
+            bookmarkShortcut = primary(ShortcutKey.B, ShortcutModifier.SHIFT),
             goToTabShortcuts = DIGITS.map { primary(it, null) },
             dialogButtonOrder = dialogButtonOrderFor(operatingSystem = operatingSystem),
             appDataDirectory = appDataDirectoryFor(operatingSystem = operatingSystem),

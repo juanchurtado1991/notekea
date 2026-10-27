@@ -50,7 +50,8 @@ fun NotekeaIconButton(
     enabled: Boolean = true,
     shortcutHint: String? = null,
     takesFocus: Boolean = true,
-    isTooltipBeside: Boolean = false
+    isTooltipBeside: Boolean = false,
+    isOn: Boolean = false
 ) {
     val tooltipText = listOfNotNull(label, shortcutHint).joinToString(separator = TOOLTIP_SEPARATOR)
     TooltipBox(
@@ -70,7 +71,7 @@ fun NotekeaIconButton(
                 .clickable(enabled = enabled, onClickLabel = label, role = Role.Button, onClick = onClick),
             contentAlignment = Alignment.Center
         ) {
-            val tint = MaterialTheme.colorScheme.onSurfaceVariant
+            val tint = if (isOn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
             Icon(
                 imageVector = icon,
                 contentDescription = label,

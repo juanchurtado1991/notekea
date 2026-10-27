@@ -79,6 +79,9 @@ sealed interface EditorIntent {
     /** `Mod+T` or the toolbar's Insert template: the window opens the template picker, then sends a template. */
     data object OnTemplateRequest : EditorIntent
 
+    /** The star beside the title: bookmarks the note, or removes its bookmark (`ROADMAP.md` 1.13). */
+    data object OnBookmarkToggle : EditorIntent
+
     /** The [template] chosen in the picker: filled in and inserted at the cursor, or as the whole of an empty note. */
     data class OnTemplateInsert(val template: RelativePath) : EditorIntent
 

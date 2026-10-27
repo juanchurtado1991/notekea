@@ -38,6 +38,8 @@ import app.notekea.resources.tree_reveal_files
 import app.notekea.resources.tree_reveal_finder
 import app.notekea.resources.tree_select_file
 import app.notekea.resources.tree_select_note
+import app.notekea.resources.tree_bookmark_add
+import app.notekea.resources.tree_bookmark_remove
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_WIDTH_DP = 260
@@ -192,7 +194,16 @@ private fun editSection(
     onIntent: (VaultTreeIntent) -> Unit
 ): List<NotekeaMenuItem> {
     val os = state.platformConventions.operatingSystem
+    val isBookmarked = row.path in state.bookmarks
     return listOf(
+        NotekeaMenuItem(
+            label = stringResource(
+                resource = if (isBookmarked) Res.string.tree_bookmark_remove else Res.string.tree_bookmark_add
+            ),
+            onClick = { onIntent(BookmarkIntent.OnToggle(path = row.path)) },
+            icon = NotekeaIcons.Bookmark,
+            shortcutHint = state.platformConventions.bookmarkShortcut.label(operatingSystem = os)
+        ),
         NotekeaMenuItem(
             label = stringResource(resource = Res.string.tree_rename),
             onClick = { onIntent(VaultTreeIntent.OnRenameRequest(path = row.path)) },

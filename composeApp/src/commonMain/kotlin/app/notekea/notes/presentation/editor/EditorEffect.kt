@@ -39,6 +39,9 @@ sealed interface EditorEffect {
     /** Tag was asked for: the window opens the tag picker with [query] (the selected text) typed, then sends a tag. */
     data class RequestTag(val query: String) : EditorEffect
 
+    /** The star beside the title was clicked: the window bookmarks the note at [path], or removes its bookmark. */
+    data class ToggleBookmark(val path: RelativePath) : EditorEffect
+
     /** Insert template was asked for: the window opens the template picker, then sends the template to insert. */
     data object RequestTemplate : EditorEffect
 
