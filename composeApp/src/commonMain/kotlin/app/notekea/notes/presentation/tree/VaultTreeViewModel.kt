@@ -188,10 +188,15 @@ class VaultTreeViewModel(
         reduce { it.copy(renaming = it.renaming?.copy(text = text, error = null)) }
     }
 
+    /**
+     * Creates a note or folder in the selected folder; a hidden sidebar opens first, so the new entry is seen where it
+     * went, with its name ready to type.
+     */
     private fun create(
         baseName: String,
         isFolder: Boolean
     ) {
+        if (state.value.isSidebarCollapsed) updateTree { it.copy(isSidebarCollapsed = false) }
         launchGuarded(onError = ::showUnexpectedError) {
             val folder = targetFolder(state = state.value)
             val outcome = if (isFolder) {
