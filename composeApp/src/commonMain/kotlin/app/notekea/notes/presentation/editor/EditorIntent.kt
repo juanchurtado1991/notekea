@@ -13,8 +13,11 @@ sealed interface EditorIntent {
     /** Save now and report [EditorEffect.Flushed], before the window closes. */
     data object OnFlushRequest : EditorIntent
 
-    /** A link to a note was clicked in Read mode. */
-    data class OnLinkClick(val link: ReadLink.Note) : EditorIntent
+    /** A link to a note was clicked in Read mode; with `Mod` held its tab opens [inBackground] (`ROADMAP.md` 1.11). */
+    data class OnLinkClick(
+        val link: ReadLink.Note,
+        val inBackground: Boolean = false
+    ) : EditorIntent
 
     /**
      * Asks for the keyboard in the text of [path] (the note open now when null), as soon as it is open: after the
@@ -104,7 +107,10 @@ sealed interface EditorIntent {
     /** A heading of the outline was clicked or chosen with Enter: the editor goes to the [index]th heading. */
     data class OnHeadingClick(val index: Int) : EditorIntent
 
-    /** `Mod+Shift+O`: the outline takes the keyboard, showing the side panel first if it was hidden. */
+    /**
+     * `Mod+Shift+O`: the outline takes the keyboard, showing the side panel first if it was hidden. The side panel
+     * belongs to the tabs around the editor, which handle this and the next two.
+     */
     data object OnOutlineFocusRequest : EditorIntent
 
     /** `Mod+Shift+\` or the panel's button: show or hide the panel on the right of the editor. */

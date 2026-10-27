@@ -183,6 +183,11 @@ class ResolvePlatformConventionsUseCaseTest {
             todayShortcut = withPrimary(ShortcutKey.D),
             previousDayShortcut = Shortcut(key = ShortcutKey.LEFT, modifiers = setOf(primary, ShortcutModifier.ALT)),
             nextDayShortcut = Shortcut(key = ShortcutKey.RIGHT, modifiers = setOf(primary, ShortcutModifier.ALT)),
+            closeTabShortcut = withPrimary(ShortcutKey.W),
+            nextTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL),
+            previousTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL + ShortcutModifier.SHIFT),
+            splitRightShortcut = withPrimaryAndShift(ShortcutKey.D),
+            goToTabShortcuts = DIGITS.map(withPrimary),
             dialogButtonOrder = buttonOrder,
             appDataDirectory = appDataDirectory,
             homeDirectory = homeDirectory
@@ -202,6 +207,11 @@ class ResolvePlatformConventionsUseCaseTest {
     ).invoke()
 
     companion object {
+        private val CONTROL = setOf(ShortcutModifier.CONTROL)
+        private val DIGITS = listOf(
+            ShortcutKey.DIGIT_1, ShortcutKey.DIGIT_2, ShortcutKey.DIGIT_3, ShortcutKey.DIGIT_4, ShortcutKey.DIGIT_5,
+            ShortcutKey.DIGIT_6, ShortcutKey.DIGIT_7, ShortcutKey.DIGIT_8, ShortcutKey.DIGIT_9
+        )
         private const val APP_DATA_VARIABLE = "APPDATA"
         private const val LINUX_HOME = "/home/ana"
         private const val LINUX_NAME = "Linux"

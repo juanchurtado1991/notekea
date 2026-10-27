@@ -2,6 +2,15 @@ package app.notekea.core.platform.domain
 
 /** Keys used by platform-level shortcuts. Grows only when a feature needs a new key. */
 enum class ShortcutKey {
+    DIGIT_1,
+    DIGIT_2,
+    DIGIT_3,
+    DIGIT_4,
+    DIGIT_5,
+    DIGIT_6,
+    DIGIT_7,
+    DIGIT_8,
+    DIGIT_9,
     B,
     BACKSLASH,
     BACKSPACE,
@@ -21,5 +30,7 @@ enum class ShortcutKey {
     Q,
     RIGHT,
     S,
-    V
+    TAB,
+    V,
+    W
 }

@@ -76,6 +76,8 @@ import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.zIndex
 import app.notekea.core.presentation.platform.matches
+import app.notekea.core.presentation.platform.PressedModifiers
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.contentDescription
@@ -125,6 +127,7 @@ private const val BODY_MIN_HEIGHT_DP = 320
 private const val CONTENT_MAX_WIDTH_DP = 760
 private const val MATCH_SCROLL_MARGIN_DP = 96
 private const val HEADING_MARGIN_DP = 8
+private const val SCROLL_RESTORE_FRAMES = 30
 internal const val NO_LIGATURES = "liga 0, calt 0"
 private const val PATH_SEPARATOR = " / "
 private const val PREVIEW_HEIGHT_DP = 520
@@ -153,23 +156,28 @@ fun EditorContent(
     properties: NoteMetadata? = null,
     textFocusRequester: FocusRequester? = null,
     outlineTracker: OutlineTracker? = null,
-    dayNeighbors: DayNeighbors? = null
+    dayNeighbors: DayNeighbors? = null,
+    scrollMemory: ScrollMemory? = null
 ) {
     val scrollState = rememberScrollState()
+    scrollMemory?.let { RememberScroll(state = state, scrollState = scrollState, memory = it) }
+    val pressed = remember { PressedModifiers() }
     // Read only when the toolbar is placed, never in composition, so updating it recomposes nothing.
     val viewport = remember { mutableStateOf<LayoutCoordinates?>(value = null) }
     val positions = rememberHeadingPositions(viewport = viewport, scrollState = scrollState)
     val keepInView = remember { EditorBringIntoViewSpec() }
     // Files dropped anywhere on the editor are attached at the cursor, in Edit mode.
     val fileDrop = LocalFileDrop.current { paths -> onIntent(EditorIntent.OnFilesDrop(paths = paths)) }
+    val tracker = outlineTracker ?: remember { OutlineTracker() }
     FollowOutline(
         state = state,
-        tracker = outlineTracker ?: remember { OutlineTracker() },
+        tracker = tracker,
         positions = positions,
         scrollState = scrollState,
         toolbarHeight = { keepInView.topInset }
     )
-    Surface(modifier = modifier.fillMaxSize().then(other = fileDrop), color = MaterialTheme.colorScheme.surface) {
+    val surface = modifier.fillMaxSize().then(other = fileDrop).then(other = pressed.tracking())
+    Surface(modifier = surface, color = MaterialTheme.colorScheme.surface) {
         Column {
             EditorBanners(state = state, platformConventions = platformConventions, onIntent = onIntent)
             state.find?.let { find -> EditorFindBar(find = find, onIntent = onIntent) }
@@ -180,7 +188,7 @@ fun EditorContent(
                     scrollState = scrollState,
                     viewport = { viewport.value },
                     platformConventions = platformConventions,
-                    onIntent = onIntent,
+                    onIntent = withModClicks(pressed = pressed, onIntent = onIntent),
                     positions = positions,
                     header = EditorHeaderData(properties = properties, dayNeighbors = dayNeighbors),
                     textFocusRequester = textFocusRequester,
@@ -188,6 +196,40 @@ fun EditorContent(
                 )
             }
         }
+    }
+}
+
+/**
+ * [onIntent], with a link clicked while `Mod` was held ([pressed]) opening behind the current tab (`ROADMAP.md` 1.11):
+ * the Markdown renderer only says which link was clicked, not how.
+ */
+private fun withModClicks(
+    pressed: PressedModifiers,
+    onIntent: (EditorIntent) -> Unit
+): (EditorIntent) -> Unit = { intent ->
+    onIntent(if (intent is EditorIntent.OnLinkClick) intent.copy(inBackground = pressed.isModPressed) else intent)
+}
+
+/**
+ * Keeps where [state]'s note is scrolled to in [memory] while it is shown, and scrolls back there when it is shown
+ * again (`ROADMAP.md` 1.11), once its text is laid out far enough to get there.
+ */
+@Composable
+private fun RememberScroll(
+    state: EditorState,
+    scrollState: ScrollState,
+    memory: ScrollMemory
+) {
+    val path = state.notePath
+    LaunchedEffect(path, state.isLoading, state.isReading) {
+        if (path == null || state.isLoading) return@LaunchedEffect
+        val target = memory.of(path = path)
+        repeat(times = SCROLL_RESTORE_FRAMES) {
+            if (scrollState.maxValue >= target) return@repeat
+            withFrameNanos { }
+        }
+        scrollState.scrollTo(value = target)
+        snapshotFlow { scrollState.value }.collect { memory.keep(path = path, offset = it) }
     }
 }
 

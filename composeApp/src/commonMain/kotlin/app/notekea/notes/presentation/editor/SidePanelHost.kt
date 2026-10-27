@@ -8,23 +8,22 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.focus.FocusRequester
 
 /**
- * How the editor's screen holds the side panel (`ROADMAP.md` 1.9), beyond what the user chose and the ViewModel keeps:
- * the [tracker] it shares with the outline, the [outlineFocus] that `Mod+Shift+O` gives the keyboard to, and whether
- * the window is too narrow for the panel beside the note ([isOverlay]), so it floats over it instead, open only while
- * it is used ([isOverlayOpen]): a heading chosen, Esc or the hide button close it.
+ * How the screen holds the side panel (`ROADMAP.md` 1.9), one for every pane, beyond what the user chose and the tabs
+ * keep: the [outlineFocus] that `Mod+Shift+O` gives the keyboard to, and whether the window is too narrow for the panel
+ * beside the notes ([isOverlay]), so it floats over them instead, open only while it is used ([isOverlayOpen]): a
+ * heading chosen, Esc or the hide button close it.
  */
 @Stable
-internal class SidePanelHost(
+class SidePanelHost(
     private val send: (EditorIntent) -> Unit
 ) {
-    val tracker = OutlineTracker()
     val outlineFocus = FocusRequester()
     var isOverlay by mutableStateOf(value = false)
     var isOverlayOpen by mutableStateOf(value = false)
 
     /**
-     * Sends [intent] to the ViewModel through [send], except showing or hiding the panel while it floats, which only
-     * opens or closes it here: the panel the user keeps beside the note is the ViewModel's.
+     * Sends a side panel request ([isRequest]) through [send], except showing or hiding the panel while it floats,
+     * which only opens or closes it here: the panel the user keeps beside the notes is the tabs'.
      */
     fun onIntent(
         intent: EditorIntent
@@ -32,30 +31,22 @@ internal class SidePanelHost(
         if (intent == EditorIntent.OnSidePanelToggle && isOverlay) isOverlayOpen = !isOverlayOpen else send(intent)
     }
 
-    /**
-     * Follows the ViewModel's side panel [effect]s: a heading chosen closes the floating panel and is scrolled to;
-     * `Mod+Shift+O` opens the panel if it floats, then gives its outline the keyboard once it is laid out.
-     */
-    suspend fun follow(
-        effect: EditorEffect
-    ) {
-        when (effect) {
-            is EditorEffect.RevealHeading -> {
-                isOverlayOpen = false
-                tracker.reveal(heading = effect.heading)
-            }
-
-            EditorEffect.FocusOutline -> {
-                if (isOverlay) isOverlayOpen = true
-                withFrameNanos { }
-                try {
-                    outlineFocus.requestFocus()
-                } catch (_: IllegalStateException) {
-                    // The note has no headings, so there is no list to focus.
-                }
-            }
-
-            else -> Unit
+    /** Opens the panel if it floats, then gives its outline the keyboard once it is laid out. */
+    suspend fun focusOutline() {
+        if (isOverlay) isOverlayOpen = true
+        withFrameNanos { }
+        try {
+            outlineFocus.requestFocus()
+        } catch (_: IllegalStateException) {
+            // The note has no headings, so there is no list to focus.
         }
+    }
+
+    companion object {
+        /** Whether [intent] is about the side panel, which the tabs handle rather than the note's editor. */
+        fun isRequest(
+            intent: EditorIntent
+        ): Boolean = intent == EditorIntent.OnSidePanelToggle || intent == EditorIntent.OnOutlineFocusRequest ||
+            intent is EditorIntent.OnSidePanelResize
     }
 }

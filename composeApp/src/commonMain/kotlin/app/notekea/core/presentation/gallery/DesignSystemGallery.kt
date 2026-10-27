@@ -51,6 +51,9 @@ import app.notekea.core.presentation.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.components.NotekeaSearchButton
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.components.NotekeaSplitPane
+import app.notekea.core.presentation.components.NotekeaGridCard
+import app.notekea.core.presentation.components.NotekeaTabStrip
+import app.notekea.core.presentation.components.NotekeaTabStripItem
 import app.notekea.core.presentation.components.PaneSide
 import app.notekea.core.presentation.components.NotekeaCompactTabs
 import app.notekea.core.presentation.components.NotekeaGridSizePicker
@@ -103,6 +106,9 @@ private const val MENU_SORT_NAME = "Name"
 private const val DIALOG_MESSAGE = "“Tomato plan” will be moved to the trash. You can restore it from there."
 private const val DIALOG_OPEN = "Delete note…"
 private const val DIALOG_TITLE = "Delete this note?"
+private const val DOCUMENT_CLOSE = "Close tab"
+private const val GRID_CARD_WIDTH_DP = 168
+private val SAMPLE_DOCUMENTS = listOf("Pricing ideas", "2026-10-23", "Tomato plan")
 private const val SPLIT_END = "Editor"
 private const val SPLIT_HEIGHT_DP = 120
 private const val SPLIT_MAX_DP = 320
@@ -470,6 +476,24 @@ private fun TabsSection() {
         onSelect = { selectedCompactTab = it },
         shortcutHint = TABS_SHORTCUT
     )
+    var documents by remember { mutableStateOf(value = SAMPLE_DOCUMENTS) }
+    var selectedDocument by remember { mutableIntStateOf(value = 0) }
+    NotekeaTabStrip(
+        tabs = documents.map { NotekeaTabStripItem(key = it, label = it, icon = NotekeaIcons.Note) },
+        selectedIndex = selectedDocument.coerceAtMost(maximumValue = documents.lastIndex),
+        isActive = true,
+        closeLabel = DOCUMENT_CLOSE,
+        onSelect = { selectedDocument = it },
+        onClose = { closed -> documents = documents.filterIndexed { index, _ -> index != closed } },
+        onDrop = { _, _ -> }
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)) {
+        SAMPLE_DOCUMENTS.take(n = 2).forEach { name ->
+            Box(modifier = Modifier.width(width = GRID_CARD_WIDTH_DP.dp)) {
+                NotekeaGridCard(label = name, icon = NotekeaIcons.Note, onClick = {})
+            }
+        }
+    }
 }
 
 /** The palette inside a card instead of over the window; arrows move the selection, Enter and Esc do nothing here. */

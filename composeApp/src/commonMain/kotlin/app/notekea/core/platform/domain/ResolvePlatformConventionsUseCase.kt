@@ -19,9 +19,7 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
     operator fun invoke(): PlatformConventions {
         val operatingSystem = detectOperatingSystem(name = systemEnvironment.operatingSystemName)
         val primaryModifier = primaryModifierFor(operatingSystem = operatingSystem)
-        val primary = { key: ShortcutKey, extra: ShortcutModifier? ->
-            Shortcut(key = key, modifiers = setOfNotNull(primaryModifier, extra))
-        }
+        val primary = { key: ShortcutKey, extra: ShortcutModifier? -> shortcut(key, primaryModifier, extra) }
         return PlatformConventions(
             operatingSystem = operatingSystem,
             primaryModifier = primaryModifier,
@@ -47,11 +45,24 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             todayShortcut = primary(ShortcutKey.D, null),
             previousDayShortcut = primary(ShortcutKey.LEFT, ShortcutModifier.ALT),
             nextDayShortcut = primary(ShortcutKey.RIGHT, ShortcutModifier.ALT),
+            closeTabShortcut = primary(ShortcutKey.W, null),
+            // Ctrl+Tab on every system, macOS included, as browsers and editors do.
+            nextTabShortcut = shortcut(ShortcutKey.TAB, ShortcutModifier.CONTROL, null),
+            previousTabShortcut = shortcut(ShortcutKey.TAB, ShortcutModifier.CONTROL, ShortcutModifier.SHIFT),
+            splitRightShortcut = primary(ShortcutKey.D, ShortcutModifier.SHIFT),
+            goToTabShortcuts = DIGITS.map { primary(it, null) },
             dialogButtonOrder = dialogButtonOrderFor(operatingSystem = operatingSystem),
             appDataDirectory = appDataDirectoryFor(operatingSystem = operatingSystem),
             homeDirectory = systemEnvironment.userHome
         )
     }
+
+    /** [key] with [modifier], and [extra] when there is one. */
+    private fun shortcut(
+        key: ShortcutKey,
+        modifier: ShortcutModifier,
+        extra: ShortcutModifier?
+    ): Shortcut = Shortcut(key = key, modifiers = setOfNotNull(modifier, extra))
 
     private fun appDataDirectoryFor(
         operatingSystem: OperatingSystem
@@ -150,6 +161,8 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
     }
 
     companion object {
+        private val DIGITS = ShortcutKey.entries.filter { it.name.startsWith(prefix = DIGIT_PREFIX) }
+        private const val DIGIT_PREFIX = "DIGIT_"
         private const val APP_DATA_FOLDER = "Notekea"
         private const val LINUX_APP_DATA_FOLDER = "notekea"
         private const val LINUX_DEFAULT_DATA_HOME = ".local/share"

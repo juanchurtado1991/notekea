@@ -55,6 +55,19 @@ object PreviewPlatformConventions {
             key = ShortcutKey.RIGHT,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.ALT)
         ),
+        closeTabShortcut = Shortcut(key = ShortcutKey.W, modifiers = setOf(ShortcutModifier.CONTROL)),
+        nextTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = setOf(ShortcutModifier.CONTROL)),
+        previousTabShortcut = Shortcut(
+            key = ShortcutKey.TAB,
+            modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
+        ),
+        splitRightShortcut = Shortcut(
+            key = ShortcutKey.D,
+            modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
+        ),
+        goToTabShortcuts = ShortcutKey.entries.filter { it.name.startsWith(prefix = "DIGIT_") }.map {
+            Shortcut(key = it, modifiers = setOf(ShortcutModifier.CONTROL))
+        },
         dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
         appDataDirectory = APP_DATA,
         homeDirectory = HOME

@@ -105,6 +105,7 @@ object NotekeaIcons {
     val More: ImageVector get() = Lucide.Ellipsis
     val NewFolder: ImageVector get() = Lucide.FolderPlus
     val NewNote: ImageVector get() = Lucide.FilePlus
+    val NewTab: ImageVector get() = Lucide.Plus
     val NewTag: ImageVector get() = Lucide.Plus
     val NextDay: ImageVector get() = Lucide.ChevronRight
     val Note: ImageVector get() = Lucide.FileText

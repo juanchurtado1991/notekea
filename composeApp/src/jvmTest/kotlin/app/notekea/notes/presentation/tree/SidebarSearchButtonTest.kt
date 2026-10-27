@@ -26,9 +26,8 @@ class SidebarSearchButtonTest {
                         vaultName = TreePreviewData.VAULT_NAME,
                         onIntent = {},
                         onSwitchVault = {},
-                        onSearch = { searches++ },
-                        noteContent = { PreviewNoteContent(note = it) }
-                    )
+                        onSearch = { searches++ }
+                    ) { PreviewNoteContent(path = TreePreviewData.state().selectedPath) }
                 }
             }.use { scene ->
                 scene.render(nanoTime = 0L)

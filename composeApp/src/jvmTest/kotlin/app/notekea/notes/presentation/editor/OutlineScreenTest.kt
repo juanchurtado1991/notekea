@@ -17,6 +17,7 @@ import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.notes.domain.OutlineFinder
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.SidePanelPreferences
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -31,7 +32,7 @@ class OutlineScreenTest {
     @Test
     fun `clicking a heading in the outline asks the editor to go to it`() {
         val intents = mutableListOf<EditorIntent>()
-        scene(intents = intents) { scene, _ ->
+        scene(intents = intents) { scene, _, _ ->
             scene.sendPointerEvent(eventType = PointerEventType.Press, position = STEPS_ROW)
             scene.sendPointerEvent(eventType = PointerEventType.Release, position = STEPS_ROW)
             settle(scene = scene)
@@ -47,8 +48,8 @@ class OutlineScreenTest {
     fun `a heading asked for is scrolled to the top of the view, in edit and read mode, and becomes the current one`() {
         val currents = listOf(false, true).map { isReading ->
             var current = 0
-            scene(isReading = isReading) { scene, host ->
-                host.tracker.reveal(heading = outline[3])
+            scene(isReading = isReading) { scene, _, tools ->
+                tools.tracker.reveal(heading = outline[3])
                 settle(scene = scene)
                 // A little further down: still in Steps only if Steps was brought to the top.
                 scene.sendPointerEvent(
@@ -57,7 +58,7 @@ class OutlineScreenTest {
                     scrollDelta = Offset(x = 0f, y = 1f)
                 )
                 settle(scene = scene)
-                current = host.tracker.current
+                current = tools.tracker.current
             }
             current
         }
@@ -71,7 +72,7 @@ class OutlineScreenTest {
     @Test
     fun `the outline is moved with the keyboard from the current heading, Enter goes and Esc leaves`() {
         val intents = mutableListOf<EditorIntent>()
-        scene(intents = intents) { scene, host ->
+        scene(intents = intents) { scene, host, _ ->
             host.outlineFocus.requestFocus()
             settle(scene = scene)
             listOf(Key.DirectionDown, Key.DirectionDown, Key.Enter, Key.Escape).forEach { key ->
@@ -90,7 +91,7 @@ class OutlineScreenTest {
     fun `the panel sits beside the editor while both fit, and floats over it, closed, when its narrowest does not`() {
         val layouts = listOf(WIDE, NARROW).map { width ->
             var layout = false to false
-            scene(width = width) { _, host -> layout = host.isOverlay to host.isOverlayOpen }
+            scene(width = width) { _, host, _ -> layout = host.isOverlay to host.isOverlayOpen }
             layout
         }
 
@@ -104,28 +105,37 @@ class OutlineScreenTest {
         isReading: Boolean = false,
         width: Int = WIDE,
         intents: MutableList<EditorIntent> = mutableListOf(),
-        actions: (ImageComposeScene, SidePanelHost) -> Unit
+        actions: (ImageComposeScene, SidePanelHost, EditorPaneTools) -> Unit
     ) {
         val host = SidePanelHost(send = { intents += it })
+        val tools = EditorPaneTools()
         val state = EditorState(notePath = RelativePath(value = NOTE), isReading = isReading, outline = outline)
         val buffer = TextFieldState(initialText = BODY)
         UiThread.run {
             ImageComposeScene(width = width, height = HEIGHT, density = Density(density = 1f)) {
                 NotekeaTheme(darkTheme = false) {
-                    EditorWithSidePanel(
-                        state = state,
-                        buffer = buffer,
-                        platformConventions = PreviewPlatformConventions.linux,
-                        onIntent = { intents += it },
+                    WithSidePanel(
+                        preferences = SidePanelPreferences.DEFAULT,
                         sidePanel = host,
-                        modifier = Modifier,
-                        textFocusRequester = FocusRequester(),
-                        properties = null
-                    )
+                        outline = state.outline,
+                        current = tools.tracker.current,
+                        platformConventions = PreviewPlatformConventions.linux,
+                        onHeadingClick = { intents += EditorIntent.OnHeadingClick(index = it) },
+                        onLeave = { intents += EditorIntent.OnFocusRequest() }
+                    ) {
+                        EditorContent(
+                            state = state,
+                            buffer = buffer,
+                            platformConventions = PreviewPlatformConventions.linux,
+                            onIntent = { intents += it },
+                            textFocusRequester = FocusRequester(),
+                            outlineTracker = tools.tracker
+                        )
+                    }
                 }
             }.use { scene ->
                 settle(scene = scene)
-                actions(scene, host)
+                actions(scene, host, tools)
             }
         }
     }

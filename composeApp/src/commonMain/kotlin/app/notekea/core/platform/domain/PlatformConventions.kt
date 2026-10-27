@@ -29,6 +29,13 @@ data class PlatformConventions(
     val todayShortcut: Shortcut,
     val previousDayShortcut: Shortcut,
     val nextDayShortcut: Shortcut,
+    val closeTabShortcut: Shortcut,
+    val nextTabShortcut: Shortcut,
+    val previousTabShortcut: Shortcut,
+    val splitRightShortcut: Shortcut,
+
+    /** `Mod+1` to `Mod+9`, in order: the first tabs, the last one for 9. */
+    val goToTabShortcuts: List<Shortcut>,
     val dialogButtonOrder: DialogButtonOrder,
     val appDataDirectory: String,
     val homeDirectory: String

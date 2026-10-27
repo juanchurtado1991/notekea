@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.tree
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
@@ -38,9 +39,8 @@ class TreeFilesScreenTest {
                         vaultName = VAULT_NAME,
                         onIntent = { intents += it },
                         onSwitchVault = {},
-                        onSearch = {},
-                        noteContent = {}
-                    )
+                        onSearch = {}
+                    ) { PlatePreview(onIntent = { intents += it }) }
                 }
             }.use { scene ->
                 scene.render(nanoTime = 0L)
@@ -65,6 +65,22 @@ class TreeFilesScreenTest {
         )
     }
 
+    /** The picture's tab beside the tree, as the tabs show a file (`ROADMAP.md` 1.11). */
+    @Composable
+    private fun PlatePreview(
+        onIntent: (VaultTreeIntent) -> Unit
+    ) {
+        FileDetails(
+            preview = FilePreview(
+                file = file(path = PLATE),
+                kind = AttachmentKind.IMAGE,
+                image = ImageBitmap(width = IMAGE_WIDTH, height = IMAGE_HEIGHT, config = ImageBitmapConfig.Argb8888)
+            ),
+            platformConventions = PreviewPlatformConventions.linux,
+            onIntent = onIntent
+        )
+    }
+
     private fun state(): VaultTreeState {
         val tree = VaultTree.EMPTY
             .withNote(note = NoteEntry(file = file(path = WELCOME), metadata = NoteMetadata.NONE))
@@ -82,12 +98,7 @@ class TreeFilesScreenTest {
                 sort = TreeSort.NAME
             ),
             expandedFolders = expanded,
-            selectedPath = PLATE,
-            filePreview = FilePreview(
-                file = file(path = PLATE),
-                kind = AttachmentKind.IMAGE,
-                image = ImageBitmap(width = IMAGE_WIDTH, height = IMAGE_HEIGHT, config = ImageBitmapConfig.Argb8888)
-            )
+            selectedPath = PLATE
         )
     }
 
