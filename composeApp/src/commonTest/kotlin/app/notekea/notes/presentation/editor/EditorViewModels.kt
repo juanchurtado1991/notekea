@@ -1,5 +1,7 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.SavePropertiesFoldUseCase
+import app.notekea.notes.domain.GetPropertiesFoldUseCase
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.FakeLocalTimeFormatter
@@ -83,7 +85,15 @@ class EditorViewModels(dispatcher: CoroutineDispatcher) {
             clipboardReader = clipboard,
             dispatchers = dispatchers
         ),
-        fillTemplate = fillTemplate()
+        fillTemplate = fillTemplate(),
+        propertyTools = propertyTools()
+    )
+
+    private fun propertyTools(): PropertyTools = PropertyTools(
+        getPropertiesFold = GetPropertiesFoldUseCase(editorPreferencesStore = preferences),
+        savePropertiesFold = SavePropertiesFoldUseCase(editorPreferencesStore = preferences),
+        localCalendar = FakeLocalCalendar(),
+        clock = FakeClock(currentTime = Instant.parse(input = NOW))
     )
 
     private fun fillTemplate(): FillTemplateUseCase = FillTemplateUseCase(

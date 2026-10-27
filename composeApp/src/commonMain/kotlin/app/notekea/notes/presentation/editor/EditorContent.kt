@@ -4,7 +4,6 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.runtime.mutableStateMapOf
 import app.notekea.core.presentation.platform.LocalFileDrop
-import app.notekea.core.domain.StringPatterns.SPACE
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -135,9 +134,7 @@ internal const val NO_LIGATURES = "liga 0, calt 0"
 private const val PATH_SEPARATOR = " / "
 private const val PREVIEW_HEIGHT_DP = 520
 private const val PREVIEW_WIDTH_DP = 760
-private const val PROPERTY_SEPARATOR = " · "
 private const val SAVED_VISIBLE_MILLIS = 1_000L
-private const val TAG_PREFIX = "#"
 private val SKELETON_WIDTHS = listOf(0.9f, 0.75f, 0.85f, 0.6f, 0.8f, 0.4f)
 
 /**
@@ -397,9 +394,7 @@ private fun EditorHeader(
             color = MaterialTheme.colorScheme.error
         )
     }
-    propertiesLine(properties = header.properties)?.let { line ->
-        Text(text = line, style = MaterialTheme.typography.bodySmall, color = muted)
-    }
+    PropertiesView(state = state, onIntent = onIntent, modifier = Modifier.padding(top = NotekeaDimensions.SpacingXs))
 }
 
 /** The star beside the title: filled in yellow while the note is bookmarked (`ROADMAP.md` 1.13). */
@@ -447,17 +442,6 @@ private fun DayArrows(
         shortcutHint = platformConventions.nextDayShortcut.label(operatingSystem = operatingSystem),
         takesFocus = false
     )
-}
-
-/** Tags and aliases on one line (`#recipe #venezuelan · Arepa`), or null when the note has neither. */
-private fun propertiesLine(
-    properties: NoteMetadata?
-): String? {
-    val tags = properties?.tags.orEmpty().joinToString(separator = SPACE) { TAG_PREFIX + it }
-    val aliases = properties?.aliases.orEmpty().joinToString(separator = PROPERTY_SEPARATOR)
-    return listOf(tags, aliases).filter { it.isNotEmpty() }.joinToString(separator = PROPERTY_SEPARATOR).ifEmpty {
-        null
-    }
 }
 
 /** "Unsaved" while edits wait for the autosave; "Saved" for a second after a save, then nothing. */

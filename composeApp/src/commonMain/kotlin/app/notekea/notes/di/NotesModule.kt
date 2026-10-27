@@ -1,5 +1,8 @@
 package app.notekea.notes.di
 
+import app.notekea.notes.domain.SavePropertiesFoldUseCase
+import app.notekea.notes.domain.GetPropertiesFoldUseCase
+import app.notekea.notes.presentation.editor.PropertyTools
 import app.notekea.notes.presentation.tree.BookmarkTools
 import app.notekea.notes.domain.SaveBookmarksUseCase
 import app.notekea.notes.domain.GetBookmarksUseCase
@@ -96,6 +99,9 @@ val notesModule = module {
     factoryOf(::DailyNoteTools)
     factoryOf(::NewNoteTools)
     factoryOf(::BookmarkTools)
+    factoryOf(::PropertyTools)
+    factoryOf(::GetPropertiesFoldUseCase)
+    factoryOf(::SavePropertiesFoldUseCase)
     factoryOf(::GetBookmarksUseCase)
     factoryOf(::SaveBookmarksUseCase)
     factoryOf(::SaveSidePanelUseCase)
@@ -156,7 +162,8 @@ val notesModule = module {
             getEditorMode = get(),
             saveEditorMode = get(),
             attachmentTools = get(),
-            fillTemplate = get()
+            fillTemplate = get(),
+            propertyTools = get()
         )
     }
     viewModel { TagPickerViewModel() }

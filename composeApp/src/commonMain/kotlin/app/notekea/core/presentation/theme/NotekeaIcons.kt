@@ -7,11 +7,18 @@ import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
+import com.composables.icons.lucide.Type
+import com.composables.icons.lucide.Code
+import com.composables.icons.lucide.Braces
+import com.composables.icons.lucide.Binary
+import com.composables.icons.lucide.SquareCheck
+import com.composables.icons.lucide.SlidersHorizontal
 import com.composables.icons.lucide.ArrowDown
 import com.composables.icons.lucide.ChevronsDownUp
 import com.composables.icons.lucide.ChevronsUpDown
 import com.composables.icons.lucide.FolderTree
 import com.composables.icons.lucide.Minus
+import com.composables.icons.lucide.Calendar
 import com.composables.icons.lucide.CalendarDays
 import com.composables.icons.lucide.ChevronLeft
 import com.composables.icons.lucide.ListTree
@@ -86,6 +93,7 @@ object NotekeaIcons {
         "l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
     ).joinToString(separator = StringPatterns.EMPTY)
 
+    val AddProperty: ImageVector get() = Lucide.Plus
     val AttachFile: ImageVector get() = Lucide.ImagePlus
     val Attachment: ImageVector get() = Lucide.Paperclip
     val Bookmark: ImageVector get() = Lucide.Star
@@ -108,6 +116,7 @@ object NotekeaIcons {
     }
     val Bold: ImageVector get() = Lucide.Bold
     val BulletList: ImageVector get() = Lucide.List
+    val Calendar: ImageVector get() = Lucide.Calendar
     val Callout: ImageVector get() = Lucide.MessageSquareQuote
     val CalloutAbstract: ImageVector get() = Lucide.ClipboardList
     val CalloutBug: ImageVector get() = Lucide.Bug
@@ -159,6 +168,14 @@ object NotekeaIcons {
     val NumberedList: ImageVector get() = Lucide.ListOrdered
     val Outline: ImageVector get() = Lucide.ListTree
     val PreviousDay: ImageVector get() = Lucide.ChevronLeft
+    val Properties: ImageVector get() = Lucide.SlidersHorizontal
+    val PropertyCheckbox: ImageVector get() = Lucide.SquareCheck
+    val PropertyDate: ImageVector get() = Lucide.Calendar
+    val PropertyList: ImageVector get() = Lucide.List
+    val PropertyNumber: ImageVector get() = Lucide.Binary
+    val PropertyOther: ImageVector get() = Lucide.Braces
+    val PropertySource: ImageVector get() = Lucide.Code
+    val PropertyText: ImageVector get() = Lucide.Type
     val Quote: ImageVector get() = Lucide.TextQuote
     val Rename: ImageVector get() = Lucide.Pencil
     val Reveal: ImageVector get() = Lucide.SquareArrowOutUpRight

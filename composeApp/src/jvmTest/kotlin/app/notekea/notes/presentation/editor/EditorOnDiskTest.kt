@@ -1,5 +1,7 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.SavePropertiesFoldUseCase
+import app.notekea.notes.domain.GetPropertiesFoldUseCase
 import app.notekea.notes.domain.FillTemplateUseCase
 import app.notekea.core.domain.time.FakeLocalCalendar
 import androidx.compose.ui.text.TextRange
@@ -188,9 +190,19 @@ class EditorOnDiskTest {
                 noteContentStore = store,
                 localCalendar = FakeLocalCalendar(),
                 clock = Clock.System
-            )
+            ),
+            propertyTools = propertyTools(preferences = preferences)
         )
     }
+
+    private fun propertyTools(
+        preferences: SettingsEditorPreferencesStore
+    ): PropertyTools = PropertyTools(
+        getPropertiesFold = GetPropertiesFoldUseCase(editorPreferencesStore = preferences),
+        savePropertiesFold = SavePropertiesFoldUseCase(editorPreferencesStore = preferences),
+        localCalendar = FakeLocalCalendar(),
+        clock = Clock.System
+    )
 
     private fun renameAndUpdateLinks(
         store: OkioNoteContentStore,
