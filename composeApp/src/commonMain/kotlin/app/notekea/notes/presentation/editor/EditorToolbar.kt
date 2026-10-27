@@ -1,11 +1,11 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -74,7 +74,6 @@ import app.notekea.resources.format_web_link
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-private const val ONE_LINE_MIN_WIDTH_DP = 560
 private const val PREVIEW_WIDTH_DP = 760
 
 /** The languages of the Code block menu, by name and as written after the fence (the names Preview colors). */
@@ -92,11 +91,11 @@ private val CODE_LANGUAGES = listOf(
 )
 
 /**
- * The editor toolbar (`ROADMAP.md` 1.17), under the title: Edit | Preview tabs (switched with their shortcut too), the
- * formatting buttons in groups (text, links and tags, lists, blocks), each with a plain-language tooltip and its
- * shortcut, and at the end Find in note and Outline, which shows or hides the side panel (`ROADMAP.md` 1.9). Preview
- * shows the note as it reads, so it keeps only the tabs, Find and Outline. The buttons move to a line of their own
- * above the tabs when the editor is too narrow for one line. The Tag button opens the tag picker.
+ * The editor toolbar (`ROADMAP.md` 1.17), under the title, always one line: Edit | Preview tabs (switched with their
+ * shortcut too), the formatting buttons in groups (text, links and tags, lists, blocks), each with a plain-language
+ * tooltip and its shortcut, and at the end Find in note. Preview shows the note as it reads, so it keeps only the tabs
+ * and Find. When the editor is too narrow for every group, the groups that do not fit move into More (⋯), the lists
+ * and the template first, then the links ([ToolbarFit]). The Tag button opens the tag picker.
  */
 @Composable
 fun EditorToolbar(
@@ -105,29 +104,22 @@ fun EditorToolbar(
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val groups = @Composable {
-        FormattingGroups(platformConventions = platformConventions, onIntent = onIntent)
-    }
     Column(modifier = modifier.background(color = MaterialTheme.colorScheme.surface)) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(top = NotekeaDimensions.SpacingS)) {
-            // The groups sit beside the tabs when they fit, else on a line of their own above them.
-            val isOneLine = isReading || maxWidth >= ONE_LINE_MIN_WIDTH_DP.dp
-            Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)) {
-                if (!isOneLine) groups()
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-                    ModeTabs(isReading = isReading, platformConventions = platformConventions, onIntent = onIntent)
-                    Spacer(modifier = Modifier.weight(weight = 1f))
-                    // The capsule and the end buttons float a little above the line under the bar.
-                    Row(
-                        modifier = Modifier.padding(bottom = NotekeaDimensions.SpacingXs),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (isOneLine && !isReading) {
-                            groups()
-                            Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingM))
-                        }
-                        EndButtons(platformConventions = platformConventions, onIntent = onIntent)
+            val fit = ToolbarFit.of(width = maxWidth)
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+                ModeTabs(isReading = isReading, platformConventions = platformConventions, onIntent = onIntent)
+                Spacer(modifier = Modifier.weight(weight = 1f))
+                // The capsule and the end buttons float a little above the line under the bar.
+                Row(
+                    modifier = Modifier.padding(bottom = NotekeaDimensions.SpacingXs),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (!isReading) {
+                        FormattingGroups(fit = fit, platformConventions = platformConventions, onIntent = onIntent)
+                        Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingM))
                     }
+                    EndButtons(platformConventions = platformConventions, onIntent = onIntent)
                 }
             }
         }
@@ -179,26 +171,68 @@ private fun ModeTabs(
 /**
  * The formatting buttons in one capsule, in groups: Heading, Bold, Italic · Link to a note, Tag · Checklist, Bulleted
  * list · Insert template · More, which holds the rest (Web link, Numbered list, Callout, Code block, Image or file,
- * Quote, Divider, Table), so the bar stays short and calm.
+ * Quote, Divider, Table), so the bar stays short and calm. The groups [fit] leaves out open from the top of More.
  */
 @Composable
 private fun FormattingGroups(
+    fit: ToolbarFit,
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit
 ) {
     val format = { action: FormatAction -> onIntent(EditorIntent.OnFormat(action = action)) }
     val actions = formatActions()
     val label = stringResource(resource = Res.string.editor_toolbar_label)
+    val overflow =
+        overflowItems(fit = fit, actions = actions, platformConventions = platformConventions, onIntent = onIntent)
+    val text: @Composable RowScope.() -> Unit =
+        { TextGroup(actions = actions, platformConventions = platformConventions, format = format) }
+    val links: @Composable RowScope.() -> Unit =
+        { LinkGroup(platformConventions = platformConventions, onIntent = onIntent) }
+    val lists: @Composable RowScope.() -> Unit = { ListGroup(actions = actions, format = format) }
+    val template: @Composable RowScope.() -> Unit =
+        { TemplateButton(platformConventions = platformConventions, onIntent = onIntent) }
+    val more: @Composable RowScope.() -> Unit = {
+        MoreMenu(actions = actions, platformConventions = platformConventions, onIntent = onIntent, overflow = overflow)
+    }
     NotekeaToolbarPill(
         modifier = Modifier.semantics { contentDescription = label },
-        groups = listOf(
-            { TextGroup(actions = actions, platformConventions = platformConventions, format = format) },
-            { LinkGroup(platformConventions = platformConventions, onIntent = onIntent) },
-            { ListGroup(actions = actions, format = format) },
-            { TemplateButton(platformConventions = platformConventions, onIntent = onIntent) },
-            { MoreMenu(actions = actions, platformConventions = platformConventions, onIntent = onIntent) }
+        groups = listOfNotNull(
+            text,
+            links.takeIf { fit.showsLinks },
+            lists.takeIf { fit.showsLists },
+            template.takeIf { fit.showsLists },
+            more
         )
     )
+}
+
+/** The buttons [fit] leaves out of the capsule, as items for the top of More: the links, the lists and the template. */
+@Composable
+private fun overflowItems(
+    fit: ToolbarFit,
+    actions: FormatActions,
+    platformConventions: PlatformConventions,
+    onIntent: (EditorIntent) -> Unit
+): List<List<NotekeaMenuItem>> {
+    val format = { action: FormatAction -> onIntent(EditorIntent.OnFormat(action = action)) }
+    val links = listOf(
+        moreItem(
+            icon = NotekeaIcons.NoteLink,
+            label = Res.string.format_note_link,
+            shortcutHint = platformConventions.shortcutLabel(shortcut = platformConventions.noteLinkShortcut)
+        ) { onIntent(EditorIntent.OnNoteLinkRequest) },
+        moreItem(icon = NotekeaIcons.Tag, label = Res.string.format_tag) { onIntent(EditorIntent.OnTagRequest) }
+    )
+    val lists = listOf(
+        moreItem(icon = NotekeaIcons.Checklist, label = Res.string.format_checklist) { format(actions.checklist) },
+        moreItem(icon = NotekeaIcons.BulletList, label = Res.string.format_bullet_list) { format(actions.bulletList) },
+        moreItem(
+            icon = NotekeaIcons.Template,
+            label = Res.string.format_template,
+            shortcutHint = platformConventions.shortcutLabel(shortcut = platformConventions.templateShortcut)
+        ) { onIntent(EditorIntent.OnTemplateRequest) }
+    )
+    return listOfNotNull(links.takeUnless { fit.showsLinks }, lists.takeUnless { fit.showsLists })
 }
 
 @Composable
@@ -301,21 +335,23 @@ private fun TextGroup(
 }
 
 /**
- * The buttons used less often: Web link (with its shortcut) and Numbered list; Callout and Code block, whose types
- * open beside the menu; Image or file; then Quote, Divider and Table (its size picked on a grid beside the menu).
+ * The buttons that do not fit ([overflow]) first, then the buttons used less often: Web link (with its shortcut) and
+ * Numbered list; Callout and Code block, whose types open beside the menu; Image or file; then Quote, Divider and
+ * Table (its size picked on a grid beside the menu).
  */
 @Composable
 private fun MoreMenu(
     actions: FormatActions,
     platformConventions: PlatformConventions,
-    onIntent: (EditorIntent) -> Unit
+    onIntent: (EditorIntent) -> Unit,
+    overflow: List<List<NotekeaMenuItem>>
 ) {
     val shortcut = platformConventions.shortcutLabel(shortcut = platformConventions.webLinkShortcut)
     val format = { action: FormatAction -> onIntent(EditorIntent.OnFormat(action = action)) }
     NotekeaMenuButton(
         icon = NotekeaIcons.More,
         label = stringResource(resource = Res.string.format_more),
-        sections = listOf(
+        sections = overflow + listOf(
             listOf(
                 moreItem(icon = NotekeaIcons.WebLink, label = Res.string.format_web_link, shortcutHint = shortcut) {
                     format(actions.webLink)

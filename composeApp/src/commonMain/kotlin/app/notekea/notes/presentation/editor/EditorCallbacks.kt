@@ -7,7 +7,8 @@ import app.notekea.notes.domain.RelativePath
  * What the editor of a pane asks of the panes around it: the title renamed the note ([onRenamed]), a deleted note was
  * closed ([onClosed]), a link was clicked ([onOpenLink]), a `#tag` is searched ([onSearchTag]), a note to link or a
  * tag is picked ([onRequestNoteLink], [onRequestTag]), a template is picked ([onRequestTemplate]), the note's star was
- * clicked ([onBookmarkToggle]), or a daily note's arrow went to another day ([onDayStep]).
+ * clicked ([onBookmarkToggle]), a daily note's arrow went to another day ([onDayStep]), or the note's folder was clicked
+ * ([onRevealFolder]).
  */
 @Immutable
 data class EditorCallbacks(
@@ -19,5 +20,6 @@ data class EditorCallbacks(
     val onRequestTag: (String) -> Unit,
     val onRequestTemplate: () -> Unit,
     val onBookmarkToggle: (RelativePath) -> Unit,
-    val onDayStep: (Int) -> Unit
+    val onDayStep: (Int) -> Unit,
+    val onRevealFolder: (RelativePath) -> Unit
 )

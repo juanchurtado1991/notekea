@@ -95,7 +95,8 @@ class TabsScreenTest {
                         state = WorkspaceState(workspace = workspace, tree = tree),
                         platformConventions = PreviewPlatformConventions.linux,
                         onIntent = { intents += it },
-                        onNewTab = {}
+                        startActions = WorkspaceStartActions(),
+                        unsavedPaths = emptySet()
                     ) { _, path, _ -> Text(text = path.value) }
                 }
             }.use { scene ->

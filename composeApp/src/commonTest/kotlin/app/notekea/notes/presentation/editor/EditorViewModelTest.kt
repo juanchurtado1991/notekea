@@ -240,6 +240,20 @@ class EditorViewModelTest {
     }
 
     @Test
+    fun `the folder above the title asks the window to show it in Files`() = runEditorTest {
+        val effects = collectEffects()
+        open(path = AREPAS)
+
+        viewModel.onIntent(intent = EditorIntent.OnFolderReveal)
+        runCurrent()
+
+        assertEquals(
+            expected = listOf<EditorEffect>(EditorEffect.RevealFolder(path = RelativePath(value = "Recipes"))),
+            actual = effects.filterIsInstance<EditorEffect.RevealFolder>()
+        )
+    }
+
+    @Test
     fun `closing a deleted note empties the editor and says so`() = runEditorTest {
         val effects = collectEffects()
         open(path = AREPAS)

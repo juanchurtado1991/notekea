@@ -410,7 +410,7 @@ Frontmatter shown as a compact form above the note content.
 - **Note info** (a section of the right panel, under Outline): the note's words, reading time, links, tags (from
   the text and the properties), tasks done of all, and when its file was created and last modified.
 - **Chat mode** (the right panel's Inspector | Chat control): until 3.3 builds it, Chat says what it will do, marked
-  "Coming soon", above its question field shown disabled; `Mod+Shift+O` always comes back to the inspector.
+  "Coming soon", above where its question field will be, drawn dashed and dimmed; `Mod+Shift+O` always comes back to the inspector.
 - **The workspace's frame** (decided with the developer while 1.14 was reviewed):
   - **Tabs:** as a browser's: the open tab rises with rounded top corners into the note's surface, its icon in the
     primary color; the others stay quiet, a faint fill under the pointer and a thin line between them, their close
@@ -441,7 +441,15 @@ Frontmatter shown as a compact form above the note content.
   - **Page width:** the note's page takes 70 % of the editor pane, never narrower than 760 dp nor wider than 1100 dp
     (nor wider than the pane), so a wide screen is used without lines too long to read.
   - **Zoom:** `Mod+=` / `Mod+-` scale the whole window by 10 % steps between 80 % and 160 %, `Mod+0` goes back to
-    100 %; the scale is remembered and listed in About's Workspace shortcuts.
+    100 %; the scale is remembered and listed in About's Workspace shortcuts. While it is not 100 %, the status bar
+    ends with it ("120 %"), and a click on it goes back to 100 %.
+  - **Second polish:** a section header has a tooltip only when it has a shortcut; the editor toolbar is always one
+    line, the groups that do not fit (lists and template, then links) moving to the top of More; a tab with unsaved
+    changes shows a dot in place of its ✕; a folder or file of the status bar's path, or the folder above a note's
+    title, shows it in Files (opening the sidebar); an editor without tabs offers Find a note, New note, Today's note
+    and Search in notes with their shortcuts as keycaps; folding sections slide open and shut, Inspector and Chat
+    fade into each other and a folder's rows fade in; pictures, PDFs and sounds or videos have their own icon colors
+    in the tree, the bookmarks and the tabs.
   - **Version:** people see `0.1.0-alpha` (About, crash reports) until the first public release; the installers keep
     a plain numeric version, which DMG and MSI require.
 - "Show source" toggles the raw YAML, editable and saved once typing pauses, like the text; YAML the form cannot read

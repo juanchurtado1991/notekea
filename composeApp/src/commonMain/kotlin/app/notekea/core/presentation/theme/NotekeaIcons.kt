@@ -8,6 +8,10 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
 import com.composables.icons.lucide.Type
+import com.composables.icons.lucide.FileImage
+import com.composables.icons.lucide.FilePlay
+import com.composables.icons.lucide.TextSearch
+import com.composables.icons.lucide.ZoomIn
 import com.composables.icons.lucide.ShieldCheck
 import com.composables.icons.lucide.BookOpen
 import com.composables.icons.lucide.MessagesSquare
@@ -158,7 +162,8 @@ object NotekeaIcons {
     val Find: ImageVector get() = Lucide.Search
     val FindNext: ImageVector get() = Lucide.ArrowDown
     val FindPrevious: ImageVector get() = Lucide.ArrowUp
-    val ImageFile: ImageVector get() = Lucide.Image
+    val ImageFile: ImageVector get() = Lucide.FileImage
+    val MediaFile: ImageVector get() = Lucide.FilePlay
     val Minimize: ImageVector get() = Lucide.Minus
     val Folder: ImageVector get() = Lucide.Folder
     val FolderOpen: ImageVector get() = Lucide.FolderOpen
@@ -202,6 +207,7 @@ object NotekeaIcons {
     val Quote: ImageVector get() = Lucide.TextQuote
     val Rename: ImageVector get() = Lucide.Pencil
     val Reveal: ImageVector get() = Lucide.SquareArrowOutUpRight
+    val SearchNotes: ImageVector get() = Lucide.TextSearch
     val SidePanel: ImageVector get() = Lucide.PanelRight
     val Settings: ImageVector get() = Lucide.Settings
     val SwitchVault: ImageVector get() = Lucide.Library
@@ -213,4 +219,5 @@ object NotekeaIcons {
     val Tag: ImageVector get() = Lucide.Hash
     val Template: ImageVector get() = Lucide.LayoutTemplate
     val WebLink: ImageVector get() = Lucide.Globe
+    val Zoom: ImageVector get() = Lucide.ZoomIn
 }

@@ -42,6 +42,9 @@ sealed interface EditorEffect {
     /** The star beside the title was clicked: the window bookmarks the note at [path], or removes its bookmark. */
     data class ToggleBookmark(val path: RelativePath) : EditorEffect
 
+    /** The note's folder was clicked: the window shows the folder at [path] in the tree, selected. */
+    data class RevealFolder(val path: RelativePath) : EditorEffect
+
     /** Insert template was asked for: the window opens the template picker, then sends the template to insert. */
     data object RequestTemplate : EditorEffect
 

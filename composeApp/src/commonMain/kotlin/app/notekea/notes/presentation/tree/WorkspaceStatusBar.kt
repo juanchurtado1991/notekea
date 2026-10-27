@@ -33,7 +33,13 @@ import app.notekea.resources.status_loading
 import app.notekea.resources.status_words
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
+import app.notekea.resources.status_zoom_tooltip
+import app.notekea.resources.status_zoom
+import app.notekea.resources.status_reveal
+import app.notekea.core.presentation.platform.LocalUiZoom
 
+private const val PERCENT = 100
 private const val PREVIEW_PATH = "Editor/Tasks and callouts.md"
 private const val PREVIEW_VAULT = "Playground Vault"
 
@@ -41,12 +47,14 @@ private const val PREVIEW_VAULT = "Playground Vault"
  * The workspace's status bar (`ROADMAP.md` 1.14), as Android Studio's: where the user is (the vault, the folders and
  * the open tab's file, [path] of [kind]) on the left; on the right the vault's first scan while it runs ([isLoading]),
  * then, for a note in Edit mode ([editor] and its [buffer]), the cursor's line and column in the file, its line endings
- * and encoding, its words, and whether it is saved.
+ * and encoding, its words, and whether it is saved; last, the window's zoom while it is not 100 %, a click going back to
+ * 100 %. A click on a folder or the file of the path shows it in Files ([onReveal]).
  */
 @Composable
 internal fun WorkspaceStatusBar(
     vaultName: String,
     isLoading: Boolean,
+    onReveal: (RelativePath) -> Unit,
     modifier: Modifier = Modifier,
     path: RelativePath? = null,
     kind: TabKind? = null,
@@ -56,28 +64,33 @@ internal fun WorkspaceStatusBar(
     NotekeaStatusBar(
         start = {
             NotekeaStatusLabel(text = vaultName, icon = NotekeaIcons.SwitchVault)
-            path?.let { Breadcrumbs(path = it, kind = kind) }
+            path?.let { Breadcrumbs(path = it, kind = kind, onReveal = onReveal) }
         },
         end = {
             if (isLoading) NotekeaStatusProgress(label = stringResource(resource = Res.string.status_loading))
             editor?.let { NoteFacts(editor = it, buffer = buffer) }
+            ZoomFact()
         },
         modifier = modifier
     )
 }
 
-/** Each folder of [path], then its file, with the icon of its [kind]. */
+/** Each folder of [path], then its file, with the icon of its [kind]; a click on one shows it in Files. */
 @Composable
 private fun Breadcrumbs(
     path: RelativePath,
-    kind: TabKind?
+    kind: TabKind?,
+    onReveal: (RelativePath) -> Unit
 ) {
+    val reveal = stringResource(resource = Res.string.status_reveal)
     generateSequence(seed = path.parent) { it.parent }.filterNot { it.isRoot }.toList().asReversed().forEach {
         Chevron()
-        NotekeaStatusLabel(text = it.name)
+        NotekeaStatusLabel(text = it.name, tooltip = reveal, onClick = { onReveal(it) })
     }
     Chevron()
     NotekeaStatusLabel(
+        tooltip = reveal,
+        onClick = { onReveal(path) },
         text = if (kind == TabKind.NOTE) path.nameWithoutExtension else path.name,
         icon = when (kind) {
             TabKind.NOTE -> NotekeaIcons.Note
@@ -133,6 +146,20 @@ private fun NoteFacts(
     )
 }
 
+/** The window's zoom while it is not 100 %, as browsers show it; a click goes back to 100 %. */
+@Composable
+private fun ZoomFact() {
+    val zoom = LocalUiZoom.current
+    if (!zoom.isZoomed) return
+    NotekeaStatusSeparator()
+    NotekeaStatusLabel(
+        text = stringResource(Res.string.status_zoom, (zoom.scale * PERCENT).roundToInt()),
+        icon = NotekeaIcons.Zoom,
+        tooltip = stringResource(Res.string.status_zoom_tooltip, zoom.resetHint),
+        onClick = zoom.onReset
+    )
+}
+
 /** The 1-based line and column of [offset] in [text]. */
 internal fun cursorOf(
     text: CharSequence,
@@ -153,6 +180,7 @@ private fun WorkspaceStatusBarPreview() {
         WorkspaceStatusBar(
             vaultName = PREVIEW_VAULT,
             isLoading = true,
+            onReveal = {},
             path = RelativePath(value = PREVIEW_PATH),
             kind = TabKind.NOTE,
             editor = EditorState(),

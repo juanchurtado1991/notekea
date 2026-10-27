@@ -104,8 +104,8 @@ class VaultTreeViewModel(
             is VaultTreeIntent.OnRenameRequest -> startRename(path = intent.path)
             is VaultTreeIntent.OnRenameTextChange -> changeRenameText(text = intent.text)
             VaultTreeIntent.OnRetryClick -> retry()
-            is VaultTreeIntent.OnRevealNote -> reveal(path = intent.path)
             is VaultTreeIntent.OnRevealRequest -> reveal(path = intent.path)
+            is VaultTreeIntent.OnRevealNote, is VaultTreeIntent.OnRevealInTree -> revealFromOutside(intent = intent)
             is VaultTreeIntent.OnRowClick -> clickRow(path = intent.path, inBackground = intent.inBackground)
             VaultTreeIntent.OnOpenSelected -> openSelected()
             is VaultTreeIntent.OnRowSelect -> reduce { it.copy(selectedPath = intent.path) }
@@ -165,6 +165,23 @@ class VaultTreeViewModel(
         inBackground: Boolean = false
     ) {
         path?.let { emit(effect = VaultTreeEffect.OpenEntry(path = it, inBackground = inBackground)) }
+    }
+
+    /**
+     * An entry named outside the tree: a note chosen in the quick switcher is selected and opened; a folder or file of
+     * a path (the status bar, the folder above a title) is shown in Files, opening the sidebar if it was hidden.
+     */
+    private fun revealFromOutside(
+        intent: VaultTreeIntent
+    ) {
+        when (intent) {
+            is VaultTreeIntent.OnRevealNote -> reveal(path = intent.path)
+
+            is VaultTreeIntent.OnRevealInTree ->
+                updateTree { reduceReveal(state = it, path = intent.path).copy(isSidebarCollapsed = false) }
+
+            else -> Unit
+        }
     }
 
     private fun stepDay(

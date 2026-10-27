@@ -52,7 +52,7 @@ private const val PREVIEW_WIDTH_DP = 260
  * selection color while the tree has the keyboard ([focused]) and in a quiet grey otherwise; the keyboard's row, when it
  * is not the selected one (an outline's), draws the focus ring. Rows are
  * transparent, so they sit on the panel that holds the tree. [badge] marks the row after its label (a bookmark's
- * star). [labelContent] replaces the label, for renaming in place;
+ * star), and [iconTint] colors the icon (a file's kind). [labelContent] replaces the label, for renaming in place;
  * it must keep its keys (a field consumes Space), or a key leaving it would click the row. Screen readers get the
  * selection and expand / collapse actions.
  */
@@ -70,7 +70,8 @@ fun NotekeaTreeItem(
     trailingText: String? = null,
     onClickLabel: String? = null,
     labelContent: (@Composable () -> Unit)? = null,
-    badge: (@Composable () -> Unit)? = null
+    badge: (@Composable () -> Unit)? = null,
+    iconTint: Color? = null
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = MaterialTheme.shapes.small
@@ -94,7 +95,7 @@ fun NotekeaTreeItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Chevron(isExpanded = isExpanded, onToggleExpanded = onToggleExpanded)
-            icon?.let { RowIcon(icon = it, selected = selected) }
+            icon?.let { RowIcon(icon = it, selected = selected && focused, tint = iconTint) }
             Box(modifier = Modifier.weight(weight = 1f)) {
                 labelContent?.invoke() ?: TreeLabel(label = label)
             }
@@ -111,17 +112,24 @@ private fun Modifier.focusRing(
     shape: Shape
 ): Modifier = if (isShown) border(width = NotekeaDimensions.FocusRingWidth, color = color, shape = shape) else this
 
-/** The row's icon, in the row's own color while selected and muted otherwise, then a gap before the label. */
+/**
+ * The row's icon, in the row's own color while [selected] in the selection color, else in its [tint] (a file kind's
+ * color) or muted, then a gap before the label.
+ */
 @Composable
 private fun RowIcon(
     icon: ImageVector,
-    selected: Boolean
+    selected: Boolean,
+    tint: Color?
 ) {
     Icon(
         imageVector = icon,
         contentDescription = null,
         modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-        tint = if (selected) LocalContentColor.current else MaterialTheme.colorScheme.onSurfaceVariant
+        tint = when {
+            selected -> LocalContentColor.current
+            else -> tint ?: MaterialTheme.colorScheme.onSurfaceVariant
+        }
     )
     Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
 }

@@ -1,6 +1,12 @@
 package app.notekea.core.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -71,17 +77,29 @@ fun NotekeaStatusBar(
     }
 }
 
-/** A short fact of the status bar, in the muted color, with its [icon] if any and its [tooltip] on hover if any. */
+/**
+ * A short fact of the status bar, in the muted color, with its [icon] if any and its [tooltip] on hover if any. One
+ * that does something on a click ([onClick]: a folder of the path shown in Files, the zoom reset) shows a hand and a
+ * faint fill under the pointer.
+ */
 @Composable
 fun NotekeaStatusLabel(
     text: String,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    tooltip: String? = null
+    tooltip: String? = null,
+    onClick: (() -> Unit)? = null
 ) {
+    val click = onClick?.let {
+        Modifier
+            .clip(shape = MaterialTheme.shapes.small)
+            .pointerHoverIcon(icon = PointerIcon.Hand)
+            .focusProperties { canFocus = false }
+            .clickable(role = Role.Button, onClick = it)
+    } ?: Modifier
     val label = @Composable {
         Row(
-            modifier = modifier.padding(horizontal = NotekeaDimensions.SpacingS),
+            modifier = modifier.then(other = click).padding(horizontal = NotekeaDimensions.SpacingS),
             horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
             verticalAlignment = Alignment.CenterVertically
         ) {

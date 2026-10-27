@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import app.notekea.core.presentation.components.NotekeaFold
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +40,8 @@ import app.notekea.resources.tree_bookmark_missing_remove
 import app.notekea.resources.tree_bookmark_remove
 import app.notekea.resources.tree_bookmarks
 import org.jetbrains.compose.resources.stringResource
+import app.notekea.notes.presentation.files.fileIconOf
+import app.notekea.notes.presentation.files.fileTintOf
 import kotlin.math.roundToInt
 
 private const val PREVIEW_WIDTH_DP = 300
@@ -64,7 +67,7 @@ internal fun BookmarksSection(
             onToggle = { onIntent(BookmarkIntent.OnSectionToggle) },
             count = paths.size
         )
-        if (state.isBookmarksExpanded) {
+        NotekeaFold(isOpen = state.isBookmarksExpanded) {
             paths.forEachIndexed { index, path ->
                 BookmarkRow(path = path, index = index, count = paths.size, state = state, onIntent = onIntent)
             }
@@ -104,6 +107,7 @@ private fun BookmarkRow(
             depth = 1,
             onClick = { onIntent(BookmarkIntent.OnClick(path = path)) },
             icon = iconOf(path = path, state = state),
+            iconTint = fileTintOf(path = path).takeUnless { path in state.tree.folders },
             selected = path == state.selectedPath,
             labelContent = if (isMissing) {
                 { MissingLabel(path = path, onIntent = onIntent) }
@@ -175,15 +179,14 @@ private fun labelOf(
     path: RelativePath
 ): String = if (path.isMarkdown) path.nameWithoutExtension else path.name
 
-/** The icon of what the bookmark points to: a folder, a note, a picture or another file. */
+/** The icon of what the bookmark points to: a folder, a note, or another file by its kind. */
 private fun iconOf(
     path: RelativePath,
     state: VaultTreeState
 ): ImageVector = when {
     path in state.tree.folders -> NotekeaIcons.Folder
     path.isMarkdown -> NotekeaIcons.Note
-    AttachmentKind.of(name = path.name) == AttachmentKind.IMAGE -> NotekeaIcons.ImageFile
-    else -> NotekeaIcons.OtherFile
+    else -> fileIconOf(path = path)
 }
 
 private const val MISSING_ALPHA = 0.6f

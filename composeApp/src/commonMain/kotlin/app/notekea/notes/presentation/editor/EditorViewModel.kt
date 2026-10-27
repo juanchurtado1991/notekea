@@ -149,6 +149,7 @@ class EditorViewModel(
             EditorIntent.OnTagRequest -> requestPicker(effect = EditorEffect.RequestTag(query = selectedForTag()))
             EditorIntent.OnTemplateRequest -> requestTemplate()
             EditorIntent.OnBookmarkToggle -> toggleBookmark()
+            EditorIntent.OnFolderReveal -> revealFolder()
             is PropertyIntent -> onPropertyIntent(intent = intent)
             is EditorIntent.OnTemplateInsert -> runSave { insertTemplate(template = intent.template) }
             EditorIntent.OnFindClose -> closeFind()
@@ -430,6 +431,12 @@ class EditorViewModel(
     /** The star beside the title: the window bookmarks this note, or removes its bookmark. */
     private fun toggleBookmark() {
         state.value.notePath?.let { emit(effect = EditorEffect.ToggleBookmark(path = it)) }
+    }
+
+    /** The note's folder above the title: the window shows it in the tree. */
+    private fun revealFolder() {
+        val folder = state.value.notePath?.parent?.takeUnless { it.isRoot } ?: return
+        emit(effect = EditorEffect.RevealFolder(path = folder))
     }
 
     /** The template picker is opened for this note; Read mode turns to Edit first, so the template is seen going in. */

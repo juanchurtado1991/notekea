@@ -45,6 +45,8 @@ import app.notekea.resources.tree_select_note
 import app.notekea.resources.tree_bookmark_add
 import app.notekea.resources.tree_bookmark_remove
 import org.jetbrains.compose.resources.stringResource
+import app.notekea.notes.presentation.files.fileIconOf
+import app.notekea.notes.presentation.files.fileTintOf
 
 private const val PREVIEW_WIDTH_DP = 260
 
@@ -109,6 +111,7 @@ private fun EntryItem(
     NotekeaTreeItem(
         label = if (row is TreeRow.Note) row.path.nameWithoutExtension else row.path.name,
         icon = iconOf(row = row),
+        iconTint = if (row is TreeRow.File) fileTintOf(path = row.path) else null,
         depth = row.depth,
         onClick = {
             onIntent(VaultTreeIntent.OnRowClick(path = row.path, inBackground = pressed.isModPressed))
@@ -151,19 +154,13 @@ private fun BookmarkBadge() {
     )
 }
 
-/** A folder open or closed, a note, or another file by its kind: a picture or anything else. */
+/** A folder open or closed, a note, or another file by its kind. */
 private fun iconOf(
     row: TreeRow
 ): ImageVector = when (row) {
     is TreeRow.Folder -> if (row.isExpanded) NotekeaIcons.FolderOpen else NotekeaIcons.Folder
-
     is TreeRow.Note -> NotekeaIcons.Note
-
-    is TreeRow.File -> if (AttachmentKind.of(name = row.path.name) == AttachmentKind.IMAGE) {
-        NotekeaIcons.ImageFile
-    } else {
-        NotekeaIcons.OtherFile
-    }
+    is TreeRow.File -> fileIconOf(path = row.path)
 }
 
 @Composable

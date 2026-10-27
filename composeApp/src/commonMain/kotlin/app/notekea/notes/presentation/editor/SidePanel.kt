@@ -24,6 +24,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.Crossfade
+import app.notekea.core.presentation.components.NotekeaFold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -104,18 +107,24 @@ fun SidePanel(
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Column(modifier = Modifier.padding(vertical = NotekeaDimensions.SpacingXs)) {
             PanelHeader(mode = preferences.mode, platformConventions = platformConventions, actions = actions)
-            when (preferences.mode) {
-                SidePanelMode.INSPECTOR -> InspectorSections(
-                    outline = outline,
-                    current = current,
-                    foldedSections = preferences.foldedSections,
-                    platformConventions = platformConventions,
-                    actions = actions,
-                    outlineFocus = outlineFocus,
-                    info = info
-                )
+            // Inspector and Chat fade into each other, so the switch reads as one panel changing.
+            Crossfade(
+                targetState = preferences.mode,
+                animationSpec = tween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
+            ) { mode ->
+                when (mode) {
+                    SidePanelMode.INSPECTOR -> InspectorSections(
+                        outline = outline,
+                        current = current,
+                        foldedSections = preferences.foldedSections,
+                        platformConventions = platformConventions,
+                        actions = actions,
+                        outlineFocus = outlineFocus,
+                        info = info
+                    )
 
-                SidePanelMode.CHAT -> SidePanelChat()
+                    SidePanelMode.CHAT -> SidePanelChat()
+                }
             }
         }
     }
@@ -172,14 +181,8 @@ private fun InspectorSections(
                 operatingSystem = platformConventions.operatingSystem
             )
         )
-        if (isOutlineOpen) {
-            OutlineSection(
-                outline = outline,
-                current = current,
-                focusRequester = outlineFocus,
-                actions = actions,
-                modifier = Modifier.weight(weight = 1f, fill = false)
-            )
+        NotekeaFold(isOpen = isOutlineOpen, modifier = Modifier.weight(weight = 1f, fill = false)) {
+            OutlineSection(outline = outline, current = current, focusRequester = outlineFocus, actions = actions)
         }
         info?.let { NoteInfoSection(info = it, isOpen = SidePanelSection.NOTE_INFO !in foldedSections, actions) }
     }
@@ -192,7 +195,7 @@ private fun OutlineSection(
     current: Int,
     focusRequester: FocusRequester,
     actions: SidePanelActions,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     if (outline.isEmpty()) {
         Column(
@@ -260,7 +263,7 @@ private fun NoteInfoSection(
         isOpen = isOpen,
         onToggle = { actions.onSectionToggle(SidePanelSection.NOTE_INFO) }
     )
-    if (isOpen) NoteInfoRows(info = info)
+    NotekeaFold(isOpen = isOpen) { NoteInfoRows(info = info) }
 }
 
 /**

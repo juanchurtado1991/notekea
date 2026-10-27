@@ -84,6 +84,9 @@ sealed interface EditorIntent {
     /** The star beside the title: bookmarks the note, or removes its bookmark (`ROADMAP.md` 1.13). */
     data object OnBookmarkToggle : EditorIntent
 
+    /** The note's folder above its title was clicked: the window shows that folder in the tree. */
+    data object OnFolderReveal : EditorIntent
+
     /** The [template] chosen in the picker: filled in and inserted at the cursor, or as the whole of an empty note. */
     data class OnTemplateInsert(val template: RelativePath) : EditorIntent
 

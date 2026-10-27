@@ -33,6 +33,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -68,7 +70,9 @@ import kotlin.math.roundToInt
 private const val FADE_WIDTH_DP = 40
 private const val HOVER_ALPHA = 0.5f
 private const val LABEL_MAX_WIDTH_DP = 180
+private const val UNSAVED_DOT_DP = 8
 private const val PREVIEW_CLOSE = "Close tab"
+private const val PREVIEW_UNSAVED = "Unsaved changes"
 private const val SETTLE_MILLIS = 500L
 private const val SEPARATOR_HEIGHT_DP = 16
 private const val STRIP_HEIGHT_DP = 34
@@ -77,7 +81,7 @@ private const val TAB_MIN_WIDTH_DP = 96
 private const val TAB_RADIUS_DP = 8
 private val PREVIEW_TABS = listOf(
     NotekeaTabStripItem(key = "a", label = "Pricing ideas", icon = NotekeaIcons.Note),
-    NotekeaTabStripItem(key = "b", label = "2026-10-23", icon = NotekeaIcons.Note),
+    NotekeaTabStripItem(key = "b", label = "2026-10-23", icon = NotekeaIcons.Note, unsavedLabel = PREVIEW_UNSAVED),
     NotekeaTabStripItem(key = "c", label = "plate.png", icon = NotekeaIcons.ImageFile)
 )
 
@@ -434,7 +438,7 @@ private fun Separator(
 
 /**
  * The tab's icon (primary in the active pane's selected tab), its label cut with an ellipsis when long (semibold when
- * selected), and its close button, seen on the selected or hovered tab and kept in place otherwise.
+ * selected), and its close button or unsaved dot.
  */
 @Composable
 private fun TabLabel(
@@ -453,7 +457,7 @@ private fun TabLabel(
                 imageVector = it,
                 contentDescription = null,
                 modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-                tint = if (look.isSelected && look.isActive) colors.primary else colors.onSurfaceVariant
+                tint = if (look.isSelected && look.isActive) colors.primary else tab.iconTint ?: colors.onSurfaceVariant
             )
             Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingXs))
         }
@@ -467,13 +471,38 @@ private fun TabLabel(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+        CloseOrDot(unsavedLabel = tab.unsavedLabel, look = look, closeLabel = closeLabel, onClose = onClose)
+    }
+}
+
+/**
+ * The tab's close button, seen on the selected or hovered tab and kept in place otherwise; a tab with unsaved changes
+ * shows a dot there instead, as VS Code does, until the pointer is on it.
+ */
+@Composable
+private fun CloseOrDot(
+    look: TabLook,
+    closeLabel: String,
+    onClose: () -> Unit,
+    unsavedLabel: String?
+) {
+    Box(contentAlignment = Alignment.Center) {
+        val isDotShown = unsavedLabel != null && !look.isHovered
         NotekeaIconButton(
             icon = NotekeaIcons.Close,
             label = closeLabel,
             onClick = onClose,
-            modifier = Modifier.alpha(alpha = if (look.isSelected || look.isHovered) 1f else 0f),
+            modifier = Modifier.alpha(alpha = if (!isDotShown && (look.isSelected || look.isHovered)) 1f else 0f),
             takesFocus = false
         )
+        if (isDotShown) {
+            Box(
+                modifier = Modifier
+                    .size(size = UNSAVED_DOT_DP.dp)
+                    .background(color = MaterialTheme.colorScheme.onSurfaceVariant, shape = CircleShape)
+                    .semantics { contentDescription = unsavedLabel.orEmpty() }
+            )
+        }
     }
 }
 

@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Second polish (ROADMAP 1.14): the editor toolbar always fits on one line, what does not fit moving into More; unsaved
+  tabs show a dot; the status bar's path and the folder above a note's title show it in Files; the status bar shows
+  the zoom while it is not 100 % and resets it on a click; an editor without tabs offers four start actions with their
+  shortcuts; sections fold with an animation; file kinds have icon colors; a section header without a shortcut no
+  longer shows a tooltip over its first row; Chat's future question field is drawn dashed.
 - Wide screens (ROADMAP 1.14): the note's page takes 70 % of the editor pane, between 760 dp and 1100 dp, and
   `Mod+=` / `Mod+-` / `Mod+0` zoom the whole window from 80 % to 160 %, remembered.
 - Polish (ROADMAP 1.14): one surface for the panes with quiet dividers, BOOKMARKS and FILES section headers, a quiet

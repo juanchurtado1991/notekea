@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import app.notekea.core.presentation.components.NotekeaFold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -99,19 +100,20 @@ internal fun PropertiesView(
             .padding(all = NotekeaDimensions.SpacingXs)
     ) {
         PropertiesHeader(state = state, count = properties.size, isEditingSource = isEditingSource, onIntent = onIntent)
-        if (!state.isPropertiesExpanded) return@Column
-        val isInvalid = content is FrontmatterContent.Invalid
-        if (isInvalid || state.isSourceShown || isEditingSource) {
-            PropertiesSource(
-                state = state,
-                invalidLine = (content as? FrontmatterContent.Invalid)?.line,
-                onEditingChange = { isEditingSource = it },
-                onIntent = onIntent
-            )
-        } else {
-            val keys = properties.map(NoteProperty::key)
-            properties.forEach { PropertyRow(property = it, keys = keys, today = state.today, onIntent = onIntent) }
-            AddPropertyRow(onIntent = onIntent)
+        NotekeaFold(isOpen = state.isPropertiesExpanded) {
+            val isInvalid = content is FrontmatterContent.Invalid
+            if (isInvalid || state.isSourceShown || isEditingSource) {
+                PropertiesSource(
+                    state = state,
+                    invalidLine = (content as? FrontmatterContent.Invalid)?.line,
+                    onEditingChange = { isEditingSource = it },
+                    onIntent = onIntent
+                )
+            } else {
+                val keys = properties.map(NoteProperty::key)
+                properties.forEach { PropertyRow(property = it, keys = keys, today = state.today, onIntent = onIntent) }
+                AddPropertyRow(onIntent = onIntent)
+            }
         }
     }
 }
