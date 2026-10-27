@@ -506,6 +506,22 @@ class VaultTreeViewModelTest {
     }
 
     @Test
+    fun `a note or folder created while the sidebar is hidden shows it, with the new name ready to type`() =
+        runTreeTest {
+            val viewModel = startedViewModel()
+            viewModel.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
+            val hidden = viewModel.state.value.isSidebarCollapsed
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnNewFolderClick(baseName = "Untitled folder"))
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = Triple(true, false, path("Untitled folder")),
+                actual = Triple(hidden, viewModel.state.value.isSidebarCollapsed, viewModel.state.value.renaming?.path)
+            )
+        }
+
+    @Test
     fun `expand all opens every folder and collapse all closes them, both remembered`() = runTreeTest {
         listOf("Projects/Garden/Tomato plan.md", "Recipes/Arepas.md").forEach {
             scanner.addNote(file = file(path = it))

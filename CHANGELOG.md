@@ -41,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Saving the app settings from two places at once (opening a folder saves the tree's open folders and the tabs) no
+  longer fails with "Something went wrong": saves now run one at a time.
 - The app follows the system's dark mode on Linux (read from the desktop portal: GNOME, KDE, COSMIC); it always
   showed the light theme there.
 - A space typed at the end of a line in a code block now moves the cursor, and the block is shaded as a whole.
@@ -61,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A tool rail on the left edge, as in Android Studio, stays when the sidebar is hidden: Files, Search notes, New note,
   New folder and Today. The sidebar's header gets Expand all, Collapse all and Minimize beside Sort. A hidden sidebar
   no longer leaves a button over the tabs.
+- New note and New folder open a hidden sidebar, so the new entry is seen where it went with its name ready to type.
 - The window opens small on the welcome screen and grows, when a vault opens, to fit the sidebar, the note and the
   outline.
 - Daily notes (ROADMAP 1.10): "Today" in the sidebar and Mod+D open today's note, creating it if needed, in the folder,
