@@ -12,6 +12,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,13 +47,14 @@ private val NUMBER = Regex(pattern = "-?\\d+(\\.\\d+)?")
  * A property's value edited in place, by its type (`ROADMAP.md` 1.14): text and numbers as fields, a checkbox, a date
  * typed or picked on a calendar that marks [today] (shown as people write it until it is edited), a list as chips with
  * a field that adds one, and a value the form does not edit as it is written, with a note to edit it in the source.
- * Each change goes to the note at once.
+ * Each change goes to the note at once. List items are pills of [chipColor], which stands out from the background.
  */
 @Composable
 internal fun PropertyValueEditor(
     property: NoteProperty,
+    onIntent: (EditorIntent) -> Unit,
     today: CalendarDate?,
-    onIntent: (EditorIntent) -> Unit
+    chipColor: Color = MaterialTheme.colorScheme.surface
 ) {
     val change = { value: PropertyValue -> onIntent(PropertyIntent.OnValueChange(key = property.key, value = value)) }
     when (val value = property.value) {
@@ -77,7 +79,7 @@ internal fun PropertyValueEditor(
 
         is PropertyValue.Date -> DateEditor(value = value, today = today, change = change)
 
-        is PropertyValue.Items -> ItemsEditor(property = property, items = value.items, change = change)
+        is PropertyValue.Items -> ItemsEditor(property, value.items, chipColor, change)
 
         is PropertyValue.Other -> OtherValue(source = value.source)
     }
@@ -111,6 +113,7 @@ private fun DateEditor(
 private fun ItemsEditor(
     property: NoteProperty,
     items: List<String>,
+    chipColor: Color,
     change: (PropertyValue) -> Unit
 ) {
     val isTags = PropertyKeys.isTags(key = property.key)
@@ -125,7 +128,7 @@ private fun ItemsEditor(
                 label = if (isTags) TAG_MARK + item else item,
                 onRemove = { change(PropertyValue.Items(items = items - item)) },
                 removeLabel = removeLabel,
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = chipColor
             )
         }
         // A new field after each change, so what was typed does not stay once it is added.

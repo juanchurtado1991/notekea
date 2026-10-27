@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.presentation.components.ErrorBanner
@@ -64,11 +65,14 @@ import app.notekea.resources.properties_remove
 import app.notekea.resources.properties_show_form
 import app.notekea.resources.properties_show_source
 import app.notekea.resources.properties_title
+import app.notekea.resources.properties_to_panel
 import org.jetbrains.compose.resources.stringResource
 
 private const val CARD_ALPHA = 0.55f
 private const val HOVER_ALPHA = 0.05f
 private const val KEY_WIDTH_DP = 150
+private const val PANEL_KEY_WIDTH_DP = 100
+private const val PANEL_PREVIEW_WIDTH_DP = 320
 private const val PREVIEW_WIDTH_DP = 640
 private const val SOURCE_LINE = "status: draft"
 
@@ -100,26 +104,55 @@ internal fun PropertiesView(
     ) {
         PropertiesHeader(state = state, count = properties.size, isEditingSource = isEditingSource, onIntent = onIntent)
         if (!state.isPropertiesExpanded) return@Column
-        val isInvalid = content is FrontmatterContent.Invalid
-        if (isInvalid || state.isSourceShown || isEditingSource) {
-            PropertiesSource(
-                state = state,
-                invalidLine = (content as? FrontmatterContent.Invalid)?.line,
-                onEditingChange = { isEditingSource = it },
-                onIntent = onIntent
-            )
-        } else {
-            val keys = properties.map(NoteProperty::key)
-            properties.forEach { PropertyRow(property = it, keys = keys, today = state.today, onIntent = onIntent) }
-            AddPropertyRow(onIntent = onIntent)
-        }
+        PropertiesForm(
+            state = state,
+            isEditingSource = isEditingSource,
+            onEditingChange = { isEditingSource = it },
+            onIntent = onIntent
+        )
     }
 }
 
 /**
- * "Properties" with their number, folding the form, and Show source / Show properties at the end; while the source is
- * being typed in, Show properties leaves it (which saves it) and shows the form.
+ * The properties themselves, in the note's card or the side panel's tab: the YAML as written while the source is shown,
+ * being typed in ([isEditingSource], told by [onEditingChange]) or unreadable, otherwise one row per property, their
+ * names [keyWidth] wide and list items as pills of [chipColor], and "Add property".
  */
+@Composable
+internal fun PropertiesForm(
+    state: EditorState,
+    isEditingSource: Boolean,
+    onEditingChange: (Boolean) -> Unit,
+    onIntent: (EditorIntent) -> Unit,
+    keyWidth: Dp = KEY_WIDTH_DP.dp,
+    chipColor: Color = MaterialTheme.colorScheme.surface
+) {
+    val content = state.properties
+    if (content is FrontmatterContent.Invalid || state.isSourceShown || isEditingSource) {
+        PropertiesSource(
+            state = state,
+            onEditingChange = onEditingChange,
+            onIntent = onIntent,
+            invalidLine = (content as? FrontmatterContent.Invalid)?.line
+        )
+    } else {
+        val properties = (content as? FrontmatterContent.Properties)?.properties.orEmpty()
+        val keys = properties.map(NoteProperty::key)
+        properties.forEach {
+            PropertyRow(
+                property = it,
+                keys = keys,
+                keyWidth = keyWidth,
+                chipColor = chipColor,
+                today = state.today,
+                onIntent = onIntent
+            )
+        }
+        AddPropertyRow(onIntent = onIntent)
+    }
+}
+
+/** "Properties" with their number, folding the form, then Show in side panel and Show source / Show properties. */
 @Composable
 private fun PropertiesHeader(
     state: EditorState,
@@ -127,15 +160,17 @@ private fun PropertiesHeader(
     isEditingSource: Boolean,
     onIntent: (EditorIntent) -> Unit
 ) {
-    val focusManager = LocalFocusManager.current
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         FoldTitle(isExpanded = state.isPropertiesExpanded, count = count, onIntent = onIntent)
         Spacer(modifier = Modifier.weight(weight = 1f))
-        if (state.isPropertiesExpanded && state.properties !is FrontmatterContent.Invalid) {
-            SourceToggle(isSourceShown = state.isSourceShown || isEditingSource, onToggle = {
-                if (isEditingSource) focusManager.clearFocus()
-                if (state.isSourceShown || !isEditingSource) onIntent(PropertyIntent.OnSourceToggle)
-            })
+        NotekeaIconButton(
+            icon = NotekeaIcons.PropertiesToPanel,
+            label = stringResource(resource = Res.string.properties_to_panel),
+            onClick = { onIntent(EditorIntent.OnPropertiesPlacementToggle) },
+            takesFocus = false
+        )
+        if (state.isPropertiesExpanded) {
+            SourceToggle(state = state, isEditingSource = isEditingSource, onIntent = onIntent)
         }
     }
 }
@@ -172,11 +207,23 @@ private fun FoldTitle(
     }
 }
 
+/**
+ * Show source / Show properties, hidden while the YAML cannot be read (it is shown anyway); while the source is being
+ * typed in ([isEditingSource]), Show properties leaves it, which saves it, and shows the form.
+ */
 @Composable
-private fun SourceToggle(
-    isSourceShown: Boolean,
-    onToggle: () -> Unit
+internal fun SourceToggle(
+    state: EditorState,
+    isEditingSource: Boolean,
+    onIntent: (EditorIntent) -> Unit
 ) {
+    if (state.properties is FrontmatterContent.Invalid) return
+    val focusManager = LocalFocusManager.current
+    val isSourceShown = state.isSourceShown || isEditingSource
+    val onToggle = {
+        if (isEditingSource) focusManager.clearFocus()
+        if (state.isSourceShown || !isEditingSource) onIntent(PropertyIntent.OnSourceToggle)
+    }
     NotekeaIconButton(
         icon = if (isSourceShown) NotekeaIcons.Properties else NotekeaIcons.PropertySource,
         label = stringResource(
@@ -195,6 +242,8 @@ private fun SourceToggle(
 private fun PropertyRow(
     property: NoteProperty,
     keys: List<String>,
+    keyWidth: Dp,
+    chipColor: Color,
     today: CalendarDate?,
     onIntent: (EditorIntent) -> Unit
 ) {
@@ -205,9 +254,9 @@ private fun PropertyRow(
         isHighlighted = isHovered,
         modifier = Modifier.hoverable(interactionSource = hover).onFocusChanged { isEditing = it.hasFocus }
     ) {
-        PropertyKey(property = property, keys = keys, onIntent = onIntent)
+        PropertyKey(property = property, keys = keys, width = keyWidth, onIntent = onIntent)
         Box(modifier = Modifier.weight(weight = 1f)) {
-            PropertyValueEditor(property = property, today = today, onIntent = onIntent)
+            PropertyValueEditor(property = property, onIntent = onIntent, today = today, chipColor = chipColor)
         }
         NotekeaIconButton(
             icon = NotekeaIcons.Close,
@@ -245,9 +294,10 @@ private fun RowFrame(
 private fun PropertyKey(
     property: NoteProperty,
     keys: List<String>,
+    width: Dp,
     onIntent: (EditorIntent) -> Unit
 ) {
-    Row(modifier = Modifier.width(width = KEY_WIDTH_DP.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = Modifier.width(width = width), verticalAlignment = Alignment.CenterVertically) {
         Icon(
             imageVector = iconOf(property = property),
             contentDescription = null,
@@ -404,6 +454,30 @@ private fun PropertiesViewPreview() {
                 onIntent = {}
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PropertiesFormPreview() {
+    NotekeaPreviewThemes {
+        Column(modifier = Modifier.width(width = PANEL_PREVIEW_WIDTH_DP.dp)) {
+            PropertiesForm(
+                state = EditorState(notePath = EditorPreviewData.path, properties = EditorPreviewData.typedProperties),
+                isEditingSource = false,
+                onEditingChange = {},
+                onIntent = {},
+                keyWidth = PANEL_KEY_WIDTH_DP.dp
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun SourceTogglePreview() {
+    NotekeaPreviewThemes {
+        SourceToggle(state = EditorState(properties = EditorPreviewData.typedProperties), isEditingSource = false) {}
     }
 }
 

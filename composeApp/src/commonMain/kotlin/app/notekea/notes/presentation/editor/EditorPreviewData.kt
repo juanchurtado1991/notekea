@@ -4,7 +4,6 @@ import androidx.compose.foundation.text.input.TextFieldState
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.notes.domain.FrontmatterContent
-import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.NoteProperty
 import app.notekea.notes.domain.PropertyValue
 import app.notekea.notes.domain.OutlineFinder
@@ -21,8 +20,6 @@ internal object EditorPreviewData {
     val platformConventions = PreviewPlatformConventions.linux
 
     val path = RelativePath(value = "Recipes/Arepas.md")
-
-    val properties = NoteMetadata(title = null, tags = listOf("recipe", "venezuelan"), aliases = listOf("Arepa"))
 
     /** The sample note's frontmatter as the properties view shows it: one property of each type. */
     val typedProperties = FrontmatterContent.Properties(

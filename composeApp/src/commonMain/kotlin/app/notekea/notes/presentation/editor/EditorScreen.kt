@@ -19,9 +19,9 @@ import app.notekea.core.presentation.platform.BeforeWindowClose
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.notes.domain.DayNeighbors
-import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.OutlineHeading
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.SidePanelTab
 import kotlinx.coroutines.channels.Channel
 
 private const val PREVIEW_HEIGHT_DP = 420
@@ -45,14 +45,16 @@ fun EditorScreen(
     sidePanel: SidePanelHost,
     modifier: Modifier = Modifier,
     isActive: Boolean = true,
-    properties: NoteMetadata? = null,
+    arePropertiesInNote: Boolean = true,
     dayNeighbors: DayNeighbors? = null,
     isBookmarked: Boolean = false
 ) {
     val state by viewModel.state.collectAsState()
     val flushed = remember(viewModel) { Channel<Unit>(capacity = Channel.CONFLATED) }
     val textFocusRequester = remember { FocusRequester() }
-    val onIntent = remember(viewModel, sidePanel) { routerOf(viewModel = viewModel, sidePanel = sidePanel) }
+    val onIntent = remember(viewModel, sidePanel, arePropertiesInNote) {
+        routerOf(viewModel = viewModel, sidePanel = sidePanel, arePropertiesInNote = arePropertiesInNote)
+    }
     LaunchedEffect(notePath) { viewModel.onIntent(intent = EditorIntent.OnOpen(path = notePath)) }
     EditorEffects(
         viewModel = viewModel,
@@ -73,7 +75,7 @@ fun EditorScreen(
         platformConventions = platformConventions,
         onIntent = onIntent,
         modifier = modifier,
-        properties = properties,
+        arePropertiesInNote = arePropertiesInNote,
         textFocusRequester = textFocusRequester,
         outlineTracker = pane.tracker,
         dayNeighbors = dayNeighbors,
@@ -85,9 +87,14 @@ fun EditorScreen(
 /** The editor's intents to [viewModel], except the side panel's requests, which go to [sidePanel]. */
 private fun routerOf(
     viewModel: EditorViewModel,
-    sidePanel: SidePanelHost
+    sidePanel: SidePanelHost,
+    arePropertiesInNote: Boolean
 ): (EditorIntent) -> Unit = { intent ->
     if (SidePanelHost.isRequest(intent = intent)) sidePanel.onIntent(intent = intent) else viewModel.onIntent(intent)
+    // A property added while they are only in the side panel is shown there, rather than added out of sight.
+    if (intent is PropertyIntent.OnAdd && !arePropertiesInNote) {
+        sidePanel.onIntent(intent = EditorIntent.OnSidePanelTabSelect(tab = SidePanelTab.PROPERTIES))
+    }
 }
 
 /** Saves the note before the window closes, waiting for that save ([flushed]) rather than one asked for earlier. */
@@ -188,8 +195,7 @@ private fun EditorScreenPreview() {
                 state = EditorPreviewData.state(),
                 buffer = EditorPreviewData.buffer(),
                 platformConventions = EditorPreviewData.platformConventions,
-                onIntent = {},
-                properties = EditorPreviewData.properties
+                onIntent = {}
             )
         }
     }

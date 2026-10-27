@@ -19,6 +19,8 @@ import app.notekea.notes.presentation.editor.EditorCallbacks
 import app.notekea.notes.presentation.editor.EditorIntent
 import app.notekea.notes.presentation.editor.EditorPaneTools
 import app.notekea.notes.presentation.editor.EditorScreen
+import app.notekea.notes.presentation.editor.EditorState
+import app.notekea.notes.presentation.editor.PropertiesPanel
 import app.notekea.notes.presentation.editor.SidePanelHost
 import app.notekea.notes.presentation.editor.WithSidePanel
 import app.notekea.notes.presentation.switcher.QuickSwitcherIntent
@@ -39,7 +41,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The vault's sidebar beside the editor's tabs and panes (`ROADMAP.md` 1.11), with the side panel of the active pane's
- * outline on the right (`ROADMAP.md` 1.9). Each tab shows a note in its pane's editor, a file's preview, a folder's grid
+ * outline or properties on the right (`ROADMAP.md` 1.9, 1.14). Each tab shows a note in its pane's editor, a file's preview, a folder's grid
  * or, for a file that is gone, says so.
  */
 @Composable
@@ -72,7 +74,15 @@ internal fun VaultWorkspace(
             current = panes[activePane].tracker.current,
             platformConventions = state.platformConventions,
             onHeadingClick = { activeEditor.onIntent(EditorIntent.OnHeadingClick(index = it)) },
-            onLeave = { activeEditor.onIntent(EditorIntent.OnFocusRequest()) }
+            onLeave = { activeEditor.onIntent(EditorIntent.OnFocusRequest()) },
+            properties = {
+                ActiveProperties(
+                    workspaceState = workspaceState,
+                    sidePanel = sidePanel,
+                    onIntent = activeEditor::onIntent,
+                    state = activeEditorState.takeIf { isNoteShown }
+                )
+            }
         ) {
             WorkspaceContent(
                 state = workspaceState,
@@ -82,6 +92,24 @@ internal fun VaultWorkspace(
             ) { pane, path, kind -> PaneContent(pane = pane, path = path, kind = kind, context = context) }
         }
     }
+}
+
+/**
+ * The side panel's Properties tab for the active pane's note ([state], null when its tab shows no note): property edits
+ * go to its editor ([onIntent]), and the panel's own requests to the [sidePanel].
+ */
+@Composable
+private fun ActiveProperties(
+    workspaceState: WorkspaceState,
+    sidePanel: SidePanelHost,
+    onIntent: (EditorIntent) -> Unit,
+    state: EditorState?
+) {
+    PropertiesPanel(
+        arePropertiesInNote = workspaceState.sidePanel.arePropertiesInNote,
+        onIntent = { if (SidePanelHost.isRequest(intent = it)) sidePanel.onIntent(intent = it) else onIntent(it) },
+        state = state
+    )
 }
 
 /** What a pane's active tab shows, by what [path] is. */
@@ -155,7 +183,7 @@ private fun NoteEditor(
         pane = context.panes[pane],
         sidePanel = context.sidePanel,
         isActive = context.workspaceState.workspace.activePane == pane,
-        properties = state.tree.notes[path]?.metadata,
+        arePropertiesInNote = context.workspaceState.sidePanel.arePropertiesInNote,
         dayNeighbors = state.dayNeighbors.takeIf { state.selectedPath == path },
         isBookmarked = path in state.bookmarks
     )
