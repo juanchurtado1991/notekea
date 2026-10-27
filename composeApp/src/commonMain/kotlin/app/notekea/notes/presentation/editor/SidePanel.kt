@@ -65,7 +65,7 @@ import app.notekea.resources.outline_empty_message
 import app.notekea.resources.outline_empty_title
 import app.notekea.resources.outline_label
 import app.notekea.resources.outline_title
-import app.notekea.resources.side_panel_hide
+import app.notekea.resources.side_panel_minimize
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_HEIGHT_DP = 480
@@ -227,8 +227,8 @@ private fun HideButton(
     onHide: () -> Unit
 ) {
     NotekeaIconButton(
-        icon = NotekeaIcons.HideSidePanel,
-        label = stringResource(resource = Res.string.side_panel_hide),
+        icon = NotekeaIcons.Minimize,
+        label = stringResource(resource = Res.string.side_panel_minimize),
         onClick = onHide,
         shortcutHint = platformConventions.toggleSidePanelShortcut.label(
             operatingSystem = platformConventions.operatingSystem

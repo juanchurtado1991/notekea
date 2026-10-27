@@ -24,7 +24,6 @@ import com.composables.icons.lucide.Calendar
 import com.composables.icons.lucide.CalendarDays
 import com.composables.icons.lucide.ChevronLeft
 import com.composables.icons.lucide.ListTree
-import com.composables.icons.lucide.PanelRightClose
 import com.composables.icons.lucide.PanelRightOpen
 import com.composables.icons.lucide.ArrowDownAZ
 import com.composables.icons.lucide.ArrowUp
@@ -153,7 +152,6 @@ object NotekeaIcons {
     val Folder: ImageVector get() = Lucide.Folder
     val FolderOpen: ImageVector get() = Lucide.FolderOpen
     val Heading: ImageVector get() = Lucide.Heading
-    val HideSidePanel: ImageVector get() = Lucide.PanelRightClose
     val InfoCreated: ImageVector get() = Lucide.CalendarPlus
     val InfoLinks: ImageVector get() = Lucide.Link
     val InfoModified: ImageVector get() = Lucide.Pencil
