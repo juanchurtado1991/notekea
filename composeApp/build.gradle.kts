@@ -13,7 +13,11 @@ plugins {
 }
 
 private val appPackageName = "Notekea"
+// The installers need a plain version whose first number is above 0 (DMG) and with no suffix (MSI); people see
+// appDisplayVersion, in About and crash reports, until the first public release.
 private val appPackageVersion = "1.0.0"
+private val appDisplayVersion = "0.1.0-alpha"
+private val appVersionSystemProperty = "notekea.version"
 private val jdkVersion = 21
 private val androidCompileSdk = 36
 private val androidMinSdk = 26
@@ -166,6 +170,7 @@ compose.desktop {
         mainClass = mainClassName
         // Skiko and java-llama.cpp load native libraries; without this the JVM warns on every launch.
         jvmArgs += nativeAccessJvmArgument
+        jvmArgs += "-D$appVersionSystemProperty=$appDisplayVersion"
 
         nativeDistributions {
             targetFormats(

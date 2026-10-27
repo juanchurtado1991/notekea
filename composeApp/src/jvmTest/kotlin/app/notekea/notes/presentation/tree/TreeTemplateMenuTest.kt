@@ -24,8 +24,7 @@ class TreeTemplateMenuTest {
                         state = TreePreviewData.state(),
                         vaultName = TreePreviewData.VAULT_NAME,
                         onIntent = { intents += it },
-                        onSwitchVault = {},
-                        onSearch = {}
+                        rail = SidebarRailActions()
                     ) {}
                 }
             }.use { scene ->

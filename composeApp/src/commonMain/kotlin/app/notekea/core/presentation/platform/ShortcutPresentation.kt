@@ -50,16 +50,18 @@ private val MODIFIER_ORDER = listOf(
 
 fun Shortcut.label(
     operatingSystem: OperatingSystem
-): String {
+): String = keys(operatingSystem = operatingSystem).joinToString(
+    separator = if (operatingSystem == OperatingSystem.MACOS) "" else KEY_SEPARATOR
+)
+
+/** The shortcut's keys one by one, as keycaps show them: modifiers first, in the platform's order. */
+fun Shortcut.keys(
+    operatingSystem: OperatingSystem
+): List<String> {
     val ordered = MODIFIER_ORDER.filter { it in modifiers }
     return when (operatingSystem) {
-        OperatingSystem.MACOS -> {
-            ordered.joinToString(separator = "") { it.macSymbol() } + key.macLabel()
-        }
-
-        OperatingSystem.LINUX, OperatingSystem.WINDOWS -> {
-            (ordered.map { it.displayName() } + key.displayName()).joinToString(separator = KEY_SEPARATOR)
-        }
+        OperatingSystem.MACOS -> ordered.map { it.macSymbol() } + key.macLabel()
+        OperatingSystem.LINUX, OperatingSystem.WINDOWS -> ordered.map { it.displayName() } + key.displayName()
     }
 }
 

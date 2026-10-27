@@ -89,8 +89,7 @@ class BookmarksScreenTest {
                 state = base.copy(bookmarks = Bookmarks(paths = listOf(base.rows[2].path, base.rows[0].path, missing))),
                 vaultName = TreePreviewData.VAULT_NAME,
                 onIntent = { treeIntents += it },
-                onSwitchVault = {},
-                onSearch = {}
+                rail = SidebarRailActions()
             ) {
                 EditorContent(
                     state = EditorState(notePath = RelativePath(value = NOTE)),

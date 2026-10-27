@@ -62,8 +62,7 @@ class DailyNoteScreenTest {
             state = TreePreviewData.state(),
             vaultName = VAULT_NAME,
             onIntent = onTreeIntent,
-            onSwitchVault = {},
-            onSearch = {}
+            rail = SidebarRailActions()
         ) {
             EditorContent(
                 state = EditorState(notePath = RelativePath(value = NOTE)),
@@ -89,6 +88,6 @@ class DailyNoteScreenTest {
         private const val WIDTH = 1100
         private val NEXT_ARROW = Offset(x = 1018f, y = 65f)
         private val PREVIOUS_ARROW = Offset(x = 990f, y = 65f)
-        private val TODAY_ROW = Offset(x = 20f, y = 150f)
+        private val TODAY_ROW = Offset(x = 20f, y = 86f)
     }
 }

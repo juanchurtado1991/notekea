@@ -20,17 +20,18 @@ private const val PREVIEW_HEIGHT_DP = 480
 private const val PREVIEW_WIDTH_DP = 900
 
 /**
- * Stateless vault workspace: the tool rail on the left edge, the resizable, hideable sidebar with the tree and, beside
- * it, [content]: the editor's tabs and panes (`ROADMAP.md` 1.11). The delete question is shown over both while it waits for an answer.
+ * Stateless vault workspace: the tool rail on the left edge (its buttons beyond the tree doing [rail]'s actions, the
+ * side panel's selected while [isSidePanelVisible]), the resizable, hideable sidebar with the tree and, beside it,
+ * [content]: the editor's tabs and panes (`ROADMAP.md` 1.11). The delete question is shown over both while it waits for an answer.
  */
 @Composable
 fun VaultTreeContent(
     state: VaultTreeState,
     vaultName: String,
     onIntent: (VaultTreeIntent) -> Unit,
-    onSwitchVault: () -> Unit,
-    onSearch: () -> Unit,
+    rail: SidebarRailActions,
     modifier: Modifier = Modifier,
+    isSidePanelVisible: Boolean = false,
     content: @Composable () -> Unit
 ) {
     Surface(
@@ -39,7 +40,7 @@ fun VaultTreeContent(
         contentColor = MaterialTheme.colorScheme.onBackground
     ) {
         Row {
-            SidebarRail(state = state, onIntent = onIntent, onSearch = onSearch)
+            SidebarRail(state = state, onIntent = onIntent, actions = rail, isSidePanelVisible = isSidePanelVisible)
             NotekeaSplitPane(
                 panelWidth = state.sidebarWidthDp.dp,
                 onPanelWidthChange = { onIntent(VaultTreeIntent.OnSidebarResize(widthDp = it.value.roundToInt())) },
@@ -47,12 +48,7 @@ fun VaultTreeContent(
                 minPanelWidth = TreePreferences.MIN_SIDEBAR_WIDTH_DP.dp,
                 maxPanelWidth = TreePreferences.MAX_SIDEBAR_WIDTH_DP.dp,
                 panel = {
-                    VaultSidebar(
-                        state = state,
-                        vaultName = vaultName,
-                        onIntent = onIntent,
-                        onSwitchVault = onSwitchVault
-                    )
+                    VaultSidebar(state = state, vaultName = vaultName, onIntent = onIntent)
                 },
                 content = { NoteDetailsPanel(state = state, content = content) }
             )
@@ -86,8 +82,7 @@ private fun VaultTreeContentPreviewFrame(
             state = state,
             vaultName = TreePreviewData.VAULT_NAME,
             onIntent = {},
-            onSwitchVault = {},
-            onSearch = {},
+            rail = SidebarRailActions(),
             modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp).height(height = PREVIEW_HEIGHT_DP.dp)
         ) { PreviewNoteContent(path = state.selectedPath) }
     }

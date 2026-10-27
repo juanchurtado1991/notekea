@@ -22,6 +22,16 @@ class ShortcutPresentationTest {
     }
 
     @Test
+    fun `keys are listed one by one for keycaps, in the platform's order`() {
+        assertEquals(
+            expected = listOf(listOf("⌃", "⌥", "⇧", "⌘", "O"), listOf("Ctrl", "Alt", "Shift", "Win", "O")),
+            actual = listOf(OperatingSystem.MACOS, OperatingSystem.WINDOWS).map {
+                everyModifier.keys(operatingSystem = it)
+            }
+        )
+    }
+
+    @Test
     fun `toggling a task reads as each platform writes it`() {
         assertEquals(
             expected = listOf("⌘↩", "Ctrl+Enter"),

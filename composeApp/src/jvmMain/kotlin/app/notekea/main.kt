@@ -24,6 +24,9 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.Alignment
 import app.notekea.core.presentation.platform.WindowSizes
+import app.notekea.core.presentation.theme.NotekeaBrand
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import app.notekea.core.presentation.platform.LocalAppVersion
 import app.notekea.core.crash.domain.RecordedCrash
 import app.notekea.core.crash.presentation.CrashNoticeContent
 import app.notekea.core.crash.presentation.CrashReportActions
@@ -89,7 +92,8 @@ fun main() {
         CompositionLocalProvider(
             LocalWindowExceptionHandlerFactory provides crashReporter.windowExceptionHandlers(),
             LocalSystemDarkTheme provides isSystemDark,
-            LocalFileDrop provides ::awtFileDrop
+            LocalFileDrop provides ::awtFileDrop,
+            LocalAppVersion provides koin.get<SystemEnvironment>().appVersion
         ) {
             if (showGallery) GalleryWindow() else NotekeaWindow(isCrashTest = isCrashTest)
             val crash by crashReporter.crash.collectAsState()
@@ -176,6 +180,7 @@ private fun ApplicationScope.NotekeaWindow(
             }
         },
         title = windowTitle(vaultName = vaultName),
+        icon = rememberVectorPainter(image = NotekeaBrand.Logo),
         state = windowState,
         onPreviewKeyEvent = shortcutDispatcher::dispatch
     ) {

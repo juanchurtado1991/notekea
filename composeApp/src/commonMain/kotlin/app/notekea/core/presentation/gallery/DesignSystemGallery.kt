@@ -440,7 +440,7 @@ private fun SplitPaneSection() {
     Row {
         NotekeaIconButton(icon = NotekeaIcons.HideSidebar, label = SPLIT_TOGGLE, onClick = { isVisible = !isVisible })
         NotekeaIconButton(
-            icon = NotekeaIcons.ShowSidePanel,
+            icon = NotekeaIcons.SidePanel,
             label = SPLIT_SIDE,
             onClick = { side = if (side == PaneSide.START) PaneSide.END else PaneSide.START }
         )

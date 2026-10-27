@@ -10,46 +10,53 @@ import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.resources.Res
+import app.notekea.resources.rail_about
 import app.notekea.resources.rail_label
+import app.notekea.resources.rail_settings
+import app.notekea.resources.rail_side_panel
 import app.notekea.resources.tree_files
-import app.notekea.resources.tree_new_folder
-import app.notekea.resources.tree_new_note
 import app.notekea.resources.tree_search
+import app.notekea.resources.tree_switch_vault
 import app.notekea.resources.tree_today
-import app.notekea.resources.tree_untitled_folder
-import app.notekea.resources.tree_untitled_note
 import org.jetbrains.compose.resources.stringResource
 
 /**
  * The vault's tool rail on the window's left edge (`ROADMAP.md` 1.11), there whether the sidebar is shown or not, as in
- * Android Studio: Files shows or hides the sidebar (selected while it is shown), then Search notes, New note, New folder
- * and Today, each with a tooltip naming it and its shortcut.
+ * Android Studio: Files shows or hides the sidebar (selected while it is shown), then Search notes, Today and the side
+ * panel (selected while [isSidePanelVisible]); at the bottom, as in Obsidian, Open another vault, About and Settings.
+ * Each has a tooltip naming it and its shortcut.
  */
 @Composable
 internal fun SidebarRail(
     state: VaultTreeState,
     onIntent: (VaultTreeIntent) -> Unit,
-    onSearch: () -> Unit,
+    actions: SidebarRailActions,
+    isSidePanelVisible: Boolean,
     modifier: Modifier = Modifier
 ) {
     NotekeaToolRail(
-        items = railItems(state = state, onIntent = onIntent, onSearch = onSearch),
+        items = topItems(
+            state = state,
+            onIntent = onIntent,
+            actions = actions,
+            isSidePanelVisible = isSidePanelVisible
+        ),
         label = stringResource(resource = Res.string.rail_label),
-        modifier = modifier
+        modifier = modifier,
+        bottomItems = bottomItems(actions = actions)
     )
 }
 
-/** Files, Search notes, New note, New folder and Today, with their shortcuts. */
+/** Files, Search notes, Today and the side panel, with their shortcuts. */
 @Composable
-private fun railItems(
+private fun topItems(
     state: VaultTreeState,
     onIntent: (VaultTreeIntent) -> Unit,
-    onSearch: () -> Unit
+    actions: SidebarRailActions,
+    isSidePanelVisible: Boolean
 ): List<NotekeaToolRailItem> {
     val conventions = state.platformConventions
     val shortcut = { it: Shortcut -> it.label(operatingSystem = conventions.operatingSystem) }
-    val untitledNote = stringResource(resource = Res.string.tree_untitled_note)
-    val untitledFolder = stringResource(resource = Res.string.tree_untitled_folder)
     return listOf(
         NotekeaToolRailItem(
             icon = NotekeaIcons.Files,
@@ -61,34 +68,57 @@ private fun railItems(
         NotekeaToolRailItem(
             icon = NotekeaIcons.Find,
             label = stringResource(resource = Res.string.tree_search),
-            onClick = onSearch,
+            onClick = actions.onSearch,
             shortcutHint = shortcut(conventions.quickSwitcherShortcut)
-        ),
-        NotekeaToolRailItem(
-            icon = NotekeaIcons.NewNote,
-            label = stringResource(resource = Res.string.tree_new_note),
-            onClick = { onIntent(VaultTreeIntent.OnNewNoteClick(baseName = untitledNote)) },
-            shortcutHint = shortcut(conventions.newNoteShortcut)
-        ),
-        NotekeaToolRailItem(
-            icon = NotekeaIcons.NewFolder,
-            label = stringResource(resource = Res.string.tree_new_folder),
-            onClick = { onIntent(VaultTreeIntent.OnNewFolderClick(baseName = untitledFolder)) }
         ),
         NotekeaToolRailItem(
             icon = NotekeaIcons.Today,
             label = stringResource(resource = Res.string.tree_today),
             onClick = { onIntent(VaultTreeIntent.OnTodayClick) },
             shortcutHint = shortcut(conventions.todayShortcut)
+        ),
+        NotekeaToolRailItem(
+            icon = NotekeaIcons.SidePanel,
+            label = stringResource(resource = Res.string.rail_side_panel),
+            onClick = actions.onSidePanelToggle,
+            shortcutHint = shortcut(conventions.toggleSidePanelShortcut),
+            isSelected = isSidePanelVisible
         )
     )
 }
+
+/** Open another vault, About and Settings. */
+@Composable
+private fun bottomItems(
+    actions: SidebarRailActions
+): List<NotekeaToolRailItem> = listOf(
+    NotekeaToolRailItem(
+        icon = NotekeaIcons.SwitchVault,
+        label = stringResource(resource = Res.string.tree_switch_vault),
+        onClick = actions.onSwitchVault
+    ),
+    NotekeaToolRailItem(
+        icon = NotekeaIcons.About,
+        label = stringResource(resource = Res.string.rail_about),
+        onClick = actions.onAbout
+    ),
+    NotekeaToolRailItem(
+        icon = NotekeaIcons.Settings,
+        label = stringResource(resource = Res.string.rail_settings),
+        onClick = actions.onSettings
+    )
+)
 
 @Preview
 @Composable
 private fun SidebarRailPreview() {
     NotekeaPreviewThemes {
-        SidebarRail(state = TreePreviewData.state(), onIntent = {}, onSearch = {})
+        SidebarRail(
+            state = TreePreviewData.state(),
+            onIntent = {},
+            actions = SidebarRailActions(),
+            isSidePanelVisible = true
+        )
     }
 }
 
@@ -96,6 +126,11 @@ private fun SidebarRailPreview() {
 @Composable
 private fun SidebarRailCollapsedPreview() {
     NotekeaPreviewThemes {
-        SidebarRail(state = TreePreviewData.state().copy(isSidebarCollapsed = true), onIntent = {}, onSearch = {})
+        SidebarRail(
+            state = TreePreviewData.state().copy(isSidebarCollapsed = true),
+            onIntent = {},
+            actions = SidebarRailActions(),
+            isSidePanelVisible = false
+        )
     }
 }
