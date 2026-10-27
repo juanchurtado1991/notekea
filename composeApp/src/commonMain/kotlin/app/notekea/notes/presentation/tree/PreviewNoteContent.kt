@@ -27,8 +27,7 @@ internal fun PreviewNoteContent(
         state = EditorState(notePath = path),
         buffer = buffer,
         platformConventions = PreviewPlatformConventions.linux,
-        onIntent = {},
-        properties = TreePreviewData.tree.notes[path]?.metadata
+        onIntent = {}
     )
 }
 

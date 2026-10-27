@@ -170,6 +170,7 @@ object NotekeaIcons {
     val Outline: ImageVector get() = Lucide.ListTree
     val PreviousDay: ImageVector get() = Lucide.ChevronLeft
     val PreviousMonth: ImageVector get() = Lucide.ChevronLeft
+    val PropertiesToPanel: ImageVector get() = Lucide.PanelRightOpen
     val Properties: ImageVector get() = Lucide.SlidersHorizontal
     val PropertyCheckbox: ImageVector get() = Lucide.SquareCheck
     val PropertyDate: ImageVector get() = Lucide.Calendar

@@ -24,7 +24,8 @@ private const val PREVIEW_HEIGHT_DP = 360
 private const val PREVIEW_WIDTH_DP = 1000
 
 /**
- * The [content] (the panes of notes) with the side panel on its right showing [outline] (`ROADMAP.md` 1.9), as wide as
+ * The [content] (the panes of notes) with the side panel on its right showing [outline] (`ROADMAP.md` 1.9) or the
+ * active note's [properties] (`ROADMAP.md` 1.14), by the tab [preferences] keep, as wide as
  * [preferences] say but never leaving the notes narrower than [EDITOR_MIN_WIDTH_DP]; when not even its narrowest width
  * fits, the panel floats over them instead, open only while it is used ([sidePanel]). [current] is the heading the
  * active pane's view is in; a heading chosen goes to [onHeadingClick], and Esc in the outline to [onLeave].
@@ -38,6 +39,7 @@ fun WithSidePanel(
     platformConventions: PlatformConventions,
     onHeadingClick: (Int) -> Unit,
     onLeave: () -> Unit,
+    properties: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -61,13 +63,16 @@ fun WithSidePanel(
                 SidePanel(
                     outline = outline,
                     current = current,
+                    selectedTab = preferences.tab,
                     platformConventions = platformConventions,
                     onHeadingClick = onHeadingClick,
+                    onTabSelect = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelTabSelect(tab = it)) },
                     onHide = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
                     onLeave = {
                         sidePanel.isOverlayOpen = false
                         onLeave()
                     },
+                    properties = properties,
                     outlineFocus = sidePanel.outlineFocus
                 )
             },
@@ -90,7 +95,8 @@ private fun WithSidePanelPreview() {
                 current = 0,
                 platformConventions = EditorPreviewData.platformConventions,
                 onHeadingClick = {},
-                onLeave = {}
+                onLeave = {},
+                properties = {}
             ) { Text(text = PREVIEW_CONTENT) }
         }
     }

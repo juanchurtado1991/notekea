@@ -268,8 +268,7 @@ class EditorToolbarTest {
                         state = EditorState(notePath = RelativePath(value = NOTE), isReading = isReading),
                         buffer = buffer,
                         platformConventions = PreviewPlatformConventions.linux,
-                        onIntent = { intents += it },
-                        properties = EditorPreviewData.properties
+                        onIntent = { intents += it }
                     )
                 }
             }.use { scene ->

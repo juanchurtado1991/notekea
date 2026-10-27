@@ -69,7 +69,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Properties view (ROADMAP 1.14): a note's frontmatter shows as a foldable form under its title, each property typed
   (text, list, number, checkbox, date picked on a compact calendar) and edited in place on a soft card, with Add property (also in the toolbar's More), rename and
-  remove; Show source edits the YAML as written, and YAML the form cannot read is shown that way with an explanation.
+  remove, also in a Properties tab of the side panel (where they can live alone, out of the note); Show source edits the
+  YAML as written, and YAML the form cannot read is shown that way with an explanation.
   Every edit rewrites only its property's lines.
 - Bookmarks (ROADMAP 1.13): the star beside a note's title, "Bookmark" in a tree row's menu or Mod+Shift+B
   bookmark a note, folder or file; the Bookmarks section above the tree opens them, folds, reorders them by dragging

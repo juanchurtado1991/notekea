@@ -4,6 +4,7 @@ import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.ListAction
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.SidePanelTab
 
 /** What the user (or the window around the editor) asked of the note editor. */
 sealed interface EditorIntent {
@@ -127,6 +128,15 @@ sealed interface EditorIntent {
 
     /** The user finished dragging the side panel's edge to [widthDp]. */
     data class OnSidePanelResize(val widthDp: Int) : EditorIntent
+
+    /** One of the side panel's tabs was chosen. */
+    data class OnSidePanelTabSelect(val tab: SidePanelTab) : EditorIntent
+
+    /**
+     * "Show in side panel" on the note's properties, or "Show in the note" in the panel's Properties tab: the properties
+     * move between the note and the panel (`ROADMAP.md` 1.14).
+     */
+    data object OnPropertiesPlacementToggle : EditorIntent
 
     /** The header's arrows of a daily note: the daily note before ([step] -1) or after ([step] 1) is opened. */
     data class OnDayStep(val step: Int) : EditorIntent

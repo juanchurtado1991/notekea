@@ -32,7 +32,7 @@ class PropertiesScreenTest {
     private var frame = 0L
 
     @Test
-    fun `the form folds, edits a checkbox, a list, a text and removes a property, and shows its source`() {
+    fun `the form folds, edits each kind of value, removes a property, shows its source and moves to the panel`() {
         val intents = mutableListOf<EditorIntent>()
         UiThread.run {
             scene(intents = intents).use { scene ->
@@ -41,7 +41,7 @@ class PropertiesScreenTest {
                 type(scene = scene, text = TYPED)
                 scene.sendKeyEvent(event = keyDown(key = Key.Enter))
                 settle(scene = scene)
-                listOf(SOURCE_TOGGLE, HEADER).forEach { click(scene, it) }
+                listOf(SOURCE_TOGGLE, TO_PANEL, HEADER).forEach { click(scene, it) }
             }
         }
 
@@ -52,9 +52,10 @@ class PropertiesScreenTest {
                 PropertyIntent.OnRemove(key = "status"),
                 PropertyIntent.OnValueChange(key = "status", value = PropertyValue.Text(text = "Tested$TYPED")),
                 PropertyIntent.OnSourceToggle,
+                EditorIntent.OnPropertiesPlacementToggle,
                 PropertyIntent.OnFoldToggle
             ),
-            actual = intents.filterIsInstance<PropertyIntent>()
+            actual = intents.filter { it is PropertyIntent || it == EditorIntent.OnPropertiesPlacementToggle }
         )
     }
 
@@ -183,6 +184,7 @@ class PropertiesScreenTest {
         private val NEXT_MONTH = Offset(x = 482f, y = 25f)
         private val NOVEMBER_2 = Offset(x = 287f, y = 131f)
         private val OCTOBER_14 = Offset(x = 351f, y = 167f)
+        private val TO_PANEL = Offset(x = 752f, y = 105f)
         private val TODAY = Offset(x = 304f, y = 292f)
         private val FAVORITE_BOX = Offset(x = 268f, y = 232f)
         private val HEADER = Offset(x = 150f, y = 105f)
