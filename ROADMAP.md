@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 13 / 17 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 14 / 17 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -368,7 +368,7 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 - **States:** no templates folder ("Create a Templates folder to add templates" with a "Create" button, which makes
   it with an example template, "Meeting notes"); an empty folder and a search that matches nothing say what to do.
 
-### ⬜ 1.13 Bookmarks — `feature/bookmarks`
+### ✅ 1.13 Bookmarks — `feature/bookmarks` — [notekea#63](https://github.com/juanchurtado1991/notekea/pull/63)
 
 - **Bookmark:** the star beside the note's title, "Bookmark" in a tree row's menu, or `Mod+Shift+B` (the
   active tab's entry, or the selected one) bookmarks a note, a folder or another file; the same action removes it.
