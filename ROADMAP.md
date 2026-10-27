@@ -401,7 +401,7 @@ Frontmatter shown as a compact form above the note content.
   list, quotes), preserving key order, comments and unknown keys; the frontmatter is never encoded again as a whole
   (Ghost would drop unknown keys and re-quote strings, see `docs/spikes/2026-10-23-ghost-llama.md`). Each edit is saved
   at once, never over an outside change.
-- "Show source" toggles the raw YAML, editable; YAML the form cannot read shows an error banner with its line and
+- "Show source" toggles the raw YAML, editable and saved once typing pauses, like the text; YAML the form cannot read shows an error banner with its line and
   falls back to the raw view, never losing data.
 - **Done when:** round-tripping every sample-vault note through the properties view produces byte-identical
   files when nothing was edited.

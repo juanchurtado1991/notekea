@@ -82,6 +82,8 @@ class EditorViewModel(
     private var outlineJob: Job? = null
     private val saveLock = Mutex()
     private var autosaveJob: Job? = null
+    private var sourceJob: Job? = null
+    private var pendingSource: PropertyIntent.OnSourceEdit? = null
     private var watchJob: Job? = null
 
     // The note as last read from or written to disk: the header kept apart, and what the file holds.
@@ -331,8 +333,15 @@ class EditorViewModel(
     ) {
         when (intent) {
             PropertyIntent.OnFoldToggle -> toggleProperties()
+
             PropertyIntent.OnSourceToggle -> reduce { it.copy(isSourceShown = !it.isSourceShown) }
-            else -> runSave { editProperties(intent = intent) }
+
+            is PropertyIntent.OnSourceEdit -> editSourceLater(intent = intent)
+
+            else -> {
+                cancelSourceEdit()
+                runSave { editProperties(intent = intent) }
+            }
         }
     }
 
@@ -345,6 +354,34 @@ class EditorViewModel(
     }
 
     /**
+     * Typed YAML in the source view is written once typing pauses, like the note's text; the next keystroke waits again.
+     * Any save before that (leaving the note, Save, the text losing focus) writes it first.
+     */
+    private fun editSourceLater(
+        intent: PropertyIntent.OnSourceEdit
+    ) {
+        sourceJob?.cancel()
+        pendingSource = intent
+        sourceJob = launchGuarded(onError = ::showUnexpectedError) {
+            delay(duration = AUTOSAVE_DELAY)
+            sourceJob = null
+            saveLock.withLock { writePendingSource() }
+        }
+    }
+
+    private suspend fun writePendingSource() {
+        val intent = pendingSource ?: return
+        pendingSource = null
+        editProperties(intent = intent)
+    }
+
+    private fun cancelSourceEdit() {
+        sourceJob?.cancel()
+        sourceJob = null
+        pendingSource = null
+    }
+
+    /**
      * Writes the frontmatter after a property edit at once, with the body as it is, so it is saved like any save (never
      * over an outside change); nothing when the edit changes nothing or is not one to make.
      */
@@ -354,6 +391,7 @@ class EditorViewModel(
         val path = state.value.notePath ?: return
         val document = opened ?: return
         if (state.value.isLoading || state.value.hasConflict || state.value.isDeleted) return
+        if (sourcePathOf(intent = intent).let { it != null && it != path }) return
         val today = today()
         val lineBreak = if (document.usesCrLf) StringPatterns.WINDOWS_NEW_LINE else StringPatterns.NEW_LINE
         val header = propertyEditing.headerAfter(intent, document.header, state.value.properties, today, lineBreak)
@@ -363,6 +401,15 @@ class EditorViewModel(
             document = document.copy(header = header, body = buffer.text.toString()),
             expectedOnDisk = onDisk
         )
+    }
+
+    /** The note a source view edit was typed in; null for the form's edits, which always concern the open note. */
+    private fun sourcePathOf(
+        intent: PropertyIntent
+    ): RelativePath? = when (intent) {
+        is PropertyIntent.OnSourceEdit -> intent.path
+        is PropertyIntent.OnSourceCommit -> intent.path
+        else -> null
     }
 
     private fun today() = propertyTools.localCalendar.momentOf(instant = propertyTools.clock.now()).date
@@ -643,6 +690,9 @@ class EditorViewModel(
 
     /** Saves the edits, unless there is nothing new or the user has a question to answer first. */
     private suspend fun saveNow() {
+        sourceJob?.cancel()
+        sourceJob = null
+        writePendingSource()
         val path = state.value.notePath ?: return
         val document = opened ?: return
         val body = buffer.text.toString()

@@ -14,6 +14,7 @@ import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.notes.domain.FrontmatterContent
 import app.notekea.notes.domain.FrontmatterReader
 import app.notekea.notes.domain.PropertyValue
 import app.notekea.notes.domain.RelativePath
@@ -79,16 +80,43 @@ class PropertiesScreenTest {
         )
     }
 
+    @Test
+    fun `typing in the source sends each change, and clicking the note's text commits it`() {
+        val intents = mutableListOf<EditorIntent>()
+        val state = EditorState(
+            notePath = RelativePath(value = NOTE),
+            properties = FrontmatterContent.Invalid(line = 2),
+            propertiesSource = BROKEN_SOURCE
+        )
+        UiThread.run {
+            scene(intents = intents, state = state).use { scene ->
+                settle(scene = scene)
+                click(scene = scene, position = BROKEN_SOURCE_END)
+                type(scene = scene, text = TYPED)
+                click(scene = scene, position = BODY_TEXT)
+            }
+        }
+
+        assertEquals(
+            expected = listOf(
+                PropertyIntent.OnSourceEdit(path = RelativePath(value = NOTE), yaml = BROKEN_SOURCE + TYPED),
+                PropertyIntent.OnSourceCommit(path = RelativePath(value = NOTE), yaml = BROKEN_SOURCE + TYPED)
+            ),
+            actual = intents.filterIsInstance<PropertyIntent>()
+        )
+    }
+
     private fun scene(
-        intents: MutableList<EditorIntent>
+        intents: MutableList<EditorIntent>,
+        state: EditorState = EditorState(
+            notePath = RelativePath(value = NOTE),
+            properties = FrontmatterReader().read(header = HEADER_TEXT),
+            today = COOKED_TODAY
+        )
     ) = ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
         NotekeaTheme(darkTheme = false) {
             EditorContent(
-                state = EditorState(
-                    notePath = RelativePath(value = NOTE),
-                    properties = FrontmatterReader().read(header = HEADER_TEXT),
-                    today = COOKED_TODAY
-                ),
+                state = state,
                 buffer = TextFieldState(initialText = BODY),
                 platformConventions = PreviewPlatformConventions.linux,
                 onIntent = { intents += it }
@@ -138,6 +166,7 @@ class PropertiesScreenTest {
 
     companion object {
         private const val BODY = "# Arepas\n\nMix the flour.\n"
+        private const val BROKEN_SOURCE = "title: Broken on purpose\nthis line is not a property"
         private const val FRAME_NANOS = 16_000_000L
         private const val HEADER_TEXT =
             "---\ntags: [recipe, venezuelan]\nstatus: Tested\nservings: 4\nfavorite: true\n" +
@@ -147,6 +176,8 @@ class PropertiesScreenTest {
         private const val SETTLE_FRAMES = 4
         private const val TYPED = "!"
         private const val WIDTH = 900
+        private val BODY_TEXT = Offset(x = 200f, y = 362f)
+        private val BROKEN_SOURCE_END = Offset(x = 600f, y = 206f)
         private val CALENDAR = Offset(x = 406f, y = 264f)
         private val COOKED_TODAY = CalendarDate(year = 2026, month = 10, day = 27)
         private val NEXT_MONTH = Offset(x = 482f, y = 25f)

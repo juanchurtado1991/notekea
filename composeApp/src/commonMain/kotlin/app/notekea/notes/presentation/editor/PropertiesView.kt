@@ -20,7 +20,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,6 +35,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -83,7 +86,9 @@ internal fun PropertiesView(
     modifier: Modifier = Modifier
 ) {
     val content = state.properties
-    if (content == FrontmatterContent.None && !state.isSourceShown) return
+    // The source stays while it is being typed in, even once its YAML is valid, empty or saved: it never vanishes.
+    var isEditingSource by remember(state.notePath) { mutableStateOf(value = false) }
+    if (content == FrontmatterContent.None && !state.isSourceShown && !isEditingSource) return
     val properties = (content as? FrontmatterContent.Properties)?.properties.orEmpty()
     val shape = MaterialTheme.shapes.medium
     Column(
@@ -93,13 +98,14 @@ internal fun PropertiesView(
             .background(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = CARD_ALPHA), shape = shape)
             .padding(all = NotekeaDimensions.SpacingXs)
     ) {
-        PropertiesHeader(state = state, count = properties.size, onIntent = onIntent)
+        PropertiesHeader(state = state, count = properties.size, isEditingSource = isEditingSource, onIntent = onIntent)
         if (!state.isPropertiesExpanded) return@Column
         val isInvalid = content is FrontmatterContent.Invalid
-        if (isInvalid || state.isSourceShown) {
+        if (isInvalid || state.isSourceShown || isEditingSource) {
             PropertiesSource(
                 state = state,
                 invalidLine = (content as? FrontmatterContent.Invalid)?.line,
+                onEditingChange = { isEditingSource = it },
                 onIntent = onIntent
             )
         } else {
@@ -110,18 +116,26 @@ internal fun PropertiesView(
     }
 }
 
-/** "Properties" with their number, folding the form, and Show source / Show properties at the end. */
+/**
+ * "Properties" with their number, folding the form, and Show source / Show properties at the end; while the source is
+ * being typed in, Show properties leaves it (which saves it) and shows the form.
+ */
 @Composable
 private fun PropertiesHeader(
     state: EditorState,
     count: Int,
+    isEditingSource: Boolean,
     onIntent: (EditorIntent) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         FoldTitle(isExpanded = state.isPropertiesExpanded, count = count, onIntent = onIntent)
         Spacer(modifier = Modifier.weight(weight = 1f))
         if (state.isPropertiesExpanded && state.properties !is FrontmatterContent.Invalid) {
-            SourceToggle(isSourceShown = state.isSourceShown, onIntent = onIntent)
+            SourceToggle(isSourceShown = state.isSourceShown || isEditingSource, onToggle = {
+                if (isEditingSource) focusManager.clearFocus()
+                if (state.isSourceShown || !isEditingSource) onIntent(PropertyIntent.OnSourceToggle)
+            })
         }
     }
 }
@@ -161,14 +175,14 @@ private fun FoldTitle(
 @Composable
 private fun SourceToggle(
     isSourceShown: Boolean,
-    onIntent: (EditorIntent) -> Unit
+    onToggle: () -> Unit
 ) {
     NotekeaIconButton(
         icon = if (isSourceShown) NotekeaIcons.Properties else NotekeaIcons.PropertySource,
         label = stringResource(
             resource = if (isSourceShown) Res.string.properties_show_form else Res.string.properties_show_source
         ),
-        onClick = { onIntent(PropertyIntent.OnSourceToggle) },
+        onClick = onToggle,
         takesFocus = false
     )
 }
@@ -304,37 +318,59 @@ private fun propertyTypeItems(
     )
 }
 
-/** The YAML as written, edited as text; left, it replaces the frontmatter. Unreadable YAML says where it fails. */
+/**
+ * The YAML as written, edited as text: typed, it replaces the frontmatter once typing pauses; left, at once. Unreadable
+ * YAML says where it fails, and the warning goes as soon as the fix is saved. [onEditingChange] says whether it is
+ * being typed in.
+ */
 @Composable
 private fun PropertiesSource(
     state: EditorState,
-    invalidLine: Int?,
-    onIntent: (EditorIntent) -> Unit
+    onEditingChange: (Boolean) -> Unit,
+    onIntent: (EditorIntent) -> Unit,
+    invalidLine: Int?
 ) {
+    val path = state.notePath ?: return
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)) {
         invalidLine?.let { ErrorBanner(message = stringResource(Res.string.properties_invalid, it)) }
-        PropertiesSourceField(source = state.propertiesSource, onCommit = {
-            onIntent(PropertyIntent.OnSourceCommit(yaml = it))
-        })
+        // A new field for each note, so what was typed in one note never goes to another.
+        key(path) {
+            PropertiesSourceField(
+                source = state.propertiesSource,
+                onEdit = { onIntent(PropertyIntent.OnSourceEdit(path = path, yaml = it)) },
+                onCommit = { onIntent(PropertyIntent.OnSourceCommit(path = path, yaml = it)) },
+                onFocusChange = onEditingChange
+            )
+        }
     }
 }
 
-/** The YAML of the source view, edited as text; once the field is left, it goes to [onCommit] when it changed. */
+/**
+ * The YAML of the source view, edited as text: each change goes to [onEdit], and once the field is left it goes to
+ * [onCommit] when it differs from [source]. What is typed is kept while the field is focused, even when the saved
+ * [source] comes back written slightly differently; once the field is left, [source] is shown again.
+ */
 @Composable
 private fun PropertiesSourceField(
     source: String,
-    onCommit: (String) -> Unit
+    onEdit: (String) -> Unit,
+    onCommit: (String) -> Unit,
+    onFocusChange: (Boolean) -> Unit
 ) {
-    var text by remember(source) { mutableStateOf(value = source) }
-    var hasHadFocus by remember { mutableStateOf(value = false) }
+    var text by remember { mutableStateOf(value = source) }
+    var isFocused by remember { mutableStateOf(value = false) }
+    LaunchedEffect(source, isFocused) { if (!isFocused) text = source }
     Box(
         modifier = Modifier.onFocusChanged { focus ->
-            if (focus.hasFocus) hasHadFocus = true
-            if (!focus.hasFocus && hasHadFocus && text != source) onCommit(text)
+            if (focus.hasFocus == isFocused) return@onFocusChanged
+            isFocused = focus.hasFocus
+            onFocusChange(focus.hasFocus)
+            if (!focus.hasFocus && text != source) onCommit(text)
         }
     ) {
         NotekeaTextField(value = text, onValueChange = {
             text = it
+            onEdit(it)
         }, modifier = Modifier.fillMaxWidth(), singleLine = false)
     }
 }
