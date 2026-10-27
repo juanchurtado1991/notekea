@@ -49,7 +49,7 @@ class SidebarSearchButtonTest {
         private const val FRAME_NANOS = 16_000_000L
         private const val WINDOW_HEIGHT = 560
         private const val WINDOW_WIDTH = 1_100
-        private val SEARCH_BUTTON = Offset(x = 30f, y = 129f)
+        private val SEARCH_BUTTON = Offset(x = 30f, y = 183f)
         private val TREE_ROW = Offset(x = 190f, y = 295f)
     }
 }

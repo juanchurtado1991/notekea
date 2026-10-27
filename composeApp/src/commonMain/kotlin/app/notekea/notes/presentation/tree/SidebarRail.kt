@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.Shortcut
+import androidx.compose.ui.unit.dp
+import app.notekea.core.presentation.components.NotekeaLogo
 import app.notekea.core.presentation.components.NotekeaToolRail
 import app.notekea.core.presentation.components.NotekeaToolRailItem
 import app.notekea.core.presentation.platform.label
@@ -20,11 +22,13 @@ import app.notekea.resources.tree_switch_vault
 import app.notekea.resources.tree_today
 import org.jetbrains.compose.resources.stringResource
 
+private const val LOGO_SIZE_DP = 24
+
 /**
  * The vault's tool rail on the window's left edge (`ROADMAP.md` 1.11), there whether the sidebar is shown or not, as in
  * Android Studio: the two panels first, Files (the sidebar, selected while it is shown) and the side panel (selected
  * while [isSidePanelVisible]), then Search notes and Today; at the bottom, as in Obsidian, Open another vault, About and Settings.
- * Each has a tooltip naming it and its shortcut.
+ * Each has a tooltip naming it and its shortcut; Notekea's logo tops the rail.
  */
 @Composable
 internal fun SidebarRail(
@@ -43,7 +47,8 @@ internal fun SidebarRail(
         ),
         label = stringResource(resource = Res.string.rail_label),
         modifier = modifier,
-        bottomItems = bottomItems(actions = actions)
+        bottomItems = bottomItems(actions = actions),
+        header = { NotekeaLogo(size = LOGO_SIZE_DP.dp) }
     )
 }
 

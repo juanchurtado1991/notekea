@@ -85,6 +85,6 @@ class SidebarRailTest {
         private const val SETTINGS = "settings"
         private const val SIDE_PANEL = "side panel"
         private const val SWITCH_VAULT = "switch vault"
-        private val RAIL = listOf(21f, 53f, 86f, 118f, 334f, 366f, 398f).map { Offset(x = 20f, y = it) }
+        private val RAIL = listOf(57f, 89f, 122f, 154f, 334f, 366f, 398f).map { Offset(x = 20f, y = it) }
     }
 }
