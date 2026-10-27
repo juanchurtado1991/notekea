@@ -13,12 +13,12 @@ import java.awt.HeadlessException
  * The main window's size for each screen (`ROADMAP.md` 1.11): the welcome screen (choosing a vault) is small, and a
  * vault's workspace is large enough to show, as it opens, the tool rail, the sidebar, a note at a readable width and
  * the outline beside it. Never larger than the screen's usable area (without the taskbar or dock); the window is centred
- * when its screen changes, and a window the user maximized, or made larger, keeps its size.
+ * when its screen changes, and a window the user maximized, or made larger, keeps its size. The usable area comes from
+ * [usableArea] (none when there is no screen to ask), [system] asking the computer's.
  */
-object WindowSizes {
-    private val WELCOME = DpSize(width = 960.dp, height = 680.dp)
-    private val WORKSPACE = DpSize(width = 1440.dp, height = 900.dp)
-
+class WindowSizes(
+    private val usableArea: () -> DpSize?
+) {
     val welcome: DpSize
         get() = fitted(size = WELCOME)
 
@@ -43,10 +43,24 @@ object WindowSizes {
     /** [size] made to fit the screen's usable area; as it is when there is no screen to ask. */
     private fun fitted(
         size: DpSize
-    ): DpSize = try {
-        val bounds = GraphicsEnvironment.getLocalGraphicsEnvironment().maximumWindowBounds
-        DpSize(width = minOf(size.width, bounds.width.dp), height = minOf(size.height, bounds.height.dp))
-    } catch (_: HeadlessException) {
-        size
+    ): DpSize {
+        val area = usableArea() ?: return size
+        return DpSize(width = minOf(size.width, area.width), height = minOf(size.height, area.height))
+    }
+
+    companion object {
+        private val WELCOME = DpSize(width = 960.dp, height = 680.dp)
+        private val WORKSPACE = DpSize(width = 1440.dp, height = 900.dp)
+
+        /** The sizes for this computer's main screen. */
+        val system = WindowSizes(usableArea = ::screenArea)
+
+        /** The main screen's area without the taskbar or dock; none without a screen. */
+        private fun screenArea(): DpSize? = try {
+            val bounds = GraphicsEnvironment.getLocalGraphicsEnvironment().maximumWindowBounds
+            DpSize(width = bounds.width.dp, height = bounds.height.dp)
+        } catch (_: HeadlessException) {
+            null
+        }
     }
 }
