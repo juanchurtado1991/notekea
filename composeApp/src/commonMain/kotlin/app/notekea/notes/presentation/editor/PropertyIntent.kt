@@ -2,6 +2,7 @@ package app.notekea.notes.presentation.editor
 
 import app.notekea.notes.domain.PropertyType
 import app.notekea.notes.domain.PropertyValue
+import app.notekea.notes.domain.RelativePath
 
 /** What the user did in the properties above the note (`ROADMAP.md` 1.14). */
 sealed interface PropertyIntent : EditorIntent {
@@ -21,8 +22,20 @@ sealed interface PropertyIntent : EditorIntent {
         val to: String
     ) : PropertyIntent
 
-    /** The source view was left: its YAML, the lines between the `---`, replaces the frontmatter as written. */
-    data class OnSourceCommit(val yaml: String) : PropertyIntent
+    /**
+     * The YAML of [path]'s source view, the lines between the `---`, was typed: it replaces the frontmatter as written
+     * once typing pauses, like the note's text. Ignored once another note is open.
+     */
+    data class OnSourceEdit(
+        val path: RelativePath,
+        val yaml: String
+    ) : PropertyIntent
+
+    /** [path]'s source view was left: its YAML replaces the frontmatter at once. Ignored once another note is open. */
+    data class OnSourceCommit(
+        val path: RelativePath,
+        val yaml: String
+    ) : PropertyIntent
 
     /** The Properties header: folds or opens the form, remembered for every note. */
     data object OnFoldToggle : PropertyIntent

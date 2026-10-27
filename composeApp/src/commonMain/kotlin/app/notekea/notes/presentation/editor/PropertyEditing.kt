@@ -43,6 +43,8 @@ internal class PropertyEditing {
 
             is PropertyIntent.OnSourceCommit -> sourceHeader(yaml = intent.yaml, header = header, lineBreak = lineBreak)
 
+            is PropertyIntent.OnSourceEdit -> sourceHeader(yaml = intent.yaml, header = header, lineBreak = lineBreak)
+
             PropertyIntent.OnFoldToggle, PropertyIntent.OnSourceToggle -> null
         }
     }
