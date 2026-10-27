@@ -1,9 +1,7 @@
 package app.notekea.notes.presentation.tree
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -19,7 +17,6 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaMenuButton
 import app.notekea.core.presentation.components.NotekeaMenuItem
-import app.notekea.core.presentation.components.NotekeaSearchButton
 import app.notekea.core.presentation.platform.displayPath
 import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
@@ -28,12 +25,9 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.TreeSort
 import app.notekea.resources.Res
-import app.notekea.resources.tree_hide_sidebar
-import app.notekea.resources.tree_new_folder
-import app.notekea.resources.tree_new_note
-import app.notekea.resources.tree_search
-import app.notekea.resources.tree_today
-import app.notekea.core.presentation.components.NotekeaTreeItem
+import app.notekea.resources.tree_collapse_all
+import app.notekea.resources.tree_expand_all
+import app.notekea.resources.tree_minimize
 import app.notekea.resources.tree_sort_by_date
 import app.notekea.resources.tree_sort_by_name
 import app.notekea.resources.tree_sorted_by_date
@@ -43,9 +37,9 @@ import org.jetbrains.compose.resources.stringResource
 private const val PREVIEW_WIDTH_DP = 260
 
 /**
- * Top of the sidebar: the vault's name and folder, the search button that opens the quick switcher (`Mod+P`, shown on
- * it), "Today", which opens today's daily note (`Mod+D`, shown beside it), and the actions on the tree. Every icon has a tooltip with its
- * name and shortcut. The sort button shows the current sort and opens a menu with both choices.
+ * Top of the sidebar, as in an IDE's project panel: the vault's name and folder, then the actions on the tree, each
+ * with a tooltip naming it (and its shortcut): the sort (its icon shows the current one, its menu both choices),
+ * expand all and collapse all folders, and minimize, which hides the sidebar and leaves its tool rail.
  */
 @Composable
 internal fun SidebarHeader(
@@ -53,88 +47,37 @@ internal fun SidebarHeader(
     vaultPath: String,
     sort: TreeSort,
     platformConventions: PlatformConventions,
-    onNewNote: () -> Unit,
-    onNewFolder: () -> Unit,
-    onSortChange: (TreeSort) -> Unit,
-    onHideSidebar: () -> Unit,
-    onSearch: () -> Unit,
-    onToday: () -> Unit
+    actions: SidebarHeaderActions
 ) {
-    Column(
+    Row(
         modifier = Modifier.fillMaxWidth().padding(
             start = NotekeaDimensions.SpacingM,
-            end = NotekeaDimensions.SpacingS,
-            top = NotekeaDimensions.SpacingM
-        )
+            end = NotekeaDimensions.SpacingXs,
+            top = NotekeaDimensions.SpacingS
+        ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        VaultTitle(
+        VaultName(
             vaultName = vaultName,
             vaultPath = vaultPath,
             platformConventions = platformConventions,
-            onHideSidebar = onHideSidebar
+            modifier = Modifier.weight(weight = 1f)
         )
-        NotekeaSearchButton(
-            label = stringResource(resource = Res.string.tree_search),
-            onClick = onSearch,
-            modifier = Modifier.padding(top = NotekeaDimensions.SpacingS, end = NotekeaDimensions.SpacingXs),
-            shortcutHint = platformConventions.quickSwitcherShortcut.label(
-                operatingSystem = platformConventions.operatingSystem
-            )
-        )
-        TodayRow(platformConventions = platformConventions, onToday = onToday)
-        TreeToolbar(
-            sort = sort,
-            platformConventions = platformConventions,
-            onNewNote = onNewNote,
-            onNewFolder = onNewFolder,
-            onSortChange = onSortChange
-        )
-    }
-}
-
-/** "Today", which opens today's daily note, with its shortcut beside it (`ROADMAP.md` 1.10). */
-@Composable
-private fun TodayRow(
-    platformConventions: PlatformConventions,
-    onToday: () -> Unit
-) {
-    NotekeaTreeItem(
-        label = stringResource(resource = Res.string.tree_today),
-        depth = 0,
-        onClick = onToday,
-        icon = NotekeaIcons.Today,
-        modifier = Modifier.padding(top = NotekeaDimensions.SpacingXs, end = NotekeaDimensions.SpacingXs),
-        trailingText = platformConventions.todayShortcut.label(operatingSystem = platformConventions.operatingSystem)
-    )
-}
-
-@Composable
-private fun VaultTitle(
-    vaultName: String,
-    vaultPath: String,
-    platformConventions: PlatformConventions,
-    onHideSidebar: () -> Unit
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Column(modifier = Modifier.weight(weight = 1f)) {
-            Text(
-                text = vaultName,
-                style = MaterialTheme.typography.titleSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = displayPath(path = vaultPath, platformConventions = platformConventions),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+        SortButton(sort = sort, onSortChange = actions.onSortChange)
         NotekeaIconButton(
-            icon = NotekeaIcons.HideSidebar,
-            label = stringResource(resource = Res.string.tree_hide_sidebar),
-            onClick = onHideSidebar,
+            icon = NotekeaIcons.ExpandAll,
+            label = stringResource(resource = Res.string.tree_expand_all),
+            onClick = actions.onExpandAll
+        )
+        NotekeaIconButton(
+            icon = NotekeaIcons.CollapseAll,
+            label = stringResource(resource = Res.string.tree_collapse_all),
+            onClick = actions.onCollapseAll
+        )
+        NotekeaIconButton(
+            icon = NotekeaIcons.Minimize,
+            label = stringResource(resource = Res.string.tree_minimize),
+            onClick = actions.onMinimize,
             shortcutHint = platformConventions.toggleSidebarShortcut.label(
                 operatingSystem = platformConventions.operatingSystem
             )
@@ -142,33 +85,28 @@ private fun VaultTitle(
     }
 }
 
+/** The vault's name and, under it, its folder, each cut with an ellipsis when long. */
 @Composable
-private fun TreeToolbar(
-    sort: TreeSort,
+private fun VaultName(
+    vaultName: String,
+    vaultPath: String,
     platformConventions: PlatformConventions,
-    onNewNote: () -> Unit,
-    onNewFolder: () -> Unit,
-    onSortChange: (TreeSort) -> Unit
+    modifier: Modifier
 ) {
-    Row(
-        modifier = Modifier.padding(top = NotekeaDimensions.SpacingS),
-        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
-    ) {
-        NotekeaIconButton(
-            icon = NotekeaIcons.NewNote,
-            label = stringResource(resource = Res.string.tree_new_note),
-            onClick = onNewNote,
-            shortcutHint = platformConventions.newNoteShortcut.label(
-                operatingSystem = platformConventions.operatingSystem
-            )
+    Column(modifier = modifier) {
+        Text(
+            text = vaultName,
+            style = MaterialTheme.typography.titleSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
-        NotekeaIconButton(
-            icon = NotekeaIcons.NewFolder,
-            label = stringResource(resource = Res.string.tree_new_folder),
-            onClick = onNewFolder
+        Text(
+            text = displayPath(path = vaultPath, platformConventions = platformConventions),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
-        Spacer(modifier = Modifier.weight(weight = 1f))
-        SortButton(sort = sort, onSortChange = onSortChange)
     }
 }
 
@@ -206,12 +144,7 @@ private fun SidebarHeaderPreview() {
                 vaultPath = TreePreviewData.VAULT_PATH,
                 sort = TreeSort.NAME,
                 platformConventions = PreviewPlatformConventions.linux,
-                onNewNote = {},
-                onNewFolder = {},
-                onSortChange = {},
-                onHideSidebar = {},
-                onSearch = {},
-                onToday = {}
+                actions = SidebarHeaderActions(onSortChange = {}, onExpandAll = {}, onCollapseAll = {}, onMinimize = {})
             )
         }
     }

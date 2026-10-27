@@ -18,7 +18,7 @@ class SmokeTabsTest {
         .toList() + File(SMOKE_ATTACHMENTS).listFiles().orEmpty().map { RelativePath(value = "attachments/" + it.name) }
 
     @Test
-    fun `1_11-09 Images and files shows the plate on its card, and the attachments grid lists its files`() = runTest {
+    fun `1_11-11 Images and files shows the plate on its card, and the attachments grid lists its files`() = runTest {
         val note = RelativePath(value = "Editor/Images and files.md")
         val store = FakeNoteContentStore().apply { texts[note] = File(SMOKE_NOTE).readText() }
         val cover = GetNoteCoverUseCase(noteContentStore = store, vaultSettingsReader = FakeVaultSettingsReader())(

@@ -20,6 +20,10 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.WindowState
+import androidx.compose.ui.Alignment
+import app.notekea.core.presentation.platform.WindowSizes
 import app.notekea.core.crash.domain.RecordedCrash
 import app.notekea.core.crash.presentation.CrashNoticeContent
 import app.notekea.core.crash.presentation.CrashReportActions
@@ -62,9 +66,7 @@ private const val GALLERY_PROPERTY = "notekea.gallery"
 private const val GALLERY_TITLE = "Notekea — Design system gallery"
 private const val GALLERY_WIDTH_DP = 1280
 private const val TITLE_SEPARATOR = " — "
-private const val WINDOW_HEIGHT_DP = 720
 private const val WINDOW_TITLE = "Notekea"
-private const val WINDOW_WIDTH_DP = 1080
 
 /**
  * Starts Notekea. Errors are kept as crash reports from the first moment ([CrashReporter]): any thread, and the window,
@@ -159,6 +161,11 @@ private fun ApplicationScope.NotekeaWindow(
     val closeGuard = remember { WindowCloseGuard() }
     val scope = rememberCoroutineScope()
     var isClosing by remember { mutableStateOf(value = false) }
+    val windowState = rememberWindowState(
+        size = WindowSizes.welcome,
+        position = WindowPosition.Aligned(alignment = Alignment.Center)
+    )
+    val onVaultNameChange = remember(windowState) { followVault(state = windowState) { title = it } }
     Window(
         onCloseRequest = {
             if (!isClosing) {
@@ -170,7 +177,7 @@ private fun ApplicationScope.NotekeaWindow(
             }
         },
         title = title,
-        state = rememberWindowState(width = WINDOW_WIDTH_DP.dp, height = WINDOW_HEIGHT_DP.dp),
+        state = windowState,
         onPreviewKeyEvent = shortcutDispatcher::dispatch
     ) {
         CompositionLocalProvider(
@@ -179,14 +186,40 @@ private fun ApplicationScope.NotekeaWindow(
             LocalResizePointerIcon provides PointerIcon(cursor = Cursor(Cursor.E_RESIZE_CURSOR))
         ) {
             if (isCrashTest) CrashTest()
-            App {
-                WelcomeScreen(
-                    onVaultNameChange = { name -> title = windowTitle(vaultName = name) },
-                    openedVaultContent = { vault, onSwitchVault ->
-                        VaultTreeScreen(vaultPath = vault.path, vaultName = vault.name, onSwitchVault = onSwitchVault)
-                    }
-                )
+            WindowContent(onVaultNameChange = onVaultNameChange)
+        }
+    }
+}
+
+/** The app: the welcome screen, then the open vault's workspace; [onVaultNameChange] reports the open vault's name. */
+@Composable
+private fun WindowContent(
+    onVaultNameChange: (String?) -> Unit
+) {
+    App {
+        WelcomeScreen(
+            onVaultNameChange = onVaultNameChange,
+            openedVaultContent = { vault, onSwitchVault ->
+                VaultTreeScreen(vaultPath = vault.path, vaultName = vault.name, onSwitchVault = onSwitchVault)
             }
+        )
+    }
+}
+
+/**
+ * What the window does when the open vault changes: its title names the vault, and its size follows the screen, the
+ * workspace large enough for the sidebar, the note and the outline, the welcome screen small ([WindowSizes]).
+ */
+private fun followVault(
+    state: WindowState,
+    onTitle: (String) -> Unit
+): (String?) -> Unit {
+    var isWorkspace = false
+    return { name ->
+        onTitle(windowTitle(vaultName = name))
+        if ((name != null) != isWorkspace) {
+            isWorkspace = name != null
+            WindowSizes.fit(state = state, isWorkspace = isWorkspace)
         }
     }
 }

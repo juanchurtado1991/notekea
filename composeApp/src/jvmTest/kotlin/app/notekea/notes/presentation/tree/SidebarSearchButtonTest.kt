@@ -11,8 +11,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The "Search notes" button at the top of the sidebar (1.6 smoke: search was hidden behind a shortcut): clicking it
- * opens the search, and clicking the tree below it does not.
+ * The "Search notes" button (1.6 smoke: search was hidden behind a shortcut), now on the tool rail (1.11): clicking it
+ * opens the search, and clicking the tree beside it does not.
  */
 class SidebarSearchButtonTest {
     @Test
@@ -50,7 +50,7 @@ class SidebarSearchButtonTest {
         private const val FRAME_NANOS = 16_000_000L
         private const val WINDOW_HEIGHT = 560
         private const val WINDOW_WIDTH = 1_100
-        private val SEARCH_BUTTON = Offset(x = 190f, y = 108f)
+        private val SEARCH_BUTTON = Offset(x = 30f, y = 81f)
         private val TREE_ROW = Offset(x = 190f, y = 295f)
     }
 }

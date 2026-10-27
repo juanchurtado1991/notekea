@@ -82,6 +82,8 @@ class VaultTreeViewModel(
             is VaultTreeIntent.OnDeleteRequest -> reduce { it.copy(pendingDelete = intent.path ?: it.selectedPath) }
             VaultTreeIntent.OnErrorDismiss -> reduce { it.copy(actionError = null, hasUnexpectedError = false) }
             VaultTreeIntent.OnExpandSelected -> updateTree(transform = ::reduceExpandSelected)
+            VaultTreeIntent.OnExpandAll -> updateTree { it.copy(expandedFolders = it.tree.folders) }
+            VaultTreeIntent.OnCollapseAll -> updateTree { it.copy(expandedFolders = emptySet()) }
             is VaultTreeIntent.OnFollowLink -> follow(intent = intent)
             is VaultTreeIntent.OnNewFolderClick -> create(baseName = intent.baseName, isFolder = true)
             is VaultTreeIntent.OnNewNoteClick -> create(baseName = intent.baseName, isFolder = false)

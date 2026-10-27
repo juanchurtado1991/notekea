@@ -152,6 +152,7 @@
     <string name="outline_empty_title">This note has no headings</string>
     <string name="outline_label">Headings of this note</string>
     <string name="outline_tab">Outline</string>
+    <string name="rail_label">Sidebar tools</string>
     <string name="side_panel_hide">Hide side panel</string>
     <string name="switcher_content_hint_message">Type words or a #tag.</string>
     <string name="switcher_content_hint_title">Search inside your notes</string>
@@ -181,6 +182,7 @@
     <string name="tag_picker_no_match_title">No tags match</string>
     <string name="tag_picker_placeholder">Find or create a tag</string>
     <string name="tree_cancel">Cancel</string>
+    <string name="tree_collapse_all">Collapse all folders</string>
     <string name="tree_delete_file">Delete file</string>
     <string name="tree_delete_file_title">Delete this file?</string>
     <string name="tree_delete_folder">Delete folder</string>
@@ -194,7 +196,8 @@
     <string name="tree_delete_note_title">Delete this note?</string>
     <string name="tree_empty_message">Create a note here, or add Markdown files to the folder and they’ll appear.</string>
     <string name="tree_empty_title">This folder has no notes yet</string>
-    <string name="tree_hide_sidebar">Hide sidebar</string>
+    <string name="tree_expand_all">Expand all folders</string>
+    <string name="tree_files">Files</string>
     <plurals name="tree_links_skipped">
         <item quantity="one">1 note couldn’t be updated and was left as it was.</item>
         <item quantity="other">%1$d notes couldn’t be updated and were left as they were.</item>
@@ -208,6 +211,7 @@
         <item quantity="other">Links updated in %1$d notes: %2$s.</item>
     </plurals>
     <string name="tree_loading">Loading notes…</string>
+    <string name="tree_minimize">Minimize sidebar</string>
     <string name="tree_moved_to_vault_trash">“%1$s” is in this vault’s .trash folder, because the system trash isn’t available.</string>
     <string name="tree_new_folder">New folder</string>
     <string name="tree_new_note">New note</string>
@@ -221,7 +225,6 @@
     <string name="tree_search">Search notes</string>
     <string name="tree_select_file">Show file</string>
     <string name="tree_select_note">Select note</string>
-    <string name="tree_show_sidebar">Show sidebar</string>
     <string name="tree_sort_by_date">Date modified, newest first</string>
     <string name="tree_sort_by_name">Name</string>
     <string name="tree_sorted_by_date">Sort notes: date modified</string>
