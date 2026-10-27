@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.tree
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.core.presentation.components.NotekeaTooltip
 import app.notekea.core.presentation.components.NotekeaMenuButton
 import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.platform.displayPath
@@ -37,7 +39,8 @@ import org.jetbrains.compose.resources.stringResource
 private const val PREVIEW_WIDTH_DP = 260
 
 /**
- * Top of the sidebar, as in an IDE's project panel: the vault's name and folder, then the actions on the tree, each
+ * Top of the sidebar, as in an IDE's project panel: the vault's name (its folder in the tooltip), then the actions on
+ * the tree, each
  * with a tooltip naming it (and its shortcut): the sort (its icon shows the current one, its menu both choices),
  * expand all and collapse all folders, and minimize, which hides the sidebar and leaves its tool rail.
  */
@@ -85,7 +88,10 @@ internal fun SidebarHeader(
     }
 }
 
-/** The vault's name and, under it, its folder, each cut with an ellipsis when long. */
+/**
+ * The vault's name, cut with an ellipsis when long; its folder shows in the tooltip, since the status bar already says
+ * which vault is open.
+ */
 @Composable
 private fun VaultName(
     vaultName: String,
@@ -93,20 +99,15 @@ private fun VaultName(
     platformConventions: PlatformConventions,
     modifier: Modifier
 ) {
-    Column(modifier = modifier) {
-        Text(
-            text = vaultName,
-            style = MaterialTheme.typography.titleSmall,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = displayPath(path = vaultPath, platformConventions = platformConventions),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+    Box(modifier = modifier) {
+        NotekeaTooltip(label = displayPath(path = vaultPath, platformConventions = platformConventions)) {
+            Text(
+                text = vaultName,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 

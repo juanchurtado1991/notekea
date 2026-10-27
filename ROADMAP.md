@@ -426,6 +426,13 @@ Frontmatter shown as a compact form above the note content.
   - **Status bar:** under the whole window, as Android Studio's: the vault › folders › file on the left; the vault's
     scan with a thin progress bar while it runs, then the note's line:column (in Edit mode, counted in the file),
     line endings (LF or CRLF), encoding and words on the right.
+  - **Polish:** one surface for the panes, divided by quiet hairlines (no gap down to the window's background);
+    BOOKMARKS and FILES headers in the sidebar like the inspector's; the selected row blue while its list has the
+    keyboard and quiet grey otherwise (the focus ring only for a keyboard row that is not the selected one); tabs at
+    least 96 dp wide, fading out at the strip's end when more are hidden, with a ⌄ listing every open tab; more room
+    between a note's header and its toolbar; reading line height 1.6; brighter secondary text; the save state
+    ("Saved" / "Unsaved") always in the status bar instead of beside the title; the vault's folder in the vault
+    name's tooltip, not under it.
   - **Scrollbars:** a thin scrollbar shows on what scrolls (the tree, the outline, About's shortcuts, the recent
     vaults, the welcome screen), only while there is more to see.
   - **Logo:** a placeholder (a cobalt square with an "N") in the window, About and the welcome screen, until the

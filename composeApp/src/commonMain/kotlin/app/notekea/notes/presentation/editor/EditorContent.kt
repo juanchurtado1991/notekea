@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -133,7 +134,6 @@ internal const val NO_LIGATURES = "liga 0, calt 0"
 private const val PATH_SEPARATOR = " / "
 private const val PREVIEW_HEIGHT_DP = 520
 private const val PREVIEW_WIDTH_DP = 760
-private const val SAVED_VISIBLE_MILLIS = 1_000L
 private val SKELETON_WIDTHS = listOf(0.9f, 0.75f, 0.85f, 0.6f, 0.8f, 0.4f)
 
 /**
@@ -297,6 +297,7 @@ private fun EditorPage(
             onIntent = onIntent
         )
         if (state.notePath != null) {
+            Spacer(modifier = Modifier.height(height = NotekeaDimensions.SpacingM))
             EditorToolbar(
                 isReading = state.isReading,
                 platformConventions = platformConventions,
@@ -383,7 +384,6 @@ private fun EditorHeader(
         header.dayNeighbors?.let {
             DayArrows(neighbors = it, platformConventions = platformConventions, onIntent = onIntent)
         }
-        SaveIndicator(status = state.saveStatus)
     }
     state.titleError?.let { error ->
         Text(
@@ -440,38 +440,6 @@ private fun DayArrows(
         shortcutHint = platformConventions.nextDayShortcut.label(operatingSystem = operatingSystem),
         takesFocus = false
     )
-}
-
-/** "Unsaved" while edits wait for the autosave; "Saved" for a second after a save, then nothing. */
-@Composable
-private fun SaveIndicator(
-    status: SaveStatus
-) {
-    var isSavedShown by remember { mutableStateOf(value = false) }
-    LaunchedEffect(status) {
-        isSavedShown = status == SaveStatus.SAVED
-        if (isSavedShown) {
-            delay(timeMillis = SAVED_VISIBLE_MILLIS)
-            isSavedShown = false
-        }
-    }
-    val text = when {
-        status == SaveStatus.UNSAVED -> stringResource(resource = Res.string.editor_unsaved)
-        isSavedShown -> stringResource(resource = Res.string.editor_saved)
-        else -> null
-    }
-    AnimatedVisibility(
-        visible = text != null,
-        enter = fadeIn(),
-        exit = fadeOut(animationSpec = tween(durationMillis = NotekeaDimensions.MOTION_PANEL_MILLIS))
-    ) {
-        Text(
-            text = text.orEmpty(),
-            modifier = Modifier.padding(start = NotekeaDimensions.SpacingM),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
 }
 
 @Composable

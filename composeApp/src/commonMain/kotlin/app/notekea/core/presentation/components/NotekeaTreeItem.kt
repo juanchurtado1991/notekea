@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.collapse
@@ -47,7 +48,9 @@ private const val PREVIEW_WIDTH_DP = 260
  * One row of a tree (the vault sidebar, a note's outline): indentation by [depth], a chevron for folders
  * ([isExpanded] is null for leaves, which keep the chevron's space so names align), an icon unless [icon] is null (an
  * outline's headings), the [label] and optional [trailingText] (a note count). Rows are not focus stops: the tree is
- * one focusable element moved with the arrow keys, and the row it is on draws the focus ring when [focused]. Rows are
+ * one focusable element moved with the arrow keys. As in Finder and VS Code, the [selected] row is filled in the
+ * selection color while the tree has the keyboard ([focused]) and in a quiet grey otherwise; the keyboard's row, when it
+ * is not the selected one (an outline's), draws the focus ring. Rows are
  * transparent, so they sit on the panel that holds the tree. [badge] marks the row after its label (a bookmark's
  * star). [labelContent] replaces the label, for renaming in place;
  * it must keep its keys (a field consumes Space), or a key leaving it would click the row. Screen readers get the
@@ -75,11 +78,11 @@ fun NotekeaTreeItem(
         modifier = modifier
             .fillMaxWidth()
             .height(height = NotekeaDimensions.TreeRowHeight)
-            .then(if (focused) Modifier.border(NotekeaDimensions.FocusRingWidth, colors.primary, shape) else Modifier)
+            .focusRing(isShown = focused && !selected, color = colors.primary, shape = shape)
             .treeSemantics(selected = selected, isExpanded = isExpanded, onToggleExpanded = onToggleExpanded),
         shape = shape,
-        color = if (selected) colors.primaryContainer else Color.Transparent,
-        contentColor = if (selected) colors.onPrimaryContainer else colors.onSurface
+        color = rowColor(selected = selected, focused = focused),
+        contentColor = if (selected && focused) colors.onPrimaryContainer else colors.onSurface
     ) {
         Row(
             modifier = Modifier
@@ -91,15 +94,7 @@ fun NotekeaTreeItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Chevron(isExpanded = isExpanded, onToggleExpanded = onToggleExpanded)
-            icon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = null,
-                    modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-                    tint = if (selected) LocalContentColor.current else colors.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
-            }
+            icon?.let { RowIcon(icon = it, selected = selected) }
             Box(modifier = Modifier.weight(weight = 1f)) {
                 labelContent?.invoke() ?: TreeLabel(label = label)
             }
@@ -107,6 +102,39 @@ fun NotekeaTreeItem(
             trailingText?.let { TrailingText(text = it) }
         }
     }
+}
+
+/** The keyboard's row's ring, when [isShown]. */
+private fun Modifier.focusRing(
+    isShown: Boolean,
+    color: Color,
+    shape: Shape
+): Modifier = if (isShown) border(width = NotekeaDimensions.FocusRingWidth, color = color, shape = shape) else this
+
+/** The row's icon, in the row's own color while selected and muted otherwise, then a gap before the label. */
+@Composable
+private fun RowIcon(
+    icon: ImageVector,
+    selected: Boolean
+) {
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        modifier = Modifier.size(size = NotekeaDimensions.IconSize),
+        tint = if (selected) LocalContentColor.current else MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
+}
+
+/** The selection color while the tree has the keyboard, a quiet grey for a selection without it, else nothing. */
+@Composable
+private fun rowColor(
+    selected: Boolean,
+    focused: Boolean
+): Color = when {
+    selected && focused -> MaterialTheme.colorScheme.primaryContainer
+    selected -> MaterialTheme.colorScheme.surfaceVariant
+    else -> Color.Transparent
 }
 
 @Composable

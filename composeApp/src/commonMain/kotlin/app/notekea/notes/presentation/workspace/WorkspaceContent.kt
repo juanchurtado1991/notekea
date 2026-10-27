@@ -45,6 +45,7 @@ import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.VaultTree
 import app.notekea.notes.domain.Workspace
 import app.notekea.resources.Res
+import app.notekea.resources.tab_all
 import app.notekea.resources.tab_close
 import app.notekea.resources.tab_close_others
 import app.notekea.resources.tab_move_to_other_pane
@@ -214,6 +215,7 @@ private fun PaneTabs(
         selectedIndex = pane.active,
         isActive = state.workspace.activePane == index,
         closeLabel = stringResource(resource = Res.string.tab_close),
+        allTabsLabel = stringResource(resource = Res.string.tab_all),
         onSelect = { onIntent(WorkspaceIntent.OnTabSelect(pane = index, tab = it)) },
         onClose = { onIntent(WorkspaceIntent.OnTabClose(pane = index, tab = it)) },
         onDrop = { tab, position -> onDrop(pane.tabs[tab], position) },

@@ -23,6 +23,7 @@ import org.jetbrains.compose.resources.Font
 private const val BODY_SIZE_SP = 14
 private const val HEADLINE_SIZE_SP = 28
 private const val LARGE_SIZE_SP = 16
+private const val READING_LINE_HEIGHT = 1.6f
 private const val SMALL_SIZE_SP = 12
 private const val TITLE_SIZE_SP = 20
 
@@ -48,7 +49,9 @@ fun notekeaTypography(): Typography {
         headlineMedium = base.headlineMedium.withInter(inter, FontWeight.SemiBold, HEADLINE_SIZE_SP),
         titleLarge = base.titleLarge.withInter(inter, FontWeight.SemiBold, TITLE_SIZE_SP),
         titleMedium = base.titleMedium.withInter(inter, FontWeight.Medium, LARGE_SIZE_SP),
-        bodyLarge = base.bodyLarge.withInter(inter, FontWeight.Normal, LARGE_SIZE_SP),
+        // The notes' text, in Edit and Preview: lines as far apart as long reading wants (Bear, iA Writer).
+        bodyLarge = base.bodyLarge.withInter(inter, FontWeight.Normal, LARGE_SIZE_SP)
+            .copy(lineHeight = (LARGE_SIZE_SP * READING_LINE_HEIGHT).sp),
         bodyMedium = base.bodyMedium.withInter(inter, FontWeight.Normal, BODY_SIZE_SP),
         bodySmall = base.bodySmall.withInter(inter, FontWeight.Normal, SMALL_SIZE_SP),
         labelLarge = base.labelLarge.withInter(inter, FontWeight.Medium, BODY_SIZE_SP),

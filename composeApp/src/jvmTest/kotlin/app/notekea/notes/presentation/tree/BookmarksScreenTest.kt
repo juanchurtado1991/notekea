@@ -145,8 +145,8 @@ class BookmarksScreenTest {
         private const val WIDTH = 1100
         private val FIRST_BOOKMARK = Offset(x = 140f, y = 93f)
         private val HEADER = Offset(x = 110f, y = 65f)
-        private val IDEAS_ROW = Offset(x = 110f, y = 189f)
-        private val REMOVE_BOOKMARK_ITEM = Offset(x = 220f, y = 317f)
+        private val IDEAS_ROW = Offset(x = 110f, y = 217f)
+        private val REMOVE_BOOKMARK_ITEM = Offset(x = 220f, y = 189f)
         private val MISSING_REMOVE = Offset(x = 354f, y = 149f)
         private val SECOND_BOOKMARK = Offset(x = 140f, y = 121f)
         private val STAR = Offset(x = 1053f, y = 66f)
