@@ -18,6 +18,9 @@ import app.notekea.notes.domain.FakeFileOpener
 import app.notekea.notes.domain.FakeNoteContentStore
 import app.notekea.notes.domain.FakeNoteFileOperations
 import app.notekea.notes.domain.FakeNoteScanner
+import app.notekea.notes.domain.FakeNoteTimesReader
+import app.notekea.notes.domain.GetNoteStatsUseCase
+import app.notekea.notes.domain.GetNoteTimesUseCase
 import app.notekea.notes.domain.FakeVaultSettingsReader
 import app.notekea.notes.domain.FillTemplateUseCase
 import app.notekea.notes.domain.GetEditorModeUseCase
@@ -47,6 +50,7 @@ class EditorViewModels(dispatcher: CoroutineDispatcher) {
     val picker = FakeAttachmentPicker()
     val clipboard = FakeClipboardReader()
     val opener = FakeFileOpener()
+    val times = FakeNoteTimesReader()
     private val dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
 
     fun create(): EditorViewModel = EditorViewModel(
@@ -86,7 +90,13 @@ class EditorViewModels(dispatcher: CoroutineDispatcher) {
             dispatchers = dispatchers
         ),
         fillTemplate = fillTemplate(),
-        propertyTools = propertyTools()
+        propertyTools = propertyTools(),
+        noteInfoTools = noteInfoTools()
+    )
+
+    private fun noteInfoTools(): NoteInfoTools = NoteInfoTools(
+        getNoteStats = GetNoteStatsUseCase(linkFinder = JetBrainsMarkdownLinkFinder()),
+        getNoteTimes = GetNoteTimesUseCase(noteTimesReader = times)
     )
 
     private fun propertyTools(): PropertyTools = PropertyTools(

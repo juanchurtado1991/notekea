@@ -11,14 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -40,7 +34,6 @@ private const val PREVIEW_EDIT = "Edit"
 private const val PREVIEW_PREVIEW = "Preview"
 private const val PREVIEW_SHORTCUT = "Ctrl+E"
 private const val PREVIEW_WIDTH_DP = 240
-private const val TOOLTIP_SEPARATOR = "  "
 
 /**
  * Tabs as wide as their labels, for a toolbar (the editor's Edit | Preview, like GitHub's): the [selectedIndex] one in
@@ -70,7 +63,6 @@ fun NotekeaCompactTabs(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CompactTab(
     label: String,
@@ -81,14 +73,7 @@ private fun CompactTab(
 ) {
     val colors = MaterialTheme.colorScheme
     val color = if (isSelected) colors.primary else colors.onSurfaceVariant
-    TooltipBox(
-        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(positioning = TooltipAnchorPosition.Below),
-        tooltip = {
-            PlainTooltip { Text(text = listOfNotNull(label, shortcutHint).joinToString(separator = TOOLTIP_SEPARATOR)) }
-        },
-        state = rememberTooltipState(),
-        hasAction = false
-    ) {
+    NotekeaTooltip(label = label, shortcutHint = shortcutHint) {
         Column(
             modifier = Modifier
                 .focusProperties { canFocus = takesFocus }

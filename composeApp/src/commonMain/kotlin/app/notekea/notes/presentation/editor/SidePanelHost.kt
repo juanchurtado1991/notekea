@@ -47,6 +47,6 @@ class SidePanelHost(
         fun isRequest(
             intent: EditorIntent
         ): Boolean = intent == EditorIntent.OnSidePanelToggle || intent == EditorIntent.OnOutlineFocusRequest ||
-            intent is EditorIntent.OnSidePanelResize
+            intent is EditorIntent.OnSidePanelResize || intent is EditorIntent.OnSidePanelSectionToggle
     }
 }

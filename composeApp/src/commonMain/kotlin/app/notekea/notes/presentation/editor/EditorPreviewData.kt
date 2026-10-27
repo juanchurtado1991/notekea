@@ -3,8 +3,9 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.foundation.text.input.TextFieldState
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.domain.time.CalendarDate
+import app.notekea.core.domain.time.LocalMoment
+import app.notekea.notes.domain.NoteStats
 import app.notekea.notes.domain.FrontmatterContent
-import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.NoteProperty
 import app.notekea.notes.domain.PropertyValue
 import app.notekea.notes.domain.OutlineFinder
@@ -21,8 +22,6 @@ internal object EditorPreviewData {
     val platformConventions = PreviewPlatformConventions.linux
 
     val path = RelativePath(value = "Recipes/Arepas.md")
-
-    val properties = NoteMetadata(title = null, tags = listOf("recipe", "venezuelan"), aliases = listOf("Arepa"))
 
     /** The sample note's frontmatter as the properties view shows it: one property of each type. */
     val typedProperties = FrontmatterContent.Properties(
@@ -42,6 +41,13 @@ internal object EditorPreviewData {
 
     /** The headings of the sample body. */
     val outline = OutlineFinder().headings(text = BODY)
+
+    /** Note info for the sample note. */
+    val info = NoteInfo(
+        stats = NoteStats(words = 412, links = 3, tags = 2, tasks = 5, doneTasks = 2),
+        createdAt = LocalMoment(date = CalendarDate(year = 2026, month = 10, day = 12), hour = 9, minute = 30),
+        modifiedAt = LocalMoment(date = CalendarDate(year = 2026, month = 10, day = 27), hour = 10, minute = 42)
+    )
 
     fun state(): EditorState = EditorState(notePath = path, outline = outline)
 }

@@ -150,13 +150,11 @@
     <string name="file_panel_open">Open with its app</string>
     <string name="file_panel_unreadable">Notekea can’t show this file here. Open it with its app to see it.</string>
     <string name="file_panel_image_size">Image · %1$d × %2$d</string>
-    <string name="note_panel_empty_message">Pick a note in the sidebar to see it here.</string>
-    <string name="note_panel_empty_title">No note selected</string>
 
     <string name="outline_empty_message">Start a line with # and a space to add a heading. Headings show up here, and a click takes you to one.</string>
     <string name="outline_empty_title">This note has no headings</string>
     <string name="outline_label">Headings of this note</string>
-    <string name="outline_tab">Outline</string>
+    <string name="outline_title">Outline</string>
     <string name="properties_add">Add property</string>
     <string name="properties_add_item">Add…</string>
     <string name="properties_calendar">Choose a date</string>
@@ -176,6 +174,16 @@
     <string name="properties_type_text">Text</string>
     <string name="rail_label">Sidebar tools</string>
     <string name="side_panel_hide">Hide side panel</string>
+    <string name="note_info_created">Created</string>
+    <string name="note_info_links">Links</string>
+    <string name="note_info_modified">Modified</string>
+    <string name="note_info_reading">Reading time</string>
+    <string name="note_info_reading_minutes">%1$d min</string>
+    <string name="note_info_tags">Tags</string>
+    <string name="note_info_tasks">Tasks</string>
+    <string name="note_info_tasks_value">%1$d of %2$d</string>
+    <string name="note_info_title">Note info</string>
+    <string name="note_info_words">Words</string>
     <string name="switcher_content_hint_message">Type words or a #tag.</string>
     <string name="switcher_content_hint_title">Search inside your notes</string>
     <string name="switcher_empty_vault_message">Create a note and find it here.</string>

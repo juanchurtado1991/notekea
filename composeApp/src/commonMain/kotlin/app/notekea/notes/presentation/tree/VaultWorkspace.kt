@@ -72,7 +72,8 @@ internal fun VaultWorkspace(
             current = panes[activePane].tracker.current,
             platformConventions = state.platformConventions,
             onHeadingClick = { activeEditor.onIntent(EditorIntent.OnHeadingClick(index = it)) },
-            onLeave = { activeEditor.onIntent(EditorIntent.OnFocusRequest()) }
+            onLeave = { activeEditor.onIntent(EditorIntent.OnFocusRequest()) },
+            info = activeEditorState.info.takeIf { isNoteShown }
         ) {
             WorkspaceContent(
                 state = workspaceState,
@@ -155,7 +156,6 @@ private fun NoteEditor(
         pane = context.panes[pane],
         sidePanel = context.sidePanel,
         isActive = context.workspaceState.workspace.activePane == pane,
-        properties = state.tree.notes[path]?.metadata,
         dayNeighbors = state.dayNeighbors.takeIf { state.selectedPath == path },
         isBookmarked = path in state.bookmarks
     )

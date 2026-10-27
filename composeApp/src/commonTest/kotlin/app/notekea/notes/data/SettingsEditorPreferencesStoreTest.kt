@@ -2,6 +2,7 @@ package app.notekea.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.notes.domain.SidePanelPreferences
+import app.notekea.notes.domain.SidePanelSection
 import com.russhwolf.settings.MapSettings
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -33,20 +34,37 @@ class SettingsEditorPreferencesStoreTest {
     }
 
     @Test
-    fun `the side panel is shown at its default width until it is changed, which is remembered`() =
+    fun `the side panel is shown at its default width, open, until it is changed, which is remembered`() =
         runTest(context = testDispatcher) {
             val firstRun = store.sidePanel()
 
-            store.setSidePanel(preferences = SidePanelPreferences(widthDp = 420, isVisible = false))
+            store.setSidePanel(preferences = CHANGED)
             val nextStore = SettingsEditorPreferencesStore(
                 settings = settings,
                 dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
             )
 
             assertEquals(
-                expected = SidePanelPreferences(widthDp = 340, isVisible = true) to
-                    SidePanelPreferences(widthDp = 420, isVisible = false),
+                expected = SidePanelPreferences(widthDp = 340, isVisible = true) to CHANGED,
                 actual = firstRun to nextStore.sidePanel()
             )
         }
+
+    @Test
+    fun `a folded section of another version is left out`() = runTest(context = testDispatcher) {
+        settings.putString(key = "editor.side_panel_folded", value = "BACKLINKS,NOTE_INFO")
+
+        assertEquals(
+            expected = setOf(SidePanelSection.NOTE_INFO),
+            actual = store.sidePanel().foldedSections
+        )
+    }
+
+    private companion object {
+        val CHANGED = SidePanelPreferences(
+            widthDp = 420,
+            isVisible = false,
+            foldedSections = setOf(SidePanelSection.OUTLINE, SidePanelSection.NOTE_INFO)
+        )
+    }
 }

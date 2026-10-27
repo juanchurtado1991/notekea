@@ -21,11 +21,14 @@ import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.notes.data.OkioNoteContentStore
+import app.notekea.notes.data.OkioNoteTimesReader
 import app.notekea.notes.data.OkioNoteFileOperations
 import app.notekea.notes.data.OkioNoteScanner
 import app.notekea.notes.data.SettingsEditorPreferencesStore
 import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.GetEditorModeUseCase
+import app.notekea.notes.domain.GetNoteStatsUseCase
+import app.notekea.notes.domain.GetNoteTimesUseCase
 import app.notekea.notes.domain.SaveEditorModeUseCase
 import com.russhwolf.settings.MapSettings
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
@@ -209,16 +212,14 @@ class EditorOnDiskTest {
             getEditorMode = GetEditorModeUseCase(editorPreferencesStore = preferences),
             saveEditorMode = SaveEditorModeUseCase(editorPreferencesStore = preferences),
             attachmentTools = attachmentTools(dispatchers = dispatchers),
-            fillTemplate = FillTemplateUseCase(
-                vaultSettingsReader = ObsidianVaultSettingsReader(
-                    fileSystem = FileSystem.SYSTEM,
-                    dispatchers = dispatchers
-                ),
-                noteContentStore = store,
-                localCalendar = FakeLocalCalendar(),
-                clock = Clock.System
-            ),
-            propertyTools = propertyTools(preferences = preferences)
+            fillTemplate = fillTemplate(store = store, dispatchers = dispatchers),
+            propertyTools = propertyTools(preferences = preferences),
+            noteInfoTools = NoteInfoTools(
+                getNoteStats = GetNoteStatsUseCase(linkFinder = JetBrainsMarkdownLinkFinder()),
+                getNoteTimes = GetNoteTimesUseCase(
+                    noteTimesReader = OkioNoteTimesReader(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
+                )
+            )
         )
     }
 

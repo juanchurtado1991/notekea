@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.workspace
 
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.SidePanelSection
 import app.notekea.notes.domain.VaultTree
 
 /** What the user did with the tabs and panes, or what the panes around them report. */
@@ -69,6 +70,8 @@ sealed interface WorkspaceIntent {
 
     data class OnSidePanelResize(val widthDp: Int) : WorkspaceIntent
 
-    /** `Mod+Shift+O`: the outline takes the keyboard, the panel shown first if it was hidden. */
+    data class OnSidePanelSectionToggle(val section: SidePanelSection) : WorkspaceIntent
+
+    /** `Mod+Shift+O`: the outline takes the keyboard, the panel shown and the outline opened first if they were not. */
     data object OnOutlineFocusRequest : WorkspaceIntent
 }

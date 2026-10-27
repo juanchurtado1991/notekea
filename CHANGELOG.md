@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The side panel is an inspector (ROADMAP 1.14): its Outline and Note info sections fold on their own, remembered, in
+  place of tabs; `Mod+Shift+O` opens a folded outline.
 - Plan for the editor's memory (`ROADMAP.md` 1.18): measure the editor alone on the three systems with a 5,000-note
   vault, check that opening and closing notes gives the memory back, and cut it to under 400 MB before M2.
 - Plan for memory (`ROADMAP.md` 3.0, 3.1, 3.2, 5.4): the inference spike measures memory per model and context and
@@ -68,9 +70,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Properties view (ROADMAP 1.14): a note's frontmatter shows as a foldable form under its title, each property typed
-  (text, list, number, checkbox, date picked on a compact calendar) and edited in place on a soft card, with Add property (also in the toolbar's More), rename and
-  remove; Show source edits the YAML as written, and YAML the form cannot read is shown that way with an explanation.
-  Every edit rewrites only its property's lines.
+  (text, list, number, checkbox, date picked on a compact calendar) and edited in place on a soft card, with Add
+  property (also in the toolbar's More), rename and remove; Show source edits the YAML as written, and YAML the form
+  cannot read is shown that way with an explanation. Every edit rewrites only its property's lines.
+- Note info (ROADMAP 1.14): a side panel section with the note's words, reading time, links, tags, tasks done and when
+  its file was created and modified.
 - Bookmarks (ROADMAP 1.13): the star beside a note's title, "Bookmark" in a tree row's menu or Mod+Shift+B
   bookmark a note, folder or file; the Bookmarks section above the tree opens them, folds, reorders them by dragging
   and removes those gone from the vault. They follow renames and deletions made in Notekea and are kept per vault in
