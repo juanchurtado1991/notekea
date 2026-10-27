@@ -7,7 +7,7 @@ guide of their system: [Windows](GUIDE_WINDOWS.md), [macOS](GUIDE_MACOS.md), [Li
 ## When
 
 - When the last feature of a milestone (M1, M2, M3, M4) is merged into `main`, before any work on the next milestone.
-- The M5 run is the release run (`ROADMAP.md` 5.4), with signed builds.
+- The M5 run is the release run (`ROADMAP.md` 5.4), with the release builds, which are not signed (`ROADMAP.md` 5.3).
 - **The M1 run is the first one and is retroactive**: it covers everything built since M0 (the "General" cases and
   all M1 cases of `MVP_SMOKE_TEST.md`) and the UI tests written for every screen that existed before the UI test
   infrastructure.

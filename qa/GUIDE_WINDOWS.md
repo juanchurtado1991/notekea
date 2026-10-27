@@ -17,7 +17,7 @@ download:
 ## 1. Install the app
 
 1. Double-click `Notekea-<version>.msi`.
-2. Windows may show **"Windows protected your PC"**. This appears because test builds are not signed yet. Click
+2. Windows may show **"Windows protected your PC"**. This appears because Notekea's builds are not signed. Click
    **More info**, then **Run anyway**.
 3. Follow the installer and finish. Notekea is now in the Start menu.
 
