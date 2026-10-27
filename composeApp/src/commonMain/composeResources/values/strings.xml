@@ -252,6 +252,18 @@
     <string name="switcher_placeholder_link">Choose a note to link</string>
     <string name="switcher_placeholder_notes">Find a note by name or alias</string>
     <string name="switcher_searching">Searching</string>
+    <string name="status_crlf">CRLF</string>
+    <string name="status_cursor">%1$d:%2$d</string>
+    <string name="status_cursor_tooltip">Line %1$d, column %2$d</string>
+    <string name="status_encoding">UTF-8</string>
+    <string name="status_encoding_tooltip">Text encoding</string>
+    <string name="status_lf">LF</string>
+    <string name="status_line_endings_tooltip">Line endings</string>
+    <string name="status_loading">Loading notes…</string>
+    <plurals name="status_words">
+        <item quantity="one">%1$d word</item>
+        <item quantity="other">%1$d words</item>
+    </plurals>
     <string name="tab_close">Close tab</string>
     <string name="tab_close_others">Close other tabs</string>
     <string name="tab_missing_message">It was moved or deleted outside Notekea. Close the tab, or find it in the sidebar.</string>
