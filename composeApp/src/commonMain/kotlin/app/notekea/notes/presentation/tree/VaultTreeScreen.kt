@@ -3,10 +3,10 @@ package app.notekea.notes.presentation.tree
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
@@ -14,36 +14,40 @@ import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.LinkResolver
-import app.notekea.notes.domain.TagRanking
 import app.notekea.notes.domain.NoteEntry
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.TagRanking
+import app.notekea.notes.domain.Workspace
 import app.notekea.notes.presentation.editor.EditorIntent
-import app.notekea.notes.presentation.editor.EditorScreen
+import app.notekea.notes.presentation.editor.EditorPaneTools
 import app.notekea.notes.presentation.editor.EditorViewModel
+import app.notekea.notes.presentation.editor.SidePanelHost
 import app.notekea.notes.presentation.switcher.QuickSwitcherContent
 import app.notekea.notes.presentation.switcher.QuickSwitcherEffect
 import app.notekea.notes.presentation.switcher.QuickSwitcherIntent
 import app.notekea.notes.presentation.switcher.QuickSwitcherMode
-import app.notekea.notes.presentation.switcher.QuickSwitcherPurpose
 import app.notekea.notes.presentation.switcher.QuickSwitcherViewModel
-import app.notekea.resources.Res
-import app.notekea.resources.tree_untitled_note
 import app.notekea.notes.presentation.tags.TagPickerContent
 import app.notekea.notes.presentation.tags.TagPickerEffect
 import app.notekea.notes.presentation.tags.TagPickerIntent
 import app.notekea.notes.presentation.tags.TagPickerViewModel
+import app.notekea.notes.presentation.workspace.WorkspaceEffect
+import app.notekea.notes.presentation.workspace.WorkspaceIntent
+import app.notekea.notes.presentation.workspace.WorkspaceShortcuts
+import app.notekea.notes.presentation.workspace.WorkspaceViewModel
+import app.notekea.resources.Res
+import app.notekea.resources.tree_untitled_note
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 /**
- * Vault workspace entry point for the vault at [vaultPath]: one [VaultTreeViewModel], one [EditorViewModel] and one
- * [QuickSwitcherViewModel] per vault (opening another vault starts fresh), rendered by [VaultTreeContent] with the
- * editor for the selected note and the quick switcher palette over both. They follow each other: a rename in the tree
- * moves the open note in the editor, a rename from the editor's title selects the note at its new path, a note chosen
- * in the palette is selected in the tree (which opens it), a `#tag` clicked in Read mode opens the palette's content
- * search with the tag typed, and the toolbar's Tag opens the tag picker ([TagPickerViewModel]) over the workspace. The new-note, toggle-sidebar, quick switcher and search shortcuts work whatever
- * has focus.
+ * Vault workspace entry point for the vault at [vaultPath]: one [VaultTreeViewModel], one [WorkspaceViewModel] for the
+ * tabs and panes, one [EditorViewModel] per pane and one [QuickSwitcherViewModel] per vault (opening another vault
+ * starts fresh), rendered by [VaultWorkspace] with the quick switcher palette and the tag picker over it. They follow
+ * each other: what the tree opens (a click, a link, the quick switcher, Today) opens in a tab, and the tree selects the
+ * active tab's file; a rename moves the tabs and the editors' notes, a deletion closes its tabs; the palette and the
+ * tag picker work on the note of the active pane. The workspace shortcuts work whatever has focus.
  */
 @Composable
 fun VaultTreeScreen(
@@ -52,100 +56,189 @@ fun VaultTreeScreen(
     onSwitchVault: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: VaultTreeViewModel = koinViewModel(key = vaultPath) { parametersOf(vaultPath) },
-    editorViewModel: EditorViewModel = koinViewModel(key = EDITOR_KEY_PREFIX + vaultPath) { parametersOf(vaultPath) },
+    workspaceViewModel: WorkspaceViewModel = koinViewModel(
+        key = WORKSPACE_KEY_PREFIX + vaultPath
+    ) { parametersOf(vaultPath) },
+    editorViewModels: List<EditorViewModel> = List(size = Workspace.MAX_PANES) { pane ->
+        koinViewModel(key = EDITOR_KEY_PREFIX + pane + vaultPath) { parametersOf(vaultPath) }
+    },
     switcherViewModel: QuickSwitcherViewModel = koinViewModel(
         key = SWITCHER_KEY_PREFIX + vaultPath
     ) { parametersOf(vaultPath) },
     tagPickerViewModel: TagPickerViewModel = koinViewModel(key = TAG_PICKER_KEY_PREFIX + vaultPath)
 ) {
     val state by viewModel.state.collectAsState()
+    val workspaceState by workspaceViewModel.state.collectAsState()
     val switcherState by switcherViewModel.state.collectAsState()
     val tagPickerState by tagPickerViewModel.state.collectAsState()
-    WorkspaceFollowers(
-        state = state,
-        viewModel = viewModel,
-        editorViewModel = editorViewModel,
-        switcherViewModel = switcherViewModel
+    val activeEditor = editorViewModels[workspaceState.workspace.activePane]
+    val panes = remember(vaultPath) { List(size = Workspace.MAX_PANES) { EditorPaneTools() } }
+    val sidePanel = remember(workspaceViewModel) {
+        SidePanelHost(send = { workspaceViewModel.onIntent(intent = workspaceIntentOf(intent = it)) })
+    }
+    val viewModels = WorkspaceViewModels(
+        tree = viewModel,
+        workspace = workspaceViewModel,
+        editors = editorViewModels,
+        onSwitcher = switcherViewModel::onIntent,
+        onTagPicker = tagPickerViewModel::onIntent
     )
-    FollowTagPicker(
-        tagPickerViewModel = tagPickerViewModel,
-        editorViewModel = editorViewModel,
-        notes = state.tree.notes.values
-    )
+    WorkspaceFollowers(state = state, viewModels = viewModels, sidePanel = sidePanel)
+    FollowQuickSwitcher(switcher = switcherViewModel, tree = viewModel, editor = activeEditor, notes = state.tree.notes)
+    FollowTagPicker(tagPicker = tagPickerViewModel, editor = activeEditor, notes = state.tree.notes.values)
     Box(modifier = modifier) {
-        Workspace(
+        VaultWorkspace(
             state = state,
+            workspaceState = workspaceState,
             vaultName = vaultName,
-            viewModel = viewModel,
-            editorViewModel = editorViewModel,
-            onSwitchVault = onSwitchVault,
-            onSwitcher = switcherViewModel::onIntent,
-            onTagPicker = tagPickerViewModel::onIntent
+            viewModels = viewModels,
+            panes = panes,
+            sidePanel = sidePanel,
+            onSwitchVault = onSwitchVault
         )
         QuickSwitcherContent(state = switcherState, onIntent = switcherViewModel::onIntent)
         TagPickerContent(state = tagPickerState, onIntent = tagPickerViewModel::onIntent)
     }
 }
 
+/** The side panel's requests from the editor's toolbar and outline, as the tabs' intents. */
+private fun workspaceIntentOf(
+    intent: EditorIntent
+): WorkspaceIntent = when (intent) {
+    is EditorIntent.OnSidePanelResize -> WorkspaceIntent.OnSidePanelResize(widthDp = intent.widthDp)
+    EditorIntent.OnOutlineFocusRequest -> WorkspaceIntent.OnOutlineFocusRequest
+    else -> WorkspaceIntent.OnSidePanelToggle
+}
+
 /** The window shortcuts of the workspace, and the view models following each other's effects. */
 @Composable
 private fun WorkspaceFollowers(
     state: VaultTreeState,
-    viewModel: VaultTreeViewModel,
-    editorViewModel: EditorViewModel,
-    switcherViewModel: QuickSwitcherViewModel
+    viewModels: WorkspaceViewModels,
+    sidePanel: SidePanelHost
 ) {
     val untitledNote = stringResource(resource = Res.string.tree_untitled_note)
-    WindowShortcut(shortcut = state.platformConventions.newNoteShortcut) {
-        viewModel.onIntent(intent = VaultTreeIntent.OnNewNoteClick(baseName = untitledNote))
+    val conventions = state.platformConventions
+    val tree = viewModels.tree
+    val workspace = viewModels.workspace
+    WindowShortcut(shortcut = conventions.newNoteShortcut) {
+        tree.onIntent(intent = VaultTreeIntent.OnNewNoteClick(baseName = untitledNote))
     }
-    WindowShortcut(shortcut = state.platformConventions.toggleSidebarShortcut) {
-        viewModel.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
+    WindowShortcut(shortcut = conventions.toggleSidebarShortcut) {
+        tree.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
     }
-    DailyNoteShortcuts(platformConventions = state.platformConventions, onIntent = viewModel::onIntent)
-    QuickSwitcherShortcuts(platformConventions = state.platformConventions, onIntent = switcherViewModel::onIntent)
-    LaunchedEffect(viewModel, editorViewModel) {
-        viewModel.effects.collect { effect -> followRename(effect = effect, editorViewModel = editorViewModel) }
-    }
-    FollowQuickSwitcher(
-        switcherViewModel = switcherViewModel,
-        viewModel = viewModel,
-        editorViewModel = editorViewModel,
-        notes = state.tree.notes
+    DailyNoteShortcuts(platformConventions = conventions, onIntent = tree::onIntent)
+    QuickSwitcherShortcuts(platformConventions = conventions, onIntent = viewModels.onSwitcher)
+    WorkspaceShortcuts(
+        platformConventions = conventions,
+        onIntent = workspace::onIntent,
+        onSidePanelToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) }
     )
+    FollowTree(state = state, viewModel = tree, workspaceViewModel = workspace, editors = viewModels.editors)
+    LaunchedEffect(workspace) {
+        workspace.effects.collect { effect ->
+            when (effect) {
+                WorkspaceEffect.FocusOutline -> sidePanel.focusOutline()
+            }
+        }
+    }
 }
 
 /**
- * The palette searches the tree's notes as they change. A note chosen in it is selected in the tree, and its text
- * takes the keyboard once it opens; closing the palette without choosing gives the keyboard back to the open note.
+ * The tree and the tabs follow each other: what the tree opens gets a tab, its renames and deletions move or close
+ * tabs (and the editors' notes), the tabs learn the vault's files as the tree reads them, and the tree selects the
+ * active tab's file. The second pane's editor closes its note when the panes merge.
+ */
+@Composable
+private fun FollowTree(
+    state: VaultTreeState,
+    viewModel: VaultTreeViewModel,
+    workspaceViewModel: WorkspaceViewModel,
+    editors: List<EditorViewModel>
+) {
+    val workspaceState by workspaceViewModel.state.collectAsState()
+    LaunchedEffect(viewModel, workspaceViewModel) {
+        viewModel.effects.collect { effect ->
+            followTreeEffect(effect = effect, workspace = workspaceViewModel, editors = editors)
+        }
+    }
+    LaunchedEffect(state.tree, state.isLoading) {
+        workspaceViewModel.onIntent(
+            intent = WorkspaceIntent.OnTreeChange(
+                tree = state.tree,
+                isLoaded =
+                !state.isLoading && state.loadError == null
+            )
+        )
+    }
+    val activePath = workspaceState.workspace.activePath
+    val selected by rememberUpdatedState(newValue = state.selectedPath)
+    LaunchedEffect(activePath) {
+        if (activePath != null && activePath != selected) {
+            viewModel.onIntent(intent = VaultTreeIntent.OnRowSelect(path = activePath))
+        }
+    }
+    val isSplit = workspaceState.workspace.isSplit
+    LaunchedEffect(isSplit) {
+        if (!isSplit) editors.drop(n = 1).forEach { it.onIntent(EditorIntent.OnOpen(path = null)) }
+    }
+}
+
+/** What the tree did that the tabs and the editors follow. */
+private fun followTreeEffect(
+    effect: VaultTreeEffect,
+    workspace: WorkspaceViewModel,
+    editors: List<EditorViewModel>
+) {
+    when (effect) {
+        is VaultTreeEffect.OpenEntry -> {
+            workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = effect.path, inBackground = effect.inBackground))
+        }
+
+        is VaultTreeEffect.EntryDeleted -> workspace.onIntent(intent = WorkspaceIntent.OnDeleted(path = effect.path))
+
+        is VaultTreeEffect.EntryRenamed -> {
+            workspace.onIntent(intent = WorkspaceIntent.OnRenamed(from = effect.from, to = effect.to))
+            editors.forEach { editor ->
+                val open = editor.state.value.notePath ?: return@forEach
+                if (open.isWithin(folder = effect.from)) {
+                    editor.onIntent(EditorIntent.OnNoteMoved(path = open.rebased(from = effect.from, to = effect.to)))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The palette searches the tree's notes as they change. A note chosen in it opens in a tab of the active pane, and its
+ * text takes the keyboard once it opens; closing the palette without choosing gives the keyboard back to the open note.
  */
 @Composable
 private fun FollowQuickSwitcher(
-    switcherViewModel: QuickSwitcherViewModel,
-    viewModel: VaultTreeViewModel,
-    editorViewModel: EditorViewModel,
+    switcher: QuickSwitcherViewModel,
+    tree: VaultTreeViewModel,
+    editor: EditorViewModel,
     notes: Map<RelativePath, NoteEntry>
 ) {
-    LaunchedEffect(switcherViewModel, notes) {
-        switcherViewModel.onIntent(intent = QuickSwitcherIntent.OnNotesChange(notes = notes.values))
+    LaunchedEffect(switcher, notes) {
+        switcher.onIntent(intent = QuickSwitcherIntent.OnNotesChange(notes = notes.values))
     }
     val currentNotes by rememberUpdatedState(newValue = notes)
-    LaunchedEffect(switcherViewModel, viewModel, editorViewModel) {
-        switcherViewModel.effects.collect { effect ->
+    val currentEditor by rememberUpdatedState(newValue = editor)
+    LaunchedEffect(switcher, tree) {
+        switcher.effects.collect { effect ->
             when (effect) {
                 is QuickSwitcherEffect.OpenNote -> {
-                    viewModel.onIntent(intent = VaultTreeIntent.OnRevealNote(path = effect.path))
-                    editorViewModel.onIntent(intent = EditorIntent.OnFocusRequest(path = effect.path))
+                    tree.onIntent(intent = VaultTreeIntent.OnRevealNote(path = effect.path))
+                    currentEditor.onIntent(intent = EditorIntent.OnFocusRequest(path = effect.path))
                 }
 
                 is QuickSwitcherEffect.LinkNote -> {
                     val target = LinkResolver(notePaths = currentNotes.keys).wikiTarget(path = effect.path)
-                    editorViewModel.onIntent(
-                        intent = EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target))
-                    )
+                    currentEditor.onIntent(EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target)))
                 }
 
-                QuickSwitcherEffect.Dismissed -> editorViewModel.onIntent(intent = EditorIntent.OnFocusRequest())
+                QuickSwitcherEffect.Dismissed -> currentEditor.onIntent(intent = EditorIntent.OnFocusRequest())
             }
         }
     }
@@ -178,112 +271,27 @@ private fun QuickSwitcherShortcuts(
     }
 }
 
-/** The tree with the editor of the selected note, wired to each other. */
-@Composable
-private fun Workspace(
-    state: VaultTreeState,
-    vaultName: String,
-    viewModel: VaultTreeViewModel,
-    editorViewModel: EditorViewModel,
-    onSwitchVault: () -> Unit,
-    onSwitcher: (QuickSwitcherIntent) -> Unit,
-    onTagPicker: (TagPickerIntent) -> Unit
-) {
-    VaultTreeContent(
-        state = state,
-        vaultName = vaultName,
-        onIntent = viewModel::onIntent,
-        onSwitchVault = onSwitchVault,
-        onSearch = { onSwitcher(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES)) },
-        noteContent = { note ->
-            NoteEditor(
-                note = note,
-                state = state,
-                viewModel = viewModel,
-                editorViewModel = editorViewModel,
-                onSwitcher = onSwitcher,
-                onTagPicker = onTagPicker
-            )
-        }
-    )
-}
-
-/**
- * The editor of the selected note, following the tree: a rename or a closed note is told to the tree, a link opens
- * its note there, a clicked `#tag` is searched, and the toolbar's note link and tag open their pickers.
- */
-@Composable
-private fun NoteEditor(
-    note: NoteEntry,
-    state: VaultTreeState,
-    viewModel: VaultTreeViewModel,
-    editorViewModel: EditorViewModel,
-    onSwitcher: (QuickSwitcherIntent) -> Unit,
-    onTagPicker: (TagPickerIntent) -> Unit
-) {
-    EditorScreen(
-        notePath = note.file.path,
-        viewModel = editorViewModel,
-        platformConventions = state.platformConventions,
-        onRenamed = {
-            viewModel.onIntent(intent = VaultTreeIntent.OnEntryRenamed(from = it.from, to = it.to, links = it.links))
-        },
-        onClosed = { viewModel.onIntent(intent = VaultTreeIntent.OnSelectionClear) },
-        onOpenLink = {
-            viewModel.onIntent(
-                intent = VaultTreeIntent.OnFollowLink(source = it.source, target = it.target, kind = it.kind)
-            )
-        },
-        onSearchTag = { tag ->
-            onSwitcher(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.CONTENT, query = TAG_MARK + tag))
-        },
-        onRequestNoteLink = {
-            onSwitcher(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES, purpose = QuickSwitcherPurpose.LINK))
-        },
-        onRequestTag = { query -> onTagPicker(TagPickerIntent.OnOpen(query = query)) },
-        onDayStep = { viewModel.onIntent(intent = VaultTreeIntent.OnDayStep(step = it)) },
-        properties = note.metadata,
-        dayNeighbors = state.dayNeighbors.takeIf { state.selectedPath == note.file.path }
-    )
-}
-
 /**
  * The tag picker searches the vault's tags as the tree reads them, the most used first. A chosen tag is written in
- * the open note; closing the picker without choosing gives the keyboard back to the note.
+ * the active pane's note; closing the picker without choosing gives the keyboard back to the note.
  */
 @Composable
 private fun FollowTagPicker(
-    tagPickerViewModel: TagPickerViewModel,
-    editorViewModel: EditorViewModel,
+    tagPicker: TagPickerViewModel,
+    editor: EditorViewModel,
     notes: Collection<NoteEntry>
 ) {
-    LaunchedEffect(tagPickerViewModel, notes) {
-        tagPickerViewModel.onIntent(intent = TagPickerIntent.OnTagsChange(tags = TagRanking().byUse(notes = notes)))
+    LaunchedEffect(tagPicker, notes) {
+        tagPicker.onIntent(intent = TagPickerIntent.OnTagsChange(tags = TagRanking().byUse(notes = notes)))
     }
-    LaunchedEffect(tagPickerViewModel, editorViewModel) {
-        tagPickerViewModel.effects.collect { effect ->
+    val currentEditor by rememberUpdatedState(newValue = editor)
+    LaunchedEffect(tagPicker) {
+        tagPicker.effects.collect { effect ->
             val intent = when (effect) {
                 is TagPickerEffect.TagChosen -> EditorIntent.OnFormat(action = FormatAction.Tag(name = effect.name))
                 TagPickerEffect.Dismissed -> EditorIntent.OnFocusRequest()
             }
-            editorViewModel.onIntent(intent = intent)
-        }
-    }
-}
-
-/** A note (or a folder holding it) renamed in the tree: the editor keeps the open note at its new path. */
-private fun followRename(
-    effect: VaultTreeEffect,
-    editorViewModel: EditorViewModel
-) {
-    when (effect) {
-        is VaultTreeEffect.EntryRenamed -> {
-            val open = editorViewModel.state.value.notePath ?: return
-            if (open.isWithin(folder = effect.from)) {
-                editorViewModel.onIntent(
-                    intent = EditorIntent.OnNoteMoved(path = open.rebased(from = effect.from, to = effect.to))
-                )
-            }
+            currentEditor.onIntent(intent = intent)
         }
     }
 }
@@ -291,7 +299,7 @@ private fun followRename(
 private const val EDITOR_KEY_PREFIX = "editor:"
 private const val SWITCHER_KEY_PREFIX = "switcher:"
 private const val TAG_PICKER_KEY_PREFIX = "tags:"
-private const val TAG_MARK = "#"
+private const val WORKSPACE_KEY_PREFIX = "workspace:"
 
 @Preview
 @Composable
@@ -302,8 +310,7 @@ private fun VaultTreeScreenPreview() {
             vaultName = TreePreviewData.VAULT_NAME,
             onIntent = {},
             onSwitchVault = {},
-            onSearch = {},
-            noteContent = { PreviewNoteContent(note = it) }
-        )
+            onSearch = {}
+        ) { PreviewNoteContent(path = TreePreviewData.state().selectedPath) }
     }
 }

@@ -43,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Saving the app settings from two places at once (opening a folder saves the tree's open folders and the tabs) no
+  longer fails with "Something went wrong": saves now run one at a time.
 - The app follows the system's dark mode on Linux (read from the desktop portal: GNOME, KDE, COSMIC); it always
   showed the light theme there.
 - A space typed at the end of a line in a code block now moves the cursor, and the block is shaded as a whole.
@@ -54,6 +56,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Tabs and split panes (ROADMAP 1.11): every note, file or folder opened gets its own tab (an open one goes to its
+  tab); Mod+click or the middle button opens it behind the current tab. Tabs close with ✕, the middle button or Mod+W,
+  cycle with Ctrl+Tab / Ctrl+Shift+Tab and jump with Mod+1…9. Split right (Mod+Shift+D or the tab menu) shows two
+  panes side by side; tabs can be dragged to reorder them or between the panes. A folder opens as a grid of cards, a note's card showing the
+  first picture it embeds. Each note keeps its scroll and cursor while the app runs, and the tabs and split come
+  back when the vault is opened again.
+- A tool rail on the left edge, as in Android Studio, stays when the sidebar is hidden: Files, Search notes, New note,
+  New folder and Today. The sidebar's header gets Expand all, Collapse all and Minimize beside Sort. A hidden sidebar
+  no longer leaves a button over the tabs.
+- New note and New folder open a hidden sidebar, so the new entry is seen where it went with its name ready to type.
+- The window opens large enough for the sidebar, the note and the outline, and keeps that size from the welcome
+  screen to the open vault.
 - Daily notes (ROADMAP 1.10): "Today" in the sidebar and Mod+D open today's note, creating it if needed, in the folder,
   name format and template of Obsidian's Daily notes settings (`.obsidian/daily-notes.json`), or in `Journal/` as
   `YYYY-MM-DD` without them. Today is the date in the computer's time zone. A daily note's header has arrows

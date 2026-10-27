@@ -28,6 +28,12 @@ sealed interface VaultTreeIntent {
 
     data object OnExpandSelected : VaultTreeIntent
 
+    /** The header's Expand all: every folder of the vault opens. */
+    data object OnExpandAll : VaultTreeIntent
+
+    /** The header's Collapse all: every folder closes. */
+    data object OnCollapseAll : VaultTreeIntent
+
     /** Opens a file that is not a note with the system's app for it; null opens the selected one. */
     data class OnFileOpen(val path: RelativePath? = null) : VaultTreeIntent
 
@@ -35,7 +41,8 @@ sealed interface VaultTreeIntent {
     data class OnFollowLink(
         val source: RelativePath,
         val target: String,
-        val kind: LinkKind
+        val kind: LinkKind,
+        val inBackground: Boolean = false
     ) : VaultTreeIntent
 
     /** [baseName] is the localized name of a new folder ("Untitled folder"). */
@@ -58,7 +65,14 @@ sealed interface VaultTreeIntent {
 
     data class OnRevealRequest(val path: RelativePath? = null) : VaultTreeIntent
 
-    data class OnRowClick(val path: RelativePath) : VaultTreeIntent
+    /** A row was clicked: it is selected and opens in a tab, behind the current one when [inBackground]. */
+    data class OnRowClick(
+        val path: RelativePath,
+        val inBackground: Boolean = false
+    ) : VaultTreeIntent
+
+    /** Enter on the selected row: it opens in a tab, as a click does. */
+    data object OnOpenSelected : VaultTreeIntent
 
     /** A note chosen outside the tree (the quick switcher): it is selected, with the folders above it expanded. */
     data class OnRevealNote(val path: RelativePath) : VaultTreeIntent

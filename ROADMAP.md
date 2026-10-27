@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 11 / 17 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 12 / 17 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -65,8 +65,9 @@ One main window with three resizable panes, a status bar, and the native window 
 └──────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Sidebar** (default 260 dp, min 200, collapsible with `Mod+\`): search field, "Today" (daily note),
-  bookmarks, folder tree.
+- **Sidebar** (default 260 dp, min 200, collapsible with `Mod+\`): the vault's name with Sort, Expand all, Collapse
+  all and Minimize, bookmarks, folder tree. A tool rail on its left (Files, Search notes, New note, New folder, Today)
+  stays when it is hidden (1.11).
 - **Editor** (flexible, min 480 dp): tab bar, title, properties, Edit / Read toggle, Markdown content.
   Can be split into two panes side by side.
 - **Right panel** (default 340 dp, min 280, collapsible with `Mod+Shift+\`): tabs **Related**, **Backlinks**,
@@ -317,7 +318,7 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
   ‹ and › to the closest daily notes before and after it that exist (days without a note are skipped, nothing is
   created), greyed out when there is none on that side.
 
-### ⬜ 1.11 Tabs and split panes — `feature/editor-tabs`
+### ✅ 1.11 Tabs and split panes — `feature/editor-tabs` — [notekea#59](https://github.com/juanchurtado1991/notekea/pull/59)
 
 - Each opened note becomes a tab; `Mod+click` (or middle click) opens a link in a new tab.
 - `Mod+W` closes the tab, `Ctrl+Tab` / `Ctrl+Shift+Tab` cycle tabs (on every OS), `Mod+1…9` jump to a tab.
@@ -325,6 +326,30 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
   drag a tab between panes. Maximum two panes in the MVP.
 - Open tabs and splits are restored when the vault is reopened.
 - Tabs live inside the window content; the window keeps its native title bar (`PLATFORM_GUIDELINES.md`).
+- **Opening:** every note, file or folder opened (a click or Enter in the sidebar, a link, the quick switcher, Today,
+  the day arrows, a new note) gets a tab after the active one; one that is already open goes to its tab, in either
+  pane, so two editors never write the same note. `Mod+click` and the middle button open it in a tab behind the
+  current one. The arrow keys in the sidebar only move the selection. The tree selects the active tab's file.
+- **What a tab shows:** a note in its pane's editor (which remembers each note's scroll and cursor while the app runs),
+  another file's preview (Open with its app, Show in Files), or a folder as a grid of cards for what is directly in
+  it, subfolders first: a note's card shows the first picture it embeds, an image's card the image itself. A tab of a
+  file that is gone says so.
+- **Closing:** the tab's ✕, the middle button or `Mod+W`; the tab to the right becomes active. The tab menu also has
+  Close other tabs, and Split right (or Move to the other pane). The "+" after the tabs finds a note to open.
+- **Order:** a tab dragged along its row keeps to the row's line while the other tabs slide aside to open the place
+  it would take; let go, it glides into that place.
+- **Two panes:** Split right moves the active tab to a new pane on the right; a click in a pane makes it the active
+  one (its tabs' line is blue, the editor shortcuts and the outline follow it); a pane left without tabs closes. One
+  side panel serves both panes.
+- **Tool rail:** a narrow strip of icons on the window's left edge, there whether the sidebar is shown or not, as in
+  Android Studio: Files (shows or hides the sidebar), Search notes, New note, New folder and Today, each with a tooltip
+  beside it. The sidebar's header holds the vault's name, then Sort, Expand all, Collapse all and Minimize; the
+  Search notes and Today rows and the New note / New folder buttons move to the rail.
+- **Window size:** the window opens large enough (1440 × 900 dp at most, never larger than the screen's usable area)
+  to show the tool rail, the sidebar, a note and the outline beside it, which are open by default; the welcome screen
+  and a vault's workspace share that size, so the window never resizes itself when a vault opens or closes.
+- **Restore:** each vault's tabs, active tabs and split are saved on every change in the app settings and come back
+  when it opens again, without the tabs of files deleted meanwhile.
 
 ### ⬜ 1.12 Templates — `feature/templates`
 

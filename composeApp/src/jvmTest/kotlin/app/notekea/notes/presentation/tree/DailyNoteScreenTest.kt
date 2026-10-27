@@ -63,21 +63,20 @@ class DailyNoteScreenTest {
             vaultName = VAULT_NAME,
             onIntent = onTreeIntent,
             onSwitchVault = {},
-            onSearch = {},
-            noteContent = {
-                EditorContent(
-                    state = EditorState(notePath = RelativePath(value = NOTE)),
-                    buffer = TextFieldState(initialText = BODY),
-                    platformConventions = PreviewPlatformConventions.linux,
-                    onIntent = onEditorIntent,
-                    dayNeighbors = DayNeighbors(
-                        date = CalendarDate(year = 2026, month = 10, day = 22),
-                        previous = RelativePath(value = PREVIOUS),
-                        next = null
-                    )
+            onSearch = {}
+        ) {
+            EditorContent(
+                state = EditorState(notePath = RelativePath(value = NOTE)),
+                buffer = TextFieldState(initialText = BODY),
+                platformConventions = PreviewPlatformConventions.linux,
+                onIntent = onEditorIntent,
+                dayNeighbors = DayNeighbors(
+                    date = CalendarDate(year = 2026, month = 10, day = 22),
+                    previous = RelativePath(value = PREVIOUS),
+                    next = null
                 )
-            }
-        )
+            )
+        }
     }
 
     companion object {
@@ -90,6 +89,6 @@ class DailyNoteScreenTest {
         private const val WIDTH = 1100
         private val NEXT_ARROW = Offset(x = 1018f, y = 65f)
         private val PREVIOUS_ARROW = Offset(x = 990f, y = 65f)
-        private val TODAY_ROW = Offset(x = 80f, y = 105f)
+        private val TODAY_ROW = Offset(x = 20f, y = 150f)
     }
 }

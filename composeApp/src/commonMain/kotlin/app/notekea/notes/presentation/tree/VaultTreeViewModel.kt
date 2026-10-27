@@ -1,10 +1,8 @@
 package app.notekea.notes.presentation.tree
 
-import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
-import app.notekea.notes.domain.AttachmentStore
 import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.DailyNoteSettings
@@ -14,7 +12,6 @@ import app.notekea.notes.domain.FileOpener
 import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.FollowLinkUseCase
 import app.notekea.notes.domain.GetTreePreferencesUseCase
-import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.RenameEntryUseCase
@@ -33,8 +30,7 @@ import kotlin.time.TimeSource
  * at once (Enter and the field losing focus); only the first confirmation runs. After a rename, the notes that link to
  * the entry are updated in the background, as Obsidian does by default, so no link breaks; a notice says how many
  * notes changed. A choice to keep old links ("Update links when renaming") belongs to Settings (`ROADMAP.md` 5.2).
- * A selected file that is not a note (an image, a PDF) is read and shown beside the tree, and opens with its app
- * (`ROADMAP.md` 1.8). "Today" opens today's daily note, creating it first if needed, and a selected daily note knows the
+ * A file that is not a note (an image, a PDF) opens with its app (`ROADMAP.md` 1.8). "Today" opens today's daily note, creating it first if needed, and a selected daily note knows the
  * daily notes before and after it, to step through them (`ROADMAP.md` 1.10).
  */
 class VaultTreeViewModel(
@@ -52,18 +48,12 @@ class VaultTreeViewModel(
     private val getTreePreferences: GetTreePreferencesUseCase,
     private val saveTreePreferences: SaveTreePreferencesUseCase,
     private val fileOpener: FileOpener,
-    private val days: DailyNoteTools,
-    attachmentStore: AttachmentStore,
-    dispatchers: AppDispatchers
+    private val days: DailyNoteTools
 ) : BaseViewModel<VaultTreeState, VaultTreeIntent, VaultTreeEffect>(
     initialState = VaultTreeState(vaultPath = vaultPath, platformConventions = platformConventions)
 ) {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private var renameJob: Job? = null
-    private val filePreviews =
-        TreeFilePreviews(vaultPath = vaultPath, attachmentStore = attachmentStore, dispatchers = dispatchers)
-    private var previewJob: Job? = null
-    private var previewed: NoteFile? = null
     private val dailyNotes = DailyNotes()
     private var dailySettings = DailyNoteSettings.DEFAULT
 
@@ -92,6 +82,8 @@ class VaultTreeViewModel(
             is VaultTreeIntent.OnDeleteRequest -> reduce { it.copy(pendingDelete = intent.path ?: it.selectedPath) }
             VaultTreeIntent.OnErrorDismiss -> reduce { it.copy(actionError = null, hasUnexpectedError = false) }
             VaultTreeIntent.OnExpandSelected -> updateTree(transform = ::reduceExpandSelected)
+            VaultTreeIntent.OnExpandAll -> updateTree { it.copy(expandedFolders = it.tree.folders) }
+            VaultTreeIntent.OnCollapseAll -> updateTree { it.copy(expandedFolders = emptySet()) }
             is VaultTreeIntent.OnFollowLink -> follow(intent = intent)
             is VaultTreeIntent.OnNewFolderClick -> create(baseName = intent.baseName, isFolder = true)
             is VaultTreeIntent.OnNewNoteClick -> create(baseName = intent.baseName, isFolder = false)
@@ -101,9 +93,10 @@ class VaultTreeViewModel(
             is VaultTreeIntent.OnRenameRequest -> startRename(path = intent.path)
             is VaultTreeIntent.OnRenameTextChange -> changeRenameText(text = intent.text)
             VaultTreeIntent.OnRetryClick -> retry()
-            is VaultTreeIntent.OnRevealNote -> updateTree { reduceReveal(state = it, path = intent.path) }
+            is VaultTreeIntent.OnRevealNote -> reveal(path = intent.path)
             is VaultTreeIntent.OnRevealRequest -> reveal(path = intent.path)
-            is VaultTreeIntent.OnRowClick -> updateTree { reduceRowClick(state = it, path = intent.path) }
+            is VaultTreeIntent.OnRowClick -> clickRow(path = intent.path, inBackground = intent.inBackground)
+            VaultTreeIntent.OnOpenSelected -> openSelected()
             is VaultTreeIntent.OnRowSelect -> reduce { it.copy(selectedPath = intent.path) }
             VaultTreeIntent.OnSelectionClear -> reduce { it.copy(selectedPath = null) }
             VaultTreeIntent.OnSelectNext -> reduce { reduceSelectionMove(state = it, step = 1) }
@@ -115,7 +108,6 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnTodayClick -> openToday()
             is VaultTreeIntent.OnDayStep -> stepDay(step = intent.step)
         }
-        updatePreview()
         updateDay()
     }
 
@@ -125,7 +117,37 @@ class VaultTreeViewModel(
             dailySettings = days.getDailyNoteSettings(vaultPath = vaultPath)
             val outcome = days.openDailyNote(vaultPath = vaultPath)
             updateTree { reduceFollowedLink(state = it, outcome = outcome) }
+            open(path = (outcome as? Outcome.Success)?.value?.path)
         }
+    }
+
+    private fun openSelected() {
+        state.value.selectedPath?.let { clickRow(path = it, inBackground = false) }
+    }
+
+    /** A note, file or folder clicked (or chosen with Enter) opens in a tab; a folder also opens or closes in the tree. */
+    private fun clickRow(
+        path: RelativePath,
+        inBackground: Boolean
+    ) {
+        updateTree { reduceRowClick(state = it, path = path) }
+        open(path = path, inBackground = inBackground)
+    }
+
+    /** An entry chosen outside the tree (the quick switcher) is selected with its folders open, and opened in a tab. */
+    private fun reveal(
+        path: RelativePath
+    ) {
+        updateTree { reduceReveal(state = it, path = path) }
+        open(path = path)
+    }
+
+    /** Asks the tabs to open [path]; [inBackground] keeps the current tab shown (`Mod+click`, middle click). */
+    private fun open(
+        path: RelativePath?,
+        inBackground: Boolean = false
+    ) {
+        path?.let { emit(effect = VaultTreeEffect.OpenEntry(path = it, inBackground = inBackground)) }
     }
 
     private fun stepDay(
@@ -133,7 +155,7 @@ class VaultTreeViewModel(
     ) {
         val neighbors = state.value.dayNeighbors ?: return
         val target = (if (step < 0) neighbors.previous else neighbors.next) ?: return
-        updateTree { reduceReveal(state = it, path = target) }
+        reveal(path = target)
     }
 
     /** Finds the selected note's day neighbors when the selection, the notes or the settings changed. */
@@ -160,32 +182,21 @@ class VaultTreeViewModel(
         }
     }
 
-    /** Reads the selected file that is not a note, again when it changed on disk; clears it when none is selected. */
-    private fun updatePreview() {
-        val file = state.value.selectedPath?.let { state.value.tree.attachments[it] }
-        if (file == previewed) return
-        previewed = file
-        previewJob?.cancel()
-        if (file == null) {
-            reduce { it.copy(filePreview = null) }
-            return
-        }
-        previewJob = launchGuarded(onError = ::showUnexpectedError) {
-            val preview = filePreviews.of(file = file)
-            reduce { if (it.selectedPath == file.path) it.copy(filePreview = preview) else it }
-        }
-    }
-
     private fun changeRenameText(
         text: String
     ) {
         reduce { it.copy(renaming = it.renaming?.copy(text = text, error = null)) }
     }
 
+    /**
+     * Creates a note or folder in the selected folder; a hidden sidebar opens first, so the new entry is seen where it
+     * went, with its name ready to type.
+     */
     private fun create(
         baseName: String,
         isFolder: Boolean
     ) {
+        if (state.value.isSidebarCollapsed) updateTree { it.copy(isSidebarCollapsed = false) }
         launchGuarded(onError = ::showUnexpectedError) {
             val folder = targetFolder(state = state.value)
             val outcome = if (isFolder) {
@@ -194,6 +205,7 @@ class VaultTreeViewModel(
                 createNote(vaultPath = vaultPath, folder = folder, baseName = baseName)
             }
             updateTree { reduceCreated(state = it, outcome = outcome, isFolder = isFolder) }
+            if (!isFolder) open(path = (outcome as? Outcome.Success)?.value)
         }
     }
 
@@ -202,6 +214,7 @@ class VaultTreeViewModel(
         launchGuarded(onError = ::showUnexpectedError) {
             val outcome = deleteEntry(vaultPath = vaultPath, path = path)
             updateTree { reduceDeleted(state = it, path = path, outcome = outcome) }
+            if (outcome is Outcome.Success) emit(effect = VaultTreeEffect.EntryDeleted(path = path))
         }
     }
 
@@ -220,7 +233,6 @@ class VaultTreeViewModel(
                     }
                     isFirstTree = false
                     updateTree { reduceTreeLoaded(state = it, tree = outcome.value) }
-                    updatePreview()
                 }
             }
         }
@@ -252,6 +264,7 @@ class VaultTreeViewModel(
                 kind = intent.kind
             )
             updateTree { reduceFollowedLink(state = it, outcome = outcome) }
+            open(path = (outcome as? Outcome.Success)?.value?.path, inBackground = intent.inBackground)
         }
     }
 

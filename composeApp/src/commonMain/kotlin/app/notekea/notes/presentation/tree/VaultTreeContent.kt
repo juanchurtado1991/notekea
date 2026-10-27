@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.tree
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -11,7 +12,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.components.NotekeaSplitPane
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.notes.domain.NoteEntry
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.TreePreferences
 import kotlin.math.roundToInt
@@ -20,8 +20,8 @@ private const val PREVIEW_HEIGHT_DP = 480
 private const val PREVIEW_WIDTH_DP = 900
 
 /**
- * Stateless vault workspace: the resizable, hideable sidebar with the tree and, beside it, the selected note shown by
- * [noteContent] (the editor). The delete question is shown over both while it waits for an answer.
+ * Stateless vault workspace: the tool rail on the left edge, the resizable, hideable sidebar with the tree and, beside
+ * it, [content]: the editor's tabs and panes (`ROADMAP.md` 1.11). The delete question is shown over both while it waits for an answer.
  */
 @Composable
 fun VaultTreeContent(
@@ -30,38 +30,33 @@ fun VaultTreeContent(
     onIntent: (VaultTreeIntent) -> Unit,
     onSwitchVault: () -> Unit,
     onSearch: () -> Unit,
-    noteContent: @Composable (NoteEntry) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground
     ) {
-        NotekeaSplitPane(
-            panelWidth = state.sidebarWidthDp.dp,
-            onPanelWidthChange = { onIntent(VaultTreeIntent.OnSidebarResize(widthDp = it.value.roundToInt())) },
-            isPanelVisible = !state.isSidebarCollapsed,
-            minPanelWidth = TreePreferences.MIN_SIDEBAR_WIDTH_DP.dp,
-            maxPanelWidth = TreePreferences.MAX_SIDEBAR_WIDTH_DP.dp,
-            panel = {
-                VaultSidebar(
-                    state = state,
-                    vaultName = vaultName,
-                    onIntent = onIntent,
-                    onSwitchVault = onSwitchVault,
-                    onSearch = onSearch
-                )
-            },
-            content = {
-                NoteDetailsPanel(
-                    state = state,
-                    onShowSidebar = { onIntent(VaultTreeIntent.OnSidebarToggle) },
-                    noteContent = noteContent,
-                    onIntent = onIntent
-                )
-            }
-        )
+        Row {
+            SidebarRail(state = state, onIntent = onIntent, onSearch = onSearch)
+            NotekeaSplitPane(
+                panelWidth = state.sidebarWidthDp.dp,
+                onPanelWidthChange = { onIntent(VaultTreeIntent.OnSidebarResize(widthDp = it.value.roundToInt())) },
+                isPanelVisible = !state.isSidebarCollapsed,
+                minPanelWidth = TreePreferences.MIN_SIDEBAR_WIDTH_DP.dp,
+                maxPanelWidth = TreePreferences.MAX_SIDEBAR_WIDTH_DP.dp,
+                panel = {
+                    VaultSidebar(
+                        state = state,
+                        vaultName = vaultName,
+                        onIntent = onIntent,
+                        onSwitchVault = onSwitchVault
+                    )
+                },
+                content = { NoteDetailsPanel(state = state, content = content) }
+            )
+        }
     }
     TreeQuestions(state = state, onIntent = onIntent)
 }
@@ -93,9 +88,8 @@ private fun VaultTreeContentPreviewFrame(
             onIntent = {},
             onSwitchVault = {},
             onSearch = {},
-            noteContent = { PreviewNoteContent(note = it) },
             modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp).height(height = PREVIEW_HEIGHT_DP.dp)
-        )
+        ) { PreviewNoteContent(path = state.selectedPath) }
     }
 }
 

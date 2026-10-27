@@ -20,8 +20,6 @@ import app.notekea.notes.data.OkioNoteScanner
 import app.notekea.notes.data.SettingsEditorPreferencesStore
 import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.GetEditorModeUseCase
-import app.notekea.notes.domain.GetSidePanelUseCase
-import app.notekea.notes.domain.SaveSidePanelUseCase
 import app.notekea.notes.domain.SaveEditorModeUseCase
 import com.russhwolf.settings.MapSettings
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
@@ -195,8 +193,6 @@ class EditorOnDiskTest {
             ),
             getEditorMode = GetEditorModeUseCase(editorPreferencesStore = preferences),
             saveEditorMode = SaveEditorModeUseCase(editorPreferencesStore = preferences),
-            getSidePanel = GetSidePanelUseCase(editorPreferencesStore = preferences),
-            saveSidePanel = SaveSidePanelUseCase(editorPreferencesStore = preferences),
             attachmentTools = attachmentTools(dispatchers = dispatchers)
         )
     }

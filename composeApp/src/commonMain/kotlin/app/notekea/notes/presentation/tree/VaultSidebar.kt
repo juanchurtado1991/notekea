@@ -42,7 +42,6 @@ import app.notekea.resources.tree_new_note
 import app.notekea.resources.tree_notice_dismiss
 import app.notekea.resources.tree_retry
 import app.notekea.resources.tree_switch_vault
-import app.notekea.resources.tree_untitled_folder
 import app.notekea.resources.tree_untitled_note
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.pluralStringResource
@@ -56,7 +55,7 @@ private const val PREVIEW_HEIGHT_DP = 520
 private val SKELETON_ROWS = listOf(0 to 0.55f, 0 to 0.4f, 1 to 0.6f, 1 to 0.5f, 0 to 0.45f, 0 to 0.65f, 1 to 0.5f)
 
 /**
- * The vault sidebar: header with the tree actions, then the tree in one of its states (skeleton while the first scan
+ * The vault sidebar: header with the vault's name and the tree actions, then the tree in one of its states (skeleton while the first scan
  * runs, the error with Retry, the empty vault with a New note action, or the notes), and "Open another vault" at the
  * bottom so the sidebar is never a dead end. Action errors and notices sit above the tree until dismissed.
  */
@@ -65,11 +64,9 @@ internal fun VaultSidebar(
     state: VaultTreeState,
     vaultName: String,
     onIntent: (VaultTreeIntent) -> Unit,
-    onSwitchVault: () -> Unit,
-    onSearch: () -> Unit
+    onSwitchVault: () -> Unit
 ) {
     val untitledNote = stringResource(resource = Res.string.tree_untitled_note)
-    val untitledFolder = stringResource(resource = Res.string.tree_untitled_folder)
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Column {
             SidebarHeader(
@@ -77,12 +74,12 @@ internal fun VaultSidebar(
                 vaultPath = state.vaultPath,
                 sort = state.sort,
                 platformConventions = state.platformConventions,
-                onNewNote = { onIntent(VaultTreeIntent.OnNewNoteClick(baseName = untitledNote)) },
-                onNewFolder = { onIntent(VaultTreeIntent.OnNewFolderClick(baseName = untitledFolder)) },
-                onSortChange = { onIntent(VaultTreeIntent.OnSortChange(sort = it)) },
-                onHideSidebar = { onIntent(VaultTreeIntent.OnSidebarToggle) },
-                onSearch = onSearch,
-                onToday = { onIntent(VaultTreeIntent.OnTodayClick) }
+                actions = SidebarHeaderActions(
+                    onSortChange = { onIntent(VaultTreeIntent.OnSortChange(sort = it)) },
+                    onExpandAll = { onIntent(VaultTreeIntent.OnExpandAll) },
+                    onCollapseAll = { onIntent(VaultTreeIntent.OnCollapseAll) },
+                    onMinimize = { onIntent(VaultTreeIntent.OnSidebarToggle) }
+                )
             )
             SidebarMessages(state = state, onIntent = onIntent)
             Box(modifier = Modifier.weight(weight = 1f).fillMaxWidth().padding(top = NotekeaDimensions.SpacingS)) {
@@ -234,8 +231,7 @@ private fun SidebarPreviewFrame(
                 state = state,
                 vaultName = TreePreviewData.VAULT_NAME,
                 onIntent = {},
-                onSwitchVault = {},
-                onSearch = {}
+                onSwitchVault = {}
             )
         }
     }

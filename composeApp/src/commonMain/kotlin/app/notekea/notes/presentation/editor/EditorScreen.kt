@@ -1,13 +1,6 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.runtime.SideEffect
-import androidx.compose.foundation.text.input.TextFieldState
-import app.notekea.core.presentation.components.NotekeaSplitPane
-import app.notekea.core.presentation.components.PaneSide
-import app.notekea.notes.domain.SidePanelPreferences
-import kotlin.math.roundToInt
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -27,134 +20,86 @@ import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.notes.domain.DayNeighbors
 import app.notekea.notes.domain.NoteMetadata
+import app.notekea.notes.domain.OutlineHeading
 import app.notekea.notes.domain.RelativePath
 import kotlinx.coroutines.channels.Channel
 
-private const val EDITOR_MIN_WIDTH_DP = 480
 private const val PREVIEW_HEIGHT_DP = 420
-private const val PREVIEW_PANEL_WIDTH_DP = 1100
 private const val PREVIEW_WIDTH_DP = 720
 
 /**
- * Editor entry point for [notePath]: opens it (saving the previous note first), opens Find and switches Edit / Read
- * with their shortcuts, saves
- * with the save shortcut, saves
- * before the window closes and when the editor leaves the screen (a folder selected, another vault opened), and
- * reports a rename from the title ([onRenamed]), a deleted note closed ([onClosed]) or a link clicked in Read mode
- * ([onOpenLink]) to the panes around it. The
- * [viewModel] belongs to the vault, so it outlives one note. The side panel with the note's outline sits on its right
- * (`ROADMAP.md` 1.9), or floats over it when the window has no room for both.
+ * Editor entry point for [notePath] in one pane: opens it (saving the previous note first), saves before the window
+ * closes and when the editor leaves the screen (a folder selected, another vault opened), and reports a rename from the
+ * title ([onRenamed]), a deleted note closed ([onClosed]) or a link clicked in Read mode ([onOpenLink]) to the panes
+ * around it. Find, Edit / Read and the other shortcuts work in the pane the keyboard is in ([isActive]). The
+ * [viewModel] belongs to the vault's pane, so it outlives one note. The outline beside the panes follows this pane
+ * through [tracker]; the side panel's requests go to [sidePanel]; [scrollMemory] keeps where each note was.
  */
 @Composable
 fun EditorScreen(
     notePath: RelativePath,
     viewModel: EditorViewModel,
     platformConventions: PlatformConventions,
-    onRenamed: (EditorEffect.Renamed) -> Unit,
-    onClosed: () -> Unit,
-    onOpenLink: (EditorEffect.OpenLink) -> Unit,
-    onSearchTag: (String) -> Unit,
-    onRequestNoteLink: () -> Unit,
-    onRequestTag: (String) -> Unit,
-    onDayStep: (Int) -> Unit,
+    callbacks: EditorCallbacks,
+    pane: EditorPaneTools,
+    sidePanel: SidePanelHost,
     modifier: Modifier = Modifier,
+    isActive: Boolean = true,
     properties: NoteMetadata? = null,
     dayNeighbors: DayNeighbors? = null
 ) {
     val state by viewModel.state.collectAsState()
     val flushed = remember(viewModel) { Channel<Unit>(capacity = Channel.CONFLATED) }
     val textFocusRequester = remember { FocusRequester() }
-    val sidePanel = remember(viewModel) { SidePanelHost(send = viewModel::onIntent) }
+    val onIntent = remember(viewModel, sidePanel) { routerOf(viewModel = viewModel, sidePanel = sidePanel) }
     LaunchedEffect(notePath) { viewModel.onIntent(intent = EditorIntent.OnOpen(path = notePath)) }
     EditorEffects(
         viewModel = viewModel,
         flushed = flushed,
         textFocusRequester = textFocusRequester,
-        onRenamed = onRenamed,
-        onClosed = onClosed,
-        onOpenLink = onOpenLink,
-        onSearchTag = onSearchTag,
-        onRequestNoteLink = onRequestNoteLink,
-        onRequestTag = onRequestTag,
-        onDayStep = onDayStep,
-        sidePanel = sidePanel
+        callbacks = callbacks,
+        onRevealHeading = { heading ->
+            sidePanel.isOverlayOpen = false
+            pane.tracker.reveal(heading = heading)
+        }
     )
     DisposableEffect(viewModel) { onDispose { viewModel.onIntent(intent = EditorIntent.OnFlushRequest) } }
-    EditorShortcuts(platformConventions = platformConventions, onIntent = sidePanel::onIntent)
+    if (isActive) EditorShortcuts(platformConventions = platformConventions, onIntent = onIntent)
+    FlushBeforeWindowClose(viewModel = viewModel, flushed = flushed)
+    EditorContent(
+        state = state,
+        buffer = viewModel.buffer,
+        platformConventions = platformConventions,
+        onIntent = onIntent,
+        modifier = modifier,
+        properties = properties,
+        textFocusRequester = textFocusRequester,
+        outlineTracker = pane.tracker,
+        dayNeighbors = dayNeighbors,
+        scrollMemory = pane.scrollMemory
+    )
+}
+
+/** The editor's intents to [viewModel], except the side panel's requests, which go to [sidePanel]. */
+private fun routerOf(
+    viewModel: EditorViewModel,
+    sidePanel: SidePanelHost
+): (EditorIntent) -> Unit = { intent ->
+    if (SidePanelHost.isRequest(intent = intent)) sidePanel.onIntent(intent = intent) else viewModel.onIntent(intent)
+}
+
+/** Saves the note before the window closes, waiting for that save ([flushed]) rather than one asked for earlier. */
+@Composable
+private fun FlushBeforeWindowClose(
+    viewModel: EditorViewModel,
+    flushed: Channel<Unit>
+) {
     BeforeWindowClose {
         while (flushed.tryReceive().isSuccess) {
             // A flush from an earlier save is not this one: wait for the save asked for now.
         }
         viewModel.onIntent(intent = EditorIntent.OnFlushRequest)
         flushed.receive()
-    }
-    EditorWithSidePanel(
-        state = state,
-        buffer = viewModel.buffer,
-        platformConventions = platformConventions,
-        onIntent = sidePanel::onIntent,
-        sidePanel = sidePanel,
-        modifier = modifier,
-        textFocusRequester = textFocusRequester,
-        properties = properties,
-        dayNeighbors = dayNeighbors
-    )
-}
-
-/**
- * The editor with the side panel on its right, as wide as the user left it but never leaving the editor narrower than
- * [EDITOR_MIN_WIDTH_DP]; when not even its narrowest width fits, the panel floats over the note instead, open only
- * while it is used.
- */
-@Composable
-internal fun EditorWithSidePanel(
-    state: EditorState,
-    buffer: TextFieldState,
-    platformConventions: PlatformConventions,
-    onIntent: (EditorIntent) -> Unit,
-    sidePanel: SidePanelHost,
-    modifier: Modifier,
-    textFocusRequester: FocusRequester,
-    properties: NoteMetadata?,
-    dayNeighbors: DayNeighbors? = null
-) {
-    BoxWithConstraints(modifier = modifier) {
-        val room = maxWidth - EDITOR_MIN_WIDTH_DP.dp
-        val isOverlay = room < SidePanelPreferences.MIN_WIDTH_DP.dp
-        val maxPanelWidth = minOf(SidePanelPreferences.MAX_WIDTH_DP.dp, if (isOverlay) maxWidth else room)
-        SideEffect {
-            sidePanel.isOverlay = isOverlay
-            if (!isOverlay) sidePanel.isOverlayOpen = false
-        }
-        NotekeaSplitPane(
-            panelWidth = minOf(state.sidePanel.widthDp.dp, maxPanelWidth),
-            onPanelWidthChange = { onIntent(EditorIntent.OnSidePanelResize(widthDp = it.value.roundToInt())) },
-            isPanelVisible = if (isOverlay) sidePanel.isOverlayOpen else state.sidePanel.isVisible,
-            minPanelWidth = SidePanelPreferences.MIN_WIDTH_DP.dp,
-            maxPanelWidth = maxPanelWidth,
-            panel = {
-                OutlinePanel(
-                    state = state,
-                    sidePanel = sidePanel,
-                    platformConventions = platformConventions,
-                    onIntent = onIntent
-                )
-            },
-            content = {
-                EditorContent(
-                    state = state,
-                    buffer = buffer,
-                    platformConventions = platformConventions,
-                    onIntent = onIntent,
-                    properties = properties,
-                    textFocusRequester = textFocusRequester,
-                    outlineTracker = sidePanel.tracker,
-                    dayNeighbors = dayNeighbors
-                )
-            },
-            panelSide = PaneSide.END,
-            isOverlay = isOverlay
-        )
     }
 }
 
@@ -164,47 +109,36 @@ private fun EditorEffects(
     viewModel: EditorViewModel,
     flushed: Channel<Unit>,
     textFocusRequester: FocusRequester,
-    onRenamed: (EditorEffect.Renamed) -> Unit,
-    onClosed: () -> Unit,
-    onOpenLink: (EditorEffect.OpenLink) -> Unit,
-    onSearchTag: (String) -> Unit,
-    onRequestNoteLink: () -> Unit,
-    onRequestTag: (String) -> Unit,
-    onDayStep: (Int) -> Unit,
-    sidePanel: SidePanelHost
+    callbacks: EditorCallbacks,
+    onRevealHeading: (OutlineHeading) -> Unit
 ) {
-    val currentOnRequestNoteLink by rememberUpdatedState(newValue = onRequestNoteLink)
-    val currentOnRequestTag by rememberUpdatedState(newValue = onRequestTag)
-    val currentOnRenamed by rememberUpdatedState(newValue = onRenamed)
-    val currentOnClosed by rememberUpdatedState(newValue = onClosed)
-    val currentOnOpenLink by rememberUpdatedState(newValue = onOpenLink)
-    val currentOnSearchTag by rememberUpdatedState(newValue = onSearchTag)
-    val currentOnDayStep by rememberUpdatedState(newValue = onDayStep)
+    val current by rememberUpdatedState(newValue = callbacks)
+    val currentOnRevealHeading by rememberUpdatedState(newValue = onRevealHeading)
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                EditorEffect.Closed -> currentOnClosed()
+                EditorEffect.Closed -> current.onClosed()
 
                 EditorEffect.Flushed -> flushed.trySend(element = Unit)
 
-                is EditorEffect.OpenLink -> currentOnOpenLink(effect)
+                is EditorEffect.OpenLink -> current.onOpenLink(effect)
 
-                is EditorEffect.Renamed -> currentOnRenamed(effect)
+                is EditorEffect.Renamed -> current.onRenamed(effect)
 
-                is EditorEffect.SearchTag -> currentOnSearchTag(effect.tag)
+                is EditorEffect.SearchTag -> current.onSearchTag(effect.tag)
 
-                EditorEffect.RequestNoteLink -> currentOnRequestNoteLink()
+                EditorEffect.RequestNoteLink -> current.onRequestNoteLink()
 
-                is EditorEffect.RequestTag -> currentOnRequestTag(effect.query)
+                is EditorEffect.RequestTag -> current.onRequestTag(effect.query)
 
                 EditorEffect.FocusText -> focusText(
                     requester = textFocusRequester,
                     isReading = viewModel.state.value.isReading
                 )
 
-                EditorEffect.FocusOutline, is EditorEffect.RevealHeading -> sidePanel.follow(effect = effect)
+                is EditorEffect.RevealHeading -> currentOnRevealHeading(effect.heading)
 
-                is EditorEffect.DayStep -> currentOnDayStep(effect.step)
+                is EditorEffect.DayStep -> current.onDayStep(effect.step)
             }
         }
     }
@@ -227,32 +161,7 @@ private suspend fun focusText(
     }
 }
 
-/** The side panel showing [state]'s outline; leaving it with Esc closes it if it floats and goes back to the note. */
-@Composable
-private fun OutlinePanel(
-    state: EditorState,
-    sidePanel: SidePanelHost,
-    platformConventions: PlatformConventions,
-    onIntent: (EditorIntent) -> Unit
-) {
-    SidePanel(
-        outline = state.outline,
-        current = sidePanel.tracker.current,
-        platformConventions = platformConventions,
-        onHeadingClick = { onIntent(EditorIntent.OnHeadingClick(index = it)) },
-        onHide = { onIntent(EditorIntent.OnSidePanelToggle) },
-        onLeave = {
-            sidePanel.isOverlayOpen = false
-            onIntent(EditorIntent.OnFocusRequest())
-        },
-        outlineFocus = sidePanel.outlineFocus
-    )
-}
-
-/**
- * Save, Find in note, Edit / Read, toggling a task, the side panel and the outline work whatever has focus while the
- * editor is shown.
- */
+/** Save, Find in note, Edit / Read and toggling a task work whatever has focus while the editor's pane is active. */
 @Composable
 private fun EditorShortcuts(
     platformConventions: PlatformConventions,
@@ -262,8 +171,6 @@ private fun EditorShortcuts(
     WindowShortcut(shortcut = platformConventions.findShortcut) { onIntent(EditorIntent.OnFindOpen) }
     WindowShortcut(shortcut = platformConventions.toggleReadModeShortcut) { onIntent(EditorIntent.OnReadModeToggle) }
     WindowShortcut(shortcut = platformConventions.toggleTaskShortcut) { onIntent(EditorIntent.OnTaskToggleShortcut) }
-    WindowShortcut(shortcut = platformConventions.toggleSidePanelShortcut) { onIntent(EditorIntent.OnSidePanelToggle) }
-    WindowShortcut(shortcut = platformConventions.outlineShortcut) { onIntent(EditorIntent.OnOutlineFocusRequest) }
 }
 
 @Preview
@@ -276,25 +183,6 @@ private fun EditorScreenPreview() {
                 buffer = EditorPreviewData.buffer(),
                 platformConventions = EditorPreviewData.platformConventions,
                 onIntent = {},
-                properties = EditorPreviewData.properties
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun EditorWithSidePanelPreview() {
-    NotekeaPreviewThemes {
-        Box(modifier = Modifier.size(width = PREVIEW_PANEL_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
-            EditorWithSidePanel(
-                state = EditorPreviewData.state(),
-                buffer = EditorPreviewData.buffer(),
-                platformConventions = EditorPreviewData.platformConventions,
-                onIntent = {},
-                sidePanel = remember { SidePanelHost(send = {}) },
-                modifier = Modifier,
-                textFocusRequester = remember { FocusRequester() },
                 properties = EditorPreviewData.properties
             )
         }
