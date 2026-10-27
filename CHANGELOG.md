@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The sidebar opens as wide as the outline panel (340 dp), so the note sits between two panels of the same width; a
+  width the user set by dragging its edge is kept.
 - The editor's toolbar is a rounded capsule of groups with the most used buttons (Heading, Bold, Italic, Link to a
   note, Tag, Checklist, Bulleted list, Insert template); Web link, Numbered list, Callout, Code block, Image or file,
   Quote, Divider and Table move to More (⋯), Callout and Code block opening their types beside it.

@@ -70,7 +70,7 @@ class SidebarRailTest {
         private const val FRAME_NANOS = 16_000_000L
         private const val HEIGHT = 420
         private const val WIDTH = 1000
-        private val HEADER = listOf(Offset(x = 227f, y = 26f), Offset(x = 255f, y = 26f), Offset(x = 283f, y = 26f))
+        private val HEADER = listOf(Offset(x = 307f, y = 26f), Offset(x = 335f, y = 26f), Offset(x = 363f, y = 26f))
         private val RAIL = listOf(
             Offset(x = 20f, y = 21f),
             Offset(x = 20f, y = 86f),

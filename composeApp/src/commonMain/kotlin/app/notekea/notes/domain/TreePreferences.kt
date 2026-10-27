@@ -12,7 +12,8 @@ data class TreePreferences(
     val isSidebarCollapsed: Boolean = false
 ) {
     companion object {
-        const val DEFAULT_SIDEBAR_WIDTH_DP = 260
+        /** As wide as the outline panel on the other side, so the note sits in the middle (1.12 smoke request). */
+        const val DEFAULT_SIDEBAR_WIDTH_DP = SidePanelPreferences.DEFAULT_WIDTH_DP
         const val MAX_SIDEBAR_WIDTH_DP = 480
         const val MIN_SIDEBAR_WIDTH_DP = 200
         val DEFAULT = TreePreferences(expandedFolders = emptySet(), sort = TreeSort.NAME)
