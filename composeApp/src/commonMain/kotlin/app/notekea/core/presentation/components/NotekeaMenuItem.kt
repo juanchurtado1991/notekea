@@ -11,7 +11,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
  * click, for an option of the other items (the callout menu's "Start folded"), so it can be set before choosing one.
  * [supportingText] explains in a second, smaller line what an option does when its label alone is not enough.
  * [submenu] makes the item open a panel beside the menu (on hover or click) instead of acting: the table size picker;
- * it calls the given `onChosen` once a choice is made, which closes the whole menu.
+ * it calls the given `onChosen` once a choice is made, which closes the whole menu. [items] does the same with menu
+ * rows of their own, in sections (the toolbar's More › Callout): the item opens them beside the menu.
  */
 data class NotekeaMenuItem(
     val label: String,
@@ -23,5 +24,6 @@ data class NotekeaMenuItem(
     val isChecked: Boolean? = null,
     val keepsMenuOpen: Boolean = false,
     val supportingText: String? = null,
-    val submenu: (@Composable (onChosen: () -> Unit) -> Unit)? = null
+    val submenu: (@Composable (onChosen: () -> Unit) -> Unit)? = null,
+    val items: List<List<NotekeaMenuItem>>? = null
 )

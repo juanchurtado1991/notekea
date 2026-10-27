@@ -90,11 +90,12 @@
 
     <string name="folder_empty_message">Notes and files you add to it show up here as cards.</string>
     <string name="folder_empty_title">This folder is empty</string>
-    <string name="format_attach">Image or file: from your computer, also by pasting or dropping it here</string>
+    <string name="format_attach">Image or file</string>
+    <string name="format_attach_hint">From your computer; you can also paste or drop it into the note</string>
     <string name="format_bold">Bold</string>
     <string name="format_bold_placeholder">bold text</string>
     <string name="format_bullet_list">Bulleted list</string>
-    <string name="format_callout">Callout: a colored box for a tip, a warning…</string>
+    <string name="format_callout">Callout</string>
     <string name="format_callout_abstract">Summary</string>
     <string name="format_callout_bug">Bug</string>
     <string name="format_callout_danger">Danger</string>
@@ -102,6 +103,7 @@
     <string name="format_callout_failure">Failure</string>
     <string name="format_callout_folded">Start folded</string>
     <string name="format_callout_folded_hint">Check it, then choose a type below: the callout shows only its title until it is clicked</string>
+    <string name="format_callout_hint">A colored box for a tip, a warning…</string>
     <string name="format_callout_info">Info</string>
     <string name="format_callout_note">Note</string>
     <string name="format_callout_placeholder">Write here</string>
