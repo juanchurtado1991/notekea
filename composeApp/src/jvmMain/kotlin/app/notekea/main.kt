@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.LocalWindowExceptionHandlerFactory
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -52,7 +51,6 @@ import io.github.vinceglb.filekit.FileKit
 import java.awt.Cursor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.context.startKoin
 
@@ -164,7 +162,7 @@ private fun ApplicationScope.NotekeaWindow(
     val scope = rememberCoroutineScope()
     var isClosing by remember { mutableStateOf(value = false) }
     val windowState = rememberWindowState(
-        size = WindowSizes.system.welcome,
+        size = WindowSizes.system.initial,
         position = WindowPosition.Aligned(alignment = Alignment.Center)
     )
     Window(
@@ -187,7 +185,6 @@ private fun ApplicationScope.NotekeaWindow(
             LocalResizePointerIcon provides PointerIcon(cursor = Cursor(Cursor.E_RESIZE_CURSOR))
         ) {
             if (isCrashTest) CrashTest()
-            FitWindowSize(state = windowState, isWorkspace = vaultName != null)
             WindowContent(onVaultNameChange = { vaultName = it })
         }
     }
@@ -203,29 +200,6 @@ private fun WindowContent(
             onVaultNameChange = onVaultNameChange,
             openedVaultContent = { vault, onSwitchVault ->
                 VaultTreeScreen(vaultPath = vault.path, vaultName = vault.name, onSwitchVault = onSwitchVault)
-            }
-        )
-    }
-}
-
-/**
- * The window's size follows what it shows ([WindowSizes]): the workspace large enough for the sidebar, the note and the
- * outline, the welcome screen small; centred whenever it changes.
- */
-@Composable
-private fun FrameWindowScope.FitWindowSize(
-    state: WindowState,
-    isWorkspace: Boolean
-) {
-    LaunchedEffect(isWorkspace) {
-        WindowSizes.system.fit(
-            state = state,
-            isWorkspace = isWorkspace,
-            shownSize = { DpSize(width = window.width.dp, height = window.height.dp) },
-            resize = { size ->
-                state.size = size
-                window.setSize(size.width.value.roundToInt(), size.height.value.roundToInt())
-                window.setLocationRelativeTo(null)
             }
         )
     }

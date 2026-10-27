@@ -64,8 +64,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   New folder and Today. The sidebar's header gets Expand all, Collapse all and Minimize beside Sort. A hidden sidebar
   no longer leaves a button over the tabs.
 - New note and New folder open a hidden sidebar, so the new entry is seen where it went with its name ready to type.
-- The window opens small on the welcome screen and grows, when a vault opens, to fit the sidebar, the note and the
-  outline.
+- The window opens large enough for the sidebar, the note and the outline, and keeps that size from the welcome
+  screen to the open vault.
 - Daily notes (ROADMAP 1.10): "Today" in the sidebar and Mod+D open today's note, creating it if needed, in the folder,
   name format and template of Obsidian's Daily notes settings (`.obsidian/daily-notes.json`), or in `Journal/` as
   `YYYY-MM-DD` without them. Today is the date in the computer's time zone. A daily note's header has arrows
