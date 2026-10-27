@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 11 / 17 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 12 / 17 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -318,7 +318,7 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
   ‹ and › to the closest daily notes before and after it that exist (days without a note are skipped, nothing is
   created), greyed out when there is none on that side.
 
-### ⬜ 1.11 Tabs and split panes — `feature/editor-tabs`
+### ✅ 1.11 Tabs and split panes — `feature/editor-tabs` — [notekea#59](https://github.com/juanchurtado1991/notekea/pull/59)
 
 - Each opened note becomes a tab; `Mod+click` (or middle click) opens a link in a new tab.
 - `Mod+W` closes the tab, `Ctrl+Tab` / `Ctrl+Shift+Tab` cycle tabs (on every OS), `Mod+1…9` jump to a tab.
