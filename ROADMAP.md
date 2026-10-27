@@ -349,7 +349,7 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 - **Tool rail:** a narrow strip of icons on the window's left edge, there whether the sidebar is shown or not, as in
   Android Studio: Files (shows or hides the sidebar), Search notes, New note, New folder and Today, each with a tooltip
   beside it (revised by 1.14: Files and Side panel, then Search notes and Today, and Open another vault, About and
-  Settings at the bottom, with 24 dp above and below; new notes and folders come from Mod+N and the tree's menu). The sidebar's header holds the vault's name, then Sort, Expand all, Collapse all and Minimize; the
+  Settings at the bottom; new notes and folders come from Mod+N and the tree's menu). The sidebar's header holds the vault's name, then Sort, Expand all, Collapse all and Minimize; the
   Search notes and Today rows and the New note / New folder buttons move to the rail.
 - **Window size:** the window opens large enough (1440 × 900 dp at most, never larger than the screen's usable area)
   to show the tool rail, the sidebar, a note and the outline beside it, which are open by default; the welcome screen
@@ -413,7 +413,7 @@ Frontmatter shown as a compact form above the note content.
   "Coming soon", above its question field shown disabled; `Mod+Shift+O` always comes back to the inspector.
 - **The workspace's frame** (decided with the developer while 1.14 was reviewed):
   - **Tool rail:** the two panels (Files, Side panel) then Search notes and Today at the top; Open another vault,
-    About and Settings at the bottom, as in Obsidian, with 24 dp above and below. New note and New folder leave the rail (Mod+N and the tree's menu stay), "Open another
+    About and Settings at the bottom, as in Obsidian. New note and New folder leave the rail (Mod+N and the tree's menu stay), "Open another
     vault" leaves the sidebar's bottom, and the editor toolbar's Outline button leaves for the rail's Side panel.
   - **About:** a dialog with the logo, the name, the version and a link to GitHub, and every keyboard shortcut of the
     platform as keycaps, in groups from the most used (Notes, Writing, Workspace).
