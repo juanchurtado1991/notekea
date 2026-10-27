@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 14 / 17 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 14 / 18 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -447,6 +447,24 @@ same Markdown a person would type, so notes stay readable in any app.
 - **Done when:** a person who never wrote Markdown can make a heading, a checklist, a callout, a table and a link to
   another note with the mouse alone, and every result reads the same in Preview and in Obsidian.
 
+### ⬜ 1.18 Editor memory — `chore/editor-memory`
+
+The editor alone, before any AI, should stay light: measure how much memory it uses and cut it, so M2 and M3 start
+from a small base (budget of 5.4: under 400 MB).
+
+- **Measure:** the memory of the whole process (resident memory, not only the Java heap) on Linux, then Windows and
+  macOS, with `smoke-data/vaults/Personal Notes` and the Large Vault (`smoke.sh large`, 5,000 notes): right after
+  opening, after opening and closing 20 notes in tabs, after scrolling a long note in Edit and Preview, and after
+  ten minutes idle. The numbers go in `docs/performance.md`.
+- **No growth:** opening and closing notes, tabs and folders, and switching vaults, gives back what it took: memory
+  after closing everything returns near the level after opening (no leak in the editor's caches, the tabs' scroll
+  memory, the decoded images or the file watcher).
+- **Cuts the measurements point at:** a heap limit and a garbage collector suited to a desktop app (set in the
+  packaged app's JVM options), bounded caches (decoded images, note texts, metadata), note texts never held twice,
+  and Skia's caches sized for a text app.
+- **Done when:** the editor alone stays under 400 MB with the Large Vault open on Linux, the measurements are in
+  `docs/performance.md`, and a test keeps the bounded caches bounded. 5.4 measures the whole app again, AI included.
+
 ---
 
 ## M2 — Indexing, links and related notes
@@ -719,7 +737,8 @@ Release with checksums.
 ### ⬜ 5.4 Performance and memory — `chore/performance`
 
 Notekea should run well on the laptop a non-technical person has (8 GB of RAM). With the whole app built, measure it
-on the reference machines (Windows, macOS, Linux) and cut what the numbers point at.
+on the reference machines (Windows, macOS, Linux) and cut what the numbers point at, starting from the editor's
+measurements of 1.18.
 
 - **Memory budgets** (whole process, the Sample Vault and a 1,000-note vault):
 
