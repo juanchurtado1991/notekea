@@ -54,24 +54,37 @@ import app.notekea.resources.tab_split_right
 import app.notekea.resources.workspace_empty_message
 import app.notekea.resources.workspace_empty_title
 import org.jetbrains.compose.resources.stringResource
+import app.notekea.resources.tab_unsaved
+import app.notekea.notes.presentation.files.fileIconOf
+import app.notekea.notes.presentation.files.fileTintOf
+import app.notekea.resources.workspace_start_search
+import app.notekea.resources.workspace_start_today
+import app.notekea.resources.workspace_start_new
+import app.notekea.resources.workspace_start_find
+import androidx.compose.foundation.layout.widthIn
+import app.notekea.core.presentation.platform.keys
+import app.notekea.core.platform.domain.Shortcut
+import app.notekea.core.presentation.components.NotekeaActionRow
 
 private const val PREVIEW_HEIGHT_DP = 320
 private const val PREVIEW_WIDTH_DP = 900
 private const val SPLIT_DROP_ZONE = 0.75f
+private const val START_WIDTH_DP = 440
 
 /**
  * The editor's panes side by side (`ROADMAP.md` 1.11), each with its tabs above what its active tab shows
  * ([paneContent]: a note's editor, a file's preview, a folder's grid). A click in a pane makes it the one the keyboard
  * works in. A tab dropped among its pane's tabs takes that place; dropped on the other pane, it moves there; dropped on
  * the right quarter of a single pane, it splits it and moves to the new pane. The "+" after the tabs finds a note to
- * open in a new tab ([onNewTab]). Without any tab, a hint says how to open one.
+ * open in a new tab; a tab of [unsavedPaths] shows a dot until it is saved. Without any tab, the pane offers [startActions] with their shortcuts.
  */
 @Composable
 fun WorkspaceContent(
     state: WorkspaceState,
     platformConventions: PlatformConventions,
     onIntent: (WorkspaceIntent) -> Unit,
-    onNewTab: () -> Unit,
+    startActions: WorkspaceStartActions,
+    unsavedPaths: Set<RelativePath>,
     modifier: Modifier = Modifier,
     paneContent: @Composable (pane: Int, path: RelativePath, kind: TabKind) -> Unit
 ) {
@@ -98,7 +111,8 @@ fun WorkspaceContent(
                     state = state,
                     platformConventions = platformConventions,
                     onIntent = onIntent,
-                    onNewTab = onNewTab,
+                    startActions = startActions,
+                    unsavedPaths = unsavedPaths,
                     onDrop = onDrop,
                     onBounds = { paneBounds[index] = it },
                     paneContent = paneContent
@@ -137,7 +151,8 @@ private fun RowScope.PaneColumn(
     state: WorkspaceState,
     platformConventions: PlatformConventions,
     onIntent: (WorkspaceIntent) -> Unit,
-    onNewTab: () -> Unit,
+    startActions: WorkspaceStartActions,
+    unsavedPaths: Set<RelativePath>,
     onDrop: (RelativePath, Offset) -> Unit,
     onBounds: (Rect) -> Unit,
     paneContent: @Composable (pane: Int, path: RelativePath, kind: TabKind) -> Unit
@@ -161,7 +176,8 @@ private fun RowScope.PaneColumn(
             state = state,
             platformConventions = platformConventions,
             onIntent = onIntent,
-            onNewTab = onNewTab,
+            onNewTab = startActions.onFindNote,
+            unsavedPaths = unsavedPaths,
             onDrop = onDrop
         )
         Box(modifier = Modifier.weight(weight = 1f).fillMaxSize()) {
@@ -169,7 +185,7 @@ private fun RowScope.PaneColumn(
             if (path ==
                 null
             ) {
-                NoTabs(platformConventions = platformConventions)
+                NoTabs(platformConventions = platformConventions, actions = startActions)
             } else {
                 paneContent(index, path, state.kindOf(path))
             }
@@ -177,19 +193,43 @@ private fun RowScope.PaneColumn(
     }
 }
 
-/** A pane without any tab says how to open one. */
+/** A pane without any tab offers the ways to open one: find a note, a new note, today's note, search the notes. */
 @Composable
 private fun BoxScope.NoTabs(
-    platformConventions: PlatformConventions
+    platformConventions: PlatformConventions,
+    actions: WorkspaceStartActions
 ) {
-    val shortcut = platformConventions.quickSwitcherShortcut.label(
-        operatingSystem = platformConventions.operatingSystem
-    )
+    val keys = { shortcut: Shortcut -> shortcut.keys(operatingSystem = platformConventions.operatingSystem) }
     EmptyState(
         title = stringResource(resource = Res.string.workspace_empty_title),
-        message = stringResource(Res.string.workspace_empty_message, shortcut),
-        modifier = Modifier.align(alignment = Alignment.Center)
-    )
+        message = stringResource(resource = Res.string.workspace_empty_message),
+        modifier = Modifier.align(alignment = Alignment.Center).widthIn(max = START_WIDTH_DP.dp)
+    ) {
+        NotekeaActionRow(
+            icon = NotekeaIcons.Find,
+            label = stringResource(resource = Res.string.workspace_start_find),
+            keys = keys(platformConventions.quickSwitcherShortcut),
+            onClick = actions.onFindNote
+        )
+        NotekeaActionRow(
+            icon = NotekeaIcons.NewNote,
+            label = stringResource(resource = Res.string.workspace_start_new),
+            keys = keys(platformConventions.newNoteShortcut),
+            onClick = actions.onNewNote
+        )
+        NotekeaActionRow(
+            icon = NotekeaIcons.Today,
+            label = stringResource(resource = Res.string.workspace_start_today),
+            keys = keys(platformConventions.todayShortcut),
+            onClick = actions.onToday
+        )
+        NotekeaActionRow(
+            icon = NotekeaIcons.SearchNotes,
+            label = stringResource(resource = Res.string.workspace_start_search),
+            keys = keys(platformConventions.searchNotesShortcut),
+            onClick = actions.onSearchNotes
+        )
+    }
 }
 
 @Composable
@@ -200,16 +240,20 @@ private fun PaneTabs(
     platformConventions: PlatformConventions,
     onIntent: (WorkspaceIntent) -> Unit,
     onNewTab: () -> Unit,
+    unsavedPaths: Set<RelativePath>,
     onDrop: (RelativePath, Offset) -> Unit
 ) {
     val operatingSystem = platformConventions.operatingSystem
     val menu = tabMenu(state = state, pane = index, platformConventions = platformConventions, onIntent = onIntent)
+    val unsaved = stringResource(resource = Res.string.tab_unsaved)
     NotekeaTabStrip(
         tabs = pane.tabs.map { path ->
             NotekeaTabStripItem(
                 key = path.value,
                 label = labelOf(path = path, state = state),
-                icon = iconOf(path, state)
+                icon = iconOf(path, state),
+                iconTint = fileTintOf(path = path).takeIf { state.kindOf(path = path) == TabKind.FILE },
+                unsavedLabel = unsaved.takeIf { path in unsavedPaths }
             )
         },
         selectedIndex = pane.active,
@@ -292,16 +336,9 @@ private fun iconOf(
     state: WorkspaceState
 ): ImageVector = when (state.kindOf(path = path)) {
     TabKind.NOTE -> NotekeaIcons.Note
-
     TabKind.FOLDER -> NotekeaIcons.Folder
-
     TabKind.MISSING -> NotekeaIcons.MissingFile
-
-    TabKind.FILE -> if (AttachmentKind.of(name = path.name) == AttachmentKind.IMAGE) {
-        NotekeaIcons.ImageFile
-    } else {
-        NotekeaIcons.OtherFile
-    }
+    TabKind.FILE -> fileIconOf(path = path)
 }
 
 @Composable
@@ -338,7 +375,8 @@ private fun WorkspaceContentPreview() {
                 ),
                 platformConventions = PreviewPlatformConventions.linux,
                 onIntent = {},
-                onNewTab = {}
+                startActions = WorkspaceStartActions(),
+                unsavedPaths = emptySet()
             ) { _, path, _ -> Text(text = path.value) }
         }
     }
@@ -353,7 +391,8 @@ private fun WorkspaceContentEmptyPreview() {
                 state = WorkspaceState(),
                 platformConventions = PreviewPlatformConventions.linux,
                 onIntent = {},
-                onNewTab = {}
+                startActions = WorkspaceStartActions(),
+                unsavedPaths = emptySet()
             ) { _, path, _ -> Text(text = path.value) }
         }
     }

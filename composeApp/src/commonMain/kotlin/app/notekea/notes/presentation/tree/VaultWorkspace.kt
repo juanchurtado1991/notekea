@@ -42,6 +42,10 @@ import app.notekea.resources.Res
 import app.notekea.resources.tab_missing_message
 import app.notekea.resources.tab_missing_title
 import org.jetbrains.compose.resources.stringResource
+import app.notekea.notes.presentation.editor.SaveStatus
+import app.notekea.notes.presentation.editor.EditorViewModel
+import app.notekea.resources.tree_untitled_note
+import app.notekea.notes.presentation.workspace.WorkspaceStartActions
 
 /**
  * The vault's sidebar beside the editor's tabs and panes (`ROADMAP.md` 1.11), with the side panel of the active pane's
@@ -86,6 +90,7 @@ private fun ActiveStatusBar(
     WorkspaceStatusBar(
         vaultName = vaultName,
         isLoading = state.isLoading,
+        onReveal = { viewModels.tree.onIntent(intent = VaultTreeIntent.OnRevealInTree(path = it)) },
         path = path,
         kind = kind,
         editor = editorState.takeIf { kind == TabKind.NOTE },
@@ -134,11 +139,36 @@ private fun WorkspaceBody(
                 state = workspaceState,
                 platformConventions = state.platformConventions,
                 onIntent = viewModels.workspace::onIntent,
-                onNewTab = findNote
+                startActions = startActionsOf(viewModels = viewModels, onFindNote = findNote),
+                unsavedPaths = unsavedPathsOf(editors = viewModels.editors)
             ) { pane, path, kind -> PaneContent(pane = pane, path = path, kind = kind, context = context) }
         }
     }
     WorkspaceDialogs(platformConventions = state.platformConventions, onDismiss = { dialog = null }, dialog = dialog)
+}
+
+/** The notes the panes' editors hold with changes not saved yet, for their tabs' dots. */
+@Composable
+private fun unsavedPathsOf(
+    editors: List<EditorViewModel>
+): Set<RelativePath> = editors.mapNotNull { editor ->
+    val editorState by editor.state.collectAsState()
+    editorState.notePath.takeIf { editorState.saveStatus == SaveStatus.UNSAVED }
+}.toSet()
+
+/** What an editor without tabs offers: find a note, a new note, today's note and a search in the notes. */
+@Composable
+private fun startActionsOf(
+    viewModels: WorkspaceViewModels,
+    onFindNote: () -> Unit
+): WorkspaceStartActions {
+    val untitledNote = stringResource(resource = Res.string.tree_untitled_note)
+    return WorkspaceStartActions(
+        onFindNote = onFindNote,
+        onNewNote = { viewModels.tree.onIntent(intent = VaultTreeIntent.OnNewNoteClick(baseName = untitledNote)) },
+        onToday = { viewModels.tree.onIntent(intent = VaultTreeIntent.OnTodayClick) },
+        onSearchNotes = { viewModels.onSwitcher(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.CONTENT)) }
+    )
 }
 
 /** The rail's actions: search, the side panel, another vault, and About or Settings opened with [onDialog]. */
@@ -281,7 +311,8 @@ private fun editorCallbacksOf(
         onRequestTemplate = {
             viewModels.onTemplatePicker(TemplatePickerIntent.OnOpen(target = TemplateTarget.CurrentNote))
         },
-        onDayStep = { tree.onIntent(intent = VaultTreeIntent.OnDayStep(step = it)) }
+        onDayStep = { tree.onIntent(intent = VaultTreeIntent.OnDayStep(step = it)) },
+        onRevealFolder = { tree.onIntent(intent = VaultTreeIntent.OnRevealInTree(path = it)) }
     )
 }
 

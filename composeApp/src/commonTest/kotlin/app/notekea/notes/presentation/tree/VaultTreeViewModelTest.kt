@@ -444,6 +444,27 @@ class VaultTreeViewModelTest {
     }
 
     @Test
+    fun `a folder clicked in the status bar shows in a hidden sidebar, without opening a tab`() = runTreeTest {
+        val viewModel = startedViewModel()
+        val effects = mutableListOf<VaultTreeEffect>()
+        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+        viewModel.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
+        runCurrent()
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnRevealInTree(path = path(PROJECTS)))
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = Triple<RelativePath?, Boolean, List<VaultTreeEffect>>(path(PROJECTS), false, emptyList()),
+            actual = Triple(
+                viewModel.state.value.selectedPath,
+                viewModel.state.value.isSidebarCollapsed,
+                effects.toList()
+            )
+        )
+    }
+
+    @Test
     fun `a wiki link to a missing note creates it at the root and selects it`() = runTreeTest {
         val viewModel = startedViewModel()
 

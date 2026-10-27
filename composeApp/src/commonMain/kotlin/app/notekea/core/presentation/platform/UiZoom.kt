@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
@@ -26,7 +27,7 @@ private const val PREVIEW_TEXT = "Zoomed text"
 /**
  * [content], the whole window, drawn at the app's zoom (`ROADMAP.md` 1.14): the platform's zoom shortcuts make it
  * larger, smaller or back to the system's size, one [UiScale] step at a time. The zoom starts where [loadScale] says
- * it was left and each change goes to [saveScale].
+ * it was left and each change goes to [saveScale]. [LocalUiZoom] tells the screens the zoom and how to reset it.
  */
 @Composable
 fun UiZoom(
@@ -46,11 +47,16 @@ fun UiZoom(
     WindowShortcut(shortcut = platformConventions.zoomOutShortcut) { change(UiScale.smaller(scale = scale)) }
     WindowShortcut(shortcut = platformConventions.zoomResetShortcut) { change(UiScale.DEFAULT) }
     val system = LocalDensity.current
+    val resetHint = platformConventions.zoomResetShortcut.label(operatingSystem = platformConventions.operatingSystem)
     CompositionLocalProvider(
         LocalDensity provides Density(density = system.density * scale, fontScale = system.fontScale),
+        LocalUiZoom provides UiZoomState(scale = scale, onReset = { change(UiScale.DEFAULT) }, resetHint = resetHint),
         content = content
     )
 }
+
+/** The window's zoom, for what shows it (the status bar); 100 % outside [UiZoom]. */
+val LocalUiZoom = staticCompositionLocalOf { UiZoomState() }
 
 @Preview
 @Composable

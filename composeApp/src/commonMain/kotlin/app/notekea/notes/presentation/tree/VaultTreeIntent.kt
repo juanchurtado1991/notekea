@@ -90,6 +90,12 @@ sealed interface VaultTreeIntent {
     /** A note chosen outside the tree (the quick switcher): it is selected, with the folders above it expanded. */
     data class OnRevealNote(val path: RelativePath) : VaultTreeIntent
 
+    /**
+     * A folder or note named outside the tree (the status bar's path, the folder above a note's title): the sidebar
+     * opens if it was hidden and selects it, with the folders above it expanded, without opening it.
+     */
+    data class OnRevealInTree(val path: RelativePath) : VaultTreeIntent
+
     /** Selects without opening or closing a folder (a right click before its menu). */
     data class OnRowSelect(val path: RelativePath) : VaultTreeIntent
 

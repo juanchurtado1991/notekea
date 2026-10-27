@@ -37,7 +37,8 @@ private const val PREVIEW_WIDTH_DP = 280
 /**
  * A section's header, as desktop inspectors and sidebars draw it: its [title] in small capitals and, when it folds
  * ([onToggle]), a chevron showing whether it [isOpen]; a click folds or opens it. [count] (how many it holds) sits at
- * the end, and the tooltip names the [shortcutHint] that goes to the section, if any.
+ * the end. Only a header with a [shortcutHint] (the shortcut that goes to the section) has a tooltip: the title says the
+ * rest, and a tooltip repeating it would cover the section's first row.
  */
 @Composable
 fun NotekeaSectionHeader(
@@ -49,8 +50,12 @@ fun NotekeaSectionHeader(
     shortcutHint: String? = null
 ) {
     Box(modifier = modifier.fillMaxWidth().padding(horizontal = NotekeaDimensions.SpacingXs)) {
-        NotekeaTooltip(label = title, shortcutHint = shortcutHint) {
+        if (shortcutHint == null) {
             HeaderRow(title = title, isOpen = isOpen, onToggle = onToggle, count = count)
+        } else {
+            NotekeaTooltip(label = title, shortcutHint = shortcutHint) {
+                HeaderRow(title = title, isOpen = isOpen, onToggle = onToggle, count = count)
+            }
         }
     }
 }

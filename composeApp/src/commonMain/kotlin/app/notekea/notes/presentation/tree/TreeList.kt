@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import app.notekea.core.presentation.components.NotekeaLazyScrollArea
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -95,16 +96,19 @@ internal fun TreeList(
                 contentPadding = TREE_PADDING
             ) {
                 items(items = state.rows, key = { it.path.value }, contentType = ::contentTypeOf) { row ->
-                    TreeEntryRow(
-                        row = row,
-                        state = state,
-                        createItems = createItems,
-                        isFocused = hasFocus && row.path == state.selectedPath,
-                        isMenuRequested = menuRequest == row.path,
-                        onMenuShown = { menuRequest = null },
-                        onIntent = onIntent,
-                        onFocusTree = { focusRequester.requestFocus() }
-                    )
+                    // A folder's rows fade in as it opens, and the rows below slide down to make room.
+                    Box(modifier = Modifier.animateItem()) {
+                        TreeEntryRow(
+                            row = row,
+                            state = state,
+                            createItems = createItems,
+                            isFocused = hasFocus && row.path == state.selectedPath,
+                            isMenuRequested = menuRequest == row.path,
+                            onMenuShown = { menuRequest = null },
+                            onIntent = onIntent,
+                            onFocusTree = { focusRequester.requestFocus() }
+                        )
+                    }
                 }
             }
         }

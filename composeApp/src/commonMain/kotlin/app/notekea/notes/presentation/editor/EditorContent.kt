@@ -10,6 +10,18 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.focus.focusProperties
+import app.notekea.core.presentation.components.NotekeaTooltip
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.material3.Icon
+import app.notekea.resources.editor_reveal_folder
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -369,6 +381,41 @@ private fun NoteText(
     }
 }
 
+/** The note's [folder] above its title, muted, turning to the link color under the pointer: a click shows it in Files. */
+@Composable
+private fun FolderPath(
+    folder: RelativePath,
+    onClick: () -> Unit
+) {
+    val interaction = remember { MutableInteractionSource() }
+    val isHovered by interaction.collectIsHoveredAsState()
+    val color = if (isHovered) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+    NotekeaTooltip(label = stringResource(resource = Res.string.editor_reveal_folder)) {
+        Row(
+            modifier = Modifier
+                .clip(shape = MaterialTheme.shapes.small)
+                .hoverable(interactionSource = interaction)
+                .pointerHoverIcon(icon = PointerIcon.Hand)
+                .focusProperties { canFocus = false }
+                .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick),
+            horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = NotekeaIcons.Folder,
+                contentDescription = null,
+                modifier = Modifier.size(size = NotekeaDimensions.BadgeIconSize),
+                tint = color
+            )
+            Text(
+                text = folder.value.split(RelativePath.SEPARATOR).joinToString(separator = PATH_SEPARATOR),
+                style = MaterialTheme.typography.bodySmall,
+                color = color
+            )
+        }
+    }
+}
+
 @Composable
 private fun EditorHeader(
     state: EditorState,
@@ -379,11 +426,8 @@ private fun EditorHeader(
     val path = state.notePath ?: return
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     path.parent?.takeUnless { it.isRoot }?.let { folder ->
-        Text(
-            text = folder.value.split(RelativePath.SEPARATOR).joinToString(separator = PATH_SEPARATOR),
-            style = MaterialTheme.typography.bodySmall,
-            color = muted
-        )
+        FolderPath(folder = folder, onClick = { onIntent(EditorIntent.OnFolderReveal) })
+        Spacer(modifier = Modifier.height(height = NotekeaDimensions.SpacingXs))
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
         NotekeaTitleField(

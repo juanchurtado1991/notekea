@@ -134,6 +134,8 @@ private fun EditorEffects(
 
                 is EditorEffect.ToggleBookmark -> current.onBookmarkToggle(effect.path)
 
+                is EditorEffect.RevealFolder -> current.onRevealFolder(effect.path)
+
                 EditorEffect.FocusText -> focusText(
                     requester = textFocusRequester,
                     isReading = viewModel.state.value.isReading

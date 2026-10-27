@@ -69,6 +69,7 @@
     <string name="editor_saved">Saved</string>
     <string name="editor_task">Task</string>
     <string name="editor_title_label">Note title</string>
+    <string name="editor_reveal_folder">Show in Files</string>
     <string name="editor_toolbar_label">Formatting</string>
     <string name="editor_unsaved">Unsaved</string>
 
@@ -229,7 +230,7 @@
     <string name="side_panel_inspector">Inspector</string>
     <string name="chat_soon_badge">Coming soon</string>
     <string name="chat_soon_message">Ask about your notes and get answers that cite them, from a model that runs on your computer.</string>
-    <string name="chat_soon_placeholder">Ask about your notes…</string>
+    <string name="chat_soon_placeholder">Your questions will go here</string>
     <string name="chat_soon_title">Chat with your notes</string>
     <string name="note_info_created">Created</string>
     <string name="note_info_links">Links</string>
@@ -257,6 +258,9 @@
     <string name="switcher_searching">Searching</string>
     <string name="status_crlf">CRLF</string>
     <string name="status_cursor">%1$d:%2$d</string>
+    <string name="status_reveal">Show in Files</string>
+    <string name="status_zoom">%1$d %</string>
+    <string name="status_zoom_tooltip">Zoom: click for the actual size (%1$s)</string>
     <string name="status_cursor_tooltip">Line %1$d, column %2$d</string>
     <string name="status_encoding">UTF-8</string>
     <string name="status_encoding_tooltip">Text encoding</string>
@@ -267,6 +271,7 @@
         <item quantity="one">%1$d word</item>
         <item quantity="other">%1$d words</item>
     </plurals>
+    <string name="tab_unsaved">Unsaved changes</string>
     <string name="tab_all">All open tabs</string>
     <string name="tab_close">Close tab</string>
     <string name="tab_close_others">Close other tabs</string>
@@ -377,7 +382,11 @@
     <string name="welcome_recent_remove">Remove</string>
     <string name="welcome_recent_title">Recent</string>
     <string name="welcome_tagline">Your notes, connected by local AI.</string>
-    <string name="workspace_empty_message">Choose a note, file or folder in the sidebar, or press %1$s to find a note. Each one opens in its own tab.</string>
+    <string name="workspace_empty_message">Choose a note, file or folder in Files, or start here. Each one opens in its own tab.</string>
+    <string name="workspace_start_find">Find a note</string>
+    <string name="workspace_start_new">New note</string>
+    <string name="workspace_start_search">Search in notes</string>
+    <string name="workspace_start_today">Today’s note</string>
     <string name="workspace_empty_title">No open tabs</string>
     <string name="calendar_next_month">Next month</string>
     <string name="calendar_previous_month">Previous month</string>

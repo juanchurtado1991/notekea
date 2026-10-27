@@ -64,6 +64,7 @@ class WorkspaceStatusBarScreenTest {
                     WorkspaceStatusBar(
                         vaultName = VAULT,
                         isLoading = !isReading,
+                        onReveal = {},
                         path = RelativePath(value = NOTE),
                         kind = TabKind.NOTE,
                         editor = editor,
