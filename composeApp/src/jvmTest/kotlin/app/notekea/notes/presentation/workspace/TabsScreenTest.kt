@@ -157,7 +157,8 @@ class TabsScreenTest {
             buttons = PointerButtons(),
             button = PointerButton.Primary
         )
-        settle(scene = scene)
+        // A tab let go on its row glides into its place before it moves there.
+        repeat(times = GLIDE_SETTLES) { settle(scene = scene) }
     }
 
     private fun settle(
@@ -169,6 +170,7 @@ class TabsScreenTest {
     companion object {
         private const val DRAG_STEPS = 10
         private const val FRAME_NANOS = 16_000_000L
+        private const val GLIDE_SETTLES = 2
         private const val HEIGHT = 400
         private const val SETTLE_FRAMES = 10
         private const val WIDTH = 900

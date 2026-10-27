@@ -336,7 +336,8 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
   file that is gone says so.
 - **Closing:** the tab's ✕, the middle button or `Mod+W`; the tab to the right becomes active. The tab menu also has
   Close other tabs, and Split right (or Move to the other pane). The "+" after the tabs finds a note to open.
-- **Order:** a tab dragged along its row and dropped takes that place.
+- **Order:** a tab dragged along its row keeps to the row's line while the other tabs slide aside to open the place
+  it would take; let go, it glides into that place.
 - **Two panes:** Split right moves the active tab to a new pane on the right; a click in a pane makes it the active
   one (its tabs' line is blue, the editor shortcuts and the outline follow it); a pane left without tabs closes. One
   side panel serves both panes.
