@@ -26,16 +26,17 @@ import kotlin.test.assertEquals
 /**
  * A note's attachments on screen (`ROADMAP.md` 1.8), rendered headless on the AWT event thread: in Edit mode each
  * file shows under its line and its chip opens it; in Preview a missing file offers Locate…; Mod+V and the toolbar's
- * Image or file ask the editor to attach. Positions are those of a 1200 × 900 px window at 1.5 density.
+ * More › Image or file ask the editor to attach. Positions are those of a 1200 × 900 px window at 1.5 density.
  */
 class EditorAttachmentsScreenTest {
     @Test
-    fun `in edit mode the file chip under its line opens the file, mod+v pastes and the toolbar picks a file`() {
+    fun `in edit mode the file chip under its line opens the file, mod+v pastes and more picks a file`() {
         val intents = render(isReading = false) { scene ->
             click(scene = scene, position = EDIT_CHIP)
             click(scene = scene, position = TEXT_LINE)
             scene.sendKeyEvent(event = ctrlV())
-            click(scene = scene, position = ATTACH_BUTTON)
+            click(scene = scene, position = MORE_BUTTON)
+            click(scene = scene, position = ATTACH_ITEM)
         }
 
         assertEquals(
@@ -141,7 +142,8 @@ class EditorAttachmentsScreenTest {
             "# Arepas\n\nThe plate:\n![[plate.png|300]]\nThe menu:\n![[menu.pdf]]\n![[gone.png]]\nEnd.\n"
         private const val WINDOW_HEIGHT = 900
         private const val WINDOW_WIDTH = 1200
-        private val ATTACH_BUTTON = Offset(x = 897f, y = 161f)
+        private val ATTACH_ITEM = Offset(x = 800f, y = 488f)
+        private val MORE_BUTTON = Offset(x = 993f, y = 161f)
         private val EDIT_CHIP = Offset(x = 255f, y = 827f)
         private val MENU = RelativePath(value = "Recipes/menu.pdf")
         private val NOTE = RelativePath(value = "Recipes/Arepas.md")

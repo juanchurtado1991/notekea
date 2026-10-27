@@ -48,7 +48,7 @@ class EditorToolbarTest {
     @Test
     fun `code block writes the chosen language, and the table picked on the grid has that size`() {
         val intents =
-            clickAll(isReading = false, positions = listOf(CODE_BLOCK, KOTLIN, MORE, TABLE_ROW, FOUR_BY_THREE))
+            clickAll(isReading = false, positions = listOf(MORE, CODE_BLOCK, KOTLIN, MORE, TABLE_ROW, FOUR_BY_THREE))
 
         assertEquals(
             expected = listOf<EditorIntent>(
@@ -67,7 +67,7 @@ class EditorToolbarTest {
 
     @Test
     fun `preview keeps only the tabs, find and outline`() {
-        val intents = clickAll(isReading = true, positions = listOf(BOLD, CODE_BLOCK, EDIT_TAB, FIND, OUTLINE))
+        val intents = clickAll(isReading = true, positions = listOf(BOLD, MORE, EDIT_TAB, FIND, OUTLINE))
 
         assertEquals(
             expected = listOf(EditorIntent.OnReadModeToggle, EditorIntent.OnFindOpen, EditorIntent.OnSidePanelToggle),
@@ -83,6 +83,7 @@ class EditorToolbarTest {
                 HEADING,
                 MEDIUM_HEADING,
                 TAG,
+                MORE,
                 CALLOUT,
                 FOLDED,
                 TIP_WITH_FOLDED_CHECKED
@@ -158,7 +159,7 @@ class EditorToolbarTest {
             drag(scene = scene, from = TEXT.copy(x = TEXT_LEFT), to = THIRD_STEP)
             click(scene = scene, position = CHECKLIST)
             selections += buffer.text.substring(range = buffer.selection.min..<buffer.selection.max)
-            click(scene = scene, position = CALLOUT)
+            click(scene = scene, position = MORE)
             selections += buffer.text.substring(range = buffer.selection.min..<buffer.selection.max)
             click(scene = scene, position = TOOLBAR_GAP)
             click(scene = scene, position = PREVIEW_TAB)
@@ -324,29 +325,29 @@ class EditorToolbarTest {
         private const val WINDOW_HEIGHT = 640
         private const val WINDOW_WIDTH = 1200
         private val BODY = "# Arepas\n\n" + (1..40).joinToString(separator = "") { "Step $it of the recipe.\n" }
-        private val BOLD = Offset(x = 381f, y = 186f)
-        private val CALLOUT = Offset(x = 800f, y = 186f)
-        private val CHECKLIST = Offset(x = 741f, y = 186f)
+        private val BOLD = Offset(x = 601f, y = 186f)
+        private val CALLOUT = Offset(x = 800f, y = 228f)
+        private val CHECKLIST = Offset(x = 821f, y = 186f)
         private val EDIT_TAB = Offset(x = 115f, y = 183f)
-        private val FIND = Offset(x = 1053f, y = 186f)
+        private val FIND = Offset(x = 1059f, y = 186f)
         private val OUTLINE = Offset(x = 1101f, y = 186f)
-        private val FOLDED = Offset(x = 556f, y = 45f)
-        private val HEADING = Offset(x = 333f, y = 186f)
-        private val MEDIUM_HEADING = Offset(x = 416f, y = 291f)
-        private val NOTE_LINK = Offset(x = 489f, y = 186f)
+        private val FOLDED = Offset(x = 300f, y = 70f)
+        private val HEADING = Offset(x = 553f, y = 186f)
+        private val MEDIUM_HEADING = Offset(x = 636f, y = 291f)
+        private val NOTE_LINK = Offset(x = 711f, y = 186f)
         private val PREVIEW_TAB = Offset(x = 211f, y = 183f)
-        private val TEMPLATE = Offset(x = 945f, y = 186f)
-        private val TAG = Offset(x = 585f, y = 186f)
-        private val CODE_BLOCK = Offset(x = 849f, y = 186f)
-        private val FOUR_BY_THREE = Offset(x = 820f, y = 406f)
-        private val KOTLIN = Offset(x = 874f, y = 327f)
+        private val TEMPLATE = Offset(x = 931f, y = 186f)
+        private val TAG = Offset(x = 759f, y = 186f)
+        private val CODE_BLOCK = Offset(x = 800f, y = 296f)
+        private val FOUR_BY_THREE = Offset(x = 436f, y = 478f)
+        private val KOTLIN = Offset(x = 480f, y = 364f)
         private val MORE = Offset(x = 993f, y = 186f)
-        private val TABLE_ROW = Offset(x = 1060f, y = 339f)
+        private val TABLE_ROW = Offset(x = 800f, y = 544f)
         private const val LINE_END_X = 700f
         private const val TEXT_LEFT = 78f
         private val TOOLBAR_GAP = Offset(x = 290f, y = 186f)
         private val THIRD_STEP = Offset(x = 140f, y = 402f)
         private val TEXT = Offset(x = 300f, y = 330f)
-        private val TIP_WITH_FOLDED_CHECKED = Offset(x = 556f, y = 332f)
+        private val TIP_WITH_FOLDED_CHECKED = Offset(x = 300f, y = 356f)
     }
 }

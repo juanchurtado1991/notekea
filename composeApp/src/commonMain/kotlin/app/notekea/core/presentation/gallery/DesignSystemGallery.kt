@@ -54,6 +54,7 @@ import app.notekea.core.presentation.components.NotekeaSplitPane
 import app.notekea.core.presentation.components.NotekeaGridCard
 import app.notekea.core.presentation.components.NotekeaTabStrip
 import app.notekea.core.presentation.components.NotekeaToolRail
+import app.notekea.core.presentation.components.NotekeaToolbarPill
 import app.notekea.core.presentation.components.NotekeaToolRailItem
 import app.notekea.core.presentation.components.NotekeaTabStripItem
 import app.notekea.core.presentation.components.PaneSide
@@ -483,7 +484,10 @@ private fun TabsSection() {
     )
 }
 
-/** Document tabs above a pane, a tool rail and grid cards: the workspace's pieces (`ROADMAP.md` 1.11). */
+/**
+ * Document tabs above a pane, a tool rail, grid cards and a toolbar capsule: the workspace's pieces (`ROADMAP.md` 1.11,
+ * 1.17).
+ */
 @Composable
 private fun DocumentTabsSection() {
     var documents by remember { mutableStateOf(value = SAMPLE_DOCUMENTS) }
@@ -513,6 +517,12 @@ private fun DocumentTabsSection() {
             }
         }
     }
+    NotekeaToolbarPill(
+        groups = listOf(
+            { SAMPLE_DOCUMENTS.forEach { NotekeaIconButton(icon = NotekeaIcons.Note, label = it, onClick = {}) } },
+            { NotekeaIconButton(icon = NotekeaIcons.More, label = DOCUMENT_CLOSE, onClick = {}) }
+        )
+    )
 }
 
 /** The palette inside a card instead of over the window; arrows move the selection, Enter and Esc do nothing here. */

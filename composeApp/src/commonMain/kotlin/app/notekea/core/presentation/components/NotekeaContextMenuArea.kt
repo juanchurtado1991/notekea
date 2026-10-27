@@ -4,6 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -94,16 +96,17 @@ fun NotekeaContextMenuArea(
             containerColor = MaterialTheme.colorScheme.surface,
             border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = MaterialTheme.colorScheme.outline)
         ) {
-            // The item whose submenu is open; hovering another item closes it, moving into the submenu does not.
-            var openSubmenu by remember { mutableStateOf<NotekeaMenuItem?>(value = null) }
+            // The label of the item whose submenu is open; hovering another item closes it, moving into the submenu
+            // does not. A label, not the item: a choice in the submenu ("Start folded") rebuilds the items.
+            var openSubmenu by remember { mutableStateOf<String?>(value = null) }
             sections.forEachIndexed { index, items ->
                 if (index > 0) MenuDivider()
                 items.forEach { item ->
                     MenuRow(
                         item = item,
                         onChosen = state::close,
-                        isSubmenuOpen = openSubmenu == item,
-                        onHover = { openSubmenu = item.takeIf { it.submenu != null } }
+                        isSubmenuOpen = openSubmenu == item.label,
+                        onHover = { openSubmenu = item.label.takeIf { item.opensSubmenu } }
                     )
                 }
             }
@@ -126,7 +129,7 @@ private fun MenuRow(
         DropdownMenuItem(
             text = { MenuRowText(item = item, color = color) },
             onClick = {
-                if (item.submenu != null) {
+                if (item.opensSubmenu) {
                     onHover()
                 } else {
                     if (!item.keepsMenuOpen) onChosen()
@@ -139,8 +142,23 @@ private fun MenuRow(
             enabled = item.enabled,
             interactionSource = interactionSource
         )
-        val submenu = item.submenu
+        val submenu = item.submenu ?: item.items?.let { sections -> submenuOf(sections = sections) }
         if (isSubmenuOpen && submenu != null) Submenu(onChosen = onChosen, content = submenu)
+    }
+}
+
+private val NotekeaMenuItem.opensSubmenu: Boolean
+    get() = submenu != null || items != null
+
+/** A submenu of rows ([NotekeaMenuItem.items]): the same rows as the menu, in sections separated by dividers. */
+private fun submenuOf(
+    sections: List<List<NotekeaMenuItem>>
+): @Composable (onChosen: () -> Unit) -> Unit = { onChosen ->
+    Column(modifier = Modifier.width(intrinsicSize = IntrinsicSize.Max)) {
+        sections.forEachIndexed { index, items ->
+            if (index > 0) MenuDivider()
+            items.forEach { item -> MenuRow(item = item, onChosen = onChosen, isSubmenuOpen = false, onHover = {}) }
+        }
     }
 }
 
@@ -174,7 +192,7 @@ private fun menuRowHeight(
 private fun trailingOf(
     item: NotekeaMenuItem
 ): (@Composable () -> Unit)? = when {
-    item.submenu != null -> {
+    item.opensSubmenu -> {
         {
             Icon(
                 imageVector = NotekeaIcons.Expand,

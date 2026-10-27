@@ -411,7 +411,10 @@ same Markdown a person would type, so notes stay readable in any app.
 
 **UI — Editor toolbar** (under the title, replacing the Edit / Read icon):
 - **Edit | Preview** tabs, like GitHub's, switched with `Mod+E` (Preview is Read mode).
-- Buttons with an icon, a plain-language tooltip and its shortcut: **Heading** (menu: Large, Medium, Small heading),
+- Buttons with an icon, a plain-language tooltip and its shortcut, in one rounded capsule of groups: Heading, Bold,
+  Italic · Link to a note, Tag · Checklist, Bulleted list · Insert template (1.12) · More (⋯), which holds the rest
+  (Web link, Numbered list, Callout and Code block with their types beside the menu, Image or file, Quote, Divider,
+  Table), so the bar stays short. The buttons: **Heading** (menu: Large, Medium, Small heading),
   **Bold** (`Mod+B`), **Italic** (`Mod+I`), **Link to a note** (`Mod+K`, picks the note in the quick switcher and writes
   `[[Note]]`, the selection becoming its label), **Web link** (`Mod+Shift+K`), **Tag** (the tag picker: the vault's
   tags, in the frontmatter or written in the text, the most used first; typing finds any of them or offers it as a new

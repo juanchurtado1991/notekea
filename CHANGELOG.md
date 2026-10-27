@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The editor's toolbar is a rounded capsule of groups with the most used buttons (Heading, Bold, Italic, Link to a
+  note, Tag, Checklist, Bulleted list, Insert template); Web link, Numbered list, Callout, Code block, Image or file,
+  Quote, Divider and Table move to More (⋯), Callout and Code block opening their types beside it.
 - Plan for the release (`ROADMAP.md` 5.3): the MVP's builds are not code-signed; the README explains how to open
   them the first time on Windows and macOS, and signing comes later, when there are users to justify it.
 - Code: Markdown marks and shared text pieces are named once (`MarkdownSyntax`, `StringPatterns`) instead of
