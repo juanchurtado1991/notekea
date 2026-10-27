@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.core.presentation.components.NotekeaLazyScrollArea
 import app.notekea.core.presentation.components.NotekeaSegment
 import app.notekea.core.presentation.components.NotekeaSegmentedControl
 import app.notekea.core.presentation.components.NotekeaTooltip
@@ -347,32 +348,27 @@ private fun OutlineList(
         if (isFocused && !hasFocus) focused = current.coerceIn(minimumValue = 0, maximumValue = outline.lastIndex)
         hasFocus = isFocused
     }
-    LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .semantics { contentDescription = label }
-            .outlineInput(focusRequester = focusRequester, onFocusChange = onFocusChange) { event ->
-                outlineKey(
-                    event = event,
-                    focused = focused,
-                    count = outline.size,
-                    onMove = { focused = it },
-                    onChoose = { onHeadingClick(focused) },
-                    onLeave = onLeave
+    NotekeaLazyScrollArea(state = listState, modifier = modifier) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = label }
+                .outlineInput(focusRequester = focusRequester, onFocusChange = onFocusChange) { event ->
+                    outlineKey(event, focused, outline.size, { focused = it }, { onHeadingClick(focused) }, onLeave)
+                },
+            state = listState,
+            contentPadding = LIST_PADDING
+        ) {
+            itemsIndexed(items = outline) { index, heading ->
+                NotekeaTreeItem(
+                    label = heading.text,
+                    icon = null,
+                    depth = heading.depth,
+                    onClick = { onHeadingClick(index) },
+                    selected = index == current,
+                    focused = hasFocus && index == focused
                 )
-            },
-        state = listState,
-        contentPadding = LIST_PADDING
-    ) {
-        itemsIndexed(items = outline) { index, heading ->
-            NotekeaTreeItem(
-                label = heading.text,
-                icon = null,
-                depth = heading.depth,
-                onClick = { onHeadingClick(index) },
-                selected = index == current,
-                focused = hasFocus && index == focused
-            )
+            }
         }
     }
 }

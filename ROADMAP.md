@@ -66,7 +66,7 @@ One main window with three resizable panes, a status bar, and the native window 
 ```
 
 - **Sidebar** (default 340 dp, as wide as the outline panel, min 200, collapsible with `Mod+\`): the vault's name with Sort, Expand all, Collapse
-  all and Minimize, bookmarks, folder tree. A tool rail on its left (Files, Search notes, Today, Side panel; Open another vault, About and Settings at its bottom; 1.14)
+  all and Minimize, bookmarks, folder tree. A tool rail on its left (Files, Side panel, Search notes, Today; Open another vault, About and Settings at its bottom; 1.14)
   stays when it is hidden (1.11).
 - **Editor** (flexible, min 480 dp): tab bar, title, properties, Edit / Read toggle, Markdown content.
   Can be split into two panes side by side.
@@ -163,7 +163,7 @@ Pick a folder with the native picker (FileKit); remember the last vault (Multipl
 └───────────────────────────────────────────┘
 ```
 
-- States: no recents (only the two buttons), folder missing (recent item greyed with "Locate…"),
+- States: no recents (only the two buttons; since 1.14 beside a card of what Notekea is), folder missing (recent item greyed with "Locate…"),
   permission error (error banner with the path).
 - Shortcut: `Mod+O` opens a folder.
 - **Done when:** a vault opens, survives restart, and missing folders are handled.
@@ -345,8 +345,8 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
   side panel serves both panes.
 - **Tool rail:** a narrow strip of icons on the window's left edge, there whether the sidebar is shown or not, as in
   Android Studio: Files (shows or hides the sidebar), Search notes, New note, New folder and Today, each with a tooltip
-  beside it (revised by 1.14: Files, Search notes, Today and Side panel, then Open another vault, About and Settings
-  at the bottom; new notes and folders come from Mod+N and the tree's menu). The sidebar's header holds the vault's name, then Sort, Expand all, Collapse all and Minimize; the
+  beside it (revised by 1.14: Files and Side panel, then Search notes and Today, and Open another vault, About and
+  Settings at the bottom, with 24 dp above and below; new notes and folders come from Mod+N and the tree's menu). The sidebar's header holds the vault's name, then Sort, Expand all, Collapse all and Minimize; the
   Search notes and Today rows and the New note / New folder buttons move to the rail.
 - **Window size:** the window opens large enough (1440 × 900 dp at most, never larger than the screen's usable area)
   to show the tool rail, the sidebar, a note and the outline beside it, which are open by default; the welcome screen
@@ -409,12 +409,16 @@ Frontmatter shown as a compact form above the note content.
 - **Chat mode** (the right panel's Inspector | Chat control): until 3.3 builds it, Chat says what it will do, marked
   "Coming soon", above its question field shown disabled; `Mod+Shift+O` always comes back to the inspector.
 - **The workspace's frame** (decided with the developer while 1.14 was reviewed):
-  - **Tool rail:** Files, Search notes, Today and Side panel at the top; Open another vault, About and Settings at the
-    bottom, as in Obsidian. New note and New folder leave the rail (Mod+N and the tree's menu stay), "Open another
+  - **Tool rail:** the two panels (Files, Side panel) then Search notes and Today at the top; Open another vault,
+    About and Settings at the bottom, as in Obsidian, with 24 dp above and below. New note and New folder leave the rail (Mod+N and the tree's menu stay), "Open another
     vault" leaves the sidebar's bottom, and the editor toolbar's Outline button leaves for the rail's Side panel.
   - **About:** a dialog with the logo, the name, the version and a link to GitHub, and every keyboard shortcut of the
     platform as keycaps, in groups from the most used (Notes, Writing, Workspace).
   - **Settings:** a dialog with the sections to come, dimmed, and "Coming soon" until settings are built.
+  - **Welcome screen:** two columns (stacked in a narrow window): the logo, the actions and any error, and beside them
+    the recent vaults, at most five shown and the rest scrolling inside, or what Notekea is while there are none.
+  - **Scrollbars:** a thin scrollbar shows on what scrolls (the tree, the outline, About's shortcuts, the recent
+    vaults, the welcome screen), only while there is more to see.
   - **Logo:** a placeholder (a cobalt square with an "N") in the window, About and the welcome screen, until the
     designed logo (an SVG of paths on a 1024 square, with and without its background) replaces it and the packaged
     icons are drawn from it.

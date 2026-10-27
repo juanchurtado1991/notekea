@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import app.notekea.core.presentation.components.NotekeaLazyScrollArea
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -85,29 +86,26 @@ internal fun TreeList(
         modifier = modifier,
         onOpenByPointer = { onIntent(VaultTreeIntent.OnSelectionClear) }
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .treeInput(
-                    focusRequester = focusRequester,
-                    state = state,
-                    onIntent = onIntent,
-                    onMenuRequest = { menuRequest = state.selectedPath }
-                ) { hasFocus = it },
-            state = listState,
-            contentPadding = TREE_PADDING
-        ) {
-            items(items = state.rows, key = { it.path.value }, contentType = ::contentTypeOf) { row ->
-                TreeEntryRow(
-                    row = row,
-                    state = state,
-                    createItems = createItems,
-                    isFocused = hasFocus && row.path == state.selectedPath,
-                    isMenuRequested = menuRequest == row.path,
-                    onMenuShown = { menuRequest = null },
-                    onIntent = onIntent,
-                    onFocusTree = { focusRequester.requestFocus() }
-                )
+        NotekeaLazyScrollArea(state = listState, modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .treeInput(focusRequester, state, onIntent, { menuRequest = state.selectedPath }) { hasFocus = it },
+                state = listState,
+                contentPadding = TREE_PADDING
+            ) {
+                items(items = state.rows, key = { it.path.value }, contentType = ::contentTypeOf) { row ->
+                    TreeEntryRow(
+                        row = row,
+                        state = state,
+                        createItems = createItems,
+                        isFocused = hasFocus && row.path == state.selectedPath,
+                        isMenuRequested = menuRequest == row.path,
+                        onMenuShown = { menuRequest = null },
+                        onIntent = onIntent,
+                        onFocusTree = { focusRequester.requestFocus() }
+                    )
+                }
             }
         }
     }

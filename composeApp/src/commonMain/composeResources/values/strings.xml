@@ -337,6 +337,14 @@
 
     <string name="welcome_busy">Opening vault…</string>
     <string name="welcome_create_vault">Create new vault</string>
+    <string name="welcome_feature_ai_text">Related notes and answers, worked out on your computer.</string>
+    <string name="welcome_feature_ai_title">Local AI</string>
+    <string name="welcome_feature_markdown_text">Ordinary .md files in folders you own, readable by any app.</string>
+    <string name="welcome_feature_markdown_title">Plain Markdown</string>
+    <string name="welcome_feature_obsidian_text">Links, tags, properties and callouts, as they are.</string>
+    <string name="welcome_feature_obsidian_title">Works with Obsidian</string>
+    <string name="welcome_feature_private_text">Nothing leaves your computer unless you choose to sync.</string>
+    <string name="welcome_feature_private_title">Private</string>
     <string name="welcome_new_vault_cancel">Cancel</string>
     <string name="welcome_new_vault_change_location">Change…</string>
     <string name="welcome_new_vault_confirm">Create vault</string>

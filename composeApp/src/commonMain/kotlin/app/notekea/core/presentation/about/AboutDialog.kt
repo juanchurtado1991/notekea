@@ -30,6 +30,7 @@ import app.notekea.core.presentation.components.NotekeaDialog
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaKeycaps
 import app.notekea.core.presentation.components.NotekeaLogo
+import app.notekea.core.presentation.components.NotekeaScrollArea
 import app.notekea.core.presentation.components.NotekeaWordmark
 import app.notekea.core.presentation.platform.LocalAppVersion
 import app.notekea.core.presentation.platform.keys
@@ -133,27 +134,32 @@ private fun Identity() {
     }
 }
 
-/** Every group of shortcuts, scrolling when they do not fit. */
+/** Every group of shortcuts, scrolling with a scrollbar when they do not fit. */
 @Composable
 private fun ShortcutList(
     platformConventions: PlatformConventions
 ) {
     val operatingSystem = platformConventions.operatingSystem
-    Column(
-        modifier = Modifier.fillMaxWidth().verticalScroll(state = rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
-    ) {
-        AboutShortcuts.groups(conventions = platformConventions).forEach { group ->
-            Text(
-                text = stringResource(resource = group.title).uppercase(),
-                modifier = Modifier.padding(top = NotekeaDimensions.SpacingS),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = GROUP_LETTER_SPACING_SP.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            group.shortcuts.forEach { ShortcutRow(shortcut = it, keys = it.shortcut.keys(operatingSystem)) }
+    val scrollState = rememberScrollState()
+    NotekeaScrollArea(state = scrollState, modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth().verticalScroll(
+                state = scrollState
+            ).padding(end = NotekeaDimensions.SpacingM),
+            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
+        ) {
+            AboutShortcuts.groups(conventions = platformConventions).forEach { group ->
+                Text(
+                    text = stringResource(resource = group.title).uppercase(),
+                    modifier = Modifier.padding(top = NotekeaDimensions.SpacingS),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = GROUP_LETTER_SPACING_SP.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                group.shortcuts.forEach { ShortcutRow(shortcut = it, keys = it.shortcut.keys(operatingSystem)) }
+            }
         }
     }
 }
