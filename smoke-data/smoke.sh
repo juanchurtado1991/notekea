@@ -63,6 +63,8 @@ prepare() {
     cp "$SMOKE_ROOT/notes/Outline practice.md" "$SCRATCH/Playground Vault/Editor/"
     # Properties (1.14): one property of each type, and a note whose frontmatter is not valid YAML.
     cp "$SMOKE_ROOT/notes/Properties practice.md" "$SMOKE_ROOT/notes/Broken properties.md" "$SCRATCH/Playground Vault/Editor/"
+    # Embeds (1.15): a note embedding a chain of notes, two notes in a circle, itself, sections, blocks and a missing note.
+    cp -R "$SMOKE_ROOT/notes/embeds" "$SCRATCH/Playground Vault/Editor/Embeds"
     # Daily notes (1.10): a vault with Obsidian's Daily notes settings, a template and two earlier days.
     cp -R "$SMOKE_ROOT/daily" "$SCRATCH/Daily Vault"
     # Templates (1.12): a vault whose Obsidian settings put templates in Snippets, with notes to insert them in.
