@@ -155,7 +155,8 @@ tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
 }
 
 // The automated smoke runs alone (ROADMAP.md 1.16), recording the process's memory for a performance pass:
-// `./gradlew :composeApp:smokeRun -PidleSeconds=600` writes build/reports/smoke-runs/memory.csv. They also run, without
+// `./gradlew :composeApp:smokeRun -PidleSeconds=600` writes build/reports/smoke-runs/memory.csv, with the JVM options
+// of `-PsmokeJvmArgs` when given. They also run, without
 // recording, in every `jvmTest`.
 val smokeRunPackage = "app.notekea.smokerun.*"
 tasks.register<Test>("smokeRun") {
@@ -167,6 +168,8 @@ tasks.register<Test>("smokeRun") {
     filter { includeTestsMatching(smokeRunPackage) }
     systemProperty("notekea.smokeRun.reportDir", layout.buildDirectory.dir("reports/smoke-runs").get().asFile.path)
     systemProperty("notekea.smokeRun.idleSeconds", providers.gradleProperty("idleSeconds").getOrElse("0"))
+    // A performance pass compares JVM settings: `-PsmokeJvmArgs="-XX:+UseSerialGC -Xmx256m"`.
+    providers.gradleProperty("smokeJvmArgs").orNull?.let { jvmArgs(it.split(" ").filter(String::isNotBlank)) }
     outputs.upToDateWhen { false }
 }
 
