@@ -37,7 +37,12 @@ value class RelativePath(val value: String) {
     /** True when this path is [folder] itself or anything inside it; every path is inside [ROOT]. */
     fun isWithin(
         folder: RelativePath
-    ): Boolean = folder.isRoot || value == folder.value || value.startsWith(prefix = folder.value + SEPARATOR)
+    ): Boolean = folder.isRoot || value == folder.value ||
+        // Compared in place, without building the folder's prefix: this runs for every entry of a vault.
+        (
+            value.length > folder.value.length && value.startsWith(prefix = folder.value) &&
+                value[folder.value.length] == SEPARATOR_CHAR
+            )
 
     /** This path after [from] was renamed or moved to [to]; paths outside [from] stay as they are. */
     fun rebased(
@@ -52,6 +57,7 @@ value class RelativePath(val value: String) {
     companion object {
         const val MARKDOWN_EXTENSION = ".md"
         const val SEPARATOR = "/"
+        private const val SEPARATOR_CHAR = '/'
         val ROOT = RelativePath(value = "")
     }
 }

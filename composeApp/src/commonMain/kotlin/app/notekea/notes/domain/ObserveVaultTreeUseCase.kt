@@ -1,6 +1,7 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
@@ -100,12 +101,12 @@ class ObserveVaultTreeUseCase(
         previous: VaultTree
     ): List<NoteEntry> = coroutineScope {
         val permits = Semaphore(permits = MAX_PARALLEL_READS)
+        // Only a changed note starts a coroutine to read it: a rescan of a vault that changed little stays cheap.
         files
             .map { file ->
-                async {
-                    val known = previous.notes[file.path]?.takeIf { isUnchanged(known = it.file, current = file) }
-                    known ?: permits.withPermit { entryOf(vaultPath = vaultPath, file = file) }
-                }
+                val known = previous.notes[file.path]?.takeIf { isUnchanged(known = it.file, current = file) }
+                known?.let { CompletableDeferred(value = it) }
+                    ?: async { permits.withPermit { entryOf(vaultPath = vaultPath, file = file) } }
             }.awaitAll()
     }
 

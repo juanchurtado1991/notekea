@@ -298,7 +298,16 @@ class VaultTreeViewModel(
         val before = state.value
         reduce { current ->
             val next = transform(current)
-            next.copy(rows = flattenTree(tree = next.tree, expandedFolders = next.expandedFolders, sort = next.sort))
+            // A change of selection, rename or dialog leaves the rows as they are: flattening walks the whole vault.
+            val isLayoutSame = next.tree === current.tree && next.expandedFolders == current.expandedFolders &&
+                next.sort == current.sort
+            if (isLayoutSame) {
+                next
+            } else {
+                next.copy(
+                    rows = flattenTree(tree = next.tree, expandedFolders = next.expandedFolders, sort = next.sort)
+                )
+            }
         }
         val after = state.value
         dailyNotes.update()

@@ -15,13 +15,18 @@ class TextTagFinder {
         val tags = LinkedHashSet<String>()
         var fence: Char? = null
         lines.forEach { line ->
-            val marker = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)?.first()
+            // Most lines have no fence and no tag: the cheap character checks skip their regexes.
+            val marker = if (line.any { it in FENCE_CHARS }) {
+                MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)?.first()
+            } else {
+                null
+            }
             when {
                 fence != null -> if (marker == fence) fence = null
 
                 marker != null -> fence = marker
 
-                else -> {
+                TAG_MARK in line -> {
                     val text = line.replace(regex = NOT_TEXT, replacement = SPACE)
                     MarkdownSyntax.TAG.findAll(input = text).forEach { tags += it.groupValues[1] }
                 }
@@ -31,6 +36,8 @@ class TextTagFinder {
     }
 
     companion object {
+        private const val FENCE_CHARS = "`~"
+        private const val TAG_MARK = '#'
         private val NOT_TEXT = Regex(pattern = "(`+).*?\\1|\\[\\[[^\\]\\n]*]]|]\\([^)\\n]*\\)")
     }
 }

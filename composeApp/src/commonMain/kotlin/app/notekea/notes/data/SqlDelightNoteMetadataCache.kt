@@ -28,24 +28,31 @@ class SqlDelightNoteMetadataCache(
         vaultPath: String
     ): List<NoteEntry> = withContext(context = dispatchers.io) {
         guarded(fallback = emptyList(), failureMessage = READ_FAILED) {
-            val tags = queries.selectTags(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.tag })
-            val aliases = queries.selectAliases(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.alias })
-            val textTags = queries.selectTextTags(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.tag })
-            queries.selectNotes(vault = vaultPath).executeAsList().map { row ->
-                NoteEntry(
-                    file = NoteFile(
-                        path = RelativePath(value = row.path),
-                        size = row.size,
-                        modifiedAt = row.modified_at?.let { Instant.fromEpochMilliseconds(epochMilliseconds = it) }
-                    ),
-                    metadata = NoteMetadata(
-                        tags = tags[row.path].orEmpty(),
-                        aliases = aliases[row.path].orEmpty(),
-                        title = row.title,
-                        textTags = textTags[row.path].orEmpty()
-                    )
+            // One transaction: the four reads share a connection and see the same snapshot.
+            queries.transactionWithResult { readNotes(vaultPath = vaultPath) }
+        }
+    }
+
+    private fun readNotes(
+        vaultPath: String
+    ): List<NoteEntry> {
+        val tags = queries.selectTags(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.tag })
+        val aliases = queries.selectAliases(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.alias })
+        val textTags = queries.selectTextTags(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.tag })
+        return queries.selectNotes(vault = vaultPath).executeAsList().map { row ->
+            NoteEntry(
+                file = NoteFile(
+                    path = RelativePath(value = row.path),
+                    size = row.size,
+                    modifiedAt = row.modified_at?.let { Instant.fromEpochMilliseconds(epochMilliseconds = it) }
+                ),
+                metadata = NoteMetadata(
+                    tags = tags[row.path].orEmpty(),
+                    aliases = aliases[row.path].orEmpty(),
+                    title = row.title,
+                    textTags = textTags[row.path].orEmpty()
                 )
-            }
+            )
         }
     }
 
