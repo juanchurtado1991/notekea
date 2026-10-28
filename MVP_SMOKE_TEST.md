@@ -352,11 +352,10 @@ on Windows and Linux: Mod+B is ⌘B or Ctrl+B, Mod+Shift+K is ⇧⌘K or Ctrl+Sh
 
 ### 1.18 Editor memory
 
-Run `smoke.sh prepare` and `smoke.sh large` (`smoke.ps1 prepare` and `smoke.ps1 large` on Windows). The cases run in
-`smoke-data/scratch/Playground Vault`, whose `attachments` folder now also holds `Market photo.jpg` (4000 × 3000), and
-1.18-05 in `smoke-data/scratch/Large Vault` (5,000 notes). "Mod" is Cmd on macOS and Ctrl on Windows and Linux. Memory
-is read in the system's monitor: Task Manager › Details › Memory on Windows, Activity Monitor › Memory on macOS, System
-Monitor (or `ps -o rss= -p <pid>`) on Linux, for the Notekea process (a `java` process when run with Gradle).
+Run `smoke.sh prepare` (`smoke.ps1 prepare` on Windows). The cases run in `smoke-data/scratch/Playground Vault`, whose
+`attachments` folder now also holds `Market photo.jpg` (4000 × 3000). "Mod" is Cmd on macOS and Ctrl on Windows and
+Linux. Memory is not a manual case: testers never measure it; the performance passes do, on the automated smoke runs
+(`docs/performance.md`).
 
 | ID | Steps | Expected | Testable from | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|
@@ -364,5 +363,4 @@ Monitor (or `ps -o rss= -p <pid>`) on Linux, for the Notekea process (a `java` p
 | 1.18-02 | Open the `attachments` folder in a tab and look at the Market photo.jpg card; click it | The card shows the photo cropped to the card and sharp ("Market photo 4000 x 3000" readable at its top); the file opens in a tab and shows the whole photo, sharp | 1.18 | `PictureScalingTest`, `WorkspaceViewModelTest` | | | |
 | 1.18-03 | Open Editor/Images and files in Preview; open Recipes/Arepas with Mod+P (it opens in a tab of its own, in the same pane); click the Images and files tab again | The pictures of Images and files show again as before, at their widths | 1.18 | `EditorAttachmentsTest` | | | |
 | 1.18-04 | Press Mod+P and type `2026-10`; then open the Journal folder in the tree | The palette lists 2026-10-20, 2026-10-21 and 2026-10-22 in that order; the tree lists them in the same order | 1.18 | `NaturalNameComparatorTest`, `FirstSortedTest` | | | |
-| 1.18-05 | Open the Large Vault with the system's monitor showing Notekea's memory; note it once the tree shows; open 20 notes with Mod+P (`Note 01 001`, `Note 02 002`… `Note 20 020`) and close them all with Mod+W; wait a minute and note it; click Open another vault, wait a minute and note it; open the Large Vault again and repeat once | The app stays responsive while it opens 5,000 notes; the three numbers go in the pull request; the second round ends near the first (within about 50 MB), so nothing keeps growing | 1.18 | `LargeVaultMemoryRunTest` (smoke run) | | | |
 
