@@ -471,6 +471,8 @@ and zoom, and two rounds of polish (below). The graph view (2.7) and onboarding 
   - Undo after deleting: entries go to the system trash, which cannot be restored reliably on the three systems; the
     confirmation dialog is enough.
   - A 24 dp padding at the rail's top and bottom; the rail keeps 8 dp.
+  - Numbers limited to positive integers: a Number property takes decimals and negatives, as in Obsidian, since
+    the type cannot know what a property means (`price: 9.5`, `temperature: -2`); only what is not a number is refused.
 - **Done when:** round-tripping every sample-vault note through the properties view produces byte-identical
   files when nothing was edited, and the cases 1.14-01 to 1.14-15 of `MVP_SMOKE_TEST.md` pass.
 
