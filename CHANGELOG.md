@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Memory runs (ROADMAP 1.18): Personal Notes with a 2,000-line note and the 5,000-note Large Vault, driven through the
+  app (notes opened and closed, a text search, Edit and Preview scrolled, idle, the vault left and opened again), each
+  in a JVM of its own; samples record the heap in use and committed, the resident memory and Skia's caches. M1's
+  numbers and where the memory goes are in `docs/performance.md`.
+
 - Automated smoke runs (ROADMAP 1.16): the real app driven through its UI on copies of the smoke vaults, a run per M1
   feature and an idle run, in every test run and in CI; `./gradlew :composeApp:smokeRun -PidleSeconds=600` records
   their memory for the performance passes.
@@ -20,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Memory (ROADMAP 1.18): a vault's ViewModels (tree, watcher, caches, editors) are cleared when it closes, after its
+  notes are saved; folder cards decode pictures at card size and keep at most 60; the editor keeps only the pictures of
+  the note on screen; searches sort only the results they show; names compare without a pattern, in the same order;
+  list keys read only the cursor's line.
 - Logo: the designed kea and N on a note with a tangerine folded corner replaces the placeholder in the window, About,
   the welcome screen and the rail, in the theme's tonal blues: the note in the primary container color and the mark in
   the primary color, for the light or dark theme.
