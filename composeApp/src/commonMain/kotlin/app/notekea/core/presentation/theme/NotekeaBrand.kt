@@ -9,9 +9,9 @@ import app.notekea.core.presentation.theme.palette.NotekeaPalette
 
 /**
  * Notekea's logo, as vectors the window, About, the welcome screen and the rail draw at any size: a kea and an "N" on a
- * note with a tangerine folded corner, in ink like the text, so it sits quietly beside the editor. [Logo] is for light
- * backgrounds (an ink note, the mark in the background's color) and [LogoDark] for dark ones, where the note turns
- * light; [NotekeaLogo][app.notekea.core.presentation.components.NotekeaLogo] picks the one that fits the theme. The
+ * note with a tangerine folded corner, in the theme's tonal blues so it sits quietly beside the editor: the note in the
+ * primary container color and the mark in the primary color. [Logo] uses the light theme's colors and [LogoDark] the
+ * dark theme's; [NotekeaLogo][app.notekea.core.presentation.components.NotekeaLogo] picks the one that fits the theme. The
  * mark is clipped to the note's inner square, as the designed SVG does.
  */
 object NotekeaBrand {
@@ -54,11 +54,19 @@ object NotekeaBrand {
     private const val MARK_DOT_PATH = "M302.93,560.76v.06l.06,0Z"
 
     val Logo: ImageVector by lazy {
-        logoOf(note = NotekeaPalette.InkLight, mark = NotekeaPalette.BackgroundLight, fold = NotekeaPalette.AccentLight)
+        logoOf(
+            note = NotekeaPalette.PrimaryContainerLight,
+            mark = NotekeaPalette.PrimaryLight,
+            fold = NotekeaPalette.AccentLight
+        )
     }
 
     val LogoDark: ImageVector by lazy {
-        logoOf(note = NotekeaPalette.InkDark, mark = NotekeaPalette.BackgroundDark, fold = NotekeaPalette.AccentDark)
+        logoOf(
+            note = NotekeaPalette.PrimaryContainerDark,
+            mark = NotekeaPalette.PrimaryDark,
+            fold = NotekeaPalette.AccentDark
+        )
     }
 
     private fun logoOf(
