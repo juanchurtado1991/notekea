@@ -21,22 +21,27 @@ A tester installs two apps from the milestone's release, **Notekea** and **Notek
 Testers are not developers: they never clone the repository, open a terminal, install Java or prepare data by hand.
 A manual run takes a fraction of the 5 to 7 hours per system the step-by-step guide takes.
 
-## Two modules: an SDK and Notekea's suite
+## Two modules: Test Buddy and Notekea's suite
 
 | Module | What it holds | Depends on |
 |---|---|---|
-| `:selftest-sdk` | The generic Self-Test: the case types, the runner, the report, the Self-Test window (Start, results, Manual tests, Copy report, Finish and clean up) and its own texts. It knows nothing about Notekea, so it could test any Compose Desktop app | Compose, Compose UI Test |
-| `:selftest` | **Notekea's suite**: every automated and manual case, the smoke data bundled in, how to prepare it and clean up after, the "Notekea Self-Test" app and its installers; also the memory runs of the performance passes (`smokeRun`) | `:composeApp`, `:selftest-sdk` |
+| `:test-buddy` | **Test Buddy**, the generic Self-Test: the case types, the runner, the report, the Self-Test window (Start, results, Manual tests, Copy report, Finish and clean up) and its own texts. It knows nothing about Notekea, so it could test any Compose Desktop app | Compose, Compose UI Test |
+| `:selftest` | **Notekea's suite**: every automated and manual case, the smoke data bundled in, how to prepare it and clean up after, the "Notekea Self-Test" app and its installers; also the memory runs of the performance passes (`smokeRun`) | `:composeApp`, `:test-buddy` |
 
 Notekea itself ships no test code: the app depends on neither module.
 
-### What the SDK offers (`app.notekea.selftest.sdk`)
+**Test Buddy is written to become a standalone SDK** if it proves useful beyond Notekea: its own package
+(`com.testbuddy`), no dependency on any Notekea module (checked by a Konsist test), a public API kept small and
+documented in its module's `README.md`, and no Notekea name in its texts (the host app gives its own name). Moving it
+to its own repository and publishing it, as Ghost Serializer is, would then need no change to its code.
+
+### What Test Buddy offers (`com.testbuddy`)
 
 - `AutomatedCase`: an ID (`1.5-04`) and a body that drives the app with Compose UI Test (find by text, click, type,
   shortcuts) and checks what the case expects, down to the files on disk. Each case runs in its own temporary app
   data folder, on fresh copies of the data it names.
 - `ManualCase`: an ID, the data it needs prepared, its steps and its expected result as string resources.
-- `SelfTestSuite`: what a host app gives the SDK: its name and version, its cases, how to prepare data (`prepare`)
+- `SelfTestSuite`: what a host app gives Test Buddy: its name and version, its cases, how to prepare data (`prepare`)
   and how to put the installed app back as it was (`backUp`, `restore`).
 - The runner: runs the automated cases one at a time with a timeout, records `Passed`, `Failed` (with the message) or
   `Skipped`, and never stops at the first failure.

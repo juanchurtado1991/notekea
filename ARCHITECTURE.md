@@ -161,7 +161,7 @@ abstract class BaseViewModel<S, I, E>(
 | `presentation` | ViewModels and reducers: every intent, every state transition, every error case | `commonTest`, `kotlinx-coroutines-test` + Turbine, fake use cases |
 | Integration | The real adapters together, on real files: saving, watching, line endings, links on disk | `jvmTest` with a temporary directory (`EditorOnDiskTest`), every step (`GUIDELINES.md` §10) |
 | Screens | A screen driven through its states, including fast or repeated input | `jvmTest` with `ImageComposeScene` (`NotekeaMarkdownCodeTest`, `QuickSwitcherContentTest`); every scene runs on the AWT event thread (`UiThread.run` in `jvmTest`), as in the app |
-| Smoke cases | Every case of `MVP_SMOKE_TEST.md`, the real app driven through its UI on copies of the smoke data | `AutomatedCase` or `ManualCase` in `:selftest`, on the `:selftest-sdk` (`qa/SELF_TEST.md`); automated cases run in CI and on the testers' machines |
+| Smoke cases | Every case of `MVP_SMOKE_TEST.md`, the real app driven through its UI on copies of the smoke data | `AutomatedCase` or `ManualCase` in `:selftest`, on Test Buddy (`:test-buddy`) (`qa/SELF_TEST.md`); automated cases run in CI and on the testers' machines |
 | Architecture | Layer boundaries and conventions in this document | Konsist tests in `jvmTest` |
 | AI quality | Retrieval recall and citation accuracy | Evaluation sets (`ROADMAP.md` 2.8, 3.4), run on demand |
 
