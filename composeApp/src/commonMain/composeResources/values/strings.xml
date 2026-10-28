@@ -183,6 +183,12 @@
         <item quantity="other">%1$d files</item>
     </plurals>
     <string name="embedded_note_open">Open note</string>
+    <string name="embed_circular">Circular embed: this note is already shown above, so it stops here.</string>
+    <string name="embed_create_note">Create note</string>
+    <string name="embed_missing_block">%1$s has no block “%2$s”.</string>
+    <string name="embed_missing_heading">%1$s has no heading “%2$s”.</string>
+    <string name="embed_missing_note">This note does not exist yet.</string>
+    <string name="embed_too_deep">Too deep to show: embeds go %1$d notes deep at most.</string>
     <string name="file_panel_open">Open with its app</string>
     <string name="file_panel_unreadable">Notekea can’t show this file here. Open it with its app to see it.</string>
     <string name="file_panel_image_size">Image · %1$d × %2$d</string>

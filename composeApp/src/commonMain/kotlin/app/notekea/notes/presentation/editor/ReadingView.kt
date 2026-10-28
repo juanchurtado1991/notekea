@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -26,7 +27,8 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
  * The note rendered (Read mode): its Markdown, with wiki links and tags as links, and its embedded files in their
  * place ([AttachmentBlock]). A click opens a note, searches a tag, opens a file with its app (or offers to locate a
  * missing one), or opens the browser for a web address. Each heading of the outline starts a piece of its own, whose
- * place is told to [onHeadingPlaced] with the heading's index, so the outline can scroll to it (`ROADMAP.md` 1.9).
+ * place is told to [onHeadingPlaced] with the heading's index, so the outline can scroll to it (`ROADMAP.md` 1.9). An
+ * embedded note is drawn the same way inside its frame, with no [topPadding].
  */
 @Composable
 fun ReadingView(
@@ -34,6 +36,7 @@ fun ReadingView(
     attachments: List<AttachmentView>,
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier = Modifier,
+    topPadding: Dp = NotekeaDimensions.SpacingL,
     onHeadingPlaced: (Int, LayoutCoordinates) -> Unit = { _, _ -> }
 ) {
     val readLinks = remember { ReadModeLinks() }
@@ -57,7 +60,7 @@ fun ReadingView(
         }
     }
     Column(
-        modifier = modifier.padding(top = NotekeaDimensions.SpacingL),
+        modifier = modifier.padding(top = topPadding),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
     ) {
         segments.forEach { segment ->

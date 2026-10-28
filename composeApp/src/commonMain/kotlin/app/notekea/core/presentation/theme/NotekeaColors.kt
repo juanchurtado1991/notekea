@@ -24,6 +24,10 @@ object NotekeaColors {
     val filePdf: Color
         @Composable get() = themed(dark = NotekeaPalette.FilePdfDark, light = NotekeaPalette.FilePdfLight)
 
+    /** A warning that is not an error (an embed that goes around in a circle or too deep): a warm yellow. */
+    val warning: Color
+        @Composable get() = themed(dark = NotekeaPalette.WarningDark, light = NotekeaPalette.WarningLight)
+
     /** [dark] on the dark theme, [light] on the light one. */
     @Composable
     private fun themed(

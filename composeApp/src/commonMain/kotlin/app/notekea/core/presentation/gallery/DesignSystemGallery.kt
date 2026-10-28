@@ -2,6 +2,7 @@ package app.notekea.core.presentation.gallery
 
 import androidx.compose.ui.graphics.ImageBitmap
 import app.notekea.core.presentation.components.NotekeaMissingFile
+import app.notekea.core.presentation.components.NotekeaEmbedNotice
 import app.notekea.core.presentation.components.NotekeaEmbeddedNote
 import app.notekea.core.presentation.components.NotekeaFileChip
 import app.notekea.core.presentation.components.NotekeaAttachmentImage
@@ -149,6 +150,10 @@ private const val SAMPLE_FILE_HINT = "Opens with its app"
 private const val SAMPLE_EMBEDDED_NOTE = "Shopping basics › Dairy"
 private const val SAMPLE_EMBEDDED_NOTE_HINT = "Open note"
 private const val SAMPLE_EMBEDDED_NOTE_TEXT = "Fresh cheese and butter."
+private const val SAMPLE_EMBED_CIRCULAR = "Circular embed: this note is already shown above, so it stops here."
+private const val SAMPLE_EMBED_CREATE = "Create note"
+private const val SAMPLE_EMBED_MISSING = "This note does not exist yet."
+private const val SAMPLE_EMBED_MISSING_TITLE = "Weekend menu"
 private const val SAMPLE_IMAGE_HEIGHT = 80
 private const val SAMPLE_IMAGE_WIDTH = 240
 private const val SAMPLE_LOCATE = "Locate…"
@@ -590,6 +595,12 @@ private fun AttachmentsSection() {
         NotekeaEmbeddedNote(title = SAMPLE_EMBEDDED_NOTE, openHint = SAMPLE_EMBEDDED_NOTE_HINT, onOpen = {}) {
             Text(text = SAMPLE_EMBEDDED_NOTE_TEXT, style = MaterialTheme.typography.bodyLarge)
         }
+        NotekeaEmbedNotice(
+            title = SAMPLE_EMBED_MISSING_TITLE,
+            message = SAMPLE_EMBED_MISSING,
+            actionLabel = SAMPLE_EMBED_CREATE
+        )
+        NotekeaEmbedNotice(title = SAMPLE_EMBEDDED_NOTE, message = SAMPLE_EMBED_CIRCULAR, isWarning = true)
         NotekeaMissingFile(title = SAMPLE_MISSING, path = SAMPLE_MISSING_PATH, locateLabel = SAMPLE_LOCATE, onLocate = {
         })
     }
