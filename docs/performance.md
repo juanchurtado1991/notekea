@@ -19,8 +19,10 @@ The memory runs (`ROADMAP.md` 1.18) are the workload of a pass:
 - **Personal Notes** (`smoke-data/vaults/Personal Notes`, plus a generated 2,000-line `Long note`): opened, 12 notes
   opened in tabs and closed, a text search, the long note scrolled to its end in Edit and then in Preview, idle one
   minute and the whole idle time, the vault left for the welcome screen, and opened again.
-- **Large Vault** (5,000 notes in 50 folders, as `smoke.sh large` writes it): opened, 20 notes opened in tabs and
-  closed, a text search over every note, idle, left and opened again.
+- **Ghost Serializer** (`smoke-data/vaults/Ghost Serializer`: a code repository as 371 notes of 250–550 words, one per
+  Kotlin file, with their links): opened, 20 of its larger notes opened in tabs and closed, a text search over every
+  note, idle, left and opened again. It replaced, during 1.18, a generated "Large Vault" of 5,000 near-empty notes: the
+  tables below that name it were measured on that vault.
 - **Idle** (Sample Vault): five notes opened and closed, then idle.
 
 The runs drive the real app through Compose's test framework, which adds its own memory to the process: the numbers
@@ -99,6 +101,19 @@ without a pattern; list keys read only the cursor's line.
 | | opened again | 25 | 90 | 524 |
 | Idle (Sample Vault) | notes closed | 30 | 64 | 368 |
 | | idle ten minutes | 30 | 64 | 357 |
+
+Ghost Serializer, after the cuts (`-PidleSeconds=600`):
+
+| Moment | Heap | Committed heap | Resident |
+|---|---|---|---|
+| opened | 24 | 64 | 334 |
+| 20 notes open | 35 | 80 | 468 |
+| notes closed | 29 | 80 | 477 |
+| text searched (371 notes) | 31 | 80 | 477 |
+| idle one minute | 31 | 80 | 451 |
+| idle ten minutes | 31 | 80 | 451 |
+| vault closed | 25 | 80 | 454 |
+| opened again | 25 | 80 | 456 |
 
 The heap a closed vault leaves drops (29–33 MB to 25–27 MB), but the process does not shrink: what it freed is
 native memory the C library keeps, and heap the JVM keeps committed.

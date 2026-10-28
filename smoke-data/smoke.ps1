@@ -2,10 +2,10 @@
 # Git cannot store a folder without read permission, and a moved vault must not change tracked files, so this script
 # builds them in smoke-data\scratch (ignored by Git), next to the sample vaults. It never touches smoke-data\vaults.
 # Usage: powershell -ExecutionPolicy Bypass -File smoke-data\smoke.ps1
-#        prepare|move|lock|outside|large|edit-note|edit-note-soon|delete-note|check-note|clear-cache|first-launch|restore-settings|clean
+#        prepare|move|lock|outside|edit-note|edit-note-soon|delete-note|check-note|clear-cache|first-launch|restore-settings|clean
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("prepare", "move", "lock", "outside", "large", "edit-note", "edit-note-soon", "delete-note", "check-note", "diff-properties",
+    [ValidateSet("prepare", "move", "lock", "outside", "edit-note", "edit-note-soon", "delete-note", "check-note", "diff-properties",
         "clear-cache",
         "first-launch", "restore-settings", "clean")]
     [string]$Command
@@ -145,20 +145,6 @@ switch ($Command) {
         Write-Note (Join-Path $Playground "Travel\Lisbon trip.md") "---`ntags: [travel, edited]`ndates: 2026-11-14 to 2026-11-20`n---`n`n# Lisbon trip`n"
         Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $Playground "Ideas\Reading list.md")
         Write-Output "Changed ${Playground}: Inbox\Created outside.md created, Travel\Lisbon trip.md edited, Ideas\Reading list.md deleted"
-    }
-    "large" {
-        # A vault of 5,000 notes in 50 folders, each with frontmatter and links, to time how fast the tree opens.
-        $Large = Join-Path $Scratch "Large Vault"
-        if (Test-Path $Large) { Remove-Item -Recurse -Force $Large }
-        foreach ($f in 1..50) {
-            $folder = "{0:D2}" -f $f
-            $dir = New-Item -ItemType Directory -Force (Join-Path $Large "Folder $folder")
-            foreach ($n in 1..100) {
-                $note = "{0:D3}" -f $n
-                Write-Note (Join-Path $dir "Note $folder $note.md") "---`ntags: [large, folder-$folder]`naliases: [Note $folder-$note]`n---`n`n# Note $folder $note`n`nSee [[Note $folder 001]].`n"
-            }
-        }
-        Write-Output "Created $Large with 5000 notes"
     }
     "edit-note" {
         [System.IO.File]::AppendAllText($SharedNote, "`nEdited outside Notekea at $(Get-Date -Format HH:mm:ss).`n", $Utf8)

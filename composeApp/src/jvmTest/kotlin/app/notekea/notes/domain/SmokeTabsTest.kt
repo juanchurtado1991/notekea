@@ -34,6 +34,7 @@ class SmokeTabsTest {
             expected = "attachments/Arepas plate.png" to listOf(
                 "Arepas plate.png" to FolderCard.Kind.IMAGE,
                 "broken.png" to FolderCard.Kind.IMAGE,
+                "Market photo.jpg" to FolderCard.Kind.IMAGE,
                 "shopping.txt" to FolderCard.Kind.FILE,
                 "Weekly menu.pdf" to FolderCard.Kind.FILE
             ),
