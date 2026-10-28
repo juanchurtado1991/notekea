@@ -114,7 +114,8 @@ case. Then go on with the next case; if Notekea no longer opens a vault, stop an
 | 4 | 1.12 to 1.15, 1.18 | `prepare` |
 
 Not run in M1 (their "Testable from" is a later feature): G-01, G-04, G-05 (offline and installer cases, 3.3 and 5.3),
-1.1-01 (menus, 5.2) and 1.2-06 (packaged gallery, 5.3).
+1.1-01 (menus, 5.2) and 1.2-06 (packaged gallery, 5.3). Memory and timing are never measured with tools here: the
+milestone's performance pass does that on the automated smoke runs.
 
 ---
 
@@ -1299,7 +1300,7 @@ dropped tab's file.
 
 ---
 
-## Session 4: templates, bookmarks, properties, embeds and memory (1.12 to 1.15, 1.18)
+## Session 4: templates, bookmarks, properties, embeds and pictures (1.12 to 1.15, 1.18)
 
 Run `prepare` before starting. Templates use two vaults: `smoke-data/scratch/Playground Vault`, which has no
 templates folder, and `smoke-data/scratch/Templates Vault`, set up as Obsidian would (templates in `Snippets`, dates
@@ -1681,7 +1682,7 @@ and notices right under it as in Preview; typing above moves them along with the
 
 ### 1.18-01 · Leaving a vault right after typing
 
-Run `prepare` and `large` before the 1.18 cases. The `attachments` folder of the Playground Vault now also holds
+Run `prepare` before the 1.18 cases. The `attachments` folder of the Playground Vault now also holds
 `Market photo.jpg`, a 4000 × 3000 photo.
 
 1. Open the Playground Vault and Recipes/Arepas; click at the end of its text.
@@ -1714,20 +1715,5 @@ the file opens in a tab and shows the whole photo, sharp.
 
 **Pass when:** the palette lists 2026-10-20, 2026-10-21 and 2026-10-22 in that order; the tree lists them in the same
 order.
-
-### 1.18-05 · Memory does not keep growing
-
-Open the system's monitor beside Notekea: Windows, Task Manager (Ctrl+Shift+Esc) › Details, column Memory, row
-`Notekea.exe`; macOS, Activity Monitor › Memory, row Notekea; Linux, System Monitor › Processes, row Notekea (or in the
-terminal `ps -o rss= -C Notekea`, in kilobytes).
-
-1. Open `smoke-data/scratch/Large Vault`. When the tree shows, write down the memory (**A1**).
-2. Open 20 notes with Mod+P, one after another: `Note 01 001`, `Note 02 002`, `Note 03 003`… up to `Note 20 020`.
-3. Close them all with Mod+W; wait one minute; write down the memory (**B1**).
-4. Click **Open another vault**; wait one minute; write down the memory (**C1**).
-5. Open the Large Vault again and repeat steps 2 to 4: **B2** and **C2**.
-
-**Pass when:** Notekea stays responsive while it opens the 5,000 notes; C2 ends near C1 (within about 50 MB), so
-nothing keeps growing. Write the five numbers in the report even when it passes.
 
 **End of session 4. Thank you!**
