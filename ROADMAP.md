@@ -605,6 +605,13 @@ the automated smoke runs of 1.16, and its smoke test also checks the code trim o
   on Enter, the sort of the quick switcher's candidates and the natural name comparator's regex.
 - **Done when:** the editor alone stays under 400 MB with the Large Vault open on Linux, the measurements are in
   `docs/performance.md`, and a test keeps the bounded caches bounded. 5.4 measures the whole app again, AI included.
+- **Result (2026-10-28):** the Large Vault opens at 368 MB, idles at 516 MB after 20 notes were opened and closed and
+  stays there once left; Personal Notes reaches 761 MB after a 2,000-line note is scrolled in Edit and Preview. The
+  Java heap stays under 40 MB (112 MB in Preview): the rest is heap the JVM keeps committed, native memory glibc keeps
+  after Skia and text layout free it, and the layout of a long note (about 170 MB while it is open). Two JVM options
+  would bring the idle Large Vault to 388 MB (`-XX:TrimNativeHeapInterval`, `-XX:G1PeriodicGCInterval`); the
+  developer chose code cuts only, so the packaged app runs with none. Left for later: an editor that lays out only the
+  visible part of a long note.
 
 ---
 

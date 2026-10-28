@@ -75,17 +75,30 @@ Each open vault has its own ViewModels, cleared when it closes; folder card pict
 60 kept); the editor keeps only the pictures of the note on screen; searches sort only the results shown; names compare
 without a pattern; list keys read only the cursor's line.
 
-| Run | Moment | Heap | Resident |
-|---|---|---|---|
-| Personal Notes | opened | 23 | 316 |
-| | 12 notes open | 28 | 362 |
-| | long note scrolled in Edit | 40 | 613 |
-| | long note scrolled in Preview | 111 | 775 |
-| | vault closed | 27 | 781 |
-| Large Vault | opened | 27 | 371 |
-| | 20 notes open | 36 | 540 |
-| | idle one minute | 33 | 515 |
-| | vault closed | 25 | 522 |
+`-PidleSeconds=600`:
+
+| Run | Moment | Heap | Committed heap | Resident |
+|---|---|---|---|---|
+| Personal Notes | opened | 23 | 64 | 306 |
+| | 12 notes open | 28 | 64 | 354 |
+| | notes closed | 27 | 64 | 362 |
+| | text searched | 27 | 64 | 362 |
+| | long note scrolled in Edit | 40 | 147 | 616 |
+| | long note scrolled in Preview | 112 | 234 | 761 |
+| | idle one minute | 39 | 147 | 766 |
+| | idle ten minutes | 36 | 137 | 678 |
+| | vault closed | 26 | 100 | 685 |
+| | opened again | 27 | 94 | 690 |
+| Large Vault | opened | 27 | 64 | 368 |
+| | 20 notes open | 36 | 137 | 557 |
+| | notes closed | 32 | 117 | 554 |
+| | text searched (5,000 notes) | 33 | 117 | 535 |
+| | idle one minute | 33 | 117 | 516 |
+| | idle ten minutes | 33 | 117 | 516 |
+| | vault closed | 25 | 94 | 518 |
+| | opened again | 25 | 90 | 524 |
+| Idle (Sample Vault) | notes closed | 30 | 64 | 368 |
+| | idle ten minutes | 30 | 64 | 357 |
 
 The heap a closed vault leaves drops (29–33 MB to 25–27 MB), but the process does not shrink: what it freed is
 native memory the C library keeps, and heap the JVM keeps committed.
