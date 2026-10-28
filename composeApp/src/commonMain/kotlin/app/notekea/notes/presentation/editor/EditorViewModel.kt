@@ -127,9 +127,7 @@ class EditorViewModel(
     }
 
     /** The intents about the note itself: opening, saving, its file, its title, links and focus. */
-    private fun onNoteIntent(
-        intent: EditorIntent
-    ) {
+    private fun onNoteIntent(intent: EditorIntent) {
         when (intent) {
             is EditorIntent.OnOpen -> saving.runSave { open(path = intent.path) }
             EditorIntent.OnRetryOpen -> saving.runSave { open(path = state.value.notePath, isRetry = true) }
@@ -148,9 +146,7 @@ class EditorViewModel(
     }
 
     /** The intents that lead elsewhere: links, tags, the star, the folder, headings, days, focus, and files. */
-    private fun onNavigationIntent(
-        intent: EditorIntent
-    ) {
+    private fun onNavigationIntent(intent: EditorIntent) {
         when (intent) {
             is EditorIntent.OnLinkClick -> openLink(link = intent.link, inBackground = intent.inBackground)
 
@@ -189,13 +185,15 @@ class EditorViewModel(
     }
 
     /** Asks the panes around the editor to open the note a Read mode link leads to, from the open note. */
-    private fun openLink(
-        link: ReadLink.Note,
-        inBackground: Boolean
-    ) {
+    private fun openLink(link: ReadLink.Note, inBackground: Boolean) {
         val source = state.value.notePath ?: return
         emit(
-            effect = EditorEffect.OpenLink(source, target = link.target, kind = link.kind, inBackground = inBackground)
+            effect = EditorEffect.OpenLink(
+                source,
+                target = link.target,
+                kind = link.kind,
+                inBackground = inBackground
+            )
         )
     }
 
@@ -205,9 +203,7 @@ class EditorViewModel(
         emit(effect = EditorEffect.RevealFolder(path = folder))
     }
 
-    private fun onBufferChanged(
-        body: String
-    ) {
+    private fun onBufferChanged(body: String) {
         state.value.find?.let { find.updateMatches(query = it.query, body = body, keepCurrent = true) }
         files.update(body = body)
         noteInfo.updateOutline(body = body)
@@ -271,13 +267,15 @@ class EditorViewModel(
         val body = buffer.text.toString()
         val blocked = state.value.hasConflict || state.value.isDeleted
         if (body == document.body || blocked) return
-        saving.write(path = path, document = document.copy(body = body), expectedOnDisk = saving.onDisk)
+        saving.write(
+            path = path,
+            document = document.copy(body = body),
+            expectedOnDisk = saving.onDisk
+        )
     }
 
     /** Saves first, so the file that moves holds every edit; the links to the note follow the new name. */
-    private suspend fun rename(
-        name: String
-    ) {
+    private suspend fun rename(name: String) {
         val from = state.value.notePath ?: return
         if (name.trim() == from.nameWithoutExtension) return
         saveNow()
@@ -304,9 +302,7 @@ class EditorViewModel(
         emit(effect = EditorEffect.Closed)
     }
 
-    private fun showUnexpectedError(
-        throwable: Throwable
-    ) {
+    private fun showUnexpectedError(throwable: Throwable) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
         reduce { it.copy(isLoading = false) }
     }
