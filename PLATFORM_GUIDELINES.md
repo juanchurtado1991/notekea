@@ -48,13 +48,16 @@ primary modifier and resolved per platform.
 | Italic | `Cmd+I` | `Ctrl+I` |
 | Link to a note | `Cmd+K` | `Ctrl+K` |
 | Web link | `Cmd+Shift+K` | `Ctrl+Shift+K` |
+| Show or hide Files (the sidebar) | `Cmd+\` | `Ctrl+\` |
 | Show or hide the side panel | `Cmd+Shift+\` | `Ctrl+Shift+\` |
+| Edit / Preview | `Cmd+E` | `Ctrl+E` |
 | Go to the outline | `Cmd+Shift+O` | `Ctrl+Shift+O` |
 | Today's daily note | `Cmd+D` | `Ctrl+D` |
 | Previous / next daily note | `Cmd+Option+←` / `Cmd+Option+→` | `Ctrl+Alt+←` / `Ctrl+Alt+→` |
 | Insert template | `Cmd+T` | `Ctrl+T` |
 | Bookmark the active note, folder or file | `Cmd+Shift+B` | `Ctrl+Shift+B` |
-| Settings | `Cmd+,` | `Ctrl+,` |
+| Zoom in / zoom out / actual size (the whole window, remembered) | `Cmd+=` / `Cmd+-` / `Cmd+0` | `Ctrl+=` / `Ctrl+-` / `Ctrl+0` |
+| Settings (from 5.2; until then the tool rail's Settings) | `Cmd+,` | `Ctrl+,` |
 | Close tab | `Cmd+W` | `Ctrl+W` |
 | Next / previous tab | `Ctrl+Tab` / `Ctrl+Shift+Tab` | `Ctrl+Tab` / `Ctrl+Shift+Tab` |
 | Go to tab 1…8, last tab | `Cmd+1`…`Cmd+8`, `Cmd+9` | `Ctrl+1`…`Ctrl+8`, `Ctrl+9` |
@@ -62,7 +65,8 @@ primary modifier and resolved per platform.
 | Close window | `Cmd+Shift+W` | `Ctrl+Shift+W` |
 | Quit | `Cmd+Q` | `Alt+F4` on Windows, `Ctrl+Q` on Linux |
 
-Never reuse a shortcut the operating system reserves (e.g. `Cmd+H` / `Cmd+M` on macOS).
+Never reuse a shortcut the operating system reserves (e.g. `Cmd+H` / `Cmd+M` on macOS). About lists every shortcut
+of the platform as keycaps, so a new shortcut is added there too (`AboutShortcuts`).
 
 ## 4. Menu bar
 

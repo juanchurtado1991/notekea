@@ -13,6 +13,7 @@ app.notekea
 ├── core
 │   ├── domain          Outcome, AppDispatchers, shared domain types
 │   ├── presentation    BaseViewModel, design system (theme, tokens, components)
+│   ├── appearance      App-wide look the user sets: the UI zoom (UiScale, its store and use cases)
 │   └── platform        Platform abstraction (PLATFORM_GUIDELINES.md)
 ├── di                  App-level Koin module that includes every feature module
 └── <feature>           vault, notes, editor, index, llm, chat, sync, …
@@ -209,10 +210,25 @@ themselves.
   items (with or without an icon) and skeleton rows, tabs, tab rows, compact tabs and document tab strips (closable,
   draggable, with a menu), tool rails, grid cards with a picture, toolbar capsules, chips, property fields edited in
   place, date fields with a compact month calendar, tooltips that name shortcuts, segmented controls, dialogs, keycaps, coming-soon notices, the logo, badges, status items, cards,
+  section headers (small capitals, folding, with a count) and the animated fold under them, a status bar with
+  clickable labels, separators and a progress item, scroll areas with a desktop scrollbar (`NotekeaScrollArea`,
+  `NotekeaLazyScrollArea`), action rows with keycaps (an empty pane's start actions),
   empty states, error banners, context menus (nestable, with checked choices, explained options and submenus) and menu
   buttons, a grid size picker, attachments (image, file chip, missing file, embedded note), confirmation dialogs and a
   resizable split pane (its panel at the start or the end, floating over the content when there is no room) already
   exist (see the gallery: `./gradlew :composeApp:run -Pgallery`).
+- **Layout and look rules decided in 1.14:**
+  - Text pages are as wide as `PAGE_SHARE` (70 %) of their pane, between 760 and 1100 dp; never a fixed width.
+  - The UI zoom is a `LocalDensity` scale provided once by `UiZoom` around the window; screens read the zoom from
+    `LocalUiZoom` (to show or reset it) and never scale themselves.
+  - Motion uses `NotekeaDimensions.MOTION_SHORT_MILLIS` (folds, fades), `MOTION_PANEL_MILLIS` (panels) and
+    `MOTION_LONGEST_MILLIS`; folding content goes through `NotekeaFold`.
+  - Colors with a meaning of their own (the bookmark star, file kinds: pictures, PDFs, sounds and videos) live in
+    `NotekeaColors`; a file's icon and color come from `notes.presentation.files` (`fileIconOf`, `fileTintOf`) so
+    the tree, the bookmarks and the tabs agree.
+  - A list's selection is filled while it has the keyboard and a quiet grey otherwise; the focus ring is only for a
+    keyboard position that is not the selection.
+  - A toolbar never wraps: what does not fit moves into its More menu (`ToolbarFit`).
 - **Keyboard focus looks the same everywhere:** a 2 dp primary border on the component's own shape, with no gap
   (`Modifier.focusBorder` in `core.presentation.components`; `NotekeaButton` draws it as its border, in the text
   color on filled buttons). A new clickable component applies it before its `clickable`.
