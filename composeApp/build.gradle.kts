@@ -26,6 +26,12 @@ private val androidNamespace = "app.notekea"
 private val galleryGradleProperty = "gallery"
 private val gallerySystemProperty = "notekea.gallery"
 private val mainClassName = "app.notekea.MainKt"
+private val appBundleId = "app.notekea"
+private val appDescription = "Local-first notes, compatible with Obsidian vaults"
+private val appVendor = "Notekea"
+private val linuxAppCategory = "Office"
+// Never change it: Windows recognizes a newer installer as an update of the installed app by this ID.
+private val windowsUpgradeUuid = "8a661b42-78a2-4f14-83a6-1249b614b495"
 private val nativeAccessJvmArgument = "--enable-native-access=ALL-UNNAMED"
 
 // The JDK modules the packaged runtime keeps; jlink leaves out every other one. `checkRuntimeModules` fails when the
@@ -219,7 +225,31 @@ compose.desktop {
             )
             packageName = appPackageName
             packageVersion = appPackageVersion
+            description = appDescription
+            vendor = appVendor
             modules(*runtimeModules.toTypedArray())
+
+            // Each installer adds Notekea to the system's launcher with the app's logo: the Start menu and the desktop
+            // on Windows, Applications (and so Launchpad) on macOS, the applications menu on Linux.
+            windows {
+                iconFile.set(project.file("packaging/icon.ico"))
+                menu = true
+                menuGroup = appPackageName
+                shortcut = true
+                upgradeUuid = windowsUpgradeUuid
+            }
+            macOS {
+                iconFile.set(project.file("packaging/icon.icns"))
+                bundleID = appBundleId
+                dockName = appPackageName
+            }
+            linux {
+                iconFile.set(project.file("packaging/icon.png"))
+                shortcut = true
+                // jpackage writes the menu group as the desktop entry's category, the menu folder Notekea shows in.
+                menuGroup = linuxAppCategory
+                appCategory = linuxAppCategory
+            }
         }
     }
 }
