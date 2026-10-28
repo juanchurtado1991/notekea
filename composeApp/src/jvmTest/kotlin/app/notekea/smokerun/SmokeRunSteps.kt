@@ -36,6 +36,8 @@ internal fun ComposeUiTest.openVault(
     shownNote: String
 ) {
     app.folderPicker.nextPick = app.vaultPath(name = name)
+    // The welcome screen shows its actions only once it has read the recent vaults, later on a slow machine (CI).
+    waitForText(text = OPEN_FOLDER)
     onNodeWithText(text = OPEN_FOLDER).performClick()
     waitForText(text = shownNote)
 }
