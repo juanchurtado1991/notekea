@@ -8,7 +8,7 @@ public class ManualCase internal constructor(
     public val id: String,
     public val reason: ManualReason,
     public val data: List<String>,
-    public val title: CaseText,
-    public val steps: CaseText,
-    public val expected: CaseText
+    public val title: String,
+    public val steps: String,
+    public val expected: String
 )

@@ -7,7 +7,7 @@ import kotlin.time.Duration.Companion.ZERO
  * The plain-text report a tester sends back, so it pastes into any chat: the app and the machine, then the automatic
  * and the manual results, each failure on a line of its own with its ID, title and message, and [diagnostics] last.
  */
-public suspend fun formatReport(
+public fun formatReport(
     suite: Suite,
     environment: ReportEnvironment,
     automatic: List<CaseResult>,
@@ -41,7 +41,7 @@ private fun StringBuilder.appendAutomatic(
     }
 }
 
-private suspend fun StringBuilder.appendManual(
+private fun StringBuilder.appendManual(
     suite: Suite,
     answers: List<ManualAnswer>
 ) {
@@ -50,7 +50,7 @@ private suspend fun StringBuilder.appendManual(
     val notRun = answers.count { it is ManualAnswer.NotRun }
     appendLine("Manual: $passed passed, ${failed.size} failed, $notRun not run")
     failed.forEach { answer ->
-        val title = suite.manual.firstOrNull { it.id == answer.id }?.title?.resolve(language = ENGLISH).orEmpty()
+        val title = suite.manual.firstOrNull { it.id == answer.id }?.title.orEmpty()
         val screenshot = answer.screenshot?.let { " (screenshot: $it)" }.orEmpty()
         appendLine("  ❌ ${answer.id} $title: \"${answer.note}\"$screenshot")
     }
@@ -66,5 +66,3 @@ private fun duration(result: CaseResult): Duration = when (result) {
     is CaseResult.Failed -> result.duration
     is CaseResult.Skipped -> ZERO
 }
-
-private const val ENGLISH = "en"

@@ -1,30 +1,30 @@
 package com.testbuddy
 
-/** Describes a [ManualCase]: what to prepare, and the texts the tester reads. */
+/** Describes a [ManualCase]: what to prepare, and the texts the tester reads, in plain English. */
 @TestBuddyDsl
 public class ManualCaseBuilder internal constructor(
     private val id: String,
     private val reason: ManualReason
 ) {
     private val data = mutableListOf<String>()
-    private var title: CaseText? = null
-    private var steps: CaseText? = null
-    private var expected: CaseText? = null
+    private var title: String? = null
+    private var steps: String? = null
+    private var expected: String? = null
 
     /** The folders of the suite's data this case needs, prepared before the tester starts it. */
     public fun prepare(vararg folders: String) {
         data.addAll(folders)
     }
 
-    public fun title(text: CaseText) {
+    public fun title(text: String) {
         title = text
     }
 
-    public fun steps(text: CaseText) {
+    public fun steps(text: String) {
         steps = text
     }
 
-    public fun expected(text: CaseText) {
+    public fun expected(text: String) {
         expected = text
     }
 

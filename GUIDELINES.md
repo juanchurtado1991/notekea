@@ -191,8 +191,8 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   (`qa/SELF_TEST.md`). Every case of `MVP_SMOKE_TEST.md` is checked by the Self-Test, automatically (as many as is
   reasonable, with no quota) or as a manual case it walks the tester through. In the step that adds the behavior, every
   `feature/` and `fix/` pull request writes each new or changed case as an `AutomatedCase` (named after its ID, run in
-  CI on the three systems through the JUnit bridge) or a `ManualCase` (steps and expected result in English and
-  Spanish, in plain words, no terminal), in `:selftest`, and adds its data to `smoke-data/`. The consistency test
+  CI on the three systems through the JUnit bridge) or a `ManualCase` (steps and expected result in plain
+  English, no terminal), in `:selftest`, and adds its data to `smoke-data/`. The consistency test
   fails when a case has no counterpart. Once the M1 cases are in (`qa/README.md` piece 5), the cases in code are the
   only source and `MVP_SMOKE_TEST.md` is generated from them, never edited by hand. Every step that adds or changes UI also brings its screen tests (§10).
 - **Manual smoke test before a `feature/` or `fix/` branch reaches `main`.** Automated tests do not prove the

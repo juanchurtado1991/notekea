@@ -1,6 +1,5 @@
 package com.testbuddy
 
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -9,23 +8,25 @@ import kotlin.time.Duration.Companion.seconds
 
 class SuiteBuilderTest {
     @Test
-    fun `the suite keeps its cases in order with what each declares`() = runTest {
+    fun `the suite keeps its cases in order with what each declares`() {
         val suite = sampleSuite {
             automated(id = "1.1-01", title = "Opens") {}
             automated(id = "1.1-02", title = "Saves", timeout = 30.seconds) {}
             manual(id = "1.1-03", reason = ManualReason.EYES) {
                 prepare("Personal Notes", "Work")
-                title(text = plainText(english = "Looks right", "es" to "Se ve bien"))
-                steps(text = plainText(english = "Open it"))
-                expected(text = plainText(english = "It looks right"))
+                title(text = "Looks right")
+                steps(text = "Open it")
+                expected(text = "It looks right")
             }
         }
         assertEquals(listOf("1.1-01", "1.1-02"), suite.automated.map { it.id })
         assertEquals(listOf(2.minutes, 30.seconds), suite.automated.map { it.timeout })
         val manual = suite.manual.single()
         assertEquals(listOf("Personal Notes", "Work"), manual.data)
-        assertEquals("Se ve bien", manual.title.resolve(language = "es"))
-        assertEquals("Looks right", manual.title.resolve(language = "fr"))
+        assertEquals(
+            listOf("Looks right", "Open it", "It looks right"),
+            listOf(manual.title, manual.steps, manual.expected)
+        )
         assertEquals("Sample", suite.appName)
         assertEquals(WindowSize(width = 640, height = 480), suite.window)
     }
@@ -52,7 +53,7 @@ class SuiteBuilderTest {
     @Test
     fun `a manual case needs its three texts`() {
         val error = assertFailsWith<IllegalArgumentException> {
-            sampleSuite { manual(id = "1.1-03", reason = ManualReason.EYES) { title(text = plainText(english = "T")) } }
+            sampleSuite { manual(id = "1.1-03", reason = ManualReason.EYES) { title(text = "T") } }
         }
         assertEquals("Manual case 1.1-03 has no steps", error.message)
     }
