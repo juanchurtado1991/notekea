@@ -68,3 +68,49 @@ What it says:
 
 The packaged app idles at 291 MB on the welcome screen (measured in 1.16); settings that trade speed or smoothness for
 memory (only the C1 compiler: 228 MB; Skia drawing in software: 161 MB) are not used.
+
+### After the code cuts (1.18)
+
+Each open vault has its own ViewModels, cleared when it closes; folder card pictures are decoded at card size (at most
+60 kept); the editor keeps only the pictures of the note on screen; searches sort only the results shown; names compare
+without a pattern; list keys read only the cursor's line.
+
+| Run | Moment | Heap | Resident |
+|---|---|---|---|
+| Personal Notes | opened | 23 | 316 |
+| | 12 notes open | 28 | 362 |
+| | long note scrolled in Edit | 40 | 613 |
+| | long note scrolled in Preview | 111 | 775 |
+| | vault closed | 27 | 781 |
+| Large Vault | opened | 27 | 371 |
+| | 20 notes open | 36 | 540 |
+| | idle one minute | 33 | 515 |
+| | vault closed | 25 | 522 |
+
+The heap a closed vault leaves drops (29–33 MB to 25–27 MB), but the process does not shrink: what it freed is
+native memory the C library keeps, and heap the JVM keeps committed.
+
+### Where the resident memory goes
+
+Measured with the columns added in 1.18 (`heap_committed_mb`, Skia's caches):
+
+- **Committed heap:** the JVM grows its heap to 120–230 MB while a long note is laid out or Preview renders it, for
+  30–110 MB in use, and keeps much of it.
+- **Freed native memory not returned:** glibc keeps what Skia and text layout freed in its arenas (up to eight per core:
+  192 on the 24-core machine measured). Trimming it gives 130–150 MB back after a minute idle.
+- **Skia's own caches** (fonts, resources) stay under 1 MB: not a cost.
+- **A long note in the editor** still costs about 170 MB while it is open, in text layout for the whole note; cutting
+  it means laying out only the visible part of the note, an editor change beyond this pass.
+
+Runtime settings compared (resident MB, Linux, `-PidleSeconds=60`):
+
+| Moment | Default | `-XX:TrimNativeHeapInterval=10000 -XX:G1PeriodicGCInterval=15000` | Those and `MALLOC_ARENA_MAX=2` |
+|---|---|---|---|
+| Large Vault, 20 notes open | 540 | 571 | 479 |
+| Large Vault, idle one minute | 515 | 388 | 380 |
+| Large Vault, vault closed | 522 | 396 | 397 |
+| Personal Notes, long note in Preview | 775 | 704 | 669 |
+| Personal Notes, idle one minute | 779 | 618 | 577 |
+
+The two JVM options only act while the app is idle (a trim every ten seconds, a collection when idle for fifteen); the
+arena limit needs an environment variable, which the packaged app's launcher cannot set.
