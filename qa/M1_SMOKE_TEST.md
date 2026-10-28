@@ -417,7 +417,7 @@ doubling `.md`; Esc keeps the old name; each refused name explains why under the
 `[[Arepas reina]]` and their other links are unchanged; renaming the journal note shows no notice and changes no other
 file.
 
-### 1.4-07 · Deleting
+### 1.4-07 and 1.4-13 · Deleting, and restoring from the trash
 
 1. Select a note and press the delete key of your system; click Cancel.
 2. Press it again and click **Delete note**.
@@ -568,7 +568,7 @@ background (code blocks without colors); links and wiki links are blue; tags are
 move to the next and previous match and wrap around; Esc closes the bar with the match selected; typing updates the
 count.
 
-### 1.5-10 · Preview, and the mode is remembered
+### 1.5-10 and 1.5-12 · Preview, and the mode is remembered
 
 1. In Editor/Read mode press Mod+E (or click the **Preview** tab under the title).
 2. Open another note; quit and restart Notekea.
@@ -1008,7 +1008,7 @@ installed the screenshot is pasted at once. On GNOME, write in the report whethe
 - The rename keeps the extension: `groceries.txt`.
 - The files added in 1.8-05 to 1.8-07 are listed.
 
-### 1.8-13 · A note inside a note
+### 1.8-13 and 1.8-14 · A note inside a note
 
 1. Open Editor/Images and files in Preview and scroll to the end.
 2. Press Mod+E (Edit); click the title of the second embedded frame.
@@ -1287,7 +1287,7 @@ window never resizes itself when a vault opens or closes; a size you give it sta
 **Pass when:** each folder opens in a tab as its grid and the tree opens and closes it; "Something went wrong" never
 shows.
 
-### 1.11-15 · Reordering tabs
+### 1.11-15 and 1.11-16 · Reordering tabs
 
 1. Open Welcome, Recipes/Arepas and Ideas in tabs (close the others first).
 2. Drag the Welcome tab slowly along the row and drop it between Arepas and Ideas.
