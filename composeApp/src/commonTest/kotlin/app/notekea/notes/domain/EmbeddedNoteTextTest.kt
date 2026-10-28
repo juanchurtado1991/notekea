@@ -41,10 +41,25 @@ class EmbeddedNoteTextTest {
     }
 
     @Test
-    fun `a heading the note does not have and a block reference stay links`() {
+    fun `a heading or block the note does not have shows nothing`() {
         assertEquals(
-            expected = listOf(null, null),
-            actual = listOf("Arepas#Sauce", "Arepas#^abc123").map { embeddedNoteText.of(text = note, target = it) }
+            expected = listOf(null, null, null),
+            actual = listOf("Arepas#Sauce", "Arepas#^abc123", "Arepas#^").map {
+                embeddedNoteText.of(text = note, target = it)
+            }
+        )
+    }
+
+    @Test
+    fun `a block is its list item, its paragraph, or the block above a marker on its own line, without the marker`() {
+        val text = "Intro line\nSecond line of it ^para\n\n- First\n- Buy flour ^item\n- Last\n\n" +
+            "| A | B |\n|---|---|\n| 1 | 2 |\n^table\n"
+
+        assertEquals(
+            expected = listOf("Intro line\nSecond line of it", "- Buy flour", "| A | B |\n|---|---|\n| 1 | 2 |"),
+            actual = listOf("Note#^para", "Note#^item", "Note#^table").map {
+                embeddedNoteText.of(text = text, target = it)
+            }
         )
     }
 }

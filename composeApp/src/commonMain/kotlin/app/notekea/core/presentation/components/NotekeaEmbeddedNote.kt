@@ -1,14 +1,11 @@
 package app.notekea.core.presentation.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,10 +54,14 @@ fun NotekeaEmbeddedNote(
         color = colors.surface,
         border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = colors.outline)
     ) {
-        Row(modifier = Modifier.height(intrinsicSize = IntrinsicSize.Min)) {
-            Box(
-                modifier = Modifier.width(width = ACCENT_WIDTH_DP.dp).fillMaxHeight().background(color = colors.primary)
-            )
+        // The bar is drawn, not laid out: a row sized to its content's intrinsic height cannot hold a picture or
+        // another embed, which have no intrinsic size.
+        val bar = colors.primary
+        Box(
+            modifier = Modifier.drawBehind {
+                drawRect(color = bar, size = Size(width = ACCENT_WIDTH_DP.dp.toPx(), height = size.height))
+            }
+        ) {
             Column(
                 modifier = Modifier.padding(all = NotekeaDimensions.SpacingM),
                 verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)

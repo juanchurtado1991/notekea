@@ -8,9 +8,6 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.components.NotekeaAttachmentImage
 import app.notekea.core.presentation.components.NotekeaEmbeddedNote
 import app.notekea.core.presentation.components.NotekeaFileChip
-import app.notekea.core.presentation.components.NotekeaMarkdown
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalUriHandler
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.notes.domain.LinkKind
@@ -30,7 +27,8 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * One embedded file as the note shows it (`ROADMAP.md` 1.8), in Read and Edit mode alike: a picture at its width, a
  * file chip that opens the file with its app, for a file that cannot be found its path and Locate…, or an embedded
- * note's text in a frame whose title opens the note.
+ * note's text in a frame whose title opens the note, with what that text embeds inside it (`ROADMAP.md` 1.15); a note
+ * that cannot be shown says why ([EmbedNoticeBlock]).
  */
 @Composable
 fun AttachmentBlock(
@@ -41,11 +39,15 @@ fun AttachmentBlock(
     val image = view.image
     val path = view.path
     val noteText = view.noteText
+    val problem = view.problem
     when {
+        problem != null -> EmbedNoticeBlock(view = view, problem = problem, onIntent = onIntent, modifier = modifier)
+
         path != null && noteText != null -> EmbeddedNote(
             path = path,
             target = view.embed.target,
             text = noteText,
+            nested = view.nested,
             onIntent = onIntent,
             modifier = modifier
         )
@@ -74,45 +76,41 @@ fun AttachmentBlock(
     }
 }
 
-/** An embedded note: its name (and section), its text rendered with working links, and a click on the title opens it. */
+/**
+ * An embedded note: its name (and section), its text rendered as Preview renders a note, with working links and the
+ * files and notes it embeds in turn ([nested]), and a click on the title opens it.
+ */
 @Composable
 private fun EmbeddedNote(
     path: RelativePath,
     target: String,
     text: String,
+    nested: List<AttachmentView>,
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier
 ) {
-    val readLinks = remember { ReadModeLinks() }
-    val uriHandler = LocalUriHandler.current
     val section = target.substringAfter(
         delimiter = MarkdownSyntax.HEADING_ANCHOR_CHAR,
         missingDelimiterValue = StringPatterns.EMPTY
-    )
-    val noteLink = ReadLink.Note(
-        target = path.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION),
-        kind = LinkKind.WIKI
     )
     NotekeaEmbeddedNote(
         title = listOf(path.nameWithoutExtension, section).filter { it.isNotBlank() }
             .joinToString(separator = SECTION_SEPARATOR),
         openHint = stringResource(resource = Res.string.embedded_note_open),
-        onOpen = { onIntent(EditorIntent.OnLinkClick(link = noteLink)) },
+        onOpen = { onIntent(EditorIntent.OnLinkClick(link = noteLinkOf(path = path))) },
         modifier = modifier
     ) {
-        NotekeaMarkdown(
-            content = remember(text) { readLinks.prepare(body = text) },
-            onLinkClick = { uri ->
-                when (val link = readLinks.classify(uri = uri)) {
-                    is ReadLink.Note -> onIntent(EditorIntent.OnLinkClick(link = link))
-                    is ReadLink.Tag -> onIntent(EditorIntent.OnTagClick(tag = link.name))
-                    is ReadLink.External -> uriHandler.openUri(uri = link.uri)
-                    is ReadLink.File, null -> Unit
-                }
-            }
-        )
+        ReadingView(text = text, attachments = nested, onIntent = onIntent, topPadding = 0.dp)
     }
 }
+
+/** The link that opens the note at [path], as a click on a wiki link to it does. */
+internal fun noteLinkOf(
+    path: RelativePath
+): ReadLink.Note = ReadLink.Note(
+    target = path.value.removeSuffix(suffix = RelativePath.MARKDOWN_EXTENSION),
+    kind = LinkKind.WIKI
+)
 
 @Preview
 @Composable
@@ -135,4 +133,4 @@ private fun AttachmentBlockPreview() {
 }
 
 private const val PREVIEW_FILE = "attachments/menu.pdf"
-private const val SECTION_SEPARATOR = " › "
+internal const val SECTION_SEPARATOR = " › "

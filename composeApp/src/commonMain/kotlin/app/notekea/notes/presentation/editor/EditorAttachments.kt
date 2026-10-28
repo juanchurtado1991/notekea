@@ -12,6 +12,7 @@ import app.notekea.notes.domain.AttachmentStore
 import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.EmbedFinder
 import app.notekea.notes.domain.EmbeddedNoteText
+import app.notekea.notes.domain.EmbedProblem
 import app.notekea.notes.domain.LinkResolver
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.notes.domain.EmbedText
@@ -26,7 +27,8 @@ import org.jetbrains.compose.resources.decodeToImageBitmap
  * The files and notes embedded in the open note of the vault at [vaultPath] (`ROADMAP.md` 1.8), for the editor: it
  * finds them in the text, resolves them among the vault's files (listed once and again after a change), reads and
  * decodes the images, keeping each decoded picture until its file changes, reads the text an embedded note shows, and
- * attaches new files, giving the embed to write. A note that embeds itself, or a missing note or heading, stays a link.
+ * attaches new files, giving the embed to write. An embedded note shows its own embeds in turn, three notes deep at
+ * most; one that is missing, lacks its section, comes back around (itself included) or is too deep says so instead.
  */
 class EditorAttachments(
     private val vaultPath: String,
@@ -41,10 +43,20 @@ class EditorAttachments(
     private var folderSetting: String? = null
     private val images = mutableMapOf<RelativePath, ImageBitmap?>()
 
-    /** The files embedded in [text] of [note], resolved, with the images read. */
+    /**
+     * The files and notes embedded in [text] of [note], resolved, with the images read and each embedded note's own
+     * embeds inside it, down to [EmbedProblem.MAX_EMBED_DEPTH] notes (`ROADMAP.md` 1.15).
+     */
     suspend fun viewsOf(
         note: RelativePath,
         text: String
+    ): List<AttachmentView> = viewsIn(note = note, text = text, chain = listOf(note))
+
+    /** The embeds of [text], written in [note]; [chain] holds the notes shown around it, [note] last. */
+    private suspend fun viewsIn(
+        note: RelativePath,
+        text: String,
+        chain: List<RelativePath>
     ): List<AttachmentView> {
         val embeds = embedFinder.embeds(text = text, includeNotes = true)
         if (embeds.isEmpty()) return emptyList()
@@ -62,33 +74,58 @@ class EditorAttachments(
         }
         val notes = LinkResolver(notePaths = vaultFiles.filter { it.isMarkdown })
         return embeds.mapNotNull { embed ->
-            if (embed.isNote) return@mapNotNull noteView(embed = embed, note = note, notes = notes)
-            val path = resolver(vaultFiles).resolve(embed = embed, note = note)
-            val kind = AttachmentKind.of(name = path?.name ?: embed.target)
-            val image = if (path != null && kind == AttachmentKind.IMAGE) imageOf(path = path) else null
-            AttachmentView(
-                embed = embed,
-                path = path,
-                kind = kind,
-                image = image,
-                isUnreadable = path != null && kind == AttachmentKind.IMAGE && image == null
-            )
+            // A note embedded inside a sentence stays a link, so only notes on their own line are read.
+            if (embed.isNote) return@mapNotNull embed.takeIf { it.isOwnLine }?.let { noteView(it, notes, chain) }
+            fileView(embed = embed, path = resolver(vaultFiles).resolve(embed = embed, note = note))
         }
     }
 
-    /** The note [embed] shows in [note], with the text it shows; null when it is missing or [note] itself. */
+    /** A file [embed] found at [path] (null when missing), with its picture read when it is an image. */
+    private suspend fun fileView(
+        embed: Embed,
+        path: RelativePath?
+    ): AttachmentView {
+        val kind = AttachmentKind.of(name = path?.name ?: embed.target)
+        val image = if (path != null && kind == AttachmentKind.IMAGE) imageOf(path = path) else null
+        return AttachmentView(
+            embed = embed,
+            path = path,
+            kind = kind,
+            image = image,
+            isUnreadable = path != null && kind == AttachmentKind.IMAGE && image == null
+        )
+    }
+
+    /**
+     * The note [embed] shows inside the last note of [chain], with its text and that text's own embeds, or why it
+     * cannot show it: missing, without the section, already in [chain] or too deep. Null for an embed of a section
+     * of the same note (`![[#Heading]]`), which stays a link.
+     */
     private suspend fun noteView(
         embed: Embed,
-        note: RelativePath,
-        notes: LinkResolver
+        notes: LinkResolver,
+        chain: List<RelativePath>
     ): AttachmentView? {
         val name = embed.target.substringBefore(delimiter = MarkdownSyntax.HEADING_ANCHOR_CHAR)
         if (name.isBlank()) return null
-        val path = notes.closestWiki(target = name, source = note)?.takeIf { it != note } ?: return null
+        val view = AttachmentView(embed = embed, kind = AttachmentKind.NOTE, path = null)
+        val path = notes.closestWiki(target = name, source = chain.last())
+            ?: return view.copy(problem = EmbedProblem.MISSING_NOTE)
+        val problem = when {
+            path in chain -> EmbedProblem.CIRCULAR
+            chain.size >= EmbedProblem.MAX_EMBED_DEPTH + 1 -> EmbedProblem.TOO_DEEP
+            else -> null
+        }
+        if (problem != null) return view.copy(path = path, problem = problem)
         val text = (attachmentStore.read(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
-            ?.decodeToString() ?: return null
-        val shown = embeddedNoteText.of(text = text, target = embed.target) ?: return null
-        return AttachmentView(embed = embed, kind = AttachmentKind.NOTE, path = path, noteText = shown)
+            ?.decodeToString() ?: return view.copy(problem = EmbedProblem.MISSING_NOTE)
+        val shown = embeddedNoteText.of(text = text, target = embed.target)
+            ?: return view.copy(path = path, problem = EmbedProblem.MISSING_SECTION)
+        return view.copy(
+            path = path,
+            noteText = shown,
+            nested = viewsIn(note = path, text = shown, chain = chain + path)
+        )
     }
 
     /**

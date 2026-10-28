@@ -4,6 +4,7 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.text.TextRange
 import androidx.lifecycle.viewModelScope
 import app.notekea.notes.domain.AttachmentKind
+import app.notekea.notes.domain.EmbedProblem
 import app.notekea.notes.domain.NoteFixtures.VAULT
 import app.notekea.notes.domain.NoteFixtures.file
 import app.notekea.notes.domain.NotesError
@@ -66,23 +67,29 @@ class EditorAttachmentsTest {
         }
 
     @Test
-    fun `an embedded note shows its text or one section, a missing note or the note itself stays a link`() =
+    fun `an embedded note shows its text or one section, a missing note or the note itself says why`() =
         runAttachmentsTest {
             fixture.attachmentStore.contents[RelativePath(value = "Shopping.md")] =
                 "---\ntags: [a]\n---\n# Shopping\n\n## Dairy\n\nCheese".encodeToByteArray()
             fixture.attachmentStore.contents[NOTE] = "".encodeToByteArray()
-            open(text = "![[Shopping]]\n![[Gone]]\n![[Arepas]]\n![[Shopping#Dairy]]\n![[plate.png]]\n")
+            open(
+                text = listOf("Shopping", "Gone", "Arepas", "Shopping#Dairy", "Shopping#Fish", "plate.png")
+                    .joinToString(separator = "") { "![[$it]]\n" }
+            )
 
             assertEquals(
                 expected = listOf(
-                    Triple("Shopping", AttachmentKind.NOTE, "# Shopping\n\n## Dairy\n\nCheese"),
-                    Triple("Shopping#Dairy", AttachmentKind.NOTE, "## Dairy\n\nCheese"),
-                    Triple("plate.png", AttachmentKind.IMAGE, null)
+                    Triple("Shopping", null, "# Shopping\n\n## Dairy\n\nCheese"),
+                    Triple("Gone", EmbedProblem.MISSING_NOTE, null),
+                    Triple("Arepas", EmbedProblem.CIRCULAR, null),
+                    Triple("Shopping#Dairy", null, "## Dairy\n\nCheese"),
+                    Triple("Shopping#Fish", EmbedProblem.MISSING_SECTION, null),
+                    Triple("plate.png", null, null)
                 ),
-                actual = viewModel.state.value.attachments.map { Triple(it.embed.target, it.kind, it.noteText) }
+                actual = viewModel.state.value.attachments.map { Triple(it.embed.target, it.problem, it.noteText) }
             )
             assertEquals(
-                expected = listOf("Shopping", "Shopping#Dairy", "plate.png"),
+                expected = listOf("Shopping", "Gone", "Arepas", "Shopping#Dairy", "Shopping#Fish", "plate.png"),
                 actual = AttachmentSpace.of(
                     text = viewModel.buffer.text.toString(),
                     views = viewModel.state.value.attachments,
@@ -90,6 +97,31 @@ class EditorAttachmentsTest {
                 ).map { it.view.embed.target }
             )
         }
+
+    @Test
+    fun `embedded notes show their own embeds three notes deep, and stop at a circle or deeper`() = runAttachmentsTest {
+        mapOf(
+            "One.md" to "One text\n![[Two]]\n![[plate.png]]",
+            "Two.md" to "Two text\n![[Three]]\n![[One]]",
+            "Three.md" to "Three text\n![[Four]]",
+            "Four.md" to "Four text"
+        ).forEach { (name, text) ->
+            fixture.attachmentStore.contents[RelativePath(value = name)] = text.encodeToByteArray()
+        }
+        open(text = "![[One]]\n")
+
+        val one = viewModel.state.value.attachments.single()
+        val two = one.nested.first()
+        val three = two.nested.first()
+        assertEquals(
+            expected = listOf(
+                listOf("Two" to null, "plate.png" to null),
+                listOf("Three" to null, "One" to EmbedProblem.CIRCULAR),
+                listOf("Four" to EmbedProblem.TOO_DEEP)
+            ),
+            actual = listOf(one, two, three).map { view -> view.nested.map { it.embed.target to it.problem } }
+        )
+    }
 
     @Test
     fun `a pasted image is saved as Obsidian names it and embedded on its own line, pasted text goes in as text`() =
