@@ -592,9 +592,12 @@ the automated smoke runs of 1.16, and its smoke test also checks the code trim o
 - **No growth:** opening and closing notes, tabs and folders, and switching vaults, gives back what it took: memory
   after closing everything returns near the level after opening (no leak in the editor's caches, the tabs' scroll
   memory, the decoded images or the file watcher).
-- **Cuts the measurements point at:** a heap limit and a garbage collector suited to a desktop app (set in the
-  packaged app's JVM options), bounded caches (decoded images, note texts, metadata), note texts never held twice,
-  and Skia's caches sized for a text app.
+- **Cuts the measurements point at,** only those without a drawback (decided with the developer on 2026-10-28):
+  bounded caches (decoded images, note texts, metadata), pictures decoded at the size they are shown, note texts
+  never held twice, leaks fixed. Settings that trade speed or smoothness for memory stay out: measured on Linux the
+  packaged app idles at 291 MB on the welcome screen, 228 MB with only the C1 compiler (slower heavy Java code) and
+  161 MB with Skia also drawing in software (less smooth, more CPU), and neither is worth it; the AI's models, loaded
+  only while used (3.1, 3.2), are what decide how light the app feels.
 - **Done when:** the editor alone stays under 400 MB with the Large Vault open on Linux, the measurements are in
   `docs/performance.md`, and a test keeps the bounded caches bounded. 5.4 measures the whole app again, AI included.
 
