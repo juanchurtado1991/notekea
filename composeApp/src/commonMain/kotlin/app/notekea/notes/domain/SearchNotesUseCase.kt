@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.domain.firstSorted
+
 /**
  * The notes the quick switcher (`ROADMAP.md` 1.6) lists for [query], best first: each note matches by its name, an
  * alias or its frontmatter title ([FuzzyMatcher]), whichever matches best, the name winning a tie; a search with a
@@ -19,13 +21,13 @@ class SearchNotesUseCase(
         val byName = compareBy(naturalNameComparator) { result: ScoredResult -> result.result.note.file.path.name }
         return notes
             .mapNotNull { bestMatch(note = it, query = query) }
-            .sortedWith(
-                compareByDescending<ScoredResult> { it.score }
+            .firstSorted(
+                n = limit,
+                comparator = compareByDescending<ScoredResult> { it.score }
                     .thenBy { it.result.note.file.path.nameWithoutExtension.length }
                     .then(byName)
                     .thenBy { it.result.note.file.path.value }
             )
-            .take(n = limit)
             .map { it.result }
     }
 
@@ -62,11 +64,13 @@ class SearchNotesUseCase(
         notes: Collection<NoteEntry>,
         limit: Int
     ): List<NoteSearchResult> = notes
-        .sortedWith(
-            compareByDescending<NoteEntry, Long?>(nullsFirst()) { it.file.modifiedAt?.toEpochMilliseconds() }
+        .firstSorted(
+            n = limit,
+            comparator = compareByDescending<NoteEntry, Long?>(nullsFirst()) {
+                it.file.modifiedAt?.toEpochMilliseconds()
+            }
                 .then(compareBy(naturalNameComparator) { it.file.path.name })
         )
-        .take(n = limit)
         .map { note ->
             NoteSearchResult(
                 note = note,

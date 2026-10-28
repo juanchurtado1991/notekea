@@ -1,5 +1,6 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.domain.firstSorted
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.AppDispatchers
 import kotlinx.coroutines.ensureActive
@@ -33,11 +34,12 @@ class SearchNoteContentUseCase(
             notes.mapNotNull { note ->
                 ensureActive()
                 texts[note.file.path]?.let { matchOf(note = note, text = it, terms = terms) }
-            }.sortedWith(
-                compareByDescending<ContentSearchResult> { it.matchCount }
+            }.firstSorted(
+                n = limit,
+                comparator = compareByDescending<ContentSearchResult> { it.matchCount }
                     .then(compareBy(naturalNameComparator) { it.note.file.path.name })
                     .thenBy { it.note.file.path.value }
-            ).take(n = limit)
+            )
         }
     }
 
