@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Plan (`ROADMAP.md`): vault queries (2.10, what Dataview and Bases do, with no query language), vault tasks (2.11)
+  and questions in plain words (3.8, the local model writes the query, the index answers it exactly) join the MVP;
+  M2 and M3 grow to 4.5 weeks each. Study cards are the first item after the MVP, and the Repositories item records
+  how its background work is estimated, shown and resumed.
 - Memory (ROADMAP 1.18): a vault's ViewModels (tree, watcher, caches, editors) are cleared when it closes, after its
   notes are saved; folder cards decode pictures at card size and keep at most 60; the editor keeps only the pictures of
   the note on screen; searches sort only the results they show; names compare without a pattern, in the same order;
