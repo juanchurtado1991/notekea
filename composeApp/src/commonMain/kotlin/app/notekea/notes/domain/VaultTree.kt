@@ -24,14 +24,22 @@ data class VaultTree(
     ): VaultTree {
         val path = note.file.path
         val parentFolders = path.parent?.let { ancestorsAndSelf(path = it) }.orEmpty()
-        return copy(folders = folders + parentFolders, notes = notes + (path to note))
+        val knownFolders = folders.takeIf { it.containsAll(parentFolders) }
+        // A watcher event for a note already known as it is changes nothing: the same tree, no copy.
+        if (knownFolders != null && notes[path] == note) return this
+        return copy(folders = knownFolders ?: (folders + parentFolders), notes = notes + (path to note))
     }
 
     fun withAttachment(
         file: NoteFile
     ): VaultTree {
         val parentFolders = file.path.parent?.let { ancestorsAndSelf(path = it) }.orEmpty()
-        return copy(folders = folders + parentFolders, attachments = attachments + (file.path to file))
+        val knownFolders = folders.takeIf { it.containsAll(parentFolders) }
+        if (knownFolders != null && attachments[file.path] == file) return this
+        return copy(
+            folders = knownFolders ?: (folders + parentFolders),
+            attachments = attachments + (file.path to file)
+        )
     }
 
     /**
@@ -66,10 +74,23 @@ data class VaultTree(
 
     fun without(
         path: RelativePath
+    ): VaultTree = when {
+        // Only a folder has entries inside it: a note or file goes alone, and an unknown path changes nothing.
+        !path.isRoot && path !in folders -> if (path in notes || path in attachments) {
+            copy(notes = notes - path, attachments = attachments - path)
+        } else {
+            this
+        }
+
+        else -> withoutFolder(folder = path)
+    }
+
+    private fun withoutFolder(
+        folder: RelativePath
     ): VaultTree = copy(
-        folders = folders.filterNot { it.isWithin(folder = path) }.toSet(),
-        notes = notes.filterKeys { !it.isWithin(folder = path) },
-        attachments = attachments.filterKeys { !it.isWithin(folder = path) }
+        folders = folders.filterNot { it.isWithin(folder = folder) }.toSet(),
+        notes = notes.filterKeys { !it.isWithin(folder = folder) },
+        attachments = attachments.filterKeys { !it.isWithin(folder = folder) }
     )
 
     private fun ancestorsAndSelf(

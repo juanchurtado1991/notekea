@@ -13,6 +13,9 @@ class TextTagFinderTest {
             ```
             #inside-code
             ```
+            ~~~
+            #inside-tildes
+            ~~~
             Served with #café.
         """.trimIndent()
 

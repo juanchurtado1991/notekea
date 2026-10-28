@@ -3,6 +3,7 @@ package app.notekea.notes.domain
 import app.notekea.notes.domain.NoteFixtures.file
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertSame
 import kotlin.time.Instant
 
 class VaultTreeTest {
@@ -53,6 +54,14 @@ class VaultTreeTest {
             expected = mapOf(path(value = TOMATO_PLAN) to updated),
             actual = tree.notes
         )
+    }
+
+    @Test
+    fun `adding a note already known as it is, or removing a path the tree does not have, keeps the same tree`() {
+        val tree = VaultTree.EMPTY.withNote(note = note(path = TOMATO_PLAN))
+
+        assertSame(expected = tree, actual = tree.withNote(note = note(path = TOMATO_PLAN)))
+        assertSame(expected = tree, actual = tree.without(path = path(value = PROJECTS_PLAN)))
     }
 
     @Test

@@ -71,11 +71,14 @@ class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparato
         tree: VaultTree
     ): Map<RelativePath, Int> {
         val counts = mutableMapOf<RelativePath, Int>()
-        (tree.notes.keys + tree.attachments.keys).forEach { path ->
+        val count = { path: RelativePath ->
             generateSequence(seed = path.parent) { it.parent }
                 .takeWhile { !it.isRoot }
                 .forEach { counts[it] = (counts[it] ?: 0) + 1 }
         }
+        // Each key set on its own: joining them would copy every path of the vault into a new set first.
+        tree.notes.keys.forEach(count)
+        tree.attachments.keys.forEach(count)
         return counts
     }
 
