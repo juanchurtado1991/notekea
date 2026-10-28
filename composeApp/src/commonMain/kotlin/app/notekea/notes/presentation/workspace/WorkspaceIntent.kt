@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.workspace
 
 import app.notekea.notes.domain.RelativePath
+import androidx.compose.ui.unit.IntSize
 import app.notekea.notes.domain.SidePanelMode
 import app.notekea.notes.domain.SidePanelSection
 import app.notekea.notes.domain.VaultTree
@@ -63,8 +64,14 @@ sealed interface WorkspaceIntent {
 
     data class OnDeleted(val path: RelativePath) : WorkspaceIntent
 
-    /** A folder grid's card for [path] (a note or a picture) is on screen and needs its picture. */
-    data class OnCoverRequest(val path: RelativePath) : WorkspaceIntent
+    /**
+     * A folder grid's card for [path] (a note or a picture) is on screen and needs its picture, at most [size] pixels:
+     * the largest a card is drawn.
+     */
+    data class OnCoverRequest(
+        val path: RelativePath,
+        val size: IntSize
+    ) : WorkspaceIntent
 
     /** `Mod+Shift+\`, the toolbar's Outline or the panel's hide button. */
     data object OnSidePanelToggle : WorkspaceIntent

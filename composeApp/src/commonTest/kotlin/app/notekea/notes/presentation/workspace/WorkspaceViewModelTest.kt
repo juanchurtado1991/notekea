@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.workspace
 
+import androidx.compose.ui.unit.IntSize
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.notes.domain.EditorPane
 import app.notekea.notes.domain.FakeAttachmentStore
@@ -136,8 +137,8 @@ class WorkspaceViewModelTest {
             viewModel.onIntent(intent = WorkspaceIntent.OnOpen(path = PLATE))
             viewModel.onIntent(intent = WorkspaceIntent.OnOpen(path = BROKEN))
             viewModel.onIntent(intent = WorkspaceIntent.OnSplitRight)
-            viewModel.onIntent(intent = WorkspaceIntent.OnCoverRequest(path = AREPAS))
-            viewModel.onIntent(intent = WorkspaceIntent.OnCoverRequest(path = WELCOME))
+            viewModel.onIntent(intent = WorkspaceIntent.OnCoverRequest(path = AREPAS, size = COVER_SIZE))
+            viewModel.onIntent(intent = WorkspaceIntent.OnCoverRequest(path = WELCOME, size = COVER_SIZE))
             advanceUntilIdle()
             val state = viewModel.state.value
 
@@ -151,6 +152,17 @@ class WorkspaceViewModelTest {
                 ) to listOf(PLATE, BROKEN).map { state.previews.getValue(it).isUnreadable }
             )
         }
+
+    @Test
+    fun `only the newest folder card pictures are kept`() = runWorkspaceTest {
+        val viewModel = started()
+        val paths = (0..WorkspaceViewModel.MAX_COVERS).map { RelativePath(value = "Card $it.md") }
+
+        paths.forEach { viewModel.onIntent(intent = WorkspaceIntent.OnCoverRequest(path = it, size = COVER_SIZE)) }
+        advanceUntilIdle()
+
+        assertEquals(expected = paths.drop(n = 1).toSet(), actual = viewModel.state.value.covers.keys)
+    }
 
     @Test
     fun `a file's picture is let go once no tab holds the file`() = runWorkspaceTest {
@@ -246,6 +258,7 @@ class WorkspaceViewModelTest {
     ) = runTest(context = testDispatcher) { body() }
 
     companion object {
+        private val COVER_SIZE = IntSize(width = 336, height = 252)
         private const val PNG_BASE64 =
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
         private val AREPAS = RelativePath(value = "Recipes/Arepas.md")

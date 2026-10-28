@@ -67,6 +67,19 @@ class EditorAttachmentsTest {
         }
 
     @Test
+    fun `a picture stays decoded while its note is shown, and is let go once another note is`() = runAttachmentsTest {
+        val plate = RelativePath(value = "attachments/plate.png")
+        open(text = "![[plate.png]]\n")
+        fixture.store.texts[PLAIN] = "No pictures here.\n"
+        fixture.scanner.addNote(file = file(path = PLAIN.value))
+        send(intent = EditorIntent.OnOpen(path = PLAIN))
+        send(intent = EditorIntent.OnOpen(path = NOTE))
+
+        // Read when the note opened, and again only because another note was shown in between.
+        assertEquals(expected = 2, actual = fixture.attachmentStore.reads.count { it == plate })
+    }
+
+    @Test
     fun `an embedded note shows its text or one section, a missing note or the note itself says why`() =
         runAttachmentsTest {
             fixture.attachmentStore.contents[RelativePath(value = "Shopping.md")] =
@@ -262,6 +275,7 @@ class EditorAttachmentsTest {
         private const val WIDE_PNG_BASE64 =
             "iVBORw0KGgoAAAANSUhEUgAAAfQAAAACCAIAAAAhCLltAAAAIElEQVR42u3QAREAAAQEMGQVViw9/rYI69sCIMwoAMjz4FkBMJDyS2EAAAAASUVORK5CYII="
         private val NOTE = RelativePath(value = "Recipes/Arepas.md")
+        private val PLAIN = RelativePath(value = "Recipes/Pancakes.md")
         private val PDF = byteArrayOf(37, 80, 68, 70)
     }
 }
