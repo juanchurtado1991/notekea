@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Automated smoke runs (ROADMAP 1.16): the real app driven through its UI on copies of the smoke vaults, a run per M1
+  feature and an idle run, in every test run and in CI; `./gradlew :composeApp:smokeRun -PidleSeconds=600` records
+  their memory for the performance passes.
 - Sample Vault (`smoke-data/vaults/Sample Vault`, ROADMAP 1.16): 40 notes covering every M1 feature, with
   non-default Obsidian settings, for tests, QA, the automated smoke runs and demos.
 - Embeds (ROADMAP 1.15): an embedded note shows its own embeds inside it, three notes deep; `![[Note#^id]]` shows

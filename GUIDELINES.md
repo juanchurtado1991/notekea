@@ -223,9 +223,11 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
 - **Automated smoke runs come with the smoke cases** (infrastructure from `ROADMAP.md` 1.16): every case added to
   `MVP_SMOKE_TEST.md` that a script can drive is also added as a scenario of the automated smoke runs, which start the
   real app (its real window and files, with a temporary app data folder, never the user's) on copies of the smoke
-  data and check the case's expected result. They run in one Gradle task, locally and in CI on the three systems,
-  and are the workload every performance pass measures. Until 1.16 lands, the pre-smoke tests below are the
-  automated part.
+  data and check the case's expected result. They live in `app.notekea.smokerun` (`jvmTest`, Compose UI Test), run in
+  every `jvmTest` and so in CI on the three systems, and `./gradlew :composeApp:smokeRun -PidleSeconds=600` runs them
+  alone and records the memory of each in `build/reports/smoke-runs/memory.csv`, the workload every performance pass
+  measures. A run drives the UI as a person does (find by text, click, type, shortcuts) and checks what the case
+  expects, down to the files on disk.
 - **Every `feature/` and `fix/` branch adds its cases to `MVP_SMOKE_TEST.md`** (in a step): what a person must check on
   each OS, including cases that only become testable with later features. Every milestone QA run executes all the
   cases testable so far on Windows, macOS and Linux, and the release run executes the whole file; it is the main
