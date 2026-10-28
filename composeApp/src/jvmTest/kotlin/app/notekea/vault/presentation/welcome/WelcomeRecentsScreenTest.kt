@@ -76,7 +76,9 @@ class WelcomeRecentsScreenTest {
         private const val NAME = "Vault "
         private const val PATH = "/home/user/Vault"
         private const val RECENTS = 7
-        private const val SCROLL_TICKS = 10f
+
+        // Far more than the list holds: a wheel tick scrolls a different distance on each system (CI runs all three).
+        private const val SCROLL_TICKS = 100f
         private const val SETTLE_FRAMES = 4
         private const val WIDTH = 1300
         private val BELOW_CARD = Offset(x = 900f, y = 560f)
