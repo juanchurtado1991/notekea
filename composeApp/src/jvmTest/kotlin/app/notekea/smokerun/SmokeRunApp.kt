@@ -27,6 +27,7 @@ import app.notekea.notes.domain.FakeFileRevealer
 import app.notekea.notes.domain.FileOpener
 import app.notekea.notes.domain.FileRevealer
 import app.notekea.notes.domain.Trash
+import app.notekea.notes.presentation.tree.VaultScope
 import app.notekea.notes.presentation.tree.VaultTreeScreen
 import app.notekea.vault.domain.FakeFolderPicker
 import app.notekea.vault.domain.FolderPicker
@@ -101,11 +102,13 @@ internal class SmokeRunApp(
                     WelcomeScreen(
                         onVaultNameChange = {},
                         openedVaultContent = { vault, onSwitchVault ->
-                            VaultTreeScreen(
-                                vaultPath = vault.path,
-                                vaultName = vault.name,
-                                onSwitchVault = onSwitchVault
-                            )
+                            VaultScope(vaultPath = vault.path) { close ->
+                                VaultTreeScreen(
+                                    vaultPath = vault.path,
+                                    vaultName = vault.name,
+                                    onSwitchVault = { close(onSwitchVault) }
+                                )
+                            }
                         }
                     )
                 }
