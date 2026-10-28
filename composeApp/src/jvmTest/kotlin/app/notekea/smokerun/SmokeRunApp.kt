@@ -6,6 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.focusable
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
@@ -41,19 +44,24 @@ import kotlin.io.path.deleteRecursively
 /**
  * The real app for an automated smoke run (`ROADMAP.md` 1.16): every Koin module of the desktop app, with its data
  * (settings, database, crash reports) in a temporary folder instead of the user's, copies of the smoke vaults named
- * [vaults], and the system's dialogs and apps replaced: the folder picker answers [folderPicker], files "open" in
+ * [vaults] (and what [prepare] writes into their folder), and the system's dialogs and apps replaced: the folder picker answers [folderPicker], files "open" in
  * [fileOpener] and [fileRevealer], and deleted entries go to the vault's `.trash` folder, never the system trash.
  * [Content] is the window's content, keyboard shortcuts included.
  */
 @OptIn(ExperimentalPathApi::class)
 internal class SmokeRunApp(
-    vaults: List<String>
+    vaults: List<String>,
+    prepare: (vaults: File) -> Unit = {}
 ) : AutoCloseable {
     private val root: Path = Files.createTempDirectory(TEMP_PREFIX)
     val folderPicker = FakeFolderPicker()
     val attachmentPicker = FakeAttachmentPicker()
     val fileOpener = FakeFileOpener()
     val fileRevealer = FakeFileRevealer()
+
+    // The window itself: in the app a window gets every key, here a focused node does, so once nothing else holds the
+    // focus (the last tab closed) a run gives it back to the window for its shortcuts.
+    val windowFocus = FocusRequester()
 
     // The app's view models live here, so closing the run stops their work (the vault's scan) with them.
     private val viewModels = object : ViewModelStoreOwner {
@@ -66,6 +74,7 @@ internal class SmokeRunApp(
         vaults.forEach { name ->
             File(SMOKE_VAULTS, name).copyRecursively(target = root.resolve(VAULTS).resolve(name).toFile())
         }
+        prepare(root.resolve(VAULTS).toFile())
         startKoin { modules(desktopModules + overrides()) }
     }
 
@@ -81,7 +90,13 @@ internal class SmokeRunApp(
             LocalShortcutDispatcher provides dispatcher,
             LocalViewModelStoreOwner provides viewModels
         ) {
-            Box(modifier = Modifier.fillMaxSize().onPreviewKeyEvent(onPreviewKeyEvent = dispatcher::dispatch)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onPreviewKeyEvent(onPreviewKeyEvent = dispatcher::dispatch)
+                    .focusRequester(focusRequester = windowFocus)
+                    .focusable()
+            ) {
                 App {
                     WelcomeScreen(
                         onVaultNameChange = {},
