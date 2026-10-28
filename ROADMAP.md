@@ -579,7 +579,7 @@ same Markdown a person would type, so notes stay readable in any app.
 - **Done when:** a person who never wrote Markdown can make a heading, a checklist, a callout, a table and a link to
   another note with the mouse alone, and every result reads the same in Preview and in Obsidian.
 
-### ⬜ 1.18 M1 performance pass: editor memory — `chore/editor-memory`
+### 🚧 1.18 M1 performance pass: editor memory — `chore/editor-memory`
 
 M1's performance pass (see "Closing a milestone"). The editor alone, before any AI, should stay light: measure how
 much memory it uses and cut it, so M2 and M3 start from a small base (budget of 5.4: under 400 MB). The workload is

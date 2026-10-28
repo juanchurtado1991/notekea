@@ -10,7 +10,8 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
@@ -19,28 +20,36 @@ import androidx.compose.ui.test.withKeysDown
 import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.platform.domain.PlatformConventions
 import org.koin.mp.KoinPlatform
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 private const val WAIT_MILLIS = 10_000L
+private val RUN_TIMEOUT = 5.minutes
 private const val OPEN_FOLDER = "Open folder…"
 
 /** Waits until something on screen shows [text] (a part of it when [substring]). */
 internal fun ComposeUiTest.waitForText(
     text: String,
-    substring: Boolean = false
-) = waitUntilAtLeastOneExists(matcher = hasText(text = text, substring = substring), timeoutMillis = WAIT_MILLIS)
+    substring: Boolean = false,
+    timeoutMillis: Long = WAIT_MILLIS
+) = waitUntilAtLeastOneExists(matcher = hasText(text = text, substring = substring), timeoutMillis = timeoutMillis)
 
 /** Opens the copy of the vault [name] from the welcome screen, as Open folder… with the picker answering it. */
 internal fun ComposeUiTest.openVault(
     app: SmokeRunApp,
     name: String,
-    shownNote: String
+    shownNote: String,
+    timeoutMillis: Long = WAIT_MILLIS
 ) {
     app.folderPicker.nextPick = app.vaultPath(name = name)
     // The welcome screen shows its actions only once it has read the recent vaults, later on a slow machine (CI).
     waitForText(text = OPEN_FOLDER)
     onNodeWithText(text = OPEN_FOLDER).performClick()
-    waitForText(text = shownNote)
+    waitForText(text = shownNote, timeoutMillis = timeoutMillis)
 }
+
+/** The window's own root: a tooltip or a menu open over it is a root of its own, drawn in a popup. */
+internal fun ComposeUiTest.window() = onAllNodes(matcher = isRoot()).onFirst()
 
 /** Presses [key] with the platform's primary modifier (Cmd on macOS, Ctrl elsewhere), and Shift when [withShift]. */
 internal fun ComposeUiTest.pressShortcut(
@@ -49,7 +58,7 @@ internal fun ComposeUiTest.pressShortcut(
 ) {
     val isMac = KoinPlatform.getKoin().get<PlatformConventions>().operatingSystem == OperatingSystem.MACOS
     val modifiers = listOfNotNull(if (isMac) Key.MetaLeft else Key.CtrlLeft, Key.ShiftLeft.takeIf { withShift })
-    onRoot().performKeyInput { withKeysDown(keys = modifiers) { pressKey(key = key) } }
+    window().performKeyInput { withKeysDown(keys = modifiers) { pressKey(key = key) } }
 }
 
 internal const val SAMPLE_VAULT = "Sample Vault"
@@ -58,15 +67,17 @@ private const val START = "start"
 private const val END = "end"
 
 /**
- * One automated smoke run named [name]: the real app on copies of [vaults], its memory sampled when it starts and
- * when [block] ends ([SmokeRunReport]).
+ * One automated smoke run named [name]: the real app on copies of [vaults] plus what [prepare] writes, its memory
+ * sampled when it starts and when [block] ends ([SmokeRunReport]).
  */
 internal fun smokeRun(
     name: String,
     vaults: List<String> = listOf(SAMPLE_VAULT),
+    prepare: (vaults: java.io.File) -> Unit = {},
     block: suspend ComposeUiTest.(SmokeRunApp) -> Unit
-) = SmokeRunApp(vaults = vaults).use { app ->
-    runComposeUiTest {
+) = SmokeRunApp(vaults = vaults, prepare = prepare).use { app ->
+    // A run waits as long as the performance pass asks it to stay idle, on top of its own steps.
+    runComposeUiTest(testTimeout = RUN_TIMEOUT + SmokeRunReport.idleSeconds.seconds * 2) {
         setContent { app.Content() }
         SmokeRunReport.sample(run = name, moment = START)
         block(app)
@@ -75,17 +86,21 @@ internal fun smokeRun(
     }
 }
 
-/** Opens the note [name] with the quick switcher (`Mod+P`), as a person who knows its name would. */
+/**
+ * Opens the note [name] with the quick switcher (`Mod+P`), as a person who knows its name would, waiting up to
+ * [timeoutMillis] for it (longer in a large vault still being read).
+ */
 internal fun ComposeUiTest.openNote(
     name: String,
-    shownText: String
+    shownText: String,
+    timeoutMillis: Long = WAIT_MILLIS
 ) {
     pressShortcut(key = Key.P)
     waitForText(text = FIND_NOTE)
     onNode(matcher = hasSetTextAction() and hasText(text = FIND_NOTE)).performTextInput(text = name)
-    waitForText(text = name)
+    waitForText(text = name, timeoutMillis = timeoutMillis)
     onNode(matcher = hasSetTextAction() and hasText(text = name)).performKeyInput { pressKey(key = Key.Enter) }
-    waitForText(text = shownText, substring = true)
+    waitForText(text = shownText, substring = true, timeoutMillis = timeoutMillis)
 }
 
 /** The note's text field, found by a part of its text. */
