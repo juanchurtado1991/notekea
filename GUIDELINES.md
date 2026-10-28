@@ -193,7 +193,8 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   `feature/` and `fix/` pull request writes each new or changed case as an `AutomatedCase` (named after its ID, run in
   CI on the three systems through the JUnit bridge) or a `ManualCase` (steps and expected result in English and
   Spanish, in plain words, no terminal), in `:selftest`, and adds its data to `smoke-data/`. The consistency test
-  fails when a case has no counterpart. Every step that adds or changes UI also brings its screen tests (§10).
+  fails when a case has no counterpart. Once the M1 cases are in (`qa/README.md` piece 5), the cases in code are the
+  only source and `MVP_SMOKE_TEST.md` is generated from them, never edited by hand. Every step that adds or changes UI also brings its screen tests (§10).
 - **Manual smoke test before a `feature/` or `fix/` branch reaches `main`.** Automated tests do not prove the
   app works as a whole, so the developer runs the app (`./gradlew :composeApp:run`) on **at least one OS** and checks:
   1. The app starts and the main window renders without errors in the log.
