@@ -103,6 +103,12 @@ abstract class BaseViewModel<S, I, E>(
 - `State` models the UI states explicitly (`isLoading`, `error: <Feature>Error?`, content), so empty, loading,
   error and content are all representable and testable.
 - `reduce` lambdas are pure; complex transitions are extracted into pure functions and unit tested directly.
+- **A ViewModel that grows is split by sub-feature, never into one long helper** (`GUIDELINES.md` §6, files under
+  350 lines). It keeps routing its intents and coordinating what spans the parts (open, save, rename); each part is an
+  `internal` class of its own (`EditorFind`, `EditorFiles`, `TreeBookmarks`…) that shares the state through a small
+  `internal` host interface the ViewModel implements with a private object (`EditorHost`, `TreeHost`: the state,
+  `reduce`, `emit`, `launch`). Parts never hold another copy of the state. A screen is split the same way: one
+  `internal` composable per section, each with its preview.
 - Long editable text is the one exception to "everything in `State`": the note editor's body lives in a
   `TextFieldState` owned by the ViewModel (`EditorViewModel.buffer`), which the text field edits directly and the
   ViewModel observes, so a keystroke does not copy the whole note into `State`. `State` keeps what the UI shows about
