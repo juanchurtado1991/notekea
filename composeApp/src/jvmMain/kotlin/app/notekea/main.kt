@@ -48,6 +48,7 @@ import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.core.presentation.theme.LocalSystemDarkTheme
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.di.desktopModules
+import app.notekea.notes.presentation.tree.VaultScope
 import app.notekea.notes.presentation.tree.VaultTreeScreen
 import app.notekea.resources.Res
 import app.notekea.resources.crash_title
@@ -216,7 +217,13 @@ private fun WindowContent(
         WelcomeScreen(
             onVaultNameChange = onVaultNameChange,
             openedVaultContent = { vault, onSwitchVault ->
-                VaultTreeScreen(vaultPath = vault.path, vaultName = vault.name, onSwitchVault = onSwitchVault)
+                VaultScope(vaultPath = vault.path) { close ->
+                    VaultTreeScreen(
+                        vaultPath = vault.path,
+                        vaultName = vault.name,
+                        onSwitchVault = { close(onSwitchVault) }
+                    )
+                }
             }
         )
     }
