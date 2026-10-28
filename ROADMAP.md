@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 14 / 18 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 15 / 18 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -395,7 +395,7 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 - **Storage:** in the app's settings, per vault, in order: the vault's files are never touched, and Obsidian's own
   bookmarks (`.obsidian/bookmarks.json`) are left alone.
 
-### ⬜ 1.14 Properties view — `feature/properties`
+### ✅ 1.14 Properties view — `feature/properties` — [notekea#65](https://github.com/juanchurtado1991/notekea/pull/65)
 
 Frontmatter shown as a compact form above the note content. While it was reviewed the feature grew, by the
 developer's decision, to **finish the base editor's UI** before it reaches `main`: the side panel as an inspector,
