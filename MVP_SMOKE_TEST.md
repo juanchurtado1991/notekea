@@ -17,8 +17,8 @@ works for a real person on a real machine. It is the main source of bugs before 
   file always describes the current app. A case that a later feature will change says so in a note under its table
   ("Revised by 1.4"); that feature's pull request rewrites the case and removes the note.
 - **Checked by** says how the Notekea Self-Test checks the case on the testers' machines (`qa/SELF_TEST.md`):
-  `Self-Test` when it runs automatically, `Manual (eyes)`, `Manual (system)` or `Manual (packaged)` when it walks the
-  tester through it. At least 80% of the cases are `Self-Test`. (The column is filled in by `qa/README.md` piece 2.)
+  `Self-Test` when it runs automatically, `Manual (eyes)`, `Manual (system)`, `Manual (packaged)` or `Manual (costly)`
+  when it walks the tester through it. There is no quota: automate what is reasonable. (The column is filled in by `qa/README.md` piece 2.)
 - **Automated** names the tests that check a case on every build: its `AutomatedCase`, named after its ID, and the
   screen or integration tests behind it (`EditorScreenTest`), so a case checked once keeps being checked as the app
   grows. A feature that changes a case updates its tests and its Self-Test case in the same pull request.
