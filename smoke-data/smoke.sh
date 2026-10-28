@@ -3,7 +3,7 @@
 # Git cannot store a folder without read permission, and a moved vault must not change tracked files, so this script
 # builds them in smoke-data/scratch (ignored by Git). It lives in the repository, not in /tmp, because sandboxed
 # terminals and the native folder picker may each see a different /tmp. It never touches smoke-data/vaults.
-# Usage: smoke-data/smoke.sh prepare | move | lock | outside | large | edit-note | edit-note-soon | delete-note |
+# Usage: smoke-data/smoke.sh prepare | move | lock | outside | edit-note | edit-note-soon | delete-note |
 #        check-note | diff-properties | clear-cache | first-launch | restore-settings | clean
 # SMOKE_SCRATCH=scratch-<name> builds everything in smoke-data/scratch-<name> instead, so an agent's checks never touch
 # the developer's smoke-data/scratch. It changes only that folder: clear-cache, first-launch and restore-settings
@@ -19,8 +19,6 @@ fi
 SCRATCH="$SMOKE_ROOT/$SCRATCH_NAME"
 SETTINGS_FILE="settings.properties"
 DATABASE_FILE="notekea.db"
-LARGE_FOLDERS=50
-LARGE_NOTES_PER_FOLDER=100
 BACKUP_SUFFIX=".smoke-backup"
 
 app_data_dir() {
@@ -164,20 +162,6 @@ outside() {
     echo "Changed $vault: Inbox/Created outside.md created, Travel/Lisbon trip.md edited, Ideas/Reading list.md deleted"
 }
 
-# A vault of 5,000 notes in 50 folders, each with frontmatter and links, to time how fast the tree opens.
-large() {
-    local vault="$SCRATCH/Large Vault"
-    rm -rf "$vault"
-    for folder in $(seq -w 1 "$LARGE_FOLDERS"); do
-        mkdir -p "$vault/Folder $folder"
-        for note in $(seq -w 1 "$LARGE_NOTES_PER_FOLDER"); do
-            printf -- '---\ntags: [large, folder-%s]\naliases: [Note %s-%s]\n---\n\n# Note %s %s\n\nSee [[Note %s 001]].\n' \
-                "$folder" "$folder" "$note" "$folder" "$note" "$folder" > "$vault/Folder $folder/Note $folder $note.md"
-        done
-    done
-    echo "Created $vault with $((LARGE_FOLDERS * LARGE_NOTES_PER_FOLDER)) notes"
-}
-
 settings_path() {
     echo "$(app_data_dir)/$SETTINGS_FILE"
 }
@@ -192,9 +176,6 @@ case "${1:-}" in
         ;;
     outside)
         outside
-        ;;
-    large)
-        large
         ;;
     clear-cache)
         rm -f "$(app_data_dir)/$DATABASE_FILE"
@@ -243,7 +224,7 @@ case "${1:-}" in
         echo "Removed $SCRATCH"
         ;;
     *)
-        echo "Usage: $0 prepare | move | lock | outside | large | edit-note | edit-note-soon | delete-note |" \
+        echo "Usage: $0 prepare | move | lock | outside | edit-note | edit-note-soon | delete-note |" \
             "check-note | diff-properties | clear-cache | first-launch | restore-settings | clean" >&2
         exit 1
         ;;

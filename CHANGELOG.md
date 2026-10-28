@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Memory runs (ROADMAP 1.18): Personal Notes with a 2,000-line note and the 5,000-note Large Vault, driven through the
+- Ghost Serializer vault (`smoke-data/vaults/Ghost Serializer`, ROADMAP 1.18): the production code of Ghost
+  Serializer as 371 notes, one per Kotlin file explaining what it is about, how it works and its code, linked to the
+  files it uses; the large vault of the performance passes and the timing cases, in place of the 5,000 generated
+  near-empty notes of `smoke.sh large`, which is gone.
+- Memory runs (ROADMAP 1.18): Personal Notes with a 2,000-line note and the Ghost Serializer vault, driven through the
   app (notes opened and closed, a text search, Edit and Preview scrolled, idle, the vault left and opened again), each
   in a JVM of its own; samples record the heap in use and committed, the resident memory and Skia's caches. M1's
   numbers and where the memory goes are in `docs/performance.md`.

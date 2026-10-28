@@ -586,9 +586,10 @@ much memory it uses and cut it, so M2 and M3 start from a small base (budget of 
 the automated smoke runs of 1.16, and its smoke test also checks the code trim of 1.16.
 
 - **Measure:** the memory of the whole process (resident memory, not only the Java heap) on Linux, then Windows and
-  macOS, with `smoke-data/vaults/Personal Notes` and the Large Vault (`smoke.sh large`, 5,000 notes): right after
-  opening, after opening and closing 20 notes in tabs, after scrolling a long note in Edit and Preview, and after
-  ten minutes idle. The numbers go in `docs/performance.md`.
+  macOS, with `smoke-data/vaults/Personal Notes` and `smoke-data/vaults/Ghost Serializer` (a code repository as 371
+  notes, one per Kotlin file explaining it, the kind of vault the Repositories feature will write; it replaced a
+  generated vault of 5,000 near-empty notes, which no one would have): right after opening, after opening and closing
+  20 notes in tabs, after scrolling a long note in Edit and Preview, and after ten minutes idle. The numbers go in `docs/performance.md`.
 - **No growth:** opening and closing notes, tabs and folders, and switching vaults, gives back what it took: memory
   after closing everything returns near the level after opening (no leak in the editor's caches, the tabs' scroll
   memory, the decoded images or the file watcher).
@@ -603,10 +604,12 @@ the automated smoke runs of 1.16, and its smoke test also checks the code trim o
   file previews released with their tab). Left for this pass: the old vault's ViewModels kept alive after switching
   vaults, the folder grid's covers and the editor's images held at full size, `ListEditing` splitting the whole note
   on Enter, the sort of the quick switcher's candidates and the natural name comparator's regex.
-- **Done when:** the editor alone stays under 400 MB with the Large Vault open on Linux, the measurements are in
+- **Done when:** the editor alone stays under 400 MB with the Ghost Serializer vault open on Linux, the measurements are in
   `docs/performance.md`, and a test keeps the bounded caches bounded. 5.4 measures the whole app again, AI included.
-- **Result (2026-10-28):** the Large Vault opens at 368 MB, idles at 516 MB after 20 notes were opened and closed and
-  stays there once left; Personal Notes reaches 761 MB after a 2,000-line note is scrolled in Edit and Preview. The
+- **Result (2026-10-28):** the Ghost Serializer vault opens at 334 MB, idles at 451 MB after 20 of its notes were
+  opened and closed and stays there once left (the generated Large Vault it replaced: 368 and 516 MB); Personal Notes
+  reaches 761 MB after a 2,000-line note is scrolled in Edit and Preview, so the 400 MB budget holds while opening a
+  vault but not after working in it. The
   Java heap stays under 40 MB (112 MB in Preview): the rest is heap the JVM keeps committed, native memory glibc keeps
   after Skia and text layout free it, and the layout of a long note (about 170 MB while it is open). Two JVM options
   would bring the idle Large Vault to 388 MB (`-XX:TrimNativeHeapInterval`, `-XX:G1PeriodicGCInterval`); the
@@ -713,7 +716,7 @@ ranking are measured.
 ### ⬜ 2.9 M2 performance pass — `chore/m2-performance`
 
 The performance pass of M2 (see "Closing a milestone"), on the automated smoke runs of M1 and M2: memory and time of
-the first indexing and of an incremental one on the Sample Vault and the Large Vault, memory with the embedding model
+the first indexing and of an incremental one on the Sample Vault and the Ghost Serializer vault, memory with the embedding model
 loaded and after it is let go, search latency, and idle memory after indexing ends. Compared with 1.18 in
 `docs/performance.md`; budgets of 5.4 (indexing or searching under 700 MB, back to the editor's level after).
 
@@ -867,7 +870,7 @@ The index folder is never committed. Token stored in the OS keychain (Java Keyri
 ### ⬜ 4.3 M4 performance pass — `chore/m4-performance`
 
 The performance pass of M4 (see "Closing a milestone"), on the automated smoke runs of M1 to M4: memory and time of
-a sync of the Sample Vault and the Large Vault, of the auto-commit while typing, and idle memory with sync on.
+a sync of the Sample Vault and the Ghost Serializer vault, of the auto-commit while typing, and idle memory with sync on.
 Compared with 3.7 in `docs/performance.md`.
 
 ---
@@ -919,7 +922,7 @@ macOS, Linux) with every automated smoke run and cut what the numbers point at, 
   | Chatting with the Small model on an 8 GB laptop | < 2.5 GB |
   | Chat closed for a few minutes | back to the editor-only level |
 
-- **Measure:** profile the editor with the Large Vault (`smoke.sh large`), the indexing and a chat session; record
+- **Measure:** profile the editor with the Ghost Serializer vault (`smoke-data/vaults/Ghost Serializer`), the indexing and a chat session; record
   memory, startup time and typing latency per OS in `docs/performance.md`.
 - **JVM:** a heap limit and a garbage collector suited to a desktop app, and a runtime trimmed with jlink to the
   modules the app uses (5.3 packages it).
