@@ -31,21 +31,6 @@ data class NoteDocument(
          * Splits a note's [text]. Frontmatter is recognized as Obsidian does: the first line is exactly `---` and a
          * later line is exactly `---`; anything else (no closing line, `----`, a `---` further down) is body.
          */
-
-        // How many times the part occurs in the text, counted without splitting it.
-        private fun countOf(
-            text: String,
-            part: String
-        ): Int {
-            var count = 0
-            var index = text.indexOf(string = part)
-            while (index >= 0) {
-                count++
-                index = text.indexOf(string = part, startIndex = index + part.length)
-            }
-            return count
-        }
-
         fun fromText(
             text: String
         ): NoteDocument {
@@ -59,6 +44,20 @@ data class NoteDocument(
                 body = if (usesCrLf) body.replace(oldValue = CRLF, newValue = LF) else body,
                 usesCrLf = usesCrLf
             )
+        }
+
+        // How many times the part occurs in the text, counted without splitting it.
+        private fun countOf(
+            text: String,
+            part: String
+        ): Int {
+            var count = 0
+            var index = text.indexOf(string = part)
+            while (index >= 0) {
+                count++
+                index = text.indexOf(string = part, startIndex = index + part.length)
+            }
+            return count
         }
 
         /** Where the frontmatter block that starts at [start] ends (after its closing line's break), or null. */
