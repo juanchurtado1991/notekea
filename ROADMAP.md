@@ -598,6 +598,11 @@ the automated smoke runs of 1.16, and its smoke test also checks the code trim o
   packaged app idles at 291 MB on the welcome screen, 228 MB with only the C1 compiler (slower heavy Java code) and
   161 MB with Skia also drawing in software (less smooth, more CPU), and neither is worth it; the AI's models, loaded
   only while used (3.1, 3.2), are what decide how light the app feels.
+- **Audit of 1.16:** an audit of needless allocations ranked them by ease and risk; 1.16 already applied the easy,
+  low-risk ones (editor scans per keystroke and caret move, tree copies per watcher change, stable Compose inputs,
+  file previews released with their tab). Left for this pass: the old vault's ViewModels kept alive after switching
+  vaults, the folder grid's covers and the editor's images held at full size, `ListEditing` splitting the whole note
+  on Enter, the sort of the quick switcher's candidates and the natural name comparator's regex.
 - **Done when:** the editor alone stays under 400 MB with the Large Vault open on Linux, the measurements are in
   `docs/performance.md`, and a test keeps the bounded caches bounded. 5.4 measures the whole app again, AI included.
 

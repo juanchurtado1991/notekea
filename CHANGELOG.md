@@ -20,6 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Logo: the designed kea and N on a cobalt note with a tangerine folded corner, in the theme's colors, replaces the
+  placeholder in the window, About and the welcome screen.
+- Performance (ROADMAP 1.16, from an audit of needless allocations): the editor no longer rescans the note on a caret
+  move, skips the embed and link work of notes without embeds or links, and checks a line's characters before its
+  regexes; the sidebar keeps its rows when only the selection changes and applies watcher changes without copying
+  the whole tree; the tag finder, the metadata cache and rescans do less work; Compose inputs stay stable so their
+  composables skip; and a file's preview is released once no tab shows it.
 - Code (ROADMAP 1.16): use cases that only forwarded a call are gone, the editor's and the sidebar's ViewModels are
   split into parts they route intents to, and no file is longer than 350 lines (`notekea:max-file-length`).
 - Plan (`ROADMAP.md`, `GUIDELINES.md` §6 and §8, `ARCHITECTURE.md` §10, `qa/README.md`, `CLAUDE.md`): every milestone
