@@ -37,17 +37,65 @@ to its own repository and publishing it, as Ghost Serializer is, would then need
 
 ### What Test Buddy offers (`com.testbuddy`)
 
-- `AutomatedCase`: an ID (`1.5-04`) and a body that drives the app with Compose UI Test (find by text, click, type,
-  shortcuts) and checks what the case expects, down to the files on disk. Each case runs in its own temporary app
-  data folder, on fresh copies of the data it names.
-- `ManualCase`: an ID, the data it needs prepared, its steps and its expected result as string resources.
-- `SelfTestSuite`: what a host app gives Test Buddy: its name and version, its cases, how to prepare data (`prepare`)
-  and how to put the installed app back as it was (`backUp`, `restore`).
-- The runner: runs the automated cases one at a time with a timeout, records `Passed`, `Failed` (with the message) or
-  `Skipped`, and never stops at the first failure.
-- A JUnit bridge: the same suite runs as one test per case ID in `jvmTest`, so CI runs every automated case on
-  Windows, macOS and Linux on every pull request. **A case is written once and runs in both places.**
-- The window and the report format (below).
+Its promise: **a case is a few lines of plain verbs, written once, and the same suite becomes a CI test, a window for
+the developer and an installable app for testers.** A host app declares its suite with a small DSL (a sketch; piece
+3 settles the names):
+
+```kotlin
+val notekeaSuite = testBuddy(appName = "Notekea", version = AppVersion.current) {
+    launch { appData, data -> NotekeaApp(appDataDir = appData, vaults = data) }
+    bundledData("smoke-data/vaults")
+
+    automated("1.6-03", "Open a note from the quick switcher") {
+        openVault("Personal Notes")
+        press(Mod + P) // Ctrl on Windows and Linux, Cmd on macOS
+        type("lisbon")
+        press(Enter)
+        expectTab("Lisbon trip")
+        expectFile("Personal Notes/Travel/Lisbon trip.md", unchanged = true)
+    }
+
+    manual("1.17-02", reason = Eyes) {
+        prepare("Personal Notes")
+        title(Res.string.case_1_17_02_title)
+        steps(Res.string.case_1_17_02_steps) // English and Spanish
+        expected(Res.string.case_1_17_02_expected)
+    }
+
+    backUp { NotekeaPaths.appDataDir } // what Finish and clean up restores
+}
+
+fun main() = testBuddyApp(notekeaSuite) // the "Notekea Self-Test" app
+```
+
+- **Verbs, not finders:** `click("text")`, `type`, `press(Mod + P)`, `scroll`, `waitFor("text")`, `expectText`,
+  `expectTab`, `expectFile`, `screenshot()`. They wrap Compose UI Test, which stays reachable for what the verbs do
+  not cover, and map `Mod` to each system's key.
+- **Each automated case starts clean:** a temporary app data folder, fresh copies of its data, a timeout; on failure
+  it keeps a screenshot and a plain message ("expected the tab 'Lisbon trip', it did not appear").
+- **The host only says how to launch itself** on those folders (`launch`) and what to back up (`backUp`); Test Buddy
+  does the rest and never writes anywhere else.
+- **The runner** runs the automated cases one at a time, records `Passed`, `Failed` (with the message) or `Skipped`,
+  and never stops at the first failure.
+- **Three ways to run one suite:**
+
+| Where | How | What for |
+|---|---|---|
+| CI | `class NotekeaSuiteTest : TestBuddyJUnit(notekeaSuite)`: one JUnit test per case ID | Every pull request, on Windows, macOS and Linux |
+| The developer's machine | `./gradlew :selftest:run -Pcases=1.6` | A feature's smoke test: its automated cases run, its manual cases in the same window testers use |
+| Testers | `./gradlew :selftest:packageSelfTest` | The "Notekea Self-Test" installers, with Notekea's Java runtime and modules |
+
+- **Built in:** the window (Start, results, Manual tests, Copy report, Finish and clean up) and its texts, the report
+  (version, system, language, screen and scale added on their own, plus the diagnostics the host passes), the
+  consistency test and the generation of the case list (`MVP_SMOKE_TEST.md`).
+- **Packaging** is a short block in `selftest/build.gradle.kts` at first; if Test Buddy becomes a standalone SDK,
+  it becomes a Gradle plugin (`id("com.testbuddy")`) that copies the host's runtime modules and builds the
+  installers in one line.
+- **Built on the official Compose UI Test** (`LIBRARIES.md`), stable on desktop. Existing Compose Multiplatform
+  end-to-end libraries (Parikshan, cmp-bridge) are early alphas when this was written: Test Buddy borrows their verb
+  names where they fit but does not depend on them. None of them, nor case managers such as TestRail, combines
+  automatic and guided manual cases in one installable app for testers; that is Test Buddy's reason to exist.
+- **Later, not now:** a recorder that writes an `automated` case from the clicks of a person using the app.
 
 ### What Notekea's suite adds (`app.notekea.selftest`)
 
