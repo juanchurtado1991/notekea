@@ -43,8 +43,8 @@ a person can judge (looks, feel, the operating system's own dialogs).
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 17 / 18 |
-| M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 9 |
-| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 8 |
+| M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 4.5 weeks | 0 / 11 |
+| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words | 4.5 weeks | 0 / 9 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
 | Post-MVP | Extensions (Koog + MCP), mobile, more | — |
@@ -707,11 +707,47 @@ attachments never are, so the graph never turns into a hairball of everything in
 - **Done when:** opening the graph from a note shows a readable local graph without any setup, the global graph
   stays responsive on a 2,000-note vault, and every node can be reached and opened with the keyboard.
 
+### ⬜ 2.10 Vault queries — `feature/vault-queries`
+
+What Obsidian users get from the Dataview plugin and Bases, without a query language to learn: lists and tables of
+notes chosen by their properties, computed exactly from the index. The AI only writes the query, in 3.8; the result
+never comes from a model.
+
+- **Index:** every property of every note, with the types of 1.14 (text, number, checkbox, date, list), in the
+  metadata cache next to tags, aliases and title, kept up to date by the file watcher.
+- **Query:** filters (is, contains, more or less than, before or after a date, is empty, has a tag, in a folder),
+  sort and the columns to show. No scripting.
+- **UI — Query tab** (opened from the tool rail, as an editor tab):
+  - Built with controls: Add filter (property, condition, value), Sort, Columns. The results are a table whose rows
+    open their note and whose cells edit the property as the properties view does (1.14).
+  - Saved inside a note as a fenced ```` ```query ```` block holding the query as YAML: Preview shows the live table,
+    Edit shows the YAML, and Obsidian shows it as a code block, so nothing breaks there.
+  - States: no note matches ("No notes match these filters"), a property no note has, a block that is not a valid
+    query (explained above its YAML, like broken properties).
+- **Done when:** on the Sample Vault, books by rating, projects by status and meetings by date list the same notes as
+  a count by hand, the table follows a property edit within a second, and a note with a query block opens unchanged
+  in Obsidian.
+
+### ⬜ 2.11 Vault tasks — `feature/vault-tasks`
+
+Every task of the vault in one view, as Obsidian users get from the Tasks plugin, with no special syntax to learn.
+
+- **Index:** every `- [ ]` and `- [x]` of every note (the `TaskFinder` of 1.7) with its note, line, heading and its
+  date when it has one: a date written in the task (`2026-11-02`) or the Tasks plugin's `📅 2026-11-02`, so Obsidian
+  users keep theirs.
+- **UI — Tasks tab** (opened from the tool rail, as an editor tab): open tasks grouped by note, or by date (overdue,
+  today, this week, later, no date); filters by folder, tag and done; checking a task writes it to its note as 1.7
+  does; clicking one opens its note at its line.
+- **Done when:** on the Sample Vault the tab lists every task of every note, checking one in the tab or in its note
+  shows in the other at once, and a task changed outside Notekea updates within a second.
+
 ### ⬜ 2.8 Retrieval evaluation set — `chore/rag-eval`
 
 `smoke-data/eval/retrieval.json` (over the 1.16 sample vault): 50 questions over the sample vault with the expected
-note and heading. A test reports recall@5 and fails below the agreed baseline, so changes to chunking, models or
-ranking are measured.
+note and heading, plus 30 over the Ghost Serializer vault of 1.18, a code repository as notes: where something is
+("where are field names matched?"), what to read to understand a part, and how a change would be made, each with the
+notes that should be found. A test reports recall@5 and fails below the agreed baseline, so changes to chunking,
+models or ranking are measured.
 
 ### ⬜ 2.9 M2 performance pass — `chore/m2-performance`
 
@@ -840,6 +876,24 @@ wins; ties go to the shorter draft. It is chosen by verified support, not by maj
 - **Done when:** on the evaluation set it beats the normal mode's citation accuracy for every model size, and it is
   cancellable at any moment.
 
+### ⬜ 3.8 Questions in plain words — `feature/plain-queries`
+
+Notes and tasks asked for in plain words ("books I rated 4 or more in 2026", "what is due this week in Garden?") and
+answered exactly by the queries of 2.10 and 2.11: the model only turns the question into a query.
+
+- **Translate:** the local model writes the query as grammar-constrained JSON (3.0) from the question and the vault's
+  property names and types; the query is checked before it runs, and a property the vault does not have makes it ask
+  which one was meant.
+- **UI:**
+  - In the query tab, a "Describe what you want" field fills the controls, so the user sees the query, and can
+    correct it, before trusting the table.
+  - In the chat (3.3), a question about properties or tasks is answered with the table or the task list, each row
+    citing its note (and its line for a task), instead of a written paragraph.
+- **Evaluation:** 30 questions over the Sample Vault with the notes or tasks they should return, in the set of 3.4,
+  reported per model size.
+- **Done when:** the Small model returns the expected notes for most of them (the threshold set in 3.4), and a wrong
+  translation always shows as a query the user can see and correct, never as a silently wrong answer.
+
 ### ⬜ 3.7 M3 performance pass — `chore/m3-performance`
 
 The performance pass of M3 (see "Closing a milestone"), on the automated smoke runs of M1 to M3: memory while a model
@@ -939,12 +993,16 @@ r/LocalLLaMA, Kotlin Slack). Measure: stars in the first month, issues from real
 
 ## Post-MVP (ordered by expected value)
 
-1. **Extensions via MCP** — Koog agent runtime with `ai.koog:agents-mcp` once stable; extensions are MCP servers
+1. **Study cards** — flashcards made by the local model from a note: each question cites the sentence it comes from
+   and passes the verification of 3.5; reviewed with spaced repetition in a review tab, and stored in the note in the
+   format of Obsidian's Spaced Repetition plugin, so they work in both. Chosen with the developer as the first item
+   after the MVP (2026-10-28), when the answer pipeline is measured.
+2. **Extensions via MCP** — Koog agent runtime with `ai.koog:agents-mcp` once stable; extensions are MCP servers
    the user enables explicitly. Agent features only when local models handle tool calling reliably.
-2. **Mobile (Android first, then iOS)** — `LlmEngine` via Llamatik, `VectorIndex` via SQLite + sqlite-vec,
+3. **Mobile (Android first, then iOS)** — `LlmEngine` via Llamatik, `VectorIndex` via SQLite + sqlite-vec,
    `GitSync` via libgit2 on iOS (see "Mobile risks" in `LIBRARIES.md`).
-3. **More sources** — PDFs and web clippings inside the vault, indexed like notes.
-4. **Repositories** — a code repository becomes part of the vault, so the graph and the chat cover it. Separate from
+4. **More sources** — PDFs and web clippings inside the vault, indexed like notes.
+5. **Repositories** — a code repository becomes part of the vault, so the graph and the chat cover it. Separate from
    Git sync (4.1), which only versions the vault itself; it reuses its JGit clone and pull. In three steps, each
    worth shipping on its own:
    1. **Repository docs:** clone a repository into a read-only vault folder with only its Markdown (README,
@@ -958,10 +1016,18 @@ r/LocalLLaMA, Kotlin Slack). Measure: stars in the first month, issues from real
       generated note, so verified answers (3.5) check against the code itself. Only if an evaluation set like 2.8
       shows small local models (and a code embedding model) are good enough: a medium repository can take hours
       on a laptop.
-5. **More than two split panes** and detachable windows.
-6. **Custom title bar** with the tabs inside it (JetBrains Jewel `DecoratedWindow`).
-7. **Screenshot tests** for UI regressions (Roborazzi).
-8. **Use an installed Ollama** — when the user already runs Ollama, Notekea can use its model instead of loading its
+   Decided with the developer (2026-10-28): the explanations are presented as work Notekea does in the background
+   for a couple of hours, fully local, on the code that never leaves the machine. Before it starts, an estimate
+   measured on the machine (the files to read times the model's speed) for each level: **Fast** (a summary per file),
+   **Normal** (one note per file: what it is about, how it works and its code, as `smoke-data/vaults/Ghost Serializer`
+   shows) and **Deep** (the verified drafts of 3.6, about three times longer, an overnight job). The parser's tree and
+   graph come first, in seconds, and the notes fill in while the user works; progress, pause and resume across
+   restarts, an option to run only while charging, no sleep while it runs and a notification when it is done; after
+   a pull only the changed files are written again. The chat cites the code, the notes guide it.
+6. **More than two split panes** and detachable windows.
+7. **Custom title bar** with the tabs inside it (JetBrains Jewel `DecoratedWindow`).
+8. **Screenshot tests** for UI regressions (Roborazzi).
+9. **Use an installed Ollama** — when the user already runs Ollama, Notekea can use its model instead of loading its
    own, so the memory is not spent twice. For technical users; the bundled model stays the default.
 
 ## Out of scope for the MVP
