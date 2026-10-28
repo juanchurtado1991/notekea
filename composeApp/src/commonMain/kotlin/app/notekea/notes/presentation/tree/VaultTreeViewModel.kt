@@ -4,15 +4,10 @@ import app.notekea.notes.domain.BookmarkStore
 import app.notekea.notes.domain.TreePreferencesStore
 import app.notekea.notes.domain.FileRevealer
 import app.notekea.notes.domain.Trash
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.sync.Mutex
-import app.notekea.notes.domain.Bookmarks
 import app.notekea.core.domain.Outcome
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.CreateFolderUseCase
-import app.notekea.notes.domain.DailyNoteSettings
-import app.notekea.notes.domain.DailyNotes
 import app.notekea.notes.domain.FileOpener
 import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.FollowLinkUseCase
@@ -23,6 +18,7 @@ import app.notekea.notes.domain.TreePreferences
 import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.StateFlow
 import kotlin.time.TimeSource
 
 /**
@@ -42,38 +38,57 @@ class VaultTreeViewModel(
     private val flattenTree: FlattenTreeUseCase,
     private val newNotes: NewNoteTools,
     private val createFolder: CreateFolderUseCase,
-    private val renameEntry: RenameEntryUseCase,
+    renameEntry: RenameEntryUseCase,
     private val trash: Trash,
     private val fileRevealer: FileRevealer,
-    private val updateLinksAfterRename: UpdateLinksAfterRenameUseCase,
+    updateLinksAfterRename: UpdateLinksAfterRenameUseCase,
     private val followLink: FollowLinkUseCase,
     private val treePreferencesStore: TreePreferencesStore,
     private val fileOpener: FileOpener,
-    private val days: DailyNoteTools,
-    private val bookmarkStore: BookmarkStore
+    days: DailyNoteTools,
+    bookmarkStore: BookmarkStore
 ) : BaseViewModel<VaultTreeState, VaultTreeIntent, VaultTreeEffect>(
     initialState = VaultTreeState(vaultPath = vaultPath, platformConventions = platformConventions)
 ) {
     private val logger = Logger.withTag(tag = LOG_TAG)
-    private var renameJob: Job? = null
-    private val bookmarkSaving = Mutex()
+    private val host = object : TreeHost {
+        override val state: StateFlow<VaultTreeState> get() = this@VaultTreeViewModel.state
 
-    // A note made from a template, and the template it is filled from once its name is set.
-    private var pendingTemplate: Pair<RelativePath, RelativePath>? = null
-    private val dailyNotes = DailyNotes()
-    private var dailySettings = DailyNoteSettings.DEFAULT
+        override fun reduce(
+            transform: (VaultTreeState) -> VaultTreeState
+        ) = this@VaultTreeViewModel.reduce(transform = transform)
 
-    // What the day neighbors were last found for (the notes by identity), so moving through the tree does not read
-    // every note name again.
-    private var dayInputs: Triple<RelativePath?, Any?, DailyNoteSettings>? = null
+        override fun updateTree(
+            transform: (VaultTreeState) -> VaultTreeState
+        ) = this@VaultTreeViewModel.updateTree(transform = transform)
+
+        override fun emit(
+            effect: VaultTreeEffect
+        ) = this@VaultTreeViewModel.emit(effect = effect)
+
+        override fun launch(
+            block: suspend () -> Unit
+        ): Job = launchGuarded(onError = ::showUnexpectedError, block = block)
+
+        override fun open(
+            path: RelativePath?
+        ) = this@VaultTreeViewModel.open(path = path)
+
+        override fun reveal(
+            path: RelativePath
+        ) = this@VaultTreeViewModel.reveal(path = path)
+    }
+    private val bookmarks = TreeBookmarks(host = host, vaultPath = vaultPath, bookmarkStore = bookmarkStore)
+    private val dailyNotes = TreeDays(host = host, vaultPath = vaultPath, days = days)
+    private val templates = TreeTemplates(host = host, vaultPath = vaultPath, newNotes = newNotes)
+    private val renaming = TreeRenaming(host, vaultPath, renameEntry, updateLinksAfterRename, bookmarks, templates)
 
     init {
         launchGuarded(onError = ::showUnexpectedError) {
             val preferences = treePreferencesStore.read(vaultPath = vaultPath)
             updateTree { restorePreferences(state = it, preferences = preferences) }
-            dailySettings = days.getDailyNoteSettings(vaultPath = vaultPath)
-            val bookmarks = bookmarkStore.read(vaultPath = vaultPath)
-            reduce { it.copy(bookmarks = bookmarks) }
+            dailyNotes.loadSettings()
+            bookmarks.load()
             observe()
         }
     }
@@ -86,7 +101,7 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnCollapseSelected -> updateTree(transform = ::reduceCollapseSelected)
             VaultTreeIntent.OnDeleteCancel -> reduce { it.copy(pendingDelete = null) }
             VaultTreeIntent.OnDeleteConfirm -> delete()
-            is VaultTreeIntent.OnEntryRenamed -> entryRenamed(intent = intent)
+            is VaultTreeIntent.OnEntryRenamed -> renaming.onRenamedElsewhere(intent = intent)
             is VaultTreeIntent.OnDeleteRequest -> reduce { it.copy(pendingDelete = intent.path ?: it.selectedPath) }
             VaultTreeIntent.OnErrorDismiss -> reduce { it.copy(actionError = null, hasUnexpectedError = false) }
             VaultTreeIntent.OnExpandSelected -> updateTree(transform = ::reduceExpandSelected)
@@ -95,13 +110,13 @@ class VaultTreeViewModel(
             is VaultTreeIntent.OnFollowLink -> follow(intent = intent)
             is VaultTreeIntent.OnNewFolderClick -> create(baseName = intent.baseName, isFolder = true)
             is VaultTreeIntent.OnNewNoteClick -> create(baseName = intent.baseName, isFolder = false)
-            VaultTreeIntent.OnNewNoteFromTemplateClick -> chooseTemplate()
-            is VaultTreeIntent.OnNoteFromTemplate -> createFromTemplate(intent = intent)
+            VaultTreeIntent.OnNewNoteFromTemplateClick -> templates.choose()
+            is VaultTreeIntent.OnNoteFromTemplate -> templates.create(intent = intent)
             VaultTreeIntent.OnNoticeDismiss -> reduce { it.copy(notice = null) }
-            VaultTreeIntent.OnRenameCancel -> cancelRename()
-            VaultTreeIntent.OnRenameConfirm -> rename()
-            is VaultTreeIntent.OnRenameRequest -> startRename(path = intent.path)
-            is VaultTreeIntent.OnRenameTextChange -> changeRenameText(text = intent.text)
+            VaultTreeIntent.OnRenameCancel -> renaming.cancel()
+            VaultTreeIntent.OnRenameConfirm -> renaming.confirm()
+            is VaultTreeIntent.OnRenameRequest -> renaming.start(path = intent.path)
+            is VaultTreeIntent.OnRenameTextChange -> renaming.changeText(text = intent.text)
             VaultTreeIntent.OnRetryClick -> retry()
             is VaultTreeIntent.OnRevealRequest -> reveal(path = intent.path)
             is VaultTreeIntent.OnRevealNote, is VaultTreeIntent.OnRevealInTree -> revealFromOutside(intent = intent)
@@ -115,26 +130,10 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnSidebarToggle -> updateTree { it.copy(isSidebarCollapsed = !it.isSidebarCollapsed) }
             is VaultTreeIntent.OnSortChange -> updateTree { it.copy(sort = intent.sort) }
             is VaultTreeIntent.OnFileOpen -> openFile(path = intent.path)
-            is BookmarkIntent -> onBookmarkIntent(intent = intent)
-            VaultTreeIntent.OnTodayClick, is VaultTreeIntent.OnDayStep -> onDayIntent(intent = intent)
+            is BookmarkIntent -> bookmarks.onIntent(intent = intent)
+            VaultTreeIntent.OnTodayClick, is VaultTreeIntent.OnDayStep -> dailyNotes.onIntent(intent = intent)
         }
-        updateDay()
-    }
-
-    private fun onDayIntent(
-        intent: VaultTreeIntent
-    ) {
-        if (intent is VaultTreeIntent.OnDayStep) stepDay(step = intent.step) else openToday()
-    }
-
-    /** Today's daily note, with the settings read again: Obsidian may have changed them since the vault opened. */
-    private fun openToday() {
-        launchGuarded(onError = ::showUnexpectedError) {
-            dailySettings = days.getDailyNoteSettings(vaultPath = vaultPath)
-            val outcome = days.openDailyNote(vaultPath = vaultPath)
-            updateTree { reduceFollowedLink(state = it, outcome = outcome) }
-            open(path = (outcome as? Outcome.Success)?.value?.path)
-        }
+        dailyNotes.update()
     }
 
     private fun openSelected() {
@@ -183,28 +182,6 @@ class VaultTreeViewModel(
         }
     }
 
-    private fun stepDay(
-        step: Int
-    ) {
-        val neighbors = state.value.dayNeighbors ?: return
-        val target = (if (step < 0) neighbors.previous else neighbors.next) ?: return
-        reveal(path = target)
-    }
-
-    /** Finds the selected note's day neighbors when the selection, the notes or the settings changed. */
-    private fun updateDay() {
-        val current = state.value
-        val last = dayInputs
-        val isSame = last != null && last.first == current.selectedPath && last.second === current.tree.notes &&
-            last.third == dailySettings
-        if (isSame) return
-        dayInputs = Triple(current.selectedPath, current.tree.notes, dailySettings)
-        val neighbors = current.selectedPath?.let {
-            dailyNotes.neighborsOf(path = it, notes = current.tree.notes.keys, settings = dailySettings)
-        }
-        if (neighbors != current.dayNeighbors) reduce { it.copy(dayNeighbors = neighbors) }
-    }
-
     private fun openFile(
         path: RelativePath?
     ) {
@@ -213,12 +190,6 @@ class VaultTreeViewModel(
             val outcome = fileOpener.open(vaultPath = vaultPath, path = target)
             if (outcome is Outcome.Failure) reduce { it.copy(actionError = outcome.error) }
         }
-    }
-
-    private fun changeRenameText(
-        text: String
-    ) {
-        reduce { it.copy(renaming = it.renaming?.copy(text = text, error = null)) }
     }
 
     /**
@@ -248,7 +219,7 @@ class VaultTreeViewModel(
             val outcome = trash.moveToTrash(vaultPath = vaultPath, path = path)
             updateTree { reduceDeleted(state = it, path = path, outcome = outcome) }
             if (outcome is Outcome.Success) {
-                changeBookmarks { it.deleted(path = path) }
+                bookmarks.change { it.deleted(path = path) }
                 emit(effect = VaultTreeEffect.EntryDeleted(path = path))
             }
         }
@@ -274,67 +245,6 @@ class VaultTreeViewModel(
         }
     }
 
-    private fun rename() {
-        val draft = state.value.renaming ?: return
-        if (renameJob?.isActive == true) return
-        renameJob = launchGuarded(onError = ::showUnexpectedError) {
-            val notesBefore = state.value.tree.notes.keys
-            val outcome = renameEntry(vaultPath = vaultPath, path = draft.path, newName = draft.text)
-            val isMoved = outcome is Outcome.Success && outcome.value != draft.path
-            if (isMoved) emit(effect = VaultTreeEffect.EntryRenamed(from = draft.path, to = outcome.value))
-            updateTree { reduceRenameOutcome(state = it, from = draft.path, outcome = outcome) }
-            if (isMoved) {
-                changeBookmarks { it.renamed(from = draft.path, to = outcome.value) }
-                updateLinks(notesBefore = notesBefore, from = draft.path, to = outcome.value)
-            }
-            if (outcome is Outcome.Success) applyPendingTemplate(note = draft.path, named = outcome.value)
-        }
-    }
-
-    private fun cancelRename() {
-        val draft = state.value.renaming
-        reduce { it.copy(renaming = null) }
-        if (draft != null) {
-            launchGuarded(onError = ::showUnexpectedError) {
-                applyPendingTemplate(note = draft.path, named = draft.path)
-            }
-        }
-    }
-
-    /** The template picker opens for a new note in the selected folder. */
-    private fun chooseTemplate() {
-        emit(effect = VaultTreeEffect.ChooseTemplate(folder = targetFolder(state = state.value)))
-    }
-
-    /**
-     * Makes a note in the intent's folder with its name ready to type, opens it, and keeps its template for when the
-     * name is set ([applyPendingTemplate]); a hidden sidebar opens first, so the name can be typed.
-     */
-    private fun createFromTemplate(
-        intent: VaultTreeIntent.OnNoteFromTemplate
-    ) {
-        if (state.value.isSidebarCollapsed) updateTree { it.copy(isSidebarCollapsed = false) }
-        launchGuarded(onError = ::showUnexpectedError) {
-            val outcome = newNotes.createNote(vaultPath = vaultPath, folder = intent.folder, baseName = intent.baseName)
-            updateTree { reduceCreated(state = it, outcome = outcome, isFolder = false) }
-            val path = (outcome as? Outcome.Success)?.value ?: return@launchGuarded
-            pendingTemplate = path to intent.template
-            open(path = path)
-        }
-    }
-
-    /** Fills the note made from a template, now [named], when [note] is that note; a failure shows in the banner. */
-    private suspend fun applyPendingTemplate(
-        note: RelativePath,
-        named: RelativePath
-    ) {
-        val (pending, template) = pendingTemplate ?: return
-        if (pending != note) return
-        pendingTemplate = null
-        val outcome = newNotes.applyTemplate(vaultPath = vaultPath, note = named, template = template)
-        if (outcome is Outcome.Failure) reduce { it.copy(actionError = outcome.error) }
-    }
-
     /** Selects the note a clicked link leads to; a created note joins the tree at once, before the watcher sees it. */
     private fun follow(
         intent: VaultTreeIntent.OnFollowLink
@@ -349,53 +259,6 @@ class VaultTreeViewModel(
             )
             updateTree { reduceFollowedLink(state = it, outcome = outcome) }
             open(path = (outcome as? Outcome.Success)?.value?.path, inBackground = intent.inBackground)
-        }
-    }
-
-    /** The editor's title renamed a note: the tree selects it at its new path and reports the links it updated. */
-    private fun entryRenamed(
-        intent: VaultTreeIntent.OnEntryRenamed
-    ) {
-        updateTree { reduceRenameOutcome(state = it, from = intent.from, outcome = Outcome.Success(value = intent.to)) }
-        changeBookmarks { it.renamed(from = intent.from, to = intent.to) }
-        intent.links?.let { result -> reduce { reduceLinksUpdated(state = it, result = result) } }
-    }
-
-    /** Rewrites the links to [from] in the notes that had them, now that it is [to]; nothing when none link to it. */
-    private suspend fun updateLinks(
-        notesBefore: Set<RelativePath>,
-        from: RelativePath,
-        to: RelativePath
-    ) {
-        val result = updateLinksAfterRename(vaultPath = vaultPath, notesBefore = notesBefore, from = from, to = to)
-            ?: return
-        logger.i { LINKS_UPDATED_MESSAGE + result.updatedCount + NOTES_SKIPPED + result.skipped.size }
-        reduce { reduceLinksUpdated(state = it, result = result) }
-    }
-
-    private fun onBookmarkIntent(
-        intent: BookmarkIntent
-    ) {
-        when (intent) {
-            is BookmarkIntent.OnToggle -> changeBookmarks { it.toggled(path = intent.path) }
-            is BookmarkIntent.OnMove -> changeBookmarks { it.moved(from = intent.from, to = intent.to) }
-            is BookmarkIntent.OnRemove -> changeBookmarks { it.without(path = intent.path) }
-            is BookmarkIntent.OnClick -> reveal(path = intent.path)
-            BookmarkIntent.OnSectionToggle -> reduce { it.copy(isBookmarksExpanded = !it.isBookmarksExpanded) }
-        }
-    }
-
-    /** Changes the bookmarks and saves them, one save at a time, each writing the latest ones. */
-    private fun changeBookmarks(
-        transform: (Bookmarks) -> Bookmarks
-    ) {
-        val before = state.value.bookmarks
-        reduce { it.copy(bookmarks = transform(it.bookmarks)) }
-        if (state.value.bookmarks == before) return
-        launchGuarded(onError = ::showUnexpectedError) {
-            bookmarkSaving.withLock {
-                bookmarkStore.write(vaultPath = vaultPath, bookmarks = state.value.bookmarks)
-            }
         }
     }
 
@@ -428,13 +291,6 @@ class VaultTreeViewModel(
         reduce { it.copy(isLoading = false, hasUnexpectedError = true) }
     }
 
-    private fun startRename(
-        path: RelativePath?
-    ) {
-        val target = path ?: state.value.selectedPath ?: return
-        reduce { reduceRenameStart(state = it, path = target) }
-    }
-
     /** Applies [transform], flattens the rows again and saves the expanded folders and sort if they changed. */
     private fun updateTree(
         transform: (VaultTreeState) -> VaultTreeState
@@ -445,7 +301,7 @@ class VaultTreeViewModel(
             next.copy(rows = flattenTree(tree = next.tree, expandedFolders = next.expandedFolders, sort = next.sort))
         }
         val after = state.value
-        updateDay()
+        dailyNotes.update()
         val preferences = preferencesOf(state = after)
         if (preferences != preferencesOf(state = before) && !after.isLoading) {
             launchGuarded(
@@ -455,9 +311,7 @@ class VaultTreeViewModel(
     }
 
     companion object {
-        private const val LINKS_UPDATED_MESSAGE = "Links updated after a rename: "
         private const val NOTES_IN = " notes in "
-        private const val NOTES_SKIPPED = " notes, skipped: "
         private const val TREE_LOADED_MESSAGE = "Vault tree loaded: "
         private const val LOG_TAG = "VaultTreeViewModel"
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the vault tree"
