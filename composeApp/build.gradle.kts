@@ -98,6 +98,7 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(libs.konsist)
+            implementation(libs.compose.ui.test)
         }
     }
 }
@@ -151,6 +152,22 @@ tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.KtLintFormatTask>().configure
 // Every developer who compiles the app gets the pre-commit hook installed, so formatting is never skipped.
 tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
     dependsOn(":installGitHooks")
+}
+
+// The automated smoke runs alone (ROADMAP.md 1.16), recording the process's memory for a performance pass:
+// `./gradlew :composeApp:smokeRun -PidleSeconds=600` writes build/reports/smoke-runs/memory.csv. They also run, without
+// recording, in every `jvmTest`.
+val smokeRunPackage = "app.notekea.smokerun.*"
+tasks.register<Test>("smokeRun") {
+    description = "Runs the automated smoke runs and records the memory of each"
+    group = "verification"
+    val jvmTest = tasks.named<Test>("jvmTest").get()
+    testClassesDirs = jvmTest.testClassesDirs
+    classpath = jvmTest.classpath
+    filter { includeTestsMatching(smokeRunPackage) }
+    systemProperty("notekea.smokeRun.reportDir", layout.buildDirectory.dir("reports/smoke-runs").get().asFile.path)
+    systemProperty("notekea.smokeRun.idleSeconds", providers.gradleProperty("idleSeconds").getOrElse("0"))
+    outputs.upToDateWhen { false }
 }
 
 // `./gradlew :composeApp:run -Pgallery` opens the design system gallery instead of the app (development only).

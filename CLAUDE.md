@@ -73,7 +73,8 @@ data folder. Within the feature's steps:
 ## Testing levels (`GUIDELINES.md` §8)
 
 1. **Feature smoke test** — the section above: the developer runs it with your script before a feature reaches
-   `main`. Every automatable case you add also becomes a scenario of the automated smoke runs (`ROADMAP.md` 1.16).
+   `main`. Every automatable case you add also becomes a scenario of the automated smoke runs (`ROADMAP.md` 1.16,
+   `app.notekea.smokerun`, `./gradlew :composeApp:smokeRun`), listed as "smoke run" in its **Automated** column.
 2. **Milestone performance pass** — the last item of every milestone (1.18, 2.9, 3.7, 4.3, 5.4): run the automated
    smoke runs while sampling memory, profile where it goes and idle RAM, record it in `docs/performance.md`, cut
    what grew. Its smoke test also proves nothing broke.

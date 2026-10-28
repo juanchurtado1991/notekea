@@ -31,7 +31,7 @@ before the M1 run; the agent checks this list and builds what is missing.
 
 | Piece | What it is | Status |
 |---|---|---|
-| Automated smoke runs | The runner of `ROADMAP.md` 1.16: the real app driven through the automatable cases of `MVP_SMOKE_TEST.md` on copies of the smoke data, in one Gradle task, in CI on the three OSes; also the workload of every performance pass | ⬜ (1.16) |
+| Automated smoke runs | The runner of `ROADMAP.md` 1.16: the real app driven through the automatable cases of `MVP_SMOKE_TEST.md` on copies of the smoke data, in one Gradle task, in CI on the three OSes; also the workload of every performance pass | ✅ (1.16, `app.notekea.smokerun`, `./gradlew :composeApp:smokeRun`) |
 | UI test infrastructure | `org.jetbrains.compose.ui:ui-test` in `LIBRARIES.md`, UI tests in CI on the three OSes, tests for every existing screen (one `test/` pull request per screen) | ⬜ |
 | Backfill of the 1.x cases | The cases of 1.1 to 1.5 in `MVP_SMOKE_TEST.md` that can run headless, automated with `ui-test` (or as integration tests) and named after their IDs, in the per-screen `test/` pull requests above; their **Automated** column is filled in, and the rest marked "manual". From 1.6 on each feature automates its own cases (`GUIDELINES.md` §8) | ⬜ |
 | Notekea Self-Test | A packaged app that runs the UI tests on the tester's machine against its real file system and shows ✅ or ❌, with a **Copy report** button | ⬜ |
