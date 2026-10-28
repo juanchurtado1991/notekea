@@ -22,7 +22,8 @@ guide of their system: [Windows](GUIDE_WINDOWS.md), [macOS](GUIDE_MACOS.md), [Li
 | Linux | The developer, with the agent | No: installs the `.deb` from the release |
 
 Testers never build anything or open a terminal except to prepare the test data, and their guide gives the exact
-command to copy.
+command to copy. They never measure memory or time with tools either: the milestone's performance pass does, on the
+automated smoke runs (`docs/performance.md`).
 
 ## Before the first run (status)
 
