@@ -34,6 +34,7 @@ fun AttachmentOverlay(
     gap: Float,
     onIntent: (EditorIntent) -> Unit
 ) {
+    if (attachments.none { it.embed.isOwnLine }) return
     val result = layout() ?: return
     val length = result.layoutInput.text.length
     AttachmentSpace.of(text = buffer.text.toString(), views = attachments, heights = heights)

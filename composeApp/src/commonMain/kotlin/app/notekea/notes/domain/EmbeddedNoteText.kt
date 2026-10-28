@@ -35,8 +35,9 @@ class EmbeddedNoteText {
         body: String,
         id: String
     ): String? {
+        val marker = blockMarker(id = id)
         val lines = body.split(StringPatterns.NEW_LINE_CHAR).map { it.trimEnd() }
-        val marked = lines.indexOfFirst { blockMarker(id = id).containsMatchIn(input = it) }
+        val marked = lines.indexOfFirst { marker.containsMatchIn(input = it) }
         if (id.isEmpty() || marked < 0) return null
         val isOwnLine = lines[marked].trim() == MarkdownSyntax.BLOCK_ANCHOR_CHAR + id
         val end = if (isOwnLine) marked - 1 else marked
@@ -48,7 +49,7 @@ class EmbeddedNoteText {
         if (end < start) return null
         return lines.subList(fromIndex = start, toIndex = end + 1)
             .joinToString(separator = StringPatterns.NEW_LINE)
-            .replace(regex = blockMarker(id = id), replacement = StringPatterns.EMPTY)
+            .replace(regex = marker, replacement = StringPatterns.EMPTY)
             .trim()
     }
 

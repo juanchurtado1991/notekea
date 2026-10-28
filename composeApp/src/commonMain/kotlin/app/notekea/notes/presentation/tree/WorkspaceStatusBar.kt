@@ -165,12 +165,17 @@ internal fun cursorOf(
     text: CharSequence,
     offset: Int
 ): Pair<Int, Int> {
-    val before = text.subSequence(
-        startIndex = 0,
-        endIndex = offset.coerceIn(minimumValue = 0, maximumValue = text.length)
-    )
-    val lineStart = before.lastIndexOf(char = StringPatterns.NEW_LINE_CHAR) + 1
-    return before.count { it == StringPatterns.NEW_LINE_CHAR } + 1 to before.length - lineStart + 1
+    // Counted in place: it runs on every keystroke and caret move, so the text before the cursor is never copied.
+    val end = offset.coerceIn(minimumValue = 0, maximumValue = text.length)
+    var lines = 1
+    var lineStart = 0
+    for (index in 0 until end) {
+        if (text[index] == StringPatterns.NEW_LINE_CHAR) {
+            lines++
+            lineStart = index + 1
+        }
+    }
+    return lines to end - lineStart + 1
 }
 
 @Preview
