@@ -1,3 +1,4 @@
+import java.io.ByteArrayOutputStream
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -26,6 +27,16 @@ private val galleryGradleProperty = "gallery"
 private val gallerySystemProperty = "notekea.gallery"
 private val mainClassName = "app.notekea.MainKt"
 private val nativeAccessJvmArgument = "--enable-native-access=ALL-UNNAMED"
+
+// The JDK modules the packaged runtime keeps; jlink leaves out every other one. `checkRuntimeModules` fails when the
+// code needs one that is not here (issue #68: SQLite's driver needs java.sql).
+private val runtimeModules = listOf(
+    "java.instrument",
+    "java.prefs",
+    "java.sql",
+    "jdk.security.auth",
+    "jdk.unsupported"
+)
 
 kotlin {
     jvmToolchain(jdkVersion)
@@ -192,6 +203,10 @@ compose.resources {
 compose.desktop {
     application {
         mainClass = mainClassName
+        // Package the toolchain's JDK, not the one that runs Gradle, so the installers ship the JDK the app is built
+        // and tested on.
+        javaHome = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(jdkVersion) }
+            .get().metadata.installationPath.asFile.absolutePath
         // Skiko and java-llama.cpp load native libraries; without this the JVM warns on every launch.
         jvmArgs += nativeAccessJvmArgument
         jvmArgs += "-D$appVersionSystemProperty=$appDisplayVersion"
@@ -204,6 +219,71 @@ compose.desktop {
             )
             packageName = appPackageName
             packageVersion = appPackageVersion
+            modules(*runtimeModules.toTypedArray())
         }
     }
 }
+
+// Asks jdeps which JDK modules the app and its libraries need, as `suggestRuntimeModules` does, and fails when one is
+// missing from runtimeModules: without it the installed app crashes the first time it reaches that code.
+abstract class CheckRuntimeModulesTask : DefaultTask() {
+    @get:InputFiles
+    abstract val classpath: ConfigurableFileCollection
+
+    @get:InputFile
+    abstract val mainJar: RegularFileProperty
+
+    @get:Input
+    abstract val javaHome: Property<String>
+
+    @get:Input
+    abstract val jvmTarget: Property<String>
+
+    @get:Input
+    abstract val packagedModules: ListProperty<String>
+
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    @TaskAction
+    fun check() {
+        val output = ByteArrayOutputStream()
+        execOperations.exec {
+            executable = File(javaHome.get(), "bin/jdeps").path
+            args(
+                "--print-module-deps",
+                "--ignore-missing-deps",
+                "--multi-release",
+                jvmTarget.get(),
+                "--class-path",
+                classpath.files.joinToString(File.pathSeparator),
+                mainJar.get().asFile.path
+            )
+            standardOutput = output
+        }
+        val needed = output.toString().trim().split(",").map(String::trim).filter(String::isNotEmpty)
+        val missing = needed - packagedModules.get().toSet()
+        if (missing.isNotEmpty()) {
+            throw GradleException(
+                "The packaged runtime lacks JDK modules the app needs: ${missing.joinToString()}. " +
+                    "Add them to runtimeModules in composeApp/build.gradle.kts."
+            )
+        }
+    }
+}
+
+val checkRuntimeModules = tasks.register<CheckRuntimeModulesTask>("checkRuntimeModules") {
+    description = "Fails when the packaged runtime lacks a JDK module the app needs"
+    group = "verification"
+    val suggest = tasks.named<org.jetbrains.compose.desktop.application.tasks.AbstractSuggestModulesTask>(
+        "suggestRuntimeModules"
+    )
+    classpath.from(suggest.map { it.files })
+    mainJar.set(suggest.flatMap { it.launcherMainJar })
+    javaHome.set(suggest.flatMap { it.javaHome })
+    jvmTarget.set(suggest.flatMap { it.jvmTarget })
+    // The packaged runtime's modules: runtimeModules plus the ones Compose always adds.
+    packagedModules.set(suggest.flatMap { it.modules })
+}
+
+tasks.named("check") { dependsOn(checkRuntimeModules) }

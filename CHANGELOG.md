@@ -119,6 +119,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The installed app no longer crashes when it opens a vault (issue #68): its Java runtime now includes the JDK modules
+  the app needs (`java.sql` for the database among them) and is built from JDK 21, the one the app is tested on, and
+  `./gradlew check` fails when the code needs a JDK module the installers leave out.
 - Saving the app settings from two places at once (opening a folder saves the tree's open folders and the tabs) no
   longer fails with "Something went wrong": saves now run one at a time.
 - The app follows the system's dark mode on Linux (read from the desktop portal: GNOME, KDE, COSMIC); it always
