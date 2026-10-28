@@ -32,8 +32,8 @@ this list and builds what is missing). The design is in [SELF_TEST.md](SELF_TEST
 
 | # | Piece | What it is | Status |
 |---|---|---|---|
-| 1 | Rules and design | `SELF_TEST.md`, this table, `GUIDELINES.md` §8, `CLAUDE.md`, `MVP_SMOKE_TEST.md`'s **Checked by** column | ⬜ |
-| 2 | Triage | **Checked by** filled in for every General and M1 case, splitting mixed ones; the share that is `Self-Test` | ⬜ |
+| 1 | Rules and design | `SELF_TEST.md`, this table, `GUIDELINES.md` §8, `CLAUDE.md`, `MVP_SMOKE_TEST.md`'s **Checked by** column | ✅ [#72](https://github.com/juanchurtado1991/notekea/pull/72) |
+| 2 | Triage | **Checked by** filled in for every General and M1 case, splitting mixed ones; the share that is `Self-Test` | ✅ [#74](https://github.com/juanchurtado1991/notekea/pull/74): 122 of 167 cases `Self-Test` |
 | 3 | Test Buddy | `:test-buddy`, the Self-Test SDK: case types, runner, JUnit bridge, window, report, its texts in English and Spanish. First a spike: Compose UI Test driving the app inside a packaged app, on the three systems | ⬜ |
 | 4 | Notekea's suite | `:selftest`: the smoke runs of `app.notekea.smokerun` moved in as the first cases, the bundled smoke data, data preparation in Kotlin (called by `smoke.sh` / `smoke.ps1`), back up and restore, the consistency test, `packageSelfTest` | ⬜ |
 | 5 | M1 cases | Every General and M1 case as an `AutomatedCase` or a `ManualCase` (English and Spanish), in four pull requests: 1.1–1.5, 1.6–1.9, 1.10–1.13, 1.14–1.18 and General. The last one makes `MVP_SMOKE_TEST.md` generated from the cases (`SELF_TEST.md`) | ⬜ |
