@@ -30,6 +30,12 @@ The rest of the pattern: port in domain, adapter in data, logic in a use case te
 
 Everything written into this repository (code, comments, docs) is in English.
 
+## Code size rules (`GUIDELINES.md` §6, `ARCHITECTURE.md` §10)
+
+- No file over 350 lines (aim for 300), tests included; split by sub-feature, never into one long helper.
+- No function body over 40 lines.
+- A use case only when it decides something; a ViewModel that needs one port's operation as it is calls the port.
+
 ## Skills
 
 Third-party skills live in `.claude/skills` (see `.claude/skills/THIRD_PARTY_NOTICES.md`).
@@ -67,14 +73,17 @@ data folder. Within the feature's steps:
 ## Testing levels (`GUIDELINES.md` §8)
 
 1. **Feature smoke test** — the section above: the developer runs it with your script before a feature reaches
-   `main`.
-2. **Milestone QA run** — `qa/README.md`. When the last feature of a milestone (M1–M4) is merged into `main`, do not
+   `main`. Every automatable case you add also becomes a scenario of the automated smoke runs (`ROADMAP.md` 1.16).
+2. **Milestone performance pass** — the last item of every milestone (1.18, 2.9, 3.7, 4.3, 5.4): run the automated
+   smoke runs while sampling memory, profile where it goes and idle RAM, record it in `docs/performance.md`, cut
+   what grew. Its smoke test also proves nothing broke.
+3. **Milestone QA run** — `qa/README.md`. When the last feature of a milestone (M1–M4) is merged into `main`, do not
    start the next milestone: check the "Before the first run" table in `qa/README.md` and build what is still ⬜
    (one `chore/` or `test/` pull request each, reviewed like any other), then follow its steps: tag `m<N>-rc<k>`,
    open `qa/runs/M<N>.md`, hand the testers their guide (`qa/GUIDE_*.md`), turn every failure in their reports into
    an issue and a `fix/` branch, publish the next release candidate and retest until Windows, macOS and Linux pass.
    The M1 run is retroactive: it covers everything since M0.
-3. **Release run** — the M5 milestone run with the release builds (unsigned, `ROADMAP.md` 5.3).
+4. **Release run** — the M5 milestone run with the release builds (unsigned, `ROADMAP.md` 5.3).
 
 **Automated UI tests** come with every step that adds or changes UI, once the UI test infrastructure of
 `qa/README.md` exists; until then, review UI headless with `ImageComposeScene`.
