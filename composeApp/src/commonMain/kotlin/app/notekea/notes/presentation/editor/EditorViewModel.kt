@@ -80,12 +80,19 @@ class EditorViewModel(
             isReadingChosen = editorPreferences.isReadMode()
             properties.loadFold()
             reduce {
-                val opened = it.copy(isPropertiesExpanded = properties.isExpandedChosen)
-                if (it.find == null) opened.copy(isReading = isReadingChosen) else opened
+                val opened = it
+                    .copy(isPropertiesExpanded = properties.isExpandedChosen)
+
+                if (it.find == null) {
+                    opened.copy(isReading = isReadingChosen)
+                } else {
+                    opened
+                }
             }
         }
         launchGuarded(onError = ::showUnexpectedError) {
-            snapshotFlow { buffer.text.toString() }.collect { onBufferChanged(body = it) }
+            snapshotFlow { buffer.text.toString() }
+                .collect { onBufferChanged(body = it) }
         }
     }
 
@@ -224,10 +231,7 @@ class EditorViewModel(
         }
     }
 
-    private suspend fun open(
-        path: RelativePath?,
-        isRetry: Boolean = false
-    ) {
+    private suspend fun open(path: RelativePath?, isRetry: Boolean = false) {
         if (path == state.value.notePath && !isRetry) return
         files.forgetFiles()
         saveNow()
@@ -247,7 +251,12 @@ class EditorViewModel(
             return
         }
         when (val outcome = openNote(vaultPath = vaultPath, path = path)) {
-            is Outcome.Failure -> reduce { it.copy(isLoading = false, loadError = outcome.error) }
+            is Outcome.Failure -> reduce {
+                it.copy(
+                    isLoading = false,
+                    loadError = outcome.error
+                )
+            }
 
             is Outcome.Success -> {
                 saving.show(document = outcome.value, isNewNote = true)
