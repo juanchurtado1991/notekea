@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -113,6 +114,8 @@ private fun NoteText(
     if (state.isLoading) {
         EditorSkeleton()
     } else if (state.isReading) {
+        // The headings' places belong to this note in Read mode: leaving it lets go of their laid-out nodes.
+        DisposableEffect(state.notePath) { onDispose { positions.inReading.clear() } }
         ReadingView(
             text = buffer.text.toString(),
             attachments = state.attachments,

@@ -14,7 +14,11 @@ data class NoteDocument(
     val usesCrLf: Boolean
 ) {
     /** The note's full text, as it must be written to disk. */
-    fun toText(): String = header + if (usesCrLf) body.replace(oldValue = LF, newValue = CRLF) else body
+    fun toText(): String = when {
+        usesCrLf -> header + body.replace(oldValue = LF, newValue = CRLF)
+        header.isEmpty() -> body
+        else -> header + body
+    }
 
     companion object {
         private const val BYTE_ORDER_MARK = "\uFEFF"
@@ -27,6 +31,21 @@ data class NoteDocument(
          * Splits a note's [text]. Frontmatter is recognized as Obsidian does: the first line is exactly `---` and a
          * later line is exactly `---`; anything else (no closing line, `----`, a `---` further down) is body.
          */
+
+        // How many times the part occurs in the text, counted without splitting it.
+        private fun countOf(
+            text: String,
+            part: String
+        ): Int {
+            var count = 0
+            var index = text.indexOf(string = part)
+            while (index >= 0) {
+                count++
+                index = text.indexOf(string = part, startIndex = index + part.length)
+            }
+            return count
+        }
+
         fun fromText(
             text: String
         ): NoteDocument {
@@ -34,7 +53,7 @@ data class NoteDocument(
             val headerEnd = frontmatterEnd(text = text, start = start) ?: start
             val body = text.substring(startIndex = headerEnd)
             val usesCrLf =
-                body.contains(other = CRLF) && body.count { it == NEW_LINE_CHAR } == body.split(CRLF).size - 1
+                body.contains(other = CRLF) && body.count { it == NEW_LINE_CHAR } == countOf(text = body, part = CRLF)
             return NoteDocument(
                 header = text.substring(startIndex = 0, endIndex = headerEnd),
                 body = if (usesCrLf) body.replace(oldValue = CRLF, newValue = LF) else body,

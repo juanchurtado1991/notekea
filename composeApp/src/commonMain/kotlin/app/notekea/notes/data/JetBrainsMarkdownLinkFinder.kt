@@ -24,13 +24,15 @@ class JetBrainsMarkdownLinkFinder : LinkFinder {
     override fun find(
         markdown: String
     ): List<NoteLink> {
-        val code = codeRanges(node = parser.buildMarkdownTreeFromString(text = markdown as CharSequence))
         val links = matches(markdown = markdown, pattern = WIKI_LINK, kind = LinkKind.WIKI) +
             matches(markdown = markdown, pattern = MARKDOWN_ANGLE_LINK, kind = LinkKind.MARKDOWN_ANGLE) +
             matches(markdown = markdown, pattern = MARKDOWN_LINK, kind = LinkKind.MARKDOWN_ENCODED).filterNot {
                 SCHEME_SEPARATOR in
                     it.target
             }
+        // The Markdown tree, which finds the code the links must not be in, is built only when there are links.
+        if (links.isEmpty()) return emptyList()
+        val code = codeRanges(node = parser.buildMarkdownTreeFromString(text = markdown as CharSequence))
         return links.filterNot { link -> code.any { link.targetStart in it } }.sortedBy { it.targetStart }
     }
 

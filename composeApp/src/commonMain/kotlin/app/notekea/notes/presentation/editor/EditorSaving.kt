@@ -52,6 +52,9 @@ internal class EditorSaving(
     ) {
         when (val outcome = saveNote(vaultPath, path, document, expectedOnDisk)) {
             is Outcome.Success -> {
+                // Note info counts the properties' tags: a save that changed them counts again; the text's own
+                // changes are counted as they are typed.
+                val isHeaderChanged = opened?.header != document.header
                 opened = document
                 onDisk = outcome.value
                 val isCurrent = host.buffer.text.toString() == document.body
@@ -64,8 +67,7 @@ internal class EditorSaving(
                         isDeleted = false
                     )
                 }
-                // The properties' tags count in Note info.
-                noteInfo.updateStats(body = host.buffer.text.toString())
+                if (isHeaderChanged) noteInfo.updateStats(body = host.buffer.text.toString())
             }
 
             is Outcome.Failure -> reduceFailure(error = outcome.error)

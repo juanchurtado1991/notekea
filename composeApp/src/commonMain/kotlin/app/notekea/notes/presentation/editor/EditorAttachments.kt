@@ -42,6 +42,8 @@ class EditorAttachments(
     private var files: List<RelativePath>? = null
     private var folderSetting: String? = null
     private val images = mutableMapOf<RelativePath, ImageBitmap?>()
+    private var noteResolver: LinkResolver? = null
+    private var noteResolverFiles: List<RelativePath>? = null
 
     /**
      * The files and notes embedded in [text] of [note], resolved, with the images read and each embedded note's own
@@ -61,24 +63,34 @@ class EditorAttachments(
         val embeds = embedFinder.embeds(text = text, includeNotes = true)
         if (embeds.isEmpty()) return emptyList()
         var vaultFiles = vaultFiles()
-        val resolver = { files: List<RelativePath> ->
+        val resolverOf = { files: List<RelativePath> ->
             AttachmentResolver(
                 files = files,
                 attachmentFolder = AttachmentFolder(setting = folderSetting).folderFor(note = note)
             )
         }
+        var resolver = resolverOf(vaultFiles)
         // A file added outside Notekea since the last listing is found by listing again once.
-        if (embeds.any { !it.isNote && resolver(vaultFiles).resolve(embed = it, note = note) == null }) {
-            vaultFiles =
-                vaultFiles(refresh = true)
+        if (embeds.any { !it.isNote && resolver.resolve(embed = it, note = note) == null }) {
+            vaultFiles = vaultFiles(refresh = true)
+            resolver = resolverOf(vaultFiles)
         }
-        val notes = LinkResolver(notePaths = vaultFiles.filter { it.isMarkdown })
+        val notes = noteResolverOf(files = vaultFiles)
         return embeds.mapNotNull { embed ->
             // A note embedded inside a sentence stays a link, so only notes on their own line are read.
             if (embed.isNote) return@mapNotNull embed.takeIf { it.isOwnLine }?.let { noteView(it, notes, chain) }
-            fileView(embed = embed, path = resolver(vaultFiles).resolve(embed = embed, note = note))
+            fileView(embed = embed, path = resolver.resolve(embed = embed, note = note))
         }
     }
+
+    /** The vault's notes as links resolve them, built again only when the vault's files were listed again. */
+    private fun noteResolverOf(
+        files: List<RelativePath>
+    ): LinkResolver = noteResolver?.takeIf { noteResolverFiles === files }
+        ?: LinkResolver(notePaths = files.filter { it.isMarkdown }).also {
+            noteResolver = it
+            noteResolverFiles = files
+        }
 
     /** A file [embed] found at [path] (null when missing), with its picture read when it is an image. */
     private suspend fun fileView(

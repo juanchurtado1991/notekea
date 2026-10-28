@@ -20,7 +20,7 @@ class MarkdownHighlighter {
             val newline = text.indexOf(char = NEW_LINE_CHAR, startIndex = lineStart)
             val lineEnd = if (newline < 0) text.length else newline
             val line = text.substring(startIndex = lineStart, endIndex = lineEnd)
-            val opening = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)
+            val opening = fenceOf(line = line)
             // Spaces ending a code line keep the text's font: with another font, the cursor does not move past them.
             val codeEnd = lineStart + line.trimEnd().length
             when {
@@ -54,7 +54,7 @@ class MarkdownHighlighter {
             val newline = text.indexOf(char = NEW_LINE_CHAR, startIndex = lineStart)
             val lineEnd = if (newline < 0) text.length else newline
             val line = text.substring(startIndex = lineStart, endIndex = lineEnd)
-            val opening = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)
+            val opening = fenceOf(line = line)
             val open = fence
             if (open != null && closesFence(line = line, fence = open)) {
                 blocks += blockStart until lineEnd
@@ -68,6 +68,15 @@ class MarkdownHighlighter {
         }
         if (fence != null) blocks += blockStart until text.length
         return blocks
+    }
+
+    /** The fence a line opens (its backticks or tildes), searched only when the line has one of them. */
+    private fun fenceOf(
+        line: String
+    ): String? = if (FENCE_CHARS.any { it in line }) {
+        MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)
+    } else {
+        null
     }
 
     private fun closesFence(
@@ -97,7 +106,10 @@ class MarkdownHighlighter {
                 marker.range.last + 1
             } ?: 0
         }
-        InlineHighlighter(line = line, offset = offset, spans = spans).highlight(from = contentStart)
+        // Every inline pattern needs one of these characters: a line without any (most prose) is not searched.
+        if (line.any { it in INLINE_TRIGGERS }) {
+            InlineHighlighter(line = line, offset = offset, spans = spans).highlight(from = contentStart)
+        }
     }
 
     /** Inline spans of one line, in order of precedence: what code or a link target covers is not searched again. */
@@ -177,6 +189,8 @@ class MarkdownHighlighter {
             HighlightKind.HEADING_5,
             HighlightKind.HEADING_6
         )
+        private const val FENCE_CHARS = "`~"
+        private const val INLINE_TRIGGERS = "`[*_#"
         private val INLINE_CODE = Regex(pattern = "(`+)(.+?)(\\1)")
         private val ITALIC =
             Regex(pattern = "((?<![*\\w])\\*(?![*\\s])|(?<![_\\w])_(?![_\\s]))(.+?)((?<=\\S)\\1(?![*\\w]))")

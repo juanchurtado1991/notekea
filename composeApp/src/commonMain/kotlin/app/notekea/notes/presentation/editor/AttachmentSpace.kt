@@ -53,6 +53,8 @@ data class AttachmentSpace(
             heights: Map<String, Int>
         ): List<AttachmentSpace> {
             val shown = views.filter { it.embed.isOwnLine }
+            // Without a file shown on its own line there is nothing to make room for, so the text is not scanned.
+            if (shown.isEmpty()) return emptyList()
             var next = 0
             return embedFinder.embeds(text = text, includeNotes = true).filter { it.isOwnLine }.mapIndexedNotNull {
                     index,

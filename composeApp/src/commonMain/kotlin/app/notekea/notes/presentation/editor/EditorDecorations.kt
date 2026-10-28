@@ -51,7 +51,9 @@ private fun TaskCheckboxes(
 ) {
     val taskFinder = remember { TaskFinder() }
     val text = buffer.text
-    val tasks = remember(text) { taskFinder.tasks(text = text.toString()) }
+    // Keyed by the content alone: the text's own equality counts the selection, and a caret move changes no task.
+    val content = text.toString()
+    val tasks = remember(content) { taskFinder.tasks(text = content) }
     val result = layout() ?: return
     val density = LocalDensity.current
     val label = stringResource(resource = Res.string.editor_task)
@@ -106,7 +108,8 @@ private fun BoxScope.CodeBlockBackgrounds(
 ) {
     val highlighter = remember { MarkdownHighlighter() }
     val text = buffer.text
-    val blocks = remember(text) { highlighter.codeBlocks(text = text) }
+    val content = text.toString()
+    val blocks = remember(content) { highlighter.codeBlocks(text = content) }
     val color = MaterialTheme.colorScheme.surfaceVariant
     val padding = with(LocalDensity.current) { NotekeaDimensions.SpacingXs.toPx() }
     val radius = with(LocalDensity.current) { NotekeaDimensions.ControlRadius.toPx() }
