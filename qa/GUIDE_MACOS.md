@@ -35,8 +35,9 @@ A link to a **release** on GitHub, named like `Notekea m1-rc1`. Under **Assets**
 
 ## 4. Run the manual cases
 
-Open the run's list (`qa/runs/M<N>.md`, link from the coordinator); each case ID is described in
-`MVP_SMOKE_TEST.md`. Do the **Steps** and compare with **Expected**. On macOS, shortcuts use **Cmd**. Write one line
+Open the run's list (`qa/runs/M<N>.md`, link from the coordinator); each case is written out step by step in
+[M1_SMOKE_TEST.md](M1_SMOKE_TEST.md) for the M1 run (in `MVP_SMOKE_TEST.md` for later ones). Do the steps and check what
+it says under **Pass when**. On macOS, shortcuts use **Cmd**. Write one line
 per case in section 2 of the report: the ID and **PASS**, **FAIL** or **SKIP**.
 
 ## 5. When a case fails
