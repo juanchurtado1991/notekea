@@ -1,5 +1,9 @@
 package app.notekea.notes.presentation.tree
 
+import app.notekea.notes.domain.BookmarkStore
+import app.notekea.notes.domain.TreePreferencesStore
+import app.notekea.notes.domain.FileRevealer
+import app.notekea.notes.domain.Trash
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.Mutex
 import app.notekea.notes.domain.Bookmarks
@@ -9,16 +13,12 @@ import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.DailyNoteSettings
 import app.notekea.notes.domain.DailyNotes
-import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.FileOpener
 import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.FollowLinkUseCase
-import app.notekea.notes.domain.GetTreePreferencesUseCase
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.RenameEntryUseCase
-import app.notekea.notes.domain.RevealEntryUseCase
-import app.notekea.notes.domain.SaveTreePreferencesUseCase
 import app.notekea.notes.domain.TreePreferences
 import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import co.touchlab.kermit.Logger
@@ -43,15 +43,14 @@ class VaultTreeViewModel(
     private val newNotes: NewNoteTools,
     private val createFolder: CreateFolderUseCase,
     private val renameEntry: RenameEntryUseCase,
-    private val deleteEntry: DeleteEntryUseCase,
-    private val revealEntry: RevealEntryUseCase,
+    private val trash: Trash,
+    private val fileRevealer: FileRevealer,
     private val updateLinksAfterRename: UpdateLinksAfterRenameUseCase,
     private val followLink: FollowLinkUseCase,
-    private val getTreePreferences: GetTreePreferencesUseCase,
-    private val saveTreePreferences: SaveTreePreferencesUseCase,
+    private val treePreferencesStore: TreePreferencesStore,
     private val fileOpener: FileOpener,
     private val days: DailyNoteTools,
-    private val bookmarkTools: BookmarkTools
+    private val bookmarkStore: BookmarkStore
 ) : BaseViewModel<VaultTreeState, VaultTreeIntent, VaultTreeEffect>(
     initialState = VaultTreeState(vaultPath = vaultPath, platformConventions = platformConventions)
 ) {
@@ -70,10 +69,10 @@ class VaultTreeViewModel(
 
     init {
         launchGuarded(onError = ::showUnexpectedError) {
-            val preferences = getTreePreferences(vaultPath = vaultPath)
+            val preferences = treePreferencesStore.read(vaultPath = vaultPath)
             updateTree { restorePreferences(state = it, preferences = preferences) }
             dailySettings = days.getDailyNoteSettings(vaultPath = vaultPath)
-            val bookmarks = bookmarkTools.getBookmarks(vaultPath = vaultPath)
+            val bookmarks = bookmarkStore.read(vaultPath = vaultPath)
             reduce { it.copy(bookmarks = bookmarks) }
             observe()
         }
@@ -246,7 +245,7 @@ class VaultTreeViewModel(
     private fun delete() {
         val path = state.value.pendingDelete ?: return
         launchGuarded(onError = ::showUnexpectedError) {
-            val outcome = deleteEntry(vaultPath = vaultPath, path = path)
+            val outcome = trash.moveToTrash(vaultPath = vaultPath, path = path)
             updateTree { reduceDeleted(state = it, path = path, outcome = outcome) }
             if (outcome is Outcome.Success) {
                 changeBookmarks { it.deleted(path = path) }
@@ -395,7 +394,7 @@ class VaultTreeViewModel(
         if (state.value.bookmarks == before) return
         launchGuarded(onError = ::showUnexpectedError) {
             bookmarkSaving.withLock {
-                bookmarkTools.saveBookmarks(vaultPath = vaultPath, bookmarks = state.value.bookmarks)
+                bookmarkStore.write(vaultPath = vaultPath, bookmarks = state.value.bookmarks)
             }
         }
     }
@@ -417,7 +416,7 @@ class VaultTreeViewModel(
     ) {
         val target = path ?: state.value.selectedPath ?: return
         launchGuarded(onError = ::showUnexpectedError) {
-            val outcome = revealEntry(vaultPath = vaultPath, path = target)
+            val outcome = fileRevealer.reveal(vaultPath = vaultPath, path = target)
             if (outcome is Outcome.Failure) reduce { it.copy(actionError = outcome.error) }
         }
     }
@@ -451,7 +450,7 @@ class VaultTreeViewModel(
         if (preferences != preferencesOf(state = before) && !after.isLoading) {
             launchGuarded(
                 onError = ::showUnexpectedError
-            ) { saveTreePreferences(vaultPath = vaultPath, preferences = preferences) }
+            ) { treePreferencesStore.write(vaultPath = vaultPath, preferences = preferences) }
         }
     }
 

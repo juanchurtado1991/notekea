@@ -1,7 +1,5 @@
 package app.notekea.notes.presentation.tree
 
-import app.notekea.notes.domain.SaveBookmarksUseCase
-import app.notekea.notes.domain.GetBookmarksUseCase
 import app.notekea.notes.domain.FakeBookmarkStore
 import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.time.CalendarDate
@@ -21,7 +19,6 @@ import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.ApplyTemplateUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
 import app.notekea.notes.domain.FillTemplateUseCase
-import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.FakeFileOpener
 import app.notekea.notes.domain.FakeFileRevealer
 import app.notekea.notes.domain.FakeFileWatcher
@@ -35,7 +32,6 @@ import app.notekea.notes.domain.FakeTreePreferencesStore
 import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.LinkKind
 import app.notekea.notes.domain.FollowLinkUseCase
-import app.notekea.notes.domain.GetTreePreferencesUseCase
 import app.notekea.notes.domain.NaturalNameComparator
 import app.notekea.notes.domain.NoteFixtures.VAULT
 import app.notekea.notes.domain.NoteFixtures.file
@@ -44,8 +40,6 @@ import app.notekea.notes.domain.ObserveVaultTreeUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.RenameEntryUseCase
-import app.notekea.notes.domain.RevealEntryUseCase
-import app.notekea.notes.domain.SaveTreePreferencesUseCase
 import app.notekea.notes.domain.TrashLocation
 import app.notekea.notes.domain.TreePreferences
 import app.notekea.notes.domain.TreeRow
@@ -842,14 +836,11 @@ class VaultTreeViewModelTest {
                 noteFileOperations = operations,
                 validateFileName = ValidateFileNameUseCase()
             ),
-            deleteEntry = DeleteEntryUseCase(trash = trash),
-            revealEntry = RevealEntryUseCase(fileRevealer = revealer),
+            trash = trash,
+            fileRevealer = revealer,
             fileOpener = opener,
             days = dailyNoteTools(),
-            bookmarkTools = BookmarkTools(
-                getBookmarks = GetBookmarksUseCase(bookmarkStore = bookmarkStore),
-                saveBookmarks = SaveBookmarksUseCase(bookmarkStore = bookmarkStore)
-            ),
+            bookmarkStore = bookmarkStore,
             updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
                 planLinkUpdates = PlanLinkUpdatesUseCase(
                     noteContentStore = contents,
@@ -858,8 +849,7 @@ class VaultTreeViewModelTest {
                 applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = contents)
             ),
             followLink = FollowLinkUseCase(createNote = CreateNoteUseCase(noteFileOperations = operations)),
-            getTreePreferences = GetTreePreferencesUseCase(treePreferencesStore = preferences),
-            saveTreePreferences = SaveTreePreferencesUseCase(treePreferencesStore = preferences)
+            treePreferencesStore = preferences
         )
         advanceUntilIdle()
         return viewModel

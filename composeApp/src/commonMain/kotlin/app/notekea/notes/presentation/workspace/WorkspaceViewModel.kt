@@ -137,7 +137,7 @@ class WorkspaceViewModel(
         val after = state.value.workspace
         if (after != before && state.value.isRestored) {
             launchGuarded(onError = ::showUnexpectedError) {
-                tools.saveWorkspace(vaultPath = vaultPath, workspace = after)
+                tools.workspaceStore.write(vaultPath = vaultPath, workspace = after)
             }
         }
         readPreviews()
@@ -172,7 +172,7 @@ class WorkspaceViewModel(
         }
         reduce { it.copy(workspace = restored, isRestored = true) }
         launchGuarded(onError = ::showUnexpectedError) {
-            tools.saveWorkspace(vaultPath = vaultPath, workspace = restored)
+            tools.workspaceStore.write(vaultPath = vaultPath, workspace = restored)
         }
         readPreviews()
     }

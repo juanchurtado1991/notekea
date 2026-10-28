@@ -112,22 +112,4 @@ class RecentVaultUseCasesTest {
 
         assertNull(actual = fixture.restoreLastVault())
     }
-
-    @Test
-    fun `picking and suggesting delegate to the platform`() = runTest {
-        fixture.folderPicker.nextPick = VaultFixture.WORK
-
-        assertEquals(
-            expected = VaultFixture.WORK,
-            actual = fixture.pickFolder(initialPath = VaultFixture.NOTES)
-        )
-        assertEquals(
-            expected = listOf<String?>(VaultFixture.NOTES),
-            actual = fixture.folderPicker.initialPaths
-        )
-        assertEquals(
-            expected = FakeVaultFileSystem.DEFAULT_PARENT,
-            actual = fixture.suggestVaultLocation()
-        )
-    }
 }

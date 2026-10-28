@@ -16,7 +16,6 @@ import app.notekea.notes.domain.NoteFixtures.file
 import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.SaveSidePanelUseCase
-import app.notekea.notes.domain.SaveWorkspaceUseCase
 import app.notekea.notes.domain.SidePanelMode
 import app.notekea.notes.domain.SidePanelPreferences
 import app.notekea.notes.domain.SidePanelSection
@@ -209,7 +208,7 @@ class WorkspaceViewModelTest {
             vaultPath = VAULT,
             tools = WorkspaceTools(
                 getWorkspace = GetWorkspaceUseCase(workspaceStore = workspaces),
-                saveWorkspace = SaveWorkspaceUseCase(workspaceStore = workspaces),
+                workspaceStore = workspaces,
                 getSidePanel = GetSidePanelUseCase(editorPreferencesStore = preferences),
                 saveSidePanel = SaveSidePanelUseCase(editorPreferencesStore = preferences),
                 getNoteCover = GetNoteCoverUseCase(

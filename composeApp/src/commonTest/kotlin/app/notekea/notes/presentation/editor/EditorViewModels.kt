@@ -1,7 +1,5 @@
 package app.notekea.notes.presentation.editor
 
-import app.notekea.notes.domain.SavePropertiesFoldUseCase
-import app.notekea.notes.domain.GetPropertiesFoldUseCase
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.FakeLocalTimeFormatter
@@ -20,17 +18,14 @@ import app.notekea.notes.domain.FakeNoteFileOperations
 import app.notekea.notes.domain.FakeNoteScanner
 import app.notekea.notes.domain.FakeNoteTimesReader
 import app.notekea.notes.domain.GetNoteStatsUseCase
-import app.notekea.notes.domain.GetNoteTimesUseCase
 import app.notekea.notes.domain.FakeVaultSettingsReader
 import app.notekea.notes.domain.FillTemplateUseCase
-import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.NoteFixtures.VAULT
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.RenameEntryUseCase
-import app.notekea.notes.domain.SaveEditorModeUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
 import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import kotlinx.coroutines.CoroutineDispatcher
@@ -72,8 +67,7 @@ class EditorViewModels(dispatcher: CoroutineDispatcher) {
                 applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store)
             )
         ),
-        getEditorMode = GetEditorModeUseCase(editorPreferencesStore = preferences),
-        saveEditorMode = SaveEditorModeUseCase(editorPreferencesStore = preferences),
+        editorPreferences = preferences,
         attachmentTools = AttachmentTools(
             attachmentStore = attachmentStore,
             vaultSettingsReader = settings,
@@ -96,12 +90,10 @@ class EditorViewModels(dispatcher: CoroutineDispatcher) {
 
     private fun noteInfoTools(): NoteInfoTools = NoteInfoTools(
         getNoteStats = GetNoteStatsUseCase(linkFinder = JetBrainsMarkdownLinkFinder()),
-        getNoteTimes = GetNoteTimesUseCase(noteTimesReader = times)
+        noteTimesReader = times
     )
 
     private fun propertyTools(): PropertyTools = PropertyTools(
-        getPropertiesFold = GetPropertiesFoldUseCase(editorPreferencesStore = preferences),
-        savePropertiesFold = SavePropertiesFoldUseCase(editorPreferencesStore = preferences),
         localCalendar = FakeLocalCalendar(),
         clock = FakeClock(currentTime = Instant.parse(input = NOW))
     )

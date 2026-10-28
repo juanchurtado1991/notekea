@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.notes.domain.EditorPreferencesStore
 import app.notekea.notes.domain.PropertyValue
 import app.notekea.notes.domain.PropertyKeys
 import app.notekea.notes.domain.FrontmatterContent
@@ -23,7 +24,6 @@ import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.TemplateInsertion
 import app.notekea.notes.domain.FillTemplateUseCase
-import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.ListAction
 import app.notekea.notes.domain.ListEditing
 import app.notekea.notes.domain.MarkdownFormatter
@@ -34,7 +34,6 @@ import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
-import app.notekea.notes.domain.SaveEditorModeUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
 import app.notekea.notes.domain.TaskFinder
 import app.notekea.notes.domain.OutlineFinder
@@ -63,8 +62,7 @@ class EditorViewModel(
     private val saveNote: SaveNoteUseCase,
     private val observeNoteOnDisk: ObserveNoteOnDiskUseCase,
     private val renameAndUpdateLinks: RenameAndUpdateLinksUseCase,
-    private val getEditorMode: GetEditorModeUseCase,
-    private val saveEditorMode: SaveEditorModeUseCase,
+    private val editorPreferences: EditorPreferencesStore,
     private val attachmentTools: AttachmentTools,
     private val fillTemplate: FillTemplateUseCase,
     private val propertyTools: PropertyTools,
@@ -121,8 +119,8 @@ class EditorViewModel(
 
     init {
         launchGuarded(onError = ::showUnexpectedError) {
-            isReadingChosen = getEditorMode()
-            isPropertiesExpandedChosen = propertyTools.getPropertiesFold()
+            isReadingChosen = editorPreferences.isReadMode()
+            isPropertiesExpandedChosen = editorPreferences.isPropertiesExpanded()
             reduce {
                 val opened = it.copy(isPropertiesExpanded = isPropertiesExpandedChosen)
                 if (it.find == null) opened.copy(isReading = isReadingChosen) else opened
@@ -188,7 +186,7 @@ class EditorViewModel(
         reduce { it.copy(isReading = isReading, find = if (isReading) null else it.find) }
         if (isReading == isReadingChosen) return
         isReadingChosen = isReading
-        launchGuarded(onError = ::showUnexpectedError) { saveEditorMode(isReading = isReading) }
+        launchGuarded(onError = ::showUnexpectedError) { editorPreferences.setReadMode(isReading = isReading) }
     }
 
     /** Asks the panes around the editor to open the note a Read mode link leads to, from the open note. */
@@ -358,7 +356,7 @@ class EditorViewModel(
         isPropertiesExpandedChosen = !isPropertiesExpandedChosen
         reduce { it.copy(isPropertiesExpanded = isPropertiesExpandedChosen) }
         launchGuarded(onError = ::showUnexpectedError) {
-            propertyTools.savePropertiesFold(isExpanded = isPropertiesExpandedChosen)
+            editorPreferences.setPropertiesExpanded(isExpanded = isPropertiesExpandedChosen)
         }
     }
 
@@ -570,7 +568,7 @@ class EditorViewModel(
     private fun readTimes() {
         val note = state.value.notePath ?: return
         launchGuarded(onError = ::showUnexpectedError) {
-            val times = noteInfoTools.getNoteTimes(vaultPath = vaultPath, path = note)
+            val times = noteInfoTools.noteTimesReader.times(vaultPath = vaultPath, path = note)
             reduce {
                 if (it.notePath != note) return@reduce it
                 it.copy(

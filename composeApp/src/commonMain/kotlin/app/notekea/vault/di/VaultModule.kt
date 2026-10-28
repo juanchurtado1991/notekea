@@ -5,11 +5,9 @@ import app.notekea.vault.domain.CreateVaultUseCase
 import app.notekea.vault.domain.GetRecentVaultsUseCase
 import app.notekea.vault.domain.LocateVaultUseCase
 import app.notekea.vault.domain.OpenVaultUseCase
-import app.notekea.vault.domain.PickFolderUseCase
 import app.notekea.vault.domain.RecentVaultsStore
 import app.notekea.vault.domain.RemoveRecentVaultUseCase
 import app.notekea.vault.domain.RestoreLastVaultUseCase
-import app.notekea.vault.domain.SuggestVaultLocationUseCase
 import app.notekea.vault.presentation.welcome.WelcomeViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
@@ -22,9 +20,7 @@ val vaultModule = module {
     factoryOf(::GetRecentVaultsUseCase)
     factoryOf(::LocateVaultUseCase)
     factoryOf(::OpenVaultUseCase)
-    factoryOf(::PickFolderUseCase)
     factoryOf(::RemoveRecentVaultUseCase)
     factoryOf(::RestoreLastVaultUseCase)
-    factoryOf(::SuggestVaultLocationUseCase)
     viewModelOf(::WelcomeViewModel)
 }

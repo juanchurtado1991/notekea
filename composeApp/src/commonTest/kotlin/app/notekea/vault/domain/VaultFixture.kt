@@ -24,11 +24,9 @@ class VaultFixture {
         vaultFileSystem = fileSystem,
         describeElapsedTime = DescribeElapsedTimeUseCase(clock = clock)
     )
-    val pickFolder = PickFolderUseCase(folderPicker = folderPicker)
     val removeRecentVault = RemoveRecentVaultUseCase(recentVaultsStore = store)
     val locateVault = LocateVaultUseCase(openVault = openVault, removeRecentVault = removeRecentVault)
     val restoreLastVault = RestoreLastVaultUseCase(recentVaultsStore = store, openVault = openVault)
-    val suggestVaultLocation = SuggestVaultLocationUseCase(vaultFileSystem = fileSystem)
 
     fun addFolder(
         path: String,
