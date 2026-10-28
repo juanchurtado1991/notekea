@@ -18,9 +18,22 @@ branch name is given next to it. Estimates assume one developer and are meant fo
   its settings for attachments, daily notes and templates folders are honored (read-only).
 - **Local only:** see the privacy rules in `GUIDELINES.md`.
 
-**Closing a milestone:** a milestone is done when all its features are ✅ **and** its QA run passes on Windows,
-macOS and Linux (`qa/README.md`); only then does the next milestone start. The M1 run also covers M0, which never
-had one. The M5 run is the release run.
+**Closing a milestone:** every milestone ends with its **performance pass** (its last item: 1.18, 2.9, 3.7, 4.3,
+5.4), then its **QA run**. A milestone is done when all its items are ✅ **and** its QA run passes on Windows, macOS
+and Linux (`qa/README.md`); only then does the next milestone start. The M1 run also covers M0, which never had one.
+The M5 run is the release run.
+
+**Performance pass** (`GUIDELINES.md` §8, `docs/performance.md`): the milestone's **automated smoke runs** (below)
+drive the real app through its cases on the smoke data while memory is sampled, so each pass profiles where the
+memory goes (resident memory, Java heap, native and Skia memory, per scenario), how much the app holds when idle
+(after one and ten minutes with a vault open), how memory returns after notes, tabs and vaults are closed, startup
+time and typing latency. The numbers go in `docs/performance.md`, next to the previous milestone's, and are checked
+against the budgets of 5.4; what grew or leaks is cut in the same pass.
+
+**Automated smoke runs:** whenever smoke cases are added to `MVP_SMOKE_TEST.md`, the cases a script can drive are
+also added as automated runs of the real app (the infrastructure is built in 1.16 for every M1 case). They catch
+regressions on every run and are the workload each performance pass measures; the manual smoke test keeps what only
+a person can judge (looks, feel, the operating system's own dialogs).
 
 **Status tracking:** features are never removed from this file. Each feature title carries its status —
 ⬜ not started, 🚧 in progress (branch open), ✅ done (with its pull request) — and the table below counts them.
@@ -30,9 +43,9 @@ had one. The M5 run is the release run.
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 16 / 18 |
-| M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
-| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
-| M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
+| M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 9 |
+| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 8 |
+| M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
 | Post-MVP | Extensions (Koog + MCP), mobile, more | — |
 
@@ -496,14 +509,36 @@ and under its line in Edit. 1.15 completes them as Obsidian does (decided with t
 - **Done when:** `Editor/Embeds/Embeds practice` of the smoke data shows every case above in Preview and Edit, and
   the cases 1.15-01 to 1.15-05 of `MVP_SMOKE_TEST.md` pass.
 
-### ⬜ 1.16 Sample vault — `chore/sample-vault`
+### ⬜ 1.16 Sample vault, automated smoke runs and code trim — `chore/sample-vault`
 
-`smoke-data/vaults/Sample Vault/`, next to the smoke test vaults (one dataset for smoke tests, unit tests,
-evaluation and demos; `SmokeDataTest` and `smoke-data/README.md` are updated with it), with 40 Markdown notes on
-varied topics (projects, journal, books, recipes, meeting notes), with frontmatter, wiki links and some deliberately
-related notes without links. It also covers every feature above: tasks, all callout types, images and attachments,
-daily notes, templates, embeds (including a circular one) and a `.obsidian/` folder with non-default settings. Used
-by tests, manual QA and demos.
+Before M1's performance pass (1.18), the M1 code gets its test data, its automated smoke runs and a trim, decided
+with the developer on 2026-10-28. The smoke test of 1.18 then also proves the trim broke nothing.
+
+- **Sample vault:** `smoke-data/vaults/Sample Vault/`, next to the smoke test vaults (one dataset for smoke tests,
+  unit tests, evaluation and demos; `SmokeDataTest` and `smoke-data/README.md` are updated with it), with 40 Markdown
+  notes on varied topics (projects, journal, books, recipes, meeting notes), with frontmatter, wiki links and some
+  deliberately related notes without links. It also covers every feature above: tasks, all callout types, images and
+  attachments, daily notes, templates, bookmarks, properties of every type, embeds (nested, by block, circular) and a
+  `.obsidian/` folder with non-default settings. Used by tests, manual QA, the automated smoke runs and demos.
+- **Automated smoke runs:** a runner that starts the real app (its real window, file system and settings in a
+  temporary app data folder, never the user's) and drives scenarios made of the M1 cases of `MVP_SMOKE_TEST.md`
+  through the UI, on copies of the smoke vaults, the Sample Vault and the Large Vault; each scenario checks the
+  case's expected result and can sample the process's memory while it runs. One Gradle task runs them all, locally
+  and in CI on the three systems; the cases it covers are listed in the **Automated** column of
+  `MVP_SMOKE_TEST.md`. The runner and its scenarios are what 1.18 and every later performance pass measure.
+- **Code trim** (`ARCHITECTURE.md` §4 and §10, `GUIDELINES.md` §6), so the code stays small as M2 starts:
+  - **Pass-through use cases go:** a use case exists only when it holds a decision or combines ports; one that only
+    calls a port (`DeleteEntryUseCase` calling `Trash.moveToTrash`) is removed, with its Koin binding and trivial
+    test, and the ViewModel calls the port. The Konsist rules are updated in the same change.
+  - **No file over 350 lines** (300 is the aim), production and tests alike, enforced by a new ktlint rule,
+    `notekea:max-file-length`. The files over it are split by sub-feature: `EditorViewModel` (reducers and handlers
+    for properties, attachments, outline, find; the ViewModel only routes), `EditorContent`, `NotekeaTabStrip`,
+    `EditorToolbar`, `VaultTreeViewModel`, `VaultTreeScreen`, `PropertiesView`, `SidePanel`, `WorkspaceContent`,
+    `WelcomeContent`, `MarkdownFormatter`, the design system gallery (one section per file) and the large tests
+    (`VaultTreeViewModelTest`, `EditorViewModelTest`, `ArchitectureTest`, `EditorToolbarTest`, split by behavior).
+  - Behavior does not change: every existing test keeps passing unchanged in what it asserts.
+- **Done when:** the Sample Vault and its tests are in, every automatable M1 case runs in the automated smoke runs
+  on the three systems, no use case only forwards a call, no file is over 350 lines and the rule enforces it.
 
 ### ✅ 1.17 Formatting toolbar — `feature/formatting-toolbar` — [notekea#55](https://github.com/juanchurtado1991/notekea/pull/55)
 
@@ -539,10 +574,11 @@ same Markdown a person would type, so notes stay readable in any app.
 - **Done when:** a person who never wrote Markdown can make a heading, a checklist, a callout, a table and a link to
   another note with the mouse alone, and every result reads the same in Preview and in Obsidian.
 
-### ⬜ 1.18 Editor memory — `chore/editor-memory`
+### ⬜ 1.18 M1 performance pass: editor memory — `chore/editor-memory`
 
-The editor alone, before any AI, should stay light: measure how much memory it uses and cut it, so M2 and M3 start
-from a small base (budget of 5.4: under 400 MB).
+M1's performance pass (see "Closing a milestone"). The editor alone, before any AI, should stay light: measure how
+much memory it uses and cut it, so M2 and M3 start from a small base (budget of 5.4: under 400 MB). The workload is
+the automated smoke runs of 1.16, and its smoke test also checks the code trim of 1.16.
 
 - **Measure:** the memory of the whole process (resident memory, not only the Java heap) on Linux, then Windows and
   macOS, with `smoke-data/vaults/Personal Notes` and the Large Vault (`smoke.sh large`, 5,000 notes): right after
@@ -653,6 +689,13 @@ attachments never are, so the graph never turns into a hairball of everything in
 `smoke-data/eval/retrieval.json` (over the 1.16 sample vault): 50 questions over the sample vault with the expected
 note and heading. A test reports recall@5 and fails below the agreed baseline, so changes to chunking, models or
 ranking are measured.
+
+### ⬜ 2.9 M2 performance pass — `chore/m2-performance`
+
+The performance pass of M2 (see "Closing a milestone"), on the automated smoke runs of M1 and M2: memory and time of
+the first indexing and of an incremental one on the Sample Vault and the Large Vault, memory with the embedding model
+loaded and after it is let go, search latency, and idle memory after indexing ends. Compared with 1.18 in
+`docs/performance.md`; budgets of 5.4 (indexing or searching under 700 MB, back to the editor's level after).
 
 ---
 
@@ -774,6 +817,13 @@ wins; ties go to the shorter draft. It is chosen by verified support, not by maj
 - **Done when:** on the evaluation set it beats the normal mode's citation accuracy for every model size, and it is
   cancellable at any moment.
 
+### ⬜ 3.7 M3 performance pass — `chore/m3-performance`
+
+The performance pass of M3 (see "Closing a milestone"), on the automated smoke runs of M1 to M3: memory while a model
+loads, chats and answers deeply on an 8 GB machine, how fast it returns to the editor's level after the chat is
+closed, time to the first token, and idle memory with the chat open but unused. Compared with 2.9 in
+`docs/performance.md`; budgets of 5.4 (chatting with the Small model under 2.5 GB).
+
 ---
 
 ## M4 — Git sync
@@ -793,6 +843,12 @@ The index folder is never committed. Token stored in the OS keychain (Java Keyri
   "Keep mine", "Keep theirs" and "Keep both".
 - States: not configured (status item hidden), offline (retries silently, shows "Offline"), auth failed
   (opens Settings → Sync with the error).
+
+### ⬜ 4.3 M4 performance pass — `chore/m4-performance`
+
+The performance pass of M4 (see "Closing a milestone"), on the automated smoke runs of M1 to M4: memory and time of
+a sync of the Sample Vault and the Large Vault, of the auto-commit while typing, and idle memory with sync on.
+Compared with 3.7 in `docs/performance.md`.
 
 ---
 
@@ -829,9 +885,10 @@ Release with checksums.
 
 ### ⬜ 5.4 Performance and memory — `chore/performance`
 
-Notekea should run well on the laptop a non-technical person has (8 GB of RAM). With the whole app built, measure it
-on the reference machines (Windows, macOS, Linux) and cut what the numbers point at, starting from the editor's
-measurements of 1.18.
+M5's performance pass, the last one (see "Closing a milestone"). Notekea should run well on the laptop a
+non-technical person has (8 GB of RAM). With the whole app built, measure it on the reference machines (Windows,
+macOS, Linux) with every automated smoke run and cut what the numbers point at, starting from the passes of 1.18,
+2.9, 3.7 and 4.3.
 
 - **Memory budgets** (whole process, the Sample Vault and a 1,000-note vault):
 

@@ -103,6 +103,11 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
 
 - A function does one thing, and its name says what that thing is. If a function needs a comment to explain
   what it does, rename it or split it.
+- **Files may not exceed 350 lines** (aim for 300), production code and tests alike, counting everything (imports,
+  KDoc, previews). Enforced by the `notekea:max-file-length` ktlint rule (added in `ROADMAP.md` 1.16). A file that
+  grows is split by sub-feature, never by moving code into one long helper: a ViewModel keeps routing intents and
+  delegates each sub-feature to its reducers and handlers; a screen keeps its layout and moves each section to its own
+  file; a test class is split by behavior.
 - **Function bodies may not exceed 40 lines.** This is enforced by the `notekea:max-function-length` ktlint rule
   (the signature is not counted). When a function grows, extract private helpers whose names describe each step.
 - Long or multi-line conditions go into a well-named `val` (e.g. `val isExpressionOnNextLine = ...`) instead of
@@ -153,8 +158,9 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
 
   A small fix or chore that is a single step goes straight from its branch to `main` in one pull request.
 
-  **Exception chosen by the developer:** for a feature they name (1.9 to 1.14 so far), the steps are commits on the
-  feature branch instead of pull requests, and the feature reaches `main` in one pull request after the smoke test.
+  **Exception chosen by the developer:** for a feature they name (1.9 to 1.16 so far), the steps are commits on the
+  feature branch instead of pull requests, with no intermediate pull requests, and the feature reaches `main` in one
+  pull request after the smoke test.
   Each commit still leaves the build green and does one logical change.
 - **Granular commits inside each step.** Prefer several small commits, each doing one logical change (e.g.
   `feat: add Platform interface`, `test: cover shortcut mapping`, `feat: bind JVM platform in Koin`), over one large
@@ -164,14 +170,20 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
 - Pull requests are merged with **rebase merging**, so the granular commits land as they are and history stays
   linear, both in the feature branch and in `main`.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`.
-- **Three levels of testing beyond unit tests**, from the smallest to the largest:
+- **Four levels of testing beyond unit tests**, from the smallest to the largest:
   1. **Feature smoke test** (below): the developer, with the agent's help, before each `feature/` or `fix/` branch
      reaches `main`. One OS is enough unless the change is platform-specific.
-  2. **Milestone QA run** (`qa/README.md`): when the last feature of a milestone is on `main`, testers run the
+  2. **Milestone performance pass** (`ROADMAP.md`, "Closing a milestone"): the last item of every milestone (1.18,
+     2.9, 3.7, 4.3, 5.4). The agent runs the milestone's **automated smoke runs** (below) on the three systems while
+     the process's memory is sampled, profiles where the memory goes (heap, native, Skia, per scenario), how much the
+     app holds idle after one and ten minutes, whether closing notes, tabs and vaults gives memory back, startup time
+     and typing latency; records the numbers in `docs/performance.md` next to the previous milestone's; and cuts what
+     grew or leaks against the budgets of `ROADMAP.md` 5.4. Its smoke test also checks that nothing broke.
+  3. **Milestone QA run** (`qa/README.md`): when the last feature of a milestone is on `main`, testers run the
      automated UI tests and then the manual cases of `MVP_SMOKE_TEST.md` accumulated so far, on **Windows, macOS and
      Linux**, with packaged builds published as a GitHub pre-release. The milestone is closed only when the three
      OSes pass. The first run, at the end of M1, is retroactive: it covers everything since M0.
-  3. **Release run**: the milestone QA run of M5, with the release builds, which are not signed (`ROADMAP.md` 5.3,
+  4. **Release run**: the milestone QA run of M5, with the release builds, which are not signed (`ROADMAP.md` 5.3,
      5.5).
 - **Automated UI tests** (Compose `ui-test`, `runComposeUiTest`) cover every screen and its states: they run in CI on
   the three OSes on every pull request and block the merge when they fail, and they are packaged as the
@@ -207,6 +219,12 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   `qa/README.md` before the M1 run. Screens rendered while
   developing are shown to the developer in the conversation, never committed or attached to pull requests: design
   decisions are made in the smoke test, using the app.
+- **Automated smoke runs come with the smoke cases** (infrastructure from `ROADMAP.md` 1.16): every case added to
+  `MVP_SMOKE_TEST.md` that a script can drive is also added as a scenario of the automated smoke runs, which start the
+  real app (its real window and files, with a temporary app data folder, never the user's) on copies of the smoke
+  data and check the case's expected result. They run in one Gradle task, locally and in CI on the three systems,
+  and are the workload every performance pass measures. Until 1.16 lands, the pre-smoke tests below are the
+  automated part.
 - **Every `feature/` and `fix/` branch adds its cases to `MVP_SMOKE_TEST.md`** (in a step): what a person must check on
   each OS, including cases that only become testable with later features. Every milestone QA run executes all the
   cases testable so far on Windows, macOS and Linux, and the release run executes the whole file; it is the main

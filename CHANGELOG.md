@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Plan (`ROADMAP.md`, `GUIDELINES.md` §6 and §8, `ARCHITECTURE.md` §10, `qa/README.md`, `CLAUDE.md`): every milestone
+  ends with a performance pass (1.18, 2.9, 3.7, 4.3, 5.4) that profiles memory, idle RAM and timing on the automated
+  smoke runs, which come with every new smoke case from 1.16 on; 1.16 also trims the code (no use case that only
+  forwards a call, no file over 350 lines).
 - Docs: `ROADMAP.md` records every decision of 1.14 (the base editor's UI finished there, what was decided against,
   the new layout); `GUIDELINES.md` adds choosing designs from rendered options, calm UI, readable width and zoom, no
   dead code and the one-pull-request exception; `ARCHITECTURE.md` adds `core.appearance`, the new design-system

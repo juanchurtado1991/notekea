@@ -6,7 +6,8 @@ guide of their system: [Windows](GUIDE_WINDOWS.md), [macOS](GUIDE_MACOS.md), [Li
 
 ## When
 
-- When the last feature of a milestone (M1, M2, M3, M4) is merged into `main`, before any work on the next milestone.
+- When the last item of a milestone (M1, M2, M3, M4), its performance pass (`ROADMAP.md`, "Closing a milestone"), is
+  merged into `main`, before any work on the next milestone.
 - The M5 run is the release run (`ROADMAP.md` 5.5), with the release builds, which are not signed (`ROADMAP.md` 5.3).
 - **The M1 run is the first one and is retroactive**: it covers everything built since M0 (the "General" cases and
   all M1 cases of `MVP_SMOKE_TEST.md`) and the UI tests written for every screen that existed before the UI test
@@ -30,6 +31,7 @@ before the M1 run; the agent checks this list and builds what is missing.
 
 | Piece | What it is | Status |
 |---|---|---|
+| Automated smoke runs | The runner of `ROADMAP.md` 1.16: the real app driven through the automatable cases of `MVP_SMOKE_TEST.md` on copies of the smoke data, in one Gradle task, in CI on the three OSes; also the workload of every performance pass | ⬜ (1.16) |
 | UI test infrastructure | `org.jetbrains.compose.ui:ui-test` in `LIBRARIES.md`, UI tests in CI on the three OSes, tests for every existing screen (one `test/` pull request per screen) | ⬜ |
 | Backfill of the 1.x cases | The cases of 1.1 to 1.5 in `MVP_SMOKE_TEST.md` that can run headless, automated with `ui-test` (or as integration tests) and named after their IDs, in the per-screen `test/` pull requests above; their **Automated** column is filled in, and the rest marked "manual". From 1.6 on each feature automates its own cases (`GUIDELINES.md` §8) | ⬜ |
 | Notekea Self-Test | A packaged app that runs the UI tests on the tester's machine against its real file system and shows ✅ or ❌, with a **Copy report** button | ⬜ |

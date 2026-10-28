@@ -36,7 +36,7 @@ app.notekea
 
 | Element | Convention | Example |
 |---|---|---|
-| Use case | Verb + noun + `UseCase`, single `operator fun invoke` | `OpenVaultUseCase`, `GetRelatedNotesUseCase` |
+| Use case | Verb + noun + `UseCase`, single `operator fun invoke` (only when it decides something, §10) | `OpenVaultUseCase`, `GetRelatedNotesUseCase` |
 | Domain interface | Noun, no prefix or suffix | `NoteRepository`, `VectorIndex`, `GitSync` |
 | Implementation | Named after the technology or source, never `Impl` | `FileSystemNoteRepository`, `LuceneVectorIndex`, `JGitSync` |
 | Domain error | `<Feature>Error` sealed interface | `VaultError`, `ChatError` |
@@ -199,6 +199,12 @@ New code copies the structure of these features instead of inventing its own. Re
 The pattern in short: a **port** (interface) in `domain` for anything the platform provides, its **adapter** in `data`
 of the platform source set, **all decisions in a use case** in `commonMain` tested with a hand-written **fake**, and
 **Koin modules** that bind the adapter to the port.
+
+**A use case holds a decision, never only a call** (decided in `ROADMAP.md` 1.16). Write one when it decides
+something (validates, picks, combines two ports, maps errors, orders steps); when the ViewModel only needs one port's
+operation as it is (`Trash.moveToTrash`, `AttachmentStore.read`), it calls the port directly, injected like a use
+case, and its test uses the port's fake. A use case that only forwards one call is dead weight: a file, a binding and
+a test that check nothing. Review this when a use case's body becomes one line.
 
 ## 11. Design system
 
