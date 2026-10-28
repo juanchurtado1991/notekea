@@ -9,12 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Sample Vault (`smoke-data/vaults/Sample Vault`, ROADMAP 1.16): 40 notes covering every M1 feature, with
+  non-default Obsidian settings, for tests, QA, the automated smoke runs and demos.
 - Embeds (ROADMAP 1.15): an embedded note shows its own embeds inside it, three notes deep; `![[Note#^id]]` shows
   one block; a note that does not exist offers Create note, a missing heading or block offers Open note, and an
   embed that comes back around or goes too deep says so instead of looping.
 
 ### Changed
 
+- Code (ROADMAP 1.16): use cases that only forwarded a call are gone, the editor's and the sidebar's ViewModels are
+  split into parts they route intents to, and no file is longer than 350 lines (`notekea:max-file-length`).
 - Plan (`ROADMAP.md`, `GUIDELINES.md` §6 and §8, `ARCHITECTURE.md` §10, `qa/README.md`, `CLAUDE.md`): every milestone
   ends with a performance pass (1.18, 2.9, 3.7, 4.3, 5.4) that profiles memory, idle RAM and timing on the automated
   smoke runs, which come with every new smoke case from 1.16 on; 1.16 also trims the code (no use case that only

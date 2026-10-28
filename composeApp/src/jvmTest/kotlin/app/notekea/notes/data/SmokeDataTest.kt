@@ -24,8 +24,8 @@ class SmokeDataTest {
         )
 
         assertEquals(
-            expected = mapOf(PERSONAL to 12, WORK to 6, EMPTY to 0),
-            actual = listOf(PERSONAL, WORK, EMPTY).associateWith {
+            expected = mapOf(PERSONAL to 12, WORK to 6, EMPTY to 0, SAMPLE to 40),
+            actual = listOf(PERSONAL, WORK, EMPTY, SAMPLE).associateWith {
                 val listing = scanner.scan(vaultPath = (VAULTS_DIRECTORY.toPath() / it).toString())
                 (listing as Outcome.Success).value.files.size
             }
@@ -35,6 +35,7 @@ class SmokeDataTest {
     companion object {
         private const val EMPTY = "Empty Vault"
         private const val PERSONAL = "Personal Notes"
+        private const val SAMPLE = "Sample Vault"
         private const val VAULTS_DIRECTORY = "../smoke-data/vaults"
         private const val WORK = "Work Obsidian"
     }
