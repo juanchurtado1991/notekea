@@ -98,7 +98,8 @@ internal fun ComposeUiTest.openNote(
     pressShortcut(key = Key.P)
     waitForText(text = FIND_NOTE)
     onNode(matcher = hasSetTextAction() and hasText(text = FIND_NOTE)).performTextInput(text = name)
-    waitForText(text = name, timeoutMillis = timeoutMillis)
+    // The name typed is in the search field at once: wait for it outside the field, as a result, before Enter.
+    waitUntilAtLeastOneExists(matcher = hasText(text = name) and !hasSetTextAction(), timeoutMillis = timeoutMillis)
     onNode(matcher = hasSetTextAction() and hasText(text = name)).performKeyInput { pressKey(key = Key.Enter) }
     waitForText(text = shownText, substring = true, timeoutMillis = timeoutMillis)
 }

@@ -36,7 +36,7 @@ class PersonalNotesMemoryRunTest {
         private val SEARCH = "tomato" to "Tomato plan"
         private val NOTES = listOf(
             "Arepas", "Café con leche", "Pasta e fagioli", "Lisbon trip", "Packing checklist", "Tomato plan",
-            "Reading list", "Old idea", "Notekea roadmap thoughts", "2026-10-20", "2026-10-21", "2026-10-22"
+            "Reading list", "Welcome", "Notekea roadmap thoughts", "2026-10-20", "2026-10-21", "2026-10-22"
         ).map { it to it }
     }
 }
