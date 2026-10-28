@@ -42,7 +42,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 16 / 18 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 17 / 18 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 9 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 8 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
@@ -509,7 +509,7 @@ and under its line in Edit. 1.15 completes them as Obsidian does (decided with t
 - **Done when:** `Editor/Embeds/Embeds practice` of the smoke data shows every case above in Preview and Edit, and
   the cases 1.15-01 to 1.15-05 of `MVP_SMOKE_TEST.md` pass.
 
-### ⬜ 1.16 Sample vault, automated smoke runs and code trim — `chore/sample-vault`
+### ✅ 1.16 Sample vault, automated smoke runs and code trim — `chore/sample-vault` — [notekea#67](https://github.com/juanchurtado1991/notekea/pull/67)
 
 Before M1's performance pass (1.18), the M1 code gets its test data, its automated smoke runs and a trim, decided
 with the developer on 2026-10-28. The smoke test of 1.18 then also proves the trim broke nothing.
