@@ -291,10 +291,10 @@ class WelcomeViewModelTest {
             getRecentVaults = fixture.getRecentVaults,
             locateVault = fixture.locateVault,
             openVault = fixture.openVault,
-            pickFolder = fixture.pickFolder,
+            folderPicker = fixture.folderPicker,
             removeRecentVault = fixture.removeRecentVault,
             restoreLastVault = fixture.restoreLastVault,
-            suggestVaultLocation = fixture.suggestVaultLocation
+            vaultFileSystem = fixture.fileSystem
         )
         advanceUntilIdle()
         return viewModel

@@ -1,12 +1,7 @@
 package app.notekea.notes.di
 
-import app.notekea.notes.domain.SavePropertiesFoldUseCase
-import app.notekea.notes.domain.GetPropertiesFoldUseCase
 import app.notekea.notes.presentation.editor.NoteInfoTools
 import app.notekea.notes.presentation.editor.PropertyTools
-import app.notekea.notes.presentation.tree.BookmarkTools
-import app.notekea.notes.domain.SaveBookmarksUseCase
-import app.notekea.notes.domain.GetBookmarksUseCase
 import app.notekea.notes.data.SettingsBookmarkStore
 import app.notekea.notes.domain.BookmarkStore
 import app.notekea.notes.data.GhostFrontmatterParser
@@ -18,13 +13,11 @@ import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.AttachFileUseCase
 import app.notekea.notes.domain.CreateFolderUseCase
 import app.notekea.notes.domain.CreateNoteUseCase
-import app.notekea.notes.domain.DeleteEntryUseCase
 import app.notekea.notes.domain.EditorPreferencesStore
 import app.notekea.notes.domain.GetSidePanelUseCase
 import app.notekea.notes.data.SettingsWorkspaceStore
 import app.notekea.notes.domain.GetNoteCoverUseCase
 import app.notekea.notes.domain.GetWorkspaceUseCase
-import app.notekea.notes.domain.SaveWorkspaceUseCase
 import app.notekea.notes.domain.WorkspaceStore
 import app.notekea.notes.presentation.workspace.WorkspaceTools
 import app.notekea.notes.presentation.workspace.WorkspaceViewModel
@@ -42,10 +35,7 @@ import app.notekea.notes.domain.FlattenTreeUseCase
 import app.notekea.notes.domain.FollowLinkUseCase
 import app.notekea.notes.domain.FuzzyMatcher
 import app.notekea.notes.domain.MarkdownLineStripper
-import app.notekea.notes.domain.GetEditorModeUseCase
-import app.notekea.notes.domain.GetTreePreferencesUseCase
 import app.notekea.notes.domain.GetNoteStatsUseCase
-import app.notekea.notes.domain.GetNoteTimesUseCase
 import app.notekea.notes.domain.LinkFinder
 import app.notekea.notes.domain.NaturalNameComparator
 import app.notekea.notes.domain.NoteMetadataCache
@@ -56,10 +46,7 @@ import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.RenameEntryUseCase
-import app.notekea.notes.domain.RevealEntryUseCase
-import app.notekea.notes.domain.SaveEditorModeUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
-import app.notekea.notes.domain.SaveTreePreferencesUseCase
 import app.notekea.notes.domain.SearchNoteContentUseCase
 import app.notekea.notes.domain.SearchNotesUseCase
 import app.notekea.notes.domain.TextFolder
@@ -87,11 +74,8 @@ val notesModule = module {
     single<BookmarkStore> { SettingsBookmarkStore(settings = get(), dispatchers = get()) }
     single<WorkspaceStore> { SettingsWorkspaceStore(settings = get(), dispatchers = get()) }
     factoryOf(::GetWorkspaceUseCase)
-    factoryOf(::SaveWorkspaceUseCase)
     factoryOf(::GetNoteCoverUseCase)
     factoryOf(::WorkspaceTools)
-    factoryOf(::GetEditorModeUseCase)
-    factoryOf(::SaveEditorModeUseCase)
     factoryOf(::GetSidePanelUseCase)
     factoryOf(::GetDailyNoteSettingsUseCase)
     factoryOf(::OpenDailyNoteUseCase)
@@ -101,27 +85,19 @@ val notesModule = module {
     factoryOf(::CreateTemplatesFolderUseCase)
     factoryOf(::DailyNoteTools)
     factoryOf(::NewNoteTools)
-    factoryOf(::BookmarkTools)
     factoryOf(::PropertyTools)
     factoryOf(::NoteInfoTools)
     factoryOf(::GetNoteStatsUseCase)
-    factoryOf(::GetNoteTimesUseCase)
-    factoryOf(::GetPropertiesFoldUseCase)
-    factoryOf(::SavePropertiesFoldUseCase)
-    factoryOf(::GetBookmarksUseCase)
-    factoryOf(::SaveBookmarksUseCase)
     factoryOf(::SaveSidePanelUseCase)
     factoryOf(::ApplyLinkUpdatesUseCase)
     factoryOf(::AttachFileUseCase)
     factoryOf(::AttachmentTools)
     factoryOf(::CreateFolderUseCase)
     factoryOf(::CreateNoteUseCase)
-    factoryOf(::DeleteEntryUseCase)
     factoryOf(::FlattenTreeUseCase)
     factoryOf(::FuzzyMatcher)
     factoryOf(::MarkdownLineStripper)
     factoryOf(::FollowLinkUseCase)
-    factoryOf(::GetTreePreferencesUseCase)
     factoryOf(::GhostFrontmatterParser)
     factoryOf(::NaturalNameComparator)
     factoryOf(::NoteTextCache)
@@ -133,8 +109,6 @@ val notesModule = module {
     factoryOf(::UpdateLinksAfterRenameUseCase)
     factoryOf(::RenameAndUpdateLinksUseCase)
     factoryOf(::RenameEntryUseCase)
-    factoryOf(::RevealEntryUseCase)
-    factoryOf(::SaveTreePreferencesUseCase)
     factoryOf(::SearchNoteContentUseCase)
     factoryOf(::SearchNotesUseCase)
     factoryOf(::TextFolder)
@@ -147,15 +121,14 @@ val notesModule = module {
             newNotes = get(),
             createFolder = get(),
             renameEntry = get(),
-            deleteEntry = get(),
-            revealEntry = get(),
+            trash = get(),
+            fileRevealer = get(),
             fileOpener = get(),
             days = get(),
-            bookmarkTools = get(),
+            bookmarkStore = get(),
             updateLinksAfterRename = get(),
             followLink = get(),
-            getTreePreferences = get(),
-            saveTreePreferences = get()
+            treePreferencesStore = get()
         )
     }
     viewModel { parameters ->
@@ -165,8 +138,7 @@ val notesModule = module {
             saveNote = get(),
             observeNoteOnDisk = get(),
             renameAndUpdateLinks = get(),
-            getEditorMode = get(),
-            saveEditorMode = get(),
+            editorPreferences = get(),
             attachmentTools = get(),
             fillTemplate = get(),
             propertyTools = get(),

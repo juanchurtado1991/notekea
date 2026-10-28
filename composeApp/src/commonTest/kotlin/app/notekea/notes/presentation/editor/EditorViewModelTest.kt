@@ -6,8 +6,6 @@ import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.ListAction
 import app.notekea.notes.domain.FakeNoteContentStore
 import app.notekea.notes.domain.FakeNoteFileOperations
-import app.notekea.notes.domain.SaveEditorModeUseCase
-import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.FakeEditorPreferencesStore
 import app.notekea.notes.domain.FakeNoteScanner
 import app.notekea.notes.domain.LinkKind

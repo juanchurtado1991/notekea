@@ -1,5 +1,7 @@
 package app.notekea.vault.presentation.welcome
 
+import app.notekea.vault.domain.VaultFileSystem
+import app.notekea.vault.domain.FolderPicker
 import app.notekea.core.domain.Outcome
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
@@ -7,10 +9,8 @@ import app.notekea.vault.domain.CreateVaultUseCase
 import app.notekea.vault.domain.GetRecentVaultsUseCase
 import app.notekea.vault.domain.LocateVaultUseCase
 import app.notekea.vault.domain.OpenVaultUseCase
-import app.notekea.vault.domain.PickFolderUseCase
 import app.notekea.vault.domain.RemoveRecentVaultUseCase
 import app.notekea.vault.domain.RestoreLastVaultUseCase
-import app.notekea.vault.domain.SuggestVaultLocationUseCase
 import app.notekea.vault.domain.Vault
 import app.notekea.vault.domain.VaultError
 import co.touchlab.kermit.Logger
@@ -27,10 +27,10 @@ class WelcomeViewModel(
     private val getRecentVaults: GetRecentVaultsUseCase,
     private val locateVault: LocateVaultUseCase,
     private val openVault: OpenVaultUseCase,
-    private val pickFolder: PickFolderUseCase,
+    private val folderPicker: FolderPicker,
     private val removeRecentVault: RemoveRecentVaultUseCase,
     private val restoreLastVault: RestoreLastVaultUseCase,
-    private val suggestVaultLocation: SuggestVaultLocationUseCase
+    private val vaultFileSystem: VaultFileSystem
 ) : BaseViewModel<WelcomeState, WelcomeIntent, Nothing>(
     initialState = WelcomeState(platformConventions = platformConventions)
 ) {
@@ -65,7 +65,7 @@ class WelcomeViewModel(
     private fun changeNewVaultLocation() {
         val form = state.value.newVaultForm ?: return
         launchGuarded(onError = ::showUnexpectedError) {
-            val parentPath = pickFolder(initialPath = form.parentPath) ?: return@launchGuarded
+            val parentPath = folderPicker.pickFolder(initialPath = form.parentPath) ?: return@launchGuarded
             updateNewVaultForm { it.copy(parentPath = parentPath) }
         }
     }
@@ -79,7 +79,7 @@ class WelcomeViewModel(
         missingPath: String
     ) {
         launchGuarded(onError = ::showUnexpectedError) {
-            val newPath = pickFolder(initialPath = null) ?: return@launchGuarded
+            val newPath = folderPicker.pickFolder(initialPath = null) ?: return@launchGuarded
             openNow { locateVault(missingPath = missingPath, newPath = newPath) }
         }
     }
@@ -101,7 +101,7 @@ class WelcomeViewModel(
 
     private fun pickAndOpen() {
         launchGuarded(onError = ::showUnexpectedError) {
-            val path = pickFolder(initialPath = null) ?: return@launchGuarded
+            val path = folderPicker.pickFolder(initialPath = null) ?: return@launchGuarded
             openNow { openVault(path = path) }
         }
     }
@@ -127,7 +127,7 @@ class WelcomeViewModel(
         suggestedName: String
     ) {
         launchGuarded(onError = ::showUnexpectedError) {
-            val parentPath = suggestVaultLocation()
+            val parentPath = vaultFileSystem.suggestedParentFolder()
             val form = NewVaultForm(name = suggestedName, parentPath = parentPath)
             reduce { it.copy(newVaultForm = form, error = null) }
         }

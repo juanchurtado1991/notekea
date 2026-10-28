@@ -2,8 +2,6 @@ package app.notekea.notes.presentation.editor
 
 import app.notekea.notes.domain.FrontmatterContent
 import app.notekea.notes.domain.PropertyValue
-import app.notekea.notes.domain.SavePropertiesFoldUseCase
-import app.notekea.notes.domain.GetPropertiesFoldUseCase
 import app.notekea.notes.domain.FillTemplateUseCase
 import app.notekea.core.domain.time.FakeLocalCalendar
 import androidx.compose.ui.text.TextRange
@@ -26,10 +24,7 @@ import app.notekea.notes.data.OkioNoteFileOperations
 import app.notekea.notes.data.OkioNoteScanner
 import app.notekea.notes.data.SettingsEditorPreferencesStore
 import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
-import app.notekea.notes.domain.GetEditorModeUseCase
 import app.notekea.notes.domain.GetNoteStatsUseCase
-import app.notekea.notes.domain.GetNoteTimesUseCase
-import app.notekea.notes.domain.SaveEditorModeUseCase
 import com.russhwolf.settings.MapSettings
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
@@ -209,25 +204,18 @@ class EditorOnDiskTest {
             saveNote = SaveNoteUseCase(noteContentStore = store),
             observeNoteOnDisk = ObserveNoteOnDiskUseCase(noteScanner = scanner, noteContentStore = store),
             renameAndUpdateLinks = renameAndUpdateLinks(store = store, scanner = scanner, dispatchers = dispatchers),
-            getEditorMode = GetEditorModeUseCase(editorPreferencesStore = preferences),
-            saveEditorMode = SaveEditorModeUseCase(editorPreferencesStore = preferences),
+            editorPreferences = preferences,
             attachmentTools = attachmentTools(dispatchers = dispatchers),
             fillTemplate = fillTemplate(store = store, dispatchers = dispatchers),
-            propertyTools = propertyTools(preferences = preferences),
+            propertyTools = propertyTools(),
             noteInfoTools = NoteInfoTools(
                 getNoteStats = GetNoteStatsUseCase(linkFinder = JetBrainsMarkdownLinkFinder()),
-                getNoteTimes = GetNoteTimesUseCase(
-                    noteTimesReader = OkioNoteTimesReader(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
-                )
+                noteTimesReader = OkioNoteTimesReader(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
             )
         )
     }
 
-    private fun propertyTools(
-        preferences: SettingsEditorPreferencesStore
-    ): PropertyTools = PropertyTools(
-        getPropertiesFold = GetPropertiesFoldUseCase(editorPreferencesStore = preferences),
-        savePropertiesFold = SavePropertiesFoldUseCase(editorPreferencesStore = preferences),
+    private fun propertyTools(): PropertyTools = PropertyTools(
         localCalendar = FakeLocalCalendar(),
         clock = Clock.System
     )
