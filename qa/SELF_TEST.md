@@ -67,9 +67,10 @@ val notekeaSuite = testBuddy(appName = "Notekea", version = AppVersion.current) 
 fun main() = testBuddyApp(notekeaSuite) // the "Notekea Self-Test" app
 ```
 
-- **Verbs, not finders:** `click("text")`, `type`, `press(Mod + P)`, `scroll`, `waitFor("text")`, `expectText`,
-  `expectTab`, `expectFile`, `screenshot()`. They wrap Compose UI Test, which stays reachable for what the verbs do
-  not cover, and map `Mod` to each system's key.
+- **Verbs, not finders:** `click`, `type`, `press(Mod + Key.P)`, `scrollTo`, `expectText`, `expectNoText`, `file`,
+  `expectFile`, `expectNoFile` (the full list is in `test-buddy/README.md`). They wrap Compose UI Test, which stays
+  reachable as `ui` for what the verbs do not cover, and map `Mod` to each system's key. Verbs that know the app
+  (`openVault`, `expectTab`) are written by the host, in `:selftest`.
 - **Each automated case starts clean:** a temporary app data folder, fresh copies of its data, a timeout; on failure
   it keeps a screenshot and a plain message ("expected the tab 'Lisbon trip', it did not appear").
 - **The host only says how to launch itself** on those folders (`launch`) and what to back up (`backUp`); Test Buddy

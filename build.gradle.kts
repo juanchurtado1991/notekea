@@ -50,6 +50,7 @@ fun KoverProjectExtension.applyNotekeaCoverageRules() {
 dependencies {
     kover(project(":composeApp"))
     kover(project(":ktlint-rules"))
+    kover(project(":test-buddy"))
 }
 
 kover {
