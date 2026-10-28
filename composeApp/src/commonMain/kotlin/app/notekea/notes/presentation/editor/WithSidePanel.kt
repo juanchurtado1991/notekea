@@ -43,6 +43,9 @@ fun WithSidePanel(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    val actions = remember(sidePanel, onHeadingClick, onLeave) {
+        actionsOf(sidePanel = sidePanel, onHeadingClick = onHeadingClick, onLeave = onLeave)
+    }
     BoxWithConstraints(modifier = modifier) {
         val room = maxWidth - EDITOR_MIN_WIDTH_DP.dp
         val isOverlay = room < SidePanelPreferences.MIN_WIDTH_DP.dp
@@ -65,7 +68,7 @@ fun WithSidePanel(
                     current = current,
                     preferences = preferences,
                     platformConventions = platformConventions,
-                    actions = actionsOf(sidePanel = sidePanel, onHeadingClick = onHeadingClick, onLeave = onLeave),
+                    actions = actions,
                     info = info,
                     outlineFocus = sidePanel.outlineFocus
                 )

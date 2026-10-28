@@ -177,8 +177,15 @@ class WorkspaceViewModel(
         readPreviews()
     }
 
-    /** Reads the file shown by each pane's tab, when it is a file and was not read yet or changed on disk. */
+    /**
+     * Reads the file shown by each pane's tab, when it is a file and was not read yet or changed on disk, and lets go
+     * of the files no tab holds any more: a full-size image can take tens of megabytes.
+     */
     private fun readPreviews() {
+        val open = state.value.workspace.panes.flatMapTo(destination = mutableSetOf()) { it.tabs }
+        if (state.value.previews.keys.any { it !in open }) {
+            reduce { it.copy(previews = it.previews.filterKeys { path -> path in open }) }
+        }
         val current = state.value
         current.workspace.panes.mapNotNull { it.activePath }.forEach { path ->
             val file = current.tree.attachments[path] ?: return@forEach

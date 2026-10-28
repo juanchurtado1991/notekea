@@ -50,7 +50,7 @@ import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.platform.matches
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.core.presentation.theme.notekeaCodeTextStyle
+import app.notekea.core.presentation.theme.LocalNotekeaCodeTextStyle
 import app.notekea.notes.domain.ListAction
 import app.notekea.notes.domain.ListEditing
 import app.notekea.resources.Res
@@ -71,7 +71,7 @@ private fun rememberHighlighting(
 ): MarkdownOutputTransformation {
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
-    val codeFontFamily = notekeaCodeTextStyle().fontFamily
+    val codeFontFamily = LocalNotekeaCodeTextStyle.current.fontFamily
     val currentFind = rememberUpdatedState(newValue = find)
     return remember(colors, typography, codeFontFamily) {
         MarkdownOutputTransformation(
