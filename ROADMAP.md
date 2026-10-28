@@ -29,7 +29,7 @@ had one. The M5 run is the release run.
 | Milestone | Goal | Estimate | Status |
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
-| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 15 / 18 |
+| M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 16 / 18 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph | 2.5 weeks | 0 / 8 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode | 3 weeks | 0 / 7 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 2 |
@@ -477,7 +477,7 @@ and zoom, and two rounds of polish (below). The graph view (2.7) and onboarding 
 - **Done when:** round-tripping every sample-vault note through the properties view produces byte-identical
   files when nothing was edited, and the cases 1.14-01 to 1.14-15 of `MVP_SMOKE_TEST.md` pass.
 
-### ⬜ 1.15 Embeds — `feature/embeds`
+### ✅ 1.15 Embeds — `feature/embeds` — [notekea#66](https://github.com/juanchurtado1991/notekea/pull/66)
 
 1.8 already shows `![[Other note]]` and `![[Other note#Heading]]` in a frame whose title opens the note, in Preview
 and under its line in Edit. 1.15 completes them as Obsidian does (decided with the developer):
