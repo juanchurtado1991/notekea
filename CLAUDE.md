@@ -64,7 +64,8 @@ data folder. Within the feature's steps:
 
 1. **Data:** add what the smoke test needs to `smoke-data/` (inside the repository when Git can hold it, otherwise
    as a step of `smoke.sh` and `smoke.ps1`) and list it in `smoke-data/README.md`. The developer never invents data.
-2. **New cases:** add the feature's release cases to `MVP_SMOKE_TEST.md`, written so they can be reproduced on
+2. **New cases:** add the feature's release cases to `MVP_SMOKE_TEST.md` (by hand until `qa/README.md` piece 5;
+   after it, in the Self-Test's cases, regenerating the file with `./gradlew :selftest:smokeCases`), written so they can be reproduced on
    Windows, macOS and Linux (name both `smoke.sh` and `smoke.ps1`, and the shortcut on each platform).
 3. **Outdated cases:** rewrite in place, keeping their IDs, the existing cases the change makes outdated, including
    those marked "Revised by <feature>"; mark the cases a later feature will change with a "Revised by" note.

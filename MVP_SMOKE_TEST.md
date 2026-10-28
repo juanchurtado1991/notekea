@@ -6,6 +6,10 @@ works for a real person on a real machine. It is the main source of bugs before 
 
 ## How this file works
 
+> **Becoming generated:** once `qa/README.md` piece 5 lands, this file is generated from the Notekea Self-Test's
+> cases (`./gradlew :selftest:smokeCases`) and is no longer edited by hand (`qa/SELF_TEST.md`). Until then, it is
+> the master list below.
+
 - **Every feature pull request adds its cases here**, under its milestone, in the same pull request
   (`GUIDELINES.md` §8). A case is something a person can do and see, written so that someone who never saw the
   feature can follow it.

@@ -36,10 +36,10 @@ this list and builds what is missing). The design is in [SELF_TEST.md](SELF_TEST
 | 2 | Triage | **Checked by** filled in for every General and M1 case, splitting mixed ones; the share that is `Self-Test` | ⬜ |
 | 3 | Self-Test SDK | `:selftest-sdk`: case types, runner, JUnit bridge, window, report, its texts in English and Spanish. First a spike: Compose UI Test driving the app inside a packaged app, on the three systems | ⬜ |
 | 4 | Notekea's suite | `:selftest`: the smoke runs of `app.notekea.smokerun` moved in as the first cases, the bundled smoke data, data preparation in Kotlin (called by `smoke.sh` / `smoke.ps1`), back up and restore, the consistency test, `packageSelfTest` | ⬜ |
-| 5 | M1 cases | Every General and M1 case as an `AutomatedCase` or a `ManualCase` (English and Spanish), in four pull requests: 1.1–1.5, 1.6–1.9, 1.10–1.13, 1.14–1.18 and General | ⬜ |
+| 5 | M1 cases | Every General and M1 case as an `AutomatedCase` or a `ManualCase` (English and Spanish), in four pull requests: 1.1–1.5, 1.6–1.9, 1.10–1.13, 1.14–1.18 and General. The last one makes `MVP_SMOKE_TEST.md` generated from the cases (`SELF_TEST.md`) | ⬜ |
 | 6 | File logs and Copy diagnostics | Logs written to a rotating file in the app data folder (never note content, `ARCHITECTURE.md` §9), **Help → Copy diagnostics** (version, OS, last log lines), read by the Self-Test's report | 🟡 Crash reports with Copy details and Report on GitHub done; rotating logs and Copy diagnostics still to do |
 | 7 | Milestone build workflow | `.github/workflows/milestone-build.yml`: on a tag `m<N>-rc<k>`, packages Notekea and Notekea Self-Test (`.msi`, `.dmg`, `.deb`) on the three runners and publishes a GitHub **pre-release** with them and the testers' guides. Unsigned until `ROADMAP.md` 5.3 | ⬜ |
-| 8 | Testers' guides | `GUIDE_*.md` rewritten as: install both apps, run the Self-Test, send the report; `M1_SMOKE_TEST.md` retired, its steps now living in the manual cases | ⬜ |
+| 8 | Testers' guides | `GUIDE_*.md` rewritten as: install both apps, run the Self-Test, send the report; `M1_SMOKE_TEST.md` and `REPORT_TEMPLATE.txt` deleted, their steps now living in the manual cases | ⬜ |
 
 Change ⬜ to ✅ with the pull request link as each one lands. Already done: the automated smoke runs (1.16,
 `app.notekea.smokerun`), which piece 4 turns into the first cases.
@@ -72,6 +72,6 @@ Change ⬜ to ✅ with the pull request link as each one lands. Already done: th
   developers.
 - `SELF_TEST.md`: the Self-Test's design and how every feature keeps it up to date.
 - `M1_SMOKE_TEST.md`: every M1 case written out click by click for the three systems; the source of the M1 manual
-  cases' texts, retired by piece 8.
-- `REPORT_TEMPLATE.txt`: what a tester filled in before the Self-Test's report; retired by piece 8.
+  cases' texts, deleted by piece 8.
+- `REPORT_TEMPLATE.txt`: what a tester filled in before the Self-Test's report; deleted by piece 8.
 - `runs/TEMPLATE.md`: the record of one run; `runs/M<N>.md` once it starts.

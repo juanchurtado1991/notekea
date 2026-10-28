@@ -72,17 +72,33 @@ The share of `Self-Test` cases is printed by the consistency test and should sta
 The Self-Test is never written at the end of a milestone. Every `feature/` and `fix/` pull request, in the step that
 adds the behavior:
 
-1. Adds or revises its cases in `MVP_SMOKE_TEST.md`, with **Checked by**.
+1. Adds or revises its cases, with **Checked by** (in `MVP_SMOKE_TEST.md` by hand until piece 5; after it, in the
+   cases themselves, and regenerates the file).
 2. Writes each `Self-Test` case as an `AutomatedCase` named after its ID, in `:selftest`; it runs in CI from then on.
 3. Writes each manual case as a `ManualCase`, its steps and expected result in **English and Spanish**
    (`values/` and `values-es/` of `:selftest`): plain words, the button and menu names as the tester sees them, the
    shortcut of each system, never a terminal command or a file path the tester must type.
 4. Adds the data the cases need to `smoke-data/` (bundled automatically).
 5. Keeps the consistency test green: it fails when a case of `MVP_SMOKE_TEST.md` has no `AutomatedCase` or
-   `ManualCase` with its ID, when one exists for a removed case, or when a manual case lacks a language.
+   `ManualCase` with its ID, when one exists for a removed case, when a manual case lacks a language, and (after
+   piece 5) when the generated file is out of date.
 
 A pull request that adds UI also brings the screen's UI tests (`GUIDELINES.md` §10). The developer's feature smoke
 test uses the same app: `./gradlew :selftest:run -Pcases=1.19` opens the Self-Test with only that feature's cases.
+
+## `MVP_SMOKE_TEST.md` becomes generated
+
+Until piece 5 of `qa/README.md` lands, `MVP_SMOKE_TEST.md` is the master list, written by hand: the triage and the
+M1 cases are written from it. Then the Self-Test's cases become the **only source** and the file is **generated**
+from them (`./gradlew :selftest:smokeCases`), so no case is written twice:
+
+- Each case in code carries what the file shows: its ID, title, steps, expected result, **Checked by** and
+  "Testable from". Manual cases take them from their English string resources.
+- The file keeps its readable layout, by milestone and feature, so a reviewer reads in a pull request's diff what is
+  tested without reading Kotlin. Its header says it is generated and must not be edited.
+- The consistency test fails when the committed file differs from what the cases generate.
+- The Win, macOS and Linux columns go: results live in the Self-Test's reports and in `qa/runs/M<N>.md`.
+- `qa/M1_SMOKE_TEST.md`, the step-by-step guide, is deleted in piece 8: its steps live in the manual cases.
 
 ## Languages
 
