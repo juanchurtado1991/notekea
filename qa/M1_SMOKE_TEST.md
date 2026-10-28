@@ -58,11 +58,11 @@ cases may change freely. Run it again whenever a session asks you to start from 
 
 ### Running a command during a case
 
-When a case says **run `large`** (or `move`, `lock`, `outside`, `edit-note`…), type in the terminal the same line as
+When a case says **run `move`** (or `lock`, `outside`, `edit-note`…), type in the terminal the same line as
 `prepare` with that word instead of `prepare`:
 
-- Windows: `powershell -ExecutionPolicy Bypass -File "$HOME\Documents\smoke-data\smoke.ps1" large`
-- macOS and Linux: `bash ~/Documents/smoke-data/smoke.sh large`
+- Windows: `powershell -ExecutionPolicy Bypass -File "$HOME\Documents\smoke-data\smoke.ps1" move`
+- macOS and Linux: `bash ~/Documents/smoke-data/smoke.sh move`
 
 Three commands change Notekea's own settings, not only the sample notes: `first-launch` (Notekea starts as if newly
 installed), `clear-cache` (it forgets the notes it has read) and `restore-settings` (it gets back what `first-launch`
@@ -448,14 +448,14 @@ row.
 **Pass when:** within a second, without clicking: Inbox/Created outside appears, Ideas/Reading list disappears, and
 Lisbon trip shows the new `#edited` tag when selected.
 
-### 1.4-10 · A vault of 5,000 notes
+### 1.4-10 · A large vault opens quickly
 
-1. Run `large` and `clear-cache`.
-2. Open `smoke-data/scratch/Large Vault` and watch the sidebar.
+1. Run `clear-cache`.
+2. Open `smoke-data/vaults/Ghost Serializer` (a code repository written out as 371 notes) and watch the sidebar.
 3. Quit Notekea and start it again.
 
-**Pass when:** the first time, the 5,000 notes are listed in about a second (the sidebar shows grey placeholder rows
-meanwhile); after the restart the tree appears at once, in under a second.
+**Pass when:** the first time, every module and its notes are listed in about a second (the sidebar may show grey
+placeholder rows meanwhile); after the restart the tree appears at once, in under a second.
 
 ### 1.4-11 · Resizing and hiding the sidebar
 
@@ -661,15 +661,16 @@ words or a `#tag` can be typed. Press Esc.
 
 **Pass when:** "Shared note" is listed with the line "Edited outside Notekea at …" just added. Press Esc.
 
-### 1.6-10 · Searching 5,000 notes
+### 1.6-10 · Searching a large vault
 
-1. Run `large`; open `smoke-data/scratch/Large Vault`.
-2. Press Mod+P and type `note 07 042`; press Esc.
-3. Press Mod+Shift+F and type `see`; press Esc; press Mod+Shift+F and type `see` again.
+1. Open `smoke-data/vaults/Ghost Serializer`.
+2. Press Mod+P and type `flatreader`; press Esc.
+3. Press Mod+Shift+F and type `perfect hash`; press Esc; press Mod+Shift+F and type it again.
 4. Open the Playground Vault again (Open another vault › Playground Vault).
 
-**Pass when:** names filter as fast as you type and "Note 07 042" ends up first; the first content search over the
-5,000 notes shows its results within about two seconds, and the second is immediate.
+**Pass when:** names filter as fast as you type and "GhostJsonFlatReader" ends up among the first, with the other flat
+readers; the first content search over the 371 notes shows its results at once, with "PerfectHashFinder" among them,
+and the second is immediate.
 
 ### 1.6-11 · The keyboard comes back to the note
 
@@ -1577,14 +1578,14 @@ the tree and the outline show a scrollbar only while they have more than fits, a
 
 ### 1.14-12 · The status bar
 
-1. Run `large` and `clear-cache`; open `smoke-data/scratch/Large Vault` and watch the bottom of the window while it
-   loads.
+1. Run `clear-cache`; open `smoke-data/vaults/Ghost Serializer` and watch the bottom of the window closely while it
+   loads (it can be quick).
 2. Run `prepare`; open the Playground Vault.
 3. Open Editor/Tasks and callouts and click at the start of "Buy corn flour"; hover the line:column on the right.
 4. Open Editor/Windows line endings; press Mod+E (Preview); press Mod+E again.
 5. Open the Recipes folder in a tab.
 
-**Pass when:** a thin bar runs along the bottom of the window; while the Large Vault loads it shows "Loading notes…"
+**Pass when:** a thin bar runs along the bottom of the window; while Ghost Serializer loads it shows "Loading notes…"
 with a moving bar; then "Playground Vault › Editor › Tasks and callouts" on the left and "8:7 | LF | UTF-8 | 236 words"
 on the right (hovering 8:7 says "Line 8, column 7"); Windows line endings shows CRLF; in Preview the line:column goes
 away; the folder's tab shows only "Playground Vault › Recipes".
