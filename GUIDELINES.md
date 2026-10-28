@@ -180,17 +180,20 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
      app holds idle after one and ten minutes, whether closing notes, tabs and vaults gives memory back, startup time
      and typing latency; records the numbers in `docs/performance.md` next to the previous milestone's; and cuts what
      grew or leaks against the budgets of `ROADMAP.md` 5.4. Its smoke test also checks that nothing broke.
-  3. **Milestone QA run** (`qa/README.md`): when the last feature of a milestone is on `main`, testers run the
-     automated UI tests and then the manual cases of `MVP_SMOKE_TEST.md` accumulated so far, on **Windows, macOS and
-     Linux**, with packaged builds published as a GitHub pre-release. The milestone is closed only when the three
-     OSes pass. The first run, at the end of M1, is retroactive: it covers everything since M0.
+  3. **Milestone QA run** (`qa/README.md`): when the last feature of a milestone is on `main`, testers install
+     Notekea and the **Notekea Self-Test** from a GitHub pre-release on **Windows, macOS and Linux**; the Self-Test
+     runs the automatic cases of `MVP_SMOKE_TEST.md` accumulated so far and walks them through the manual ones
+     (`qa/SELF_TEST.md`). The milestone is closed only when the three OSes pass. The first run, at the end of M1, is
+     retroactive: it covers everything since M0.
   4. **Release run**: the milestone QA run of M5, with the release builds, which are not signed (`ROADMAP.md` 5.3,
      5.5).
-- **Automated UI tests** (Compose `ui-test`, `runComposeUiTest`) cover every screen and its states: they run in CI on
-  the three OSes on every pull request and block the merge when they fail, and they are packaged as the
-  **Notekea Self-Test** app that testers run first in a milestone QA run. Every step that adds or changes UI brings
-  its UI tests in the same pull request. Status: the infrastructure is planned in `qa/README.md` ("Before the first
-  run"); until it lands, UI is reviewed headless with `ImageComposeScene` and by the feature smoke test.
+- **The Notekea Self-Test is kept up to date by every feature, never at the end of a milestone**
+  (`qa/SELF_TEST.md`). Every case of `MVP_SMOKE_TEST.md` is checked by the Self-Test, automatically (the target is
+  80% of the cases or more) or as a manual case it walks the tester through. In the step that adds the behavior, every
+  `feature/` and `fix/` pull request writes each new or changed case as an `AutomatedCase` (named after its ID, run in
+  CI on the three systems through the JUnit bridge) or a `ManualCase` (steps and expected result in English and
+  Spanish, in plain words, no terminal), in `:selftest`, and adds its data to `smoke-data/`. The consistency test
+  fails when a case has no counterpart. Every step that adds or changes UI also brings its screen tests (§10).
 - **Manual smoke test before a `feature/` or `fix/` branch reaches `main`.** Automated tests do not prove the
   app works as a whole, so the developer runs the app (`./gradlew :composeApp:run`) on **at least one OS** and checks:
   1. The app starts and the main window renders without errors in the log.
@@ -216,18 +219,16 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   run in `check` and CI, so the cases accumulate feature after feature, and a feature that changes a case updates
   its test. The agent also runs the `smoke.sh` commands with `SMOKE_SCRATCH=scratch-agent` (never the developer's
   `smoke-data/scratch`) and checks every expected value the guide states (names, counts, file contents) against
-  the data in `smoke-data/`. The cases of 1.1 to 1.5, written before this rule, are automated by the backfill of
-  `qa/README.md` before the M1 run. Screens rendered while
+  the data in `smoke-data/`. The cases of 1.1 to 1.5, written before this rule, become Self-Test cases with the rest
+  of M1 before the M1 run (`qa/README.md`, piece 5). Screens rendered while
   developing are shown to the developer in the conversation, never committed or attached to pull requests: design
   decisions are made in the smoke test, using the app.
-- **Automated smoke runs come with the smoke cases** (infrastructure from `ROADMAP.md` 1.16): every case added to
-  `MVP_SMOKE_TEST.md` that a script can drive is also added as a scenario of the automated smoke runs, which start the
-  real app (its real window and files, with a temporary app data folder, never the user's) on copies of the smoke
-  data and check the case's expected result. They live in `app.notekea.smokerun` (`jvmTest`, Compose UI Test), run in
-  every `jvmTest` and so in CI on the three systems, and `./gradlew :composeApp:smokeRun -PidleSeconds=600` runs them
-  alone and records the memory of each in `build/reports/smoke-runs/memory.csv`, the workload every performance pass
-  measures. A run drives the UI as a person does (find by text, click, type, shortcuts) and checks what the case
-  expects, down to the files on disk.
+- **Automated cases are smoke runs** (infrastructure from `ROADMAP.md` 1.16, moving into `:selftest`): they start
+  the real app (its real window and files, with a temporary app data folder, never the user's) on copies of the smoke
+  data, drive the UI as a person does (find by text, click, type, shortcuts) and check what the case expects, down to
+  the files on disk. They run in every `jvmTest` and so in CI on the three systems, and
+  `./gradlew :composeApp:smokeRun -PidleSeconds=600` runs them alone and records the memory of each in
+  `build/reports/smoke-runs/memory.csv`, the workload every performance pass measures.
 - **Every `feature/` and `fix/` branch adds its cases to `MVP_SMOKE_TEST.md`** (in a step): what a person must check on
   each OS, including cases that only become testable with later features. Every milestone QA run executes all the
   cases testable so far on Windows, macOS and Linux, and the release run executes the whole file; it is the main
@@ -269,7 +270,7 @@ The commit is blocked if any step fails. `git commit --no-verify` is for emergen
 - **Each step also tests the real thing,** because the bugs the 1.5 smoke test found were real-world ones (timing,
   line endings, parallel work), not logic: an integration test of the real adapters on real files in a temporary
   directory (`jvmTest`, like `EditorOnDiskTest`), and for a step with UI a headless screen test with
-  `ImageComposeScene` that drives the screen through its states (until the UI tests of §8 exist).
+  `ImageComposeScene` that drives the screen through its states.
 - **A library is tested the way we use it:** when a step adds a library, it brings a test of our use of it with real
   data and, where the library works in the background, under concurrency (the 1.5 Read mode crash came from a
   highlighter that is not safe to share between threads).

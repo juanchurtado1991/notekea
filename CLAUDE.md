@@ -7,6 +7,8 @@ Before changing anything, read and follow:
   injected dispatchers and clock, string resources, testing strategy (fakes, never a real model in unit tests).
 - `PLATFORM_GUIDELINES.md` — UI behavior on Windows, macOS and Linux.
 - `LIBRARIES.md` — the approved libraries and why. Do not add a library that is not listed there without asking.
+- `qa/SELF_TEST.md` — how every smoke case is tested on the testers' machines (the Notekea Self-Test) and what each
+  feature must add to it.
 - `ROADMAP.md` — milestones, features (with branch names, status and the UI specification of each screen).
   In the feature's pull request to `main`, mark it ✅ with the PR link and update the milestone count.
 
@@ -66,28 +68,34 @@ data folder. Within the feature's steps:
    Windows, macOS and Linux (name both `smoke.sh` and `smoke.ps1`, and the shortcut on each platform).
 3. **Outdated cases:** rewrite in place, keeping their IDs, the existing cases the change makes outdated, including
    those marked "Revised by <feature>"; mark the cases a later feature will change with a "Revised by" note.
-4. **Results:** the developer's results go in the description of the pull request to `main` (OS, version, what was
+4. **Self-Test:** give every new or changed case its **Checked by** (`Self-Test`, or `Manual (<reason>)` only for
+   eyes, system or packaged) and write it in `:selftest` in the same step: an `AutomatedCase` named after its ID, or
+   a `ManualCase` with its steps and expected result in English and Spanish, in plain words for a tester who is not
+   a developer (no terminal, no paths to type). Keep the consistency test green (`qa/SELF_TEST.md`).
+5. **Results:** the developer's results go in the description of the pull request to `main` (OS, version, what was
    checked); the OS
    columns of `MVP_SMOKE_TEST.md` are only filled in the release run with a packaged build.
 
 ## Testing levels (`GUIDELINES.md` §8)
 
 1. **Feature smoke test** — the section above: the developer runs it with your script before a feature reaches
-   `main`. Every automatable case you add also becomes a scenario of the automated smoke runs (`ROADMAP.md` 1.16,
-   `app.notekea.smokerun`, `./gradlew :composeApp:smokeRun`), listed as "smoke run" in its **Automated** column.
+   `main`. Every automatable case you add also becomes an automated case of the Self-Test (point 4 above), the
+   automated smoke runs of `ROADMAP.md` 1.16, listed in its **Automated** column.
 2. **Milestone performance pass** — the last item of every milestone (1.18, 2.9, 3.7, 4.3, 5.4): run the automated
    smoke runs while sampling memory, profile where it goes and idle RAM, record it in `docs/performance.md`, cut
    what grew. Its smoke test also proves nothing broke.
 3. **Milestone QA run** — `qa/README.md`. When the last feature of a milestone (M1–M4) is merged into `main`, do not
    start the next milestone: check the "Before the first run" table in `qa/README.md` and build what is still ⬜
    (one `chore/` or `test/` pull request each, reviewed like any other), then follow its steps: tag `m<N>-rc<k>`,
-   open `qa/runs/M<N>.md`, hand the testers their guide (`qa/GUIDE_*.md`), turn every failure in their reports into
+   open `qa/runs/M<N>.md`, hand the testers the release and their guide (`qa/GUIDE_*.md`): they install Notekea and
+   the Notekea Self-Test and send its report. Turn every failure in their reports into
    an issue and a `fix/` branch, publish the next release candidate and retest until Windows, macOS and Linux pass.
    The M1 run is retroactive: it covers everything since M0.
 4. **Release run** — the M5 milestone run with the release builds (unsigned, `ROADMAP.md` 5.3).
 
-**Automated UI tests** come with every step that adds or changes UI, once the UI test infrastructure of
-`qa/README.md` exists; until then, review UI headless with `ImageComposeScene`.
+**The Self-Test is never left for the end of a milestone:** every feature keeps it current, so a milestone's QA
+run only needs a tag. Every step that adds or changes UI also brings its screen tests, and UI is reviewed headless
+with `ImageComposeScene` while it is built.
 
 ## Skills from another working directory
 

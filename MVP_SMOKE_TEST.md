@@ -12,10 +12,12 @@ works for a real person on a real machine. It is the main source of bugs before 
 - **Every feature pull request also revises the cases it makes outdated**, in place and keeping their IDs, so the
   file always describes the current app. A case that a later feature will change says so in a note under its table
   ("Revised by 1.4"); that feature's pull request rewrites the case and removes the note.
-- **Automated** names the test that runs a case on every build (`EditorScreenTest`), so a case checked once keeps
-  being checked as the app grows; "manual" marks what only a person can check (native pickers, real permissions,
-  installers, the system clipboard), and empty means not automated yet. A feature that changes a case updates its
-  test in the same pull request. Automated cases still run by hand in the QA runs, on packaged builds.
+- **Checked by** says how the Notekea Self-Test checks the case on the testers' machines (`qa/SELF_TEST.md`):
+  `Self-Test` when it runs automatically, `Manual (eyes)`, `Manual (system)` or `Manual (packaged)` when it walks the
+  tester through it. At least 80% of the cases are `Self-Test`. (The column is filled in by `qa/README.md` piece 2.)
+- **Automated** names the tests that check a case on every build: its `AutomatedCase`, named after its ID, and the
+  screen or integration tests behind it (`EditorScreenTest`), so a case checked once keeps being checked as the app
+  grows. A feature that changes a case updates its tests and its Self-Test case in the same pull request.
 - Cases that depend on a feature not built yet say so in **Testable from**; they still go in now, so nothing is
   forgotten.
 - At the end of every milestone, the cases testable so far (the "General" section and every milestone up to that

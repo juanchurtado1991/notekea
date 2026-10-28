@@ -115,7 +115,7 @@ MVP behavior:
 | Okio FakeFileSystem | `com.squareup.okio:okio-fakefilesystem` | 3.18.2 | In-memory file system for `data` tests |
 | Multiplatform Settings Test | `com.russhwolf:multiplatform-settings-test` | 1.3.0 | In-memory `MapSettings` for settings adapters |
 | Konsist | `com.lemonappdev:konsist` | 0.18.1 | Architecture tests (`jvmTest`): layer boundaries and the conventions of `ARCHITECTURE.md` |
-| Compose UI Test | `org.jetbrains.compose.ui:ui-test` | 1.12.2 (with Compose Multiplatform) | The automated smoke runs (`ROADMAP.md` 1.16): the real app driven through its UI (find by text, click, type, wait), headless on the three systems; later the UI tests of every screen and the Notekea Self-Test (`qa/README.md`) |
+| Compose UI Test | `org.jetbrains.compose.ui:ui-test` | 1.12.2 (with Compose Multiplatform) | The automated smoke runs (`ROADMAP.md` 1.16): the real app driven through its UI (find by text, click, type, wait), headless on the three systems; the automated cases of the Notekea Self-Test, in CI and on the testers' machines (`qa/SELF_TEST.md`) |
 | JUnit Jupiter | `org.junit.jupiter:junit-jupiter` (+ `junit-platform-launcher` 6.1.3) | 6.1.3 | Test runner of `:ktlint-rules` |
 | ktlint test | `com.pinterest.ktlint:ktlint-test` | 1.8.0 | Assertions for the custom ktlint rules |
 
