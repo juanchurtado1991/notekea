@@ -1,0 +1,101 @@
+package app.notekea.core.presentation.gallery
+
+// The sample texts and sizes of the design system gallery, a developer tool (`ARCHITECTURE.md` §7).
+internal const val BADGE_SAMPLE_COUNT = 12
+internal const val BADGE_TAB_INDEX = 1
+internal const val BUTTON_CANCEL = "Cancel"
+internal const val BUTTON_DELETE = "Delete note"
+internal const val BUTTON_DISABLED = "Disabled"
+internal const val BUTTON_LOAD_THEIRS = "Load theirs"
+internal const val BUTTON_LOCATE = "Locate…"
+internal const val BUTTON_NEW_FOLDER = "New folder"
+internal const val BUTTON_NEW_NOTE = "New note"
+internal const val BUTTON_NEW_NOTE_SHORTCUT = "Ctrl+N"
+internal const val BUTTON_OPEN_FOLDER = "Open folder…"
+internal const val BUTTON_OPEN_SHORTCUT = "Ctrl+O"
+internal const val BUTTON_REMOVE = "Remove"
+internal const val BUTTON_SORT = "Sort by name"
+internal const val CODE_SAMPLE = "fun main() = println(\"Notekea\")"
+internal const val DARK_TITLE = "Dark"
+internal const val DIALOG_MESSAGE = "“Tomato plan” will be moved to the trash. You can restore it from there."
+internal const val DIALOG_OPEN = "Delete note…"
+internal const val DIALOG_TITLE = "Delete this note?"
+internal const val DOCUMENT_CLOSE = "Close tab"
+internal const val EMPTY_MESSAGE = "Create your first note to get started."
+internal const val EMPTY_TITLE = "This folder has no notes yet"
+internal const val FIND_COUNT = "1 of 3"
+internal const val GRID_CARD_WIDTH_DP = 168
+internal const val GRID_COLUMNS = 8
+internal const val GRID_ROWS = 6
+internal const val LIGHT_TITLE = "Light"
+internal const val MARKDOWN_SAMPLE =
+    "## Read mode\n\nRendered **Markdown** with a [link](https://example.com) and code:\n\n" +
+        "```kotlin\nfun greet(name: String) = \"Hello, ${'$'}name\"\n```\n"
+internal const val MENU_AREA = "Right-click for the context menu"
+internal const val MENU_DELETE_SHORTCUT = "Delete"
+internal const val MENU_RENAME = "Rename"
+internal const val MENU_RENAME_SHORTCUT = "F2"
+internal const val MENU_REVEAL = "Show in Files"
+internal const val MENU_SORTED_BY_DATE = "Sort notes: date modified"
+internal const val MENU_SORTED_BY_NAME = "Sort notes: name"
+internal const val MENU_SORT_DATE = "Date modified, newest first"
+internal const val MENU_SORT_NAME = "Name"
+internal const val MENU_TABLE = "Insert table"
+internal const val MENU_TABLE_HINT = "A submenu with a size picker"
+internal const val NOTE_ARCHIVE = "Archive"
+internal const val NOTE_EDITED = "2 days ago"
+internal const val NOTE_FOLDER_JOURNAL = "Journal"
+internal const val NOTE_FOLDER_PROJECTS = "Projects/Notekea"
+internal const val NOTE_MEETING = "Meeting with Ana"
+internal const val NOTE_MISSING = "Folder not found"
+internal const val NOTE_PRICING = "Pricing ideas"
+internal const val PALETTE_HEIGHT_DP = 300
+internal const val PROGRESS_LABEL = "Opening vault…"
+internal const val RAIL_HEIGHT_DP = 140
+internal const val RAIL_LABEL = "Tools"
+internal const val SAMPLE_EMBEDDED_NOTE = "Shopping basics › Dairy"
+internal const val SAMPLE_EMBEDDED_NOTE_HINT = "Open note"
+internal const val SAMPLE_EMBEDDED_NOTE_TEXT = "Fresh cheese and butter."
+internal const val SAMPLE_EMBED_CIRCULAR = "Circular embed: this note is already shown above, so it stops here."
+internal const val SAMPLE_EMBED_CREATE = "Create note"
+internal const val SAMPLE_EMBED_MISSING = "This note does not exist yet."
+internal const val SAMPLE_EMBED_MISSING_TITLE = "Weekend menu"
+internal const val SAMPLE_ERROR = "This note changed outside Notekea."
+internal const val SAMPLE_FILE = "Menu for the week.pdf"
+internal const val SAMPLE_FILE_HINT = "Opens with its app"
+internal const val SAMPLE_IMAGE_HEIGHT = 80
+internal const val SAMPLE_IMAGE_WIDTH = 240
+internal const val SAMPLE_LOCATE = "Locate…"
+internal const val SAMPLE_MISSING = "This file is missing"
+internal const val SAMPLE_MISSING_PATH = "attachments/plate.png"
+internal const val SAMPLE_PLACEHOLDER = "Search notes…"
+internal const val SEARCH_LABEL = "Search notes"
+internal const val SEARCH_SHORTCUT = "Ctrl+P"
+internal const val SKELETON_LONG_FRACTION = 0.7f
+internal const val SKELETON_SHORT_FRACTION = 0.5f
+internal const val SPLIT_END = "Editor"
+internal const val SPLIT_HEIGHT_DP = 120
+internal const val SPLIT_MAX_DP = 320
+internal const val SPLIT_MIN_DP = 120
+internal const val SPLIT_OVERLAY = "Float the panel over the content, or put it back beside it"
+internal const val SPLIT_SIDE = "Move the panel to the other side"
+internal const val SPLIT_START = "Sidebar — drag the edge"
+internal const val SPLIT_TOGGLE = "Hide or show the sidebar"
+internal const val STATUS_INDEXED = "Indexed 1,204 notes"
+internal const val STATUS_MODEL = "Model: ready"
+internal const val STATUS_SYNC = "Sync: conflict"
+internal const val TABS_SHORTCUT = "Ctrl+E"
+internal const val TREE_COUNT_PROJECTS = "12"
+internal const val TREE_FOLDER_GARDEN = "Garden"
+internal const val TREE_FOLDER_PROJECTS = "Projects"
+internal const val TREE_NOTE_RENAMED = "Tomato plan 2027"
+internal const val TREE_NOTE_TOMATO = "Tomato plan"
+internal const val TREE_WIDTH_DP = 260
+internal val PALETTE_RESULTS = listOf(
+    NOTE_PRICING to NOTE_FOLDER_PROJECTS,
+    NOTE_MEETING to NOTE_FOLDER_JOURNAL,
+    NOTE_ARCHIVE to null
+)
+internal val SAMPLE_COMPACT_TABS = listOf("Edit", "Preview")
+internal val SAMPLE_DOCUMENTS = listOf("Pricing ideas", "2026-10-23", "Tomato plan")
+internal val SAMPLE_TABS = listOf("Related", "Backlinks", "Outline", "Chat")

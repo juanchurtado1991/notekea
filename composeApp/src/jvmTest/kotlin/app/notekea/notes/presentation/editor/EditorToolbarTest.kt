@@ -2,15 +2,14 @@ package app.notekea.notes.presentation.editor
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.ImageComposeScene
-import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.ctrlKeyDown
+import app.notekea.core.presentation.keyDown
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.notes.domain.FormatAction
@@ -237,13 +236,6 @@ class EditorToolbarTest {
         settle(scene = scene)
     }
 
-    /** A key pressed without Ctrl, as the window sends it. */
-    @OptIn(InternalComposeUiApi::class)
-    private fun keyDown(
-        key: Key,
-        isShiftPressed: Boolean = false
-    ): KeyEvent = KeyEvent(key = key, type = KeyEventType.KeyDown, isShiftPressed = isShiftPressed)
-
     private fun clickAll(
         isReading: Boolean,
         positions: List<Offset>
@@ -279,18 +271,6 @@ class EditorToolbarTest {
         // Closing the scene takes the keyboard from the text; only what happened before matters.
         if (intents.lastOrNull() == EditorIntent.OnFocusLost) intents.removeAt(index = intents.lastIndex)
     }
-
-    /** A key pressed with Ctrl, and Shift when [isShiftPressed], as the window sends it. */
-    @OptIn(InternalComposeUiApi::class)
-    private fun ctrlKeyDown(
-        key: Key,
-        isShiftPressed: Boolean = false
-    ): KeyEvent = KeyEvent(
-        key = key,
-        type = KeyEventType.KeyDown,
-        isCtrlPressed = true,
-        isShiftPressed = isShiftPressed
-    )
 
     private fun click(
         scene: ImageComposeScene,

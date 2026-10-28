@@ -11,6 +11,7 @@ import com.pinterest.ktlint.rule.engine.core.api.RuleSetId
 class NotekeaRuleSetProvider : RuleSetProviderV3(id = RuleSetId(RULE_SET_ID)) {
     override fun getRuleProviders(): Set<RuleProvider> = setOf(
         RuleProvider { ExpressionOnAssignmentLineRule() },
+        RuleProvider { MaxFileLengthRule() },
         RuleProvider { MaxFunctionLengthRule() },
         RuleProvider { ParameterOrderRule() }
     )
