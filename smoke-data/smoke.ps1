@@ -116,6 +116,9 @@ switch ($Command) {
         # Properties (1.14): one property of each type, and a note whose frontmatter is not valid YAML.
         Copy-Item (Join-Path $SmokeRoot "notes\Properties practice.md") $Editor
         Copy-Item (Join-Path $SmokeRoot "notes\Broken properties.md") $Editor
+        # Embeds (1.15): a note embedding a chain of notes, two notes in a circle, itself, sections, blocks and a missing
+        # note.
+        Copy-Item -Recurse (Join-Path $SmokeRoot "notes\embeds") (Join-Path $Editor "Embeds")
         # Daily notes (1.10): a vault with Obsidian's Daily notes settings, a template and two earlier days.
         Copy-Item -Recurse (Join-Path $SmokeRoot "daily") (Join-Path $Scratch "Daily Vault")
         # Templates (1.12): a vault whose Obsidian settings put templates in Snippets, with notes to insert them in.

@@ -280,7 +280,8 @@ Obsidian-flavored Markdown blocks that most vaults use.
 - **Embedded notes:** `![[Note]]` on a line of its own shows the note's text in place (without its frontmatter), in a
   frame whose title opens it; `![[Note#Heading]]` shows only that section, down to the next heading of its level. In
   Preview and under its line in Edit, as Obsidian does. A missing note or heading, a block (`#^id`), the note itself
-  or an embed inside a sentence stay links.
+  or an embed inside a sentence stay links (revised by 1.15: only an embed inside a sentence stays a link; the others
+  show, nest or say why).
 - **Files in the sidebar:** the tree lists files that are not notes too, with their extension and an image or file
   icon, among the notes by name; a folder's number counts all its files, notes and others. Selecting one shows it beside the tree: the
   picture with its size, or its name; with **Open with its app** and **Show in Files/Finder/File Explorer**. Rename
@@ -478,11 +479,22 @@ and zoom, and two rounds of polish (below). The graph view (2.7) and onboarding 
 
 ### ⬜ 1.15 Embeds — `feature/embeds`
 
-- `![[Other note]]` renders the target note inline in Read mode inside a bordered card with its title as a link;
-  `![[Other note#Heading]]` embeds only that section.
-- Recursion guard: an embed that includes itself (directly or indirectly) shows "Circular embed" instead of
-  looping; maximum depth 3.
-- Missing targets show a placeholder with "Create note".
+1.8 already shows `![[Other note]]` and `![[Other note#Heading]]` in a frame whose title opens the note, in Preview
+and under its line in Edit. 1.15 completes them as Obsidian does (decided with the developer):
+
+- **Nested embeds:** an embedded note's own embeds show inside its frame as in the note itself (notes in their frame,
+  pictures at their width, file chips), three notes deep at most.
+- **Blocks:** `![[Note#^id]]` shows the block marked `^id`: the list item or paragraph whose last line ends with
+  ` ^id`, or the block (a table, a quote) just above a line holding only `^id`, without the marker.
+- **When a note cannot be shown,** its place is the same frame, muted, saying why in plain words:
+  - a note that does not exist yet: "Create note" creates it and opens it in a tab, as a click on a link to it does;
+  - a heading or block the note does not have: "Open note";
+  - an embed that comes back around (two notes embedding each other, or a note embedding itself): "Circular embed",
+    with a yellow bar, and it stops there;
+  - a fourth note deep: "Too deep to show", with a yellow bar and "Open note".
+- An embed inside a sentence and `![[#Heading]]` (a section of the same note) stay links.
+- **Done when:** `Editor/Embeds/Embeds practice` of the smoke data shows every case above in Preview and Edit, and
+  the cases 1.15-01 to 1.15-05 of `MVP_SMOKE_TEST.md` pass.
 
 ### ⬜ 1.16 Sample vault — `chore/sample-vault`
 

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Embeds (ROADMAP 1.15): an embedded note shows its own embeds inside it, three notes deep; `![[Note#^id]]` shows
+  one block; a note that does not exist offers Create note, a missing heading or block offers Open note, and an
+  embed that comes back around or goes too deep says so instead of looping.
+
 ### Changed
 
 - Docs: `ROADMAP.md` records every decision of 1.14 (the base editor's UI finished there, what was decided against,
