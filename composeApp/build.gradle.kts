@@ -170,6 +170,8 @@ tasks.register<Test>("smokeRun") {
     systemProperty("notekea.smokeRun.idleSeconds", providers.gradleProperty("idleSeconds").getOrElse("0"))
     // A performance pass compares JVM settings: `-PsmokeJvmArgs="-XX:+UseSerialGC -Xmx256m"`.
     providers.gradleProperty("smokeJvmArgs").orNull?.let { jvmArgs(it.split(" ").filter(String::isNotBlank)) }
+    // And the C library's memory arenas on Linux: `-PmallocArenaMax=2`.
+    providers.gradleProperty("mallocArenaMax").orNull?.let { environment("MALLOC_ARENA_MAX", it) }
     // A fresh JVM per test class, so a run is measured without what the runs before it left behind.
     forkEvery = 1
     outputs.upToDateWhen { false }
