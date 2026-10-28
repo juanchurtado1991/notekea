@@ -1,5 +1,6 @@
 package app.notekea.architecture
 
+import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.declaration.KoObjectDeclaration
 import com.lemonappdev.konsist.api.verify.assertFalse
 import com.lemonappdev.konsist.api.verify.assertTrue
@@ -44,5 +45,14 @@ class FileStructureTest : ArchitectureTestBase() {
         ) {
             topLevelTypeCount(file = it) <= 1
         }
+    }
+
+    @Test
+    fun `test buddy depends on no Notekea code`() {
+        Konsist.scopeFromModule(moduleName = TEST_BUDDY_MODULE_NAME).files
+            .assertFalse(additionalMessage = "qa/SELF_TEST.md: Test Buddy stays ready to be a standalone SDK") { file ->
+                val isNotekeaPackage = file.packagee?.name?.startsWith(prefix = APP_PACKAGE_PREFIX) == true
+                isNotekeaPackage || file.imports.any { it.name.startsWith(prefix = APP_PACKAGE_PREFIX) }
+            }
     }
 }

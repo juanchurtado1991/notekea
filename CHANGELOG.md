@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notekea Self-Test plan (`qa/SELF_TEST.md`): testers install Notekea and a Self-Test app that runs the automatic
   smoke cases on their system and walks them through the manual ones in English or Spanish, in one report; every
   feature keeps it up to date from now on (`GUIDELINES.md` §8, `qa/README.md`).
+- Test Buddy core (`:test-buddy`, `qa/README.md` piece 3a): the generic Self-Test SDK, ready to become a standalone
+  library. A suite declares how to show the app, its test data and its automated and manual cases; a case's body uses
+  plain verbs (`click`, `type`, `press(Mod + Key.P)`, `expectText`, `expectFile`…) over Compose UI Test and fails with
+  a message a tester can read. The runner gives each case fresh folders and keeps a screenshot of a failure; the
+  JUnit bridge runs the same cases in CI; `formatReport` writes the tester's plain-text report.
 - **Checked by** in `MVP_SMOKE_TEST.md`: each General and M1 case says whether the Self-Test runs it (122 of 167) or
   guides the tester through it, and why (eyes, system, packaged, costly); four cases that mixed both were split
   (1.4-13, 1.5-12, 1.8-14, 1.11-16).

@@ -6,11 +6,12 @@ import com.lemonappdev.konsist.api.declaration.KoFileDeclaration
 /**
  * Turns the rules of `ARCHITECTURE.md` into failing tests, so layer boundaries and naming conventions hold no matter
  * who (or which AI agent) writes the code. Layer rules run on production code; file-structure rules run on all the
- * code of both modules, tests included. Rules pass while a category is empty.
+ * code of every module, tests included. Rules pass while a category is empty.
  */
 abstract class ArchitectureTestBase {
     protected val allCodeScope = Konsist.scopeFromModule(moduleName = MODULE_NAME) +
-        Konsist.scopeFromModule(moduleName = KTLINT_RULES_MODULE_NAME)
+        Konsist.scopeFromModule(moduleName = KTLINT_RULES_MODULE_NAME) +
+        Konsist.scopeFromModule(moduleName = TEST_BUDDY_MODULE_NAME)
     protected val productionScope = Konsist.scopeFromProduction(moduleName = MODULE_NAME)
 
     protected val designSystemOnlyImports = listOf(
@@ -123,6 +124,7 @@ abstract class ArchitectureTestBase {
         const val PRESENTATION_LAYER = "presentation"
         const val SYSTEM_CLOCK = "Clock.System"
         const val SYSTEM_ENVIRONMENT_IMPLEMENTATION = "JvmSystemEnvironment"
+        const val TEST_BUDDY_MODULE_NAME = "test-buddy"
         const val COMPOSABLE_ANNOTATION = "Composable"
         const val MATERIAL3_PACKAGE = "androidx.compose.material3"
         const val PREVIEW_ANNOTATION = "Preview"
