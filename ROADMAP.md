@@ -46,37 +46,42 @@ One main window with three resizable panes, a status bar, and the native window 
 (`PLATFORM_GUIDELINES.md`).
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│ (native title bar / menu bar)                                                    │
-├──────────────┬──────────────────────────────────────────┬────────────────────────┤
-│ SIDEBAR      │ [Pricing ✕] [2026-10-23 ✕] [+]          │ RIGHT PANEL            │
-│ 🔍 Search    │──────────────────────────────────────────│ [Inspector][Chat]      │
-│ 📅 Today     │ Pricing ideas                 Edit|Read  │ ▾ RELATED              │
-│              │ tags: product · status: draft  (props)   │                        │
-│ ★ Bookmarks  │ ─────────────────────────────────────    │ Related notes          │
-│   Roadmap    │ > [!tip] Start simple                    │ ┌────────────────────┐ │
-│              │ - [x] Compare competitors                │ │ Meeting w/ Ana     │ │
-│ ▾ Projects   │ - [ ] Decide price                       │ │ "…start at 9€"     │ │
-│   Notekea    │ ![[chart.png]]                           │ │ [Insert link]      │ │
-│ ▾ Journal    │                                          │ └────────────────────┘ │
-│   2026-10-23 │                                          │                        │
-├──────────────┴──────────────────────────────────────────┴────────────────────────┤
-│ STATUS BAR   ● Indexed 1,204 notes   ● Model: ready   ● Sync: up to date          │
-└──────────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────┐
+│ (native title bar / menu bar)                                                      │
+├──┬─────────────┬──────────────────────────────────────────┬────────────────────────┤
+│N │ Vault ⇅ ⌄ – │ ╭Pricing ✕╮ 2026-10-23 •│ plate.png  ⌄ + │ [Inspector][Chat]    – │
+│▤ │ BOOKMARKS   │──────────────────────────────────────────│ ▾ OUTLINE              │
+│▢ │   Roadmap   │    🗀 Projects                            │   Pricing ideas        │
+│🔍│ FILES       │    Pricing ideas                     ☆   │     Competitors        │
+│📅│ ▾ Projects  │    ╭ Properties 2 ──────────────╮        │ ▾ NOTE INFO            │
+│  │   Notekea   │    │ tags  product  status draft│        │   236 words · 2 min    │
+│  │ ▾ Journal   │    ╰────────────────────────────╯        │ ▾ RELATED (M2)         │
+│  │   2026-10-23│    Edit Preview   [H B I│🔗 #│☑ •│▦│⋯] 🔍│ ▾ BACKLINKS (M2)       │
+│  │             │    > [!tip] Start simple                 │                        │
+│⇄ │             │    - [x] Compare competitors             │                        │
+│ⓘ │             │    - [ ] Decide price                    │                        │
+│⚙ │             │    ![[chart.png]]                        │                        │
+├──┴─────────────┴──────────────────────────────────────────┴────────────────────────┤
+│ ⇄ Vault › Projects › 🗎 Pricing ideas 8:7 │ LF │ UTF-8 │ 236 words │ ✓ Saved │ 120 %│
+└────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 - **Sidebar** (default 340 dp, as wide as the outline panel, min 200, collapsible with `Mod+\`): the vault's name with Sort, Expand all, Collapse
   all and Minimize, bookmarks, folder tree. A tool rail on its left (Files, Side panel, Search notes, Today; Open another vault, About and Settings at its bottom; 1.14)
   stays when it is hidden (1.11).
-- **Editor** (flexible, min 480 dp): tab bar, title, properties, Edit / Read toggle, Markdown content.
-  Can be split into two panes side by side.
+- **Editor** (flexible, min 480 dp): tab bar (browser-style tabs, an unsaved note's tab marked with a dot), the
+  note's folder (a click shows it in Files), its title and star, properties, the toolbar (Edit | Preview and the
+  formatting capsule, always one line), Markdown content. The page takes 70 % of the pane, between 760 and 1100 dp,
+  and the whole window zooms with `Mod+=` / `Mod+-` / `Mod+0` (1.14). Without tabs it offers Find a note, New note,
+  Today's note and Search in notes. Can be split into two panes side by side.
 - **Right panel** (default 340 dp, min 280, collapsible with `Mod+Shift+\`): an **Inspector | Chat** control at its
   top (remembered). The inspector has sections that fold on their own (remembered): **Outline** and **Note info**
   (1.14), then **Related** and **Backlinks** (M2). **Chat** (3.3) fills the panel, since a conversation needs its full
   height; until it is built it says "Coming soon" (1.14).
-- **Status bar** (24 dp, since 1.14): where the user is (the vault, the folders and the open file) on the left; on the
-  right the work in progress with a thin progress bar (the vault's first scan, then indexing), and for a note the
-  cursor's line:column in the file, its line endings, its encoding and its words. Then indexing progress, model state
+- **Status bar** (24 dp, since 1.14): where the user is (the vault, the folders and the open file, each shown in Files
+  on a click) on the left; on the right the work in progress with a thin progress bar (the vault's first scan, then
+  indexing), and for a note the cursor's line:column in the file, its line endings, its encoding, its words and
+  whether it is saved; last, the zoom while it is not 100 % (a click resets it). Then indexing progress, model state
   and sync state join it (M2–M4). Each of those is clickable and opens its
   detail (indexing log, model manager, sync panel).
 - Below 1000 dp of window width the right panel becomes an overlay; below 760 dp the sidebar does too.
@@ -205,8 +210,9 @@ between runs.
 
 **UI — Editor pane:**
 - Header: note title (editable, renames the file and updates the links to it), path breadcrumb, Edit / Read toggle
-  (`Mod+E`).
-- Unsaved indicator in the header while the debounce is pending; "Saved" fades after 1 s. `Mod+S` saves at once;
+  (`Mod+E`) (revised by 1.17 and 1.14: Edit | Preview in the toolbar, the folder above the title).
+- Unsaved indicator in the header while the debounce is pending; "Saved" fades after 1 s (revised by 1.14: the save
+  state lives in the status bar, and the unsaved note's tab shows a dot). `Mod+S` saves at once;
   leaving the text, opening another note and closing the window save first.
 - Conflict banner if the file changed on disk while editing: "This note changed outside Notekea —
   Keep mine / Load theirs"; a note without unsaved edits reloads by itself. A note deleted while open offers
@@ -391,7 +397,10 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
 
 ### ⬜ 1.14 Properties view — `feature/properties`
 
-Frontmatter shown as a compact form above the note content.
+Frontmatter shown as a compact form above the note content. While it was reviewed the feature grew, by the
+developer's decision, to **finish the base editor's UI** before it reaches `main`: the side panel as an inspector,
+the workspace's frame (tool rail, tabs, status bar, welcome screen), About, Settings as "Coming soon", wide screens
+and zoom, and two rounds of polish (below). The graph view (2.7) and onboarding (5.1) wait for their milestones.
 
 - **The form:** a "Properties" card under the title (a soft background) with their number, open by default and folded
   with its header (the fold is remembered); one row per property with its type's icon (`#` for tags, like the
@@ -454,8 +463,16 @@ Frontmatter shown as a compact form above the note content.
     a plain numeric version, which DMG and MSI require.
 - "Show source" toggles the raw YAML, editable and saved once typing pauses, like the text; YAML the form cannot read
   shows an error banner with its line and falls back to the raw view, never losing data.
+- **Decided against** while reviewing, so later features do not bring them back:
+  - Properties in a tab of the side panel: they stay only in the note, under the title.
+  - Tabs in the side panel (Outline | Info): sections that fold on their own read better in a narrow panel.
+  - A Tag button that only edits the properties: `#tag` in the text and `tags:` in the properties are both valid in
+    Obsidian, so the toolbar keeps `#` and the properties keep their own tags row.
+  - Undo after deleting: entries go to the system trash, which cannot be restored reliably on the three systems; the
+    confirmation dialog is enough.
+  - A 24 dp padding at the rail's top and bottom; the rail keeps 8 dp.
 - **Done when:** round-tripping every sample-vault note through the properties view produces byte-identical
-  files when nothing was edited.
+  files when nothing was edited, and the cases 1.14-01 to 1.14-15 of `MVP_SMOKE_TEST.md` pass.
 
 ### ⬜ 1.15 Embeds — `feature/embeds`
 
@@ -777,7 +794,8 @@ First run flow, three steps, skippable at any point:
 
 ### ⬜ 5.2 Settings — `feature/settings`
 
-`Mod+,` opens Settings with sections: General (theme, language, open last vault), Editor (font size, line width,
+`Mod+,` opens Settings (the dialog the tool rail's Settings opens since 1.14, with its sections marked "Coming soon")
+with sections: General (theme, language, open last vault), Editor (font size, line width,
 spell check), Files (update links when renaming: always or ask, default always; attachments folder, daily notes folder and date format, templates folder — prefilled from
 `.obsidian/` when present), AI (model manager, chat scope default), Sync (M4), Shortcuts (read-only list),
 About (version, licenses, privacy statement).

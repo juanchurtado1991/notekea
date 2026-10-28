@@ -17,6 +17,14 @@ Notekea is built for everyday users, without giving up the power it offers. Ever
 - **Nothing is a dead end.** Every error or missing state offers an action (locate, remove, retry).
 - **Polished by default.** Screens are composed from the design system (§2, `ARCHITECTURE.md` §11) with generous
   spacing and a clear hierarchy; a screen is not done until its previews look right in light and dark.
+- **Designs are chosen, not imposed.** A new screen or a visible redesign starts with two or three options rendered
+  headless and shown to the developer in the conversation; only the chosen one is built (never committed as
+  pictures, §8).
+- **Calm and honest UI.** A tooltip adds something (what an icon does, its shortcut), never repeats a visible label;
+  a feature not built yet says "Coming soon" and takes no input; what moves on screen moves briefly (150–250 ms,
+  `NotekeaDimensions.MOTION_*`) so the eye follows it; nothing important is only shown on hover.
+- **Use the whole screen, keep lines readable.** Content adapts to the window (the note's page grows with the pane up
+  to a readable width) and the whole UI zooms (`Mod+=` / `Mod+-` / `Mod+0`), so small and wide screens both work.
 
 ## 1. SOLID
 
@@ -110,9 +118,12 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   a **single parameter** keeps it on the class line when the line fits in 120 columns:
   `class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnvironment) {`.
 
-## 7. No warnings
+## 7. No warnings, no dead code
 
 - The build fails on any Kotlin warning (`allWarningsAsErrors`). Fix the cause; do not silence it.
+- **No dead code.** A change that removes or replaces behavior also removes what only it used: parameters, helpers,
+  string resources, icons, previews and tests of what is gone. Before committing, check the compiler's "never used"
+  warnings and that every new string resource is referenced.
 - `@Suppress` is only allowed with a comment explaining why the warning cannot be fixed.
 - Deprecated APIs are migrated, not suppressed.
 
@@ -141,6 +152,10 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
      marks the feature ✅ in `ROADMAP.md` and is merged with rebase merging once CI is green.
 
   A small fix or chore that is a single step goes straight from its branch to `main` in one pull request.
+
+  **Exception chosen by the developer:** for a feature they name (1.9 to 1.14 so far), the steps are commits on the
+  feature branch instead of pull requests, and the feature reaches `main` in one pull request after the smoke test.
+  Each commit still leaves the build green and does one logical change.
 - **Granular commits inside each step.** Prefer several small commits, each doing one logical change (e.g.
   `feat: add Platform interface`, `test: cover shortcut mapping`, `feat: bind JVM platform in Koin`), over one large
   commit. Every commit must leave the build green (the pre-commit hook enforces it), so history stays readable,

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Docs: `ROADMAP.md` records every decision of 1.14 (the base editor's UI finished there, what was decided against,
+  the new layout); `GUIDELINES.md` adds choosing designs from rendered options, calm UI, readable width and zoom, no
+  dead code and the one-pull-request exception; `ARCHITECTURE.md` adds `core.appearance`, the new design-system
+  pieces and the layout rules; `PLATFORM_GUIDELINES.md` adds the sidebar, Edit / Preview and zoom shortcuts.
 - Second polish (ROADMAP 1.14): the editor toolbar always fits on one line, what does not fit moving into More; unsaved
   tabs show a dot; the status bar's path and the folder above a note's title show it in Files; the status bar shows
   the zoom while it is not 100 % and resets it on a click; an editor without tabs offers four start actions with their
