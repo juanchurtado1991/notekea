@@ -20,8 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Logo: the designed kea and N on a cobalt note with a tangerine folded corner, in the theme's colors, replaces the
-  placeholder in the window, About and the welcome screen.
+- Logo: the designed kea and N on a note with a tangerine folded corner replaces the placeholder in the window, About,
+  the welcome screen and the rail; the note is in ink like the text, dark on the light theme and light on the dark one.
 - Performance (ROADMAP 1.16, from an audit of needless allocations): the editor no longer rescans the note on a caret
   move, skips the embed and link work of notes without embeds or links, and checks a line's characters before its
   regexes; the sidebar keeps its rows when only the selection changes and applies watcher changes without copying

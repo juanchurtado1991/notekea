@@ -1,7 +1,6 @@
 package app.notekea.core.presentation.theme
 
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.addPathNodes
@@ -9,18 +8,17 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.theme.palette.NotekeaPalette
 
 /**
- * Notekea's logo, as a vector the window, About and the welcome screen draw at any size: a kea and an "N" in white on a
- * cobalt note whose folded corner is tangerine, in the theme's colors (the brand's own primary, accent and bookmark
- * gold). The mark is clipped to the note's inner square, as the designed SVG does.
+ * Notekea's logo, as vectors the window, About, the welcome screen and the rail draw at any size: a kea and an "N" on a
+ * note with a tangerine folded corner, in ink like the text, so it sits quietly beside the editor. [Logo] is for light
+ * backgrounds (an ink note, the mark in the background's color) and [LogoDark] for dark ones, where the note turns
+ * light; [NotekeaLogo][app.notekea.core.presentation.components.NotekeaLogo] picks the one that fits the theme. The
+ * mark is clipped to the note's inner square, as the designed SVG does.
  */
 object NotekeaBrand {
     private const val LOGO_NAME = "NotekeaLogo"
     private const val LOGO_SIZE_DP = 64
     private const val VIEWPORT_WIDTH = 718f
     private const val VIEWPORT_HEIGHT = 719f
-    private const val FOLD_START_X = 468f
-    private const val FOLD_END_X = 718f
-    private const val FOLD_Y = 125f
     private const val MARK_CLIP_PATH = "M62 88H593V619H62Z"
     private const val SQUARE_PATH = "M468,1H156.37A156.37,156.37,0,0,0,0,157.37V562.63A156.37,156.37,0,0,0,156.37,719" +
         "H561.63A156.37,156.37,0,0,0,718,562.63V251Z"
@@ -56,31 +54,36 @@ object NotekeaBrand {
     private const val MARK_DOT_PATH = "M302.93,560.76v.06l.06,0Z"
 
     val Logo: ImageVector by lazy {
-        val mark = SolidColor(value = NotekeaPalette.OnPrimaryLight)
-        ImageVector.Builder(
+        logoOf(note = NotekeaPalette.InkLight, mark = NotekeaPalette.BackgroundLight, fold = NotekeaPalette.AccentLight)
+    }
+
+    val LogoDark: ImageVector by lazy {
+        logoOf(note = NotekeaPalette.InkDark, mark = NotekeaPalette.BackgroundDark, fold = NotekeaPalette.AccentDark)
+    }
+
+    private fun logoOf(
+        note: Color,
+        mark: Color,
+        fold: Color
+    ): ImageVector {
+        val markFill = SolidColor(value = mark)
+        return ImageVector.Builder(
             name = LOGO_NAME,
             defaultWidth = LOGO_SIZE_DP.dp,
             defaultHeight = LOGO_SIZE_DP.dp,
             viewportWidth = VIEWPORT_WIDTH,
             viewportHeight = VIEWPORT_HEIGHT
         )
-            .addPath(
-                pathData = addPathNodes(pathStr = SQUARE_PATH),
-                fill = SolidColor(value = NotekeaPalette.PrimaryLight)
-            )
+            .addPath(pathData = addPathNodes(pathStr = SQUARE_PATH), fill = SolidColor(value = note))
             .addGroup(clipPathData = addPathNodes(pathStr = MARK_CLIP_PATH))
-            .addPath(pathData = addPathNodes(pathStr = MARK_TOP_PATH), fill = mark)
-            .addPath(pathData = addPathNodes(pathStr = MARK_PATH), fill = mark)
-            .addPath(pathData = addPathNodes(pathStr = EYE_PATH), fill = mark)
-            .addPath(pathData = addPathNodes(pathStr = MARK_DOT_PATH), fill = mark)
+            .addPath(pathData = addPathNodes(pathStr = MARK_TOP_PATH), fill = markFill)
+            .addPath(pathData = addPathNodes(pathStr = MARK_PATH), fill = markFill)
+            .addPath(pathData = addPathNodes(pathStr = EYE_PATH), fill = markFill)
+            .addPath(pathData = addPathNodes(pathStr = MARK_DOT_PATH), fill = markFill)
             .clearGroup()
             .addPath(
                 pathData = addPathNodes(pathStr = FOLD_PATH),
-                fill = Brush.linearGradient(
-                    colors = listOf(NotekeaPalette.BookmarkLight, NotekeaPalette.AccentLight),
-                    start = Offset(x = FOLD_START_X, y = FOLD_Y),
-                    end = Offset(x = FOLD_END_X, y = FOLD_Y)
-                )
+                fill = SolidColor(value = fold)
             )
             .build()
     }
