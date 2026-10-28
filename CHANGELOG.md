@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Notekea Self-Test plan (`qa/SELF_TEST.md`): testers install Notekea and a Self-Test app that runs the automatic
+  smoke cases on their system and walks them through the manual ones in English or Spanish, in one report; every
+  feature keeps it up to date from now on (`GUIDELINES.md` §8, `qa/README.md`).
+
 - Ghost Serializer vault (`smoke-data/vaults/Ghost Serializer`, ROADMAP 1.18): the production code of Ghost
   Serializer as 371 notes, one per Kotlin file explaining what it is about, how it works and its code, linked to the
   files it uses; the large vault of the performance passes and the timing cases, in place of the 5,000 generated
