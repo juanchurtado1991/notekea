@@ -18,6 +18,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,6 +38,8 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val CARD_MIN_WIDTH_DP = 168
+private const val CARD_MAX_WIDTH_DP = CARD_MIN_WIDTH_DP * 2
+private const val CARD_RATIO = 4f / 3f
 private const val PREVIEW_HEIGHT_DP = 420
 private const val PREVIEW_WIDTH_DP = 720
 
@@ -53,7 +57,7 @@ fun FolderGrid(
     cards: List<FolderCard>,
     covers: Map<RelativePath, ImageBitmap?>,
     onOpen: (RelativePath) -> Unit,
-    onCoverNeeded: (RelativePath) -> Unit,
+    onCoverNeeded: (RelativePath, IntSize) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
@@ -83,8 +87,12 @@ private fun Cards(
     cards: List<FolderCard>,
     covers: Map<RelativePath, ImageBitmap?>,
     onOpen: (RelativePath) -> Unit,
-    onCoverNeeded: (RelativePath) -> Unit
+    onCoverNeeded: (RelativePath, IntSize) -> Unit
 ) {
+    // The largest a card is drawn, in pixels: below twice the narrowest card, or the grid would fit another column.
+    val coverSize = with(LocalDensity.current) {
+        IntSize(width = CARD_MAX_WIDTH_DP.dp.roundToPx(), height = (CARD_MAX_WIDTH_DP / CARD_RATIO).dp.roundToPx())
+    }
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = CARD_MIN_WIDTH_DP.dp),
         contentPadding = PaddingValues(top = NotekeaDimensions.SpacingL),
@@ -93,7 +101,7 @@ private fun Cards(
     ) {
         items(items = cards, key = { it.path.value }) { card ->
             val hasCover = card.kind == FolderCard.Kind.NOTE || card.kind == FolderCard.Kind.IMAGE
-            if (hasCover) LaunchedEffect(card.path) { onCoverNeeded(card.path) }
+            if (hasCover) LaunchedEffect(card.path) { onCoverNeeded(card.path, coverSize) }
             NotekeaGridCard(
                 label = if (card.kind == FolderCard.Kind.NOTE) card.path.nameWithoutExtension else card.path.name,
                 icon = iconOf(kind = card.kind),
@@ -133,7 +141,7 @@ private fun FolderGridPreview() {
                 },
                 covers = emptyMap(),
                 onOpen = {},
-                onCoverNeeded = {}
+                onCoverNeeded = { _, _ -> }
             )
         }
     }
@@ -150,7 +158,7 @@ private fun FolderGridEmptyPreview() {
                 cards = emptyList(),
                 covers = emptyMap(),
                 onOpen = {},
-                onCoverNeeded = {}
+                onCoverNeeded = { _, _ -> }
             )
         }
     }

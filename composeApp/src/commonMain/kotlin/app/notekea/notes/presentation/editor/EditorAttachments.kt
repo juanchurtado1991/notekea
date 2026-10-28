@@ -26,7 +26,7 @@ import org.jetbrains.compose.resources.decodeToImageBitmap
 /**
  * The files and notes embedded in the open note of the vault at [vaultPath] (`ROADMAP.md` 1.8), for the editor: it
  * finds them in the text, resolves them among the vault's files (listed once and again after a change), reads and
- * decodes the images, keeping each decoded picture until its file changes, reads the text an embedded note shows, and
+ * decodes the images, keeping the pictures the note shows (and no others) until their files change, reads the text an embedded note shows, and
  * attaches new files, giving the embed to write. An embedded note shows its own embeds in turn, three notes deep at
  * most; one that is missing, lacks its section, comes back around (itself included) or is too deep says so instead.
  */
@@ -41,7 +41,10 @@ class EditorAttachments(
     private val embeddedNoteText = EmbeddedNoteText()
     private var files: List<RelativePath>? = null
     private var folderSetting: String? = null
-    private val images = mutableMapOf<RelativePath, ImageBitmap?>()
+    private val images = mutableMapOf<RelativePath, CachedImage>()
+
+    // Counts the readings of a note's embeds, so a picture no reading has used since the last one is let go.
+    private var reading = 0
     private var noteResolver: LinkResolver? = null
     private var noteResolverFiles: List<RelativePath>? = null
 
@@ -52,7 +55,14 @@ class EditorAttachments(
     suspend fun viewsOf(
         note: RelativePath,
         text: String
-    ): List<AttachmentView> = viewsIn(note = note, text = text, chain = listOf(note))
+    ): List<AttachmentView> {
+        val current = ++reading
+        val views = viewsIn(note = note, text = text, chain = listOf(note))
+        // Only the pictures this note shows stay decoded: the notes shown before keep nothing in memory. A reading
+        // started meanwhile (the text changed again) prunes for itself.
+        if (reading == current) images.values.removeAll { it.reading < current }
+        return views
+    }
 
     /** The embeds of [text], written in [note]; [chain] holds the notes shown around it, [note] last. */
     private suspend fun viewsIn(
@@ -197,12 +207,21 @@ class EditorAttachments(
         return files.orEmpty()
     }
 
-    @OptIn(ExperimentalResourceApi::class)
+    /** The picture at [path], decoded once and kept while the notes read use it (null when it cannot be read). */
     private suspend fun imageOf(
         path: RelativePath
-    ): ImageBitmap? = images.getOrPut(key = path) {
+    ): ImageBitmap? {
+        val cached = images[path] ?: CachedImage(reading = reading, image = decodeImage(path = path))
+        images[path] = cached.copy(reading = reading)
+        return cached.image
+    }
+
+    @OptIn(ExperimentalResourceApi::class)
+    private suspend fun decodeImage(
+        path: RelativePath
+    ): ImageBitmap? {
         val bytes = (attachmentStore.read(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
-        bytes?.let {
+        return bytes?.let {
             withContext(context = dispatchers.default) {
                 try {
                     it.decodeToImageBitmap()
@@ -213,6 +232,12 @@ class EditorAttachments(
             }
         }
     }
+
+    /** A decoded picture, and the reading of a note's embeds that last used it. */
+    private data class CachedImage(
+        val reading: Int,
+        val image: ImageBitmap?
+    )
 
     companion object {
         /** The widest a new image is embedded, in the note's units (dp), so it fits beside the text it belongs to. */

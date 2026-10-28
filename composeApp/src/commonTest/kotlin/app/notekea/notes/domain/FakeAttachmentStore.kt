@@ -13,6 +13,9 @@ class FakeAttachmentStore(
     val contents = mutableMapOf<RelativePath, ByteArray>()
     val outside = mutableMapOf<String, ByteArray>()
 
+    /** Every file read, in order, so a test can tell a picture decoded again from one kept. */
+    val reads = mutableListOf<RelativePath>()
+
     override suspend fun files(
         vaultPath: String
     ): Outcome<List<RelativePath>, NotesError> = Outcome.Success(value = contents.keys.sortedBy { it.value })
@@ -20,8 +23,11 @@ class FakeAttachmentStore(
     override suspend fun read(
         vaultPath: String,
         path: RelativePath
-    ): Outcome<ByteArray, NotesError> = contents[path]?.let { Outcome.Success(value = it) }
-        ?: Outcome.Failure(error = NotesError.EntryMissing(path.value))
+    ): Outcome<ByteArray, NotesError> {
+        reads += path
+        return contents[path]?.let { Outcome.Success(value = it) }
+            ?: Outcome.Failure(error = NotesError.EntryMissing(path.value))
+    }
 
     override suspend fun write(
         vaultPath: String,

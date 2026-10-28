@@ -250,7 +250,9 @@ private fun FolderTab(
         cards = remember(tree, folder) { folderCards.of(folder = folder, tree = tree) },
         covers = context.workspaceState.covers,
         onOpen = { workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = it)) },
-        onCoverNeeded = { workspace.onIntent(intent = WorkspaceIntent.OnCoverRequest(path = it)) }
+        onCoverNeeded = { path, size ->
+            workspace.onIntent(intent = WorkspaceIntent.OnCoverRequest(path = path, size = size))
+        }
     )
 }
 

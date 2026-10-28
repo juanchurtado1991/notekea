@@ -1,6 +1,8 @@
 package app.notekea.notes.presentation.workspace
 
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.unit.IntSize
+import app.notekea.core.presentation.images.scaledToCover
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.AttachmentKind
@@ -84,7 +86,7 @@ class WorkspaceViewModel(
 
             is WorkspaceIntent.OnDeleted -> change { it.without(path = intent.path) }
 
-            is WorkspaceIntent.OnCoverRequest -> readCover(path = intent.path)
+            is WorkspaceIntent.OnCoverRequest -> readCover(path = intent.path, size = intent.size)
 
             else -> onSidePanelIntent(intent = intent)
         }
@@ -197,9 +199,13 @@ class WorkspaceViewModel(
         }
     }
 
-    /** Reads the picture of a folder grid's card: the image itself, or the first image a note embeds. */
+    /**
+     * Reads the picture of a folder grid's card, the image itself or the first image a note embeds, at the [size] the
+     * card needs; only the [MAX_COVERS] newest stay, the others are read again if their card comes back into view.
+     */
     private fun readCover(
-        path: RelativePath
+        path: RelativePath,
+        size: IntSize
     ) {
         if (path in coverSources) return
         coverSources[path] = sourceOf(path = path)
@@ -210,20 +216,26 @@ class WorkspaceViewModel(
             } else {
                 path.takeIf { AttachmentKind.of(name = it.name) == AttachmentKind.IMAGE }
             }
-            val image = picture?.let { imageOf(path = it) }
-            reduce { it.copy(covers = it.covers + (path to image)) }
+            val image = picture?.let { imageOf(path = it, size = size) }
+            reduce { current ->
+                val covers = current.covers - path + (path to image)
+                val dropped = covers.keys.take(n = (covers.size - MAX_COVERS).coerceAtLeast(minimumValue = 0))
+                dropped.forEach { coverSources.remove(key = it) }
+                current.copy(covers = covers - dropped.toSet())
+            }
         }
     }
 
     @OptIn(ExperimentalResourceApi::class)
     private suspend fun imageOf(
-        path: RelativePath
+        path: RelativePath,
+        size: IntSize
     ): ImageBitmap? {
         val bytes = (tools.attachmentStore.read(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
             ?: return null
         return withContext(context = tools.dispatchers.default) {
             try {
-                bytes.decodeToImageBitmap()
+                bytes.decodeToImageBitmap().scaledToCover(width = size.width, height = size.height)
             } catch (_: IllegalArgumentException) {
                 // Not a picture Skia can read (a broken or renamed file): the card shows its icon instead.
                 null
@@ -250,6 +262,8 @@ class WorkspaceViewModel(
     }
 
     companion object {
+        /** The most folder grid cards whose pictures are kept: more than a screen of cards, so scrolling back is quick. */
+        const val MAX_COVERS = 60
         private const val LOG_TAG = "WorkspaceViewModel"
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the editor's tabs"
     }
