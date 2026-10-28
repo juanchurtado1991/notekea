@@ -67,5 +67,7 @@ Change ⬜ to ✅ with the pull request link as each one lands.
 
 - `GUIDE_WINDOWS.md`, `GUIDE_MACOS.md`, `GUIDE_LINUX.md`: step by step for testers, written for people who are not
   developers.
+- `M1_SMOKE_TEST.md`: every M1 case of `MVP_SMOKE_TEST.md` written out click by click for the three systems, in four
+  sessions; it changes with `MVP_SMOKE_TEST.md`, in the same pull request.
 - `REPORT_TEMPLATE.txt`: what a tester fills in and sends back as plain text.
 - `runs/TEMPLATE.md`: the record of one run; `runs/M<N>.md` once it starts.

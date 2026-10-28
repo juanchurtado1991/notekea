@@ -30,7 +30,8 @@ unzip smoke-data.zip -d ~/Documents && bash ~/Documents/smoke-data/smoke.sh prep
 
 ## 4. Run the manual cases
 
-Open the run's list (`qa/runs/M<N>.md`); each case ID is described in `MVP_SMOKE_TEST.md`. Shortcuts use **Ctrl**.
+Open the run's list (`qa/runs/M<N>.md`); for the M1 run each case is written out step by step in
+[M1_SMOKE_TEST.md](M1_SMOKE_TEST.md) (in `MVP_SMOKE_TEST.md` for later runs). Shortcuts use **Ctrl**.
 One line per case in section 2 of the report: the ID and **PASS**, **FAIL** or **SKIP**.
 
 ## 5. When a case fails

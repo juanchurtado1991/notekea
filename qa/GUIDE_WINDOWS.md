@@ -47,9 +47,11 @@ download:
 
 ## 4. Run the manual cases
 
-1. Open the run's list of cases: the coordinator sends you its link (`qa/runs/M<N>.md` in the repository); each case
-   ID there is described in `MVP_SMOKE_TEST.md`, which opens on GitHub in your browser.
-2. For each case: do the **Steps** in Notekea and compare with **Expected**. On Windows, the shortcuts use **Ctrl**.
+1. Open the run's list of cases: the coordinator sends you its link (`qa/runs/M<N>.md` in the repository). For the M1
+   run, every case is written out step by step in [M1_SMOKE_TEST.md](M1_SMOKE_TEST.md), which opens on GitHub in your
+   browser; later runs describe their cases in `MVP_SMOKE_TEST.md`.
+2. For each case: do its steps in Notekea and check what it says under **Pass when**. On Windows, the shortcuts use
+   **Ctrl**.
 3. Write one line per case in section 2 of the report: the case ID and **PASS**, **FAIL** or **SKIP** (when the case
    says it does not apply to Windows).
 
