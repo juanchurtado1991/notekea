@@ -188,8 +188,8 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   4. **Release run**: the milestone QA run of M5, with the release builds, which are not signed (`ROADMAP.md` 5.3,
      5.5).
 - **The Notekea Self-Test is kept up to date by every feature, never at the end of a milestone**
-  (`qa/SELF_TEST.md`). Every case of `MVP_SMOKE_TEST.md` is checked by the Self-Test, automatically (the target is
-  80% of the cases or more) or as a manual case it walks the tester through. In the step that adds the behavior, every
+  (`qa/SELF_TEST.md`). Every case of `MVP_SMOKE_TEST.md` is checked by the Self-Test, automatically (as many as is
+  reasonable, with no quota) or as a manual case it walks the tester through. In the step that adds the behavior, every
   `feature/` and `fix/` pull request writes each new or changed case as an `AutomatedCase` (named after its ID, run in
   CI on the three systems through the JUnit bridge) or a `ManualCase` (steps and expected result in English and
   Spanish, in plain words, no terminal), in `:selftest`, and adds its data to `smoke-data/`. The consistency test

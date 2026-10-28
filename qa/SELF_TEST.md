@@ -8,8 +8,7 @@ before adding or changing a case of `MVP_SMOKE_TEST.md` (`GUIDELINES.md` §8). S
 
 A tester installs two apps from the milestone's release, **Notekea** and **Notekea Self-Test**, and opens the second:
 
-1. **Automatic part:** one click on **Start** runs every case a program can check (the target is at least 80% of the
-   cases) on the tester's own system, files and screen settings, and shows each case's ID with ✅ or ❌. The tester
+1. **Automatic part:** one click on **Start** runs every case a program can check on the tester's own system, files and screen settings, and shows each case's ID with ✅ or ❌. The tester
    can keep using the computer meanwhile.
 2. **Manual part:** **Manual tests** walks the tester through the rest, one case per screen: what to open, what to
    do, what they should see, and **Passed** / **Failed** (with a note and a screenshot when it failed). The tester uses
@@ -115,10 +114,16 @@ manual only for one of these reasons:
 - **eyes:** a person must judge how it looks or feels (spacing, colors, smooth scrolling);
 - **system:** it needs something outside the app: the installer, the system's launcher, a native file dialog, the
   system's settings (dark mode), another app (the clipboard in a text editor, Obsidian);
-- **packaged:** it only exists in the installed app (its shortcuts, the crash report window of the packaged build).
+- **packaged:** it only exists in the installed app (its shortcuts, the crash report window of the packaged build);
+- **costly:** automating it would cost far more than the case is worth (fragile timing, heavy setup, a scenario that
+  only a long script could reach).
 
 Everything else is `Self-Test`. When part of a case is automatic and part needs eyes, it is split into two cases.
-The share of `Self-Test` cases is printed by the consistency test and should stay at 80% or above.
+
+**Automate what is reasonable, not a quota.** Because the Self-Test guides every manual case step by step, a manual
+case is cheap for the tester. So there is no percentage to reach: automate the cases a few clear verbs can check, and
+leave the rest manual instead of forcing them. The consistency test prints the share of `Self-Test` cases as
+information only.
 
 ## Every feature keeps it up to date
 
