@@ -982,6 +982,12 @@ macOS, Linux) with every automated smoke run and cut what the numbers point at, 
   modules the app uses (5.3 packages it).
 - **Cuts the measurements point at:** caches that grow without bound, note texts held twice, the embedding model
   kept loaded after indexing ends.
+- **Preview of a long note** (found in 1.18, decided with the developer for this pass): Read mode composes every
+  section of the note at once (one Markdown renderer per heading, in a `Column` inside the page's scroll), so a
+  2,000-line note reaches 761 MB. Its sections become the items of a `LazyColumn`, with the title, properties and
+  toolbar as its first items: the sticky toolbar follows the list's state, the outline scrolls to a section by its
+  index and highlights from the first visible item, and each tab remembers the list's position. Embedded notes keep
+  their `Column`. Measured with the Personal Notes memory run, before and after.
 - **Done when:** the release run (5.5) meets every budget on Windows, macOS and Linux.
 
 ### ⬜ 5.5 Release v0.1.0
