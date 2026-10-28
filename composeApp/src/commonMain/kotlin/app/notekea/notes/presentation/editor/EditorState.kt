@@ -45,4 +45,7 @@ data class EditorState(
     val info: NoteInfo = NoteInfo(),
     val usesCrLf: Boolean = false,
     val bodyStartLine: Int = 0
-)
+) {
+    /** Whether the text can be changed now: a note is open and loaded, in Edit mode. */
+    val isEditable: Boolean get() = notePath != null && !isLoading && !isReading
+}
