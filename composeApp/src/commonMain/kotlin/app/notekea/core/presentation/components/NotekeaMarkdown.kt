@@ -22,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.markdown.ReadingMarkdown
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.theme.notekeaCodeTextStyle
+import app.notekea.core.presentation.theme.LocalNotekeaCodeTextStyle
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.compose.elements.MarkdownCodeBlock
 import com.mikepenz.markdown.compose.elements.MarkdownCodeFence
@@ -100,27 +100,33 @@ private fun ThemedMarkdown(
         ),
         typography = notekeaMarkdownTypography(),
         modifier = Modifier.fillMaxWidth(),
-        components = markdownComponents(
-            codeBlock = {
-                val depth = quoteDepth(node = it.node)
-                MarkdownCodeBlock(it.content, it.node, it.typography.code) { code, language, style ->
-                    val unquoted = readingMarkdown.unquoted(code = code, depth = depth)
-                    HighlightedCode(code = unquoted, style = style, isDark = isDark, language = language)
-                }
-            },
-            codeFence = {
-                val depth = quoteDepth(node = it.node)
-                MarkdownCodeFence(it.content, it.node, it.typography.code) { code, language, style ->
-                    val unquoted = readingMarkdown.unquoted(code = code, depth = depth)
-                    HighlightedCode(code = unquoted, style = style, isDark = isDark, language = language)
-                }
-            },
-            checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) },
-            blockQuote = { MarkdownQuoteOrCallout(content = it.content, node = it.node) },
-            alert = { MarkdownQuoteOrCallout(content = it.content, node = it.node) }
-        )
+        components = remember(isDark) { componentsOf(readingMarkdown = readingMarkdown, isDark = isDark) }
     )
 }
+
+/** Code colored by language without the `>` marks of the quotes around it, checkboxes and callouts as cards. */
+private fun componentsOf(
+    readingMarkdown: ReadingMarkdown,
+    isDark: Boolean
+) = markdownComponents(
+    codeBlock = {
+        val depth = quoteDepth(node = it.node)
+        MarkdownCodeBlock(it.content, it.node, it.typography.code) { code, language, style ->
+            val unquoted = readingMarkdown.unquoted(code = code, depth = depth)
+            HighlightedCode(code = unquoted, style = style, isDark = isDark, language = language)
+        }
+    },
+    codeFence = {
+        val depth = quoteDepth(node = it.node)
+        MarkdownCodeFence(it.content, it.node, it.typography.code) { code, language, style ->
+            val unquoted = readingMarkdown.unquoted(code = code, depth = depth)
+            HighlightedCode(code = unquoted, style = style, isDark = isDark, language = language)
+        }
+    },
+    checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) },
+    blockQuote = { MarkdownQuoteOrCallout(content = it.content, node = it.node) },
+    alert = { MarkdownQuoteOrCallout(content = it.content, node = it.node) }
+)
 
 /**
  * One code block colored by language. The renderer colors every block in the background at the same time, and a
@@ -151,7 +157,8 @@ private fun notekeaMarkdownTypography(): MarkdownTypography {
     val typography = MaterialTheme.typography
     val colors = MaterialTheme.colorScheme
     val heading = typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
-    val code = notekeaCodeTextStyle()
+    // The theme's style, loaded once: building it again would look up its font files for every segment.
+    val code = LocalNotekeaCodeTextStyle.current
     return markdownTypography(
         h1 = typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
         h2 = typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),

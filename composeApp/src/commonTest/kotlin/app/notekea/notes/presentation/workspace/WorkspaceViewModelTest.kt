@@ -153,6 +153,22 @@ class WorkspaceViewModelTest {
         }
 
     @Test
+    fun `a file's picture is let go once no tab holds the file`() = runWorkspaceTest {
+        attachmentStore.contents[PLATE] = Base64.decode(source = PNG_BASE64)
+        val viewModel = started()
+
+        viewModel.onIntent(intent = WorkspaceIntent.OnOpen(path = PLATE))
+        advanceUntilIdle()
+        val read = viewModel.state.value.previews.keys
+        viewModel.onIntent(intent = WorkspaceIntent.OnCloseActive)
+
+        assertEquals(
+            expected = setOf(PLATE) to emptySet(),
+            actual = read to viewModel.state.value.previews.keys
+        )
+    }
+
+    @Test
     fun `the side panel is shown at first, hides, and the outline shortcut shows it again and focuses it`() =
         runWorkspaceTest {
             val viewModel = started()

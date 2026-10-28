@@ -151,10 +151,14 @@ private fun WorkspaceBody(
 @Composable
 private fun unsavedPathsOf(
     editors: List<EditorViewModel>
-): Set<RelativePath> = editors.mapNotNull { editor ->
-    val editorState by editor.state.collectAsState()
-    editorState.notePath.takeIf { editorState.saveStatus == SaveStatus.UNSAVED }
-}.toSet()
+): Set<RelativePath> {
+    val paths = editors.mapNotNull { editor ->
+        val editorState by editor.state.collectAsState()
+        editorState.notePath.takeIf { editorState.saveStatus == SaveStatus.UNSAVED }
+    }.toSet()
+    // The same set while its paths stay the same, so the tabs skip recomposing on every keystroke.
+    return remember(paths) { paths }
+}
 
 /** What an editor without tabs offers: find a note, a new note, today's note and a search in the notes. */
 @Composable
