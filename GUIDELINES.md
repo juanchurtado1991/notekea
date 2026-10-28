@@ -118,7 +118,8 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   Components get one preview per meaningful variant (e.g. primary, secondary, destructive, disabled). Screens get
   **one preview per UI state**: the stateless `<Screen>Content` receives a sample `<Screen>State` for each case
   (empty, loading, error, content, and any feature-specific state). Enforced by Konsist; theme functions, the
-  preview helper and the developer gallery are exempt.
+  preview helper and the developer gallery are exempt, and so are composables that draw nothing and only make view
+  models follow each other's effects, which are named `Follow…` (`FollowTree`, `FollowQuickSwitcher`).
 - **Parameters go one per line**, in functions and constructors. Exception: a class whose primary constructor has
   a **single parameter** keeps it on the class line when the line fits in 120 columns:
   `class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnvironment) {`.

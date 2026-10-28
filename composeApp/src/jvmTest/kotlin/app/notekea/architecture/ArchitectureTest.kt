@@ -148,10 +148,11 @@ class ArchitectureTest {
             .assertTrue(additionalMessage = "GUIDELINES.md §6: add a @Preview named <Composable>…Preview") { file ->
                 val functions = file.functions(includeNested = false, includeLocal = false)
                 val previews = functions.filter { it.hasAnnotationWithName(PREVIEW_ANNOTATION) }
-                // An actual's preview is its expect's, in the common file.
+                // An actual's preview is its expect's, in the common file; a Follow… composable draws nothing.
                 functions
                     .filter { it.hasAnnotationWithName(COMPOSABLE_ANNOTATION) && !it.hasPrivateModifier }
                     .filterNot { it.hasActualModifier }
+                    .filterNot { it.name.startsWith(prefix = FOLLOWER_PREFIX) }
                     .filterNot { it.hasAnnotationWithName(PREVIEW_ANNOTATION) }
                     .all { composable -> previews.any { it.name.startsWith(prefix = composable.name) } }
             }
@@ -377,6 +378,7 @@ class ArchitectureTest {
         private const val COMPOSABLE_ANNOTATION = "Composable"
         private const val MATERIAL3_PACKAGE = "androidx.compose.material3"
         private const val PREVIEW_ANNOTATION = "Preview"
+        private const val FOLLOWER_PREFIX = "Follow"
         private const val THEME_PACKAGE = "app.notekea.core.presentation.theme"
         private val NON_FEATURE_PACKAGES = setOf("architecture", "core", "db", "di", "resources")
         private val DESIGN_SYSTEM_PACKAGES = listOf("app.notekea.core.presentation.components", THEME_PACKAGE)
