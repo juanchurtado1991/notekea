@@ -1,6 +1,5 @@
 package com.testbuddy
 
-import kotlinx.coroutines.test.runTest
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,16 +12,16 @@ class FormatReportTest {
         automated(id = "1.6-03", title = "Opening a note from the quick switcher") {}
         automated(id = "1.6-04", title = "Searching content") {}
         manual(id = "1.17-02", reason = ManualReason.EYES) {
-            title(text = plainText(english = "Dark mode follows the system", "es" to "El modo oscuro sigue al sistema"))
-            steps(text = plainText(english = "Switch"))
-            expected(text = plainText(english = "Dark"))
+            title(text = "Dark mode follows the system")
+            steps(text = "Switch")
+            expected(text = "Dark")
         }
     }
     private val environment =
         ReportEnvironment(system = "Windows 11 10.0", language = "es-CO", screen = "1920×1080 at 125%")
 
     @Test
-    fun `a report lists the machine, the counts and every failure in English`() = runTest {
+    fun `a report lists the machine, the counts and every failure in English`() {
         val report = formatReport(
             suite = suite,
             environment = environment,
@@ -57,7 +56,7 @@ class FormatReportTest {
     }
 
     @Test
-    fun `a short run counts seconds, and no diagnostics leaves the section out`() = runTest {
+    fun `a short run counts seconds, and no diagnostics leaves the section out`() {
         val report = formatReport(
             suite = suite,
             environment = environment,

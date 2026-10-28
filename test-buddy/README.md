@@ -25,9 +25,9 @@ val notesSuite = testBuddy(appName = "Notes", version = "1.0") {
 
     manual(id = "1.17-02", reason = ManualReason.EYES) {
         prepare("Personal Notes")
-        title(text = plainText(english = "Dark mode follows the system", "es" to "El modo oscuro sigue al sistema"))
-        steps(text = plainText(english = "Switch the system to dark mode."))
-        expected(text = plainText(english = "The app turns dark at once and every text reads well."))
+        title(text = "Dark mode follows the system")
+        steps(text = "Switch the system to dark mode.")
+        expected(text = "The app turns dark at once and every text reads well.")
     }
 
     backUp { listOf(NotesPaths.appDataDir) }
@@ -36,8 +36,8 @@ val notesSuite = testBuddy(appName = "Notes", version = "1.0") {
 
 - `launch` shows the app on a case's `CaseFolders`: `appData` stands for its data folder (never the real one) and
   `data` holds a fresh copy of the suite's `data` folders. Both are deleted after the case.
-- A case ID is used once and has no spaces. A manual case needs a title, steps and an expected result; `CaseText`
-  resolves them in the tester's language (`plainText`, or the host's string resources) and falls back to English.
+- A case ID is used once and has no spaces. A manual case needs a title, steps and an expected result, in plain
+  English for a tester who is not a developer.
 - `backUp` names what Finish and clean up puts back as it was after the manual cases.
 
 ## Verbs (`CaseScope`)

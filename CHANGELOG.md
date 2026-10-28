@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Notekea Self-Test plan (`qa/SELF_TEST.md`): testers install Notekea and a Self-Test app that runs the automatic
-  smoke cases on their system and walks them through the manual ones in English or Spanish, in one report; every
+  smoke cases on their system and walks them through the manual ones, in one report; every
   feature keeps it up to date from now on (`GUIDELINES.md` §8, `qa/README.md`).
 - Test Buddy core (`:test-buddy`, `qa/README.md` piece 3a): the generic Self-Test SDK, ready to become a standalone
   library. A suite declares how to show the app, its test data and its automated and manual cases; a case's body uses

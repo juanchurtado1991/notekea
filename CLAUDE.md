@@ -70,9 +70,9 @@ data folder. Within the feature's steps:
 3. **Outdated cases:** rewrite in place, keeping their IDs, the existing cases the change makes outdated, including
    those marked "Revised by <feature>"; mark the cases a later feature will change with a "Revised by" note.
 4. **Self-Test:** give every new or changed case its **Checked by** (`Self-Test`, or `Manual (<reason>)` for
-   eyes, system, packaged or costly; automate what is reasonable, with no quota) and write it in `:selftest` in the same step: an `AutomatedCase` named after its ID, or
-   a `ManualCase` with its steps and expected result in English and Spanish, in plain words for a tester who is not
-   a developer (no terminal, no paths to type). Keep the consistency test green (`qa/SELF_TEST.md`).
+   eyes, system, packaged or costly; automate what is reasonable, with no quota) and write it in `:selftest` in the
+   same step: an `AutomatedCase` named after its ID, or a `ManualCase` with its steps and expected result in plain
+   English for a tester who is not a developer (no terminal, no paths to type). Keep the consistency test green (`qa/SELF_TEST.md`).
 5. **Results:** the developer's results go in the description of the pull request to `main` (OS, version, what was
    checked); the OS
    columns of `MVP_SMOKE_TEST.md` are only filled in the release run with a packaged build.
