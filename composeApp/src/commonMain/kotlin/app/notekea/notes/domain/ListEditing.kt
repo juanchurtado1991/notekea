@@ -22,15 +22,15 @@ class ListEditing {
     ): TextEdit? {
         val start = minOf(selectionStart, selectionEnd).coerceIn(range = 0..text.length)
         val end = maxOf(selectionStart, selectionEnd).coerceIn(range = 0..text.length)
-        val lines = text.split(NEW_LINE_CHAR)
-        val first = lineIndexOf(text = text, offset = start)
-        if (isInCode(lines = lines, index = first)) return null
-        return when (action) {
+        // The edit is worked out on the cursor's line first: Enter or Backspace in plain text, the usual case, never
+        // reads the rest of the note. Only an edit found is checked against the code blocks above it.
+        val edit = when (action) {
             ListAction.NEW_ITEM -> if (start == end) newItem(text = text, cursor = start) else null
-            ListAction.INDENT -> shift(lines = lines, start = start, end = end, isIndent = true)
-            ListAction.OUTDENT -> shift(lines = lines, start = start, end = end, isIndent = false)
+            ListAction.INDENT -> shift(text = text, start = start, end = end, isIndent = true)
+            ListAction.OUTDENT -> shift(text = text, start = start, end = end, isIndent = false)
             ListAction.REMOVE_MARKER -> if (start == end) removeMarker(text = text, cursor = start) else null
-        }
+        } ?: return null
+        return edit.takeUnless { isInCode(text = text, index = lineIndexOf(text = text, offset = start)) }
     }
 
     private fun newItem(
@@ -61,12 +61,12 @@ class ListEditing {
 
     /** Tab and Shift+Tab: every list item the selection touches moves by the step the first one takes. */
     private fun shift(
-        lines: List<String>,
+        text: String,
         start: Int,
         end: Int,
         isIndent: Boolean
     ): TextEdit? {
-        val text = lines.joinToString(separator = NEW_LINE)
+        val lines = text.split(NEW_LINE_CHAR)
         val first = lineIndexOf(text = text, offset = start)
         val last = lineIndexOf(
             text = text,
@@ -99,8 +99,9 @@ class ListEditing {
         val firstStart = lineStartOf(lines = lines, index = first)
         val lastEnd = lineStartOf(lines = lines, index = last) + lines[last].length
         val replacement = shifted.subList(fromIndex = first, toIndex = last + 1).joinToString(separator = NEW_LINE)
-        val newStart = mapOffset(lines = lines, shifted = shifted, offset = start, items = items, step = step)
-        val newEnd = mapOffset(lines = lines, shifted = shifted, offset = end, items = items, step = step)
+        val newStart =
+            mapOffset(text = text, lines = lines, shifted = shifted, offset = start, items = items, step = step)
+        val newEnd = mapOffset(text = text, lines = lines, shifted = shifted, offset = end, items = items, step = step)
         return TextEdit(firstStart, lastEnd, replacement, newStart, newEnd)
     }
 
@@ -142,13 +143,13 @@ class ListEditing {
 
     /** [offset] in the text after the shift: moved with its line, and never into the indentation it lost. */
     private fun mapOffset(
+        text: String,
         lines: List<String>,
         shifted: List<String>,
         offset: Int,
         items: List<Int>,
         step: Int
     ): Int {
-        val text = lines.joinToString(separator = NEW_LINE)
         val index = lineIndexOf(text = text, offset = offset)
         val column = offset - lineStartOf(lines = lines, index = index)
         val moved = if (index in items) column + (shifted[index].length - lines[index].length) else column
@@ -159,26 +160,55 @@ class ListEditing {
     private fun lineIndexOf(
         text: String,
         offset: Int
-    ): Int = text.substring(startIndex = 0, endIndex = offset).count { it == NEW_LINE_CHAR }
+    ): Int {
+        var count = 0
+        for (index in 0 until offset) if (text[index] == NEW_LINE_CHAR) count++
+        return count
+    }
 
     private fun lineStartOf(
         lines: List<String>,
         index: Int
     ): Int = lines.take(n = index).sumOf { it.length + 1 }
 
-    /** Whether line [index] is inside a fenced code block, where list keys type as usual. */
+    /**
+     * Whether line [index] of [text] is inside a fenced code block, where list keys type as usual. The lines are read in
+     * place, and only one with a backtick or a tilde is matched against a fence.
+     */
     private fun isInCode(
-        lines: List<String>,
+        text: String,
         index: Int
     ): Boolean {
         var fence: Char? = null
-        for (line in lines.take(n = index + 1)) {
-            val marker = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)?.first()
+        var isFenceLine = false
+        var lineStart = 0
+        for (line in 0..index) {
+            val lineEnd = text.indexOf(char = NEW_LINE_CHAR, startIndex = lineStart).takeIf { it >= 0 } ?: text.length
+            val marker = fenceMarker(text = text, start = lineStart, end = lineEnd)
+            isFenceLine = marker != null
             fence = when {
                 fence != null -> if (marker == fence) null else fence
                 else -> marker
             }
+            lineStart = lineEnd + 1
         }
-        return fence != null && MarkdownSyntax.FENCE_LINE.find(input = lines[index]) == null
+        return fence != null && !isFenceLine
+    }
+
+    /** The fence character of the line from [start] to [end] of [text] when it is a fence line, read in place. */
+    private fun fenceMarker(
+        text: String,
+        start: Int,
+        end: Int
+    ): Char? = if ((start until end).any { text[it] == BACKTICK || text[it] == TILDE }) {
+        val line = text.substring(startIndex = start, endIndex = end)
+        MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)?.first()
+    } else {
+        null
+    }
+
+    companion object {
+        private const val BACKTICK = '`'
+        private const val TILDE = '~'
     }
 }
