@@ -91,6 +91,9 @@ private fun SuiteBuilder.newNotesAndFolders() {
 private fun SuiteBuilder.renameInTheTree() {
     automated(id = "1.4-05", title = "Renaming in the tree, and names that cannot be used") {
         openVault(name = PLAYGROUND, shownText = WELCOME)
+        // Travel is opened first: the renames below reorder the tree while it lays out.
+        clickInTree(text = "Travel")
+        expectText(text = "Lisbon trip")
         // A folder keeps the keyboard in the tree when clicked (a note gives it to the editor), so F2 (Enter on
         // macOS) reaches the tree.
         clickInTree(text = "Ideas")
@@ -101,7 +104,6 @@ private fun SuiteBuilder.renameInTheTree() {
         renameInTree(name = WELCOME, newName = "Good morning")
         expectFile(path = "$PLAYGROUND/Good morning.md")
         expectNoFile(path = "$PLAYGROUND/Welcome.md")
-        clickInTree(text = "Travel")
         refusedName(name = "a/b", message = "Enter a name without characters like / : * ? or quotes.")
         refusedName(name = ".hidden", message = "Names can’t start with a dot, or the note would be hidden.")
         refusedName(name = "Packing checklist", message = "There’s already something named Packing checklist")

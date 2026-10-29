@@ -21,6 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notekea Self-Test plan (`qa/SELF_TEST.md`): testers install Notekea and a Self-Test app that runs the automatic
   smoke cases on their system and walks them through the manual ones, in one report; every
   feature keeps it up to date from now on (`GUIDELINES.md` §8, `qa/README.md`).
+- Self-Test cases of 1.10 to 1.13: 31 automatic ones (today's note and the day arrows, Obsidian's daily note
+  settings, the tool rail and the sidebar's header, tabs opened, opened behind, closed and switched, two panes and
+  dragging tabs between them, a tab's place kept, folders as cards, quick folder clicks, reordering tabs, templates
+  with and without a folder, Obsidian's template settings, a template for a new note and over a selection, the
+  panels' first width, bookmarks from the star and the menu, opening, folding, reordering and following them) and 5
+  manual ones. 1.9-05 became a manual case; dropping a tab in the first place moved to 1.11-16; 1.11-10 stays
+  pending: a tab of a note deleted while Notekea was closed came back after the relaunch, with "This note couldn't
+  be opened".
 - Self-Test cases of 1.6 to 1.9: 23 automatic ones (search by text and tag, the palette's keyboard, a tag link, the
   large vault, tasks as checkboxes and Mod+Enter, folding callouts, embeds in Edit, the attachments folder, notes
   shown in a note, the outline and the side panel, in a narrow window too) and 13 manual ones (callout colors,

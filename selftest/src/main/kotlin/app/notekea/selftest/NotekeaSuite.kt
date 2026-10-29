@@ -1,13 +1,18 @@
 package app.notekea.selftest
 
 import app.notekea.selftest.cases.m1.attachmentCases
+import app.notekea.selftest.cases.m1.bookmarkCases
+import app.notekea.selftest.cases.m1.dailyCases
 import app.notekea.selftest.cases.m1.editorCases
 import app.notekea.selftest.cases.m1.editorViewCases
 import app.notekea.selftest.cases.m1.outlineCases
+import app.notekea.selftest.cases.m1.paneCases
 import app.notekea.selftest.cases.m1.platformCases
 import app.notekea.selftest.cases.m1.quickSwitcherCases
 import app.notekea.selftest.cases.m1.searchCases
+import app.notekea.selftest.cases.m1.tabCases
 import app.notekea.selftest.cases.m1.taskCases
+import app.notekea.selftest.cases.m1.templateCases
 import app.notekea.selftest.cases.m1.themeCases
 import app.notekea.selftest.cases.m1.treeCases
 import app.notekea.selftest.cases.m1.treeChangeCases
@@ -44,6 +49,11 @@ object NotekeaSuite {
             taskCases()
             attachmentCases()
             outlineCases()
+            dailyCases()
+            tabCases()
+            paneCases()
+            templateCases()
+            bookmarkCases()
         }
     }
 

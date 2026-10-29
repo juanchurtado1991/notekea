@@ -24,6 +24,7 @@ import java.nio.file.Files
 private const val OPEN_FOLDER = "Open folder…"
 private const val FIND_NOTE = "Find a note by name or alias"
 private const val WAIT_MILLIS = 10_000L
+private const val RELAUNCH_MILLIS = 30_000L
 
 /** The Notekea a case drives, to set what its pickers answer. */
 fun CaseScope.notekea(): CaseApp = CaseApps.of(vaults = folders.data)
@@ -34,7 +35,8 @@ fun CaseScope.notekea(): CaseApp = CaseApps.of(vaults = folders.data)
  */
 fun CaseScope.relaunch(whileClosed: () -> Unit = {}) {
     val quitting = CaseApps.quit(vaults = folders.data, whileClosed = whileClosed)
-    ui.waitUntil(timeoutMillis = WAIT_MILLIS) {
+    // Quitting waits for the window's close guard, which gives each of its handlers a few seconds.
+    ui.waitUntil(timeoutMillis = RELAUNCH_MILLIS) {
         runCatching { CaseApps.of(vaults = folders.data) !== quitting }.getOrDefault(false)
     }
     ui.waitForIdle()

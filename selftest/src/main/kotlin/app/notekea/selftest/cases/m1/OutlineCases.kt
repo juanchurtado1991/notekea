@@ -15,6 +15,7 @@ import app.notekea.selftest.pressInWindow
 import app.notekea.selftest.relaunch
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
+import com.testbuddy.ManualReason
 import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.ShortcutModifier.Shift
 import com.testbuddy.SuiteBuilder
@@ -33,6 +34,7 @@ fun SuiteBuilder.outlineCases() {
     outlineClick()
     outlineHighlight()
     outlineInPreview()
+    outlineKeyboard()
     sidePanelHides()
     narrowSidePanel()
     outlineOfNewNote()
@@ -78,6 +80,26 @@ private fun SuiteBuilder.outlineInPreview() {
         pressInWindow(shortcut = Mod + Key.E)
         clickOutline(heading = "Serving")
         expectSelected(heading = "Serving")
+    }
+}
+
+// Manual because, in an automated case, Mod+Shift+O does not move the keyboard from the note to the docked outline,
+// while it does in the app (checked by the developer, 2026-10-29).
+private fun SuiteBuilder.outlineKeyboard() {
+    manual(id = "1.9-05", reason = ManualReason.COSTLY) {
+        prepare(PLAYGROUND)
+        title(text = "The outline with the keyboard")
+        steps(
+            text = "1. Open Notekea and open the Playground Vault from the Test data folder (Open folder…).\n" +
+                "2. Open the note Editor › Outline practice and click in its text.\n" +
+                "3. Press Ctrl+Shift+O (Cmd+Shift+O on macOS), then the Down arrow twice and Enter, and type x.\n" +
+                "4. Press Ctrl+Shift+O (Cmd+Shift+O) again, then Esc, and type y.\n5. Undo both letters with Ctrl+Z (Cmd+Z)."
+        )
+        expected(
+            text = "Ctrl+Shift+O puts a ring around the highlighted heading of the outline and the arrows move it; " +
+                "Enter goes to that heading and x is typed at the end of its line. After Esc the keyboard is back " +
+                "in the note and y is typed where the cursor was."
+        )
     }
 }
 
