@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The app's log is kept in `logs/notekea.log` in the app data folder (rotated at 1 MB, three files kept, never note
+  text), and About has **Copy diagnostics**: the app, system and Java versions and the last 100 log lines, to paste
+  in a tester's report (`qa/README.md`, piece 6).
 - Faster CI: the Self-Test runs in four parts at the same time (`Suite.shard` in Test Buddy), a step's pull request
   into its feature branch runs on Linux only, a pull request of documents only skips the build, `smokeRun` no longer
   repeats the smoke runs inside `check`, and a nightly workflow runs everything with the smoke runs on the three

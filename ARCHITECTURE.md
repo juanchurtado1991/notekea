@@ -183,7 +183,8 @@ abstract class BaseViewModel<S, I, E>(
 
 ## 9. Logging
 
-- Kermit, with one tag per class.
+- Kermit, with one tag per class. Info and above also go to `logs/notekea.log` in the app data folder
+  (`FileLogWriter`, rotated at 1 MB, three files kept), which About's Copy diagnostics and the Self-Test's report read.
 - Never log note content, titles, chunks, prompts, answers or embeddings (`GUIDELINES.md` §13). Log ids,
   counts, durations, error types and paths relative to the vault.
 
