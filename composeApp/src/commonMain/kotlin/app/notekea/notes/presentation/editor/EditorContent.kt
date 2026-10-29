@@ -26,7 +26,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -53,7 +52,6 @@ import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.stringResource
 
 private const val HEADING_MARGIN_DP = 8
-private const val SCROLL_RESTORE_FRAMES = 30
 internal const val NO_LIGATURES = "liga 0, calt 0"
 private const val PREVIEW_HEIGHT_DP = 520
 private const val PREVIEW_WIDTH_DP = 760
@@ -145,12 +143,7 @@ private fun RememberScroll(
     val path = state.notePath
     LaunchedEffect(path, state.isLoading, state.isReading) {
         if (path == null || state.isLoading) return@LaunchedEffect
-        val target = memory.of(path = path)
-        repeat(times = SCROLL_RESTORE_FRAMES) {
-            if (scrollState.maxValue >= target) return@repeat
-            withFrameNanos { }
-        }
-        scrollState.scrollTo(value = target)
+        scrollState.scrollWhenLaidOut(target = memory.of(path = path))
         snapshotFlow { scrollState.value }.collect { memory.keep(path = path, offset = it) }
     }
 }
