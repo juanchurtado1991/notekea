@@ -115,5 +115,8 @@ internal fun ComposeUiTest.waitForFile(
     path: String,
     part: String
 ) = waitUntil(timeoutMillis = WAIT_MILLIS) {
-    java.io.File(app.vaultPath(name = SAMPLE_VAULT), path).let { it.exists() && it.readText().contains(other = part) }
+    // Windows refuses a read while the app is replacing the file: that is not yet, so the wait goes on.
+    java.io.File(app.vaultPath(name = SAMPLE_VAULT), path).let {
+        it.exists() && runCatching { it.readText() }.getOrDefault(defaultValue = "").contains(other = part)
+    }
 }
