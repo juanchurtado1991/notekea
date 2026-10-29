@@ -14,7 +14,6 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onFirst
@@ -156,7 +155,7 @@ public class CaseScope internal constructor(
             val nodes = ui.onAllNodes(matcher = hasText(text = text, substring = substring))
             val count = nodes.fetchSemanticsNodes().size
             // A node can leave between counting and looking at it: gone is what this waits for.
-            (0 until count).none { runCatching { nodes[it].isDisplayed() }.getOrDefault(defaultValue = false) }
+            (0 until count).none { nodes[it].isShown() }
         }
         if (!holds) throw CaseFailure(message = "expected \"$text\" to go away, it stayed")
     }
@@ -194,7 +193,7 @@ public class CaseScope internal constructor(
     private fun firstShown(matcher: SemanticsMatcher): SemanticsNodeInteraction {
         val nodes = ui.onAllNodes(matcher = matcher)
         val count = nodes.fetchSemanticsNodes().size
-        return (0 until count).map { nodes[it] }.firstOrNull { it.isDisplayed() } ?: nodes.onFirst()
+        return (0 until count).map { nodes[it] }.firstOrNull { it.isShown() } ?: nodes.onFirst()
     }
 
     private fun holdsInTime(condition: () -> Boolean): Boolean = try {

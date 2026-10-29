@@ -5,13 +5,13 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.MouseButton
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.rightClick
 import app.notekea.selftest.clickInTree
 import app.notekea.selftest.pressInWindow
+import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.HostSystem
@@ -35,7 +35,7 @@ internal fun CaseScope.tabsShowing(name: String): List<SemanticsNodeInteraction>
     val nodes = ui.onAllNodes(matcher = hasText(text = name))
     val count = nodes.fetchSemanticsNodes().size
     return (0 until count).map { nodes[it] }
-        .filter { it.isDisplayed() && it.fetchSemanticsNode().boundsInRoot.bottom < TAB_STRIP_BOTTOM }
+        .filter { it.isShown() && it.fetchSemanticsNode().boundsInRoot.bottom < TAB_STRIP_BOTTOM }
         .sortedBy { it.fetchSemanticsNode().boundsInRoot.left }
 }
 

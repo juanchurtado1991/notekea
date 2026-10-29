@@ -76,6 +76,8 @@ private fun SuiteBuilder.tagLink() {
         openVault(name = PERSONAL_NOTES, shownText = WELCOME)
         openNote(name = "2026-10-21", shownText = "#travel")
         pressInWindow(shortcut = Mod + Key.E)
+        // Wait for Preview before clicking the tag: until it shows, the words are the editor's text, not a link.
+        expectNoText(text = "[[Lisbon trip]]", substring = true)
         expectText(text = "#travel", substring = true)
         clickWords(words = "#travel")
         waitForResult(name = "Lisbon trip")
