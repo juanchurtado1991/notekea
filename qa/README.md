@@ -40,7 +40,7 @@ this list and builds what is missing). The design is in [SELF_TEST.md](SELF_TEST
 | 5 | M1 cases | Every General and M1 case as an `AutomatedCase` or a `ManualCase`, in four pull requests: 1.1–1.5, 1.6–1.9, 1.10–1.13, 1.14–1.18 and General. The last one makes `MVP_SMOKE_TEST.md` generated from the cases (`SELF_TEST.md`) | 🟡 1.1–1.5 in [#78](https://github.com/juanchurtado1991/notekea/pull/78), 1.6–1.9 in [#80](https://github.com/juanchurtado1991/notekea/pull/80), 1.10–1.13 in [#81](https://github.com/juanchurtado1991/notekea/pull/81), 1.14–1.18, 1.11-10 and General (with the free use case G-09) in the next pull request; generating `MVP_SMOKE_TEST.md` to do |
 | 6 | File logs and Copy diagnostics | Logs written to a rotating file in the app data folder (never note content, `ARCHITECTURE.md` §9), **Help → Copy diagnostics** (version, OS, last log lines), read by the Self-Test's report | ✅ Crash reports with Copy details and Report on GitHub; rotating log file, About's Copy diagnostics and the Self-Test's report ending with the installed Notekea's log in this pull request |
 | 7 | Milestone build workflow | `.github/workflows/milestone-build.yml`: on a tag `m<N>-rc<k>`, packages Notekea and Notekea Self-Test (`.msi`, `.dmg`, `.deb`) on the three runners and publishes a GitHub **pre-release** with them and the testers' guides. Unsigned until `ROADMAP.md` 5.3 | ✅ this pull request: `m<N>-rc<k>` installs as version `1.<N>.<k>`, so each candidate installs over the last; a pull request changing the workflow builds the installers without publishing |
-| 8 | Testers' guides | `GUIDE_*.md` rewritten as: install both apps, run the Self-Test, send the report; `M1_SMOKE_TEST.md` and `REPORT_TEMPLATE.txt` deleted, their steps now living in the manual cases | ⬜ |
+| 8 | Testers' guides | `GUIDE_*.md` rewritten as: install both apps, run the Self-Test, send the report; `M1_SMOKE_TEST.md` and `REPORT_TEMPLATE.txt` deleted, their steps now living in the manual cases | ✅ this pull request |
 
 Change ⬜ to ✅ with the pull request link as each one lands. Already done: the automated smoke runs (1.16,
 `app.notekea.smokerun`), which piece 4 moves into `:selftest`.
@@ -56,8 +56,9 @@ Change ⬜ to ✅ with the pull request link as each one lands. Already done: th
 3. **Open the run record**: copy `runs/TEMPLATE.md` to `runs/M<N>.md` and list every case to run (the "General"
    section plus every milestone up to this one; skip cases whose "Testable from" is a later feature).
 4. **Send each tester** the link to the pre-release and to the guide of their system.
-5. **Testers run the Self-Test's automatic part.** If a case fails they send the report and wait: the manual part is
-   not run on a build whose automatic cases fail, unless the developer says the failure does not block it.
+5. **Testers run the Self-Test's automatic part**, then the manual part, even when an automatic case failed: the
+   failures go in the same report. A failure that makes the manual part pointless (Notekea does not open) is the
+   developer's call: they tell the testers to wait for the next build.
 6. **Testers run the manual part** in the Self-Test, then **Copy report** and **Finish and clean up**, and send the
    report with the screenshots of failed cases.
 7. **Triage**: record every result in `runs/M<N>.md`. Each failure becomes a GitHub issue labeled `qa-m<N>` and the
@@ -74,7 +75,4 @@ Change ⬜ to ✅ with the pull request link as each one lands. Already done: th
 - `GUIDE_WINDOWS.md`, `GUIDE_MACOS.md`, `GUIDE_LINUX.md`: step by step for testers, written for people who are not
   developers.
 - `SELF_TEST.md`: the Self-Test's design and how every feature keeps it up to date.
-- `M1_SMOKE_TEST.md`: every M1 case written out click by click for the three systems; the source of the M1 manual
-  cases' texts, deleted by piece 8.
-- `REPORT_TEMPLATE.txt`: what a tester filled in before the Self-Test's report; deleted by piece 8.
 - `runs/TEMPLATE.md`: the record of one run; `runs/M<N>.md` once it starts.

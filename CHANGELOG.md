@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Milestone builds (`qa/README.md`, piece 7): a tag `m<N>-rc<k>` packages Notekea and Notekea Self-Test for
   Windows, macOS and Linux and publishes them as a GitHub pre-release with the testers' guides. Each candidate
   installs over the last (version `1.<N>.<k>`), and About shows which candidate it is.
+- Testers' guides for the Self-Test (`qa/GUIDE_*.md`, piece 8): install Notekea and Notekea Self-Test, run the
+  automatic part, follow the manual cases, send the report and finish and clean up, on Windows, macOS and Linux. The
+  step-by-step M1 guide and the report template are gone: their steps live in the Self-Test's manual cases.
 - Faster CI: the Self-Test runs in four parts at the same time (`Suite.shard` in Test Buddy), a step's pull request
   into its feature branch runs on Linux only, a pull request of documents only skips the build, `smokeRun` no longer
   repeats the smoke runs inside `check`, and a nightly workflow runs everything with the smoke runs on the three

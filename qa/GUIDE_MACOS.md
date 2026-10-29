@@ -1,52 +1,62 @@
 # Notekea QA guide — macOS
 
-Follow the steps in order; about two hours the first time. If something here is unclear, say so in your report.
+Thank you for testing Notekea. You do not need to know anything about programming: two apps do the work,
+**Notekea** (the app being tested) and **Notekea Self-Test** (which tests it and tells you what to do). The automatic
+part runs by itself in about 20 minutes; the manual cases take one to two hours, and you can stop and go on later.
+If something here is unclear, that is a problem with the guide, not with you: say so when you send the report.
 
-## What you receive
+## 1. Download
 
-A link to a **release** on GitHub, named like `Notekea m1-rc1`. Under **Assets**, download `Notekea-<version>.dmg`,
-`Notekea-Self-Test-<version>.dmg`, `smoke-data.zip` and `REPORT_TEMPLATE.txt`.
+You receive a link to a **release** on GitHub, named like `Notekea m1-rc1`. On that page, under **Assets**, download
+the two files for macOS:
 
-## 1. Install the app
+- `Notekea-<version>.dmg` — the app.
+- `Notekea Self-Test-<version>.dmg` — the test.
 
-1. Open `Notekea-<version>.dmg` and drag **Notekea** to **Applications**.
-2. The first time, macOS may say Notekea **cannot be opened** because the developer cannot be verified (Notekea's
-   builds are not signed). In **Applications**, **right-click** Notekea → **Open** → **Open**. On macOS 15 or later, if
-   there is no Open button: **System Settings → Privacy & Security**, scroll down to the message about Notekea and
-   click **Open Anyway**.
+## 2. Install both apps
 
-## 2. Run the automatic test first
+1. Double-click `Notekea-<version>.dmg` and drag **Notekea** onto **Applications** in the window that opens.
+2. Do the same with `Notekea Self-Test-<version>.dmg`.
+3. The first time you open each app, macOS may say it **cannot check it for malicious software**: Notekea's builds
+   are not signed yet. Click **Done**, open **System Settings › Privacy & Security**, scroll down and click **Open
+   Anyway** next to the app's name, then **Open**. This is needed once per app.
 
-1. Install `Notekea-Self-Test-<version>.dmg` the same way and open **Notekea Self-Test**; click **Run** and do not use
-   the Mac while it runs.
-2. ✅ **All tests passed** — continue with step 3. ❌ **Some tests failed** — click **Copy report**, paste it
-   (Cmd+V) into section 1 of `REPORT_TEMPLATE.txt` (open it with TextEdit), save it and send it. **Stop here.**
+## 3. The automatic part
 
-## 3. Prepare the sample notes
+1. Open **Notekea Self-Test** from **Applications** (or Launchpad).
+2. Click **Start the automatic tests**. You can keep using the computer while it runs; it uses its own copies of
+   the test notes and never touches yours.
+3. When it says **Done**, look at the result. Failed cases are red: there is nothing to do about them now, they go in
+   the report. Close Notekea if it is open, and click **Next: manual cases**.
 
-1. Double-click `smoke-data.zip`; move the `smoke-data` folder into your **Documents** folder.
-2. Open **Terminal** (Cmd+Space, type Terminal, Enter), paste this line and press Enter:
+## 4. The manual cases
 
-   ```bash
-   bash ~/Documents/smoke-data/smoke.sh prepare
-   ```
+The Self-Test shows one case per screen:
 
-3. It answers with "Smoke scenarios ready in …". Keep Terminal open: some cases ask you to paste another line there.
+- **Do this** says what to do, step by step. **Open Notekea** starts Notekea for you, and **Open the folder** shows
+  the **Test data** folder, where each case's sample notes are ready (Notekea asks for a folder with **Open folder…**:
+  choose the one the case names there).
+- **You should see** says what must happen.
+- Click **Passed** when it did, or **Failed** when it did not: write **What did you see?**, click **Add a
+  screenshot…** if you took one, and **Save as failed**. **Skip for now** leaves a case for later.
 
-## 4. Run the manual cases
+**Screenshots:** press **Cmd + Shift + 4**, then the **Space bar**, and click the window. The picture is saved on the
+Desktop; choose it with **Add a screenshot…**. On macOS the shortcuts the cases name use **Cmd**.
 
-Open the run's list (`qa/runs/M<N>.md`, link from the coordinator); each case is written out step by step in
-[M1_SMOKE_TEST.md](M1_SMOKE_TEST.md) for the M1 run (in `MVP_SMOKE_TEST.md` for later ones). Do the steps and check what
-it says under **Pass when**. On macOS, shortcuts use **Cmd**. Write one line
-per case in section 2 of the report: the ID and **PASS**, **FAIL** or **SKIP**.
+Your answers are saved: you can close the Self-Test and open it again later, it goes on where you left. The last
+case is 15 minutes of free use: use Notekea as you really would, and say whether you found anything odd.
 
-## 5. When a case fails
+## 5. Send the report
 
-- **Screenshot**: **Cmd+Shift+3** saves the whole screen to the Desktop (**Cmd+Shift+4** lets you select an area).
-- **Diagnostics**: in Notekea, **Help → Copy diagnostics**, then paste under the case. It never contains your notes.
-- If Notekea closed or froze: in Finder press **Cmd+Shift+G**, paste `~/Library/Application Support/Notekea/logs`
-  and press Enter; attach the newest file.
+1. After the last case, click **Copy report** and paste it into a message (email, WhatsApp…) to whoever asked you to
+   test.
+2. Click **Open the Report folder** and attach the pictures in it to the same message.
 
-## 6. Send the report
+## 6. Finish
 
-Save the report (e.g. `report-macos-m1-rc1.txt`) and send it with the screenshots and files.
+1. Close Notekea, then click **Finish and clean up**: it puts Notekea back exactly as it was before the test and
+   deletes the test notes. It says **All clean** when it is done.
+2. Uninstall **Notekea Self-Test**: drag it from **Applications** to the Trash.
+
+You keep Notekea installed for everyday use. When a new build comes (`m1-rc2`), install both apps again over the old
+ones and repeat this guide: the Self-Test only asks for the cases it needs.

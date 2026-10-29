@@ -18,7 +18,7 @@ A tester installs two apps from the milestone's release, **Notekea** and **Notek
    Self-Test can be uninstalled.
 
 Testers are not developers: they never clone the repository, open a terminal, install Java or prepare data by hand.
-A manual run takes a fraction of the 5 to 7 hours per system the step-by-step guide takes.
+A manual run takes a fraction of the 5 to 7 hours per system the old step-by-step guide took.
 
 ## Two modules: Test Buddy and Notekea's suite
 
@@ -167,7 +167,7 @@ from them (`./gradlew :selftest:smokeCases`), so no case is written twice:
   tested without reading Kotlin. Its header says it is generated and must not be edited.
 - The consistency test fails when the committed file differs from what the cases generate.
 - The Win, macOS and Linux columns go: results live in the Self-Test's reports and in `qa/runs/M<N>.md`.
-- `qa/M1_SMOKE_TEST.md`, the step-by-step guide, is deleted in piece 8: its steps live in the manual cases.
+- `qa/M1_SMOKE_TEST.md`, the old step-by-step guide, was deleted in piece 8: its steps live in the manual cases.
 
 ## Language
 
