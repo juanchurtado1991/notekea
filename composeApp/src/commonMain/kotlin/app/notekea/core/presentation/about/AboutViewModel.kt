@@ -5,15 +5,6 @@ import app.notekea.core.logging.domain.TextClipboard
 import app.notekea.core.presentation.BaseViewModel
 import co.touchlab.kermit.Logger
 
-/** What About shows besides its fixed texts: whether Copy diagnostics has put them on the clipboard. */
-data class AboutState(
-    val isDiagnosticsCopied: Boolean = false
-)
-
-sealed interface AboutIntent {
-    data object OnCopyDiagnostics : AboutIntent
-}
-
 /** About Notekea's Copy diagnostics (`qa/README.md`, piece 6): the versions and the recent log, for a tester's report. */
 class AboutViewModel(
     private val getDiagnostics: GetDiagnosticsUseCase,

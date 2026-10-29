@@ -85,7 +85,7 @@ fun AboutDialog(
 }
 
 @Composable
-fun AboutContent(
+private fun AboutContent(
     platformConventions: PlatformConventions,
     state: AboutState,
     onIntent: (AboutIntent) -> Unit,
