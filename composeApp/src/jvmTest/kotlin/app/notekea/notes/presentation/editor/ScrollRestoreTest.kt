@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
@@ -42,12 +43,30 @@ class ScrollRestoreTest {
             }
         }
 
-        // Frames keep coming while real time passes, as on screen.
-        val start = System.nanoTime()
-        while (scrollState.value != TARGET && System.nanoTime() - start < WAIT_MILLIS * NANOS_PER_MILLI) {
-            mainClock.advanceTimeByFrame()
-            Thread.sleep(FRAME_MILLIS)
+        pumpFrames(until = { scrollState.value == TARGET }, millis = WAIT_MILLIS)
+
+        assertEquals(TARGET, scrollState.value)
+    }
+
+    @Test
+    fun `a page laid out again shorter for a moment, as Preview does, goes back to its place`() = runComposeUiTest {
+        val scrollState = ScrollState(initial = 0)
+        var height by mutableStateOf(value = PAGE)
+        setContent {
+            Column(modifier = Modifier.height(height = VIEWPORT.dp).verticalScroll(state = scrollState)) {
+                Spacer(modifier = Modifier.height(height = height.dp))
+            }
+            LaunchedEffect(Unit) { scrollState.scrollWhenLaidOut(target = TARGET) }
+            // What 1.11-09 recorded on CI: the page at full height, then shorter than the place, then full again.
+            LaunchedEffect(Unit) {
+                withContext(context = Dispatchers.IO) { Thread.sleep(SHRINK_MILLIS) }
+                height = SHORT_PAGE
+                withContext(context = Dispatchers.IO) { Thread.sleep(SHRINK_MILLIS) }
+                height = PAGE
+            }
         }
+
+        pumpFrames(until = { false }, millis = SHRINK_MILLIS * 3)
 
         assertEquals(TARGET, scrollState.value)
     }
@@ -67,12 +86,25 @@ class ScrollRestoreTest {
         assertEquals(scrollState.maxValue, scrollState.value)
     }
 
+    /** Frames keep coming while real time passes, as on screen, for [millis] or [until] it holds. */
+    private fun ComposeUiTest.pumpFrames(
+        until: () -> Boolean,
+        millis: Long
+    ) {
+        val start = System.nanoTime()
+        while (!until() && System.nanoTime() - start < millis * NANOS_PER_MILLI) {
+            mainClock.advanceTimeByFrame()
+            Thread.sleep(FRAME_MILLIS)
+        }
+    }
+
     private companion object {
         const val VIEWPORT = 100
         const val PAGE = 3_000
         const val SHORT_PAGE = 300
         const val TARGET = 1_000
         const val LATE_MILLIS = 800L
+        const val SHRINK_MILLIS = 300L
         const val WAIT_MILLIS = 5_000L
         const val FRAME_MILLIS = 16L
         const val NANOS_PER_MILLI = 1_000_000L
