@@ -19,7 +19,9 @@ internal class CaseWorkspace(
             appData = Files.createDirectories(root.resolve(APP_DATA)),
             data = Files.createDirectories(root.resolve(DATA))
         )
-        dataSources.forEach { it.copyToRecursively(target = folders.data, followLinks = false, overwrite = true) }
+        dataSources.forEach {
+            it.copyToRecursively(target = folders.data, followLinks = false, copyAction = copyKeepingTimes())
+        }
         return folders
     }
 

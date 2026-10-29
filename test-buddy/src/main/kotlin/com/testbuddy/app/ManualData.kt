@@ -1,5 +1,6 @@
 package com.testbuddy.app
 
+import com.testbuddy.copyKeepingTimes
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
@@ -18,7 +19,7 @@ internal class ManualData(
                 ?: error("No test data folder \"$name\"")
             val copy = target.resolve(name)
             copy.deleteRecursively()
-            source.copyToRecursively(target = copy, followLinks = false, overwrite = true)
+            source.copyToRecursively(target = copy, followLinks = false, copyAction = copyKeepingTimes())
         }
     }
 

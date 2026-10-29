@@ -34,16 +34,16 @@ this list and builds what is missing). The design is in [SELF_TEST.md](SELF_TEST
 |---|---|---|---|
 | 1 | Rules and design | `SELF_TEST.md`, this table, `GUIDELINES.md` §8, `CLAUDE.md`, `MVP_SMOKE_TEST.md`'s **Checked by** column | ✅ [#72](https://github.com/juanchurtado1991/notekea/pull/72) |
 | 2 | Triage | **Checked by** filled in for every General and M1 case, splitting mixed ones; the share that is `Self-Test` | ✅ [#74](https://github.com/juanchurtado1991/notekea/pull/74): 122 of 167 cases `Self-Test` |
-| 3a | Test Buddy core | `:test-buddy`, the Self-Test SDK: case types and DSL, verbs, runner, JUnit bridge, report. The spike before it showed Compose UI Test driving an app inside a packaged app on Windows, macOS and Linux, also with a window open | ⬜ |
-| 3b | Test Buddy app | The Self-Test window (design A, a wizard: Automatic, Manual, Send report), the manual walk-through with Passed/Failed, a note and a screenshot, pausing, back up and restore, `testBuddyApp(suite)` | ⬜ |
-| 4 | Notekea's suite | `:selftest`: the smoke runs of `app.notekea.smokerun` moved in as the first cases, the bundled smoke data, data preparation in Kotlin (called by `smoke.sh` / `smoke.ps1`), back up and restore, the consistency test, `packageSelfTest` | ⬜ |
+| 3a | Test Buddy core | `:test-buddy`, the Self-Test SDK: case types and DSL, verbs, runner, JUnit bridge, report. The spike before it showed Compose UI Test driving an app inside a packaged app on Windows, macOS and Linux, also with a window open | ✅ [#75](https://github.com/juanchurtado1991/notekea/pull/75) |
+| 3b | Test Buddy app | The Self-Test window (design A, a wizard: Automatic, Manual, Send report), the manual walk-through with Passed/Failed, a note and a screenshot, pausing, back up and restore, `testBuddyApp(suite)` | ✅ [#76](https://github.com/juanchurtado1991/notekea/pull/76) |
+| 4 | Notekea's suite | `:selftest`: `CaseApp` (the real Notekea on a case's folders), the smoke runs of `app.notekea.smokerun` moved in, the bundled smoke data, the `smoke.sh` scenarios in Kotlin (checked against the script), back up, the first cases (1.6-01 to 1.6-03), `pending-cases.txt` and the consistency test, `run -Pcases=…`, `packageSelfTest` | ⬜ |
 | 5 | M1 cases | Every General and M1 case as an `AutomatedCase` or a `ManualCase`, in four pull requests: 1.1–1.5, 1.6–1.9, 1.10–1.13, 1.14–1.18 and General. The last one makes `MVP_SMOKE_TEST.md` generated from the cases (`SELF_TEST.md`) | ⬜ |
 | 6 | File logs and Copy diagnostics | Logs written to a rotating file in the app data folder (never note content, `ARCHITECTURE.md` §9), **Help → Copy diagnostics** (version, OS, last log lines), read by the Self-Test's report | 🟡 Crash reports with Copy details and Report on GitHub done; rotating logs and Copy diagnostics still to do |
 | 7 | Milestone build workflow | `.github/workflows/milestone-build.yml`: on a tag `m<N>-rc<k>`, packages Notekea and Notekea Self-Test (`.msi`, `.dmg`, `.deb`) on the three runners and publishes a GitHub **pre-release** with them and the testers' guides. Unsigned until `ROADMAP.md` 5.3 | ⬜ |
 | 8 | Testers' guides | `GUIDE_*.md` rewritten as: install both apps, run the Self-Test, send the report; `M1_SMOKE_TEST.md` and `REPORT_TEMPLATE.txt` deleted, their steps now living in the manual cases | ⬜ |
 
 Change ⬜ to ✅ with the pull request link as each one lands. Already done: the automated smoke runs (1.16,
-`app.notekea.smokerun`), which piece 4 turns into the first cases.
+`app.notekea.smokerun`), which piece 4 moves into `:selftest`.
 
 ## Steps
 

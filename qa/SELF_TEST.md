@@ -99,13 +99,20 @@ fun main() = testBuddyApp(notekeaSuite) // the "Notekea Self-Test" app
 
 ### What Notekea's suite adds (`app.notekea.selftest`)
 
-- Cases grouped like the roadmap: `cases/m1/EditorCases.kt` holds the cases of 1.5, and so on (the 350-line limit
-  applies).
-- The vaults of `smoke-data/vaults` and the extra data `smoke.sh` / `smoke.ps1` build, bundled as resources at build
-  time. Data preparation is written once, in Kotlin, in this module; the scripts call it, so the developer's smoke
-  data and the testers' are the same.
-- `backUp` / `restore` of the installed Notekea's app data folder (settings, recent vaults, cache), found through
+- Cases grouped like the roadmap: `cases/m1/QuickSwitcherCases.kt` holds the cases of 1.6, and so on (the 350-line
+  limit applies). Verbs that know Notekea (`openVault`, `openNote`, `waitForResult`) are in `NotekeaVerbs.kt`.
+- `CaseApp`: the real Notekea for one case, every Koin module with its data in the case's folder and the system's
+  dialogs and apps replaced (the pickers answer what the case sets, opening a file is recorded, the trash is the
+  vault's `.trash`). The smoke runs of `app.notekea.smokerun`, in this module's tests, use it too.
+- The `smoke-data/` folders, bundled as resources at build time with an index of their files (`SmokeData`). The
+  scenarios of `smoke.sh` (`prepare`, `outside`, `move`, `edit-note`, `delete-note`) are written in Kotlin
+  (`SmokeScenarios`), and `SmokeScenariosTest` checks on macOS and Linux that they build the same files, byte for
+  byte and with the same dates, so the developer's smoke data and the testers' are the same.
+- `backUp` of the installed Notekea's app data folder (settings, recent vaults, cache), found through
   `PlatformConventions`.
+- `pending-cases.txt`: the cases of `MVP_SMOKE_TEST.md` not written yet. Piece 5 empties it; writing a case removes
+  its line, and the consistency test (`SmokeCasesConsistencyTest`) fails while a case is neither written as its
+  **Checked by** says nor listed there.
 
 ## Which cases are automatic
 
