@@ -636,6 +636,11 @@ character range of every chunk (needed for citations). Pure `commonMain` logic, 
 re-indexing using the SQLDelight index state (path, content hash, modified date). Index stored in the app data
 directory, never inside the vault.
 
+Lucene stays the desktop index (weighed against SQLite FTS5 + sqlite-vec on 2026-10-29): it is plain Java in the JVM
+Notekea already runs, reads its index from disk instead of holding it in memory, and analyzes each language (Spanish
+stems and accents) where FTS5 does not; sqlite-vec is a native extension to ship and load on every system. sqlite-vec
+remains the plan for mobile (post-MVP 3).
+
 **UI — Indexing progress:**
 - Status bar: "Indexing 340 / 1,204" with a thin progress bar; "Indexed 1,204 notes" when done.
 - Click opens a popover with the last run, duration, skipped files and a "Rebuild index" button.
@@ -768,12 +773,27 @@ critiquing or debating their own answers without evidence from the notes are not
 better than they answer, and each round adds waiting time. Every step is measured with the evaluation set (3.4)
 and kept only if it improves citation accuracy within the latency budget (`ARCHITECTURE.md` §12).
 
+**Hardware (decided with the developer, 2026-10-29): a dedicated GPU is always used when the machine has one, and
+the CPU is the route for modest PCs.** Models load with their layers on the GPU (Metal on Apple Silicon; CUDA or
+Vulkan on Windows and Linux, as far as the llama.cpp build allows, see 3.0), fall back to the CPU when there is no
+GPU or not enough video memory, and nobody has to choose. On CPU only, parallel slots share the same cores and
+memory bandwidth, so they save no time: the independent steps of 3.5 run one after another there, and the long jobs
+(Deep answer, the repositories' notes) are offered as background work instead of something to wait for.
+
 ### ⬜ 3.0 Parallel inference spike — `chore/llm-parallel-spike`
 
 Before 3.2, measure with real 2B, 4B and 8B chat models on the reference machines (Windows, macOS, Linux):
 - java-llama.cpp `setParallel(n)` with continuous batching, called concurrently from coroutines: does each call get
   its own slot, and is the output identical to a single call with the same seed?
 - RAM per extra slot (KV cache) and tokens/s with 1, 2 and 4 slots, on CPU only and with GPU offload.
+- The GPU route: which GPU backends java-llama.cpp ships for each system (Metal on Apple Silicon; CUDA or Vulkan on
+  Windows and Linux, or a build of our own if it ships none), how Notekea detects the GPU and its video memory, how
+  many layers it offloads, and the fall back to the CPU when the GPU is missing, too small or fails.
+- Time to the first token with 1k, 2k and 4k tokens of retrieved notes, on CPU and on GPU: on a CPU reading the
+  prompt can take longer than writing the answer, so the latency budget counts both.
+- The candidates are the open models current at the time, chosen for Spanish and English and for following a JSON
+  grammar; no family is fixed in advance (Qwen 2.5 and Gemma were weighed on 2026-10-29). The 3.4 evaluation set and
+  the Ghost Serializer questions of 2.8 pick the Small, Medium and Large defaults.
 - `rerank()` with a small GGUF reranker (bge-reranker class): quality on the sample vault and time per 20 chunks.
 - Grammar-constrained output (`jsonSchemaToGrammar`): valid JSON every time, cost in tokens/s.
 
@@ -791,7 +811,8 @@ Catalog of tested chat models (JSON parsed with Ghost): **Small (~2B)**, **Mediu
 plus the reranker model (3.0), which is downloaded with whichever chat model is chosen. Download with Ktor
 (progress, pause, resume), SHA-256 verification, delete. Hardware check: warns when RAM is below the model's
 requirement, including the KV cache of its parallel slots (3.0) and the editor itself. The model is recommended from
-the machine's RAM (Small on 8 GB, Medium on 16 GB), with nothing technical to choose. Sizes below are placeholders
+the machine's RAM and, when it has a dedicated GPU, its video memory (Small on 8 GB, Medium on 16 GB, a larger size
+when the GPU holds it), with nothing technical to choose. Sizes below are placeholders
 until 3.0 measures them.
 
 **UI — Model manager** (opened from Settings or the status bar):
@@ -872,7 +893,8 @@ seeds, same evidence), each goes through the verification of 3.5, and the draft 
 wins; ties go to the shorter draft. It is chosen by verified support, not by majority vote.
 - **UI:** the **Deep answer** toggle of the chat panel (3.3); the step line shows "Writing 3 drafts…" and
   "Comparing drafts…"; Stop (`Esc`) keeps the best verified draft so far.
-- Draft count follows the slot count measured in 3.0 for the machine's RAM.
+- Draft count follows the slot count measured in 3.0 for the machine's RAM; on CPU only, where drafts run one after
+  another, Deep answer says how long it will take and can keep working in the background.
 - **Done when:** on the evaluation set it beats the normal mode's citation accuracy for every model size, and it is
   cancellable at any moment.
 
@@ -1016,7 +1038,10 @@ r/LocalLLaMA, Kotlin Slack). Measure: stars in the first month, issues from real
       unchanged.
    2. **Module graph from a parser:** a parser (for example tree-sitter, to be approved in `LIBRARIES.md`) writes
       one note per module or package, with its imports as links. The graph is exact and repeatable, and takes
-      seconds, with no model involved.
+      seconds, with no model involved; which class extends, injects or calls which comes from the parser too, never
+      from the model. tree-sitter's Java bindings use the foreign-function API of Java 22 and Notekea runs on 21, so
+      the item starts with a spike: those bindings after a JDK update, a native build, or Kotlin's own parser for
+      Kotlin code.
    3. **Summaries and chat over the code:** optional summaries per module from the local model, marked as
       generated, and chat over code chunked by function or class, with citations to `file:line` and never to a
       generated note, so verified answers (3.5) check against the code itself. Only if an evaluation set like 2.8

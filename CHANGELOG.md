@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- AI hardware plan (`ROADMAP.md` M3): a dedicated GPU is used whenever the machine has one and the CPU is the route
+  for modest PCs; the 3.0 spike checks the GPU backends, measures the time to the first token and picks the models
+  with the evaluation sets; Lucene stays the desktop index; the repositories' code graph comes from a parser only.
+
 - Notekea Self-Test plan (`qa/SELF_TEST.md`): testers install Notekea and a Self-Test app that runs the automatic
   smoke cases on their system and walks them through the manual ones, in one report; every
   feature keeps it up to date from now on (`GUIDELINES.md` §8, `qa/README.md`).
