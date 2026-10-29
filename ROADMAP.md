@@ -44,7 +44,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
 | M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 4.5 weeks | 0 / 11 |
-| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words | 4.5 weeks | 0 / 9 |
+| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 5.5 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
 | Post-MVP | Extensions (Koog + MCP), mobile, more | — |
@@ -916,6 +916,48 @@ answered exactly by the queries of 2.10 and 2.11: the model only turns the quest
 - **Done when:** the Small model returns the expected notes for most of them (the threshold set in 3.4), and a wrong
   translation always shows as a query the user can see and correct, never as a silently wrong answer.
 
+### ⬜ 3.9 Actions from chat — `feature/chat-actions`
+
+The chat does things, not only answers (decided with the developer, 2026-10-29): it opens a note at the exact place,
+makes notes, sets properties, adds tasks. Built for small local models, so it is **one action per request, not an
+agent loop**: the action step reads the request and returns either an answer (3.5) or one action from a short, fixed
+list, as JSON constrained by a grammar (3.0). Notekea checks the action before doing anything (the note and the
+folder exist, the property name is valid) and carries it out with the use cases the app already has (creating a
+note, the template picker, the properties editor, opening a note scrolled to a quote); the model only chooses.
+Multi-step agents stay after the MVP (post-MVP 2).
+
+- **Actions that read or move around, done at once:** open a note scrolled to a quote or a heading ("where did I
+  write about the arepa dough?"), search by text, tag or property (2.10), show tasks (2.11), open today's note, show
+  related notes and backlinks, list notes without tags and broken links.
+- **Actions that write, always confirmed first:** create a note (title, folder, text, optionally from a template),
+  set or change a property, add a tag, append text to a note or to today's note, add a task, link two notes,
+  bookmark a note or folder, make a new note from the open one (its summary, its tasks).
+- **Not in the MVP, on purpose:** deleting, renaming, moving and rewriting whole notes; a mistake there costs too
+  much.
+- **Safety:** text inside notes can look like an instruction ("delete all notes"), so writing is always confirmed,
+  deleting is not an action, and actions only reach the open vault. Every action done is listed in the chat, and
+  writing ones can be undone.
+- Asked for something outside the list (writing code, deleting), the chat says in plain words what it can do instead.
+
+**UI — Action card** (in the chat panel of 3.3):
+
+```
+You:  create a note "Meeting with Ana" in Work from the Meeting template, status draft
+
+┌ Notekea will: ──────────────────────────────────┐
+│  ＋ Create note   Work/Meeting with Ana          │
+│     from the template Meeting                    │
+│  ✎ Property      status: draft                   │
+│                         [ Do it ]  [ Cancel ]    │
+└──────────────────────────────────────────────────┘
+→ "Done" with Undo (Mod+Z), and the note opens
+```
+
+- An evaluation set of 40–50 requests with the expected action and its fields (`create_task(note, text)`), run on
+  Small, Medium and Large like 3.4.
+- **Done when:** the recommended model picks the right action with the right fields for at least 90% of the set;
+  where a model size falls short, its writing actions are offered as suggestions the user completes instead.
+
 ### ⬜ 3.7 M3 performance pass — `chore/m3-performance`
 
 The performance pass of M3 (see "Closing a milestone"), on the automated smoke runs of M1 to M3: memory while a model
@@ -1030,31 +1072,33 @@ r/LocalLLaMA, Kotlin Slack). Measure: stars in the first month, issues from real
 3. **Mobile (Android first, then iOS)** — `LlmEngine` via Llamatik, `VectorIndex` via SQLite + sqlite-vec,
    `GitSync` via libgit2 on iOS (see "Mobile risks" in `LIBRARIES.md`).
 4. **More sources** — PDFs and web clippings inside the vault, indexed like notes.
-5. **Repositories** — a code repository becomes part of the vault, so the graph and the chat cover it. Separate from
-   Git sync (4.1), which only versions the vault itself; it reuses its JGit clone and pull. In three steps, each
-   worth shipping on its own:
-   1. **Repository docs:** clone a repository into a read-only vault folder with only its Markdown (README,
-      `docs/`, ADRs, CHANGELOG), and update it with "Update" (pull). Indexing, links, graph and chat then work
-      unchanged.
-   2. **Module graph from a parser:** a parser (for example tree-sitter, to be approved in `LIBRARIES.md`) writes
-      one note per module or package, with its imports as links. The graph is exact and repeatable, and takes
-      seconds, with no model involved; which class extends, injects or calls which comes from the parser too, never
-      from the model. tree-sitter's Java bindings use the foreign-function API of Java 22 and Notekea runs on 21, so
-      the item starts with a spike: those bindings after a JDK update, a native build, or Kotlin's own parser for
-      Kotlin code.
-   3. **Summaries and chat over the code:** optional summaries per module from the local model, marked as
-      generated, and chat over code chunked by function or class, with citations to `file:line` and never to a
-      generated note, so verified answers (3.5) check against the code itself. Only if an evaluation set like 2.8
-      shows small local models (and a code embedding model) are good enough: a medium repository can take hours
-      on a laptop.
-   Decided with the developer (2026-10-28): the explanations are presented as work Notekea does in the background
-   for a couple of hours, fully local, on the code that never leaves the machine. Before it starts, an estimate
-   measured on the machine (the files to read times the model's speed) for each level: **Fast** (a summary per file),
-   **Normal** (one note per file: what it is about, how it works and its code, as `smoke-data/vaults/Ghost Serializer`
-   shows) and **Deep** (the verified drafts of 3.6, about three times longer, an overnight job). The parser's tree and
-   graph come first, in seconds, and the notes fill in while the user works; progress, pause and resume across
-   restarts, an option to run only while charging, no sleep while it runs and a notification when it is done; after
-   a pull only the changed files are written again. The chat cites the code, the notes guide it.
+5. **Repositories** — a code repository becomes something the chat can answer about, with the exact file and line.
+   Separate from Git sync (4.1), which only versions the vault itself; it reuses its JGit clone and pull.
+   **Decided with the developer (2026-10-29), replacing the plan of 2026-10-28 that wrote notes about the code:**
+   Notekea writes no notes for a repository. It clones it as it is into a read-only folder of the app data (never
+   inside the vault), indexes its code, and the chat and its actions (3.9) answer about it:
+   1. **Clone and update:** add a repository by its URL or folder, "Update" pulls it; after a pull only the changed
+      files are indexed again. Its Markdown (README, `docs/`, ADRs, CHANGELOG) is indexed like notes.
+   2. **Code index from a parser (AST):** a parser (for example tree-sitter, to be approved in `LIBRARIES.md`) reads
+      every source file into its symbols (classes, interfaces, functions, properties) with their exact line ranges,
+      and the relations between them (imports, extends, implements, injects, calls). Code is chunked by function or
+      class for the hybrid index (with a code embedding model, if 2.8-style evaluation shows it helps). The index and
+      the graph of classes and modules are exact and repeatable, take seconds to minutes, and involve no model.
+      tree-sitter's Java bindings use the foreign-function API of Java 22 and Notekea runs on 21, so the item starts
+      with a spike: those bindings after a JDK update, a native build, or Kotlin's own parser for Kotlin code.
+   3. **Questions about the code:** "which line opens the database?", "what calls `syncCache`?", "where is the
+      network error handled?", "which classes should I read to understand the parser?". Answers cite `file:line`
+      and are verified against the code itself (3.5); a click opens the file in a read-only code tab, scrolled to
+      the line and highlighted. The actions of 3.9 gain read-only code actions: find a symbol, open a file at a
+      line, list what calls or implements something.
+   4. **No code is written:** Notekea reads code, it does not edit it. When asked to create a class, change a
+      function or fix a bug, the chat answers in plain words, for example: "Notekea reads your code to answer
+      questions about it, but it doesn't write code. For that, try a coding assistant such as Claude Code or
+      Codex." The request is recognized by the action step of 3.9 (an action that is not in its list), not by the
+      model improvising.
+   The Ghost Serializer vault (`smoke-data/vaults/Ghost Serializer`) stays as the large vault of the tests and the
+   performance passes, and its questions (2.8) as an evaluation set; the repository itself becomes the test data of
+   this item.
 6. **More than two split panes** and detachable windows.
 7. **Custom title bar** with the tabs inside it (JetBrains Jewel `DecoratedWindow`).
 8. **Screenshot tests** for UI regressions (Roborazzi).

@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AI hardware plan (`ROADMAP.md` M3): a dedicated GPU is used whenever the machine has one and the CPU is the route
   for modest PCs; the 3.0 spike checks the GPU backends, measures the time to the first token and picks the models
   with the evaluation sets; Lucene stays the desktop index; the repositories' code graph comes from a parser only.
+- Actions from chat (`ROADMAP.md` 3.9): one action per request from a fixed list (open a note at the exact place,
+  search, tasks, create notes, properties, tasks, links), writing ones always confirmed and undoable, measured with
+  their own evaluation set. Repositories (post-MVP 5) are now cloned as they are and indexed by a parser, so the
+  chat answers about the code with `file:line` and opens it there; Notekea writes no notes about the code and no
+  code, and says so in plain words.
 
 - Notekea Self-Test plan (`qa/SELF_TEST.md`): testers install Notekea and a Self-Test app that runs the automatic
   smoke cases on their system and walks them through the manual ones, in one report; every
