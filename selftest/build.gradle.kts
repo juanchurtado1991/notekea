@@ -88,6 +88,8 @@ tasks.register<Test>("smokeRun") {
     // A fresh JVM per test class, so a run is measured without what the runs before it left behind.
     forkEvery = 1
     outputs.upToDateWhen { false }
+    // Only when asked for: `check` runs the same smoke runs in `test` already, and running them twice doubled CI.
+    onlyIf { gradle.startParameter.taskNames.any { it.endsWith("smokeRun") } }
 }
 
 compose.desktop {
