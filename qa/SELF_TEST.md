@@ -109,7 +109,10 @@ fun main() = testBuddyApp(notekeaSuite) // the "Notekea Self-Test" app
   (`SmokeScenarios`), and `SmokeScenariosTest` checks on macOS and Linux that they build the same files, byte for
   byte and with the same dates, so the developer's smoke data and the testers' are the same.
 - `backUp` of the installed Notekea's app data folder (settings, recent vaults, cache), found through
-  `PlatformConventions`.
+  `PlatformConventions`, and `installedApp`, where each installer puts Notekea: the manual cases' Open Notekea button
+  starts it, so a tester never types a command (G-07 starts it with its crash test on).
+- The last manual case, G-09, is 15 minutes of free use on the test data, answered "Nothing odd" or "I found
+  something": it catches what no written case thought of, and every bug it finds becomes a case.
 - `pending-cases.txt`: the cases of `MVP_SMOKE_TEST.md` not written yet. Piece 5 empties it; writing a case removes
   its line, and the consistency test (`SmokeCasesConsistencyTest`) fails while a case is neither written as its
   **Checked by** says nor listed there.

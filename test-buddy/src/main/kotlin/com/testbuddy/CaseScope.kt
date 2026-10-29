@@ -155,7 +155,8 @@ public class CaseScope internal constructor(
         val holds = holdsInTime {
             val nodes = ui.onAllNodes(matcher = hasText(text = text, substring = substring))
             val count = nodes.fetchSemanticsNodes().size
-            (0 until count).none { nodes[it].isDisplayed() }
+            // A node can leave between counting and looking at it: gone is what this waits for.
+            (0 until count).none { runCatching { nodes[it].isDisplayed() }.getOrDefault(defaultValue = false) }
         }
         if (!holds) throw CaseFailure(message = "expected \"$text\" to go away, it stayed")
     }

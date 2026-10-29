@@ -15,6 +15,7 @@ import com.testbuddy.app.SelfTestSession
 import com.testbuddy.app.SelfTestTheme
 import com.testbuddy.app.sessionActions
 import kotlinx.coroutines.Dispatchers
+import java.nio.file.Files
 
 /**
  * Opens the "<app> Self-Test" window for [suite]: the host's `main` is `fun main() = testBuddyApp(suite)`. What the
@@ -27,7 +28,10 @@ public fun testBuddyApp(
     val scope = rememberCoroutineScope()
     val session =
         remember { SelfTestSession(suite = suite, folders = folders, scope = scope, background = Dispatchers.IO) }
-    val actions = remember { sessionActions(session = session, folders = folders) }
+    val actions = remember {
+        val installed = suite.installedApp(HostSystem.current())?.takeIf { Files.exists(it) }
+        sessionActions(session = session, folders = folders, installedApp = installed)
+    }
     val environment = remember { ReportEnvironment.current() }
     val state by session.state.collectAsState()
     Window(

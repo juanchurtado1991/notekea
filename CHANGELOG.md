@@ -23,6 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   chat answers about the code with `file:line` and opens it there; Notekea writes no notes about the code and no
   code, and says so in plain words.
 
+- Self-Test cases of 1.14 to 1.18 and General, so every M1 case is written: 31 automatic ones (1.11-10, the
+  properties form, its source and broken YAML, note info and the Chat panel, the status bar, the zoom, embeds and
+  their notices, the formatting toolbar, More and list editing, a word saved when switching vaults, pictures read
+  again, names with numbers in order) and 14 manual ones, the General cases and, last, 15 minutes of free use (G-09).
+  Manual cases get an Open Notekea button that starts the installed app (G-07 with its crash test on) and keeps its
+  output in the Report folder; free use answers "Nothing odd" or "I found something". 1.17-05 now expects the
+  vault's tags as the smoke data has them (#recipe first, #weekend already a tag).
 - Notekea Self-Test plan (`qa/SELF_TEST.md`): testers install Notekea and a Self-Test app that runs the automatic
   smoke cases on their system and walks them through the manual ones, in one report; every
   feature keeps it up to date from now on (`GUIDELINES.md` §8, `qa/README.md`).
