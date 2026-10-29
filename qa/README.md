@@ -39,7 +39,7 @@ this list and builds what is missing). The design is in [SELF_TEST.md](SELF_TEST
 | 4 | Notekea's suite | `:selftest`: `CaseApp` (the real Notekea on a case's folders), the smoke runs of `app.notekea.smokerun` moved in, the bundled smoke data, the `smoke.sh` scenarios in Kotlin (checked against the script), back up, the first cases (1.6-01 to 1.6-03), `pending-cases.txt` and the consistency test, `run -Pcases=…`, `packageSelfTest` | ✅ [#77](https://github.com/juanchurtado1991/notekea/pull/77) |
 | 5 | M1 cases | Every General and M1 case as an `AutomatedCase` or a `ManualCase`, in four pull requests: 1.1–1.5, 1.6–1.9, 1.10–1.13, 1.14–1.18 and General. The last one makes `MVP_SMOKE_TEST.md` generated from the cases (`SELF_TEST.md`) | 🟡 1.1–1.5 in [#78](https://github.com/juanchurtado1991/notekea/pull/78), 1.6–1.9 in [#80](https://github.com/juanchurtado1991/notekea/pull/80), 1.10–1.13 in [#81](https://github.com/juanchurtado1991/notekea/pull/81) (1.11-10 pending); 1.14–1.18 and General to do |
 | 6 | File logs and Copy diagnostics | Logs written to a rotating file in the app data folder (never note content, `ARCHITECTURE.md` §9), **Help → Copy diagnostics** (version, OS, last log lines), read by the Self-Test's report | 🟡 Crash reports with Copy details and Report on GitHub done; rotating logs and Copy diagnostics still to do |
-| 7 | Milestone build workflow | `.github/workflows/milestone-build.yml`: on a tag `m<N>-rc<k>`, packages Notekea and Notekea Self-Test (`.msi`, `.dmg`, `.deb`) on the three runners and publishes a GitHub **pre-release** with them and the testers' guides. Unsigned until `ROADMAP.md` 5.3 | ⬜ |
+| 7 | Milestone build workflow | `.github/workflows/milestone-build.yml`: on a tag `m<N>-rc<k>`, packages Notekea and Notekea Self-Test (`.msi`, `.dmg`, `.deb`) on the three runners and publishes a GitHub **pre-release** with them and the testers' guides. Unsigned until `ROADMAP.md` 5.3 | ✅ this pull request: `m<N>-rc<k>` installs as version `1.<N>.<k>`, so each candidate installs over the last; a pull request changing the workflow builds the installers without publishing |
 | 8 | Testers' guides | `GUIDE_*.md` rewritten as: install both apps, run the Self-Test, send the report; `M1_SMOKE_TEST.md` and `REPORT_TEMPLATE.txt` deleted, their steps now living in the manual cases | ⬜ |
 
 Change ⬜ to ✅ with the pull request link as each one lands. Already done: the automated smoke runs (1.16,
@@ -49,7 +49,9 @@ Change ⬜ to ✅ with the pull request link as each one lands. Already done: th
 
 1. **Check** that every feature of the milestone is ✅ in `ROADMAP.md` and that `MVP_SMOKE_TEST.md` has their cases.
 2. **Build the release candidate**: tag `main` as `m<N>-rc<k>` (`m1-rc1`, then `m1-rc2` after fixes) and push the
-   tag. The workflow publishes the pre-release `Notekea m<N>-rc<k>` on the repository's Releases page. Installers are
+   tag (`git tag m1-rc1 && git push origin m1-rc1`). `milestone-build.yml` packages both apps on the three systems
+   (about 15 minutes) and publishes the pre-release `Notekea m<N>-rc<k>` on the repository's Releases page; the
+   installers' version is `1.<N>.<k>` and About shows `0.1.0-alpha (m<N>-rc<k>)`. Installers are
    never committed to Git: each is 50–100 MB and would stay in the history forever.
 3. **Open the run record**: copy `runs/TEMPLATE.md` to `runs/M<N>.md` and list every case to run (the "General"
    section plus every milestone up to this one; skip cases whose "Testable from" is a later feature).
