@@ -10,14 +10,8 @@ public fun Suite.shard(
     count: Int
 ): Suite {
     require(count > 0 && index in 0 until count) { "Part $index of $count does not exist" }
-    return Suite(
-        appName = appName,
-        version = version,
+    return withCases(
         automated = automated.filterIndexed { position, _ -> position % count == index },
-        manual = if (index == 0) manual else emptyList(),
-        window = window,
-        dataSources = dataSources,
-        backUp = backUp,
-        content = content
+        manual = if (index == 0) manual else emptyList()
     )
 }

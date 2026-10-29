@@ -10,6 +10,9 @@ public class ManualCaseBuilder internal constructor(
     private var title: String? = null
     private var steps: String? = null
     private var expected: String? = null
+    private var passLabel = DEFAULT_PASS
+    private var failLabel = DEFAULT_FAIL
+    private val launchEnvironment = mutableMapOf<String, String>()
 
     /** The folders of the suite's data this case needs, prepared before the tester starts it. */
     public fun prepare(vararg folders: String) {
@@ -28,12 +31,37 @@ public class ManualCaseBuilder internal constructor(
         expected = text
     }
 
+    /** The words of the two answers when Passed and Failed do not fit: "Nothing odd" and "I found something". */
+    public fun answers(
+        passed: String,
+        failed: String
+    ) {
+        passLabel = passed
+        failLabel = failed
+    }
+
+    /** A variable the "Open <app>" button sets for this case only: `launchWith("NOTES_CRASH_TEST", "1")`. */
+    public fun launchWith(
+        name: String,
+        value: String
+    ) {
+        launchEnvironment[name] = value
+    }
+
     internal fun build(): ManualCase = ManualCase(
         id = id,
         reason = reason,
         data = data.toList(),
         title = requireNotNull(title) { "Manual case $id has no title" },
         steps = requireNotNull(steps) { "Manual case $id has no steps" },
-        expected = requireNotNull(expected) { "Manual case $id has no expected result" }
+        expected = requireNotNull(expected) { "Manual case $id has no expected result" },
+        passLabel = passLabel,
+        failLabel = failLabel,
+        launchEnvironment = launchEnvironment.toMap()
     )
+
+    private companion object {
+        const val DEFAULT_PASS = "Passed"
+        const val DEFAULT_FAIL = "Failed"
+    }
 }

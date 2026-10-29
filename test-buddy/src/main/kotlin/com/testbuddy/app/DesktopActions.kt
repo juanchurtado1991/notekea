@@ -7,7 +7,7 @@ import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.nio.file.Path
 
-/** What the Self-Test asks of the desktop: the clipboard, the file manager and a picture to add. */
+/** What the Self-Test asks of the desktop: the clipboard, the file manager, the installed app and a picture to add. */
 internal object DesktopActions {
     fun copy(text: String) {
         Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
@@ -15,6 +15,24 @@ internal object DesktopActions {
 
     fun open(folder: Path) {
         runCatching { Desktop.getDesktop().open(folder.toFile()) }
+    }
+
+    /**
+     * Starts the installed app's program at [path] with [environment] added, its output and errors written to
+     * [output], so a tester can send what it printed without opening a terminal.
+     */
+    fun launch(
+        path: Path,
+        environment: Map<String, String>,
+        output: Path
+    ) {
+        runCatching {
+            ProcessBuilder(path.toString())
+                .redirectErrorStream(true)
+                .redirectOutput(output.toFile())
+                .apply { environment().putAll(environment) }
+                .start()
+        }
     }
 
     fun pickPicture(): Path? {

@@ -213,13 +213,6 @@ private fun CaseScope.waitForNameField(name: String) {
     }
 }
 
-private fun CaseScope.cursorAtEnd(part: String) {
-    val field = noteText(part = part)
-    field.performClick()
-    val length = field.fetchSemanticsNode().config[SemanticsProperties.EditableText].text.length
-    field.performTextInputSelection(selection = TextRange(index = length))
-}
-
 // Both panels open 340 dp wide on a first launch: a row of the tree and a row of the outline span their panel.
 private fun CaseScope.expectSameWidths() {
     expectText(text = "Ingredients")

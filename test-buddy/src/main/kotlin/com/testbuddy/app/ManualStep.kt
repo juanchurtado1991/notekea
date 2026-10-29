@@ -25,6 +25,7 @@ import java.nio.file.Path
 /** Step 2: one manual case at a time, what to do and what to see, answered Passed, Failed or Skip for now. */
 @Composable
 internal fun ManualStep(
+    appName: String,
     cases: List<ManualCase>,
     index: Int,
     actions: ManualActions
@@ -36,11 +37,16 @@ internal fun ManualStep(
             CaseHeading(case = case, number = index + 1, total = cases.size)
             Section(label = "Do this", text = case.steps)
             if (case.data.isNotEmpty()) DataHint(folders = case.data, onOpen = actions.onOpenData)
+            actions.onOpenApp?.let { onOpen ->
+                OutlinedButton(onClick = { onOpen(case) }) { Text(text = "Open $appName") }
+            }
             Section(label = "You should see", text = case.expected)
             if (isFailing) {
                 FailedForm(onSave = actions.onFail, onCancel = { isFailing = false }, onPick = actions.onPickScreenshot)
             } else {
-                AnswerButtons(onPass = actions.onPass, onFail = { isFailing = true }, onSkip = actions.onSkip)
+                AnswerButtons(case = case, onPass = actions.onPass, onFail = {
+                    isFailing = true
+                }, onSkip = actions.onSkip)
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -55,14 +61,15 @@ internal fun ManualStep(
     }
 }
 
-/** What the manual step can ask the session and the system for. */
+/** What the manual step can ask the session and the system for; [onOpenApp] is null when the app is not installed. */
 internal class ManualActions(
     val onPass: () -> Unit,
     val onFail: (note: String, screenshot: Path?) -> Unit,
     val onSkip: () -> Unit,
     val onPrevious: () -> Unit,
     val onOpenData: () -> Unit,
-    val onPickScreenshot: () -> Path?
+    val onPickScreenshot: () -> Path?,
+    val onOpenApp: ((ManualCase) -> Unit)? = null
 )
 
 @Composable
@@ -103,16 +110,17 @@ private fun DataHint(
 
 @Composable
 private fun AnswerButtons(
+    case: ManualCase,
     onPass: () -> Unit,
     onFail: () -> Unit,
     onSkip: () -> Unit
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
         Button(onClick = onPass, colors = ButtonDefaults.buttonColors(containerColor = SelfTestColors.Passed)) {
-            Text(text = "Passed")
+            Text(text = case.passLabel)
         }
         Button(onClick = onFail, colors = ButtonDefaults.buttonColors(containerColor = SelfTestColors.Failed)) {
-            Text(text = "Failed")
+            Text(text = case.failLabel)
         }
         Spacer(modifier = Modifier.weight(weight = 1f))
         OutlinedButton(onClick = onSkip) { Text(text = "Skip for now") }

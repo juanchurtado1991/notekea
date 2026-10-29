@@ -10,14 +10,8 @@ public fun Suite.only(prefixes: List<String>): Suite {
         id == prefix || id.startsWith("$prefix-") ||
             id.startsWith("$prefix.")
     }
-    return Suite(
-        appName = appName,
-        version = version,
+    return withCases(
         automated = automated.filter { isKept(id = it.id) },
-        manual = manual.filter { isKept(id = it.id) },
-        window = window,
-        dataSources = dataSources,
-        backUp = backUp,
-        content = content
+        manual = manual.filter { isKept(id = it.id) }
     )
 }

@@ -6,8 +6,11 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.performClick
+import app.notekea.selftest.SmokeScenarios
 import app.notekea.selftest.clickInTree
+import app.notekea.selftest.relaunch
 import app.notekea.selftest.noteText
+import app.notekea.selftest.openNote
 import app.notekea.selftest.openVault
 import app.notekea.selftest.pressInWindow
 import com.testbuddy.CaseFailure
@@ -18,6 +21,8 @@ import com.testbuddy.ShortcutModifier.Shift
 import com.testbuddy.SuiteBuilder
 
 private const val WELCOME_TEXT = "This is a sample vault"
+private const val SHARED_NOTE = "Shared note"
+private const val SHARED_NOTE_TEXT = "Another app changes or deletes this note"
 
 // A heading in the middle of the note, as the case says: the end of a note is where the scroll stops short.
 private const val OUTLINE_MIDDLE = "Serving note 1:"
@@ -29,6 +34,7 @@ fun SuiteBuilder.paneCases() {
     splitRight()
     tabBetweenPanes()
     placeKept()
+    sessionKept()
     folderCards()
     nativeTitleBar()
     windowSize()
@@ -81,6 +87,22 @@ private fun SuiteBuilder.placeKept() {
         clickInTree(text = WELCOME)
         tab(name = "Outline practice").performClick()
         expectOnScreen(text = OUTLINE_MIDDLE)
+    }
+}
+
+private fun SuiteBuilder.sessionKept() {
+    automated(id = "1.11-10", title = "The tabs and the split come back, without a note deleted while closed") {
+        openTwoNotes()
+        pressInWindow(shortcut = Mod + Shift + Key.D)
+        expectShown(text = AREPAS_FLOUR)
+        relaunch()
+        expectShown(text = WELCOME_TEXT)
+        expectShown(text = AREPAS_FLOUR)
+        openNote(name = SHARED_NOTE, shownText = SHARED_NOTE_TEXT)
+        relaunch { SmokeScenarios(smokeData = folders.data, scratch = folders.data).deleteNote() }
+        expectShown(text = AREPAS_FLOUR)
+        expectNoTab(name = SHARED_NOTE)
+        expectNoText(text = "couldn't be opened", substring = true)
     }
 }
 

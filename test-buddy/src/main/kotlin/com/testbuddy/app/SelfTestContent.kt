@@ -48,6 +48,7 @@ internal fun SelfTestContent(
                 )
 
                 SelfTestStep.MANUAL -> ManualStep(
+                    appName = suite.appName,
                     cases = suite.manual,
                     index = state.manualIndex,
                     actions = session.manual

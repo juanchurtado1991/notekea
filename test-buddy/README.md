@@ -40,6 +40,10 @@ val notesSuite = testBuddy(appName = "Notes", version = "1.0") {
 - A case ID is used once and has no spaces. A manual case needs a title, steps and an expected result, in plain
   English for a tester who is not a developer.
 - `backUp` names what Finish and clean up puts back as it was after the manual cases.
+- `installedApp { system -> path }` says where the installed app's program is on each system: every manual case gets
+  an "Open <app>" button that starts it, its output written to `<case id> output.txt` in the Report folder. A case's
+  `launchWith(name, value)` adds a variable for that start (a crash test), and `answers(passed, failed)` renames its
+  two answers ("Nothing odd" / "I found something" for free use).
 
 ## Verbs (`CaseScope`)
 
