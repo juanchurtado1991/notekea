@@ -47,7 +47,7 @@ private fun SuiteBuilder.treeKeyboard() {
         click(text = "Journal")
         expectText(text = "2026-10-21")
         press(key = Key.DirectionDown)
-        press(key = Key.Enter)
+        pressOpen()
         expectText(text = "Planted the last tomato seedlings", substring = true)
         press(key = Key.DirectionLeft)
         press(key = Key.DirectionLeft)
@@ -91,10 +91,14 @@ private fun SuiteBuilder.newNotesAndFolders() {
 private fun SuiteBuilder.renameInTheTree() {
     automated(id = "1.4-05", title = "Renaming in the tree, and names that cannot be used") {
         openVault(name = PLAYGROUND, shownText = WELCOME)
-        click(text = WELCOME)
+        // A folder keeps the keyboard in the tree when clicked (a note gives it to the editor), so F2 (Enter on
+        // macOS) reaches the tree.
+        clickInTree(text = "Ideas")
         pressRename()
-        type(text = "Good morning")
+        type(text = "Ideas and plans")
         press(key = Key.Enter)
+        expectFolder(path = "$PLAYGROUND/Ideas and plans")
+        renameInTree(name = WELCOME, newName = "Good morning")
         expectFile(path = "$PLAYGROUND/Good morning.md")
         expectNoFile(path = "$PLAYGROUND/Welcome.md")
         clickInTree(text = "Travel")
@@ -116,6 +120,11 @@ private fun SuiteBuilder.renameUpdatesLinks() {
             expectFile(path = "$PLAYGROUND/$it", containing = "[[Arepas reina")
         }
     }
+}
+
+// Enter opens on Windows and Linux; on macOS it renames, as in Finder, and Cmd+Down opens.
+private fun CaseScope.pressOpen() {
+    if (system == HostSystem.MACOS) press(shortcut = Mod + Key.DirectionDown) else press(key = Key.Enter)
 }
 
 private fun CaseScope.pressRename() {

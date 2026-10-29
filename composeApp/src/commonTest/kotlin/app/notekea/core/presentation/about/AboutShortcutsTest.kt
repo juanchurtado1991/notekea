@@ -13,7 +13,7 @@ class AboutShortcutsTest {
 
         assertEquals(
             expected = Triple(
-                listOf(10, 8, 10),
+                listOf(11, 8, 10),
                 PreviewPlatformConventions.linux.quickSwitcherShortcut,
                 shortcuts.size
             ),

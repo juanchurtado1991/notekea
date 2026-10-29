@@ -19,6 +19,7 @@ object PreviewPlatformConventions {
         quitShortcut = Shortcut(key = ShortcutKey.Q, modifiers = setOf(ShortcutModifier.CONTROL)),
         newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(ShortcutModifier.CONTROL)),
         renameShortcut = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
+        openSelectedShortcut = Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet()),
         deleteShortcut = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
         toggleSidebarShortcut = Shortcut(key = ShortcutKey.BACKSLASH, modifiers = setOf(ShortcutModifier.CONTROL)),
         saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(ShortcutModifier.CONTROL)),

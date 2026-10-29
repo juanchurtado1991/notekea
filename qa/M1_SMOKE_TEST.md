@@ -367,7 +367,7 @@ locked after Notekea knows it because the system's pickers do not let you choose
 ### 1.4-02 · The tree with the keyboard
 
 1. Click a row of the tree, then use only the keyboard: ↓ and ↑; on a folder → twice; ← twice; Enter on a folder; ↓ to
-   a note and Enter.
+   a note and Enter. On macOS use Cmd+↓ instead of Enter: there Enter renames, as in Finder.
 
 **Pass when:** ↓ ↑ move the selection without opening anything; the first → opens the folder and the second goes into
 it; ← closes it, then goes to the parent; Enter on a folder opens or closes it and shows it in a tab; Enter on a note

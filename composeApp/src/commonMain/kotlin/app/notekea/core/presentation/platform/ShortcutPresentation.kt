@@ -30,6 +30,7 @@ private const val EQUALS_NAME = "="
 private const val MINUS_NAME = "-"
 private const val KEY_SEPARATOR = "+"
 private const val DIGIT_PREFIX = "DIGIT_"
+private const val DOWN_ARROW = "↓"
 private const val LEFT_ARROW = "←"
 private const val MAC_TAB_SYMBOL = "⇥"
 private const val RIGHT_ARROW = "→"
@@ -94,6 +95,7 @@ private fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.DIGIT_7 -> Key.Seven
     ShortcutKey.DIGIT_8 -> Key.Eight
     ShortcutKey.DIGIT_9 -> Key.Nine
+    ShortcutKey.DOWN -> Key.DirectionDown
     ShortcutKey.B -> Key.B
     ShortcutKey.BACKSLASH -> Key.Backslash
     ShortcutKey.BACKSPACE -> Key.Backspace
@@ -128,6 +130,7 @@ private val KEY_NAMES = mapOf(
     ShortcutKey.DELETE to DELETE_NAME,
     ShortcutKey.ENTER to ENTER_NAME,
     ShortcutKey.EQUALS to EQUALS_NAME,
+    ShortcutKey.DOWN to DOWN_ARROW,
     ShortcutKey.LEFT to LEFT_ARROW,
     ShortcutKey.MINUS to MINUS_NAME,
     ShortcutKey.RIGHT to RIGHT_ARROW,
