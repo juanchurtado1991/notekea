@@ -33,6 +33,9 @@ import app.notekea.core.crash.domain.RecordedCrash
 import app.notekea.core.crash.presentation.CrashNoticeContent
 import app.notekea.core.crash.presentation.CrashReportActions
 import app.notekea.core.crash.presentation.CrashReporter
+import app.notekea.core.logging.data.FileLogWriter
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.platformLogWriter
 import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.SystemAppearance
@@ -84,6 +87,8 @@ fun main() {
     val koin = startKoin { modules(desktopModules) }.koin
     val crashReporter = koin.get<CrashReporter>()
     crashReporter.installThreadHandler()
+    // What the app logs goes to the console and to the log file Copy diagnostics reads (qa/README.md, piece 6).
+    Logger.setLogWriters(platformLogWriter(), koin.get<FileLogWriter>())
     FileKit.init(appId = APP_ID)
     val showGallery = System.getProperty(GALLERY_PROPERTY).toBoolean()
     val isCrashTest = koin.get<SystemEnvironment>().environmentVariable(name = CRASH_TEST_VARIABLE) == CRASH_TEST_ON
