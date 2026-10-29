@@ -54,6 +54,22 @@ class OkioNoteContentStoreTest {
     }
 
     @Test
+    fun `a move refused for a moment, as Windows does while the note is being read, is tried again`() = runStoreTest {
+        writeNote(content = ORIGINAL)
+
+        val outcome = store(fileSystem = refusingMoves(times = 3)).write(vaultPath = VAULT, path = NOTE, content = TEXT)
+
+        assertEquals(
+            expected = Outcome.Success(value = Unit) to TEXT,
+            actual = outcome to store().read(vaultPath = VAULT, path = NOTE)
+        )
+        assertEquals(
+            expected = listOf("Arepas.md"),
+            actual = fakeFileSystem.list(dir = VAULT.toPath() / FOLDER).map { it.name }
+        )
+    }
+
+    @Test
     fun `a note that cannot be read reads as null`() = runStoreTest {
         assertEquals(
             expected = null,
@@ -61,11 +77,22 @@ class OkioNoteContentStoreTest {
         )
     }
 
-    private fun refusingMoves(): FileSystem = object : ForwardingFileSystem(delegate = fakeFileSystem) {
+    /** A file system that refuses the first [times] moves, every move unless told. */
+    private fun refusingMoves(
+        times: Int = Int.MAX_VALUE
+    ): FileSystem = object : ForwardingFileSystem(delegate = fakeFileSystem) {
+        private var refused = 0
+
         override fun atomicMove(
             source: Path,
             target: Path
-        ) = throw IOException(DENIED)
+        ) {
+            if (refused < times) {
+                refused++
+                throw IOException(DENIED)
+            }
+            super.atomicMove(source = source, target = target)
+        }
     }
 
     private fun runStoreTest(
@@ -89,6 +116,7 @@ class OkioNoteContentStoreTest {
         private const val DENIED = "File in use"
         private const val FOLDER = "Recipes"
         private const val ORIGINAL = "# Arepas\n"
+        private const val TEXT = "# Arepas\n\nServe them warm.\n"
         private const val VAULT = "/home/ana/Notes"
         private val NOTE = RelativePath(value = "Recipes/Arepas.md")
     }

@@ -176,6 +176,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Saving a note on Windows no longer fails when another reader has it open for a moment (Notekea checking it for
+  outside changes, an antivirus, a sync app): the save tries again a few times before it gives up.
 - A note deleted while Notekea was closed no longer comes back as a tab that says "This note couldn't be opened":
   the last run's tabs are restored against the scanned vault, not against the note cache, which can still list it
   (found by the Self-Test's 1.11-10).
