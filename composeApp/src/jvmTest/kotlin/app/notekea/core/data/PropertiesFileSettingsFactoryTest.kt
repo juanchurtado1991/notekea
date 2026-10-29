@@ -83,6 +83,34 @@ class PropertiesFileSettingsFactoryTest {
         )
     }
 
+    @Test
+    fun `two apps saving in one folder at once never fail, and leave no temporary file`() {
+        // 1.3-03 on CI: the Self-Test's quitting Notekea and the next one saved at once, each with its own lock, and one
+        // moved the shared temporary file away from the other (NoSuchFileException: settings.properties.tmp).
+        val apps = List(size = 2) { PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create() }
+        val pool = Executors.newFixedThreadPool(THREADS)
+        val failures = ConcurrentLinkedQueue<Throwable>()
+        val writes = (0 until THREADS).map { thread ->
+            pool.submit {
+                repeat(times = WRITES) { write ->
+                    try {
+                        apps[thread % apps.size].putString(key = "key.$thread.$write", value = VALUE)
+                    } catch (exception: Exception) {
+                        failures += exception
+                    }
+                }
+            }
+        }
+        writes.forEach { it.get() }
+        pool.shutdown()
+
+        assertEquals(
+            expected = emptyList<Throwable>() to listOf(SETTINGS_FILE),
+            actual =
+            failures.toList() to Files.list(appData).use { files -> files.map { it.fileName.toString() }.toList() }
+        )
+    }
+
     companion object {
         private const val THREADS = 8
         private const val WRITES = 50

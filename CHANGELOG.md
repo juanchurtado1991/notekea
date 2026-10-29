@@ -186,6 +186,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Quick edits (a few properties in a row) no longer bring back an older version of the note or say it "changed
   outside Notekea": the check for outside changes could report a read of Notekea's own earlier save after a later one;
   it now reads the file again and ignores a file that holds the last save (found by the Self-Test's 1.14-02 on macOS).
+- Settings saved by two Notekeas at once (opened twice, or the Self-Test relaunching it) no longer fail: each save
+  writes a temporary file of its own and saves run one at a time in the whole process (found by the Self-Test's
+  1.3-03).
 - A tab shown again goes back to the same part of its note on a slow computer too: the scroll came before the page
   was laid out, gave up after 30 frames while Preview was still drawing a long note, or was pulled up when Preview
   laid the note out again shorter for a moment, and the note stayed at the top.
