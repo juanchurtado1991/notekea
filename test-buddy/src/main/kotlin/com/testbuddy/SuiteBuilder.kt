@@ -17,6 +17,7 @@ public class SuiteBuilder internal constructor(
     private var window = WindowSize(width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT)
     private var backUp: () -> List<Path> = { emptyList() }
     private var installedApp: (HostSystem) -> Path? = { null }
+    private var diagnostics: () -> String? = { null }
     private var content: (@Composable (CaseFolders) -> Unit)? = null
 
     /** Shows the app on a case's [CaseFolders]: its data folder must be [CaseFolders.appData], never the real one. */
@@ -51,6 +52,11 @@ public class SuiteBuilder internal constructor(
         installedApp = path
     }
 
+    /** What the report ends with, read when it is made: the installed app's recent log, for one. */
+    public fun diagnostics(read: () -> String?) {
+        diagnostics = read
+    }
+
     public fun automated(
         id: String,
         title: String,
@@ -80,6 +86,7 @@ public class SuiteBuilder internal constructor(
         dataSources = dataSources.toList(),
         backUp = backUp,
         installedApp = installedApp,
+        diagnostics = diagnostics,
         content = requireNotNull(content) { "The suite of $appName does not say how to launch it" }
     )
 

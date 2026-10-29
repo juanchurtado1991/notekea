@@ -89,7 +89,14 @@ internal class SelfTestSession(
                 copyIntoReport(file = it, name = it.fileName.toString())
             }
         }
-        val report = formatReport(suite = suite, environment = environment(), automatic = automatic, manual = manual)
+        val diagnostics = runCatching { suite.diagnostics() }.getOrNull()
+        val report = formatReport(
+            suite = suite,
+            environment = environment(),
+            automatic = automatic,
+            manual = manual,
+            diagnostics = diagnostics
+        )
         mutableState.update { it.copy(step = SelfTestStep.REPORT, report = report) }
     }
 
