@@ -93,6 +93,8 @@ private fun SuiteBuilder.calloutFolding() {
     automated(id = "1.7-05", title = "A folded callout opens and folds with a click on its title") {
         openPlaygroundNote(name = TASKS_NOTE, shownText = SHOWN)
         pressInWindow(shortcut = Mod + Key.E)
+        // Wait for Preview before clicking a title: until it shows, the words are the editor's text, not a callout.
+        expectNoText(text = "[!faq]", substring = true)
         expectNoText(text = "This text is hidden until the title is clicked.")
         clickWords(words = "A folded question")
         expectText(text = "This text is hidden until the title is clicked.")

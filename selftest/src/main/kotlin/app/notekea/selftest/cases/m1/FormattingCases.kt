@@ -121,6 +121,8 @@ private fun SuiteBuilder.noteLink() {
         type(text = " hot")
         expectInNote(text = "[[Café con leche|coffee]] hot")
         pressInWindow(shortcut = Mod + Key.E)
+        // Wait for Preview before clicking the link: until it shows, the words are the editor's text, not a link.
+        expectNoText(text = "[[Café con leche|coffee]]", substring = true)
         clickWords(words = "coffee")
         tab(name = "Café con leche")
     }
