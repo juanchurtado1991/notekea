@@ -36,6 +36,7 @@ val notesSuite = testBuddy(appName = "Notes", version = "1.0") {
 
 - `launch` shows the app on a case's `CaseFolders`: `appData` stands for its data folder (never the real one) and
   `data` holds a fresh copy of the suite's `data` folders. Both are deleted after the case.
+- An automated case can have a `window` size of its own (a narrow window) instead of the suite's.
 - A case ID is used once and has no spaces. A manual case needs a title, steps and an expected result, in plain
   English for a tester who is not a developer.
 - `backUp` names what Finish and clean up puts back as it was after the manual cases.

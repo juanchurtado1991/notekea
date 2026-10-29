@@ -76,6 +76,16 @@ class CaseScopeTest {
     }
 
     @Test
+    fun `a text below the window is scrolled to before it is clicked`() {
+        assertIs<CaseResult.Passed>(
+            runCase {
+                clickWords(words = "far below")
+                expectText(text = "Far text clicked")
+            }
+        )
+    }
+
+    @Test
     fun `scrolling brings a far row into view`() {
         assertIs<CaseResult.Passed>(runCase { scrollTo(text = "Row 99") })
     }

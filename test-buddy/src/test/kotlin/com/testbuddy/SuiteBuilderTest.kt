@@ -11,7 +11,13 @@ class SuiteBuilderTest {
     fun `the suite keeps its cases in order with what each declares`() {
         val suite = sampleSuite {
             automated(id = "1.1-01", title = "Opens") {}
-            automated(id = "1.1-02", title = "Saves", timeout = 30.seconds) {}
+            automated(
+                id = "1.1-02",
+                title = "Saves",
+                timeout = 30.seconds,
+                window = WindowSize(width = 400, height = 300)
+            ) {
+            }
             manual(id = "1.1-03", reason = ManualReason.EYES) {
                 prepare("Personal Notes", "Work")
                 title(text = "Looks right")
@@ -21,6 +27,7 @@ class SuiteBuilderTest {
         }
         assertEquals(listOf("1.1-01", "1.1-02"), suite.automated.map { it.id })
         assertEquals(listOf(2.minutes, 30.seconds), suite.automated.map { it.timeout })
+        assertEquals(listOf(null, WindowSize(width = 400, height = 300)), suite.automated.map { it.window })
         val manual = suite.manual.single()
         assertEquals(listOf("Personal Notes", "Work"), manual.data)
         assertEquals(

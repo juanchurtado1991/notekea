@@ -9,6 +9,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
@@ -148,4 +149,16 @@ fun CaseScope.pressInWindow(shortcut: Shortcut) {
     val hasFocus = ui.onAllNodes(matcher = isFocused()).fetchSemanticsNodes().isNotEmpty()
     if (!hasFocus) ui.runOnIdle { notekea().windowFocus.requestFocus() }
     press(shortcut = shortcut)
+}
+
+/** Fails unless [texts] show on screen from top to bottom in that order (the first of each that is shown). */
+fun CaseScope.expectOrderOnScreen(texts: List<String>) {
+    texts.forEach { expectText(text = it) }
+    val tops = texts.map { text ->
+        val nodes = ui.onAllNodes(matcher = hasText(text = text))
+        val count = nodes.fetchSemanticsNodes().size
+        val shown = (0 until count).map { nodes[it] }.firstOrNull { it.isDisplayed() } ?: nodes[0]
+        shown.fetchSemanticsNode().boundsInRoot.top
+    }
+    if (tops != tops.sorted()) throw CaseFailure(message = "expected ${texts.joinToString()} in that order")
 }

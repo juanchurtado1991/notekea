@@ -18,7 +18,6 @@ import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
 
-private const val AREPAS_TEXT = "2 cups pre-cooked white corn flour"
 private const val SHARED = "Shared note"
 private const val SHARED_TEXT = "Another app changes or deletes this note"
 private const val SHARED_FILE = "$PLAYGROUND/Editor/Shared note.md"
@@ -37,8 +36,8 @@ fun SuiteBuilder.editorCases() {
 
 private fun SuiteBuilder.typingIsSaved() {
     automated(id = "1.5-01", title = "Typing is saved, the frontmatter as it was") {
-        openPlaygroundNote(name = "Arepas", shownText = AREPAS_TEXT)
-        typeAtEnd(part = AREPAS_TEXT, text = "\nServe them warm.")
+        openPlaygroundNote(name = "Arepas", shownText = AREPAS_FLOUR)
+        typeAtEnd(part = AREPAS_FLOUR, text = "\nServe them warm.")
         expectText(text = "Unsaved")
         expectText(text = "Saved")
         expectFile(path = "$PLAYGROUND/Recipes/Arepas.md", containing = "Serve them warm.")
@@ -51,15 +50,15 @@ private fun SuiteBuilder.typingIsSaved() {
 
 private fun SuiteBuilder.savedOnLeaving() {
     automated(id = "1.5-02", title = "Mod+S, leaving the note and quitting all save it") {
-        openPlaygroundNote(name = "Arepas", shownText = AREPAS_TEXT)
-        typeAtEnd(part = AREPAS_TEXT, text = "\nFirst line.")
+        openPlaygroundNote(name = "Arepas", shownText = AREPAS_FLOUR)
+        typeAtEnd(part = AREPAS_FLOUR, text = "\nFirst line.")
         press(shortcut = Mod + Key.S)
         expectFile(path = "$PLAYGROUND/Recipes/Arepas.md", containing = "First line.")
-        typeAtEnd(part = AREPAS_TEXT, text = "\nSecond line.")
+        typeAtEnd(part = AREPAS_FLOUR, text = "\nSecond line.")
         clickInTree(text = WELCOME)
         expectFile(path = "$PLAYGROUND/Recipes/Arepas.md", containing = "Second line.")
         clickInTree(text = "Arepas")
-        typeAtEnd(part = AREPAS_TEXT, text = "\nThird line.")
+        typeAtEnd(part = AREPAS_FLOUR, text = "\nThird line.")
         relaunch()
         expectFile(path = "$PLAYGROUND/Recipes/Arepas.md", containing = "Third line.")
     }
@@ -82,7 +81,7 @@ private fun SuiteBuilder.windowsLineEndings() {
 
 private fun SuiteBuilder.renameFromTitle() {
     automated(id = "1.5-04", title = "Renaming a note from its title") {
-        openPlaygroundNote(name = "Arepas", shownText = AREPAS_TEXT)
+        openPlaygroundNote(name = "Arepas", shownText = AREPAS_FLOUR)
         renameFromTitle(name = "Arepas", newName = "Arepas reina")
         expectText(text = "Links updated in 3 notes: 2026-10-20, Read mode, Welcome.")
         expectFile(path = "$PLAYGROUND/Recipes/Arepas reina.md")
