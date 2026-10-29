@@ -66,4 +66,17 @@ cover, and `system` is the `HostSystem` the case runs on.
 - **Report:** `formatReport(suite, ReportEnvironment.current(), automatic, manual, diagnostics)` writes the plain text
   a tester sends back.
 
-The Self-Test window, the manual walk-through and Finish and clean up come next (`qa/README.md`, piece 3b).
+## The Self-Test app
+
+`fun main() = testBuddyApp(suite)` opens the "<app> Self-Test" window, a wizard in three steps:
+
+1. **Automatic:** Start runs every automated case in the background (the tester can keep using the computer), each
+   with its state and, when it failed, why; Stop skips the rest.
+2. **Manual:** before the first manual case the installed app's `backUp` folders are copied aside. Then one case per
+   screen: its fresh test data in the Test data folder, Do this, You should see, and Passed, Failed (what they saw and
+   a screenshot) or Skip for now. Answers are saved, so the tester can close the window and go on later.
+3. **Send report:** the report to copy, the Report folder with the screenshots, and Finish and clean up, which puts
+   the app's folders back as they were and deletes the test data.
+
+Everything the tester does is kept in `<Documents>/<app> Self-Test` (`SelfTestFolders`): `Test data`, `Report` and
+the Self-Test's own `.self-test`.
