@@ -1,46 +1,66 @@
 # Notekea QA guide — Linux
 
-Follow the steps in order. Tested on the developer's machine (record the distribution and desktop, e.g. Pop!_OS 24.04
-with COSMIC, because the folder picker and the trash depend on the desktop).
+Thank you for testing Notekea. You do not need to know anything about programming: two apps do the work,
+**Notekea** (the app being tested) and **Notekea Self-Test** (which tests it and tells you what to do). The automatic
+part runs by itself in about 20 minutes; the manual cases take one to two hours, and you can stop and go on later.
+If something here is unclear, that is a problem with the guide, not with you: say so when you send the report.
 
-## What you receive
+## 1. Download
 
-A link to a **release** on GitHub, named like `Notekea m1-rc1`. Under **Assets**, download `notekea_<version>.deb`,
-`notekea-self-test_<version>.deb`, `smoke-data.zip` and `REPORT_TEMPLATE.txt`.
+You receive a link to a **release** on GitHub, named like `Notekea m1-rc1`. On that page, under **Assets**, download
+the two files for Linux:
 
-## 1. Install the app
+- `notekea_<version>_amd64.deb` — the app.
+- `notekea-self-test_<version>_amd64.deb` — the test.
 
-```bash
-sudo apt install ./notekea_<version>.deb
-```
+These are for Debian, Ubuntu, Pop!_OS and other systems that install `.deb` files.
 
-Notekea appears in the applications menu. Remove an earlier test build first with `sudo apt remove notekea` if the
-install refuses to downgrade.
+## 2. Install both apps
 
-## 2. Run the automatic test first
+1. Double-click `notekea_<version>_amd64.deb`: your software center (Ubuntu's App Center, Pop!_Shop, GNOME
+   Software) opens it; click **Install** and type your password. If it does not open, right-click the file, **Open
+   With**, and choose the software center.
+2. Do the same with `notekea-self-test_<version>_amd64.deb`.
 
-Install `notekea-self-test_<version>.deb` the same way, open **Notekea Self-Test**, click **Run** and do not use the
-computer while it runs. ✅ continue; ❌ click **Copy report**, paste it into section 1 of the report and **stop**.
+Both are now in the applications menu.
 
-## 3. Prepare the sample notes
+## 3. The automatic part
 
-```bash
-unzip smoke-data.zip -d ~/Documents && bash ~/Documents/smoke-data/smoke.sh prepare
-```
+1. Open **Notekea Self-Test** from the applications menu.
+2. Click **Start the automatic tests**. You can keep using the computer while it runs; it uses its own copies of
+   the test notes and never touches yours.
+3. When it says **Done**, look at the result. Failed cases are red: there is nothing to do about them now, they go in
+   the report. Close Notekea if it is open, and click **Next: manual cases**.
 
-## 4. Run the manual cases
+## 4. The manual cases
 
-Open the run's list (`qa/runs/M<N>.md`); for the M1 run each case is written out step by step in
-[M1_SMOKE_TEST.md](M1_SMOKE_TEST.md) (in `MVP_SMOKE_TEST.md` for later runs). Shortcuts use **Ctrl**.
-One line per case in section 2 of the report: the ID and **PASS**, **FAIL** or **SKIP**.
+The Self-Test shows one case per screen:
 
-## 5. When a case fails
+- **Do this** says what to do, step by step. **Open Notekea** starts Notekea for you, and **Open the folder** shows
+  the **Test data** folder, where each case's sample notes are ready (Notekea asks for a folder with **Open folder…**:
+  choose the one the case names there).
+- **You should see** says what must happen.
+- Click **Passed** when it did, or **Failed** when it did not: write **What did you see?**, click **Add a
+  screenshot…** if you took one, and **Save as failed**. **Skip for now** leaves a case for later.
 
-- **Screenshot**: **Print Screen** (the desktop's screenshot tool); attach the file.
-- **Diagnostics**: **Help → Copy diagnostics** in Notekea, pasted under the case.
-- If Notekea closed or froze: attach the newest file of `~/.local/share/notekea/logs` (or
-  `$XDG_DATA_HOME/notekea/logs`). Launching `notekea` from a terminal also shows the log live.
+**Screenshots:** press **Print Screen** and save the picture (most desktops save it in **Pictures › Screenshots**);
+choose it with **Add a screenshot…**. Write your distribution and desktop (for example Pop!_OS 24.04 with COSMIC) in
+the report's message: the file dialogs and the trash depend on it.
 
-## 6. Send the report
+Your answers are saved: you can close the Self-Test and open it again later, it goes on where you left. The last
+case is 15 minutes of free use: use Notekea as you really would, and say whether you found anything odd.
 
-Save it (e.g. `report-linux-m1-rc1.txt`) and add it to the run record.
+## 5. Send the report
+
+1. After the last case, click **Copy report** and paste it into a message (email, WhatsApp…) to whoever asked you to
+   test.
+2. Click **Open the Report folder** and attach the pictures in it to the same message.
+
+## 6. Finish
+
+1. Close Notekea, then click **Finish and clean up**: it puts Notekea back exactly as it was before the test and
+   deletes the test notes. It says **All clean** when it is done.
+2. Uninstall **Notekea Self-Test** from your software center (search for it, **Uninstall**).
+
+You keep Notekea installed for everyday use. When a new build comes (`m1-rc2`), install both apps again over the old
+ones and repeat this guide: the Self-Test only asks for the cases it needs.
