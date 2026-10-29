@@ -1,73 +1,62 @@
 # Notekea QA guide — Windows
 
-Thank you for testing Notekea. This guide takes about two hours the first time. You do not need to know anything
-about programming: follow the steps in order and write down what you see. If something here is unclear, that is a
-problem with the guide, not with you: say so in your report.
+Thank you for testing Notekea. You do not need to know anything about programming: two apps do the work,
+**Notekea** (the app being tested) and **Notekea Self-Test** (which tests it and tells you what to do). The automatic
+part runs by itself in about 20 minutes; the manual cases take one to two hours, and you can stop and go on later.
+If something here is unclear, that is a problem with the guide, not with you: say so when you send the report.
 
-## What you receive
+## 1. Download
 
-A link to a **release** on GitHub, named like `Notekea m1-rc1` (the "build"). On that page, under **Assets**,
-download:
+You receive a link to a **release** on GitHub, named like `Notekea m1-rc1`. On that page, under **Assets**, download
+the two files for Windows:
 
 - `Notekea-<version>.msi` — the app.
-- `Notekea-Self-Test-<version>.msi` — the automatic test.
-- `smoke-data.zip` — the sample notes used by the tests.
-- `REPORT_TEMPLATE.txt` — the report you will fill in (also in this folder of the repository).
+- `Notekea Self-Test-<version>.msi` — the test.
 
-## 1. Install the app
+## 2. Install both apps
 
-1. Double-click `Notekea-<version>.msi`.
-2. Windows may show **"Windows protected your PC"**. This appears because Notekea's builds are not signed. Click
-   **More info**, then **Run anyway**.
-3. Follow the installer and finish. Notekea is now in the Start menu.
+1. Double-click `Notekea-<version>.msi`. Windows may show **"Windows protected your PC"**: it appears because
+   Notekea's builds are not signed yet. Click **More info**, then **Run anyway**, and follow the installer.
+2. Do the same with `Notekea Self-Test-<version>.msi`.
 
-## 2. Run the automatic test first
+Both are now in the Start menu.
 
-1. Install `Notekea-Self-Test-<version>.msi` the same way (same "More info → Run anyway" if it appears).
-2. Open **Notekea Self-Test** from the Start menu and click **Run**. Do not use the computer while it runs (a few
-   minutes): it clicks and types by itself.
-3. When it finishes it shows:
-   - ✅ **All tests passed** — continue with step 3.
-   - ❌ **Some tests failed** — click **Copy report**, paste it into section 1 of `REPORT_TEMPLATE.txt` (open it with
-     Notepad and press Ctrl+V), save it and send it. **Stop here**: the manual tests wait for a new build.
+## 3. The automatic part
 
-## 3. Prepare the sample notes
+1. Open **Notekea Self-Test** from the Start menu.
+2. Click **Start the automatic tests**. You can keep using the computer while it runs; it uses its own copies of
+   the test notes and never touches yours.
+3. When it says **Done**, look at the result. Failed cases are red: there is nothing to do about them now, they go in
+   the report. Close Notekea if it is open, and click **Next: manual cases**.
 
-1. Right-click `smoke-data.zip` → **Extract All…** → choose your **Documents** folder → **Extract**. You now have
-   `Documents\smoke-data`.
-2. Open the Start menu, type **PowerShell** and open **Windows PowerShell**.
-3. Copy this line, paste it into the window with a right-click, and press Enter:
+## 4. The manual cases
 
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File "$HOME\Documents\smoke-data\smoke.ps1" prepare
-   ```
+The Self-Test shows one case per screen:
 
-4. It answers with "Smoke scenarios ready in …". Leave that window open: some cases ask you to paste another line
-   there (they say exactly which).
+- **Do this** says what to do, step by step. **Open Notekea** starts Notekea for you, and **Open the folder** shows
+  the **Test data** folder, where each case's sample notes are ready (Notekea asks for a folder with **Open folder…**:
+  choose the one the case names there).
+- **You should see** says what must happen.
+- Click **Passed** when it did, or **Failed** when it did not: write **What did you see?**, click **Add a
+  screenshot…** if you took one, and **Save as failed**. **Skip for now** leaves a case for later.
 
-## 4. Run the manual cases
+**Screenshots:** press **Windows key + Print Screen**. The screen flashes and the picture is saved in **Pictures ›
+Screenshots**; choose it with **Add a screenshot…**.
 
-1. Open the run's list of cases: the coordinator sends you its link (`qa/runs/M<N>.md` in the repository). For the M1
-   run, every case is written out step by step in [M1_SMOKE_TEST.md](M1_SMOKE_TEST.md), which opens on GitHub in your
-   browser; later runs describe their cases in `MVP_SMOKE_TEST.md`.
-2. For each case: do its steps in Notekea and check what it says under **Pass when**. On Windows, the shortcuts use
-   **Ctrl**.
-3. Write one line per case in section 2 of the report: the case ID and **PASS**, **FAIL** or **SKIP** (when the case
-   says it does not apply to Windows).
+Your answers are saved: you can close the Self-Test and open it again later, it goes on where you left. The last
+case is 15 minutes of free use: use Notekea as you really would, and say whether you found anything odd.
 
-## 5. When a case fails
+## 5. Send the report
 
-Under the case in the report, write what you did, what you expected and what happened, then:
+1. After the last case, click **Copy report** and paste it into a message (email, WhatsApp…) to whoever asked you to
+   test.
+2. Click **Open the Report folder** and attach the pictures in it to the same message.
 
-- **Screenshot**: press **Windows key + Print Screen**. The screen flashes and the picture is saved in
-  `Pictures\Screenshots`. Attach it to your message and write its name in the report.
-- **Diagnostics**: in Notekea, open the **Help** menu and click **Copy diagnostics**, then paste (Ctrl+V) under the
-  case. This copies the app version, your Windows version and the app's recent log; it never contains your notes.
-- If Notekea closed or froze and you cannot open the Help menu: press **Windows key + R**, paste
-  `%APPDATA%\Notekea\logs` and press Enter. Attach the newest file of that folder to your message.
+## 6. Finish
 
-## 6. Send the report
+1. Close Notekea, then click **Finish and clean up**: it puts Notekea back exactly as it was before the test and
+   deletes the test notes. It says **All clean** when it is done.
+2. Uninstall **Notekea Self-Test**: **Settings › Apps › Installed apps**, its **⋯** button, **Uninstall**.
 
-Save `REPORT_TEMPLATE.txt` (you can rename it, e.g. `report-windows-m1-rc1.txt`) and send it with your screenshots
-and attached files to the coordinator. You will receive a new build if anything has to be fixed; then you only repeat
-the Self-Test and the cases you are told.
+You keep Notekea installed for everyday use. When a new build comes (`m1-rc2`), install both apps again over the old
+ones and repeat this guide: the Self-Test only asks for the cases it needs.
