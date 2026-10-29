@@ -81,7 +81,9 @@ public class CaseScope internal constructor(
         semantics.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts)
         val layout =
             layouts.firstOrNull() ?: throw CaseFailure(message = "\"$words\" is not in a text that can be clicked")
-        val box = layout.getBoundingBox(offset = text.indexOf(words) + words.length / 2)
+        // The middle of the first word: words that wrap onto two lines have a line's end between them, not the link.
+        val firstWord = words.substringBefore(delimiter = ' ')
+        val box = layout.getBoundingBox(offset = text.indexOf(words) + firstWord.length / 2)
         node.performMouseInput { click(position = box.center) }
     }
 

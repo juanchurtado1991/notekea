@@ -177,9 +177,15 @@ private fun CaseScope.highest(name: String): SemanticsNodeInteraction = shown(na
 
 private fun CaseScope.lowest(name: String): SemanticsNodeInteraction = shown(name = name).maxBy { it.top() }
 
+// The tree is drawn anew after a rename, so its rows can be gone for a moment: this waits until they are back.
 private fun CaseScope.shown(name: String): List<SemanticsNodeInteraction> {
     expectText(text = name)
-    return shownNow(name = name)
+    var rows = emptyList<SemanticsNodeInteraction>()
+    ui.waitUntil(timeoutMillis = 10_000) {
+        rows = shownNow(name = name)
+        rows.isNotEmpty()
+    }
+    return rows
 }
 
 // No waiting inside: it runs within the waits of expectBookmarkOrder, which cannot hold other waits.
