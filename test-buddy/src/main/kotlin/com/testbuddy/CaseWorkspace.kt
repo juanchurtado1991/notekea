@@ -25,8 +25,14 @@ internal class CaseWorkspace(
         return folders
     }
 
+    /**
+     * Deletes the case's folders. An app may still be finishing work there (a database closing), so what cannot be
+     * deleted now is deleted when the process ends.
+     */
     fun clean(caseId: String) {
-        caseRoot(caseId = caseId).deleteRecursively()
+        val root = caseRoot(caseId = caseId)
+        val isDeleted = runCatching { root.deleteRecursively() }.isSuccess
+        if (!isDeleted) Runtime.getRuntime().addShutdownHook(Thread { runCatching { root.deleteRecursively() } })
     }
 
     fun screenshotFile(caseId: String): Path =

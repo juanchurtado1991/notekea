@@ -1,6 +1,13 @@
 package app.notekea.selftest
 
+import app.notekea.selftest.cases.m1.editorCases
+import app.notekea.selftest.cases.m1.editorViewCases
+import app.notekea.selftest.cases.m1.platformCases
 import app.notekea.selftest.cases.m1.quickSwitcherCases
+import app.notekea.selftest.cases.m1.themeCases
+import app.notekea.selftest.cases.m1.treeCases
+import app.notekea.selftest.cases.m1.treeChangeCases
+import app.notekea.selftest.cases.m1.vaultCases
 import app.notekea.core.platform.data.JvmSystemEnvironment
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
 import com.testbuddy.Suite
@@ -21,6 +28,13 @@ object NotekeaSuite {
             data(from = SmokeData.folder)
             window(width = WINDOW_WIDTH, height = WINDOW_HEIGHT)
             backUp { listOf(installedAppData()) }
+            platformCases()
+            themeCases()
+            vaultCases()
+            treeCases()
+            treeChangeCases()
+            editorCases()
+            editorViewCases()
             quickSwitcherCases()
         }
     }

@@ -9,11 +9,14 @@ import app.notekea.selftest.waitForResult
 import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.SuiteBuilder
 
-private const val PERSONAL_NOTES = "Personal Notes"
-private const val WELCOME = "Welcome"
-
 /** The cases of 1.6, the quick switcher and search (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.quickSwitcherCases() {
+    openByPartOfName()
+    aliasesAndAccents()
+    folderPath()
+}
+
+private fun SuiteBuilder.openByPartOfName() {
     automated(id = "1.6-01", title = "The quick switcher opens a note by part of its name") {
         openVault(name = PERSONAL_NOTES, shownText = WELCOME)
         press(shortcut = Mod + Key.P)
@@ -23,6 +26,9 @@ fun SuiteBuilder.quickSwitcherCases() {
         press(key = Key.Enter)
         expectText(text = "2 cups pre-cooked white corn flour", substring = true)
     }
+}
+
+private fun SuiteBuilder.aliasesAndAccents() {
     automated(id = "1.6-02", title = "The quick switcher finds aliases and names with accents") {
         openVault(name = PERSONAL_NOTES, shownText = WELCOME)
         press(shortcut = Mod + Key.P)
@@ -33,6 +39,9 @@ fun SuiteBuilder.quickSwitcherCases() {
         type(text = "cafe")
         waitForResult(name = "Café con leche")
     }
+}
+
+private fun SuiteBuilder.folderPath() {
     automated(id = "1.6-03", title = "The quick switcher matches a folder path") {
         openVault(name = PERSONAL_NOTES, shownText = WELCOME)
         press(shortcut = Mod + Key.P)

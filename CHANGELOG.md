@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notekea Self-Test plan (`qa/SELF_TEST.md`): testers install Notekea and a Self-Test app that runs the automatic
   smoke cases on their system and walks them through the manual ones, in one report; every
   feature keeps it up to date from now on (`GUIDELINES.md` §8, `qa/README.md`).
+- Self-Test cases of 1.1 to 1.5 (`qa/README.md` piece 5): the 33 automatic ones drive the real Notekea (shortcuts,
+  dialogs, the app data folder, opening, creating and locating vaults, the tree, renaming with links, deleting,
+  changes made by other apps, the editor's saving, conflicts, find, Preview and its links) and the 14 manual ones
+  walk the tester through what needs eyes or the system. Notekea's verbs gained `relaunch`, the tree's rows and the
+  note's text; Test Buddy gained `clickIcon`, `rightClick`, `clickWords`, `clearText`, a hidden text counting as gone,
+  and copies that keep files' dates.
 - Notekea's Self-Test suite (`:selftest`, `qa/README.md` piece 4): the real Notekea for each case (`CaseApp`), its
   verbs (`openVault`, `openNote`), the smoke data bundled in and its scenarios in Kotlin (checked byte for byte
   against `smoke.sh`), the first cases (1.6-01 to 1.6-03), a consistency test with `MVP_SMOKE_TEST.md` and the

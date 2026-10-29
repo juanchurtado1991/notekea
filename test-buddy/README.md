@@ -45,10 +45,13 @@ val notesSuite = testBuddy(appName = "Notes", version = "1.0") {
 | Verb | What it does |
 |---|---|
 | `click(text, substring)` | Clicks the first element showing the text, once it shows |
-| `type(text)` | Types into the focused text field |
+| `rightClick(text)` | Right-clicks the first element showing the text, for its context menu |
+| `clickWords(words)` | Clicks some words inside a longer text, where they are drawn: a link in a paragraph |
+| `clickIcon(label)` | Clicks the first icon button with that label for screen readers |
+| `type(text)`, `clearText()` | Types into the focused text field, or empties it |
 | `press(shortcut)`, `press(key)` | Presses `Mod + Key.P` (Cmd on macOS, Ctrl elsewhere), `Mod + Shift + Key.F`, `Ctrl + Key.Tab`, or a single key |
 | `scrollTo(text)` | Scrolls the list holding the text into view, also a lazy list that has not made the row yet |
-| `expectText(text, substring)`, `expectNoText(text)` | Waits until the text shows, or goes away |
+| `expectText(text, substring)`, `expectNoText(text, substring)` | Waits until the text shows, or is gone or hidden |
 | `file(path)` | The file at a path of the case's data, to read or change |
 | `expectFile(path, content, containing)`, `expectNoFile(path)` | Waits until the file exists with that content, or is gone |
 
