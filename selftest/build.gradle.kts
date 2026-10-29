@@ -13,8 +13,10 @@ plugins {
 // "Notekea Self-Test" installers, packaged with Notekea's own Java runtime.
 private val jdkVersion = 21
 private val appName = "Notekea Self-Test"
-private val appPackageVersion = "1.0.0"
-private val appDisplayVersion = "0.1.0-alpha"
+// As Notekea's: a milestone build passes `-PpackageVersion` and `-PreleaseName` (composeApp/build.gradle.kts).
+private val appPackageVersion = providers.gradleProperty("packageVersion").getOrElse("1.0.0")
+private val appDisplayVersion = "0.1.0-alpha" +
+    providers.gradleProperty("releaseName").map { " ($it)" }.getOrElse("")
 private val mainClassName = "app.notekea.selftest.MainKt"
 private val runtimeModules = providers.gradleProperty("notekea.runtimeModules").get().split(",")
 private val smokeDataFolders = listOf("vaults", "notes", "daily", "templates", "attachments", "outside")

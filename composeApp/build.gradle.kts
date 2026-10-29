@@ -14,9 +14,11 @@ plugins {
 
 private val appPackageName = "Notekea"
 // The installers need a plain version whose first number is above 0 (DMG) and with no suffix (MSI); people see
-// appDisplayVersion, in About and crash reports, until the first public release.
-private val appPackageVersion = "1.0.0"
-private val appDisplayVersion = "0.1.0-alpha"
+// appDisplayVersion, in About and crash reports, until the first public release. A milestone build passes both:
+// `-PpackageVersion=1.1.2 -PreleaseName=m1-rc2` (qa/README.md), so each release candidate installs over the last.
+private val appPackageVersion = providers.gradleProperty("packageVersion").getOrElse("1.0.0")
+private val appDisplayVersion = "0.1.0-alpha" +
+    providers.gradleProperty("releaseName").map { " ($it)" }.getOrElse("")
 private val appVersionSystemProperty = "notekea.version"
 private val jdkVersion = 21
 private val androidCompileSdk = 36

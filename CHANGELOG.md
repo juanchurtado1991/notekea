@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The app's log is kept in `logs/notekea.log` in the app data folder (rotated at 1 MB, three files kept, never note
   text), and About has **Copy diagnostics**: the app, system and Java versions and the last 100 log lines, to paste
   in a tester's report (`qa/README.md`, piece 6).
+- Milestone builds (`qa/README.md`, piece 7): a tag `m<N>-rc<k>` packages Notekea and Notekea Self-Test for
+  Windows, macOS and Linux and publishes them as a GitHub pre-release with the testers' guides. Each candidate
+  installs over the last (version `1.<N>.<k>`), and About shows which candidate it is.
 - Faster CI: the Self-Test runs in four parts at the same time (`Suite.shard` in Test Buddy), a step's pull request
   into its feature branch runs on Linux only, a pull request of documents only skips the build, `smokeRun` no longer
   repeats the smoke runs inside `check`, and a nightly workflow runs everything with the smoke runs on the three
