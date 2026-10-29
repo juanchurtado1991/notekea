@@ -1,6 +1,8 @@
 package com.testbuddy
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
@@ -28,6 +30,7 @@ import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import java.nio.file.Files
 
@@ -58,6 +61,8 @@ internal fun SampleApp(folders: CaseFolders) {
         }
     ) {
         BasicTextField(value = text, onValueChange = { text = it })
+        // A hidden twin first, as a panel being replaced keeps its text: clicks must reach the button on screen.
+        Box(modifier = Modifier.size(size = 0.dp)) { Button(onClick = {}) { Text(text = "Clicked $clicks times") } }
         Button(onClick = { clicks++ }) { Text(text = "Clicked $clicks times") }
         Button(onClick = { saveLater = true }) { Text(text = "Save later") }
         Button(onClick = { clicks += 10 }, modifier = Modifier.semantics { contentDescription = "Add ten" }) {

@@ -64,6 +64,8 @@ ktlint {
 
 tasks.test {
     useJUnitPlatform()
+    // Screenshots of failed cases land next to the test reports, which CI uploads when a check fails.
+    systemProperty("testbuddy.workFolder", layout.buildDirectory.dir("reports/tests/test-buddy").get().asFile.path)
 }
 
 // The automated smoke runs alone (ROADMAP.md 1.16), recording the process's memory for a performance pass:
