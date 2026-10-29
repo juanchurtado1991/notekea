@@ -11,6 +11,7 @@ data class PlatformConventions(
     val quitShortcut: Shortcut,
     val newNoteShortcut: Shortcut,
     val renameShortcut: Shortcut,
+    val openSelectedShortcut: Shortcut,
     val deleteShortcut: Shortcut,
     val toggleSidebarShortcut: Shortcut,
     val saveShortcut: Shortcut,

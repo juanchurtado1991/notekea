@@ -26,12 +26,12 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
         val primaryModifier = primaryModifierFor(operatingSystem = operatingSystem)
         val primary = { key: ShortcutKey, extra: ShortcutModifier? -> shortcut(key, primaryModifier, extra) }
         return PlatformConventions(
-            operatingSystem = operatingSystem,
-            primaryModifier = primaryModifier,
+            operatingSystem = operatingSystem, primaryModifier = primaryModifier,
             openFolderShortcut = primary(ShortcutKey.O, null),
             quitShortcut = quitShortcutFor(operatingSystem = operatingSystem),
             newNoteShortcut = primary(ShortcutKey.N, null),
             renameShortcut = renameShortcutFor(operatingSystem = operatingSystem),
+            openSelectedShortcut = openSelectedShortcutFor(operatingSystem = operatingSystem),
             deleteShortcut = deleteShortcutFor(operatingSystem = operatingSystem),
             toggleSidebarShortcut = primary(ShortcutKey.BACKSLASH, null),
             saveShortcut = primary(ShortcutKey.S, null),
@@ -156,6 +156,14 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             key = ShortcutKey.F4,
             modifiers = setOf(ShortcutModifier.ALT)
         )
+    }
+
+    // Finder renames with Enter and opens with Cmd+Down; File Explorer and Linux file managers open with Enter.
+    private fun openSelectedShortcutFor(
+        operatingSystem: OperatingSystem
+    ): Shortcut = when (operatingSystem) {
+        OperatingSystem.MACOS -> Shortcut(key = ShortcutKey.DOWN, modifiers = setOf(ShortcutModifier.COMMAND))
+        OperatingSystem.LINUX, OperatingSystem.WINDOWS -> Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet())
     }
 
     private fun renameShortcutFor(

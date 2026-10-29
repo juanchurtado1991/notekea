@@ -39,6 +39,8 @@ primary modifier and resolved per platform.
 | Action | macOS | Windows / Linux |
 |---|---|---|
 | New note | `Cmd+N` | `Ctrl+N` |
+| Open the selected entry in Files | `Cmd+↓` (Enter renames, as in Finder) | `Enter` |
+| Rename the selected entry in Files | `Enter` | `F2` |
 | Save | `Cmd+S` | `Ctrl+S` |
 | Find in note | `Cmd+F` | `Ctrl+F` |
 | Quick switcher (find a note by name) | `Cmd+P` | `Ctrl+P` |

@@ -148,6 +148,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- On macOS the selected entry of Files opens with Cmd+↓, as in Finder: Enter renames there, so a note could not be
+  opened from the tree with the keyboard (found by the Self-Test's 1.4-02 on macOS). About lists Open the selected
+  file with the key of each system.
 - The installed app no longer crashes when it opens a vault (issue #68): its Java runtime now includes the JDK modules
   the app needs (`java.sql` for the database among them) and is built from JDK 21, the one the app is tested on, and
   `./gradlew check` fails when the code needs a JDK module the installers leave out.

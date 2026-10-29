@@ -21,6 +21,7 @@
     <string name="about_shortcut_previous_tab">Previous tab</string>
     <string name="about_shortcut_read_mode">Edit or preview</string>
     <string name="about_shortcut_rename">Rename the selected file</string>
+    <string name="about_shortcut_open_selected">Open the selected file</string>
     <string name="about_shortcut_save">Save</string>
     <string name="about_shortcut_search_notes">Search in all notes</string>
     <string name="about_shortcut_side_panel">Show or hide the side panel</string>

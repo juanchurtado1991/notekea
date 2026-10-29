@@ -12,6 +12,7 @@ enum class ShortcutKey {
     DIGIT_7,
     DIGIT_8,
     DIGIT_9,
+    DOWN,
     B,
     BACKSLASH,
     BACKSPACE,

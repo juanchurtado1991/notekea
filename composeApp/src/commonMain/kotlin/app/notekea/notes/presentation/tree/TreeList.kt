@@ -204,13 +204,22 @@ private fun treeIntentFor(
 ): VaultTreeIntent? {
     val conventions = state.platformConventions
     return when {
+        // Before the arrows: on macOS Cmd+Down opens, as in Finder, where Enter renames.
+        conventions.openSelectedShortcut.matches(event = event) && state.selectedPath != null ->
+            VaultTreeIntent.OnOpenSelected
+
         event.key == Key.DirectionDown -> VaultTreeIntent.OnSelectNext
+
         event.key == Key.DirectionUp -> VaultTreeIntent.OnSelectPrevious
+
         event.key == Key.DirectionRight -> VaultTreeIntent.OnExpandSelected
+
         event.key == Key.DirectionLeft -> VaultTreeIntent.OnCollapseSelected
+
         conventions.renameShortcut.matches(event = event) -> VaultTreeIntent.OnRenameRequest()
+
         conventions.deleteShortcut.matches(event = event) -> VaultTreeIntent.OnDeleteRequest()
-        event.key == Key.Enter && state.selectedPath != null -> VaultTreeIntent.OnOpenSelected
+
         else -> null
     }
 }

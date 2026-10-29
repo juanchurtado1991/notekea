@@ -23,6 +23,7 @@ import app.notekea.resources.about_shortcut_outline
 import app.notekea.resources.about_shortcut_previous_day
 import app.notekea.resources.about_shortcut_previous_tab
 import app.notekea.resources.about_shortcut_read_mode
+import app.notekea.resources.about_shortcut_open_selected
 import app.notekea.resources.about_shortcut_rename
 import app.notekea.resources.about_shortcut_save
 import app.notekea.resources.about_shortcut_search_notes
@@ -54,6 +55,7 @@ object AboutShortcuts {
                     AboutShortcut(label = Res.string.about_shortcut_next_day, shortcut = nextDayShortcut),
                     AboutShortcut(label = Res.string.about_shortcut_template, shortcut = templateShortcut),
                     AboutShortcut(label = Res.string.about_shortcut_bookmark, shortcut = bookmarkShortcut),
+                    AboutShortcut(label = Res.string.about_shortcut_open_selected, shortcut = openSelectedShortcut),
                     AboutShortcut(label = Res.string.about_shortcut_rename, shortcut = renameShortcut),
                     AboutShortcut(label = Res.string.about_shortcut_delete, shortcut = deleteShortcut)
                 )
