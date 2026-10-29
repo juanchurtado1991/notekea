@@ -154,7 +154,9 @@ class WorkspaceViewModel(
             stale.forEach { coverSources.remove(key = it) }
             reduce { it.copy(covers = it.covers - stale) }
         }
-        if (intent.isLoaded) {
+        // The tree remembered from the last run can still list files deleted while Notekea was closed (1.11-10), so
+        // the tabs come back against the scanned one.
+        if (intent.isLoaded && !intent.tree.isFromCache) {
             treeLoaded = true
             restoreIfReady()
         }

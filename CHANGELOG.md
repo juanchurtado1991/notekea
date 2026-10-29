@@ -171,6 +171,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- A note deleted while Notekea was closed no longer comes back as a tab that says "This note couldn't be opened":
+  the last run's tabs are restored against the scanned vault, not against the note cache, which can still list it
+  (found by the Self-Test's 1.11-10).
 - On macOS the selected entry of Files opens with Cmd+↓, as in Finder: Enter renames there, so a note could not be
   opened from the tree with the keyboard (found by the Self-Test's 1.4-02 on macOS). About lists Open the selected
   file with the key of each system.

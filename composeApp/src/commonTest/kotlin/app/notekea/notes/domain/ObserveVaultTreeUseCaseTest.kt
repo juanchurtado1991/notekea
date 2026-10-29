@@ -218,6 +218,8 @@ class ObserveVaultTreeUseCaseTest {
                 expected = setOf(RelativePath(value = "Recipes"), RelativePath(value = "Travel")),
                 actual = cached.folders
             )
+            // Only the cached tree says so: it may still list files deleted while Notekea was closed.
+            assertEquals(expected = true to false, actual = cached.isFromCache to scanned.isFromCache)
         }
     }
 

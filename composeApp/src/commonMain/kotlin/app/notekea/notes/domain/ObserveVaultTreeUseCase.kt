@@ -36,7 +36,7 @@ class ObserveVaultTreeUseCase(
         val changes = Channel<VaultChange>(capacity = Channel.UNLIMITED)
         val watching = launch { fileWatcher.watch(vaultPath = vaultPath).collect { changes.send(element = it) } }
         val cached = VaultTree.fromNotes(notes = noteMetadataCache.read(vaultPath = vaultPath))
-        if (cached.notes.isNotEmpty()) send(element = Outcome.Success(value = cached))
+        if (cached.notes.isNotEmpty()) send(element = Outcome.Success(value = cached.copy(isFromCache = true)))
         var saved = cached
         var tree = scanOrReport(vaultPath = vaultPath, previous = cached)
         while (tree != null) {
