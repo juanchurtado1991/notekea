@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="about_close">Close</string>
+    <string name="about_copy_diagnostics">Copy diagnostics</string>
+    <string name="about_diagnostics_copied">Copied to the clipboard</string>
     <string name="about_github">GitHub</string>
     <string name="about_group_notes">Notes</string>
     <string name="about_group_workspace">Workspace</string>

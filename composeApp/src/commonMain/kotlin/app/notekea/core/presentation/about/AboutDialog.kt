@@ -15,6 +15,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -40,11 +42,14 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.resources.Res
 import app.notekea.resources.about_close
+import app.notekea.resources.about_copy_diagnostics
+import app.notekea.resources.about_diagnostics_copied
 import app.notekea.resources.about_github
 import app.notekea.resources.about_shortcuts_title
 import app.notekea.resources.about_tagline
 import app.notekea.resources.about_version
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 private const val DIALOG_HEIGHT_DP = 520
 private const val DIALOG_WIDTH_DP = 780
@@ -55,28 +60,39 @@ private const val LOGO_SIZE_DP = 88
 private const val REPOSITORY_URL = "https://github.com/juanchurtado1991/notekea"
 
 /**
- * About Notekea: on the left the logo, the name, the version and the tagline, with a link to the project on GitHub; on
- * the right every keyboard shortcut on this platform, as keycaps, in groups from the most used ([AboutShortcuts]). Esc,
- * a click outside or ✕ closes it ([onDismiss]).
+ * About Notekea: on the left the logo, the name, the version and the tagline, with links to the project on GitHub and
+ * Copy diagnostics, for a tester's report; on the right every keyboard shortcut on this platform, as keycaps, in groups
+ * from the most used ([AboutShortcuts]). Esc, a click outside or ✕ closes it ([onDismiss]).
  */
 @Composable
 fun AboutDialog(
     platformConventions: PlatformConventions,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    viewModel: AboutViewModel = koinViewModel()
 ) {
+    val state by viewModel.state.collectAsState()
     NotekeaDialog(
         onDismiss = onDismiss,
         modifier = Modifier.size(width = DIALOG_WIDTH_DP.dp, height = DIALOG_HEIGHT_DP.dp)
-    ) { AboutContent(platformConventions = platformConventions, onDismiss = onDismiss) }
+    ) {
+        AboutContent(
+            platformConventions = platformConventions,
+            state = state,
+            onIntent = viewModel::onIntent,
+            onDismiss = onDismiss
+        )
+    }
 }
 
 @Composable
-private fun AboutContent(
+fun AboutContent(
     platformConventions: PlatformConventions,
+    state: AboutState,
+    onIntent: (AboutIntent) -> Unit,
     onDismiss: () -> Unit
 ) {
     Row {
-        Identity()
+        Identity(state = state, onIntent = onIntent)
         Column(modifier = Modifier.weight(weight = 1f).padding(all = NotekeaDimensions.SpacingXl)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -97,10 +113,12 @@ private fun AboutContent(
     }
 }
 
-/** The logo, the name, the version, the tagline and GitHub, on a soft column. */
+/** The logo, the name, the version, the tagline, GitHub and Copy diagnostics, on a soft column. */
 @Composable
-private fun Identity() {
-    val uriHandler = LocalUriHandler.current
+private fun Identity(
+    state: AboutState,
+    onIntent: (AboutIntent) -> Unit
+) {
     Column(
         modifier = Modifier
             .width(width = IDENTITY_WIDTH_DP.dp)
@@ -126,12 +144,33 @@ private fun Identity() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
-        NotekeaButton(
-            text = stringResource(resource = Res.string.about_github),
-            onClick = { uriHandler.openUri(uri = REPOSITORY_URL) },
-            style = NotekeaButtonStyle.SECONDARY
-        )
+        IdentityButtons(state = state, onIntent = onIntent)
     }
+}
+
+/** GitHub, and Copy diagnostics, which says once it has copied them. */
+@Composable
+private fun IdentityButtons(
+    state: AboutState,
+    onIntent: (AboutIntent) -> Unit
+) {
+    val uriHandler = LocalUriHandler.current
+    NotekeaButton(
+        text = stringResource(resource = Res.string.about_github),
+        onClick = { uriHandler.openUri(uri = REPOSITORY_URL) },
+        style = NotekeaButtonStyle.SECONDARY
+    )
+    NotekeaButton(
+        text = stringResource(
+            resource = if (state.isDiagnosticsCopied) {
+                Res.string.about_diagnostics_copied
+            } else {
+                Res.string.about_copy_diagnostics
+            }
+        ),
+        onClick = { onIntent(AboutIntent.OnCopyDiagnostics) },
+        style = NotekeaButtonStyle.SECONDARY
+    )
 }
 
 /** Every group of shortcuts, scrolling with a scrollbar when they do not fit. */
@@ -185,7 +224,12 @@ private fun ShortcutRow(
 private fun AboutDialogPreview() {
     NotekeaPreviewThemes {
         Box(modifier = Modifier.size(width = DIALOG_WIDTH_DP.dp, height = DIALOG_HEIGHT_DP.dp)) {
-            AboutContent(platformConventions = PreviewPlatformConventions.linux, onDismiss = {})
+            AboutContent(
+                platformConventions = PreviewPlatformConventions.linux,
+                state = AboutState(),
+                onIntent = {},
+                onDismiss = {}
+            )
         }
     }
 }
