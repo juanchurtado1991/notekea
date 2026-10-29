@@ -64,8 +64,6 @@ ktlint {
 
 tasks.test {
     useJUnitPlatform()
-    // The memory runs of the performance passes run only in `smokeRun`.
-    filter { excludeTestsMatching("*MemoryRunTest") }
 }
 
 // The automated smoke runs alone (ROADMAP.md 1.16), recording the process's memory for a performance pass:
