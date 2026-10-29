@@ -18,26 +18,45 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
+        # Main and the pull requests into it run on the three systems (main requires the three checks); the step
+        # pull requests into a feature branch run on Linux only, and the feature's pull request to main runs all three.
+        os: ${{ fromJSON(github.event_name == 'pull_request' && github.base_ref != 'main' && '["ubuntu-latest"]' || '["ubuntu-latest","macos-latest","windows-latest"]') }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # A pull request that only changes documents skips the build: its checks still report, so main can take it.
+      # Smoke data, MVP_SMOKE_TEST.md (read by the consistency test) and everything else count as code.
+      - name: What changed
+        id: changes
+        shell: bash
+        run: |
+          code=true
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            changed=$(git diff --name-only "origin/$GITHUB_BASE_REF...HEAD")
+            docs='^(README|ROADMAP|CHANGELOG|CLAUDE|GUIDELINES|ARCHITECTURE|PLATFORM_GUIDELINES|LIBRARIES|CONTRIBUTING|SECURITY)\.md$|^docs/|^qa/|^test-buddy/README\.md$'
+            if [ -n "$changed" ] && ! echo "$changed" | grep -qvE "$docs"; then code=false; fi
+          fi
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "Code changed: $code"
 
       - name: Set up JDK 21
+        if: steps.changes.outputs.code == 'true'
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
 
       - name: Set up Gradle
+        if: steps.changes.outputs.code == 'true'
         uses: gradle/actions/setup-gradle@v6
 
       # `check` runs ktlint and every test task of every module; `koverVerify` enforces the minimum coverage.
       - name: Lint, test and coverage
+        if: steps.changes.outputs.code == 'true'
         shell: bash
         run: ./gradlew check koverVerify --continue --console=plain
 

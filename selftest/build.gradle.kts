@@ -19,6 +19,7 @@ private val mainClassName = "app.notekea.selftest.MainKt"
 private val runtimeModules = providers.gradleProperty("notekea.runtimeModules").get().split(",")
 private val smokeDataFolders = listOf("vaults", "notes", "daily", "templates", "attachments", "outside")
 private val bundledSmokeData = layout.buildDirectory.dir("generated/smoke-data")
+private val maxForks = 4
 
 kotlin {
     jvmToolchain(jdkVersion)
@@ -64,6 +65,10 @@ ktlint {
 
 tasks.test {
     useJUnitPlatform()
+    // The Self-Test's parts and the smoke runs are test classes of their own: up to half the cores run them at the
+    // same time, each in its own JVM, since every case starts the whole app with a global Koin.
+    maxParallelForks =
+        (Runtime.getRuntime().availableProcessors() / 2).coerceIn(minimumValue = 1, maximumValue = maxForks)
     // Screenshots of failed cases land next to the test reports, which CI uploads when a check fails.
     systemProperty("testbuddy.workFolder", layout.buildDirectory.dir("reports/tests/test-buddy").get().asFile.path)
 }

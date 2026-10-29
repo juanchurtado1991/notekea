@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Faster CI: the Self-Test runs in four parts at the same time (`Suite.shard` in Test Buddy), a step's pull request
+  into its feature branch runs on Linux only, a pull request of documents only skips the build, `smokeRun` no longer
+  repeats the smoke runs inside `check`, and a nightly workflow runs everything with the smoke runs on the three
+  systems.
+
 - AI hardware plan (`ROADMAP.md` M3): a dedicated GPU is used whenever the machine has one and the CPU is the route
   for modest PCs; the 3.0 spike checks the GPU backends, measures the time to the first token and picks the models
   with the evaluation sets; Lucene stays the desktop index; the repositories' code graph comes from a parser only.

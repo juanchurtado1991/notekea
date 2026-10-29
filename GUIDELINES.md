@@ -140,7 +140,10 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   - `fix/<short-description>` for bug fixes
   - `chore/<short-description>` for tooling, build or documentation changes
 - Changes reach `main` through a pull request. CI runs on every pull request (to `main` or to a feature branch) and
-  every merge to `main`.
+  every merge to `main`: a step's pull request into its feature branch runs on Linux only, and the pull request to
+  `main` and every merge to it on Windows, macOS and Linux. A pull request that only changes documents (the root
+  `.md` files other than `MVP_SMOKE_TEST.md`, `docs/`, `qa/`) skips the build; its checks still pass. Every night
+  `nightly.yml` runs the whole `check` and the smoke runs (`smokeRun`) on `main` on the three systems.
 - **A feature is reviewed one step at a time** (`feature/` and `fix/` branches with more than one step), because a
   whole feature is too large to review well:
   1. Create the feature branch from `main` (`feature/note-editor`). Nothing is committed to it directly.
@@ -227,7 +230,7 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
 - **Automated cases and smoke runs live in `:selftest`** (`ROADMAP.md` 1.16, `qa/SELF_TEST.md`): they start the real
   app (its real code and files, with a temporary app data folder, never the user's) on copies of the smoke data, drive
   the UI as a person does (find by text, click, type, shortcuts) and check what the case expects, down to the files
-  on disk. They run in every `check` and so in CI on the three systems, and
+  on disk. They run in every `check` and so in CI (§8), the Self-Test in parts at the same time, each in its own JVM, and
   `./gradlew :selftest:smokeRun -PidleSeconds=600` runs the smoke runs alone and records the memory of each in
   `selftest/build/reports/smoke-runs/memory.csv`, the workload every performance pass measures.
 - **Every `feature/` and `fix/` branch adds its cases to `MVP_SMOKE_TEST.md`** (in a step): what a person must check on
@@ -287,7 +290,8 @@ The commit is blocked if any step fails. `git commit --no-verify` is for emergen
 
 ## 12. Cross-platform tests (Windows, macOS, Linux)
 
-- CI runs every test on Windows, macOS and Linux.
+- CI runs every test on Windows, macOS and Linux: in the pull request to `main`, on every merge to it and every night
+  (step pull requests run on Linux only, §8).
 - Prefer `commonTest`: if a test can live there, it must. Use `jvmTest` only for code that exists only in `jvmMain`.
 - Never hard-code path separators or line endings: build paths with Okio's `Path` and normalize `\r\n` when comparing text.
 - Do not depend on the machine: no absolute paths, no user home, no network. Use temporary directories created by the test.
