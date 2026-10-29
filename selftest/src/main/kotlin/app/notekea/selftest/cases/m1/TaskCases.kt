@@ -5,9 +5,9 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.performClick
 import app.notekea.selftest.pressInWindow
+import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
@@ -124,7 +124,7 @@ private fun CaseScope.clickFirstTaskBox() {
     val boxes = ui.onAllNodes(matcher = hasContentDescription(value = "Task"))
     ui.waitUntil(timeoutMillis = 10_000) { boxes.fetchSemanticsNodes().isNotEmpty() }
     val count = boxes.fetchSemanticsNodes().size
-    val shown = (0 until count).map { boxes[it] }.filter { it.isDisplayed() }
+    val shown = (0 until count).map { boxes[it] }.filter { it.isShown() }
     shown.minBy { it.fetchSemanticsNode().boundsInRoot.top }.performClick()
 }
 

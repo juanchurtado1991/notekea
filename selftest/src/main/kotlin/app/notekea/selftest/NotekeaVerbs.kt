@@ -9,12 +9,12 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
+import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.Shortcut
@@ -159,7 +159,7 @@ fun CaseScope.expectOrderOnScreen(texts: List<String>) {
     val tops = texts.map { text ->
         val nodes = ui.onAllNodes(matcher = hasText(text = text))
         val count = nodes.fetchSemanticsNodes().size
-        val shown = (0 until count).map { nodes[it] }.firstOrNull { it.isDisplayed() } ?: nodes[0]
+        val shown = (0 until count).map { nodes[it] }.firstOrNull { it.isShown() } ?: nodes[0]
         shown.fetchSemanticsNode().boundsInRoot.top
     }
     if (tops != tops.sorted()) throw CaseFailure(message = "expected ${texts.joinToString()} in that order")

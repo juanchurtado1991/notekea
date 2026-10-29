@@ -2,7 +2,6 @@ package app.notekea.selftest.cases.m1
 
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.performSemanticsAction
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -15,6 +14,7 @@ import androidx.compose.ui.test.performTextInputSelection
 import androidx.compose.ui.text.TextRange
 import app.notekea.selftest.noteText
 import app.notekea.selftest.pressInWindow
+import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.ShortcutModifier.Mod
@@ -188,7 +188,7 @@ private fun CaseScope.scrollNoteTo(text: String) {
 private fun CaseScope.firstShownTop(text: String): Float? {
     val nodes = ui.onAllNodes(matcher = hasText(text = text) and inNote)
     val count = nodes.fetchSemanticsNodes().size
-    return (0 until count).map { nodes[it] }.filter { it.isDisplayed() }
+    return (0 until count).map { nodes[it] }.filter { it.isShown() }
         .minOfOrNull { it.fetchSemanticsNode().boundsInRoot.top }
 }
 

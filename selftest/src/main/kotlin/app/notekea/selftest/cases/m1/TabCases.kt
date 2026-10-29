@@ -4,7 +4,6 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.performClick
 import app.notekea.selftest.clickInTree
 import app.notekea.selftest.noteText
@@ -13,6 +12,7 @@ import app.notekea.selftest.openVault
 import app.notekea.selftest.pressInWindow
 import app.notekea.selftest.relaunch
 import app.notekea.selftest.treeRow
+import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.ShortcutModifier.Ctrl
@@ -145,6 +145,6 @@ internal fun CaseScope.expectShown(text: String) {
     ui.waitUntil(timeoutMillis = 10_000) {
         val nodes = ui.onAllNodes(matcher = hasSetTextAction() and hasText(text = text, substring = true))
         val count = nodes.fetchSemanticsNodes().size
-        (0 until count).any { nodes[it].isDisplayed() }
+        (0 until count).any { nodes[it].isShown() }
     }
 }

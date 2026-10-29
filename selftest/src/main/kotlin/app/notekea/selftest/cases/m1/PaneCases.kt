@@ -4,7 +4,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.performClick
 import app.notekea.selftest.SmokeScenarios
 import app.notekea.selftest.clickInTree
@@ -13,6 +12,7 @@ import app.notekea.selftest.noteText
 import app.notekea.selftest.openNote
 import app.notekea.selftest.openVault
 import app.notekea.selftest.pressInWindow
+import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
@@ -211,7 +211,7 @@ private fun CaseScope.card(name: String): SemanticsNodeInteraction {
     val count = nodes.fetchSemanticsNodes().size
     return (0 until count).map {
         nodes[it]
-    }.filter { it.isDisplayed() }.maxBy { it.fetchSemanticsNode().boundsInRoot.left }
+    }.filter { it.isShown() }.maxBy { it.fetchSemanticsNode().boundsInRoot.left }
 }
 
 private fun SemanticsNodeInteraction.top(): Float = fetchSemanticsNode().boundsInRoot.top
@@ -220,7 +220,7 @@ private fun CaseScope.expectOnScreen(text: String) {
     ui.waitUntil(timeoutMillis = 10_000) {
         val nodes = ui.onAllNodes(matcher = hasText(text = text, substring = true))
         val count = nodes.fetchSemanticsNodes().size
-        (0 until count).any { nodes[it].isDisplayed() }
+        (0 until count).any { nodes[it].isShown() }
     }
 }
 

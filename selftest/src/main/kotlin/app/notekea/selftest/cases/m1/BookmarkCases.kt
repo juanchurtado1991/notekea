@@ -5,7 +5,6 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
@@ -18,6 +17,7 @@ import app.notekea.selftest.openVault
 import app.notekea.selftest.pressInWindow
 import app.notekea.selftest.relaunch
 import app.notekea.selftest.titleField
+import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.HostSystem
@@ -187,7 +187,7 @@ private fun CaseScope.shownNow(name: String): List<SemanticsNodeInteraction> {
     val nodes = ui.onAllNodes(matcher = hasText(text = name))
     val count = nodes.fetchSemanticsNodes().size
     return (0 until count).map { nodes[it] }.filter {
-        it.isDisplayed() &&
+        it.isShown() &&
             it.fetchSemanticsNode().boundsInRoot.left < SIDEBAR_RIGHT
     }
 }
@@ -196,7 +196,7 @@ private fun CaseScope.shownCount(name: String): Int {
     val nodes = ui.onAllNodes(matcher = hasText(text = name))
     val count = nodes.fetchSemanticsNodes().size
     return (0 until count).count {
-        nodes[it].isDisplayed() &&
+        nodes[it].isShown() &&
             nodes[it].fetchSemanticsNode().boundsInRoot.left < SIDEBAR_RIGHT
     }
 }

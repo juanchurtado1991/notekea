@@ -6,12 +6,12 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
+import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import kotlin.math.abs
@@ -46,7 +46,7 @@ internal fun CaseScope.onRowOf(
     val row = firstShownOf(matcher = anchor, what = "\"$rowText\"").fetchSemanticsNode().boundsInRoot
     val nodes = ui.onAllNodes(matcher = matcher)
     val count = nodes.fetchSemanticsNodes().size
-    return (0 until count).map { nodes[it] }.filter { it.isDisplayed() }.minByOrNull { node ->
+    return (0 until count).map { nodes[it] }.filter { it.isShown() }.minByOrNull { node ->
         val bounds = node.fetchSemanticsNode().boundsInRoot
         val rowDistance = abs(bounds.center.y - row.center.y) * ROW_WEIGHT
         rowDistance + if (bounds.left >= row.left) bounds.left - row.right else LEFT_PENALTY
@@ -79,7 +79,7 @@ private fun CaseScope.firstShownOf(
         ui.waitUntil(timeoutMillis = WAIT_MILLIS) {
             val nodes = ui.onAllNodes(matcher = matcher)
             val count = nodes.fetchSemanticsNodes().size
-            found = (0 until count).map { nodes[it] }.firstOrNull { it.isDisplayed() }
+            found = (0 until count).map { nodes[it] }.firstOrNull { it.isShown() }
             found != null
         }
     }
