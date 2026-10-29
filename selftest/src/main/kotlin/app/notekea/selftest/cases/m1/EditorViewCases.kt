@@ -76,6 +76,8 @@ private fun SuiteBuilder.previewLinks() {
     automated(id = "1.5-11", title = "Links in Preview open notes, make missing ones and open the web") {
         openPlaygroundNote(name = READ_MODE, shownText = RAW_BOLD)
         press(shortcut = Mod + Key.E)
+        // Wait for Preview before clicking a link: until it shows, the words are the editor's text, not links.
+        expectNoText(text = RAW_BOLD, substring = true)
         clickWords(words = "Arepas")
         expectText(text = "2 cups pre-cooked white corn flour", substring = true)
         openNote(name = READ_MODE, shownText = "A finished task")
