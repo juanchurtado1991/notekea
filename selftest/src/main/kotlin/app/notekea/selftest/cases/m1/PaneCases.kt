@@ -18,7 +18,9 @@ import com.testbuddy.ShortcutModifier.Shift
 import com.testbuddy.SuiteBuilder
 
 private const val WELCOME_TEXT = "This is a sample vault"
-private const val OUTLINE_END = "The note ends here, close below this heading."
+
+// A heading in the middle of the note, as the case says: the end of a note is where the scroll stops short.
+private const val OUTLINE_MIDDLE = "Serving note 1:"
 private const val OPEN_PLAYGROUND =
     "1. Open Notekea and open the Playground Vault from the Test data folder (Open folder…)."
 
@@ -74,11 +76,11 @@ private fun SuiteBuilder.placeKept() {
     automated(id = "1.11-09", title = "A tab shows the same part of its note when it comes back") {
         openPlaygroundNote(name = "Outline practice", shownText = "Arepas guide")
         pressInWindow(shortcut = Mod + Key.E)
-        clickInOutline(heading = "Last section")
-        expectOnScreen(text = OUTLINE_END)
+        clickInOutline(heading = "Serving")
+        expectOnScreen(text = OUTLINE_MIDDLE)
         clickInTree(text = WELCOME)
         tab(name = "Outline practice").performClick()
-        expectOnScreen(text = OUTLINE_END)
+        expectOnScreen(text = OUTLINE_MIDDLE)
     }
 }
 
