@@ -1,4 +1,3 @@
-import java.io.ByteArrayOutputStream
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -34,15 +33,8 @@ private val linuxAppCategory = "Office"
 private val windowsUpgradeUuid = "8a661b42-78a2-4f14-83a6-1249b614b495"
 private val nativeAccessJvmArgument = "--enable-native-access=ALL-UNNAMED"
 
-// The JDK modules the packaged runtime keeps; jlink leaves out every other one. `checkRuntimeModules` fails when the
-// code needs one that is not here (issue #68: SQLite's driver needs java.sql).
-private val runtimeModules = listOf(
-    "java.instrument",
-    "java.prefs",
-    "java.sql",
-    "jdk.security.auth",
-    "jdk.unsupported"
-)
+// The JDK modules the installers keep, shared with the Notekea Self-Test (gradle.properties).
+private val runtimeModules = providers.gradleProperty("notekea.runtimeModules").get().split(",")
 
 kotlin {
     jvmToolchain(jdkVersion)
@@ -171,29 +163,6 @@ tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
     dependsOn(":installGitHooks")
 }
 
-// The automated smoke runs alone (ROADMAP.md 1.16), recording the process's memory for a performance pass:
-// `./gradlew :composeApp:smokeRun -PidleSeconds=600` writes build/reports/smoke-runs/memory.csv, with the JVM options
-// of `-PsmokeJvmArgs` when given. They also run, without
-// recording, in every `jvmTest`.
-val smokeRunPackage = "app.notekea.smokerun.*"
-tasks.register<Test>("smokeRun") {
-    description = "Runs the automated smoke runs and records the memory of each"
-    group = "verification"
-    val jvmTest = tasks.named<Test>("jvmTest").get()
-    testClassesDirs = jvmTest.testClassesDirs
-    classpath = jvmTest.classpath
-    filter { includeTestsMatching(smokeRunPackage) }
-    systemProperty("notekea.smokeRun.reportDir", layout.buildDirectory.dir("reports/smoke-runs").get().asFile.path)
-    systemProperty("notekea.smokeRun.idleSeconds", providers.gradleProperty("idleSeconds").getOrElse("0"))
-    // A performance pass compares JVM settings: `-PsmokeJvmArgs="-XX:+UseSerialGC -Xmx256m"`.
-    providers.gradleProperty("smokeJvmArgs").orNull?.let { jvmArgs(it.split(" ").filter(String::isNotBlank)) }
-    // And the C library's memory arenas on Linux: `-PmallocArenaMax=2`.
-    providers.gradleProperty("mallocArenaMax").orNull?.let { environment("MALLOC_ARENA_MAX", it) }
-    // A fresh JVM per test class, so a run is measured without what the runs before it left behind.
-    forkEvery = 1
-    outputs.upToDateWhen { false }
-}
-
 // `./gradlew :composeApp:run -Pgallery` opens the design system gallery instead of the app (development only).
 tasks.withType<JavaExec>().matching { it.name == "run" }.configureEach {
     if (project.hasProperty(galleryGradleProperty)) {
@@ -250,54 +219,6 @@ compose.desktop {
                 menuGroup = linuxAppCategory
                 appCategory = linuxAppCategory
             }
-        }
-    }
-}
-
-// Asks jdeps which JDK modules the app and its libraries need, as `suggestRuntimeModules` does, and fails when one is
-// missing from runtimeModules: without it the installed app crashes the first time it reaches that code.
-abstract class CheckRuntimeModulesTask : DefaultTask() {
-    @get:InputFiles
-    abstract val classpath: ConfigurableFileCollection
-
-    @get:InputFile
-    abstract val mainJar: RegularFileProperty
-
-    @get:Input
-    abstract val javaHome: Property<String>
-
-    @get:Input
-    abstract val jvmTarget: Property<String>
-
-    @get:Input
-    abstract val packagedModules: ListProperty<String>
-
-    @get:Inject
-    abstract val execOperations: ExecOperations
-
-    @TaskAction
-    fun check() {
-        val output = ByteArrayOutputStream()
-        execOperations.exec {
-            executable = File(javaHome.get(), "bin/jdeps").path
-            args(
-                "--print-module-deps",
-                "--ignore-missing-deps",
-                "--multi-release",
-                jvmTarget.get(),
-                "--class-path",
-                classpath.files.joinToString(File.pathSeparator),
-                mainJar.get().asFile.path
-            )
-            standardOutput = output
-        }
-        val needed = output.toString().trim().split(",").map(String::trim).filter(String::isNotEmpty)
-        val missing = needed - packagedModules.get().toSet()
-        if (missing.isNotEmpty()) {
-            throw GradleException(
-                "The packaged runtime lacks JDK modules the app needs: ${missing.joinToString()}. " +
-                    "Add them to runtimeModules in composeApp/build.gradle.kts."
-            )
         }
     }
 }

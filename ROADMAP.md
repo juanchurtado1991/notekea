@@ -520,7 +520,7 @@ with the developer on 2026-10-28. The smoke test of 1.18 then also proves the tr
   deliberately related notes without links. It also covers every feature above: tasks, all callout types, images and
   attachments, daily notes, templates, bookmarks, properties of every type, embeds (nested, by block, circular) and a
   `.obsidian/` folder with non-default settings. Used by tests, manual QA, the automated smoke runs and demos.
-- **Automated smoke runs** (`composeApp/src/jvmTest/.../smokerun`, Compose UI Test): the real app (every Koin
+- **Automated smoke runs** (`selftest/src/test/.../smokerun` since the Self-Test, Compose UI Test): the real app (every Koin
   module, its view models, data layer and file system, drawn headless) with its data in a temporary folder, never the
   user's, and the system's dialogs and apps replaced (folder and file pickers, opening a file, the trash), driven
   through its UI on copies of the smoke vaults like a person would: find by text, click, type, press shortcuts. One
@@ -528,7 +528,7 @@ with the developer on 2026-10-28. The smoke test of 1.18 then also proves the tr
   its tree, Recent, tabs, bookmarks, typing saved, tasks, the outline, toolbar formats, search, attachments, daily
   notes, templates, properties, embeds), plus an idle run. Each run samples the Java heap and the process's resident
   memory when it starts and ends. They run in every `jvmTest` (so in `check` and in CI on the three systems), and
-  `./gradlew :composeApp:smokeRun -PidleSeconds=600` runs them alone and writes
+  `./gradlew :selftest:smokeRun -PidleSeconds=600` runs them alone and writes
   `build/reports/smoke-runs/memory.csv`, the workload of 1.18 and every later performance pass. The cases they cover
   say so in the **Automated** column of `MVP_SMOKE_TEST.md` ("smoke run"); every later feature adds its own runs.
 - **Code trim** (`ARCHITECTURE.md` §4 and §10, `GUIDELINES.md` §6), so the code stays small as M2 starts:

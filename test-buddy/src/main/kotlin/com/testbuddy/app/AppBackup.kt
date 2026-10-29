@@ -1,5 +1,6 @@
 package com.testbuddy.app
 
+import com.testbuddy.copyKeepingTimes
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
@@ -25,7 +26,13 @@ internal class AppBackup(
         Files.createDirectories(folder)
         val lines = paths().mapIndexed { index, path ->
             val exists = Files.exists(path)
-            if (exists) path.copyToRecursively(target = slot(index = index), followLinks = false, overwrite = true)
+            if (exists) {
+                path.copyToRecursively(
+                    target = slot(index = index),
+                    followLinks = false,
+                    copyAction = copyKeepingTimes()
+                )
+            }
             "${if (exists) KEPT else ABSENT}\t$path"
         }
         Files.write(manifest, lines)
@@ -40,7 +47,11 @@ internal class AppBackup(
             if (state ==
                 KEPT
             ) {
-                slot(index = index).copyToRecursively(target = path, followLinks = false, overwrite = true)
+                slot(index = index).copyToRecursively(
+                    target = path,
+                    followLinks = false,
+                    copyAction = copyKeepingTimes()
+                )
             }
         }
         folder.deleteRecursively()

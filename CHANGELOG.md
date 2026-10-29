@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notekea Self-Test plan (`qa/SELF_TEST.md`): testers install Notekea and a Self-Test app that runs the automatic
   smoke cases on their system and walks them through the manual ones, in one report; every
   feature keeps it up to date from now on (`GUIDELINES.md` §8, `qa/README.md`).
+- Notekea's Self-Test suite (`:selftest`, `qa/README.md` piece 4): the real Notekea for each case (`CaseApp`), its
+  verbs (`openVault`, `openNote`), the smoke data bundled in and its scenarios in Kotlin (checked byte for byte
+  against `smoke.sh`), the first cases (1.6-01 to 1.6-03), a consistency test with `MVP_SMOKE_TEST.md` and the
+  cases still pending, `./gradlew :selftest:run -Pcases=1.6` for a feature's smoke test and `packageSelfTest`. The
+  automated smoke runs and `smokeRun` moved into it (`./gradlew :selftest:smokeRun`), and the Java modules of the
+  installers are shared in `gradle.properties`, checked for both apps.
 - Test Buddy app (`qa/README.md` piece 3b): `testBuddyApp(suite)` opens the Self-Test window, a wizard in three
   steps: the automatic cases run in the background with their progress; the manual cases one per screen, with fresh
   test data, Passed, Failed (a note and a screenshot) or Skip, saved so the tester can go on later; then the report

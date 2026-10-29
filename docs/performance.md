@@ -6,10 +6,10 @@ the passes before it. Budgets are those of `ROADMAP.md` 5.4: the editor alone un
 ## How the numbers are taken
 
 ```bash
-./gradlew :composeApp:smokeRun -PidleSeconds=600
+./gradlew :selftest:smokeRun -PidleSeconds=600
 ```
 
-runs the automated smoke runs (`app.notekea.smokerun`), each test class in a JVM of its own, and writes
+runs the automated smoke runs (`app.notekea.smokerun`, in `:selftest` since the Self-Test), each test class in a JVM of its own, and writes
 `composeApp/build/reports/smoke-runs/memory.csv`: one line per sample, with the Java heap in use after a collection
 and the resident memory of the whole process (heap, native, Skia, compiled code), in megabytes. `-PidleSeconds` is how
 long the idle steps wait (0, no waiting, in a plain test run); `-PsmokeJvmArgs` passes JVM options to compare.

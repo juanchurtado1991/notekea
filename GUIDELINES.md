@@ -224,12 +224,12 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   of M1 before the M1 run (`qa/README.md`, piece 5). Screens rendered while
   developing are shown to the developer in the conversation, never committed or attached to pull requests: design
   decisions are made in the smoke test, using the app.
-- **Automated cases are smoke runs** (infrastructure from `ROADMAP.md` 1.16, moving into `:selftest`): they start
-  the real app (its real window and files, with a temporary app data folder, never the user's) on copies of the smoke
-  data, drive the UI as a person does (find by text, click, type, shortcuts) and check what the case expects, down to
-  the files on disk. They run in every `jvmTest` and so in CI on the three systems, and
-  `./gradlew :composeApp:smokeRun -PidleSeconds=600` runs them alone and records the memory of each in
-  `build/reports/smoke-runs/memory.csv`, the workload every performance pass measures.
+- **Automated cases and smoke runs live in `:selftest`** (`ROADMAP.md` 1.16, `qa/SELF_TEST.md`): they start the real
+  app (its real code and files, with a temporary app data folder, never the user's) on copies of the smoke data, drive
+  the UI as a person does (find by text, click, type, shortcuts) and check what the case expects, down to the files
+  on disk. They run in every `check` and so in CI on the three systems, and
+  `./gradlew :selftest:smokeRun -PidleSeconds=600` runs the smoke runs alone and records the memory of each in
+  `selftest/build/reports/smoke-runs/memory.csv`, the workload every performance pass measures.
 - **Every `feature/` and `fix/` branch adds its cases to `MVP_SMOKE_TEST.md`** (in a step): what a person must check on
   each OS, including cases that only become testable with later features. Every milestone QA run executes all the
   cases testable so far on Windows, macOS and Linux, and the release run executes the whole file; it is the main

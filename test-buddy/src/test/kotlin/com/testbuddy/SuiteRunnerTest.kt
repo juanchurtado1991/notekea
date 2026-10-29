@@ -20,6 +20,9 @@ class SuiteRunnerTest {
         val seen = mutableListOf<String>()
         val suite = sampleSuite {
             automated(id = "A", title = "Changes the note") {
+                val original = sampleData().resolve("notes/draft.txt")
+                val copied = Files.getLastModifiedTime(file(path = "notes/draft.txt")).toMillis()
+                seen += (copied == Files.getLastModifiedTime(original).toMillis()).toString()
                 seen += file(path = "notes/draft.txt").readText()
                 file(path = "notes/draft.txt").writeText("changed")
                 folders.appData.resolve("settings.txt").writeText("A")
@@ -31,7 +34,7 @@ class SuiteRunnerTest {
         }
         val results = runner(suite = suite).run()
         assertTrue(results.all { it is CaseResult.Passed })
-        assertEquals(listOf("first draft", "first draft", "0"), seen)
+        assertEquals(listOf("true", "first draft", "first draft", "0"), seen)
         assertFalse(workFolder.resolve("cases/A").exists())
         assertEquals("first draft", sampleData().resolve("notes/draft.txt").readText())
     }
