@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
@@ -17,7 +18,9 @@ import app.notekea.App
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
 import app.notekea.core.presentation.platform.LocalShortcutDispatcher
+import app.notekea.core.presentation.platform.LocalWindowCloseGuard
 import app.notekea.core.presentation.platform.ShortcutDispatcher
+import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.di.desktopModules
 import app.notekea.notes.data.VaultFolderTrash
 import app.notekea.notes.domain.AttachmentPicker
@@ -37,15 +40,21 @@ import java.nio.file.Path
 
 /**
  * The real Notekea for one automated case or smoke run: every Koin module of the desktop app, with its data
- * (settings, database, crash reports) in [appData] instead of the user's folder, its vaults in [vaults], and the
- * system's dialogs and apps replaced: the pickers answer what the case set, files "open" in [fileOpener] and
- * [fileRevealer], and deleted entries go to the vault's `.trash` folder, never the system trash. [Content] is the
- * window's content, keyboard shortcuts included.
+ * (settings, database, crash reports) in [appData] instead of the user's folder, its vaults in [vaults], a home folder
+ * of its own for new vaults ([home]), and the system's dialogs and apps replaced: the pickers answer what the case
+ * set, files "open" in [fileOpener] and [fileRevealer], web links in [uriHandler], and deleted entries go to the
+ * vault's `.trash` folder, never the system trash. [Content] is the window's content, keyboard shortcuts included;
+ * [closeGuard] is what the window runs before it closes (the editor saving the note being typed).
  */
 class CaseApp(
     private val appData: Path,
     val vaults: Path
 ) : AutoCloseable {
+    val home: Path = appData.resolveSibling(HOME)
+    val uriHandler = RecordingUriHandler()
+    val closeGuard = WindowCloseGuard()
+    private var isClosed = false
+
     val folderPicker = ScriptedFolderPicker()
     val attachmentPicker = ScriptedAttachmentPicker()
     val fileOpener = RecordingFileOpener()
@@ -63,6 +72,7 @@ class CaseApp(
     init {
         // As the installed app finds it: its data folder exists before the database and the settings open there.
         Files.createDirectories(appData)
+        Files.createDirectories(home.resolve(DOCUMENTS))
         startKoin { modules(desktopModules + overrides()) }
     }
 
@@ -74,7 +84,9 @@ class CaseApp(
         val dispatcher = remember { ShortcutDispatcher() }
         CompositionLocalProvider(
             LocalShortcutDispatcher provides dispatcher,
-            LocalViewModelStoreOwner provides viewModels
+            LocalViewModelStoreOwner provides viewModels,
+            LocalWindowCloseGuard provides closeGuard,
+            LocalUriHandler provides uriHandler
         ) {
             Box(
                 modifier = Modifier
@@ -101,19 +113,30 @@ class CaseApp(
         }
     }
 
+    /** Stops the app once: the view models' work, then Koin. */
     override fun close() {
+        if (isClosed) return
+        isClosed = true
         viewModels.viewModelStore.clear()
         stopKoin()
     }
 
     private fun overrides() = module {
         single<PlatformConventions> {
-            get<ResolvePlatformConventionsUseCase>().invoke().copy(appDataDirectory = appData.toString())
+            get<ResolvePlatformConventionsUseCase>().invoke().copy(
+                appDataDirectory = appData.toString(),
+                homeDirectory = home.toString()
+            )
         }
         single<FolderPicker> { folderPicker }
         single<AttachmentPicker> { attachmentPicker }
         single<FileOpener> { fileOpener }
         single<FileRevealer> { fileRevealer }
         single<Trash> { VaultFolderTrash(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
+    }
+
+    private companion object {
+        const val HOME = "home"
+        const val DOCUMENTS = "Documents"
     }
 }

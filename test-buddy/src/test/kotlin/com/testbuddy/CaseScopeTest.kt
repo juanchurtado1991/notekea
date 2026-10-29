@@ -36,6 +36,46 @@ class CaseScopeTest {
     }
 
     @Test
+    fun `an icon is clicked by its label, and a field is cleared`() {
+        val result = runCase {
+            clickIcon(label = "Add ten")
+            expectText(text = "Clicked 10 times")
+            click(text = "first draft")
+            clearText()
+            type(text = "fresh")
+            press(shortcut = Mod + Key.S)
+            expectFile(path = "notes/draft.txt", content = "fresh")
+        }
+        assertIs<CaseResult.Passed>(result)
+        val missing = assertIs<CaseResult.Failed>(runCase { clickIcon(label = "Nowhere") })
+        assertEquals("expected a button labeled \"Nowhere\", it did not appear", missing.message)
+        val nothing = assertIs<CaseResult.Failed>(runCase { clearText() })
+        assertEquals("nothing was ready to clear: click a text field first", nothing.message)
+    }
+
+    @Test
+    fun `a right click reaches the element's menu`() {
+        assertIs<CaseResult.Passed>(
+            runCase {
+                rightClick(text = "Right-click me")
+                expectText(text = "Menu open")
+            }
+        )
+    }
+
+    @Test
+    fun `words inside a longer text are clicked where they are drawn`() {
+        assertIs<CaseResult.Passed>(
+            runCase {
+                clickWords(words = "guide")
+                expectText(text = "Guide opened")
+            }
+        )
+        val stayed = assertIs<CaseResult.Failed>(runCase { expectNoText(text = "need a precise", substring = true) })
+        assertEquals("expected \"need a precise\" to go away, it stayed", stayed.message)
+    }
+
+    @Test
     fun `scrolling brings a far row into view`() {
         assertIs<CaseResult.Passed>(runCase { scrollTo(text = "Row 99") })
     }

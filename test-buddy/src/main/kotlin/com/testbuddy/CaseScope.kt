@@ -2,23 +2,32 @@ package com.testbuddy
 
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeTimeoutException
+import androidx.compose.ui.test.click
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
-import androidx.compose.ui.test.waitUntilDoesNotExist
 import androidx.compose.ui.test.withKeysDown
 import java.nio.file.Path
 
@@ -45,11 +54,52 @@ public class CaseScope internal constructor(
         ui.onAllNodes(matcher = hasText(text = text, substring = substring)).onFirst().performClick()
     }
 
+    /** Right-clicks the first element that shows [text], once it shows, to open its context menu. */
+    public fun rightClick(text: String) {
+        expectText(text = text)
+        ui.onAllNodes(matcher = hasText(text = text)).onFirst().performMouseInput { rightClick() }
+    }
+
+    /**
+     * Clicks the words [words] inside a longer text, where they are drawn: a link in a paragraph, a word in a note.
+     * The first text that contains them is used.
+     */
+    public fun clickWords(words: String) {
+        expectText(text = words, substring = true)
+        val node = ui.onAllNodes(matcher = hasText(text = words, substring = true)).onFirst()
+        val semantics = node.fetchSemanticsNode()
+        val shown = (
+            semantics.config.getOrNull(SemanticsProperties.Text).orEmpty() +
+                listOfNotNull(semantics.config.getOrNull(SemanticsProperties.EditableText))
+            ).map { it.text }
+        val text = shown.first { it.contains(words) }
+        val layouts = mutableListOf<TextLayoutResult>()
+        semantics.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts)
+        val layout =
+            layouts.firstOrNull() ?: throw CaseFailure(message = "\"$words\" is not in a text that can be clicked")
+        val box = layout.getBoundingBox(offset = text.indexOf(words) + words.length / 2)
+        node.performMouseInput { click(position = box.center) }
+    }
+
+    /** Clicks the first icon button labeled [label] for screen readers (its content description), once it shows. */
+    public fun clickIcon(label: String) {
+        val icon = hasContentDescription(value = label)
+        expect(matcher = icon, failure = "expected a button labeled \"$label\", it did not appear")
+        ui.onAllNodes(matcher = icon).onFirst().performClick()
+    }
+
     /** Types [text] where the keyboard is: the focused text field. */
     public fun type(text: String) {
         val field = isFocused() and hasSetTextAction()
         expect(matcher = field, failure = "nothing was ready to type \"$text\" in: click a text field first")
         ui.onNode(matcher = field).performTextInput(text = text)
+    }
+
+    /** Empties the focused text field. */
+    public fun clearText() {
+        val field = isFocused() and hasSetTextAction()
+        expect(matcher = field, failure = "nothing was ready to clear: click a text field first")
+        ui.onNode(matcher = field).performTextClearance()
     }
 
     /** Presses [shortcut] with this system's keys (`Mod` is Cmd on macOS, Ctrl elsewhere). */
@@ -92,13 +142,17 @@ public class CaseScope internal constructor(
         )
     }
 
-    /** Waits until nothing shows [text]. */
-    public fun expectNoText(text: String) {
-        try {
-            ui.waitUntilDoesNotExist(matcher = hasText(text = text), timeoutMillis = waitMillis)
-        } catch (exception: ComposeTimeoutException) {
-            throw CaseFailure(message = "expected \"$text\" to go away, it stayed").apply { initCause(exception) }
+    /** Waits until nothing shows [text] (or a text containing it, with [substring]) on screen: gone, or hidden. */
+    public fun expectNoText(
+        text: String,
+        substring: Boolean = false
+    ) {
+        val holds = holdsInTime {
+            val nodes = ui.onAllNodes(matcher = hasText(text = text, substring = substring))
+            val count = nodes.fetchSemanticsNodes().size
+            (0 until count).none { nodes[it].isDisplayed() }
         }
+        if (!holds) throw CaseFailure(message = "expected \"$text\" to go away, it stayed")
     }
 
     /** The file at [path] in the case's data folder (`"Personal Notes/Welcome.md"`), to read or change. */

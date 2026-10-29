@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -19,6 +20,14 @@ import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import kotlinx.coroutines.delay
 import java.nio.file.Files
 
@@ -26,6 +35,7 @@ import java.nio.file.Files
  * A tiny app for Test Buddy's own tests: a note read from the case's data, a field to edit it, Mod+S and a button that
  * save it (the button a moment later, as apps save in the background), a counter and a long list.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun SampleApp(folders: CaseFolders) {
     val note = folders.data.resolve("notes/draft.txt")
@@ -50,7 +60,33 @@ internal fun SampleApp(folders: CaseFolders) {
         BasicTextField(value = text, onValueChange = { text = it })
         Button(onClick = { clicks++ }) { Text(text = "Clicked $clicks times") }
         Button(onClick = { saveLater = true }) { Text(text = "Save later") }
+        Button(onClick = { clicks += 10 }, modifier = Modifier.semantics { contentDescription = "Add ten" }) {
+            Text(text = "+10")
+        }
         if (clicks > 0) Text(text = "Hello again")
+        LinkAndMenu()
         LazyColumn { items(count = 100) { Text(text = "Row $it") } }
     }
+}
+
+/** A link inside a sentence, for clickWords, and a text with a right-click menu, for rightClick. */
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun LinkAndMenu() {
+    var linked by remember { mutableStateOf(false) }
+    Text(
+        text = buildAnnotatedString {
+            append("Read the ")
+            withLink(LinkAnnotation.Clickable(tag = "guide") { linked = true }) { append("guide") }
+            append(" before you start, it is long enough to need a precise click on its words.")
+        }
+    )
+    if (linked) Text(text = "Guide opened")
+    var menu by remember { mutableStateOf(false) }
+    Text(
+        text = if (menu) "Menu open" else "Right-click me",
+        modifier = Modifier.onPointerEvent(PointerEventType.Press) {
+            if (it.buttons.isSecondaryPressed) menu = true
+        }
+    )
 }
