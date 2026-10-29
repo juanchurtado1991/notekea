@@ -22,14 +22,16 @@ kotlin {
 dependencies {
     api(libs.compose.ui.test)
     implementation(compose.desktop.common)
+    implementation(libs.compose.material3)
+    implementation(libs.kotlinx.coroutines.swing)
     compileOnly(libs.junit.jupiter)
 
     ktlintRuleset(project(":ktlint-rules"))
 
     testImplementation(compose.desktop.currentOs)
-    testImplementation(libs.compose.material3)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotlinx.coroutines.test)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

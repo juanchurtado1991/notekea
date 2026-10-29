@@ -24,7 +24,7 @@ A manual run takes a fraction of the 5 to 7 hours per system the step-by-step gu
 
 | Module | What it holds | Depends on |
 |---|---|---|
-| `:test-buddy` | **Test Buddy**, the generic Self-Test: the case types, the runner, the report, the Self-Test window (Start, results, Manual tests, Copy report, Finish and clean up) and its own texts. It knows nothing about Notekea, so it could test any Compose Desktop app | Compose, Compose UI Test |
+| `:test-buddy` | **Test Buddy**, the generic Self-Test: the case types, the runner, the report, the Self-Test window (a wizard: Automatic, Manual, Send report) and its own texts. It knows nothing about Notekea, so it could test any Compose Desktop app | Compose, Compose UI Test |
 | `:selftest` | **Notekea's suite**: every automated and manual case, the smoke data bundled in, how to prepare it and clean up after, the "Notekea Self-Test" app and its installers; also the memory runs of the performance passes (`smokeRun`) | `:composeApp`, `:test-buddy` |
 
 Notekea itself ships no test code: the app depends on neither module.
@@ -85,7 +85,7 @@ fun main() = testBuddyApp(notekeaSuite) // the "Notekea Self-Test" app
 | The developer's machine | `./gradlew :selftest:run -Pcases=1.6` | A feature's smoke test: its automated cases run, its manual cases in the same window testers use |
 | Testers | `./gradlew :selftest:packageSelfTest` | The "Notekea Self-Test" installers, with Notekea's Java runtime and modules |
 
-- **Built in:** the window (Start, results, Manual tests, Copy report, Finish and clean up) and its texts, the report
+- **Built in:** the window (a wizard: Automatic, Manual, Send report, with Finish and clean up) and its texts, the report
   (version, system, language, screen and scale added on their own, plus the diagnostics the host passes), the
   consistency test and the generation of the case list (`MVP_SMOKE_TEST.md`).
 - **Packaging** is a short block in `selftest/build.gradle.kts` at first; if Test Buddy becomes a standalone SDK,
@@ -168,9 +168,10 @@ decision): plain words a tester who is not a developer can follow.
 
 - The automatic part runs in temporary folders (app data and vault copies) that it deletes when it ends.
 - Before the manual part, the Self-Test asks the tester to close Notekea, backs up Notekea's app data folder into its
-  own folder and prepares the test vaults in its own folder (`Notekea Self-Test` in the tester's documents).
-- **Finish and clean up** asks to close Notekea, restores the backup and deletes the test vaults. It never deletes or
-  changes a vault the test did not create.
+  own folder (once, so reopening the Self-Test never backs up what the tests changed) and prepares each case's test
+  vaults, fresh, in `Test data` of its folder (`Notekea Self-Test` in the tester's documents).
+- **Finish and clean up** asks to close Notekea, restores the backup (a folder that did not exist is deleted) and
+  deletes the test vaults. It never deletes or changes a vault the test did not create.
 
 ## The report
 
