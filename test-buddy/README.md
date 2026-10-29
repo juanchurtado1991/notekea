@@ -62,7 +62,8 @@ cover, and `system` is the `HostSystem` the case runs on.
 ## Running a suite
 
 - **CI:** `class NotesSuiteTest : TestBuddyJUnit(notesSuite)` turns every automated case into a JUnit 5 test named
-  after its ID (`1.6-03 Open a note from the quick switcher`). The test module needs `useJUnitPlatform()`.
+  after its ID (`1.6-03 Open a note from the quick switcher`). The test module needs `useJUnitPlatform()`; the system
+  property `testbuddy.workFolder` keeps the screenshots of failures in a folder of your choice (where CI uploads).
 - **Code:** `SuiteRunner(suite, workFolder).run()` runs the cases one at a time and never stops at the first failure;
   each result is `Passed`, `Failed` (with its message and a screenshot in `workFolder/screenshots`) or `Skipped`
   (after `shouldStop` said so).

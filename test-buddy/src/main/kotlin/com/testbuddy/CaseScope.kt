@@ -51,13 +51,13 @@ public class CaseScope internal constructor(
         substring: Boolean = false
     ) {
         expectText(text = text, substring = substring)
-        ui.onAllNodes(matcher = hasText(text = text, substring = substring)).onFirst().performClick()
+        firstShown(matcher = hasText(text = text, substring = substring)).performClick()
     }
 
     /** Right-clicks the first element that shows [text], once it shows, to open its context menu. */
     public fun rightClick(text: String) {
         expectText(text = text)
-        ui.onAllNodes(matcher = hasText(text = text)).onFirst().performMouseInput { rightClick() }
+        firstShown(matcher = hasText(text = text)).performMouseInput { rightClick() }
     }
 
     /**
@@ -66,7 +66,7 @@ public class CaseScope internal constructor(
      */
     public fun clickWords(words: String) {
         expectText(text = words, substring = true)
-        val node = ui.onAllNodes(matcher = hasText(text = words, substring = true)).onFirst()
+        val node = firstShown(matcher = hasText(text = words, substring = true))
         val semantics = node.fetchSemanticsNode()
         val shown = (
             semantics.config.getOrNull(SemanticsProperties.Text).orEmpty() +
@@ -85,7 +85,7 @@ public class CaseScope internal constructor(
     public fun clickIcon(label: String) {
         val icon = hasContentDescription(value = label)
         expect(matcher = icon, failure = "expected a button labeled \"$label\", it did not appear")
-        ui.onAllNodes(matcher = icon).onFirst().performClick()
+        firstShown(matcher = icon).performClick()
     }
 
     /** Types [text] where the keyboard is: the focused text field. */
@@ -181,6 +181,14 @@ public class CaseScope internal constructor(
         } catch (exception: ComposeTimeoutException) {
             throw CaseFailure(message = failure).apply { initCause(exception) }
         }
+    }
+
+    // The first element matching [matcher] that is on screen: a panel being hidden (the editor while Preview takes its
+    // place) can still hold the same text, and a person only clicks what they see.
+    private fun firstShown(matcher: SemanticsMatcher): SemanticsNodeInteraction {
+        val nodes = ui.onAllNodes(matcher = matcher)
+        val count = nodes.fetchSemanticsNodes().size
+        return (0 until count).map { nodes[it] }.firstOrNull { it.isDisplayed() } ?: nodes.onFirst()
     }
 
     private fun holdsInTime(condition: () -> Boolean): Boolean = try {
