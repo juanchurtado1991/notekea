@@ -1,0 +1,115 @@
+name: Milestone build
+
+# A milestone's release candidate for its QA run (qa/README.md): a tag `m<N>-rc<k>` (`m1-rc1`) packages Notekea and
+# Notekea Self-Test on Windows, macOS and Linux and publishes them as a GitHub pre-release, with the testers' guides.
+# The installers are not signed until ROADMAP.md 5.3. A pull request that changes this workflow builds the installers
+# without publishing them, so the workflow is checked before a tag needs it.
+on:
+  push:
+    tags:
+      - "m*-rc*"
+  pull_request:
+    paths:
+      - .github/workflows/milestone-build.yml
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    name: Package (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      # m1-rc2 → package version 1.1.2: the installers need plain numbers that grow, so each candidate installs over
+      # the last one. A pull request builds as m0-rc0.
+      - name: Version
+        id: version
+        shell: bash
+        run: |
+          name="${GITHUB_REF_NAME}"
+          if [ "$GITHUB_EVENT_NAME" != "push" ]; then name="m0-rc0"; fi
+          if [[ ! "$name" =~ ^m([0-9]+)-rc([0-9]+)$ ]]; then echo "Not a milestone tag: $name"; exit 1; fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "package=1.${BASH_REMATCH[1]}.${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+
+      - name: Package Notekea and Notekea Self-Test
+        shell: bash
+        run: >
+          ./gradlew :composeApp:packageDistributionForCurrentOS :selftest:packageSelfTest --console=plain
+          -PpackageVersion=${{ steps.version.outputs.package }} -PreleaseName=${{ steps.version.outputs.name }}
+
+      - name: Collect the installers
+        shell: bash
+        run: |
+          mkdir -p installers
+          for app in composeApp selftest; do
+            find "$app/build/compose/binaries/main" -type f \( -name "*.msi" -o -name "*.dmg" -o -name "*.deb" \) \
+              -exec cp {} installers/ \;
+          done
+          ls -l installers
+
+      - name: Upload the installers
+        uses: actions/upload-artifact@v7
+        with:
+          name: installers-${{ matrix.os }}
+          path: installers/
+          retention-days: 14
+
+  publish:
+    name: Publish the pre-release
+    if: github.event_name == 'push'
+    needs: package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download the installers
+        uses: actions/download-artifact@v7
+        with:
+          path: installers
+          merge-multiple: true
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          base="https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/qa"
+          cat > notes.md <<EOF
+          Release candidate **${GITHUB_REF_NAME}** for the milestone's QA run. Install **Notekea** and **Notekea
+          Self-Test** for your system, open the Self-Test and follow it; it ends with a report to send back.
+
+          Your guide: [Windows](${base}/GUIDE_WINDOWS.md) · [macOS](${base}/GUIDE_MACOS.md) · [Linux](${base}/GUIDE_LINUX.md)
+
+          | System | Notekea | Notekea Self-Test |
+          |---|---|---|
+          | Windows | \`Notekea-*.msi\` | \`Notekea Self-Test-*.msi\` |
+          | macOS | \`Notekea-*.dmg\` | \`Notekea Self-Test-*.dmg\` |
+          | Linux (Debian, Ubuntu, Pop!_OS) | \`notekea_*.deb\` | \`notekea-self-test_*.deb\` |
+
+          The installers are not signed yet: your system may ask to confirm that you want to open them (the guide
+          shows how).
+          EOF
+          gh release create "${GITHUB_REF_NAME}" installers/* --prerelease --title "Notekea ${GITHUB_REF_NAME}" \
+            --notes-file notes.md
