@@ -115,6 +115,13 @@ class SuiteBuilderTest {
     }
 
     @Test
+    fun `the report's diagnostics come from the suite, none unless it says`() {
+        assertEquals(null, sampleSuite {}.diagnostics())
+        val suite = sampleSuite { diagnostics { "Recent log: saved" } }
+        assertEquals("Recent log: saved", suite.shard(index = 0, count = 2).diagnostics())
+    }
+
+    @Test
     fun `manual reasons read as the case list writes them`() {
         assertEquals(listOf("eyes", "system", "packaged", "costly"), ManualReason.entries.map { it.label })
     }

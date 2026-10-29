@@ -13,6 +13,7 @@ public class Suite internal constructor(
     internal val dataSources: List<Path>,
     internal val backUp: () -> List<Path>,
     internal val installedApp: (HostSystem) -> Path?,
+    internal val diagnostics: () -> String?,
     internal val content: @Composable (CaseFolders) -> Unit
 ) {
     /** The same suite with other cases: a part of it, or the cases of one feature. */
@@ -28,6 +29,7 @@ public class Suite internal constructor(
         dataSources = dataSources,
         backUp = backUp,
         installedApp = installedApp,
+        diagnostics = diagnostics,
         content = content
     )
 }
