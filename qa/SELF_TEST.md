@@ -81,7 +81,7 @@ fun main() = testBuddyApp(notekeaSuite) // the "Notekea Self-Test" app
 
 | Where | How | What for |
 |---|---|---|
-| CI | `class NotekeaSuiteTest : TestBuddyJUnit(notekeaSuite)`: one JUnit test per case ID | Every pull request, on Windows, macOS and Linux |
+| CI | `class NotekeaSuitePart1Test : TestBuddyJUnit(notekeaSuite.shard(index = 0, count = 4))`: one JUnit test per case ID, the parts at the same time | Every pull request (steps on Linux only) and every night, on Windows, macOS and Linux |
 | The developer's machine | `./gradlew :selftest:run -Pcases=1.6` | A feature's smoke test: its automated cases run, its manual cases in the same window testers use |
 | Testers | `./gradlew :selftest:packageSelfTest` | The "Notekea Self-Test" installers, with Notekea's Java runtime and modules |
 

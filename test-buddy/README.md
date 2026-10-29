@@ -65,6 +65,8 @@ cover, and `system` is the `HostSystem` the case runs on.
 - **CI:** `class NotesSuiteTest : TestBuddyJUnit(notesSuite)` turns every automated case into a JUnit 5 test named
   after its ID (`1.6-03 Open a note from the quick switcher`). The test module needs `useJUnitPlatform()`; the system
   property `testbuddy.workFolder` keeps the screenshots of failures in a folder of your choice (where CI uploads).
+  A long suite runs in parts at the same time: `suite.shard(index, count)` keeps every `count`-th automated case
+  (the manual ones stay in part 0), one `TestBuddyJUnit` class per part, with Gradle's `maxParallelForks`.
 - **Code:** `SuiteRunner(suite, workFolder).run()` runs the cases one at a time and never stops at the first failure;
   each result is `Passed`, `Failed` (with its message and a screenshot in `workFolder/screenshots`) or `Skipped`
   (after `shouldStop` said so).
