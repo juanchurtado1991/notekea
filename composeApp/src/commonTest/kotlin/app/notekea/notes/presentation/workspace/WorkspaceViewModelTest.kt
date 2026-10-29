@@ -83,6 +83,27 @@ class WorkspaceViewModelTest {
     }
 
     @Test
+    fun `the cache alone does not restore the tabs, so a note deleted while Notekea was closed stays closed`() =
+        runWorkspaceTest {
+            // The 1.11-10 Self-Test case: the cache still lists the note deleted while the app was closed.
+            workspaces.workspaces[VAULT] = Workspace.EMPTY.open(path = AREPAS).open(path = GONE)
+            val viewModel = started(isLoaded = false)
+            val gone = NoteEntry(file = file(path = GONE.value), metadata = NoteMetadata.NONE)
+            val cached = tree.withNote(note = gone).copy(isFromCache = true)
+
+            viewModel.onIntent(intent = WorkspaceIntent.OnTreeChange(tree = cached, isLoaded = true))
+            advanceUntilIdle()
+            val fromCache = viewModel.state.value.isRestored
+            viewModel.onIntent(intent = WorkspaceIntent.OnTreeChange(tree = tree, isLoaded = true))
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = false to listOf(listOf(AREPAS)),
+                actual = fromCache to viewModel.state.value.workspace.panes.map { it.tabs }
+            )
+        }
+
+    @Test
     fun `the last run's tabs come back once the files are known, without those of files that are gone`() =
         runWorkspaceTest {
             workspaces.workspaces[VAULT] = Workspace.EMPTY.open(path = AREPAS).open(path = GONE).open(path = PLATE)

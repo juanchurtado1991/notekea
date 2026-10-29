@@ -3,12 +3,14 @@ package app.notekea.notes.domain
 /**
  * The notes, other files ([attachments]: images, PDFs…) and folders of a vault, kept flat (keyed by path) so a single
  * change from the file watcher is applied without rebuilding anything. Adding an entry also adds its missing parent
- * folders; removing a folder removes everything inside it.
+ * folders; removing a folder removes everything inside it. [isFromCache] marks the tree remembered from the last run,
+ * shown before the vault is scanned: it can still list files deleted while Notekea was closed.
  */
 data class VaultTree(
     val folders: Set<RelativePath>,
     val notes: Map<RelativePath, NoteEntry>,
-    val attachments: Map<RelativePath, NoteFile> = emptyMap()
+    val attachments: Map<RelativePath, NoteFile> = emptyMap(),
+    val isFromCache: Boolean = false
 ) {
     /** Whether [path] is one of the vault's notes, other files or folders. */
     operator fun contains(
