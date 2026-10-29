@@ -1,5 +1,6 @@
 package com.testbuddy
 
+import androidx.compose.ui.test.onRoot
 import java.nio.file.Files
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
@@ -53,6 +54,18 @@ class SuiteRunnerTest {
         val screenshot = assertNotNull(failed.screenshot)
         assertEquals("1.2-03.png", screenshot.fileName.toString())
         assertTrue(Files.size(screenshot) > 0)
+    }
+
+    @Test
+    fun `a case with a window of its own runs at that size`() {
+        var width = 0f
+        val suite = sampleSuite {
+            automated(id = "W", title = "Narrow", window = WindowSize(width = 320, height = 480)) {
+                width = ui.onRoot().fetchSemanticsNode().size.width.toFloat()
+            }
+        }
+        assertIs<CaseResult.Passed>(runner(suite = suite).run().single())
+        assertEquals(320f, width)
     }
 
     @Test

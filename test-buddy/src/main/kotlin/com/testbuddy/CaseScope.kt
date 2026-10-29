@@ -51,7 +51,10 @@ public class CaseScope internal constructor(
         substring: Boolean = false
     ) {
         expectText(text = text, substring = substring)
-        firstShown(matcher = hasText(text = text, substring = substring)).performClick()
+        firstShown(matcher = hasText(text = text, substring = substring)).apply {
+            runCatching { performScrollTo() }
+            performClick()
+        }
     }
 
     /** Right-clicks the first element that shows [text], once it shows, to open its context menu. */
@@ -67,6 +70,8 @@ public class CaseScope internal constructor(
     public fun clickWords(words: String) {
         expectText(text = words, substring = true)
         val node = firstShown(matcher = hasText(text = words, substring = true))
+        // A person scrolls to what they click; a text in a scrolling view may be below the window.
+        runCatching { node.performScrollTo() }
         val semantics = node.fetchSemanticsNode()
         val shown = (
             semantics.config.getOrNull(SemanticsProperties.Text).orEmpty() +

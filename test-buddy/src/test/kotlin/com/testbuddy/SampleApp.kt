@@ -2,6 +2,10 @@ package com.testbuddy
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.BasicTextField
@@ -41,6 +45,12 @@ import java.nio.file.Files
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun SampleApp(folders: CaseFolders) {
+    SampleColumn(folders = folders)
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun SampleColumn(folders: CaseFolders) {
     val note = folders.data.resolve("notes/draft.txt")
     var text by remember { mutableStateOf(Files.readString(note)) }
     var clicks by remember { mutableStateOf(0) }
@@ -53,7 +63,7 @@ internal fun SampleApp(folders: CaseFolders) {
         }
     }
     Column(
-        modifier = Modifier.onPreviewKeyEvent { event ->
+        modifier = Modifier.verticalScroll(state = rememberScrollState()).onPreviewKeyEvent { event ->
             val isSave = event.type == KeyEventType.KeyDown && event.key == Key.S &&
                 (event.isCtrlPressed || event.isMetaPressed)
             if (isSave) Files.writeString(note, text)
@@ -70,7 +80,8 @@ internal fun SampleApp(folders: CaseFolders) {
         }
         if (clicks > 0) Text(text = "Hello again")
         LinkAndMenu()
-        LazyColumn { items(count = 100) { Text(text = "Row $it") } }
+        LazyColumn(modifier = Modifier.height(height = 200.dp)) { items(count = 100) { Text(text = "Row $it") } }
+        FarText()
     }
 }
 
@@ -94,4 +105,19 @@ private fun LinkAndMenu() {
             if (it.buttons.isSecondaryPressed) menu = true
         }
     )
+}
+
+/** A text far below the window, in the scrolling column, for clickWords to scroll to. */
+@Composable
+private fun FarText() {
+    var clicked by remember { mutableStateOf(false) }
+    Spacer(modifier = Modifier.height(height = 1200.dp))
+    Text(
+        text = buildAnnotatedString {
+            append("A line ")
+            withLink(LinkAnnotation.Clickable(tag = "far") { clicked = true }) { append("far below") }
+            append(" the window.")
+        }
+    )
+    if (clicked) Text(text = "Far text clicked")
 }

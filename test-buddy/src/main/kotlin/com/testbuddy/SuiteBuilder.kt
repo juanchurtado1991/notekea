@@ -45,9 +45,12 @@ public class SuiteBuilder internal constructor(
         id: String,
         title: String,
         timeout: Duration = DEFAULT_TIMEOUT,
+        window: WindowSize? = null,
         body: CaseScope.() -> Unit
     ) {
-        automated.add(AutomatedCase(id = checkedId(id = id), title = title, timeout = timeout, body = body))
+        automated.add(
+            AutomatedCase(id = checkedId(id = id), title = title, timeout = timeout, window = window, body = body)
+        )
     }
 
     public fun manual(

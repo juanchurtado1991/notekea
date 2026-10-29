@@ -39,8 +39,8 @@ public class SuiteRunner(
         var screenshot: Path? = null
         val failure = runCatching {
             runDesktopComposeUiTest(
-                width = suite.window.width,
-                height = suite.window.height,
+                width = (case.window ?: suite.window).width,
+                height = (case.window ?: suite.window).height,
                 testTimeout = case.timeout
             ) {
                 setContent { suite.content(folders) }

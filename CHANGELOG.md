@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Notekea Self-Test plan (`qa/SELF_TEST.md`): testers install Notekea and a Self-Test app that runs the automatic
   smoke cases on their system and walks them through the manual ones, in one report; every
   feature keeps it up to date from now on (`GUIDELINES.md` §8, `qa/README.md`).
+- Self-Test cases of 1.6 to 1.9: 23 automatic ones (search by text and tag, the palette's keyboard, a tag link, the
+  large vault, tasks as checkboxes and Mod+Enter, folding callouts, embeds in Edit, the attachments folder, notes
+  shown in a note, the outline and the side panel, in a narrow window too) and 13 manual ones (callout colors,
+  pictures, PDFs, file dialogs, drag and drop, pasting screenshots, Obsidian). 1.9-05 stays pending: Mod+Shift+O
+  did not give the outline the keyboard in the automated case. Test Buddy now clicks what is on screen, scrolls to
+  it first, and lets a case have a window size of its own.
 - Self-Test cases of 1.1 to 1.5 (`qa/README.md` piece 5): the 33 automatic ones drive the real Notekea (shortcuts,
   dialogs, the app data folder, opening, creating and locating vaults, the tree, renaming with links, deleting,
   changes made by other apps, the editor's saving, conflicts, find, Preview and its links) and the 14 manual ones
