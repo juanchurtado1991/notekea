@@ -163,6 +163,8 @@ private fun CaseScope.bookmarkFour() {
     clickInTree(text = "attachments")
     bookmarkFromMenu(name = PLATE)
     clickInTree(text = "Ideas")
+    // The shortcut bookmarks what is open: wait until the Ideas folder is, or it goes to the tab before.
+    expectText(text = "2 files")
     pressInWindow(shortcut = Mod + Shift + Key.B)
     expectBookmarkOrder(names = listOf(WELCOME, "Recipes", PLATE, "Ideas"))
 }
