@@ -115,7 +115,7 @@ class BaseViewModelTest {
     private class CounterViewModel : BaseViewModel<CounterState, CounterIntent, CounterEffect>(
         initialState = CounterState()
     ) {
-        override fun onIntent(
+        override fun handleIntent(
             intent: CounterIntent
         ) {
             when (intent) {

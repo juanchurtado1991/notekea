@@ -95,6 +95,8 @@ kotlin {
 
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
+            // Crash reports and their notice (test-buddy-crash/README.md): the one Test Buddy library the release ships.
+            implementation(project(":test-buddy-crash"))
 
             implementation(libs.directory.watcher)
             implementation(libs.java.keyring)

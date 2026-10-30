@@ -15,7 +15,7 @@ class TagPickerViewModel : BaseViewModel<TagPickerState, TagPickerIntent, TagPic
     private val tagSearch = TagSearch()
     private var tags: List<String> = emptyList()
 
-    override fun onIntent(
+    override fun handleIntent(
         intent: TagPickerIntent
     ) {
         when (intent) {

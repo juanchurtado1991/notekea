@@ -12,7 +12,7 @@ class AboutViewModel(
 ) : BaseViewModel<AboutState, AboutIntent, Nothing>(initialState = AboutState()) {
     private val logger = Logger.withTag(tag = LOG_TAG)
 
-    override fun onIntent(
+    override fun handleIntent(
         intent: AboutIntent
     ) {
         when (intent) {

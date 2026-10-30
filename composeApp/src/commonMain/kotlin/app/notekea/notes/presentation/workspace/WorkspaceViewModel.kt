@@ -52,7 +52,7 @@ class WorkspaceViewModel(
         }
     }
 
-    override fun onIntent(
+    override fun handleIntent(
         intent: WorkspaceIntent
     ) {
         when (intent) {

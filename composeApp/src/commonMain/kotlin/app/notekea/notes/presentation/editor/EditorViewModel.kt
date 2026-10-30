@@ -96,7 +96,7 @@ class EditorViewModel(
         }
     }
 
-    override fun onIntent(
+    override fun handleIntent(
         intent: EditorIntent
     ) {
         when (intent) {

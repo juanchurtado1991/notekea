@@ -35,7 +35,7 @@ class TemplatePickerViewModel(
     private var tree = VaultTree.EMPTY
     private var settings = TemplateSettings.DEFAULT
 
-    override fun onIntent(
+    override fun handleIntent(
         intent: TemplatePickerIntent
     ) {
         when (intent) {
