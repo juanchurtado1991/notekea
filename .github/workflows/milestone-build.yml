@@ -55,7 +55,7 @@ jobs:
       - name: Package Notekea and Notekea Self-Test
         shell: bash
         run: >
-          ./gradlew :composeApp:packageDistributionForCurrentOS :selftest:packageSelfTest --console=plain
+          ./gradlew :composeApp:packageDistributionForCurrentOS :selftest:packageQa --console=plain
           -PpackageVersion=${{ steps.version.outputs.package }} -PreleaseName=${{ steps.version.outputs.name }}
 
       - name: Collect the installers

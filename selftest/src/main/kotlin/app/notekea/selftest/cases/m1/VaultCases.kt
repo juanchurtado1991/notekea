@@ -83,7 +83,7 @@ private fun SuiteBuilder.openFolderShortcut() {
         prepare(PERSONAL_NOTES)
         title(text = "Ctrl+O (Cmd+O) opens the folder picker")
         steps(
-            text = "1. Open Notekea. If a vault opens, click Open another vault at the bottom left.\n" +
+            text = "1. In Notekea, if a vault is open, click Open another vault at the bottom left.\n" +
                 "2. Press Ctrl+O (Cmd+O on macOS), then press Cancel in the window that opens.\n" +
                 "3. Open any vault from the Test data folder, click inside a note, and press Ctrl+O (Cmd+O) again."
         )
@@ -149,7 +149,7 @@ private fun SuiteBuilder.lockedVault() {
         title(text = "A vault whose folder cannot be read")
         steps(
             text =
-            "1. In the Test data folder, open the Locked Vault in Notekea (Open folder…), then click Open another " +
+            "1. In Notekea, open the Locked Vault of the Test data folder (Open folder…, after Open another vault at the bottom left if a vault is open), then click Open another " +
                 "vault.\n2. Take away your permission to read the Locked Vault folder: on Windows, right-click it › " +
                 "Properties › Security › Edit, select your user and check Deny for Read; on macOS, Get Info › " +
                 "Sharing & Permissions, " +

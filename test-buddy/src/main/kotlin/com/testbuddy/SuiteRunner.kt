@@ -55,6 +55,28 @@ public class SuiteRunner(
         }
         val folders = workspace.prepare(caseId = case.id)
         val started = TimeSource.Monotonic.markNow()
+        val (failure, screenshot) = runInApp(case = case, folders = folders, onStep = keepStep)
+        workspace.clean(caseId = case.id)
+        val duration = started.elapsedNow()
+        return if (failure == null) {
+            CaseResult.Passed(id = case.id, duration = duration)
+        } else {
+            CaseResult.Failed(
+                id = case.id,
+                message = describe(failure = failure),
+                duration = duration,
+                screenshot = screenshot,
+                steps = steps.toList()
+            )
+        }
+    }
+
+    /** Runs [case] in its own app on [folders]: how it failed, if it did, and the screenshot taken then. */
+    private fun runInApp(
+        case: AutomatedCase,
+        folders: CaseFolders,
+        onStep: (String) -> Unit
+    ): Pair<Throwable?, Path?> {
         var screenshot: Path? = null
         val failure = runCatching {
             runDesktopComposeUiTest(
@@ -70,7 +92,7 @@ public class SuiteRunner(
                             folders = folders,
                             system = system,
                             waitMillis = waitMillis,
-                            onStep = keepStep
+                            onStep = onStep
                         )
                     )
                 } catch (failure: Throwable) {
@@ -79,19 +101,7 @@ public class SuiteRunner(
                 }
             }
         }.exceptionOrNull()
-        workspace.clean(caseId = case.id)
-        val duration = started.elapsedNow()
-        return if (failure == null) {
-            CaseResult.Passed(id = case.id, duration = duration)
-        } else {
-            CaseResult.Failed(
-                id = case.id,
-                message = describe(failure = failure),
-                duration = duration,
-                screenshot = screenshot,
-                steps = steps.toList()
-            )
-        }
+        return failure to screenshot
     }
 
     private fun ComposeUiTest.capture(caseId: String): Path? = runCatching {

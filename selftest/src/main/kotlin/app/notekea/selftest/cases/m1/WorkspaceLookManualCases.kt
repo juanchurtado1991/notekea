@@ -4,7 +4,7 @@ import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val OPEN_PLAYGROUND =
-    "1. Open Notekea and open the Playground Vault from the Test data folder (Open folder…)."
+    "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at the bottom left if a vault is open)."
 
 /** The cases of 1.14 a person must look at: the tool rail, the scrollbars and the workspace's details. */
 internal fun SuiteBuilder.workspaceLookManualCases() {
@@ -40,7 +40,7 @@ private fun SuiteBuilder.scrollbars() {
         prepare(PLAYGROUND, "Personal Notes", "Work Obsidian", "Empty Vault", "Daily Vault", "Templates Vault")
         title(text = "Long lists show a thin scrollbar")
         steps(
-            text = "1. Open Notekea. With Open another vault (bottom left) and Open folder…, open one after another " +
+            text = "1. In Notekea, with Open another vault (bottom left) and Open folder…, open one after another " +
                 "these vaults of the Test data folder: Personal Notes, Work Obsidian, Empty Vault, Playground Vault, " +
                 "Daily Vault and Templates Vault.\n2. Click Open another vault and scroll the Recent list.\n3. Open " +
                 "the Playground Vault, click Expand all folders (above the list of notes) and scroll the list.\n4. " +

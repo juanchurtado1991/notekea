@@ -24,13 +24,9 @@ import app.notekea.selftest.cases.m1.treeCases
 import app.notekea.selftest.cases.m1.treeChangeCases
 import app.notekea.selftest.cases.m1.vaultCases
 import app.notekea.selftest.cases.m1.workspaceLookCases
-import app.notekea.core.platform.data.JvmSystemEnvironment
-import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
-import com.testbuddy.HostSystem
 import com.testbuddy.Suite
 import com.testbuddy.testBuddy
 import java.nio.file.Files
-import java.nio.file.Path
 
 /** Notekea's Self-Test suite (`qa/SELF_TEST.md`): every smoke case of `MVP_SMOKE_TEST.md` written so far. */
 object NotekeaSuite {
@@ -46,9 +42,7 @@ object NotekeaSuite {
             launch { folders -> NotekeaCase(folders = folders) }
             data(from = SmokeData.folder)
             window(width = WINDOW_WIDTH, height = WINDOW_HEIGHT)
-            backUp { listOf(installedAppData()) }
-            installedApp { system -> installedProgram(system = system) }
-            diagnostics { installedLog() }
+            diagnostics { recentLog() }
             generalCases()
             platformCases()
             themeCases()
@@ -77,23 +71,11 @@ object NotekeaSuite {
         }
     }
 
-    // Where each system's installer puts Notekea's program (ROADMAP.md fix #68).
-    private fun installedProgram(system: HostSystem): Path = when (system) {
-        HostSystem.WINDOWS -> Path.of(System.getenv("ProgramFiles") ?: "C:\\Program Files", APP_NAME, "$APP_NAME.exe")
-        HostSystem.MACOS -> Path.of("/Applications", "$APP_NAME.app", "Contents", "MacOS", APP_NAME)
-        HostSystem.LINUX -> Path.of("/opt", APP_NAME.lowercase(), "bin", APP_NAME)
-    }
-
-    // The last lines of the installed Notekea's log (logs/notekea.log, as About's Copy diagnostics reads it).
-    private fun installedLog(): String? {
-        val log = installedAppData().resolve("logs").resolve("notekea.log")
+    // The last lines of Notekea QA's log (logs/notekea.log, as About's Copy diagnostics reads it).
+    private fun recentLog(): String? {
+        val log = QaAppData.current().resolve("logs").resolve("notekea.log")
         if (!Files.isRegularFile(log)) return null
         return "Notekea's recent log:\n" +
             Files.readAllLines(log).takeLast(n = LOG_LINES).joinToString(separator = "\n")
     }
-
-    // The installed Notekea's data folder (PLATFORM_GUIDELINES.md), which the manual cases change and Finish and
-    // clean up puts back.
-    private fun installedAppData(): Path =
-        Path.of(ResolvePlatformConventionsUseCase(systemEnvironment = JvmSystemEnvironment())().appDataDirectory)
 }

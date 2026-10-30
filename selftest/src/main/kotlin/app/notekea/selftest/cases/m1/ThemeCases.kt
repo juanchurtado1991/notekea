@@ -4,7 +4,7 @@ import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val OPEN_PLAYGROUND =
-    "1. Open Notekea and open the Playground Vault from the Test data folder (Open folder…)."
+    "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at the bottom left if a vault is open)."
 
 /** The cases of 1.2, the theme and the design system (`MVP_SMOKE_TEST.md`): all of them need a person's eyes. */
 fun SuiteBuilder.themeCases() {
@@ -84,7 +84,7 @@ private fun SuiteBuilder.screenReader() {
 private fun SuiteBuilder.noDeveloperTools() {
     manual(id = "1.2-06", reason = ManualReason.PACKAGED) {
         title(text = "No developer tools in the installed app")
-        steps(text = "1. Open Notekea and look through About, Settings and the right-click menus.")
+        steps(text = "1. In Notekea, look through About, Settings and the right-click menus.")
         expected(text = "Nothing offers a design gallery or a developer screen.")
     }
 }

@@ -124,7 +124,7 @@ public class CaseScope internal constructor(
 
     /** Presses [shortcut] with this system's keys (`Mod` is Cmd on macOS, Ctrl elsewhere). */
     public fun press(shortcut: Shortcut) {
-        step(description = "Press $shortcut")
+        step(description = "Press ${shortcut.describe(system = system)}")
         keyboardTarget().performKeyInput {
             withKeysDown(keys = shortcut.modifierKeysOn(system = system)) { pressKey(key = shortcut.key) }
         }
@@ -132,7 +132,7 @@ public class CaseScope internal constructor(
 
     /** Presses [key] alone: Enter, Escape, an arrow. */
     public fun press(key: Key) {
-        step(description = "Press ${key.toString().removePrefix("Key: ")}")
+        step(description = "Press ${keyName(key = key)}")
         keyboardTarget().performKeyInput { pressKey(key = key) }
     }
 

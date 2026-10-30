@@ -9,15 +9,16 @@ plugins {
     alias(libs.plugins.kover)
 }
 
-// Notekea's Self-Test (qa/SELF_TEST.md): its cases on Test Buddy, the smoke data bundled in, and the
-// "Notekea Self-Test" installers, packaged with Notekea's own Java runtime.
+// Notekea QA (qa/SELF_TEST.md): Notekea with its cases on Test Buddy and the manager next to its window, the smoke
+// data bundled in, and the "Notekea QA" installers, packaged with Notekea's own Java runtime. Notekea's release has
+// none of it.
 private val jdkVersion = 21
-private val appName = "Notekea Self-Test"
+private val appName = "Notekea QA"
 // As Notekea's: a milestone build passes `-PpackageVersion` and `-PreleaseName` (composeApp/build.gradle.kts).
 private val appPackageVersion = providers.gradleProperty("packageVersion").getOrElse("1.0.0")
 private val appDisplayVersion = "0.1.0-alpha" +
     providers.gradleProperty("releaseName").map { " ($it)" }.getOrElse("")
-private val mainClassName = "app.notekea.selftest.MainKt"
+private val mainClassName = "app.notekea.selftest.QaMainKt"
 private val runtimeModules = providers.gradleProperty("notekea.runtimeModules").get().split(",")
 private val smokeDataFolders = listOf("vaults", "notes", "daily", "templates", "attachments", "outside")
 private val bundledSmokeData = layout.buildDirectory.dir("generated/smoke-data")
@@ -111,14 +112,14 @@ compose.desktop {
             targetFormats(TargetFormat.Deb, TargetFormat.Dmg, TargetFormat.Msi)
             packageName = appName
             packageVersion = appPackageVersion
-            description = "Checks Notekea on this computer before a release"
+            description = "Notekea with its tests, for testers before a release"
             vendor = "Notekea"
             modules(*runtimeModules.toTypedArray())
             windows {
                 iconFile.set(rootProject.file("composeApp/packaging/icon.ico"))
                 menu = true
                 menuGroup = "Notekea"
-                // Never change it: a newer Self-Test installer updates the installed one by this ID.
+                // Never change it: a newer Notekea QA installer updates the installed one by this ID.
                 upgradeUuid = "3c2f0b7e-5a41-4d0e-9a8e-6f1d2b7c4e19"
             }
             macOS {
@@ -134,20 +135,20 @@ compose.desktop {
     }
 }
 
-// `./gradlew :selftest:run -Pcases=1.6,1.17-02` opens the Self-Test with only those cases (a feature's smoke test).
+// `./gradlew :selftest:run -Pcases=1.6,1.17-02` opens Notekea QA with only those cases (a feature's smoke test).
 tasks.withType<JavaExec>().matching { it.name == "run" }.configureEach {
     providers.gradleProperty("cases").orNull?.let { systemProperty("notekea.selftest.cases", it) }
 }
 
-// `./gradlew :selftest:packageSelfTest` builds the installer of this system, like packageDistributionForCurrentOS.
-tasks.register("packageSelfTest") {
-    description = "Builds the Notekea Self-Test installer of this system"
+// `./gradlew :selftest:packageQa` builds the Notekea QA installer of this system, like packageDistributionForCurrentOS.
+tasks.register("packageQa") {
+    description = "Builds the Notekea QA installer of this system"
     group = "distribution"
     dependsOn("packageDistributionForCurrentOS")
 }
 
 val checkRuntimeModules = tasks.register<CheckRuntimeModulesTask>("checkRuntimeModules") {
-    description = "Fails when the packaged runtime lacks a JDK module the Self-Test needs"
+    description = "Fails when the packaged runtime lacks a JDK module Notekea QA needs"
     group = "verification"
     val suggest = tasks.named<AbstractSuggestModulesTask>("suggestRuntimeModules")
     classpath.from(suggest.map { it.files })
