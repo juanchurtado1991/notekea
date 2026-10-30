@@ -18,16 +18,18 @@ import androidx.compose.ui.unit.sp
 import com.testbuddy.ManualAnswer
 import com.testbuddy.ManualCase
 import com.testbuddy.ManualReason
+import java.nio.file.Path
 
 /**
  * The manual cases, one at a time: which case of how many and why it is manual, its title, and its steps as a line
- * (✓ done, the current one in bold, the rest to come); Back and "Done, next step"; the case's test data and Restart
- * the app when it needs them. After its last step comes the result ([ManualResult]).
+ * (✓ done, the current one in bold, the rest to come); Back and "Done, next step"; above them the case's test data and
+ * how to open it ([TestDataCard]), and Restart the app when the case needs it. After its last step comes the result ([ManualResult]).
  */
 @Composable
 internal fun ColumnScope.ManualTab(
     appName: String,
     cases: List<ManualCase>,
+    dataFolder: Path,
     state: ManagerState,
     actions: ManagerActions
 ) {
@@ -46,6 +48,18 @@ internal fun ColumnScope.ManualTab(
     if (state.manualStep >= case.stepList.size) {
         ManualResult(case = case, actions = actions)
     } else {
+        // In full on the first step, where the vault is opened; one line after it, so the steps keep their room.
+        when {
+            case.data.isEmpty() -> Unit
+
+            state.manualStep == 0 -> TestDataCard(appName = appName, folders = case.data, dataFolder = dataFolder)
+
+            else -> Text(
+                text = "Test data: a fresh copy of ${case.data.joinToString()}",
+                fontSize = 11.sp,
+                color = SelfTestColors.Muted
+            )
+        }
         Steps(appName = appName, case = case, step = state.manualStep, actions = actions)
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -73,11 +87,6 @@ private fun ColumnScope.Steps(
         )
     }
     Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
-        if (case.data.isNotEmpty()) {
-            OutlinedButton(onClick = actions.onOpenData) {
-                Text(text = "Open the test data", fontSize = 12.sp)
-            }
-        }
         if (case.launchEnvironment.isNotEmpty()) {
             OutlinedButton(onClick = actions.onRestart) {
                 Text(text = "Restart $appName for this case", fontSize = 12.sp)

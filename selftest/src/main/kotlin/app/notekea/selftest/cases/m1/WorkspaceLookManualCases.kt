@@ -3,9 +3,7 @@ package app.notekea.selftest.cases.m1
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
-private const val OPEN_PLAYGROUND =
-    "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at " +
-        "the bottom left if a vault is open)."
+private const val OPEN_PLAYGROUND = "1. In Notekea, open the Playground Vault (see TEST DATA above)."
 
 /** The cases of 1.14 a person must look at: the tool rail, the scrollbars and the workspace's details. */
 internal fun SuiteBuilder.workspaceLookManualCases() {

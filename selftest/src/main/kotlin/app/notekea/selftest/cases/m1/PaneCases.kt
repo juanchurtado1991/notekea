@@ -26,9 +26,7 @@ private const val SHARED_NOTE_TEXT = "Another app changes or deletes this note"
 
 // A heading in the middle of the note, as the case says: the end of a note is where the scroll stops short.
 private const val OUTLINE_MIDDLE = "Serving note 1:"
-private const val OPEN_PLAYGROUND =
-    "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at " +
-        "the bottom left if a vault is open)."
+private const val OPEN_PLAYGROUND = "1. In Notekea, open the Playground Vault (see TEST DATA above)."
 
 /** The cases of 1.11 about two panes, the tabs' memory and the folders' cards (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.paneCases() {

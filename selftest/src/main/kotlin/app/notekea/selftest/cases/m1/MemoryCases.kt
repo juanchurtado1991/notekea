@@ -45,9 +45,8 @@ private fun SuiteBuilder.sharpPictures() {
         prepare(PLAYGROUND)
         title(text = "A folder's cards and an opened picture are sharp")
         steps(
-            text = "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open " +
-                "another vault at the bottom left if a vault is open).\n2. Click the attachments folder in the list " +
-                "on the left and look at the card of Market photo.jpg.\n3. Click that card."
+            text = "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Click the attachments folder " +
+                "in the list on the left and look at the card of Market photo.jpg.\n3. Click that card."
         )
         expected(
             text = "The card shows the photo cropped to the card and sharp: \"Market photo 4000 x 3000\" reads at " +

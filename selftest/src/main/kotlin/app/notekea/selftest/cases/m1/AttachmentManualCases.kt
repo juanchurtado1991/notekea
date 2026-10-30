@@ -4,8 +4,7 @@ import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val OPEN_IMAGES =
-    "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at " +
-        "the bottom left if a vault is open).\n2. Open the note Editor › Images and files."
+    "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Open the note Editor › Images and files."
 
 /** The cases of 1.8 that need the system (its file dialogs, file manager, clipboard, PDF viewer) or a person's eyes. */
 internal fun SuiteBuilder.attachmentManualCases() {

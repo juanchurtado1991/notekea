@@ -13,9 +13,8 @@ internal class ManagerActions(
     val onFail: (note: String, screenshot: Path?) -> Unit,
     val onSkip: () -> Unit,
     val onPreviousCase: () -> Unit,
-    val onOpenData: () -> Unit,
     val onRestart: () -> Unit,
     val onPickScreenshot: () -> Path?,
-    val onCopyReport: (String) -> Unit,
+    val onCopy: (String) -> Unit,
     val onOpenReport: () -> Unit
 )
