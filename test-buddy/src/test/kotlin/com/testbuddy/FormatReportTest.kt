@@ -69,24 +69,26 @@ class FormatReportTest {
         val current = AppEnvironment.current()
         assertTrue(current.system.isNotBlank() && current.language.isNotBlank() && current.screen.isNotBlank())
     }
-}
 
-private val EXPECTED_REPORT = """
-    Sample QA report
-    Sample 1.0
-    OS: Windows 11 10.0
-    Java: 21.0.5
-    Language: es-CO
-    Screen: 1920×1080 at 125%
-    Automatic: 1 passed, 1 failed, 1 skipped (17 min)
-      ❌ 1.6-03 Opening a note from the quick switcher: expected to see "Lisbon trip", it did not appear (screenshot: 1.6-03.png)
-         Last steps of the test:
-           Press Mod+P
-           Type “lisbon”
-    Manual: 1 passed, 1 failed, 1 not run
-      ❌ 1.17-02 Dark mode follows the system: "the sidebar stayed white" (screenshot: 1.17-02.png)
-         Last steps in Sample:
-           10:15:01 Workspace: OnSidePanelToggle
-    Diagnostics:
-    last log line
-""".trimIndent() + "\n"
+    private companion object {
+        val EXPECTED_REPORT = """
+            Sample QA report
+            Sample 1.0
+            OS: Windows 11 10.0
+            Java: 21.0.5
+            Language: es-CO
+            Screen: 1920×1080 at 125%
+            Automatic: 1 passed, 1 failed, 1 skipped (17 min)
+              ❌ 1.6-03 Opening a note from the quick switcher: expected to see "Lisbon trip", it did not appear (screenshot: 1.6-03.png)
+                 Last steps of the test:
+                   Press Mod+P
+                   Type “lisbon”
+            Manual: 1 passed, 1 failed, 1 not run
+              ❌ 1.17-02 Dark mode follows the system: "the sidebar stayed white" (screenshot: 1.17-02.png)
+                 Last steps in Sample:
+                   10:15:01 Workspace: OnSidePanelToggle
+            Diagnostics:
+            last log line
+        """.trimIndent() + "\n"
+    }
+}

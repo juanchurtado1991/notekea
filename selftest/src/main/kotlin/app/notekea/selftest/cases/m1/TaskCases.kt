@@ -19,9 +19,8 @@ private const val TASKS_NOTE = "Tasks and callouts"
 private const val TASKS_FILE = "$PLAYGROUND/Editor/Tasks and callouts.md"
 private const val SHOWN = "Buy corn flour"
 private const val OPEN_TASKS =
-    "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at " +
-        "the bottom left if a vault is open).\n2. Open the note Editor › Tasks and callouts and click Preview under " +
-        "its title."
+    "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Open the note Editor › Tasks and callouts " +
+        "and click Preview under its title."
 
 /** The cases of 1.7, tasks and callouts (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.taskCases() {

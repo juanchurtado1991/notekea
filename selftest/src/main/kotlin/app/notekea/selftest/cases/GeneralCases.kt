@@ -4,9 +4,7 @@ import app.notekea.selftest.cases.m1.PLAYGROUND
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
-private const val OPEN_PLAYGROUND =
-    "In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at the " +
-        "bottom left if a vault is open)"
+private const val OPEN_PLAYGROUND = "In Notekea, open the Playground Vault (see TEST DATA above)"
 private const val PROCESS_LIST =
     "the list of running apps (Windows: Task Manager, Ctrl+Shift+Esc; macOS: Activity Monitor, in Applications › " +
         "Utilities; Linux: System Monitor)"

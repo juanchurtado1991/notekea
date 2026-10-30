@@ -47,7 +47,7 @@ internal fun ColumnScope.ReportTab(
     }
     Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
         Button(onClick = {
-            actions.onCopyReport(state.report).also { isCopied = true }
+            actions.onCopy(state.report).also { isCopied = true }
         }, modifier = Modifier.weight(weight = 1f)) {
             Text(text = if (isCopied) "Copied" else "Copy report")
         }

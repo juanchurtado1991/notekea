@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.testbuddy.Suite
+import java.nio.file.Path
 
 /**
  * The manager window's content: the app, its version and the machine at the top, the Automatic, Manual and Report
@@ -29,6 +30,7 @@ import com.testbuddy.Suite
 internal fun ManagerContent(
     suite: Suite,
     machine: String,
+    dataFolder: Path,
     state: ManagerState,
     actions: ManagerActions
 ) {
@@ -45,6 +47,7 @@ internal fun ManagerContent(
                 ManagerTab.MANUAL -> ManualTab(
                     appName = suite.appName,
                     cases = suite.manual,
+                    dataFolder = dataFolder,
                     state = state,
                     actions = actions
                 )

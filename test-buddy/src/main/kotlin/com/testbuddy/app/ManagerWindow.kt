@@ -38,7 +38,15 @@ internal fun ApplicationScope.ManagerWindow(
         title = "${suite.appName} QA",
         alwaysOnTop = true
     ) {
-        SelfTestTheme { ManagerContent(suite = suite, machine = machine, state = state, actions = actions) }
+        SelfTestTheme {
+            ManagerContent(
+                suite = suite,
+                machine = machine,
+                dataFolder = folders.data,
+                state = state,
+                actions = actions
+            )
+        }
     }
 }
 
@@ -55,13 +63,12 @@ private fun managerActions(
     onFail = session::fail,
     onSkip = session::skip,
     onPreviousCase = session::previousCase,
-    onOpenData = { DesktopActions.open(folder = folders.data) },
     onRestart = {
         AppProcess.start(arguments = emptyList(), environment = session.launchEnvironment())
         exitProcess(status = 0)
     },
     onPickScreenshot = DesktopActions::pickPicture,
-    onCopyReport = DesktopActions::copy,
+    onCopy = DesktopActions::copy,
     onOpenReport = { DesktopActions.open(folder = folders.report) }
 )
 
