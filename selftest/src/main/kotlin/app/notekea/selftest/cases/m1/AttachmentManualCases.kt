@@ -26,7 +26,7 @@ private fun SuiteBuilder.pictureSizes() {
     manual(id = "1.8-01", reason = ManualReason.EYES) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
         title(text = "Pictures at the right size, files as chips")
-        steps(text = "$OPEN_IMAGES\n" + "3. Click Preview and scroll through the note.")
+        steps(text = "$OPEN_IMAGES\n3. Click Preview and scroll through the note.")
         expected(
             text =
             "The orange and blue plate shows three times: at its own size (480 wide, or the note's width if " +
