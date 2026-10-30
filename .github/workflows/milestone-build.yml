@@ -104,8 +104,8 @@ jobs:
 
           | System | Notekea QA, for testers | Notekea |
           |---|---|---|
-          | Windows | \`Notekea QA-*.msi\` | \`Notekea-*.msi\` |
-          | macOS | \`Notekea QA-*.dmg\` | \`Notekea-*.dmg\` |
+          | Windows | \`Notekea.QA-*.msi\` | \`Notekea-*.msi\` |
+          | macOS | \`Notekea.QA-*.dmg\` | \`Notekea-*.dmg\` |
           | Linux (Debian, Ubuntu, Pop!_OS) | \`notekea-qa_*.deb\` | \`notekea_*.deb\` |
 
           The installers are not signed yet: your system may ask to confirm that you want to open them (the guide

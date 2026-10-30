@@ -9,11 +9,11 @@ something here is unclear, that is a problem with the guide, not with you: say s
 ## 1. Download
 
 You receive a link to a **release** on GitHub, named like `Notekea m1-rc1`. On that page, under **Assets**, download
-`Notekea QA-<version>.msi`.
+`Notekea.QA-<version>.msi`.
 
 ## 2. Install
 
-Double-click `Notekea QA-<version>.msi`. Windows may show **"Windows protected your PC"**: it appears because the
+Double-click `Notekea.QA-<version>.msi`. Windows may show **"Windows protected your PC"**: it appears because the
 builds are not signed yet. Click **More info**, then **Run anyway**, and follow the installer. Notekea QA is now in
 the Start menu.
 
