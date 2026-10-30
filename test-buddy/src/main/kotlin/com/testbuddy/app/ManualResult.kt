@@ -51,21 +51,12 @@ internal fun ColumnScope.ManualResult(
         ) { Text(text = case.failLabel) }
     }
     if (isFailing) {
-        OutlinedTextField(
-            value = note,
-            onValueChange = { note = it },
-            label = { Text(text = "What did you see?") },
-            modifier = Modifier.fillMaxWidth().height(height = 96.dp)
+        WhatYouSaw(
+            note = note,
+            hasScreenshot = screenshot != null,
+            onNote = { note = it },
+            onPickScreenshot = { actions.onPickScreenshot()?.let { screenshot = it } }
         )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedButton(onClick = { actions.onPickScreenshot()?.let { screenshot = it } }) {
-                Text(text = if (screenshot == null) "Add a screenshot" else "Screenshot added", fontSize = 12.sp)
-            }
-            Text(text = "Your last steps in the app are added for you.", fontSize = 10.sp, color = SelfTestColors.Muted)
-        }
     }
     Spacer(modifier = Modifier.weight(weight = 1f))
     if (isFailing) {
@@ -78,5 +69,27 @@ internal fun ColumnScope.ManualResult(
         OutlinedButton(onClick = actions.onPreviousStep, modifier = Modifier.fillMaxWidth()) {
             Text(text = "‹ Back to the steps")
         }
+    }
+}
+
+/** What the tester saw, and a screenshot: the note is needed to save a failure. */
+@Composable
+private fun WhatYouSaw(
+    note: String,
+    hasScreenshot: Boolean,
+    onNote: (String) -> Unit,
+    onPickScreenshot: () -> Unit
+) {
+    OutlinedTextField(
+        value = note,
+        onValueChange = onNote,
+        label = { Text(text = "What did you see?") },
+        modifier = Modifier.fillMaxWidth().height(height = 96.dp)
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        OutlinedButton(onClick = onPickScreenshot) {
+            Text(text = if (hasScreenshot) "Screenshot added" else "Add a screenshot", fontSize = 12.sp)
+        }
+        Text(text = "Your last steps in the app are added for you.", fontSize = 10.sp, color = SelfTestColors.Muted)
     }
 }

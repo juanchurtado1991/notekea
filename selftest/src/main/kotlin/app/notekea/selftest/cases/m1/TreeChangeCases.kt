@@ -52,7 +52,8 @@ private fun SuiteBuilder.showInFiles() {
         prepare(PLAYGROUND)
         title(text = "Show in Files opens the file manager")
         steps(
-            text = "1. Open the Playground Vault from the Test data folder in Notekea.\n2. Right-click a note in the " +
+            text =
+            "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at the bottom left if a vault is open).\n2. Right-click a note in the " +
                 "list on the left and choose Show in File Explorer (Windows), Show in Finder (macOS) or Show in " +
                 "Files " +
                 "(Linux).\n3. Select another note and press Shift+F10, or the Menu key if your keyboard has one."
@@ -115,7 +116,8 @@ private fun SuiteBuilder.restoreFromTrash() {
         prepare(PLAYGROUND)
         title(text = "A deleted note comes back from the system's trash")
         steps(
-            text = "1. Open the Playground Vault from the Test data folder in Notekea.\n2. Delete the note Travel › " +
+            text =
+            "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at the bottom left if a vault is open).\n2. Delete the note Travel › " +
                 "Packing checklist (select it and press Delete, Cmd+Backspace on macOS, then Delete note).\n" +
                 "3. Open the system's trash (Recycle Bin on Windows, Trash on macOS and Linux) and restore it."
         )

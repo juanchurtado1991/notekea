@@ -88,7 +88,7 @@ private fun ColumnScope.Running(
         color = SelfTestColors.Muted
     )
     Counts(results = state.results.values, waiting = cases.size - done)
-    NowCard(case = cases.firstOrNull { it.id == state.runningId }, steps = state.runningSteps)
+    NowCard(steps = state.runningSteps, case = cases.firstOrNull { it.id == state.runningId })
     Recent(cases = cases, results = state.results.values.toList())
     Spacer(modifier = Modifier.weight(weight = 1f))
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -104,8 +104,8 @@ private fun ColumnScope.Running(
 
 @Composable
 private fun NowCard(
-    case: AutomatedCase?,
-    steps: List<String>
+    steps: List<String>,
+    case: AutomatedCase?
 ) {
     Card {
         SectionLabel(text = "NOW")

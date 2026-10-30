@@ -90,7 +90,8 @@ private fun SuiteBuilder.outlineKeyboard() {
         prepare(PLAYGROUND)
         title(text = "The outline with the keyboard")
         steps(
-            text = "1. Open Notekea and open the Playground Vault from the Test data folder (Open folder…).\n" +
+            text =
+            "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at the bottom left if a vault is open).\n" +
                 "2. Open the note Editor › Outline practice and click in its text.\n" +
                 "3. Press Ctrl+Shift+O (Cmd+Shift+O on macOS), then the Down arrow twice and Enter, and type x.\n" +
                 "4. Press Ctrl+Shift+O (Cmd+Shift+O) again, then Esc, and type y.\n5. Undo both letters with Ctrl+Z (Cmd+Z)."
