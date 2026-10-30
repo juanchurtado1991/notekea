@@ -7,7 +7,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 /**
- * Copies what the app prints (its output and errors) into [file] as well, so a tester sends it from the Report folder
+ * Copies what the app prints (its output and errors) into `file` as well, so a tester sends it from the Report folder
  * without opening a terminal; the console still gets it.
  */
 internal object OutputCapture {

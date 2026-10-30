@@ -146,7 +146,6 @@ object NotekeaIcons {
     val CodeBlock: ImageVector get() = Lucide.SquareCode
     val Collapse: ImageVector get() = Lucide.ChevronDown
     val CollapseAll: ImageVector get() = Lucide.ChevronsDownUp
-    val Crash: ImageVector get() = Lucide.TriangleAlert
     val Delete: ImageVector get() = Lucide.Trash2
     val Divider: ImageVector get() = Lucide.SeparatorHorizontal
     val Expand: ImageVector get() = Lucide.ChevronRight
