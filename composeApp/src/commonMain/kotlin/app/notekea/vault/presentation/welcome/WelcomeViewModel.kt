@@ -44,7 +44,7 @@ class WelcomeViewModel(
         }
     }
 
-    override fun onIntent(
+    override fun handleIntent(
         intent: WelcomeIntent
     ) {
         when (intent) {

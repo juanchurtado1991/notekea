@@ -93,7 +93,7 @@ class VaultTreeViewModel(
         }
     }
 
-    override fun onIntent(
+    override fun handleIntent(
         intent: VaultTreeIntent
     ) {
         when (intent) {

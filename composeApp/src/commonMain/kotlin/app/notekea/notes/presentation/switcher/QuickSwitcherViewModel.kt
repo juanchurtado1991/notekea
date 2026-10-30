@@ -29,7 +29,7 @@ class QuickSwitcherViewModel(
     private var notes: Collection<NoteEntry> = emptyList()
     private var searchJob: Job? = null
 
-    override fun onIntent(
+    override fun handleIntent(
         intent: QuickSwitcherIntent
     ) {
         when (intent) {
