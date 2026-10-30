@@ -9,11 +9,11 @@ something here is unclear, that is a problem with the guide, not with you: say s
 ## 1. Download
 
 You receive a link to a **release** on GitHub, named like `Notekea m1-rc1`. On that page, under **Assets**, download
-`Notekea QA-<version>.dmg`.
+`Notekea.QA-<version>.dmg`.
 
 ## 2. Install
 
-Double-click `Notekea QA-<version>.dmg` and drag **Notekea QA** onto **Applications** in the window that opens. The
+Double-click `Notekea.QA-<version>.dmg` and drag **Notekea QA** onto **Applications** in the window that opens. The
 first time you open it, macOS may say it **cannot check it for malicious software**: the builds are not signed yet.
 Click **Done**, open **System Settings › Privacy & Security**, scroll down and click **Open Anyway** next to Notekea
 QA, then **Open**.
