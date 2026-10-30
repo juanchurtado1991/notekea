@@ -13,7 +13,7 @@ internal enum class CaseStatus {
     companion object {
         fun of(
             id: String,
-            state: SelfTestState
+            state: ManagerState
         ): CaseStatus = when (state.results[id]) {
             is CaseResult.Passed -> PASSED
             is CaseResult.Failed -> FAILED

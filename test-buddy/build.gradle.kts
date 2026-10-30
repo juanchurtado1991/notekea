@@ -21,6 +21,7 @@ kotlin {
 // Test Buddy depends on no Notekea module (qa/SELF_TEST.md), so it can become a standalone SDK.
 dependencies {
     api(libs.compose.ui.test)
+    api(project(":test-buddy-crash"))
     implementation(compose.desktop.common)
     implementation(libs.compose.material3)
     implementation(libs.kotlinx.coroutines.swing)

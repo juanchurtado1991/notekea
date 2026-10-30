@@ -1,23 +1,24 @@
 package com.testbuddy
 
+import com.testbuddy.crash.AppEnvironment
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.ZERO
 
 /**
  * The plain-text report a tester sends back, so it pastes into any chat: the app and the machine, then the automatic
- * and the manual results, each failure on a line of its own with its ID, title and message, and [diagnostics] last.
+ * and the manual results, each failure on a line of its own with its ID, title and message and the steps that led to
+ * it, and [diagnostics] last.
  */
 public fun formatReport(
     suite: Suite,
-    environment: ReportEnvironment,
+    environment: AppEnvironment,
     automatic: List<CaseResult>,
     manual: List<ManualAnswer>,
     diagnostics: String? = null
 ): String = buildString {
-    appendLine("${suite.appName} Self-Test report")
-    appendLine(
-        "${suite.appName} ${suite.version} · ${environment.system} · ${environment.language} · ${environment.screen}"
-    )
+    appendLine("${suite.appName} QA report")
+    appendLine("${suite.appName} ${suite.version}")
+    environment.lines().forEach { appendLine(it) }
     appendAutomatic(suite = suite, results = automatic)
     appendManual(suite = suite, answers = manual)
     if (!diagnostics.isNullOrBlank()) {
@@ -38,6 +39,7 @@ private fun StringBuilder.appendAutomatic(
         val title = suite.automated.firstOrNull { it.id == result.id }?.title.orEmpty()
         val screenshot = result.screenshot?.let { " (screenshot: ${it.fileName})" }.orEmpty()
         appendLine("  ❌ ${result.id} $title: ${result.message}$screenshot")
+        appendSteps(title = "Last steps of the test", steps = result.steps)
     }
 }
 
@@ -53,7 +55,17 @@ private fun StringBuilder.appendManual(
         val title = suite.manual.firstOrNull { it.id == answer.id }?.title.orEmpty()
         val screenshot = answer.screenshot?.let { " (screenshot: $it)" }.orEmpty()
         appendLine("  ❌ ${answer.id} $title: \"${answer.note}\"$screenshot")
+        appendSteps(title = "Last steps in ${suite.appName}", steps = answer.steps)
     }
+}
+
+private fun StringBuilder.appendSteps(
+    title: String,
+    steps: List<String>
+) {
+    if (steps.isEmpty()) return
+    appendLine("     $title:")
+    steps.forEach { appendLine("       $it") }
 }
 
 private fun totalTime(results: List<CaseResult>): String {

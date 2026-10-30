@@ -73,13 +73,6 @@ class SuiteBuilderTest {
     }
 
     @Test
-    fun `nothing is backed up unless the suite says what`() {
-        assertEquals(emptyList(), sampleSuite {}.backUp())
-        val folder = sampleData()
-        assertEquals(listOf(folder), sampleSuite { backUp { listOf(folder) } }.backUp())
-    }
-
-    @Test
     fun `a manual case answers Passed or Failed unless it names its own answers, and can set a variable`() {
         val suite = sampleSuite {
             manual(id = "G-01", reason = ManualReason.PACKAGED) {
@@ -100,18 +93,6 @@ class SuiteBuilderTest {
         assertEquals(emptyMap(), plain.launchEnvironment)
         assertEquals(listOf("Nothing odd", "I found something"), listOf(freeUse.passLabel, freeUse.failLabel))
         assertEquals(mapOf("SAMPLE_CRASH_TEST" to "1"), freeUse.launchEnvironment)
-    }
-
-    @Test
-    fun `the installed app is where the suite says on each system, and kept by its parts`() {
-        val program = Path.of("/Applications/Sample.app/Contents/MacOS/Sample")
-        val suite = sampleSuite { installedApp { system -> program.takeIf { system == HostSystem.MACOS } } }
-        assertEquals(listOf(null, program, null), HostSystem.entries.map { suite.installedApp(it) })
-        assertEquals(
-            program,
-            suite.shard(index = 0, count = 2).only(prefixes = listOf("1.1")).installedApp(HostSystem.MACOS)
-        )
-        assertEquals(null, sampleSuite {}.installedApp(HostSystem.MACOS))
     }
 
     @Test

@@ -15,8 +15,6 @@ public class SuiteBuilder internal constructor(
     private val manual = mutableListOf<ManualCase>()
     private val dataSources = mutableListOf<Path>()
     private var window = WindowSize(width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT)
-    private var backUp: () -> List<Path> = { emptyList() }
-    private var installedApp: (HostSystem) -> Path? = { null }
     private var diagnostics: () -> String? = { null }
     private var content: (@Composable (CaseFolders) -> Unit)? = null
 
@@ -36,20 +34,6 @@ public class SuiteBuilder internal constructor(
         height: Int
     ) {
         window = WindowSize(width = width, height = height)
-    }
-
-    /** What Finish and clean up puts back as it was: the installed app's own data, backed up before manual cases. */
-    public fun backUp(paths: () -> List<Path>) {
-        backUp = paths
-    }
-
-    /**
-     * Where the installed app's program is on each system (`/Applications/Notes.app/Contents/MacOS/Notes`,
-     * `C:\Program Files\Notes\Notes.exe`): the manual cases get an "Open <app>" button that starts it, its output
-     * kept in the Report folder. No path, or one that does not exist, hides the button.
-     */
-    public fun installedApp(path: (HostSystem) -> Path?) {
-        installedApp = path
     }
 
     /** What the report ends with, read when it is made: the installed app's recent log, for one. */
@@ -84,8 +68,6 @@ public class SuiteBuilder internal constructor(
         manual = manual.toList(),
         window = window,
         dataSources = dataSources.toList(),
-        backUp = backUp,
-        installedApp = installedApp,
         diagnostics = diagnostics,
         content = requireNotNull(content) { "The suite of $appName does not say how to launch it" }
     )

@@ -12,12 +12,16 @@ public sealed class CaseResult {
         val duration: Duration
     ) : CaseResult()
 
-    /** The case did not hold: [message] says what was expected, [screenshot] shows the app when it failed. */
+    /**
+     * The case did not hold: [message] says what was expected, [screenshot] shows the app when it failed and [steps]
+     * are the case's last steps before it.
+     */
     public data class Failed(
         override val id: String,
         val message: String,
         val duration: Duration,
-        val screenshot: Path? = null
+        val screenshot: Path? = null,
+        val steps: List<String> = emptyList()
     ) : CaseResult()
 
     /** The case did not run, because the run was stopped before it. */
