@@ -29,13 +29,13 @@ private fun SuiteBuilder.quitShortcut() {
     manual(id = "1.1-01", reason = ManualReason.PACKAGED) {
         title(text = "Quitting Notekea with the system's shortcut")
         steps(
-            text =
-            "1. Click in Notekea's window.\n2. Press the quit shortcut of your system: Alt+F4 on Windows, Cmd+Q on " +
-                "macOS, Ctrl+Q on Linux.\n3. Open Notekea QA again from the system's launcher; this window comes back " +
-                "on this case.\n4. On macOS, open the Notekea menu at the top left of the screen."
+            text = "1. Click in Notekea's window.\n2. Press the quit shortcut of your system: Alt+F4 on Windows, " +
+                "Cmd+Q on macOS, Ctrl+Q on Linux.\n3. Open Notekea QA again from the system's launcher; this window " +
+                "comes back on this case.\n4. On macOS, open the Notekea menu at the top left of the screen."
         )
         expected(
-            text = "Notekea closes at once, with this window. On macOS the Notekea menu ends with \"Quit Notekea\" and ⌘Q."
+            text = "Notekea closes at once, with this window. On macOS the Notekea menu ends with \"Quit Notekea\" " +
+                "and ⌘Q."
         )
     }
 }

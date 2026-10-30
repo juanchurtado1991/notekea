@@ -1,7 +1,7 @@
 name: Milestone build
 
 # A milestone's release candidate for its QA run (qa/README.md): a tag `m<N>-rc<k>` (`m1-rc1`) packages Notekea and
-# Notekea Self-Test on Windows, macOS and Linux and publishes them as a GitHub pre-release, with the testers' guides.
+# Notekea QA on Windows, macOS and Linux and publishes them as a GitHub pre-release, with the testers' guides.
 # The installers are not signed until ROADMAP.md 5.3. A pull request that changes this workflow builds the installers
 # without publishing them, so the workflow is checked before a tag needs it.
 on:
@@ -52,7 +52,7 @@ jobs:
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "package=1.${BASH_REMATCH[1]}.${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
 
-      - name: Package Notekea and Notekea Self-Test
+      - name: Package Notekea and Notekea QA
         shell: bash
         run: >
           ./gradlew :composeApp:packageDistributionForCurrentOS :selftest:packageQa --console=plain
@@ -97,16 +97,16 @@ jobs:
         run: |
           base="https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/qa"
           cat > notes.md <<EOF
-          Release candidate **${GITHUB_REF_NAME}** for the milestone's QA run. Install **Notekea** and **Notekea
-          Self-Test** for your system, open the Self-Test and follow it; it ends with a report to send back.
+          Release candidate **${GITHUB_REF_NAME}** for the milestone's QA run. Testers install **Notekea QA** for their
+          system: Notekea with its tests and the manager, which walks them through and ends with a report to send back.
 
           Your guide: [Windows](${base}/GUIDE_WINDOWS.md) · [macOS](${base}/GUIDE_MACOS.md) · [Linux](${base}/GUIDE_LINUX.md)
 
-          | System | Notekea | Notekea Self-Test |
+          | System | Notekea QA, for testers | Notekea |
           |---|---|---|
-          | Windows | \`Notekea-*.msi\` | \`Notekea Self-Test-*.msi\` |
-          | macOS | \`Notekea-*.dmg\` | \`Notekea Self-Test-*.dmg\` |
-          | Linux (Debian, Ubuntu, Pop!_OS) | \`notekea_*.deb\` | \`notekea-self-test_*.deb\` |
+          | Windows | \`Notekea QA-*.msi\` | \`Notekea-*.msi\` |
+          | macOS | \`Notekea QA-*.dmg\` | \`Notekea-*.dmg\` |
+          | Linux (Debian, Ubuntu, Pop!_OS) | \`notekea-qa_*.deb\` | \`notekea_*.deb\` |
 
           The installers are not signed yet: your system may ask to confirm that you want to open them (the guide
           shows how).

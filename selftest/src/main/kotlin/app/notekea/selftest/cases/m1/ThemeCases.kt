@@ -4,7 +4,8 @@ import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val OPEN_PLAYGROUND =
-    "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at the bottom left if a vault is open)."
+    "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at " +
+        "the bottom left if a vault is open)."
 
 /** The cases of 1.2, the theme and the design system (`MVP_SMOKE_TEST.md`): all of them need a person's eyes. */
 fun SuiteBuilder.themeCases() {
@@ -36,8 +37,8 @@ private fun SuiteBuilder.lightAndDark() {
         prepare(PLAYGROUND)
         title(text = "Colors in light and dark mode")
         steps(
-            text = "$OPEN_PLAYGROUND\n2. Look around, then switch your system to dark mode (or light, if it is " +
-                "dark) and look again."
+            text = "$OPEN_PLAYGROUND\n2. Look around, then switch your system to dark mode (or light, if it is dark) " +
+                "and look again."
         )
         expected(
             text = "Blue is the main color and orange marks small details. In both modes every text is easy to read."
@@ -59,8 +60,8 @@ private fun SuiteBuilder.keyboardFocus() {
         prepare(PLAYGROUND)
         title(text = "Moving through the window with the keyboard")
         steps(
-            text = "$OPEN_PLAYGROUND\n2. Without the mouse, press Tab several times, then Shift+Tab, and press " +
-                "Enter or Space on a button."
+            text = "$OPEN_PLAYGROUND\n2. Without the mouse, press Tab several times, then Shift+Tab, and press Enter " +
+                "or Space on a button."
         )
         expected(text = "Each time, a clear ring shows which element has the keyboard, and Enter or Space uses it.")
     }
@@ -72,8 +73,8 @@ private fun SuiteBuilder.screenReader() {
         title(text = "A screen reader reads the window")
         steps(
             text = "1. Turn on your system's screen reader: Narrator (Ctrl+Win+Enter) on Windows, VoiceOver (Cmd+F5) " +
-                "on macOS, Orca on Linux.\n2. Open the Playground Vault in Notekea and move through it with Tab.\n" +
-                "3. Turn the screen reader off."
+                "on macOS, Orca on Linux.\n2. Open the Playground Vault in Notekea and move through it with Tab.\n3. " +
+                "Turn the screen reader off."
         )
         expected(
             text = "Buttons, tabs and rows are read aloud with their name and what they are (\"button\", \"tab\")."

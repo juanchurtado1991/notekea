@@ -20,8 +20,8 @@ guide of their system: [Windows](GUIDE_WINDOWS.md), [macOS](GUIDE_MACOS.md), [Li
 | macOS | The developer | No: installs the `.dmg` from the release |
 | Linux | The developer, with the agent | No: installs the `.deb` from the release |
 
-Testers never build anything, open a terminal or prepare data: they install Notekea and **Notekea Self-Test**,
-which runs the automatic cases and walks them through the manual ones ([SELF_TEST.md](SELF_TEST.md)). They never
+Testers never build anything, open a terminal or prepare data: they install **Notekea QA**, Notekea with the Test
+Buddy manager, which runs the automatic cases and walks them through the manual ones ([SELF_TEST.md](SELF_TEST.md)). They never
 measure memory or time with tools either: the milestone's performance pass does, on the automated smoke runs
 (`docs/performance.md`).
 
@@ -41,6 +41,7 @@ this list and builds what is missing). The design is in [SELF_TEST.md](SELF_TEST
 | 6 | File logs and Copy diagnostics | Logs written to a rotating file in the app data folder (never note content, `ARCHITECTURE.md` §9), **About → Copy diagnostics** (version, OS, last log lines), read by the Self-Test's report | ✅ Crash reports with Copy details and Report on GitHub; rotating log file, About's Copy diagnostics and the Self-Test's report ending with the installed Notekea's log in this pull request |
 | 7 | Milestone build workflow | `.github/workflows/milestone-build.yml`: on a tag `m<N>-rc<k>`, packages Notekea and Notekea Self-Test (`.msi`, `.dmg`, `.deb`) on the three runners and publishes a GitHub **pre-release** with them and the testers' guides. Unsigned until `ROADMAP.md` 5.3 | ✅ this pull request: `m<N>-rc<k>` installs as version `1.<N>.<k>`, so each candidate installs over the last; a pull request changing the workflow builds the installers without publishing |
 | 8 | Testers' guides | `GUIDE_*.md` rewritten as: install both apps, run the Self-Test, send the report; `M1_SMOKE_TEST.md` and `REPORT_TEMPLATE.txt` deleted, their steps now living in the manual cases | ✅ this pull request |
+| 9 | Notekea QA | One app for testers: Notekea with the **Test Buddy manager** (a small window, always on top: Automatic with Running tests and each case's steps live, Manual one step at a time, Report), automatic cases in a process of their own, `testBuddyMain`; crash notice and reports in **Test Buddy Crash** (`:test-buddy-crash`), with the last steps and the machine in every report | ✅ this pull request |
 
 Change ⬜ to ✅ with the pull request link as each one lands. Already done: the automated smoke runs (1.16,
 `app.notekea.smokerun`), which piece 4 moves into `:selftest`.
@@ -59,8 +60,8 @@ Change ⬜ to ✅ with the pull request link as each one lands. Already done: th
 5. **Testers run the Self-Test's automatic part**, then the manual part, even when an automatic case failed: the
    failures go in the same report. A failure that makes the manual part pointless (Notekea does not open) is the
    developer's call: they tell the testers to wait for the next build.
-6. **Testers run the manual part** in the Self-Test, then **Copy report** and **Finish and clean up**, and send the
-   report with the screenshots of failed cases.
+6. **Testers run the manual part** in the manager, step by step, then **Copy report**, and send it with the Report
+   folder's screenshots and `output.txt`.
 7. **Triage**: record every result in `runs/M<N>.md`. Each failure becomes a GitHub issue labeled `qa-m<N>` and the
    system (`windows`, `macos`, `linux`), with the steps, the expected and actual result, the diagnostics and the
    screenshot.

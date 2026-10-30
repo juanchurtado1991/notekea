@@ -14,8 +14,8 @@ import com.testbuddy.SuiteBuilder
 private const val READ_MODE = "Read mode"
 private const val RAW_BOLD = "Some **bold**"
 private const val OPEN_READ_MODE =
-    "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at the bottom left if a vault is open).\n" +
-        "2. Open the note Editor › Read mode."
+    "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at " +
+        "the bottom left if a vault is open).\n2. Open the note Editor › Read mode."
 
 /** The cases of 1.5 that show a note: how it looks, finding in it, Preview and its links (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.editorViewCases() {
@@ -108,8 +108,8 @@ private fun SuiteBuilder.previewLook() {
         title(text = "How a note looks in Preview")
         steps(text = "$OPEN_READ_MODE\n3. Click Preview under the title and look at the note.")
         expected(
-            text = "Headings, lists, checkboxes and the quote are drawn as such, and both code blocks are colored " +
-                "by their language (Kotlin and Python)."
+            text = "Headings, lists, checkboxes and the quote are drawn as such, and both code blocks are colored by " +
+                "their language (Kotlin and Python)."
         )
     }
 }

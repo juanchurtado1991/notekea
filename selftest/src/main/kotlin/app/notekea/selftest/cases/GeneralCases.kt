@@ -31,10 +31,9 @@ fun SuiteBuilder.freeUseCase() {
         title(text = "Use Notekea freely for 15 minutes")
         answers(passed = "Nothing odd", failed = "I found something")
         steps(
-            text =
-            "1. $OPEN_PLAYGROUND.\n2. For 15 minutes, use Notekea as you really would: write notes, link them, " +
-                "search, open and close notes and tabs, open another vault and come back.\n3. Whenever something " +
-                "looks wrong, surprising or slow, note what you did and what you saw."
+            text = "1. $OPEN_PLAYGROUND.\n2. For 15 minutes, use Notekea as you really would: write notes, link " +
+                "them, search, open and close notes and tabs, open another vault and come back.\n3. Whenever " +
+                "something looks wrong, surprising or slow, note what you did and what you saw."
         )
         expected(
             text = "Nothing odd happens: no error, no lost text, nothing that looks wrong. If something did, choose " +
@@ -47,9 +46,8 @@ private fun SuiteBuilder.installAndLaunch() {
     manual(id = "G-01", reason = ManualReason.PACKAGED) {
         title(text = "Notekea installs and opens like any app")
         steps(
-            text =
-            "1. Think back to installing Notekea QA from the file you were sent (msi on Windows, dmg on macOS, " +
-                "deb on Linux) and opening it from the system's launcher (the Start menu, Launchpad or the " +
+            text = "1. Think back to installing Notekea QA from the file you were sent (msi on Windows, dmg on " +
+                "macOS, deb on Linux) and opening it from the system's launcher (the Start menu, Launchpad or the " +
                 "applications menu)."
         )
         expected(
@@ -64,14 +62,12 @@ private fun SuiteBuilder.cleanOutput() {
         prepare(PLAYGROUND)
         title(text = "Notekea starts without errors")
         steps(
-            text =
-            "1. $OPEN_PLAYGROUND, and open a note.\n2. In this window, click Report, then Open the Report folder, " +
-                "and open the file output.txt."
+            text = "1. $OPEN_PLAYGROUND, and open a note.\n2. In this window, click Report, then Open the Report " +
+                "folder, and open the file output.txt."
         )
         expected(
-            text =
-            "The file has no line with \"Exception\" and no \"WARNING: A restricted method\". An empty file is " +
-                "fine."
+            text = "The file has no line with \"Exception\" and no \"WARNING: A restricted method\". An empty file " +
+                "is fine."
         )
     }
 }
@@ -92,8 +88,8 @@ private fun SuiteBuilder.worksOffline() {
         prepare(PLAYGROUND)
         title(text = "Notekea works without the internet")
         steps(
-            text = "1. Turn off Wi-Fi and unplug the network cable.\n2. $OPEN_PLAYGROUND, edit a note and search.\n" +
-                "3. Turn the network back on."
+            text = "1. Turn off Wi-Fi and unplug the network cable.\n2. $OPEN_PLAYGROUND, edit a note and " +
+                "search.\n3. Turn the network back on."
         )
         expected(text = "Everything works as with the internet; nothing waits or shows an error about the network.")
     }
@@ -136,10 +132,10 @@ private fun SuiteBuilder.crashNotice() {
                 "Close Notekea.\n4. $REOPEN Open the same note."
         )
         expected(
-            text =
-            "About 3 seconds after Notekea opened, a window \"Notekea needs to close\" named a report file. Copy " +
-                "details said \"Copied to the clipboard\"; Report on GitHub opened a Crash report form in the browser " +
-                "with your last steps in the report; Close Notekea closed it. The word you typed is in the note."
+            text = "About 3 seconds after Notekea opened, a window \"Notekea needs to close\" named a report file. " +
+                "Copy details said \"Copied to the clipboard\"; Report on GitHub opened a Crash report form in the " +
+                "browser with your last steps in the report; Close Notekea closed it. The word you typed is in the " +
+                "note."
         )
     }
 }
@@ -149,10 +145,9 @@ private fun SuiteBuilder.launcherAndUpdate() {
         prepare(PLAYGROUND)
         title(text = "Notekea is in the launcher, and installing again updates it")
         steps(
-            text =
-            "1. Look for Notekea QA in the system's launcher.\n2. $OPEN_PLAYGROUND, open a note and search for " +
-                "\"plan\" (the magnifier on the left).\n3. On Windows only: close Notekea, run its installer again, " +
-                "and open Notekea QA again: this window comes back on this case."
+            text = "1. Look for Notekea QA in the system's launcher.\n2. $OPEN_PLAYGROUND, open a note and search " +
+                "for \"plan\" (the magnifier on the left).\n3. On Windows only: close Notekea, run its installer " +
+                "again, and open Notekea QA again: this window comes back on this case."
         )
         expected(
             text = "Notekea QA is in the launcher with its logo (Windows: the Start menu and a desktop shortcut; " +

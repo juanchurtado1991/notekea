@@ -7,7 +7,7 @@ Before changing anything, read and follow:
   injected dispatchers and clock, string resources, testing strategy (fakes, never a real model in unit tests).
 - `PLATFORM_GUIDELINES.md` — UI behavior on Windows, macOS and Linux.
 - `LIBRARIES.md` — the approved libraries and why. Do not add a library that is not listed there without asking.
-- `qa/SELF_TEST.md` — how every smoke case is tested on the testers' machines (the Notekea Self-Test) and what each
+- `qa/SELF_TEST.md` — how every smoke case is tested on the testers' machines (Notekea QA and its Self-Test) and what each
   feature must add to it.
 - `ROADMAP.md` — milestones, features (with branch names, status and the UI specification of each screen).
   In the feature's pull request to `main`, mark it ✅ with the PR link and update the milestone count.
@@ -88,8 +88,8 @@ data folder. Within the feature's steps:
 3. **Milestone QA run** — `qa/README.md`. When the last feature of a milestone (M1–M4) is merged into `main`, do not
    start the next milestone: check the "Before the first run" table in `qa/README.md` and build what is still ⬜
    (one `chore/` or `test/` pull request each, reviewed like any other), then follow its steps: tag `m<N>-rc<k>`,
-   open `qa/runs/M<N>.md`, hand the testers the release and their guide (`qa/GUIDE_*.md`): they install Notekea and
-   the Notekea Self-Test and send its report. Turn every failure in their reports into
+   open `qa/runs/M<N>.md`, hand the testers the release and their guide (`qa/GUIDE_*.md`): they install Notekea QA,
+   follow its manager and send its report. Turn every failure in their reports into
    an issue and a `fix/` branch, publish the next release candidate and retest until Windows, macOS and Linux pass.
    The M1 run is retroactive: it covers everything since M0.
 4. **Release run** — the M5 milestone run with the release builds (unsigned, `ROADMAP.md` 5.3).
