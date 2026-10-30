@@ -5,7 +5,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.time.Duration.Companion.milliseconds
 
-/** Keeps the automatic results in [file], so a Self-Test closed after the automatic part still reports them. */
+/** Keeps the automatic results in [file], so an app closed after the automatic part still reports them. */
 internal class ResultStore(private val file: Path) {
     fun load(): Map<String, CaseResult> {
         if (!Files.isRegularFile(file)) return emptyMap()
@@ -28,7 +28,7 @@ internal class ResultStore(private val file: Path) {
             result.duration.inWholeMilliseconds.toString(),
             result.message.replace(Regex(pattern = "\\s+"), " "),
             result.screenshot?.toString().orEmpty()
-        )
+        ) + result.steps.map { it.replace(Regex(pattern = "\\s+"), " ") }
     }.joinToString(separator = SEPARATOR)
 
     private fun parse(line: String): CaseResult? {
@@ -45,7 +45,8 @@ internal class ResultStore(private val file: Path) {
                     id = id,
                     message = fields.getOrElse(3) { "" },
                     duration = it,
-                    screenshot = fields.getOrNull(4)?.takeIf(String::isNotBlank)?.let(Path::of)
+                    screenshot = fields.getOrNull(4)?.takeIf(String::isNotBlank)?.let(Path::of),
+                    steps = fields.drop(n = 5)
                 )
             }
 

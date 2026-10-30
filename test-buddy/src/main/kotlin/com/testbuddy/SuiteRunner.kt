@@ -23,17 +23,36 @@ public class SuiteRunner(
 ) {
     private val workspace = CaseWorkspace(workFolder = workFolder, dataSources = suite.dataSources)
 
-    /** Runs [cases] in order, telling [onResult] about each; once [shouldStop] says so, the rest are skipped. */
+    /**
+     * Runs [cases] in order, telling [onStart] when each starts, [onStep] each of its steps and [onResult] how it
+     * ended; once [shouldStop] says so, the rest are skipped.
+     */
     public fun run(
         cases: List<AutomatedCase> = suite.automated,
         shouldStop: () -> Boolean = { false },
+        onStart: (AutomatedCase) -> Unit = {},
+        onStep: (String) -> Unit = {},
         onResult: (CaseResult) -> Unit = {}
     ): List<CaseResult> = cases.map { case ->
-        val result = if (shouldStop()) CaseResult.Skipped(id = case.id) else run(case = case)
+        val result = if (shouldStop()) {
+            CaseResult.Skipped(id = case.id)
+        } else {
+            onStart(case)
+            run(case = case, onStep = onStep)
+        }
         result.also(onResult)
     }
 
-    public fun run(case: AutomatedCase): CaseResult {
+    public fun run(
+        case: AutomatedCase,
+        onStep: (String) -> Unit = {}
+    ): CaseResult {
+        val steps = ArrayDeque<String>()
+        val keepStep: (String) -> Unit = { step ->
+            steps.addLast(step)
+            if (steps.size > KEPT_STEPS) steps.removeFirst()
+            onStep(step)
+        }
         val folders = workspace.prepare(caseId = case.id)
         val started = TimeSource.Monotonic.markNow()
         var screenshot: Path? = null
@@ -45,7 +64,15 @@ public class SuiteRunner(
             ) {
                 setContent { suite.content(folders) }
                 try {
-                    case.body(CaseScope(ui = this, folders = folders, system = system, waitMillis = waitMillis))
+                    case.body(
+                        CaseScope(
+                            ui = this,
+                            folders = folders,
+                            system = system,
+                            waitMillis = waitMillis,
+                            onStep = keepStep
+                        )
+                    )
                 } catch (failure: Throwable) {
                     screenshot = capture(caseId = case.id)
                     throw failure
@@ -61,7 +88,8 @@ public class SuiteRunner(
                 id = case.id,
                 message = describe(failure = failure),
                 duration = duration,
-                screenshot = screenshot
+                screenshot = screenshot,
+                steps = steps.toList()
             )
         }
     }
@@ -78,6 +106,9 @@ public class SuiteRunner(
 
     private companion object {
         const val PNG = "png"
+
+        // The steps a failure's report lists: what led to it, not the whole case.
+        const val KEPT_STEPS = 8
         const val DEFAULT_WAIT_MILLIS = 10_000L
     }
 }

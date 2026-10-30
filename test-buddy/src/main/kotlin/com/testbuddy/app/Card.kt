@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-/** A white card with a thin border, the Self-Test's one container. */
+/** A white card with a thin border, the manager's one container. */
 @Composable
 internal fun Card(
     modifier: Modifier = Modifier,
@@ -25,8 +25,8 @@ internal fun Card(
             .fillMaxWidth()
             .background(color = Color.White, shape = shape)
             .border(width = 1.dp, color = SelfTestColors.Border, shape = shape)
-            .padding(all = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(space = 12.dp),
+            .padding(all = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(space = 6.dp),
         content = content
     )
 }

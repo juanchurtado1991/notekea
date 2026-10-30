@@ -11,8 +11,6 @@ public class Suite internal constructor(
     public val manual: List<ManualCase>,
     internal val window: WindowSize,
     internal val dataSources: List<Path>,
-    internal val backUp: () -> List<Path>,
-    internal val installedApp: (HostSystem) -> Path?,
     internal val diagnostics: () -> String?,
     internal val content: @Composable (CaseFolders) -> Unit
 ) {
@@ -27,8 +25,6 @@ public class Suite internal constructor(
         manual = manual,
         window = window,
         dataSources = dataSources,
-        backUp = backUp,
-        installedApp = installedApp,
         diagnostics = diagnostics,
         content = content
     )

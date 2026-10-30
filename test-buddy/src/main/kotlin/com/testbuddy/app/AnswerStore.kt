@@ -4,7 +4,7 @@ import com.testbuddy.ManualAnswer
 import java.nio.file.Files
 import java.nio.file.Path
 
-/** Keeps a tester's manual answers in [file], one per line, so they can close the Self-Test and go on later. */
+/** Keeps a tester's manual answers in [file], one per line, so they can close the app and go on later. */
 internal class AnswerStore(private val file: Path) {
     fun load(): Map<String, ManualAnswer> {
         if (!Files.isRegularFile(file)) return emptyMap()
@@ -18,8 +18,11 @@ internal class AnswerStore(private val file: Path) {
 
     private fun line(answer: ManualAnswer): String = when (answer) {
         is ManualAnswer.Passed -> listOf(answer.id, PASSED)
+
         is ManualAnswer.NotRun -> listOf(answer.id, NOT_RUN)
-        is ManualAnswer.Failed -> listOf(answer.id, FAILED, escape(answer.note), answer.screenshot.orEmpty())
+
+        is ManualAnswer.Failed ->
+            listOf(answer.id, FAILED, escape(answer.note), answer.screenshot.orEmpty()) + answer.steps.map(::escape)
     }.joinToString(separator = SEPARATOR)
 
     private fun parse(line: String): ManualAnswer? {
@@ -33,7 +36,8 @@ internal class AnswerStore(private val file: Path) {
             FAILED -> ManualAnswer.Failed(
                 id = id,
                 note = unescape(fields.getOrElse(2) { "" }),
-                screenshot = fields.getOrNull(3)?.takeIf { it.isNotBlank() }
+                screenshot = fields.getOrNull(3)?.takeIf { it.isNotBlank() },
+                steps = fields.drop(n = 4).map(::unescape)
             )
 
             else -> null
