@@ -183,10 +183,9 @@ private fun SuiteBuilder.templatesInObsidian() {
         prepare(TEMPLATES_VAULT)
         title(text = "Obsidian lists the same templates")
         steps(
-            text =
-            "If Obsidian is not installed, press Skip for now.\n1. Open the Templates Vault from the Test data " +
-                "folder in Obsidian and turn on the Templates core plugin.\n2. Open Projects › Kickoff notes and run " +
-                "\"Templates: Insert template\"."
+            text = "If Obsidian is not installed, press Skip for now.\n1. Open the Templates Vault from the Test " +
+                "data folder in Obsidian and turn on the Templates core plugin.\n2. Open Projects › Kickoff notes " +
+                "and run \"Templates: Insert template\"."
         )
         expected(
             text = "Obsidian lists the same templates of Snippets and fills in the date and time in the same formats " +

@@ -184,13 +184,14 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
      and typing latency; records the numbers in `docs/performance.md` next to the previous milestone's; and cuts what
      grew or leaks against the budgets of `ROADMAP.md` 5.4. Its smoke test also checks that nothing broke.
   3. **Milestone QA run** (`qa/README.md`): when the last feature of a milestone is on `main`, testers install
-     Notekea and the **Notekea Self-Test** from a GitHub pre-release on **Windows, macOS and Linux**; the Self-Test
-     runs the automatic cases of `MVP_SMOKE_TEST.md` accumulated so far and walks them through the manual ones
-     (`qa/SELF_TEST.md`). The milestone is closed only when the three OSes pass. The first run, at the end of M1, is
+     **Notekea QA** (Notekea with its Self-Test and the Test Buddy manager) from a GitHub pre-release on **Windows,
+     macOS and Linux**; the manager runs the automatic cases of `MVP_SMOKE_TEST.md` accumulated so far and walks them
+     through the manual ones, step by step (`qa/SELF_TEST.md`). The milestone is closed only when the three OSes pass. The first run, at the end of M1, is
      retroactive: it covers everything since M0.
   4. **Release run**: the milestone QA run of M5, with the release builds, which are not signed (`ROADMAP.md` 5.3,
      5.5).
-- **The Notekea Self-Test is kept up to date by every feature, never at the end of a milestone**
+- **Notekea's Self-Test (the cases of Notekea QA) is kept up to date by every feature, never at the end of a
+  milestone**
   (`qa/SELF_TEST.md`). Every case of `MVP_SMOKE_TEST.md` is checked by the Self-Test, automatically (as many as is
   reasonable, with no quota) or as a manual case it walks the tester through. In the step that adds the behavior, every
   `feature/` and `fix/` pull request writes each new or changed case as an `AutomatedCase` (named after its ID, run in

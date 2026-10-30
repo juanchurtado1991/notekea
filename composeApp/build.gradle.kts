@@ -35,7 +35,7 @@ private val linuxAppCategory = "Office"
 private val windowsUpgradeUuid = "8a661b42-78a2-4f14-83a6-1249b614b495"
 private val nativeAccessJvmArgument = "--enable-native-access=ALL-UNNAMED"
 
-// The JDK modules the installers keep, shared with the Notekea Self-Test (gradle.properties).
+// The JDK modules the installers keep, shared with Notekea QA (gradle.properties).
 private val runtimeModules = providers.gradleProperty("notekea.runtimeModules").get().split(",")
 
 kotlin {

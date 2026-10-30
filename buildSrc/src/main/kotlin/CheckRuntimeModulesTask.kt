@@ -16,7 +16,7 @@ import javax.inject.Inject
 /**
  * Asks jdeps which JDK modules an app and its libraries need, as Compose's `suggestRuntimeModules` does, and fails when
  * one is missing from [packagedModules]: without it the installed app crashes the first time it reaches that code
- * (issue #68). Shared by Notekea and the Notekea Self-Test, which ship the same runtime.
+ * (issue #68). Shared by Notekea and Notekea QA, which ship the same runtime.
  */
 abstract class CheckRuntimeModulesTask : DefaultTask() {
     @get:InputFiles

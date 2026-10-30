@@ -83,9 +83,9 @@ private fun SuiteBuilder.openFolderShortcut() {
         prepare(PERSONAL_NOTES)
         title(text = "Ctrl+O (Cmd+O) opens the folder picker")
         steps(
-            text = "1. In Notekea, if a vault is open, click Open another vault at the bottom left.\n" +
-                "2. Press Ctrl+O (Cmd+O on macOS), then press Cancel in the window that opens.\n" +
-                "3. Open any vault from the Test data folder, click inside a note, and press Ctrl+O (Cmd+O) again."
+            text = "1. In Notekea, if a vault is open, click Open another vault at the bottom left.\n2. Press Ctrl+O " +
+                "(Cmd+O on macOS), then press Cancel in the window that opens.\n3. Open any vault from the Test data " +
+                "folder, click inside a note, and press Ctrl+O (Cmd+O) again."
         )
         expected(text = "The system's window for choosing a folder opens both times. Cancelling it changes nothing.")
     }
@@ -148,13 +148,12 @@ private fun SuiteBuilder.lockedVault() {
         prepare("Locked Vault")
         title(text = "A vault whose folder cannot be read")
         steps(
-            text =
-            "1. In Notekea, open the Locked Vault of the Test data folder (Open folder…, after Open another vault at the bottom left if a vault is open), then click Open another " +
-                "vault.\n2. Take away your permission to read the Locked Vault folder: on Windows, right-click it › " +
-                "Properties › Security › Edit, select your user and check Deny for Read; on macOS, Get Info › " +
-                "Sharing & Permissions, " +
-                "your user to No Access; on Linux, run chmod 000 on it.\n3. Click Locked Vault in Recent.\n" +
-                "4. Give the permission back the same way."
+            text = "1. In Notekea, open the Locked Vault of the Test data folder (Open folder…, after Open another " +
+                "vault at the bottom left if a vault is open), then click Open another vault.\n2. Take away your " +
+                "permission to read the Locked Vault folder: on Windows, right-click it › Properties › Security › " +
+                "Edit, select your user and check Deny for Read; on macOS, Get Info › Sharing & Permissions, your " +
+                "user to No Access; on Linux, run chmod 000 on it.\n3. Click Locked Vault in Recent.\n4. Give the " +
+                "permission back the same way."
         )
         expected(
             text = "A banner names the folder and says to check its permissions; Dismiss hides it. Nothing crashes."

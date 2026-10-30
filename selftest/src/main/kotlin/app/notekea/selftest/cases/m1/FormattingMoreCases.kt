@@ -94,13 +94,12 @@ private fun SuiteBuilder.undoAndObsidian() {
         prepare(PLAYGROUND)
         title(text = "Undo takes back a toolbar change, and Obsidian shows the same formats")
         steps(
-            text =
-            "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at the bottom left if a vault is open).\n2. Open " +
-                "Editor/Formatting practice, select \"corn flour\" and click Bold (B) in the bar under the " +
-                "title.\n3. Press Ctrl+Z (Cmd+Z on a Mac), then Ctrl+Shift+Z (Cmd+Shift+Z).\n4. Format the note with " +
-                "the bar: a heading, a checklist, a link, a tag, a callout, a table, a code block and a quote. Wait " +
-                "for \"Saved\" at the bottom right.\n5. If Obsidian is installed, open the Playground Vault there " +
-                "and open the same note."
+            text = "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open " +
+                "another vault at the bottom left if a vault is open).\n2. Open Editor/Formatting practice, select " +
+                "\"corn flour\" and click Bold (B) in the bar under the title.\n3. Press Ctrl+Z (Cmd+Z on a Mac), " +
+                "then Ctrl+Shift+Z (Cmd+Shift+Z).\n4. Format the note with the bar: a heading, a checklist, a link, " +
+                "a tag, a callout, a table, a code block and a quote. Wait for \"Saved\" at the bottom right.\n5. If " +
+                "Obsidian is installed, open the Playground Vault there and open the same note."
         )
         expected(
             text = "Ctrl+Z takes the bold away in one step and Ctrl+Shift+Z puts it back. Obsidian shows the same " +

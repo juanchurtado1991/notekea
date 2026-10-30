@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Notekea QA** replaces the separate Self-Test app: testers install one app, Notekea with its tests and the Test
+  Buddy **manager**, a small window always on top. **Automatic** says "Running tests" and shows the time, the
+  progress and what is left, the counts, the case running now with each step as it happens, and the last ones done;
+  the cases run out of sight in a process of their own, so the tester's Notekea is never touched and can be used
+  meanwhile. **Manual** walks through each case one step at a time, then asks for the result (a note, a screenshot,
+  and the tester's last steps in Notekea added for them); Restart brings Notekea back on the case that needs it.
+  **Report** adds the machine and the steps behind each failure. Notekea QA keeps its own data folder, so nothing
+  needs backing up. Test Buddy works for any Compose Desktop app (`test-buddy/README.md`).
+- **Test Buddy Crash** (`test-buddy-crash/README.md`), in Notekea's release: the crash notice and reports, configured
+  by the app (name, texts, folder, GitHub form), now listing the last steps (each screen action's name, never what was
+  written) and the machine (system, Java, language, screen and scale).
 - The app's log is kept in `logs/notekea.log` in the app data folder (rotated at 1 MB, three files kept, never note
   text), and About has **Copy diagnostics**: the app, system and Java versions and the last 100 log lines, to paste
   in a tester's report (`qa/README.md`, piece 6).

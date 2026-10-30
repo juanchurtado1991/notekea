@@ -27,7 +27,8 @@ private const val SHARED_NOTE_TEXT = "Another app changes or deletes this note"
 // A heading in the middle of the note, as the case says: the end of a note is where the scroll stops short.
 private const val OUTLINE_MIDDLE = "Serving note 1:"
 private const val OPEN_PLAYGROUND =
-    "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at the bottom left if a vault is open)."
+    "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at " +
+        "the bottom left if a vault is open)."
 
 /** The cases of 1.11 about two panes, the tabs' memory and the folders' cards (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.paneCases() {
@@ -139,12 +140,13 @@ private fun SuiteBuilder.windowSize() {
         title(text = "The window keeps a sensible size")
         steps(
             text = "$OPEN_PLAYGROUND\n2. Quit Notekea and open it again.\n3. Click Open another vault at the bottom " +
-                "left and look at the window, then open the Playground Vault from Recent. Do this twice more.\n" +
-                "4. Resize the window and quit and open Notekea once more."
+                "left and look at the window, then open the Playground Vault from Recent. Do this twice more.\n4. " +
+                "Resize the window and quit and open Notekea once more."
         )
         expected(
             text = "The window opens centered, never larger than the screen, showing the tools, the list of notes, a " +
-                "note and the outline. It keeps its size when a vault opens or closes, and the size you gave it stays."
+                "note and the outline. It keeps its size when a vault opens or closes, and the size you gave it " +
+                "stays."
         )
     }
 }

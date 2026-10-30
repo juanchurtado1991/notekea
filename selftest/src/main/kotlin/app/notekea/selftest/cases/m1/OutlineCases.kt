@@ -90,16 +90,16 @@ private fun SuiteBuilder.outlineKeyboard() {
         prepare(PLAYGROUND)
         title(text = "The outline with the keyboard")
         steps(
-            text =
-            "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open another vault at the bottom left if a vault is open).\n" +
-                "2. Open the note Editor › Outline practice and click in its text.\n" +
-                "3. Press Ctrl+Shift+O (Cmd+Shift+O on macOS), then the Down arrow twice and Enter, and type x.\n" +
-                "4. Press Ctrl+Shift+O (Cmd+Shift+O) again, then Esc, and type y.\n5. Undo both letters with Ctrl+Z (Cmd+Z)."
+            text = "1. In Notekea, open the Playground Vault from the Test data folder (Open folder…, after Open " +
+                "another vault at the bottom left if a vault is open).\n2. Open the note Editor › Outline practice " +
+                "and click in its text.\n3. Press Ctrl+Shift+O (Cmd+Shift+O on macOS), then the Down arrow twice and " +
+                "Enter, and type x.\n4. Press Ctrl+Shift+O (Cmd+Shift+O) again, then Esc, and type y.\n5. Undo both " +
+                "letters with Ctrl+Z (Cmd+Z)."
         )
         expected(
             text = "Ctrl+Shift+O puts a ring around the highlighted heading of the outline and the arrows move it; " +
-                "Enter goes to that heading and x is typed at the end of its line. After Esc the keyboard is back " +
-                "in the note and y is typed where the cursor was."
+                "Enter goes to that heading and x is typed at the end of its line. After Esc the keyboard is back in " +
+                "the note and y is typed where the cursor was."
         )
     }
 }
