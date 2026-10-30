@@ -1,6 +1,5 @@
 package app.notekea.core.presentation.platform
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -15,7 +14,7 @@ import kotlin.io.path.toPath
  * [LocalFileDrop] on the desktop: the element takes a drag that carries files, and a drop gives their paths, read from
  * the `file:` addresses the system hands over.
  */
-@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 fun awtFileDrop(
     onDrop: (List<String>) -> Unit
 ): Modifier = Modifier.dragAndDropTarget(

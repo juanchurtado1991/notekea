@@ -1,6 +1,5 @@
 package app.notekea.notes.domain
 
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.decodeToImageBitmap
 import java.io.File
 import kotlin.test.Test
@@ -68,7 +67,6 @@ class SmokeAttachmentsTest {
         )
     }
 
-    @OptIn(ExperimentalResourceApi::class)
     @Test
     fun `1_8-01 the plate is a picture of 480 x 240, the broken png cannot be drawn and shows as a file`() {
         val plate = File(SMOKE_ATTACHMENTS, "Arepas plate.png").readBytes().decodeToImageBitmap()

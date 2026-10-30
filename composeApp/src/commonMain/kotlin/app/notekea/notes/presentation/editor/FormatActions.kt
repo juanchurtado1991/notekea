@@ -1,37 +1,7 @@
 package app.notekea.notes.presentation.editor
 
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.domain.markdown.CalloutKind
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.notes.domain.FormatAction
-import app.notekea.resources.Res
-import app.notekea.resources.format_bold_placeholder
-import app.notekea.resources.format_callout_abstract
-import app.notekea.resources.format_callout_bug
-import app.notekea.resources.format_callout_danger
-import app.notekea.resources.format_callout_example
-import app.notekea.resources.format_callout_failure
-import app.notekea.resources.format_callout_info
-import app.notekea.resources.format_callout_note
-import app.notekea.resources.format_callout_placeholder
-import app.notekea.resources.format_callout_question
-import app.notekea.resources.format_callout_quote
-import app.notekea.resources.format_callout_success
-import app.notekea.resources.format_callout_tip
-import app.notekea.resources.format_callout_todo
-import app.notekea.resources.format_callout_warning
-import app.notekea.resources.format_checklist_placeholder
-import app.notekea.resources.format_code_placeholder
-import app.notekea.resources.format_heading_placeholder
-import app.notekea.resources.format_italic_placeholder
-import app.notekea.resources.format_list_placeholder
-import app.notekea.resources.format_quote_placeholder
-import app.notekea.resources.format_table_column
-import app.notekea.resources.format_web_link_placeholder
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * The toolbar's [FormatAction]s with their placeholders in the app's language, so the toolbar and the shortcuts insert

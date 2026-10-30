@@ -33,7 +33,6 @@ import app.notekea.core.presentation.components.NotekeaTreeItem
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
-import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.RelativePath
 import app.notekea.resources.Res
 import app.notekea.resources.tree_bookmark_missing_remove

@@ -3,7 +3,7 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.Outcome
 
 /**
- * Fills the note at [note] on disk from [template] (`ROADMAP.md` 1.12), for a note made with "New note from template":
+ * Fills the note at `note` on disk from `template` (`ROADMAP.md` 1.12), for a note made with "New note from template":
  * the template is filled in with the note's name as its title, then inserted ([TemplateInsertion]), so an empty note
  * becomes the template and a note with text gets it at its end.
  */

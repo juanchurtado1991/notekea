@@ -6,7 +6,6 @@ package app.notekea.core.domain.markdown
  */
 object MarkdownSyntax {
     const val HEADING_MARK = "#"
-    const val HEADING_LEVELS = 6
     const val BOLD = "**"
     const val ITALIC = "*"
     const val ITALIC_CHAR = '*'
@@ -14,7 +13,6 @@ object MarkdownSyntax {
 
     /** A bulleted list item's marker; any of `-`, `*` and `+` is read as one. */
     const val BULLET = "- "
-    const val BULLET_CHARS = "-*+"
 
     /** An unchecked task's box after a list marker, and the characters a task's state can be. */
     const val TASK_BOX = "[ ] "
@@ -30,7 +28,6 @@ object MarkdownSyntax {
     const val FENCE = "```"
     const val DIVIDER = "---"
     const val TAG_MARK = "#"
-    const val TAG_MARK_CHAR = '#'
     const val WIKI_LINK_OPEN = "[["
     const val WIKI_LINK_CLOSE = "]]"
 

@@ -19,6 +19,8 @@ import com.testbuddy.ManualReason
 import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.ShortcutModifier.Shift
 import com.testbuddy.SuiteBuilder
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
 
 private const val WELCOME_TEXT = "This is a sample vault"
 private const val SHARED_NOTE = "Shared note"
@@ -225,8 +227,8 @@ private fun CaseScope.expectOnScreen(text: String) {
 }
 
 private fun CaseScope.clickInOutline(heading: String) {
-    val row = hasText(text = heading) and androidx.compose.ui.test.hasAnyAncestor(
-        matcher = androidx.compose.ui.test.hasContentDescription(value = "Headings of this note")
+    val row = hasText(text = heading) and hasAnyAncestor(
+        matcher = hasContentDescription(value = "Headings of this note")
     )
     ui.waitUntil(timeoutMillis = 10_000) { ui.onAllNodes(matcher = row).fetchSemanticsNodes().isNotEmpty() }
     ui.onAllNodes(matcher = row)[0].performClick()

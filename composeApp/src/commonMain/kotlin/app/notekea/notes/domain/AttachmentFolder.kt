@@ -12,7 +12,7 @@ class AttachmentFolder(private val setting: String?) {
         val written = setting?.trim()
         val noteFolder = note.parent ?: RelativePath.ROOT
         return when {
-            written == null || written.isEmpty() -> RelativePath(value = DEFAULT_FOLDER)
+            written.isNullOrEmpty() -> RelativePath(value = DEFAULT_FOLDER)
 
             written == VAULT_ROOT -> RelativePath.ROOT
 

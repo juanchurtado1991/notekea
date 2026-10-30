@@ -6,7 +6,7 @@ import app.notekea.core.domain.time.LocalCalendar
 import kotlin.time.Clock
 
 /**
- * Opens the daily note of [date], today's where the user is when it is null (`ROADMAP.md` 1.10), creating it when it
+ * Opens the daily note of `date`, today's where the user is when it is null (`ROADMAP.md` 1.10), creating it when it
  * does not exist yet: in the folder and with the name of the vault's Daily notes settings (`Journal/YYYY-MM-DD` without
  * them), its missing folders created too, starting from the settings' template filled in ([TemplateFiller]), or
  * empty when there is none or it cannot be read. An existing note is opened as it is.

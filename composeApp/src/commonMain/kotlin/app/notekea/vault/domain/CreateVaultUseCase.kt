@@ -4,7 +4,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 
 /**
- * Creates a new vault folder named [name] inside a parent folder and opens it. Names that cannot be a folder on
+ * Creates a new vault folder named `name` inside a parent folder and opens it. Names that cannot be a folder on
  * every supported operating system are rejected up front (see [ValidateFileNameUseCase]).
  */
 class CreateVaultUseCase(

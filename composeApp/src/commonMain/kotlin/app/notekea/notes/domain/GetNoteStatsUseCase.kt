@@ -5,7 +5,7 @@ import app.notekea.core.domain.StringPatterns
 /**
  * Counts what a note's [NoteStats] say from its body: words are runs of text holding a letter or a digit (Markdown's
  * own marks, like `#`, `-`, `>` or a checked task's `[x]`, are not words), links are those [linkFinder] finds outside code, tags are the text's
- * `#tags` and the [propertyTags] of its properties, each counted once, and tasks are its checklist items.
+ * `#tags` and the `propertyTags` of its properties, each counted once, and tasks are its checklist items.
  */
 class GetNoteStatsUseCase(
     private val linkFinder: LinkFinder

@@ -5,7 +5,7 @@ import app.notekea.core.domain.Outcome
 import kotlin.time.Clock
 
 /**
- * Attaches a file to [note] (`ROADMAP.md` 1.8) and gives the path to embed: a file already in the vault is linked
+ * Attaches a file to `note` (`ROADMAP.md` 1.8) and gives the path to embed: a file already in the vault is linked
  * where it is; anything else is saved into the note's attachments folder ([AttachmentFolder], from Obsidian's
  * settings) under the first free name, numbered as Obsidian does. A pasted image is named `Pasted image
  * <local date and time>.png`.

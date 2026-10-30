@@ -15,7 +15,6 @@ import app.notekea.notes.domain.Workspace
 import app.notekea.notes.presentation.tree.TreeFilePreviews
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.decodeToImageBitmap
 
 /**
@@ -228,7 +227,6 @@ class WorkspaceViewModel(
         }
     }
 
-    @OptIn(ExperimentalResourceApi::class)
     private suspend fun imageOf(
         path: RelativePath,
         size: IntSize

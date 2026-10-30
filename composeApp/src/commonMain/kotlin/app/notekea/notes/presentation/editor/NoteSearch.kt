@@ -1,6 +1,6 @@
 package app.notekea.notes.presentation.editor
 
-/** Where [query] appears in a note's body for Find in note: every match, ignoring letter case, without overlaps. */
+/** Where `query` appears in a note's body for Find in note: every match, ignoring letter case, without overlaps. */
 class NoteSearch {
     fun matches(
         text: CharSequence,

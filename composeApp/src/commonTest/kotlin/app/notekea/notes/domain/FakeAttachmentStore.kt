@@ -5,7 +5,7 @@ import app.notekea.core.domain.Outcome
 /**
  * A vault's files in memory, like the disk: a write or copy to a path in use fails with [NotesError.NameTaken], and
  * every file written is also seen by [fileOperations], as the real disk is. [outside] holds files on the computer
- * outside the vault, by absolute path, to copy from; a path under [VAULT] is inside it.
+ * outside the vault, by absolute path, to copy from; a path under `VAULT` is inside it.
  */
 class FakeAttachmentStore(
     private val fileOperations: FakeNoteFileOperations = FakeNoteFileOperations()

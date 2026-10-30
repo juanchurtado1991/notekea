@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -21,7 +19,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -38,8 +35,6 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaFindBar
 import app.notekea.core.presentation.platform.LocalFileDrop
 import app.notekea.core.presentation.platform.PressedModifiers
-import app.notekea.core.presentation.platform.label
-import app.notekea.core.presentation.platform.matches
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.notes.domain.DayNeighbors
@@ -48,7 +43,6 @@ import app.notekea.resources.Res
 import app.notekea.resources.editor_find_count
 import app.notekea.resources.editor_find_none
 import kotlin.math.roundToInt
-import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.stringResource
 
 private const val HEADING_MARGIN_DP = 8

@@ -24,7 +24,6 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaIconButton
@@ -93,7 +92,6 @@ internal fun EditorHeader(
     onIntent: (EditorIntent) -> Unit
 ) {
     val path = state.notePath ?: return
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
     path.parent?.takeUnless { it.isRoot }?.let { folder ->
         FolderPath(folder = folder, onClick = { onIntent(EditorIntent.OnFolderReveal) })
         Spacer(modifier = Modifier.height(height = NotekeaDimensions.SpacingXs))

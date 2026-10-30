@@ -1,7 +1,6 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.ui.ImageComposeScene
-import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getAllSemanticsNodes
@@ -45,7 +44,6 @@ class SidePanelScreenTest {
     }
 
     // Smoke 1.14-09: a disabled text field in Chat left stale pixels on Linux once the panel went back to the inspector.
-    @OptIn(InternalComposeUiApi::class)
     @Test
     fun `Chat says it is coming soon and holds no text field`() {
         var editable = emptyList<SemanticsNode>()

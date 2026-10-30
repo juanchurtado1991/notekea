@@ -2,7 +2,7 @@ package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
 
-/** Creates an empty note in [folder] named after [baseName] (the localized "Untitled"), numbered when it is taken. */
+/** Creates an empty note in `folder` named after `baseName` (the localized "Untitled"), numbered when it is taken. */
 class CreateNoteUseCase(private val noteFileOperations: NoteFileOperations) {
     suspend operator fun invoke(
         vaultPath: String,

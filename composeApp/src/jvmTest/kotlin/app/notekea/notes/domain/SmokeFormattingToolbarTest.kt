@@ -220,7 +220,8 @@ class SmokeFormattingToolbarTest {
     private inner class Steps(
         var text: String
     ) {
-        private var selection = 0..<0
+        // Nothing selected and the cursor at the start: an empty range whose last is -1.
+        private var selection = IntRange(start = 0, endInclusive = -1)
         val cursor: Int get() = selection.last + 1
 
         fun select(

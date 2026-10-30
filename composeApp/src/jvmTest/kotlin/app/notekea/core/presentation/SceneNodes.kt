@@ -1,7 +1,6 @@
 package app.notekea.core.presentation
 
 import androidx.compose.ui.ImageComposeScene
-import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.semantics.SemanticsNode
@@ -10,7 +9,6 @@ import androidx.compose.ui.semantics.getAllSemanticsNodes
 import androidx.compose.ui.semantics.getOrNull
 
 /** Every node of the scene, unmerged, as a screen reader would list them. */
-@OptIn(InternalComposeUiApi::class)
 fun ImageComposeScene.nodes(): List<SemanticsNode> =
     semanticsOwners.flatMap { it.getAllSemanticsNodes(mergingEnabled = false) }
 

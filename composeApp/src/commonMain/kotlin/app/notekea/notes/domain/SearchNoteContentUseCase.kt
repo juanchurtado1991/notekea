@@ -7,7 +7,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 /**
- * Content search (`ROADMAP.md` 1.6, `Mod+Shift+F`; plain text until hybrid search in 2.6). Every word of [query] must
+ * Content search (`ROADMAP.md` 1.6, `Mod+Shift+F`; plain text until hybrid search in 2.6). Every word of `query` must
  * appear in the note's body, ignoring letter case and accents; a `#tag` in the query must be a tag of the note, in its
  * frontmatter or in its text outside code blocks, and also finds nested tags (`#recipe` finds `#recipe/venezuelan`).
  * Notes where the search appears most come first, then by name. The matching line reads as plain text, without

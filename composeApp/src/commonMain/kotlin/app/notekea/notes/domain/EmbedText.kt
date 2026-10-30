@@ -4,7 +4,7 @@ import app.notekea.core.domain.markdown.MarkdownSyntax
 
 /**
  * How Notekea writes an embed of a file in a note, as Obsidian does by default: `![[name.png]]` when no other file of
- * the vault ([files]) has that name, otherwise `![[folder/name.png]]`; a [width] is kept as `|300`.
+ * the vault ([files]) has that name, otherwise `![[folder/name.png]]`; a `width` is kept as `|300`.
  */
 class EmbedText(files: Collection<RelativePath>) {
     private val names = files.groupingBy { it.name.lowercase() }.eachCount()

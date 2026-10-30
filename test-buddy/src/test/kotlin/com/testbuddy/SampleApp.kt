@@ -42,13 +42,11 @@ import java.nio.file.Files
  * A tiny app for Test Buddy's own tests: a note read from the case's data, a field to edit it, Mod+S and a button that
  * save it (the button a moment later, as apps save in the background), a counter and a long list.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun SampleApp(folders: CaseFolders) {
     SampleColumn(folders = folders)
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SampleColumn(folders: CaseFolders) {
     val note = folders.data.resolve("notes/draft.txt")

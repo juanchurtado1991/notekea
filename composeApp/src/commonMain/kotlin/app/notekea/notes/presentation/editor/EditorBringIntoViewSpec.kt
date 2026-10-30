@@ -1,6 +1,5 @@
 package app.notekea.notes.presentation.editor
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.BringIntoViewSpec
 
 /**
@@ -9,7 +8,6 @@ import androidx.compose.foundation.gestures.BringIntoViewSpec
  * while it is stuck there. A request as tall as the editor is the text field taking the keyboard on a click: the
  * clicked line is already in view, so it scrolls nothing instead of aligning the field's top with the editor's.
  */
-@OptIn(ExperimentalFoundationApi::class)
 class EditorBringIntoViewSpec : BringIntoViewSpec {
     /** The height of the toolbar, set when it is laid out; read only while scrolling. */
     var topInset: Float = 0f

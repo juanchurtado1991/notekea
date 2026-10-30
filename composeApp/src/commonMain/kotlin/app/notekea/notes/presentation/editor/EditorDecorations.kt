@@ -2,12 +2,9 @@ package app.notekea.notes.presentation.editor
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.input.TextFieldDecorator
 import androidx.compose.foundation.text.input.TextFieldState
@@ -20,19 +17,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.IntOffset
 import app.notekea.core.presentation.components.NotekeaCheckbox
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.notes.domain.TaskFinder
 import app.notekea.resources.Res
 import app.notekea.resources.editor_task
 import kotlin.math.roundToInt
-import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.stringResource
 
 private const val TASK_CHECKBOX_DP = 16

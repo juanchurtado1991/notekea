@@ -35,12 +35,11 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** The editor's tabs and panes (`ROADMAP.md` 1.11) over real use cases and in-memory stores. */
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalEncodingApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class WorkspaceViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val workspaces = FakeWorkspaceStore()
