@@ -242,7 +242,7 @@ private fun leadingIconOf(
     item: NotekeaMenuItem,
     color: Color
 ): (@Composable () -> Unit)? {
-    val icon = if (item.isChecked != null) NotekeaIcons.Checked.takeIf { item.isChecked == true } else item.icon
+    val icon = if (item.isChecked != null) NotekeaIcons.Checked.takeIf { item.isChecked } else item.icon
     if (icon == null && item.isChecked == null) return null
     return {
         val iconModifier = Modifier.size(size = NotekeaDimensions.IconSize)
