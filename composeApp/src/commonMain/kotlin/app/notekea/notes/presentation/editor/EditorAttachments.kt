@@ -20,7 +20,6 @@ import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.VaultSettingsReader
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.decodeToImageBitmap
 
 /**
@@ -216,7 +215,6 @@ class EditorAttachments(
         return cached.image
     }
 
-    @OptIn(ExperimentalResourceApi::class)
     private suspend fun decodeImage(
         path: RelativePath
     ): ImageBitmap? {

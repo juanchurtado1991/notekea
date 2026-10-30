@@ -66,7 +66,7 @@ fun NotekeaPropertyField(
     val commit = { if (text != value && isValid(text)) onCommit(text) }
     val isShowingDisplay = !isFocused && displayValue != null && text == value
     BasicTextField(
-        value = if (isShowingDisplay) displayValue.orEmpty() else text,
+        value = if (isShowingDisplay) displayValue else text,
         onValueChange = { if (!isShowingDisplay) text = it },
         modifier = modifier
             .fillMaxWidth()

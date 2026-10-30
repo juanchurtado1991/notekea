@@ -20,14 +20,13 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** The open note's attachments (`ROADMAP.md` 1.8) over real use cases, an in-memory vault and a real PNG. */
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalEncodingApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class EditorAttachmentsTest {
     private val testDispatcher = StandardTestDispatcher()
     private val fixture = EditorViewModels(dispatcher = testDispatcher)

@@ -5,7 +5,7 @@ import app.notekea.core.domain.time.LocalCalendar
 import kotlin.time.Clock
 
 /**
- * Reads the [template] note and fills it in for a note named [title] (`ROADMAP.md` 1.12): `{{date}}` and `{{time}}` are
+ * Reads the `template` note and fills it in for a note named `title` (`ROADMAP.md` 1.12): `{{date}}` and `{{time}}` are
  * now, where the user is, in the vault's Templates formats ([TemplateSettings]); the result is split into frontmatter
  * and body. A template that cannot be read fails with [NotesError.EntryMissing].
  */

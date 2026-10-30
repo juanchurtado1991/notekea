@@ -1,7 +1,6 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -12,7 +11,6 @@ import app.notekea.core.presentation.components.NotekeaGridSizePicker
 import app.notekea.core.presentation.components.NotekeaMenuButton
 import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.calloutIcon
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.FormatAction

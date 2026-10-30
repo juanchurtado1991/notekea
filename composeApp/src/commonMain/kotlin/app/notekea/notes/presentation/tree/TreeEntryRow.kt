@@ -28,8 +28,6 @@ import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
-import app.notekea.notes.domain.AttachmentKind
-import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.TreeRow
 import app.notekea.resources.Res
 import app.notekea.resources.tree_delete_file
@@ -47,6 +45,7 @@ import app.notekea.resources.tree_bookmark_remove
 import org.jetbrains.compose.resources.stringResource
 import app.notekea.notes.presentation.files.fileIconOf
 import app.notekea.notes.presentation.files.fileTintOf
+import app.notekea.notes.domain.NotesError
 
 private const val PREVIEW_WIDTH_DP = 260
 
@@ -249,7 +248,7 @@ internal fun revealLabel(
 @Composable
 private fun TreeEntryRowPreview() {
     val state = TreePreviewData.renamingState().let {
-        it.copy(renaming = it.renaming?.copy(error = app.notekea.notes.domain.NotesError.HiddenName))
+        it.copy(renaming = it.renaming?.copy(error = NotesError.HiddenName))
     }
     NotekeaPreviewThemes {
         Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {

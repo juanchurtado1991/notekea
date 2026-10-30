@@ -6,7 +6,6 @@ import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.AttachmentStore
 import app.notekea.notes.domain.NoteFile
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.decodeToImageBitmap
 
 /** Reads and decodes the files of the vault at [vaultPath] that the tree shows beside it ([FilePreview]). */
@@ -15,7 +14,6 @@ class TreeFilePreviews(
     private val attachmentStore: AttachmentStore,
     private val dispatchers: AppDispatchers
 ) {
-    @OptIn(ExperimentalResourceApi::class)
     suspend fun of(
         file: NoteFile
     ): FilePreview {

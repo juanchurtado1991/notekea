@@ -5,7 +5,6 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isFocused
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInputSelection
 import androidx.compose.ui.text.TextRange
 import app.notekea.selftest.clickInTree
@@ -225,7 +224,7 @@ private fun CaseScope.expectSameWidths() {
 }
 
 private fun CaseScope.treeRowOf(text: String): Float {
-    val nodes = ui.onAllNodes(matcher = androidx.compose.ui.test.hasText(text = text))
+    val nodes = ui.onAllNodes(matcher = hasText(text = text))
     val count = nodes.fetchSemanticsNodes().size
     return (0 until count).maxOf { nodes[it].fetchSemanticsNode().boundsInRoot.left }.let { left ->
         (0 until count).map { nodes[it].fetchSemanticsNode().boundsInRoot }.first { it.left == left }.width

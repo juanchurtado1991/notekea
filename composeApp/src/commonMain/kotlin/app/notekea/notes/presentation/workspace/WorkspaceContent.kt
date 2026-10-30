@@ -33,7 +33,6 @@ import app.notekea.core.platform.domain.Shortcut
 import app.notekea.core.presentation.components.EmptyState
 import app.notekea.core.presentation.components.NotekeaActionRow
 import app.notekea.core.presentation.platform.keys
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaDimensions

@@ -1,7 +1,7 @@
 package app.notekea.notes.domain
 
 /**
- * What a folder's grid shows (`ROADMAP.md` 1.11): what is directly inside [folder] in [tree], subfolders first, then
+ * What a folder's grid shows (`ROADMAP.md` 1.11): what is directly inside `folder` in `tree`, subfolders first, then
  * notes and files together, each group in the tree's name order (notes by their name without `.md`).
  */
 class FolderCards(private val naturalNameComparator: NaturalNameComparator) {

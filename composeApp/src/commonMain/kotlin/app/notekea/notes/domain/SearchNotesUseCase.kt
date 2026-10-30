@@ -3,7 +3,7 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.firstSorted
 
 /**
- * The notes the quick switcher (`ROADMAP.md` 1.6) lists for [query], best first: each note matches by its name, an
+ * The notes the quick switcher (`ROADMAP.md` 1.6) lists for `query`, best first: each note matches by its name, an
  * alias or its frontmatter title ([FuzzyMatcher]), whichever matches best, the name winning a tie; a search with a
  * `/` also matches the path (`rec/are` finds "Recipes/Arepas"). Equal scores put shorter names first, then names in
  * natural order. An empty search lists the most recently modified notes, as a starting point.

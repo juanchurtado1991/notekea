@@ -18,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -48,6 +47,7 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeRow
+import androidx.compose.ui.Modifier
 
 private const val EMPTY_ROWS_BELOW = 2
 private const val PREVIEW_HEIGHT_DP = 320
@@ -231,7 +231,7 @@ private fun TreeListPreview() {
         TreeList(
             state = TreePreviewData.state(),
             onIntent = {},
-            modifier = androidx.compose.ui.Modifier
+            modifier = Modifier
                 .width(
                     width = PREVIEW_WIDTH_DP.dp
                 ).height(height = PREVIEW_HEIGHT_DP.dp)

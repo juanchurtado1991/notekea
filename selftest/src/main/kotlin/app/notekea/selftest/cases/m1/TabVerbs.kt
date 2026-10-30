@@ -16,6 +16,7 @@ import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.HostSystem
 import com.testbuddy.ShortcutModifier.Mod
+import androidx.compose.ui.test.hasContentDescription
 
 private const val TAB_STRIP_BOTTOM = 40f
 private const val DRAG_STEPS = 12
@@ -72,7 +73,7 @@ internal fun CaseScope.modClick(node: SemanticsNodeInteraction) {
 /** Hovers the tab [name], so its ✕ shows, and clicks the ✕. */
 internal fun CaseScope.closeTabWithX(name: String) {
     tab(name = name).performMouseInput { moveTo(position = center) }
-    val closes = ui.onAllNodes(matcher = androidx.compose.ui.test.hasContentDescription(value = "Close tab"))
+    val closes = ui.onAllNodes(matcher = hasContentDescription(value = "Close tab"))
     ui.waitUntil(timeoutMillis = 10_000) { closes.fetchSemanticsNodes().isNotEmpty() }
     val tabBounds = tab(name = name).fetchSemanticsNode().boundsInRoot
     val count = closes.fetchSemanticsNodes().size

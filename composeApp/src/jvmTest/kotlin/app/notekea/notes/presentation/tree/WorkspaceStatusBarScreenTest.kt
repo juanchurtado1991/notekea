@@ -2,7 +2,6 @@ package app.notekea.notes.presentation.tree
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.ImageComposeScene
-import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getAllSemanticsNodes
 import androidx.compose.ui.semantics.getOrNull
@@ -43,7 +42,6 @@ class WorkspaceStatusBarScreenTest {
         )
     }
 
-    @OptIn(InternalComposeUiApi::class)
     private fun texts(
         isReading: Boolean
     ): List<String> {

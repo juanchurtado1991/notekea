@@ -7,7 +7,6 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import app.notekea.selftest.clickInTree
 import app.notekea.selftest.noteText
-import app.notekea.selftest.openNote
 import app.notekea.selftest.openVault
 import app.notekea.selftest.pressInWindow
 import app.notekea.selftest.relaunch

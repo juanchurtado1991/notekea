@@ -4,7 +4,7 @@ import app.notekea.core.domain.Outcome
 
 /**
  * Creates the vault's templates folder ([TemplateSettings.folder], `Templates` by default) with an example template
- * named [exampleName] holding [exampleText] (`ROADMAP.md` 1.12), so someone who never used a template sees one at once.
+ * named `exampleName` holding `exampleText` (`ROADMAP.md` 1.12), so someone who never used a template sees one at once.
  * An example already there is kept as it is. Returns the example's path.
  */
 class CreateTemplatesFolderUseCase(

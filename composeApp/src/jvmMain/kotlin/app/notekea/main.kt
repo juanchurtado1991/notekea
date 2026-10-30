@@ -18,7 +18,6 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.Alignment
 import app.notekea.core.presentation.platform.WindowSizes
 import app.notekea.core.presentation.theme.NotekeaBrand

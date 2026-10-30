@@ -24,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -276,7 +275,7 @@ private fun CloseOrDot(
                 modifier = Modifier
                     .size(size = UNSAVED_DOT_DP.dp)
                     .background(color = MaterialTheme.colorScheme.onSurfaceVariant, shape = CircleShape)
-                    .semantics { contentDescription = unsavedLabel.orEmpty() }
+                    .semantics { contentDescription = unsavedLabel }
             )
         }
     }

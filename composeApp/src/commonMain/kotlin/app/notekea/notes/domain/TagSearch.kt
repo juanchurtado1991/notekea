@@ -4,7 +4,7 @@ import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.MarkdownSyntax
 
 /**
- * Finds tags for the tag picker (`ROADMAP.md` 1.17) among the vault's [tags], already ranked by [TagRanking]: typed
+ * Finds tags for the tag picker (`ROADMAP.md` 1.17) among the vault's `tags`, already ranked by [TagRanking]: typed
  * text (a leading `#` ignored, letter case too) matches tags that start with it first, then tags that contain it,
  * each group in rank order. [newTag] is the typed text as a tag to create, when it is a valid tag the vault lacks.
  */
@@ -21,7 +21,7 @@ class TagSearch {
         return (starting + others).take(n = limit)
     }
 
-    /** [query] as a new tag (spaces become `-`), or null when it is empty, not a valid tag or already in [tags]. */
+    /** [query] as a new tag (spaces become `-`), or null when it is empty, not a valid tag or already in `tags`. */
     fun newTag(
         tags: List<String>,
         query: String

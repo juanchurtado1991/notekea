@@ -1,7 +1,5 @@
 package app.notekea.notes.domain
 
-import app.notekea.core.domain.StringPatterns
-
 /**
  * Merges a template's frontmatter into a note's (`ROADMAP.md` 1.12), as Obsidian does when a template with properties is
  * inserted: a property the note lacks is added with the template's value, one it has keeps its own value, and the list

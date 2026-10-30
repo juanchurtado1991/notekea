@@ -3,11 +3,11 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.Outcome
 
 /**
- * Where a link clicked in Read mode leads (`ROADMAP.md` 1.5), resolved among [notes] the way Obsidian and the link
- * updates do ([LinkResolver]) from the note [source] that holds it. A `[[wiki link]]` to a name several notes share
+ * Where a link clicked in Read mode leads (`ROADMAP.md` 1.5), resolved among `notes` the way Obsidian and the link
+ * updates do ([LinkResolver]) from the note `source` that holds it. A `[[wiki link]]` to a name several notes share
  * opens the closest one ([LinkResolver.closestWiki]) instead of creating another; one to a note that does not exist
  * creates it at the vault root, as Obsidian does by default. A Markdown link to a missing file is reported instead,
- * since its target is a path the user typed. [target] is the link's target only: no alias, heading or block.
+ * since its target is a path the user typed. `target` is the link's target only: no alias, heading or block.
  */
 class FollowLinkUseCase(private val createNote: CreateNoteUseCase) {
     suspend operator fun invoke(

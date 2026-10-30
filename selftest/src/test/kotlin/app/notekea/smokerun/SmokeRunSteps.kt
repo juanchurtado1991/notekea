@@ -22,6 +22,7 @@ import app.notekea.core.platform.domain.PlatformConventions
 import org.koin.mp.KoinPlatform
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import java.io.File
 
 private const val WAIT_MILLIS = 10_000L
 private val RUN_TIMEOUT = 5.minutes
@@ -116,7 +117,7 @@ internal fun ComposeUiTest.waitForFile(
     part: String
 ) = waitUntil(timeoutMillis = WAIT_MILLIS) {
     // Windows refuses a read while the app is replacing the file: that is not yet, so the wait goes on.
-    java.io.File(app.vaultPath(name = SAMPLE_VAULT), path).let {
+    File(app.vaultPath(name = SAMPLE_VAULT), path).let {
         it.exists() && runCatching { it.readText() }.getOrDefault(defaultValue = "").contains(other = part)
     }
 }

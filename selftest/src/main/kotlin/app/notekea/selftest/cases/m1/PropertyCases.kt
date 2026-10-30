@@ -13,6 +13,7 @@ import com.testbuddy.CaseScope
 import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
+import androidx.compose.ui.semantics.SemanticsProperties
 
 private const val PRACTICE = "Properties practice"
 private const val PRACTICE_TEXT = "Edit the properties above"
@@ -116,7 +117,7 @@ private fun SuiteBuilder.propertiesSource() {
         clickIcon(label = "Show source")
         expectText(text = "# Properties for the smoke test", substring = true)
         val source = sourceField(part = "page: 12")
-        val yaml = source.fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.EditableText]
+        val yaml = source.fetchSemanticsNode().config[SemanticsProperties.EditableText]
         source.performTextReplacement(text = yaml.text.replace("page: 12", "page: 13"))
         expectFile(path = PRACTICE_FILE, containing = "  page: 13\n")
         noteText(part = PRACTICE_TEXT).performClick()
@@ -131,7 +132,7 @@ private fun SuiteBuilder.brokenProperties() {
         openPlaygroundNote(name = "Broken properties", shownText = "Its frontmatter is not valid YAML")
         expectText(text = "not valid YAML (line 2)", substring = true)
         val source = sourceField(part = BROKEN_LINE)
-        val yaml = source.fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.EditableText]
+        val yaml = source.fetchSemanticsNode().config[SemanticsProperties.EditableText]
         source.performTextReplacement(text = yaml.text.lines().filterNot { it == BROKEN_LINE }.joinToString("\n"))
         expectNoText(text = "not valid YAML (line 2)", substring = true)
         expectFile(path = BROKEN_FILE, content = "---\ntitle: Broken on purpose\n---\n" + brokenBody())

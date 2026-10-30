@@ -3,7 +3,6 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.InternalComposeUiApi
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key

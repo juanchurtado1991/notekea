@@ -11,6 +11,7 @@ import com.testbuddy.CaseScope
 import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.ShortcutModifier.Shift
 import com.testbuddy.SuiteBuilder
+import androidx.compose.ui.test.hasText
 
 private const val THREE_LINES = "Buy corn flour\nBuy fresh cheese\nSoak the beans"
 
@@ -172,7 +173,7 @@ private fun CaseScope.pickTag(
 }
 
 private fun CaseScope.isTagPickerOpen(): Boolean =
-    ui.onAllNodes(matcher = androidx.compose.ui.test.hasText(text = "Find or create a tag")).fetchSemanticsNodes()
+    ui.onAllNodes(matcher = hasText(text = "Find or create a tag")).fetchSemanticsNodes()
         .isNotEmpty()
 
 internal fun CaseScope.hasLabel(label: String): Boolean =

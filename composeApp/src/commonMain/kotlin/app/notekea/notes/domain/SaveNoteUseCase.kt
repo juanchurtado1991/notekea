@@ -3,12 +3,12 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.Outcome
 
 /**
- * Writes the editor's [NoteDocument] back to its note, never over a change made elsewhere: [expectedOnDisk] is the
+ * Writes the editor's [NoteDocument] back to its note, never over a change made elsewhere: `expectedOnDisk` is the
  * text the editor last read or wrote, and when the file now holds something else (another app, a sync) nothing is
  * written and [NotesError.ChangedOnDisk] lets the user choose. A file that is gone (moved, renamed or deleted
  * meanwhile) is never recreated by a save: [NotesError.EntryMissing]. Passing the file's current text overwrites it on
  * purpose ("Keep mine"); null skips the check, for a note the user brings back ("Restore"). Returns the text written,
- * the next save's [expectedOnDisk].
+ * the next save's `expectedOnDisk`.
  */
 class SaveNoteUseCase(private val noteContentStore: NoteContentStore) {
     suspend operator fun invoke(

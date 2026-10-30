@@ -29,10 +29,10 @@ private const val PREVIEW_WIDTH_DP = 720
 /**
  * Editor entry point for [notePath] in one pane: opens it (saving the previous note first), saves before the window
  * closes and when the editor leaves the screen (a folder selected, another vault opened), and reports a rename from the
- * title ([onRenamed]), a deleted note closed ([onClosed]) or a link clicked in Read mode ([onOpenLink]) to the panes
+ * title (`onRenamed`), a deleted note closed (`onClosed`) or a link clicked in Read mode (`onOpenLink`) to the panes
  * around it. Find, Edit / Read and the other shortcuts work in the pane the keyboard is in ([isActive]). The
  * [viewModel] belongs to the vault's pane, so it outlives one note. The outline beside the panes follows this pane
- * through [tracker]; the side panel's requests go to [sidePanel]; [scrollMemory] keeps where each note was.
+ * through `tracker`; the side panel's requests go to [sidePanel]; `scrollMemory` keeps where each note was.
  */
 @Composable
 fun EditorScreen(

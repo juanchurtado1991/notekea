@@ -50,7 +50,6 @@ import com.composables.icons.lucide.Ellipsis
 import com.composables.icons.lucide.FilePlus
 import com.composables.icons.lucide.File
 import com.composables.icons.lucide.FileText
-import com.composables.icons.lucide.Image
 import com.composables.icons.lucide.FileX
 import com.composables.icons.lucide.Flame
 import com.composables.icons.lucide.Folder
@@ -72,7 +71,6 @@ import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Star
 import com.composables.icons.lucide.MessageSquareQuote
 import com.composables.icons.lucide.PanelLeftClose
-import com.composables.icons.lucide.PanelLeftOpen
 import com.composables.icons.lucide.Paperclip
 import com.composables.icons.lucide.Pencil
 import com.composables.icons.lucide.Plus
@@ -186,7 +184,6 @@ object NotekeaIcons {
     val NewFolder: ImageVector get() = Lucide.FolderPlus
     val NewNote: ImageVector get() = Lucide.FilePlus
     val NewTab: ImageVector get() = Lucide.Plus
-    val NewTag: ImageVector get() = Lucide.Plus
     val NextDay: ImageVector get() = Lucide.ChevronRight
     val NextMonth: ImageVector get() = Lucide.ChevronRight
     val Note: ImageVector get() = Lucide.FileText
@@ -211,7 +208,6 @@ object NotekeaIcons {
     val SidePanel: ImageVector get() = Lucide.PanelRight
     val Settings: ImageVector get() = Lucide.Settings
     val SwitchVault: ImageVector get() = Lucide.Library
-    val ShowSidebar: ImageVector get() = Lucide.PanelLeftOpen
     val SortByModified: ImageVector get() = Lucide.ClockArrowDown
     val SortByName: ImageVector get() = Lucide.ArrowDownAZ
     val Table: ImageVector get() = Lucide.Table

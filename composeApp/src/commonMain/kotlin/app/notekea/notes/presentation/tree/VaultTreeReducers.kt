@@ -10,7 +10,6 @@ import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeRow
 import app.notekea.notes.domain.TreePreferences
-import app.notekea.notes.domain.TreeSort
 import app.notekea.notes.domain.TrashLocation
 import app.notekea.notes.domain.VaultTree
 

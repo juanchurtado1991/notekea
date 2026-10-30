@@ -18,7 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import androidx.compose.foundation.layout.Row

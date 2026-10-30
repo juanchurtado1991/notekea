@@ -1,8 +1,8 @@
 package app.notekea.notes.domain
 
 /**
- * Prepares, without writing anything, the notes whose links must change after [from] was renamed to [to] (a note or
- * a folder, in the same parent folder). [notesBefore] are the vault's notes before the rename, so old links resolve as
+ * Prepares, without writing anything, the notes whose links must change after `from` was renamed to [to] (a note or
+ * a folder, in the same parent folder). `notesBefore` are the vault's notes before the rename, so old links resolve as
  * they did; the files are read at their current paths. A rename keeps the parent folder, so every affected link names
  * the old entry: notes whose text does not contain that name are not parsed at all, which keeps large vaults fast.
  * A rewritten link keeps its style: a bare `[[name]]` stays bare unless the new name is shared by another note, a path
