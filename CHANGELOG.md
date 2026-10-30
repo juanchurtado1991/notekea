@@ -113,6 +113,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Code cleanup from Android Studio's analyzer: 86 unused imports, unused symbols (`GitSync` and `VectorIndex`, back
+  with their features in M3, three Markdown constants, three icons), KDoc links to parameters as code, opt-ins and
+  qualified names that were not needed.
 - Plan (`ROADMAP.md`): vault queries (2.10, what Dataview and Bases do, with no query language), vault tasks (2.11)
   and questions in plain words (3.8, the local model writes the query, the index answers it exactly) join the MVP;
   M2 and M3 grow to 4.5 weeks each. Study cards are the first item after the MVP, and the Repositories item records

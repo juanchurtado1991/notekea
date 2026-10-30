@@ -1,6 +1,6 @@
 package com.testbuddy.crash
 
-/** What the crash notice says; [english] fills them in for an app called [appName]. */
+/** What the crash notice says; [english] fills them in for an app called `appName`. */
 public data class CrashTexts(
     val title: String,
     val message: String,
