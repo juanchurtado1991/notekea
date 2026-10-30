@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.editor
 
+import androidx.compose.runtime.snapshots.Snapshot
 import app.notekea.notes.domain.LinkUpdateResult
 import app.notekea.notes.domain.NoteFixtures.file
 import app.notekea.notes.domain.NotesError
@@ -22,6 +23,34 @@ class EditorFileChangesTest : EditorViewModelTestBase() {
         assertEquals(
             expected = false to "# Arepas from the phone\n",
             actual = viewModel.state.value.hasConflict to viewModel.buffer.text.toString()
+        )
+    }
+
+    @Test
+    fun `a read of the editor's own earlier save, reported after a later one, is no outside change`() = runEditorTest {
+        open(path = AREPAS)
+        type(text = "First")
+        viewModel.onIntent(intent = EditorIntent.OnSaveShortcut)
+        runCurrent()
+        val first = store.texts.getValue(AREPAS)
+        type(text = "First and second")
+        viewModel.onIntent(intent = EditorIntent.OnSaveShortcut)
+        runCurrent()
+
+        // The watcher read the file between the two saves and reports it only now (1.14-02 on macOS CI).
+        store.staleReads += first
+        scanner.addNote(file = file(path = AREPAS.value, modifiedOffsetMillis = 2L))
+        advanceTimeBy(delayTimeMillis = TWO_SECONDS_MILLIS)
+        Snapshot.sendApplyNotifications()
+        runCurrent()
+
+        assertEquals(
+            expected = Triple(false, "First and second", "---\ntags: [recipe]\n---\nFirst and second"),
+            actual = Triple(
+                viewModel.state.value.hasConflict,
+                viewModel.buffer.text.toString(),
+                store.texts.getValue(AREPAS)
+            )
         )
     }
 

@@ -78,8 +78,12 @@ internal class EditorDisk(
         saving.write(path = path, document = document.copy(body = host.buffer.text.toString()), expectedOnDisk = null)
     }
 
-    /** The editor's own saves are recognized and ignored; anything else reloads or asks. */
-    private fun onChange(
+    /**
+     * The editor's own saves are recognized and ignored; anything else reloads or asks. A change can also be the file
+     * read before the editor's last save and reported after it (quick saves, a busy computer): the file is read again,
+     * and one that holds the last save is no outside change.
+     */
+    private suspend fun onChange(
         change: NoteDiskChange
     ) {
         when (change) {
@@ -90,6 +94,7 @@ internal class EditorDisk(
 
             is NoteDiskChange.Changed -> {
                 if (change.text == saving.onDisk && !host.state.value.isDeleted) return
+                if (holdsLastSave()) return
                 if (saving.hasEdits() || host.state.value.hasConflict) {
                     host.reduce { it.copy(hasConflict = true, isDeleted = false) }
                 } else {
@@ -98,5 +103,12 @@ internal class EditorDisk(
                 }
             }
         }
+    }
+
+    private suspend fun holdsLastSave(): Boolean {
+        val path = host.state.value.notePath ?: return false
+        if (host.state.value.isDeleted) return false
+        val current = (openNote(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value?.toText()
+        return current != null && current == saving.onDisk
     }
 }

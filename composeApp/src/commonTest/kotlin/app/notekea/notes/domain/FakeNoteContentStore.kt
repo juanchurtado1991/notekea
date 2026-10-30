@@ -6,7 +6,8 @@ import kotlinx.coroutines.yield
 /**
  * Note texts in memory; writes to [refused] paths fail as a locked file would. With [suspendsLikeDisk], every read and
  * write suspends as the real store does when it switches to the IO dispatcher, so a cancelled caller is stopped there.
- * [reads] lists every path read, in order, and [onRead] runs after each read.
+ * [reads] lists every path read, in order, and [onRead] runs after each read. [staleReads] are answered first, one per
+ * read, as a read that began before a later write and returns the file as it was.
  */
 class FakeNoteContentStore : NoteContentStore {
     val texts = mutableMapOf<RelativePath, String>()
@@ -14,6 +15,7 @@ class FakeNoteContentStore : NoteContentStore {
     var suspendsLikeDisk = false
     val reads = mutableListOf<RelativePath>()
     var onRead: () -> Unit = {}
+    val staleReads = ArrayDeque<String>()
 
     override suspend fun read(
         vaultPath: String,
@@ -22,7 +24,7 @@ class FakeNoteContentStore : NoteContentStore {
         if (suspendsLikeDisk) yield()
         reads += path
         onRead()
-        return texts[path]
+        return staleReads.removeFirstOrNull() ?: texts[path]
     }
 
     override suspend fun write(
