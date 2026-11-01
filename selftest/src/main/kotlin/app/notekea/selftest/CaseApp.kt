@@ -5,6 +5,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import app.notekea.core.presentation.theme.LocalAppearance
+import app.notekea.core.appearance.domain.AppearanceStore
+import app.notekea.core.appearance.domain.Appearance
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -88,7 +93,11 @@ class CaseApp(
     @Composable
     fun Content() {
         val dispatcher = remember { ShortcutDispatcher() }
+        // The color theme and mode of Settings → Appearance, as the app's windows follow them (2.12-01).
+        val appearances = remember { koin.get<AppearanceStore>().observe() }
+        val appearance by appearances.collectAsState(initial = Appearance())
         CompositionLocalProvider(
+            LocalAppearance provides appearance,
             LocalShortcutDispatcher provides dispatcher,
             LocalViewModelStoreOwner provides viewModels,
             LocalWindowCloseGuard provides closeGuard,

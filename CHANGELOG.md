@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Color themes** (`ROADMAP.md` 2.12): Settings → Appearance, the first section of Settings, chooses the mode
+  (System, Light or Dark) and one of ten color themes as cards showing each in light and dark: Default, the app's
+  palette, and nine made from two tones (Midnight Lime, Deep Sage, Signal Almond, Cosmic Violet, Azure Cloud, Neon
+  Porcelain, Forest Mint, Prompt Green and Clay Butter). Every text meets WCAG AA in every theme and mode. The choice
+  applies at once to every window, the logo included, and is kept for the next run.
 - **Notekea QA** replaces the separate Self-Test app: testers install one app, Notekea with its tests and the Test
   Buddy **manager**, a small window always on top. **Automatic** says "Running tests" and shows the time, the
   progress and what is left, the counts, the case running now with each step as it happens, and the last ones done;
