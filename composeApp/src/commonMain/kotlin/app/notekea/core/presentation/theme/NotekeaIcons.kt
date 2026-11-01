@@ -8,6 +8,9 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
 import com.composables.icons.lucide.Type
+import com.composables.icons.lucide.Monitor
+import com.composables.icons.lucide.Moon
+import com.composables.icons.lucide.Sun
 import com.composables.icons.lucide.FileImage
 import com.composables.icons.lucide.FilePlay
 import com.composables.icons.lucide.TextSearch
@@ -178,6 +181,9 @@ object NotekeaIcons {
     val HideSidebar: ImageVector get() = Lucide.PanelLeftClose
     val Italic: ImageVector get() = Lucide.Italic
     val Locate: ImageVector get() = Lucide.FolderSearch
+    val ModeDark: ImageVector get() = Lucide.Moon
+    val ModeLight: ImageVector get() = Lucide.Sun
+    val ModeSystem: ImageVector get() = Lucide.Monitor
     val MissingFile: ImageVector get() = Lucide.FileX
     val More: ImageVector get() = Lucide.Ellipsis
     val NewFolder: ImageVector get() = Lucide.FolderPlus

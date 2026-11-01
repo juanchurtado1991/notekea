@@ -39,6 +39,12 @@
     <string name="about_shortcuts_title">Keyboard shortcuts</string>
     <string name="about_tagline">Your notes, on your computer, as plain Markdown.</string>
     <string name="about_version">Version %1$s</string>
+    <string name="appearance_mode">Mode</string>
+    <string name="appearance_mode_dark">Dark</string>
+    <string name="appearance_mode_hint">System follows your computer’s light or dark setting.</string>
+    <string name="appearance_mode_light">Light</string>
+    <string name="appearance_mode_system">System</string>
+    <string name="appearance_theme">Theme</string>
     <string name="attachment_locate">Locate…</string>
     <string name="attachment_missing">This file is missing</string>
     <string name="attachment_open_hint">Opens with its app</string>
@@ -232,7 +238,6 @@
     <string name="settings_section_sync">Sync</string>
     <string name="settings_section_templates">Templates</string>
     <string name="settings_soon_badge">Coming soon</string>
-    <string name="settings_soon_message">Choose the theme, the editor’s font, where new notes go and more. Until then, Notekea works with sensible defaults.</string>
     <string name="settings_title">Settings</string>
     <string name="side_panel_minimize">Minimize side panel</string>
     <string name="side_panel_chat">Chat</string>
@@ -306,6 +311,16 @@
     <string name="template_picker_no_match_message">Try another name, or add the template to the %1$s folder.</string>
     <string name="template_picker_no_match_title">No templates match</string>
     <string name="template_picker_placeholder">Find a template to insert</string>
+    <string name="theme_azure_cloud">Azure Cloud</string>
+    <string name="theme_clay_butter">Clay Butter</string>
+    <string name="theme_cosmic_violet">Cosmic Violet</string>
+    <string name="theme_deep_sage">Deep Sage</string>
+    <string name="theme_default">Default</string>
+    <string name="theme_forest_mint">Forest Mint</string>
+    <string name="theme_midnight_lime">Midnight Lime</string>
+    <string name="theme_neon_porcelain">Neon Porcelain</string>
+    <string name="theme_prompt_green">Prompt Green</string>
+    <string name="theme_signal_almond">Signal Almond</string>
     <string name="tree_bookmark_add">Bookmark</string>
     <string name="tree_bookmark_missing_remove">Remove: it is no longer in the vault</string>
     <string name="tree_bookmark_remove">Remove bookmark</string>

@@ -6,6 +6,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
+import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.logging.domain.FakeLogStore
 import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.logging.domain.GetDiagnosticsUseCase
@@ -13,6 +14,7 @@ import app.notekea.core.platform.domain.FakeSystemEnvironment
 import app.notekea.core.presentation.about.AboutDialog
 import app.notekea.core.presentation.about.AboutViewModel
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.settings.AppearanceViewModel
 import app.notekea.core.presentation.settings.SettingsDialog
 import app.notekea.core.presentation.theme.NotekeaTheme
 import kotlin.test.Test
@@ -34,7 +36,12 @@ class AboutAndSettingsScreenTest {
                         viewModel = aboutViewModel()
                     )
                 },
-                SETTINGS_CLOSE to { SettingsDialog { dismissed++ } }
+                SETTINGS_CLOSE to {
+                    SettingsDialog(
+                        onDismiss = { dismissed++ },
+                        viewModel = AppearanceViewModel(appearanceStore = FakeAppearanceStore())
+                    )
+                }
             ).forEach { (close, dialog) ->
                 ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
                     NotekeaTheme(darkTheme = false) { dialog() }
@@ -74,6 +81,6 @@ class AboutAndSettingsScreenTest {
         private const val SETTLE_FRAMES = 4
         private const val WIDTH = 1000
         private val ABOUT_CLOSE = Offset(x = 852f, y = 98f)
-        private val SETTINGS_CLOSE = Offset(x = 857f, y = 92f)
+        private val SETTINGS_CLOSE = Offset(x = 857f, y = 62f)
     }
 }

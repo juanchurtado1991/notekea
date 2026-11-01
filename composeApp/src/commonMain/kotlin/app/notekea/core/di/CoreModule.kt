@@ -8,13 +8,15 @@ import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.appearance.domain.GetUiScaleUseCase
 import app.notekea.core.appearance.domain.SaveUiScaleUseCase
 import app.notekea.core.appearance.domain.UiScaleStore
+import app.notekea.core.presentation.settings.AppearanceViewModel
 import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import kotlin.time.Clock
 
 /**
  * Cross-feature services: the system clock, read only here (`ARCHITECTURE.md` §5), time descriptions, file name rules
- * and the app's zoom and appearance.
+ * and the app's zoom and appearance, with Settings → Appearance.
  */
 val coreModule = module {
     single<Clock> { Clock.System }
@@ -24,4 +26,5 @@ val coreModule = module {
     single<AppearanceStore> { SettingsAppearanceStore(settings = get(), dispatchers = get()) }
     factoryOf(::GetUiScaleUseCase)
     factoryOf(::SaveUiScaleUseCase)
+    viewModelOf(::AppearanceViewModel)
 }
