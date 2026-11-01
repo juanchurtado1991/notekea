@@ -10,8 +10,8 @@ Last updated: 2026-11-01, at the end of M1.
 - **M0 — Foundation:** ✅
 - **M1 — Vault and editor:** ✅ 18 of 18 items. Its QA run (`qa/runs/M1.md`) closed on 2026-11-01 with the macOS run
   of `m1-rc1`, as the developer decided: the Windows tester is not available until M2, and Linux was not run.
-- **M2 — Indexing, links and related notes:** next, not started. It begins with **2.1 Markdown chunking**
-  (`feature/chunking`, `ROADMAP.md`), then 2.2 Embedding engine and 2.3 Hybrid index.
+- **M2 — Indexing, links and related notes:** started. 2.12 Color themes is done (#107); next is **2.1 Markdown
+  chunking** (`feature/chunking`, `ROADMAP.md`), then 2.2 Embedding engine and 2.3 Hybrid index.
 
 ## Open work, in order
 
@@ -23,7 +23,7 @@ Last updated: 2026-11-01, at the end of M1.
 3. **`qa/README.md` piece 5** is 🟡: `MVP_SMOKE_TEST.md` is still edited by hand; making it generated from the
    Self-Test's cases (`./gradlew :selftest:smokeCases`, `qa/SELF_TEST.md`) is still to do. Until then, every case
    change goes both in `:selftest` and in `MVP_SMOKE_TEST.md`.
-4. **M2** starts with 2.1 Markdown chunking (above).
+4. **M2** goes on with 2.1 Markdown chunking (above).
 
 No pull request is open.
 
