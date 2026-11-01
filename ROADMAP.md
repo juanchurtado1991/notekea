@@ -662,6 +662,15 @@ developer on 2026-11-01:
 Split each note by headings into chunks of ~200–400 tokens with overlap; keep note path, heading path and
 character range of every chunk (needed for citations). Pure `commonMain` logic, exhaustively unit tested.
 
+- Implemented in `notes.domain` (features never depend on each other): `ChunkNoteUseCase` over the note's body
+  (frontmatter left out, ranges in the body as the editor shows it), `NoteSections` by the outline's headings,
+  `ChunkBlocks` and `ChunkPacker`. Sizes (`ChunkSize`, estimated tokens, `TokenEstimate`): a section under 200 joins
+  the next ones under the same parent heading up to 400; one that fits 400 is a chunk; a longer one is split between
+  its paragraphs, lists, tables and whole code blocks, packed to 300, each chunk starting with the previous one's last
+  sentence or line (at most 60). 2.2 compares the estimate with the embedding model's tokenizer.
+- Checked on all 431 notes of `smoke-data` (`ChunkSmokeDataTest`); no Self-Test case, since nothing shows yet: the
+  cases of 2.3, 2.4 and 2.6 exercise it.
+
 ### ⬜ 2.2 Embedding engine — `feature/embeddings`
 
 `LlmEngine.embed` implemented with java-llama.cpp and a small bundled GGUF embedding model
