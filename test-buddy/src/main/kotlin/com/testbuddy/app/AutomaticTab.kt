@@ -1,7 +1,6 @@
 package com.testbuddy.app
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,7 +32,7 @@ import kotlinx.coroutines.delay
  * counts and the failures, with Run again and the way on to the manual cases.
  */
 @Composable
-internal fun ColumnScope.AutomaticTab(
+internal fun AutomaticTab(
     cases: List<AutomatedCase>,
     state: ManagerState,
     actions: ManagerActions
@@ -46,10 +45,10 @@ internal fun ColumnScope.AutomaticTab(
 }
 
 @Composable
-private fun ColumnScope.Idle(
+private fun Idle(
     total: Int,
     onStart: () -> Unit
-) {
+) = TabLayout(actions = {}) {
     Text(text = "Automatic tests", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
     Text(
         text = "$total cases check the app on their own, on copies of the test data, out of sight. It takes a while " +
@@ -58,15 +57,24 @@ private fun ColumnScope.Idle(
         color = SelfTestColors.Muted
     )
     Button(onClick = onStart, modifier = Modifier.fillMaxWidth()) { Text(text = "Start the automatic tests") }
-    Spacer(modifier = Modifier.weight(weight = 1f))
 }
 
 @Composable
-private fun ColumnScope.Running(
+private fun Running(
     cases: List<AutomatedCase>,
     state: ManagerState,
     onStop: () -> Unit
-) {
+) = TabLayout(actions = {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = "You can keep using the computer.",
+            fontSize = 11.sp,
+            color = SelfTestColors.Muted,
+            modifier = Modifier.weight(weight = 1f)
+        )
+        OutlinedButton(onClick = onStop) { Text(text = "Stop") }
+    }
+}) {
     val elapsed = rememberElapsedMillis(startedAt = state.startedAt)
     val done = state.results.size
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -90,16 +98,6 @@ private fun ColumnScope.Running(
     Counts(results = state.results.values, waiting = cases.size - done)
     NowCard(steps = state.runningSteps, case = cases.firstOrNull { it.id == state.runningId })
     Recent(cases = cases, results = state.results.values.toList())
-    Spacer(modifier = Modifier.weight(weight = 1f))
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = "You can keep using the computer.",
-            fontSize = 11.sp,
-            color = SelfTestColors.Muted,
-            modifier = Modifier.weight(weight = 1f)
-        )
-        OutlinedButton(onClick = onStop) { Text(text = "Stop") }
-    }
 }
 
 @Composable
@@ -133,11 +131,17 @@ private fun Recent(
 }
 
 @Composable
-private fun ColumnScope.Finished(
+private fun Finished(
     cases: List<AutomatedCase>,
     state: ManagerState,
     actions: ManagerActions
-) {
+) = TabLayout(actions = {
+    Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
+        OutlinedButton(onClick = actions.onStart) { Text(text = "Run again") }
+        Spacer(modifier = Modifier.weight(weight = 1f))
+        Button(onClick = { actions.onTab(ManagerTab.MANUAL) }) { Text(text = "Next: manual cases ›") }
+    }
+}) {
     val failed = state.results.values.filterIsInstance<CaseResult.Failed>()
     Text(
         text = if (failed.isEmpty()) "All automatic tests passed" else "Automatic tests done",
@@ -154,12 +158,6 @@ private fun ColumnScope.Finished(
         failed.take(n = SHOWN_FAILURES).forEach { result ->
             ResultRow(title = cases.firstOrNull { it.id == result.id }?.title.orEmpty(), result = result)
         }
-    }
-    Spacer(modifier = Modifier.weight(weight = 1f))
-    Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
-        OutlinedButton(onClick = actions.onStart) { Text(text = "Run again") }
-        Spacer(modifier = Modifier.weight(weight = 1f))
-        Button(onClick = { actions.onTab(ManagerTab.MANUAL) }) { Text(text = "Next: manual cases ›") }
     }
 }
 

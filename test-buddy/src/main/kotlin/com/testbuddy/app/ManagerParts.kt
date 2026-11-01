@@ -2,9 +2,15 @@ package com.testbuddy.app
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,6 +19,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+/**
+ * A tab's screen: its [body], which scrolls when the window is too short for it, and its [actions] under it, always
+ * on screen (issue #101: at 200% on macOS and on Windows they were cut off at the bottom).
+ */
+@Composable
+internal fun TabLayout(
+    actions: @Composable ColumnScope.() -> Unit,
+    body: @Composable ColumnScope.() -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(space = 10.dp)) {
+        Column(
+            modifier = Modifier.weight(weight = 1f).fillMaxWidth().verticalScroll(state = rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(space = 10.dp),
+            content = body
+        )
+        actions()
+    }
+}
 
 /** A small rounded count in a color: `✓ 31 passed`. */
 @Composable

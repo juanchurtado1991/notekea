@@ -2,16 +2,21 @@
 
 package com.testbuddy.crash
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.unit.dp
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /** The notice's buttons: Copy confirms itself, Report opens the app's form and Close closes; no form, no Report. */
 class CrashNoticeContentTest {
@@ -46,6 +51,29 @@ class CrashNoticeContentTest {
         assertEquals(listOf("copy", "report https://example.com/issues/new", "close"), events)
     }
 
+    // Issue #101, the QA run of m1-rc1: on macOS at 200% and on Windows the buttons were cut off at the bottom of the
+    // notice. In a window too short for its text, the text scrolls and the buttons stay inside it.
+    @Test
+    fun `in a short window the buttons stay inside it`() = runComposeUiTest {
+        setContent {
+            MaterialTheme {
+                Box(modifier = Modifier.size(width = WIDTH_DP.dp, height = SHORT_HEIGHT_DP.dp)) {
+                    CrashNoticeContent(
+                        crash = CrashReport(text = "report", path = "/reports/" + "long folder/".repeat(n = 20)),
+                        config = config,
+                        onCopy = {},
+                        onReport = {},
+                        onClose = {}
+                    )
+                }
+            }
+        }
+
+        val close = onNodeWithText("Close Sample").fetchSemanticsNode().boundsInRoot
+        val (height, bottom) = with(density) { BUTTON_HEIGHT_DP.dp.toPx() to SHORT_HEIGHT_DP.dp.toPx() }
+        assertTrue(close.height >= height && close.bottom <= bottom, "The Close button is at $close")
+    }
+
     @Test
     fun `without an issue form there is no Report button`() = runComposeUiTest {
         setContent {
@@ -62,5 +90,11 @@ class CrashNoticeContentTest {
 
         onAllNodesWithText("Report on GitHub").assertCountEquals(0)
         onNodeWithText("The report could not be saved, but you can still copy it.").assertExists()
+    }
+
+    private companion object {
+        const val BUTTON_HEIGHT_DP = 40
+        const val SHORT_HEIGHT_DP = 220
+        const val WIDTH_DP = 560
     }
 }

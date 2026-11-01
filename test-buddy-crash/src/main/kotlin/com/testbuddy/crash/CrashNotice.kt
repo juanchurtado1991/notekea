@@ -40,4 +40,4 @@ public fun CrashNotice(
 }
 
 private const val WIDTH_DP = 560
-private const val HEIGHT_DP = 320
+private const val HEIGHT_DP = 380

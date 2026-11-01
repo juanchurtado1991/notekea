@@ -23,10 +23,11 @@ import java.nio.file.Path
 /**
  * The manual cases, one at a time: which case of how many and why it is manual, its title, and its steps as a line
  * (✓ done, the current one in bold, the rest to come); Back and "Done, next step"; above them the case's test data and
- * how to open it ([TestDataCard]), and Restart the app when the case needs it. After its last step comes the result ([ManualResult]).
+ * how to open it ([TestDataCard]), and Restart the app when the case needs it. After its last step comes the result
+ * ([ManualResult]). The case scrolls; its buttons and the way to the other cases stay under it.
  */
 @Composable
-internal fun ColumnScope.ManualTab(
+internal fun ManualTab(
     appName: String,
     cases: List<ManualCase>,
     dataFolder: Path,
@@ -38,32 +39,55 @@ internal fun ColumnScope.ManualTab(
         Text(text = "There are no manual cases.", fontSize = 13.sp)
         return
     }
+    val header: @Composable ColumnScope.() -> Unit = { CaseHeader(case = case, count = cases.size, state = state) }
+    val otherCases: @Composable ColumnScope.() -> Unit = { OtherCases(index = state.manualIndex, actions = actions) }
+    if (state.manualStep >= case.stepList.size) {
+        ManualResult(case = case, actions = actions, header = header, otherCases = otherCases)
+    } else {
+        TabLayout(actions = {
+            StepButtons(case = case, step = state.manualStep, actions = actions)
+            otherCases()
+        }) {
+            header()
+            // In full on the first step, where the vault is opened; one line after it, so the steps keep their room.
+            when {
+                case.data.isEmpty() -> Unit
+
+                state.manualStep == 0 -> TestDataCard(appName = appName, folders = case.data, dataFolder = dataFolder)
+
+                else -> Text(
+                    text = "Test data: a fresh copy of ${case.data.joinToString()}",
+                    fontSize = 11.sp,
+                    color = SelfTestColors.Muted
+                )
+            }
+            Steps(appName = appName, case = case, step = state.manualStep, actions = actions)
+        }
+    }
+}
+
+@Composable
+private fun CaseHeader(
+    case: ManualCase,
+    count: Int,
+    state: ManagerState
+) {
     val answered = state.answers[case.id]?.let { if (it is ManualAnswer.Passed) " · passed" else " · failed" }.orEmpty()
     Text(
-        text = "Case ${state.manualIndex + 1} of ${cases.size} · ${case.reason.hint()}$answered",
+        text = "Case ${state.manualIndex + 1} of $count · ${case.reason.hint()}$answered",
         fontSize = 11.sp,
         color = SelfTestColors.Muted
     )
     Text(text = "${case.id} · ${case.title}", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-    if (state.manualStep >= case.stepList.size) {
-        ManualResult(case = case, actions = actions)
-    } else {
-        // In full on the first step, where the vault is opened; one line after it, so the steps keep their room.
-        when {
-            case.data.isEmpty() -> Unit
+}
 
-            state.manualStep == 0 -> TestDataCard(appName = appName, folders = case.data, dataFolder = dataFolder)
-
-            else -> Text(
-                text = "Test data: a fresh copy of ${case.data.joinToString()}",
-                fontSize = 11.sp,
-                color = SelfTestColors.Muted
-            )
-        }
-        Steps(appName = appName, case = case, step = state.manualStep, actions = actions)
-    }
+@Composable
+private fun OtherCases(
+    index: Int,
+    actions: ManagerActions
+) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        TextButton(onClick = actions.onPreviousCase, enabled = state.manualIndex > 0) {
+        TextButton(onClick = actions.onPreviousCase, enabled = index > 0) {
             Text(text = "‹ Previous case", fontSize = 12.sp)
         }
         Spacer(modifier = Modifier.weight(weight = 1f))
@@ -72,7 +96,7 @@ internal fun ColumnScope.ManualTab(
 }
 
 @Composable
-private fun ColumnScope.Steps(
+private fun Steps(
     appName: String,
     case: ManualCase,
     step: Int,
@@ -86,14 +110,17 @@ private fun ColumnScope.Steps(
             pending = case.stepList.drop(n = step + 1)
         )
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
-        if (case.launchEnvironment.isNotEmpty()) {
-            OutlinedButton(onClick = actions.onRestart) {
-                Text(text = "Restart $appName for this case", fontSize = 12.sp)
-            }
-        }
+    if (case.launchEnvironment.isNotEmpty()) {
+        OutlinedButton(onClick = actions.onRestart) { Text(text = "Restart $appName for this case", fontSize = 12.sp) }
     }
-    Spacer(modifier = Modifier.weight(weight = 1f))
+}
+
+@Composable
+private fun StepButtons(
+    case: ManualCase,
+    step: Int,
+    actions: ManagerActions
+) {
     Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp), modifier = Modifier.fillMaxWidth()) {
         OutlinedButton(onClick = actions.onPreviousStep, enabled = step > 0) { Text(text = "‹ Back") }
         Spacer(modifier = Modifier.weight(weight = 1f))
