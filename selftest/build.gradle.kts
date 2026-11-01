@@ -109,6 +109,8 @@ compose.desktop {
         jvmArgs += "-Dnotekea.version=$appDisplayVersion"
 
         nativeDistributions {
+            // Notekea's embedding model, as the app bundles it (ROADMAP.md 2.2).
+            appResourcesRootDir.set(layout.buildDirectory.dir("app-resources"))
             targetFormats(TargetFormat.Deb, TargetFormat.Dmg, TargetFormat.Msi)
             packageName = appName
             packageVersion = appPackageVersion
@@ -134,6 +136,9 @@ compose.desktop {
         }
     }
 }
+
+val embeddingModelResources = EmbeddingModel.appResources(project)
+tasks.matching { it.name == "prepareAppResources" }.configureEach { dependsOn(embeddingModelResources) }
 
 // `./gradlew :selftest:run -Pcases=1.6,1.17-02` opens Notekea QA with only those cases (a feature's smoke test).
 tasks.withType<JavaExec>().matching { it.name == "run" }.configureEach {

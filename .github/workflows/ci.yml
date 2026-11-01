@@ -50,6 +50,14 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      # The embedding model the app bundles (ROADMAP.md 2.2), 121 MB, downloaded once and kept by its SHA-256.
+      - name: Cache the embedding model
+        if: steps.changes.outputs.code == 'true'
+        uses: actions/cache@v6
+        with:
+          path: .gradle/models
+          key: embedding-model-15691dfe830257f569a1e3521977351d16eac18e48e414908dc98ed9b8455e07
+
       - name: Set up Gradle
         if: steps.changes.outputs.code == 'true'
         uses: gradle/actions/setup-gradle@v6
