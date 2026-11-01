@@ -49,14 +49,16 @@ private fun StringBuilder.appendManual(
 ) {
     val passed = answers.count { it is ManualAnswer.Passed }
     val failed = answers.filterIsInstance<ManualAnswer.Failed>()
-    val notRun = answers.count { it is ManualAnswer.NotRun }
-    appendLine("Manual: $passed passed, ${failed.size} failed, $notRun not run")
+    val notRun = answers.filterIsInstance<ManualAnswer.NotRun>()
+    appendLine("Manual: $passed passed, ${failed.size} failed, ${notRun.size} not run")
     failed.forEach { answer ->
         val title = suite.manual.firstOrNull { it.id == answer.id }?.title.orEmpty()
         val screenshot = answer.screenshot?.let { " (screenshot: $it)" }.orEmpty()
         appendLine("  ❌ ${answer.id} $title: \"${answer.note}\"$screenshot")
         appendSteps(title = "Last steps in ${suite.appName}", steps = answer.steps)
     }
+    // Named, so the run's record can tell them from the passed ones (the macOS run of m1-rc1 could not).
+    if (notRun.isNotEmpty()) appendLine("  Not run: ${notRun.joinToString { it.id }}")
 }
 
 private fun StringBuilder.appendSteps(

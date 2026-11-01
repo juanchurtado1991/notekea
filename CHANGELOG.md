@@ -216,7 +216,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is no longer broken. In the cases, Shift+F10 is Fn+Shift+F10 on a Mac keyboard, where F10 mutes the sound.
 - The Notekea QA manager's and the crash notice's buttons are never cut off at large text sizes (issue #101): the
   content scrolls and the buttons stay under it. A report's last steps leave out what the app feeds its screens
-  (the vault's notes, a card's picture), so they show what the tester did.
+  (the vault's notes, a card's picture), so they show what the tester did, and the report names the manual cases
+  not run.
 - Quick edits (a few properties in a row) no longer bring back an older version of the note or say it "changed
   outside Notekea": the check for outside changes could report a read of Notekea's own earlier save after a later one;
   it now reads the file again and ignores a file that holds the last save (found by the Self-Test's 1.14-02 on macOS).

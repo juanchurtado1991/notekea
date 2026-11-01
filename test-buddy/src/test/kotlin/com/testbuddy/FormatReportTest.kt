@@ -87,6 +87,7 @@ class FormatReportTest {
               ❌ 1.17-02 Dark mode follows the system: "the sidebar stayed white" (screenshot: 1.17-02.png)
                  Last steps in Sample:
                    10:15:01 Workspace: OnSidePanelToggle
+              Not run: 1.17-04
             Diagnostics:
             last log line
         """.trimIndent() + "\n"
