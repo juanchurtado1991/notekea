@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Markdown chunking** (`ROADMAP.md` 2.1), the first piece of the index: a note's body is split by its headings into
+  chunks of about 200 to 400 tokens, short sections joined under their parent heading, long ones split between their
+  paragraphs and whole code blocks with a sentence of overlap. Each chunk keeps its note, its headings and its exact
+  range in the body, for the citations of the chat. Nothing shows in the app yet.
 - **Color themes** (`ROADMAP.md` 2.12): Settings → Appearance, the first section of Settings, chooses the mode
   (System, Light or Dark) and one of ten color themes as cards showing each in light and dark: Default, the app's
   palette, and nine made from two tones (Midnight Lime, Deep Sage, Signal Almond, Cosmic Violet, Azure Cloud, Neon
