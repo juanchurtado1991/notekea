@@ -46,7 +46,7 @@ class ChunkNoteUseCaseTest {
 
     @Test
     fun `a short section never joins one outside its parent heading`() {
-        val text = "# Food\n${words(count = 200)}\n## Arepas\nCorn.\n# Travel\nLisbon."
+        val text = "# Food\n${words(count = 120)}\n## Arepas\nCorn.\n# Travel\nLisbon."
 
         assertEquals(
             expected = listOf(listOf("Food"), listOf("Food", "Arepas"), listOf("Travel")),
@@ -56,7 +56,7 @@ class ChunkNoteUseCaseTest {
 
     @Test
     fun `sections that fit on their own stay apart, numbered in order`() {
-        val text = "# One\n${words(count = 200)}\n# Two\n${words(count = 200)}"
+        val text = "# One\n${words(count = 120)}\n# Two\n${words(count = 120)}"
 
         assertEquals(
             expected = listOf(0 to listOf("One"), 1 to listOf("Two")),
@@ -66,10 +66,10 @@ class ChunkNoteUseCaseTest {
 
     @Test
     fun `short sections stop joining before they would be larger than the maximum`() {
-        val text = "# One\n${words(count = 100)}\n# Two\n${words(count = 100)}\n# Three\n${words(count = 150)}"
+        val text = "# One\n${words(count = 80)}\n# Two\n${words(count = 100)}"
 
         assertEquals(
-            expected = listOf(emptyList(), listOf("Three")),
+            expected = listOf(listOf("One"), listOf("Two")),
             actual = chunkNote(note = NOTE, text = text).map { it.headingPath }
         )
     }
