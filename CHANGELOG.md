@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Embedding engine** (`ROADMAP.md` 2.2): Notekea bundles a small multilingual model,
+  granite-embedding-107m-multilingual (121 MB, Apache 2.0), that turns notes and questions into vectors close in
+  meaning across Spanish and English; it loads when needed and is let go after three idle minutes. The installers
+  are about 121 MB larger. Nothing shows in the app yet: the index of 2.3 uses it.
 - **Markdown chunking** (`ROADMAP.md` 2.1), the first piece of the index: a note's body is split by its headings into
   chunks of about 200 to 400 tokens, short sections joined under their parent heading, long ones split between their
   paragraphs and whole code blocks with a sentence of overlap. Each chunk keeps its note, its headings and its exact

@@ -667,7 +667,7 @@ character range of every chunk (needed for citations). Pure `commonMain` logic, 
   `ChunkBlocks` and `ChunkPacker`. Sizes (`ChunkSize`, estimated tokens, `TokenEstimate`): a section under 200 joins
   the next ones under the same parent heading up to 400; one that fits 400 is a chunk; a longer one is split between
   its paragraphs, lists, tables and whole code blocks, packed to 300, each chunk starting with the previous one's last
-  sentence or line (at most 60). 2.2 compares the estimate with the embedding model's tokenizer.
+  sentence or line (at most 60). 2.2 checks the estimate against the embedding model's tokenizer.
 - Checked on all 431 notes of `smoke-data` (`ChunkSmokeDataTest`); no Self-Test case, since nothing shows yet: the
   cases of 2.3, 2.4 and 2.6 exercise it.
 
@@ -675,6 +675,17 @@ character range of every chunk (needed for citations). Pure `commonMain` logic, 
 
 `LlmEngine.embed` implemented with java-llama.cpp and a small bundled GGUF embedding model
 (~100 MB, e.g. nomic-embed or bge-small). Batched, off the UI thread, cancellable.
+
+- **Multilingual** (the developer's requirement: notes and questions mix Spanish and English): the model is
+  `granite-embedding-107m-multilingual` (Q8_0, 121 MB, 384 dimensions, 512 tokens, Apache 2.0), chosen over
+  multilingual-e5-small and bge-m3 on Spanish questions about English notes (`docs/spikes/2026-11-01-embedding-models.md`).
+- Implemented as the `TextEmbedder` port in `core.embedding` (shared, so the index can use it; `LlmEngine` keeps
+  only generation) and `LlamaTextEmbedder`: loaded on first use, let go after three idle minutes, one call at a time
+  off the UI thread, cancellable between texts, a text over 510 tokens refused rather than cut, vectors of length 1;
+  java-llama.cpp's native library extracted to the app data, not `/tmp`. The build downloads the model from a pinned
+  commit, checks its SHA-256 and bundles it in Notekea and Notekea QA; CI caches it.
+- `TokenEstimate` (2.1) counts a token every two characters: the model's tokenizer splits code finely, and
+  `ChunkModelTokensTest` checks every chunk of `smoke-data` fits it and is never over its estimate.
 
 ### ⬜ 2.3 Hybrid index — `feature/hybrid-index`
 
