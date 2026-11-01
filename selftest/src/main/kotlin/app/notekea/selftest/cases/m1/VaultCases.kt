@@ -152,10 +152,12 @@ private fun SuiteBuilder.lockedVault() {
                 "Take away your permission to read the Locked Vault folder: on Windows, right-click it › Properties " +
                 "› Security › Edit, select your user and check Deny for Read; on macOS, Get Info › Sharing & " +
                 "Permissions, your user to No Access; on Linux, run chmod 000 on it.\n3. Click Locked Vault in " +
-                "Recent.\n4. Give the permission back the same way."
+                "Recent.\n4. Click another vault in Recent, press Ctrl+O (Cmd+O on macOS) and choose the Locked " +
+                "Vault folder.\n5. Give the permission back the same way."
         )
         expected(
-            text = "A banner names the folder and says to check its permissions; Dismiss hides it. Nothing crashes."
+            text = "Both times a banner names the folder and says to check its permissions (in step 4, over the open " +
+                "vault); Dismiss hides it. Nothing crashes."
         )
     }
 }
