@@ -43,16 +43,17 @@ it includes the mapped model file and llama.cpp's buffers.
 Measured with granite's tokenizer on all 1 027 chunks of `smoke-data` (2.1): the estimate of 2.1 (four characters a
 token) **undercounts 987 of them**, by up to 1.72×, and the largest chunk is 523 tokens, over the 512 the model reads.
 Multilingual tokenizers cut code and rare words into many pieces: the worst chunk has 2.13 characters a token (code),
-the median 3.3 (prose). An estimate of one token per 2.2 characters never undercounts any chunk.
+the median 3.3 (prose). An estimate of one token per 2.2 characters undercounts none of them; with the chunks
+cut to that estimate one still came out 2 tokens over it, so the estimate counts one token per **two** characters.
 
-## Recommendation (for the developer to decide)
+## Decisions (the developer chose granite on 2026-11-01)
 
 - **Model: `granite-embedding-107m-multilingual`, Q8_0** (bartowski's conversion, SHA-256
   `15691dfe830257f5…`, checked in full when packaging). Best results, fastest, smallest, Apache 2.0, no prefixes for
   questions or passages. bge-m3 is no better on this set and an order of magnitude slower and larger.
-- **`TokenEstimate` counts one token per 2.2 characters** (and at least two per word), so a chunk of at most 400
-  estimated tokens always fits the model's 512. Prose chunks become smaller in real tokens (about 200 to 270), within
-  the 200–400 of `ROADMAP.md` 2.1. The embedder also refuses a text longer than the model's context rather than
+- **`TokenEstimate` counts one token per two characters** (and at least two per word), so a chunk of at most 400
+  estimated tokens always fits the model's 512 (`ChunkModelTokensTest` checks every chunk of `smoke-data` with the
+  model's tokenizer). Prose chunks become smaller in real tokens (about 180 to 260). The embedder also refuses a text longer than the model's context rather than
   cutting it silently.
 - java-llama.cpp loads its natives from a folder given by `de.kherud.llama.lib.path`: the adapter extracts them to the
   app's data folder instead of `/tmp` (the spike of 2026-10-23, gotcha 3).

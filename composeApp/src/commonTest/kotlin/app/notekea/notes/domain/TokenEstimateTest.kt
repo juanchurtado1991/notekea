@@ -9,9 +9,9 @@ import kotlin.test.assertEquals
  */
 class TokenEstimateTest {
     @Test
-    fun `a token every 2 point 2 characters, at least two a word, and nothing counts nothing`() {
+    fun `a token every two characters, at least two a word, and nothing counts nothing`() {
         assertEquals(
-            expected = listOf(0, 7, 10),
+            expected = listOf(0, 8, 10),
             actual = listOf(
                 "",
                 "Arepas are good",

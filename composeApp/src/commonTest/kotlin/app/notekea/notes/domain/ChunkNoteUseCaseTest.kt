@@ -66,7 +66,7 @@ class ChunkNoteUseCaseTest {
 
     @Test
     fun `short sections stop joining before they would be larger than the maximum`() {
-        val text = "# One\n${words(count = 80)}\n# Two\n${words(count = 100)}"
+        val text = "# One\n${words(count = 70)}\n# Two\n${words(count = 100)}"
 
         assertEquals(
             expected = listOf(listOf("One"), listOf("Two")),
