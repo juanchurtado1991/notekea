@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.core.presentation.FeedIntent
 import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.ListAction
@@ -13,7 +14,9 @@ sealed interface EditorIntent {
     data object OnCloseDeleted : EditorIntent
 
     /** Save now and report [EditorEffect.Flushed], before the window closes. */
-    data object OnFlushRequest : EditorIntent
+    data object OnFlushRequest :
+        EditorIntent,
+        FeedIntent
 
     /** A link to a note was clicked in Read mode; with `Mod` held its tab opens [inBackground] (`ROADMAP.md` 1.11). */
     data class OnLinkClick(

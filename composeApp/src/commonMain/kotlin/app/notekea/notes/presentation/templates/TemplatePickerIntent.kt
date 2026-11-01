@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.templates
 
+import app.notekea.core.presentation.FeedIntent
 import app.notekea.notes.domain.VaultTree
 
 /** What the user did in the template picker, plus the vault tree as it changes. */
@@ -27,5 +28,7 @@ sealed interface TemplatePickerIntent {
     ) : TemplatePickerIntent
 
     /** The vault's notes and folders, sent whenever the tree changes. */
-    data class OnTreeChange(val tree: VaultTree) : TemplatePickerIntent
+    data class OnTreeChange(val tree: VaultTree) :
+        TemplatePickerIntent,
+        FeedIntent
 }
