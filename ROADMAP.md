@@ -43,7 +43,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
-| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 5 weeks | 1 / 12 |
+| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 5 weeks | 2 / 12 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 5.5 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
@@ -657,7 +657,7 @@ developer on 2026-11-01:
 - **Done when:** each theme can be chosen with the mouse and the keyboard and shows in light and dark, the choice
   survives a restart, and the contrast test passes for all twenty color schemes.
 
-### ⬜ 2.1 Markdown chunking — `feature/chunking`
+### ✅ 2.1 Markdown chunking — `feature/chunking` — [notekea#108](https://github.com/juanchurtado1991/notekea/pull/108)
 
 Split each note by headings into chunks of ~200–400 tokens with overlap; keep note path, heading path and
 character range of every chunk (needed for citations). Pure `commonMain` logic, exhaustively unit tested.
