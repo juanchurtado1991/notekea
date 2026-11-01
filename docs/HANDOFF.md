@@ -11,7 +11,7 @@ Last updated: 2026-11-01, at the end of M1.
 - **M1 — Vault and editor:** ✅ 18 of 18 items. Its QA run (`qa/runs/M1.md`) closed on 2026-11-01 with the macOS run
   of `m1-rc1`, as the developer decided: the Windows tester is not available until M2, and Linux was not run.
 - **M2 — Indexing, links and related notes:** started. 2.12 Color themes is done (#107) and 2.1 Markdown chunking
-  is in review; next is **2.2 Embedding engine** (`feature/embeddings`, `ROADMAP.md`), then 2.3 Hybrid index.
+  (#108); next is **2.2 Embedding engine** (`feature/embeddings`, `ROADMAP.md`), then 2.3 Hybrid index.
 
 ## Open work, in order
 
