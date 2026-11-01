@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.switcher
 
+import app.notekea.core.presentation.FeedIntent
 import app.notekea.notes.domain.NoteEntry
 import app.notekea.notes.domain.RelativePath
 
@@ -14,7 +15,9 @@ sealed interface QuickSwitcherIntent {
     data object OnModeSwitch : QuickSwitcherIntent
 
     /** The vault's notes, sent when the palette is shown and again whenever the tree changes. */
-    data class OnNotesChange(val notes: Collection<NoteEntry>) : QuickSwitcherIntent
+    data class OnNotesChange(val notes: Collection<NoteEntry>) :
+        QuickSwitcherIntent,
+        FeedIntent
 
     /** `Mod+P`, `Mod+Shift+F` or a clicked `#tag`, which opens content search with the tag already typed. */
     data class OnOpen(

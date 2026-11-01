@@ -1,5 +1,7 @@
 package app.notekea.notes.presentation.tags
 
+import app.notekea.core.presentation.FeedIntent
+
 /** What the user did in the tag picker, plus the vault's tags as they change. */
 sealed interface TagPickerIntent {
     /** The toolbar's Tag button, with the selected text as the first search. */
@@ -19,5 +21,7 @@ sealed interface TagPickerIntent {
     data object OnSelectPrevious : TagPickerIntent
 
     /** The vault's tags, most used first, sent whenever the tree changes. */
-    data class OnTagsChange(val tags: List<String>) : TagPickerIntent
+    data class OnTagsChange(val tags: List<String>) :
+        TagPickerIntent,
+        FeedIntent
 }

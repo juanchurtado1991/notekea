@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.workspace
 
+import app.notekea.core.presentation.FeedIntent
 import app.notekea.notes.domain.RelativePath
 import androidx.compose.ui.unit.IntSize
 import app.notekea.notes.domain.SidePanelMode
@@ -12,7 +13,8 @@ sealed interface WorkspaceIntent {
     data class OnTreeChange(
         val tree: VaultTree,
         val isLoaded: Boolean
-    ) : WorkspaceIntent
+    ) : WorkspaceIntent,
+        FeedIntent
 
     /** [path] was opened (a click, a link, the quick switcher…): its tab is shown, or added behind when [inBackground]. */
     data class OnOpen(
@@ -71,7 +73,8 @@ sealed interface WorkspaceIntent {
     data class OnCoverRequest(
         val path: RelativePath,
         val size: IntSize
-    ) : WorkspaceIntent
+    ) : WorkspaceIntent,
+        FeedIntent
 
     /** `Mod+Shift+\`, the toolbar's Outline or the panel's hide button. */
     data object OnSidePanelToggle : WorkspaceIntent
