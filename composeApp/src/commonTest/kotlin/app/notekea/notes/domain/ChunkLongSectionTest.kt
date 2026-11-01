@@ -26,10 +26,23 @@ class ChunkLongSectionTest {
         }
     }
 
+    // Found on smoke-data with the multilingual model's token count: a paragraph just under the maximum, after another,
+    // went over it once the previous chunk's last sentence was added in front of it.
+    @Test
+    fun `the previous chunk's last sentence is added only while the chunk still fits the maximum`() {
+        val nearlyFull = (1..20).joinToString(separator = " ") { "Long paragraph sentence $it has words in it." }
+        val text = "# Long\n${paragraph(number = 1)}\n\n$nearlyFull"
+
+        val chunks = chunkNote(note = NOTE, text = text)
+
+        assertEquals(expected = 2, actual = chunks.size)
+        assertTrue(actual = chunks.all { it.tokens <= ChunkSize.MAX }, message = chunks.map { it.tokens }.toString())
+    }
+
     @Test
     fun `a code block that fits is never split, even across its blank lines`() {
         val code =
-            "```kotlin\n" + List(size = 30) { "val line$it = $it\n\nprintln(line$it)" }.joinToString("\n") + "\n```"
+            "```kotlin\n" + List(size = 20) { "val line$it = $it\n\nprintln(line$it)" }.joinToString("\n") + "\n```"
         val text = "# Code\n${paragraph(number = 1)}\n\n$code\n\n${paragraph(number = 2)}"
 
         val chunks = chunkNote(note = NOTE, text = text)

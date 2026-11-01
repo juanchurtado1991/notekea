@@ -3,7 +3,7 @@ package app.notekea.notes.domain
 /**
  * Packs ranges of a note's body, in order, into chunks of at most [ChunkSize.TARGET] (a range larger than it is a
  * chunk of its own), and gives each chunk after the first the previous one's last sentence or line when it is at most
- * [ChunkSize.OVERLAP] ([overlapped]), so a sentence cut between two chunks is whole in one of them.
+ * [ChunkSize.OVERLAP] and the chunk still fits [ChunkSize.MAX] ([overlapped]), so a sentence cut between two chunks is whole in one of them.
  */
 object ChunkPacker {
     fun pack(
@@ -30,7 +30,9 @@ object ChunkPacker {
         if (index == 0) return@mapIndexed chunk
         val previous = chunks[index - 1]
         val start = lastUnitStart(body = body, range = previous)
-        if (ChunkSize.of(body = body, range = start..previous.last) <= ChunkSize.OVERLAP) start..chunk.last else chunk
+        val fits = ChunkSize.of(body = body, range = start..previous.last) <= ChunkSize.OVERLAP &&
+            ChunkSize.of(body = body, range = start..chunk.last) <= ChunkSize.MAX
+        if (fits) start..chunk.last else chunk
     }
 
     /** Where the last sentence or line of [range] starts. */

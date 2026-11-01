@@ -129,6 +129,6 @@ object ChunkBlocks {
     private val LINE_ITEM = Regex(pattern = "^\\s*([-*+]\\s|\\d+[.)]\\s|\\|)")
     private val SENTENCE_END = Regex(pattern = "[.!?](?=\\s)")
 
-    // Characters of a forced cut, about the target size of a chunk.
-    private const val HARD_SPLIT_CHARACTERS = ChunkSize.TARGET * 4
+    // Characters of a forced cut, within the target size of a chunk at the estimate's 2.2 characters a token.
+    private const val HARD_SPLIT_CHARACTERS = ChunkSize.TARGET * 2
 }
