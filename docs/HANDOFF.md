@@ -10,8 +10,8 @@ Last updated: 2026-11-01, at the end of M1.
 - **M0 — Foundation:** ✅
 - **M1 — Vault and editor:** ✅ 18 of 18 items. Its QA run (`qa/runs/M1.md`) closed on 2026-11-01 with the macOS run
   of `m1-rc1`, as the developer decided: the Windows tester is not available until M2, and Linux was not run.
-- **M2 — Indexing, links and related notes:** started. 2.12 Color themes is done (#107) 2.1 Markdown chunking
-  (#108) and 2.2 Embedding engine are done; next is **2.3 Hybrid index** (`feature/hybrid-index`, `ROADMAP.md`).
+- **M2 — Indexing, links and related notes:** started. 2.12 Color themes is done (#107), 2.1 Markdown chunking
+  (#108) and 2.2 Embedding engine (#109) are done; next is **2.3 Hybrid index** (`feature/hybrid-index`, `ROADMAP.md`).
 
 ## Open work, in order
 

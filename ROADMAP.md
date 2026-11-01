@@ -43,7 +43,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
-| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 5 weeks | 2 / 12 |
+| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 5 weeks | 3 / 12 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 5.5 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
@@ -671,7 +671,7 @@ character range of every chunk (needed for citations). Pure `commonMain` logic, 
 - Checked on all 431 notes of `smoke-data` (`ChunkSmokeDataTest`); no Self-Test case, since nothing shows yet: the
   cases of 2.3, 2.4 and 2.6 exercise it.
 
-### ⬜ 2.2 Embedding engine — `feature/embeddings`
+### ✅ 2.2 Embedding engine — `feature/embeddings` — [notekea#109](https://github.com/juanchurtado1991/notekea/pull/109)
 
 `LlmEngine.embed` implemented with java-llama.cpp and a small bundled GGUF embedding model
 (~100 MB, e.g. nomic-embed or bge-small). Batched, off the UI thread, cancellable.
