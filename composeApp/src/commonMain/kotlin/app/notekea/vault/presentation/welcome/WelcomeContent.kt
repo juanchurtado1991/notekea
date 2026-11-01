@@ -50,7 +50,8 @@ private const val TWO_COLUMNS_MIN_WIDTH_DP = 820
 
 /**
  * Stateless welcome flow: nothing but the wordmark while the last vault is restored, the open vault once there is
- * one (drawn by [openedVaultContent], which the app provides so this feature does not depend on the notes one), and
+ * one (drawn by [openedVaultContent], which the app provides so this feature does not depend on the notes one, with
+ * the error over it when another vault fails to open from it), and
  * otherwise the welcome screen (`ROADMAP.md` 1.3, two columns since 1.14).
  */
 @Composable
@@ -75,6 +76,19 @@ fun WelcomeContent(
                 ) { onIntent(WelcomeIntent.OnSwitchVaultClick) }
 
                 else -> WelcomeHome(state = state, onIntent = onIntent)
+            }
+            // A vault that fails to open from the open one (Open folder… and its shortcut) says why over it.
+            if (openedVault != null && (state.error != null || state.hasUnexpectedError)) {
+                WelcomeErrorBanner(
+                    platformConventions = state.platformConventions,
+                    onDismiss = { onIntent(WelcomeIntent.OnErrorDismiss) },
+                    onLocate = { onIntent(WelcomeIntent.OnLocateVaultClick(missingPath = it)) },
+                    error = state.error.takeUnless { state.hasUnexpectedError },
+                    modifier = Modifier
+                        .align(alignment = Alignment.TopCenter)
+                        .padding(all = NotekeaDimensions.SpacingL)
+                        .widthIn(max = COLUMN_MAX_WIDTH_DP.dp)
+                )
             }
         }
     }

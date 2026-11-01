@@ -218,7 +218,8 @@ private fun treeIntentFor(
 
         conventions.renameShortcut.matches(event = event) -> VaultTreeIntent.OnRenameRequest()
 
-        conventions.deleteShortcut.matches(event = event) -> VaultTreeIntent.OnDeleteRequest()
+        conventions.deleteShortcut.matches(event = event) ||
+            conventions.alternateDeleteShortcut?.matches(event = event) == true -> VaultTreeIntent.OnDeleteRequest()
 
         else -> null
     }

@@ -192,7 +192,9 @@ class ResolvePlatformConventionsUseCaseTest {
         goToTabShortcuts = DIGITS.map { primary.with(it) },
         dialogButtonOrder = buttonOrder,
         appDataDirectory = appDataDirectory,
-        homeDirectory = homeDirectory
+        homeDirectory = homeDirectory,
+        alternateDeleteShortcut = Shortcut(key = ShortcutKey.BACKSPACE, modifiers = emptySet())
+            .takeIf { operatingSystem == OperatingSystem.MACOS }
     )
 
     private fun ShortcutModifier.with(
