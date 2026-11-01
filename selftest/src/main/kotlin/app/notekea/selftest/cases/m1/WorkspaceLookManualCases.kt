@@ -27,7 +27,8 @@ private fun SuiteBuilder.toolRail() {
                 "rises with rounded corners into the note; the other tabs are quiet, with a thin line between them " +
                 "and their ✕ only when pointed at. About shows the logo, Notekea, \"Version 0.1.0-alpha\", GitHub " +
                 "and this computer's shortcuts as keys (Notes, Writing, Workspace) with a scrollbar beside them; Esc " +
-                "closes it. Settings shows its sections dimmed and \"Coming soon\". Side panel hides and shows the " +
+                "closes it. Settings shows Appearance (Mode and the themes) and its other sections dimmed under " +
+                "\"Coming soon\". Side panel hides and shows the " +
                 "panel on the right. Open another vault shows the welcome screen: the logo, Notekea and the actions " +
                 "on the left, the recent vaults on the right."
         )
