@@ -15,9 +15,9 @@ Last updated: 2026-11-01, at the end of M1.
 
 ## Open work, in order
 
-1. **Release candidate `m1-rc2`:** the macOS run's fixes (#104: 1.3-09, 1.4-13, 1.8-05, the case text of 1.4-08,
-   the cut-off buttons of #101, the report's last steps and the cases not run) are on `main` but not published. Ask
-   the developer before tagging `m1-rc2` (`.github/workflows/milestone-build.yml`, version `1.1.2`).
+1. **No `m1-rc2`:** the developer decided to go straight to M2. The macOS run's fixes (#104: 1.3-09, 1.4-13, 1.8-05,
+   the case text of 1.4-08, the cut-off buttons of #101, the report's last steps and the cases not run) are on
+   `main` and assumed to work; M2's QA run, from `m2-rc1`, checks them again with every M1 case.
 2. **Issue #103** (1.11-16, dragging a tab is unreliable with several tabs) is the only open issue, deferred to M2:
    reproduce it on macOS at 200% before fixing, as the issue says.
 3. **`qa/README.md` piece 5** is 🟡: `MVP_SMOKE_TEST.md` is still edited by hand; making it generated from the
