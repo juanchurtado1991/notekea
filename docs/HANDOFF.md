@@ -15,21 +15,17 @@ Last updated: 2026-11-01, at the end of M1.
 
 ## Open work, in order
 
-1. **Pull request #104** (`fix/m1-rc1-macos-findings`): the fixes of the macOS run (1.3-09, 1.4-13, 1.8-05, the case
-   text of 1.4-08), issue #101 (the manager's and the crash notice's buttons cut off), a report's last steps
-   without the app's own feed intents (`FeedIntent`), the report naming the cases not run, and the M1 record. Waiting
-   for the developer's review.
-2. **After #104 is merged:** ask the developer before tagging `m1-rc2`, which publishes the release candidate with
-   those fixes (`.github/workflows/milestone-build.yml`, version `1.1.2`).
-3. **Issues:**
-   - #100 and #102 (G-07 on macOS and Windows) show the crash test working as designed; the developer may close them.
-   - #101 is fixed by #104.
-   - #103 (1.11-16, dragging a tab is unreliable with several tabs) is deferred to M2: reproduce it on macOS at 200%
-     before fixing, as the issue says.
-4. **Dependabot** pull requests #98 and #99: the developer reviews them like any other.
-5. **`qa/README.md` piece 5** is 🟡: `MVP_SMOKE_TEST.md` is still edited by hand; making it generated from the
+1. **Release candidate `m1-rc2`:** the macOS run's fixes (#104: 1.3-09, 1.4-13, 1.8-05, the case text of 1.4-08,
+   the cut-off buttons of #101, the report's last steps and the cases not run) are on `main` but not published. Ask
+   the developer before tagging `m1-rc2` (`.github/workflows/milestone-build.yml`, version `1.1.2`).
+2. **Issue #103** (1.11-16, dragging a tab is unreliable with several tabs) is the only open issue, deferred to M2:
+   reproduce it on macOS at 200% before fixing, as the issue says.
+3. **`qa/README.md` piece 5** is 🟡: `MVP_SMOKE_TEST.md` is still edited by hand; making it generated from the
    Self-Test's cases (`./gradlew :selftest:smokeCases`, `qa/SELF_TEST.md`) is still to do. Until then, every case
    change goes both in `:selftest` and in `MVP_SMOKE_TEST.md`.
+4. **M2** starts with 2.1 Markdown chunking (above).
+
+No pull request is open.
 
 ## The M2 QA run
 
