@@ -13,3 +13,8 @@ This product bundles the following icons (license texts in the same folder):
   the icons derived from Feather are Copyright (c) 2013-present Cole Bemis, licensed under the MIT License
 - Compose Icons 2.2.1 (Lucide for Compose Multiplatform), Copyright (c) 2025 Composable Horizons, licensed under the
   MIT License (https://github.com/composablehorizons/composeicons)
+
+This product bundles the following model for searching notes by meaning:
+- granite-embedding-107m-multilingual, Copyright IBM, licensed under the Apache License, Version 2.0 (see LICENSE)
+  (https://huggingface.co/ibm-granite/granite-embedding-107m-multilingual), in the Q8_0 GGUF conversion by bartowski
+  (https://huggingface.co/bartowski/granite-embedding-107m-multilingual-GGUF)

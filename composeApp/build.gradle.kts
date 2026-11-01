@@ -191,6 +191,8 @@ compose.desktop {
         jvmArgs += "-D$appVersionSystemProperty=$appDisplayVersion"
 
         nativeDistributions {
+            // The embedding model (ROADMAP.md 2.2) goes with the app, read from compose.application.resources.dir.
+            appResourcesRootDir.set(layout.buildDirectory.dir("app-resources"))
             targetFormats(
                 TargetFormat.Deb,
                 TargetFormat.Dmg,
@@ -225,6 +227,16 @@ compose.desktop {
             }
         }
     }
+}
+
+// The bundled embedding model: downloaded once (checked by its SHA-256) and put into the app's resources; the tests
+// of the real model read it where it was downloaded.
+val downloadEmbeddingModel = EmbeddingModel.registerDownload(project)
+val embeddingModelResources = EmbeddingModel.appResources(project)
+tasks.matching { it.name == "prepareAppResources" }.configureEach { dependsOn(embeddingModelResources) }
+tasks.withType<Test>().configureEach {
+    dependsOn(downloadEmbeddingModel)
+    systemProperty(EmbeddingModel.TEST_PROPERTY, EmbeddingModel.file(project).asFile.absolutePath)
 }
 
 val checkRuntimeModules = tasks.register<CheckRuntimeModulesTask>("checkRuntimeModules") {
