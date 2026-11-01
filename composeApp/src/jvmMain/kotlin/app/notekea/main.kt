@@ -31,6 +31,7 @@ import co.touchlab.kermit.platformLogWriter
 import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.SystemAppearance
+import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.platform.domain.SystemEnvironment
 import app.notekea.core.presentation.gallery.DesignSystemGallery
 import app.notekea.core.presentation.platform.LocalResizePointerIcon
@@ -40,6 +41,7 @@ import app.notekea.core.presentation.platform.LocalWindowCloseGuard
 import app.notekea.core.presentation.platform.awtFileDrop
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.WindowCloseGuard
+import app.notekea.core.presentation.theme.LocalAppearance
 import app.notekea.core.presentation.theme.LocalSystemDarkTheme
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.di.desktopModules
@@ -60,6 +62,7 @@ import com.testbuddy.crash.CrashBuddy
 import com.testbuddy.crash.CrashConfig
 import com.testbuddy.crash.CrashNotice
 import com.testbuddy.crash.CrashTexts
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.getString
 import org.koin.core.module.Module
@@ -114,11 +117,16 @@ fun runNotekea(
     val showGallery = System.getProperty(GALLERY_PROPERTY).toBoolean()
     val isCrashTest = koin.get<SystemEnvironment>().environmentVariable(name = CRASH_TEST_VARIABLE) == CRASH_TEST_ON
     val systemDarkTheme = koin.get<SystemAppearance>().observeDarkTheme()
+    val appearances = koin.get<AppearanceStore>().observe()
+    // Read before the first window, so it never opens in the default theme first.
+    val keptAppearance = runBlocking { appearances.first() }
     application {
         val isSystemDark by systemDarkTheme.collectAsState(initial = null)
+        val appearance by appearances.collectAsState(initial = keptAppearance)
         CompositionLocalProvider(
             LocalWindowExceptionHandlerFactory provides crashBuddy.windowExceptionHandlers(),
             LocalSystemDarkTheme provides isSystemDark,
+            LocalAppearance provides appearance,
             LocalFileDrop provides ::awtFileDrop,
             LocalAppVersion provides koin.get<SystemEnvironment>().appVersion
         ) {
