@@ -121,7 +121,7 @@ of the platform as keycaps, so a new shortcut is added there too (`AboutShortcut
 ## References
 
 - [Apple Human Interface Guidelines — macOS](https://developer.apple.com/design/human-interface-guidelines/designing-for-macos)
-  (also available to agents as the `macos-design-guidelines` skill in `.claude/skills`)
+  (also available to agents as the `macos-design-guidelines` skill in `.agents/skills`)
 - [Windows app design (Fluent)](https://learn.microsoft.com/windows/apps/design/)
 - [GNOME Human Interface Guidelines](https://developer.gnome.org/hig/)
 - [Compose Desktop components: menus, tray, windows](https://kotlinlang.org/docs/multiplatform/compose-desktop-components.html)

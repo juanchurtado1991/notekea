@@ -70,9 +70,10 @@ them.
 
 ## Skills
 
-`.claude/skills/<name>/SKILL.md` are plain Markdown guides (third-party, see `.claude/skills/THIRD_PARTY_NOTICES.md`).
-Claude Code loads them on its own; any other agent reads the relevant `SKILL.md`, and the reference files it points
-to, from disk before the work it covers:
+`.agents/skills/<name>/SKILL.md` are plain Markdown guides in the open Agent Skills format (third-party, see
+`.agents/skills/THIRD_PARTY_NOTICES.md`). `.claude/skills` is a link to the same folder, from where Claude Code loads
+them on its own. An agent that loads skills from another folder can link it there too; any other agent reads the
+relevant `SKILL.md`, and the reference files it points to, from disk before the work it covers:
 
 | Work | Read first |
 |---|---|

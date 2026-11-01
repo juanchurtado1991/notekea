@@ -46,8 +46,8 @@ hs_err_pid*
 *.keystore
 *.p12
 
-# --- Claude Code -----------------------------------------------------------
-# Shared and committed: CLAUDE.md and .claude/skills/. Personal and ignored:
+# --- AI coding agents -------------------------------------------------------
+# Shared and committed: AGENTS.md, CLAUDE.md, .agents/skills/ and the .claude/skills link to it. Personal and ignored:
 .claude/settings.local.json
 .claude/*.local.*
 
