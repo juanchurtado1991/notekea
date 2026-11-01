@@ -13,11 +13,13 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import com.testbuddy.Suite
 import com.testbuddy.crash.AppEnvironment
+import java.awt.GraphicsEnvironment
 import kotlin.system.exitProcess
 
 /**
  * The manager: a small window of its own next to the app, always on top, at the bottom left of the screen, which the
- * tester moves and minimizes as any window; closing it only minimizes it, so it is never lost.
+ * tester moves and minimizes as any window; closing it only minimizes it, so it is never lost. It is never taller than
+ * the screen leaves room for, and its tabs scroll in it ([TabLayout]).
  */
 @Composable
 internal fun ApplicationScope.ManagerWindow(
@@ -28,7 +30,7 @@ internal fun ApplicationScope.ManagerWindow(
     val state by session.state.collectAsState()
     val windowState = rememberWindowState(
         position = WindowPosition(alignment = Alignment.BottomStart),
-        size = DpSize(width = WIDTH_DP.dp, height = HEIGHT_DP.dp)
+        size = DpSize(width = WIDTH_DP.dp, height = heightOnScreen().dp)
     )
     val machine = remember { AppEnvironment.current().let { "${it.system.substringBefore(" (")} · ${it.screen}" } }
     val actions = remember { managerActions(session = session, folders = folders) }
@@ -72,5 +74,18 @@ private fun managerActions(
     onOpenReport = { DesktopActions.open(folder = folders.report) }
 )
 
+/** [HEIGHT_DP], or less on a short screen: the room the taskbar or the Dock leaves, with a margin. */
+private fun heightOnScreen(): Int {
+    val room = if (GraphicsEnvironment.isHeadless()) {
+        HEIGHT_DP
+    } else {
+        GraphicsEnvironment.getLocalGraphicsEnvironment()
+            .maximumWindowBounds.height - SCREEN_MARGIN_DP
+    }
+    return room.coerceIn(minimumValue = MIN_HEIGHT_DP, maximumValue = HEIGHT_DP)
+}
+
 private const val WIDTH_DP = 380
 private const val HEIGHT_DP = 640
+private const val MIN_HEIGHT_DP = 360
+private const val SCREEN_MARGIN_DP = 40

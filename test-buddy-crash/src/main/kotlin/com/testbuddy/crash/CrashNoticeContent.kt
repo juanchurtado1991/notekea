@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -25,7 +27,8 @@ import androidx.compose.ui.unit.dp
 /**
  * What the crash notice says: the app must close, its work is saved first, where the report is (selectable), and the
  * actions: Copy details (confirmed under the buttons), Report on GitHub when the app has a form, and Close, the primary
- * one, placed as the platform orders dialog buttons ([CrashConfig.isCloseLast]). It fills the window it is in.
+ * one, placed as the platform orders dialog buttons ([CrashConfig.isCloseLast]). It fills the window it is in: the
+ * text scrolls when it does not fit, the buttons are always shown.
  */
 @Composable
 internal fun CrashNoticeContent(
@@ -39,14 +42,19 @@ internal fun CrashNoticeContent(
     val texts = config.texts
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Column(modifier = Modifier.padding(all = 24.dp), verticalArrangement = Arrangement.spacedBy(space = 12.dp)) {
-            Text(
-                text = texts.title,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.error
-            )
-            Text(text = texts.message, style = MaterialTheme.typography.bodyMedium)
-            ReportLocation(texts = texts, path = crash.path)
-            Spacer(modifier = Modifier.weight(weight = 1f))
+            // The text scrolls and the buttons stay under it, so a large text size never pushes them out of the window.
+            Column(
+                modifier = Modifier.weight(weight = 1f).verticalScroll(state = rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(space = 12.dp)
+            ) {
+                Text(
+                    text = texts.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.error
+                )
+                Text(text = texts.message, style = MaterialTheme.typography.bodyMedium)
+                ReportLocation(texts = texts, path = crash.path)
+            }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
                 if (!config.isCloseLast) Button(onClick = onClose) { Text(text = texts.close) }
                 OutlinedButton(onClick = { onCopy().also { isCopied = true } }) { Text(text = texts.copy) }

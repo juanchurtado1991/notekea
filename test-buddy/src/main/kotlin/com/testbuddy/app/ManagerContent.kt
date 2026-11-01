@@ -2,7 +2,6 @@ package com.testbuddy.app
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,10 +36,7 @@ internal fun ManagerContent(
     Column(modifier = Modifier.fillMaxSize().background(color = Color.White)) {
         TitleBar(title = "${suite.appName} QA", subtitle = "${suite.version} · $machine")
         Tabs(selected = state.tab, onSelect = actions.onTab)
-        Column(
-            modifier = Modifier.fillMaxSize().padding(start = 14.dp, end = 14.dp, bottom = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(space = 10.dp)
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(start = 14.dp, end = 14.dp, bottom = 12.dp)) {
             when (state.tab) {
                 ManagerTab.AUTOMATIC -> AutomaticTab(cases = suite.automated, state = state, actions = actions)
 

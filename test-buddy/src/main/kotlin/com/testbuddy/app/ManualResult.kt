@@ -3,7 +3,6 @@ package com.testbuddy.app
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
@@ -24,20 +23,56 @@ import com.testbuddy.ManualCase
 import java.nio.file.Path
 
 /**
- * A manual case's result, after its last step: what the tester should have seen, then the case's two answers
- * ([ManualCase.passLabel], [ManualCase.failLabel]). The second asks what they saw and takes a screenshot; the steps
- * they took in the app are added to the report for them.
+ * A manual case's result, after its last step: the case's [header], what the tester should have seen, then the
+ * case's two answers ([ManualCase.passLabel], [ManualCase.failLabel]). The second asks what they saw and takes a
+ * screenshot; the steps they took in the app are added to the report for them. Save (or Back to the steps) and
+ * [otherCases] stay under it.
  */
 @Composable
-internal fun ColumnScope.ManualResult(
+internal fun ManualResult(
     case: ManualCase,
-    actions: ManagerActions
+    actions: ManagerActions,
+    header: @Composable ColumnScope.() -> Unit,
+    otherCases: @Composable ColumnScope.() -> Unit
 ) {
     var isFailing by remember(case.id) { mutableStateOf(value = false) }
     var note by remember(case.id) { mutableStateOf(value = "") }
     var screenshot by remember(case.id) { mutableStateOf<Path?>(value = null) }
-    SectionLabel(text = "YOU SHOULD HAVE SEEN")
-    Text(text = case.expected, fontSize = 13.sp)
+    TabLayout(actions = {
+        if (isFailing) {
+            Button(onClick = {
+                actions.onFail(note, screenshot)
+            }, enabled = note.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
+                Text(text = "Save and go to the next case")
+            }
+        } else {
+            OutlinedButton(onClick = actions.onPreviousStep, modifier = Modifier.fillMaxWidth()) {
+                Text(text = "‹ Back to the steps")
+            }
+        }
+        otherCases()
+    }) {
+        header()
+        SectionLabel(text = "YOU SHOULD HAVE SEEN")
+        Text(text = case.expected, fontSize = 13.sp)
+        Answers(case = case, actions = actions, onFail = { isFailing = true })
+        if (isFailing) {
+            WhatYouSaw(
+                note = note,
+                hasScreenshot = screenshot != null,
+                onNote = { note = it },
+                onPickScreenshot = { actions.onPickScreenshot()?.let { screenshot = it } }
+            )
+        }
+    }
+}
+
+@Composable
+private fun Answers(
+    case: ManualCase,
+    actions: ManagerActions,
+    onFail: () -> Unit
+) {
     Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
         Button(
             onClick = actions.onPass,
@@ -45,30 +80,10 @@ internal fun ColumnScope.ManualResult(
             modifier = Modifier.weight(weight = 1f)
         ) { Text(text = case.passLabel) }
         Button(
-            onClick = { isFailing = true },
+            onClick = onFail,
             colors = ButtonDefaults.buttonColors(containerColor = SelfTestColors.Failed),
             modifier = Modifier.weight(weight = 1f)
         ) { Text(text = case.failLabel) }
-    }
-    if (isFailing) {
-        WhatYouSaw(
-            note = note,
-            hasScreenshot = screenshot != null,
-            onNote = { note = it },
-            onPickScreenshot = { actions.onPickScreenshot()?.let { screenshot = it } }
-        )
-    }
-    Spacer(modifier = Modifier.weight(weight = 1f))
-    if (isFailing) {
-        Button(onClick = {
-            actions.onFail(note, screenshot)
-        }, enabled = note.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Save and go to the next case")
-        }
-    } else {
-        OutlinedButton(onClick = actions.onPreviousStep, modifier = Modifier.fillMaxWidth()) {
-            Text(text = "‹ Back to the steps")
-        }
     }
 }
 
