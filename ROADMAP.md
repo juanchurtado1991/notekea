@@ -43,7 +43,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
-| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 5 weeks | 0 / 12 |
+| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 5 weeks | 1 / 12 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 5.5 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
@@ -624,7 +624,7 @@ the automated smoke runs of 1.16, and its smoke test also checks the code trim o
 
 ## M2 — Indexing, links and related notes
 
-### ⬜ 2.12 Color themes — `feature/color-themes`
+### ✅ 2.12 Color themes — `feature/color-themes` — [notekea#107](https://github.com/juanchurtado1991/notekea/pull/107)
 
 Settings → Appearance, the first section of Settings to be built: the light and dark mode, and a color theme. Nine
 themes join the default palette (above), each made from two tones (a deep one and a light one) chosen by the
