@@ -685,7 +685,8 @@ character range of every chunk (needed for citations). Pure `commonMain` logic, 
   java-llama.cpp's native library extracted to the app data, not `/tmp`. The build downloads the model from a pinned
   commit, checks its SHA-256 and bundles it in Notekea and Notekea QA; CI caches it.
 - `TokenEstimate` (2.1) counts a token every two characters: the model's tokenizer splits code finely, and
-  `ChunkModelTokensTest` checks every chunk of `smoke-data` fits it and is never over its estimate.
+  `ChunkTokensRealModelTest` checks every chunk of `smoke-data` fits it and is never over its estimate. The tests
+  that load the model run in `modelTest`, in the nightly build, not in every pull request's `check`.
 
 ### ⬜ 2.3 Hybrid index — `feature/hybrid-index`
 

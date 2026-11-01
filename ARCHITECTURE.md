@@ -177,11 +177,11 @@ abstract class BaseViewModel<S, I, E>(
   tests and the `:ktlint-rules` module).
   A new convention in this document comes with its Konsist rule in the same pull request.
 - **Unit tests never load a real model.** Fakes of the ports stand in for it: a fake `TextEmbedder` (2.3) returns
-  deterministic vectors and `FakeLlmEngine` scripted generations. The one model tests load is the embedding model the
-  app bundles (`ROADMAP.md` 2.2): its adapter's tests (`LlamaTextEmbedderTest`, `ChunkModelTokensTest`) run in
-  `check` on the three systems, since it ships with the app, is 121 MB, is cached by CI and takes about two seconds,
-  and they prove its native library loads everywhere. Tests of the chat models (gigabytes, downloaded by the user)
-  stay out of `check`, in an `integrationTest` task that 3.2 adds.
+  deterministic vectors and `FakeLlmEngine` scripted generations. Tests that load a real model are named
+  `*RealModelTest` and stay out of `check`, which every pull request runs: `./gradlew :composeApp:modelTest` runs them,
+  and so does the nightly build on the three systems. Today they are the bundled embedding model's
+  (`LlamaTextEmbedderRealModelTest`, `ChunkTokensRealModelTest`, `ROADMAP.md` 2.2), which also prove its native
+  library loads everywhere; the chat models' (3.2) join them.
 - Unit tests never touch the real user home, network or clock.
 
 ## 9. Logging
