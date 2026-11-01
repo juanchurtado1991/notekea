@@ -113,6 +113,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The agent instructions are in `AGENTS.md`, for any AI coding agent (`CLAUDE.md` only points there), with the
+  working rules that lived in one agent's memory and a table of which skill to read for each kind of work.
+  `docs/HANDOFF.md` says where the project stands and what comes next.
 - Code cleanup from Android Studio's analyzer: 86 unused imports, unused symbols (`GitSync` and `VectorIndex`, back
   with their features in M3, three Markdown constants, three icons), KDoc links to parameters as code, opt-ins and
   qualified names that were not needed.
