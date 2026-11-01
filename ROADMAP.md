@@ -145,8 +145,9 @@ platform guidelines, community files. See `CHANGELOG.md`.
 
 ## M1 — Vault and editor
 
-M1 is closed (2026-11-01): its QA run (`qa/runs/M1.md`) passed on macOS with m1-rc1, and its fixes go in m1-rc2.
-Windows and Linux are tested again in M2's run; 1.11-16 (tab drag, #103) is deferred to M2.
+M1 is closed (2026-11-01): its QA run (`qa/runs/M1.md`) passed on macOS with m1-rc1. Its fixes are on `main` without a
+release candidate of their own: M2's run (from m2-rc1) checks them, with Windows and Linux; 1.11-16 (tab drag, #103) is
+deferred to M2.
 
 ### ✅ 1.1 Platform conventions — `feature/platform-conventions` — [notekea#15](https://github.com/juanchurtado1991/notekea/pull/15)
 
