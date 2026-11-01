@@ -17,7 +17,7 @@ import kotlin.test.assertTrue
  * (`ARCHITECTURE.md`: unit tests use fakes): unit vectors of its size, closeness in meaning across Spanish and English,
  * a text over its context refused, a missing file named, and the model let go when it is idle.
  */
-class LlamaTextEmbedderTest {
+class LlamaTextEmbedderRealModelTest {
     private val modelPath = System.getProperty(MODEL_PROPERTY)
     private val natives = Files.createTempDirectory("notekea-natives").toString()
 

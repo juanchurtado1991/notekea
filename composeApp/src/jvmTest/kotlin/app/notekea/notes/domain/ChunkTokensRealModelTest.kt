@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
  * `ROADMAP.md` 2.1 and 2.2 together: every chunk of every `smoke-data` note fits what the bundled embedding model
  * reads, counted by its own tokenizer, and the estimate the chunks are sized by never counts fewer tokens than it.
  */
-class ChunkModelTokensTest {
+class ChunkTokensRealModelTest {
     private val chunkNote = ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder()))
 
     @Test

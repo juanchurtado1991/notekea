@@ -52,7 +52,7 @@ cut to that estimate one still came out 2 tokens over it, so the estimate counts
   `15691dfe830257f5…`, checked in full when packaging). Best results, fastest, smallest, Apache 2.0, no prefixes for
   questions or passages. bge-m3 is no better on this set and an order of magnitude slower and larger.
 - **`TokenEstimate` counts one token per two characters** (and at least two per word), so a chunk of at most 400
-  estimated tokens always fits the model's 512 (`ChunkModelTokensTest` checks every chunk of `smoke-data` with the
+  estimated tokens always fits the model's 512 (`ChunkTokensRealModelTest` checks every chunk of `smoke-data` with the
   model's tokenizer). Prose chunks become smaller in real tokens (about 180 to 260). The embedder also refuses a text longer than the model's context rather than
   cutting it silently.
 - java-llama.cpp loads its natives from a folder given by `de.kherud.llama.lib.path`: the adapter extracts them to the

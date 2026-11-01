@@ -40,9 +40,10 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
+      # check, and the tests that load the bundled embedding model, which pull requests skip (ARCHITECTURE.md).
       - name: Lint, test and coverage
         shell: bash
-        run: ./gradlew check koverVerify --continue --console=plain
+        run: ./gradlew check koverVerify :composeApp:modelTest --continue --console=plain
 
       - name: Smoke runs with memory
         if: always()

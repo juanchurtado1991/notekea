@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.kover)
 }
 
+private val modelTestPattern = "*RealModelTest"
 private val appPackageName = "Notekea"
 // The installers need a plain version whose first number is above 0 (DMG) and with no suffix (MSI); people see
 // appDisplayVersion, in About and crash reports, until the first public release. A milestone build passes both:
@@ -229,12 +230,21 @@ compose.desktop {
     }
 }
 
-// The bundled embedding model: downloaded once (checked by its SHA-256) and put into the app's resources; the tests
-// of the real model read it where it was downloaded.
+// The bundled embedding model: downloaded once (checked by its SHA-256) and put into the app's resources.
 val downloadEmbeddingModel = EmbeddingModel.registerDownload(project)
 val embeddingModelResources = EmbeddingModel.appResources(project)
 tasks.matching { it.name == "prepareAppResources" }.configureEach { dependsOn(embeddingModelResources) }
-tasks.withType<Test>().configureEach {
+
+// The tests that load the real model (named *RealModelTest) stay out of check, which every pull request runs: they run in
+// `./gradlew :composeApp:modelTest`, in the nightly build (ARCHITECTURE.md, testing).
+val jvmTest = tasks.named<Test>("jvmTest") { filter { excludeTestsMatching(modelTestPattern) } }
+tasks.register<Test>("modelTest") {
+    description = "Runs the tests that load the bundled embedding model"
+    group = "verification"
+    testClassesDirs = jvmTest.get().testClassesDirs
+    classpath = jvmTest.get().classpath
+    useJUnit()
+    filter { includeTestsMatching(modelTestPattern) }
     dependsOn(downloadEmbeddingModel)
     systemProperty(EmbeddingModel.TEST_PROPERTY, EmbeddingModel.file(project).asFile.absolutePath)
 }

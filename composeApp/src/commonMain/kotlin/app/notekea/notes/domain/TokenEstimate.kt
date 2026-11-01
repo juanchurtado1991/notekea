@@ -5,7 +5,7 @@ package app.notekea.notes.domain
  * every two characters and at least two per word, whichever is larger, so a chunk is never larger than it is counted.
  * Measured against the bundled multilingual model's tokenizer on every chunk of `smoke-data`
  * (`docs/spikes/2026-11-01-embedding-models.md`): it cuts code and rare words into many pieces, down to 2.13
- * characters a token, and this estimate never undercounts (`ChunkModelTokensTest`).
+ * characters a token, and this estimate never undercounts (`ChunkTokensRealModelTest`).
  */
 object TokenEstimate {
     fun of(
