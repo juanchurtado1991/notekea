@@ -43,7 +43,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
-| M2 — Indexing, links and related notes | Local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 4.5 weeks | 0 / 11 |
+| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 5 weeks | 0 / 12 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 5.5 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
@@ -124,7 +124,8 @@ day after two earlier versions (saturated olive and orange, then sage and terrac
   (JetBrains Mono, SIL OFL) for code blocks. Scale: 12 / 14 (body) / 16 / 20 / 28.
 - **Spacing:** 4 dp grid (4, 8, 12, 16, 24, 32). **Corner radius:** 6 dp controls, 10 dp cards.
 - **Motion:** 150–200 ms for panel open/close; no animation longer than 250 ms; respect "reduce motion".
-- **Themes:** light and dark, following the system by default.
+- **Themes:** light and dark, following the system by default; since 2.12 also chosen in Settings → Appearance,
+  with nine color themes besides this default palette.
 - **Accessibility:** WCAG AA contrast for text, every action reachable by keyboard, visible focus ring,
   semantics for screen readers on all interactive elements.
 
@@ -623,6 +624,39 @@ the automated smoke runs of 1.16, and its smoke test also checks the code trim o
 
 ## M2 — Indexing, links and related notes
 
+### ⬜ 2.12 Color themes — `feature/color-themes`
+
+Settings → Appearance, the first section of Settings to be built: the light and dark mode, and a color theme. Nine
+themes join the default palette (above), each made from two tones (a deep one and a light one) chosen by the
+developer on 2026-11-01:
+
+| Theme | Deep tone | Light tone |
+|---|---|---|
+| Midnight Lime | `#071A52` | `#A7FF83` |
+| Deep Sage | `#152D35` | `#D4ECDD` |
+| Signal Almond | `#F62440` | `#FFFAF3` |
+| Cosmic Violet | `#0C134F` | `#D4ADFC` |
+| Azure Cloud | `#1B4EF5` | `#F7DCFF` |
+| Neon Porcelain | `#FF6115` | `#FFFCF4` |
+| Forest Mint | `#18251D` | `#B7FF72` |
+| Prompt Green | `#0B132B` | `#39FF88` |
+| Clay Butter | `#6B352A` | `#FFF1A6` |
+
+- **Colors:** every theme has a light and a dark version built from its two tones: in dark, the deep tone is the
+  page and the light tone leads (actions, selection, links, tags); in light, the light tone is the page (a tint of it
+  when it is vivid) and the deep tone leads. Every pair of text and background meets WCAG AA (4.5:1), checked by a
+  test for every theme and mode; a tone is darkened or lightened only as far as that needs. The logo takes the
+  theme's colors. The colors of meaning (bookmarks, file types, warnings, errors) stay the same in every theme.
+- **UI — Settings → Appearance** (design A, picked 2026-11-01):
+  - **Mode:** System, Light or Dark (a segmented control); System follows the operating system, as before.
+  - **Theme:** a grid of cards, three per row, each showing the theme's light and dark versions side by side with
+    its name; the chosen one is outlined and checked. Clicking or Enter on a card applies it at once.
+  - The other sections stay "Coming soon" (5.2).
+- **Behavior:** the choice applies at once to every window, the crash notice included, and is kept for the next run
+  (app settings, the same for every vault).
+- **Done when:** each theme can be chosen with the mouse and the keyboard and shows in light and dark, the choice
+  survives a restart, and the contrast test passes for all twenty color schemes.
+
 ### ⬜ 2.1 Markdown chunking — `feature/chunking`
 
 Split each note by headings into chunks of ~200–400 tokens with overlap; keep note path, heading path and
@@ -1009,7 +1043,7 @@ First run flow, three steps, skippable at any point:
 ### ⬜ 5.2 Settings — `feature/settings`
 
 `Mod+,` opens Settings (the dialog the tool rail's Settings opens since 1.14, with its sections marked "Coming soon")
-with sections: General (theme, language, open last vault), Editor (font size, line width,
+with sections: General (language, open last vault), Appearance (mode and color theme, built in 2.12), Editor (font size, line width,
 spell check), Files (update links when renaming: always or ask, default always; attachments folder, daily notes folder and date format, templates folder — prefilled from
 `.obsidian/` when present), AI (model manager, chat scope default), Sync (M4), Shortcuts (read-only list),
 About (version, licenses, privacy statement).
