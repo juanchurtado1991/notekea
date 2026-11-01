@@ -76,6 +76,7 @@ object PreviewPlatformConventions {
             .map { Shortcut(key = it, modifiers = setOf(ShortcutModifier.CONTROL)) },
         dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
         appDataDirectory = APP_DATA,
-        homeDirectory = HOME
+        homeDirectory = HOME,
+        alternateDeleteShortcut = null
     )
 }

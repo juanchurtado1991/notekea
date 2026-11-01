@@ -58,6 +58,24 @@ class AttachFileUseCaseTest {
         assertEquals(expected = setOf(RelativePath(value = "Recipes/menu.pdf")), actual = store.contents.keys)
     }
 
+    // Smoke 1.8-05 on macOS: a Switch game, `Game [0100][v0].nsp`, was embedded as `![[Game [0100][v0].nsp]]`, a link
+    // the first `]]` ends, so it showed as broken.
+    @Test
+    fun `a file whose name would end its embed is saved under a name the embed can hold`() = runTest {
+        store.outside["/home/ana/Downloads/Game [0100][v0] #1 | demo.nsp"] = PNG
+
+        val copied = attachFile(
+            vaultPath = VAULT,
+            note = NOTE,
+            source = AttachmentSource.File(absolutePath = "/home/ana/Downloads/Game [0100][v0] #1 | demo.nsp")
+        )
+
+        assertEquals(
+            expected = "attachments/Game (0100)(v0) 1 demo.nsp",
+            actual = (copied as Outcome.Success).value.value
+        )
+    }
+
     companion object {
         private const val VAULT = "/home/ana/Notes"
         private val NOTE = RelativePath(value = "Recipes/Arepas.md")

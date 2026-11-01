@@ -27,9 +27,8 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
         val primary = { key: ShortcutKey, extra: ShortcutModifier? -> shortcut(key, primaryModifier, extra) }
         return PlatformConventions(
             operatingSystem = operatingSystem, primaryModifier = primaryModifier,
-            openFolderShortcut = primary(ShortcutKey.O, null),
+            openFolderShortcut = primary(ShortcutKey.O, null), newNoteShortcut = primary(ShortcutKey.N, null),
             quitShortcut = quitShortcutFor(operatingSystem = operatingSystem),
-            newNoteShortcut = primary(ShortcutKey.N, null),
             renameShortcut = renameShortcutFor(operatingSystem = operatingSystem),
             openSelectedShortcut = openSelectedShortcutFor(operatingSystem = operatingSystem),
             deleteShortcut = deleteShortcutFor(operatingSystem = operatingSystem),
@@ -59,7 +58,8 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             goToTabShortcuts = DIGITS.map { primary(it, null) },
             dialogButtonOrder = dialogButtonOrderFor(operatingSystem = operatingSystem),
             appDataDirectory = appDataDirectoryFor(operatingSystem = operatingSystem),
-            homeDirectory = systemEnvironment.userHome
+            homeDirectory = systemEnvironment.userHome,
+            alternateDeleteShortcut = alternateDeleteShortcutFor(operatingSystem = operatingSystem)
         )
     }
 
@@ -95,6 +95,11 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
         OperatingSystem.MACOS -> Shortcut(key = ShortcutKey.BACKSPACE, modifiers = setOf(ShortcutModifier.COMMAND))
         OperatingSystem.LINUX, OperatingSystem.WINDOWS -> Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet())
     }
+
+    private fun alternateDeleteShortcutFor(
+        operatingSystem: OperatingSystem
+    ): Shortcut? = Shortcut(key = ShortcutKey.BACKSPACE, modifiers = emptySet())
+        .takeIf { operatingSystem == OperatingSystem.MACOS }
 
     private fun detectOperatingSystem(
         name: String
