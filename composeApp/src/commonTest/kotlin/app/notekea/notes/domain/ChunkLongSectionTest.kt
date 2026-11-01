@@ -30,7 +30,7 @@ class ChunkLongSectionTest {
     // went over it once the previous chunk's last sentence was added in front of it.
     @Test
     fun `the previous chunk's last sentence is added only while the chunk still fits the maximum`() {
-        val nearlyFull = (1..20).joinToString(separator = " ") { "Long paragraph sentence $it has words in it." }
+        val nearlyFull = (1..18).joinToString(separator = " ") { "Long paragraph sentence $it has words in it." }
         val text = "# Long\n${paragraph(number = 1)}\n\n$nearlyFull"
 
         val chunks = chunkNote(note = NOTE, text = text)
