@@ -17,23 +17,15 @@ import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaListItem
 import app.notekea.core.presentation.platform.displayPath
+import app.notekea.core.presentation.elapsedTimeText
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.resources.Res
-import app.notekea.resources.elapsed_days
-import app.notekea.resources.elapsed_hours
-import app.notekea.resources.elapsed_just_now
-import app.notekea.resources.elapsed_minutes
-import app.notekea.resources.elapsed_months
-import app.notekea.resources.elapsed_weeks
-import app.notekea.resources.elapsed_years
 import app.notekea.resources.welcome_recent_locate
 import app.notekea.resources.welcome_recent_missing
 import app.notekea.resources.welcome_recent_open
 import app.notekea.resources.welcome_recent_remove
 import app.notekea.vault.domain.RecentVaultStatus
-import org.jetbrains.compose.resources.PluralStringResource
-import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_WIDTH_DP = 520
@@ -100,25 +92,6 @@ private fun MissingVaultActions(
         )
     }
 }
-
-@Composable
-private fun elapsedTimeText(
-    elapsed: ElapsedTime
-): String = when (elapsed) {
-    is ElapsedTime.Days -> countText(resource = Res.plurals.elapsed_days, count = elapsed.count)
-    is ElapsedTime.Hours -> countText(resource = Res.plurals.elapsed_hours, count = elapsed.count)
-    ElapsedTime.JustNow -> stringResource(resource = Res.string.elapsed_just_now)
-    is ElapsedTime.Minutes -> countText(resource = Res.plurals.elapsed_minutes, count = elapsed.count)
-    is ElapsedTime.Months -> countText(resource = Res.plurals.elapsed_months, count = elapsed.count)
-    is ElapsedTime.Weeks -> countText(resource = Res.plurals.elapsed_weeks, count = elapsed.count)
-    is ElapsedTime.Years -> countText(resource = Res.plurals.elapsed_years, count = elapsed.count)
-}
-
-@Composable
-private fun countText(
-    resource: PluralStringResource,
-    count: Int
-): String = pluralStringResource(resource, count, count)
 
 @Preview
 @Composable

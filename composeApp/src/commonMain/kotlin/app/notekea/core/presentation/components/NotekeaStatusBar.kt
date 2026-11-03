@@ -78,8 +78,8 @@ fun NotekeaStatusBar(
 }
 
 /**
- * A short fact of the status bar, in the muted color, with its [icon] if any and its [tooltip] on hover if any. One
- * that does something on a click ([onClick]: a folder of the path shown in Files, the zoom reset) shows a hand and a
+ * A short fact of the status bar, in the muted color, with its [icon] (or a [leading] element of its own, such as a
+ * progress ring) if any and its [tooltip] on hover if any. One that does something on a click ([onClick]: a folder of the path shown in Files, the zoom reset) shows a hand and a
  * faint fill under the pointer.
  */
 @Composable
@@ -88,7 +88,8 @@ fun NotekeaStatusLabel(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     tooltip: String? = null,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    leading: (@Composable () -> Unit)? = null
 ) {
     val click = onClick?.let {
         Modifier
@@ -111,6 +112,7 @@ fun NotekeaStatusLabel(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            leading?.invoke()
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelMedium,

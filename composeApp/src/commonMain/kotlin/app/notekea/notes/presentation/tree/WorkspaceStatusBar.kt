@@ -46,7 +46,7 @@ private const val PREVIEW_VAULT = "Playground Vault"
 /**
  * The workspace's status bar (`ROADMAP.md` 1.14), as Android Studio's: where the user is (the vault, the folders and
  * the open tab's file, [path] of [kind]) on the left; on the right the vault's first scan while it runs ([isLoading]),
- * then, for a note in Edit mode ([editor] and its [buffer]), the cursor's line and column in the file, its line endings
+ * then the search index ([searchIndex], `ROADMAP.md` 2.3), then, for a note in Edit mode ([editor] and its [buffer]), the cursor's line and column in the file, its line endings
  * and encoding, its words, and whether it is saved; last, the window's zoom while it is not 100 %, a click going back to
  * 100 %. A click on a folder or the file of the path shows it in Files ([onReveal]).
  */
@@ -59,7 +59,8 @@ internal fun WorkspaceStatusBar(
     path: RelativePath? = null,
     kind: TabKind? = null,
     editor: EditorState? = null,
-    buffer: TextFieldState? = null
+    buffer: TextFieldState? = null,
+    searchIndex: @Composable () -> Unit = {}
 ) {
     NotekeaStatusBar(
         start = {
@@ -68,6 +69,7 @@ internal fun WorkspaceStatusBar(
         },
         end = {
             if (isLoading) NotekeaStatusProgress(label = stringResource(resource = Res.string.status_loading))
+            searchIndex()
             editor?.let { NoteFacts(editor = it, buffer = buffer) }
             ZoomFact()
         },

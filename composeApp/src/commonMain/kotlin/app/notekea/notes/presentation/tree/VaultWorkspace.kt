@@ -50,7 +50,8 @@ import app.notekea.notes.presentation.workspace.WorkspaceStartActions
 /**
  * The vault's sidebar beside the editor's tabs and panes (`ROADMAP.md` 1.11), with the side panel of the active pane's
  * outline on the right (`ROADMAP.md` 1.9). Each tab shows a note in its pane's editor, a file's preview, a folder's grid
- * or, for a file that is gone, says so. The status bar runs under all of it (`ROADMAP.md` 1.14).
+ * or, for a file that is gone, says so. The status bar runs under all of it (`ROADMAP.md` 1.14), with the search index's
+ * status ([searchIndex], 2.3).
  */
 @Composable
 internal fun VaultWorkspace(
@@ -60,7 +61,8 @@ internal fun VaultWorkspace(
     viewModels: WorkspaceViewModels,
     panes: List<EditorPaneTools>,
     sidePanel: SidePanelHost,
-    onSwitchVault: () -> Unit
+    onSwitchVault: () -> Unit,
+    searchIndex: @Composable () -> Unit = {}
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         WorkspaceBody(
@@ -71,7 +73,7 @@ internal fun VaultWorkspace(
             onSwitchVault = onSwitchVault,
             modifier = Modifier.weight(weight = 1f)
         )
-        ActiveStatusBar(state = state, workspaceState = workspaceState, vaultName = vaultName, viewModels = viewModels)
+        ActiveStatusBar(state, workspaceState, vaultName, viewModels, searchIndex)
     }
 }
 
@@ -81,7 +83,8 @@ private fun ActiveStatusBar(
     state: VaultTreeState,
     workspaceState: WorkspaceState,
     vaultName: String,
-    viewModels: WorkspaceViewModels
+    viewModels: WorkspaceViewModels,
+    searchIndex: @Composable () -> Unit
 ) {
     val activeEditor = viewModels.editors[workspaceState.workspace.activePane]
     val editorState by activeEditor.state.collectAsState()
@@ -94,7 +97,8 @@ private fun ActiveStatusBar(
         path = path,
         kind = kind,
         editor = editorState.takeIf { kind == TabKind.NOTE },
-        buffer = activeEditor.buffer
+        buffer = activeEditor.buffer,
+        searchIndex = searchIndex
     )
 }
 
