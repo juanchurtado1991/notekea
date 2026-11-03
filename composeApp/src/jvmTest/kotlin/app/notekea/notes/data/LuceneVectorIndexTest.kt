@@ -52,6 +52,17 @@ class LuceneVectorIndexTest {
     }
 
     @Test
+    fun `the nearest chunks by meaning alone come closest first`() = runTest(context = testDispatcher) {
+        val index = index()
+        index.put(vaultPath = VAULT, note = AREPAS, chunks = listOf(chunk(AREPAS, "masa")), vectors = listOf(EAST))
+        index.put(vaultPath = VAULT, note = SONG, chunks = listOf(chunk(SONG, "song")), vectors = listOf(NORTH))
+
+        val hits = (index.nearest(vaultPath = VAULT, vector = NORTH_EAST_ISH, limit = 2) as Outcome.Success).value
+
+        assertEquals(expected = listOf(SONG, AREPAS), actual = hits.map { it.note })
+    }
+
+    @Test
     fun `a note put again replaces its chunks, a removed one is gone, and clearing empties the vault`() = runTest(
         context = testDispatcher
     ) {

@@ -26,6 +26,13 @@ interface VectorIndex {
         vaultPath: String
     ): Outcome<Unit, IndexError>
 
+    /** The [limit] chunks closest in meaning to [vector] alone, best first: the related notes of a passage (2.4). */
+    suspend fun nearest(
+        vaultPath: String,
+        vector: FloatArray,
+        limit: Int
+    ): Outcome<List<SearchHit>, IndexError>
+
     /** The [limit] chunks closest to the question, by its [text] and its [vector] together, best first. */
     suspend fun search(
         vaultPath: String,
