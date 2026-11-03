@@ -63,6 +63,7 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 llama = { module = "de.kherud:llama", version.ref = "llama" }
 lucene-core = { module = "org.apache.lucene:lucene-core", version.ref = "lucene" }
+lucene-analysis-common = { module = "org.apache.lucene:lucene-analysis-common", version.ref = "lucene" }
 
 # Agents
 koog-agents-core = { module = "ai.koog:agents-core", version.ref = "koog" }

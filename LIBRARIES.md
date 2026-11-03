@@ -60,6 +60,7 @@ Decisions:
 | java-llama.cpp | `de.kherud:llama` | 4.2.0 | A single engine for embeddings (GGUF such as nomic-embed / bge), chat (~2B, ~4B or ~8B model) and reranking (`rerank()`). Parallel slots (`setParallel` + continuous batching) share one loaded model; grammars (`jsonSchemaToGrammar`) constrain structured output (`ARCHITECTURE.md` §12). Avoids a separate ONNX Runtime and tokenizer stack |
 | Embedding model (bundled) | `granite-embedding-107m-multilingual`, Q8_0 GGUF (bartowski) | Hugging Face commit `52fed1c8` | Multilingual embeddings for the index (`ROADMAP.md` 2.2): 384 dimensions, 512 tokens, 121 MB, Apache 2.0. Chosen over multilingual-e5-small and bge-m3 (`docs/spikes/2026-11-01-embedding-models.md`); downloaded by the build with its SHA-256 checked (`downloadEmbeddingModel`) and packaged in the app's resources |
 | Lucene | `org.apache.lucene:lucene-core` | 10.5.2 | Hybrid search: vectors (HNSW) + keywords (BM25). Requires Java 21 |
+| Lucene analysis | `org.apache.lucene:lucene-analysis-common` | 10.5.2 | The keywords of the index (`ROADMAP.md` 2.3) without accents and with Spanish words reduced to their stem, so "cancion" finds "canción" and "receta" finds "recetas" (approved by the developer on 2026-11-03) |
 | Ktor Client | `io.ktor:ktor-client-core` + `io.ktor:ktor-client-okhttp` | 3.6.0 | Downloads the model (~2 GB) with progress and resume |
 
 ### Agents
