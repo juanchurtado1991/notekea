@@ -40,6 +40,8 @@ class LlamaTextEmbedder(
     private var model: LlamaModel? = null
     private var release: Job? = null
 
+    override val modelId: String = MODEL_FILE
+
     override val dimensions: Int = DIMENSIONS
 
     override val maxTokens: Int = CONTEXT_TOKENS - SPECIAL_TOKENS
