@@ -46,6 +46,9 @@ sealed interface WorkspaceIntent {
     /** `Mod+1` to `Mod+9`. */
     data class OnJump(val number: Int) : WorkspaceIntent
 
+    /** A related note's Open to the side (`ROADMAP.md` 2.4): [path] opens in the other pane, created if needed. */
+    data class OnOpenBeside(val path: RelativePath) : WorkspaceIntent
+
     /** `Mod+Shift+D` or the tab menu's Split right: the active tab moves to a new pane on the right. */
     data object OnSplitRight : WorkspaceIntent
 

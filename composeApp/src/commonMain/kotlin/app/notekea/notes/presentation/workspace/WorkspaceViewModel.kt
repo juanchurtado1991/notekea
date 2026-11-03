@@ -75,6 +75,8 @@ class WorkspaceViewModel(
 
             WorkspaceIntent.OnSplitRight -> change { it.splitRight() }
 
+            is WorkspaceIntent.OnOpenBeside -> change { it.openBeside(path = intent.path) }
+
             is WorkspaceIntent.OnTabMove -> change {
                 it.move(path = intent.path, toPane = intent.toPane, toIndex = intent.toIndex)
             }
