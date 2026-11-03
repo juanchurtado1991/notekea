@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.tree
 
 import app.notekea.notes.domain.LinkKind
-import app.notekea.notes.domain.LinkUpdateResult
+import app.notekea.notes.domain.NoteRewrite
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeSort
 
@@ -17,12 +17,18 @@ sealed interface VaultTreeIntent {
 
     data class OnDeleteRequest(val path: RelativePath? = null) : VaultTreeIntent
 
-    /** The note editor renamed [from] to [to] and updated the links to it as [links] says. */
+    /** The note editor renamed [from] to [to]; [rewrites] are the link updates it calls for, not yet written. */
     data class OnEntryRenamed(
         val from: RelativePath,
         val to: RelativePath,
-        val links: LinkUpdateResult?
-    ) : VaultTreeIntent
+        val rewrites: List<NoteRewrite>
+    ) : RenameIntent
+
+    /** The links a rename left behind are updated ([LinkUpdateOffer]). */
+    data object OnLinkUpdateConfirm : RenameIntent
+
+    /** The links a rename left behind keep the old name. */
+    data object OnLinkUpdateDecline : RenameIntent
 
     data object OnErrorDismiss : VaultTreeIntent
 
@@ -66,13 +72,13 @@ sealed interface VaultTreeIntent {
 
     data object OnNoticeDismiss : VaultTreeIntent
 
-    data object OnRenameCancel : VaultTreeIntent
+    data object OnRenameCancel : RenameIntent
 
-    data object OnRenameConfirm : VaultTreeIntent
+    data object OnRenameConfirm : RenameIntent
 
-    data class OnRenameRequest(val path: RelativePath? = null) : VaultTreeIntent
+    data class OnRenameRequest(val path: RelativePath? = null) : RenameIntent
 
-    data class OnRenameTextChange(val text: String) : VaultTreeIntent
+    data class OnRenameTextChange(val text: String) : RenameIntent
 
     data object OnRetryClick : VaultTreeIntent
 

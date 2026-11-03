@@ -351,6 +351,18 @@
         <item quantity="one">%1$s and 1 more</item>
         <item quantity="other">%1$s and %2$d more</item>
     </plurals>
+    <plurals name="tree_link_update_count_links">
+        <item quantity="one">1 link</item>
+        <item quantity="other">%1$d links</item>
+    </plurals>
+    <plurals name="tree_link_update_count_notes">
+        <item quantity="one">1 note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
+    <string name="tree_link_update_confirm">Update links</string>
+    <string name="tree_link_update_decline">Don’t update</string>
+    <string name="tree_link_update_message">They still point to “%1$s”. Update them to point to “%2$s”, or they will no longer open it.</string>
+    <string name="tree_link_update_title">Update %1$s in %2$s?</string>
     <plurals name="tree_links_updated">
         <item quantity="one">Links updated in 1 note: %2$s.</item>
         <item quantity="other">Links updated in %1$d notes: %2$s.</item>

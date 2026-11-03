@@ -33,7 +33,6 @@ import app.notekea.notes.domain.OpenDailyNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.RenameEntryUseCase
-import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.time.Instant
@@ -143,7 +142,7 @@ abstract class VaultTreeViewModelTestBase {
             fileOpener = opener,
             days = dailyNoteTools(),
             bookmarkStore = bookmarkStore,
-            updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
+            linkUpdates = LinkUpdateTools(
                 planLinkUpdates = PlanLinkUpdatesUseCase(
                     noteContentStore = contents,
                     linkFinder = JetBrainsMarkdownLinkFinder()

@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.editor
 
 import app.notekea.notes.domain.LinkKind
-import app.notekea.notes.domain.LinkUpdateResult
+import app.notekea.notes.domain.NoteRewrite
 import app.notekea.notes.domain.OutlineHeading
 import app.notekea.notes.domain.RelativePath
 
@@ -51,10 +51,10 @@ sealed interface EditorEffect {
     /** A `#tag` was clicked in Read mode: the window searches it in all notes. */
     data class SearchTag(val tag: String) : EditorEffect
 
-    /** The title renamed the note from [from] to [to]; [links] is how the links to it were updated, if any. */
+    /** The title renamed the note from [from] to [to]; [rewrites] are the link updates it calls for, not written. */
     data class Renamed(
         val from: RelativePath,
         val to: RelativePath,
-        val links: LinkUpdateResult?
+        val rewrites: List<NoteRewrite>
     ) : EditorEffect
 }

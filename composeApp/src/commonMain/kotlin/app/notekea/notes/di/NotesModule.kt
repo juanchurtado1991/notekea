@@ -29,6 +29,7 @@ import app.notekea.notes.domain.ApplyTemplateUseCase
 import app.notekea.notes.domain.FillTemplateUseCase
 import app.notekea.notes.domain.GetTemplateSettingsUseCase
 import app.notekea.notes.presentation.tree.DailyNoteTools
+import app.notekea.notes.presentation.tree.LinkUpdateTools
 import app.notekea.notes.presentation.tree.NewNoteTools
 import app.notekea.notes.domain.SaveSidePanelUseCase
 import app.notekea.notes.domain.FlattenTreeUseCase
@@ -44,14 +45,13 @@ import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
-import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
+import app.notekea.notes.domain.RenameAndPlanLinksUseCase
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
 import app.notekea.notes.domain.SearchNoteContentUseCase
 import app.notekea.notes.domain.SearchNotesUseCase
 import app.notekea.notes.domain.TextFolder
 import app.notekea.notes.domain.TreePreferencesStore
-import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import app.notekea.notes.presentation.editor.AttachmentTools
 import app.notekea.notes.presentation.editor.EditorViewModel
 import app.notekea.notes.presentation.switcher.QuickSwitcherViewModel
@@ -134,8 +134,8 @@ val notesModule = module {
     factoryOf(::OpenNoteUseCase)
     factoryOf(::PlanLinkUpdatesUseCase)
     factoryOf(::SaveNoteUseCase)
-    factoryOf(::UpdateLinksAfterRenameUseCase)
-    factoryOf(::RenameAndUpdateLinksUseCase)
+    factoryOf(::LinkUpdateTools)
+    factoryOf(::RenameAndPlanLinksUseCase)
     factoryOf(::RenameEntryUseCase)
     factoryOf(::SearchNoteContentUseCase)
     factoryOf(::SearchNotesUseCase)
@@ -154,7 +154,7 @@ val notesModule = module {
             fileOpener = get(),
             days = get(),
             bookmarkStore = get(),
-            updateLinksAfterRename = get(),
+            linkUpdates = get(),
             followLink = get(),
             treePreferencesStore = get()
         )
@@ -165,7 +165,7 @@ val notesModule = module {
             openNote = get(),
             saveNote = get(),
             observeNoteOnDisk = get(),
-            renameAndUpdateLinks = get(),
+            renameAndPlanLinks = get(),
             editorPreferences = get(),
             attachmentTools = get(),
             fillTemplate = get(),

@@ -294,7 +294,7 @@ private fun editorCallbacksOf(
     val workspace = viewModels.workspace
     return EditorCallbacks(
         onRenamed = {
-            tree.onIntent(intent = VaultTreeIntent.OnEntryRenamed(from = it.from, to = it.to, links = it.links))
+            tree.onIntent(intent = VaultTreeIntent.OnEntryRenamed(from = it.from, to = it.to, rewrites = it.rewrites))
             workspace.onIntent(intent = WorkspaceIntent.OnRenamed(from = it.from, to = it.to))
         },
         onClosed = { workspace.onIntent(intent = WorkspaceIntent.OnDeleted(path = path)) },

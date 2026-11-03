@@ -213,7 +213,8 @@ notes are read again.
 - Delete moves to the system trash (`gio trash` on Linux), falling back to the vault's `.trash` folder.
 - Rename updates the `[[wiki links]]`, embeds and Markdown links that point to the entry, as Obsidian does by
   default, so no link breaks; a notice says how many notes changed. A note that changes while it is rewritten is
-  left as it was and counted in the notice. Keeping the old links is a Settings option (5.2).
+  left as it was and counted in the notice. Since 2.5 it asks first ("Update 12 links in 7 notes?"): Don't update
+  keeps the old links.
 - Until the editor (1.5), the main area shows the selected note's title, folder, tags and aliases.
 - **Done when:** a 5,000-note vault lists in under 1 s after the first scan, external changes appear within 1 s.
 - Smoke test: cases 1.4-01 to 1.4-12; 1.3-02, 1.3-04 and 1.3-07 rewritten for the tree.
