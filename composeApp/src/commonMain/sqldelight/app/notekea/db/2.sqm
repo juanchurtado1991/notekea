@@ -1,0 +1,10 @@
+-- 2.3: what the search index holds of each note, so it indexes only what changed and resumes after a restart.
+CREATE TABLE note_index_state (
+    vault TEXT NOT NULL,
+    path TEXT NOT NULL,
+    content_hash TEXT NOT NULL,
+    size INTEGER,
+    modified_at INTEGER,
+    version TEXT NOT NULL,
+    PRIMARY KEY (vault, path)
+);
