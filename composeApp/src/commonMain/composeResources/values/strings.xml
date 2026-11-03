@@ -415,6 +415,42 @@
     <string name="calendar_next_month">Next month</string>
     <string name="calendar_previous_month">Previous month</string>
     <string name="calendar_today">Today</string>
+    <string name="search_index_dismiss">Dismiss</string>
+    <string name="search_index_error_busy">Another Notekea is using this vault’s index. It tries again in a moment.</string>
+    <string name="search_index_error_model">The search model could not be loaded. Writing works as always; search and related notes wait.</string>
+    <string name="search_index_indexing">Indexing · %1$d %</string>
+    <string name="search_index_last_run">Last run</string>
+    <string name="search_index_less_than_a_minute">less than a minute left</string>
+    <string name="search_index_never">Not yet</string>
+    <string name="search_index_notice">Notekea is reading your notes. Related notes and chat will be ready soon. You can keep writing.</string>
+    <string name="search_index_progress">%1$s of %2$s notes</string>
+    <string name="search_index_rebuild">Rebuild index</string>
+    <string name="search_index_skipped">Skipped</string>
+    <string name="search_index_title">Search index</string>
+    <string name="search_index_too_large">larger than 5 MB</string>
+    <string name="search_index_too_long">too long to index</string>
+    <string name="search_index_took">Took</string>
+    <string name="search_index_took_minutes">%1$d min %2$d s</string>
+    <string name="search_index_took_seconds">%1$d s</string>
+    <string name="search_index_tooltip">Search index: click for details</string>
+    <string name="search_index_unavailable">Search unavailable</string>
+    <string name="search_index_unreadable">could not be read</string>
+    <plurals name="search_index_minutes_left">
+        <item quantity="one">about %1$d minute left</item>
+        <item quantity="other">about %1$d minutes left</item>
+    </plurals>
+    <plurals name="search_index_more">
+        <item quantity="one">and %1$d more</item>
+        <item quantity="other">and %1$d more</item>
+    </plurals>
+    <plurals name="search_index_ready">
+        <item quantity="one">%1$s note ready to search</item>
+        <item quantity="other">%1$s notes ready to search</item>
+    </plurals>
+    <plurals name="search_index_skipped_files">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
     <string-array name="calendar_months">
         <item>January</item>
         <item>February</item>
