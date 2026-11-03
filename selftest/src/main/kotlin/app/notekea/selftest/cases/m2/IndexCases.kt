@@ -45,13 +45,13 @@ private fun SuiteBuilder.resumes() {
         prepare(GHOST)
         title(text = "Indexing goes on after Notekea is closed in the middle")
         steps(
-            text = "$OPEN_GHOST\n2. While the bar at the bottom says Indexing, click it and note how many notes it " +
-                "has left (\"120 of 371 notes\").\n3. Close Notekea before it ends, open it again and click Indexing " +
+            text = "$OPEN_GHOST\n2. While the bar at the bottom says Indexing, click it and note how many notes are " +
+                "done (\"120 of 371 notes\").\n3. Close Notekea before it ends, open it again and click Indexing " +
                 "again."
         )
         expected(
-            text = "It goes on with the notes it had left: it counts fewer notes than at the start, not 371 again, " +
-                "and ends with \"$GHOST_READY\"."
+            text = "It goes on from the notes it had done: the count and the percent do not start again from 0, " +
+                "and it ends with \"$GHOST_READY\"."
         )
     }
 }
