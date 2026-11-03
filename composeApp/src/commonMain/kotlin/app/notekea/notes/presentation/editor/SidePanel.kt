@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
@@ -64,7 +67,8 @@ fun SidePanel(
     actions: SidePanelActions,
     info: NoteInfo?,
     modifier: Modifier = Modifier,
-    outlineFocus: FocusRequester = remember { FocusRequester() }
+    outlineFocus: FocusRequester = remember { FocusRequester() },
+    related: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit = { _, _ -> }
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Column(modifier = Modifier.padding(vertical = NotekeaDimensions.SpacingXs)) {
@@ -82,7 +86,8 @@ fun SidePanel(
                         platformConventions = platformConventions,
                         actions = actions,
                         outlineFocus = outlineFocus,
-                        info = info
+                        info = info,
+                        related = related
                     )
 
                     SidePanelMode.CHAT -> SidePanelChat()
@@ -122,7 +127,7 @@ private fun PanelHeader(
     }
 }
 
-/** The inspector's sections: Outline, and Note info while a note is open. */
+/** The inspector's sections: Outline, and Related and Note info while a note is open. */
 @Composable
 private fun InspectorSections(
     outline: List<OutlineHeading>,
@@ -131,22 +136,82 @@ private fun InspectorSections(
     platformConventions: PlatformConventions,
     actions: SidePanelActions,
     outlineFocus: FocusRequester,
-    info: NoteInfo?
+    info: NoteInfo?,
+    related: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        val isOutlineOpen = SidePanelSection.OUTLINE !in foldedSections
+    Layout(
+        modifier = Modifier.fillMaxSize(),
+        content = {
+            OutlinePart(
+                outline = outline,
+                current = current,
+                isOpen = SidePanelSection.OUTLINE !in foldedSections,
+                platformConventions = platformConventions,
+                actions = actions,
+                outlineFocus = outlineFocus
+            )
+            if (info != null) {
+                Column {
+                    related(SidePanelSection.RELATED !in foldedSections) {
+                        actions.onSectionToggle(SidePanelSection.RELATED)
+                    }
+                }
+                Column {
+                    NoteInfoSection(
+                        info = info,
+                        isOpen = SidePanelSection.NOTE_INFO !in foldedSections,
+                        actions = actions
+                    )
+                }
+            }
+        },
+        measurePolicy = InspectorMeasurePolicy
+    )
+}
+
+/** Outline's header and, while [isOpen], its headings. */
+@Composable
+private fun OutlinePart(
+    outline: List<OutlineHeading>,
+    current: Int,
+    isOpen: Boolean,
+    platformConventions: PlatformConventions,
+    actions: SidePanelActions,
+    outlineFocus: FocusRequester
+) {
+    Column {
         NotekeaSectionHeader(
             title = stringResource(resource = Res.string.outline_title),
-            isOpen = isOutlineOpen,
+            isOpen = isOpen,
             onToggle = { actions.onSectionToggle(SidePanelSection.OUTLINE) },
             shortcutHint = platformConventions.outlineShortcut.label(
                 operatingSystem = platformConventions.operatingSystem
             )
         )
-        NotekeaFold(isOpen = isOutlineOpen, modifier = Modifier.weight(weight = 1f, fill = false)) {
+        NotekeaFold(isOpen = isOpen, modifier = Modifier.weight(weight = 1f, fill = false)) {
             OutlineSection(outline = outline, current = current, focusRequester = outlineFocus, actions = actions)
         }
-        info?.let { NoteInfoSection(info = it, isOpen = SidePanelSection.NOTE_INFO !in foldedSections, actions) }
+    }
+}
+
+/**
+ * Outline, then Related and Note info when a note is open, stacked. Note info takes what it needs; Outline takes up to
+ * half of the rest, or more when Related needs less; Related takes what is left. Each scrolls inside its share.
+ */
+private val InspectorMeasurePolicy = MeasurePolicy { measurables, constraints ->
+    val loose = constraints.copy(minHeight = 0)
+    val outline = measurables.first()
+    val related = measurables.getOrNull(index = 1)
+    val info = measurables.getOrNull(index = 2)?.measure(constraints = loose)
+    val free = (constraints.maxHeight - (info?.height ?: 0)).coerceAtLeast(minimumValue = 0)
+    val relatedNeeds = related?.maxIntrinsicHeight(width = constraints.maxWidth) ?: 0
+    val outlineMax = maxOf(free / 2, free - relatedNeeds)
+    val top = outline.measure(constraints = loose.copy(maxHeight = outlineMax))
+    val middle = related?.measure(constraints = loose.copy(maxHeight = free - top.height))
+    layout(width = constraints.maxWidth, height = constraints.maxHeight) {
+        top.placeRelative(x = 0, y = 0)
+        middle?.placeRelative(x = 0, y = top.height)
+        info?.placeRelative(x = 0, y = top.height + (middle?.height ?: 0))
     }
 }
 

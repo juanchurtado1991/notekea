@@ -1,9 +1,7 @@
 package app.notekea.core.presentation.components
 
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -12,8 +10,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
@@ -24,8 +22,8 @@ private const val PREVIEW_ROWS = 20
 private const val PREVIEW_WIDTH_DP = 200
 
 /**
- * [content], a `verticalScroll` column on [state], with its [NotekeaScrollbar] along the right edge: as tall as the
- * area, shown only while there is more to see.
+ * [content] (one layout), a `verticalScroll` column on [state], with its [NotekeaScrollbar] along the right edge: as
+ * tall as the area, shown only while there is more to see.
  */
 @Composable
 fun NotekeaScrollArea(
@@ -33,12 +31,14 @@ fun NotekeaScrollArea(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    Box(modifier = modifier) {
-        content()
-        Box(modifier = Modifier.matchParentSize()) {
-            NotekeaScrollbar(state = state, modifier = Modifier.align(alignment = Alignment.CenterEnd).fillMaxHeight())
-        }
-    }
+    Layout(
+        content = {
+            content()
+            NotekeaScrollbar(state = state)
+        },
+        modifier = modifier,
+        measurePolicy = ScrollAreaMeasurePolicy
+    )
 }
 
 /** [NotekeaScrollArea] for [content], a lazy list on [state]. */
@@ -48,15 +48,14 @@ fun NotekeaLazyScrollArea(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    Box(modifier = modifier) {
-        content()
-        Box(modifier = Modifier.matchParentSize()) {
-            NotekeaLazyScrollbar(
-                state = state,
-                modifier = Modifier.align(alignment = Alignment.CenterEnd).fillMaxHeight()
-            )
-        }
-    }
+    Layout(
+        content = {
+            content()
+            NotekeaLazyScrollbar(state = state)
+        },
+        modifier = modifier,
+        measurePolicy = ScrollAreaMeasurePolicy
+    )
 }
 
 @Preview
