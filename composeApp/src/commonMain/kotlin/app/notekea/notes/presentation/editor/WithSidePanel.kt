@@ -70,7 +70,8 @@ fun WithSidePanel(
                     platformConventions = platformConventions,
                     actions = actions,
                     info = info,
-                    outlineFocus = sidePanel.outlineFocus
+                    outlineFocus = sidePanel.outlineFocus,
+                    related = sidePanel.related
                 )
             },
             content = content,

@@ -42,6 +42,10 @@ import app.notekea.notes.presentation.related.RelatedNotesViewModel
 import app.notekea.notes.presentation.index.SearchIndexNotice
 import app.notekea.notes.presentation.index.SearchIndexStatus
 import app.notekea.notes.presentation.index.SearchIndexViewModel
+import app.notekea.notes.domain.LinkResolver
+import app.notekea.notes.domain.FormatAction
+import app.notekea.notes.presentation.related.RelatedActions
+import app.notekea.notes.presentation.related.RelatedSection
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -93,9 +97,7 @@ fun VaultTreeScreen(
     val workspaceState by workspaceViewModel.state.collectAsState()
     val activeEditor = editorViewModels[workspaceState.workspace.activePane]
     val panes = remember(vaultPath) { List(size = Workspace.MAX_PANES) { EditorPaneTools() } }
-    val sidePanel = remember(workspaceViewModel) {
-        SidePanelHost(send = { workspaceViewModel.onIntent(intent = workspaceIntentOf(intent = it)) })
-    }
+    val sidePanel = rememberSidePanelHost(workspaceViewModel, relatedViewModel, activeEditor, state.tree.notes.keys)
     val viewModels = WorkspaceViewModels(
         tree = viewModel,
         workspace = workspaceViewModel,
@@ -126,6 +128,41 @@ fun VaultTreeScreen(
             tagPicker = tagPickerViewModel,
             templatePicker = templatePickerViewModel
         )
+    }
+}
+
+/**
+ * The side panel's host, with the inspector's Related section (`ROADMAP.md` 2.4): a card opens its note, opens it
+ * beside, or inserts a link to it at the active [editor]'s cursor, resolved among the vault's [notes].
+ */
+@Composable
+private fun rememberSidePanelHost(
+    workspace: WorkspaceViewModel,
+    related: RelatedNotesViewModel,
+    editor: EditorViewModel,
+    notes: Set<RelativePath>
+): SidePanelHost {
+    val currentEditor by rememberUpdatedState(newValue = editor)
+    val currentNotes by rememberUpdatedState(newValue = notes)
+    return remember(workspace, related) {
+        val actions = RelatedActions(
+            onOpen = { workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = it)) },
+            onOpenBeside = { workspace.onIntent(intent = WorkspaceIntent.OnOpenBeside(path = it)) },
+            onInsertLink = { path ->
+                val target = LinkResolver(notePaths = currentNotes).wikiTarget(path = path)
+                currentEditor.onIntent(intent = EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target)))
+            }
+        )
+        SidePanelHost(send = { workspace.onIntent(intent = workspaceIntentOf(intent = it)) }) { isOpen, onToggle ->
+            val relatedState by related.state.collectAsState()
+            RelatedSection(
+                state = relatedState,
+                isOpen = isOpen,
+                onToggle = onToggle,
+                onIntent = related::onIntent,
+                actions = actions
+            )
+        }
     }
 }
 

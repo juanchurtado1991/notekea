@@ -451,6 +451,15 @@
         <item quantity="one">%1$d file</item>
         <item quantity="other">%1$d files</item>
     </plurals>
+    <string name="related_empty">No related notes yet. They show as the vault grows.</string>
+    <string name="related_error_index">The search index cannot be read right now.</string>
+    <string name="related_error_model">Related notes need the search model, which could not be loaded.</string>
+    <string name="related_insert_link">Insert link</string>
+    <string name="related_linked">Already linked</string>
+    <string name="related_not_ready">Related notes appear after indexing.</string>
+    <string name="related_open">Open</string>
+    <string name="related_open_beside">Open to the side</string>
+    <string name="related_title">Related</string>
     <string-array name="calendar_months">
         <item>January</item>
         <item>February</item>
