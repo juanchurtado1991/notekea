@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Related notes** (`ROADMAP.md` 2.4): the inspector's new Related section lists the eight notes closest in meaning
+  to the open note, from the search index, as cards with the note's name, its folder and the passage that matched,
+  its closest sentence highlighted. It follows the open note and its edits. On hover a card opens its note, opens it
+  to the side (splitting the editor) or inserts a link to it at the cursor; nothing is ever linked on its own. Notes
+  the open note already links are folded under "Already linked".
 - **Search index** (`ROADMAP.md` 2.3): an open vault's notes are indexed in the background, by meaning (the
   multilingual model of 2.2) and by keywords (without accents, Spanish words by their stem), in the app's data,
   never inside the vault. Only notes whose text changed are indexed again, an edited note within seconds, and a run

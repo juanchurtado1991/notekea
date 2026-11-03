@@ -728,6 +728,14 @@ changes.
   written to the note automatically; "Insert link" is the only way a suggestion becomes a real link.
 - Section "Already linked" collapsed at the bottom.
 - States: index not ready ("Related notes appear after indexing"), no results, error.
+- Implemented in `notes`: `VectorIndex.nearest` (vectors only; `LuceneVectorIndex` by HNSW) and
+  `FindRelatedNotesUseCase`, which embeds the note's chunks (title and headings in front, as indexed), keeps each
+  other note's best chunk, leaves out the note and the notes it links (`LinkFinder`, `LinkResolver`) and keeps 8;
+  `RelatedSnippet` highlights the passage's sentence that shares the most words with the note.
+  `RelatedNotesViewModel` follows the open note (`FollowRelatedNotes`): 200 ms after a note opens, 1.5 s after typing
+  stops, again when the index is ready. `Workspace.openBeside` opens a note in the other pane, splitting the editor if
+  needed. UI design A, cards (picked 2026-11-03): `RelatedSection` in the inspector on the design system's
+  `NotekeaPassageCard`; Outline and Related share the height Note info leaves.
 
 ### ⬜ 2.5 Backlinks — `feature/backlinks`
 
