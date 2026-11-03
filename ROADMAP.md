@@ -707,6 +707,15 @@ remains the plan for mobile (post-MVP 3).
   Related notes and chat will be ready in about 2 minutes." The app stays usable.
 - **Done when:** editing one note re-indexes only that note within 2 s; closing the app mid-indexing resumes
   correctly.
+- Implemented in `notes` (features never depend on each other): `note_index_state` (SQLDelight) keeps each note's
+  text fingerprint (`ContentHash`), size, date and index version; `PlanIndexUseCase` picks the notes to read;
+  `IndexVaultUseCase` chunks, embeds (title and headings in front) and puts only notes whose text changed, marking
+  each done, so a run resumes; notes over 5 MB, unreadable or too long are skipped and named.
+  `LuceneVectorIndex` keeps one index per vault in the app data's `index` folder (BM25 with `NoteAnalyzer`, no
+  accents and Spanish stems, `lucene-analysis-common`; HNSW on unit vectors), merged by `RankFusion` (RRF).
+  `SearchIndexViewModel` follows the tree: a run 300 ms after a change, a busy index tried again after 30 s,
+  Rebuild index. UI design B (picked 2026-11-03): `SearchIndexStatus`, `SearchIndexDetails`, `SearchIndexNotice`,
+  on the design system's `NotekeaStatusRing`, `NotekeaPopover` and `NotekeaNotice`.
 
 ### ⬜ 2.4 Related notes panel — `feature/related-notes`
 

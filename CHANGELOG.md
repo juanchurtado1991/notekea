@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Search index** (`ROADMAP.md` 2.3): an open vault's notes are indexed in the background, by meaning (the
+  multilingual model of 2.2) and by keywords (without accents, Spanish words by their stem), in the app's data,
+  never inside the vault. Only notes whose text changed are indexed again, an edited note within seconds, and a run
+  stopped by closing Notekea goes on with the notes it had left. The status bar shows "Indexing · 28 %" and then
+  "1,204 notes ready to search"; a click opens the details (time left, last run, skipped notes, Rebuild index), and
+  a large first run shows a notice that writing goes on meanwhile.
 - **Embedding engine** (`ROADMAP.md` 2.2): Notekea bundles a small multilingual model,
   granite-embedding-107m-multilingual (121 MB, Apache 2.0), that turns notes and questions into vectors close in
   meaning across Spanish and English; it loads when needed and is let go after three idle minutes. The installers

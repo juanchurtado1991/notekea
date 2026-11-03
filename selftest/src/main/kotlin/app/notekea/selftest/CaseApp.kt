@@ -43,6 +43,8 @@ import okio.FileSystem
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import app.notekea.core.embedding.data.LlamaTextEmbedder
+import app.notekea.core.embedding.domain.TextEmbedder
 import org.koin.dsl.module
 import java.nio.file.Files
 import java.nio.file.Path
@@ -158,10 +160,18 @@ class CaseApp(
         single<FileOpener> { fileOpener }
         single<FileRevealer> { fileRevealer }
         single<Trash> { VaultFolderTrash(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
+        // The index's embedder (2.3): the bundled model in Notekea QA, a stand-in where it is not there (CI).
+        if (!hasBundledModel()) single<TextEmbedder> { StandInTextEmbedder() }
+    }
+
+    private fun hasBundledModel(): Boolean {
+        val resources = System.getProperty(RESOURCES_PROPERTY) ?: return false
+        return Files.isRegularFile(Path.of(resources, LlamaTextEmbedder.MODEL_FOLDER, LlamaTextEmbedder.MODEL_FILE))
     }
 
     private companion object {
         const val HOME = "home"
         const val DOCUMENTS = "Documents"
+        const val RESOURCES_PROPERTY = "compose.application.resources.dir"
     }
 }
