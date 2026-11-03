@@ -65,6 +65,8 @@ import app.notekea.notes.domain.NoteSections
 import app.notekea.notes.domain.OutlineFinder
 import app.notekea.notes.domain.PlanIndexUseCase
 import app.notekea.notes.presentation.index.SearchIndexViewModel
+import app.notekea.notes.domain.FindRelatedNotesUseCase
+import app.notekea.notes.presentation.related.RelatedNotesViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -87,6 +89,8 @@ val notesModule = module {
     factoryOf(::ChunkNoteUseCase)
     factoryOf(::PlanIndexUseCase)
     factoryOf(::IndexVaultUseCase)
+    factoryOf(::FindRelatedNotesUseCase)
+    viewModel { parameters -> RelatedNotesViewModel(vaultPath = parameters.get(), findRelatedNotes = get()) }
     viewModel { parameters ->
         SearchIndexViewModel(
             vaultPath = parameters.get(),
