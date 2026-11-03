@@ -89,12 +89,15 @@ fun CaseScope.expectFolder(path: String) {
     }
 }
 
-/** The row of the sidebar's tree that shows [text]: of every element showing it, the one furthest left. */
+/**
+ * The row of the sidebar's tree that shows [text]: of every element on screen showing it, the one furthest left. One
+ * scrolled out of its list (a Related card, say) has no size, at the window's corner, so it is left out.
+ */
 fun CaseScope.treeRow(text: String): SemanticsNodeInteraction {
     expectText(text = text)
     val nodes = ui.onAllNodes(matcher = hasText(text = text))
-    val count = nodes.fetchSemanticsNodes().size
-    val leftmost = (0 until count).minBy { nodes[it].fetchSemanticsNode().boundsInRoot.left }
+    val shown = nodes.fetchSemanticsNodes().indices.filterNot { nodes[it].fetchSemanticsNode().boundsInRoot.isEmpty }
+    val leftmost = shown.minBy { nodes[it].fetchSemanticsNode().boundsInRoot.left }
     return nodes[leftmost]
 }
 
