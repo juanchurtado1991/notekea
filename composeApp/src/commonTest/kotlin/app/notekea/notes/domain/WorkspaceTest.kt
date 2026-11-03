@@ -10,6 +10,32 @@ class WorkspaceTest {
     private val today = RelativePath(value = "Journal/2026-10-27.md")
 
     @Test
+    fun `opening beside puts the note in a second pane, or the other one, and an open note goes to its tab`() {
+        val single = Workspace.EMPTY.open(path = arepas)
+        val beside = single.openBeside(path = welcome)
+        val back = beside.focus(pane = 0).openBeside(path = plate)
+        val again = back.openBeside(path = arepas)
+
+        assertEquals(
+            expected = listOf(
+                listOf(EditorPane(tabs = listOf(arepas), active = 0), EditorPane(tabs = listOf(welcome), active = 0)) to
+                    1,
+                listOf(
+                    EditorPane(tabs = listOf(arepas), active = 0),
+                    EditorPane(tabs = listOf(welcome, plate), active = 1)
+                ) to
+                    1,
+                listOf(
+                    EditorPane(tabs = listOf(arepas), active = 0),
+                    EditorPane(tabs = listOf(welcome, plate), active = 1)
+                ) to
+                    0
+            ),
+            actual = listOf(beside, back, again).map { it.panes to it.activePane }
+        )
+    }
+
+    @Test
     fun `opening adds a tab after the active one and shows it, an open file goes to its tab, a background one waits`() {
         val opened = Workspace.EMPTY.open(
             path = arepas

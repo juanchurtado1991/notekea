@@ -95,6 +95,23 @@ data class Workspace(
     }
 
     /**
+     * Opens [path] beside the active pane (a related note's Open to the side, `ROADMAP.md` 2.4): goes to its tab when it
+     * is open; otherwise adds it after the other pane's active tab, creating that pane when there is one, and makes
+     * the other pane active.
+     */
+    fun openBeside(
+        path: RelativePath
+    ): Workspace {
+        find(path = path)?.let { (pane, tab) -> return select(pane = pane, tab = tab) }
+        val other = if (isSplit) MAX_PANES - 1 - activePane else 1
+        val split = if (isSplit) this else copy(panes = panes + EditorPane())
+        val target = split.panes[other]
+        val index = target.active + 1
+        val tabs = target.tabs.toMutableList().apply { add(index = index, element = path) }
+        return split.withPane(index = other, pane = EditorPane(tabs = tabs, active = index)).copy(activePane = other)
+    }
+
+    /**
      * Split right (`Mod+Shift+D`): the active tab moves to a new pane on the right, which becomes active. With two
      * panes, or no tab, nothing changes.
      */
