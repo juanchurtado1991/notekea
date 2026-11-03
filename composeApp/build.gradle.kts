@@ -107,6 +107,7 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             implementation(libs.llama)
             implementation(libs.lucene.core)
+            implementation(libs.lucene.analysis.common)
             implementation(libs.sqldelight.sqlite.driver)
         }
 
