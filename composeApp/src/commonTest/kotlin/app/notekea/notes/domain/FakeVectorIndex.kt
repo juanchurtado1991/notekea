@@ -31,6 +31,16 @@ class FakeVectorIndex : VectorIndex {
         vaultPath: String
     ): Outcome<Unit, IndexError> = change { notes.remove(key = vaultPath) }
 
+    override suspend fun nearest(
+        vaultPath: String,
+        vector: FloatArray,
+        limit: Int
+    ): Outcome<List<SearchHit>, IndexError> {
+        val scored = notes[vaultPath].orEmpty().values.flatten().map { (chunk, v) -> chunk to dot(v, vector) }
+        val best = scored.sortedByDescending { it.second }.take(n = limit)
+        return Outcome.Success(value = best.map { (chunk, score) -> hitOf(chunk, score) })
+    }
+
     override suspend fun search(
         vaultPath: String,
         text: String,
@@ -43,17 +53,25 @@ class FakeVectorIndex : VectorIndex {
         val byWords = chunks.filter { (chunk, _) -> words.any { it in chunk.text.lowercase() } }
         val hits = RankFusion.merge(rankings = listOf(byMeaning.map { it.first }, byWords.map { it.first }))
         return Outcome.Success(
-            value = hits.take(n = limit).map { (chunk, score) ->
-                SearchHit(
-                    note = chunk.note,
-                    index = chunk.index,
-                    headingPath = chunk.headingPath,
-                    range = chunk.range,
-                    score = score
-                )
-            }
+            value = hits.take(n = limit).map { (chunk, score) -> hitOf(chunk, score) }
         )
     }
+
+    private fun dot(
+        first: FloatArray,
+        second: FloatArray
+    ): Float = first.indices.sumOf { (first[it] * second[it]).toDouble() }.toFloat()
+
+    private fun hitOf(
+        chunk: NoteChunk,
+        score: Float
+    ) = SearchHit(
+        note = chunk.note,
+        index = chunk.index,
+        headingPath = chunk.headingPath,
+        range = chunk.range,
+        score = score
+    )
 
     private fun change(
         block: () -> Unit

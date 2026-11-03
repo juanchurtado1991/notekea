@@ -71,22 +71,35 @@ class LuceneVectorIndex(
         vaultPath: String
     ): Outcome<Unit, IndexError> = write(vaultPath = vaultPath) { it.deleteAll() }
 
+    override suspend fun nearest(
+        vaultPath: String,
+        vector: FloatArray,
+        limit: Int
+    ): Outcome<List<SearchHit>, IndexError> = read(vaultPath = vaultPath) { searcher ->
+        val fields = searcher.storedFields()
+        searcher.search(KnnFloatVectorQuery(VECTOR, vector, limit), limit).scoreDocs.map {
+            hitOf(document = fields.document(it.doc), score = it.score)
+        }
+    }
+
     override suspend fun search(
         vaultPath: String,
         text: String,
         vector: FloatArray,
         limit: Int
+    ): Outcome<List<SearchHit>, IndexError> = read(vaultPath = vaultPath) { hitsOf(it, text, vector, limit) }
+
+    /** [query] on the vault's index as it is on disk; nothing found when it has none yet. */
+    private suspend fun read(
+        vaultPath: String,
+        query: (IndexSearcher) -> List<SearchHit>
     ): Outcome<List<SearchHit>, IndexError> = withContext(context = dispatchers.io) {
         val folder = folderOf(vaultPath = vaultPath)
-        if (!DirectoryReader.indexExists(
-                FSDirectory.open(folder)
-            )
-        ) {
-            return@withContext Outcome.Success(value = emptyList())
-        }
+        val exists = DirectoryReader.indexExists(FSDirectory.open(folder))
+        if (!exists) return@withContext Outcome.Success(value = emptyList())
         guarded {
             FSDirectory.open(folder).use { directory ->
-                DirectoryReader.open(directory).use { reader -> hitsOf(IndexSearcher(reader), text, vector, limit) }
+                DirectoryReader.open(directory).use { reader -> query(IndexSearcher(reader)) }
             }
         }
     }
