@@ -8,6 +8,9 @@ import app.notekea.core.domain.Outcome
  * multilingual model bundled with the app, off the UI thread; a cancelled call stops between texts.
  */
 interface TextEmbedder {
+    /** Which model makes the vectors: vectors of different models are not comparable, so the index starts over. */
+    val modelId: String
+
     /** How many numbers each vector has. */
     val dimensions: Int
 
