@@ -37,6 +37,8 @@ import app.notekea.notes.presentation.workspace.WorkspaceIntent
 import app.notekea.notes.presentation.workspace.WorkspaceState
 import app.notekea.notes.presentation.workspace.WorkspaceViewModel
 import app.notekea.notes.presentation.index.SearchIndexIntent
+import app.notekea.notes.presentation.related.FollowRelatedNotes
+import app.notekea.notes.presentation.related.RelatedNotesViewModel
 import app.notekea.notes.presentation.index.SearchIndexNotice
 import app.notekea.notes.presentation.index.SearchIndexStatus
 import app.notekea.notes.presentation.index.SearchIndexViewModel
@@ -48,6 +50,7 @@ private const val EDITOR_KEY_PREFIX = "editor:"
 private const val SWITCHER_KEY_PREFIX = "switcher:"
 private const val SEARCH_INDEX_KEY_PREFIX = "search-index:"
 private const val NOTICE_MAX_WIDTH_DP = 640
+private const val RELATED_KEY_PREFIX = "related:"
 private const val TAG_PICKER_KEY_PREFIX = "tags:"
 private const val WORKSPACE_KEY_PREFIX = "workspace:"
 
@@ -81,6 +84,9 @@ fun VaultTreeScreen(
     ) { parametersOf(vaultPath) },
     searchIndexViewModel: SearchIndexViewModel = koinViewModel(
         key = SEARCH_INDEX_KEY_PREFIX + vaultPath
+    ) { parametersOf(vaultPath) },
+    relatedViewModel: RelatedNotesViewModel = koinViewModel(
+        key = RELATED_KEY_PREFIX + vaultPath
     ) { parametersOf(vaultPath) }
 ) {
     val state by viewModel.state.collectAsState()
@@ -110,7 +116,7 @@ fun VaultTreeScreen(
             onSwitchVault = onSwitchVault,
             searchIndex = { SearchIndexStatusOf(viewModel = searchIndexViewModel) }
         )
-        SearchIndexFollower(tree = state, viewModel = searchIndexViewModel)
+        SearchIndexFollower(state, activeEditor, searchIndexViewModel, relatedViewModel)
         Pickers(
             state = state,
             workspaceState = workspaceState,
@@ -134,14 +140,25 @@ private fun SearchIndexStatusOf(
 
 /**
  * The search index follows the vault's notes once the tree's first scan is done, and shows its first large run's
- * notice over the top of the workspace (`ROADMAP.md` 2.3).
+ * notice over the top of the workspace (`ROADMAP.md` 2.3); the Related section follows the active [editor]'s note and
+ * the index's runs (2.4).
  */
 @Composable
 private fun BoxScope.SearchIndexFollower(
     tree: VaultTreeState,
-    viewModel: SearchIndexViewModel
+    editor: EditorViewModel,
+    viewModel: SearchIndexViewModel,
+    related: RelatedNotesViewModel
 ) {
     val state by viewModel.state.collectAsState()
+    val editorState by editor.state.collectAsState()
+    FollowRelatedNotes(
+        buffer = editor.buffer,
+        notes = tree.tree.notes.keys,
+        isIndexReady = !state.isRunning && state.readyNotes != null,
+        onIntent = related::onIntent,
+        note = editorState.notePath
+    )
     LaunchedEffect(tree.tree, tree.isLoading) {
         val notes = tree.tree.notes.values.map { it.file }
         val isLoaded = !tree.isLoading && tree.loadError == null
