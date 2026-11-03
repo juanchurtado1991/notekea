@@ -1,13 +1,14 @@
 package app.notekea.core.embedding.domain
 
 import app.notekea.core.domain.Outcome
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
 import kotlin.math.sqrt
 
 /**
  * [TextEmbedder] without a model: a text's vector counts its words, each word adding to one of [DIMENSIONS] places
  * (its hash), scaled to length 1, so texts sharing words are close as with the real model, and the same text always
- * gives the same vector. It suspends between texts as the real one runs off the UI thread. [embedded] lists every text
+ * gives the same vector. It suspends between texts as the real one runs off the UI thread, for [millisPerText] if set. [embedded] lists every text
  * embedded; [failure] makes every call fail; a text over [maxTokens] words is refused as the real one refuses it.
  */
 class FakeTextEmbedder(
@@ -17,6 +18,9 @@ class FakeTextEmbedder(
     val embedded = mutableListOf<String>()
     var failure: EmbeddingError? = null
 
+    /** How long each text takes, as the real model takes milliseconds; none by default. */
+    var millisPerText = 0L
+
     override val dimensions: Int = DIMENSIONS
 
     override suspend fun embed(
@@ -24,7 +28,7 @@ class FakeTextEmbedder(
     ): Outcome<List<FloatArray>, EmbeddingError> {
         failure?.let { return Outcome.Failure(error = it) }
         val vectors = texts.mapIndexed { index, text ->
-            yield()
+            if (millisPerText > 0) delay(timeMillis = millisPerText) else yield()
             val words = WORD.findAll(input = text.lowercase()).map { it.value }.toList()
             if (words.size >
                 maxTokens

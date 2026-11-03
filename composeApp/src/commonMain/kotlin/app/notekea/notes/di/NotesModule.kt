@@ -57,6 +57,14 @@ import app.notekea.notes.presentation.editor.EditorViewModel
 import app.notekea.notes.presentation.switcher.QuickSwitcherViewModel
 import app.notekea.notes.presentation.tags.TagPickerViewModel
 import app.notekea.notes.presentation.tree.VaultTreeViewModel
+import app.notekea.notes.data.SqlDelightIndexStateStore
+import app.notekea.notes.domain.ChunkNoteUseCase
+import app.notekea.notes.domain.IndexStateStore
+import app.notekea.notes.domain.IndexVaultUseCase
+import app.notekea.notes.domain.NoteSections
+import app.notekea.notes.domain.OutlineFinder
+import app.notekea.notes.domain.PlanIndexUseCase
+import app.notekea.notes.presentation.index.SearchIndexViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -69,10 +77,26 @@ import org.koin.dsl.module
 val notesModule = module {
     single<LinkFinder> { JetBrainsMarkdownLinkFinder() }
     single<NoteMetadataCache> { SqlDelightNoteMetadataCache(database = get(), dispatchers = get()) }
+    single<IndexStateStore> { SqlDelightIndexStateStore(database = get(), dispatchers = get()) }
     single<TreePreferencesStore> { SettingsTreePreferencesStore(settings = get(), dispatchers = get()) }
     single<EditorPreferencesStore> { SettingsEditorPreferencesStore(settings = get(), dispatchers = get()) }
     single<BookmarkStore> { SettingsBookmarkStore(settings = get(), dispatchers = get()) }
     single<WorkspaceStore> { SettingsWorkspaceStore(settings = get(), dispatchers = get()) }
+    factoryOf(::OutlineFinder)
+    factoryOf(::NoteSections)
+    factoryOf(::ChunkNoteUseCase)
+    factoryOf(::PlanIndexUseCase)
+    factoryOf(::IndexVaultUseCase)
+    viewModel { parameters ->
+        SearchIndexViewModel(
+            vaultPath = parameters.get(),
+            indexVault = get(),
+            vectorIndex = get(),
+            indexStateStore = get(),
+            describeElapsedTime = get(),
+            clock = get()
+        )
+    }
     factoryOf(::GetWorkspaceUseCase)
     factoryOf(::GetNoteCoverUseCase)
     factoryOf(::WorkspaceTools)
