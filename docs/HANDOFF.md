@@ -3,7 +3,7 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-01, at the end of M1.
+Last updated: 2026-11-03, with 2.4 in its smoke.
 
 ## Milestones
 
@@ -11,8 +11,9 @@ Last updated: 2026-11-01, at the end of M1.
 - **M1 — Vault and editor:** ✅ 18 of 18 items. Its QA run (`qa/runs/M1.md`) closed on 2026-11-01 with the macOS run
   of `m1-rc1`, as the developer decided: the Windows tester is not available until M2, and Linux was not run.
 - **M2 — Indexing, links and related notes:** started. 2.12 Color themes is done (#107), 2.1 Markdown chunking
-  (#108), 2.2 Embedding engine (#109) and **2.3 Hybrid index** (#110) are done; next is **2.4 Related
-  notes panel** (`feature/related-notes`, `ROADMAP.md`).
+  (#108), 2.2 Embedding engine (#109) and 2.3 Hybrid index (#110) are done; **2.4 Related notes panel**
+  (`feature/related-notes`, `ROADMAP.md`) is built and waits for the developer's smoke (`MVP_SMOKE_TEST.md` 2.4)
+  before its pull request.
 
 ## Open work, in order
 
@@ -24,7 +25,7 @@ Last updated: 2026-11-01, at the end of M1.
 3. **`qa/README.md` piece 5** is 🟡: `MVP_SMOKE_TEST.md` is still edited by hand; making it generated from the
    Self-Test's cases (`./gradlew :selftest:smokeCases`, `qa/SELF_TEST.md`) is still to do. Until then, every case
    change goes both in `:selftest` and in `MVP_SMOKE_TEST.md`.
-4. **M2** goes on with 2.4 Related notes panel, on the index of 2.3.
+4. **M2** goes on with 2.4's smoke and pull request, then 2.5 Backlinks.
 
 No pull request is open.
 
