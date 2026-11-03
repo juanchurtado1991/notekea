@@ -25,6 +25,7 @@ import app.notekea.selftest.cases.m1.treeChangeCases
 import app.notekea.selftest.cases.m1.vaultCases
 import app.notekea.selftest.cases.m1.workspaceLookCases
 import app.notekea.selftest.cases.m2.appearanceCases
+import app.notekea.selftest.cases.m2.indexCases
 import com.testbuddy.Suite
 import com.testbuddy.testBuddy
 import java.nio.file.Files
@@ -68,6 +69,7 @@ object NotekeaSuite {
             formattingCases()
             memoryCases()
             appearanceCases()
+            indexCases()
             // Free use comes last, after every other manual case.
             freeUseCase()
         }

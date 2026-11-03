@@ -388,3 +388,16 @@ Settings is the gear at the bottom of the tool rail. Leave Settings → Appearan
 | 2.12-01 | In the Playground Vault open Settings, click the Deep Sage card and Dark under Mode; press Esc, quit and relaunch, and open Settings again | The Deep Sage card is outlined and checked and Dark is selected, before and after the relaunch | 2.12 | Self-Test | `SettingsAppearanceStoreTest`, `AppearanceViewModelTest`, `AppearanceSettingsScreenTest` | | | |
 | 2.12-02 | In the Playground Vault open Settings; under Mode click Light and click each theme's card, then Dark and each card again; press Tab until a card has the focus ring and press Enter | Each click turns the whole window (tree, tabs, note, logo) to the card's colors at once, every text readable; the chosen card is outlined and checked; Enter chooses the focused card | 2.12 | Manual (eyes) | `ColorThemeSchemesTest`, `NotekeaThemeAppearanceTest` | | | |
 | 2.12-03 | In the Playground Vault choose a theme other than Default with Mode System and switch the system between light and dark; then choose Light and switch it again | On System Notekea turns light or dark with the system, in the chosen theme; on Light it stays light | 2.12 | Manual (system) | `NotekeaThemeAppearanceTest` | | | |
+
+### 2.3 Hybrid index
+
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes) and `smoke-data/vaults/Ghost Serializer` (371 notes), as
+`smoke.sh prepare` (`smoke.ps1 prepare` on Windows) leaves them. The search index's status is on the right of the
+status bar; its card opens with a click on it.
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 2.3-01 | Open the Sample Vault and wait | The status bar ends with "40 notes ready to search" | 2.3 | Self-Test | `IndexVaultUseCaseTest`, `SearchIndexViewModelTest`, `LuceneVectorIndexTest` | | | |
+| 2.3-02 | In the Sample Vault, once ready, open Recipes/Arepas, type a line at its end, wait for "Saved", then click "40 notes ready to search" | Within two seconds of the save the status is ready again, and the card says the last run was "Just now" | 2.3 | Self-Test | `IndexVaultUseCaseTest`, `SearchIndexViewModelTest` | | | |
+| 2.3-03 | Open the Ghost Serializer vault; while it says Indexing, click it and note the notes left; quit before it ends, relaunch and click Indexing again | It goes on with the notes it had left (fewer than 371) and ends with "371 notes ready to search" | 2.3 | Manual (packaged) | `IndexVaultUseCaseTest` | | | |
+| 2.3-04 | Open the Ghost Serializer vault for the first time; Dismiss the notice at the top; click Indexing; when ready, click it and Rebuild index | A notice says Notekea is reading your notes; Dismiss hides it; the card shows a bar, notes done of 371 and the time left, the status a ring and the percent; Rebuild index starts again from 0 % and ends ready | 2.3 | Manual (eyes) | `SearchIndexScreenTest` | | | |
