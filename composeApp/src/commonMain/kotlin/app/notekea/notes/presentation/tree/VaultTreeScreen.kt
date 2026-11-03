@@ -2,6 +2,7 @@ package app.notekea.notes.presentation.tree
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -29,12 +30,15 @@ import app.notekea.notes.presentation.workspace.TabKind
 import app.notekea.notes.presentation.workspace.WorkspaceIntent
 import app.notekea.notes.presentation.workspace.WorkspaceState
 import app.notekea.notes.presentation.workspace.WorkspaceViewModel
+import app.notekea.notes.presentation.index.SearchIndexIntent
+import app.notekea.notes.presentation.index.SearchIndexViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 private const val TEMPLATE_PICKER_KEY_PREFIX = "templates:"
 private const val EDITOR_KEY_PREFIX = "editor:"
 private const val SWITCHER_KEY_PREFIX = "switcher:"
+private const val SEARCH_INDEX_KEY_PREFIX = "search-index:"
 private const val TAG_PICKER_KEY_PREFIX = "tags:"
 private const val WORKSPACE_KEY_PREFIX = "workspace:"
 
@@ -65,6 +69,9 @@ fun VaultTreeScreen(
     tagPickerViewModel: TagPickerViewModel = koinViewModel(key = TAG_PICKER_KEY_PREFIX + vaultPath),
     templatePickerViewModel: TemplatePickerViewModel = koinViewModel(
         key = TEMPLATE_PICKER_KEY_PREFIX + vaultPath
+    ) { parametersOf(vaultPath) },
+    searchIndexViewModel: SearchIndexViewModel = koinViewModel(
+        key = SEARCH_INDEX_KEY_PREFIX + vaultPath
     ) { parametersOf(vaultPath) }
 ) {
     val state by viewModel.state.collectAsState()
@@ -83,6 +90,7 @@ fun VaultTreeScreen(
         onTemplatePicker = templatePickerViewModel::onIntent
     )
     FollowWorkspace(state = state, viewModels = viewModels, sidePanel = sidePanel)
+    FollowSearchIndex(state = state, onIntent = searchIndexViewModel::onIntent)
     Box(modifier = modifier) {
         VaultWorkspace(
             state = state,
@@ -194,5 +202,17 @@ private fun VaultTreeScreenPreview() {
             onIntent = {},
             rail = SidebarRailActions()
         ) { PreviewNoteContent(path = TreePreviewData.state().selectedPath) }
+    }
+}
+
+/** The search index follows the vault's notes, once the tree's first scan is done (`ROADMAP.md` 2.3). */
+@Composable
+private fun FollowSearchIndex(
+    state: VaultTreeState,
+    onIntent: (SearchIndexIntent) -> Unit
+) {
+    LaunchedEffect(state.tree, state.isLoading) {
+        val notes = state.tree.notes.values.map { it.file }
+        onIntent(SearchIndexIntent.OnNotesChange(notes = notes, isLoaded = !state.isLoading && state.loadError == null))
     }
 }

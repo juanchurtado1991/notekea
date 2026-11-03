@@ -35,17 +35,29 @@ import app.notekea.notes.domain.Trash
 import app.notekea.notes.domain.AttachmentStore
 import app.notekea.notes.domain.VaultSettingsReader
 import okio.FileSystem
+import app.notekea.notes.data.LuceneVectorIndex
+import app.notekea.notes.domain.VectorIndex
+import java.nio.file.Path
 import org.koin.dsl.module
 import kotlin.time.Duration.Companion.seconds
+
+private const val INDEX_FOLDER = "index"
 
 // On Wayland the owner of a copied image never answers Java, so it gives up after a second instead of ten.
 private val WAYLAND_SELECTION_TIMEOUT = 1.seconds
 
 /**
  * Desktop implementations of the notes ports: the real file system through Okio, native change events, the system
- * trash with the vault's `.trash` folder as fallback, and the system file manager.
+ * trash with the vault's `.trash` folder as fallback, the system file manager, and the search indexes on Lucene.
  */
 val jvmNotesModule = module {
+    // The search indexes (ROADMAP.md 2.3), one per vault, in the app data's `index` folder: never inside a vault.
+    single<VectorIndex> {
+        LuceneVectorIndex(
+            indexRoot = Path.of(get<PlatformConventions>().appDataDirectory, INDEX_FOLDER).toString(),
+            dispatchers = get()
+        )
+    }
     single<FileRevealer> {
         ProcessFileRevealer(
             operatingSystem = get<PlatformConventions>().operatingSystem,
