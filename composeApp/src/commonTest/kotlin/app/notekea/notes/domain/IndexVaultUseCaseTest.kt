@@ -72,16 +72,21 @@ class IndexVaultUseCaseTest {
         )
     }
 
+    // Smoke 2.3 on Linux: a run stopped by closing Notekea went on with the notes left, but counted them from zero, so
+    // it looked as if indexing started over. It now goes on from the notes already indexed.
     @Test
-    fun `a run stopped after its first note resumes with the notes left`() = runTest {
+    fun `a run stopped after its first note goes on with the notes left, counted from those done`() = runTest {
         val notes = write(AREPAS to "Corn.", DUNE to "Water.", LISBON to "River.")
         indexVault(vaultPath = VAULT, notes = notes).first { it.done == 1 }
         index.puts.clear()
 
-        val resumed = indexVault(vaultPath = VAULT, notes = notes).last()
+        val resumed = indexVault(vaultPath = VAULT, notes = notes).toList()
 
         assertEquals(expected = listOf(AREPAS, LISBON), actual = index.puts)
-        assertEquals(expected = IndexProgress(total = 2, done = 2, indexed = 2, isFinished = true), actual = resumed)
+        assertEquals(
+            expected = (1 to 3) to IndexProgress(total = 3, done = 3, indexed = 2, isFinished = true),
+            actual = (resumed.first().done to resumed.first().total) to resumed.last()
+        )
     }
 
     @Test

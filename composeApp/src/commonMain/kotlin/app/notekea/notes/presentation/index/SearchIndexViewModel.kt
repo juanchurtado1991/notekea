@@ -79,9 +79,12 @@ class SearchIndexViewModel(
         val startedAt = clock.now()
         reduce { it.copy(isRunning = true, isFirstRun = isFirstRun, error = null) }
         var last: IndexProgress? = null
+        var doneBefore: Int? = null
         indexVault(vaultPath = vaultPath, notes = notes).collect { progress ->
             last = progress
-            reduce { it.copy(progress = progress, remaining = remaining(progress = progress, since = startedAt)) }
+            val before = doneBefore ?: progress.done.also { doneBefore = it }
+            val remaining = remaining(progress = progress, doneBefore = before, since = startedAt)
+            reduce { it.copy(progress = progress, remaining = remaining) }
         }
         finish(startedAt = startedAt, notes = notes.size, progress = last)
     }
@@ -106,14 +109,18 @@ class SearchIndexViewModel(
         if (progress?.error == IndexRunError.INDEX) start(after = RETRY_DELAY)
     }
 
-    /** About how long the run has left, at the pace of the notes done so far; null before the first one. */
+    /**
+     * About how long the run has left, at the pace of the notes it has done so far (those [doneBefore] it were
+     * indexed by an earlier run); null before its first one.
+     */
     private fun remaining(
         progress: IndexProgress,
+        doneBefore: Int,
         since: Instant
     ): Duration? {
-        if (progress.done == 0 || progress.done >= progress.total) return null
-        val elapsed = clock.now() - since
-        return elapsed / progress.done * (progress.total - progress.done)
+        val doneNow = progress.done - doneBefore
+        if (doneNow <= 0 || progress.done >= progress.total) return null
+        return (clock.now() - since) / doneNow * (progress.total - progress.done)
     }
 
     private fun rebuild() {

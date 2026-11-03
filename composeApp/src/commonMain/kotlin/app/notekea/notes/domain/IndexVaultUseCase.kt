@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.flow
  * note read is chunked ([ChunkNoteUseCase]), embedded ([TextEmbedder]) and put in the index ([VectorIndex]) only when
  * its text changed (by its [ContentHash]), then marked done ([IndexStateStore]), so a run stopped anywhere (the app closed,
  * the vault switched) resumes with the notes left. Gone notes leave the index. The [Flow] tells the progress after
- * every note; a model or index failure stops the run, the rest waiting for the next one.
+ * every note, over all the vault's notes (those already indexed count as done); a model or index failure stops the run, the rest waiting for the next one.
  */
 class IndexVaultUseCase(
     private val planIndex: PlanIndexUseCase,
@@ -32,12 +32,13 @@ class IndexVaultUseCase(
         val plan = planIndex(notes = notes, indexed = held, version = version)
         plan.remove.forEach { path ->
             if (vectorIndex.remove(vaultPath = vaultPath, note = path) is Outcome.Failure) {
-                return@flow emit(value = IndexProgress(total = plan.read.size, error = IndexRunError.INDEX))
+                return@flow emit(value = IndexProgress(total = notes.size, error = IndexRunError.INDEX))
             }
             indexStateStore.delete(vaultPath = vaultPath, path = path)
         }
         val hashes = held.associate { it.file.path to it.contentHash.takeIf { _ -> it.version == version } }
-        var progress = IndexProgress(total = plan.read.size)
+        // Counted over the whole vault: a run that resumes shows how far the index is, not a new count from zero.
+        var progress = IndexProgress(total = plan.read.size + plan.unchanged, done = plan.unchanged)
         emit(value = progress)
         for (file in plan.read) {
             val step = indexNote(vaultPath = vaultPath, file = file, heldHash = hashes[file.path])

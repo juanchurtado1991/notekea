@@ -7,6 +7,7 @@ import app.notekea.core.embedding.domain.TextEmbedder
 import co.touchlab.kermit.Logger
 import de.kherud.llama.LlamaModel
 import de.kherud.llama.ModelParameters
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -76,6 +77,9 @@ class LlamaTextEmbedder(
             vectors += normalized(vector = loaded.embed(text))
         }
         Outcome.Success(value = vectors)
+    } catch (cancellation: CancellationException) {
+        // A cancelled call (the vault closed, a new run) is not the model failing.
+        throw cancellation
     } catch (exception: RuntimeException) {
         // java-llama.cpp's LlamaException (a RuntimeException) is not public: a model that fails to load or to embed.
         logger.e(throwable = exception) { ENGINE_FAILED_MESSAGE }

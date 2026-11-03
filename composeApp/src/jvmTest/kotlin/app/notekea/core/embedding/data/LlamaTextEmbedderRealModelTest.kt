@@ -1,8 +1,15 @@
 package app.notekea.core.embedding.data
 
 import app.notekea.core.data.JvmAppDispatchers
+import co.touchlab.kermit.LogWriter
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
+import co.touchlab.kermit.platformLogWriter
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.EmbeddingError
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.delay
@@ -52,6 +59,30 @@ class LlamaTextEmbedderRealModelTest {
         )
     }
 
+    // Smoke 2.3 on Linux: quitting while indexing logged "The embedding model failed": the cancellation was caught as
+    // the model failing. A cancelled call now stops as cancelled and logs nothing.
+    @Test
+    fun `a cancelled call stops as cancelled, never logged as a failing model`() = runBlocking {
+        val embedder = embedder()
+        val errors = mutableListOf<String>()
+        Logger.setLogWriters(
+            object : LogWriter() {
+                override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
+                    if (severity >= Severity.Error) errors += message
+                }
+            }
+        )
+        try {
+            val call = launch(context = Dispatchers.Default) { embedder.embed(texts = List(size = 300) { "Note $it" }) }
+            delay(timeMillis = CANCEL_AFTER_MILLIS)
+            call.cancelAndJoin()
+        } finally {
+            Logger.setLogWriters(platformLogWriter())
+        }
+
+        assertEquals(expected = emptyList(), actual = errors)
+    }
+
     @Test
     fun `a missing model file is named`() = runBlocking {
         val embedder = embedder(modelPath = "/no/model.gguf")
@@ -96,5 +127,6 @@ class LlamaTextEmbedderRealModelTest {
         const val DEFAULT_IDLE_MILLIS = 60_000L
         const val WAIT_MILLIS = 10_000L
         const val POLL_MILLIS = 50L
+        const val CANCEL_AFTER_MILLIS = 300L
     }
 }
