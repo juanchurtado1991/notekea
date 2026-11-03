@@ -83,6 +83,7 @@ private fun SuiteBuilder.renameFromTitle() {
     automated(id = "1.5-04", title = "Renaming a note from its title") {
         openPlaygroundNote(name = "Arepas", shownText = AREPAS_FLOUR)
         renameFromTitle(name = "Arepas", newName = "Arepas reina")
+        click(text = "Update links")
         expectText(text = "Links updated in 3 notes: 2026-10-20, Read mode, Welcome.")
         expectFile(path = "$PLAYGROUND/Recipes/Arepas reina.md")
         renameFromTitle(name = "Arepas reina", newName = "a/b")

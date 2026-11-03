@@ -102,6 +102,8 @@ private fun SuiteBuilder.renameInTheTree() {
         press(key = Key.Enter)
         expectFolder(path = "$PLAYGROUND/Ideas and plans")
         renameInTree(name = WELCOME, newName = "Good morning")
+        // Editor/Read mode links to Welcome, so the rename asks about it (2.5); its links are not what this case checks.
+        click(text = "Don’t update")
         expectFile(path = "$PLAYGROUND/Good morning.md")
         expectNoFile(path = "$PLAYGROUND/Welcome.md")
         refusedName(name = "a/b", message = "Enter a name without characters like / : * ? or quotes.")
@@ -113,10 +115,12 @@ private fun SuiteBuilder.renameInTheTree() {
 }
 
 private fun SuiteBuilder.renameUpdatesLinks() {
-    automated(id = "1.4-06", title = "Renaming a note updates the links to it") {
+    automated(id = "1.4-06", title = "Renaming a note offers to update the links to it, and updates them") {
         openVault(name = PLAYGROUND, shownText = WELCOME)
         clickInTree(text = RECIPES)
         renameInTree(name = "Arepas", newName = "Arepas reina")
+        expectText(text = "in 3 notes?", substring = true)
+        click(text = "Update links")
         expectText(text = "Links updated in 3 notes", substring = true)
         listOf("Welcome.md", "Journal/2026-10-20.md", "Editor/Read mode.md").forEach {
             expectFile(path = "$PLAYGROUND/$it", containing = "[[Arepas reina")

@@ -6,7 +6,6 @@ import app.notekea.core.domain.FakeLocalTimeFormatter
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
-import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.AttachFileUseCase
 import app.notekea.notes.domain.FakeAttachmentPicker
 import app.notekea.notes.domain.FakeAttachmentStore
@@ -24,10 +23,9 @@ import app.notekea.notes.domain.NoteFixtures.VAULT
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
-import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
+import app.notekea.notes.domain.RenameAndPlanLinksUseCase
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
-import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlin.time.Instant
 
@@ -53,18 +51,15 @@ class EditorViewModels(dispatcher: CoroutineDispatcher) {
         openNote = OpenNoteUseCase(noteContentStore = store),
         saveNote = SaveNoteUseCase(noteContentStore = store),
         observeNoteOnDisk = ObserveNoteOnDiskUseCase(noteScanner = scanner, noteContentStore = store),
-        renameAndUpdateLinks = RenameAndUpdateLinksUseCase(
+        renameAndPlanLinks = RenameAndPlanLinksUseCase(
             noteScanner = scanner,
             renameEntry = RenameEntryUseCase(
                 noteFileOperations = operations,
                 validateFileName = ValidateFileNameUseCase()
             ),
-            updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
-                planLinkUpdates = PlanLinkUpdatesUseCase(
-                    noteContentStore = store,
-                    linkFinder = JetBrainsMarkdownLinkFinder()
-                ),
-                applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store)
+            planLinkUpdates = PlanLinkUpdatesUseCase(
+                noteContentStore = store,
+                linkFinder = JetBrainsMarkdownLinkFinder()
             )
         ),
         editorPreferences = preferences,
