@@ -12,6 +12,12 @@ fun keyDown(
     isShiftPressed: Boolean = false
 ): KeyEvent = KeyEvent(key = key, type = KeyEventType.KeyDown, isShiftPressed = isShiftPressed)
 
+/** A key let go, as the window sends it. */
+@OptIn(InternalComposeUiApi::class)
+fun keyUp(
+    key: Key
+): KeyEvent = KeyEvent(key = key, type = KeyEventType.KeyUp)
+
 /** A key pressed with Ctrl, and Shift when [isShiftPressed], as the window sends it. */
 @OptIn(InternalComposeUiApi::class)
 fun ctrlKeyDown(

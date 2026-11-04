@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -32,8 +31,8 @@ private const val SEGMENT_VERTICAL_PADDING_DP = 4
 
 /**
  * A few exclusive choices side by side in a soft track, as macOS draws them: each with its icon and label, the
- * [selectedIndex] one raised on the surface with the primary icon. A click goes to [onSelect] with its index; the
- * segments are not focus stops, so a click leaves the keyboard where it was.
+ * [selectedIndex] one raised on the surface with the primary icon. A click, or Enter on a segment, goes to [onSelect]
+ * with its index.
  */
 @Composable
 fun NotekeaSegmentedControl(
@@ -64,11 +63,12 @@ private fun Segment(
     onClick: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
+    val shape = MaterialTheme.shapes.extraSmall
     Row(
         modifier = Modifier
-            .clip(shape = MaterialTheme.shapes.extraSmall)
+            .focusBorder(color = colors.primary, shape = shape)
+            .clip(shape = shape)
             .background(color = if (isSelected) colors.surface else colors.surfaceVariant)
-            .focusProperties { canFocus = false }
             .clickable(role = Role.Tab, onClick = onClick)
             .semantics { selected = isSelected }
             .padding(horizontal = NotekeaDimensions.SpacingS, vertical = SEGMENT_VERTICAL_PADDING_DP.dp),
