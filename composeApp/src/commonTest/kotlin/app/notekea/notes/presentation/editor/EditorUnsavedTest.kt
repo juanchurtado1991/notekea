@@ -62,6 +62,20 @@ class EditorUnsavedTest : EditorViewModelTestBase() {
     }
 
     @Test
+    fun `a note that fails unexpectedly while it opens says so, and never shows as the previous note's text`() =
+        runEditorTest {
+            open(path = AREPAS)
+            store.onRead = { error("bug") }
+
+            open(path = WELCOME)
+
+            assertEquals(
+                expected = NotesError.OperationFailed(path = WELCOME.value),
+                actual = viewModel.state.value.loadError
+            )
+        }
+
+    @Test
     fun `leaving a saved note keeps nothing`() = runEditorTest {
         val effects = collectEffects()
         open(path = AREPAS)

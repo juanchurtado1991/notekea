@@ -2,6 +2,7 @@ package app.notekea.notes.presentation.related
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
+import app.notekea.notes.domain.IndexRunError
 import app.notekea.notes.domain.FindRelatedNotesUseCase
 import app.notekea.notes.domain.RelativePath
 import co.touchlab.kermit.Logger
@@ -84,7 +85,7 @@ class RelatedNotesViewModel(
         throwable: Throwable
     ) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
-        reduce { it.copy(isLoading = false) }
+        reduce { it.copy(isLoading = false, error = IndexRunError.Index) }
     }
 
     private companion object {
