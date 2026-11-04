@@ -8,7 +8,6 @@ import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.NoteMetadataCache
 import app.notekea.notes.domain.RelativePath
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import kotlin.time.Instant
 
@@ -85,9 +84,8 @@ class SqlDelightNoteMetadataCache(
         block: () -> T
     ): T = try {
         block()
-    } catch (cancellation: CancellationException) {
-        throw cancellation
     } catch (exception: Exception) {
+        if (!isDatabaseFailure(exception = exception)) throw exception
         logger.w(throwable = exception) { failureMessage }
         fallback
     }
