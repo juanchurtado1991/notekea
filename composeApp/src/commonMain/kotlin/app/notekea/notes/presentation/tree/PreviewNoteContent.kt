@@ -19,7 +19,10 @@ private const val PREVIEW_WIDTH_DP = 560
 internal fun PreviewNoteContent(
     path: RelativePath?
 ) {
-    Text(text = path?.nameWithoutExtension.orEmpty() + "\n\n" + PREVIEW_BODY, style = MaterialTheme.typography.bodyLarge)
+    Text(
+        text = path?.nameWithoutExtension.orEmpty() + "\n\n" + PREVIEW_BODY,
+        style = MaterialTheme.typography.bodyLarge
+    )
 }
 
 @Preview

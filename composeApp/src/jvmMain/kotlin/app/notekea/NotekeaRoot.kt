@@ -27,7 +27,7 @@ import app.notekea.core.presentation.theme.LocalAppearance
 import app.notekea.core.presentation.theme.LocalSystemDarkTheme
 import app.notekea.core.presentation.theme.LocalSystemReduceMotion
 import app.notekea.notes.presentation.tree.VaultScope
-import app.notekea.notes.presentation.tree.VaultTreeScreen
+import app.notekea.shell.presentation.VaultTreeScreen
 import app.notekea.vault.presentation.welcome.WelcomeContent
 import app.notekea.vault.presentation.welcome.WelcomePreviewData
 import app.notekea.vault.presentation.welcome.WelcomeScreen

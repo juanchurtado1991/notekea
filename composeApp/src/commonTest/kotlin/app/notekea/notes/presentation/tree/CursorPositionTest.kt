@@ -2,6 +2,7 @@ package app.notekea.notes.presentation.tree
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.shell.presentation.cursorOf
 
 class CursorPositionTest {
     @Test
