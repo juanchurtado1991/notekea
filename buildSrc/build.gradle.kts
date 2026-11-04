@@ -6,9 +6,22 @@ plugins {
 repositories {
     gradlePluginPortal()
     mavenCentral()
+    google()
 }
 
+/** The artifact of a plugin of the catalog, for the convention plugin's code to compile against. */
+fun marker(
+    plugin: Provider<PluginDependency>
+) = plugin.map { "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version}" }
+
 dependencies {
+    // In one class loader with Kotlin and Compose, which look for the Android plugin's classes.
+    implementation(marker(libs.plugins.android.kotlin.multiplatform.library))
+    implementation(marker(libs.plugins.compose.compiler))
+    implementation(marker(libs.plugins.compose.multiplatform))
+    implementation(marker(libs.plugins.kotlin.jvm))
+    implementation(marker(libs.plugins.ktlint))
+
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(libs.junit.jupiter)
