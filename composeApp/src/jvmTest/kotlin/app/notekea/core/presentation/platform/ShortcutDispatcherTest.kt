@@ -23,7 +23,7 @@ class ShortcutDispatcherTest {
     @Test
     fun `a registered shortcut handles its key press and nothing else`() {
         var triggered = 0
-        dispatcher.register { event -> openFolder.matches(event = event).also { if (it) triggered++ } }
+        dispatcher.register(shortcut = openFolder) { triggered++ }
 
         val handled = listOf(
             dispatcher.dispatch(event = keyEvent(type = KeyEventType.KeyDown, isCtrlPressed = true)),
@@ -42,30 +42,37 @@ class ShortcutDispatcherTest {
     }
 
     @Test
-    fun `the newest handler is asked first and unregistering removes it`() {
+    fun `the newest registration runs, and unregistering removes it`() {
         val calls = mutableListOf<String>()
-        dispatcher.register {
-            calls += FIRST
-            false
-        }
-        val unregister = dispatcher.register {
-            calls += SECOND
-            true
-        }
+        dispatcher.register(shortcut = openFolder) { calls += FIRST }
+        val unregister = dispatcher.register(shortcut = openFolder) { calls += SECOND }
 
-        dispatcher.dispatch(event = keyEvent(type = KeyEventType.KeyDown, isCtrlPressed = false))
+        dispatcher.dispatch(event = keyEvent(type = KeyEventType.KeyDown, isCtrlPressed = true))
         unregister()
-        val handledAfterRemoval = dispatcher.dispatch(
-            event = keyEvent(type = KeyEventType.KeyDown, isCtrlPressed = false)
-        )
+        dispatcher.dispatch(event = keyEvent(type = KeyEventType.KeyDown, isCtrlPressed = true))
 
         assertEquals(
             expected = listOf(SECOND, FIRST),
             actual = calls
         )
+    }
+
+    @Test
+    fun `the menu bar runs what a shortcut does, and sees what no screen offers`() {
+        var triggered = 0
+        val unregister = dispatcher.register(shortcut = openFolder) { triggered++ }
+
+        val available = dispatcher.isAvailable(shortcut = openFolder) to dispatcher.trigger(shortcut = openFolder)
+        unregister()
+        val gone = dispatcher.isAvailable(shortcut = openFolder) to dispatcher.trigger(shortcut = openFolder)
+
         assertEquals(
-            expected = false,
-            actual = handledAfterRemoval
+            expected = listOf(true to true, false to false),
+            actual = listOf(available, gone)
+        )
+        assertEquals(
+            expected = 1,
+            actual = triggered
         )
     }
 

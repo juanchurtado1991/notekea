@@ -13,7 +13,9 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
+import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.LocalWindowExceptionHandlerFactory
+import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -34,16 +36,23 @@ import app.notekea.core.platform.domain.SystemAppearance
 import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.platform.domain.SystemEnvironment
 import app.notekea.core.presentation.gallery.DesignSystemGallery
+import app.notekea.core.presentation.menu.AppMenuEntry
+import app.notekea.core.presentation.menu.AppMenus
 import app.notekea.core.presentation.platform.LocalResizePointerIcon
 import app.notekea.core.presentation.platform.LocalShortcutDispatcher
 import app.notekea.core.presentation.platform.LocalFileDrop
 import app.notekea.core.presentation.platform.LocalWindowCloseGuard
+import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.core.presentation.platform.awtFileDrop
 import app.notekea.core.presentation.platform.ShortcutDispatcher
+import app.notekea.core.presentation.platform.SystemAppMenu
 import app.notekea.core.presentation.platform.SystemQuit
 import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.core.presentation.platform.WindowCloseShortcuts
+import app.notekea.core.presentation.platform.WindowDialogs
+import app.notekea.core.presentation.platform.WindowDialogsHost
 import app.notekea.core.presentation.platform.WindowQuit
+import app.notekea.core.presentation.platform.keyShortcut
 import app.notekea.core.presentation.theme.LocalAppearance
 import app.notekea.core.presentation.theme.LocalSystemDarkTheme
 import app.notekea.core.presentation.theme.NotekeaTheme
@@ -68,6 +77,7 @@ import com.testbuddy.crash.CrashTexts
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.core.module.Module
 import java.nio.file.Path
 import app.notekea.vault.presentation.welcome.WelcomeScreen
@@ -89,6 +99,7 @@ private const val GALLERY_HEIGHT_DP = 900
 private const val GALLERY_PROPERTY = "notekea.gallery"
 private const val GALLERY_TITLE = "Notekea — Design system gallery"
 private const val GALLERY_WIDTH_DP = 1280
+private const val SCREEN_MENU_BAR_PROPERTY = "apple.laf.useScreenMenuBar"
 private const val TITLE_SEPARATOR = " — "
 private const val WINDOW_TITLE = "Notekea"
 
@@ -109,6 +120,7 @@ fun runNotekea(
     modules: List<Module> = desktopModules,
     extraWindows: @Composable ApplicationScope.() -> Unit = {}
 ) {
+    System.setProperty(SCREEN_MENU_BAR_PROPERTY, true.toString())
     val koin = startKoin { modules(modules) }.koin
     val crashBuddy = crashBuddyOf(koin = koin)
     crashBuddy.installThreadHandler()
@@ -193,34 +205,87 @@ private fun ApplicationScope.NotekeaWindow(
     var vaultName by remember { mutableStateOf<String?>(value = null) }
     val shortcutDispatcher = remember { ShortcutDispatcher() }
     val closeGuard = remember { WindowCloseGuard() }
+    val dialogs = remember { WindowDialogs() }
     val scope = rememberCoroutineScope()
     val quit = remember { WindowQuit(closeGuard = closeGuard, scope = scope) }
-    LaunchedEffect(quit) { SystemQuit(quit = quit).install() }
+    LaunchedEffect(quit) {
+        SystemQuit(quit = quit).install()
+        SystemAppMenu(dialogs = dialogs).install()
+    }
     val windowState = rememberWindowState(
         size = WindowSizes.system.initial,
         position = WindowPosition.Aligned(alignment = Alignment.Center)
     )
+    val onClose = { quit.request(then = ::exitApplication) }
     Window(
-        onCloseRequest = { quit.request(then = ::exitApplication) },
+        onCloseRequest = onClose,
         title = windowTitle(vaultName = vaultName),
         icon = rememberVectorPainter(image = NotekeaBrand.Logo),
         state = windowState,
         onPreviewKeyEvent = shortcutDispatcher::dispatch
     ) {
+        NotekeaMenuBar(conventions = zoom.platformConventions, shortcuts = shortcutDispatcher, dialogs = dialogs)
         CompositionLocalProvider(
             LocalShortcutDispatcher provides shortcutDispatcher,
             LocalWindowCloseGuard provides closeGuard,
+            LocalWindowDialogs provides dialogs,
             LocalResizePointerIcon provides PointerIcon(cursor = Cursor(Cursor.E_RESIZE_CURSOR))
         ) {
             if (isCrashTest) CrashTest()
-            WindowCloseShortcuts(platformConventions = zoom.platformConventions) {
-                quit.request(then = ::exitApplication)
+            WindowCloseShortcuts(platformConventions = zoom.platformConventions, onClose = onClose)
+            ZoomedContent(zoom = zoom, dialogs = dialogs, onVaultNameChange = { vaultName = it })
+        }
+    }
+}
+
+@Composable
+private fun ZoomedContent(
+    zoom: WindowZoom,
+    dialogs: WindowDialogs,
+    onVaultNameChange: (String?) -> Unit
+) {
+    UiZoom(
+        platformConventions = zoom.platformConventions,
+        loadScale = { zoom.getUiScale() },
+        saveScale = { zoom.saveUiScale(scale = it) }
+    ) {
+        WindowContent(
+            platformConventions = zoom.platformConventions,
+            dialogs = dialogs,
+            onVaultNameChange = onVaultNameChange
+        )
+    }
+}
+
+/** The menu bar ([AppMenus]): a command runs what its shortcut runs, and is disabled while no screen offers it. */
+@Composable
+private fun FrameWindowScope.NotekeaMenuBar(
+    conventions: PlatformConventions,
+    shortcuts: ShortcutDispatcher,
+    dialogs: WindowDialogs
+) {
+    MenuBar {
+        AppMenus.of(conventions = conventions).forEach { menu ->
+            Menu(text = stringResource(resource = menu.title)) {
+                menu.entries.forEach { entry ->
+                    when (entry) {
+                        is AppMenuEntry.Command -> Item(
+                            text = stringResource(resource = entry.label),
+                            enabled = shortcuts.isAvailable(shortcut = entry.shortcut),
+                            shortcut = entry.shortcut.keyShortcut(),
+                            onClick = { shortcuts.trigger(shortcut = entry.shortcut) }
+                        )
+
+                        is AppMenuEntry.OpensDialog -> Item(
+                            text = stringResource(resource = entry.label),
+                            shortcut = null,
+                            onClick = { dialogs.shown = entry.dialog }
+                        )
+
+                        AppMenuEntry.Separator -> Separator()
+                    }
+                }
             }
-            UiZoom(
-                platformConventions = zoom.platformConventions,
-                loadScale = { zoom.getUiScale() },
-                saveScale = { zoom.saveUiScale(scale = it) }
-            ) { WindowContent(onVaultNameChange = { vaultName = it }) }
         }
     }
 }
@@ -230,9 +295,14 @@ private fun zoomOf(
     koin: Koin
 ) = WindowZoom(platformConventions = koin.get(), getUiScale = koin.get(), saveUiScale = koin.get())
 
-/** The app: the welcome screen, then the open vault's workspace; [onVaultNameChange] reports the open vault's name. */
+/**
+ * The app: the welcome screen, then the open vault's workspace, with the window's [dialogs] over them;
+ * [onVaultNameChange] reports the open vault's name.
+ */
 @Composable
 private fun WindowContent(
+    platformConventions: PlatformConventions,
+    dialogs: WindowDialogs,
     onVaultNameChange: (String?) -> Unit
 ) {
     App {
@@ -248,6 +318,7 @@ private fun WindowContent(
                 }
             }
         )
+        WindowDialogsHost(platformConventions = platformConventions, dialogs = dialogs)
     }
 }
 
