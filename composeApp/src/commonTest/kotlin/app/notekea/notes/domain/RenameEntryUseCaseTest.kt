@@ -33,6 +33,19 @@ class RenameEntryUseCaseTest {
     }
 
     @Test
+    fun `a note's name is measured with its extension`() = runTest {
+        val fits = "a".repeat(n = 252)
+
+        assertEquals(
+            expected = listOf<Outcome<RelativePath, NotesError>>(
+                Outcome.Success(value = RelativePath(value = "Recipes/$fits.md")),
+                Outcome.Failure(error = NotesError.InvalidName)
+            ),
+            actual = listOf(fits, fits + "a").map { renameEntry(vaultPath = VAULT, path = AREPAS, newName = it) }
+        )
+    }
+
+    @Test
     fun `invalid and hidden names are refused without touching the disk`() = runTest {
         val outcomes = listOf("", "  .md", "a/b", "Arepas: reina", ".secret").map {
             renameEntry(vaultPath = VAULT, path = AREPAS, newName = it)

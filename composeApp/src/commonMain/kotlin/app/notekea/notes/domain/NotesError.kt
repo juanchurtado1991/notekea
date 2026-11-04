@@ -17,7 +17,7 @@ sealed interface NotesError {
     /** A name starting with a dot would hide the entry from the tree (and from Obsidian). */
     data object HiddenName : NotesError
 
-    /** A name that cannot be a file on every supported system (empty, `..`, or with `/ \ : * ? " < > |`). */
+    /** A name that cannot be a file on every supported system (empty, `..`, too long, or with `/ \ : * ? " < > |`). */
     data object InvalidName : NotesError
 
     data class NameTaken(val name: String) : NotesError

@@ -115,13 +115,15 @@ class OkioNoteContentStoreTest {
     }
 
     @Test
-    fun `a longer temporary file left by a crash leaves nothing of itself in the next save`() = runStoreTest {
-        writeNote(content = ORIGINAL)
-        fakeFileSystem.write(file = VAULT.toPath() / FOLDER / ".Arepas.md.notekea-tmp") { writeUtf8(TEXT + TEXT) }
-
+    fun `the temporary name has the same short length for every note, however long its name is`() = runStoreTest {
+        val longest = RelativePath(value = "$FOLDER/${"é".repeat(n = 126)}.md")
         store().write(vaultPath = VAULT, path = NOTE, content = TEXT)
+        store().write(vaultPath = VAULT, path = longest, content = TEXT)
 
-        assertEquals(expected = TEXT, actual = store().read(vaultPath = VAULT, path = NOTE))
+        assertEquals(
+            expected = listOf(TEMPORARY_NAME_BYTES, TEMPORARY_NAME_BYTES),
+            actual = attributes.copies.map { (_, temporary) -> temporary.substringAfterLast("/").length }
+        )
     }
 
     @Test
@@ -186,6 +188,7 @@ class OkioNoteContentStoreTest {
         private const val DENIED = "File in use"
         private const val FOLDER = "Recipes"
         private const val ORIGINAL = "# Arepas\n"
+        private const val TEMPORARY_NAME_BYTES = 21
         private const val TEXT = "# Arepas\n\nServe them warm.\n"
         private const val VAULT = "/home/ana/Notes"
         private val NOTE = RelativePath(value = "Recipes/Arepas.md")

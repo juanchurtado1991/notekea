@@ -17,6 +17,16 @@ class ValidateFileNameUseCaseTest {
     }
 
     @Test
+    fun `a name is measured in bytes, up to the 255 a file system takes`() {
+        val longest = "é".repeat(n = 127) + "a"
+
+        assertEquals(
+            expected = listOf(true, false, false),
+            actual = listOf(longest, longest + "a", "é".repeat(n = 128)).map { validateFileName(name = it) }
+        )
+    }
+
+    @Test
     fun `ordinary names are accepted, including spaces, dots and accents`() {
         val valid = listOf("My Notes", "Café con leche", "2026-10-24", ".hidden", "v1.2", "a..b")
 
