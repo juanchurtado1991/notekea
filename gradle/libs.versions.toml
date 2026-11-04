@@ -6,15 +6,12 @@ directory-watcher = "0.19.1"
 filekit = "0.17.0"
 ghost = "1.3.5"
 jdk = "21"
-java-keyring = "1.0.4"
 jetbrains-markdown = "0.7.18"
-jgit = "7.8.0.202609011348-r"
 junit-jupiter = "6.1.3"
 junit-platform = "6.1.3"
 kermit = "2.2.0"
 koin = "4.2.2"
 konsist = "0.18.1"
-koog = "1.3.0"
 kover = "0.9.11"
 lucide = "2.2.1"
 kotlin = "2.4.21"
@@ -22,7 +19,6 @@ kotlinx-coroutines = "1.11.0"
 ksp = "2.3.12"
 ktlint-cli = "1.8.0"
 ktlint-plugin = "14.2.0"
-ktor = "3.6.0"
 lifecycle = "2.11.0"
 llama = "4.2.0"
 lucene = "10.5.2"
@@ -64,20 +60,9 @@ jetbrains-markdown = { module = "org.jetbrains:markdown", version.ref = "jetbrai
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 
 # Local AI
-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
-ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 llama = { module = "de.kherud:llama", version.ref = "llama" }
 lucene-core = { module = "org.apache.lucene:lucene-core", version.ref = "lucene" }
 lucene-analysis-common = { module = "org.apache.lucene:lucene-analysis-common", version.ref = "lucene" }
-
-# Agents
-koog-agents-core = { module = "ai.koog:agents-core", version.ref = "koog" }
-koog-agents-tools = { module = "ai.koog:agents-tools", version.ref = "koog" }
-
-# Git sync
-java-keyring = { module = "com.github.javakeyring:java-keyring", version.ref = "java-keyring" }
-jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
-jgit-ssh-apache = { module = "org.eclipse.jgit:org.eclipse.jgit.ssh.apache", version.ref = "jgit" }
 
 # Infrastructure
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }

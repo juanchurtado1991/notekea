@@ -144,6 +144,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The app no longer ships seven libraries nothing uses yet: JGit and its SSH client, Java Keyring, Koog and the Ktor
+  client. They come back with the code that needs them (M3 and M4).
 - The agent instructions are in `AGENTS.md`, for any AI coding agent (`CLAUDE.md` only points there), with the
   working rules that lived in one agent's memory and a table of which skill to read for each kind of work.
   The skills moved to `.agents/skills` (`.claude/skills` links to it). `docs/HANDOFF.md` says where the project
