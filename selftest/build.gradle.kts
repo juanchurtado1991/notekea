@@ -22,8 +22,8 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":composeApp"))
-    implementation(project(":test-buddy"))
+    implementation(projects.composeApp)
+    implementation(projects.testBuddy)
     implementation(compose.desktop.currentOs)
     implementation(libs.koin.core)
     implementation(libs.lifecycle.viewmodel.compose)

@@ -61,9 +61,11 @@ Decisions:
 | Embedding model (bundled) | `granite-embedding-107m-multilingual`, Q8_0 GGUF (bartowski) | Hugging Face commit `52fed1c8` | Multilingual embeddings for the index (`ROADMAP.md` 2.2): 384 dimensions, 512 tokens, 121 MB, Apache 2.0. Chosen over multilingual-e5-small and bge-m3 (`docs/spikes/2026-11-01-embedding-models.md`); downloaded by the build with its SHA-256 checked (`downloadEmbeddingModel`) and packaged in the app's resources |
 | Lucene | `org.apache.lucene:lucene-core` | 10.5.2 | Hybrid search: vectors (HNSW) + keywords (BM25). Requires Java 21 |
 | Lucene analysis | `org.apache.lucene:lucene-analysis-common` | 10.5.2 | The keywords of the index (`ROADMAP.md` 2.3) without accents and with Spanish words reduced to their stem, so "cancion" finds "canción" and "receta" finds "recetas" (approved by the developer on 2026-11-03) |
-| Ktor Client | `io.ktor:ktor-client-core` + `io.ktor:ktor-client-okhttp` | 3.6.0 | Downloads the model (~2 GB) with progress and resume |
+| Ktor Client | `io.ktor:ktor-client-core` + `io.ktor:ktor-client-okhttp` | 3.6.0 | Downloads the model (~2 GB) with progress and resume. **Not in the build yet:** added back with the code that uses it (M3–M4) |
 
 ### Agents
+
+**Not in the build yet:** approved, and added back with the code that uses them (M3–M4), so the app does not ship them unused.
 
 | Library | Coordinates | Version | Purpose |
 |---|---|---|---|
@@ -84,6 +86,8 @@ separate build.
 Alternative to evaluate for the mobile phase: **Llamatik** (`com.llamatik:library` 1.10.1), on-device KMP LLM (Android, iOS, Desktop). Young (~200 ⭐).
 
 ## 5. Git sync
+
+**Not in the build yet:** approved, and added back with the code that uses them (M3–M4), so the app does not ship them unused.
 
 | Library | Coordinates | Version | Purpose |
 |---|---|---|---|
@@ -148,12 +152,12 @@ Packages follow Clean Architecture by feature (`app.notekea.<feature>.{domain,da
 
 ```
 commonMain → Ghost, Okio, JetBrains Markdown, SQLDelight, Koin, Settings, Kermit,
-             Koog (agents-core, agents-tools), Compose UI, ViewModel
+             Koog (agents-core, agents-tools; from M3–M4), Compose UI, ViewModel
              + domain interfaces: llm.domain.LlmEngine, index.domain.VectorIndex,
                sync.domain.GitSync, notes.domain.FileWatcher
 
-jvmMain    → java-llama.cpp, Lucene, JGit (+SSH), Java Keyring, directory-watcher,
-             Ktor OkHttp, SQLDelight SQLite driver
+jvmMain    → java-llama.cpp, Lucene, directory-watcher, SQLDelight SQLite driver,
+             JGit (+SSH), Java Keyring, Ktor OkHttp (from M3–M4)
 ```
 
 Rule: no type from a `jvmMain` library (JGit, Lucene, llama.cpp) appears in `commonMain`.

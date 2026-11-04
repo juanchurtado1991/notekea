@@ -54,10 +54,7 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)
-            implementation(libs.koog.agents.core)
-            implementation(libs.koog.agents.tools)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.ktor.client.core)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.markdown.renderer.code)
             implementation(libs.markdown.renderer.m3)
@@ -77,14 +74,10 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             // Crash reports and their notice (test-buddy-crash/README.md): the one Test Buddy library the release ships.
-            implementation(project(":test-buddy-crash"))
+            implementation(projects.testBuddyCrash)
 
             implementation(libs.directory.watcher)
-            implementation(libs.java.keyring)
-            implementation(libs.jgit)
-            implementation(libs.jgit.ssh.apache)
             implementation(libs.kotlinx.coroutines.swing)
-            implementation(libs.ktor.client.okhttp)
             implementation(libs.llama)
             implementation(libs.lucene.core)
             implementation(libs.lucene.analysis.common)
