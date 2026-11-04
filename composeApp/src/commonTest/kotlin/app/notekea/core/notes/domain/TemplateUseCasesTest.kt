@@ -9,7 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
 import app.notekea.notes.domain.ApplyTemplateUseCase
-import app.notekea.notes.domain.CreateTemplatesFolderUseCase
+import app.notekea.templates.domain.CreateTemplatesFolderUseCase
 
 /** Filling a template, applying it to a new note, and making the templates folder (`ROADMAP.md` 1.12). */
 class TemplateUseCasesTest {

@@ -1,4 +1,4 @@
-package app.notekea.notes.presentation.templates
+package app.notekea.templates.presentation
 
 import app.notekea.core.presentation.FeedIntent
 import app.notekea.core.notes.domain.VaultTree

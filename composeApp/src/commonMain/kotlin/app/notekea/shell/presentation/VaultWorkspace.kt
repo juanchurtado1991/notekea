@@ -28,8 +28,8 @@ import app.notekea.notes.presentation.switcher.QuickSwitcherIntent
 import app.notekea.notes.presentation.switcher.QuickSwitcherMode
 import app.notekea.notes.presentation.switcher.QuickSwitcherPurpose
 import app.notekea.notes.presentation.tags.TagPickerIntent
-import app.notekea.notes.presentation.templates.TemplatePickerIntent
-import app.notekea.notes.presentation.templates.TemplateTarget
+import app.notekea.templates.presentation.TemplatePickerIntent
+import app.notekea.templates.presentation.TemplateTarget
 import app.notekea.shell.presentation.FolderGrid
 import app.notekea.shell.presentation.TabKind
 import app.notekea.shell.presentation.WorkspaceContent

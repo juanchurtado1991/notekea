@@ -3,7 +3,7 @@ package app.notekea.shell.presentation
 import app.notekea.notes.presentation.editor.EditorViewModel
 import app.notekea.notes.presentation.switcher.QuickSwitcherIntent
 import app.notekea.notes.presentation.tags.TagPickerIntent
-import app.notekea.notes.presentation.templates.TemplatePickerIntent
+import app.notekea.templates.presentation.TemplatePickerIntent
 import app.notekea.shell.presentation.WorkspaceViewModel
 import app.notekea.notes.presentation.tree.VaultTreeViewModel
 

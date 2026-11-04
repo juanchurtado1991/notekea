@@ -1,4 +1,4 @@
-package app.notekea.notes.domain
+package app.notekea.templates.domain
 
 import app.notekea.core.notes.domain.TemplateSettings
 import app.notekea.core.notes.domain.VaultSettingsReader

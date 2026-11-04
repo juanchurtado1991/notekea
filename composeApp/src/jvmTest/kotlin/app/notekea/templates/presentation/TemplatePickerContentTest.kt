@@ -1,4 +1,4 @@
-package app.notekea.notes.presentation.templates
+package app.notekea.templates.presentation
 
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.geometry.Offset
