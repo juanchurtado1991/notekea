@@ -11,8 +11,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -27,14 +29,15 @@ import kotlin.math.sqrt
  * `docs/spikes/2026-11-01-embedding-models.md`). The model loads on the first call and is let go after [idleMillis]
  * without one, a cancelled call included, so writing notes never pays for its memory; calls run one at a time on the
  * default dispatcher and a cancelled one stops between texts. java-llama.cpp extracts its native library to [nativeFolder] (the app's data),
- * not `/tmp`, which some systems mount without the right to run it.
+ * not `/tmp`, which some systems mount without the right to run it. Koin closes it with its module ([close]).
  */
 class LlamaTextEmbedder(
     private val modelPath: String,
     private val nativeFolder: String,
     private val dispatchers: AppDispatchers,
     private val idleMillis: Long = IDLE_MILLIS
-) : TextEmbedder {
+) : TextEmbedder,
+    AutoCloseable {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private val mutex = Mutex()
     private val scope = CoroutineScope(context = SupervisorJob() + dispatchers.default)
@@ -50,6 +53,9 @@ class LlamaTextEmbedder(
     /** Whether the model is in memory now. */
     val isLoaded: Boolean get() = model != null
 
+    /** Whether it was closed. */
+    val isClosed: Boolean get() = !scope.isActive
+
     override suspend fun embed(
         texts: List<String>
     ): Outcome<List<FloatArray>, EmbeddingError> = withContext(context = dispatchers.default) {
@@ -63,7 +69,20 @@ class LlamaTextEmbedder(
         }
     }
 
+    /** Stops the idle timer and lets the model go; a call still running lets it go as it ends. */
+    override fun close() {
+        scope.cancel()
+        if (mutex.tryLock()) {
+            try {
+                unload()
+            } finally {
+                mutex.unlock()
+            }
+        }
+    }
+
     private fun releaseWhenIdle() {
+        if (isClosed) return unload()
         release = scope.launch {
             delay(timeMillis = idleMillis)
             mutex.withLock { unload() }

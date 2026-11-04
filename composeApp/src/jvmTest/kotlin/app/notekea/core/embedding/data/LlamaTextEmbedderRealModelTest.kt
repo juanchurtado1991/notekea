@@ -117,6 +117,17 @@ class LlamaTextEmbedderRealModelTest {
         assertEquals(expected = false, actual = embedder.isLoaded)
     }
 
+    @Test
+    fun `closing lets the model go at once`() = runBlocking {
+        val embedder = embedder()
+        embedder.embed(texts = listOf("Tomato soup"))
+        val loadedAfterUse = embedder.isLoaded
+
+        embedder.close()
+
+        assertEquals(expected = listOf(true, false), actual = listOf(loadedAfterUse, embedder.isLoaded))
+    }
+
     private fun embedder(
         modelPath: String = this.modelPath,
         idleMillis: Long = DEFAULT_IDLE_MILLIS
