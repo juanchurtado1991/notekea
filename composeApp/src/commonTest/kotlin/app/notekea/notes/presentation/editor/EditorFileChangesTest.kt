@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.runtime.snapshots.Snapshot
-import app.notekea.notes.domain.NoteRewrite
+import app.notekea.notes.domain.LinkUpdateResult
 import app.notekea.notes.domain.NoteFixtures.file
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
@@ -158,7 +158,7 @@ class EditorFileChangesTest : EditorViewModelTestBase() {
     }
 
     @Test
-    fun `the title renames the note after saving it and plans the links to it`() = runEditorTest {
+    fun `the title renames the note after saving it, and the notes that link to it follow`() = runEditorTest {
         val effects = collectEffects()
         store.texts[WELCOME] = "Cook [[Arepas]]."
         open(path = AREPAS)
@@ -171,7 +171,7 @@ class EditorFileChangesTest : EditorViewModelTestBase() {
         assertEquals(
             expected = listOf(
                 "---\ntags: [recipe]\n---\nSaved before the rename",
-                "Cook [[Arepas]]."
+                "Cook [[Arepas reina]]."
             ),
             actual = listOf(store.texts.getValue(AREPAS), store.texts.getValue(WELCOME))
         )
@@ -183,14 +183,7 @@ class EditorFileChangesTest : EditorViewModelTestBase() {
                     EditorEffect.Renamed(
                         from = AREPAS,
                         to = renamed,
-                        rewrites = listOf(
-                            NoteRewrite(
-                                path = WELCOME,
-                                original = "Cook [[Arepas]].",
-                                updated = "Cook [[Arepas reina]].",
-                                linkCount = 1
-                            )
-                        )
+                        links = LinkUpdateResult(updated = listOf(WELCOME), skipped = emptyList())
                     )
                 )
             ),

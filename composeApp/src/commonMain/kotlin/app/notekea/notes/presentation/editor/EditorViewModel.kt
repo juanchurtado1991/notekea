@@ -9,7 +9,7 @@ import app.notekea.notes.domain.FillTemplateUseCase
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.RenameAndPlanLinksUseCase
+import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
@@ -33,7 +33,7 @@ class EditorViewModel(
     private val openNote: OpenNoteUseCase,
     saveNote: SaveNoteUseCase,
     observeNoteOnDisk: ObserveNoteOnDiskUseCase,
-    private val renameAndPlanLinks: RenameAndPlanLinksUseCase,
+    private val renameAndUpdateLinks: RenameAndUpdateLinksUseCase,
     private val editorPreferences: EditorPreferencesStore,
     attachmentTools: AttachmentTools,
     fillTemplate: FillTemplateUseCase,
@@ -285,12 +285,12 @@ class EditorViewModel(
         )
     }
 
-    /** Saves first, so the file that moves holds every edit; the links to the note are planned for the tree to offer. */
+    /** Saves first, so the file that moves holds every edit; the links to the note follow the new name. */
     private suspend fun rename(name: String) {
         val from = state.value.notePath ?: return
         if (name.trim() == from.nameWithoutExtension) return
         saveNow()
-        when (val outcome = renameAndPlanLinks(vaultPath = vaultPath, path = from, newName = name)) {
+        when (val outcome = renameAndUpdateLinks(vaultPath = vaultPath, path = from, newName = name)) {
             is Outcome.Failure -> reduce { it.copy(titleError = outcome.error) }
 
             is Outcome.Success -> {
@@ -298,7 +298,7 @@ class EditorViewModel(
                 disk.stop()
                 reduce { it.copy(notePath = renamed.path, titleError = null) }
                 disk.watch(path = renamed.path)
-                emit(effect = EditorEffect.Renamed(from = from, to = renamed.path, rewrites = renamed.rewrites))
+                emit(effect = EditorEffect.Renamed(from = from, to = renamed.path, links = renamed.links))
             }
         }
     }

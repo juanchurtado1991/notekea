@@ -71,14 +71,6 @@ private fun TreeQuestions(
             onDismiss = { onIntent(VaultTreeIntent.OnDeleteCancel) }
         )
     }
-    state.linkOffer?.let { offer ->
-        LinkUpdateDialog(
-            offer = offer,
-            buttonOrder = state.platformConventions.dialogButtonOrder,
-            onConfirm = { onIntent(VaultTreeIntent.OnLinkUpdateConfirm) },
-            onDismiss = { onIntent(VaultTreeIntent.OnLinkUpdateDecline) }
-        )
-    }
 }
 
 @Composable

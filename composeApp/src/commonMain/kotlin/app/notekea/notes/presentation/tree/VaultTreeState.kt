@@ -36,7 +36,6 @@ data class VaultTreeState(
     val isBookmarksExpanded: Boolean = true,
     val renaming: RenameDraft? = null,
     val pendingDelete: RelativePath? = null,
-    val linkOffer: LinkUpdateOffer? = null,
     val notice: TreeNotice? = null,
     val loadError: NotesError? = null,
     val actionError: NotesError? = null,

@@ -15,6 +15,7 @@ import app.notekea.notes.domain.ObserveVaultTreeUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.TreePreferences
+import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
@@ -24,9 +25,9 @@ import kotlin.time.TimeSource
  * Vault sidebar (`ROADMAP.md` 1.4): shows the vault tree, kept up to date by the file watcher, and runs the actions
  * on its entries. The expanded folders and the sort are restored when the vault opens and saved on every change. The
  * rows are flattened again whenever the tree, the expanded folders or the sort change. Renaming can be confirmed twice
- * at once (Enter and the field losing focus); only the first confirmation runs. After a rename, when notes link to the
- * entry, Notekea asks whether to update them ("Update 12 links in 7 notes?", `ROADMAP.md` 2.5), never silently; a
- * notice then says how many notes changed.
+ * at once (Enter and the field losing focus); only the first confirmation runs. After a rename, the notes that link to
+ * the entry are updated in the background, as Obsidian does by default, so no link breaks; a notice says how many
+ * notes changed. A choice to keep old links ("Update links when renaming") belongs to Settings (`ROADMAP.md` 5.2).
  * A file that is not a note (an image, a PDF) opens with its app (`ROADMAP.md` 1.8). "Today" opens today's daily note, creating it first if needed, and a selected daily note knows the
  * daily notes before and after it, to step through them (`ROADMAP.md` 1.10).
  */
@@ -40,7 +41,7 @@ class VaultTreeViewModel(
     renameEntry: RenameEntryUseCase,
     private val trash: Trash,
     private val fileRevealer: FileRevealer,
-    linkUpdates: LinkUpdateTools,
+    updateLinksAfterRename: UpdateLinksAfterRenameUseCase,
     private val followLink: FollowLinkUseCase,
     private val treePreferencesStore: TreePreferencesStore,
     private val fileOpener: FileOpener,
@@ -80,7 +81,7 @@ class VaultTreeViewModel(
     private val bookmarks = TreeBookmarks(host = host, vaultPath = vaultPath, bookmarkStore = bookmarkStore)
     private val dailyNotes = TreeDays(host = host, vaultPath = vaultPath, days = days)
     private val templates = TreeTemplates(host = host, vaultPath = vaultPath, newNotes = newNotes)
-    private val renaming = TreeRenaming(host, vaultPath, renameEntry, linkUpdates, bookmarks, templates)
+    private val renaming = TreeRenaming(host, vaultPath, renameEntry, updateLinksAfterRename, bookmarks, templates)
 
     init {
         launchGuarded(onError = ::showUnexpectedError) {
@@ -100,6 +101,7 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnCollapseSelected -> updateTree(transform = ::reduceCollapseSelected)
             VaultTreeIntent.OnDeleteCancel -> reduce { it.copy(pendingDelete = null) }
             VaultTreeIntent.OnDeleteConfirm -> delete()
+            is VaultTreeIntent.OnEntryRenamed -> renaming.onRenamedElsewhere(intent = intent)
             is VaultTreeIntent.OnDeleteRequest -> reduce { it.copy(pendingDelete = intent.path ?: it.selectedPath) }
             VaultTreeIntent.OnErrorDismiss -> reduce { it.copy(actionError = null, hasUnexpectedError = false) }
             VaultTreeIntent.OnExpandSelected -> updateTree(transform = ::reduceExpandSelected)
@@ -111,7 +113,10 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnNewNoteFromTemplateClick -> templates.choose()
             is VaultTreeIntent.OnNoteFromTemplate -> templates.create(intent = intent)
             VaultTreeIntent.OnNoticeDismiss -> reduce { it.copy(notice = null) }
-            is RenameIntent -> renaming.onIntent(intent = intent)
+            VaultTreeIntent.OnRenameCancel -> renaming.cancel()
+            VaultTreeIntent.OnRenameConfirm -> renaming.confirm()
+            is VaultTreeIntent.OnRenameRequest -> renaming.start(path = intent.path)
+            is VaultTreeIntent.OnRenameTextChange -> renaming.changeText(text = intent.text)
             VaultTreeIntent.OnRetryClick -> retry()
             is VaultTreeIntent.OnRevealRequest -> reveal(path = intent.path)
             is VaultTreeIntent.OnRevealNote, is VaultTreeIntent.OnRevealInTree -> revealFromOutside(intent = intent)

@@ -23,15 +23,17 @@ import app.notekea.notes.data.OkioNoteTimesReader
 import app.notekea.notes.data.OkioNoteFileOperations
 import app.notekea.notes.data.OkioNoteScanner
 import app.notekea.notes.data.SettingsEditorPreferencesStore
+import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.GetNoteStatsUseCase
 import com.russhwolf.settings.MapSettings
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.RenameAndPlanLinksUseCase
+import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
+import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -201,7 +203,7 @@ class EditorOnDiskTest {
             openNote = OpenNoteUseCase(noteContentStore = store),
             saveNote = SaveNoteUseCase(noteContentStore = store),
             observeNoteOnDisk = ObserveNoteOnDiskUseCase(noteScanner = scanner, noteContentStore = store),
-            renameAndPlanLinks = renameAndPlanLinks(store = store, scanner = scanner, dispatchers = dispatchers),
+            renameAndUpdateLinks = renameAndUpdateLinks(store = store, scanner = scanner, dispatchers = dispatchers),
             editorPreferences = preferences,
             attachmentTools = attachmentTools(dispatchers = dispatchers),
             fillTemplate = fillTemplate(store = store, dispatchers = dispatchers),
@@ -218,11 +220,11 @@ class EditorOnDiskTest {
         clock = Clock.System
     )
 
-    private fun renameAndPlanLinks(
+    private fun renameAndUpdateLinks(
         store: OkioNoteContentStore,
         scanner: OkioNoteScanner,
         dispatchers: JvmAppDispatchers
-    ): RenameAndPlanLinksUseCase = RenameAndPlanLinksUseCase(
+    ): RenameAndUpdateLinksUseCase = RenameAndUpdateLinksUseCase(
         noteScanner = scanner,
         renameEntry = RenameEntryUseCase(
             noteFileOperations = OkioNoteFileOperations(
@@ -231,7 +233,13 @@ class EditorOnDiskTest {
             ),
             validateFileName = ValidateFileNameUseCase()
         ),
-        planLinkUpdates = PlanLinkUpdatesUseCase(noteContentStore = store, linkFinder = JetBrainsMarkdownLinkFinder())
+        updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
+            planLinkUpdates = PlanLinkUpdatesUseCase(
+                noteContentStore = store,
+                linkFinder = JetBrainsMarkdownLinkFinder()
+            ),
+            applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store)
+        )
     )
 
     private fun fillTemplate(

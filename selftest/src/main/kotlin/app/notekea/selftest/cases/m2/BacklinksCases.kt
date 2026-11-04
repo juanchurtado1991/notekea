@@ -3,10 +3,8 @@ package app.notekea.selftest.cases.m2
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performMouseInput
-import app.notekea.selftest.clickInTree
 import app.notekea.selftest.openNote
 import app.notekea.selftest.openVault
-import app.notekea.selftest.renameInTree
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
@@ -19,11 +17,10 @@ private const val OPEN_AREPAS =
         "the bottom says \"40 notes ready to search\".\n2. Open Recipes/Arepas and look at Connections in the " +
         "panel on the right."
 
-/** The cases of 2.5, backlinks (`MVP_SMOKE_TEST.md`): Connections' Linked and Unlinked tabs, and links on rename. */
+/** The cases of 2.5, backlinks (`MVP_SMOKE_TEST.md`): Connections' Linked and Unlinked tabs. */
 fun SuiteBuilder.backlinksCases() {
     linkedMentions()
     linkUnlinked()
-    renameKeepsLinks()
     connectionsLook()
 }
 
@@ -55,21 +52,8 @@ private fun SuiteBuilder.linkUnlinked() {
     }
 }
 
-private fun SuiteBuilder.renameKeepsLinks() {
-    automated(id = "2.5-03", title = "A rename asks before updating links, and Don't update keeps them") {
-        openVault(name = SAMPLE, shownText = "Recipes")
-        clickInTree(text = "Recipes")
-        renameInTree(name = AREPAS, newName = "Arepas reina")
-        expectText(text = "Update 4 links in 3 notes?")
-        click(text = "Don’t update")
-        expectFile(path = "$SAMPLE/Recipes/Arepas reina.md")
-        expectFile(path = "$SAMPLE/Recipes/Weekly menu.md", containing = "[[Arepas]]")
-        expectNoText(text = "Links updated", substring = true)
-    }
-}
-
 private fun SuiteBuilder.connectionsLook() {
-    manual(id = "2.5-04", reason = ManualReason.EYES) {
+    manual(id = "2.5-03", reason = ManualReason.EYES) {
         prepare(SAMPLE)
         title(text = "Connections reads well, and a mention opens where it is")
         steps(

@@ -113,8 +113,6 @@ private fun SuiteBuilder.bookmarksFollow() {
         click(text = "Rename")
         type(text = "Cooking")
         press(key = Key.Enter)
-        // Editor/Read mode links into Recipes and to Welcome, so both renames ask about it (2.5); not checked here.
-        click(text = "Don’t update")
         expectBookmarkOrder(names = listOf(WELCOME, "Cooking", PLATE, "Ideas"))
         clickInTree(text = WELCOME)
         titleField(name = WELCOME).apply {
@@ -122,7 +120,6 @@ private fun SuiteBuilder.bookmarksFollow() {
             performTextReplacement(text = "Start here")
         }
         titleField(name = "Start here").performKeyInput { pressKey(key = Key.Enter) }
-        click(text = "Don’t update")
         expectBookmarkOrder(names = listOf("Start here", "Cooking", PLATE, "Ideas"))
         lowest(name = "Ideas").performClick()
         if (system == HostSystem.MACOS) press(shortcut = Mod + Key.Backspace) else press(key = Key.Delete)
