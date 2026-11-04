@@ -48,7 +48,8 @@ private const val PREVIEW_WIDTH_DP = 720
  * in the tree says), then a grid of cards for what is
  * directly inside it ([cards]): subfolders, notes and files. A note's card shows the first picture it embeds and an
  * image's card the image itself ([covers], asked for with [onCoverNeeded] as cards come into view); the others show
- * their icon. A click opens the card's folder, note or file in a tab ([onOpen]).
+ * their icon. A click opens the card's folder, note or file in a tab ([onOpen]); [cardMenu] wraps each card with its
+ * menu.
  */
 @Composable
 fun FolderGrid(
@@ -58,6 +59,7 @@ fun FolderGrid(
     covers: Map<RelativePath, ImageBitmap?>,
     onOpen: (RelativePath) -> Unit,
     onCoverNeeded: (RelativePath, IntSize) -> Unit,
+    cardMenu: @Composable (FolderCard, @Composable () -> Unit) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
@@ -76,7 +78,13 @@ fun FolderGrid(
                     )
                 }
             } else {
-                Cards(cards = cards, covers = covers, onOpen = onOpen, onCoverNeeded = onCoverNeeded)
+                Cards(
+                    cards = cards,
+                    covers = covers,
+                    onOpen = onOpen,
+                    onCoverNeeded = onCoverNeeded,
+                    cardMenu = cardMenu
+                )
             }
         }
     }
@@ -87,7 +95,8 @@ private fun Cards(
     cards: List<FolderCard>,
     covers: Map<RelativePath, ImageBitmap?>,
     onOpen: (RelativePath) -> Unit,
-    onCoverNeeded: (RelativePath, IntSize) -> Unit
+    onCoverNeeded: (RelativePath, IntSize) -> Unit,
+    cardMenu: @Composable (FolderCard, @Composable () -> Unit) -> Unit
 ) {
     // The largest a card is drawn, in pixels: below twice the narrowest card, or the grid would fit another column.
     val coverSize = with(LocalDensity.current) {
@@ -102,12 +111,14 @@ private fun Cards(
         items(items = cards, key = { it.path.value }) { card ->
             val hasCover = card.kind == FolderCard.Kind.NOTE || card.kind == FolderCard.Kind.IMAGE
             if (hasCover) LaunchedEffect(card.path) { onCoverNeeded(card.path, coverSize) }
-            NotekeaGridCard(
-                label = if (card.kind == FolderCard.Kind.NOTE) card.path.nameWithoutExtension else card.path.name,
-                icon = iconOf(kind = card.kind),
-                onClick = { onOpen(card.path) },
-                image = covers[card.path]
-            )
+            cardMenu(card) {
+                NotekeaGridCard(
+                    label = if (card.kind == FolderCard.Kind.NOTE) card.path.nameWithoutExtension else card.path.name,
+                    icon = iconOf(kind = card.kind),
+                    onClick = { onOpen(card.path) },
+                    image = covers[card.path]
+                )
+            }
         }
     }
 }
@@ -141,7 +152,8 @@ private fun FolderGridPreview() {
                 },
                 covers = emptyMap(),
                 onOpen = {},
-                onCoverNeeded = { _, _ -> }
+                onCoverNeeded = { _, _ -> },
+                cardMenu = { _, card -> card() }
             )
         }
     }
@@ -158,7 +170,8 @@ private fun FolderGridEmptyPreview() {
                 cards = emptyList(),
                 covers = emptyMap(),
                 onOpen = {},
-                onCoverNeeded = { _, _ -> }
+                onCoverNeeded = { _, _ -> },
+                cardMenu = { _, card -> card() }
             )
         }
     }

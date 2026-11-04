@@ -19,29 +19,21 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.OperatingSystem
-import app.notekea.core.presentation.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.components.NotekeaContextMenuState
 import app.notekea.core.presentation.components.NotekeaInlineTextField
 import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.NotekeaTreeItem
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.TreeRow
 import app.notekea.resources.Res
-import app.notekea.resources.tree_delete_file
-import app.notekea.resources.tree_delete_folder
-import app.notekea.resources.tree_delete_note
 import app.notekea.resources.tree_open_folder
-import app.notekea.resources.tree_rename
 import app.notekea.resources.tree_reveal_explorer
 import app.notekea.resources.tree_reveal_files
 import app.notekea.resources.tree_reveal_finder
 import app.notekea.resources.tree_select_file
 import app.notekea.resources.tree_select_note
-import app.notekea.resources.tree_bookmark_add
-import app.notekea.resources.tree_bookmark_remove
 import org.jetbrains.compose.resources.stringResource
 import app.notekea.notes.presentation.files.fileIconOf
 import app.notekea.notes.presentation.files.fileTintOf
@@ -72,9 +64,12 @@ internal fun TreeEntryRow(
             onMenuShown()
         }
     }
-    NotekeaContextMenuArea(
-        sections = menuSections(row = row, state = state, createItems = createItems, onIntent = onIntent),
-        state = menuState,
+    EntryMenuArea(
+        row = row,
+        state = state,
+        onIntent = onIntent,
+        createItems = createItems,
+        menuState = menuState,
         onOpenByPointer = { onIntent(VaultTreeIntent.OnRowSelect(path = row.path)) }
     ) {
         Column {
@@ -174,65 +169,6 @@ private fun RenameField(
         onCancel = { onIntent(VaultTreeIntent.OnRenameCancel) },
         isError = draft.error != null,
         onFocusLost = { onIntent(VaultTreeIntent.OnRenameConfirm) }
-    )
-}
-
-@Composable
-private fun menuSections(
-    row: TreeRow,
-    state: VaultTreeState,
-    createItems: List<NotekeaMenuItem>,
-    onIntent: (VaultTreeIntent) -> Unit
-): List<List<NotekeaMenuItem>> = listOf(
-    createItems,
-    editSection(row = row, state = state, onIntent = onIntent),
-    listOf(
-        NotekeaMenuItem(
-            label = stringResource(
-                resource = when (row) {
-                    is TreeRow.Folder -> Res.string.tree_delete_folder
-                    is TreeRow.Note -> Res.string.tree_delete_note
-                    is TreeRow.File -> Res.string.tree_delete_file
-                }
-            ),
-            onClick = { onIntent(VaultTreeIntent.OnDeleteRequest(path = row.path)) },
-            icon = NotekeaIcons.Delete,
-            shortcutHint = state.platformConventions.deleteShortcut.label(
-                operatingSystem = state.platformConventions.operatingSystem
-            ),
-            isDestructive = true
-        )
-    )
-)
-
-@Composable
-private fun editSection(
-    row: TreeRow,
-    state: VaultTreeState,
-    onIntent: (VaultTreeIntent) -> Unit
-): List<NotekeaMenuItem> {
-    val os = state.platformConventions.operatingSystem
-    val isBookmarked = row.path in state.bookmarks
-    return listOf(
-        NotekeaMenuItem(
-            label = stringResource(
-                resource = if (isBookmarked) Res.string.tree_bookmark_remove else Res.string.tree_bookmark_add
-            ),
-            onClick = { onIntent(BookmarkIntent.OnToggle(path = row.path)) },
-            icon = NotekeaIcons.Bookmark,
-            shortcutHint = state.platformConventions.bookmarkShortcut.label(operatingSystem = os)
-        ),
-        NotekeaMenuItem(
-            label = stringResource(resource = Res.string.tree_rename),
-            onClick = { onIntent(VaultTreeIntent.OnRenameRequest(path = row.path)) },
-            icon = NotekeaIcons.Rename,
-            shortcutHint = state.platformConventions.renameShortcut.label(operatingSystem = os)
-        ),
-        NotekeaMenuItem(
-            label = stringResource(resource = revealLabel(operatingSystem = os)),
-            onClick = { onIntent(VaultTreeIntent.OnRevealRequest(path = row.path)) },
-            icon = NotekeaIcons.Reveal
-        )
     )
 }
 

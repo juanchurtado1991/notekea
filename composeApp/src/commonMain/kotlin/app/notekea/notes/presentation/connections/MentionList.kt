@@ -110,43 +110,47 @@ private fun MentionRow(
     actions: ConnectionActions
 ) {
     val source = mention.source
-    val folder = folderOf(path = source)
-    val times = if (mention.count >
-        1
-    ) {
+    val onReveal = { actions.onReveal(source, mention.range) }
+    val onBeside = { actions.onOpenBeside(source) }
+    val onLink = { onIntent(NoteMentionsIntent.OnLink(mention = mention)) }
+    val beside = stringResource(Res.string.related_open_beside)
+    val rowAction = if (isLinked) {
+        connectionAction(label = beside, onAction = onBeside)
+    } else {
+        connectionAction(label = stringResource(resource = Res.string.mentions_link), onAction = onLink)
+    }
+    ConnectionMenu(onOpen = onReveal, onOpenBeside = onBeside) {
+        NotekeaPassageRow(
+            title = source.nameWithoutExtension,
+            subtitle = subtitleOf(mention = mention),
+            text = mention.passage,
+            highlight = mention.highlight,
+            icon = NotekeaIcons.Note,
+            onClick = onReveal,
+            showsActions = !isLinked,
+            accessibilityActions = listOf(rowAction)
+        ) {
+            if (isLinked) {
+                NotekeaIconButton(icon = NotekeaIcons.SidePanel, label = beside, onClick = onBeside)
+            } else {
+                LinkButton(onClick = onLink)
+            }
+        }
+    }
+}
+
+/** The note's folder and, when it names the open one more than once, how many times. */
+@Composable
+private fun subtitleOf(
+    mention: NoteMention
+): String {
+    val times = if (mention.count > 1) {
         pluralStringResource(Res.plurals.mentions_count, mention.count, mention.count)
     } else {
         ""
     }
-    val beside = stringResource(Res.string.related_open_beside)
-    val linkLabel = stringResource(resource = Res.string.mentions_link)
-    val onLink = { onIntent(NoteMentionsIntent.OnLink(mention = mention)) }
-    NotekeaPassageRow(
-        title = source.nameWithoutExtension,
-        subtitle = listOf(folder, times).filter { it.isNotEmpty() }.joinToString(separator = SUBTITLE_SEPARATOR),
-        text = mention.passage,
-        highlight = mention.highlight,
-        icon = NotekeaIcons.Note,
-        onClick = { actions.onReveal(source, mention.range) },
-        showsActions = !isLinked,
-        accessibilityActions = listOf(
-            if (isLinked) {
-                connectionAction(label = beside) { actions.onOpenBeside(source) }
-            } else {
-                connectionAction(label = linkLabel, onAction = onLink)
-            }
-        )
-    ) {
-        if (isLinked) {
-            NotekeaIconButton(
-                icon = NotekeaIcons.SidePanel,
-                label = beside,
-                onClick = { actions.onOpenBeside(source) }
-            )
-        } else {
-            LinkButton(onClick = onLink)
-        }
-    }
+    return listOf(folderOf(path = mention.source), times).filter { it.isNotEmpty() }
+        .joinToString(separator = SUBTITLE_SEPARATOR)
 }
 
 /** Unlinked's Link: small, in the accent color, the row's one action. */

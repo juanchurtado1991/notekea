@@ -209,6 +209,7 @@
 
     <string name="outline_empty_message">Start a line with # and a space to add a heading. Headings show up here, and a click takes you to one.</string>
     <string name="outline_empty_title">This note has no headings</string>
+    <string name="outline_go_to">Go to heading</string>
     <string name="outline_label">Headings of this note</string>
     <string name="outline_title">Outline</string>
     <string name="properties_add">Add property</string>
@@ -461,6 +462,7 @@
         <item quantity="other">%1$d files</item>
     </plurals>
     <string name="connections_linked">Linked</string>
+    <string name="connections_open">Open</string>
     <string name="connections_related">Related</string>
     <string name="connections_title">Connections</string>
     <string name="connections_unlinked">Unlinked</string>

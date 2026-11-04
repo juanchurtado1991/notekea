@@ -34,7 +34,9 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.presentation.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.components.NotekeaLazyScrollArea
+import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.NotekeaTreeItem
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
@@ -42,6 +44,7 @@ import app.notekea.notes.domain.OutlineHeading
 import app.notekea.resources.Res
 import app.notekea.resources.outline_empty_message
 import app.notekea.resources.outline_empty_title
+import app.notekea.resources.outline_go_to
 import app.notekea.resources.outline_label
 import org.jetbrains.compose.resources.stringResource
 
@@ -104,6 +107,7 @@ private fun OutlineList(
     var hasFocus by remember { mutableStateOf(value = false) }
     var focused by remember { mutableIntStateOf(value = 0) }
     val label = stringResource(resource = Res.string.outline_label)
+    val goTo = stringResource(resource = Res.string.outline_go_to)
     FollowCurrent(listState = listState, index = if (hasFocus) focused else current)
     // Each time the list takes the keyboard, its row starts at the current heading.
     val onFocusChange = { isFocused: Boolean ->
@@ -122,14 +126,17 @@ private fun OutlineList(
             contentPadding = LIST_PADDING
         ) {
             itemsIndexed(items = outline) { index, heading ->
-                NotekeaTreeItem(
-                    label = heading.text,
-                    icon = null,
-                    depth = heading.depth,
-                    onClick = { onHeadingClick(index) },
-                    selected = index == current,
-                    focused = hasFocus && index == focused
-                )
+                val goToItem = NotekeaMenuItem(label = goTo, onClick = { onHeadingClick(index) })
+                NotekeaContextMenuArea(sections = listOf(listOf(goToItem))) {
+                    NotekeaTreeItem(
+                        label = heading.text,
+                        icon = null,
+                        depth = heading.depth,
+                        onClick = { onHeadingClick(index) },
+                        selected = index == current,
+                        focused = hasFocus && index == focused
+                    )
+                }
             }
         }
     }
