@@ -28,7 +28,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -58,7 +61,8 @@ private const val PREVIEW_HIGHLIGHT_START = 35
  * A row of a list that quotes a passage, as an inspector lists things (`ROADMAP.md` 2.4, 2.5, design A): its [icon],
  * [title] and, beside it in the muted color, [subtitle] (the folder); below, up to two lines of [text] with its
  * [highlight] on the accent color. No border: the row tints softly under the pointer, and its [actions] show at the
- * end of the title's row while the pointer is over it or the keyboard is on it or on one of them, so Tab reaches them.
+ * end of the title's row while the pointer is over it or the keyboard is on it or on one of them, so Tab reaches them,
+ * or always when [showsActions] (the one thing a row is there for). Screen readers get them as [accessibilityActions].
  * A click or Enter on the row goes to [onClick].
  */
 @Composable
@@ -70,6 +74,8 @@ fun NotekeaPassageRow(
     icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    showsActions: Boolean = false,
+    accessibilityActions: List<CustomAccessibilityAction> = emptyList(),
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     val colors = MaterialTheme.colorScheme
@@ -93,6 +99,7 @@ fun NotekeaPassageRow(
                     Color.Transparent
                 }
             )
+            .semantics { customActions = accessibilityActions }
             .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick)
             .padding(horizontal = NotekeaDimensions.SpacingS, vertical = ROW_VERTICAL_DP.dp)
     ) {
@@ -100,7 +107,7 @@ fun NotekeaPassageRow(
             title = title,
             subtitle = subtitle,
             icon = icon,
-            showsActions = isHovered || hasFocus,
+            showsActions = showsActions || isHovered || hasFocus,
             actions = actions
         )
         Passage(text = text, highlight = highlight)
