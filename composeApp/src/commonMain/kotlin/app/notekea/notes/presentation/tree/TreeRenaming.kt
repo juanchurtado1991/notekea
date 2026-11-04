@@ -6,11 +6,14 @@ import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Renaming in the sidebar (`ROADMAP.md` 1.4): the name typed in place, confirmed once even when Enter and the field
  * losing focus both confirm it; after a rename the notes that link to the entry are updated in the background, as
- * Obsidian does by default, the bookmarks follow it, and a note made from a template is filled once named.
+ * Obsidian does by default, one rename's links at a time while the next rename goes on, the bookmarks follow it, and a
+ * note made from a template is filled once named.
  */
 internal class TreeRenaming(
     private val host: TreeHost,
@@ -21,6 +24,7 @@ internal class TreeRenaming(
     private val templates: TreeTemplates
 ) {
     private val logger = Logger.withTag(tag = LOG_TAG)
+    private val updatingLinks = Mutex()
     private var job: Job? = null
 
     fun start(
@@ -45,11 +49,11 @@ internal class TreeRenaming(
             val isMoved = outcome is Outcome.Success && outcome.value != draft.path
             if (isMoved) host.emit(effect = VaultTreeEffect.EntryRenamed(from = draft.path, to = outcome.value))
             host.updateTree { reduceRenameOutcome(state = it, from = draft.path, outcome = outcome) }
-            if (isMoved) {
-                bookmarks.change { it.renamed(from = draft.path, to = outcome.value) }
-                updateLinks(notesBefore = notesBefore, from = draft.path, to = outcome.value)
+            if (isMoved) bookmarks.change { it.renamed(from = draft.path, to = outcome.value) }
+            host.launch {
+                if (isMoved) updateLinks(notesBefore = notesBefore, from = draft.path, to = outcome.value)
+                if (outcome is Outcome.Success) templates.apply(note = draft.path, named = outcome.value)
             }
-            if (outcome is Outcome.Success) templates.apply(note = draft.path, named = outcome.value)
         }
     }
 
@@ -76,8 +80,9 @@ internal class TreeRenaming(
         from: RelativePath,
         to: RelativePath
     ) {
-        val result = updateLinksAfterRename(vaultPath = vaultPath, notesBefore = notesBefore, from = from, to = to)
-            ?: return
+        val result = updatingLinks.withLock {
+            updateLinksAfterRename(vaultPath = vaultPath, notesBefore = notesBefore, from = from, to = to)
+        } ?: return
         logger.i { LINKS_UPDATED_MESSAGE + result.updatedCount + NOTES_SKIPPED + result.skipped.size }
         host.reduce { reduceLinksUpdated(state = it, result = result) }
     }
