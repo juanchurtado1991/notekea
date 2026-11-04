@@ -185,7 +185,13 @@ switch ($Command) {
         Write-Output "Removed Notekea's note cache; the next vault opens with a full scan"
     }
     "first-launch" {
-        if (Test-Path $Settings) { Move-Item -Force $Settings $Backup }
+        # Run twice, the settings now are the ones the first launch wrote: the backup already holds the real ones.
+        if (Test-Path $Backup) {
+            Remove-Item -Force -ErrorAction SilentlyContinue $Settings
+        }
+        elseif (Test-Path $Settings) {
+            Move-Item -Force $Settings $Backup
+        }
         Write-Output "Notekea will start as on a first launch (backup: $Backup)"
     }
     "restore-settings" {

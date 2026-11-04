@@ -80,6 +80,15 @@ subprojects {
     }
 }
 
+// buildSrc is a build of its own (it checks the bundled model's hash), so `check` has to ask for its tests.
+tasks.register<GradleBuild>("check") {
+    description = "Checks the build's own code; every module adds its own check to the same command"
+    group = "verification"
+    dir = file("buildSrc")
+    buildName = "buildSrcCheck"
+    tasks = listOf("check")
+}
+
 tasks.register<Exec>("installGitHooks") {
     description = "Points git at the versioned hooks in $gitHooksDirectory (pre-commit: ktlintFormat + check)."
     group = "git hooks"
