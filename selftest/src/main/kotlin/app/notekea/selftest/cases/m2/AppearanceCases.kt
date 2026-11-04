@@ -20,6 +20,7 @@ private const val SELECTED_MILLIS = 10_000L
 /** The cases of 2.12, color themes (`MVP_SMOKE_TEST.md`): Settings → Appearance's mode and themes. */
 fun SuiteBuilder.appearanceCases() {
     keptChoice()
+    startingChoice()
     themesLook()
     systemMode()
 }
@@ -41,6 +42,15 @@ private fun SuiteBuilder.keptChoice() {
     }
 }
 
+private fun SuiteBuilder.startingChoice() {
+    automated(id = "2.12-04", title = "Before anything is chosen Notekea is in Workspace Blue, following the system") {
+        openVault(name = PLAYGROUND, shownText = WELCOME)
+        clickIcon(label = "Settings")
+        expectChosen(text = "Workspace Blue")
+        expectChosen(text = "System")
+    }
+}
+
 private fun SuiteBuilder.themesLook() {
     manual(id = "2.12-02", reason = ManualReason.EYES) {
         prepare(PLAYGROUND)
@@ -48,7 +58,7 @@ private fun SuiteBuilder.themesLook() {
         steps(
             text = "$OPEN_PLAYGROUND\n2. $OPEN_APPEARANCE.\n3. Under Mode click Light, then click each theme's card " +
                 "and look at the window behind the dialog.\n4. Under Mode click Dark and click each card again.\n5. " +
-                "Press Tab until a card has a ring around it and press Enter.\n6. Choose Default and System again."
+                "Press Tab until a card has a ring around it and press Enter.\n6. Choose Workspace Blue and System again."
         )
         expected(
             text = "Each click changes the whole window at once (the list on the left, the tabs, the note and the " +
@@ -63,9 +73,10 @@ private fun SuiteBuilder.systemMode() {
         prepare(PLAYGROUND)
         title(text = "System follows the computer's light or dark setting")
         steps(
-            text = "$OPEN_PLAYGROUND\n2. $OPEN_APPEARANCE and choose a theme other than Default.\n3. With Mode on " +
+            text =
+            "$OPEN_PLAYGROUND\n2. $OPEN_APPEARANCE and choose a theme other than Workspace Blue.\n3. With Mode on " +
                 "System, switch your computer between light and dark mode.\n4. Click Light under Mode and switch " +
-                "your computer again.\n5. Choose Default and System again, and set your computer back."
+                "your computer again.\n5. Choose Workspace Blue and System again, and set your computer back."
         )
         expected(
             text = "On System, Notekea turns light or dark with the computer, in the chosen theme. On Light it stays " +

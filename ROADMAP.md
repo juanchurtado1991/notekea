@@ -106,7 +106,8 @@ One main window with three resizable panes, a status bar, and the native window 
 Notekea has its own visual identity, identical on every platform: a vivid **cobalt blue** for actions and selection
 and a **tangerine** accent, its complementary color, that keeps a nod to the kea's orange underwings. All values live
 in the theme; composables never hard-code colors. Typefaces approved on 2026-10-23; the palette was chosen the same
-day after two earlier versions (saturated olive and orange, then sage and terracotta) were judged too dull.
+day after two earlier versions (saturated olive and orange, then sage and terracotta) were judged too dull. The table
+below is that palette, now the Cobalt Tangerine theme; the app starts in Workspace Blue (2.12).
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
@@ -125,7 +126,7 @@ day after two earlier versions (saturated olive and orange, then sage and terrac
 - **Spacing:** 4 dp grid (4, 8, 12, 16, 24, 32). **Corner radius:** 6 dp controls, 10 dp cards.
 - **Motion:** 150–200 ms for panel open/close; no animation longer than 250 ms; respect "reduce motion".
 - **Themes:** light and dark, following the system by default; since 2.12 also chosen in Settings → Appearance,
-  with nine color themes besides this default palette.
+  with eleven color themes, Workspace Blue the one it starts with.
 - **Accessibility:** WCAG AA contrast for text, every action reachable by keyboard, visible focus ring,
   semantics for screen readers on all interactive elements.
 
@@ -628,7 +629,7 @@ the automated smoke runs of 1.16, and its smoke test also checks the code trim o
 ### ✅ 2.12 Color themes — `feature/color-themes` — [notekea#107](https://github.com/juanchurtado1991/notekea/pull/107)
 
 Settings → Appearance, the first section of Settings to be built: the light and dark mode, and a color theme. Nine
-themes join the default palette (above), each made from two tones (a deep one and a light one) chosen by the
+themes join the first palette (above, now Cobalt Tangerine), each made from two tones (a deep one and a light one) chosen by the
 developer on 2026-11-01:
 
 | Theme | Deep tone | Light tone |
@@ -643,6 +644,10 @@ developer on 2026-11-01:
 | Prompt Green | `#0B132B` | `#39FF88` |
 | Clay Butter | `#6B352A` | `#FFF1A6` |
 
+**Workspace Blue**, added on 2026-11-03 and the theme the app starts with, has a palette of its own instead of two
+tones: grays and a clear blue with an orange accent (primary `#1868DB` / `#669DF1`, page `#F8F8F8` / `#18191A`). Only
+those who never chose a theme get it: the stored id `default` stays, and it now means Cobalt Tangerine.
+
 - **Colors:** every theme has a light and a dark version built from its two tones: in dark, the deep tone is the
   page and the light tone leads (actions, selection, links, tags); in light, the light tone is the page (a tint of it
   when it is vivid) and the deep tone leads. Every pair of text and background meets WCAG AA (4.5:1), checked by a
@@ -650,13 +655,13 @@ developer on 2026-11-01:
   theme's colors. The colors of meaning (bookmarks, file types, warnings, errors) stay the same in every theme.
 - **UI — Settings → Appearance** (design A, picked 2026-11-01):
   - **Mode:** System, Light or Dark (a segmented control); System follows the operating system, as before.
-  - **Theme:** a grid of cards, three per row, each showing the theme's light and dark versions side by side with
+  - **Theme:** a grid of cards, three per row, Workspace Blue first, each showing the theme's light and dark versions side by side with
     its name; the chosen one is outlined and checked. Clicking or Enter on a card applies it at once.
   - The other sections stay "Coming soon" (5.2).
 - **Behavior:** the choice applies at once to every window, the crash notice included, and is kept for the next run
   (app settings, the same for every vault).
 - **Done when:** each theme can be chosen with the mouse and the keyboard and shows in light and dark, the choice
-  survives a restart, and the contrast test passes for all twenty color schemes.
+  survives a restart, and the contrast test passes for all twenty-two color schemes.
 
 ### ✅ 2.1 Markdown chunking — `feature/chunking` — [notekea#108](https://github.com/juanchurtado1991/notekea/pull/108)
 

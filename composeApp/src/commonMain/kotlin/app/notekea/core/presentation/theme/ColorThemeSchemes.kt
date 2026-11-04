@@ -12,9 +12,10 @@ import app.notekea.core.presentation.theme.palette.ThemeTones
 
 /**
  * The light and dark color schemes of every [ColorTheme] (`ROADMAP.md` 2.12), with the same roles as
- * [NotekeaColorSchemes], which [ColorTheme.DEFAULT] uses as it is. The others are built from their two [ThemeTones]:
- * in dark the deep tone is the page and the light tone leads; in light the light tone is the page (a tint of it when it
- * is vivid) and the deep tone leads. Every text color is made readable on its background ([readableOn], WCAG AA).
+ * [NotekeaColorSchemes] and [WorkspaceBlueSchemes], which [ColorTheme.COBALT_TANGERINE] and [ColorTheme.WORKSPACE_BLUE]
+ * use as they are. The others are built from their two [ThemeTones]: in dark the deep tone is the page and the light
+ * tone leads; in light the light tone is the page (a tint of it when it is vivid) and the deep tone leads. Every text
+ * color is made readable on its background ([readableOn], WCAG AA).
  */
 object ColorThemeSchemes {
     private val schemes: Map<Pair<ColorTheme, Boolean>, ColorScheme> by lazy {
@@ -31,9 +32,14 @@ object ColorThemeSchemes {
     private fun build(
         theme: ColorTheme,
         darkTheme: Boolean
-    ): ColorScheme {
-        val tones = ThemeTones.all[theme] ?: return NotekeaColorSchemes.forTheme(darkTheme = darkTheme)
-        return if (darkTheme) darkSchemeOf(tones = tones) else lightSchemeOf(tones = tones)
+    ): ColorScheme = when (theme) {
+        ColorTheme.COBALT_TANGERINE -> NotekeaColorSchemes.forTheme(darkTheme = darkTheme)
+
+        ColorTheme.WORKSPACE_BLUE -> WorkspaceBlueSchemes.forTheme(darkTheme = darkTheme)
+
+        else -> ThemeTones.all.getValue(key = theme).let { tones ->
+            if (darkTheme) darkSchemeOf(tones = tones) else lightSchemeOf(tones = tones)
+        }
     }
 
     private fun darkSchemeOf(

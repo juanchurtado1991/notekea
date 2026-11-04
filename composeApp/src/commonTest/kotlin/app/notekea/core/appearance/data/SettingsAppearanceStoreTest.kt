@@ -27,15 +27,24 @@ class SettingsAppearanceStoreTest {
     )
 
     @Test
-    fun `the app starts with the default theme following the system, and a choice is kept for the next run`() =
+    fun `the app starts in Workspace Blue following the system, and a choice is kept for the next run`() =
         runTest(context = testDispatcher) {
             val firstRun = store().observe().first()
+            assertEquals(expected = ColorTheme.WORKSPACE_BLUE, actual = firstRun.theme)
             store().save(appearance = Appearance(theme = ColorTheme.DEEP_SAGE, mode = ThemeMode.DARK))
 
             assertEquals(
                 expected = listOf(Appearance(), Appearance(theme = ColorTheme.DEEP_SAGE, mode = ThemeMode.DARK)),
                 actual = listOf(firstRun, store().observe().first())
             )
+        }
+
+    @Test
+    fun `whoever kept the first palette while it was the default keeps it, now as Cobalt Tangerine`() =
+        runTest(context = testDispatcher) {
+            settings.putString(key = "app.theme", value = "default")
+
+            assertEquals(expected = ColorTheme.COBALT_TANGERINE, actual = store().observe().first().theme)
         }
 
     @Test

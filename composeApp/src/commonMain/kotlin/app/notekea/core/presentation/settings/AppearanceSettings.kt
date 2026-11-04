@@ -34,14 +34,15 @@ import app.notekea.resources.appearance_theme
 import app.notekea.resources.settings_section_appearance
 import app.notekea.resources.theme_azure_cloud
 import app.notekea.resources.theme_clay_butter
+import app.notekea.resources.theme_cobalt_tangerine
 import app.notekea.resources.theme_cosmic_violet
 import app.notekea.resources.theme_deep_sage
-import app.notekea.resources.theme_default
 import app.notekea.resources.theme_forest_mint
 import app.notekea.resources.theme_midnight_lime
 import app.notekea.resources.theme_neon_porcelain
 import app.notekea.resources.theme_prompt_green
 import app.notekea.resources.theme_signal_almond
+import app.notekea.resources.theme_workspace_blue
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -149,7 +150,8 @@ private fun GroupLabel(
 private fun nameOf(
     theme: ColorTheme
 ): StringResource = when (theme) {
-    ColorTheme.DEFAULT -> Res.string.theme_default
+    ColorTheme.WORKSPACE_BLUE -> Res.string.theme_workspace_blue
+    ColorTheme.COBALT_TANGERINE -> Res.string.theme_cobalt_tangerine
     ColorTheme.MIDNIGHT_LIME -> Res.string.theme_midnight_lime
     ColorTheme.DEEP_SAGE -> Res.string.theme_deep_sage
     ColorTheme.SIGNAL_ALMOND -> Res.string.theme_signal_almond

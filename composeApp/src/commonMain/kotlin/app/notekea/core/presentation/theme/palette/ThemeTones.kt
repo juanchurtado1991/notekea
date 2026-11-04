@@ -9,7 +9,10 @@ internal data class ThemeTones(
     val light: Color
 ) {
     companion object {
-        /** The tones of every theme but [ColorTheme.DEFAULT], which has its own palette ([NotekeaPalette]). */
+        /**
+         * The tones of every theme but [ColorTheme.WORKSPACE_BLUE] and [ColorTheme.COBALT_TANGERINE], which have
+         * palettes of their own ([WorkspaceBluePalette], [NotekeaPalette]).
+         */
         val all: Map<ColorTheme, ThemeTones> = mapOf(
             ColorTheme.MIDNIGHT_LIME to ThemeTones(deep = Color(color = 0xFF071A52), light = Color(color = 0xFFA7FF83)),
             ColorTheme.DEEP_SAGE to ThemeTones(deep = Color(color = 0xFF152D35), light = Color(color = 0xFFD4ECDD)),

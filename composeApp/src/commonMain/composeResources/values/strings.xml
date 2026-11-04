@@ -313,14 +313,15 @@
     <string name="template_picker_placeholder">Find a template to insert</string>
     <string name="theme_azure_cloud">Azure Cloud</string>
     <string name="theme_clay_butter">Clay Butter</string>
+    <string name="theme_cobalt_tangerine">Cobalt Tangerine</string>
     <string name="theme_cosmic_violet">Cosmic Violet</string>
     <string name="theme_deep_sage">Deep Sage</string>
-    <string name="theme_default">Default</string>
     <string name="theme_forest_mint">Forest Mint</string>
     <string name="theme_midnight_lime">Midnight Lime</string>
     <string name="theme_neon_porcelain">Neon Porcelain</string>
     <string name="theme_prompt_green">Prompt Green</string>
     <string name="theme_signal_almond">Signal Almond</string>
+    <string name="theme_workspace_blue">Workspace Blue</string>
     <string name="tree_bookmark_add">Bookmark</string>
     <string name="tree_bookmark_missing_remove">Remove: it is no longer in the vault</string>
     <string name="tree_bookmark_remove">Remove bookmark</string>
