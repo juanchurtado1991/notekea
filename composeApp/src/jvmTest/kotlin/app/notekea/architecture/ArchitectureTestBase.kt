@@ -92,7 +92,7 @@ abstract class ArchitectureTestBase {
         file.interfaces(includeNested = false).size +
         file.objects(includeNested = false).size
 
-    /** The feature a package belongs to (`vault`, `notes`…), or null for core, the app root and generated code. */
+    /** The feature a package belongs to (`vault`, `editor`…), or null for core, the app root and generated code. */
     protected fun featureOf(
         packageName: String?
     ): String? {
@@ -129,6 +129,7 @@ abstract class ArchitectureTestBase {
         const val COLOR_LITERAL = "Color(0x"
         const val COMMON_MAIN = "commonMain"
         const val CORE_PACKAGE_PREFIX = "app.notekea.core"
+        const val SHELL_PACKAGE_PREFIX = "app.notekea.shell"
         const val DATA_LAYER = "data"
         const val DI_LAYER = "di"
         const val DIRECT_DISPATCHER_PATTERN = "Dispatchers\\.(IO|Default|Main|Unconfined)"

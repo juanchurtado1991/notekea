@@ -2,11 +2,28 @@ package app.notekea.di
 
 import app.notekea.core.di.coreModule
 import app.notekea.core.platform.di.platformModule
-import app.notekea.notes.di.notesModule
+import app.notekea.core.notes.di.coreNotesModule
+import app.notekea.editor.di.editorModule
+import app.notekea.tree.di.treeModule
+import app.notekea.search.di.searchModule
+import app.notekea.connections.di.connectionsModule
+import app.notekea.templates.di.templatesModule
+import app.notekea.shell.di.shellModule
 import app.notekea.vault.di.vaultModule
 import org.koin.dsl.module
 
 /** Composition root of the shared code: includes every feature module. */
 val appModule = module {
-    includes(coreModule, platformModule, notesModule, vaultModule)
+    includes(
+        coreModule,
+        platformModule,
+        coreNotesModule,
+        editorModule,
+        treeModule,
+        searchModule,
+        connectionsModule,
+        templatesModule,
+        shellModule,
+        vaultModule
+    )
 }

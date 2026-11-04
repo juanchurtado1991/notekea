@@ -165,6 +165,20 @@ class ArchitectureTest : ArchitectureTestBase() {
     }
 
     @Test
+    fun `only the app's root depends on the shell`() {
+        productionScope.files
+            .filter {
+                featureOf(packageName = it.packagee?.name) != null ||
+                    it.packagee?.name?.startsWith(prefix = CORE_PACKAGE_PREFIX) == true
+            }
+            .assertFalse(
+                additionalMessage = "ARCHITECTURE.md §1: the shell assembles the features, nothing depends on it"
+            ) { file ->
+                file.imports.any { it.name.startsWith(prefix = SHELL_PACKAGE_PREFIX) }
+            }
+    }
+
+    @Test
     fun `presentation does not depend on data`() {
         filesInLayer(layer = PRESENTATION_LAYER).assertFalse(additionalMessage = "ARCHITECTURE.md §1") { file ->
             file.imports.any {
