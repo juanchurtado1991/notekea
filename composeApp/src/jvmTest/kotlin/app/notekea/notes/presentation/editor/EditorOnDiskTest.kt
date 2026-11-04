@@ -27,6 +27,7 @@ import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.GetNoteStatsUseCase
 import com.russhwolf.settings.MapSettings
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
+import app.notekea.notes.domain.KeepUnsavedTextUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.RelativePath
@@ -208,6 +209,10 @@ class EditorOnDiskTest {
             attachmentTools = attachmentTools(dispatchers = dispatchers),
             fillTemplate = fillTemplate(store = store, dispatchers = dispatchers),
             propertyTools = propertyTools(),
+            keepUnsavedText = KeepUnsavedTextUseCase(
+                noteFileOperations = OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers),
+                noteContentStore = store
+            ),
             noteInfoTools = NoteInfoTools(
                 getNoteStats = GetNoteStatsUseCase(linkFinder = JetBrainsMarkdownLinkFinder()),
                 noteTimesReader = OkioNoteTimesReader(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)

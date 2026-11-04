@@ -2,6 +2,7 @@ package app.notekea.notes.presentation.editor
 
 import app.notekea.core.domain.StringPatterns
 import app.notekea.notes.domain.EditorPreferencesStore
+import app.notekea.notes.domain.NoteDocument
 import app.notekea.notes.domain.RelativePath
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -50,8 +51,25 @@ internal class EditorProperties(
         sourceJob?.cancel()
         sourceJob = null
         val intent = pendingSource ?: return
+        if (host.state.value.let { it.hasConflict || it.isDeleted }) return
         pendingSource = null
         edit(intent = intent)
+    }
+
+    /** [document]'s header with the YAML a blocked save could not write, to keep it when the note is left. */
+    fun headerWithPendingSource(
+        document: NoteDocument
+    ): String {
+        val intent = pendingSource ?: return document.header
+        pendingSource = null
+        val state = host.state.value
+        return saving.propertyEditing.headerAfter(
+            intent,
+            document.header,
+            state.properties,
+            noteInfo.today(),
+            StringPatterns.NEW_LINE
+        ) ?: document.header
     }
 
     private fun toggleFold() {

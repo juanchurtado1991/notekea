@@ -36,6 +36,8 @@ import app.notekea.resources.tree_files
 import app.notekea.resources.tree_links_more
 import app.notekea.resources.tree_links_skipped
 import app.notekea.resources.tree_links_updated
+import app.notekea.resources.tree_unsaved_in_memory
+import app.notekea.resources.tree_unsaved_kept
 import app.notekea.resources.tree_loading
 import app.notekea.resources.tree_moved_to_vault_trash
 import app.notekea.resources.tree_new_note
@@ -201,6 +203,9 @@ private fun noticeText(
     ).joinToString(separator = NOTICE_SEPARATOR)
 
     is TreeNotice.MovedToVaultTrash -> stringResource(Res.string.tree_moved_to_vault_trash, notice.name)
+
+    is TreeNotice.UnsavedKept -> notice.copy?.let { stringResource(Res.string.tree_unsaved_kept, notice.note, it) }
+        ?: stringResource(Res.string.tree_unsaved_in_memory, notice.note)
 }
 
 @Composable

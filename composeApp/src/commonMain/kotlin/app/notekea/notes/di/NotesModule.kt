@@ -8,6 +8,7 @@ import app.notekea.notes.data.GhostFrontmatterParser
 import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.notes.data.JetBrainsMarkdownMentionFinder
 import app.notekea.notes.domain.FindMentionsUseCase
+import app.notekea.notes.domain.KeepUnsavedTextUseCase
 import app.notekea.notes.domain.LinkMentionUseCase
 import app.notekea.notes.domain.MentionFinder
 import app.notekea.notes.presentation.mentions.NoteMentionsViewModel
@@ -96,6 +97,7 @@ val notesModule = module {
     factoryOf(::PlanIndexUseCase)
     factoryOf(::IndexVaultUseCase)
     factoryOf(::FindRelatedNotesUseCase)
+    factoryOf(::KeepUnsavedTextUseCase)
     factoryOf(::FindMentionsUseCase)
     factoryOf(::LinkMentionUseCase)
     viewModel { parameters -> RelatedNotesViewModel(vaultPath = parameters.get(), findRelatedNotes = get()) }
@@ -187,7 +189,8 @@ val notesModule = module {
             attachmentTools = get(),
             fillTemplate = get(),
             propertyTools = get(),
-            noteInfoTools = get()
+            noteInfoTools = get(),
+            keepUnsavedText = get()
         )
     }
     viewModel { TagPickerViewModel() }

@@ -22,6 +22,7 @@ import app.notekea.notes.domain.FakeVaultSettingsReader
 import app.notekea.notes.domain.FillTemplateUseCase
 import app.notekea.notes.domain.NoteFixtures.VAULT
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
+import app.notekea.notes.domain.KeepUnsavedTextUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
@@ -85,6 +86,7 @@ class EditorViewModels(dispatcher: CoroutineDispatcher) {
         ),
         fillTemplate = fillTemplate(),
         propertyTools = propertyTools(),
+        keepUnsavedText = KeepUnsavedTextUseCase(noteFileOperations = operations, noteContentStore = store),
         noteInfoTools = noteInfoTools()
     )
 

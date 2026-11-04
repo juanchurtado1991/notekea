@@ -136,6 +136,8 @@ private fun EditorEffects(
 
                 is EditorEffect.RevealFolder -> current.onRevealFolder(effect.path)
 
+                is EditorEffect.UnsavedKept -> current.onUnsavedKept(effect)
+
                 EditorEffect.FocusText -> focusText(
                     requester = textFocusRequester,
                     isReading = viewModel.state.value.isReading
