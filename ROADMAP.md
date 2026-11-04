@@ -244,7 +244,7 @@ between runs.
   Restore / Close; a save never recreates a note that was moved or deleted.
 - Find in note: `Mod+F` opens an inline bar with match count and next/previous (`Enter` / `Shift+Enter`).
 - Read mode: code blocks colored by language (Edit mode keeps code plain); `[[links]]` and links to notes open the
-  note, a missing wiki link's note is created at the vault root, a name several notes share opens the closest one
+  note, a missing wiki link's note is created where the link says (a bare name at the vault root), a name several notes share opens the closest one
   (same folder, then nearest the vault root), web links open the browser.
 - **Done when:** typing never loses text, external changes are detected, frontmatter is preserved untouched.
 - Smoke test: cases 1.5-01 to 1.5-11; 1.4-01 and 1.4-06 rewritten for the editor.

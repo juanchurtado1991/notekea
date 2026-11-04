@@ -1,8 +1,8 @@
 package app.notekea.notes.domain
 
 /**
- * Resolves links the way Obsidian does, among [notePaths], ignoring letter case. A wiki link with a folder must match
- * a path (or the end of one); a bare name must match one note's name, and among several the one in the linking note's
+ * Resolves links the way Obsidian does, among [notePaths], ignoring letter case. A wiki link is first read as a path
+ * ([wikiPath]: `./`, `../` and a leading `/`). With a folder it must match a path (or the end of one); a bare name must match one note's name, and among several the one in the linking note's
  * folder wins; any other ambiguity resolves to nothing, so an unclear link is never rewritten. A Markdown link is read
  * from the linking note's folder, then from the vault root, and otherwise as a wiki link: by a name only one note has.
  */
@@ -43,7 +43,7 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
         target: String,
         source: RelativePath
     ): RelativePath? {
-        val name = withoutMarkdownExtension(target = target.trim()).lowercase()
+        val name = wikiPath(target = target, source = source)?.value?.lowercase() ?: return null
         val candidates = if (RelativePath.SEPARATOR in name) {
             val withExtension = name + RelativePath.MARKDOWN_EXTENSION
             notes.filter {
@@ -101,7 +101,7 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
         target: String,
         source: RelativePath
     ): RelativePath? {
-        val name = withoutMarkdownExtension(target = target.trim()).lowercase()
+        val name = wikiPath(target = target, source = source)?.value?.lowercase() ?: return null
         if (RelativePath.SEPARATOR in name) {
             val withExtension = name + RelativePath.MARKDOWN_EXTENSION
             return byLowerPath[withExtension]

@@ -14,7 +14,7 @@ import okio.Path.Companion.toPath
 
 /**
  * [NoteFileOperations] on Okio. Creation uses `mustCreate`, so a file that appears between the check and the write is
- * never truncated, and moves are atomic renames. On case-insensitive disks (macOS, Windows) the target of a
+ * never truncated, moves are atomic renames, and a path that leaves the vault changes nothing. On case-insensitive disks (macOS, Windows) the target of a
  * case-only rename "exists" because it is the same file, so that case is not treated as a name in use.
  */
 class OkioNoteFileOperations(
@@ -51,6 +51,8 @@ class OkioNoteFileOperations(
         val target = resolve(vaultPath = vaultPath, path = to)
         val isCaseOnlyRename = from.value.equals(other = to.value, ignoreCase = true)
         when {
+            !isInVault(vaultPath = vaultPath, file = target) -> Outcome.Failure(error = NotesError.InvalidName)
+
             !existsOnDisk(file = source) -> Outcome.Failure(error = NotesError.EntryMissing(path = from.value))
 
             existsOnDisk(file = target) && (!isCaseOnlyRename || isListed(file = target)) -> {
@@ -79,6 +81,10 @@ class OkioNoteFileOperations(
         val target = resolve(vaultPath = vaultPath, path = path)
         val parent = path.parent ?: RelativePath.ROOT
         return when {
+            !isInVault(vaultPath = vaultPath, file = target) -> {
+                Outcome.Failure(error = NotesError.InvalidName)
+            }
+
             existsOnDisk(file = target) -> {
                 Outcome.Failure(error = NotesError.NameTaken(name = path.name))
             }
@@ -91,6 +97,16 @@ class OkioNoteFileOperations(
                 attempt(path = path) { create(target) }
             }
         }
+    }
+
+    /** Whether [file], once its `..` are followed (Okio takes `\\` for a separator too), is inside the vault. */
+    private fun isInVault(
+        vaultPath: String,
+        file: Path
+    ): Boolean {
+        val vault = vaultPath.toPath(normalize = true)
+        val normalized = file.normalized()
+        return normalized.root == vault.root && normalized.segments.take(n = vault.segments.size) == vault.segments
     }
 
     /**
