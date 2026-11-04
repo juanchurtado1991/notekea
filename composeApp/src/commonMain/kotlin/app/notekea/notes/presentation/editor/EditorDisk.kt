@@ -3,6 +3,7 @@ package app.notekea.notes.presentation.editor
 import app.notekea.core.domain.Outcome
 import app.notekea.notes.domain.NoteDiskChange
 import app.notekea.notes.domain.NoteDocument
+import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.RelativePath
@@ -11,7 +12,8 @@ import kotlinx.coroutines.Job
 /**
  * The open note's file, watched (`ROADMAP.md` 1.5): the editor's own saves are recognized; an outside change reloads a
  * note without unsaved edits and otherwise asks (Keep mine overwrites it, Load theirs drops the edits); a deleted file
- * offers Restore ([onDeleted] stops a pending autosave); a note moved in Notekea is followed.
+ * offers Restore ([onDeleted] stops a pending autosave); a note moved in Notekea is followed. Only a file that is
+ * really gone counts as deleted: one that cannot be read is a failed save, and an answer never replaces it.
  */
 internal class EditorDisk(
     private val host: EditorHost,
@@ -51,6 +53,7 @@ internal class EditorDisk(
         val path = host.state.value.notePath ?: return
         val document = saving.opened ?: return
         val current = openNote(vaultPath = vaultPath, path = path)
+        if (isUnreadable(outcome = current)) return
         val expected = (current as? Outcome.Success)?.value?.toText()
         host.reduce { it.copy(hasConflict = false) }
         saving.write(
@@ -62,7 +65,9 @@ internal class EditorDisk(
 
     suspend fun loadTheirs() {
         val path = host.state.value.notePath ?: return
-        when (val outcome = openNote(vaultPath = vaultPath, path = path)) {
+        val outcome = openNote(vaultPath = vaultPath, path = path)
+        if (isUnreadable(outcome = outcome)) return
+        when (outcome) {
             is Outcome.Failure -> host.reduce { it.copy(hasConflict = false, isDeleted = true) }
 
             is Outcome.Success -> {
@@ -72,10 +77,29 @@ internal class EditorDisk(
         }
     }
 
+    /** Brings back a file that is gone; one that came back meanwhile is replaced only if it holds what was last seen. */
     suspend fun restore() {
         val path = host.state.value.notePath ?: return
         val document = saving.opened ?: return
-        saving.write(path = path, document = document.copy(body = host.buffer.text.toString()), expectedOnDisk = null)
+        val current = openNote(vaultPath = vaultPath, path = path)
+        if (isUnreadable(outcome = current)) return
+        val isBack = current is Outcome.Success
+        if (isBack) host.reduce { it.copy(isDeleted = false) }
+        saving.write(
+            path = path,
+            document = document.copy(body = host.buffer.text.toString()),
+            expectedOnDisk = if (isBack) saving.onDisk else null
+        )
+    }
+
+    /** Whether [outcome] failed with the file still there: that is shown as a failed save. */
+    private fun isUnreadable(
+        outcome: Outcome<NoteDocument, NotesError>
+    ): Boolean {
+        val error = (outcome as? Outcome.Failure)?.error
+        if (error == null || error is NotesError.EntryMissing) return false
+        host.reduce { it.copy(saveError = error) }
+        return true
     }
 
     /**

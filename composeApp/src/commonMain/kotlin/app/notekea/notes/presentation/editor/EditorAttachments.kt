@@ -201,7 +201,8 @@ class EditorAttachments(
     ): List<RelativePath> {
         if (refresh || files == null) {
             folderSetting = vaultSettingsReader.attachmentFolderPath(vaultPath = vaultPath)
-            files = (attachmentStore.files(vaultPath = vaultPath) as? Outcome.Success)?.value.orEmpty()
+            // A listing that failed says nothing about the vault: the last one stays, and the next reading tries again.
+            (attachmentStore.files(vaultPath = vaultPath) as? Outcome.Success)?.let { files = it.value }
         }
         return files.orEmpty()
     }

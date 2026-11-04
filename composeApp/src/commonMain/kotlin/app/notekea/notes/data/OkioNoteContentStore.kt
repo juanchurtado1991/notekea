@@ -7,7 +7,6 @@ import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import okio.FileNotFoundException
 import okio.FileSystem
 import okio.IOException
 import okio.Path
@@ -28,13 +27,12 @@ class OkioNoteContentStore(
         vaultPath: String,
         path: RelativePath
     ): Outcome<String, NotesError> = withContext(context = dispatchers.io) {
+        val file = fileOf(vaultPath = vaultPath, path = path)
         try {
-            val bytes = fileSystem.read(file = fileOf(vaultPath = vaultPath, path = path)) { readByteArray() }
+            val bytes = fileSystem.read(file = file) { readByteArray() }
             Outcome.Success(value = bytes.decodeToString(throwOnInvalidSequence = true))
-        } catch (_: FileNotFoundException) {
-            Outcome.Failure(error = NotesError.EntryMissing(path = path.value))
         } catch (_: IOException) {
-            Outcome.Failure(error = NotesError.Unreadable(path = path.value))
+            Outcome.Failure(error = fileSystem.readFailureOf(file = file, path = path))
         } catch (_: CharacterCodingException) {
             Outcome.Failure(error = NotesError.Unreadable(path = path.value))
         }

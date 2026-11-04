@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
+import java.nio.file.FileSystems
 import java.nio.file.Files
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.deleteRecursively
@@ -31,6 +32,29 @@ class AttachmentsOnDiskTest {
     fun deleteVault() {
         vault.deleteRecursively()
     }
+
+    @Test
+    fun `a file without read permission is unreadable, and a missing file or vault says so`() =
+        runTest(context = testDispatcher) {
+            // Windows has no POSIX permissions to take away.
+            if ("posix" !in FileSystems.getDefault().supportedFileAttributeViews()) return@runTest
+            val file = vault.resolve("private.png").also { Files.write(it, PNG) }
+            val private = RelativePath(value = "private.png")
+            Files.setPosixFilePermissions(file, emptySet())
+
+            assertEquals(
+                expected = listOf<Any>(
+                    NotesError.Unreadable(path = private.value),
+                    NotesError.EntryMissing(path = IMAGE.value),
+                    NotesError.VaultMissing(path = "$vaultPath/gone")
+                ),
+                actual = listOf(
+                    (store.read(vaultPath = vaultPath, path = private) as Outcome.Failure).error,
+                    (store.read(vaultPath = vaultPath, path = IMAGE) as Outcome.Failure).error,
+                    (store.files(vaultPath = "$vaultPath/gone") as Outcome.Failure).error
+                )
+            )
+        }
 
     @Test
     fun `files are written and copied into new folders, never over another, and listed without hidden ones`() =
