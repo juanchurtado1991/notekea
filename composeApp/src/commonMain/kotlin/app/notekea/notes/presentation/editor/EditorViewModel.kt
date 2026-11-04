@@ -333,14 +333,8 @@ class EditorViewModel(
 
     private fun showUnexpectedError(throwable: Throwable) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
-        reduce { current ->
-            val error = NotesError.OperationFailed(path = current.notePath?.value.orEmpty())
-            if (current.isLoading) {
-                current.copy(isLoading = false, loadError = error)
-            } else {
-                current.copy(saveError = error)
-            }
-        }
+        val error = NotesError.OperationFailed(path = state.value.notePath?.value.orEmpty())
+        reduce { if (it.isLoading) it.copy(isLoading = false, loadError = error) else it.copy(saveError = error) }
     }
 
     companion object {
