@@ -12,6 +12,7 @@ object NotekeaDimensions {
     val BorderWidth = 1.dp
     val CardRadius = 10.dp
     val CompactControlSize = 28.dp
+    val ControlHeight = 32.dp
     val ControlRadius = 6.dp
     val FocusRingWidth = 2.dp
     val IconSize = 16.dp

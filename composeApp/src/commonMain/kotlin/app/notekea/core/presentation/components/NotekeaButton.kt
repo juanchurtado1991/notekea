@@ -1,16 +1,21 @@
 package app.notekea.core.presentation.components
 
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.runtime.getValue
@@ -19,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
@@ -31,9 +37,14 @@ private const val PREVIEW_OPEN = "Open folder…"
 private const val PREVIEW_REMOVE = "Remove"
 private const val PREVIEW_SHORTCUT = "Ctrl+O"
 private const val SHORTCUT_HINT_ALPHA = 0.72f
+private val BUTTON_PADDING = PaddingValues(
+    horizontal = NotekeaDimensions.SpacingM,
+    vertical = NotekeaDimensions.SpacingXs
+)
 
 /**
- * Text button in the four Notekea weights with the 6 dp control radius; colors come from semantic roles.
+ * Text button in the four Notekea weights, as tall as the app's other controls ([NotekeaDimensions.ControlHeight]), with
+ * the 6 dp control radius; colors come from semantic roles.
  * [shortcutHint] shows the keyboard shortcut ("Ctrl+O", "⌘O") as a muted label after the text, so power users
  * discover it without it being the only way in (`GUIDELINES.md`, product principle). A focused button shows its focus
  * as a border.
@@ -53,14 +64,19 @@ fun NotekeaButton(
     }
     // Read from the focus modifier, not from interactions: a dialog may focus the button before it collects them.
     var isFocused by remember { mutableStateOf(value = false) }
-    StyledButton(
-        style = style,
-        onClick = onClick,
-        modifier = modifier.onFocusChanged { isFocused = it.isFocused },
-        enabled = enabled,
-        border = borderOf(style = style, enabled = enabled, isFocused = isFocused),
-        label = label
-    )
+    // Material's 48 dp touch target is for phones: a pointer needs none around the 32 dp button.
+    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+        StyledButton(
+            style = style,
+            onClick = onClick,
+            modifier = modifier
+                .heightIn(min = NotekeaDimensions.ControlHeight)
+                .onFocusChanged { isFocused = it.isFocused },
+            enabled = enabled,
+            border = borderOf(style = style, enabled = enabled, isFocused = isFocused),
+            label = label
+        )
+    }
 }
 
 @Composable
@@ -74,38 +90,47 @@ private fun StyledButton(
 ) {
     val shape = MaterialTheme.shapes.small
     when (style) {
-        NotekeaButtonStyle.DESTRUCTIVE -> {
-            Button(
-                onClick = onClick,
-                modifier = modifier,
-                enabled = enabled,
-                shape = shape,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
-                ),
-                border = border
-            ) { label() }
-        }
+        NotekeaButtonStyle.DESTRUCTIVE, NotekeaButtonStyle.PRIMARY -> Button(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            shape = shape,
+            colors = filledColors(style = style),
+            border = border,
+            contentPadding = BUTTON_PADDING
+        ) { label() }
 
-        NotekeaButtonStyle.PRIMARY -> {
-            Button(onClick = onClick, modifier = modifier, enabled = enabled, shape = shape, border = border) {
-                label()
-            }
-        }
+        NotekeaButtonStyle.SECONDARY -> OutlinedButton(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            shape = shape,
+            border = border,
+            contentPadding = BUTTON_PADDING
+        ) { label() }
 
-        NotekeaButtonStyle.SECONDARY -> {
-            OutlinedButton(onClick = onClick, modifier = modifier, enabled = enabled, shape = shape, border = border) {
-                label()
-            }
-        }
-
-        NotekeaButtonStyle.TEXT -> {
-            TextButton(onClick = onClick, modifier = modifier, enabled = enabled, shape = shape, border = border) {
-                label()
-            }
-        }
+        NotekeaButtonStyle.TEXT -> TextButton(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            shape = shape,
+            border = border,
+            contentPadding = BUTTON_PADDING
+        ) { label() }
     }
+}
+
+/** The error colors for a destructive button, the primary ones otherwise. */
+@Composable
+private fun filledColors(
+    style: NotekeaButtonStyle
+): ButtonColors = if (style == NotekeaButtonStyle.DESTRUCTIVE) {
+    ButtonDefaults.buttonColors(
+        containerColor = MaterialTheme.colorScheme.error,
+        contentColor = MaterialTheme.colorScheme.onError
+    )
+} else {
+    ButtonDefaults.buttonColors()
 }
 
 /**
