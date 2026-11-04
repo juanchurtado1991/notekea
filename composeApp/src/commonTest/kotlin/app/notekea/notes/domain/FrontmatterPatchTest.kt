@@ -69,4 +69,18 @@ class FrontmatterPatchTest {
             )
         )
     }
+
+    @Test
+    fun `an item with a comma added to an inline list is quoted, or it would read as two`() {
+        val header = "---\nauthors: [\"Smith, John\", JS]\n---\n"
+
+        assertEquals(
+            expected = "---\nauthors: [\"Smith, John\", JS, \"Doe, Jane\"]\n---\n",
+            actual = patch.set(
+                header = header,
+                key = "authors",
+                value = PropertyValue.Items(items = listOf("Smith, John", "JS", "Doe, Jane"))
+            )
+        )
+    }
 }

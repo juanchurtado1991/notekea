@@ -47,4 +47,34 @@ class YamlValuesTest {
             actual = listOf(YamlValues.written(text = "a\nb"), YamlValues.written(text = "a\nb", quote = '\''))
         )
     }
+
+    @Test
+    fun `a comma inside quotes does not split a list, a quote in the middle of an item opens nothing`() {
+        assertEquals(
+            expected = listOf(
+                listOf("Smith, John", "JS"),
+                listOf("it's, ok", "b"),
+                listOf("say \", hi", "b"),
+                listOf("it's", "ok"),
+                listOf("Smith, John", "JS")
+            ),
+            actual = listOf(
+                YamlValues.inlineItems(text = "[\"Smith, John\", JS]"),
+                YamlValues.inlineItems(text = "['it''s, ok', b]"),
+                YamlValues.inlineItems(text = "[\"say \\\", hi\", b]"),
+                YamlValues.inlineItems(text = "[it's, ok, ]"),
+                YamlValues.scalarItems(text = "'Smith, John', JS")
+            )
+        )
+    }
+
+    @Test
+    fun `the items of an inline list are found as written, quotes included`() {
+        val block = FrontmatterBlocks.Block(lines = listOf("authors: [\"Smith, John\", JS]"), key = "authors")
+
+        assertEquals(
+            expected = mapOf("Smith, John" to "\"Smith, John\"", "JS" to "JS"),
+            actual = YamlValues.writtenItems(block = block)
+        )
+    }
 }
