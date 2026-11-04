@@ -3,7 +3,7 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-04, with the audit fixes in review.
+Last updated: 2026-11-04, with the split of `notes` in review.
 
 ## Milestones
 
@@ -13,7 +13,8 @@ Last updated: 2026-11-04, with the audit fixes in review.
 - **M2 — Indexing, links and related notes:** started. 2.12 Color themes is done (#107), 2.1 Markdown chunking
   (#108), 2.2 Embedding engine (#109), 2.3 Hybrid index (#110), 2.4 Related notes panel (#111) and **2.5
   Backlinks** (#112) are done; Workspace Blue is the default theme (#113). Next is **2.6 Hybrid search**
-  (`feature/hybrid-search`, `ROADMAP.md`), once the audit branch below is merged.
+  (`feature/hybrid-search`, `ROADMAP.md`), in the new `search` feature, once the split of `notes` is merged: `notes` became
+  `core.notes`, `shell`, `editor`, `tree`, `search`, `connections` and `templates` (`ARCHITECTURE.md` §1).
 
 ## Open work, in order
 
