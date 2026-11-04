@@ -3,6 +3,7 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.firstSorted
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.AppDispatchers
+import app.notekea.core.domain.markdown.FenceTracker
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
@@ -91,16 +92,11 @@ class SearchNoteContentUseCase(
         body: String
     ): List<InlineTag> {
         val tags = mutableListOf<InlineTag>()
-        var fence: Char? = null
+        val fences = FenceTracker()
         var lineStart = 0
         body.split(NEW_LINE_CHAR).forEach { line ->
-            val marker = FENCE.find(input = line)?.groupValues?.get(index = 1)?.first()
-            when {
-                fence != null -> if (marker == fence) fence = null
-
-                marker != null -> fence = marker
-
-                else -> TAG.findAll(input = line).forEach { match ->
+            if (!fences.read(text = line)) {
+                TAG.findAll(input = line).forEach { match ->
                     val range = match.range.first + lineStart..match.range.last + lineStart
                     tags += InlineTag(name = textFolder.fold(text = match.groupValues[1]), range = range)
                 }
@@ -163,7 +159,6 @@ class SearchNoteContentUseCase(
         private const val MAX_SNIPPET_LENGTH = 160
         private const val NESTED_TAG_SEPARATOR = "/"
         private const val TAG_MARK = "#"
-        private val FENCE = Regex(pattern = "^\\s{0,3}(`{3,}|~{3,})")
         private val TAG = Regex(pattern = "(?<![\\w#/&])#([\\p{L}\\p{N}_/-]*[\\p{L}_/-][\\p{L}\\p{N}_/-]*)")
         private val WHITESPACE = Regex(pattern = "\\s+")
     }

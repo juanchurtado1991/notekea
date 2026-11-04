@@ -1,6 +1,7 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.StringPatterns
+import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 
 /**
@@ -15,15 +16,10 @@ class EmbedFinder {
         includeNotes: Boolean = false
     ): List<Embed> {
         val embeds = mutableListOf<Embed>()
-        var fence: Char? = null
+        val fences = FenceTracker()
         var lineStart = 0
         text.split(StringPatterns.NEW_LINE_CHAR).forEach { line ->
-            val marker = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)?.first()
-            when {
-                fence != null -> if (marker == fence) fence = null
-                marker != null -> fence = marker
-                else -> embeds += embedsOf(line = line, offset = lineStart)
-            }
+            if (!fences.read(text = line)) embeds += embedsOf(line = line, offset = lineStart)
             lineStart += line.length + 1
         }
         return embeds.filter { if (it.isNote) includeNotes else isFile(target = it.target) }

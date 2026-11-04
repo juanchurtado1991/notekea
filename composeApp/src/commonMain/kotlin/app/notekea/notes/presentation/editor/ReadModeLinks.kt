@@ -3,6 +3,7 @@ package app.notekea.notes.presentation.editor
 import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.RelativePath
 import app.notekea.core.domain.StringPatterns
+import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.StringPatterns.NEW_LINE
@@ -21,20 +22,9 @@ class ReadModeLinks {
     fun prepare(
         body: String
     ): String {
-        var fence: Char? = null
+        val fences = FenceTracker()
         return body.split(NEW_LINE_CHAR).joinToString(separator = NEW_LINE) { line ->
-            val opening = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)
-            when {
-                fence != null -> line.also {
-                    if (line.trim().let { it.length >= MarkdownSyntax.FENCE.length && it.all { c -> c == fence } }) {
-                        fence = null
-                    }
-                }
-
-                opening != null -> line.also { fence = opening.first() }
-
-                else -> linkLine(line = line)
-            }
+            if (fences.read(text = line)) line else linkLine(line = line)
         }
     }
 

@@ -148,6 +148,13 @@ class SearchNoteContentUseCaseTest {
         entry(path = path)
     }
 
+    @Test
+    fun `a tag after a shorter fence inside a longer one is code`() = runTest {
+        val notes = notesWith(AREPAS to "````\n```\n#corn\n````\n", IDEAS to "#corn\n")
+
+        assertEquals(expected = listOf(IDEAS), actual = search()(VAULT, notes, "#corn").map { it.note.file.path.value })
+    }
+
     companion object {
         private const val AREPAS = "Recipes/Arepas.md"
         private const val CANCEL_AFTER_READS = 40

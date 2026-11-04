@@ -90,6 +90,17 @@ class ListEditingTest {
         )
     }
 
+    @Test
+    fun `list keys type as usual inside a long fence with a shorter one in it`() {
+        assertEquals(
+            expected = listOf(null, "````\n```\n````\n- a\n- |"),
+            actual = listOf(
+                applyOrNull(marked = "````\n```\n- a|\n````", action = ListAction.NEW_ITEM),
+                applyOrNull(marked = "````\n```\n````\n- a|", action = ListAction.NEW_ITEM)
+            )
+        )
+    }
+
     private fun apply(
         marked: String,
         action: ListAction

@@ -62,4 +62,11 @@ class EmbedFinderTest {
             actual = embeds.map { Triple(it.target, it.width, it.isOwnLine) }
         )
     }
+
+    @Test
+    fun `a shorter fence inside a longer one does not end the code`() {
+        val text = "````\n```\n![[inside.png]]\n````\n![[outside.png]]"
+
+        assertEquals(expected = listOf("outside.png"), actual = EmbedFinder().embeds(text = text).map { it.target })
+    }
 }
