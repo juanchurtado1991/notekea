@@ -752,6 +752,18 @@ A link graph built from `[[wiki links]]`, Markdown links, embeds and frontmatter
 - Renaming a note offers to update every link to it ("Update 12 links in 7 notes?"), never silently.
 - **Done when:** link resolution matches Obsidian's (shortest path, aliases, headings `[[Note#Heading]]`,
   block references are kept as-is) on the sample vault.
+- Implemented in `notes`: `FindMentionsUseCase` reads the vault's texts (`NoteTextCache`, so only changed notes are
+  read again) and lists, per note, its links that resolve to the open one (`LinkFinder`, `LinkResolver`: wiki links,
+  embeds, Markdown links, headings and blocks) or, when it has none, the plain words that name it or an alias
+  (`MentionFinder`: whole words, never in code, links, addresses or tags), each with its line as a reader sees it
+  (`MentionPassage` on `MarkdownLineStripper`). Only notes holding the name are parsed. Obsidian does not resolve a
+  bare `[[alias]]`, and neither does Notekea: aliases count for unlinked mentions. `LinkMentionUseCase` writes
+  `[[Note]]` (or `[[Note|words]]`) only if the words are still there (`ApplyLinkUpdatesUseCase`).
+  `NoteMentionsViewModel` follows the open note and the tree (the file watcher). A rename plans its link updates
+  (`PlanLinkUpdatesUseCase`, `RenameAndPlanLinksUseCase`) and the tree asks (`LinkUpdateDialog`) before writing.
+  UI design A (picked 2026-11-03), following the macOS inspector: `ConnectionsSection` with the design system's
+  `NotekeaCountTabs` and `NotekeaPassageRow` (rows, not cards; 2.4's Related moved to them), Note info as a compact
+  table; a mention's click selects it in its note (`EditorIntent.OnRevealRequest`).
 
 ### ⬜ 2.6 Hybrid search — `feature/hybrid-search`
 
