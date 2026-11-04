@@ -22,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.components.NotekeaChip
 import app.notekea.core.presentation.components.NotekeaFold
 import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.core.presentation.components.focusBorder
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
@@ -121,11 +121,13 @@ private fun FoldTitle(
     count: Int,
     onIntent: (EditorIntent) -> Unit
 ) {
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val colors = MaterialTheme.colorScheme
+    val muted = colors.onSurfaceVariant
+    val shape = MaterialTheme.shapes.small
     Row(
         modifier = Modifier
-            .clip(shape = MaterialTheme.shapes.small)
-            .focusProperties { canFocus = false }
+            .focusBorder(color = colors.primary, shape = shape)
+            .clip(shape = shape)
             .clickable { onIntent(PropertyIntent.OnFoldToggle) }
             .padding(horizontal = NotekeaDimensions.SpacingXs, vertical = NotekeaDimensions.SpacingXs),
         verticalAlignment = Alignment.CenterVertically,

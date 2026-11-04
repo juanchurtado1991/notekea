@@ -108,6 +108,7 @@ private fun BookmarkRow(
             icon = iconOf(path = path, state = state),
             iconTint = fileTintOf(path = path).takeUnless { path in state.tree.folders },
             selected = path == state.selectedPath,
+            takesFocus = true,
             labelContent = if (isMissing) {
                 { MissingLabel(path = path, onIntent = onIntent) }
             } else {

@@ -53,8 +53,9 @@ private const val PREVIEW_WIDTH_DP = 260
  * is not the selected one (an outline's), draws the focus ring. Rows are
  * transparent, so they sit on the panel that holds the tree. [badge] marks the row after its label (a bookmark's
  * star), and [iconTint] colors the icon (a file's kind). [labelContent] replaces the label, for renaming in place;
- * it must keep its keys (a field consumes Space), or a key leaving it would click the row. Screen readers get the
- * selection and expand / collapse actions.
+ * it must keep its keys (a field consumes Space), or a key leaving it would click the row. A row that [takesFocus],
+ * outside a list that is one focus stop, is a focus stop of its own. Screen readers get the selection and expand /
+ * collapse actions.
  */
 @Composable
 fun NotekeaTreeItem(
@@ -65,6 +66,7 @@ fun NotekeaTreeItem(
     modifier: Modifier = Modifier,
     selected: Boolean = false,
     focused: Boolean = false,
+    takesFocus: Boolean = false,
     isExpanded: Boolean? = null,
     onToggleExpanded: (() -> Unit)? = null,
     trailingText: String? = null,
@@ -87,7 +89,8 @@ fun NotekeaTreeItem(
     ) {
         Row(
             modifier = Modifier
-                .rowClick(onClick = onClick, onClickLabel = onClickLabel)
+                .focusBorder(color = colors.primary, shape = shape)
+                .rowClick(onClick = onClick, onClickLabel = onClickLabel, takesFocus = takesFocus)
                 .padding(
                     start = NotekeaDimensions.SpacingXs + NotekeaDimensions.TreeIndent * depth,
                     end = NotekeaDimensions.SpacingS
@@ -189,11 +192,12 @@ private fun TrailingText(
     Text(text = text, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
-/** Rows are not focus stops: the tree is. */
+/** Rows are not focus stops unless they [takesFocus] (the bookmarks): the tree is. */
 private fun Modifier.rowClick(
     onClick: () -> Unit,
+    takesFocus: Boolean,
     onClickLabel: String?
-): Modifier = focusProperties { canFocus = false }
+): Modifier = focusProperties { canFocus = takesFocus }
     .clickable(onClickLabel = onClickLabel, role = Role.Button, onClick = onClick)
 
 private fun Modifier.treeSemantics(
