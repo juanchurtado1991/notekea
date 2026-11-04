@@ -77,6 +77,23 @@ internal class EditorDisk(
         }
     }
 
+    /**
+     * Notekea itself rewrote the open note at [path] (a rename updated its links to itself): the editor takes the new
+     * text, or with edits of its own keeps them on top of it, so the next save is no conflict.
+     */
+    suspend fun followRewrite(
+        path: RelativePath
+    ) {
+        val document = (openNote(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value ?: return
+        if (saving.hasEdits()) {
+            saving.rebase(
+                document = document
+            )
+        } else {
+            saving.show(document = document, isNewNote = false)
+        }
+    }
+
     /** Brings back a file that is gone; one that came back meanwhile is replaced only if it holds what was last seen. */
     suspend fun restore() {
         val path = host.state.value.notePath ?: return
