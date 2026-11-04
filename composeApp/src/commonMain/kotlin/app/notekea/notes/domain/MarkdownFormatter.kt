@@ -142,15 +142,23 @@ class MarkdownFormatter {
         start: Int,
         end: Int,
         mark: String
-    ): Boolean =
+    ): Boolean = if (mark == MarkdownSyntax.ITALIC) {
+        isItalicAround(text = text, start = start, end = end)
+    } else {
         text.regionMatches(thisOffset = start - mark.length, other = mark, otherOffset = 0, length = mark.length) &&
-            text.regionMatches(thisOffset = end, other = mark, otherOffset = 0, length = mark.length) &&
-            (
-                mark != MarkdownSyntax.ITALIC || (
-                    text.getOrNull(index = start - 2) != MarkdownSyntax.ITALIC_CHAR &&
-                        text.getOrNull(index = end + 1) != MarkdownSyntax.ITALIC_CHAR
-                    )
-                )
+            text.regionMatches(thisOffset = end, other = mark, otherOffset = 0, length = mark.length)
+    }
+
+    /** Whether the same stars stand on both sides and hold an italic: one, or three with bold; two are bold alone. */
+    private fun isItalicAround(
+        text: String,
+        start: Int,
+        end: Int
+    ): Boolean {
+        val before = (start - 1 downTo 0).takeWhile { text[it] == MarkdownSyntax.ITALIC_CHAR }.size
+        val after = (end until text.length).takeWhile { text[it] == MarkdownSyntax.ITALIC_CHAR }.size
+        return before == after && before > 0 && before != MarkdownSyntax.BOLD.length
+    }
 
     /** [style] on every line the selection touches, or off when every non-empty one already has it. */
     private fun styleLines(
