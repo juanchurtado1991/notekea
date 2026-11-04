@@ -35,7 +35,8 @@ private fun SuiteBuilder.lightAndDark() {
         prepare(PLAYGROUND)
         title(text = "Colors in light and dark mode")
         steps(
-            text = "$OPEN_PLAYGROUND\n2. With Settings → Appearance as it starts (Mode System, Default theme), look " +
+            text =
+            "$OPEN_PLAYGROUND\n2. With Settings → Appearance as it starts (Mode System, Workspace Blue theme), look " +
                 "around, then switch your system to dark mode (or light, if it is dark) and look again."
         )
         expected(

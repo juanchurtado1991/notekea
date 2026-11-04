@@ -34,7 +34,7 @@ class NotekeaThemeAppearanceTest {
                 ColorThemeSchemes.of(theme = ColorTheme.DEEP_SAGE, darkTheme = true),
                 ColorThemeSchemes.of(theme = ColorTheme.SIGNAL_ALMOND, darkTheme = false),
                 ColorThemeSchemes.of(theme = ColorTheme.MIDNIGHT_LIME, darkTheme = true),
-                NotekeaColorSchemes.light
+                WorkspaceBlueSchemes.light
             ),
             actual = drawn
         )

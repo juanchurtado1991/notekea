@@ -75,7 +75,7 @@ building 1.3. Test data comes from `smoke-data/` (see its README); run its scrip
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
 | 1.2-01 | Look at any screen text and at a code block | UI text uses Inter and code uses JetBrains Mono on every OS (not the system font) | 1.2 | Manual (eyes) | | | | |
-| 1.2-02 | With Settings → Appearance as it starts (Mode System, Default theme; revised by 2.12), compare the app in light and dark mode | Cobalt and tangerine palette: cobalt primary, tangerine accents (citations, badges); all text is readable, nothing low-contrast | 1.2 | Manual (eyes) | | | | |
+| 1.2-02 | With Settings → Appearance as it starts (Mode System, Workspace Blue theme; revised by 2.12), compare the app in light and dark mode | Workspace Blue palette: quiet grays, blue primary, orange accents (citations, badges); all text is readable, nothing low-contrast | 1.2 | Manual (eyes) | | | | |
 | 1.2-03 | Check buttons, text fields and list items | Controls have small rounded corners (6 dp), not pill shapes; cards 10 dp | 1.2 | Manual (eyes) | | | | |
 | 1.2-04 | Navigate the main window with Tab / Shift+Tab only | Every interactive element gets a visible focus ring and can be activated from the keyboard | 1.3 | Manual (eyes) | | | | |
 | 1.2-05 | With a screen reader (Narrator, VoiceOver, Orca), move through a screen | Buttons, tabs and list items are announced with their text and role | 1.3 | Manual (system) | | | | |
@@ -381,13 +381,14 @@ Linux. Memory is not a manual case: testers never measure it; the performance pa
 ### 2.12 Color themes
 
 Run `smoke.sh prepare` (`smoke.ps1 prepare` on Windows). The cases run in `smoke-data/scratch/Playground Vault`.
-Settings is the gear at the bottom of the tool rail. Leave Settings → Appearance on Default and System after them.
+Settings is the gear at the bottom of the tool rail. Leave Settings → Appearance on Workspace Blue and System after them.
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
 | 2.12-01 | In the Playground Vault open Settings, click the Deep Sage card and Dark under Mode; press Esc, quit and relaunch, and open Settings again | The Deep Sage card is outlined and checked and Dark is selected, before and after the relaunch | 2.12 | Self-Test | `SettingsAppearanceStoreTest`, `AppearanceViewModelTest`, `AppearanceSettingsScreenTest` | | | |
 | 2.12-02 | In the Playground Vault open Settings; under Mode click Light and click each theme's card, then Dark and each card again; press Tab until a card has the focus ring and press Enter | Each click turns the whole window (tree, tabs, note, logo) to the card's colors at once, every text readable; the chosen card is outlined and checked; Enter chooses the focused card | 2.12 | Manual (eyes) | `ColorThemeSchemesTest`, `NotekeaThemeAppearanceTest` | | | |
-| 2.12-03 | In the Playground Vault choose a theme other than Default with Mode System and switch the system between light and dark; then choose Light and switch it again | On System Notekea turns light or dark with the system, in the chosen theme; on Light it stays light | 2.12 | Manual (system) | `NotekeaThemeAppearanceTest` | | | |
+| 2.12-03 | In the Playground Vault choose a theme other than Workspace Blue with Mode System and switch the system between light and dark; then choose Light and switch it again | On System Notekea turns light or dark with the system, in the chosen theme; on Light it stays light | 2.12 | Manual (system) | `NotekeaThemeAppearanceTest` | | | |
+| 2.12-04 | On a machine or Notekea QA data folder where no theme was ever chosen, open the Playground Vault and open Settings | The Workspace Blue card, first in the grid, is outlined and checked and System is selected; Cobalt Tangerine is the second card, and a theme chosen before this version stays chosen | 2.12 | Self-Test | `SettingsAppearanceStoreTest`, `ColorThemeSchemesTest` | | | |
 
 ### 2.3 Hybrid index
 

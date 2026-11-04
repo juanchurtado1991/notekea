@@ -10,7 +10,7 @@ import app.notekea.core.presentation.theme.palette.NotekeaPalette
 /**
  * Notekea's logo, as vectors the window, About, the welcome screen and the rail draw at any size: a kea and an "N" on a
  * note with a folded corner, so it sits quietly beside the editor: the note in the primary container color, the mark in
- * the primary color and the corner in the accent. [Logo], the window's icon, has the default light theme's blues and
+ * the primary color and the corner in the accent. [Logo], the window's icon, has Cobalt Tangerine's light blues and
  * tangerine; [NotekeaLogo][app.notekea.core.presentation.components.NotekeaLogo] draws [logoOf] in the color theme's
  * (`ROADMAP.md` 2.12). The mark is clipped to the note's inner square, as the designed SVG does.
  */
