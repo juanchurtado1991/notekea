@@ -9,6 +9,8 @@ import app.notekea.core.presentation.theme.LocalAppearance
 import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.appearance.domain.Appearance
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -35,6 +37,7 @@ import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.core.presentation.platform.WindowCloseShortcuts
 import app.notekea.core.presentation.platform.WindowDialogs
 import app.notekea.core.presentation.platform.WindowDialogsHost
+import app.notekea.core.presentation.platform.WindowTitle
 import app.notekea.di.desktopModules
 import app.notekea.notes.data.VaultFolderTrash
 import app.notekea.notes.domain.AttachmentPicker
@@ -72,6 +75,8 @@ class CaseApp(
     val closeGuard = WindowCloseGuard()
     val shortcuts = ShortcutDispatcher()
     private val dialogs = WindowDialogs()
+    private var vaultName by mutableStateOf<String?>(value = null)
+    private var activeTabName by mutableStateOf<String?>(value = null)
     private var isClosed = false
 
     val folderPicker = ScriptedFolderPicker()
@@ -96,6 +101,9 @@ class CaseApp(
         Files.createDirectories(home.resolve(DOCUMENTS))
         koin = startKoin { modules(desktopModules + overrides()) }.koin
     }
+
+    /** The title the app's window shows now. */
+    val windowTitle: String get() = WindowTitle.of(vaultName = vaultName, activeTabName = activeTabName)
 
     /** Where the vault [name] is. */
     fun vaultPath(name: String): String = vaults.resolve(name).toString()
@@ -138,13 +146,14 @@ class CaseApp(
     private fun Window() {
         App {
             WelcomeScreen(
-                onVaultNameChange = {},
+                onVaultNameChange = { vaultName = it },
                 openedVaultContent = { vault, onSwitchVault ->
                     VaultScope(vaultPath = vault.path) { close ->
                         VaultTreeScreen(
                             vaultPath = vault.path,
                             vaultName = vault.name,
-                            onSwitchVault = { close(onSwitchVault) }
+                            onSwitchVault = { close(onSwitchVault) },
+                            onActiveTabChange = { activeTabName = it }
                         )
                     }
                 }

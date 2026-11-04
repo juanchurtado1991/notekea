@@ -16,6 +16,9 @@ data class TreePreferences(
         const val DEFAULT_SIDEBAR_WIDTH_DP = SidePanelPreferences.DEFAULT_WIDTH_DP
         const val MAX_SIDEBAR_WIDTH_DP = 480
         const val MIN_SIDEBAR_WIDTH_DP = 200
+
+        /** In a window narrower than this the sidebar floats over the note (`ROADMAP.md`, the main layout). */
+        const val SIDEBAR_OVERLAY_BELOW_DP = 760
         val DEFAULT = TreePreferences(expandedFolders = emptySet(), sort = TreeSort.NAME)
 
         fun clampSidebarWidth(

@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.tree
 
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -17,12 +18,13 @@ import app.notekea.notes.domain.TreePreferences
 import kotlin.math.roundToInt
 
 private const val PREVIEW_HEIGHT_DP = 480
+private const val PREVIEW_NARROW_WIDTH_DP = 640
 private const val PREVIEW_WIDTH_DP = 900
 
 /**
  * Stateless vault workspace: the tool rail on the left edge (its buttons beyond the tree doing [rail]'s actions, the
  * side panel's selected while [isSidePanelVisible]), the resizable, hideable sidebar with the tree and, beside it,
- * [content]: the editor's tabs and panes (`ROADMAP.md` 1.11). The delete question is shown over both while it waits for an answer.
+ * [content]: the editor's tabs and panes (`ROADMAP.md` 1.11); in a narrow window the sidebar floats over them. The delete question is shown over both while it waits for an answer.
  */
 @Composable
 fun VaultTreeContent(
@@ -39,19 +41,23 @@ fun VaultTreeContent(
         color = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground
     ) {
-        Row {
-            SidebarRail(state = state, onIntent = onIntent, actions = rail, isSidePanelVisible = isSidePanelVisible)
-            NotekeaSplitPane(
-                panelWidth = state.sidebarWidthDp.dp,
-                onPanelWidthChange = { onIntent(VaultTreeIntent.OnSidebarResize(widthDp = it.value.roundToInt())) },
-                isPanelVisible = !state.isSidebarCollapsed,
-                minPanelWidth = TreePreferences.MIN_SIDEBAR_WIDTH_DP.dp,
-                maxPanelWidth = TreePreferences.MAX_SIDEBAR_WIDTH_DP.dp,
-                panel = {
-                    VaultSidebar(state = state, vaultName = vaultName, onIntent = onIntent)
-                },
-                content = { NoteDetailsPanel(state = state, content = content) }
-            )
+        BoxWithConstraints {
+            val isOverlay = maxWidth < TreePreferences.SIDEBAR_OVERLAY_BELOW_DP.dp
+            Row {
+                SidebarRail(state = state, onIntent = onIntent, actions = rail, isSidePanelVisible = isSidePanelVisible)
+                NotekeaSplitPane(
+                    panelWidth = state.sidebarWidthDp.dp,
+                    onPanelWidthChange = { onIntent(VaultTreeIntent.OnSidebarResize(widthDp = it.value.roundToInt())) },
+                    isPanelVisible = !state.isSidebarCollapsed,
+                    minPanelWidth = TreePreferences.MIN_SIDEBAR_WIDTH_DP.dp,
+                    maxPanelWidth = TreePreferences.MAX_SIDEBAR_WIDTH_DP.dp,
+                    panel = {
+                        VaultSidebar(state = state, vaultName = vaultName, onIntent = onIntent)
+                    },
+                    content = { NoteDetailsPanel(state = state, content = content) },
+                    isOverlay = isOverlay
+                )
+            }
         }
     }
     TreeQuestions(state = state, onIntent = onIntent)
@@ -75,7 +81,8 @@ private fun TreeQuestions(
 
 @Composable
 private fun VaultTreeContentPreviewFrame(
-    state: VaultTreeState
+    state: VaultTreeState,
+    widthDp: Int = PREVIEW_WIDTH_DP
 ) {
     NotekeaPreviewThemes {
         VaultTreeContent(
@@ -83,7 +90,7 @@ private fun VaultTreeContentPreviewFrame(
             vaultName = TreePreviewData.VAULT_NAME,
             onIntent = {},
             rail = SidebarRailActions(),
-            modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp).height(height = PREVIEW_HEIGHT_DP.dp)
+            modifier = Modifier.width(width = widthDp.dp).height(height = PREVIEW_HEIGHT_DP.dp)
         ) { PreviewNoteContent(path = state.selectedPath) }
     }
 }
@@ -92,6 +99,12 @@ private fun VaultTreeContentPreviewFrame(
 @Composable
 private fun VaultTreeContentPreview() {
     VaultTreeContentPreviewFrame(state = TreePreviewData.state())
+}
+
+@Preview
+@Composable
+private fun VaultTreeContentNarrowWindowPreview() {
+    VaultTreeContentPreviewFrame(state = TreePreviewData.state(), widthDp = PREVIEW_NARROW_WIDTH_DP)
 }
 
 @Preview

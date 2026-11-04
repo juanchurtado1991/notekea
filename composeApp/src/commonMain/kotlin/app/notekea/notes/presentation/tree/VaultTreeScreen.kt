@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Alignment
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -64,6 +65,7 @@ private const val WORKSPACE_KEY_PREFIX = "workspace:"
  * over it. They follow each other: what the tree opens (a click, a link, the quick switcher, Today) opens in a tab, and
  * the tree selects the active tab's file; a rename moves the tabs and the editors' notes, a deletion closes its tabs;
  * the palette and the pickers work on the note of the active pane. The workspace shortcuts work whatever has focus.
+ * [onActiveTabChange] hears the name the active tab shows.
  */
 @Composable
 fun VaultTreeScreen(
@@ -71,6 +73,7 @@ fun VaultTreeScreen(
     vaultName: String,
     onSwitchVault: () -> Unit,
     modifier: Modifier = Modifier,
+    onActiveTabChange: (String?) -> Unit = {},
     viewModel: VaultTreeViewModel = koinViewModel(key = vaultPath) { parametersOf(vaultPath) },
     workspaceViewModel: WorkspaceViewModel = koinViewModel(
         key = WORKSPACE_KEY_PREFIX + vaultPath
@@ -109,6 +112,7 @@ fun VaultTreeScreen(
         onTemplatePicker = templatePickerViewModel::onIntent
     )
     FollowWorkspace(state = state, viewModels = viewModels, sidePanel = sidePanel)
+    FollowActiveTab(name = workspaceState.activeTabName, onChange = onActiveTabChange)
     Box(modifier = modifier) {
         VaultWorkspace(
             state = state,
@@ -131,6 +135,17 @@ fun VaultTreeScreen(
             templatePicker = templatePickerViewModel
         )
     }
+}
+
+/** [onChange] hears the name the active tab shows, for the window's title, and null once the vault closes. */
+@Composable
+private fun FollowActiveTab(
+    name: String?,
+    onChange: (String?) -> Unit
+) {
+    val currentOnChange by rememberUpdatedState(newValue = onChange)
+    LaunchedEffect(name) { currentOnChange(name) }
+    DisposableEffect(Unit) { onDispose { currentOnChange(null) } }
 }
 
 /** The side panel with the inspector's Connections ([connectionsSidePanel]), on the active [editor] and the [tree]. */

@@ -388,7 +388,9 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
   Search notes and Today rows and the New note / New folder buttons move to the rail.
 - **Window size:** the window opens large enough (1440 × 900 dp at most, never larger than the screen's usable area)
   to show the tool rail, the sidebar, a note and the outline beside it, which are open by default; the welcome screen
-  and a vault's workspace share that size, so the window never resizes itself when a vault opens or closes.
+  and a vault's workspace share that size, so the window never resizes itself when a vault opens or closes. Its size,
+  position and maximized state come back on the next launch, on a screen that still shows it; it never goes below
+  560 × 400 dp, and its title names the active tab and the vault.
 - **Restore:** each vault's tabs, active tabs and split are saved on every change in the app settings and come back
   when it opens again, without the tabs of files deleted meanwhile.
 
