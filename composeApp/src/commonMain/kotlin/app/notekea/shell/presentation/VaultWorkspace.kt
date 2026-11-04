@@ -15,7 +15,7 @@ import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.core.presentation.platform.WindowDialog
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.notes.domain.AttachmentKind
-import app.notekea.notes.domain.FolderCards
+import app.notekea.tree.domain.FolderCards
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.presentation.EditorCallbacks
@@ -27,7 +27,7 @@ import app.notekea.editor.presentation.WithSidePanel
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherMode
 import app.notekea.search.presentation.switcher.QuickSwitcherPurpose
-import app.notekea.notes.presentation.tags.TagPickerIntent
+import app.notekea.tree.presentation.tags.TagPickerIntent
 import app.notekea.templates.presentation.TemplatePickerIntent
 import app.notekea.templates.presentation.TemplateTarget
 import app.notekea.shell.presentation.FolderGrid
@@ -44,17 +44,17 @@ import app.notekea.editor.presentation.EditorViewModel
 import app.notekea.editor.presentation.saveInOtherEditors
 import app.notekea.resources.tree_untitled_note
 import app.notekea.shell.presentation.WorkspaceStartActions
-import app.notekea.notes.presentation.tree.BookmarkIntent
-import app.notekea.notes.presentation.tree.EntryMenuArea
-import app.notekea.notes.presentation.tree.FileDetails
-import app.notekea.notes.presentation.tree.FilePreview
-import app.notekea.notes.presentation.tree.PreviewNoteContent
-import app.notekea.notes.presentation.tree.SidebarRailActions
-import app.notekea.notes.presentation.tree.TreePreviewData
-import app.notekea.notes.presentation.tree.VaultTreeContent
-import app.notekea.notes.presentation.tree.VaultTreeIntent
-import app.notekea.notes.presentation.tree.VaultTreeState
-import app.notekea.notes.presentation.tree.asTreeRow
+import app.notekea.tree.presentation.BookmarkIntent
+import app.notekea.tree.presentation.EntryMenuArea
+import app.notekea.tree.presentation.FileDetails
+import app.notekea.tree.presentation.FilePreview
+import app.notekea.tree.presentation.PreviewNoteContent
+import app.notekea.tree.presentation.SidebarRailActions
+import app.notekea.tree.presentation.TreePreviewData
+import app.notekea.tree.presentation.VaultTreeContent
+import app.notekea.tree.presentation.VaultTreeIntent
+import app.notekea.tree.presentation.VaultTreeState
+import app.notekea.tree.presentation.asTreeRow
 
 /**
  * The vault's sidebar beside the editor's tabs and panes (`ROADMAP.md` 1.11), with the side panel of the active pane's

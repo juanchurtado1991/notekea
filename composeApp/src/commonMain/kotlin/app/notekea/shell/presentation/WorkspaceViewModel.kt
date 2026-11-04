@@ -13,7 +13,7 @@ import app.notekea.core.notes.domain.SidePanelMode
 import app.notekea.core.notes.domain.SidePanelPreferences
 import app.notekea.core.notes.domain.SidePanelSection
 import app.notekea.shell.domain.Workspace
-import app.notekea.notes.presentation.tree.TreeFilePreviews
+import app.notekea.tree.presentation.TreeFilePreviews
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

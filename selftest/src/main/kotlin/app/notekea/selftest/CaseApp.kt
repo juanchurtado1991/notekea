@@ -26,11 +26,11 @@ import app.notekea.core.presentation.menu.AppMenus
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.di.desktopModules
-import app.notekea.notes.data.VaultFolderTrash
+import app.notekea.tree.data.VaultFolderTrash
 import app.notekea.editor.domain.AttachmentPicker
 import app.notekea.core.notes.domain.FileOpener
-import app.notekea.notes.domain.FileRevealer
-import app.notekea.notes.domain.Trash
+import app.notekea.tree.domain.FileRevealer
+import app.notekea.tree.domain.Trash
 import app.notekea.vault.domain.FolderPicker
 import okio.FileSystem
 import org.koin.core.Koin

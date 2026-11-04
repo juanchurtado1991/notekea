@@ -28,7 +28,7 @@ import app.notekea.core.presentation.components.NotekeaGridCard
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
-import app.notekea.notes.domain.FolderCard
+import app.notekea.tree.domain.FolderCard
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.resources.Res
 import app.notekea.resources.folder_empty_message

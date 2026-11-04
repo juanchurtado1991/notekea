@@ -27,8 +27,8 @@ import app.notekea.editor.presentation.EditorViewModel
 import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.search.presentation.switcher.QuickSwitcherContent
 import app.notekea.search.presentation.switcher.QuickSwitcherViewModel
-import app.notekea.notes.presentation.tags.TagPickerContent
-import app.notekea.notes.presentation.tags.TagPickerViewModel
+import app.notekea.tree.presentation.tags.TagPickerContent
+import app.notekea.tree.presentation.tags.TagPickerViewModel
 import app.notekea.templates.presentation.TemplatePickerContent
 import app.notekea.templates.presentation.TemplatePickerIntent
 import app.notekea.templates.presentation.TemplatePickerViewModel
@@ -47,12 +47,12 @@ import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.editor.domain.FormatAction
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import app.notekea.notes.presentation.tree.PreviewNoteContent
-import app.notekea.notes.presentation.tree.SidebarRailActions
-import app.notekea.notes.presentation.tree.TreePreviewData
-import app.notekea.notes.presentation.tree.VaultTreeContent
-import app.notekea.notes.presentation.tree.VaultTreeState
-import app.notekea.notes.presentation.tree.VaultTreeViewModel
+import app.notekea.tree.presentation.PreviewNoteContent
+import app.notekea.tree.presentation.SidebarRailActions
+import app.notekea.tree.presentation.TreePreviewData
+import app.notekea.tree.presentation.VaultTreeContent
+import app.notekea.tree.presentation.VaultTreeState
+import app.notekea.tree.presentation.VaultTreeViewModel
 
 private const val TEMPLATE_PICKER_KEY_PREFIX = "templates:"
 private const val EDITOR_KEY_PREFIX = "editor:"

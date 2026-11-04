@@ -4,7 +4,7 @@ import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.ApplyTemplateUseCase
+import app.notekea.tree.domain.ApplyTemplateUseCase
 import app.notekea.templates.domain.CreateTemplatesFolderUseCase
 import app.notekea.core.notes.domain.FillTemplateUseCase
 import app.notekea.core.notes.domain.RelativePath

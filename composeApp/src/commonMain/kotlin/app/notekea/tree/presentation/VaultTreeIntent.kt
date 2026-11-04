@@ -1,0 +1,130 @@
+package app.notekea.tree.presentation
+
+import app.notekea.core.notes.domain.LinkKind
+import app.notekea.core.notes.domain.LinkUpdateResult
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.tree.domain.TreeSort
+
+/** What the user did in the vault sidebar. Actions without a path apply to the selected entry. */
+sealed interface VaultTreeIntent {
+    data class OnChevronClick(val path: RelativePath) : VaultTreeIntent
+
+    data object OnCollapseSelected : VaultTreeIntent
+
+    data object OnDeleteCancel : VaultTreeIntent
+
+    data object OnDeleteConfirm : VaultTreeIntent
+
+    data class OnDeleteRequest(val path: RelativePath? = null) : VaultTreeIntent
+
+    /** The note editor renamed [from] to [to] and updated the links to it as [links] says. */
+    data class OnEntryRenamed(
+        val from: RelativePath,
+        val to: RelativePath,
+        val links: LinkUpdateResult?
+    ) : VaultTreeIntent
+
+    data object OnErrorDismiss : VaultTreeIntent
+
+    data object OnExpandSelected : VaultTreeIntent
+
+    /** The header's Expand all: every folder of the vault opens. */
+    data object OnExpandAll : VaultTreeIntent
+
+    /** The header's Collapse all: every folder closes. */
+    data object OnCollapseAll : VaultTreeIntent
+
+    /** Opens a file that is not a note with the system's app for it; null opens the selected one. */
+    data class OnFileOpen(val path: RelativePath? = null) : VaultTreeIntent
+
+    /** A link in the open note [source] was clicked: select the note it leads to, creating a missing wiki link's. */
+    data class OnFollowLink(
+        val source: RelativePath,
+        val target: String,
+        val kind: LinkKind,
+        val inBackground: Boolean = false
+    ) : VaultTreeIntent
+
+    /** [baseName] is the localized name of a new folder ("Untitled folder"). */
+    data class OnNewFolderClick(val baseName: String) : VaultTreeIntent
+
+    /** [baseName] is the localized name of a new note ("Untitled"). */
+    data class OnNewNoteClick(val baseName: String) : VaultTreeIntent
+
+    /** "New note from template" in the menu: the template picker opens for a new note in the selected folder. */
+    data object OnNewNoteFromTemplateClick : VaultTreeIntent
+
+    /**
+     * A [template] chosen for a new note in [folder]: the note is made (named after [baseName], the localized
+     * "Untitled") with its name ready to type, and filled from the template once it is named, so `{{title}}` is its name.
+     */
+    data class OnNoteFromTemplate(
+        val folder: RelativePath,
+        val template: RelativePath,
+        val baseName: String
+    ) : VaultTreeIntent
+
+    data object OnNoticeDismiss : VaultTreeIntent
+
+    /** Something unexpected went wrong around the tree (the tabs): the sidebar's banner says so. */
+    data object OnUnexpectedError : VaultTreeIntent
+
+    /** The editor kept what it could not save of [note]: in [copy], or in memory when even that failed (null). */
+    data class OnUnsavedKept(
+        val note: RelativePath,
+        val copy: RelativePath?
+    ) : VaultTreeIntent
+
+    data object OnRenameCancel : VaultTreeIntent
+
+    data object OnRenameConfirm : VaultTreeIntent
+
+    data class OnRenameRequest(val path: RelativePath? = null) : VaultTreeIntent
+
+    data class OnRenameTextChange(val text: String) : VaultTreeIntent
+
+    data object OnRetryClick : VaultTreeIntent
+
+    data class OnRevealRequest(val path: RelativePath? = null) : VaultTreeIntent
+
+    /** A row was clicked: it is selected and opens in a tab, behind the current one when [inBackground]. */
+    data class OnRowClick(
+        val path: RelativePath,
+        val inBackground: Boolean = false
+    ) : VaultTreeIntent
+
+    /** Enter on the selected row: it opens in a tab, as a click does. */
+    data object OnOpenSelected : VaultTreeIntent
+
+    /** A note chosen outside the tree (the quick switcher): it is selected, with the folders above it expanded. */
+    data class OnRevealNote(val path: RelativePath) : VaultTreeIntent
+
+    /**
+     * A folder or note named outside the tree (the status bar's path, the folder above a note's title): the sidebar
+     * opens if it was hidden and selects it, with the folders above it expanded, without opening it.
+     */
+    data class OnRevealInTree(val path: RelativePath) : VaultTreeIntent
+
+    /** Selects without opening or closing a folder (a right click before its menu). */
+    data class OnRowSelect(val path: RelativePath) : VaultTreeIntent
+
+    /** A click or right click on the empty part of the tree: nothing is selected, so new entries go to the root. */
+    data object OnSelectionClear : VaultTreeIntent
+
+    data object OnSelectNext : VaultTreeIntent
+
+    /** The user finished dragging the sidebar edge to [widthDp]. */
+    data class OnSidebarResize(val widthDp: Int) : VaultTreeIntent
+
+    data object OnSidebarToggle : VaultTreeIntent
+
+    data object OnSelectPrevious : VaultTreeIntent
+
+    data class OnSortChange(val sort: TreeSort) : VaultTreeIntent
+
+    /** "Today" or `Mod+D`: today's daily note is selected, created first if needed. */
+    data object OnTodayClick : VaultTreeIntent
+
+    /** The daily note before ([step] -1) or after ([step] 1) the selected one is selected, when there is one. */
+    data class OnDayStep(val step: Int) : VaultTreeIntent
+}
