@@ -53,9 +53,9 @@ class OkioNoteFileOperations(
         when {
             !existsOnDisk(file = source) -> Outcome.Failure(error = NotesError.EntryMissing(path = from.value))
 
-            existsOnDisk(
-                file = target
-            ) && !isCaseOnlyRename -> Outcome.Failure(error = NotesError.NameTaken(name = to.name))
+            existsOnDisk(file = target) && (!isCaseOnlyRename || isListed(file = target)) -> {
+                Outcome.Failure(error = NotesError.NameTaken(name = to.name))
+            }
 
             else -> attempt(path = from) { fileSystem.atomicMove(source = source, target = target) }
         }
@@ -92,6 +92,14 @@ class OkioNoteFileOperations(
             }
         }
     }
+
+    /**
+     * Whether [file]'s folder lists it by that exact name. A disk that ignores letter case finds `Foo.md` when only
+     * `foo.md` exists, the same file; on one that does not, a listed `Foo.md` is another note, never to be replaced.
+     */
+    private fun isListed(
+        file: Path
+    ): Boolean = file.parent?.let { fileSystem.listOrNull(dir = it) }.orEmpty().any { it.name == file.name }
 
     private fun existsOnDisk(
         file: Path
