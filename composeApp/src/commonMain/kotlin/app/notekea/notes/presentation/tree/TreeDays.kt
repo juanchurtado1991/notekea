@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.tree
 
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.DailyNoteSettings
+import app.notekea.core.notes.domain.DailyNoteSettings
 import app.notekea.notes.domain.DailyNotes
 
 /**

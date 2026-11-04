@@ -2,7 +2,7 @@ package app.notekea.notes.presentation.editor
 
 import androidx.compose.ui.text.TextRange
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * Where the keyboard and the cursor go in the editor: a focus request gives the keyboard to the text once its note is

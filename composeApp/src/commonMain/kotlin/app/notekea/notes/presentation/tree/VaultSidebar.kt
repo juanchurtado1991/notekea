@@ -27,7 +27,7 @@ import app.notekea.core.presentation.components.NotekeaSectionHeader
 import app.notekea.core.presentation.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.notes.domain.NotesError
+import app.notekea.core.notes.domain.NotesError
 import app.notekea.resources.Res
 import app.notekea.resources.error_unexpected
 import app.notekea.resources.tree_empty_message
@@ -47,6 +47,7 @@ import app.notekea.resources.tree_untitled_note
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import app.notekea.core.notes.presentation.notesErrorMessage
 
 private const val NAMED_NOTES = 3
 private const val NAME_SEPARATOR = ", "

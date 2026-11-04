@@ -3,10 +3,10 @@ package app.notekea.notes.data
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.StringPatterns
 import app.notekea.notes.domain.EditorPreferencesStore
-import app.notekea.notes.domain.ConnectionsTab
-import app.notekea.notes.domain.SidePanelMode
-import app.notekea.notes.domain.SidePanelPreferences
-import app.notekea.notes.domain.SidePanelSection
+import app.notekea.core.notes.domain.ConnectionsTab
+import app.notekea.core.notes.domain.SidePanelMode
+import app.notekea.core.notes.domain.SidePanelPreferences
+import app.notekea.core.notes.domain.SidePanelSection
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.withContext
 

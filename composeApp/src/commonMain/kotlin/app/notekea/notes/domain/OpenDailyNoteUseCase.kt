@@ -4,6 +4,14 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
 import kotlin.time.Clock
+import app.notekea.core.notes.domain.DailyNoteSettings
+import app.notekea.core.notes.domain.NoteContentStore
+import app.notekea.core.notes.domain.NoteFileOperations
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TemplateFiller
+import app.notekea.core.notes.domain.VaultSettingsReader
+import app.notekea.core.notes.domain.createMissingFolders
 
 /**
  * Opens the daily note of `date`, today's where the user is when it is null (`ROADMAP.md` 1.10), creating it when it

@@ -1,5 +1,8 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.resolvedFrom
+
 /**
  * Where new attachments of a note are saved, as Obsidian's `attachmentFolderPath` setting says (`ROADMAP.md` 1.8):
  * `/` the vault root, `./` the note's own folder, `./images` a folder inside the note's folder, any other path a fixed

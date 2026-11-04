@@ -2,16 +2,16 @@ package app.notekea.notes.presentation.tree
 
 import app.notekea.core.domain.Outcome
 import app.notekea.notes.domain.FollowedLink
-import app.notekea.notes.domain.LinkUpdateResult
-import app.notekea.notes.domain.NoteEntry
-import app.notekea.notes.domain.NoteFile
-import app.notekea.notes.domain.NoteMetadata
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.LinkUpdateResult
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeRow
 import app.notekea.notes.domain.TreePreferences
 import app.notekea.notes.domain.TrashLocation
-import app.notekea.notes.domain.VaultTree
+import app.notekea.core.notes.domain.VaultTree
 
 // Pure state transitions of the vault sidebar, unit tested directly (`ARCHITECTURE.md` §4). Rows are not computed
 // here: the ViewModel flattens the tree again after any change to the tree, the expanded folders or the sort.

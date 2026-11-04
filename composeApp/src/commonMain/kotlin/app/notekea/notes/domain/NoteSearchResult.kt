@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.NoteEntry
+
 /**
  * A note found by the quick switcher. [text] is what matched (the name, the alias, or the path without `.md`; the name
  * for a recent note) and [ranges] its matched characters, for highlighting.

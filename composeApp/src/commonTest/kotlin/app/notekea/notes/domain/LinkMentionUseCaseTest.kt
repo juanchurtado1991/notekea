@@ -1,10 +1,15 @@
 package app.notekea.notes.domain
 
-import app.notekea.notes.domain.NoteFixtures.VAULT
-import app.notekea.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NoteFixtures.entry
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.RelativePath
 
 class LinkMentionUseCaseTest {
     private val store = FakeNoteContentStore()

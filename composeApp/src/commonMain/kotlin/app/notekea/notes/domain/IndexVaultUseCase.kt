@@ -6,6 +6,13 @@ import app.notekea.core.embedding.domain.TextEmbedder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlin.coroutines.cancellation.CancellationException
+import app.notekea.core.notes.domain.ChunkNoteUseCase
+import app.notekea.core.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.NoteContentStore
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VectorIndex
+import app.notekea.core.notes.domain.embedChunks
 
 /**
  * Brings a vault's search index up to date with its [notes] (`ROADMAP.md` 2.3), as [PlanIndexUseCase] decides: each

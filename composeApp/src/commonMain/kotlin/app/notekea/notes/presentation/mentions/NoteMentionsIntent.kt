@@ -1,9 +1,9 @@
 package app.notekea.notes.presentation.mentions
 
 import app.notekea.core.presentation.FeedIntent
-import app.notekea.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.notes.domain.NoteMention
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 sealed interface NoteMentionsIntent {
     /** The active pane shows [note] (none when no note is open). */

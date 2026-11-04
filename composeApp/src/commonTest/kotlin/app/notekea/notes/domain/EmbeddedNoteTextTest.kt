@@ -2,6 +2,7 @@ package app.notekea.notes.domain
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.NoteDocument
 
 class EmbeddedNoteTextTest {
     private val embeddedNoteText = EmbeddedNoteText()

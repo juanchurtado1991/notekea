@@ -1,10 +1,10 @@
 package app.notekea.notes.presentation.tree
 
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.LinkUpdateResult
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.RenameEntryUseCase
-import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
+import app.notekea.core.notes.domain.LinkUpdateResult
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RenameEntryUseCase
+import app.notekea.core.notes.domain.UpdateLinksAfterRenameUseCase
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.sync.Mutex

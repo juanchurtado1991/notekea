@@ -1,8 +1,8 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.runtime.Immutable
-import app.notekea.notes.domain.SidePanelMode
-import app.notekea.notes.domain.SidePanelSection
+import app.notekea.core.notes.domain.SidePanelMode
+import app.notekea.core.notes.domain.SidePanelSection
 
 /**
  * What the side panel's controls do: a heading chosen in the outline ([onHeadingClick], by its index), Inspector or

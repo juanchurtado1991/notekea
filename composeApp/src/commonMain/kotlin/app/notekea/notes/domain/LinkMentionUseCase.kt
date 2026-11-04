@@ -1,6 +1,14 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.LinkResolver
+import app.notekea.core.notes.domain.NoteContentStore
+import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteRewrite
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.isTableRow
 
 /**
  * Turns an unlinked mention into a link (`ROADMAP.md` 2.5), only because the person clicked Link: the words at the

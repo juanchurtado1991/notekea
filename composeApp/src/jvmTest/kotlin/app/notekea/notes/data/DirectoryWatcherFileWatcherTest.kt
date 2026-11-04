@@ -1,7 +1,7 @@
 package app.notekea.notes.data
 
 import app.notekea.core.data.JvmAppDispatchers
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.VaultChange
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

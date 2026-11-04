@@ -1,6 +1,11 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.NoteContentStore
+import app.notekea.core.notes.domain.NoteFileOperations
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.createUnderFreeName
 
 /**
  * Keeps [text], the note's full text that could not be saved over [note] (an outside change, a deleted file, a failed

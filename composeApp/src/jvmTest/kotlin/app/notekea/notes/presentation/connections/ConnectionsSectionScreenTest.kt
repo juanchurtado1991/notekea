@@ -16,13 +16,13 @@ import app.notekea.core.presentation.nodes
 import app.notekea.core.presentation.rightClickText
 import app.notekea.core.presentation.texts
 import app.notekea.core.presentation.theme.NotekeaTheme
-import app.notekea.notes.domain.ConnectionsTab
-import app.notekea.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.ConnectionsTab
+import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.notes.domain.NoteMention
 import app.notekea.notes.domain.NoteMentions
 import app.notekea.notes.domain.RelatedNote
 import app.notekea.notes.domain.RelatedSnippet
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.presentation.mentions.NoteMentionsIntent
 import app.notekea.notes.presentation.mentions.NoteMentionsState
 import app.notekea.notes.presentation.related.RelatedNotesState

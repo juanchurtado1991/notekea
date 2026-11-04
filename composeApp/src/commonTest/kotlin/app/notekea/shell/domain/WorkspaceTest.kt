@@ -2,7 +2,7 @@ package app.notekea.shell.domain
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 class WorkspaceTest {
     private val arepas = RelativePath(value = "Recipes/Arepas.md")

@@ -15,7 +15,7 @@ import app.notekea.core.presentation.components.NotekeaStatusSeparator
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.presentation.editor.EditorState
 import app.notekea.notes.presentation.editor.SaveStatus
 import app.notekea.shell.presentation.TabKind

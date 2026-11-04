@@ -2,7 +2,7 @@ package app.notekea.shell.data
 
 import app.notekea.core.data.PropertiesFileSettingsFactory
 import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.shell.domain.Workspace
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest

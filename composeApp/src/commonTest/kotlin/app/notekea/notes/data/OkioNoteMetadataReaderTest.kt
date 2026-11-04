@@ -1,8 +1,8 @@
 package app.notekea.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.notes.domain.NoteMetadata
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -10,6 +10,7 @@ import okio.Path.Companion.toPath
 import okio.fakefilesystem.FakeFileSystem
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.data.GhostFrontmatterParser
 
 class OkioNoteMetadataReaderTest {
     private val testDispatcher = StandardTestDispatcher()

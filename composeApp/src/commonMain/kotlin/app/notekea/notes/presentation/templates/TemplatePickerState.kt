@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.templates
 
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.TemplateSettings
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.TemplateSettings
 
 /**
  * State of the template picker (`ROADMAP.md` 1.12): the templates matching [query] as [rows], and [selectedIndex] the

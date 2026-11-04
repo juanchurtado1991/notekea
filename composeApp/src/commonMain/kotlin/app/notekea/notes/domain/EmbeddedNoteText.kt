@@ -2,6 +2,9 @@ package app.notekea.notes.domain
 
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.OutlineFinder
+import app.notekea.core.notes.domain.OutlineHeading
 
 /**
  * The part of a note an embed shows, as Obsidian does (`ROADMAP.md` 1.8, 1.15): the whole note without its frontmatter

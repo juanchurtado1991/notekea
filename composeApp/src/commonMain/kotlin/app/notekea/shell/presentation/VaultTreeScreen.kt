@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.shell.domain.Workspace
 import app.notekea.notes.presentation.editor.EditorIntent
 import app.notekea.notes.presentation.editor.EditorPaneTools
@@ -43,7 +43,7 @@ import app.notekea.notes.presentation.related.RelatedNotesViewModel
 import app.notekea.notes.presentation.index.SearchIndexNotice
 import app.notekea.notes.presentation.index.SearchIndexStatus
 import app.notekea.notes.presentation.index.SearchIndexViewModel
-import app.notekea.notes.domain.LinkResolver
+import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.notes.domain.FormatAction
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf

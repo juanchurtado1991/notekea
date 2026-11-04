@@ -5,8 +5,8 @@ import app.notekea.core.domain.Outcome
 import app.notekea.notes.domain.FakeFileWatcher
 import app.notekea.notes.domain.FakeNoteMetadataCache
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.VaultTree
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -14,6 +14,8 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.data.GhostFrontmatterParser
+import app.notekea.core.notes.data.OkioNoteScanner
 
 /**
  * Runs the production scanner and frontmatter reader on the `Personal Notes` smoke vault, so the tree the smoke test

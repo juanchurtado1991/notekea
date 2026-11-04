@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.runtime.Immutable
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * What the editor of a pane asks of the panes around it: the title renamed the note ([onRenamed]), a deleted note was

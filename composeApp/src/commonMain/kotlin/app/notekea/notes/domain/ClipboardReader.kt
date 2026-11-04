@@ -1,6 +1,7 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.NotesError
 
 /** What the system clipboard holds, read when the user pastes into a note. */
 interface ClipboardReader {

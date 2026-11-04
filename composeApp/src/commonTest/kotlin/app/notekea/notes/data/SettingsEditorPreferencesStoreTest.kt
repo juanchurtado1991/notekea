@@ -1,10 +1,10 @@
 package app.notekea.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.notes.domain.ConnectionsTab
-import app.notekea.notes.domain.SidePanelMode
-import app.notekea.notes.domain.SidePanelPreferences
-import app.notekea.notes.domain.SidePanelSection
+import app.notekea.core.notes.domain.ConnectionsTab
+import app.notekea.core.notes.domain.SidePanelMode
+import app.notekea.core.notes.domain.SidePanelPreferences
+import app.notekea.core.notes.domain.SidePanelSection
 import com.russhwolf.settings.MapSettings
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest

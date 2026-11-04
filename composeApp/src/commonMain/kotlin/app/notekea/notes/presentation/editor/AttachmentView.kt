@@ -1,10 +1,10 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.ui.graphics.ImageBitmap
-import app.notekea.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.EmbedProblem
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * One file embedded in the open note, ready to show (`ROADMAP.md` 1.8): [path] is the file it found, null when it is

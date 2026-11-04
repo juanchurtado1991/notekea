@@ -1,17 +1,17 @@
 package app.notekea.notes.presentation.mentions
 
 import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
+import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.notes.data.JetBrainsMarkdownMentionFinder
-import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
-import app.notekea.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.notes.domain.FindMentionsUseCase
 import app.notekea.notes.domain.LinkMentionUseCase
-import app.notekea.notes.domain.NoteEntry
-import app.notekea.notes.domain.NoteFixtures.entry
-import app.notekea.notes.domain.NoteTextCache
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.TextFolder
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteTextCache
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TextFolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher

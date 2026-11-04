@@ -4,10 +4,10 @@ import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.DailyNoteSettings
+import app.notekea.core.notes.domain.DailyNoteSettings
 import app.notekea.notes.domain.FollowedLink
 import app.notekea.notes.domain.OpenDailyNoteUseCase
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
@@ -22,6 +22,10 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
+import app.notekea.core.notes.data.NioNoteFileAttributes
+import app.notekea.core.notes.data.ObsidianVaultSettingsReader
+import app.notekea.core.notes.data.OkioNoteContentStore
+import app.notekea.core.notes.data.OkioNoteFileOperations
 
 /**
  * Daily notes on real files (`ROADMAP.md` 1.10): Obsidian's `daily-notes.json` read from a temporary vault, and today's

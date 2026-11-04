@@ -1,8 +1,8 @@
 package app.notekea.notes.presentation.related
 
-import app.notekea.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.notes.domain.RelatedNote
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * The open note's Related section (`ROADMAP.md` 2.4): its [related] notes and those it [linked] already (folded unless

@@ -1,5 +1,8 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.TemplateSettings
+import app.notekea.core.notes.domain.VaultSettingsReader
+
 /** The vault's Templates settings (`.obsidian/templates.json`), or Notekea's defaults when it has none. */
 class GetTemplateSettingsUseCase(private val vaultSettingsReader: VaultSettingsReader) {
     suspend operator fun invoke(

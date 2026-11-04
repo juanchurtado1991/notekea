@@ -11,7 +11,7 @@ import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.notes.domain.NoteStats
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.presentation.editor.EditorState
 import app.notekea.notes.presentation.editor.NoteInfo
 import app.notekea.shell.presentation.TabKind

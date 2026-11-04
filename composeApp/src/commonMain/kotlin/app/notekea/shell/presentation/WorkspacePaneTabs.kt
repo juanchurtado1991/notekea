@@ -14,8 +14,8 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.shell.domain.EditorPane
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.VaultTree
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 import app.notekea.shell.domain.Workspace
 import app.notekea.notes.presentation.files.fileIconOf
 import app.notekea.notes.presentation.files.fileTintOf

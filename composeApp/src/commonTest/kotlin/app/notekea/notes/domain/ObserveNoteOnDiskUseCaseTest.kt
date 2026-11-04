@@ -1,13 +1,16 @@
 package app.notekea.notes.domain
 
 import app.cash.turbine.test
-import app.notekea.notes.domain.NoteFixtures.VAULT
-import app.notekea.notes.domain.NoteFixtures.file
+import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NoteFixtures.file
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.FakeNoteScanner
+import app.notekea.core.notes.domain.RelativePath
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ObserveNoteOnDiskUseCaseTest {

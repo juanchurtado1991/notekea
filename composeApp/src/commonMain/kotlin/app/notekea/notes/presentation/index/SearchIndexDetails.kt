@@ -23,8 +23,8 @@ import app.notekea.core.presentation.elapsedTimeText
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.notes.domain.IndexProgress
-import app.notekea.notes.domain.IndexRunError
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.SkipReason
 import app.notekea.notes.domain.SkippedNote
 import app.notekea.resources.Res

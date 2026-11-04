@@ -3,6 +3,12 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.LocalTimeFormatter
 import app.notekea.core.domain.Outcome
 import kotlin.time.Clock
+import app.notekea.core.notes.domain.AttachmentStore
+import app.notekea.core.notes.domain.NoteFileOperations
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultSettingsReader
+import app.notekea.core.notes.domain.createUnderFreeName
 
 /**
  * Attaches a file to `note` (`ROADMAP.md` 1.8) and gives the path to embed: a file already in the vault is linked

@@ -1,6 +1,11 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.NoteScanner
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RenameEntryUseCase
+import app.notekea.core.notes.domain.UpdateLinksAfterRenameUseCase
 
 /**
  * Renames an entry and updates the links to it, for callers that do not hold the vault's tree (the editor's title).

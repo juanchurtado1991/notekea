@@ -1,8 +1,12 @@
 package app.notekea.notes.domain
 
-import app.notekea.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteFixtures.entry
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.NoteFixtures
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 
 class FlattenTreeUseCaseTest {
     private val flattenTree = FlattenTreeUseCase(naturalNameComparator = NaturalNameComparator())

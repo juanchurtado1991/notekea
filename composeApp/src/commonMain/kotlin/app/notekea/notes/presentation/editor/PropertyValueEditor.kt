@@ -24,9 +24,9 @@ import app.notekea.core.presentation.components.NotekeaDateField
 import app.notekea.core.presentation.components.NotekeaPropertyField
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.notes.domain.NoteProperty
+import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.notes.domain.PropertyKeys
-import app.notekea.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.resources.Res
 import app.notekea.resources.properties_add_item
 import app.notekea.resources.properties_calendar

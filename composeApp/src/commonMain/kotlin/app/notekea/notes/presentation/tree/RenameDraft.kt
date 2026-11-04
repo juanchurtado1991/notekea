@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.tree
 
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 
 /** A rename in progress: the entry, the name being typed and why the last attempt was refused, if it was. */
 data class RenameDraft(

@@ -2,7 +2,7 @@ package app.notekea.notes.data
 
 import app.notekea.core.domain.Outcome
 import app.notekea.notes.domain.ClipboardReader
-import app.notekea.notes.domain.NotesError
+import app.notekea.core.notes.domain.NotesError
 import java.awt.HeadlessException
 import java.awt.Image
 import java.awt.Toolkit

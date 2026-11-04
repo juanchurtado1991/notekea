@@ -1,7 +1,7 @@
 package app.notekea.notes.domain
 
-import app.notekea.notes.domain.NoteFixtures.entry
-import app.notekea.notes.domain.NoteFixtures.tags
+import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteFixtures.tags
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

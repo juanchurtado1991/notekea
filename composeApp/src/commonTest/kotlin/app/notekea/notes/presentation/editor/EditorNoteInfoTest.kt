@@ -4,11 +4,11 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
-import app.notekea.notes.domain.NoteFixtures.file
+import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.notes.domain.NoteStats
 import app.notekea.notes.domain.NoteTimes
-import app.notekea.notes.domain.PropertyValue
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel

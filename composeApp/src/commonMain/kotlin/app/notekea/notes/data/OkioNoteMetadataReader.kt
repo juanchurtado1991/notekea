@@ -1,10 +1,10 @@
 package app.notekea.notes.data
 
 import app.notekea.core.domain.AppDispatchers
-import app.notekea.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.notes.domain.NoteMetadataReader
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.TextTagFinder
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TextTagFinder
 import kotlinx.coroutines.withContext
 import okio.BufferedSource
 import okio.FileSystem
@@ -12,6 +12,7 @@ import okio.IOException
 import okio.Path.Companion.toPath
 import okio.buffer
 import okio.use
+import app.notekea.core.notes.data.GhostFrontmatterParser
 
 /**
  * [NoteMetadataReader] on Okio: reads the frontmatter, then the text line by line for its `#tags` ([TextTagFinder]),

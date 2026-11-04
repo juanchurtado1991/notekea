@@ -1,5 +1,14 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.LinkFinder
+import app.notekea.core.notes.domain.LinkKind
+import app.notekea.core.notes.domain.LinkResolver
+import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteLink
+import app.notekea.core.notes.domain.NoteText
+import app.notekea.core.notes.domain.RelativePath
+
 /**
  * The notes that name [note] (`ROADMAP.md` 2.5), read from [texts] (each note's body): those with a link that leads
  * to it when clicked ([LinkResolver.closest]: wiki links, embeds and Markdown links), and those that only write

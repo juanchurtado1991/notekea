@@ -1,10 +1,10 @@
 package app.notekea.notes.presentation.tree
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import app.notekea.notes.domain.NoteFixtures.VAULT
-import app.notekea.notes.domain.NoteFixtures.file
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NoteFixtures.file
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.TreePreferences
 import app.notekea.notes.domain.TreeRow
 import app.notekea.notes.domain.TreeSort

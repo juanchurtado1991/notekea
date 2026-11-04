@@ -2,6 +2,8 @@ package app.notekea.notes.domain
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.RelativePath
 
 /** The kind of an attachment, the folder new ones go to, how an embed finds its file and how a new one is written. */
 class AttachmentRulesTest {

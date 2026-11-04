@@ -1,6 +1,11 @@
 package app.notekea.notes.domain
 
 import kotlin.time.Instant
+import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 
 /**
  * Turns the vault tree into the rows the sidebar shows: inside each folder, subfolders first by name, then notes and

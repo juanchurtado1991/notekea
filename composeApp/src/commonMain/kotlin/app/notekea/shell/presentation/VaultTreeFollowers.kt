@@ -8,9 +8,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.notes.domain.FormatAction
-import app.notekea.notes.domain.LinkResolver
-import app.notekea.notes.domain.NoteEntry
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.LinkResolver
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.TagRanking
 import app.notekea.notes.presentation.editor.EditorIntent
 import app.notekea.notes.presentation.editor.EditorViewModel

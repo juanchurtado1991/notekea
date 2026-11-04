@@ -3,8 +3,8 @@ package app.notekea.notes.data
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.platform.domain.OperatingSystem
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
 import java.nio.file.Path
@@ -14,6 +14,7 @@ import kotlin.io.path.writeText
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.data.runCommand
 
 @OptIn(kotlin.io.path.ExperimentalPathApi::class)
 class ProcessFileRevealerTest {

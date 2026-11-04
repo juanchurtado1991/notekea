@@ -48,7 +48,7 @@ import app.notekea.resources.tree_untitled_note
 import org.jetbrains.compose.resources.stringResource
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeRow
 import androidx.compose.ui.Modifier
 import app.notekea.core.presentation.theme.LocalReduceMotion

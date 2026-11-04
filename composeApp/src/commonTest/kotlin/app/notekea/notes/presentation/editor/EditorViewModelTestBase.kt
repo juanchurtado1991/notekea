@@ -2,8 +2,8 @@ package app.notekea.notes.presentation.editor
 
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.viewModelScope
-import app.notekea.notes.domain.NoteFixtures.file
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NoteFixtures.file
+import app.notekea.core.notes.domain.RelativePath
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlinx.coroutines.Dispatchers

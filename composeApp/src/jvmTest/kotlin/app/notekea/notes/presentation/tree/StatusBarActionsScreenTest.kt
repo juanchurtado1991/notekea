@@ -10,7 +10,7 @@ import app.notekea.core.presentation.platform.LocalUiZoom
 import app.notekea.core.presentation.platform.UiZoomState
 import app.notekea.core.presentation.texts
 import app.notekea.core.presentation.theme.NotekeaTheme
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.shell.presentation.TabKind
 import kotlin.test.Test
 import kotlin.test.assertEquals

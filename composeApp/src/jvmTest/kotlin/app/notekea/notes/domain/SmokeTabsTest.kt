@@ -5,6 +5,13 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import app.notekea.shell.domain.GetNoteCoverUseCase
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.FakeVaultSettingsReader
+import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.notes.domain.relativeTo
 
 /**
  * The tabs cases of `MVP_SMOKE_TEST.md` (1.11) on the smoke data itself: the Playground Vault's folders show the

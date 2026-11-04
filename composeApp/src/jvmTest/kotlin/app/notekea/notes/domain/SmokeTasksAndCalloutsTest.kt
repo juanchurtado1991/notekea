@@ -7,6 +7,7 @@ import app.notekea.core.domain.markdown.ReadingMarkdown
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.NoteDocument
 
 /**
  * The tasks and callouts cases of `MVP_SMOKE_TEST.md` (1.7) on the smoke note itself: every task and callout the

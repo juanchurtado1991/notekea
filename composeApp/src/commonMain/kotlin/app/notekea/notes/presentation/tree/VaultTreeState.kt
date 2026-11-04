@@ -2,13 +2,13 @@ package app.notekea.notes.presentation.tree
 
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.notes.domain.Bookmarks
-import app.notekea.notes.domain.DayNeighbors
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.DayNeighbors
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeRow
 import app.notekea.notes.domain.TreePreferences
 import app.notekea.notes.domain.TreeSort
-import app.notekea.notes.domain.VaultTree
+import app.notekea.core.notes.domain.VaultTree
 
 /**
  * State of the vault sidebar. [isLoading] covers the first scan only; later changes keep the rows on screen.

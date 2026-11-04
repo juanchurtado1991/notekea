@@ -25,9 +25,9 @@ import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.notes.domain.AttachmentKind
-import app.notekea.notes.domain.NoteFile
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.resources.Res
 import app.notekea.resources.file_panel_image_size
 import app.notekea.resources.file_panel_open

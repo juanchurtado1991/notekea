@@ -28,7 +28,7 @@ import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.di.desktopModules
 import app.notekea.notes.data.VaultFolderTrash
 import app.notekea.notes.domain.AttachmentPicker
-import app.notekea.notes.domain.FileOpener
+import app.notekea.core.notes.domain.FileOpener
 import app.notekea.notes.domain.FileRevealer
 import app.notekea.notes.domain.Trash
 import app.notekea.vault.domain.FolderPicker

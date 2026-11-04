@@ -4,9 +4,9 @@ import app.notekea.core.presentation.FeedIntent
 import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.FormatAction
 import app.notekea.notes.domain.ListAction
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.SidePanelMode
-import app.notekea.notes.domain.SidePanelSection
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.SidePanelMode
+import app.notekea.core.notes.domain.SidePanelSection
 import kotlinx.coroutines.CompletableDeferred
 
 /** What the user (or the window around the editor) asked of the note editor. */

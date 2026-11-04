@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.mentions
 
 import app.notekea.notes.domain.NoteMentions
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * The Linked and Unlinked tabs of the inspector's Connections (`ROADMAP.md` 2.5): the open [note]'s [mentions], whether

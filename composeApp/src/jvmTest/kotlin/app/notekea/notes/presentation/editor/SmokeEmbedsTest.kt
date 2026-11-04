@@ -2,13 +2,13 @@ package app.notekea.notes.presentation.editor
 
 import app.notekea.core.data.JvmLocalTimeFormatter
 import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.notes.data.ObsidianVaultSettingsReader
-import app.notekea.notes.data.OkioAttachmentStore
-import app.notekea.notes.data.OkioNoteFileOperations
+import app.notekea.core.notes.data.ObsidianVaultSettingsReader
+import app.notekea.core.notes.data.OkioAttachmentStore
+import app.notekea.core.notes.data.OkioNoteFileOperations
 import app.notekea.notes.domain.AttachFileUseCase
-import app.notekea.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.notes.domain.EmbedProblem
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem

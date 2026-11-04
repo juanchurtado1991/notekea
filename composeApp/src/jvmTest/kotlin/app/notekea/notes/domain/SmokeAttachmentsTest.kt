@@ -4,6 +4,9 @@ import org.jetbrains.compose.resources.decodeToImageBitmap
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.relativeTo
 
 /**
  * The images and attachments cases of `MVP_SMOKE_TEST.md` (1.8) on the smoke data itself: the note's embeds are found

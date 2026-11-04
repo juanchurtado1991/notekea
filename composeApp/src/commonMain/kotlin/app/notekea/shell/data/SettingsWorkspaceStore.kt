@@ -2,12 +2,12 @@ package app.notekea.shell.data
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.shell.domain.EditorPane
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.shell.domain.Workspace
 import app.notekea.shell.domain.WorkspaceStore
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.withContext
-import app.notekea.notes.data.VaultKeyHash
+import app.notekea.core.notes.data.VaultKeyHash
 
 /**
  * [WorkspaceStore] on Multiplatform Settings: one key per vault (`workspace.<hash>`, [VaultKeyHash]) holding lines of

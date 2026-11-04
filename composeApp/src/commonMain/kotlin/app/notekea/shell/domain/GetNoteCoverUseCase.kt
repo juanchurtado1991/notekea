@@ -1,12 +1,12 @@
 package app.notekea.shell.domain
 
 import app.notekea.notes.domain.AttachmentFolder
-import app.notekea.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.notes.domain.AttachmentResolver
 import app.notekea.notes.domain.EmbedFinder
-import app.notekea.notes.domain.NoteContentStore
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.VaultSettingsReader
+import app.notekea.core.notes.domain.NoteContentStore
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultSettingsReader
 
 /**
  * The picture a note's card shows in a folder's grid (`ROADMAP.md` 1.11): the first image the note embeds

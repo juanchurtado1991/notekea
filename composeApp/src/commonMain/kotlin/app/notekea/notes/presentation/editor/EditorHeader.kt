@@ -34,9 +34,9 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaColors
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
-import app.notekea.notes.domain.DayNeighbors
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.presentation.tree.notesErrorMessage
+import app.notekea.core.notes.domain.DayNeighbors
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.presentation.notesErrorMessage
 import app.notekea.resources.Res
 import app.notekea.resources.editor_bookmark_add
 import app.notekea.resources.editor_bookmark_remove

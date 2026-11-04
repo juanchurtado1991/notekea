@@ -7,6 +7,10 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
+import app.notekea.core.notes.domain.FakeAttachmentStore
+import app.notekea.core.notes.domain.FakeNoteFileOperations
+import app.notekea.core.notes.domain.FakeVaultSettingsReader
+import app.notekea.core.notes.domain.RelativePath
 
 class AttachFileUseCaseTest {
     private val fileOperations = FakeNoteFileOperations()

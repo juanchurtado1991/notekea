@@ -2,13 +2,13 @@ package app.notekea.notes.presentation.tree
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import app.notekea.core.domain.time.CalendarDate
-import app.notekea.notes.domain.DailyNoteSettings
-import app.notekea.notes.domain.DayNeighbors
-import app.notekea.notes.domain.LinkKind
-import app.notekea.notes.domain.NoteFixtures.VAULT
-import app.notekea.notes.domain.NoteFixtures.file
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.DailyNoteSettings
+import app.notekea.core.notes.domain.DayNeighbors
+import app.notekea.core.notes.domain.LinkKind
+import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NoteFixtures.file
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.launch

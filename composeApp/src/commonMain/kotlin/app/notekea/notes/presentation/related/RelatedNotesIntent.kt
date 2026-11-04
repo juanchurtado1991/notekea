@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.related
 
 import app.notekea.core.presentation.FeedIntent
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /** What the Related section is told: the open note and its text, the vault's notes, the index's runs, and a fold. */
 sealed interface RelatedNotesIntent {

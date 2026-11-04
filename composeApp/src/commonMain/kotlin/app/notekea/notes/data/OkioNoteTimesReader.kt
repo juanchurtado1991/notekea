@@ -3,7 +3,7 @@ package app.notekea.notes.data
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.notes.domain.NoteTimes
 import app.notekea.notes.domain.NoteTimesReader
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.IOException

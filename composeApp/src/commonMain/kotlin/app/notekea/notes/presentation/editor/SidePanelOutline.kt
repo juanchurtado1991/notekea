@@ -43,7 +43,7 @@ import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.NotekeaTreeItem
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.notes.domain.OutlineHeading
+import app.notekea.core.notes.domain.OutlineHeading
 import app.notekea.resources.Res
 import app.notekea.resources.outline_empty_message
 import app.notekea.resources.outline_empty_title

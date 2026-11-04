@@ -2,8 +2,8 @@ package app.notekea.notes.presentation.editor
 
 import app.notekea.core.domain.Outcome
 import app.notekea.notes.domain.KeepUnsavedTextUseCase
-import app.notekea.notes.domain.NoteDocument
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * What the editor could not save when it leaves a note or the window closes: an outside change waiting for an answer,

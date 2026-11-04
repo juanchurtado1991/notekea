@@ -4,11 +4,18 @@ import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.FakeLocalCalendar
-import app.notekea.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
+import app.notekea.core.notes.domain.DailyNoteSettings
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.FakeNoteFileOperations
+import app.notekea.core.notes.domain.FakeVaultSettingsReader
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.Templates
 
 class OpenDailyNoteUseCaseTest {
     private val settings = FakeVaultSettingsReader()

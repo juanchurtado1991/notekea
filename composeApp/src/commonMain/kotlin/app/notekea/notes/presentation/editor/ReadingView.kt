@@ -1,6 +1,6 @@
 package app.notekea.notes.presentation.editor
 
-import app.notekea.notes.domain.percentDecoded
+import app.notekea.core.notes.domain.percentDecoded
 import app.notekea.core.presentation.components.attachmentImageSize
 import app.notekea.core.presentation.components.ScaledBitmapPainter
 import androidx.compose.ui.geometry.Size
@@ -16,7 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
-import app.notekea.notes.domain.OutlineFinder
+import app.notekea.core.notes.domain.OutlineFinder
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.components.NotekeaMarkdown

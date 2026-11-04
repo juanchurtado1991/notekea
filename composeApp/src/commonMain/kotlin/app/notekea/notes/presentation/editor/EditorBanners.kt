@@ -14,8 +14,8 @@ import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.presentation.tree.notesErrorMessage
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.presentation.notesErrorMessage
 import app.notekea.resources.Res
 import app.notekea.resources.editor_close
 import app.notekea.resources.editor_conflict_message

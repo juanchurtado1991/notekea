@@ -7,7 +7,7 @@ import app.notekea.core.domain.StringPatterns.WINDOWS_NEW_LINE
 import app.notekea.notes.domain.AttachmentSource
 import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.FormatAction
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -87,7 +87,7 @@ internal class EditorFiles(
             }
             val text = withContext(context = tools.dispatchers.io) { tools.clipboardReader.text() }
             if (!isOpen(note = note)) return@launch
-            // The text being edited only has `\n` breaks, as [app.notekea.notes.domain.NoteDocument] says.
+            // The text being edited only has `\n` breaks, as [app.notekea.core.notes.domain.NoteDocument] says.
             text?.replace(oldValue = WINDOWS_NEW_LINE, newValue = NEW_LINE)?.let { pasted ->
                 host.buffer.edit {
                     val start = selection.min

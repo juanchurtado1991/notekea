@@ -3,9 +3,10 @@ package app.notekea.notes.data
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.notes.domain.BookmarkStore
 import app.notekea.notes.domain.Bookmarks
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.withContext
+import app.notekea.core.notes.data.VaultKeyHash
 
 /**
  * [BookmarkStore] on Multiplatform Settings: one key per vault (`bookmarks.<hash>`, [VaultKeyHash]) holding the

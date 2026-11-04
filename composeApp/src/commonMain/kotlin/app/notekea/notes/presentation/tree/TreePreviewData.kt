@@ -2,13 +2,13 @@ package app.notekea.notes.presentation.tree
 
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.notes.domain.FlattenTreeUseCase
-import app.notekea.notes.domain.NaturalNameComparator
-import app.notekea.notes.domain.NoteEntry
-import app.notekea.notes.domain.NoteFile
-import app.notekea.notes.domain.NoteMetadata
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeSort
-import app.notekea.notes.domain.VaultTree
+import app.notekea.core.notes.domain.VaultTree
 import kotlin.time.Instant
 
 /** A believable vault for the sidebar previews: the shape of the `Personal Notes` smoke vault. */

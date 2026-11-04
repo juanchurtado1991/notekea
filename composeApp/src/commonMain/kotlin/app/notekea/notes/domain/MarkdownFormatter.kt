@@ -4,6 +4,9 @@ import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.StringPatterns.NEW_LINE
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.notes.domain.NoteLink
+import app.notekea.core.notes.domain.TextEdit
+import app.notekea.core.notes.domain.isTableRow
 
 /**
  * What a formatting toolbar button does to a note's text (`ROADMAP.md` 1.17), as the single [TextEdit] a person would

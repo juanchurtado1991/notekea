@@ -1,6 +1,6 @@
 package app.notekea.notes.presentation.templates
 
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /** Where a template chosen in the picker goes (`ROADMAP.md` 1.12). */
 sealed interface TemplateTarget {

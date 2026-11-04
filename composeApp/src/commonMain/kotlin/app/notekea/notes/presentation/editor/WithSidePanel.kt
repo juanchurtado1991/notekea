@@ -10,8 +10,8 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaSplitPane
 import app.notekea.core.presentation.components.PaneSide
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.notes.domain.OutlineHeading
-import app.notekea.notes.domain.SidePanelPreferences
+import app.notekea.core.notes.domain.OutlineHeading
+import app.notekea.core.notes.domain.SidePanelPreferences
 import kotlin.math.roundToInt
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size

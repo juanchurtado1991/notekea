@@ -25,10 +25,10 @@ import app.notekea.core.presentation.components.focusBorder
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
-import app.notekea.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.notes.domain.RelatedNote
 import app.notekea.notes.domain.RelatedSnippet
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.presentation.connections.ConnectionActions
 import app.notekea.notes.presentation.connections.ConnectionMenu
 import app.notekea.notes.presentation.connections.ConnectionsMuted

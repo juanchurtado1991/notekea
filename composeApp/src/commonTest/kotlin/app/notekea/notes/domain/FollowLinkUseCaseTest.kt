@@ -2,10 +2,14 @@ package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.files.ValidateFileNameUseCase
-import app.notekea.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.FakeNoteFileOperations
+import app.notekea.core.notes.domain.LinkKind
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 
 class FollowLinkUseCaseTest {
     private val operations = FakeNoteFileOperations()

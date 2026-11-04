@@ -4,11 +4,11 @@ import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.FindMentionsUseCase
 import app.notekea.notes.domain.LinkMentionUseCase
-import app.notekea.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.notes.domain.NoteMention
 import app.notekea.notes.domain.NoteMentions
-import app.notekea.notes.domain.NoteTextCache
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NoteTextCache
+import app.notekea.core.notes.domain.RelativePath
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

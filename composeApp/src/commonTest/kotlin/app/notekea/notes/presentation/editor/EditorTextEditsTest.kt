@@ -3,7 +3,7 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.text.TextRange
 import app.notekea.notes.domain.FormatAction
-import app.notekea.notes.domain.LinkKind
+import app.notekea.core.notes.domain.LinkKind
 import app.notekea.notes.domain.ListAction
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -5,6 +5,7 @@ import app.notekea.core.domain.StringPatterns.BLANK_LINE
 import app.notekea.core.domain.StringPatterns.NEW_LINE
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.notes.domain.TextEdit
 
 /**
  * The blocks the formatting toolbar writes (`ROADMAP.md` 1.17): a callout, a table, a code block, a divider or an

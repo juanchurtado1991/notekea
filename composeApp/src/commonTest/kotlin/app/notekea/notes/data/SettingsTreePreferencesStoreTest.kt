@@ -1,7 +1,7 @@
 package app.notekea.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.TreePreferences
 import app.notekea.notes.domain.TreeSort
 import com.russhwolf.settings.MapSettings

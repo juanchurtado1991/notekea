@@ -1,12 +1,12 @@
 package app.notekea.shell.presentation
 
 import app.notekea.core.presentation.FeedIntent
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import androidx.compose.ui.unit.IntSize
-import app.notekea.notes.domain.ConnectionsTab
-import app.notekea.notes.domain.SidePanelMode
-import app.notekea.notes.domain.SidePanelSection
-import app.notekea.notes.domain.VaultTree
+import app.notekea.core.notes.domain.ConnectionsTab
+import app.notekea.core.notes.domain.SidePanelMode
+import app.notekea.core.notes.domain.SidePanelSection
+import app.notekea.core.notes.domain.VaultTree
 
 /** What the user did with the tabs and panes, or what the panes around them report. */
 sealed interface WorkspaceIntent {

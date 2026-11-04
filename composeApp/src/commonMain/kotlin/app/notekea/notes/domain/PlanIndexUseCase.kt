@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.NoteFile
+
 /**
  * Decides what the search index must do for a vault's [notes] (`ROADMAP.md` 2.3): a note it does not hold, or holds
  * from another [version], or whose size or date changed (or are unknown) is read; a note it holds that is gone is
