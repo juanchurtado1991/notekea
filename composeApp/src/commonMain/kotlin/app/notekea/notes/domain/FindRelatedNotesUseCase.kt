@@ -1,6 +1,7 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.TextEmbedder
 
 /**
@@ -25,14 +26,26 @@ class FindRelatedNotesUseCase(
         val linked = linkedNotes(note = note, text = text, notes = notes)
         val chunks = chunkNote(note = note, text = text)
         if (chunks.isEmpty()) return Outcome.Success(value = RelatedNotes(related = emptyList(), linked = linked))
-        val texts = chunks.map { chunk -> embeddingText(note = note, chunk = chunk) }
-        val vectors = (textEmbedder.embed(texts = texts) as? Outcome.Success)?.value
-            ?: return Outcome.Failure(error = IndexRunError.Model)
+        val title = note.nameWithoutExtension
+        val vectors = when (val embedded = embedChunks(textEmbedder, title = title, chunks = chunks)) {
+            is Outcome.Success -> embedded.value.map { (_, vector) -> vector }
+            is Outcome.Failure -> return refused(error = embedded.error, linked = linked)
+        }
         val best = closest(vaultPath = vaultPath, vectors = vectors, leftOut = linked + note)
             ?: return Outcome.Failure(error = IndexRunError.Index)
         val words = WORD.findAll(input = text.lowercase()).map { it.value }.toSet()
         val related = best.take(n = LIMIT).mapNotNull { relatedOf(vaultPath = vaultPath, hit = it, words = words) }
         return Outcome.Success(value = RelatedNotes(related = related, linked = linked))
+    }
+
+    /** What the model refusing the note means: a note too long to compare is no failing model. */
+    private fun refused(
+        error: EmbeddingError,
+        linked: List<RelativePath>
+    ): Outcome<RelatedNotes, IndexRunError> = if (error is EmbeddingError.TextTooLong) {
+        Outcome.Success(value = RelatedNotes(related = emptyList(), linked = linked, isTooLong = true))
+    } else {
+        Outcome.Failure(error = IndexRunError.Model)
     }
 
     /** The closest chunk of each note but [leftOut], closest first; null when the index cannot be read. */
@@ -64,13 +77,6 @@ class FindRelatedNotesUseCase(
             .distinct()
     }
 
-    /** The text the model embeds for [chunk], as the index embeds the notes' chunks: title and headings in front. */
-    private fun embeddingText(
-        note: RelativePath,
-        chunk: NoteChunk
-    ): String = (listOf(note.nameWithoutExtension) + chunk.headingPath).joinToString(separator = HEADING_JOIN) +
-        "\n" + chunk.text
-
     /** [hit]'s note with the passage that matched, read from its body; null when it can no longer be read. */
     private suspend fun relatedOf(
         vaultPath: String,
@@ -90,7 +96,6 @@ class FindRelatedNotesUseCase(
 
         // The nearest chunks of each of the open note's chunks: enough for eight notes after the linked ones go.
         private const val CANDIDATES = 30
-        private const val HEADING_JOIN = " › "
         private val WORD = Regex(pattern = "\\p{L}{3,}")
     }
 }

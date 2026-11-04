@@ -30,6 +30,7 @@ import app.notekea.resources.related_error_model
 import app.notekea.resources.related_insert_link
 import app.notekea.resources.related_linked
 import app.notekea.resources.related_not_ready
+import app.notekea.resources.related_too_long
 import app.notekea.resources.related_open_beside
 import org.jetbrains.compose.resources.stringResource
 
@@ -59,6 +60,7 @@ private fun statusText(
     state.error == IndexRunError.Model -> stringResource(Res.string.related_error_model)
     state.error == IndexRunError.Index -> stringResource(Res.string.related_error_index)
     state.related.isNotEmpty() || state.isLoading -> null
+    state.isTooLong -> stringResource(Res.string.related_too_long)
     !state.isIndexReady -> stringResource(Res.string.related_not_ready)
     else -> stringResource(Res.string.related_empty)
 }

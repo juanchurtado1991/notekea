@@ -172,6 +172,30 @@ class IndexVaultUseCaseTest {
         assertEquals(expected = setOf(AREPAS), actual = index.notes.getValue(VAULT).keys)
     }
 
+    // Audit: one chunk the model refused left its whole note out of the index.
+    @Test
+    fun `a chunk the model refuses is left out, the rest of its note indexed`() = runTest {
+        val longSection = List(size = 150) { "word" }.joinToString(separator = " ")
+        val notes = write(LONG to "# One\n$longSection\n\n# Two\nShort section.")
+
+        val last = indexVault(embedder = FakeTextEmbedder(maxTokens = 100))(vaultPath = VAULT, notes = notes).last()
+
+        val held = index.notes.getValue(VAULT).getValue(LONG).map { (chunk, _) -> chunk.headingPath }
+        assertEquals(expected = 1 to emptyList<SkippedNote>(), actual = last.indexed to last.skipped)
+        assertEquals(expected = listOf(listOf("Two")), actual = held)
+    }
+
+    // Audit: the title and headings in front of a chunk that just fits pushed it past the model's limit.
+    @Test
+    fun `a long title is cut to what the chunk leaves, so the note is still indexed`() = runTest {
+        val title = RelativePath(value = List(size = 50) { "title" }.joinToString(separator = " ") + ".md")
+        val notes = write(title to "Six short words in this note.")
+
+        val last = indexVault(embedder = FakeTextEmbedder(maxTokens = 20))(vaultPath = VAULT, notes = notes).last()
+
+        assertEquals(expected = 1 to emptyList<SkippedNote>(), actual = last.indexed to last.skipped)
+    }
+
     @Test
     fun `a failing model or a busy index stops the run, and nothing is marked done`() = runTest {
         val notes = write(AREPAS to "Corn.")

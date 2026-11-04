@@ -57,6 +57,21 @@ class FindRelatedNotesUseCaseTest {
         assertEquals(expected = listOf(root), actual = (result as Outcome.Success).value.linked)
     }
 
+    // Audit: a note the model could not read showed as the search model failing to load.
+    @Test
+    fun `a note too long for the model is told apart from a failing model, its links still shown`() = runTest {
+        embedder.failure = EmbeddingError.TextTooLong(index = 0, tokens = 600)
+
+        val result = findRelated(vaultPath = VAULT, note = GARDEN, text = "See [[Weekly menu]].", notes = ALL)
+
+        assertEquals(
+            expected = Outcome.Success(
+                value = RelatedNotes(related = emptyList(), linked = listOf(MENU), isTooLong = true)
+            ),
+            actual = result
+        )
+    }
+
     @Test
     fun `at most eight notes are related`() = runTest {
         indexed(*(1..12).map { RelativePath(value = "Note $it.md") to "Tomatoes and basil, note $it." }.toTypedArray())
