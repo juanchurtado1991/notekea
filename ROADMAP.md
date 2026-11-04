@@ -51,7 +51,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 | M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 6 / 13 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
-| M4b — Sources, study cards and agent | Web clips, PDFs, study cards, agent mode | 9 weeks | 0 / 5 |
+| M4b — Sources, study cards and agent | Web clips, documents, study cards, agent mode | 10 weeks | 0 / 5 |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
 | Post-MVP | Extensions (Koog + MCP), mobile, repositories, more | — |
 
@@ -1130,13 +1130,22 @@ Notes from a web page: give Notekea a URL and it writes notes about the article 
 - **Done when:** the articles of an evaluation set of 20 saved pages make notes whose every sentence is backed by the
   article, and a page that cannot be read leaves no note behind.
 
-### ⬜ 4.5 PDFs — `feature/pdf-sources`
+### ⬜ 4.5 Documents — `feature/document-sources`
 
-PDFs inside the vault are indexed like notes (a text extraction library to approve in `LIBRARIES.md`): search, Related
-and the chat find them, and a citation opens the file at its page in the system's reader. Scanned PDFs with no text
-are listed as not readable; there is no OCR.
+Documents inside the vault are indexed like notes, whatever their format (decided with the developer, 2026-11-04):
+search, Related and the chat find them. Notekea reads them and never edits them, and they do not become notes.
 
-- **Done when:** a PDF's sentence can be found and cited, and a change to the file indexes it again.
+- **Plain text:** `.txt`, `.rst`, `.org`, `.csv`, `.json` and `.html`, with almost no new code.
+- **Office and books:** PDF, Word (`.docx`), LibreOffice (`.odt`), EPUB, PowerPoint (`.pptx`) and Excel (`.xlsx`). The item
+  starts by measuring what Apache Tika adds to the app's size against one small library per format; the choice goes in
+  `LIBRARIES.md`.
+- **One reader per format,** so another format is cheap to add later.
+- **Citations:** a click opens the file in the system's app, at its page or slide in PDF and PowerPoint where the system
+  allows it, and names the section or line in the rest.
+- **Left out:** scanned PDFs and images with no text, listed as not readable (OCR comes after the MVP), other binary
+  files, and source code, which Repositories indexes properly.
+- **Done when:** a sentence of each format can be found and cited, a change to a file indexes it again, and a damaged
+  file is only skipped and reported.
 
 ### ⬜ 4.6 Study cards — `feature/study-cards`
 
@@ -1165,7 +1174,7 @@ of them, so it is built to be safe when they get it wrong, and 3.0 and 3.4 decid
 
 ### ⬜ 4.8 M4b performance pass — `chore/m4b-performance`
 
-The performance pass of M4b (see "Closing a milestone"): memory and time of a web clip, of indexing large PDFs and of a
+The performance pass of M4b (see "Closing a milestone"): memory and time of a web clip, of indexing large documents and of a
 long agent run. Compared with 4.3 in `docs/performance.md`.
 
 ---
@@ -1274,7 +1283,12 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
 4. **More than two split panes** and detachable windows.
 5. **Custom title bar** with the tabs inside it (JetBrains Jewel `DecoratedWindow`).
 6. **Screenshot tests** for UI regressions (Roborazzi).
-7. **Use an installed Ollama** — when the user already runs Ollama, Notekea can use its model instead of loading its
+7. **Web search for agent mode** — the agent finds its own sources instead of using the URLs it is given. Decided with
+   the developer on 2026-11-04 to come after the MVP. It needs an outside search service, so searches leave the computer
+   and the privacy promise changes: off by default, each search shown and approved first, with the user's own provider,
+   its own issue and an update to `GUIDELINES.md` §13.
+8. **OCR** — text from scanned PDFs and pictures, on the computer. Tesseract first, as an optional download.
+9. **Use an installed Ollama** — when the user already runs Ollama, Notekea can use its model instead of loading its
    own, so the memory is not spent twice. For technical users; the bundled model stays the default.
 
 ## Out of scope for the MVP
