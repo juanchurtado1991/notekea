@@ -8,6 +8,7 @@ import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.performTextInputSelection
 import androidx.compose.ui.text.TextRange
 import app.notekea.selftest.clickInTree
+import app.notekea.selftest.expectNoResult
 import app.notekea.selftest.noteText
 import app.notekea.selftest.openNote
 import app.notekea.selftest.openVault
@@ -79,7 +80,8 @@ private fun SuiteBuilder.templatesFromSettings() {
         waitForResult(name = "Meeting")
         waitForResult(name = "Work/Weekly review")
         type(text = "wee")
-        expectNoText(text = "Meeting")
+        // Related (2.4) may show the Meeting snippet as a card: only the picker must let it go.
+        expectNoResult(name = "Meeting")
         clearText()
         waitForResult(name = "Meeting")
         press(key = Key.Enter)

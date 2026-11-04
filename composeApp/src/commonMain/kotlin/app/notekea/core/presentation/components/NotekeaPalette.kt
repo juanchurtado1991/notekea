@@ -37,10 +37,12 @@ import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.presentation.TestTags
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 
@@ -132,7 +134,10 @@ private fun PaletteCard(
         border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = colors.outline),
         shadowElevation = SHADOW_DP.dp
     ) {
-        Column(modifier = Modifier.padding(all = NotekeaDimensions.SpacingS), content = content)
+        Column(
+            modifier = Modifier.padding(all = NotekeaDimensions.SpacingS).testTag(tag = TestTags.PALETTE_RESULTS),
+            content = content
+        )
     }
 }
 

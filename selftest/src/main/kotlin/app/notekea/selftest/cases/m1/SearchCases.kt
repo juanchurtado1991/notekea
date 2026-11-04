@@ -112,7 +112,7 @@ private fun SuiteBuilder.outsideEditFound() {
 
 private fun SuiteBuilder.largeVaultSearch() {
     automated(id = "1.6-10", title = "Searching the large vault by name and by text") {
-        openVault(name = "Ghost Serializer", shownText = "ghost-compiler")
+        openVault(name = "Ghost Serializer", shownText = "ghost-compiler", waitsForIndex = false)
         pressInWindow(shortcut = Mod + Key.P)
         type(text = "flatreader")
         waitForResult(name = "GhostJsonFlatReader")
