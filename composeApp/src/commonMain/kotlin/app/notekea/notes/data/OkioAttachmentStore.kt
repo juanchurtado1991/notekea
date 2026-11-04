@@ -82,7 +82,10 @@ class OkioAttachmentStore(
     ): RelativePath? {
         val root = vaultPath.toPath().normalized()
         val file = absolutePath.toPath().normalized()
-        if (!file.toString().startsWith(prefix = root.toString()) || file == root) return null
+        // Compared by segments: `/home/me/notes-old` starts like `/home/me/notes` but is not inside it.
+        val isInside = file.root == root.root && file.segments.size > root.segments.size &&
+            file.segments.take(n = root.segments.size) == root.segments
+        if (!isInside) return null
         return RelativePath(
             value = file.relativeTo(other = root).segments.joinToString(separator = RelativePath.SEPARATOR)
         )
