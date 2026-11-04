@@ -1,5 +1,6 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import kotlinx.coroutines.flow.first
@@ -21,12 +22,15 @@ class IndexVaultUseCaseTest {
     private val states = FakeIndexStateStore()
     private val indexVault = indexVault(embedder = embedder)
 
-    private fun indexVault(embedder: FakeTextEmbedder) = IndexVaultUseCase(
+    private fun indexVault(
+        embedder: FakeTextEmbedder,
+        vectorIndex: VectorIndex = index
+    ) = IndexVaultUseCase(
         planIndex = PlanIndexUseCase(),
         chunkNote = ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder())),
         noteContentStore = contents,
         textEmbedder = embedder,
-        vectorIndex = index,
+        vectorIndex = vectorIndex,
         indexStateStore = states
     )
 
@@ -107,6 +111,32 @@ class IndexVaultUseCaseTest {
             actual = last.skipped
         )
         assertEquals(expected = setOf(AREPAS), actual = index.notes.getValue(VAULT).keys)
+    }
+
+    // Audit: one note that broke the chunker ended every run, so no note after it was ever indexed.
+    @Test
+    fun `an unexpected failure on one note skips it, the others still indexed`() = runTest {
+        val broken = object : VectorIndex by index {
+            override suspend fun put(
+                vaultPath: String,
+                note: RelativePath,
+                chunks: List<NoteChunk>,
+                vectors: List<FloatArray>
+            ): Outcome<Unit, IndexError> {
+                check(note != DUNE)
+                return index.put(vaultPath = vaultPath, note = note, chunks = chunks, vectors = vectors)
+            }
+        }
+        val notes = write(AREPAS to "Corn.", DUNE to "Water.", LISBON to "River.")
+
+        val last = indexVault(embedder = embedder, vectorIndex = broken)(vaultPath = VAULT, notes = notes).last()
+
+        assertEquals(expected = listOf(DUNE to SkipReason.FAILED), actual = last.skipped.map { it.path to it.reason })
+        assertEquals(
+            expected = true to setOf(AREPAS, LISBON),
+            actual =
+            last.isFinished to index.notes.getValue(VAULT).keys
+        )
     }
 
     @Test

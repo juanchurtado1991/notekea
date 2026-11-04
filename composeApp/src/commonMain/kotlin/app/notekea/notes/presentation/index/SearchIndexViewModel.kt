@@ -96,6 +96,9 @@ class SearchIndexViewModel(
     ) {
         val now = clock.now()
         val changedSomething = (progress?.total ?: 0) > 0
+        progress?.skipped.orEmpty().forEach { note ->
+            note.cause?.let { logger.e(throwable = it) { UNEXPECTED_ERROR_MESSAGE } }
+        }
         if (changedSomething) lastRunAt = now
         reduce {
             it.copy(

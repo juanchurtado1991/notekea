@@ -9,5 +9,8 @@ enum class SkipReason {
     UNREADABLE,
 
     /** A chunk was longer than the embedding model reads. */
-    TOO_LONG
+    TOO_LONG,
+
+    /** Something nobody expected went wrong with this note; the run goes on with the others. */
+    FAILED
 }

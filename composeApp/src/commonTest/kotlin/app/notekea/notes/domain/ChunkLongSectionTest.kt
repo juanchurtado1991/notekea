@@ -26,6 +26,28 @@ class ChunkLongSectionTest {
         }
     }
 
+    // Audit: a table row of 201 short words, under 600 characters, sent the cut past its end, and the whole run died.
+    @Test
+    fun `a line of many short words shorter than a forced cut is split inside it`() {
+        val row = "| " + List(size = 201) { "a" }.joinToString(separator = " ")
+        val text = "# Wide\n\n$row\n$row\n"
+
+        val chunks = chunkNote(note = NOTE, text = text)
+
+        assertTrue(actual = chunks.all { it.tokens <= ChunkSize.MAX }, message = chunks.map { it.tokens }.toString())
+        assertTrue(actual = chunks.size > 1 && chunks.last().text.endsWith(suffix = "a"))
+    }
+
+    // Audit: the first piece of a forced cut was never checked, so 600 characters of short words stayed over the maximum.
+    @Test
+    fun `a long line of short words is cut into pieces that all fit the maximum`() {
+        val text = "# Wide\n" + List(size = 1_000) { "a" }.joinToString(separator = " ")
+
+        val chunks = chunkNote(note = NOTE, text = text)
+
+        assertTrue(actual = chunks.all { it.tokens <= ChunkSize.MAX }, message = chunks.map { it.tokens }.toString())
+    }
+
     // Found on smoke-data with the multilingual model's token count: a paragraph just under the maximum, after another,
     // went over it once the previous chunk's last sentence was added in front of it.
     @Test
