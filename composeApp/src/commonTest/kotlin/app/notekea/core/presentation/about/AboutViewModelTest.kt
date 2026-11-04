@@ -3,6 +3,7 @@ package app.notekea.core.presentation.about
 import app.notekea.core.logging.domain.FakeLogStore
 import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.logging.domain.GetDiagnosticsUseCase
+import app.notekea.core.logging.domain.TextClipboard
 import app.notekea.core.platform.domain.FakeSystemEnvironment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,6 +30,26 @@ class AboutViewModelTest {
     @AfterTest
     fun tearDown() {
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `Copy diagnostics says so when they cannot be copied`() = runTest(testDispatcher) {
+        val viewModel = AboutViewModel(
+            getDiagnostics = GetDiagnosticsUseCase(
+                systemEnvironment = FakeSystemEnvironment(operatingSystemName = "Linux", userHome = "/home/ana"),
+                logStore = FakeLogStore(lines = emptyList())
+            ),
+            clipboard = object : TextClipboard {
+                override fun copy(
+                    text: String
+                ): Unit = error("bug")
+            }
+        )
+
+        viewModel.onIntent(intent = AboutIntent.OnCopyDiagnostics)
+        advanceUntilIdle()
+
+        assertEquals(expected = AboutState(hasCopyFailed = true), actual = viewModel.state.value)
     }
 
     @Test

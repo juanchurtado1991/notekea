@@ -34,7 +34,7 @@ class AppearanceViewModel(
         change: (Appearance) -> Appearance
     ) {
         val appearance = change(state.value.appearance)
-        reduce { it.copy(appearance = appearance) }
+        reduce { it.copy(appearance = appearance, hasSaveFailed = false) }
         launchGuarded(onError = ::logUnexpectedError) { appearanceStore.save(appearance = appearance) }
     }
 
@@ -42,6 +42,7 @@ class AppearanceViewModel(
         throwable: Throwable
     ) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
+        reduce { it.copy(hasSaveFailed = true) }
     }
 
     private companion object {

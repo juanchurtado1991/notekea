@@ -18,7 +18,7 @@ class AboutViewModel(
         when (intent) {
             AboutIntent.OnCopyDiagnostics -> launchGuarded(onError = ::showUnexpectedError) {
                 clipboard.copy(text = getDiagnostics())
-                reduce { it.copy(isDiagnosticsCopied = true) }
+                reduce { it.copy(isDiagnosticsCopied = true, hasCopyFailed = false) }
             }
         }
     }
@@ -27,6 +27,7 @@ class AboutViewModel(
         throwable: Throwable
     ) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
+        reduce { it.copy(isDiagnosticsCopied = false, hasCopyFailed = true) }
     }
 
     private companion object {

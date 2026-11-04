@@ -9,6 +9,9 @@ class FakeAppearanceStore(
 ) : AppearanceStore {
     private val current = MutableStateFlow(value = initial)
 
+    /** Thrown by every save, as a bug in the store would. */
+    var failure: Throwable? = null
+
     val kept: Appearance get() = current.value
 
     override fun observe(): Flow<Appearance> = current
@@ -16,6 +19,7 @@ class FakeAppearanceStore(
     override suspend fun save(
         appearance: Appearance
     ) {
+        failure?.let { throw it }
         current.value = appearance
     }
 }

@@ -94,6 +94,19 @@ class RelatedNotesViewModelTest {
     }
 
     @Test
+    fun `a search that fails unexpectedly says so instead of looking like nothing related`() =
+        runTest(context = testDispatcher) {
+            indexed()
+            contents.onRead = { error("bug") }
+            val viewModel = viewModel()
+
+            viewModel.onIntent(intent = RelatedNotesIntent.OnNoteChange(text = "Tomatoes.", note = GARDEN))
+            advanceUntilIdle()
+
+            assertEquals(expected = IndexRunError.Index, actual = viewModel.state.value.error)
+        }
+
+    @Test
     fun `the end of an indexing run searches again, and a failing model is told`() = runTest(context = testDispatcher) {
         val viewModel = viewModel()
         viewModel.onIntent(intent = RelatedNotesIntent.OnNoteChange(text = "Tomatoes.", note = GARDEN))

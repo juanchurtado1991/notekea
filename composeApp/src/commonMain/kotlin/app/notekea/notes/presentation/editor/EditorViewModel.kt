@@ -10,6 +10,7 @@ import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.KeepUnsavedTextUseCase
+import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
 import co.touchlab.kermit.Logger
@@ -332,7 +333,14 @@ class EditorViewModel(
 
     private fun showUnexpectedError(throwable: Throwable) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
-        reduce { it.copy(isLoading = false) }
+        reduce { current ->
+            val error = NotesError.OperationFailed(path = current.notePath?.value.orEmpty())
+            if (current.isLoading) {
+                current.copy(isLoading = false, loadError = error)
+            } else {
+                current.copy(saveError = error)
+            }
+        }
     }
 
     companion object {

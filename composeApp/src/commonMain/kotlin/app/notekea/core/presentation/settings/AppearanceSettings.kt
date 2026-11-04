@@ -34,6 +34,7 @@ import app.notekea.resources.appearance_mode_light
 import app.notekea.resources.appearance_mode_system
 import app.notekea.resources.appearance_reduce_motion
 import app.notekea.resources.appearance_reduce_motion_hint
+import app.notekea.resources.appearance_save_failed
 import app.notekea.resources.appearance_theme
 import app.notekea.resources.settings_section_appearance
 import app.notekea.resources.theme_azure_cloud
@@ -77,6 +78,13 @@ fun AppearanceSettings(
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
+            if (state.hasSaveFailed) {
+                Text(
+                    text = stringResource(resource = Res.string.appearance_save_failed),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
             ModeChoice(mode = state.appearance.mode, onIntent = onIntent)
             ReduceMotionChoice(isOn = state.appearance.reduceMotion, onIntent = onIntent)
             ThemeChoice(theme = state.appearance.theme, onIntent = onIntent)

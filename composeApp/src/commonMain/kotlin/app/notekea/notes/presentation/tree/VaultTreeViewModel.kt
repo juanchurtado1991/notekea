@@ -113,6 +113,7 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnNewNoteFromTemplateClick -> templates.choose()
             is VaultTreeIntent.OnNoteFromTemplate -> templates.create(intent = intent)
             VaultTreeIntent.OnNoticeDismiss -> reduce { it.copy(notice = null) }
+            VaultTreeIntent.OnUnexpectedError -> reduce { it.copy(hasUnexpectedError = true) }
             is VaultTreeIntent.OnUnsavedKept -> reduce { it.copy(notice = unsavedNotice(intent = intent)) }
             VaultTreeIntent.OnRenameCancel -> renaming.cancel()
             VaultTreeIntent.OnRenameConfirm -> renaming.confirm()

@@ -63,6 +63,22 @@ class WorkspaceViewModelTest {
     }.withAttachment(file = file(path = PLATE.value)).withAttachment(file = file(path = BROKEN.value))
 
     @Test
+    fun `tabs that cannot be kept tell the window`() = runWorkspaceTest {
+        val viewModel = started()
+        runCurrent()
+        val effects = mutableListOf<WorkspaceEffect>()
+        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+        runCurrent()
+        workspaces.failure = IllegalStateException("bug")
+
+        viewModel.onIntent(intent = WorkspaceIntent.OnOpen(path = RelativePath(value = "Bug.md")))
+        advanceUntilIdle()
+        runCurrent()
+
+        assertEquals(expected = listOf<WorkspaceEffect>(WorkspaceEffect.UnexpectedError), actual = effects)
+    }
+
+    @Test
     fun `a tab opens at once while the disk is still busy, and is saved when the disk answers`() = runWorkspaceTest {
         val viewModel = started()
         val onDisk = workspaces.workspaces[VAULT]

@@ -221,7 +221,7 @@ class WorkspaceViewModel(
     ) {
         if (path in coverSources) return
         coverSources[path] = sourceOf(path = path)
-        launchGuarded(onError = ::showUnexpectedError) {
+        launchGuarded(onError = ::logCoverError) {
             val tree = state.value.tree
             val picture = if (path.isMarkdown) {
                 tools.getNoteCover(vaultPath = vaultPath, note = path, files = tree.attachments.keys)
@@ -271,6 +271,14 @@ class WorkspaceViewModel(
         throwable: Throwable
     ) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
+        emit(effect = WorkspaceEffect.UnexpectedError)
+    }
+
+    /** A card without its picture shows its icon, so this is worth a line in the log and nothing more. */
+    private fun logCoverError(
+        throwable: Throwable
+    ) {
+        logger.w(throwable = throwable) { COVER_ERROR_MESSAGE }
     }
 
     companion object {
@@ -278,5 +286,6 @@ class WorkspaceViewModel(
         const val MAX_COVERS = 60
         private const val LOG_TAG = "WorkspaceViewModel"
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the editor's tabs"
+        private const val COVER_ERROR_MESSAGE = "A card's picture could not be read"
     }
 }
