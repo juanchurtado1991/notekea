@@ -103,7 +103,7 @@ class IndexVaultUseCase(
         reason: SkipReason
     ): NoteStep {
         if (vectorIndex.remove(vaultPath = vaultPath, note = file.path) is Outcome.Failure) {
-            return NoteStep.Failed(error = IndexRunError.INDEX)
+            return NoteStep.Failed(error = IndexRunError.Index)
         }
         indexStateStore.save(
             vaultPath = vaultPath,
