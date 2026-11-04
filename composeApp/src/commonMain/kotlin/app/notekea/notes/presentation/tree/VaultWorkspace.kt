@@ -6,16 +6,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.about.AboutDialog
 import app.notekea.core.presentation.components.EmptyState
-import app.notekea.core.presentation.settings.SettingsDialog
+import app.notekea.core.presentation.platform.LocalWindowDialogs
+import app.notekea.core.presentation.platform.WindowDialog
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.FolderCards
@@ -103,7 +100,7 @@ private fun ActiveStatusBar(
     )
 }
 
-/** The rail, the sidebar, the tabs and panes and the side panel, with About or Settings over them while open. */
+/** The rail, the sidebar, the tabs and panes and the side panel; the rail's About and Settings open over the window. */
 @Composable
 private fun WorkspaceBody(
     state: VaultTreeState,
@@ -121,12 +118,12 @@ private fun WorkspaceBody(
     val activeEditorState by activeEditor.state.collectAsState()
     val isNoteShown = workspaceState.workspace.activePath?.let { workspaceState.kindOf(path = it) } == TabKind.NOTE
     val findNote = { viewModels.onSwitcher(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES)) }
-    var dialog by remember { mutableStateOf<WorkspaceDialog?>(value = null) }
+    val dialogs = LocalWindowDialogs.current
     VaultTreeContent(
         state = state,
         vaultName = vaultName,
         onIntent = viewModels.tree::onIntent,
-        rail = railActionsOf(sidePanel = sidePanel, onSearch = findNote, onSwitchVault = onSwitchVault) { dialog = it },
+        rail = railActionsOf(sidePanel, findNote, onSwitchVault) { dialogs.shown = it },
         modifier = modifier,
         isSidePanelVisible = if (sidePanel.isOverlay) sidePanel.isOverlayOpen else workspaceState.sidePanel.isVisible
     ) {
@@ -149,7 +146,6 @@ private fun WorkspaceBody(
             ) { pane, path, kind -> PaneContent(pane = pane, path = path, kind = kind, context = context) }
         }
     }
-    WorkspaceDialogs(platformConventions = state.platformConventions, onDismiss = { dialog = null }, dialog = dialog)
 }
 
 /** The notes the panes' editors hold with changes not saved yet, for their tabs' dots. */
@@ -185,28 +181,14 @@ private fun railActionsOf(
     sidePanel: SidePanelHost,
     onSearch: () -> Unit,
     onSwitchVault: () -> Unit,
-    onDialog: (WorkspaceDialog) -> Unit
+    onDialog: (WindowDialog) -> Unit
 ) = SidebarRailActions(
     onSearch = onSearch,
     onSidePanelToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
     onSwitchVault = onSwitchVault,
-    onAbout = { onDialog(WorkspaceDialog.ABOUT) },
-    onSettings = { onDialog(WorkspaceDialog.SETTINGS) }
+    onAbout = { onDialog(WindowDialog.ABOUT) },
+    onSettings = { onDialog(WindowDialog.SETTINGS) }
 )
-
-/** About or Settings over the workspace, while one is open. */
-@Composable
-private fun WorkspaceDialogs(
-    platformConventions: PlatformConventions,
-    onDismiss: () -> Unit,
-    dialog: WorkspaceDialog?
-) {
-    when (dialog) {
-        WorkspaceDialog.ABOUT -> AboutDialog(platformConventions = platformConventions, onDismiss = onDismiss)
-        WorkspaceDialog.SETTINGS -> SettingsDialog(onDismiss = onDismiss)
-        null -> Unit
-    }
-}
 
 /** What a pane's active tab shows, by what [path] is. */
 @Composable

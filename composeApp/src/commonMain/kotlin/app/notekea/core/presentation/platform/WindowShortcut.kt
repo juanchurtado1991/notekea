@@ -25,11 +25,7 @@ fun WindowShortcut(
     val dispatcher = LocalShortcutDispatcher.current
     val currentOnTrigger by rememberUpdatedState(newValue = onTrigger)
     DisposableEffect(dispatcher, shortcut) {
-        val unregister = dispatcher.register { event ->
-            val isMatch = shortcut.matches(event = event)
-            if (isMatch) currentOnTrigger()
-            isMatch
-        }
+        val unregister = dispatcher.register(shortcut = shortcut) { currentOnTrigger() }
         onDispose { unregister() }
     }
 }

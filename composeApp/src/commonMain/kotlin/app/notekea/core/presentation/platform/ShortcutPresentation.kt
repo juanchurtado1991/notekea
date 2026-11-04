@@ -84,7 +84,7 @@ private fun KeyEvent.pressedModifiers(): Set<ShortcutModifier> = buildSet {
     if (isShiftPressed) add(element = ShortcutModifier.SHIFT)
 }
 
-private fun ShortcutKey.composeKey(): Key = when (this) {
+internal fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.DIGIT_0 -> Key.Zero
     ShortcutKey.DIGIT_1 -> Key.One
     ShortcutKey.DIGIT_2 -> Key.Two

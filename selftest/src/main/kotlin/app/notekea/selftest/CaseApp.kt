@@ -24,12 +24,17 @@ import app.notekea.core.appearance.domain.GetUiScaleUseCase
 import app.notekea.core.appearance.domain.SaveUiScaleUseCase
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
+import app.notekea.core.presentation.menu.AppMenuEntry
+import app.notekea.core.presentation.menu.AppMenus
 import app.notekea.core.presentation.platform.LocalShortcutDispatcher
 import app.notekea.core.presentation.platform.LocalWindowCloseGuard
+import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.UiZoom
 import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.core.presentation.platform.WindowCloseShortcuts
+import app.notekea.core.presentation.platform.WindowDialogs
+import app.notekea.core.presentation.platform.WindowDialogsHost
 import app.notekea.di.desktopModules
 import app.notekea.notes.data.VaultFolderTrash
 import app.notekea.notes.domain.AttachmentPicker
@@ -65,6 +70,8 @@ class CaseApp(
     val home: Path = appData.resolveSibling(HOME)
     val uriHandler = RecordingUriHandler()
     val closeGuard = WindowCloseGuard()
+    val shortcuts = ShortcutDispatcher()
+    private val dialogs = WindowDialogs()
     private var isClosed = false
 
     val folderPicker = ScriptedFolderPicker()
@@ -95,21 +102,21 @@ class CaseApp(
 
     @Composable
     fun Content() {
-        val dispatcher = remember { ShortcutDispatcher() }
         // The color theme and mode of Settings → Appearance, as the app's windows follow them (2.12-01).
         val appearances = remember { koin.get<AppearanceStore>().observe() }
         val appearance by appearances.collectAsState(initial = Appearance())
         CompositionLocalProvider(
             LocalAppearance provides appearance,
-            LocalShortcutDispatcher provides dispatcher,
+            LocalShortcutDispatcher provides shortcuts,
             LocalViewModelStoreOwner provides viewModels,
             LocalWindowCloseGuard provides closeGuard,
+            LocalWindowDialogs provides dialogs,
             LocalUriHandler provides uriHandler
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .onPreviewKeyEvent(onPreviewKeyEvent = dispatcher::dispatch)
+                    .onPreviewKeyEvent(onPreviewKeyEvent = shortcuts::dispatch)
                     .focusRequester(focusRequester = windowFocus)
                     .focusable()
             ) {
@@ -142,8 +149,14 @@ class CaseApp(
                     }
                 }
             )
+            WindowDialogsHost(platformConventions = koin.get(), dialogs = dialogs)
         }
     }
+
+    /** The commands of the menu bar on this system, which the app's window shows. */
+    fun menuCommands(): List<AppMenuEntry.Command> = AppMenus.of(conventions = koin.get())
+        .flatMap { it.entries }
+        .filterIsInstance<AppMenuEntry.Command>()
 
     /** Stops the app once: the view models' work, then Koin. */
     override fun close() {
