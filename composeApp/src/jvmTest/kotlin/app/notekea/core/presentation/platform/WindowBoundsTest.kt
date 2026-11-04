@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import app.notekea.core.appearance.domain.WindowBounds
-import app.notekea.notes.domain.TreePreferences
+import app.notekea.tree.domain.TreePreferences
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

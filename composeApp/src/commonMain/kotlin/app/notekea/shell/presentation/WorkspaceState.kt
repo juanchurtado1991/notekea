@@ -5,7 +5,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.SidePanelPreferences
 import app.notekea.core.notes.domain.VaultTree
 import app.notekea.shell.domain.Workspace
-import app.notekea.notes.presentation.tree.FilePreview
+import app.notekea.tree.presentation.FilePreview
 
 /**
  * State of the editor's tabs and panes (`ROADMAP.md` 1.11). [workspace] is restored from the last run once the vault's

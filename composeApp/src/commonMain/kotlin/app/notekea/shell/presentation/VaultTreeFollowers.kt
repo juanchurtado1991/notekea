@@ -11,7 +11,7 @@ import app.notekea.editor.domain.FormatAction
 import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.notes.domain.TagRanking
+import app.notekea.tree.domain.TagRanking
 import app.notekea.editor.presentation.EditorIntent
 import app.notekea.editor.presentation.EditorViewModel
 import app.notekea.editor.presentation.SidePanelHost
@@ -19,9 +19,9 @@ import app.notekea.search.presentation.switcher.QuickSwitcherEffect
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherMode
 import app.notekea.search.presentation.switcher.QuickSwitcherViewModel
-import app.notekea.notes.presentation.tags.TagPickerEffect
-import app.notekea.notes.presentation.tags.TagPickerIntent
-import app.notekea.notes.presentation.tags.TagPickerViewModel
+import app.notekea.tree.presentation.tags.TagPickerEffect
+import app.notekea.tree.presentation.tags.TagPickerIntent
+import app.notekea.tree.presentation.tags.TagPickerViewModel
 import app.notekea.templates.presentation.TemplatePickerEffect
 import app.notekea.templates.presentation.TemplatePickerIntent
 import app.notekea.templates.presentation.TemplatePickerViewModel
@@ -32,11 +32,11 @@ import app.notekea.shell.presentation.WorkspaceShortcuts
 import app.notekea.resources.Res
 import app.notekea.resources.tree_untitled_note
 import org.jetbrains.compose.resources.stringResource
-import app.notekea.notes.presentation.tree.BookmarkIntent
-import app.notekea.notes.presentation.tree.VaultTreeEffect
-import app.notekea.notes.presentation.tree.VaultTreeIntent
-import app.notekea.notes.presentation.tree.VaultTreeState
-import app.notekea.notes.presentation.tree.VaultTreeViewModel
+import app.notekea.tree.presentation.BookmarkIntent
+import app.notekea.tree.presentation.VaultTreeEffect
+import app.notekea.tree.presentation.VaultTreeIntent
+import app.notekea.tree.presentation.VaultTreeState
+import app.notekea.tree.presentation.VaultTreeViewModel
 
 /** The window shortcuts of the workspace, and the view models following each other's effects. */
 @Composable

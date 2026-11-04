@@ -2,15 +2,15 @@ package app.notekea.core.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.FakeFileWatcher
-import app.notekea.notes.domain.FakeNoteMetadataCache
+import app.notekea.tree.domain.FakeFileWatcher
+import app.notekea.tree.domain.FakeNoteMetadataCache
 import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.search.domain.NoteMatchField
 import app.notekea.core.notes.domain.NoteTextCache
-import app.notekea.notes.domain.ObserveVaultTreeUseCase
+import app.notekea.tree.domain.ObserveVaultTreeUseCase
 import app.notekea.search.domain.SearchNoteContentUseCase
 import app.notekea.search.domain.SearchNotesUseCase
 import app.notekea.core.notes.domain.TextFolder
@@ -21,7 +21,7 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.notes.data.OkioNoteMetadataReader
+import app.notekea.tree.data.OkioNoteMetadataReader
 
 /**
  * The quick switcher cases of `MVP_SMOKE_TEST.md` (1.6) that can run headless, on the `Personal Notes` smoke vault

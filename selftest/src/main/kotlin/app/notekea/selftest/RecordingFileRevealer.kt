@@ -1,7 +1,7 @@
 package app.notekea.selftest
 
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.FileRevealer
+import app.notekea.tree.domain.FileRevealer
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
 

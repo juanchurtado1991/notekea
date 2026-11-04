@@ -17,8 +17,8 @@ import app.notekea.shell.domain.EditorPane
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
 import app.notekea.shell.domain.Workspace
-import app.notekea.notes.presentation.files.fileIconOf
-import app.notekea.notes.presentation.files.fileTintOf
+import app.notekea.tree.presentation.fileIconOf
+import app.notekea.tree.presentation.fileTintOf
 import app.notekea.resources.Res
 import app.notekea.resources.tab_all
 import app.notekea.resources.tab_close

@@ -17,7 +17,7 @@ import app.notekea.connections.presentation.FollowRelatedNotes
 import app.notekea.connections.presentation.RelatedNotesViewModel
 import app.notekea.shell.presentation.WorkspaceIntent
 import app.notekea.shell.presentation.WorkspaceViewModel
-import app.notekea.notes.presentation.tree.VaultTreeState
+import app.notekea.tree.presentation.VaultTreeState
 
 /**
  * The side panel's host, with the inspector's Connections (`ROADMAP.md` 2.4, 2.5): a row opens its note (a mention at

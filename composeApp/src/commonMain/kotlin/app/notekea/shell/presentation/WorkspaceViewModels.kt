@@ -2,10 +2,10 @@ package app.notekea.shell.presentation
 
 import app.notekea.editor.presentation.EditorViewModel
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
-import app.notekea.notes.presentation.tags.TagPickerIntent
+import app.notekea.tree.presentation.tags.TagPickerIntent
 import app.notekea.templates.presentation.TemplatePickerIntent
 import app.notekea.shell.presentation.WorkspaceViewModel
-import app.notekea.notes.presentation.tree.VaultTreeViewModel
+import app.notekea.tree.presentation.VaultTreeViewModel
 
 /**
  * The view models the vault workspace is drawn from, given together: the [tree], the [workspace] of tabs, one editor

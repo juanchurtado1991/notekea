@@ -2,13 +2,13 @@ package app.notekea.core.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.FakeFileWatcher
-import app.notekea.notes.domain.FakeNoteMetadataCache
+import app.notekea.tree.domain.FakeFileWatcher
+import app.notekea.tree.domain.FakeNoteMetadataCache
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteTextCache
-import app.notekea.notes.domain.ObserveVaultTreeUseCase
+import app.notekea.tree.domain.ObserveVaultTreeUseCase
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.search.domain.SearchNoteContentUseCase
 import app.notekea.core.notes.domain.TextFolder
@@ -26,7 +26,7 @@ import kotlin.io.path.writeText
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.notes.data.OkioNoteMetadataReader
+import app.notekea.tree.data.OkioNoteMetadataReader
 
 /**
  * Content search over the production scanner, frontmatter reader and content store, on real files: Windows line
