@@ -2,6 +2,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import java.io.File
@@ -13,7 +14,8 @@ import java.security.MessageDigest
 /**
  * Downloads [url] to [file] once and checks it is the file it must be: its SHA-256 is [sha256]. A file already there
  * with that hash is kept (it is never downloaded again), one with another hash is replaced, and a download that does
- * not match fails the build and leaves nothing behind. Used for the embedding model the app bundles (`ROADMAP.md` 2.2).
+ * not match or breaks halfway fails the build and leaves nothing behind. A server that stops answering fails it after
+ * [timeoutMillis], never hangs it. Used for the embedding model the app bundles (`ROADMAP.md` 2.2).
  */
 abstract class DownloadVerifiedFileTask : DefaultTask() {
     @get:Input
@@ -25,19 +27,35 @@ abstract class DownloadVerifiedFileTask : DefaultTask() {
     @get:OutputFile
     abstract val file: RegularFileProperty
 
+    /** How long connecting, and then each read, may wait for the server. */
+    @get:Internal
+    abstract val timeoutMillis: Property<Int>
+
+    init {
+        timeoutMillis.convention(DEFAULT_TIMEOUT_MILLIS)
+    }
+
     @TaskAction
     fun download() {
         val target = file.get().asFile
         if (target.isFile && sha256Of(file = target) == sha256.get()) return
         target.parentFile.mkdirs()
         val partial = File(target.parentFile, target.name + PARTIAL_SUFFIX)
-        URI(url.get()).toURL().openStream().use { input -> partial.outputStream().use { input.copyTo(it) } }
-        val actual = sha256Of(file = partial)
-        if (actual != sha256.get()) {
+        try {
+            fetch(partial = partial)
+            val actual = sha256Of(file = partial)
+            if (actual != sha256.get()) error("${url.get()} has SHA-256 $actual, not ${sha256.get()}")
+            Files.move(partial.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        } finally {
             partial.delete()
-            error("${url.get()} has SHA-256 $actual, not ${sha256.get()}")
         }
-        Files.move(partial.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+    }
+
+    private fun fetch(partial: File) {
+        val connection = URI(url.get()).toURL().openConnection()
+        connection.connectTimeout = timeoutMillis.get()
+        connection.readTimeout = timeoutMillis.get()
+        connection.getInputStream().use { input -> partial.outputStream().use { input.copyTo(it) } }
     }
 
     private fun sha256Of(file: File): String {
@@ -55,6 +73,7 @@ abstract class DownloadVerifiedFileTask : DefaultTask() {
 
     private companion object {
         const val BUFFER_SIZE = 1 shl 16
+        const val DEFAULT_TIMEOUT_MILLIS = 60_000
         const val PARTIAL_SUFFIX = ".part"
         const val SHA_256 = "SHA-256"
     }

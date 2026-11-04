@@ -1,5 +1,6 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 
@@ -13,16 +14,11 @@ class TaskFinder {
         text: String
     ): List<TaskMarker> {
         val tasks = mutableListOf<TaskMarker>()
-        var fence: Char? = null
+        val fences = FenceTracker()
         var lineStart = 0
         text.split(NEW_LINE_CHAR).forEach { line ->
-            val marker = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)?.first()
-            when {
-                fence != null -> if (marker == fence) fence = null
-
-                marker != null -> fence = marker
-
-                else -> TASK.find(input = line)?.groups?.get(index = 1)?.let { state ->
+            if (!fences.read(text = line)) {
+                TASK.find(input = line)?.groups?.get(index = 1)?.let { state ->
                     tasks +=
                         TaskMarker(
                             stateIndex = lineStart + state.range.first,

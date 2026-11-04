@@ -23,6 +23,7 @@ fun SuiteBuilder.appearanceCases() {
     startingChoice()
     themesLook()
     systemMode()
+    reduceMotion()
 }
 
 private fun SuiteBuilder.keptChoice() {
@@ -48,6 +49,25 @@ private fun SuiteBuilder.startingChoice() {
         clickIcon(label = "Settings")
         expectChosen(text = "Workspace Blue")
         expectChosen(text = "System")
+    }
+}
+
+private fun SuiteBuilder.reduceMotion() {
+    manual(id = "2.12-05", reason = ManualReason.EYES) {
+        prepare(PLAYGROUND)
+        title(text = "Reduce motion")
+        steps(
+            text = "$OPEN_PLAYGROUND\n2. $OPEN_APPEARANCE, tick Reduce motion and press Esc.\n3. Press the sidebar's " +
+                "shortcut (Ctrl+\\, Cmd+\\ on macOS) twice, open a folder in Files and switch the side panel between " +
+                "Inspector and Chat.\n4. $OPEN_APPEARANCE, untick Reduce motion and do step 3 again.\n5. Turn on the " +
+                "system's own setting (Reduce motion on macOS, Animation effects off on Windows, Animations off on " +
+                "GNOME), start Notekea again and do step 3."
+        )
+        expected(
+            text = "In step 3 everything changes at once, nothing slides or fades. In step 4 panels slide and rows " +
+                "fade as usual. In step 5 they change at once again, with the box in Settings unticked; on Linux " +
+                "desktops that do not share this setting they slide."
+        )
     }
 }
 

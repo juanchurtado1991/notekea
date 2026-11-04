@@ -5,12 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import app.notekea.core.presentation.theme.LocalAppearance
-import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.appearance.domain.Appearance
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import app.notekea.NotekeaAppLocals
+import app.notekea.NotekeaRoot
+import app.notekea.core.presentation.platform.AppEnvironment
+import app.notekea.core.presentation.platform.WindowHost
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -19,15 +19,11 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import app.notekea.App
-import app.notekea.core.appearance.domain.GetUiScaleUseCase
-import app.notekea.core.appearance.domain.SaveUiScaleUseCase
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
-import app.notekea.core.presentation.platform.LocalShortcutDispatcher
-import app.notekea.core.presentation.platform.LocalWindowCloseGuard
+import app.notekea.core.presentation.menu.AppMenuEntry
+import app.notekea.core.presentation.menu.AppMenus
 import app.notekea.core.presentation.platform.ShortcutDispatcher
-import app.notekea.core.presentation.platform.UiZoom
 import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.di.desktopModules
 import app.notekea.notes.data.VaultFolderTrash
@@ -35,10 +31,7 @@ import app.notekea.notes.domain.AttachmentPicker
 import app.notekea.notes.domain.FileOpener
 import app.notekea.notes.domain.FileRevealer
 import app.notekea.notes.domain.Trash
-import app.notekea.notes.presentation.tree.VaultScope
-import app.notekea.notes.presentation.tree.VaultTreeScreen
 import app.notekea.vault.domain.FolderPicker
-import app.notekea.vault.presentation.welcome.WelcomeScreen
 import okio.FileSystem
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
@@ -63,7 +56,6 @@ class CaseApp(
 ) : AutoCloseable {
     val home: Path = appData.resolveSibling(HOME)
     val uriHandler = RecordingUriHandler()
-    val closeGuard = WindowCloseGuard()
     private var isClosed = false
 
     val folderPicker = ScriptedFolderPicker()
@@ -81,64 +73,51 @@ class CaseApp(
     }
 
     private val koin: Koin
+    private val host: WindowHost
 
     init {
         // As the installed app finds it: its data folder exists before the database and the settings open there.
         Files.createDirectories(appData)
         Files.createDirectories(home.resolve(DOCUMENTS))
         koin = startKoin { modules(desktopModules + overrides()) }.koin
+        host = WindowHost(conventions = koin.get())
     }
+
+    val closeGuard: WindowCloseGuard get() = host.closeGuard
+    val shortcuts: ShortcutDispatcher get() = host.shortcuts
+
+    /** The title the app's window shows now. */
+    val windowTitle: String get() = host.title
 
     /** Where the vault [name] is. */
     fun vaultPath(name: String): String = vaults.resolve(name).toString()
 
     @Composable
     fun Content() {
-        val dispatcher = remember { ShortcutDispatcher() }
-        // The color theme and mode of Settings → Appearance, as the app's windows follow them (2.12-01).
-        val appearances = remember { koin.get<AppearanceStore>().observe() }
-        val appearance by appearances.collectAsState(initial = Appearance())
-        CompositionLocalProvider(
-            LocalAppearance provides appearance,
-            LocalShortcutDispatcher provides dispatcher,
-            LocalViewModelStoreOwner provides viewModels,
-            LocalWindowCloseGuard provides closeGuard,
-            LocalUriHandler provides uriHandler
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .onPreviewKeyEvent(onPreviewKeyEvent = dispatcher::dispatch)
-                    .focusRequester(focusRequester = windowFocus)
-                    .focusable()
+        val environment = remember { koin.get<AppEnvironment>() }
+        NotekeaAppLocals(environment = environment, initialAppearance = Appearance()) {
+            CompositionLocalProvider(
+                LocalViewModelStoreOwner provides viewModels,
+                LocalUriHandler provides uriHandler
             ) {
-                // The window's zoom, as the app's main window has it (1.14-14).
-                UiZoom(
-                    platformConventions = koin.get(),
-                    loadScale = { koin.get<GetUiScaleUseCase>()() },
-                    saveScale = { koin.get<SaveUiScaleUseCase>()(scale = it) }
-                ) { Window() }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .onPreviewKeyEvent(onPreviewKeyEvent = shortcuts::dispatch)
+                        .focusRequester(focusRequester = windowFocus)
+                        .focusable()
+                ) {
+                    // Closing the window quits, as in the app: the case's Notekea quits and starts again (1.1-07).
+                    NotekeaRoot(host = host, onClose = { CaseApps.quit(vaults = vaults, whileClosed = {}) })
+                }
             }
         }
     }
 
-    @Composable
-    private fun Window() {
-        App {
-            WelcomeScreen(
-                onVaultNameChange = {},
-                openedVaultContent = { vault, onSwitchVault ->
-                    VaultScope(vaultPath = vault.path) { close ->
-                        VaultTreeScreen(
-                            vaultPath = vault.path,
-                            vaultName = vault.name,
-                            onSwitchVault = { close(onSwitchVault) }
-                        )
-                    }
-                }
-            )
-        }
-    }
+    /** The commands of the menu bar on this system, which the app's window shows. */
+    fun menuCommands(): List<AppMenuEntry.Command> = AppMenus.of(conventions = host.conventions)
+        .flatMap { it.entries }
+        .filterIsInstance<AppMenuEntry.Command>()
 
     /** Stops the app once: the view models' work, then Koin. */
     override fun close() {

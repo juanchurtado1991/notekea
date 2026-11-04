@@ -90,4 +90,11 @@ class ReadModeLinksTest {
             actual = links.classify(uri = "notekea-file:Arepas%20plate.png?width=80")
         )
     }
+
+    @Test
+    fun `a shorter fence inside a longer one does not end the code`() {
+        val body = "````\n```\n[[Inside]]\n````"
+
+        assertEquals(expected = body, actual = ReadModeLinks().prepare(body = body))
+    }
 }

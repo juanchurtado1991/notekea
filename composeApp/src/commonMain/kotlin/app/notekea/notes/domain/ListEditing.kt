@@ -1,7 +1,7 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
-import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.StringPatterns.NEW_LINE
 import app.notekea.core.domain.StringPatterns
 /**
@@ -136,9 +136,11 @@ class ListEditing {
         line: String,
         step: Int
     ): String {
-        if (step >= 0) return StringPatterns.SPACE.repeat(n = step) + line
-        val removable = line.takeWhile { StringPatterns.isIndent(char = it) }.length
-        return line.substring(startIndex = minOf(-step, removable))
+        val quote = ListLine.of(line = line).quote
+        val item = line.removePrefix(prefix = quote)
+        if (step >= 0) return quote + StringPatterns.SPACE.repeat(n = step) + item
+        val removable = item.takeWhile { StringPatterns.isIndent(char = it) }.length
+        return quote + item.substring(startIndex = minOf(-step, removable))
     }
 
     /** [offset] in the text after the shift: moved with its line, and never into the indentation it lost. */
@@ -172,43 +174,23 @@ class ListEditing {
     ): Int = lines.take(n = index).sumOf { it.length + 1 }
 
     /**
-     * Whether line [index] of [text] is inside a fenced code block, where list keys type as usual. The lines are read in
-     * place, and only one with a backtick or a tilde is matched against a fence.
+     * Whether line [index] of [text] is inside a fenced code block, between its fence lines, where list keys type as
+     * usual. The lines are read in place.
      */
     private fun isInCode(
         text: String,
         index: Int
     ): Boolean {
-        var fence: Char? = null
-        var isFenceLine = false
+        val fences = FenceTracker()
+        var isInside = false
         var lineStart = 0
         for (line in 0..index) {
             val lineEnd = text.indexOf(char = NEW_LINE_CHAR, startIndex = lineStart).takeIf { it >= 0 } ?: text.length
-            val marker = fenceMarker(text = text, start = lineStart, end = lineEnd)
-            isFenceLine = marker != null
-            fence = when {
-                fence != null -> if (marker == fence) null else fence
-                else -> marker
-            }
+            val wasOpen = fences.isOpen
+            fences.read(text = text, start = lineStart, end = lineEnd)
+            isInside = wasOpen && fences.isOpen
             lineStart = lineEnd + 1
         }
-        return fence != null && !isFenceLine
-    }
-
-    /** The fence character of the line from [start] to [end] of [text] when it is a fence line, read in place. */
-    private fun fenceMarker(
-        text: String,
-        start: Int,
-        end: Int
-    ): Char? = if ((start until end).any { text[it] == BACKTICK || text[it] == TILDE }) {
-        val line = text.substring(startIndex = start, endIndex = end)
-        MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)?.first()
-    } else {
-        null
-    }
-
-    companion object {
-        private const val BACKTICK = '`'
-        private const val TILDE = '~'
+        return isInside
     }
 }

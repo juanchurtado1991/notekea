@@ -83,6 +83,34 @@ class LinkUpdateUseCasesTest {
         )
     }
 
+    // Audit: the text was only searched for the name as written, so these links broke without a word.
+    @Test
+    fun `a link that only holds the name percent-encoded is rewritten, for a note and for a folder`() = runTest {
+        val note = "Travel/My Note.md"
+        store.texts[path(SOURCE)] = "[x](Travel/My%20Note.md) [y](My%20Folder/a.md)"
+        val notes = setOf(path(note), path("My Folder/a.md"), path(SOURCE))
+
+        val renamedNote =
+            planLinkUpdates(vaultPath = VAULT, notesBefore = notes, from = path(note), to = path("Travel/New.md"))
+        val renamedFolder =
+            planLinkUpdates(vaultPath = VAULT, notesBefore = notes, from = path("My Folder"), to = path("Other"))
+
+        assertEquals(
+            expected = listOf(
+                "[x](Travel/New.md) [y](My%20Folder/a.md)",
+                "[x](Travel/My%20Note.md) [y](Other/a.md)"
+            ),
+            actual = (renamedNote + renamedFolder).map { it.updated }
+        )
+    }
+
+    @Test
+    fun `a link in a table follows a rename and keeps its escaped bar`() = runTest {
+        val rewrites = renameArepas(source = "| [[Arepas\\|the arepas]] | x |")
+
+        assertEquals(expected = "| [[Arepas reina\\|the arepas]] | x |", actual = rewrites.single().updated)
+    }
+
     @Test
     fun `a note's links to itself follow it, read from its new path`() = runTest {
         store.texts[path(RENAMED)] = "Back to [[#Dough]] and [[Arepas#Filling]]"

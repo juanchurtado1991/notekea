@@ -51,7 +51,7 @@ tags: [editor, smoke]
 
 ## Links
 
-Cook [[Arepas]], see [[CAFE_ACCENT con leche|the coffee]], open [[A note that does not exist yet]].
+Cook [[Arepas]], see [[CAFE_ACCENT con leche|the coffee]], open [[A note that does not exist yet]], file [[Drafts/A note in a folder|in a new folder]].
 A Markdown link to [Pasta e fagioli](../Recipes/Pasta%20e%20fagioli.md) and to [the web](https://example.com).
 
 ## Text
@@ -185,7 +185,13 @@ switch ($Command) {
         Write-Output "Removed Notekea's note cache; the next vault opens with a full scan"
     }
     "first-launch" {
-        if (Test-Path $Settings) { Move-Item -Force $Settings $Backup }
+        # Run twice, the settings now are the ones the first launch wrote: the backup already holds the real ones.
+        if (Test-Path $Backup) {
+            Remove-Item -Force -ErrorAction SilentlyContinue $Settings
+        }
+        elseif (Test-Path $Settings) {
+            Move-Item -Force $Settings $Backup
+        }
         Write-Output "Notekea will start as on a first launch (backup: $Backup)"
     }
     "restore-settings" {

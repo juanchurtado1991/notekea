@@ -47,6 +47,23 @@ fun resolvedFrom(
     return RelativePath(value = segments.joinToString(separator = RelativePath.SEPARATOR))
 }
 
+/**
+ * Where a wiki link's [target] points in the vault, without `.md`: from [source]'s folder when it starts with `./` or
+ * `../`, otherwise from the root, a leading `/` or not; null when it climbs above the vault.
+ */
+fun wikiPath(
+    target: String,
+    source: RelativePath
+): RelativePath? {
+    val written = LinkResolver.withoutMarkdownExtension(target = target.trim())
+    val first = written.substringBefore(delimiter = RelativePath.SEPARATOR)
+    val isRelative = first == CURRENT || first == PARENT
+    return resolvedFrom(
+        folder = if (isRelative) source.parent ?: RelativePath.ROOT else RelativePath.ROOT,
+        target = written
+    )
+}
+
 /** How to reach [target] from [folder], with `../` for every folder to climb. */
 fun relativeTo(
     folder: RelativePath,

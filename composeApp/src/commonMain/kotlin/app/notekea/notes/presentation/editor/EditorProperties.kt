@@ -2,6 +2,7 @@ package app.notekea.notes.presentation.editor
 
 import app.notekea.core.domain.StringPatterns
 import app.notekea.notes.domain.EditorPreferencesStore
+import app.notekea.notes.domain.NoteDocument
 import app.notekea.notes.domain.RelativePath
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -50,8 +51,33 @@ internal class EditorProperties(
         sourceJob?.cancel()
         sourceJob = null
         val intent = pendingSource ?: return
-        pendingSource = null
+        if (isBlocked()) return
         edit(intent = intent)
+        // A write that failed or met an outside change leaves the YAML pending, to be written or kept later.
+        if (!isBlocked() && host.state.value.saveError == null) pendingSource = null
+    }
+
+    /** Forgets the YAML not written yet: the user chose the file's own text. */
+    fun cancelSourceEdit() {
+        sourceJob?.cancel()
+        sourceJob = null
+        pendingSource = null
+    }
+
+    /** [document]'s header with the YAML a blocked save could not write, to keep it when the note is left. */
+    fun headerWithPendingSource(
+        document: NoteDocument
+    ): String {
+        val intent = pendingSource ?: return document.header
+        pendingSource = null
+        val state = host.state.value
+        return saving.propertyEditing.headerAfter(
+            intent,
+            document.header,
+            state.properties,
+            noteInfo.today(),
+            StringPatterns.NEW_LINE
+        ) ?: document.header
     }
 
     private fun toggleFold() {
@@ -71,12 +97,6 @@ internal class EditorProperties(
             sourceJob = null
             saving.alone { writePendingSource() }
         }
-    }
-
-    private fun cancelSourceEdit() {
-        sourceJob?.cancel()
-        sourceJob = null
-        pendingSource = null
     }
 
     /**
@@ -106,6 +126,8 @@ internal class EditorProperties(
             expectedOnDisk = saving.onDisk
         )
     }
+
+    private fun isBlocked(): Boolean = host.state.value.let { it.hasConflict || it.isDeleted }
 
     /** The note a source view edit was typed in; null for the form's edits, which always concern the open note. */
     private fun sourcePathOf(

@@ -19,29 +19,21 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.OperatingSystem
-import app.notekea.core.presentation.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.components.NotekeaContextMenuState
 import app.notekea.core.presentation.components.NotekeaInlineTextField
 import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.NotekeaTreeItem
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.TreeRow
 import app.notekea.resources.Res
-import app.notekea.resources.tree_delete_file
-import app.notekea.resources.tree_delete_folder
-import app.notekea.resources.tree_delete_note
 import app.notekea.resources.tree_open_folder
-import app.notekea.resources.tree_rename
 import app.notekea.resources.tree_reveal_explorer
 import app.notekea.resources.tree_reveal_files
 import app.notekea.resources.tree_reveal_finder
 import app.notekea.resources.tree_select_file
 import app.notekea.resources.tree_select_note
-import app.notekea.resources.tree_bookmark_add
-import app.notekea.resources.tree_bookmark_remove
 import org.jetbrains.compose.resources.stringResource
 import app.notekea.notes.presentation.files.fileIconOf
 import app.notekea.notes.presentation.files.fileTintOf
@@ -51,19 +43,23 @@ private const val PREVIEW_WIDTH_DP = 260
 
 /**
  * One entry of the tree with its context menu ([createItems], the tree's New note and New folder, then rename, show in
- * the file manager, delete) and, while it is
- * renamed, the name field with the reason a name was refused below it. A right click selects the entry first.
+ * the file manager, delete), built from the tree's latest [state] only when it opens, and, while it is renamed
+ * ([draft]), the name field with the reason a name was refused below it. A right click selects the entry first. Only
+ * what this row shows comes as values, so a change to another row leaves this one alone.
  */
 @Composable
 internal fun TreeEntryRow(
     row: TreeRow,
-    state: VaultTreeState,
-    createItems: List<NotekeaMenuItem>,
+    state: () -> VaultTreeState,
+    createItems: @Composable () -> List<NotekeaMenuItem>,
+    isSelected: Boolean,
+    isBookmarked: Boolean,
     isFocused: Boolean,
     isMenuRequested: Boolean,
     onMenuShown: () -> Unit,
     onIntent: (VaultTreeIntent) -> Unit,
-    onFocusTree: () -> Unit
+    onFocusTree: () -> Unit,
+    draft: RenameDraft?
 ) {
     val menuState = remember { NotekeaContextMenuState() }
     LaunchedEffect(key1 = isMenuRequested) {
@@ -72,17 +68,27 @@ internal fun TreeEntryRow(
             onMenuShown()
         }
     }
-    NotekeaContextMenuArea(
-        sections = menuSections(row = row, state = state, createItems = createItems, onIntent = onIntent),
-        state = menuState,
+    EntryMenuArea(
+        row = row,
+        state = state,
+        onIntent = onIntent,
+        createItems = createItems,
+        menuState = menuState,
         onOpenByPointer = { onIntent(VaultTreeIntent.OnRowSelect(path = row.path)) }
     ) {
         Column {
-            EntryItem(row = row, state = state, isFocused = isFocused, onIntent = onIntent, onFocusTree = onFocusTree)
-            val error = state.renaming?.takeIf { it.path == row.path }?.error
-            error?.let {
+            EntryItem(
+                row = row,
+                isSelected = isSelected,
+                isBookmarked = isBookmarked,
+                isFocused = isFocused,
+                onIntent = onIntent,
+                onFocusTree = onFocusTree,
+                draft = draft
+            )
+            draft?.error?.let {
                 Text(
-                    text = notesErrorMessage(error = it, platformConventions = state.platformConventions),
+                    text = notesErrorMessage(error = it, platformConventions = state().platformConventions),
                     modifier = Modifier.padding(
                         start = NotekeaDimensions.TreeIndent * (row.depth + 1),
                         bottom = NotekeaDimensions.SpacingXs
@@ -98,12 +104,13 @@ internal fun TreeEntryRow(
 @Composable
 private fun EntryItem(
     row: TreeRow,
-    state: VaultTreeState,
+    isSelected: Boolean,
+    isBookmarked: Boolean,
     isFocused: Boolean,
     onIntent: (VaultTreeIntent) -> Unit,
-    onFocusTree: () -> Unit
+    onFocusTree: () -> Unit,
+    draft: RenameDraft?
 ) {
-    val draft = state.renaming?.takeIf { it.path == row.path }
     // Mod+click or the middle button opens the entry in a tab behind the current one (`ROADMAP.md` 1.11).
     val pressed = remember { PressedModifiers() }
     val folder = row as? TreeRow.Folder
@@ -119,7 +126,7 @@ private fun EntryItem(
         modifier = pressed.tracking().onMiddleClick {
             onIntent(VaultTreeIntent.OnRowClick(path = row.path, inBackground = true))
         },
-        selected = row.path == state.selectedPath,
+        selected = isSelected,
         focused = isFocused && draft == null,
         isExpanded = folder?.isExpanded,
         onToggleExpanded = folder?.let { { onIntent(VaultTreeIntent.OnChevronClick(path = it.path)) } },
@@ -132,7 +139,7 @@ private fun EntryItem(
             }
         ),
         labelContent = draft?.let { { RenameField(draft = it, onIntent = onIntent) } },
-        badge = if (row.path in state.bookmarks) {
+        badge = if (isBookmarked) {
             { BookmarkBadge() }
         } else {
             null
@@ -177,65 +184,6 @@ private fun RenameField(
     )
 }
 
-@Composable
-private fun menuSections(
-    row: TreeRow,
-    state: VaultTreeState,
-    createItems: List<NotekeaMenuItem>,
-    onIntent: (VaultTreeIntent) -> Unit
-): List<List<NotekeaMenuItem>> = listOf(
-    createItems,
-    editSection(row = row, state = state, onIntent = onIntent),
-    listOf(
-        NotekeaMenuItem(
-            label = stringResource(
-                resource = when (row) {
-                    is TreeRow.Folder -> Res.string.tree_delete_folder
-                    is TreeRow.Note -> Res.string.tree_delete_note
-                    is TreeRow.File -> Res.string.tree_delete_file
-                }
-            ),
-            onClick = { onIntent(VaultTreeIntent.OnDeleteRequest(path = row.path)) },
-            icon = NotekeaIcons.Delete,
-            shortcutHint = state.platformConventions.deleteShortcut.label(
-                operatingSystem = state.platformConventions.operatingSystem
-            ),
-            isDestructive = true
-        )
-    )
-)
-
-@Composable
-private fun editSection(
-    row: TreeRow,
-    state: VaultTreeState,
-    onIntent: (VaultTreeIntent) -> Unit
-): List<NotekeaMenuItem> {
-    val os = state.platformConventions.operatingSystem
-    val isBookmarked = row.path in state.bookmarks
-    return listOf(
-        NotekeaMenuItem(
-            label = stringResource(
-                resource = if (isBookmarked) Res.string.tree_bookmark_remove else Res.string.tree_bookmark_add
-            ),
-            onClick = { onIntent(BookmarkIntent.OnToggle(path = row.path)) },
-            icon = NotekeaIcons.Bookmark,
-            shortcutHint = state.platformConventions.bookmarkShortcut.label(operatingSystem = os)
-        ),
-        NotekeaMenuItem(
-            label = stringResource(resource = Res.string.tree_rename),
-            onClick = { onIntent(VaultTreeIntent.OnRenameRequest(path = row.path)) },
-            icon = NotekeaIcons.Rename,
-            shortcutHint = state.platformConventions.renameShortcut.label(operatingSystem = os)
-        ),
-        NotekeaMenuItem(
-            label = stringResource(resource = revealLabel(operatingSystem = os)),
-            onClick = { onIntent(VaultTreeIntent.OnRevealRequest(path = row.path)) },
-            icon = NotekeaIcons.Reveal
-        )
-    )
-}
-
 internal fun revealLabel(
     operatingSystem: OperatingSystem
 ) = when (operatingSystem) {
@@ -255,13 +203,16 @@ private fun TreeEntryRowPreview() {
             state.rows.forEach { row ->
                 TreeEntryRow(
                     row = row,
-                    state = state,
-                    createItems = emptyList(),
+                    state = { state },
+                    createItems = { emptyList() },
+                    isSelected = row.path == state.selectedPath,
+                    isBookmarked = row.path in state.bookmarks,
                     isFocused = false,
                     isMenuRequested = false,
                     onMenuShown = {},
                     onIntent = {},
-                    onFocusTree = {}
+                    onFocusTree = {},
+                    draft = state.renaming?.takeIf { it.path == row.path }
                 )
             }
         }

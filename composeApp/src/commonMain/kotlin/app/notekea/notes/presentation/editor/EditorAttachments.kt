@@ -3,6 +3,7 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.ui.graphics.ImageBitmap
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
+import app.notekea.core.presentation.images.decodedImage
 import app.notekea.notes.domain.AttachFileUseCase
 import app.notekea.notes.domain.AttachmentFolder
 import app.notekea.notes.domain.AttachmentKind
@@ -20,7 +21,6 @@ import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.VaultSettingsReader
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.decodeToImageBitmap
 
 /**
  * The files and notes embedded in the open note of the vault at [vaultPath] (`ROADMAP.md` 1.8), for the editor: it
@@ -71,20 +71,28 @@ class EditorAttachments(
     ): List<AttachmentView> {
         val embeds = embedFinder.embeds(text = text, includeNotes = true)
         if (embeds.isEmpty()) return emptyList()
-        var vaultFiles = vaultFiles()
-        val resolverOf = { files: List<RelativePath> ->
-            AttachmentResolver(
-                files = files,
-                attachmentFolder = AttachmentFolder(setting = folderSetting).folderFor(note = note)
-            )
+        val views = viewsAmong(files = vaultFiles(), embeds = embeds, note = note, chain = chain)
+        // A file or note added, moved or renamed outside Notekea since the last listing is found by listing again once.
+        val isAnyMissing = views.any { it.path == null }
+        return if (isAnyMissing) {
+            viewsAmong(files = vaultFiles(refresh = true), embeds = embeds, note = note, chain = chain)
+        } else {
+            views
         }
-        var resolver = resolverOf(vaultFiles)
-        // A file added outside Notekea since the last listing is found by listing again once.
-        if (embeds.any { !it.isNote && resolver.resolve(embed = it, note = note) == null }) {
-            vaultFiles = vaultFiles(refresh = true)
-            resolver = resolverOf(vaultFiles)
-        }
-        val notes = noteResolverOf(files = vaultFiles)
+    }
+
+    /** The [embeds] of [note], resolved among [files]. */
+    private suspend fun viewsAmong(
+        files: List<RelativePath>,
+        embeds: List<Embed>,
+        note: RelativePath,
+        chain: List<RelativePath>
+    ): List<AttachmentView> {
+        val resolver = AttachmentResolver(
+            files = files,
+            attachmentFolder = AttachmentFolder(setting = folderSetting).folderFor(note = note)
+        )
+        val notes = noteResolverOf(files = files)
         return embeds.mapNotNull { embed ->
             // A note embedded inside a sentence stays a link, so only notes on their own line are read.
             if (embed.isNote) return@mapNotNull embed.takeIf { it.isOwnLine }?.let { noteView(it, notes, chain) }
@@ -138,8 +146,9 @@ class EditorAttachments(
             else -> null
         }
         if (problem != null) return view.copy(path = path, problem = problem)
-        val text = (attachmentStore.read(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
-            ?.decodeToString() ?: return view.copy(problem = EmbedProblem.MISSING_NOTE)
+        val bytes = (attachmentStore.read(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
+            ?: return view.copy(problem = EmbedProblem.MISSING_NOTE)
+        val text = textOf(bytes = bytes) ?: return view.copy(path = path, problem = EmbedProblem.UNREADABLE_NOTE)
         val shown = embeddedNoteText.of(text = text, target = embed.target)
             ?: return view.copy(path = path, problem = EmbedProblem.MISSING_SECTION)
         return view.copy(
@@ -147,6 +156,15 @@ class EditorAttachments(
             noteText = shown,
             nested = viewsIn(note = path, text = shown, chain = chain + path)
         )
+    }
+
+    /** [bytes] as text; null when they are not UTF-8, as for the note itself. */
+    private fun textOf(
+        bytes: ByteArray
+    ): String? = try {
+        bytes.decodeToString(throwOnInvalidSequence = true)
+    } catch (_: CharacterCodingException) {
+        null
     }
 
     /**
@@ -201,7 +219,8 @@ class EditorAttachments(
     ): List<RelativePath> {
         if (refresh || files == null) {
             folderSetting = vaultSettingsReader.attachmentFolderPath(vaultPath = vaultPath)
-            files = (attachmentStore.files(vaultPath = vaultPath) as? Outcome.Success)?.value.orEmpty()
+            // A listing that failed says nothing about the vault: the last one stays, and the next reading tries again.
+            (attachmentStore.files(vaultPath = vaultPath) as? Outcome.Success)?.let { files = it.value }
         }
         return files.orEmpty()
     }
@@ -219,16 +238,7 @@ class EditorAttachments(
         path: RelativePath
     ): ImageBitmap? {
         val bytes = (attachmentStore.read(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
-        return bytes?.let {
-            withContext(context = dispatchers.default) {
-                try {
-                    it.decodeToImageBitmap()
-                } catch (_: IllegalArgumentException) {
-                    // Not a picture Skia can read (a broken or renamed file): it shows as a file to open instead.
-                    null
-                }
-            }
-        }
+        return bytes?.let { decodedImage(bytes = it, dispatcher = dispatchers.default) }
     }
 
     /** A decoded picture, and the reading of a note's embeds that last used it. */

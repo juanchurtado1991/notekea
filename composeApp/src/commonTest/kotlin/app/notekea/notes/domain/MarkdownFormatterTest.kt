@@ -53,6 +53,26 @@ class MarkdownFormatterTest {
     }
 
     @Test
+    fun `italic undoes itself on bold text, and only two stars read as bold alone`() {
+        val italic = FormatAction.Italic(placeholder = "x")
+
+        assertEquals(
+            expected = listOf(
+                "Mix **corn** flour" to "corn",
+                "Mix **corn** flour" to "corn",
+                "Mix corn flour" to "corn",
+                "Mix ***corn*** flour" to "corn"
+            ),
+            actual = listOf(
+                apply(text = "Mix ***corn*** flour", selected = "corn", action = italic),
+                apply(text = "Mix ***corn*** flour", cursor = 9, action = italic),
+                apply(text = "Mix *corn* flour", selected = "corn", action = italic),
+                apply(text = "Mix **corn** flour", cursor = 8, action = italic)
+            )
+        )
+    }
+
+    @Test
     fun `list styles apply to every selected line, replace other lists, and come off when all have them`() {
         val lines = "Flour\nWater\nSalt"
 

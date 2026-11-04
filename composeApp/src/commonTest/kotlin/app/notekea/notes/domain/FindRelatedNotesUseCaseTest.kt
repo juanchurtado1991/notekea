@@ -45,6 +45,33 @@ class FindRelatedNotesUseCaseTest {
         assertEquals(expected = true, actual = "tomatoes" in result.related.first().snippet.text.lowercase())
     }
 
+    // Audit: the note a click opens was missing from "Already linked" when another note shared its name.
+    @Test
+    fun `a link to a name two notes share counts as linking the note a click opens`() = runTest {
+        val root = RelativePath(value = "Arepas.md")
+        val shared = RelativePath(value = "Recipes/Arepas.md")
+
+        val result =
+            findRelated(vaultPath = VAULT, note = GARDEN, text = "See [[Arepas]].", notes = ALL + root + shared)
+
+        assertEquals(expected = listOf(root), actual = (result as Outcome.Success).value.linked)
+    }
+
+    // Audit: a note the model could not read showed as the search model failing to load.
+    @Test
+    fun `a note too long for the model is told apart from a failing model, its links still shown`() = runTest {
+        embedder.failure = EmbeddingError.TextTooLong(index = 0, tokens = 600)
+
+        val result = findRelated(vaultPath = VAULT, note = GARDEN, text = "See [[Weekly menu]].", notes = ALL)
+
+        assertEquals(
+            expected = Outcome.Success(
+                value = RelatedNotes(related = emptyList(), linked = listOf(MENU), isTooLong = true)
+            ),
+            actual = result
+        )
+    }
+
     @Test
     fun `at most eight notes are related`() = runTest {
         indexed(*(1..12).map { RelativePath(value = "Note $it.md") to "Tomatoes and basil, note $it." }.toTypedArray())
@@ -60,7 +87,7 @@ class FindRelatedNotesUseCaseTest {
         embedder.failure = EmbeddingError.EngineFailed
         val model = findRelated(vaultPath = VAULT, note = GARDEN, text = "Tomatoes.", notes = ALL)
 
-        assertEquals(expected = Outcome.Failure(error = IndexRunError.MODEL), actual = model)
+        assertEquals(expected = Outcome.Failure(error = IndexRunError.Model), actual = model)
     }
 
     /** Writes the notes and indexes them as the app does. */

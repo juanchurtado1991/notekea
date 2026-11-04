@@ -23,6 +23,7 @@ fun SuiteBuilder.editorViewCases() {
     previewRemembered()
     previewLinks()
     previewLook()
+    createdKept()
 }
 
 private fun SuiteBuilder.editLook() {
@@ -86,6 +87,9 @@ private fun SuiteBuilder.previewLinks() {
         clickWords(words = "A note that does not exist yet")
         expectFile(path = "$PLAYGROUND/A note that does not exist yet.md")
         openNote(name = READ_MODE, shownText = "A finished task")
+        clickWords(words = "in a new folder")
+        expectFile(path = "$PLAYGROUND/Drafts/A note in a folder.md")
+        openNote(name = READ_MODE, shownText = "A finished task")
         clickWords(words = "Pasta e fagioli")
         expectText(text = "Pasta e fagioli")
         openNote(name = READ_MODE, shownText = "A finished task")
@@ -109,6 +113,21 @@ private fun SuiteBuilder.previewLook() {
         expected(
             text = "Headings, lists, checkboxes and the quote are drawn as such, and both code blocks are colored by " +
                 "their language (Kotlin and Python)."
+        )
+    }
+}
+
+private fun SuiteBuilder.createdKept() {
+    manual(id = "1.5-13", reason = ManualReason.SYSTEM) {
+        prepare(PLAYGROUND)
+        title(text = "Saving a note keeps the date it was created")
+        steps(
+            text = "$OPEN_READ_MODE\n3. Look at Created under Note info in the side panel.\n" +
+                "4. Type a word in the note, wait until it says Saved, then open another note and come back."
+        )
+        expected(
+            text = "On Windows and macOS, Created shows the same date and time as before. Linux cannot keep it, so " +
+                "this case does not apply there."
         )
     }
 }

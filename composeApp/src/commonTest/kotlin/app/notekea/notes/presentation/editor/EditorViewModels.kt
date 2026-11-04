@@ -22,6 +22,7 @@ import app.notekea.notes.domain.FakeVaultSettingsReader
 import app.notekea.notes.domain.FillTemplateUseCase
 import app.notekea.notes.domain.NoteFixtures.VAULT
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
+import app.notekea.notes.domain.KeepUnsavedTextUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
@@ -35,7 +36,10 @@ import kotlin.time.Instant
  * The fakes behind an [EditorViewModel] and the ViewModel over them with real use cases, shared by the editor's
  * ViewModel tests. [attachmentStore] sees the files [operations] holds, as the disk would.
  */
-class EditorViewModels(dispatcher: CoroutineDispatcher) {
+class EditorViewModels(
+    dispatcher: CoroutineDispatcher,
+    io: CoroutineDispatcher = dispatcher
+) {
     val scanner = FakeNoteScanner()
     val store = FakeNoteContentStore()
     val operations = FakeNoteFileOperations()
@@ -46,7 +50,7 @@ class EditorViewModels(dispatcher: CoroutineDispatcher) {
     val clipboard = FakeClipboardReader()
     val opener = FakeFileOpener()
     val times = FakeNoteTimesReader()
-    private val dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
+    private val dispatchers = FakeAppDispatchers(dispatcher = dispatcher, io = io)
 
     fun create(): EditorViewModel = EditorViewModel(
         vaultPath = VAULT,
@@ -85,6 +89,7 @@ class EditorViewModels(dispatcher: CoroutineDispatcher) {
         ),
         fillTemplate = fillTemplate(),
         propertyTools = propertyTools(),
+        keepUnsavedText = KeepUnsavedTextUseCase(noteFileOperations = operations, noteContentStore = store),
         noteInfoTools = noteInfoTools()
     )
 

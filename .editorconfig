@@ -40,3 +40,7 @@ ktlint_standard_no-empty-first-line-in-class-body = disabled
 
 # Compose functions are PascalCase by convention.
 ktlint_function_naming_ignore_when_annotated_with = Composable
+
+# The accessors kotlin-dsl generates for the convention plugin, which it adds to buildSrc's main source set.
+[**/build/generated-sources/**.kt]
+ktlint_standard = disabled

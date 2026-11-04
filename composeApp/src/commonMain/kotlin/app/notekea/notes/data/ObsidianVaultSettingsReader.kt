@@ -8,9 +8,10 @@ import app.notekea.notes.domain.TemplateSettings
 import app.notekea.notes.domain.VaultSettingsReader
 import co.touchlab.kermit.Logger
 import com.ghost.serialization.Ghost
-import kotlinx.coroutines.CancellationException
+import com.ghost.serialization.exception.GhostJsonException
 import kotlinx.coroutines.withContext
 import okio.FileSystem
+import okio.IOException
 import okio.Path.Companion.toPath
 
 /**
@@ -61,12 +62,19 @@ class ObsidianVaultSettingsReader(
         try {
             if (!fileSystem.exists(path = file)) return@withContext null
             decode(fileSystem.read(file = file) { readUtf8() })
-        } catch (cancellation: CancellationException) {
-            throw cancellation
-        } catch (exception: Exception) {
-            logger.w(throwable = exception) { UNREADABLE_MESSAGE + fileName }
-            null
+        } catch (exception: IOException) {
+            unreadable(fileName = fileName, cause = exception)
+        } catch (exception: GhostJsonException) {
+            unreadable(fileName = fileName, cause = exception)
         }
+    }
+
+    private fun <T> unreadable(
+        fileName: String,
+        cause: Exception
+    ): T? {
+        logger.w(throwable = cause) { UNREADABLE_MESSAGE + fileName }
+        return null
     }
 
     companion object {

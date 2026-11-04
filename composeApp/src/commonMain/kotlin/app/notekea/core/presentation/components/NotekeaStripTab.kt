@@ -1,27 +1,21 @@
 package app.notekea.core.presentation.components
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,21 +24,18 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -52,12 +43,11 @@ import androidx.compose.ui.zIndex
 import app.notekea.core.presentation.platform.onMiddleClick
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.theme.motionTween
 import app.notekea.core.presentation.theme.NotekeaIcons
 import kotlin.math.roundToInt
 
 private const val HOVER_ALPHA = 0.5f
-private const val LABEL_MAX_WIDTH_DP = 180
-private const val UNSAVED_DOT_DP = 8
 private const val SEPARATOR_HEIGHT_DP = 16
 private const val TAB_HEIGHT_DP = 30
 private const val TAB_MIN_WIDTH_DP = 96
@@ -118,7 +108,7 @@ private fun tabOffset(
     val isDragged = drag?.index == index
     val shift by animateFloatAsState(
         targetValue = if (drag == null || isDragged) 0f else targets.shiftOf(index = index, drag = drag),
-        animationSpec = tween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
+        animationSpec = motionTween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
     )
     return {
         when {
@@ -131,7 +121,8 @@ private fun tabOffset(
 
 /**
  * One tab: on the surface with rounded top corners while [isSelected], a faint fill while hovered, quiet otherwise, a
- * thin line at its end ([hasSeparator]) while neither it nor its neighbour is the selected one.
+ * thin line at its end ([hasSeparator]) while neither it nor its neighbour is the selected one. A click leaves the
+ * keyboard where it was; the selected tab is a focus stop of its own, for its menu's keys.
  */
 @Composable
 private fun StripTab(
@@ -158,6 +149,7 @@ private fun StripTab(
             .widthIn(min = TAB_MIN_WIDTH_DP.dp)
             .offset { offset().let { IntOffset(x = it.x.roundToInt(), y = it.y.roundToInt()) } }
             .onGloballyPositioned { place = it }
+            .focusStop(isSelected = isSelected, shape = shape)
             .clip(shape = shape)
             .background(color = tabColor(isSelected = isSelected, isHovered = isHovered))
             .hoverable(interactionSource = hover)
@@ -177,7 +169,7 @@ private fun StripTab(
             .clickable(role = Role.Tab, onClick = onSelect),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TabLabel(
+        NotekeaTabLabel(
             tab = tab,
             look = TabLook(isSelected = isSelected, isActive = isActive, isHovered = isHovered),
             closeLabel = closeLabel,
@@ -186,6 +178,15 @@ private fun StripTab(
         Separator(isShown = hasSeparator && !isHovered)
     }
 }
+
+/** Only the selected tab is a focus stop, with the border every focus stop shows. */
+@Composable
+private fun Modifier.focusStop(
+    isSelected: Boolean,
+    shape: Shape
+): Modifier = focusBorder(color = MaterialTheme.colorScheme.primary, shape = shape)
+    .focusProperties { canFocus = isSelected }
+    .focusable()
 
 /** The selected tab's surface, a faint fill under the pointer, or nothing. */
 @Composable
@@ -209,76 +210,6 @@ private fun Separator(
             .height(height = SEPARATOR_HEIGHT_DP.dp)
             .background(color = if (isShown) MaterialTheme.colorScheme.outline else Color.Transparent)
     )
-}
-
-/**
- * The tab's icon (primary in the active pane's selected tab), its label cut with an ellipsis when long (semibold when
- * selected), and its close button or unsaved dot.
- */
-@Composable
-private fun TabLabel(
-    tab: NotekeaTabStripItem,
-    look: TabLook,
-    closeLabel: String,
-    onClose: () -> Unit
-) {
-    val colors = MaterialTheme.colorScheme
-    Row(
-        modifier = Modifier.padding(start = NotekeaDimensions.SpacingM, end = NotekeaDimensions.SpacingXs),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        tab.icon?.let {
-            Icon(
-                imageVector = it,
-                contentDescription = null,
-                modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-                tint = if (look.isSelected && look.isActive) colors.primary else tab.iconTint ?: colors.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingXs))
-        }
-        Text(
-            text = tab.label,
-            modifier = Modifier.widthIn(max = LABEL_MAX_WIDTH_DP.dp),
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = if (look.isSelected) FontWeight.SemiBold else FontWeight.Normal
-            ),
-            color = if (look.isSelected) colors.onSurface else colors.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        CloseOrDot(unsavedLabel = tab.unsavedLabel, look = look, closeLabel = closeLabel, onClose = onClose)
-    }
-}
-
-/**
- * The tab's close button, seen on the selected or hovered tab and kept in place otherwise; a tab with unsaved changes
- * shows a dot there instead, as VS Code does, until the pointer is on it.
- */
-@Composable
-private fun CloseOrDot(
-    look: TabLook,
-    closeLabel: String,
-    onClose: () -> Unit,
-    unsavedLabel: String?
-) {
-    Box(contentAlignment = Alignment.Center) {
-        val isDotShown = unsavedLabel != null && !look.isHovered
-        NotekeaIconButton(
-            icon = NotekeaIcons.Close,
-            label = closeLabel,
-            onClick = onClose,
-            modifier = Modifier.alpha(alpha = if (!isDotShown && (look.isSelected || look.isHovered)) 1f else 0f),
-            takesFocus = false
-        )
-        if (isDotShown) {
-            Box(
-                modifier = Modifier
-                    .size(size = UNSAVED_DOT_DP.dp)
-                    .background(color = MaterialTheme.colorScheme.onSurfaceVariant, shape = CircleShape)
-                    .semantics { contentDescription = unsavedLabel }
-            )
-        }
-    }
 }
 
 /**

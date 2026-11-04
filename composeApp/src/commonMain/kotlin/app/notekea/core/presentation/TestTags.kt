@@ -6,6 +6,7 @@ package app.notekea.core.presentation
  * looks inside [TREE]. Invisible to people and screen readers.
  */
 object TestTags {
+    const val CONNECTIONS_LOADING = "connections-loading"
     const val PALETTE_RESULTS = "palette-results"
     const val TREE = "tree"
 }

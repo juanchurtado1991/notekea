@@ -47,6 +47,19 @@ class EditorAttachmentsTest {
     }
 
     @Test
+    fun `a listing that fails keeps the last one, so the files already found stay found`() = runAttachmentsTest {
+        open(text = "![[menu.pdf]]\n")
+        fixture.attachmentStore.listingFails = true
+
+        type(text = "![[menu.pdf]]\n![[gone.png]]\n")
+
+        assertEquals(
+            expected = listOf(RelativePath(value = "Recipes/menu.pdf"), null),
+            actual = viewModel.state.value.attachments.map { it.path }
+        )
+    }
+
+    @Test
     fun `embedded files are found, images read, other files shown as files and missing ones as missing`() =
         runAttachmentsTest {
             open(text = "![[plate.png|300]]\nSee ![[menu.pdf]].\n![[broken.png]]\n![[gone.png]]\n")
@@ -134,6 +147,49 @@ class EditorAttachmentsTest {
             actual = listOf(one, two, three).map { view -> view.nested.map { it.embed.target to it.problem } }
         )
     }
+
+    @Test
+    fun `an embedded note added outside Notekea is found once the text changes`() = runAttachmentsTest {
+        open(text = "![[Later]]\n")
+        fixture.attachmentStore.contents[RelativePath(value = "Later.md")] = "Now here".encodeToByteArray()
+
+        type(text = "![[Later]]\nMore\n")
+
+        assertEquals(
+            expected = "Now here" to null,
+            actual = viewModel.state.value.attachments.single().run { noteText to problem }
+        )
+    }
+
+    @Test
+    fun `an embedded note moved outside Notekea is found where it went`() = runAttachmentsTest {
+        val moved = RelativePath(value = "New/Later.md")
+        fixture.attachmentStore.contents[RelativePath(value = "Old/Later.md")] = "Here".encodeToByteArray()
+        open(text = "![[Later]]\n")
+        fixture.attachmentStore.contents.remove(key = RelativePath(value = "Old/Later.md"))
+        fixture.attachmentStore.contents[moved] = "Here".encodeToByteArray()
+
+        type(text = "![[Later]]\nMore\n")
+
+        assertEquals(
+            expected = moved to null,
+            actual = viewModel.state.value.attachments.single().run { path to problem }
+        )
+    }
+
+    @Test
+    fun `text pasted with windows line breaks goes in with plain ones, so a windows note saves them once`() =
+        runAttachmentsTest {
+            open(text = "Intro\r\n")
+            viewModel.buffer.edit { selection = TextRange(index = length) }
+            fixture.clipboard.text = "One\r\nTwo\r\n"
+
+            send(intent = EditorIntent.OnPaste)
+            send(intent = EditorIntent.OnSaveShortcut)
+
+            assertEquals(expected = "Intro\nOne\nTwo\n", actual = viewModel.buffer.text.toString())
+            assertEquals(expected = "Intro\r\nOne\r\nTwo\r\n", actual = fixture.store.texts[NOTE])
+        }
 
     @Test
     fun `a pasted image is saved as Obsidian names it and embedded on its own line, pasted text goes in as text`() =
@@ -241,6 +297,16 @@ class EditorAttachmentsTest {
         fixture.scanner.addNote(file = file(path = NOTE.value))
         fixture.operations.existing += NOTE
         send(intent = EditorIntent.OnOpen(path = NOTE))
+    }
+
+    /** Types [text] over the body, then lets the attachments be read again. */
+    private fun TestScope.type(
+        text: String
+    ) {
+        viewModel.buffer.edit { replace(start = 0, end = length, text = text) }
+        Snapshot.sendApplyNotifications()
+        advanceTimeBy(delayTimeMillis = SETTLE_MILLIS)
+        runCurrent()
     }
 
     /** Sends [intent], then lets the edits reach the ViewModel and the attachments be read again. */

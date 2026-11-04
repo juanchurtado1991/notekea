@@ -26,6 +26,7 @@ class AppearanceViewModel(
         when (intent) {
             is AppearanceIntent.OnThemeChoose -> save { it.copy(theme = intent.theme) }
             is AppearanceIntent.OnModeChoose -> save { it.copy(mode = intent.mode) }
+            AppearanceIntent.OnReduceMotionToggle -> save { it.copy(reduceMotion = !it.reduceMotion) }
         }
     }
 
@@ -33,7 +34,7 @@ class AppearanceViewModel(
         change: (Appearance) -> Appearance
     ) {
         val appearance = change(state.value.appearance)
-        reduce { it.copy(appearance = appearance) }
+        reduce { it.copy(appearance = appearance, hasSaveFailed = false) }
         launchGuarded(onError = ::logUnexpectedError) { appearanceStore.save(appearance = appearance) }
     }
 
@@ -41,6 +42,7 @@ class AppearanceViewModel(
         throwable: Throwable
     ) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
+        reduce { it.copy(hasSaveFailed = true) }
     }
 
     private companion object {

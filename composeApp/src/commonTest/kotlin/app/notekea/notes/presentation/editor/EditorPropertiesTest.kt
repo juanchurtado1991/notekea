@@ -115,6 +115,40 @@ class EditorPropertiesTest {
     }
 
     @Test
+    fun `YAML whose write failed is kept with the text when the note is left`() = runPropertiesTest {
+        fixture.store.texts[NOTE] = BROKEN
+        fixture.store.texts[OTHER] = TEXT
+        fixture.operations.existing += OTHER
+        open()
+        fixture.store.refused += NOTE
+        send(intent = PropertyIntent.OnSourceEdit(path = NOTE, yaml = FIXED))
+
+        send(intent = EditorIntent.OnOpen(path = OTHER))
+
+        assertEquals(expected = "---\n$FIXED\n---\n# Broken\n", actual = fixture.store.texts[COPY])
+    }
+
+    @Test
+    fun `YAML that met an outside change is written by Keep mine, and dropped by Load theirs`() = runPropertiesTest {
+        val mine = "---\n$FIXED\n---\n# Broken\n"
+        val answers = listOf(EditorIntent.OnKeepMine to mine, EditorIntent.OnLoadTheirs to OUTSIDE)
+        answers.forEach { (answer, expected) ->
+            fixture.store.texts[NOTE] = BROKEN
+            send(intent = EditorIntent.OnOpen(path = null))
+            open()
+            viewModel.onIntent(intent = PropertyIntent.OnSourceEdit(path = NOTE, yaml = FIXED))
+            fixture.store.texts[NOTE] = OUTSIDE
+            advanceTimeBy(delayTimeMillis = SETTLE_MILLIS)
+            runCurrent()
+
+            send(intent = answer)
+            send(intent = EditorIntent.OnSaveShortcut)
+
+            assertEquals(expected = expected, actual = fixture.store.texts[NOTE])
+        }
+    }
+
+    @Test
     fun `the fold is remembered for every note and run, and the source view is toggled`() = runPropertiesTest {
         open()
         send(intent = PropertyIntent.OnFoldToggle)
@@ -158,11 +192,13 @@ class EditorPropertiesTest {
 
     companion object {
         private const val FIXED = "title: Broken on purpose"
+        private const val OUTSIDE = "---\ntitle: Broken\n---\n# Broken\n"
         private const val SETTLE_MILLIS = 1_200L
         private const val TYPING_MILLIS = 500L
         private val OTHER = RelativePath(value = "Recipes/Cachapas.md")
         private const val BROKEN = "---\ntitle: Broken on purpose\nthis line is not a property\n---\n# Broken\n"
         private const val TEXT = "---\n# kept\nstatus: draft\ntags: [recipe]\nservings: 4\n---\n# Arepas\n"
         private val NOTE = RelativePath(value = "Recipes/Arepas.md")
+        private val COPY = RelativePath(value = "Recipes/Arepas (unsaved).md")
     }
 }

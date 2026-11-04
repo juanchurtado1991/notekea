@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,7 +35,7 @@ private const val PREVIEW_WIDTH_DP = 280
 
 /**
  * A section's header, as desktop inspectors and sidebars draw it: its [title] in small capitals and, when it folds
- * ([onToggle]), a chevron showing whether it [isOpen]; a click folds or opens it. [count] (how many it holds) sits at
+ * ([onToggle]), a chevron showing whether it [isOpen]; a click, or Enter on it, folds or opens it. [count] (how many it holds) sits at
  * the end. Only a header with a [shortcutHint] (the shortcut that goes to the section) has a tooltip: the title says the
  * rest, and a tooltip repeating it would cover the section's first row.
  */
@@ -67,15 +66,16 @@ private fun HeaderRow(
     onToggle: (() -> Unit)?,
     count: Int?
 ) {
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    val click = onToggle?.let {
-        Modifier.focusProperties { canFocus = false }.clickable(role = Role.Button, onClick = it)
-    } ?: Modifier
+    val colors = MaterialTheme.colorScheme
+    val muted = colors.onSurfaceVariant
+    val shape = MaterialTheme.shapes.small
+    val click = onToggle?.let { Modifier.clickable(role = Role.Button, onClick = it) } ?: Modifier
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = NotekeaDimensions.CompactControlSize)
-            .clip(shape = MaterialTheme.shapes.small)
+            .focusBorder(color = colors.primary, shape = shape)
+            .clip(shape = shape)
             .then(other = click)
             .padding(horizontal = NotekeaDimensions.SpacingXs),
         verticalAlignment = Alignment.CenterVertically,

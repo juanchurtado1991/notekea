@@ -1,0 +1,2 @@
+-- Audit 20: why a note is left out of the search index, so it is not read again until it changes.
+ALTER TABLE note_index_state ADD COLUMN skip_reason TEXT;

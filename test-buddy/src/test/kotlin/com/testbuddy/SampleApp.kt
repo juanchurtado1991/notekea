@@ -35,7 +35,9 @@ import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import java.nio.file.Files
 
 /**
@@ -73,6 +75,7 @@ private fun SampleColumn(folders: CaseFolders) {
         Box(modifier = Modifier.size(size = 0.dp)) { Button(onClick = {}) { Text(text = "Clicked $clicks times") } }
         Button(onClick = { clicks++ }) { Text(text = "Clicked $clicks times") }
         Button(onClick = { saveLater = true }) { Text(text = "Save later") }
+        LateText()
         Button(onClick = { clicks += 10 }, modifier = Modifier.semantics { contentDescription = "Add ten" }) {
             Text(text = "+10")
         }
@@ -81,6 +84,22 @@ private fun SampleColumn(folders: CaseFolders) {
         LazyColumn(modifier = Modifier.height(height = 200.dp)) { items(count = 100) { Text(text = "Row $it") } }
         FarText()
     }
+}
+
+/** A button whose text shows a moment after the click, for what can only be caught by watching for a while. */
+@Composable
+private fun LateText() {
+    var clicked by remember { mutableStateOf(false) }
+    var shows by remember { mutableStateOf(false) }
+    LaunchedEffect(clicked) {
+        if (clicked) {
+            // On the real clock, not the test's, which skips a delay as soon as the app is idle.
+            withContext(Dispatchers.Default) { delay(timeMillis = 300) }
+            shows = true
+        }
+    }
+    Button(onClick = { clicked = true }) { Text(text = "Fail later") }
+    if (shows) Text(text = "Something failed")
 }
 
 /** A link inside a sentence, for clickWords, and a text with a right-click menu, for rightClick. */

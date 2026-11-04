@@ -1,5 +1,6 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import kotlinx.coroutines.flow.first
@@ -19,14 +20,18 @@ class IndexVaultUseCaseTest {
     private val embedder = FakeTextEmbedder()
     private val index = FakeVectorIndex()
     private val states = FakeIndexStateStore()
+    private val shortEmbedder = FakeTextEmbedder(maxTokens = SHORT_LIMIT)
     private val indexVault = indexVault(embedder = embedder)
 
-    private fun indexVault(embedder: FakeTextEmbedder) = IndexVaultUseCase(
+    private fun indexVault(
+        embedder: FakeTextEmbedder,
+        vectorIndex: VectorIndex = index
+    ) = IndexVaultUseCase(
         planIndex = PlanIndexUseCase(),
         chunkNote = ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder())),
         noteContentStore = contents,
         textEmbedder = embedder,
-        vectorIndex = index,
+        vectorIndex = vectorIndex,
         indexStateStore = states
     )
 
@@ -109,6 +114,88 @@ class IndexVaultUseCaseTest {
         assertEquals(expected = setOf(AREPAS), actual = index.notes.getValue(VAULT).keys)
     }
 
+    // Audit: one note that broke the chunker ended every run, so no note after it was ever indexed.
+    @Test
+    fun `an unexpected failure on one note skips it, the others still indexed`() = runTest {
+        val broken = object : VectorIndex by index {
+            override suspend fun put(
+                vaultPath: String,
+                note: RelativePath,
+                chunks: List<NoteChunk>,
+                vectors: List<FloatArray>
+            ): Outcome<Unit, IndexError> {
+                check(note != DUNE)
+                return index.put(vaultPath = vaultPath, note = note, chunks = chunks, vectors = vectors)
+            }
+        }
+        val notes = write(AREPAS to "Corn.", DUNE to "Water.", LISBON to "River.")
+
+        val last = indexVault(embedder = embedder, vectorIndex = broken)(vaultPath = VAULT, notes = notes).last()
+
+        assertEquals(expected = listOf(DUNE to SkipReason.FAILED), actual = last.skipped.map { it.path to it.reason })
+        assertEquals(
+            expected = true to setOf(AREPAS, LISBON),
+            actual =
+            last.isFinished to index.notes.getValue(VAULT).keys
+        )
+    }
+
+    // Audit: both kept the vectors of their old text, in search results, and were read and embedded again every run.
+    @Test
+    fun `a note grown too large or too long leaves the index, and is not read again until it changes`() = runTest {
+        val shortModel = indexVault(embedder = shortEmbedder)
+        val small = write(AREPAS to "Corn.", LONG to "Few words.")
+        shortModel(vaultPath = VAULT, notes = small).last()
+        val grown = listOf(small[0].copy(size = IndexVaultUseCase.MAX_NOTE_BYTES + 1)) +
+            write(LONG to List(size = 50) { "word" }.joinToString(separator = " "), size = 2)
+
+        val first = shortModel(vaultPath = VAULT, notes = grown).last()
+        shortEmbedder.embedded.clear()
+        val next = shortModel(vaultPath = VAULT, notes = grown).last()
+
+        assertEquals(expected = emptySet<RelativePath>(), actual = index.notes.getValue(VAULT).keys)
+        assertEquals(expected = first.skipped, actual = next.skipped)
+        assertEquals(
+            expected = listOf(SkipReason.TOO_LONG, SkipReason.TOO_LARGE) to emptyList<String>(),
+            actual = next.skipped.map { it.reason } to shortEmbedder.embedded
+        )
+    }
+
+    @Test
+    fun `a note back to a size it can be indexed at goes in the index again`() = runTest {
+        val notes = write(AREPAS to "Corn.").map { it.copy(size = IndexVaultUseCase.MAX_NOTE_BYTES + 1) }
+        indexVault(vaultPath = VAULT, notes = notes).last()
+
+        val last = indexVault(vaultPath = VAULT, notes = write(AREPAS to "Corn.")).last()
+
+        assertEquals(expected = 1 to emptyList<SkippedNote>(), actual = last.indexed to last.skipped)
+        assertEquals(expected = setOf(AREPAS), actual = index.notes.getValue(VAULT).keys)
+    }
+
+    // Audit: one chunk the model refused left its whole note out of the index.
+    @Test
+    fun `a chunk the model refuses is left out, the rest of its note indexed`() = runTest {
+        val longSection = List(size = 150) { "word" }.joinToString(separator = " ")
+        val notes = write(LONG to "# One\n$longSection\n\n# Two\nShort section.")
+
+        val last = indexVault(embedder = FakeTextEmbedder(maxTokens = 100))(vaultPath = VAULT, notes = notes).last()
+
+        val held = index.notes.getValue(VAULT).getValue(LONG).map { (chunk, _) -> chunk.headingPath }
+        assertEquals(expected = 1 to emptyList<SkippedNote>(), actual = last.indexed to last.skipped)
+        assertEquals(expected = listOf(listOf("Two")), actual = held)
+    }
+
+    // Audit: the title and headings in front of a chunk that just fits pushed it past the model's limit.
+    @Test
+    fun `a long title is cut to what the chunk leaves, so the note is still indexed`() = runTest {
+        val title = RelativePath(value = List(size = 50) { "title" }.joinToString(separator = " ") + ".md")
+        val notes = write(title to "Six short words in this note.")
+
+        val last = indexVault(embedder = FakeTextEmbedder(maxTokens = 20))(vaultPath = VAULT, notes = notes).last()
+
+        assertEquals(expected = 1 to emptyList<SkippedNote>(), actual = last.indexed to last.skipped)
+    }
+
     @Test
     fun `a failing model or a busy index stops the run, and nothing is marked done`() = runTest {
         val notes = write(AREPAS to "Corn.")
@@ -119,7 +206,7 @@ class IndexVaultUseCaseTest {
         val busy = indexVault(vaultPath = VAULT, notes = notes).last()
 
         assertEquals(
-            expected = listOf(IndexRunError.MODEL, IndexRunError.INDEX) to emptyList(),
+            expected = listOf(IndexRunError.Model, IndexRunError.Index) to emptyList(),
             actual = listOf(model.error, busy.error) to states.read(vaultPath = VAULT)
         )
     }

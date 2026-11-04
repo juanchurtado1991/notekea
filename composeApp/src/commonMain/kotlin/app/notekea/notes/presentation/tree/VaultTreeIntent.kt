@@ -66,6 +66,15 @@ sealed interface VaultTreeIntent {
 
     data object OnNoticeDismiss : VaultTreeIntent
 
+    /** Something unexpected went wrong around the tree (the tabs): the sidebar's banner says so. */
+    data object OnUnexpectedError : VaultTreeIntent
+
+    /** The editor kept what it could not save of [note]: in [copy], or in memory when even that failed (null). */
+    data class OnUnsavedKept(
+        val note: RelativePath,
+        val copy: RelativePath?
+    ) : VaultTreeIntent
+
     data object OnRenameCancel : VaultTreeIntent
 
     data object OnRenameConfirm : VaultTreeIntent

@@ -15,7 +15,9 @@ import app.notekea.core.domain.time.ElapsedTime
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaButtonStyle
+import app.notekea.core.presentation.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.components.NotekeaListItem
+import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.platform.displayPath
 import app.notekea.core.presentation.elapsedTimeText
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
@@ -32,7 +34,8 @@ private const val PREVIEW_WIDTH_DP = 520
 
 /**
  * A recent vault: its name, its folder as users write it ("~/Notes") and when it was last opened. A vault whose
- * folder is gone is muted and offers "Locate…" and "Remove" instead of failing when clicked.
+ * folder is gone is muted and offers "Locate…" and "Remove" instead of failing when clicked. Its menu offers the same,
+ * and any recent vault can be removed from it.
  */
 @Composable
 internal fun RecentVaultRow(
@@ -44,28 +47,65 @@ internal fun RecentVaultRow(
     enabled: Boolean = true
 ) {
     val path = recentVault.vault.path
-    NotekeaListItem(
-        title = recentVault.vault.name,
-        onClick = onOpen,
-        supportingText = if (recentVault.isMissing) {
-            stringResource(resource = Res.string.welcome_recent_missing)
-        } else {
-            displayPath(path = path, platformConventions = platformConventions)
-        },
-        enabled = enabled && !recentVault.isMissing,
-        onClickLabel = stringResource(resource = Res.string.welcome_recent_open),
-        trailingContent = {
-            if (recentVault.isMissing) {
-                MissingVaultActions(enabled = enabled, onLocate = onLocate, onRemove = onRemove)
+    NotekeaContextMenuArea(
+        sections = recentVaultMenu(
+            isMissing = recentVault.isMissing,
+            enabled = enabled,
+            onOpen = onOpen,
+            onLocate = onLocate,
+            onRemove = onRemove
+        )
+    ) {
+        NotekeaListItem(
+            title = recentVault.vault.name,
+            onClick = onOpen,
+            supportingText = if (recentVault.isMissing) {
+                stringResource(resource = Res.string.welcome_recent_missing)
             } else {
-                Text(
-                    text = elapsedTimeText(elapsed = recentVault.lastOpened),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                displayPath(path = path, platformConventions = platformConventions)
+            },
+            enabled = enabled && !recentVault.isMissing,
+            onClickLabel = stringResource(resource = Res.string.welcome_recent_open),
+            trailingContent = {
+                if (recentVault.isMissing) {
+                    MissingVaultActions(enabled = enabled, onLocate = onLocate, onRemove = onRemove)
+                } else {
+                    Text(
+                        text = elapsedTimeText(elapsed = recentVault.lastOpened),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-        }
+        )
+    }
+}
+
+/** Open, or Locate… for a vault whose folder is gone, then Remove. */
+@Composable
+private fun recentVaultMenu(
+    isMissing: Boolean,
+    enabled: Boolean,
+    onOpen: () -> Unit,
+    onLocate: () -> Unit,
+    onRemove: () -> Unit
+): List<List<NotekeaMenuItem>> {
+    val open = NotekeaMenuItem(
+        label = stringResource(resource = Res.string.welcome_recent_open),
+        onClick = onOpen,
+        enabled = enabled
     )
+    val locate = NotekeaMenuItem(
+        label = stringResource(resource = Res.string.welcome_recent_locate),
+        onClick = onLocate,
+        enabled = enabled
+    )
+    val remove = NotekeaMenuItem(
+        label = stringResource(resource = Res.string.welcome_recent_remove),
+        onClick = onRemove,
+        enabled = enabled
+    )
+    return listOf(listOf(if (isMissing) locate else open), listOf(remove))
 }
 
 @Composable

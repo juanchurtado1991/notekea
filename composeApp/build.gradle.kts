@@ -1,27 +1,17 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.kotlin.multiplatform.library)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.compose.multiplatform)
+    id("org.jetbrains.kotlin.multiplatform")
+    id("com.android.kotlin.multiplatform.library")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.compose")
     alias(libs.plugins.ksp)
     alias(libs.plugins.ghost)
     alias(libs.plugins.sqldelight)
-    alias(libs.plugins.ktlint)
+    id("notekea.jvm")
     alias(libs.plugins.kover)
 }
 
 private val modelTestPattern = "*RealModelTest"
 private val appPackageName = "Notekea"
-// The installers need a plain version whose first number is above 0 (DMG) and with no suffix (MSI); people see
-// appDisplayVersion, in About and crash reports, until the first public release. A milestone build passes both:
-// `-PpackageVersion=1.1.2 -PreleaseName=m1-rc2` (qa/README.md), so each release candidate installs over the last.
-private val appPackageVersion = providers.gradleProperty("packageVersion").getOrElse("1.0.0")
-private val appDisplayVersion = "0.1.0-alpha" +
-    providers.gradleProperty("releaseName").map { " ($it)" }.getOrElse("")
-private val appVersionSystemProperty = "notekea.version"
-private val jdkVersion = 21
 private val androidCompileSdk = 36
 private val androidMinSdk = 26
 private val androidNamespace = "app.notekea"
@@ -34,18 +24,8 @@ private val appVendor = "Notekea"
 private val linuxAppCategory = "Office"
 // Never change it: Windows recognizes a newer installer as an update of the installed app by this ID.
 private val windowsUpgradeUuid = "8a661b42-78a2-4f14-83a6-1249b614b495"
-private val nativeAccessJvmArgument = "--enable-native-access=ALL-UNNAMED"
-
-// The JDK modules the installers keep, shared with Notekea QA (gradle.properties).
-private val runtimeModules = providers.gradleProperty("notekea.runtimeModules").get().split(",")
 
 kotlin {
-    jvmToolchain(jdkVersion)
-
-    compilerOptions {
-        allWarningsAsErrors.set(true)
-    }
-
     jvm()
 
     // Android target only so Android Studio can render the common @Previews (no Android app yet).
@@ -74,10 +54,7 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.core)
-            implementation(libs.koog.agents.core)
-            implementation(libs.koog.agents.tools)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.ktor.client.core)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.markdown.renderer.code)
             implementation(libs.markdown.renderer.m3)
@@ -97,14 +74,10 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             // Crash reports and their notice (test-buddy-crash/README.md): the one Test Buddy library the release ships.
-            implementation(project(":test-buddy-crash"))
+            implementation(projects.testBuddyCrash)
 
             implementation(libs.directory.watcher)
-            implementation(libs.java.keyring)
-            implementation(libs.jgit)
-            implementation(libs.jgit.ssh.apache)
             implementation(libs.kotlinx.coroutines.swing)
-            implementation(libs.ktor.client.okhttp)
             implementation(libs.llama)
             implementation(libs.lucene.core)
             implementation(libs.lucene.analysis.common)
@@ -119,7 +92,6 @@ kotlin {
 }
 
 dependencies {
-    ktlintRuleset(project(":ktlint-rules"))
     // Preview rendering for Android Studio; on the KMP library plugin it goes on the runtime classpath.
     "androidRuntimeClasspath"(libs.compose.ui.tooling)
 }
@@ -133,9 +105,6 @@ sqldelight {
 }
 
 ktlint {
-    version.set(libs.versions.ktlint.cli.get())
-    verbose.set(true)
-    ignoreFailures.set(false)
     filter {
         exclude("**/build/**")
         exclude("**/generated/**")
@@ -184,27 +153,12 @@ compose.resources {
 compose.desktop {
     application {
         mainClass = mainClassName
-        // Package the toolchain's JDK, not the one that runs Gradle, so the installers ship the JDK the app is built
-        // and tested on.
-        javaHome = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(jdkVersion) }
-            .get().metadata.installationPath.asFile.absolutePath
-        // Skiko and java-llama.cpp load native libraries; without this the JVM warns on every launch.
-        jvmArgs += nativeAccessJvmArgument
-        jvmArgs += "-D$appVersionSystemProperty=$appDisplayVersion"
+        notekeaDesktopApp(project = project)
 
         nativeDistributions {
-            // The embedding model (ROADMAP.md 2.2) goes with the app, read from compose.application.resources.dir.
-            appResourcesRootDir.set(layout.buildDirectory.dir("app-resources"))
-            targetFormats(
-                TargetFormat.Deb,
-                TargetFormat.Dmg,
-                TargetFormat.Msi
-            )
             packageName = appPackageName
-            packageVersion = appPackageVersion
             description = appDescription
             vendor = appVendor
-            modules(*runtimeModules.toTypedArray())
 
             // Each installer adds Notekea to the system's launcher with the app's logo: the Start menu and the desktop
             // on Windows, Applications (and so Launchpad) on macOS, the applications menu on Linux.
@@ -231,10 +185,8 @@ compose.desktop {
     }
 }
 
-// The bundled embedding model: downloaded once (checked by its SHA-256) and put into the app's resources.
+// The bundled embedding model: downloaded once (checked by its SHA-256).
 val downloadEmbeddingModel = EmbeddingModel.registerDownload(project)
-val embeddingModelResources = EmbeddingModel.appResources(project)
-tasks.matching { it.name == "prepareAppResources" }.configureEach { dependsOn(embeddingModelResources) }
 
 // The tests that load the real model (named *RealModelTest) stay out of check, which every pull request runs: they run in
 // `./gradlew :composeApp:modelTest`, in the nightly build (ARCHITECTURE.md, testing).
@@ -249,19 +201,3 @@ tasks.register<Test>("modelTest") {
     dependsOn(downloadEmbeddingModel)
     systemProperty(EmbeddingModel.TEST_PROPERTY, EmbeddingModel.file(project).asFile.absolutePath)
 }
-
-val checkRuntimeModules = tasks.register<CheckRuntimeModulesTask>("checkRuntimeModules") {
-    description = "Fails when the packaged runtime lacks a JDK module the app needs"
-    group = "verification"
-    val suggest = tasks.named<org.jetbrains.compose.desktop.application.tasks.AbstractSuggestModulesTask>(
-        "suggestRuntimeModules"
-    )
-    classpath.from(suggest.map { it.files })
-    mainJar.set(suggest.flatMap { it.launcherMainJar })
-    javaHome.set(suggest.flatMap { it.javaHome })
-    jvmTarget.set(suggest.flatMap { it.jvmTarget })
-    // The packaged runtime's modules: runtimeModules plus the ones Compose always adds.
-    packagedModules.set(suggest.flatMap { it.modules })
-}
-
-tasks.named("check") { dependsOn(checkRuntimeModules) }

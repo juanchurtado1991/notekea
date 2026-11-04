@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.IntSize
 import app.notekea.core.presentation.images.scaledToCover
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
+import app.notekea.core.presentation.images.decodedImage
 import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.RelativePath
@@ -14,8 +15,9 @@ import app.notekea.notes.domain.SidePanelSection
 import app.notekea.notes.domain.Workspace
 import app.notekea.notes.presentation.tree.TreeFilePreviews
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.decodeToImageBitmap
 
 /**
  * The editor's tabs and panes of the vault at [vaultPath] (`ROADMAP.md` 1.11). Every opened note, file or folder gets a
@@ -34,6 +36,10 @@ class WorkspaceViewModel(
         attachmentStore = tools.attachmentStore,
         dispatchers = tools.dispatchers
     )
+
+    // One save at a time, each writing the latest state, so a slow save never lands after a newer one.
+    private val savingPanel = Mutex()
+    private val savingTabs = Mutex()
 
     // The tabs of the last run, until the vault's files are known ([treeLoaded]).
     private var saved: Workspace? = null
@@ -139,12 +145,7 @@ class WorkspaceViewModel(
     ) {
         val before = state.value.workspace
         reduce { it.copy(workspace = transform(it.workspace)) }
-        val after = state.value.workspace
-        if (after != before && state.value.isRestored) {
-            launchGuarded(onError = ::showUnexpectedError) {
-                tools.workspaceStore.write(vaultPath = vaultPath, workspace = after)
-            }
-        }
+        if (state.value.workspace != before && state.value.isRestored) saveTabs()
         readPreviews()
     }
 
@@ -178,10 +179,16 @@ class WorkspaceViewModel(
             tabs.open(path)
         }
         reduce { it.copy(workspace = restored, isRestored = true) }
-        launchGuarded(onError = ::showUnexpectedError) {
-            tools.workspaceStore.write(vaultPath = vaultPath, workspace = restored)
-        }
+        saveTabs()
         readPreviews()
+    }
+
+    private fun saveTabs() {
+        launchGuarded(onError = ::showUnexpectedError) {
+            savingTabs.withLock {
+                tools.workspaceStore.write(vaultPath = vaultPath, workspace = state.value.workspace)
+            }
+        }
     }
 
     /**
@@ -214,7 +221,7 @@ class WorkspaceViewModel(
     ) {
         if (path in coverSources) return
         coverSources[path] = sourceOf(path = path)
-        launchGuarded(onError = ::showUnexpectedError) {
+        launchGuarded(onError = ::logCoverError) {
             val tree = state.value.tree
             val picture = if (path.isMarkdown) {
                 tools.getNoteCover(vaultPath = vaultPath, note = path, files = tree.attachments.keys)
@@ -222,12 +229,10 @@ class WorkspaceViewModel(
                 path.takeIf { AttachmentKind.of(name = it.name) == AttachmentKind.IMAGE }
             }
             val image = picture?.let { imageOf(path = it, size = size) }
-            reduce { current ->
-                val covers = current.covers - path + (path to image)
-                val dropped = covers.keys.take(n = (covers.size - MAX_COVERS).coerceAtLeast(minimumValue = 0))
-                dropped.forEach { coverSources.remove(key = it) }
-                current.copy(covers = covers - dropped.toSet())
-            }
+            val held = state.value.covers.keys - path + path
+            val dropped = held.take(n = (held.size - MAX_COVERS).coerceAtLeast(minimumValue = 0)).toSet()
+            dropped.forEach { coverSources.remove(key = it) }
+            reduce { it.copy(covers = it.covers - path + (path to image) - dropped) }
         }
     }
 
@@ -237,14 +242,8 @@ class WorkspaceViewModel(
     ): ImageBitmap? {
         val bytes = (tools.attachmentStore.read(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
             ?: return null
-        return withContext(context = tools.dispatchers.default) {
-            try {
-                bytes.decodeToImageBitmap().scaledToCover(width = size.width, height = size.height)
-            } catch (_: IllegalArgumentException) {
-                // Not a picture Skia can read (a broken or renamed file): the card shows its icon instead.
-                null
-            }
-        }
+        val image = decodedImage(bytes = bytes, dispatcher = tools.dispatchers.default)
+        return image?.scaledToCover(width = size.width, height = size.height)
     }
 
     private fun sourceOf(
@@ -254,15 +253,24 @@ class WorkspaceViewModel(
     private fun updateSidePanel(
         change: (SidePanelPreferences) -> SidePanelPreferences
     ) {
-        val panel = change(state.value.sidePanel)
-        reduce { it.copy(sidePanel = panel) }
-        launchGuarded(onError = ::showUnexpectedError) { tools.saveSidePanel(preferences = panel) }
+        reduce { it.copy(sidePanel = change(it.sidePanel)) }
+        launchGuarded(onError = ::showUnexpectedError) {
+            savingPanel.withLock { tools.saveSidePanel(preferences = state.value.sidePanel) }
+        }
     }
 
     private fun showUnexpectedError(
         throwable: Throwable
     ) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
+        emit(effect = WorkspaceEffect.UnexpectedError)
+    }
+
+    /** A card without its picture shows its icon, so this is worth a line in the log and nothing more. */
+    private fun logCoverError(
+        throwable: Throwable
+    ) {
+        logger.w(throwable = throwable) { COVER_ERROR_MESSAGE }
     }
 
     companion object {
@@ -270,5 +278,6 @@ class WorkspaceViewModel(
         const val MAX_COVERS = 60
         private const val LOG_TAG = "WorkspaceViewModel"
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the editor's tabs"
+        private const val COVER_ERROR_MESSAGE = "A card's picture could not be read"
     }
 }

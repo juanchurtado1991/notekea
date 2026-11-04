@@ -1,7 +1,8 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
-import app.notekea.core.domain.StringPatterns.SPACE
+import app.notekea.core.domain.StringPatterns
 
 /**
  * The `#tags` written in a note's text, as Obsidian reads them, each once in the order they first appear: a `#` not
@@ -13,30 +14,31 @@ class TextTagFinder {
         lines: Sequence<String>
     ): List<String> {
         val tags = LinkedHashSet<String>()
-        var fence: Char? = null
+        val fences = FenceTracker()
         lines.forEach { line ->
-            // Most lines have no fence and no tag: the cheap character checks skip their regexes.
-            val marker = if (line.any { it in FENCE_CHARS }) {
-                MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)?.first()
-            } else {
-                null
-            }
-            when {
-                fence != null -> if (marker == fence) fence = null
-
-                marker != null -> fence = marker
-
-                TAG_MARK in line -> {
-                    val text = line.replace(regex = NOT_TEXT, replacement = SPACE)
-                    MarkdownSyntax.TAG.findAll(input = text).forEach { tags += it.groupValues[1] }
-                }
-            }
+            if (!fences.read(text = line)) tagsIn(line = line).forEach { tags += it.groupValues[1] }
         }
         return tags.toList()
     }
 
+    /**
+     * The `#tags` of a [line] outside fenced code, each match at its place in the line, its name in group 1. Most lines
+     * have no tag: the cheap character check skips the regexes.
+     */
+    fun tagsIn(
+        line: String
+    ): Sequence<MatchResult> = if (TAG_MARK in line) {
+        MarkdownSyntax.TAG.findAll(input = textOf(line = line))
+    } else {
+        emptySequence()
+    }
+
+    /** [line] with what is not text blanked, every other character where it was. */
+    private fun textOf(
+        line: String
+    ): String = NOT_TEXT.replace(input = line) { StringPatterns.SPACE.repeat(n = it.value.length) }
+
     companion object {
-        private const val FENCE_CHARS = "`~"
         private const val TAG_MARK = '#'
         private val NOT_TEXT = Regex(pattern = "(`+).*?\\1|\\[\\[[^\\]\\n]*]]|]\\([^)\\n]*\\)")
     }

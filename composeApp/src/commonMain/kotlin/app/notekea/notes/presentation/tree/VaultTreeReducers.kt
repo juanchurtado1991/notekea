@@ -216,6 +216,13 @@ internal fun reduceLinksUpdated(
     )
 )
 
+internal fun unsavedNotice(
+    intent: VaultTreeIntent.OnUnsavedKept
+): TreeNotice = TreeNotice.UnsavedKept(
+    note = intent.note.nameWithoutExtension,
+    copy = intent.copy?.nameWithoutExtension
+)
+
 /** The row a selection moves to when [path] goes away: the next one outside it, else the one before it. */
 private fun neighborOf(
     rows: List<TreeRow>,

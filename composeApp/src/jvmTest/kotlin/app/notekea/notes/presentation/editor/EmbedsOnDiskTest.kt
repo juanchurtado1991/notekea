@@ -69,6 +69,16 @@ class EmbedsOnDiskTest {
             )
         }
 
+    @Test
+    fun `an embedded note that is not UTF-8 says so, and never shows as replaced characters`() =
+        runTest(context = testDispatcher) {
+            Files.write(vault.resolve("Latin.md"), byteArrayOf(0x41, 0xE9.toByte()))
+
+            val view = attachments().viewsOf(note = RelativePath(value = "Menu.md"), text = "![[Latin]]\n").single()
+
+            assertEquals(expected = EmbedProblem.UNREADABLE_NOTE to null, actual = view.problem to view.noteText)
+        }
+
     private fun attachments() = EditorAttachments(
         vaultPath = vault.toString(),
         attachmentStore = store,

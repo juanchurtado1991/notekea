@@ -30,6 +30,7 @@ import app.notekea.notes.domain.SkippedNote
 import app.notekea.resources.Res
 import app.notekea.resources.search_index_error_busy
 import app.notekea.resources.search_index_error_model
+import app.notekea.resources.search_index_failed
 import app.notekea.resources.search_index_last_run
 import app.notekea.resources.search_index_more
 import app.notekea.resources.search_index_never
@@ -121,8 +122,8 @@ private fun ErrorText(
 ) {
     Text(
         text = when (error) {
-            IndexRunError.MODEL -> stringResource(Res.string.search_index_error_model)
-            IndexRunError.INDEX -> stringResource(Res.string.search_index_error_busy)
+            IndexRunError.Model -> stringResource(Res.string.search_index_error_model)
+            IndexRunError.Index -> stringResource(Res.string.search_index_error_busy)
         },
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.error
@@ -210,6 +211,7 @@ private fun skipReasonText(
     SkipReason.TOO_LARGE -> stringResource(Res.string.search_index_too_large)
     SkipReason.UNREADABLE -> stringResource(Res.string.search_index_unreadable)
     SkipReason.TOO_LONG -> stringResource(Res.string.search_index_too_long)
+    SkipReason.FAILED -> stringResource(Res.string.search_index_failed)
 }
 
 @Preview

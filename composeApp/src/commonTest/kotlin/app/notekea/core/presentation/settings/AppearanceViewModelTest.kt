@@ -32,6 +32,43 @@ class AppearanceViewModelTest {
     }
 
     @Test
+    fun `a choice that cannot be kept says so, until the next one is`() = runTest(context = testDispatcher) {
+        val store = FakeAppearanceStore().apply { failure = IllegalStateException("bug") }
+        val viewModel = AppearanceViewModel(appearanceStore = store)
+        advanceUntilIdle()
+
+        viewModel.onIntent(intent = AppearanceIntent.OnThemeChoose(theme = ColorTheme.FOREST_MINT))
+        advanceUntilIdle()
+        val failed = viewModel.state.value.hasSaveFailed
+        store.failure = null
+        viewModel.onIntent(intent = AppearanceIntent.OnThemeChoose(theme = ColorTheme.DEEP_SAGE))
+        advanceUntilIdle()
+
+        assertEquals(expected = true to false, actual = failed to viewModel.state.value.hasSaveFailed)
+    }
+
+    @Test
+    fun `reduce motion is kept with the theme, and off again on a second click`() = runTest(context = testDispatcher) {
+        val store = FakeAppearanceStore(initial = Appearance(theme = ColorTheme.FOREST_MINT))
+        val viewModel = AppearanceViewModel(appearanceStore = store)
+        advanceUntilIdle()
+
+        viewModel.onIntent(intent = AppearanceIntent.OnReduceMotionToggle)
+        advanceUntilIdle()
+        val turnedOn = store.kept
+        viewModel.onIntent(intent = AppearanceIntent.OnReduceMotionToggle)
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = listOf(
+                Appearance(theme = ColorTheme.FOREST_MINT, reduceMotion = true),
+                Appearance(theme = ColorTheme.FOREST_MINT)
+            ),
+            actual = listOf(turnedOn, store.kept)
+        )
+    }
+
+    @Test
     fun `it shows the kept appearance, and a theme and a mode chosen are kept together`() = runTest(
         context = testDispatcher
     ) {

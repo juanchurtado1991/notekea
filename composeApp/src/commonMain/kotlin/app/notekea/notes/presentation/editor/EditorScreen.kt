@@ -51,7 +51,10 @@ fun EditorScreen(
     val flushed = remember(viewModel) { Channel<Unit>(capacity = Channel.CONFLATED) }
     val textFocusRequester = remember { FocusRequester() }
     val onIntent = remember(viewModel, sidePanel) { routerOf(viewModel = viewModel, sidePanel = sidePanel) }
-    LaunchedEffect(notePath) { viewModel.onIntent(intent = EditorIntent.OnOpen(path = notePath)) }
+    LaunchedEffect(notePath) {
+        callbacks.onBeforeOpen(notePath)
+        viewModel.onIntent(intent = EditorIntent.OnOpen(path = notePath))
+    }
     EditorEffects(
         viewModel = viewModel,
         flushed = flushed,
@@ -135,6 +138,8 @@ private fun EditorEffects(
                 is EditorEffect.ToggleBookmark -> current.onBookmarkToggle(effect.path)
 
                 is EditorEffect.RevealFolder -> current.onRevealFolder(effect.path)
+
+                is EditorEffect.UnsavedKept -> current.onUnsavedKept(effect)
 
                 EditorEffect.FocusText -> focusText(
                     requester = textFocusRequester,

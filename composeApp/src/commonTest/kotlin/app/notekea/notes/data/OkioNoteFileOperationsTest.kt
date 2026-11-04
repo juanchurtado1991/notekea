@@ -21,6 +21,23 @@ class OkioNoteFileOperationsTest {
     private val testDispatcher = StandardTestDispatcher()
     private val fakeFileSystem = FakeFileSystem().apply { createDirectories(dir = VAULT.toPath() / IDEAS) }
 
+    // Audit: a path with `..` wrote outside the vault, Okio taking `\\` for a separator as well.
+    @Test
+    fun `nothing is created or moved out of the vault`() = runOperationsTest {
+        val note = path(value = "$IDEAS/Note.md")
+        operations().createFile(vaultPath = VAULT, path = note)
+
+        val outcomes = listOf(
+            operations().createFile(vaultPath = VAULT, path = path(value = "..\\..\\evil.md")),
+            operations().createFile(vaultPath = VAULT, path = path(value = "../evil.md")),
+            operations().createFolder(vaultPath = VAULT, path = path(value = "$IDEAS/../../evil")),
+            operations().move(vaultPath = VAULT, from = note, to = path(value = "../evil.md"))
+        )
+
+        assertEquals(expected = List(size = 4) { Outcome.Failure(error = NotesError.InvalidName) }, actual = outcomes)
+        assertEquals(expected = true, actual = fakeFileSystem.exists(path = vaultPath(path = "$IDEAS/Note.md")))
+    }
+
     @Test
     fun `an empty note and an empty folder are created where they were asked`() = runOperationsTest {
         val outcomes = listOf(
@@ -128,6 +145,40 @@ class OkioNoteFileOperationsTest {
                 )
             )
         }
+
+    @Test
+    fun `a case change never replaces another note on a disk where both names exist`() = runOperationsTest {
+        fakeFileSystem.write(file = vaultPath(path = "$IDEAS/foo.md")) { writeUtf8("lower") }
+        fakeFileSystem.write(file = vaultPath(path = "$IDEAS/Foo.md")) { writeUtf8("upper") }
+
+        val outcome = operations().move(
+            vaultPath = VAULT,
+            from = path(value = "$IDEAS/foo.md"),
+            to = path(value = "$IDEAS/Foo.md")
+        )
+
+        assertEquals(
+            expected = Outcome.Failure(error = NotesError.NameTaken(name = "Foo.md")) to listOf("lower", "upper"),
+            actual = outcome to listOf("foo.md", "Foo.md").map { name ->
+                fakeFileSystem.read(file = vaultPath(path = "$IDEAS/$name")) { readUtf8() }
+            }
+        )
+    }
+
+    @Test
+    fun `only an empty file is removed`() = runOperationsTest {
+        fakeFileSystem.write(file = vaultPath(path = "$IDEAS/Full.md")) { writeUtf8(string = "text") }
+        fakeFileSystem.write(file = vaultPath(path = "$IDEAS/Empty.md")) {}
+
+        operations().deleteEmptyFile(vaultPath = VAULT, path = path(value = "$IDEAS/Full.md"))
+        operations().deleteEmptyFile(vaultPath = VAULT, path = path(value = "$IDEAS/Empty.md"))
+
+        assertEquals(
+            expected = true to false,
+            actual = fakeFileSystem.exists(path = vaultPath(path = "$IDEAS/Full.md")) to
+                fakeFileSystem.exists(path = vaultPath(path = "$IDEAS/Empty.md"))
+        )
+    }
 
     @Test
     fun `anything on disk exists, hidden entries included`() = runOperationsTest {

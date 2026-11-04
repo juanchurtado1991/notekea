@@ -136,10 +136,10 @@ private fun SuiteBuilder.badVaultName() {
         clearText()
         type(text = "a/b")
         click(text = CREATE_CONFIRM)
-        expectText(text = "Enter a name without characters like / : * ? or quotes.")
+        expectText(text = "Enter a name that is not too long and has no characters like / : * ? or quotes.")
         click(text = "a/b")
         type(text = "c")
-        expectNoText(text = "Enter a name without characters like / : * ? or quotes.")
+        expectNoText(text = "Enter a name that is not too long and has no characters like / : * ? or quotes.")
     }
 }
 

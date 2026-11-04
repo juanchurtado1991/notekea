@@ -44,6 +44,7 @@ import app.notekea.resources.Res
 import app.notekea.resources.about_close
 import app.notekea.resources.about_copy_diagnostics
 import app.notekea.resources.about_diagnostics_copied
+import app.notekea.resources.about_diagnostics_failed
 import app.notekea.resources.about_github
 import app.notekea.resources.about_shortcuts_title
 import app.notekea.resources.about_tagline
@@ -162,10 +163,10 @@ private fun IdentityButtons(
     )
     NotekeaButton(
         text = stringResource(
-            resource = if (state.isDiagnosticsCopied) {
-                Res.string.about_diagnostics_copied
-            } else {
-                Res.string.about_copy_diagnostics
+            resource = when {
+                state.hasCopyFailed -> Res.string.about_diagnostics_failed
+                state.isDiagnosticsCopied -> Res.string.about_diagnostics_copied
+                else -> Res.string.about_copy_diagnostics
             }
         ),
         onClick = { onIntent(AboutIntent.OnCopyDiagnostics) },

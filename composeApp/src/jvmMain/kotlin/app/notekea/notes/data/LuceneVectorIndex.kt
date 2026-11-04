@@ -95,11 +95,14 @@ class LuceneVectorIndex(
         query: (IndexSearcher) -> List<SearchHit>
     ): Outcome<List<SearchHit>, IndexError> = withContext(context = dispatchers.io) {
         val folder = folderOf(vaultPath = vaultPath)
-        val exists = DirectoryReader.indexExists(FSDirectory.open(folder))
-        if (!exists) return@withContext Outcome.Success(value = emptyList())
+        if (!Files.exists(folder)) return@withContext Outcome.Success(value = emptyList())
         guarded {
             FSDirectory.open(folder).use { directory ->
-                DirectoryReader.open(directory).use { reader -> query(IndexSearcher(reader)) }
+                if (DirectoryReader.indexExists(directory)) {
+                    DirectoryReader.open(directory).use { reader -> query(IndexSearcher(reader)) }
+                } else {
+                    emptyList()
+                }
             }
         }
     }
@@ -118,7 +121,7 @@ class LuceneVectorIndex(
             .map { (document, score) -> hitOf(document = fields.document(document), score = score) }
     }
 
-    /** Any of the question's words, as the index reads them; null when it has none. */
+    /** Any of the first [MAX_QUERY_TERMS] words of the question, as the index reads them; null when it has none. */
     private fun keywordQuery(
         text: String
     ): Query? {
@@ -131,7 +134,9 @@ class LuceneVectorIndex(
         }
         if (terms.isEmpty()) return null
         val query = BooleanQuery.Builder()
-        terms.distinct().forEach { query.add(TermQuery(Term(TEXT, it)), BooleanClause.Occur.SHOULD) }
+        terms.distinct().take(n = MAX_QUERY_TERMS).forEach {
+            query.add(TermQuery(Term(TEXT, it)), BooleanClause.Occur.SHOULD)
+        }
         return query.build()
     }
 
@@ -208,6 +213,9 @@ class LuceneVectorIndex(
         // The best chunks of each ranking merged: enough for the related notes and the chat to pick from.
         private const val CANDIDATES = 50
         private const val FOLDER_BYTES = 8
+
+        // Lucene refuses a query of over 1,024 clauses, and a pasted page is no sharper a question for its last words.
+        private const val MAX_QUERY_TERMS = 256
         private const val SHA_256 = "SHA-256"
         private const val LOG_TAG = "LuceneVectorIndex"
         private const val UNAVAILABLE_MESSAGE = "The search index is unavailable"

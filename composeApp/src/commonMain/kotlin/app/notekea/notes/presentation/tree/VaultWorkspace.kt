@@ -6,16 +6,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.about.AboutDialog
 import app.notekea.core.presentation.components.EmptyState
-import app.notekea.core.presentation.settings.SettingsDialog
+import app.notekea.core.presentation.platform.LocalWindowDialogs
+import app.notekea.core.presentation.platform.WindowDialog
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.FolderCards
@@ -44,6 +41,7 @@ import app.notekea.resources.tab_missing_title
 import org.jetbrains.compose.resources.stringResource
 import app.notekea.notes.presentation.editor.SaveStatus
 import app.notekea.notes.presentation.editor.EditorViewModel
+import app.notekea.notes.presentation.editor.saveInOtherEditors
 import app.notekea.resources.tree_untitled_note
 import app.notekea.notes.presentation.workspace.WorkspaceStartActions
 
@@ -102,7 +100,7 @@ private fun ActiveStatusBar(
     )
 }
 
-/** The rail, the sidebar, the tabs and panes and the side panel, with About or Settings over them while open. */
+/** The rail, the sidebar, the tabs and panes and the side panel; the rail's About and Settings open over the window. */
 @Composable
 private fun WorkspaceBody(
     state: VaultTreeState,
@@ -120,12 +118,12 @@ private fun WorkspaceBody(
     val activeEditorState by activeEditor.state.collectAsState()
     val isNoteShown = workspaceState.workspace.activePath?.let { workspaceState.kindOf(path = it) } == TabKind.NOTE
     val findNote = { viewModels.onSwitcher(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES)) }
-    var dialog by remember { mutableStateOf<WorkspaceDialog?>(value = null) }
+    val dialogs = LocalWindowDialogs.current
     VaultTreeContent(
         state = state,
         vaultName = vaultName,
         onIntent = viewModels.tree::onIntent,
-        rail = railActionsOf(sidePanel = sidePanel, onSearch = findNote, onSwitchVault = onSwitchVault) { dialog = it },
+        rail = railActionsOf(sidePanel, findNote, onSwitchVault) { dialogs.shown = it },
         modifier = modifier,
         isSidePanelVisible = if (sidePanel.isOverlay) sidePanel.isOverlayOpen else workspaceState.sidePanel.isVisible
     ) {
@@ -133,7 +131,7 @@ private fun WorkspaceBody(
             preferences = workspaceState.sidePanel,
             sidePanel = sidePanel,
             outline = if (isNoteShown) activeEditorState.outline else emptyList(),
-            current = panes[activePane].tracker.current,
+            current = { panes[activePane].tracker.current },
             platformConventions = state.platformConventions,
             onHeadingClick = { activeEditor.onIntent(EditorIntent.OnHeadingClick(index = it)) },
             onLeave = { activeEditor.onIntent(EditorIntent.OnFocusRequest()) },
@@ -148,7 +146,6 @@ private fun WorkspaceBody(
             ) { pane, path, kind -> PaneContent(pane = pane, path = path, kind = kind, context = context) }
         }
     }
-    WorkspaceDialogs(platformConventions = state.platformConventions, onDismiss = { dialog = null }, dialog = dialog)
 }
 
 /** The notes the panes' editors hold with changes not saved yet, for their tabs' dots. */
@@ -184,28 +181,14 @@ private fun railActionsOf(
     sidePanel: SidePanelHost,
     onSearch: () -> Unit,
     onSwitchVault: () -> Unit,
-    onDialog: (WorkspaceDialog) -> Unit
+    onDialog: (WindowDialog) -> Unit
 ) = SidebarRailActions(
     onSearch = onSearch,
     onSidePanelToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
     onSwitchVault = onSwitchVault,
-    onAbout = { onDialog(WorkspaceDialog.ABOUT) },
-    onSettings = { onDialog(WorkspaceDialog.SETTINGS) }
+    onAbout = { onDialog(WindowDialog.ABOUT) },
+    onSettings = { onDialog(WindowDialog.SETTINGS) }
 )
-
-/** About or Settings over the workspace, while one is open. */
-@Composable
-private fun WorkspaceDialogs(
-    platformConventions: PlatformConventions,
-    onDismiss: () -> Unit,
-    dialog: WorkspaceDialog?
-) {
-    when (dialog) {
-        WorkspaceDialog.ABOUT -> AboutDialog(platformConventions = platformConventions, onDismiss = onDismiss)
-        WorkspaceDialog.SETTINGS -> SettingsDialog(onDismiss = onDismiss)
-        null -> Unit
-    }
-}
 
 /** What a pane's active tab shows, by what [path] is. */
 @Composable
@@ -250,12 +233,15 @@ private fun FolderTab(
     val folderCards = remember { FolderCards(naturalNameComparator = NaturalNameComparator()) }
     FolderGrid(
         folder = folder,
-        fileCount = (tree.notes.keys + tree.attachments.keys).count { it.isWithin(folder = folder) },
+        fileCount = remember(tree, folder) { tree.fileCountIn(folder = folder) },
         cards = remember(tree, folder) { folderCards.of(folder = folder, tree = tree) },
         covers = context.workspaceState.covers,
         onOpen = { workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = it)) },
         onCoverNeeded = { path, size ->
             workspace.onIntent(intent = WorkspaceIntent.OnCoverRequest(path = path, size = size))
+        },
+        cardMenu = { card, content ->
+            EntryMenuArea(card.asTreeRow(), { context.state }, context.viewModels.tree::onIntent, content = content)
         }
     )
 }
@@ -276,7 +262,7 @@ private fun NoteEditor(
         notePath = path,
         viewModel = context.viewModels.editors[pane],
         platformConventions = state.platformConventions,
-        callbacks = editorCallbacksOf(viewModels = context.viewModels, path = path),
+        callbacks = editorCallbacksOf(viewModels = context.viewModels, pane = pane, path = path),
         pane = context.panes[pane],
         sidePanel = context.sidePanel,
         isActive = context.workspaceState.workspace.activePane == pane,
@@ -285,9 +271,10 @@ private fun NoteEditor(
     )
 }
 
-/** What the editor of the note at [path] asks of the tree, the tabs and the pickers. */
+/** What the editor of [pane], on the note at [path], asks of the tree, the tabs, the pickers and the other editor. */
 private fun editorCallbacksOf(
     viewModels: WorkspaceViewModels,
+    pane: Int,
     path: RelativePath
 ): EditorCallbacks {
     val tree = viewModels.tree
@@ -322,7 +309,11 @@ private fun editorCallbacksOf(
             viewModels.onTemplatePicker(TemplatePickerIntent.OnOpen(target = TemplateTarget.CurrentNote))
         },
         onDayStep = { tree.onIntent(intent = VaultTreeIntent.OnDayStep(step = it)) },
-        onRevealFolder = { tree.onIntent(intent = VaultTreeIntent.OnRevealInTree(path = it)) }
+        onRevealFolder = { tree.onIntent(intent = VaultTreeIntent.OnRevealInTree(path = it)) },
+        onUnsavedKept = { tree.onIntent(intent = VaultTreeIntent.OnUnsavedKept(note = it.note, copy = it.copy)) },
+        onBeforeOpen = {
+            saveInOtherEditors(path = it, editor = viewModels.editors[pane], editors = viewModels.editors)
+        }
     )
 }
 

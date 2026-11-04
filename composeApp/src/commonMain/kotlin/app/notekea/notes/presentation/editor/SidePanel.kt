@@ -1,7 +1,6 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +32,7 @@ import app.notekea.core.presentation.components.NotekeaSegmentedControl
 import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.theme.motionTween
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.OutlineHeading
 import app.notekea.notes.domain.SidePanelMode
@@ -61,7 +61,7 @@ private const val PREVIEW_WIDTH_DP = 300
 @Composable
 fun SidePanel(
     outline: List<OutlineHeading>,
-    current: Int,
+    current: () -> Int,
     preferences: SidePanelPreferences,
     platformConventions: PlatformConventions,
     actions: SidePanelActions,
@@ -76,7 +76,7 @@ fun SidePanel(
             // Inspector and Chat fade into each other, so the switch reads as one panel changing.
             Crossfade(
                 targetState = preferences.mode,
-                animationSpec = tween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
+                animationSpec = motionTween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
             ) { mode ->
                 when (mode) {
                     SidePanelMode.INSPECTOR -> InspectorSections(
@@ -131,7 +131,7 @@ private fun PanelHeader(
 @Composable
 private fun InspectorSections(
     outline: List<OutlineHeading>,
-    current: Int,
+    current: () -> Int,
     foldedSections: Set<SidePanelSection>,
     platformConventions: PlatformConventions,
     actions: SidePanelActions,
@@ -173,7 +173,7 @@ private fun InspectorSections(
 @Composable
 private fun OutlinePart(
     outline: List<OutlineHeading>,
-    current: Int,
+    current: () -> Int,
     isOpen: Boolean,
     platformConventions: PlatformConventions,
     actions: SidePanelActions,
@@ -195,8 +195,9 @@ private fun OutlinePart(
 }
 
 /**
- * Outline, then Connections and Note info when a note is open, stacked. Note info takes what it needs; Outline takes up to
- * half of the rest, or more when Connections need less; Connections take what is left. Each scrolls inside its share.
+ * Outline, then Connections and Note info when a note is open, stacked. Note info takes what it needs; Connections take
+ * up to half of the rest, or more when the outline needs less, which it says without being measured (Connections cannot:
+ * their rows are lazy); Outline takes what is left. Each scrolls inside its share.
  */
 private val InspectorMeasurePolicy = MeasurePolicy { measurables, constraints ->
     val loose = constraints.copy(minHeight = 0)
@@ -204,10 +205,9 @@ private val InspectorMeasurePolicy = MeasurePolicy { measurables, constraints ->
     val connections = measurables.getOrNull(index = 1)
     val info = measurables.getOrNull(index = 2)?.measure(constraints = loose)
     val free = (constraints.maxHeight - (info?.height ?: 0)).coerceAtLeast(minimumValue = 0)
-    val connectionsNeed = connections?.maxIntrinsicHeight(width = constraints.maxWidth) ?: 0
-    val outlineMax = maxOf(free / 2, free - connectionsNeed)
-    val top = outline.measure(constraints = loose.copy(maxHeight = outlineMax))
-    val middle = connections?.measure(constraints = loose.copy(maxHeight = free - top.height))
+    val outlineNeed = outline.maxIntrinsicHeight(width = constraints.maxWidth)
+    val middle = connections?.measure(constraints = loose.copy(maxHeight = maxOf(free / 2, free - outlineNeed)))
+    val top = outline.measure(constraints = loose.copy(maxHeight = free - (middle?.height ?: 0)))
     layout(width = constraints.maxWidth, height = constraints.maxHeight) {
         top.placeRelative(x = 0, y = 0)
         middle?.placeRelative(x = 0, y = top.height)
@@ -256,7 +256,7 @@ private fun NoteInfoSection(
 @Composable
 private fun SidePanelPreviewFrame(
     outline: List<OutlineHeading>,
-    current: Int,
+    current: () -> Int,
     foldedSections: Set<SidePanelSection> = emptySet(),
     mode: SidePanelMode = SidePanelMode.INSPECTOR
 ) {
@@ -283,19 +283,19 @@ private fun SidePanelPreviewFrame(
 @Preview
 @Composable
 private fun SidePanelPreview() {
-    SidePanelPreviewFrame(outline = EditorPreviewData.outline, current = 1)
+    SidePanelPreviewFrame(outline = EditorPreviewData.outline, current = { 1 })
 }
 
 @Preview
 @Composable
 private fun SidePanelEmptyPreview() {
-    SidePanelPreviewFrame(outline = emptyList(), current = OutlineTracker.NONE)
+    SidePanelPreviewFrame(outline = emptyList(), current = { OutlineTracker.NONE })
 }
 
 @Preview
 @Composable
 private fun SidePanelChatModePreview() {
-    SidePanelPreviewFrame(outline = EditorPreviewData.outline, current = 1, mode = SidePanelMode.CHAT)
+    SidePanelPreviewFrame(outline = EditorPreviewData.outline, current = { 1 }, mode = SidePanelMode.CHAT)
 }
 
 @Preview
@@ -303,7 +303,7 @@ private fun SidePanelChatModePreview() {
 private fun SidePanelFoldedPreview() {
     SidePanelPreviewFrame(
         outline = EditorPreviewData.outline,
-        current = 1,
+        current = { 1 },
         foldedSections = setOf(SidePanelSection.OUTLINE)
     )
 }

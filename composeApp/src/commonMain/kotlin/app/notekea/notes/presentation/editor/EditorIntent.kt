@@ -7,11 +7,15 @@ import app.notekea.notes.domain.ListAction
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.SidePanelMode
 import app.notekea.notes.domain.SidePanelSection
+import kotlinx.coroutines.CompletableDeferred
 
 /** What the user (or the window around the editor) asked of the note editor. */
 sealed interface EditorIntent {
     /** The deleted note is closed instead of restored. */
     data object OnCloseDeleted : EditorIntent
+
+    /** Another pane is about to open this note: [done] completes once this editor has saved what it holds. */
+    data class OnHandOver(val done: CompletableDeferred<Unit>) : EditorIntent
 
     /** Save now and report [EditorEffect.Flushed], before the window closes. */
     data object OnFlushRequest :
@@ -71,6 +75,9 @@ sealed interface EditorIntent {
 
     /** The open note was renamed or moved in Notekea and now lives at [path]; nothing is saved to the old place. */
     data class OnNoteMoved(val path: RelativePath) : EditorIntent
+
+    /** A rename's link update rewrote the open note at [path]. */
+    data class OnNoteRewritten(val path: RelativePath) : EditorIntent
 
     /** Open [path], saving the current note first; null closes the editor. */
     data class OnOpen(val path: RelativePath?) : EditorIntent

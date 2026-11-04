@@ -41,4 +41,14 @@ class TaskFinderTest {
             }
         )
     }
+
+    @Test
+    fun `a shorter fence inside a longer one does not end the code`() {
+        val text = "````\n```\n- [ ] inside\n````\n- [ ] outside"
+
+        assertEquals(
+            expected = listOf(text.lastIndexOf(string = "[ ]") + 1),
+            actual = finder.tasks(text = text).map { it.stateIndex }
+        )
+    }
 }

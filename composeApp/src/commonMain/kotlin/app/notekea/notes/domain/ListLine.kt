@@ -18,8 +18,17 @@ data class ListLine(
 
     val isQuote: Boolean get() = MarkdownSyntax.QUOTE_MARK in prefix
 
-    /** Leading spaces and tabs, before any quote mark. */
-    val indent: Int get() = prefix.takeWhile { StringPatterns.isIndent(char = it) }.length
+    /** The part of [prefix] up to the last quote mark and its space; empty outside a quote. */
+    val quote: String
+        get() {
+            val end = prefix.lastIndexOf(char = MarkdownSyntax.QUOTE_MARK) + 1
+            if (end == 0) return StringPatterns.EMPTY
+            val hasSpace = prefix.getOrNull(index = end)?.let { StringPatterns.isIndent(char = it) } == true
+            return prefix.substring(startIndex = 0, endIndex = if (hasSpace) end + 1 else end)
+        }
+
+    /** The spaces and tabs before the marker, after any quote marks: where a list's levels are told apart. */
+    val indent: Int get() = prefix.length - quote.length
 
     /** Where the item's text starts for Markdown, so a child indented this far nests under it: a task's box is text. */
     val textOffset: Int get() = if (marker.contains(
@@ -42,18 +51,20 @@ data class ListLine(
     }
 
     companion object {
-        private val LINE = Regex(pattern = "^([ \\t]*(?:>[ \\t]?)*)([-*+] \\[[ xX]] |[-*+] |(\\d{1,9})([.)]) )?(.*)$")
+        // `[\s\S]` and `\z`: a line can hold what `.` and `$` take for a line end (U+2028, U+2029, U+0085, a lone `\r`).
+        private val LINE =
+            Regex(pattern = "^([ \\t]*(?:>[ \\t]?)*[ \\t]*)([-*+] \\[[ xX]] |[-*+] |(\\d{1,9})([.)]) )?([\\s\\S]*)\\z")
 
         fun of(
             line: String
         ): ListLine {
-            val match = LINE.find(input = line)!!
+            val groups = LINE.find(input = line)?.groupValues.orEmpty()
             return ListLine(
-                prefix = match.groupValues[1],
-                marker = match.groupValues[2],
-                content = match.groupValues[5],
-                delimiter = match.groupValues[4],
-                number = match.groupValues[3].toIntOrNull()
+                prefix = groups.getOrElse(index = 1) { StringPatterns.EMPTY },
+                marker = groups.getOrElse(index = 2) { StringPatterns.EMPTY },
+                content = groups.getOrElse(index = 5) { line },
+                delimiter = groups.getOrElse(index = 4) { StringPatterns.EMPTY },
+                number = groups.getOrNull(index = 3)?.toIntOrNull()
             )
         }
     }

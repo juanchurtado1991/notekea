@@ -1,5 +1,6 @@
 package app.notekea.architecture
 
+import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.verify.assertFalse
 import com.lemonappdev.konsist.api.verify.assertTrue
 import kotlin.test.Test
@@ -41,6 +42,16 @@ class UiArchitectureTest : ArchitectureTestBase() {
             .filterNot { it.packagee?.name?.startsWith(prefix = THEME_PACKAGE) == true }
             .assertFalse(additionalMessage = "ARCHITECTURE.md §1: use theme tokens") {
                 it.text.contains(other = COLOR_LITERAL)
+            }
+    }
+
+    @Test
+    fun `the window's locals are provided in one root, shared with the Self-Test's cases`() {
+        val rootLocals = listOf("LocalShortcutDispatcher", "LocalFileDrop", "LocalAppVersion", "LocalResizePointerIcon")
+        (productionScope + Konsist.scopeFromProduction(moduleName = SELF_TEST_MODULE_NAME)).files
+            .filterNot { it.name == ROOT_FILE }
+            .assertFalse(additionalMessage = "audit 64: provide them in NotekeaRoot") { file ->
+                rootLocals.any { local -> file.text.contains(other = "$local provides") }
             }
     }
 

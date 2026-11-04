@@ -44,6 +44,30 @@ class JetBrainsMarkdownLinkFinderTest {
         )
     }
 
+    // Audit: in a table the target came out as `Note\`, so the link had no backlink and renames missed it.
+    @Test
+    fun `the backslash of a wiki link's escaped bar in a table is not part of its target`() {
+        val markdown = "| [[Note\\|alias]] | ![[Other#Part\\|alias]] |"
+
+        val links = finder.find(markdown = markdown)
+
+        assertEquals(expected = listOf("Note", "Other"), actual = links.map { it.target })
+        assertEquals(
+            expected = "Note",
+            actual = markdown.substring(startIndex = links[0].targetStart, endIndex = links[0].targetEnd)
+        )
+    }
+
+    // Audit: an angle link with no `)` was found, and the mentions that looked for its end crashed.
+    @Test
+    fun `an angle link must be closed, and may carry a title`() {
+        assertEquals(expected = emptyList(), actual = finder.find(markdown = "[x](<Target.md>"))
+        assertEquals(
+            expected = listOf("Target.md"),
+            actual = finder.find(markdown = "[x](<Target.md> \"A title\")").map { it.target }
+        )
+    }
+
     @Test
     fun `links inside code are left alone`() {
         val markdown =

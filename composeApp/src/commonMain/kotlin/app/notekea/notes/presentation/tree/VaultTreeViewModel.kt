@@ -113,6 +113,7 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnNewNoteFromTemplateClick -> templates.choose()
             is VaultTreeIntent.OnNoteFromTemplate -> templates.create(intent = intent)
             VaultTreeIntent.OnNoticeDismiss -> reduce { it.copy(notice = null) }
+            VaultTreeIntent.OnUnexpectedError, is VaultTreeIntent.OnUnsavedKept -> tellFromOutside(intent = intent)
             VaultTreeIntent.OnRenameCancel -> renaming.cancel()
             VaultTreeIntent.OnRenameConfirm -> renaming.confirm()
             is VaultTreeIntent.OnRenameRequest -> renaming.start(path = intent.path)
@@ -124,8 +125,7 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnOpenSelected -> openSelected()
             is VaultTreeIntent.OnRowSelect -> reduce { it.copy(selectedPath = intent.path) }
             VaultTreeIntent.OnSelectionClear -> reduce { it.copy(selectedPath = null) }
-            VaultTreeIntent.OnSelectNext -> reduce { reduceSelectionMove(state = it, step = 1) }
-            VaultTreeIntent.OnSelectPrevious -> reduce { reduceSelectionMove(state = it, step = -1) }
+            VaultTreeIntent.OnSelectNext, VaultTreeIntent.OnSelectPrevious -> moveSelection(intent = intent)
             is VaultTreeIntent.OnSidebarResize -> resizeSidebar(widthDp = intent.widthDp)
             VaultTreeIntent.OnSidebarToggle -> updateTree { it.copy(isSidebarCollapsed = !it.isSidebarCollapsed) }
             is VaultTreeIntent.OnSortChange -> updateTree { it.copy(sort = intent.sort) }
@@ -134,6 +134,26 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnTodayClick, is VaultTreeIntent.OnDayStep -> dailyNotes.onIntent(intent = intent)
         }
         dailyNotes.update()
+    }
+
+    /** The editors and the tabs have no banner of their own: the sidebar's says what happened to them. */
+    private fun tellFromOutside(
+        intent: VaultTreeIntent
+    ) {
+        reduce {
+            if (intent is VaultTreeIntent.OnUnsavedKept) {
+                it.copy(notice = unsavedNotice(intent = intent))
+            } else {
+                it.copy(hasUnexpectedError = true)
+            }
+        }
+    }
+
+    private fun moveSelection(
+        intent: VaultTreeIntent
+    ) {
+        val step = if (intent == VaultTreeIntent.OnSelectNext) 1 else -1
+        reduce { reduceSelectionMove(state = it, step = step) }
     }
 
     private fun openSelected() {

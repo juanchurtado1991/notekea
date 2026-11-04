@@ -45,6 +45,15 @@ class VaultTreeTest {
     }
 
     @Test
+    fun `a folder counts the notes and files inside it, subfolders too`() {
+        val tree = VaultTree.EMPTY.withNote(note = note(path = TOMATO_PLAN))
+            .withAttachment(file = file(path = "$PROJECTS/plate.png"))
+            .withAttachment(file = file(path = "Other/plate.png"))
+
+        assertEquals(expected = 2, actual = tree.fileCountIn(folder = path(value = PROJECTS)))
+    }
+
+    @Test
     fun `adding a note again replaces it`() {
         val updated = note(path = TOMATO_PLAN).copy(metadata = NoteMetadata.NONE.copy(title = TITLE))
 

@@ -28,9 +28,13 @@ class RenameEntryUseCase(
         val fileName = if (path.isMarkdown) baseName.trimEnd() + RelativePath.MARKDOWN_EXTENSION else baseName
         val target = (path.parent ?: RelativePath.ROOT).child(name = fileName)
         return when {
-            !validateFileName(name = baseName.trimEnd()) -> Outcome.Failure(error = NotesError.InvalidName)
+            !validateFileName(name = baseName.trimEnd()) || !validateFileName(name = fileName) ->
+                Outcome.Failure(error = NotesError.InvalidName)
+
             fileName.startsWith(prefix = HIDDEN_PREFIX) -> Outcome.Failure(error = NotesError.HiddenName)
+
             target == path -> Outcome.Success(value = path)
+
             else -> moveTo(vaultPath = vaultPath, path = path, target = target)
         }
     }

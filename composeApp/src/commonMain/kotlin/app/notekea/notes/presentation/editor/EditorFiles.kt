@@ -3,6 +3,7 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.ui.text.TextRange
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.StringPatterns.NEW_LINE
+import app.notekea.core.domain.StringPatterns.WINDOWS_NEW_LINE
 import app.notekea.notes.domain.AttachmentSource
 import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.FormatAction
@@ -16,7 +17,8 @@ import kotlin.time.Duration.Companion.milliseconds
  * The files of the open note (`ROADMAP.md` 1.8, 1.15): what it embeds, resolved and read a moment after the last
  * change; a pasted image, dropped or picked files attached and embedded where the selection was; a file opened with its
  * app; and a missing one located. [onPickCancelled] gives the keyboard back to the text when the file picker closes
- * without a choice.
+ * without a choice. Reading the clipboard, the picker and copying a file take time, and another note may open
+ * meanwhile: the edit is then dropped, never made in that note.
  */
 internal class EditorFiles(
     private val host: EditorHost,
@@ -66,9 +68,11 @@ internal class EditorFiles(
 
     /** Mod+V: a copied image is attached and embedded; copied text replaces the selection, as a paste does. */
     private fun paste() {
+        val note = host.state.value.notePath ?: return
         if (!host.state.value.isEditable) return
         host.launch {
             val image = withContext(context = tools.dispatchers.io) { tools.clipboardReader.image() }
+            if (!isOpen(note = note)) return@launch
             when {
                 // An image the clipboard cannot give is explained, instead of pasting nothing or other text.
                 image is Outcome.Failure -> {
@@ -77,12 +81,14 @@ internal class EditorFiles(
                 }
 
                 image is Outcome.Success && image.value != null -> {
-                    attachAndEmbed(sources = listOf(attachments.pastedImage(bytes = image.value)))
+                    attachAndEmbed(note = note, sources = listOf(attachments.pastedImage(bytes = image.value)))
                     return@launch
                 }
             }
             val text = withContext(context = tools.dispatchers.io) { tools.clipboardReader.text() }
-            text?.let { pasted ->
+            if (!isOpen(note = note)) return@launch
+            // The text being edited only has `\n` breaks, as [app.notekea.notes.domain.NoteDocument] says.
+            text?.replace(oldValue = WINDOWS_NEW_LINE, newValue = NEW_LINE)?.let { pasted ->
                 host.buffer.edit {
                     val start = selection.min
                     replace(start = start, end = selection.max, text = pasted)
@@ -95,12 +101,14 @@ internal class EditorFiles(
     private fun drop(
         paths: List<String>
     ) {
+        val note = host.state.value.notePath ?: return
         if (!host.state.value.isEditable || paths.isEmpty()) return
-        host.launch { attachAndEmbed(sources = paths.map { AttachmentSource.File(absolutePath = it) }) }
+        host.launch { attachAndEmbed(note = note, sources = paths.map { AttachmentSource.File(absolutePath = it) }) }
     }
 
     /** Image or file: the system's picker takes the keyboard, so the selection is kept for the embed. */
     private fun pick() {
+        val note = host.state.value.notePath ?: return
         if (!host.state.value.isEditable) return
         textEdits.keepSelectionForPicker()
         host.launch {
@@ -108,16 +116,19 @@ internal class EditorFiles(
             if (picked == null) {
                 onPickCancelled()
             } else {
-                attachAndEmbed(sources = listOf(AttachmentSource.File(absolutePath = picked)))
+                attachAndEmbed(note = note, sources = listOf(AttachmentSource.File(absolutePath = picked)))
             }
         }
     }
 
-    /** Attaches every source and writes their embeds, one per line, in place of the selection; images get a width. */
+    /**
+     * Attaches every source to [note] and writes their embeds, one per line, in place of the selection; images get a
+     * width. The files stay attached if another note opened meanwhile, but no embed goes in it.
+     */
     private suspend fun attachAndEmbed(
+        note: RelativePath,
         sources: List<AttachmentSource>
     ) {
-        val note = host.state.value.notePath ?: return
         val embeds = mutableListOf<String>()
         for (source in sources) {
             when (val attached = attachments.attach(note = note, source = source, withDefaultWidth = true)) {
@@ -125,8 +136,17 @@ internal class EditorFiles(
                 is Outcome.Failure -> host.reduce { it.copy(actionError = attached.error) }
             }
         }
-        if (embeds.isNotEmpty()) textEdits.format(action = FormatAction.Embed(markdown = embeds.joinToString(NEW_LINE)))
+        if (!isOpen(note = note)) {
+            textEdits.releasePickerSelection(isCancelled = false)
+        } else if (embeds.isNotEmpty()) {
+            textEdits.format(action = FormatAction.Embed(markdown = embeds.joinToString(NEW_LINE)))
+        }
     }
+
+    /** Whether [note], which an edit started from, is still the one in the text. */
+    private fun isOpen(
+        note: RelativePath
+    ): Boolean = host.state.value.notePath == note
 
     private fun open(
         path: RelativePath
@@ -148,7 +168,10 @@ internal class EditorFiles(
             val source = AttachmentSource.File(absolutePath = picked)
             when (val attached = attachments.attach(note = note, source = source, width = embed.width)) {
                 is Outcome.Failure -> host.reduce { it.copy(actionError = attached.error) }
-                is Outcome.Success -> replaceEmbed(embed = embed, written = written, replacement = attached.value)
+
+                is Outcome.Success -> if (isOpen(note = note)) {
+                    replaceEmbed(embed = embed, written = written, replacement = attached.value)
+                }
             }
         }
     }

@@ -86,7 +86,7 @@ private fun SuiteBuilder.renameFromTitle() {
         expectText(text = "Links updated in 3 notes: 2026-10-20, Read mode, Welcome.")
         expectFile(path = "$PLAYGROUND/Recipes/Arepas reina.md")
         renameFromTitle(name = "Arepas reina", newName = "a/b")
-        expectText(text = "Enter a name without characters like / : * ? or quotes.")
+        expectText(text = "Enter a name that is not too long and has no characters like / : * ? or quotes.")
         press(key = Key.Escape)
         expectText(text = "Arepas reina")
     }

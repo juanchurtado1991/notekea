@@ -55,11 +55,13 @@ internal class EditorSaving(
                 // Note info counts the properties' tags: a save that changed them counts again; the text's own
                 // changes are counted as they are typed.
                 val isHeaderChanged = opened?.header != document.header
-                opened = document
+                // The header as the file holds it: a body typed after a closing `---` gave that line its line break.
+                val saved = document.copy(header = NoteDocument.fromText(text = outcome.value).header)
+                opened = saved
                 onDisk = outcome.value
                 val isCurrent = host.buffer.text.toString() == document.body
                 host.reduce {
-                    describeFile(state = it, document = document).copy(
+                    describeFile(state = it, document = saved).copy(
                         info = it.info.copy(modifiedAt = noteInfo.now()),
                         saveStatus = if (isCurrent) SaveStatus.SAVED else SaveStatus.UNSAVED,
                         saveError = null,
@@ -74,14 +76,21 @@ internal class EditorSaving(
         }
     }
 
+    /** Takes [document] as what the file holds now, the text in the editor staying as it is. */
+    fun rebase(
+        document: NoteDocument
+    ) {
+        opened = document
+        onDisk = document.toText()
+        host.reduce { describeFile(state = it, document = document) }
+    }
+
     /** Shows [document] as the saved state of the note; a new note starts at the top with a fresh undo history. */
     fun show(
         document: NoteDocument,
         isNewNote: Boolean
     ) {
-        opened = document
-        onDisk = document.toText()
-        host.reduce { describeFile(state = it, document = document) }
+        rebase(document = document)
         noteInfo.readTimes()
         replaceBuffer(body = document.body, isNewNote = isNewNote)
     }

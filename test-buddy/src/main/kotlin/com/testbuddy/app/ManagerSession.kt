@@ -14,6 +14,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import kotlin.io.path.extension
+import kotlin.time.Duration
 
 /**
  * The manager's work for one [suite]: runs the automatic cases in their own process ([startRun]), walks the tester
@@ -25,7 +26,7 @@ internal class ManagerSession(
     private val suite: Suite,
     private val folders: SelfTestFolders,
     private val environment: () -> AppEnvironment = AppEnvironment::current,
-    private val startRun: (onEvent: (RunnerEvent) -> Unit, onEnd: () -> Unit) -> AutomaticRun = { onEvent, onEnd ->
+    private val startRun: (onEvent: (RunnerEvent) -> Unit, onEnd: (Int) -> Unit) -> AutomaticRun = { onEvent, onEnd ->
         AutomaticRun(log = folders.report.resolve(RUN_LOG), onEvent = onEvent, onEnd = onEnd).also { it.start() }
     }
 ) {
@@ -36,17 +37,25 @@ internal class ManagerSession(
     private val mutableState = MutableStateFlow(value = restoredState())
     private var run: AutomaticRun? = null
 
+    // Written by the tester's clicks and read on the run's own thread when it ends.
+    @Volatile private var isStopping = false
+
+    @Volatile private var sawDone = false
+
     val state: StateFlow<ManagerState> = mutableState.asStateFlow()
 
     fun startAutomatic() {
         if (mutableState.value.isRunning) return
+        isStopping = false
+        sawDone = false
         mutableState.update {
             it.copy(results = emptyMap(), isRunning = true, runningId = null, startedAt = System.currentTimeMillis())
         }
-        run = startRun(::onEvent) { mutableState.update { it.copy(isRunning = false, runningId = null) } }
+        run = startRun(::onEvent, ::onEnd)
     }
 
     fun stopAutomatic() {
+        isStopping = true
         run?.stop()
     }
 
@@ -99,8 +108,30 @@ internal class ManagerSession(
                 resultStore.save(results = mutableState.value.results.values)
             }
 
-            RunnerEvent.Done -> Unit
+            RunnerEvent.Done -> sawDone = true
         }
+    }
+
+    /** A run that ends without its [RunnerEvent.Done] or with an error died, unless the tester stopped it. */
+    private fun onEnd(exitCode: Int) {
+        if (!isStopping && (!sawDone || exitCode != 0)) failStoppedCase(exitCode = exitCode)
+        mutableState.update { it.copy(isRunning = false, runningId = null) }
+    }
+
+    /** The case the dead process was in, or the next one when it died between two: the rest are left skipped. */
+    private fun failStoppedCase(exitCode: Int) {
+        val current = mutableState.value
+        val id = current.runningId?.takeUnless { it in current.results }
+            ?: suite.automated.firstOrNull { it.id !in current.results }?.id
+            ?: return
+        val failed = CaseResult.Failed(
+            id = id,
+            message = "the test process stopped (exit code $exitCode)",
+            duration = Duration.ZERO,
+            steps = current.runningSteps
+        )
+        mutableState.update { it.copy(results = it.results + (id to failed)) }
+        resultStore.save(results = mutableState.value.results.values)
     }
 
     private fun moveStep(by: Int) {

@@ -24,6 +24,10 @@ class OkioAttachmentStore(
     ): Outcome<List<RelativePath>, NotesError> = withContext(context = dispatchers.io) {
         val root = vaultPath.toPath()
         try {
+            // Listing a folder that is gone gives no files and no error, which is not an empty vault.
+            if (!fileSystem.exists(path = root)) {
+                return@withContext Outcome.Failure(error = NotesError.VaultMissing(path = vaultPath))
+            }
             val files = fileSystem.listRecursively(dir = root)
                 .map {
                     RelativePath(
@@ -37,7 +41,7 @@ class OkioAttachmentStore(
                 .toList()
             Outcome.Success(value = files)
         } catch (_: IOException) {
-            Outcome.Failure(error = NotesError.VaultMissing(path = vaultPath))
+            Outcome.Failure(error = NotesError.OperationFailed(path = vaultPath))
         }
     }
 
@@ -45,14 +49,11 @@ class OkioAttachmentStore(
         vaultPath: String,
         path: RelativePath
     ): Outcome<ByteArray, NotesError> = withContext(context = dispatchers.io) {
+        val file = resolve(vaultPath = vaultPath, path = path)
         try {
-            Outcome.Success(
-                value = fileSystem.read(file = resolve(vaultPath = vaultPath, path = path)) {
-                    readByteArray()
-                }
-            )
+            Outcome.Success(value = fileSystem.read(file = file) { readByteArray() })
         } catch (_: IOException) {
-            Outcome.Failure(error = NotesError.EntryMissing(path = path.value))
+            Outcome.Failure(error = fileSystem.readFailureOf(file = file, path = path))
         }
     }
 
@@ -81,7 +82,10 @@ class OkioAttachmentStore(
     ): RelativePath? {
         val root = vaultPath.toPath().normalized()
         val file = absolutePath.toPath().normalized()
-        if (!file.toString().startsWith(prefix = root.toString()) || file == root) return null
+        // Compared by segments: `/home/me/notes-old` starts like `/home/me/notes` but is not inside it.
+        val isInside = file.root == root.root && file.segments.size > root.segments.size &&
+            file.segments.take(n = root.segments.size) == root.segments
+        if (!isInside) return null
         return RelativePath(
             value = file.relativeTo(other = root).segments.joinToString(separator = RelativePath.SEPARATOR)
         )

@@ -8,7 +8,8 @@ import app.notekea.notes.domain.RelativePath
  * closed ([onClosed]), a link was clicked ([onOpenLink]), a `#tag` is searched ([onSearchTag]), a note to link or a
  * tag is picked ([onRequestNoteLink], [onRequestTag]), a template is picked ([onRequestTemplate]), the note's star was
  * clicked ([onBookmarkToggle]), a daily note's arrow went to another day ([onDayStep]), or the note's folder was clicked
- * ([onRevealFolder]).
+ * ([onRevealFolder]), or text that could not be saved was kept ([onUnsavedKept]); and [onBeforeOpen] runs, and is
+ * waited for, before it opens a note.
  */
 @Immutable
 data class EditorCallbacks(
@@ -21,5 +22,7 @@ data class EditorCallbacks(
     val onRequestTemplate: () -> Unit,
     val onBookmarkToggle: (RelativePath) -> Unit,
     val onDayStep: (Int) -> Unit,
-    val onRevealFolder: (RelativePath) -> Unit
+    val onRevealFolder: (RelativePath) -> Unit,
+    val onUnsavedKept: (EditorEffect.UnsavedKept) -> Unit,
+    val onBeforeOpen: suspend (RelativePath) -> Unit
 )

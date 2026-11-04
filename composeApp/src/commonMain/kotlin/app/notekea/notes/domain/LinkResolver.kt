@@ -1,10 +1,10 @@
 package app.notekea.notes.domain
 
 /**
- * Resolves links the way Obsidian does, among [notePaths], ignoring letter case. A wiki link with a folder must match
- * a path (or the end of one); a bare name must match one note's name, and among several the one in the linking note's
+ * Resolves links the way Obsidian does, among [notePaths], ignoring letter case. A wiki link is first read as a path
+ * ([wikiPath]: `./`, `../` and a leading `/`). With a folder it must match a path (or the end of one); a bare name must match one note's name, and among several the one in the linking note's
  * folder wins; any other ambiguity resolves to nothing, so an unclear link is never rewritten. A Markdown link is read
- * from the linking note's folder first and from the vault root otherwise.
+ * from the linking note's folder, then from the vault root, and otherwise as a wiki link: by a name only one note has.
  */
 class LinkResolver(notePaths: Collection<RelativePath>) {
     private val notes = notePaths.toSet()
@@ -25,15 +25,25 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
     }
 
     /**
-     * The note a clicked wiki link to [target] opens when [resolve] finds no single one because several notes share its
+     * The note [link] leads to when read, not rewritten: the one [resolve] finds, or for a wiki link to a name several
+     * notes share, the closest ([closestWiki]). Following it, backlinks and "Already linked" all agree on this note.
+     */
+    fun closest(
+        link: NoteLink,
+        source: RelativePath
+    ): RelativePath? = resolve(link = link, source = source)?.target
+        ?: closestWiki(target = link.target, source = source).takeIf { link.kind == LinkKind.WIKI }
+
+    /**
+     * The note a wiki link to [target] leads to when [resolve] finds no single one because several notes share its
      * name: the one in [source]'s folder, else the one closest to the vault root, else the first by path. Null when no
-     * note matches. Only for following a link: an ambiguous link is still never rewritten.
+     * note matches. Only for reading a link: an ambiguous link is still never rewritten.
      */
     fun closestWiki(
         target: String,
         source: RelativePath
     ): RelativePath? {
-        val name = withoutMarkdownExtension(target = target.trim()).lowercase()
+        val name = wikiPath(target = target, source = source)?.value?.lowercase() ?: return null
         val candidates = if (RelativePath.SEPARATOR in name) {
             val withExtension = name + RelativePath.MARKDOWN_EXTENSION
             notes.filter {
@@ -70,22 +80,28 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
         target: String,
         source: RelativePath
     ): ResolvedLink? {
-        val fromSource = resolvedFrom(folder = source.parent ?: RelativePath.ROOT, target = target)
-        if (fromSource != null &&
-            fromSource in notes
-        ) {
-            return ResolvedLink(target = fromSource, isRelativeToSource = true)
+        val fromSource = noteAt(folder = source.parent ?: RelativePath.ROOT, target = target)
+        if (fromSource != null) return ResolvedLink(target = fromSource, isRelativeToSource = true)
+        val fromRoot = noteAt(folder = RelativePath.ROOT, target = target.removePrefix(prefix = RelativePath.SEPARATOR))
+        return (fromRoot ?: resolveWiki(target = target, source = source))?.let {
+            ResolvedLink(target = it, isRelativeToSource = false)
         }
-        val fromRoot =
-            resolvedFrom(folder = RelativePath.ROOT, target = target.removePrefix(prefix = RelativePath.SEPARATOR))
-        return fromRoot?.takeIf { it in notes }?.let { ResolvedLink(target = it, isRelativeToSource = false) }
+    }
+
+    /** The note [target] names read from [folder]: exactly as written, else ignoring letter case. */
+    private fun noteAt(
+        folder: RelativePath,
+        target: String
+    ): RelativePath? {
+        val path = resolvedFrom(folder = folder, target = target) ?: return null
+        return path.takeIf { it in notes } ?: byLowerPath[path.value.lowercase()]
     }
 
     private fun resolveWiki(
         target: String,
         source: RelativePath
     ): RelativePath? {
-        val name = withoutMarkdownExtension(target = target.trim()).lowercase()
+        val name = wikiPath(target = target, source = source)?.value?.lowercase() ?: return null
         if (RelativePath.SEPARATOR in name) {
             val withExtension = name + RelativePath.MARKDOWN_EXTENSION
             return byLowerPath[withExtension]

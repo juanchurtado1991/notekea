@@ -81,7 +81,10 @@ val notesSuite = testBuddy(appName = "Notes", version = "1.0") {
 | `press(shortcut)`, `press(key)` | Presses `Mod + Key.P` (Cmd on macOS, Ctrl elsewhere), `Mod + Shift + Key.F`, or a single key |
 | `scrollTo(text)` | Scrolls the list holding the text into view, also a lazy list that has not made the row yet |
 | `expectText`, `expectNoText` | Waits until the text shows, or is gone or hidden |
+| `expectTextStaysAway` | Watches for a while that the text never shows, for what would come late |
 | `file(path)`, `expectFile`, `expectNoFile` | The file at a path of the case's data; waits until it exists with that content, or is gone |
+| `expectFileStays` | Watches for a while that the file keeps its content, for a save that must not happen |
+| `settle` | Lets the app run for a moment, for what no text tells has ended |
 | `step(description)` | Names a step of the host's own verbs (`Open the vault Personal Notes`) |
 
 Every verb names its step (`Click “Save”`), which the manager shows while the case runs and a failure's report lists.

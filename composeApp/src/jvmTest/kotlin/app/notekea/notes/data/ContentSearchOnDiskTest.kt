@@ -37,7 +37,13 @@ class ContentSearchOnDiskTest {
     private val dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     private val vault: Path = Files.createTempDirectory(TEMP_PREFIX)
     private val reads = mutableListOf<RelativePath>()
-    private val store = counting(real = OkioNoteContentStore(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers))
+    private val store = counting(
+        real = OkioNoteContentStore(
+            fileSystem = FileSystem.SYSTEM,
+            dispatchers = dispatchers,
+            attributes = NioNoteFileAttributes()
+        )
+    )
     private val folder = TextFolder()
     private val search = SearchNoteContentUseCase(
         noteTextCache = NoteTextCache(contentStore = store, textFolder = folder),

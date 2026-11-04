@@ -1,15 +1,9 @@
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 
 plugins {
-    alias(libs.plugins.android.kotlin.multiplatform.library) apply false
-    alias(libs.plugins.compose.compiler) apply false
-    alias(libs.plugins.compose.multiplatform) apply false
     alias(libs.plugins.ghost) apply false
-    alias(libs.plugins.kotlin.jvm) apply false
-    alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.kover)
     alias(libs.plugins.ksp) apply false
-    alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.sqldelight) apply false
 }
 
@@ -29,6 +23,7 @@ fun KoverProjectExtension.applyNotekeaCoverageRules() {
                 classes(
                     "*ComposableSingletons*",
                     "app.notekea.MainKt",
+                    "app.notekea.CrashReportsKt",
                     "app.notekea.selftest.QaMainKt",
                     // What talks to the desktop or starts processes: the clipboard, the browser, Swing dialogs, the
                     // app started again; checked in the QA run (qa/README.md), not by unit tests.
@@ -61,11 +56,11 @@ fun KoverProjectExtension.applyNotekeaCoverageRules() {
 }
 
 dependencies {
-    kover(project(":composeApp"))
-    kover(project(":ktlint-rules"))
-    kover(project(":test-buddy"))
-    kover(project(":test-buddy-crash"))
-    kover(project(":selftest"))
+    kover(projects.composeApp)
+    kover(projects.ktlintRules)
+    kover(projects.testBuddy)
+    kover(projects.testBuddyCrash)
+    kover(projects.selftest)
 }
 
 kover {
@@ -78,6 +73,23 @@ subprojects {
             applyNotekeaCoverageRules()
         }
     }
+}
+
+// buildSrc is a build of its own (it checks the bundled model's hash), so `check` has to ask for its tests.
+tasks.register<GradleBuild>("check") {
+    description = "Checks the build's own code; every module adds its own check to the same command"
+    group = "verification"
+    dir = file("buildSrc")
+    buildName = "buildSrcCheck"
+    tasks = listOf("check")
+}
+
+tasks.register<GradleBuild>("ktlintFormat") {
+    description = "Formats the build's own code; every module adds its own format to the same command"
+    group = "formatting"
+    dir = file("buildSrc")
+    buildName = "buildSrcFormat"
+    tasks = listOf("ktlintFormat")
 }
 
 tasks.register<Exec>("installGitHooks") {

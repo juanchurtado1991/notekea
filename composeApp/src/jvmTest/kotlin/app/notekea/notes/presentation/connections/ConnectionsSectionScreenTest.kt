@@ -3,14 +3,17 @@ package app.notekea.notes.presentation.connections
 import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
+import app.notekea.core.presentation.TestTags
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickDescription
 import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.nodes
+import app.notekea.core.presentation.rightClickText
 import app.notekea.core.presentation.texts
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.notes.domain.ConnectionsTab
@@ -46,7 +49,7 @@ class ConnectionsSectionScreenTest {
         val states = listOf(
             RelatedNotesState(),
             RelatedNotesState(isIndexReady = true),
-            RelatedNotesState(isIndexReady = true, error = IndexRunError.MODEL)
+            RelatedNotesState(isIndexReady = true, error = IndexRunError.Model)
         )
 
         val said = states.map {
@@ -121,6 +124,98 @@ class ConnectionsSectionScreenTest {
         assertTrue(actual = "No other note names “Arepas” without a link." in empty, message = empty.toString())
     }
 
+    @Test
+    fun `a row's menu opens its note, or opens it to the side`() {
+        render(tab = ConnectionsTab.LINKED, mentions = MENTIONS, onScene = { scene ->
+            scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
+            scene.clickText(text = "Open") { repeat(times = MENU_CLOSE_SETTLES) { settle(scene = scene) } }
+            scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
+            scene.clickText(text = "Open to the side") { settle(scene = scene) }
+        })
+        render(
+            related = RELATED.copy(linked = listOf(RelativePath(value = MENU)), isLinkedOpen = true),
+            onScene = { scene ->
+                scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
+                scene.clickText(text = "Open to the side") { settle(scene = scene) }
+            }
+        )
+
+        assertEquals(expected = listOf("reveal $MENU 8..17", "beside $MENU", "beside $MENU"), actual = sent)
+    }
+
+    @Test
+    fun `an unlinked row shows Link without the pointer on it`() {
+        val shown = render(tab = ConnectionsTab.UNLINKED, mentions = MENTIONS)
+
+        assertTrue(actual = "Link" in shown, message = shown.toString())
+    }
+
+    @Test
+    fun `a row's actions reach screen readers, with Related's on hover only on screen`() {
+        var unlinked = emptyList<String>()
+        var related = emptyList<String>()
+        render(tab = ConnectionsTab.UNLINKED, mentions = MENTIONS, onScene = { unlinked = it.customActionLabels() })
+        val shown = render(onScene = { related = it.customActionLabels() })
+
+        assertEquals(
+            expected = Triple(listOf("Link"), listOf("Open to the side", "Insert link"), false),
+            actual = Triple(unlinked, related, "Insert link" in shown)
+        )
+    }
+
+    private fun ImageComposeScene.customActionLabels(): List<String> = nodes().flatMap { node ->
+        node.config.getOrNull(SemanticsActions.CustomActions).orEmpty().map { it.label }
+    }
+
+    @Test
+    fun `a failed search says so and tries again, never that nothing was found`() {
+        val intents = mutableListOf<NoteMentionsIntent>()
+
+        val shown = render(
+            tab = ConnectionsTab.LINKED,
+            mentions = NoteMentionsState(note = RelativePath(value = AREPAS), searchFailed = true),
+            onMentionsIntent = { intents += it },
+            textClicks = listOf("Try again")
+        )
+
+        assertEquals(
+            expected = Triple(true, false, listOf<NoteMentionsIntent>(NoteMentionsIntent.OnRetry)),
+            actual = Triple(
+                "The notes could not be searched." in shown,
+                "No other note links here yet." in shown,
+                intents
+            )
+        )
+    }
+
+    @Test
+    fun `bars stand in for the rows the first time they are found, in Linked and in Related`() {
+        val mentions = NoteMentionsState(note = RelativePath(value = AREPAS), isLoading = true)
+        val related = RelatedNotesState(isIndexReady = true, isLoading = true)
+
+        val loading = listOf(
+            isLoadingShown(tab = ConnectionsTab.LINKED, mentions = mentions),
+            isLoadingShown(tab = ConnectionsTab.RELATED, related = related),
+            isLoadingShown(tab = ConnectionsTab.LINKED, mentions = MENTIONS.copy(isLoading = true))
+        )
+
+        assertEquals(expected = listOf(true, true, false), actual = loading)
+    }
+
+    private fun isLoadingShown(
+        tab: ConnectionsTab,
+        related: RelatedNotesState = RELATED,
+        mentions: NoteMentionsState = NoteMentionsState()
+    ): Boolean {
+        var isShown = false
+        render(tab = tab, related = related, mentions = mentions, onScene = { scene ->
+            isShown = scene.nodes().any { node ->
+                node.config.getOrNull(SemanticsProperties.TestTag) == TestTags.CONNECTIONS_LOADING
+            }
+        })
+        return isShown
+    }
+
     private fun render(
         tab: ConnectionsTab = ConnectionsTab.RELATED,
         related: RelatedNotesState = RELATED,
@@ -129,7 +224,8 @@ class ConnectionsSectionScreenTest {
         onMentionsIntent: (NoteMentionsIntent) -> Unit = {},
         hoverText: String? = null,
         clicks: List<String> = emptyList(),
-        textClicks: List<String> = emptyList()
+        textClicks: List<String> = emptyList(),
+        onScene: (ImageComposeScene) -> Unit = {}
     ): List<String> {
         var texts = emptyList<String>()
         UiThread.run {
@@ -153,6 +249,7 @@ class ConnectionsSectionScreenTest {
                 settle(scene = scene)
                 hoverText?.let { hover(scene = scene, text = it) }
                 texts = scene.texts()
+                onScene(scene)
                 clicks.forEach { scene.clickDescription(description = it) { settle(scene = scene) } }
                 textClicks.forEach { scene.clickText(text = it) { settle(scene = scene) } }
             }
@@ -184,6 +281,7 @@ class ConnectionsSectionScreenTest {
         const val SOUP = "Recipes/Tomato soup.md"
         const val PASSAGE = "Summer tomatoes from the beds make it sweeter."
         const val FRAME_NANOS = 16_000_000L
+        const val MENU_CLOSE_SETTLES = 10
         const val SETTLE_FRAMES = 5
         const val WIDTH = 320
         const val HEIGHT = 600

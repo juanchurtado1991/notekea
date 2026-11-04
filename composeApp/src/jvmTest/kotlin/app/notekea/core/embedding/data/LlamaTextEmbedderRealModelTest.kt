@@ -104,6 +104,30 @@ class LlamaTextEmbedderRealModelTest {
         assertEquals(expected = listOf(true, false), actual = listOf(loadedAfterUse, embedder.isLoaded))
     }
 
+    // Audit: the idle timer was started only by a call that returned, so a cancelled one kept the model loaded for good.
+    @Test
+    fun `the model is let go after a cancelled call too`() = runBlocking {
+        val embedder = embedder(idleMillis = IDLE_MILLIS)
+
+        val call = launch(context = Dispatchers.Default) { embedder.embed(texts = List(size = 300) { "Note $it" }) }
+        withTimeout(timeMillis = WAIT_MILLIS) { while (!embedder.isLoaded) delay(timeMillis = POLL_MILLIS) }
+        call.cancelAndJoin()
+        withTimeout(timeMillis = WAIT_MILLIS) { while (embedder.isLoaded) delay(timeMillis = POLL_MILLIS) }
+
+        assertEquals(expected = false, actual = embedder.isLoaded)
+    }
+
+    @Test
+    fun `closing lets the model go at once`() = runBlocking {
+        val embedder = embedder()
+        embedder.embed(texts = listOf("Tomato soup"))
+        val loadedAfterUse = embedder.isLoaded
+
+        embedder.close()
+
+        assertEquals(expected = listOf(true, false), actual = listOf(loadedAfterUse, embedder.isLoaded))
+    }
+
     private fun embedder(
         modelPath: String = this.modelPath,
         idleMillis: Long = DEFAULT_IDLE_MILLIS

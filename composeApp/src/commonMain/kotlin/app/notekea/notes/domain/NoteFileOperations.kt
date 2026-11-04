@@ -13,6 +13,12 @@ interface NoteFileOperations {
         path: RelativePath
     ): Outcome<Unit, NotesError>
 
+    /** Removes the file at [path] if it is still empty: one just created that nothing could be written into. */
+    suspend fun deleteEmptyFile(
+        vaultPath: String,
+        path: RelativePath
+    )
+
     /** Creates an empty folder at [path]. Its parent must exist. */
     suspend fun createFolder(
         vaultPath: String,

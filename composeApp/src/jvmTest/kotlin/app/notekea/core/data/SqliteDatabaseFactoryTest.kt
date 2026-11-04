@@ -62,6 +62,32 @@ class SqliteDatabaseFactoryTest {
     }
 
     @Test
+    fun `an older database gains the reason a note is left out of the index`() {
+        Files.createDirectories(appData)
+        DriverManager.getConnection(URL_PREFIX + appData.resolve(SqliteDatabaseFactory.DATABASE_FILE_NAME)).use {
+            it.createStatement().use { statement ->
+                VERSION_1_SCHEMA.forEach { sql -> statement.executeUpdate(sql) }
+            }
+        }
+
+        val queries = SqliteDatabaseFactory(appDataDirectory = appData.toString()).create().noteIndexStateQueries
+        queries.upsertState(
+            vault = VAULT,
+            path = NOTE,
+            content_hash = "",
+            size = null,
+            modified_at = null,
+            version = "v1",
+            skip_reason = "TOO_LARGE"
+        )
+
+        assertEquals(
+            expected = listOf("TOO_LARGE"),
+            actual = queries.selectStates(vault = VAULT).executeAsList().map { it.skip_reason }
+        )
+    }
+
+    @Test
     fun `a file that is not a database is replaced by an empty one`() {
         Files.createDirectories(appData)
         appData.resolve(SqliteDatabaseFactory.DATABASE_FILE_NAME).writeText(text = GARBAGE)

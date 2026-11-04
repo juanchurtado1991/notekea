@@ -17,7 +17,7 @@ sealed interface NotesError {
     /** A name starting with a dot would hide the entry from the tree (and from Obsidian). */
     data object HiddenName : NotesError
 
-    /** A name that cannot be a file on every supported system (empty, `..`, or with `/ \ : * ? " < > |`). */
+    /** A name that cannot be a file on every supported system (empty, `..`, too long, or with `/ \ : * ? " < > |`). */
     data object InvalidName : NotesError
 
     data class NameTaken(val name: String) : NotesError
@@ -29,6 +29,9 @@ sealed interface NotesError {
     data class OpenFailed(val path: String) : NotesError
 
     data class PermissionDenied(val path: String) : NotesError
+
+    /** The note is there but cannot be read as UTF-8 text: a disk error, or another encoding Notekea must not rewrite. */
+    data class Unreadable(val path: String) : NotesError
 
     /** The system file manager could not be opened on the entry. */
     data class RevealFailed(val path: String) : NotesError

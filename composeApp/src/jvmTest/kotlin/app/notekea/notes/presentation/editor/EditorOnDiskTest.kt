@@ -11,6 +11,7 @@ import app.notekea.notes.domain.FakeClipboardReader
 import app.notekea.notes.domain.FakeAttachmentPicker
 import app.notekea.notes.domain.AttachFileUseCase
 import app.notekea.notes.data.OkioAttachmentStore
+import app.notekea.notes.data.NioNoteFileAttributes
 import app.notekea.notes.data.ObsidianVaultSettingsReader
 import app.notekea.core.data.JvmLocalTimeFormatter
 import androidx.compose.runtime.snapshots.Snapshot
@@ -27,6 +28,7 @@ import app.notekea.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.notes.domain.GetNoteStatsUseCase
 import com.russhwolf.settings.MapSettings
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
+import app.notekea.notes.domain.KeepUnsavedTextUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.notes.domain.RelativePath
@@ -195,7 +197,11 @@ class EditorOnDiskTest {
     private fun editor(): EditorViewModel {
         Dispatchers.setMain(dispatcher = main)
         val dispatchers = JvmAppDispatchers()
-        val store = OkioNoteContentStore(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
+        val store = OkioNoteContentStore(
+            fileSystem = FileSystem.SYSTEM,
+            dispatchers = dispatchers,
+            attributes = NioNoteFileAttributes()
+        )
         val scanner = OkioNoteScanner(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
         val preferences = SettingsEditorPreferencesStore(settings = MapSettings(), dispatchers = dispatchers)
         return EditorViewModel(
@@ -208,6 +214,10 @@ class EditorOnDiskTest {
             attachmentTools = attachmentTools(dispatchers = dispatchers),
             fillTemplate = fillTemplate(store = store, dispatchers = dispatchers),
             propertyTools = propertyTools(),
+            keepUnsavedText = KeepUnsavedTextUseCase(
+                noteFileOperations = OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers),
+                noteContentStore = store
+            ),
             noteInfoTools = NoteInfoTools(
                 getNoteStats = GetNoteStatsUseCase(linkFinder = JetBrainsMarkdownLinkFinder()),
                 noteTimesReader = OkioNoteTimesReader(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)

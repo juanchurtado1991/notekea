@@ -14,12 +14,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import app.notekea.core.presentation.theme.LocalReduceMotion
+import app.notekea.core.presentation.theme.followItem
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -32,7 +37,9 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.presentation.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.components.NotekeaLazyScrollArea
+import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.NotekeaTreeItem
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
@@ -40,16 +47,19 @@ import app.notekea.notes.domain.OutlineHeading
 import app.notekea.resources.Res
 import app.notekea.resources.outline_empty_message
 import app.notekea.resources.outline_empty_title
+import app.notekea.resources.outline_go_to
 import app.notekea.resources.outline_label
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.stringResource
 
+private const val HEADING_ROW = "heading"
 private val LIST_PADDING = PaddingValues(all = NotekeaDimensions.SpacingXs)
 
 /** The outline's headings, or how to add one when the note has none. */
 @Composable
 internal fun OutlineSection(
     outline: List<OutlineHeading>,
-    current: Int,
+    current: () -> Int,
     focusRequester: FocusRequester,
     actions: SidePanelActions,
     modifier: Modifier = Modifier
@@ -92,7 +102,7 @@ internal fun OutlineSection(
 @Composable
 private fun OutlineList(
     outline: List<OutlineHeading>,
-    current: Int,
+    current: () -> Int,
     focusRequester: FocusRequester,
     onHeadingClick: (Int) -> Unit,
     onLeave: () -> Unit,
@@ -102,13 +112,14 @@ private fun OutlineList(
     var hasFocus by remember { mutableStateOf(value = false) }
     var focused by remember { mutableIntStateOf(value = 0) }
     val label = stringResource(resource = Res.string.outline_label)
-    FollowCurrent(listState = listState, index = if (hasFocus) focused else current)
-    // Each time the list takes the keyboard, its row starts at the current heading.
+    val goTo = stringResource(resource = Res.string.outline_go_to)
+    FollowCurrent(listState = listState, index = { if (hasFocus) focused else current() })
     val onFocusChange = { isFocused: Boolean ->
-        if (isFocused && !hasFocus) focused = current.coerceIn(minimumValue = 0, maximumValue = outline.lastIndex)
+        if (isFocused && !hasFocus) focused = current().coerceIn(minimumValue = 0, maximumValue = outline.lastIndex)
         hasFocus = isFocused
     }
-    NotekeaLazyScrollArea(state = listState, modifier = modifier) {
+    val contentHeight = NotekeaDimensions.TreeRowHeight * outline.size + NotekeaDimensions.SpacingXs * 2
+    NotekeaLazyScrollArea(state = listState, modifier = modifier, contentHeight = contentHeight) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -119,17 +130,42 @@ private fun OutlineList(
             state = listState,
             contentPadding = LIST_PADDING
         ) {
-            itemsIndexed(items = outline) { index, heading ->
-                NotekeaTreeItem(
-                    label = heading.text,
-                    icon = null,
-                    depth = heading.depth,
-                    onClick = { onHeadingClick(index) },
-                    selected = index == current,
-                    focused = hasFocus && index == focused
+            itemsIndexed(
+                items = outline,
+                key = { _, heading -> heading.offset },
+                contentType = { _, _ -> HEADING_ROW }
+            ) { index, heading ->
+                val isCurrent by remember(index, current) { derivedStateOf { index == current() } }
+                OutlineRow(
+                    heading = heading,
+                    isCurrent = isCurrent,
+                    isFocused = hasFocus && index == focused,
+                    goTo = goTo,
+                    onClick = { onHeadingClick(index) }
                 )
             }
         }
+    }
+}
+
+/** A heading, indented by its depth, with its menu. */
+@Composable
+private fun OutlineRow(
+    heading: OutlineHeading,
+    isCurrent: Boolean,
+    isFocused: Boolean,
+    goTo: String,
+    onClick: () -> Unit
+) {
+    NotekeaContextMenuArea(sections = listOf(listOf(NotekeaMenuItem(label = goTo, onClick = onClick)))) {
+        NotekeaTreeItem(
+            label = heading.text,
+            icon = null,
+            depth = heading.depth,
+            onClick = onClick,
+            selected = isCurrent,
+            focused = isFocused
+        )
     }
 }
 
@@ -147,11 +183,15 @@ private fun Modifier.outlineInput(
 @Composable
 private fun FollowCurrent(
     listState: LazyListState,
-    index: Int
+    index: () -> Int
 ) {
-    LaunchedEffect(key1 = index) {
-        val isVisible = listState.layoutInfo.visibleItemsInfo.any { it.index == index && it.offset >= 0 }
-        if (index >= 0 && !isVisible) listState.animateScrollToItem(index = index)
+    val reduceMotion = LocalReduceMotion.current
+    val currentIndex by rememberUpdatedState(newValue = index)
+    LaunchedEffect(listState, reduceMotion) {
+        snapshotFlow { currentIndex() }.collectLatest { row ->
+            val isVisible = listState.layoutInfo.visibleItemsInfo.any { it.index == row && it.offset >= 0 }
+            if (row >= 0 && !isVisible) listState.followItem(index = row, reduceMotion = reduceMotion)
+        }
     }
 }
 
@@ -192,7 +232,7 @@ private fun OutlineSectionPreview() {
         Column {
             OutlineSection(
                 outline = EditorPreviewData.outline,
-                current = 1,
+                current = { 1 },
                 focusRequester = remember { FocusRequester() },
                 actions = SidePanelActions(
                     onHeadingClick = {},

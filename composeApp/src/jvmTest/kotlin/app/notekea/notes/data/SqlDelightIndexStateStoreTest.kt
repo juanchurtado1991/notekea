@@ -1,15 +1,21 @@
 package app.notekea.notes.data
 
+import app.cash.sqldelight.db.QueryResult
+import app.cash.sqldelight.db.SqlCursor
+import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.db.SqlPreparedStatement
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.db.NotekeaDatabase
 import app.notekea.notes.domain.IndexedNote
 import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.SkipReason
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.time.Instant
 
 /** What the search index holds of each note, in the app's database (`ROADMAP.md` 2.3), per vault. */
@@ -22,6 +28,25 @@ class SqlDelightIndexStateStoreTest {
     )
 
     @Test
+    fun `a bug is not taken for a broken database`() = runTest(context = testDispatcher) {
+        val buggy = object : SqlDriver by driver {
+            override fun <R> executeQuery(
+                identifier: Int?,
+                sql: String,
+                mapper: (SqlCursor) -> QueryResult<R>,
+                parameters: Int,
+                binders: (SqlPreparedStatement.() -> Unit)?
+            ): QueryResult<R> = error("a bug")
+        }
+        val store = SqlDelightIndexStateStore(
+            database = NotekeaDatabase(driver = buggy),
+            dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
+        )
+
+        assertFailsWith<IllegalStateException> { store.read(vaultPath = NOTES) }
+    }
+
+    @Test
     fun `a saved note comes back as saved, replaced by a later save, per vault`() = runTest(context = testDispatcher) {
         store.save(vaultPath = NOTES, note = AREPAS)
         store.save(vaultPath = NOTES, note = AREPAS.copy(contentHash = "new"))
@@ -31,6 +56,15 @@ class SqlDelightIndexStateStoreTest {
             expected = listOf(listOf(AREPAS.copy(contentHash = "new")), listOf(UNKNOWN)),
             actual = listOf(store.read(vaultPath = NOTES), store.read(vaultPath = WORK))
         )
+    }
+
+    @Test
+    fun `a note left out comes back with its reason`() = runTest(context = testDispatcher) {
+        val leftOut = AREPAS.copy(skipReason = SkipReason.TOO_LONG)
+
+        store.save(vaultPath = NOTES, note = leftOut)
+
+        assertEquals(expected = listOf(leftOut), actual = store.read(vaultPath = NOTES))
     }
 
     @Test

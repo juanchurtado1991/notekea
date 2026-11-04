@@ -1,6 +1,8 @@
 package app.notekea.di
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import app.notekea.core.embedding.data.LlamaTextEmbedder
+import app.notekea.core.embedding.domain.TextEmbedder
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.db.NotekeaDatabase
 import app.notekea.notes.domain.Trash
@@ -21,6 +23,7 @@ import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
@@ -90,6 +93,17 @@ class DesktopModulesTest {
             expected = koin.get<RecentVaultsStore>(),
             actual = koin.get<RecentVaultsStore>()
         )
+    }
+
+    // Audit: nothing ended the embedder's timer or freed its model when Koin stopped, as it does after every Self-Test case.
+    @Test
+    fun `closing Koin closes the embedder`() {
+        val embedder = koinApplication.koin.get<TextEmbedder>() as LlamaTextEmbedder
+        val closedWhileOpen = embedder.isClosed
+
+        koinApplication.close()
+
+        assertEquals(expected = false to true, actual = closedWhileOpen to embedder.isClosed)
     }
 
     companion object {

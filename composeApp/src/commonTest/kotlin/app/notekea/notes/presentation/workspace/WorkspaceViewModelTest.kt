@@ -29,6 +29,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -61,6 +62,34 @@ class WorkspaceViewModelTest {
     private val tree = listOf(AREPAS, WELCOME).fold(initial = VaultTree.EMPTY) { tree, path ->
         tree.withNote(note = NoteEntry(file = file(path = path.value), metadata = NoteMetadata.NONE))
     }.withAttachment(file = file(path = PLATE.value)).withAttachment(file = file(path = BROKEN.value))
+
+    @Test
+    fun `tabs that cannot be kept tell the window`() = runWorkspaceTest {
+        val viewModel = started()
+        workspaces.failure = IllegalStateException("bug")
+
+        viewModel.onIntent(intent = WorkspaceIntent.OnOpen(path = RelativePath(value = "Bug.md")))
+
+        assertEquals(expected = WorkspaceEffect.UnexpectedError, actual = viewModel.effects.first())
+    }
+
+    @Test
+    fun `a tab opens at once while the disk is still busy, and is saved when the disk answers`() = runWorkspaceTest {
+        val viewModel = started()
+        val onDisk = workspaces.workspaces[VAULT]
+        workspaces.gate.close()
+
+        viewModel.onIntent(intent = WorkspaceIntent.OnOpen(path = AREPAS))
+        advanceUntilIdle()
+
+        assertEquals(listOf(AREPAS), viewModel.state.value.workspace.panes.flatMap { it.tabs })
+        assertEquals(onDisk, workspaces.workspaces[VAULT])
+
+        workspaces.gate.open()
+        advanceUntilIdle()
+
+        assertEquals(viewModel.state.value.workspace, workspaces.workspaces[VAULT])
+    }
 
     @Test
     fun `opened entries get tabs, the second pane comes and goes, and every change is saved`() = runWorkspaceTest {
@@ -252,6 +281,32 @@ class WorkspaceViewModelTest {
         )
     }
 
+    @Test
+    fun `a slow save of the panel never lands after a newer one`() = runWorkspaceTest {
+        val viewModel = started()
+        preferences.sidePanelSaveMillis += listOf(SLOW_SAVE_MILLIS, 0L)
+
+        viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelResize(widthDp = 300))
+        runCurrent()
+        viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelResize(widthDp = 360))
+        advanceUntilIdle()
+
+        assertEquals(expected = 360, actual = preferences.sidePanel.widthDp)
+    }
+
+    @Test
+    fun `a slow save of the tabs never lands after a newer one`() = runWorkspaceTest {
+        val viewModel = started()
+        workspaces.writeMillis += listOf(SLOW_SAVE_MILLIS, 0L)
+
+        viewModel.onIntent(intent = WorkspaceIntent.OnOpen(path = AREPAS))
+        runCurrent()
+        viewModel.onIntent(intent = WorkspaceIntent.OnOpen(path = WELCOME))
+        advanceUntilIdle()
+
+        assertEquals(expected = viewModel.state.value.workspace, actual = workspaces.workspaces[VAULT])
+    }
+
     private fun TestScope.started(
         isLoaded: Boolean = true
     ): WorkspaceViewModel {
@@ -281,6 +336,7 @@ class WorkspaceViewModelTest {
     ) = runTest(context = testDispatcher) { body() }
 
     companion object {
+        private const val SLOW_SAVE_MILLIS = 1_000L
         private val COVER_SIZE = IntSize(width = 336, height = 252)
         private const val PNG_BASE64 =
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="

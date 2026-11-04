@@ -8,6 +8,9 @@ enum class SkipReason {
     /** It could not be read (permissions, a file in use). */
     UNREADABLE,
 
-    /** A chunk was longer than the embedding model reads. */
-    TOO_LONG
+    /** Every chunk was longer than the embedding model reads. */
+    TOO_LONG,
+
+    /** Something nobody expected went wrong with this note; the run goes on with the others. */
+    FAILED
 }

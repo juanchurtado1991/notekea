@@ -145,6 +145,13 @@ class MarkdownHighlighterTest {
         )
     }
 
+    @Test
+    fun `a fence indented four spaces is code, not the end of the block`() {
+        val text = "```\n    ```\n```"
+
+        assertEquals(expected = listOf(0..text.lastIndex), actual = MarkdownHighlighter().codeBlocks(text = text))
+    }
+
     private fun shown(
         text: String
     ): List<Pair<String, HighlightKind>> = highlighter.highlight(text = text).map {

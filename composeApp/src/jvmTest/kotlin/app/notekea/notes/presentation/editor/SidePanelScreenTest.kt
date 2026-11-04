@@ -19,12 +19,21 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.texts
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.notes.domain.ConnectionsTab
+import app.notekea.notes.domain.NoteMention
+import app.notekea.notes.domain.NoteMentions
 import app.notekea.notes.domain.OutlineFinder
+import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.SidePanelMode
 import app.notekea.notes.domain.SidePanelPreferences
 import app.notekea.notes.domain.SidePanelSection
+import app.notekea.notes.presentation.connections.ConnectionActions
+import app.notekea.notes.presentation.connections.ConnectionsSection
+import app.notekea.notes.presentation.mentions.NoteMentionsState
+import app.notekea.notes.presentation.related.RelatedNotesState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -91,6 +100,54 @@ class SidePanelScreenTest {
         assertTrue(actual = related.top > panel.height - NOTE_INFO_MAX - SHORT * 2, message = "$related in $panel")
     }
 
+    @Test
+    fun `a long list of mentions takes half the panel beside a long outline, and only its visible rows are composed`() {
+        val longBody = (1..LONG_OUTLINE).joinToString(separator = "\n\n") { "## Heading $it" }
+        var rows = 0
+        var outlineRows = 0
+        UiThread.run {
+            scene(
+                actions = mutableListOf(),
+                body = longBody,
+                connections = { isOpen, onToggle -> ManyMentions(isOpen = isOpen, onToggle = onToggle) }
+            ).use { scene ->
+                settle(scene = scene)
+                rows = scene.texts().count { it.startsWith(prefix = "Note ") && it != "Note info" }
+                outlineRows = scene.texts().count { it.startsWith(prefix = "Heading ") }
+            }
+        }
+
+        assertTrue(actual = rows in 1..MAX_COMPOSED_ROWS, message = "$rows rows")
+        assertTrue(actual = outlineRows > 1, message = "$outlineRows headings")
+    }
+
+    @Composable
+    private fun ColumnScope.ManyMentions(
+        isOpen: Boolean,
+        onToggle: () -> Unit
+    ) {
+        val mentions = (1..MANY_MENTIONS).map { index ->
+            NoteMention(
+                source = RelativePath(value = "Note $index.md"),
+                range = 0..1,
+                count = 1,
+                passage = "Names it",
+                highlight = 0..1
+            )
+        }
+        ConnectionsSection(
+            tab = ConnectionsTab.LINKED,
+            onTabSelect = {},
+            isOpen = isOpen,
+            onToggle = onToggle,
+            related = RelatedNotesState(),
+            mentions = NoteMentionsState(mentions = NoteMentions(linked = mentions, unlinked = emptyList())),
+            onRelatedIntent = {},
+            onMentionsIntent = {},
+            actions = ConnectionActions(onOpen = {}, onReveal = { _, _ -> }, onOpenBeside = {}, onInsertLink = {})
+        )
+    }
+
     /** Where a Related section that wants [relatedHeight], weighted as the real one, lands beside an outline of [body], and the panel. */
     private fun relatedBounds(
         body: String,
@@ -123,7 +180,7 @@ class SidePanelScreenTest {
         NotekeaTheme(darkTheme = false) {
             SidePanel(
                 outline = OutlineFinder().headings(text = body),
-                current = 0,
+                current = { 0 },
                 preferences = SidePanelPreferences(mode = mode),
                 platformConventions = PreviewPlatformConventions.linux,
                 actions = SidePanelActions(
@@ -162,6 +219,8 @@ class SidePanelScreenTest {
         private const val HEIGHT = 560
         private const val HIDDEN = "hidden"
         private const val LONG_OUTLINE = 40
+        private const val MANY_MENTIONS = 500
+        private const val MAX_COMPOSED_ROWS = 30
         private const val NOTE_INFO_MAX = 260
         private const val RELATED = "related"
         private const val SHORT = 40

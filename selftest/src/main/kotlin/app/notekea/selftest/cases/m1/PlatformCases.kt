@@ -6,12 +6,16 @@ import androidx.compose.ui.test.onFirst
 import app.notekea.core.platform.data.JvmSystemEnvironment
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
 import app.notekea.core.platform.domain.SystemEnvironment
+import app.notekea.selftest.closeWindowWith
 import app.notekea.selftest.openVault
+import app.notekea.selftest.typeAtEnd
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.HostSystem
 import com.testbuddy.ManualReason
+import com.testbuddy.ShortcutModifier.Alt
 import com.testbuddy.ShortcutModifier.Mod
+import com.testbuddy.ShortcutModifier.Shift
 import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
 import java.nio.file.Path
@@ -19,6 +23,10 @@ import java.nio.file.Path
 /** The cases of 1.1, platform conventions (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.platformCases() {
     quitShortcut()
+    quitSavesTheNote()
+    closeWindowShortcuts()
+    menuCases()
+    windowCases()
     shortcutModifier()
     dialogButtonOrder()
     appDataFolder()
@@ -37,6 +45,33 @@ private fun SuiteBuilder.quitShortcut() {
             text = "Notekea closes at once, with this window. On macOS the Notekea menu ends with \"Quit Notekea\" " +
                 "and ⌘Q."
         )
+    }
+}
+
+private fun SuiteBuilder.quitSavesTheNote() {
+    manual(id = "1.1-06", reason = ManualReason.SYSTEM) {
+        prepare(PLAYGROUND)
+        title(text = "Quitting from the system keeps what was just typed")
+        steps(
+            text = "1. In Notekea, open the Playground Vault (see TEST DATA above) and the note Welcome.\n2. Type a " +
+                "few words at the end of the note and, within a second, end Notekea: on macOS press Cmd+Q; on " +
+                "Windows and Linux end it from a terminal (taskkill /PID <its id>, or kill <its id>), without " +
+                "closing its window first.\n3. Open Notekea QA again from the system's launcher; this window comes " +
+                "back on this case.\n4. Open the Playground Vault's Welcome.md in a text editor."
+        )
+        expected(text = "Notekea closes. The words typed in step 2 are in Welcome.md, none of them lost.")
+    }
+}
+
+private fun SuiteBuilder.closeWindowShortcuts() {
+    automated(id = "1.1-07", title = "Close window and Quit save the note and close the window") {
+        openPlaygroundNote(name = "Arepas", shownText = AREPAS_FLOUR)
+        typeAtEnd(part = AREPAS_FLOUR, text = "\nClosed with the keyboard.")
+        closeWindowWith(shortcut = Mod + Shift + Key.W)
+        expectFile(path = "$PLAYGROUND/Recipes/Arepas.md", containing = "Closed with the keyboard.")
+        typeAtEnd(part = AREPAS_FLOUR, text = "\nQuit with the keyboard.")
+        closeWindowWith(shortcut = if (system == HostSystem.WINDOWS) Alt + Key.F4 else Mod + Key.Q)
+        expectFile(path = "$PLAYGROUND/Recipes/Arepas.md", containing = "Quit with the keyboard.")
     }
 }
 

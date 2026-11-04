@@ -15,6 +15,84 @@ import kotlinx.coroutines.test.runCurrent
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditorFileChangesTest : EditorViewModelTestBase() {
     @Test
+    fun `load theirs on a file that cannot be read keeps the question and the text, and says why`() = runEditorTest {
+        open(path = AREPAS)
+        type(text = "mine\n")
+        changeOutside(text = "theirs\n")
+        store.unreadable += AREPAS
+
+        viewModel.onIntent(intent = EditorIntent.OnLoadTheirs)
+        runCurrent()
+
+        assertEquals(
+            expected = listOf(true, false, NotesError.Unreadable(path = AREPAS.value)),
+            actual = viewModel.state.value.run { listOf(hasConflict, isDeleted, saveError) }
+        )
+        assertEquals(expected = "mine\n", actual = viewModel.buffer.text.toString())
+    }
+
+    @Test
+    fun `keep mine never replaces a file that cannot be read`() = runEditorTest {
+        open(path = AREPAS)
+        type(text = "mine\n")
+        changeOutside(text = "theirs\n")
+        store.unreadable += AREPAS
+
+        viewModel.onIntent(intent = EditorIntent.OnKeepMine)
+        runCurrent()
+
+        assertEquals(
+            expected = "theirs\n" to NotesError.Unreadable(path = AREPAS.value),
+            actual = store.texts[AREPAS] to viewModel.state.value.saveError
+        )
+    }
+
+    @Test
+    fun `restore never replaces a file that cannot be read`() = runEditorTest {
+        open(path = AREPAS)
+        deleteOutside()
+        store.texts[AREPAS] = "not text"
+        store.unreadable += AREPAS
+
+        viewModel.onIntent(intent = EditorIntent.OnRestore)
+        runCurrent()
+
+        assertEquals(
+            expected = "not text" to NotesError.Unreadable(path = AREPAS.value),
+            actual = store.texts[AREPAS] to viewModel.state.value.saveError
+        )
+    }
+
+    @Test
+    fun `restore over a file that came back with other text asks instead of replacing it`() = runEditorTest {
+        open(path = AREPAS)
+        deleteOutside()
+        store.texts[AREPAS] = "came back\n"
+
+        viewModel.onIntent(intent = EditorIntent.OnRestore)
+        runCurrent()
+
+        assertEquals(
+            expected = Triple("came back\n", true, false),
+            actual = viewModel.state.value.run { Triple(store.texts[AREPAS], hasConflict, isDeleted) }
+        )
+    }
+
+    @Test
+    fun `text typed in a note whose properties end its file is saved below them and counted from there`() =
+        runEditorTest {
+            putOnDisk(path = TASKS, text = "---\ntitle: x\n---")
+            open(path = TASKS)
+
+            type(text = "hello")
+            advanceTimeBy(delayTimeMillis = SECOND_MILLIS + 1)
+            runCurrent()
+
+            assertEquals(expected = "---\ntitle: x\n---\nhello", actual = store.texts[TASKS])
+            assertEquals(expected = 3, actual = viewModel.state.value.bodyStartLine)
+        }
+
+    @Test
     fun `an outside change reloads a note without unsaved edits`() = runEditorTest {
         open(path = AREPAS)
 

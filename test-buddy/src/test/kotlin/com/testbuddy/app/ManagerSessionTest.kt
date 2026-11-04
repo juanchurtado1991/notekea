@@ -7,11 +7,16 @@ import com.testbuddy.crash.AppEnvironment
 import com.testbuddy.crash.Breadcrumbs
 import com.testbuddy.sampleSuite
 import java.nio.file.Files
+import java.nio.file.Path
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
@@ -60,12 +65,91 @@ class ManagerSessionTest {
                     duration = 1.seconds,
                     steps = listOf("Expect “Ghost”")
                 )
-            )
+            ),
+            RunnerEvent.Done
         )
         end()
 
         assertEquals(false, session.state.value.isRunning)
         assertEquals(session.state.value.results, session().state.value.results)
+    }
+
+    @Test
+    fun `a process that dies fails the case it was running and the report counts the rest as skipped`() {
+        val session = session()
+        session.startAutomatic()
+        send(session, RunnerEvent.Started(id = "1.1-01"), RunnerEvent.Step(text = "Click “Save”"))
+        end(exitCode = 137)
+
+        val failed = assertIs<CaseResult.Failed>(session.state.value.results["1.1-01"])
+        assertEquals("the test process stopped (exit code 137)", failed.message)
+        assertEquals(listOf("Click “Save”"), failed.steps)
+        assertEquals(false, session.state.value.isRunning)
+        session.select(tab = ManagerTab.REPORT)
+        assertTrue(session.state.value.report.contains("Automatic: 0 passed, 1 failed, 1 skipped"))
+    }
+
+    @Test
+    fun `a process that dies between two cases fails the next one`() {
+        val session = session()
+        session.startAutomatic()
+        send(
+            session,
+            RunnerEvent.Started(id = "1.1-01"),
+            RunnerEvent.Ended(result = CaseResult.Passed(id = "1.1-01", duration = 1.seconds))
+        )
+        end(exitCode = 1)
+
+        assertIs<CaseResult.Passed>(session.state.value.results["1.1-01"])
+        assertIs<CaseResult.Failed>(session.state.value.results["1.1-02"])
+    }
+
+    @Test
+    fun `a process that quits without saying Done is a failure even with exit code 0`() {
+        val session = session()
+        session.startAutomatic()
+        send(session, RunnerEvent.Started(id = "1.1-01"))
+        end(exitCode = 0)
+
+        assertIs<CaseResult.Failed>(session.state.value.results["1.1-01"])
+    }
+
+    @Test
+    fun `a run the tester stopped fails nothing`() {
+        val session = session()
+        session.startAutomatic()
+        send(session, RunnerEvent.Started(id = "1.1-01"))
+        session.stopAutomatic()
+        end(exitCode = 143)
+
+        assertEquals(emptyMap(), session.state.value.results)
+        assertEquals(false, session.state.value.isRunning)
+    }
+
+    @Test
+    fun `a run that says Done and exits fine fails nothing`() {
+        val session = session()
+        session.startAutomatic()
+        send(session, RunnerEvent.Done)
+        end(exitCode = 0)
+
+        assertEquals(emptyMap(), session.state.value.results)
+    }
+
+    @Test
+    fun `the run tells the exit code of its process and keeps the process output in the log`() {
+        val java = Path.of(System.getProperty("java.home"), "bin", "java").toString()
+        val exitCode = CompletableFuture<Int>()
+        val log = root.resolve("run.txt")
+        AutomaticRun(
+            log = log,
+            onEvent = {},
+            onEnd = { exitCode.complete(it) },
+            startProcess = { ProcessBuilder(java, "--no-such-option").redirectErrorStream(true).start() }
+        ).start()
+
+        assertNotEquals(0, exitCode.get(1, TimeUnit.MINUTES))
+        assertTrue(log.readText().isNotBlank())
     }
 
     @Test
@@ -117,7 +201,7 @@ class ManagerSessionTest {
         assertEquals("Sample QA", SelfTestFolders.default(appName = "Sample").root.fileName.toString())
     }
 
-    private var onEnd: () -> Unit = {}
+    private var onEnd: (Int) -> Unit = {}
 
     private fun session() = ManagerSession(
         suite = suite,
@@ -140,5 +224,5 @@ class ManagerSessionTest {
         sent.forEach(sink)
     }
 
-    private fun end() = onEnd()
+    private fun end(exitCode: Int = 0) = onEnd(exitCode)
 }

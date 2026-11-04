@@ -45,11 +45,13 @@ fun NotekeaActionRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val shape = MaterialTheme.shapes.small
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = ROW_HEIGHT_DP.dp)
-            .clip(shape = MaterialTheme.shapes.small)
+            .focusBorder(color = MaterialTheme.colorScheme.primary, shape = shape)
+            .clip(shape = shape)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = NotekeaDimensions.SpacingS),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),

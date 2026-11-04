@@ -130,7 +130,11 @@ below is that palette, now the Cobalt Tangerine theme; the app starts in Workspa
 - **Typography:** one bundled UI typeface (Inter, SIL OFL) for UI and editor body; a bundled monospaced typeface
   (JetBrains Mono, SIL OFL) for code blocks. Scale: 12 / 14 (body) / 16 / 20 / 28.
 - **Spacing:** 4 dp grid (4, 8, 12, 16, 24, 32). **Corner radius:** 6 dp controls, 10 dp cards.
-- **Motion:** 150–200 ms for panel open/close; no animation longer than 250 ms; respect "reduce motion".
+- **Menu bar:** File, Edit, View, Window and Help, in the window on Windows and Linux and at the top of the screen on
+  macOS, whose app menu holds About, Settings and Quit (`PLATFORM_GUIDELINES.md` §4). Each entry runs what its shortcut
+  runs and is dimmed while no screen offers it, so every command can be found without knowing its shortcut.
+- **Motion:** 150–200 ms for panel open/close; no animation longer than 250 ms; respect "reduce motion": the setting
+  in Settings → Appearance or the system's turns animations off.
 - **Themes:** light and dark, following the system by default; since 2.12 also chosen in Settings → Appearance,
   with eleven color themes, Workspace Blue the one it starts with.
 - **Accessibility:** WCAG AA contrast for text, every action reachable by keyboard, visible focus ring,
@@ -244,7 +248,7 @@ between runs.
   Restore / Close; a save never recreates a note that was moved or deleted.
 - Find in note: `Mod+F` opens an inline bar with match count and next/previous (`Enter` / `Shift+Enter`).
 - Read mode: code blocks colored by language (Edit mode keeps code plain); `[[links]]` and links to notes open the
-  note, a missing wiki link's note is created at the vault root, a name several notes share opens the closest one
+  note, a missing wiki link's note is created where the link says (a bare name at the vault root), a name several notes share opens the closest one
   (same folder, then nearest the vault root), web links open the browser.
 - **Done when:** typing never loses text, external changes are detected, frontmatter is preserved untouched.
 - Smoke test: cases 1.5-01 to 1.5-11; 1.4-01 and 1.4-06 rewritten for the editor.
@@ -385,7 +389,9 @@ headings". Shortcut: `Mod+Shift+O` focuses the outline.
   Search notes and Today rows and the New note / New folder buttons move to the rail.
 - **Window size:** the window opens large enough (1440 × 900 dp at most, never larger than the screen's usable area)
   to show the tool rail, the sidebar, a note and the outline beside it, which are open by default; the welcome screen
-  and a vault's workspace share that size, so the window never resizes itself when a vault opens or closes.
+  and a vault's workspace share that size, so the window never resizes itself when a vault opens or closes. Its size,
+  position and maximized state come back on the next launch, on a screen that still shows it; it never goes below
+  560 × 400 dp, and its title names the active tab and the vault.
 - **Restore:** each vault's tabs, active tabs and split are saved on every change in the app settings and come back
   when it opens again, without the tabs of files deleted meanwhile.
 

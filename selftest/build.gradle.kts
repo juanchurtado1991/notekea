@@ -1,47 +1,33 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.compose.desktop.application.tasks.AbstractSuggestModulesTask
-
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.compose.multiplatform)
-    alias(libs.plugins.ktlint)
+    id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.compose")
+    id("notekea.jvm")
     alias(libs.plugins.kover)
 }
 
 // Notekea QA (qa/SELF_TEST.md): Notekea with its cases on Test Buddy and the manager next to its window, the smoke
 // data bundled in, and the "Notekea QA" installers, packaged with Notekea's own Java runtime. Notekea's release has
 // none of it.
-private val jdkVersion = 21
 private val appName = "Notekea QA"
-// As Notekea's: a milestone build passes `-PpackageVersion` and `-PreleaseName` (composeApp/build.gradle.kts).
-private val appPackageVersion = providers.gradleProperty("packageVersion").getOrElse("1.0.0")
-private val appDisplayVersion = "0.1.0-alpha" +
-    providers.gradleProperty("releaseName").map { " ($it)" }.getOrElse("")
 private val mainClassName = "app.notekea.selftest.QaMainKt"
-private val runtimeModules = providers.gradleProperty("notekea.runtimeModules").get().split(",")
 private val smokeDataFolders = listOf("vaults", "notes", "daily", "templates", "attachments", "outside")
 private val bundledSmokeData = layout.buildDirectory.dir("generated/smoke-data")
 private val maxForks = 4
 
 kotlin {
-    jvmToolchain(jdkVersion)
-
     compilerOptions {
-        allWarningsAsErrors.set(true)
         optIn.add("androidx.compose.ui.test.ExperimentalTestApi")
     }
 }
 
 dependencies {
-    implementation(project(":composeApp"))
-    implementation(project(":test-buddy"))
+    implementation(projects.composeApp)
+    implementation(projects.testBuddy)
     implementation(compose.desktop.currentOs)
     implementation(libs.koin.core)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.okio)
-
-    ktlintRuleset(project(":ktlint-rules"))
 
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.kotlin.test)
@@ -59,12 +45,6 @@ val bundleSmokeData = tasks.register<Sync>("bundleSmokeData") {
     }
 }
 sourceSets.main { resources.srcDir(files(bundledSmokeData).builtBy(bundleSmokeData)) }
-
-ktlint {
-    version.set(libs.versions.ktlint.cli.get())
-    verbose.set(true)
-    ignoreFailures.set(false)
-}
 
 tasks.test {
     useJUnitPlatform()
@@ -103,20 +83,12 @@ tasks.register<Test>("smokeRun") {
 compose.desktop {
     application {
         mainClass = mainClassName
-        javaHome = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(jdkVersion) }
-            .get().metadata.installationPath.asFile.absolutePath
-        jvmArgs += "--enable-native-access=ALL-UNNAMED"
-        jvmArgs += "-Dnotekea.version=$appDisplayVersion"
+        notekeaDesktopApp(project = project)
 
         nativeDistributions {
-            // Notekea's embedding model, as the app bundles it (ROADMAP.md 2.2).
-            appResourcesRootDir.set(layout.buildDirectory.dir("app-resources"))
-            targetFormats(TargetFormat.Deb, TargetFormat.Dmg, TargetFormat.Msi)
             packageName = appName
-            packageVersion = appPackageVersion
             description = "Notekea with its tests, for testers before a release"
             vendor = "Notekea"
-            modules(*runtimeModules.toTypedArray())
             windows {
                 iconFile.set(rootProject.file("composeApp/packaging/icon.ico"))
                 menu = true
@@ -137,9 +109,6 @@ compose.desktop {
     }
 }
 
-val embeddingModelResources = EmbeddingModel.appResources(project)
-tasks.matching { it.name == "prepareAppResources" }.configureEach { dependsOn(embeddingModelResources) }
-
 // `./gradlew :selftest:run -Pcases=1.6,1.17-02` opens Notekea QA with only those cases (a feature's smoke test).
 tasks.withType<JavaExec>().matching { it.name == "run" }.configureEach {
     providers.gradleProperty("cases").orNull?.let { systemProperty("notekea.selftest.cases", it) }
@@ -151,16 +120,3 @@ tasks.register("packageQa") {
     group = "distribution"
     dependsOn("packageDistributionForCurrentOS")
 }
-
-val checkRuntimeModules = tasks.register<CheckRuntimeModulesTask>("checkRuntimeModules") {
-    description = "Fails when the packaged runtime lacks a JDK module Notekea QA needs"
-    group = "verification"
-    val suggest = tasks.named<AbstractSuggestModulesTask>("suggestRuntimeModules")
-    classpath.from(suggest.map { it.files })
-    mainJar.set(suggest.flatMap { it.launcherMainJar })
-    javaHome.set(suggest.flatMap { it.javaHome })
-    jvmTarget.set(suggest.flatMap { it.jvmTarget })
-    packagedModules.set(suggest.flatMap { it.modules })
-}
-
-tasks.named("check") { dependsOn(checkRuntimeModules) }

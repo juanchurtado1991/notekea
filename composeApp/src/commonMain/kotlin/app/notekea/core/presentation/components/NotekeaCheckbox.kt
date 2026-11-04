@@ -23,13 +23,15 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
+import app.notekea.resources.Res
+import app.notekea.resources.checkbox_checked
+import app.notekea.resources.checkbox_unchecked
+import org.jetbrains.compose.resources.stringResource
 
-private const val CHECKED = "checked"
 private const val CHECK_SIZE_RATIO = 0.75f
 private const val CORNER_DP = 3
 private const val DEFAULT_SIZE_DP = 16
 private const val PREVIEW_LABEL = "Buy flour"
-private const val UNCHECKED = "not checked"
 
 /**
  * A small square checkbox: an outlined box when unchecked, filled with the primary color and a check mark when
@@ -46,6 +48,7 @@ fun NotekeaCheckbox(
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(size = CORNER_DP.dp)
+    val state = stringResource(resource = if (checked) Res.string.checkbox_checked else Res.string.checkbox_unchecked)
     Box(
         modifier = modifier
             .size(size = size.dp)
@@ -60,7 +63,7 @@ fun NotekeaCheckbox(
             .clickable(role = Role.Checkbox, onClick = onClick)
             .semantics {
                 contentDescription = label
-                stateDescription = if (checked) CHECKED else UNCHECKED
+                stateDescription = state
             },
         contentAlignment = Alignment.Center
     ) {

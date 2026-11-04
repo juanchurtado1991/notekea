@@ -2,11 +2,17 @@ package app.notekea.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
+import app.notekea.notes.domain.FakeNoteFileAttributes
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okio.FileHandle
 import okio.FileSystem
 import okio.ForwardingFileSystem
 import okio.IOException
@@ -16,9 +22,11 @@ import okio.fakefilesystem.FakeFileSystem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class OkioNoteContentStoreTest {
     private val testDispatcher = StandardTestDispatcher()
     private val fakeFileSystem = FakeFileSystem().apply { createDirectories(dir = VAULT.toPath() / FOLDER) }
+    private val attributes = FakeNoteFileAttributes()
 
     @Test
     fun `text round-trips exactly, byte order mark and windows line endings included`() = runStoreTest {
@@ -54,6 +62,38 @@ class OkioNoteContentStoreTest {
     }
 
     @Test
+    fun `a write cancelled between two tries of the move leaves no temporary file behind`() = runStoreTest {
+        writeNote(content = ORIGINAL)
+
+        val write = launch { store(fileSystem = refusingMoves()).write(vaultPath = VAULT, path = NOTE, content = TEXT) }
+        runCurrent()
+        write.cancelAndJoin()
+
+        assertEquals(
+            expected = listOf("Arepas.md"),
+            actual = fakeFileSystem.list(dir = VAULT.toPath() / FOLDER).map { it.name }
+        )
+    }
+
+    @Test
+    fun `a temporary file that cannot be removed does not hide the failed save`() = runStoreTest {
+        writeNote(content = ORIGINAL)
+        val refusingDeletes = object : ForwardingFileSystem(delegate = refusingMoves()) {
+            override fun delete(
+                path: Path,
+                mustExist: Boolean
+            ) = throw IOException(DENIED)
+        }
+
+        val outcome = store(fileSystem = refusingDeletes).write(vaultPath = VAULT, path = NOTE, content = TEXT)
+
+        assertEquals(
+            expected = Outcome.Failure(error = NotesError.OperationFailed(path = NOTE.value)),
+            actual = outcome
+        )
+    }
+
+    @Test
     fun `a move refused for a moment, as Windows does while the note is being read, is tried again`() = runStoreTest {
         writeNote(content = ORIGINAL)
 
@@ -70,12 +110,80 @@ class OkioNoteContentStoreTest {
     }
 
     @Test
-    fun `a note that cannot be read reads as null`() = runStoreTest {
+    fun `a save reaches the disk before it replaces the note, so a power cut cannot lose both`() = runStoreTest {
+        writeNote(content = ORIGINAL)
+        val steps = mutableListOf<String>()
+        val recording = object : ForwardingFileSystem(delegate = fakeFileSystem) {
+            override fun openReadWrite(
+                file: Path,
+                mustCreate: Boolean,
+                mustExist: Boolean
+            ): FileHandle = RecordingFileHandle(
+                delegate = super.openReadWrite(file = file, mustCreate = mustCreate, mustExist = mustExist),
+                onFlush = { steps += "flush" }
+            )
+
+            override fun atomicMove(
+                source: Path,
+                target: Path
+            ) {
+                steps += "move"
+                super.atomicMove(source = source, target = target)
+            }
+        }
+
+        store(fileSystem = recording).write(vaultPath = VAULT, path = NOTE, content = TEXT)
+
+        assertEquals(expected = listOf("flush", "move"), actual = steps)
+        assertEquals(expected = TEXT, actual = store().read(vaultPath = VAULT, path = NOTE))
+    }
+
+    @Test
+    fun `the temporary file takes the note's attributes before it replaces the note`() = runStoreTest {
+        writeNote(content = ORIGINAL)
+        var noteAtCopy: String? = null
+        attributes.onCopy = { noteAtCopy = fakeFileSystem.read(VAULT.toPath() / NOTE.value) { readUtf8() } }
+
+        store().write(vaultPath = VAULT, path = NOTE, content = TEXT)
+
+        assertEquals(expected = "$VAULT/${NOTE.value}", actual = attributes.copies.single().first)
+        assertEquals(expected = "$VAULT/$FOLDER", actual = attributes.copies.single().second.substringBeforeLast("/"))
+        assertEquals(expected = ORIGINAL, actual = noteAtCopy)
+    }
+
+    @Test
+    fun `the temporary name has the same short length for every note, however long its name is`() = runStoreTest {
+        val longest = RelativePath(value = "$FOLDER/${"é".repeat(n = 126)}.md")
+        store().write(vaultPath = VAULT, path = NOTE, content = TEXT)
+        store().write(vaultPath = VAULT, path = longest, content = TEXT)
+
         assertEquals(
-            expected = null,
-            actual = store().read(vaultPath = VAULT, path = RelativePath(value = "Gone.md"))
+            expected = listOf(TEMPORARY_NAME_BYTES, TEMPORARY_NAME_BYTES),
+            actual = attributes.copies.map { (_, temporary) -> temporary.substringAfterLast("/").length }
         )
     }
+
+    @Test
+    fun `a note that is gone says so, and reads as null for who only needs the text`() = runStoreTest {
+        val gone = RelativePath(value = "Gone.md")
+
+        assertEquals(
+            expected = Outcome.Failure(error = NotesError.EntryMissing(path = "Gone.md")) to null,
+            actual = store().readText(vaultPath = VAULT, path = gone) to store().read(vaultPath = VAULT, path = gone)
+        )
+    }
+
+    @Test
+    fun `a note in another encoding is never read as text, so it is never rewritten with replaced bytes`() =
+        runStoreTest {
+            val latin1 = byteArrayOf('c'.code.toByte(), 'a'.code.toByte(), 'f'.code.toByte(), 0xE9.toByte())
+            fakeFileSystem.write(file = VAULT.toPath() / NOTE.value) { write(latin1) }
+
+            assertEquals(
+                expected = Outcome.Failure(error = NotesError.Unreadable(path = NOTE.value)),
+                actual = store().readText(vaultPath = VAULT, path = NOTE)
+            )
+        }
 
     /** A file system that refuses the first [times] moves, every move unless told. */
     private fun refusingMoves(
@@ -103,7 +211,8 @@ class OkioNoteContentStoreTest {
         fileSystem: FileSystem = fakeFileSystem
     ): OkioNoteContentStore = OkioNoteContentStore(
         fileSystem = fileSystem,
-        dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
+        dispatchers = FakeAppDispatchers(dispatcher = testDispatcher),
+        attributes = attributes
     )
 
     private fun writeNote(
@@ -116,6 +225,7 @@ class OkioNoteContentStoreTest {
         private const val DENIED = "File in use"
         private const val FOLDER = "Recipes"
         private const val ORIGINAL = "# Arepas\n"
+        private const val TEMPORARY_NAME_BYTES = 21
         private const val TEXT = "# Arepas\n\nServe them warm.\n"
         private const val VAULT = "/home/ana/Notes"
         private val NOTE = RelativePath(value = "Recipes/Arepas.md")

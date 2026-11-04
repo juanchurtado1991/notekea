@@ -18,6 +18,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import app.notekea.core.presentation.theme.LocalReduceMotion
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -40,6 +41,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
@@ -94,7 +96,6 @@ internal fun EditorBody(
     find: FindState?,
     focusRequester: FocusRequester?
 ) {
-    val colors = MaterialTheme.colorScheme
     val room = AttachmentRoom.remember(attachments = attachments)
     val highlighting = rememberHighlighting(find = find, paragraphs = room.paragraphs)
     var hasFocus by remember { mutableStateOf(value = false) }
@@ -107,6 +108,7 @@ internal fun EditorBody(
     PlaceHeadings(outline = outline, layout = { layout() }, textPlace = { textPlace })
     BasicTextField(
         state = buffer,
+        inputTransformation = OnlyNewLines,
         modifier = Modifier
             .fillMaxWidth()
             .onGloballyPositioned { textPlace = it }
@@ -120,12 +122,8 @@ internal fun EditorBody(
                 if (hasFocus && !it.isFocused) onIntent(EditorIntent.OnFocusLost)
                 hasFocus = it.isFocused
             },
-        // Ligatures would turn what is typed into other glyphs (`->` into an arrow): the editor shows the characters.
-        textStyle = MaterialTheme.typography.bodyLarge.copy(
-            color = colors.onSurface,
-            fontFeatureSettings = NO_LIGATURES
-        ),
-        cursorBrush = SolidColor(value = colors.primary),
+        textStyle = editorTextStyle(),
+        cursorBrush = SolidColor(value = MaterialTheme.colorScheme.primary),
         onTextLayout = { getResult -> layout = getResult },
         outputTransformation = highlighting,
         decorator = decoratorOf(buffer = buffer, layout = { layout() }, onIntent = onIntent) {
@@ -133,6 +131,13 @@ internal fun EditorBody(
         }
     )
 }
+
+/** Ligatures would turn what is typed into other glyphs (`->` into an arrow): the editor shows the characters. */
+@Composable
+private fun editorTextStyle(): TextStyle = MaterialTheme.typography.bodyLarge.copy(
+    color = MaterialTheme.colorScheme.onSurface,
+    fontFeatureSettings = NO_LIGATURES
+)
 
 /** The toolbar action of a formatting shortcut pressed in the text (bold, italic, links), or null for any other key. */
 private fun formatShortcut(
@@ -238,13 +243,15 @@ private fun ScrollToCurrentMatch(
 ) {
     val margin = with(LocalDensity.current) { MATCH_SCROLL_MARGIN_DP.dp.toPx() }
     val match = find?.current?.let { find.matches.getOrNull(index = it) }
+    val reduceMotion = LocalReduceMotion.current
     LaunchedEffect(match) {
         if (match == null) return@LaunchedEffect
         // The text may not be laid out yet (Find opened with the note): wait for its first layout.
         val result = snapshotFlow { layout() }.filterNotNull().first()
         if (match.first >= result.layoutInput.text.length) return@LaunchedEffect
         val lineTop = result.getLineTop(lineIndex = result.getLineForOffset(offset = match.first))
-        scrollState.animateScrollTo(value = (top() + lineTop - margin).roundToInt().coerceAtLeast(minimumValue = 0))
+        val target = (top() + lineTop - margin).roundToInt().coerceAtLeast(minimumValue = 0)
+        if (reduceMotion) scrollState.scrollTo(value = target) else scrollState.animateScrollTo(value = target)
     }
 }
 

@@ -89,6 +89,36 @@ relevant `SKILL.md`, and the reference files it points to, from disk before the 
 When a skill disagrees with the project documents above, **the project documents win** (known differences are in
 `THIRD_PARTY_NOTICES.md`: no navigation library, SQLDelight instead of Room).
 
+## Project decisions
+
+Where Notekea differs from the skills on purpose. These are decided: a review does not flag them, and code follows
+them.
+
+- **Leaf composables take `onIntent`.** `ARCHITECTURE.md` §4 names `state` + `onIntent` for `<Screen>Content`, and
+  the composables under it take the same `onIntent`: a screen has dozens of gestures, and a callback for each would
+  pass through every level without adding anything. Stays this way while the leaf belongs to one screen; the design
+  system's components take plain callbacks.
+- **`IntentTrail` and `Breadcrumbs` are global state.** They are `object`s because a crash report reads them from the
+  uncaught-exception handler, when the app may have no working Koin graph or ViewModel left to ask. They hold short
+  step names only, never what the person wrote, and are the one exception to "no file-level mutable state".
+- **No `SavedStateHandle`.** It exists for process death on Android, which a desktop app does not have. Typed text
+  reaches the disk through autosave, and what a run leaves behind (tabs, panels) is restored from the settings.
+- **First loads start in `init`.** A ViewModel lives as long as its vault or its screen, with no `ON_START` to come
+  back through, so the kit's cold load on start has nothing to add.
+- **Streams keep their names:** `AppearanceStore.observe`, `FileWatcher.watch` and the `Observe*UseCase` classes,
+  not `get…Stream`. A port with one stream names what it does, and a use case's name is a verb.
+- **One Gradle module with package-level features.** `composeApp` holds `core` and the features as packages, and
+  Konsist guards their boundaries, including that features never depend on each other and that `core` depends on
+  none. Gradle modules would pay in build time and wiring for a separation the app gets without them. The other
+  modules exist because they ship or run separately (`selftest`, `test-buddy`, `test-buddy-crash`, `ktlint-rules`).
+- **No `.composekit.conf`.** The kit's guards are not installed: the Konsist tests and `ktlint-rules/` enforce the
+  rules that apply here, in `check`, where CI and the pre-commit hook already run them.
+- **`buildSrc`, not `build-logic`.** `notekea.jvm` is the one convention plugin, for the five modules. Because
+  `buildSrc` puts Kotlin, Compose, Android and ktlint on the build's classpath, modules apply those by plain `id(...)`;
+  their versions stay in the catalog, read by `buildSrc/build.gradle.kts`.
+- **Ghost DTOs are public.** The serializers Ghost generates are public and do not compile against an `internal`
+  class, so the `*Dto` classes it reads cannot be `internal` as the skills ask.
+
 ## Smoke tests (`GUIDELINES.md` §8)
 
 A `feature/` or `fix/` branch is not done until the developer has run the manual smoke test. Agents cannot replace

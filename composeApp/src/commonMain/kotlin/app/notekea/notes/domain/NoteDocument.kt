@@ -13,11 +13,21 @@ data class NoteDocument(
     val body: String,
     val usesCrLf: Boolean
 ) {
-    /** The note's full text, as it must be written to disk. */
-    fun toText(): String = when {
-        usesCrLf -> header + body.replace(oldValue = LF, newValue = CRLF)
-        header.isEmpty() -> body
-        else -> header + body
+    /**
+     * The note's full text, as it must be written to disk. A header whose closing `---` ended the file gets the file's
+     * line break before a body that was typed after it; otherwise the body would join that line and the frontmatter
+     * would stop being one.
+     */
+    fun toText(): String {
+        val text = if (usesCrLf) body.replace(oldValue = LF, newValue = CRLF) else body
+        return header + breakBeforeBody() + text
+    }
+
+    private fun breakBeforeBody(): String = when {
+        body.isEmpty() || header.removePrefix(prefix = BYTE_ORDER_MARK).isEmpty() || header.endsWith(suffix = LF) -> ""
+        header.endsWith(char = CR) -> LF
+        usesCrLf || header.contains(other = CRLF) -> CRLF
+        else -> LF
     }
 
     companion object {

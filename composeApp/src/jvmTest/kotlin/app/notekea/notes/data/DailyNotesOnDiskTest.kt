@@ -90,7 +90,11 @@ class DailyNotesOnDiskTest {
     ): OpenDailyNoteUseCase = OpenDailyNoteUseCase(
         vaultSettingsReader = settings,
         noteFileOperations = OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers),
-        noteContentStore = OkioNoteContentStore(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers),
+        noteContentStore = OkioNoteContentStore(
+            fileSystem = FileSystem.SYSTEM,
+            dispatchers = dispatchers,
+            attributes = NioNoteFileAttributes()
+        ),
         localCalendar = JvmLocalCalendar(zone = { ZoneId.of(zone) }),
         clock = FakeClock(currentTime = Instant.parse(input = "2026-10-26T20:00:00Z"))
     )

@@ -1,6 +1,7 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.StringPatterns
+import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 
 /**
@@ -21,11 +22,11 @@ object ChunkBlocks {
     ): List<IntRange> {
         val blocks = mutableListOf<IntRange>()
         var blockStart = -1
-        var fence: Char? = null
+        val fences = FenceTracker()
         lines(body = body, range = range).forEach { line ->
             val text = body.substring(range = line)
-            fence = fenceAfter(line = text, fence = fence)
-            if (text.isBlank() && fence == null) {
+            fences.read(text = text)
+            if (text.isBlank() && !fences.isOpen) {
                 if (blockStart >= 0) blocks += trimmed(body = body, range = blockStart until line.first)
                 blockStart = -1
             } else if (blockStart < 0) {
@@ -34,19 +35,6 @@ object ChunkBlocks {
         }
         if (blockStart >= 0) blocks += trimmed(body = body, range = blockStart..range.last)
         return blocks.filterNot { it.isEmpty() }
-    }
-
-    /** The code block open after [line]: one opens on a fence line and closes on a fence of the same character. */
-    private fun fenceAfter(
-        line: String,
-        fence: Char?
-    ): Char? {
-        val mark = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)?.first() ?: return fence
-        return when (fence) {
-            null -> mark
-            mark -> null
-            else -> fence
-        }
     }
 
     /** [block] as it is, or, when it is larger than [ChunkSize.MAX], its units packed into pieces of the target size. */
@@ -108,9 +96,20 @@ object ChunkBlocks {
         range: IntRange
     ): List<IntRange> {
         if (ChunkSize.of(body = body, range = range) <= ChunkSize.MAX) return listOf(range)
-        val cut = body.lastIndexOf(char = ' ', startIndex = range.first + HARD_SPLIT_CHARACTERS)
-            .takeIf { it > range.first } ?: (range.first + HARD_SPLIT_CHARACTERS)
-        return listOf(range.first..cut) + hardSplit(body = body, range = cut + 1..range.last)
+        val cut = hardCut(body = body, range = range)
+        return hardSplit(body = body, range = range.first..cut) + hardSplit(body = body, range = cut + 1..range.last)
+    }
+
+    /**
+     * Where to cut [range]: the last space before the target size, or before its middle when it is shorter than twice
+     * that (many short words reach the maximum in few characters), and there when it has no space.
+     */
+    private fun hardCut(
+        body: String,
+        range: IntRange
+    ): Int {
+        val limit = minOf(range.first + HARD_SPLIT_CHARACTERS, (range.first + range.last) / 2)
+        return body.lastIndexOf(char = ' ', startIndex = limit).takeIf { it > range.first } ?: limit
     }
 
     /** [range] without the whitespace at its ends. */

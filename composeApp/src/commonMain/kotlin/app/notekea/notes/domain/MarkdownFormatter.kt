@@ -29,7 +29,7 @@ class MarkdownFormatter {
             // In a table the file goes into the cell, its `|` escaped so the row keeps its columns.
             val markdown = action.markdown.replace(
                 oldValue = MarkdownSyntax.LINK_LABEL_SEPARATOR,
-                newValue = ESCAPED_SEPARATOR
+                newValue = MarkdownSyntax.LINK_LABEL_SEPARATOR_ESCAPED
             )
             return TextEdit(start, end, markdown, start + markdown.length, start + markdown.length)
         }
@@ -40,19 +40,6 @@ class MarkdownFormatter {
             return if (action is FormatAction.Embed) edit.copy(selectionStart = after, selectionEnd = after) else edit
         }
         return inline(text = text, start = start, end = end, action = action)
-    }
-
-    /** Whether the line holding [offset] is a row of a table (`| a | b |`). */
-    private fun isTableRow(
-        text: String,
-        offset: Int
-    ): Boolean {
-        val lineStart = text.lastIndexOf(char = NEW_LINE_CHAR, startIndex = offset - 1) + 1
-        val lineEnd = text.indexOf(char = NEW_LINE_CHAR, startIndex = offset).takeIf { it >= 0 } ?: text.length
-        return text.substring(
-            startIndex = lineStart,
-            endIndex = lineEnd
-        ).trimStart().startsWith(prefix = MarkdownSyntax.TABLE_COLUMN)
     }
 
     /** The line style a line action applies, with its placeholder; null for other actions. */
@@ -155,15 +142,23 @@ class MarkdownFormatter {
         start: Int,
         end: Int,
         mark: String
-    ): Boolean =
+    ): Boolean = if (mark == MarkdownSyntax.ITALIC) {
+        isItalicAround(text = text, start = start, end = end)
+    } else {
         text.regionMatches(thisOffset = start - mark.length, other = mark, otherOffset = 0, length = mark.length) &&
-            text.regionMatches(thisOffset = end, other = mark, otherOffset = 0, length = mark.length) &&
-            (
-                mark != MarkdownSyntax.ITALIC || (
-                    text.getOrNull(index = start - 2) != MarkdownSyntax.ITALIC_CHAR &&
-                        text.getOrNull(index = end + 1) != MarkdownSyntax.ITALIC_CHAR
-                    )
-                )
+            text.regionMatches(thisOffset = end, other = mark, otherOffset = 0, length = mark.length)
+    }
+
+    /** Whether the same stars stand on both sides and hold an italic: one, or three with bold; two are bold alone. */
+    private fun isItalicAround(
+        text: String,
+        start: Int,
+        end: Int
+    ): Boolean {
+        val before = (start - 1 downTo 0).takeWhile { text[it] == MarkdownSyntax.ITALIC_CHAR }.size
+        val after = (end until text.length).takeWhile { text[it] == MarkdownSyntax.ITALIC_CHAR }.size
+        return before == after && before > 0 && before != MarkdownSyntax.BOLD.length
+    }
 
     /** [style] on every line the selection touches, or off when every non-empty one already has it. */
     private fun styleLines(
@@ -272,7 +267,6 @@ class MarkdownFormatter {
     )
 
     companion object {
-        private const val ESCAPED_SEPARATOR = "\\|"
         private const val NOT_INLINE_MESSAGE = "Not an inline action: "
     }
 }

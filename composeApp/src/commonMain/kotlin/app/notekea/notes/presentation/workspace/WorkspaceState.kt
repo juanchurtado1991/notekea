@@ -21,6 +21,12 @@ data class WorkspaceState(
     val covers: Map<RelativePath, ImageBitmap?> = emptyMap(),
     val sidePanel: SidePanelPreferences = SidePanelPreferences.DEFAULT
 ) {
+    /** What the active tab shows, as a person names it: a note without its extension; null without tabs. */
+    val activeTabName: String?
+        get() = workspace.activePath?.let {
+            if (kindOf(path = it) == TabKind.NOTE) it.nameWithoutExtension else it.name
+        }
+
     fun kindOf(
         path: RelativePath
     ): TabKind = when (path) {

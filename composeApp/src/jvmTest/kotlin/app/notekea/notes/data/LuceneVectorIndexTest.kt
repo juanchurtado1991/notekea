@@ -62,6 +62,33 @@ class LuceneVectorIndexTest {
         assertEquals(expected = listOf(SONG, AREPAS), actual = hits.map { it.note })
     }
 
+    // Audit: a question of over 1,024 different words threw out of the search instead of answering.
+    @Test
+    fun `a very long question is answered from its first words`() = runTest(context = testDispatcher) {
+        val index = index()
+        index.put(vaultPath = VAULT, note = SONG, chunks = listOf(chunk(SONG, "palabra1")), vectors = listOf(NORTH))
+        val question = (1..2_000).joinToString(separator = " ") { "palabra$it" }
+
+        val found = index.search(vaultPath = VAULT, text = question, vector = NORTH, limit = 1)
+
+        assertEquals(expected = listOf(SONG), actual = (found as Outcome.Success).value.map { it.note })
+    }
+
+    // Audit: opening the index was outside the guard, so a folder that could not be read threw out of the search.
+    @Test
+    fun `an index folder that cannot be read is told, not thrown`() = runTest(context = testDispatcher) {
+        val index = index()
+        index.put(vaultPath = VAULT, note = SONG, chunks = listOf(chunk(SONG, "song")), vectors = listOf(NORTH))
+        val folder = root.listDirectoryEntries().single()
+        folder.toFile().deleteRecursively()
+        Files.createFile(folder)
+
+        assertEquals(
+            expected = Outcome.Failure(error = IndexError.Unavailable),
+            actual = index.nearest(vaultPath = VAULT, vector = NORTH, limit = 1)
+        )
+    }
+
     @Test
     fun `a note put again replaces its chunks, a removed one is gone, and clearing empties the vault`() = runTest(
         context = testDispatcher

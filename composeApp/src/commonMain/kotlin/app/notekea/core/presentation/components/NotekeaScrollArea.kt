@@ -10,9 +10,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 
@@ -41,11 +43,15 @@ fun NotekeaScrollArea(
     )
 }
 
-/** [NotekeaScrollArea] for [content], a lazy list on [state]. */
+/**
+ * [NotekeaScrollArea] for [content], a lazy list on [state]. A lazy list cannot tell how tall it would be, so a parent
+ * that asks needs its [contentHeight], given when the rows' heights are known.
+ */
 @Composable
 fun NotekeaLazyScrollArea(
     state: LazyListState,
     modifier: Modifier = Modifier,
+    contentHeight: Dp? = null,
     content: @Composable () -> Unit
 ) {
     Layout(
@@ -54,7 +60,9 @@ fun NotekeaLazyScrollArea(
             NotekeaLazyScrollbar(state = state)
         },
         modifier = modifier,
-        measurePolicy = ScrollAreaMeasurePolicy
+        measurePolicy = remember(contentHeight) {
+            contentHeight?.let { KnownHeightMeasurePolicy(height = it) } ?: ScrollAreaMeasurePolicy
+        }
     )
 }
 
