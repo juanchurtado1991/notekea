@@ -41,6 +41,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
@@ -95,7 +96,6 @@ internal fun EditorBody(
     find: FindState?,
     focusRequester: FocusRequester?
 ) {
-    val colors = MaterialTheme.colorScheme
     val room = AttachmentRoom.remember(attachments = attachments)
     val highlighting = rememberHighlighting(find = find, paragraphs = room.paragraphs)
     var hasFocus by remember { mutableStateOf(value = false) }
@@ -108,6 +108,7 @@ internal fun EditorBody(
     PlaceHeadings(outline = outline, layout = { layout() }, textPlace = { textPlace })
     BasicTextField(
         state = buffer,
+        inputTransformation = OnlyNewLines,
         modifier = Modifier
             .fillMaxWidth()
             .onGloballyPositioned { textPlace = it }
@@ -121,12 +122,8 @@ internal fun EditorBody(
                 if (hasFocus && !it.isFocused) onIntent(EditorIntent.OnFocusLost)
                 hasFocus = it.isFocused
             },
-        // Ligatures would turn what is typed into other glyphs (`->` into an arrow): the editor shows the characters.
-        textStyle = MaterialTheme.typography.bodyLarge.copy(
-            color = colors.onSurface,
-            fontFeatureSettings = NO_LIGATURES
-        ),
-        cursorBrush = SolidColor(value = colors.primary),
+        textStyle = editorTextStyle(),
+        cursorBrush = SolidColor(value = MaterialTheme.colorScheme.primary),
         onTextLayout = { getResult -> layout = getResult },
         outputTransformation = highlighting,
         decorator = decoratorOf(buffer = buffer, layout = { layout() }, onIntent = onIntent) {
@@ -134,6 +131,13 @@ internal fun EditorBody(
         }
     )
 }
+
+/** Ligatures would turn what is typed into other glyphs (`->` into an arrow): the editor shows the characters. */
+@Composable
+private fun editorTextStyle(): TextStyle = MaterialTheme.typography.bodyLarge.copy(
+    color = MaterialTheme.colorScheme.onSurface,
+    fontFeatureSettings = NO_LIGATURES
+)
 
 /** The toolbar action of a formatting shortcut pressed in the text (bold, italic, links), or null for any other key. */
 private fun formatShortcut(
