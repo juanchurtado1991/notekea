@@ -113,8 +113,7 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnNewNoteFromTemplateClick -> templates.choose()
             is VaultTreeIntent.OnNoteFromTemplate -> templates.create(intent = intent)
             VaultTreeIntent.OnNoticeDismiss -> reduce { it.copy(notice = null) }
-            VaultTreeIntent.OnUnexpectedError -> reduce { it.copy(hasUnexpectedError = true) }
-            is VaultTreeIntent.OnUnsavedKept -> reduce { it.copy(notice = unsavedNotice(intent = intent)) }
+            VaultTreeIntent.OnUnexpectedError, is VaultTreeIntent.OnUnsavedKept -> tellFromOutside(intent = intent)
             VaultTreeIntent.OnRenameCancel -> renaming.cancel()
             VaultTreeIntent.OnRenameConfirm -> renaming.confirm()
             is VaultTreeIntent.OnRenameRequest -> renaming.start(path = intent.path)
@@ -135,6 +134,19 @@ class VaultTreeViewModel(
             VaultTreeIntent.OnTodayClick, is VaultTreeIntent.OnDayStep -> dailyNotes.onIntent(intent = intent)
         }
         dailyNotes.update()
+    }
+
+    /** The editors and the tabs have no banner of their own: the sidebar's says what happened to them. */
+    private fun tellFromOutside(
+        intent: VaultTreeIntent
+    ) {
+        reduce {
+            if (intent is VaultTreeIntent.OnUnsavedKept) {
+                it.copy(notice = unsavedNotice(intent = intent))
+            } else {
+                it.copy(hasUnexpectedError = true)
+            }
+        }
     }
 
     private fun moveSelection(

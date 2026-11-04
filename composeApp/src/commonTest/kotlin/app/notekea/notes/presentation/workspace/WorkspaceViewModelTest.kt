@@ -29,6 +29,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -65,17 +66,11 @@ class WorkspaceViewModelTest {
     @Test
     fun `tabs that cannot be kept tell the window`() = runWorkspaceTest {
         val viewModel = started()
-        runCurrent()
-        val effects = mutableListOf<WorkspaceEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
-        runCurrent()
         workspaces.failure = IllegalStateException("bug")
 
         viewModel.onIntent(intent = WorkspaceIntent.OnOpen(path = RelativePath(value = "Bug.md")))
-        advanceUntilIdle()
-        runCurrent()
 
-        assertEquals(expected = listOf<WorkspaceEffect>(WorkspaceEffect.UnexpectedError), actual = effects)
+        assertEquals(expected = WorkspaceEffect.UnexpectedError, actual = viewModel.effects.first())
     }
 
     @Test
