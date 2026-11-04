@@ -1,7 +1,7 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.StringPatterns
-import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.domain.markdown.FenceTracker
 
 /**
  * The headings of a note's body in text order (`ROADMAP.md` 1.9): every line that starts with one to six `#` and a
@@ -16,18 +16,14 @@ class OutlineFinder {
     ): List<OutlineHeading> {
         val headings = mutableListOf<OutlineHeading>()
         val openLevels = ArrayDeque<Int>()
-        var fence: String? = null
+        val fences = FenceTracker()
         var lineStart = 0
         while (lineStart <= text.length) {
             val newline = text.indexOf(char = StringPatterns.NEW_LINE_CHAR, startIndex = lineStart)
             val lineEnd = if (newline < 0) text.length else newline
             val line = text.substring(startIndex = lineStart, endIndex = lineEnd).removeSuffix(suffix = CARRIAGE_RETURN)
-            val fenceMark = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)
-            val open = fence
-            when {
-                open != null -> if (closesFence(line = line, fence = open)) fence = null
-                fenceMark != null -> fence = fenceMark
-                else -> headingOf(line = line, offset = lineStart, openLevels = openLevels)?.let { headings += it }
+            if (!fences.read(text = line)) {
+                headingOf(line = line, offset = lineStart, openLevels = openLevels)?.let { headings += it }
             }
             if (newline < 0) break
             lineStart = newline + 1
@@ -51,16 +47,6 @@ class OutlineFinder {
         val heading = OutlineHeading(level = level, text = shown, offset = offset, depth = openLevels.size)
         openLevels.addLast(level)
         return heading
-    }
-
-    /** Whether [line] closes the code block [fence] opened: the same character, at least as many, and nothing else. */
-    private fun closesFence(
-        line: String,
-        fence: String
-    ): Boolean {
-        val mark = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1) ?: return false
-        val rest = line.substringAfter(delimiter = mark)
-        return mark.first() == fence.first() && mark.length >= fence.length && rest.isBlank()
     }
 
     companion object {

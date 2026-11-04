@@ -15,13 +15,11 @@ class ReadingMarkdown {
     fun prepare(
         markdown: String
     ): String {
-        var fence: Char? = null
+        val fences = FenceTracker()
         return markdown.split(NEW_LINE_CHAR).joinToString(separator = NEW_LINE) { line ->
-            val marker = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)?.first()
             val calloutHeader = QUOTED_CALLOUT_HEADER.matchEntire(input = line)
             when {
-                fence != null -> line.also { if (marker == fence) fence = null }
-                marker != null -> line.also { fence = marker }
+                fences.read(text = line) -> line
                 calloutHeader != null -> line + NEW_LINE + calloutHeader.groupValues[1].trimEnd()
                 else -> UPPERCASE_TASK.replace(input = line) { it.groupValues[1] + CHECKED_TASK }
             }

@@ -37,4 +37,14 @@ class ReadingMarkdownTest {
             actual = reading.prepare(markdown = markdown)
         )
     }
+
+    @Test
+    fun `a shorter fence inside a longer one does not end the code`() {
+        val markdown = "````\n```\n- [X] inside\n````\n- [X] outside"
+
+        assertEquals(
+            expected = "````\n```\n- [X] inside\n````\n- [x] outside",
+            actual = reading.prepare(markdown = markdown)
+        )
+    }
 }

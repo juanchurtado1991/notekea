@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.editor
 
+import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 
@@ -14,27 +15,21 @@ class MarkdownHighlighter {
         text: CharSequence
     ): List<HighlightSpan> {
         val spans = mutableListOf<HighlightSpan>()
-        var fence: String? = null
+        val fences = FenceTracker()
         var lineStart = 0
         while (lineStart <= text.length) {
             val newline = text.indexOf(char = NEW_LINE_CHAR, startIndex = lineStart)
             val lineEnd = if (newline < 0) text.length else newline
             val line = text.substring(startIndex = lineStart, endIndex = lineEnd)
-            val opening = fenceOf(line = line)
-            // Spaces ending a code line keep the text's font: with another font, the cursor does not move past them.
-            val codeEnd = lineStart + line.trimEnd().length
-            when {
-                fence != null -> {
-                    spans += HighlightSpan(kind = HighlightKind.CODE_BLOCK, start = lineStart, end = codeEnd)
-                    if (closesFence(line = line, fence = fence)) fence = null
-                }
-
-                opening != null -> {
-                    spans += HighlightSpan(kind = HighlightKind.CODE_BLOCK, start = lineStart, end = codeEnd)
-                    fence = opening
-                }
-
-                else -> highlightLine(line = line, offset = lineStart, spans = spans)
+            if (fences.read(text = line)) {
+                // Spaces ending a code line keep the text's font: in another, the cursor does not move past them.
+                spans += HighlightSpan(
+                    kind = HighlightKind.CODE_BLOCK,
+                    start = lineStart,
+                    end = lineStart + line.trimEnd().length
+                )
+            } else {
+                highlightLine(line = line, offset = lineStart, spans = spans)
             }
             if (newline < 0) break
             lineStart = newline + 1
@@ -47,44 +42,21 @@ class MarkdownHighlighter {
         text: CharSequence
     ): List<IntRange> {
         val blocks = mutableListOf<IntRange>()
-        var fence: String? = null
+        val fences = FenceTracker()
         var blockStart = 0
         var lineStart = 0
         while (lineStart <= text.length) {
             val newline = text.indexOf(char = NEW_LINE_CHAR, startIndex = lineStart)
             val lineEnd = if (newline < 0) text.length else newline
-            val line = text.substring(startIndex = lineStart, endIndex = lineEnd)
-            val opening = fenceOf(line = line)
-            val open = fence
-            if (open != null && closesFence(line = line, fence = open)) {
-                blocks += blockStart until lineEnd
-                fence = null
-            } else if (open == null && opening != null) {
-                fence = opening
-                blockStart = lineStart
-            }
+            val wasOpen = fences.isOpen
+            fences.read(text = text, start = lineStart, end = lineEnd)
+            if (wasOpen && !fences.isOpen) blocks += blockStart until lineEnd
+            if (!wasOpen && fences.isOpen) blockStart = lineStart
             if (newline < 0) break
             lineStart = newline + 1
         }
-        if (fence != null) blocks += blockStart until text.length
+        if (fences.isOpen) blocks += blockStart until text.length
         return blocks
-    }
-
-    /** The fence a line opens (its backticks or tildes), searched only when the line has one of them. */
-    private fun fenceOf(
-        line: String
-    ): String? = if (FENCE_CHARS.any { it in line }) {
-        MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)
-    } else {
-        null
-    }
-
-    private fun closesFence(
-        line: String,
-        fence: String
-    ): Boolean {
-        val trimmed = line.trim()
-        return trimmed.length >= fence.length && trimmed.all { it == fence.first() }
     }
 
     private fun highlightLine(
@@ -189,7 +161,6 @@ class MarkdownHighlighter {
             HighlightKind.HEADING_5,
             HighlightKind.HEADING_6
         )
-        private const val FENCE_CHARS = "`~"
         private const val INLINE_TRIGGERS = "`[*_#"
         private val INLINE_CODE = Regex(pattern = "(`+)(.+?)(\\1)")
         private val ITALIC =
