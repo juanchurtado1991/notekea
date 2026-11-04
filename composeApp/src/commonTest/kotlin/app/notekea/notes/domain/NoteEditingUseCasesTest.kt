@@ -27,7 +27,7 @@ class NoteEditingUseCasesTest {
     @Test
     fun `a note that cannot be read does not open`() = runTest {
         assertEquals(
-            expected = Outcome.Failure(error = NotesError.OperationFailed(path = NOTE.value)),
+            expected = Outcome.Failure(error = NotesError.EntryMissing(path = NOTE.value)),
             actual = openNote(vaultPath = VAULT, path = NOTE)
         )
     }
@@ -101,6 +101,21 @@ class NoteEditingUseCasesTest {
                 Outcome.Failure(error = NotesError.OperationFailed(path = NOTE.value))
             ),
             actual = listOf(restored, refused)
+        )
+    }
+
+    @Test
+    fun `a note that cannot be read is neither opened nor replaced by a save`() = runTest {
+        store.texts[NOTE] = ORIGINAL
+        store.unreadable += NOTE
+        val failure = Outcome.Failure(error = NotesError.Unreadable(path = NOTE.value))
+
+        val document = NoteDocument.fromText(text = "Edited")
+        val saved = saveNote(vaultPath = VAULT, path = NOTE, document = document, expectedOnDisk = ORIGINAL)
+
+        assertEquals(
+            expected = Triple<Any, Any, Any>(failure, failure, ORIGINAL),
+            actual = Triple(openNote(vaultPath = VAULT, path = NOTE), saved, store.texts.getValue(NOTE))
         )
     }
 

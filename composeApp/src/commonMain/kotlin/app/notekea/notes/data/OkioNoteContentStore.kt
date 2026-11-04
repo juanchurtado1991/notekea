@@ -7,6 +7,7 @@ import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import okio.FileNotFoundException
 import okio.FileSystem
 import okio.IOException
 import okio.Path
@@ -23,16 +24,26 @@ class OkioNoteContentStore(
     private val fileSystem: FileSystem,
     private val dispatchers: AppDispatchers
 ) : NoteContentStore {
+    override suspend fun readText(
+        vaultPath: String,
+        path: RelativePath
+    ): Outcome<String, NotesError> = withContext(context = dispatchers.io) {
+        try {
+            val bytes = fileSystem.read(file = fileOf(vaultPath = vaultPath, path = path)) { readByteArray() }
+            Outcome.Success(value = bytes.decodeToString(throwOnInvalidSequence = true))
+        } catch (_: FileNotFoundException) {
+            Outcome.Failure(error = NotesError.EntryMissing(path = path.value))
+        } catch (_: IOException) {
+            Outcome.Failure(error = NotesError.Unreadable(path = path.value))
+        } catch (_: CharacterCodingException) {
+            Outcome.Failure(error = NotesError.Unreadable(path = path.value))
+        }
+    }
+
     override suspend fun read(
         vaultPath: String,
         path: RelativePath
-    ): String? = withContext(context = dispatchers.io) {
-        try {
-            fileSystem.read(file = fileOf(vaultPath = vaultPath, path = path)) { readUtf8() }
-        } catch (_: IOException) {
-            null
-        }
-    }
+    ): String? = (readText(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
 
     override suspend fun write(
         vaultPath: String,
