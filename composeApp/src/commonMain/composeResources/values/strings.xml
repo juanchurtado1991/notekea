@@ -468,6 +468,7 @@
         <item quantity="one">1 mention</item>
         <item quantity="other">%1$d mentions</item>
     </plurals>
+    <string name="mentions_failed">The notes could not be searched.</string>
     <string name="mentions_link">Link</string>
     <string name="mentions_link_failed">“%1$s” changed meanwhile, so it was not linked. Try again.</string>
     <string name="mentions_linked_empty">No other note links here yet.</string>

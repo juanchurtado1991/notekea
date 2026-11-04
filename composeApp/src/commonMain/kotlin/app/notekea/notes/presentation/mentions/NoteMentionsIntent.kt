@@ -14,4 +14,7 @@ sealed interface NoteMentionsIntent {
 
     /** Link was clicked on an unlinked [mention]: its words become a link to the open note. */
     data class OnLink(val mention: NoteMention) : NoteMentionsIntent
+
+    /** Try again after a search that failed. */
+    data object OnRetry : NoteMentionsIntent
 }

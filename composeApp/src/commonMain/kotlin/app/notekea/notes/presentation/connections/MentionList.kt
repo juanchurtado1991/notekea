@@ -19,6 +19,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.presentation.components.NotekeaButton
+import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaPassageRow
 import app.notekea.core.presentation.components.focusBorder
@@ -32,11 +34,13 @@ import app.notekea.notes.presentation.mentions.NoteMentionsIntent
 import app.notekea.notes.presentation.mentions.NoteMentionsState
 import app.notekea.resources.Res
 import app.notekea.resources.mentions_count
+import app.notekea.resources.mentions_failed
 import app.notekea.resources.mentions_link
 import app.notekea.resources.mentions_link_failed
 import app.notekea.resources.mentions_linked_empty
 import app.notekea.resources.mentions_unlinked_empty
 import app.notekea.resources.related_open_beside
+import app.notekea.resources.tree_retry
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -47,7 +51,8 @@ private const val PILL_GAP_DP = 4
 /**
  * Connections' Linked or Unlinked tab (`ROADMAP.md` 2.5, design A): a row per note that names the open one, with the
  * line where it does and the mention highlighted (and how many times, when more than once); a click opens that note
- * there. A linked row offers Open to the side; an unlinked one a Link button, the only way it becomes a link.
+ * there. A linked row offers Open to the side; an unlinked one a Link button, the only way it becomes a link. Bars stand
+ * in for the rows the first time they are found, and a search that failed says so, with Try again.
  */
 @Composable
 fun MentionList(
@@ -61,20 +66,40 @@ fun MentionList(
         state.linkFailed?.takeUnless { isLinked }?.let {
             ConnectionsMuted(text = stringResource(Res.string.mentions_link_failed, it.nameWithoutExtension))
         }
-        if (mentions.isEmpty() && !state.isLoading) {
-            val name = state.note?.nameWithoutExtension.orEmpty()
-            ConnectionsMuted(
-                text = if (isLinked) {
-                    stringResource(resource = Res.string.mentions_linked_empty)
-                } else {
-                    stringResource(Res.string.mentions_unlinked_empty, name)
-                }
-            )
+        when {
+            state.searchFailed -> MentionsFailed(onRetry = { onIntent(NoteMentionsIntent.OnRetry) })
+
+            mentions.isEmpty() && state.isLoading -> ConnectionsSkeleton()
+
+            mentions.isEmpty() -> {
+                val name = state.note?.nameWithoutExtension.orEmpty()
+                ConnectionsMuted(
+                    text = if (isLinked) {
+                        stringResource(resource = Res.string.mentions_linked_empty)
+                    } else {
+                        stringResource(Res.string.mentions_unlinked_empty, name)
+                    }
+                )
+            }
         }
         mentions.forEach { mention ->
             MentionRow(mention = mention, isLinked = isLinked, onIntent = onIntent, actions = actions)
         }
     }
+}
+
+/** The search failed: it says so and offers to try again, never that nothing was found. */
+@Composable
+private fun MentionsFailed(
+    onRetry: () -> Unit
+) {
+    ConnectionsMuted(text = stringResource(resource = Res.string.mentions_failed))
+    NotekeaButton(
+        text = stringResource(resource = Res.string.tree_retry),
+        onClick = onRetry,
+        modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingS),
+        style = NotekeaButtonStyle.TEXT
+    )
 }
 
 @Composable

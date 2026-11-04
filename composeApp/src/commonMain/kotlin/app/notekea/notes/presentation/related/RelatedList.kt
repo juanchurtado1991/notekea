@@ -22,6 +22,7 @@ import app.notekea.notes.domain.RelatedSnippet
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.presentation.connections.ConnectionActions
 import app.notekea.notes.presentation.connections.ConnectionsMuted
+import app.notekea.notes.presentation.connections.ConnectionsSkeleton
 import app.notekea.notes.presentation.connections.folderOf
 import app.notekea.resources.Res
 import app.notekea.resources.related_empty
@@ -36,8 +37,8 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * Connections' Related tab (`ROADMAP.md` 2.4, design A): a row per related note (name, folder, the passage that
- * matched) with Open to the side and Insert link on hover, a click opening it; or why there is none; then "Already
- * linked", folded unless opened.
+ * matched) with Open to the side and Insert link on hover, a click opening it; or why there is none, bars standing in
+ * for the rows the first time they are found; then "Already linked", folded unless opened.
  */
 @Composable
 fun RelatedList(
@@ -47,6 +48,7 @@ fun RelatedList(
 ) {
     Column {
         statusText(state = state)?.let { ConnectionsMuted(text = it) }
+        if (state.related.isEmpty() && state.isLoading && state.error == null) ConnectionsSkeleton()
         state.related.forEach { RelatedRow(note = it, actions = actions) }
         Linked(state = state, onIntent = onIntent, onOpen = actions.onOpen)
     }

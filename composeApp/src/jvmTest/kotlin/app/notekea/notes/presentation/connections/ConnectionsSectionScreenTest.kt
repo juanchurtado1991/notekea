@@ -7,6 +7,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
+import app.notekea.core.presentation.TestTags
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickDescription
 import app.notekea.core.presentation.clickText
@@ -121,6 +122,55 @@ class ConnectionsSectionScreenTest {
         assertTrue(actual = "No other note names “Arepas” without a link." in empty, message = empty.toString())
     }
 
+    @Test
+    fun `a failed search says so and tries again, never that nothing was found`() {
+        val intents = mutableListOf<NoteMentionsIntent>()
+
+        val shown = render(
+            tab = ConnectionsTab.LINKED,
+            mentions = NoteMentionsState(note = RelativePath(value = AREPAS), searchFailed = true),
+            onMentionsIntent = { intents += it },
+            textClicks = listOf("Try again")
+        )
+
+        assertEquals(
+            expected = Triple(true, false, listOf<NoteMentionsIntent>(NoteMentionsIntent.OnRetry)),
+            actual = Triple(
+                "The notes could not be searched." in shown,
+                "No other note links here yet." in shown,
+                intents
+            )
+        )
+    }
+
+    @Test
+    fun `bars stand in for the rows the first time they are found, in Linked and in Related`() {
+        val mentions = NoteMentionsState(note = RelativePath(value = AREPAS), isLoading = true)
+        val related = RelatedNotesState(isIndexReady = true, isLoading = true)
+
+        val loading = listOf(
+            isLoadingShown(tab = ConnectionsTab.LINKED, mentions = mentions),
+            isLoadingShown(tab = ConnectionsTab.RELATED, related = related),
+            isLoadingShown(tab = ConnectionsTab.LINKED, mentions = MENTIONS.copy(isLoading = true))
+        )
+
+        assertEquals(expected = listOf(true, true, false), actual = loading)
+    }
+
+    private fun isLoadingShown(
+        tab: ConnectionsTab,
+        related: RelatedNotesState = RELATED,
+        mentions: NoteMentionsState = NoteMentionsState()
+    ): Boolean {
+        var isShown = false
+        render(tab = tab, related = related, mentions = mentions, onScene = { scene ->
+            isShown = scene.nodes().any { node ->
+                node.config.getOrNull(SemanticsProperties.TestTag) == TestTags.CONNECTIONS_LOADING
+            }
+        })
+        return isShown
+    }
+
     private fun render(
         tab: ConnectionsTab = ConnectionsTab.RELATED,
         related: RelatedNotesState = RELATED,
@@ -129,7 +179,8 @@ class ConnectionsSectionScreenTest {
         onMentionsIntent: (NoteMentionsIntent) -> Unit = {},
         hoverText: String? = null,
         clicks: List<String> = emptyList(),
-        textClicks: List<String> = emptyList()
+        textClicks: List<String> = emptyList(),
+        onScene: (ImageComposeScene) -> Unit = {}
     ): List<String> {
         var texts = emptyList<String>()
         UiThread.run {
@@ -153,6 +204,7 @@ class ConnectionsSectionScreenTest {
                 settle(scene = scene)
                 hoverText?.let { hover(scene = scene, text = it) }
                 texts = scene.texts()
+                onScene(scene)
                 clicks.forEach { scene.clickDescription(description = it) { settle(scene = scene) } }
                 textClicks.forEach { scene.clickText(text = it) { settle(scene = scene) } }
             }

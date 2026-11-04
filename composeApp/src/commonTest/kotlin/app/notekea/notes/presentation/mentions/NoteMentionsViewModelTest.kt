@@ -109,6 +109,27 @@ class NoteMentionsViewModelTest {
         )
     }
 
+    @Test
+    fun `a search that fails says so and keeps what it found, and Try again finds it`() = runTest(
+        context = testDispatcher
+    ) {
+        val viewModel = started()
+        val found = viewModel.state.value.mentions
+        contents.onRead = { error("The disk went away") }
+
+        viewModel.onIntent(intent = NoteMentionsIntent.OnNotesChange(notes = notes(changed = LISBON)))
+        advanceUntilIdle()
+        val failed = viewModel.state.value
+        contents.onRead = {}
+        viewModel.onIntent(intent = NoteMentionsIntent.OnRetry)
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = Triple(true, found, false),
+            actual = Triple(failed.searchFailed, failed.mentions, viewModel.state.value.searchFailed)
+        )
+    }
+
     private fun kotlinx.coroutines.test.TestScope.started(): NoteMentionsViewModel {
         contents.texts[AREPAS] = "# Arepas"
         contents.texts[WELCOME] = "Cook [[Arepas]] on Sundays."
