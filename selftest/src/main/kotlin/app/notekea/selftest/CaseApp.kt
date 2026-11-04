@@ -22,8 +22,6 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import app.notekea.App
-import app.notekea.core.appearance.domain.GetUiScaleUseCase
-import app.notekea.core.appearance.domain.SaveUiScaleUseCase
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
 import app.notekea.core.presentation.menu.AppMenuEntry
@@ -133,11 +131,7 @@ class CaseApp(
                     CaseApps.quit(vaults = vaults, whileClosed = {})
                 }
                 // The window's zoom, as the app's main window has it (1.14-14).
-                UiZoom(
-                    platformConventions = koin.get(),
-                    loadScale = { koin.get<GetUiScaleUseCase>()() },
-                    saveScale = { koin.get<SaveUiScaleUseCase>()(scale = it) }
-                ) { Window() }
+                UiZoom(platformConventions = koin.get()) { Window() }
             }
         }
     }

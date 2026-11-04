@@ -10,6 +10,7 @@ import app.notekea.core.appearance.domain.GetUiScaleUseCase
 import app.notekea.core.appearance.domain.SaveUiScaleUseCase
 import app.notekea.core.appearance.domain.UiScaleStore
 import app.notekea.core.appearance.domain.WindowBoundsStore
+import app.notekea.core.presentation.platform.UiZoomViewModel
 import app.notekea.core.presentation.platform.WindowBoundsViewModel
 import app.notekea.core.presentation.settings.AppearanceViewModel
 import org.koin.core.module.dsl.factoryOf
@@ -32,4 +33,5 @@ val coreModule = module {
     factoryOf(::SaveUiScaleUseCase)
     viewModelOf(::AppearanceViewModel)
     viewModelOf(::WindowBoundsViewModel)
+    viewModelOf(::UiZoomViewModel)
 }
