@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.IntSize
 import app.notekea.core.presentation.images.scaledToCover
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
+import app.notekea.core.presentation.images.decodedImage
 import app.notekea.notes.domain.AttachmentKind
 import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.RelativePath
@@ -17,7 +18,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.decodeToImageBitmap
 
 /**
  * The editor's tabs and panes of the vault at [vaultPath] (`ROADMAP.md` 1.11). Every opened note, file or folder gets a
@@ -229,12 +229,10 @@ class WorkspaceViewModel(
                 path.takeIf { AttachmentKind.of(name = it.name) == AttachmentKind.IMAGE }
             }
             val image = picture?.let { imageOf(path = it, size = size) }
-            reduce { current ->
-                val covers = current.covers - path + (path to image)
-                val dropped = covers.keys.take(n = (covers.size - MAX_COVERS).coerceAtLeast(minimumValue = 0))
-                dropped.forEach { coverSources.remove(key = it) }
-                current.copy(covers = covers - dropped.toSet())
-            }
+            val held = state.value.covers.keys - path + path
+            val dropped = held.take(n = (held.size - MAX_COVERS).coerceAtLeast(minimumValue = 0)).toSet()
+            dropped.forEach { coverSources.remove(key = it) }
+            reduce { it.copy(covers = it.covers - path + (path to image) - dropped) }
         }
     }
 
@@ -244,14 +242,8 @@ class WorkspaceViewModel(
     ): ImageBitmap? {
         val bytes = (tools.attachmentStore.read(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
             ?: return null
-        return withContext(context = tools.dispatchers.default) {
-            try {
-                bytes.decodeToImageBitmap().scaledToCover(width = size.width, height = size.height)
-            } catch (_: IllegalArgumentException) {
-                // Not a picture Skia can read (a broken or renamed file): the card shows its icon instead.
-                null
-            }
-        }
+        val image = decodedImage(bytes = bytes, dispatcher = tools.dispatchers.default)
+        return image?.scaledToCover(width = size.width, height = size.height)
     }
 
     private fun sourceOf(

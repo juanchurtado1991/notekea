@@ -3,6 +3,7 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.ui.graphics.ImageBitmap
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
+import app.notekea.core.presentation.images.decodedImage
 import app.notekea.notes.domain.AttachFileUseCase
 import app.notekea.notes.domain.AttachmentFolder
 import app.notekea.notes.domain.AttachmentKind
@@ -20,7 +21,6 @@ import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.VaultSettingsReader
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.decodeToImageBitmap
 
 /**
  * The files and notes embedded in the open note of the vault at [vaultPath] (`ROADMAP.md` 1.8), for the editor: it
@@ -228,16 +228,7 @@ class EditorAttachments(
         path: RelativePath
     ): ImageBitmap? {
         val bytes = (attachmentStore.read(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
-        return bytes?.let {
-            withContext(context = dispatchers.default) {
-                try {
-                    it.decodeToImageBitmap()
-                } catch (_: IllegalArgumentException) {
-                    // Not a picture Skia can read (a broken or renamed file): it shows as a file to open instead.
-                    null
-                }
-            }
-        }
+        return bytes?.let { decodedImage(bytes = it, dispatcher = dispatchers.default) }
     }
 
     /** A decoded picture, and the reading of a note's embeds that last used it. */
