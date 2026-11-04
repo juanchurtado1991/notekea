@@ -22,12 +22,12 @@ import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.core.notes.domain.FrontmatterContent
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.notes.presentation.connections.ConnectionActions
+import app.notekea.connections.presentation.ConnectionActions
 import app.notekea.notes.presentation.editor.EditorPreviewData
 import app.notekea.notes.presentation.editor.EditorState
 import app.notekea.notes.presentation.editor.PropertiesView
-import app.notekea.notes.presentation.related.RelatedList
-import app.notekea.notes.presentation.related.RelatedNotesState
+import app.notekea.connections.presentation.RelatedList
+import app.notekea.connections.presentation.RelatedNotesState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

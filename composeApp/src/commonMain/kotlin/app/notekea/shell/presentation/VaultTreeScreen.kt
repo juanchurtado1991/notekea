@@ -38,8 +38,8 @@ import app.notekea.shell.presentation.WorkspaceIntent
 import app.notekea.shell.presentation.WorkspaceState
 import app.notekea.shell.presentation.WorkspaceViewModel
 import app.notekea.notes.presentation.index.SearchIndexIntent
-import app.notekea.notes.presentation.mentions.NoteMentionsViewModel
-import app.notekea.notes.presentation.related.RelatedNotesViewModel
+import app.notekea.connections.presentation.NoteMentionsViewModel
+import app.notekea.connections.presentation.RelatedNotesViewModel
 import app.notekea.notes.presentation.index.SearchIndexNotice
 import app.notekea.notes.presentation.index.SearchIndexStatus
 import app.notekea.notes.presentation.index.SearchIndexViewModel
