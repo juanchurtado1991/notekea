@@ -28,7 +28,6 @@ import app.notekea.core.presentation.theme.NotekeaBrand
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import app.notekea.core.presentation.platform.LocalAppVersion
 import app.notekea.core.presentation.platform.UiZoom
-import org.koin.core.Koin
 import app.notekea.core.logging.data.FileLogWriter
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.platformLogWriter
@@ -115,6 +114,7 @@ fun runNotekea(
     val showGallery = System.getProperty(GALLERY_PROPERTY).toBoolean()
     val isCrashTest = koin.get<SystemEnvironment>().environmentVariable(name = CRASH_TEST_VARIABLE) == CRASH_TEST_ON
     val systemDarkTheme = koin.get<SystemAppearance>().observeDarkTheme()
+    val conventions = koin.get<PlatformConventions>()
     val systemMotion = koin.get<SystemMotion>()
     val appearances = koin.get<AppearanceStore>().observe()
     // Read before the first window, so it never opens in the default theme first.
@@ -132,7 +132,7 @@ fun runNotekea(
             LocalFileDrop provides ::awtFileDrop,
             LocalAppVersion provides koin.get<SystemEnvironment>().appVersion
         ) {
-            if (showGallery) GalleryWindow() else NotekeaWindow(isCrashTest, windowOpening, zoomOf(koin = koin))
+            if (showGallery) GalleryWindow() else NotekeaWindow(isCrashTest, windowOpening, conventions)
             CrashNotice(crashBuddy = crashBuddy, theme = { NotekeaTheme { it() } })
             extraWindows()
         }
@@ -159,7 +159,7 @@ private fun ApplicationScope.GalleryWindow() {
 private fun ApplicationScope.NotekeaWindow(
     isCrashTest: Boolean,
     opening: WindowOpening,
-    zoom: WindowZoom
+    conventions: PlatformConventions
 ) {
     var vaultName by remember { mutableStateOf<String?>(value = null) }
     var activeTabName by remember { mutableStateOf<String?>(value = null) }
@@ -176,7 +176,7 @@ private fun ApplicationScope.NotekeaWindow(
         state = windowState,
         onPreviewKeyEvent = shortcutDispatcher::dispatch
     ) {
-        NotekeaMenuBar(conventions = zoom.platformConventions, shortcuts = shortcutDispatcher, dialogs = dialogs)
+        NotekeaMenuBar(conventions = conventions, shortcuts = shortcutDispatcher, dialogs = dialogs)
         FollowWindowBounds(state = windowState)
         CompositionLocalProvider(
             LocalShortcutDispatcher provides shortcutDispatcher,
@@ -185,9 +185,9 @@ private fun ApplicationScope.NotekeaWindow(
             LocalResizePointerIcon provides PointerIcon(cursor = Cursor(Cursor.E_RESIZE_CURSOR))
         ) {
             if (isCrashTest) CrashTest()
-            WindowCloseShortcuts(platformConventions = zoom.platformConventions, onClose = onClose)
+            WindowCloseShortcuts(platformConventions = conventions, onClose = onClose)
             ZoomedContent(
-                zoom = zoom,
+                conventions = conventions,
                 dialogs = dialogs,
                 onVaultNameChange = { vaultName = it },
                 onActiveTabChange = { activeTabName = it }
@@ -213,18 +213,14 @@ private fun rememberSystemIntegration(
 
 @Composable
 private fun ZoomedContent(
-    zoom: WindowZoom,
+    conventions: PlatformConventions,
     dialogs: WindowDialogs,
     onVaultNameChange: (String?) -> Unit,
     onActiveTabChange: (String?) -> Unit
 ) {
-    UiZoom(
-        platformConventions = zoom.platformConventions,
-        loadScale = { zoom.getUiScale() },
-        saveScale = { zoom.saveUiScale(scale = it) }
-    ) {
+    UiZoom(platformConventions = conventions) {
         WindowContent(
-            platformConventions = zoom.platformConventions,
+            platformConventions = conventions,
             dialogs = dialogs,
             onVaultNameChange = onVaultNameChange,
             onActiveTabChange = onActiveTabChange
@@ -264,11 +260,6 @@ private fun FrameWindowScope.NotekeaMenuBar(
         }
     }
 }
-
-/** What the window's zoom needs from Koin: the platform's shortcuts and where the zoom is kept. */
-private fun zoomOf(
-    koin: Koin
-) = WindowZoom(platformConventions = koin.get(), getUiScale = koin.get(), saveUiScale = koin.get())
 
 /**
  * The app: the welcome screen, then the open vault's workspace, with the window's [dialogs] over them;
