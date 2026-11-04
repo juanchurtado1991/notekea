@@ -24,7 +24,7 @@ import app.notekea.notes.presentation.editor.EditorEffect
 import app.notekea.notes.presentation.editor.EditorIntent
 import app.notekea.notes.presentation.editor.EditorViewModel
 import app.notekea.notes.presentation.editor.EditorViewModels
-import app.notekea.notes.presentation.switcher.QuickSwitcherEffect
+import app.notekea.search.presentation.switcher.QuickSwitcherEffect
 import app.notekea.shell.presentation.WorkspaceIntent
 import app.notekea.shell.presentation.WorkspaceTools
 import app.notekea.shell.presentation.WorkspaceViewModel

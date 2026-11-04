@@ -10,7 +10,7 @@ import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.notes.domain.SearchNoteContentUseCase
+import app.notekea.search.domain.SearchNoteContentUseCase
 import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.VaultTree
 import kotlinx.coroutines.flow.first
