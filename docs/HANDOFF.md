@@ -36,7 +36,7 @@ Last updated: 2026-11-03, with 2.5 in review.
 
 Decided on 2026-11-04: there is no M2, M3 or M4 QA run. The only run left comes after 5.4 and before 5.5, on Windows,
 macOS and Linux, with every case (`ROADMAP.md`, `qa/README.md`). The developer also installs the app on Windows and
-macOS at the end of M3 to see the chat answer there. Study cards, PDFs, web clips and agent mode joined the MVP as M4b;
+macOS at the end of M3 to see the chat answer there. Study cards, documents, web clips and agent mode joined the MVP as M4b;
 Repositories stays after it. The testers: the developer (macOS and Linux) and a tester who is not a
 developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
 
