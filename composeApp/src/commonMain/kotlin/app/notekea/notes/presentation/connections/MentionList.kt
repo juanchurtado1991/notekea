@@ -118,22 +118,33 @@ private fun MentionRow(
     } else {
         ""
     }
+    val beside = stringResource(Res.string.related_open_beside)
+    val linkLabel = stringResource(resource = Res.string.mentions_link)
+    val onLink = { onIntent(NoteMentionsIntent.OnLink(mention = mention)) }
     NotekeaPassageRow(
         title = source.nameWithoutExtension,
         subtitle = listOf(folder, times).filter { it.isNotEmpty() }.joinToString(separator = SUBTITLE_SEPARATOR),
         text = mention.passage,
         highlight = mention.highlight,
         icon = NotekeaIcons.Note,
-        onClick = { actions.onReveal(source, mention.range) }
+        onClick = { actions.onReveal(source, mention.range) },
+        showsActions = !isLinked,
+        accessibilityActions = listOf(
+            if (isLinked) {
+                connectionAction(label = beside) { actions.onOpenBeside(source) }
+            } else {
+                connectionAction(label = linkLabel, onAction = onLink)
+            }
+        )
     ) {
         if (isLinked) {
             NotekeaIconButton(
                 icon = NotekeaIcons.SidePanel,
-                label = stringResource(Res.string.related_open_beside),
+                label = beside,
                 onClick = { actions.onOpenBeside(source) }
             )
         } else {
-            LinkButton(onClick = { onIntent(NoteMentionsIntent.OnLink(mention = mention)) })
+            LinkButton(onClick = onLink)
         }
     }
 }

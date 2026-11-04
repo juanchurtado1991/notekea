@@ -3,6 +3,7 @@ package app.notekea.notes.presentation.connections
 import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.unit.Density
@@ -120,6 +121,30 @@ class ConnectionsSectionScreenTest {
             actual = intents
         )
         assertTrue(actual = "No other note names “Arepas” without a link." in empty, message = empty.toString())
+    }
+
+    @Test
+    fun `an unlinked row shows Link without the pointer on it`() {
+        val shown = render(tab = ConnectionsTab.UNLINKED, mentions = MENTIONS)
+
+        assertTrue(actual = "Link" in shown, message = shown.toString())
+    }
+
+    @Test
+    fun `a row's actions reach screen readers, with Related's on hover only on screen`() {
+        var unlinked = emptyList<String>()
+        var related = emptyList<String>()
+        render(tab = ConnectionsTab.UNLINKED, mentions = MENTIONS, onScene = { unlinked = it.customActionLabels() })
+        val shown = render(onScene = { related = it.customActionLabels() })
+
+        assertEquals(
+            expected = Triple(listOf("Link"), listOf("Open to the side", "Insert link"), false),
+            actual = Triple(unlinked, related, "Insert link" in shown)
+        )
+    }
+
+    private fun ImageComposeScene.customActionLabels(): List<String> = nodes().flatMap { node ->
+        node.config.getOrNull(SemanticsActions.CustomActions).orEmpty().map { it.label }
     }
 
     @Test

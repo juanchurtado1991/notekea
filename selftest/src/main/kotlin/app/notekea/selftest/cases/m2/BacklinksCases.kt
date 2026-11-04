@@ -1,8 +1,5 @@
 package app.notekea.selftest.cases.m2
 
-import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onFirst
-import androidx.compose.ui.test.performMouseInput
 import app.notekea.selftest.openNote
 import app.notekea.selftest.openVault
 import com.testbuddy.ManualReason
@@ -42,9 +39,6 @@ private fun SuiteBuilder.linkUnlinked() {
         openNote(name = AREPAS, shownText = AREPAS_TEXT)
         click(text = "Unlinked")
         expectText(text = TASKS_LINE, substring = true)
-        // Link shows under the pointer, as a person sees it.
-        ui.onAllNodes(matcher = hasText(text = TASKS_LINE, substring = true)).onFirst()
-            .performMouseInput { moveTo(position = center) }
         click(text = "Link")
         expectFile(path = "$SAMPLE/Guides/Tasks.md", containing = "Buy flour for the [[Arepas|arepas]]")
         click(text = "Linked")

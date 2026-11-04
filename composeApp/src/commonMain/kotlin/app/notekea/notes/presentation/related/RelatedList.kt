@@ -23,6 +23,7 @@ import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.presentation.connections.ConnectionActions
 import app.notekea.notes.presentation.connections.ConnectionsMuted
 import app.notekea.notes.presentation.connections.ConnectionsSkeleton
+import app.notekea.notes.presentation.connections.connectionAction
 import app.notekea.notes.presentation.connections.folderOf
 import app.notekea.resources.Res
 import app.notekea.resources.related_empty
@@ -73,22 +74,28 @@ private fun RelatedRow(
     actions: ConnectionActions
 ) {
     val path = note.path
+    val beside = stringResource(Res.string.related_open_beside)
+    val insertLink = stringResource(Res.string.related_insert_link)
     NotekeaPassageRow(
         title = path.nameWithoutExtension,
         subtitle = folderOf(path = path),
         text = note.snippet.text,
         highlight = note.snippet.highlight,
         icon = NotekeaIcons.Note,
-        onClick = { actions.onOpen(path) }
+        onClick = { actions.onOpen(path) },
+        accessibilityActions = listOf(
+            connectionAction(label = beside) { actions.onOpenBeside(path) },
+            connectionAction(label = insertLink) { actions.onInsertLink(path) }
+        )
     ) {
         NotekeaIconButton(
             icon = NotekeaIcons.SidePanel,
-            label = stringResource(Res.string.related_open_beside),
+            label = beside,
             onClick = { actions.onOpenBeside(path) }
         )
         NotekeaIconButton(
             icon = NotekeaIcons.NoteLink,
-            label = stringResource(Res.string.related_insert_link),
+            label = insertLink,
             onClick = { actions.onInsertLink(path) }
         )
     }
