@@ -25,8 +25,8 @@ import kotlin.math.sqrt
 /**
  * [TextEmbedder] on java-llama.cpp with the bundled multilingual model at [modelPath] (`ROADMAP.md` 2.2,
  * `docs/spikes/2026-11-01-embedding-models.md`). The model loads on the first call and is let go after [idleMillis]
- * without one, so writing notes never pays for its memory; calls run one at a time on the default dispatcher and a
- * cancelled one stops between texts. java-llama.cpp extracts its native library to [nativeFolder] (the app's data),
+ * without one, a cancelled call included, so writing notes never pays for its memory; calls run one at a time on the
+ * default dispatcher and a cancelled one stops between texts. java-llama.cpp extracts its native library to [nativeFolder] (the app's data),
  * not `/tmp`, which some systems mount without the right to run it.
  */
 class LlamaTextEmbedder(
@@ -55,12 +55,18 @@ class LlamaTextEmbedder(
     ): Outcome<List<FloatArray>, EmbeddingError> = withContext(context = dispatchers.default) {
         mutex.withLock {
             release?.cancel()
-            val outcome = embedAll(texts = texts)
-            release = scope.launch {
-                delay(timeMillis = idleMillis)
-                mutex.withLock { unload() }
+            try {
+                embedAll(texts = texts)
+            } finally {
+                releaseWhenIdle()
             }
-            outcome
+        }
+    }
+
+    private fun releaseWhenIdle() {
+        release = scope.launch {
+            delay(timeMillis = idleMillis)
+            mutex.withLock { unload() }
         }
     }
 
