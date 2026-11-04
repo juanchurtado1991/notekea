@@ -3,7 +3,9 @@ package app.notekea.di
 import app.notekea.core.embedding.di.embeddingModule
 import app.notekea.core.logging.di.loggingModule
 import app.notekea.core.platform.di.jvmPlatformModule
-import app.notekea.notes.di.jvmNotesModule
+import app.notekea.core.notes.di.jvmCoreNotesModule
+import app.notekea.tree.di.jvmTreeModule
+import app.notekea.editor.di.jvmEditorModule
 import app.notekea.vault.di.jvmVaultModule
 import org.koin.core.module.Module
 
@@ -13,6 +15,8 @@ val desktopModules: List<Module> = listOf(
     loggingModule,
     embeddingModule,
     jvmPlatformModule,
-    jvmNotesModule,
+    jvmCoreNotesModule,
+    jvmTreeModule,
+    jvmEditorModule,
     jvmVaultModule
 )
