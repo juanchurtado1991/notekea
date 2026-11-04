@@ -25,9 +25,19 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
     }
 
     /**
-     * The note a clicked wiki link to [target] opens when [resolve] finds no single one because several notes share its
+     * The note [link] leads to when read, not rewritten: the one [resolve] finds, or for a wiki link to a name several
+     * notes share, the closest ([closestWiki]). Following it, backlinks and "Already linked" all agree on this note.
+     */
+    fun closest(
+        link: NoteLink,
+        source: RelativePath
+    ): RelativePath? = resolve(link = link, source = source)?.target
+        ?: closestWiki(target = link.target, source = source).takeIf { link.kind == LinkKind.WIKI }
+
+    /**
+     * The note a wiki link to [target] leads to when [resolve] finds no single one because several notes share its
      * name: the one in [source]'s folder, else the one closest to the vault root, else the first by path. Null when no
-     * note matches. Only for following a link: an ambiguous link is still never rewritten.
+     * note matches. Only for reading a link: an ambiguous link is still never rewritten.
      */
     fun closestWiki(
         target: String,

@@ -45,6 +45,18 @@ class FindRelatedNotesUseCaseTest {
         assertEquals(expected = true, actual = "tomatoes" in result.related.first().snippet.text.lowercase())
     }
 
+    // Audit: the note a click opens was missing from "Already linked" when another note shared its name.
+    @Test
+    fun `a link to a name two notes share counts as linking the note a click opens`() = runTest {
+        val root = RelativePath(value = "Arepas.md")
+        val shared = RelativePath(value = "Recipes/Arepas.md")
+
+        val result =
+            findRelated(vaultPath = VAULT, note = GARDEN, text = "See [[Arepas]].", notes = ALL + root + shared)
+
+        assertEquals(expected = listOf(root), actual = (result as Outcome.Success).value.linked)
+    }
+
     @Test
     fun `at most eight notes are related`() = runTest {
         indexed(*(1..12).map { RelativePath(value = "Note $it.md") to "Tomatoes and basil, note $it." }.toTypedArray())

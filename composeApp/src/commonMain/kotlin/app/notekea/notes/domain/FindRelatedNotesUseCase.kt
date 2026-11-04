@@ -52,14 +52,14 @@ class FindRelatedNotesUseCase(
         return best.values.sortedByDescending { it.score }
     }
 
-    /** The notes [text] links to, as [LinkResolver] resolves them among [notes], once each, in order. */
+    /** The notes [text]'s links lead to when clicked ([LinkResolver.closest]) among [notes], once each, in order. */
     private fun linkedNotes(
         note: RelativePath,
         text: String,
         notes: Collection<RelativePath>
     ): List<RelativePath> {
         val resolver = LinkResolver(notePaths = notes)
-        return linkFinder.find(markdown = text).mapNotNull { resolver.resolve(link = it, source = note)?.target }
+        return linkFinder.find(markdown = text).mapNotNull { resolver.closest(link = it, source = note) }
             .filter { it != note }
             .distinct()
     }
