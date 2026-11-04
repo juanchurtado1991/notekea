@@ -14,9 +14,11 @@ app.notekea
 │   ├── domain          Outcome, AppDispatchers, shared domain types
 │   ├── presentation    BaseViewModel, design system (theme, tokens, components)
 │   ├── appearance      App-wide look the user sets: the UI zoom (UiScale, its store and use cases)
+│   ├── notes           What features share about notes: paths, documents, files, links, frontmatter
 │   └── platform        Platform abstraction (PLATFORM_GUIDELINES.md)
 ├── di                  App-level Koin module that includes every feature module
-└── <feature>           vault, notes, editor, index, llm, chat, sync, …
+├── shell               Assembles the window: panes, tabs, side panel, what follows what
+└── <feature>           editor, tree, search, connections, templates, vault; later chat, sync, sources
     ├── domain          Entities, <Feature>Error, repository interfaces, use cases
     ├── data            Implementations of the domain interfaces, DTOs and mappers
     ├── presentation    <Screen>State, <Screen>Intent, <Screen>Effect, <Screen>ViewModel, <Screen>Screen
@@ -29,6 +31,11 @@ app.notekea
 - **Features never depend on each other.** What two features share lives in `core`; when one feature's screen shows
   another's (the open vault showing the notes tree), it takes a composable slot and the app fills it in `main.kt`
   (`WelcomeScreen(openedVaultContent = …)`). Enforced by Konsist.
+- **`shell` assembles the features,** like `main.kt`: it may depend on every feature, and no feature or `core` depends on
+  it. A screen that needs several features belongs there. Enforced by Konsist.
+- **`core.notes` holds only what two features use.** A file enters it when a second feature needs it, not before.
+- **New work starts as its own feature,** never inside an existing one. Features are packages, not Gradle modules, as
+  long as a full compile stays short (`docs/spikes/2026-11-04-notes-feature-split.md`).
 - One top-level class, interface or object per file, named after it; DTOs, interfaces and utility functions each in
   their own file (`GUIDELINES.md` §2, "File organization").
 
