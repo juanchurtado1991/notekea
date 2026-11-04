@@ -51,6 +51,7 @@ import org.koin.core.module.Module
 import io.github.vinceglb.filekit.FileKit
 import kotlinx.coroutines.delay
 import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 
 private const val APP_ID = "Notekea"
 private const val CRASH_TEST_DELAY_MILLIS = 3_000L
@@ -106,6 +107,7 @@ fun runNotekea(
             }
         }
     }
+    stopKoin()
 }
 
 @Composable
