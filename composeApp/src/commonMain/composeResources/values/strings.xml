@@ -470,6 +470,7 @@
     <string name="mentions_unlinked_empty">No other note names “%1$s” without a link.</string>
     <string name="related_empty">No related notes yet. They show as the vault grows.</string>
     <string name="related_error_index">The search index cannot be read right now.</string>
+    <string name="related_too_long">This note is too long to compare with the others.</string>
     <string name="related_error_model">Related notes need the search model, which could not be loaded.</string>
     <string name="related_insert_link">Insert link</string>
     <string name="related_linked">Already linked</string>

@@ -69,6 +69,7 @@ class RelatedNotesViewModel(
                     is Outcome.Success -> it.copy(
                         related = outcome.value.related,
                         linked = outcome.value.linked,
+                        isTooLong = outcome.value.isTooLong,
                         isLoading = false,
                         error = null
                     )
