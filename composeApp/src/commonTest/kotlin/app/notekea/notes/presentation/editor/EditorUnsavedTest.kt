@@ -77,6 +77,17 @@ class EditorUnsavedTest : EditorViewModelTestBase() {
     }
 
     @Test
+    fun `a copy that cannot be written leaves no empty note beside the draft`() = runEditorTest {
+        open(path = AREPAS)
+        store.refused += setOf(AREPAS, COPY)
+        type(text = "Typed here")
+
+        open(path = WELCOME)
+
+        assertEquals(expected = false, actual = COPY in operations.existing)
+    }
+
+    @Test
     fun `a note that fails unexpectedly while it opens says so, and never shows as the previous note's text`() =
         runEditorTest {
             open(path = AREPAS)

@@ -28,6 +28,18 @@ class OkioNoteFileOperations(
         createIfFree(vaultPath = vaultPath, path = path) { fileSystem.write(file = it, mustCreate = true) {} }
     }
 
+    override suspend fun deleteEmptyFile(
+        vaultPath: String,
+        path: RelativePath
+    ) = withContext(context = dispatchers.io) {
+        val file = resolve(vaultPath = vaultPath, path = path)
+        try {
+            if (fileSystem.metadataOrNull(path = file)?.size == 0L) fileSystem.delete(path = file)
+        } catch (_: IOException) {
+            // An empty file left behind holds nothing to lose.
+        }
+    }
+
     override suspend fun createFolder(
         vaultPath: String,
         path: RelativePath

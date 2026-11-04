@@ -166,6 +166,21 @@ class OkioNoteFileOperationsTest {
     }
 
     @Test
+    fun `only an empty file is removed`() = runOperationsTest {
+        fakeFileSystem.write(file = vaultPath(path = "$IDEAS/Full.md")) { writeUtf8(string = "text") }
+        fakeFileSystem.write(file = vaultPath(path = "$IDEAS/Empty.md")) {}
+
+        operations().deleteEmptyFile(vaultPath = VAULT, path = path(value = "$IDEAS/Full.md"))
+        operations().deleteEmptyFile(vaultPath = VAULT, path = path(value = "$IDEAS/Empty.md"))
+
+        assertEquals(
+            expected = true to false,
+            actual = fakeFileSystem.exists(path = vaultPath(path = "$IDEAS/Full.md")) to
+                fakeFileSystem.exists(path = vaultPath(path = "$IDEAS/Empty.md"))
+        )
+    }
+
+    @Test
     fun `anything on disk exists, hidden entries included`() = runOperationsTest {
         writeNote(path = ".obsidian/app.json")
 
