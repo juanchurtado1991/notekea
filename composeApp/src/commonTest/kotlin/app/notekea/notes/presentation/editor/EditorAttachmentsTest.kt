@@ -149,6 +149,20 @@ class EditorAttachmentsTest {
     }
 
     @Test
+    fun `text pasted with windows line breaks goes in with plain ones, so a windows note saves them once`() =
+        runAttachmentsTest {
+            open(text = "Intro\r\n")
+            viewModel.buffer.edit { selection = TextRange(index = length) }
+            fixture.clipboard.text = "One\r\nTwo\r\n"
+
+            send(intent = EditorIntent.OnPaste)
+            send(intent = EditorIntent.OnSaveShortcut)
+
+            assertEquals(expected = "Intro\nOne\nTwo\n", actual = viewModel.buffer.text.toString())
+            assertEquals(expected = "Intro\r\nOne\r\nTwo\r\n", actual = fixture.store.texts[NOTE])
+        }
+
+    @Test
     fun `a pasted image is saved as Obsidian names it and embedded on its own line, pasted text goes in as text`() =
         runAttachmentsTest {
             open(text = "Intro")
