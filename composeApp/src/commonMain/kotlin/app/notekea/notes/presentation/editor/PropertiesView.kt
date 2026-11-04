@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -128,7 +129,7 @@ private fun FoldTitle(
         modifier = Modifier
             .focusBorder(color = colors.primary, shape = shape)
             .clip(shape = shape)
-            .clickable { onIntent(PropertyIntent.OnFoldToggle) }
+            .clickable(role = Role.Button) { onIntent(PropertyIntent.OnFoldToggle) }
             .padding(horizontal = NotekeaDimensions.SpacingXs, vertical = NotekeaDimensions.SpacingXs),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)

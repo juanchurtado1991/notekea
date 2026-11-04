@@ -21,6 +21,7 @@ import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaLazyScrollArea
 import app.notekea.core.presentation.components.NotekeaPassageRow
 import app.notekea.core.presentation.components.NotekeaSectionHeader
+import app.notekea.core.presentation.components.focusBorder
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
@@ -143,6 +144,7 @@ private fun LazyListScope.linkedItems(
                 text = path.nameWithoutExtension,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .focusBorder(color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.small)
                     .clickable(role = Role.Button) { actions.onOpen(path) }
                     .padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingXs),
                 style = MaterialTheme.typography.bodySmall,
