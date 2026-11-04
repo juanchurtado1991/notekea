@@ -3,23 +3,14 @@ package app.notekea.notes.data
 import app.notekea.notes.domain.LinkFinder
 import app.notekea.notes.domain.LinkKind
 import app.notekea.notes.domain.NoteLink
-import org.intellij.markdown.MarkdownElementTypes
-import org.intellij.markdown.ast.ASTNode
-import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
-import org.intellij.markdown.parser.CancellationToken
-import org.intellij.markdown.parser.MarkdownParser
 
 /**
- * [LinkFinder] that uses the JetBrains Markdown parser only to know where code is (fenced and indented blocks, inline
- * code), since it does not know Obsidian's `[[wiki links]]`, and finds the links themselves with patterns. Markdown
- * links count only when they point to a `.md` file and have no URL scheme, so web pages are never rewritten.
+ * [LinkFinder] that uses the JetBrains Markdown parser only to know where code is ([MarkdownCodeRanges]), since it
+ * does not know Obsidian's `[[wiki links]]`, and finds the links themselves with patterns. Markdown links count only
+ * when they point to a `.md` file and have no URL scheme, so web pages are never rewritten.
  */
 class JetBrainsMarkdownLinkFinder : LinkFinder {
-    private val parser = MarkdownParser(
-        flavour = GFMFlavourDescriptor(),
-        assertionsEnabled = false,
-        cancellationToken = CancellationToken.NonCancellable
-    )
+    private val codeRanges = MarkdownCodeRanges()
 
     override fun find(
         markdown: String
@@ -32,16 +23,8 @@ class JetBrainsMarkdownLinkFinder : LinkFinder {
             }
         // The Markdown tree, which finds the code the links must not be in, is built only when there are links.
         if (links.isEmpty()) return emptyList()
-        val code = codeRanges(node = parser.buildMarkdownTreeFromString(text = markdown as CharSequence))
+        val code = codeRanges.of(markdown = markdown)
         return links.filterNot { link -> code.any { link.targetStart in it } }.sortedBy { it.targetStart }
-    }
-
-    private fun codeRanges(
-        node: ASTNode
-    ): List<IntRange> = if (node.type in CODE_TYPES) {
-        listOf(node.startOffset until node.endOffset)
-    } else {
-        node.children.flatMap { codeRanges(node = it) }
     }
 
     private fun matches(
@@ -63,8 +46,6 @@ class JetBrainsMarkdownLinkFinder : LinkFinder {
     companion object {
         private const val SCHEME_SEPARATOR = "://"
         private const val TARGET_GROUP = 1
-        private val CODE_TYPES =
-            setOf(MarkdownElementTypes.CODE_FENCE, MarkdownElementTypes.CODE_BLOCK, MarkdownElementTypes.CODE_SPAN)
 
         // [[target]], [[target#heading]], [[target^block]], [[target|alias]], with or without a leading "!" (embeds).
         private val WIKI_LINK = Regex(pattern = """\[\[([^\[\]|#^\n]+?)(?:[#^][^\[\]|\n]*)?(?:\|[^\[\]\n]*)?]]""")

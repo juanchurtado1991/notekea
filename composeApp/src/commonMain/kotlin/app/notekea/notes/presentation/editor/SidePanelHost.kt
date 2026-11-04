@@ -13,13 +13,13 @@ import androidx.compose.ui.focus.FocusRequester
  * How the screen holds the side panel (`ROADMAP.md` 1.9), one for every pane, beyond what the user chose and the tabs
  * keep: the [outlineFocus] that `Mod+Shift+O` gives the keyboard to, and whether the window is too narrow for the panel
  * beside the notes ([isOverlay]), so it floats over them instead, open only while it is used ([isOverlayOpen]): a
- * heading chosen, Esc or the hide button close it. [related] draws the inspector's Related section (`ROADMAP.md`
- * 2.4), given whether it is open and how to fold it; the vault's screen provides it.
+ * heading chosen, Esc or the hide button close it. [connections] draws the inspector's Connections (`ROADMAP.md`
+ * 2.4, 2.5), given whether it is open and how to fold it; the vault's screen provides it.
  */
 @Stable
 class SidePanelHost(
     private val send: (EditorIntent) -> Unit,
-    val related: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit = { _, _ -> }
+    val connections: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit = { _, _ -> }
 ) {
     val outlineFocus = FocusRequester()
     var isOverlay by mutableStateOf(value = false)

@@ -37,15 +37,13 @@ import app.notekea.notes.presentation.workspace.WorkspaceIntent
 import app.notekea.notes.presentation.workspace.WorkspaceState
 import app.notekea.notes.presentation.workspace.WorkspaceViewModel
 import app.notekea.notes.presentation.index.SearchIndexIntent
-import app.notekea.notes.presentation.related.FollowRelatedNotes
+import app.notekea.notes.presentation.mentions.NoteMentionsViewModel
 import app.notekea.notes.presentation.related.RelatedNotesViewModel
 import app.notekea.notes.presentation.index.SearchIndexNotice
 import app.notekea.notes.presentation.index.SearchIndexStatus
 import app.notekea.notes.presentation.index.SearchIndexViewModel
 import app.notekea.notes.domain.LinkResolver
 import app.notekea.notes.domain.FormatAction
-import app.notekea.notes.presentation.related.RelatedActions
-import app.notekea.notes.presentation.related.RelatedSection
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -54,6 +52,7 @@ private const val EDITOR_KEY_PREFIX = "editor:"
 private const val SWITCHER_KEY_PREFIX = "switcher:"
 private const val SEARCH_INDEX_KEY_PREFIX = "search-index:"
 private const val NOTICE_MAX_WIDTH_DP = 640
+private const val MENTIONS_KEY_PREFIX = "mentions:"
 private const val RELATED_KEY_PREFIX = "related:"
 private const val TAG_PICKER_KEY_PREFIX = "tags:"
 private const val WORKSPACE_KEY_PREFIX = "workspace:"
@@ -91,13 +90,16 @@ fun VaultTreeScreen(
     ) { parametersOf(vaultPath) },
     relatedViewModel: RelatedNotesViewModel = koinViewModel(
         key = RELATED_KEY_PREFIX + vaultPath
+    ) { parametersOf(vaultPath) },
+    mentionsViewModel: NoteMentionsViewModel = koinViewModel(
+        key = MENTIONS_KEY_PREFIX + vaultPath
     ) { parametersOf(vaultPath) }
 ) {
     val state by viewModel.state.collectAsState()
     val workspaceState by workspaceViewModel.state.collectAsState()
     val activeEditor = editorViewModels[workspaceState.workspace.activePane]
     val panes = remember(vaultPath) { List(size = Workspace.MAX_PANES) { EditorPaneTools() } }
-    val sidePanel = rememberSidePanelHost(workspaceViewModel, relatedViewModel, activeEditor, state.tree.notes.keys)
+    val sidePanel = rememberSidePanel(workspaceViewModel, relatedViewModel, mentionsViewModel, activeEditor, state)
     val viewModels = WorkspaceViewModels(
         tree = viewModel,
         workspace = workspaceViewModel,
@@ -118,7 +120,7 @@ fun VaultTreeScreen(
             onSwitchVault = onSwitchVault,
             searchIndex = { SearchIndexStatusOf(viewModel = searchIndexViewModel) }
         )
-        SearchIndexFollower(state, activeEditor, searchIndexViewModel, relatedViewModel)
+        SearchIndexFollower(state, activeEditor, searchIndexViewModel, relatedViewModel, mentionsViewModel)
         Pickers(
             state = state,
             workspaceState = workspaceState,
@@ -131,38 +133,19 @@ fun VaultTreeScreen(
     }
 }
 
-/**
- * The side panel's host, with the inspector's Related section (`ROADMAP.md` 2.4): a card opens its note, opens it
- * beside, or inserts a link to it at the active [editor]'s cursor, resolved among the vault's [notes].
- */
+/** The side panel with the inspector's Connections ([connectionsSidePanel]), on the active [editor] and the [tree]. */
 @Composable
-private fun rememberSidePanelHost(
+private fun rememberSidePanel(
     workspace: WorkspaceViewModel,
     related: RelatedNotesViewModel,
+    mentions: NoteMentionsViewModel,
     editor: EditorViewModel,
-    notes: Set<RelativePath>
+    tree: VaultTreeState
 ): SidePanelHost {
     val currentEditor by rememberUpdatedState(newValue = editor)
-    val currentNotes by rememberUpdatedState(newValue = notes)
-    return remember(workspace, related) {
-        val actions = RelatedActions(
-            onOpen = { workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = it)) },
-            onOpenBeside = { workspace.onIntent(intent = WorkspaceIntent.OnOpenBeside(path = it)) },
-            onInsertLink = { path ->
-                val target = LinkResolver(notePaths = currentNotes).wikiTarget(path = path)
-                currentEditor.onIntent(intent = EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target)))
-            }
-        )
-        SidePanelHost(send = { workspace.onIntent(intent = workspaceIntentOf(intent = it)) }) { isOpen, onToggle ->
-            val relatedState by related.state.collectAsState()
-            RelatedSection(
-                state = relatedState,
-                isOpen = isOpen,
-                onToggle = onToggle,
-                onIntent = related::onIntent,
-                actions = actions
-            )
-        }
+    val currentNotes by rememberUpdatedState(newValue = tree.tree.notes.keys)
+    return remember(workspace, related, mentions) {
+        connectionsSidePanel(workspace, related, mentions, { currentEditor }, { currentNotes })
     }
 }
 
@@ -177,24 +160,24 @@ private fun SearchIndexStatusOf(
 
 /**
  * The search index follows the vault's notes once the tree's first scan is done, and shows its first large run's
- * notice over the top of the workspace (`ROADMAP.md` 2.3); the Related section follows the active [editor]'s note and
- * the index's runs (2.4).
+ * notice over the top of the workspace (`ROADMAP.md` 2.3); Connections follow the active [editor]'s note, the
+ * index's runs and the vault (2.4, 2.5).
  */
 @Composable
 private fun BoxScope.SearchIndexFollower(
     tree: VaultTreeState,
     editor: EditorViewModel,
     viewModel: SearchIndexViewModel,
-    related: RelatedNotesViewModel
+    related: RelatedNotesViewModel,
+    mentions: NoteMentionsViewModel
 ) {
     val state by viewModel.state.collectAsState()
-    val editorState by editor.state.collectAsState()
-    FollowRelatedNotes(
-        buffer = editor.buffer,
-        notes = tree.tree.notes.keys,
+    FollowConnections(
+        tree = tree,
+        editor = editor,
         isIndexReady = !state.isRunning && state.readyNotes != null,
-        onIntent = related::onIntent,
-        note = editorState.notePath
+        related = related,
+        mentions = mentions
     )
     LaunchedEffect(tree.tree, tree.isLoading) {
         val notes = tree.tree.notes.values.map { it.file }
@@ -244,17 +227,6 @@ private fun Pickers(
         platformConventions = state.platformConventions,
         onIntent = templatePicker::onIntent
     )
-}
-
-/** The side panel's requests from the editor's toolbar and outline, as the tabs' intents. */
-private fun workspaceIntentOf(
-    intent: EditorIntent
-): WorkspaceIntent = when (intent) {
-    is EditorIntent.OnSidePanelResize -> WorkspaceIntent.OnSidePanelResize(widthDp = intent.widthDp)
-    is EditorIntent.OnSidePanelSectionToggle -> WorkspaceIntent.OnSidePanelSectionToggle(section = intent.section)
-    is EditorIntent.OnSidePanelModeSelect -> WorkspaceIntent.OnSidePanelModeSelect(mode = intent.mode)
-    EditorIntent.OnOutlineFocusRequest -> WorkspaceIntent.OnOutlineFocusRequest
-    else -> WorkspaceIntent.OnSidePanelToggle
 }
 
 /**

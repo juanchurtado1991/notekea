@@ -171,13 +171,7 @@ object NotekeaIcons {
     val Chat: ImageVector get() = Lucide.MessagesSquare
     val ChatSoon: ImageVector get() = Lucide.Sparkles
     val Inspector: ImageVector get() = Lucide.Info
-    val InfoCreated: ImageVector get() = Lucide.CalendarPlus
-    val InfoLinks: ImageVector get() = Lucide.Link
     val InfoModified: ImageVector get() = Lucide.Pencil
-    val InfoReading: ImageVector get() = Lucide.Clock
-    val InfoTags: ImageVector get() = Lucide.Hash
-    val InfoTasks: ImageVector get() = Lucide.SquareCheck
-    val InfoWords: ImageVector get() = Lucide.Type
     val HideSidebar: ImageVector get() = Lucide.PanelLeftClose
     val Italic: ImageVector get() = Lucide.Italic
     val Locate: ImageVector get() = Lucide.FolderSearch

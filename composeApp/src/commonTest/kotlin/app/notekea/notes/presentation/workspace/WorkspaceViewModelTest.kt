@@ -17,6 +17,7 @@ import app.notekea.notes.domain.NoteFixtures.file
 import app.notekea.notes.domain.NoteMetadata
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.SaveSidePanelUseCase
+import app.notekea.notes.domain.ConnectionsTab
 import app.notekea.notes.domain.SidePanelMode
 import app.notekea.notes.domain.SidePanelPreferences
 import app.notekea.notes.domain.SidePanelSection
@@ -228,12 +229,13 @@ class WorkspaceViewModelTest {
         }
 
     @Test
-    fun `a section folds, Chat is chosen, and the outline shortcut comes back to an open outline`() = runWorkspaceTest {
+    fun `a section folds, Chat and a Connections tab are chosen, the outline shortcut opens it`() = runWorkspaceTest {
         val viewModel = started()
         runCurrent()
         viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelSectionToggle(section = SidePanelSection.NOTE_INFO))
         viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelSectionToggle(section = SidePanelSection.OUTLINE))
         viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelModeSelect(mode = SidePanelMode.CHAT))
+        viewModel.onIntent(intent = WorkspaceIntent.OnConnectionsTabSelect(tab = ConnectionsTab.LINKED))
         advanceUntilIdle()
         val chosen = preferences.sidePanel
         viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelSectionToggle(section = SidePanelSection.NOTE_INFO))
@@ -243,8 +245,9 @@ class WorkspaceViewModelTest {
         assertEquals(
             expected = SidePanelPreferences(
                 mode = SidePanelMode.CHAT,
-                foldedSections = setOf(SidePanelSection.NOTE_INFO, SidePanelSection.OUTLINE)
-            ) to SidePanelPreferences(),
+                foldedSections = setOf(SidePanelSection.NOTE_INFO, SidePanelSection.OUTLINE),
+                connections = ConnectionsTab.LINKED
+            ) to SidePanelPreferences(connections = ConnectionsTab.LINKED),
             actual = chosen to preferences.sidePanel
         )
     }

@@ -3,6 +3,7 @@ package app.notekea.notes.data
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.StringPatterns
 import app.notekea.notes.domain.EditorPreferencesStore
+import app.notekea.notes.domain.ConnectionsTab
 import app.notekea.notes.domain.SidePanelMode
 import app.notekea.notes.domain.SidePanelPreferences
 import app.notekea.notes.domain.SidePanelSection
@@ -38,7 +39,9 @@ class SettingsEditorPreferencesStore(
             foldedSections = settings.getString(key = SIDE_PANEL_FOLDED_KEY, defaultValue = StringPatterns.EMPTY)
                 .split(SECTION_SEPARATOR)
                 .mapNotNull { name -> SidePanelSection.entries.firstOrNull { it.name == name } }
-                .toSet()
+                .toSet(),
+            connections = settings.getStringOrNull(key = SIDE_PANEL_CONNECTIONS_KEY)
+                .let { name -> ConnectionsTab.entries.firstOrNull { it.name == name } } ?: ConnectionsTab.RELATED
         )
     }
 
@@ -48,6 +51,7 @@ class SettingsEditorPreferencesStore(
         settings.putInt(key = SIDE_PANEL_WIDTH_KEY, value = preferences.widthDp)
         settings.putBoolean(key = SIDE_PANEL_VISIBLE_KEY, value = preferences.isVisible)
         settings.putString(key = SIDE_PANEL_MODE_KEY, value = preferences.mode.name)
+        settings.putString(key = SIDE_PANEL_CONNECTIONS_KEY, value = preferences.connections.name)
         settings.putString(
             key = SIDE_PANEL_FOLDED_KEY,
             value = preferences.foldedSections.joinToString(separator = SECTION_SEPARATOR) { it.name }
@@ -68,6 +72,7 @@ class SettingsEditorPreferencesStore(
         private const val PROPERTIES_EXPANDED_KEY = "editor.properties_expanded"
         private const val READ_MODE_KEY = "editor.read_mode"
         private const val SECTION_SEPARATOR = ","
+        private const val SIDE_PANEL_CONNECTIONS_KEY = "editor.side_panel_connections"
         private const val SIDE_PANEL_FOLDED_KEY = "editor.side_panel_folded"
         private const val SIDE_PANEL_MODE_KEY = "editor.side_panel_mode"
         private const val SIDE_PANEL_VISIBLE_KEY = "editor.side_panel_visible"

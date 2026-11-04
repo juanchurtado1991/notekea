@@ -124,6 +124,12 @@ sealed interface EditorIntent {
     /** A heading of the outline was clicked or chosen with Enter: the editor goes to the [index]th heading. */
     data class OnHeadingClick(val index: Int) : EditorIntent
 
+    /** A mention was chosen in Connections (`ROADMAP.md` 2.5): [range] of [path]'s body is selected once it is open. */
+    data class OnRevealRequest(
+        val path: RelativePath,
+        val range: IntRange
+    ) : EditorIntent
+
     /**
      * `Mod+Shift+O`: the outline takes the keyboard, showing the side panel and opening the outline first if they were
      * not. The side panel belongs to the tabs around the editor, which handle this and the next four.
