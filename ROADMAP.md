@@ -43,7 +43,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
-| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 5 weeks | 5 / 12 |
+| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 5 weeks | 6 / 12 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 5.5 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
@@ -737,7 +737,7 @@ changes.
   needed. UI design A, cards (picked 2026-11-03): `RelatedSection` in the inspector on the design system's
   `NotekeaPassageCard`; Outline and Related share the height Note info leaves.
 
-### ⬜ 2.5 Backlinks — `feature/backlinks`
+### ✅ 2.5 Backlinks — `feature/backlinks` — [notekea#112](https://github.com/juanchurtado1991/notekea/pull/112)
 
 A link graph built from `[[wiki links]]`, Markdown links, embeds and frontmatter aliases, kept up to date by the
 `FileWatcher` (independent of the vector index, so it works even before indexing finishes).

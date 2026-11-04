@@ -3,7 +3,7 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-03, with 2.5 in its smoke.
+Last updated: 2026-11-03, with 2.5 in review.
 
 ## Milestones
 
@@ -11,9 +11,9 @@ Last updated: 2026-11-03, with 2.5 in its smoke.
 - **M1 — Vault and editor:** ✅ 18 of 18 items. Its QA run (`qa/runs/M1.md`) closed on 2026-11-01 with the macOS run
   of `m1-rc1`, as the developer decided: the Windows tester is not available until M2, and Linux was not run.
 - **M2 — Indexing, links and related notes:** started. 2.12 Color themes is done (#107), 2.1 Markdown chunking
-  (#108), 2.2 Embedding engine (#109), 2.3 Hybrid index (#110) and 2.4 Related notes panel (#111) are done;
-  **2.5 Backlinks** (`feature/backlinks`, `ROADMAP.md`) is built and waits for the developer's smoke
-  (`MVP_SMOKE_TEST.md` 2.5) before its pull request.
+  (#108), 2.2 Embedding engine (#109), 2.3 Hybrid index (#110), 2.4 Related notes panel (#111) and **2.5
+  Backlinks** (#112, open, smoke passed on Linux) are done; next is **2.6 Hybrid search** (`feature/hybrid-search`,
+  `ROADMAP.md`).
 
 ## Open work, in order
 
@@ -25,12 +25,12 @@ Last updated: 2026-11-03, with 2.5 in its smoke.
 3. **`qa/README.md` piece 5** is 🟡: `MVP_SMOKE_TEST.md` is still edited by hand; making it generated from the
    Self-Test's cases (`./gradlew :selftest:smokeCases`, `qa/SELF_TEST.md`) is still to do. Until then, every case
    change goes both in `:selftest` and in `MVP_SMOKE_TEST.md`.
-4. **M2** goes on with 2.5's smoke and pull request. Main's CI has failed since #111: Self-Test cases matched note names
+4. **M2** goes on with 2.6 Hybrid search once #112 is merged. Main's CI has failed since #111: Self-Test cases matched note names
    anywhere in the window and found them in Related's rows. `feature/backlinks` fixes it (a vault opens in a case once
-   its notes are ready to search; tree and palette results are found by their test tags), so main is green again only
-   once 2.5 is merged.
+   its notes are ready to search; tree and palette results are found by their test tags), so main is green again once
+   #112 is merged; its CI checks 1.12-02 and 1.4-02, which did not fail locally.
 
-No pull request is open.
+#112 (2.5) is open, waiting for the developer's review.
 
 ## The M2 QA run
 
