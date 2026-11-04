@@ -4,7 +4,8 @@ package app.notekea.notes.domain
  * Prepares, without writing anything, the notes whose links must change after `from` was renamed to [to] (a note or
  * a folder, in the same parent folder). `notesBefore` are the vault's notes before the rename, so old links resolve as
  * they did; the files are read at their current paths. A rename keeps the parent folder, so every affected link names
- * the old entry: notes whose text does not contain that name are not parsed at all, which keeps large vaults fast.
+ * the old entry: notes whose text does not contain that name, as written or percent-encoded, are not parsed at all,
+ * which keeps large vaults fast.
  * A rewritten link keeps its style: a bare `[[name]]` stays bare unless the new name is shared by another note, a path
  * stays a path, `.md` stays when it was written, and a Markdown link stays relative or vault-rooted and encoded alike.
  */
@@ -27,10 +28,17 @@ class PlanLinkUpdatesUseCase(
         return notesBefore.mapNotNull { oldSource ->
             val source = oldSource.rebased(from = from, to = to)
             val text = noteContentStore.read(vaultPath = vaultPath, path = source)
-            val mayLink = text != null && text.contains(other = from.nameWithoutExtension, ignoreCase = true)
+            val mayLink = text != null && mayName(text = text, name = from.nameWithoutExtension)
             if (mayLink) rewrite(text = text, oldSource = oldSource, source = source, rename = rename) else null
         }
     }
+
+    /** Whether [text] holds [name] at all: a Markdown link may only hold it encoded (`My%20Note.md`). */
+    private fun mayName(
+        text: String,
+        name: String
+    ): Boolean = text.contains(other = name, ignoreCase = true) ||
+        percentDecoded(target = text).contains(other = name, ignoreCase = true)
 
     private fun rewrite(
         text: String,
