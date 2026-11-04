@@ -105,6 +105,13 @@ class LinkUpdateUseCasesTest {
     }
 
     @Test
+    fun `a link in a table follows a rename and keeps its escaped bar`() = runTest {
+        val rewrites = renameArepas(source = "| [[Arepas\\|the arepas]] | x |")
+
+        assertEquals(expected = "| [[Arepas reina\\|the arepas]] | x |", actual = rewrites.single().updated)
+    }
+
+    @Test
     fun `a note's links to itself follow it, read from its new path`() = runTest {
         store.texts[path(RENAMED)] = "Back to [[#Dough]] and [[Arepas#Filling]]"
 

@@ -33,6 +33,7 @@ object MarkdownSyntax {
 
     /** Between a wiki link's target and its label (`[[Note|label]]`). */
     const val LINK_LABEL_SEPARATOR = "|"
+    const val LINK_LABEL_SEPARATOR_ESCAPED = "\\|"
     const val LINK_LABEL_SEPARATOR_CHAR = '|'
 
     /** After a link's note, a heading (`#`) or a block (`^`) inside it. */

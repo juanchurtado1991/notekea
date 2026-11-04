@@ -36,6 +36,15 @@ class LinkMentionUseCaseTest {
         )
     }
 
+    // Audit: a plain `|` in a table row ended the cell in the middle of the link.
+    @Test
+    fun `in a table the bar before the words is escaped`() = runTest {
+        assertEquals(
+            expected = true to "| We ate [[Arepas\\|arepas]]. | x |",
+            actual = link(text = "| We ate arepas. | x |", words = "arepas")
+        )
+    }
+
     @Test
     fun `nothing is written when the words there are no longer the note's name`() = runTest {
         store.texts[LISBON] = "We ate tacos."
