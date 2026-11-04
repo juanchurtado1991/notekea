@@ -30,7 +30,7 @@ Last updated: 2026-11-04, with the audit fixes in review.
    toolbar's submenus (Callout, Code block, More) are still mouse-only: `ROADMAP.md` decided the toolbar takes no focus.
 5. **M2** goes on with 2.6 Hybrid search.
 
-`fix/audit-findings` is pushed, waiting for the developer's review; no pull request yet.
+`fix/audit-findings` is #114, waiting for the developer's review.
 
 ## The release run
 
