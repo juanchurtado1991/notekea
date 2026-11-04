@@ -154,7 +154,7 @@ private fun Chevron(
     onToggleExpanded: (() -> Unit)?
 ) {
     val toggle = Modifier.focusProperties { canFocus = false }.let { base ->
-        if (onToggleExpanded != null) base.clickable(onClick = onToggleExpanded) else base
+        if (onToggleExpanded != null) base.clickable(role = Role.Button, onClick = onToggleExpanded) else base
     }
     Box(
         modifier = Modifier.size(size = NotekeaDimensions.IconSize).then(other = toggle),
