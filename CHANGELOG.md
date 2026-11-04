@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Menu bar** on every system (File, Edit, View, Window, Help), built from the app's own shortcuts; the window comes
+  back as it was left, names its note in the title and has a minimum size; `Ctrl+Q` (Linux) and `Mod+Shift+W` close it,
+  and every way of quitting saves first; Settings → Appearance can reduce motion; right-click menus on Connections'
+  rows, headings, folder cards and recent vaults.
+
 - **Backlinks** (`ROADMAP.md` 2.5): the inspector's Related section becomes **Connections**, with a picker that says
   how many each tab holds and is remembered: Related (by meaning, 2.4), **Linked** (the notes that link to the open
   one, by wiki link, embed or Markdown link, headings and blocks included, as Obsidian resolves them) and **Unlinked**
@@ -242,6 +247,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   CI actions `checkout` v7, `setup-java` v6, `setup-gradle` v6 and `upload-artifact` v7.
 
 ### Fixed
+
+A full audit of the project (`fix/audit-findings`):
+
+- **Notes are never lost or damaged:** text that cannot be saved goes to a "Name (unsaved)" note beside it instead of
+  being dropped; a case-only rename never replaces another note; a note that is not UTF-8 is not opened rather than
+  corrupted; typing after a closing `---` keeps the properties; a read error no longer counts as a deleted note; saves
+  reach the disk before they replace the old file and keep the file's permissions; a slow paste or attachment never
+  lands in another note; a tab moved between panes keeps its last keystrokes.
+- **Links:** renames reach `%20` links and `[[Note\|alias]]` in tables; Markdown links ignore letter case and find a
+  note by its unique name, as Obsidian does; `[[folder/New]]` creates its note there, never outside the vault.
+- **Search index:** a table of very short words no longer stops indexing, one bad note only skips itself, Rebuild
+  never leaves an empty index marked done, and text without spaces (Chinese, Japanese, Thai) fits the model. Every
+  vault re-indexes once.
+- **Editor:** Enter, Tab and Backspace work on lines holding a Unicode line separator; every Markdown reader agrees on
+  where code blocks end; embeds follow heading paths; italics undo on bold text; Tab nests lists inside quotes.
+- **Screens:** an unexpected failure now shows where it happened instead of only in the log; more of the app is
+  reachable by keyboard; buttons and fields match the interface's compact size.
 
 - From the macOS QA run of m1-rc1: opening a folder Notekea cannot read with Open folder… from an open vault now
   shows why over the vault (it did nothing); on macOS the Delete key (Backspace) deletes in the list of notes, as
