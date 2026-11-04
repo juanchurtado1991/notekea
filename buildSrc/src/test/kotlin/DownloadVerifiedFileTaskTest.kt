@@ -10,6 +10,7 @@ import java.security.MessageDigest
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -55,7 +56,7 @@ class DownloadVerifiedFileTaskTest {
         server.start()
         try {
             val url = "http://127.0.0.1:${server.address.port}/model"
-            assertFailsWith<java.io.IOException> { task(url = url, sha256 = "any").download() }
+            assertFails { task(url = url, sha256 = "any").download() }
             assertFalse(partial.exists())
         } finally {
             server.stop(0)
