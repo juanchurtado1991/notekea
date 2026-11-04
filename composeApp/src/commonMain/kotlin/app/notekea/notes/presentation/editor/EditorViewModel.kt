@@ -142,6 +142,7 @@ class EditorViewModel(
             is EditorIntent.OnOpen -> saving.runSave { open(path = intent.path) }
             EditorIntent.OnRetryOpen -> saving.runSave { open(path = state.value.notePath, isRetry = true) }
             EditorIntent.OnFlushRequest -> saving.runSave { flush() }
+            is EditorIntent.OnHandOver -> saving.runSave { saveNow() }.invokeOnCompletion { intent.done.complete(Unit) }
             EditorIntent.OnFocusLost, EditorIntent.OnSaveShortcut -> saving.runSave { saveNow() }
             EditorIntent.OnKeepMine -> saving.runSave { disk.keepMine() }
             EditorIntent.OnLoadTheirs -> saving.runSave { disk.loadTheirs() }

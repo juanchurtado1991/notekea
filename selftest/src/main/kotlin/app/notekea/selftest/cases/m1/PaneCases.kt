@@ -12,6 +12,7 @@ import app.notekea.selftest.noteText
 import app.notekea.selftest.openNote
 import app.notekea.selftest.openVault
 import app.notekea.selftest.pressInWindow
+import app.notekea.selftest.typeAtEnd
 import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
@@ -28,6 +29,7 @@ private const val SHARED_NOTE_TEXT = "Another app changes or deletes this note"
 
 // A heading in the middle of the note, as the case says: the end of a note is where the scroll stops short.
 private const val OUTLINE_MIDDLE = "Serving note 1:"
+private const val TYPED_BEFORE_MOVE = "Typed just before the move"
 private const val OPEN_PLAYGROUND = "1. In Notekea, open the Playground Vault (see TEST DATA above)."
 
 /** The cases of 1.11 about two panes, the tabs' memory and the folders' cards (`MVP_SMOKE_TEST.md`). */
@@ -42,6 +44,7 @@ fun SuiteBuilder.paneCases() {
     quickFolderClicks()
     reorderTabs()
     tabSlides()
+    tabMovedWhileTyping()
 }
 
 private fun SuiteBuilder.splitRight() {
@@ -180,6 +183,17 @@ private fun SuiteBuilder.reorderTabs() {
         expectTabOrder(names = listOf("Arepas", "Ideas", WELCOME))
         // Dropping a tab in the first place does not register with synthetic mouse input, though it does with a
         // person's mouse (the 1.11 smoke): 1.11-16 walks the tester through it.
+    }
+}
+
+private fun SuiteBuilder.tabMovedWhileTyping() {
+    automated(id = "1.11-17", title = "A tab moved right after typing keeps the last keystrokes") {
+        openTwoNotes()
+        typeAtEnd(part = AREPAS_FLOUR, text = TYPED_BEFORE_MOVE)
+        pressInWindow(shortcut = Mod + Shift + Key.D)
+        expectText(text = TYPED_BEFORE_MOVE, substring = true)
+        expectShown(text = WELCOME_TEXT)
+        expectNoText(text = "This note changed outside Notekea", substring = true)
     }
 }
 
