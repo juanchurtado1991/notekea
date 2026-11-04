@@ -23,6 +23,7 @@ internal object NotekeaPalette {
     val FileMediaLight = Color(0xFF6A44C2)
     val FilePdfDark = Color(0xFFF28B82)
     val FilePdfLight = Color(0xFFC5362B)
+    val OnImage = Color(0xFFFFFFFF)
     val WarningDark = Color(0xFFF5C542)
     val WarningLight = Color(0xFFD99A00)
     val InkDark = Color(0xFFE6EBF3)

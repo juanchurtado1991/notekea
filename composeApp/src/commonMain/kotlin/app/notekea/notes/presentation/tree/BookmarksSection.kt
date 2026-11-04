@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,7 @@ import app.notekea.core.presentation.components.NotekeaTreeItem
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
+import app.notekea.core.presentation.theme.missingEntry
 import app.notekea.notes.domain.RelativePath
 import app.notekea.resources.Res
 import app.notekea.resources.tree_bookmark_missing_remove
@@ -49,7 +51,7 @@ private const val PREVIEW_WIDTH_DP = 300
  * The vault's bookmarks above the tree (`ROADMAP.md` 1.13), under a BOOKMARKS header that folds them; nothing while
  * there are none. A bookmark opens its entry in a tab and selects it in the tree; dragged up or down, it moves among
  * the others; its menu removes it. One whose entry is no longer in the vault (moved or deleted outside Notekea) is
- * greyed out, with a ✕ that removes it.
+ * struck through, with a ✕ that removes it.
  */
 @Composable
 internal fun BookmarksSection(
@@ -150,7 +152,7 @@ private fun Modifier.bookmarkDrag(
         }
 }
 
-/** A bookmark whose entry is gone: its name greyed out, and a ✕ that removes it, its tooltip saying why. */
+/** A bookmark whose entry is gone: its name muted and struck through, and a ✕ that removes it, its tooltip saying why. */
 @Composable
 private fun MissingLabel(
     path: RelativePath,
@@ -161,7 +163,8 @@ private fun MissingLabel(
             text = labelOf(path = path),
             modifier = Modifier.weight(weight = 1f),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = MISSING_ALPHA),
+            color = MaterialTheme.colorScheme.missingEntry,
+            textDecoration = TextDecoration.LineThrough,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -188,8 +191,6 @@ private fun iconOf(
     path.isMarkdown -> NotekeaIcons.Note
     else -> fileIconOf(path = path)
 }
-
-private const val MISSING_ALPHA = 0.6f
 
 @Preview
 @Composable

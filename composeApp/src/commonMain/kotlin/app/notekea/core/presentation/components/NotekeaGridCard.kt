@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.theme.NotekeaColors
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 
@@ -101,7 +102,7 @@ private fun BoxScope.CardLabel(
     icon: ImageVector,
     isOnImage: Boolean
 ) {
-    val color = if (isOnImage) Color.White else MaterialTheme.colorScheme.onSurface
+    val color = if (isOnImage) NotekeaColors.onImage else MaterialTheme.colorScheme.onSurface
     Row(
         modifier = Modifier
             .align(alignment = Alignment.BottomStart)
