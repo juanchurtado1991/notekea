@@ -11,11 +11,13 @@ import app.notekea.core.domain.markdown.MarkdownSyntax
  * the note does not have.
  */
 class EmbeddedNoteText {
+    private val outlineFinder = OutlineFinder()
+
     fun of(
         text: String,
         target: String
     ): String? {
-        val body = FRONTMATTER.replaceFirst(input = text, replacement = StringPatterns.EMPTY)
+        val body = NoteDocument.fromText(text = text).body
         val anchor = target.substringAfter(
             delimiter = MarkdownSyntax.HEADING_ANCHOR_CHAR,
             missingDelimiterValue = StringPatterns.EMPTY
@@ -62,26 +64,14 @@ class EmbeddedNoteText {
         body: String,
         heading: String
     ): String? {
-        val lines = body.split(StringPatterns.NEW_LINE_CHAR)
-        val start = lines.indexOfFirst { headingOf(line = it)?.second.equals(other = heading, ignoreCase = true) }
-        val level = lines.getOrNull(index = start)?.let { headingOf(line = it)?.first } ?: return null
-        val end = (start + 1 until lines.size).firstOrNull { index ->
-            headingOf(line = lines[index])?.let { it.first <= level } == true
-        } ?: lines.size
-        return lines.subList(fromIndex = start, toIndex = end).joinToString(separator = StringPatterns.NEW_LINE).trim()
-    }
-
-    /** The level and text of a heading line (`## Dough` → 2 and "Dough"), null for any other line. */
-    private fun headingOf(
-        line: String
-    ): Pair<Int, String>? = HEADING.matchEntire(input = line)?.let {
-        it.groupValues[1].length to
-            it.groupValues[2].trim()
+        val headings = outlineFinder.headings(text = body)
+        val index = headings.indexOfFirst { it.text.equals(other = heading, ignoreCase = true) }
+        val start = headings.getOrNull(index = index) ?: return null
+        val end = headings.drop(n = index + 1).firstOrNull { it.level <= start.level }?.offset ?: body.length
+        return body.substring(startIndex = start.offset, endIndex = end).trim()
     }
 
     companion object {
-        private val FRONTMATTER = Regex(pattern = "\\A---\\r?\\n[\\s\\S]*?\\r?\\n---\\r?\\n?")
-        private val HEADING = Regex(pattern = "^(#{1,6})\\s+(.*?)\\s*#*\\s*$")
         private val LIST_ITEM = Regex(pattern = "^\\s*([-*+]|\\d+[.)])\\s")
     }
 }
