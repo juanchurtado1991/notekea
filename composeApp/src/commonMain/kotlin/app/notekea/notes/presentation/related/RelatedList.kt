@@ -56,8 +56,8 @@ fun RelatedList(
 private fun statusText(
     state: RelatedNotesState
 ): String? = when {
-    state.error == IndexRunError.MODEL -> stringResource(Res.string.related_error_model)
-    state.error == IndexRunError.INDEX -> stringResource(Res.string.related_error_index)
+    state.error == IndexRunError.Model -> stringResource(Res.string.related_error_model)
+    state.error == IndexRunError.Index -> stringResource(Res.string.related_error_index)
     state.related.isNotEmpty() || state.isLoading -> null
     !state.isIndexReady -> stringResource(Res.string.related_not_ready)
     else -> stringResource(Res.string.related_empty)

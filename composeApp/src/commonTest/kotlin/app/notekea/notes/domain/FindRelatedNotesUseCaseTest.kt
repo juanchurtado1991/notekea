@@ -60,7 +60,7 @@ class FindRelatedNotesUseCaseTest {
         embedder.failure = EmbeddingError.EngineFailed
         val model = findRelated(vaultPath = VAULT, note = GARDEN, text = "Tomatoes.", notes = ALL)
 
-        assertEquals(expected = Outcome.Failure(error = IndexRunError.MODEL), actual = model)
+        assertEquals(expected = Outcome.Failure(error = IndexRunError.Model), actual = model)
     }
 
     /** Writes the notes and indexes them as the app does. */

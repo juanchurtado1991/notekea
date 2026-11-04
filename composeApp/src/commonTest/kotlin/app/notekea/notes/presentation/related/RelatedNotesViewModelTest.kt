@@ -108,7 +108,7 @@ class RelatedNotesViewModelTest {
         advanceUntilIdle()
 
         assertEquals(
-            expected = listOf<Any?>(false to emptyList<Any>(), true, IndexRunError.MODEL),
+            expected = listOf<Any?>(false to emptyList<Any>(), true, IndexRunError.Model),
             actual = listOf(beforeIndex, afterIndex, viewModel.state.value.error)
         )
     }

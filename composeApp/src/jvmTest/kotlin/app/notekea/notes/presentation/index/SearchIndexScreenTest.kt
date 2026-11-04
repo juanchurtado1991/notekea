@@ -33,7 +33,7 @@ class SearchIndexScreenTest {
     fun `the status says how far a run is, how many notes are ready, or that search is unavailable`() {
         val running = SearchIndexState(isRunning = true, progress = IndexProgress(total = 1204, done = 337))
         val ready = SearchIndexState(readyNotes = 1204)
-        val failed = SearchIndexState(readyNotes = 3, error = IndexRunError.MODEL)
+        val failed = SearchIndexState(readyNotes = 3, error = IndexRunError.Model)
 
         val shown = listOf(running, ready, failed).map { state ->
             render { SearchIndexStatus(state = state, onIntent = {}) }.texts

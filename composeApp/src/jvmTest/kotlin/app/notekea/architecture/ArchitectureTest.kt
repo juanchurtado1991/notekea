@@ -1,5 +1,6 @@
 package app.notekea.architecture
 
+import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.declaration.type.KoTypeDeclaration
 import com.lemonappdev.konsist.api.ext.list.withNameEndingWith
 import com.lemonappdev.konsist.api.verify.assertFalse
@@ -36,9 +37,37 @@ class ArchitectureTest : ArchitectureTestBase() {
     }
 
     @Test
+    fun `no error is a class or an enum`() {
+        productionScope
+            .classes(includeNested = false)
+            .withNameEndingWith("Error")
+            .assertFalse(additionalMessage = "ARCHITECTURE.md §3: declare it as a sealed interface") { true }
+    }
+
+    @Test
+    fun `core depends on no feature`() {
+        productionScope.files
+            .filter { it.packagee?.name?.startsWith(prefix = CORE_PACKAGE_PREFIX) == true }
+            .assertFalse(
+                additionalMessage = "ARCHITECTURE.md §1: features depend on core, never the other way"
+            ) { file ->
+                file.imports.any { featureOf(packageName = it.name) != null }
+            }
+    }
+
+    @Test
+    fun `common code uses no Java`() {
+        val javaReference = Regex(pattern = JAVA_REFERENCE_PATTERN)
+        Konsist.scopeFromSourceSet(COMMON_MAIN, MODULE_NAME).files
+            .assertFalse(additionalMessage = "GUIDELINES.md §2: put it behind a port, in jvmMain") {
+                javaReference.containsMatchIn(input = it.text)
+            }
+    }
+
+    @Test
     fun `dispatchers are injected instead of referenced directly`() {
         val dispatcherReference = Regex(pattern = DIRECT_DISPATCHER_PATTERN)
-        productionScope.files
+        runningCodeScope.files
             .filterNot { it.name == DISPATCHERS_IMPLEMENTATION }
             .assertFalse(additionalMessage = "ARCHITECTURE.md §5: inject AppDispatchers") {
                 dispatcherReference.containsMatchIn(input = it.text)
@@ -97,7 +126,7 @@ class ArchitectureTest : ArchitectureTestBase() {
 
     @Test
     fun `koin is only used through constructor injection`() {
-        productionScope.files.assertFalse(additionalMessage = "ARCHITECTURE.md §6") { file ->
+        runningCodeScope.files.assertFalse(additionalMessage = "ARCHITECTURE.md §6") { file ->
             file.imports.any { it.name == KOIN_COMPONENT_IMPORT }
         }
     }
@@ -137,11 +166,19 @@ class ArchitectureTest : ArchitectureTestBase() {
 
     @Test
     fun `system clock is only read in dependency injection`() {
-        productionScope.files
+        runningCodeScope.files
             .filterNot { isInLayer(file = it, layer = DI_LAYER) }
             .assertFalse(additionalMessage = "ARCHITECTURE.md §5: inject kotlin.time.Clock") {
                 it.text.contains(other = SYSTEM_CLOCK)
             }
+    }
+
+    @Test
+    fun `shipped code never asks java time for the moment directly`() {
+        val directRead = Regex(pattern = DIRECT_TIME_PATTERN)
+        shippedScope.files.assertFalse(additionalMessage = "ARCHITECTURE.md §5: take a clock") {
+            directRead.containsMatchIn(input = it.text)
+        }
     }
 
     @Test

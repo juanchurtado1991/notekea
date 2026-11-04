@@ -45,7 +45,7 @@ fun SearchIndexStatus(
                 leading = { NotekeaStatusRing(fraction = state.fraction) }
             )
 
-            state.error == IndexRunError.MODEL -> NotekeaStatusLabel(
+            state.error == IndexRunError.Model -> NotekeaStatusLabel(
                 text = stringResource(Res.string.search_index_unavailable),
                 icon = NotekeaIcons.FeatureAi,
                 tooltip = tooltip,
