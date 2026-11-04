@@ -89,7 +89,7 @@ private fun countsOf(
     related: RelatedNotesState,
     mentions: NoteMentionsState
 ): List<Int?> {
-    val isFinding = mentions.isLoading
+    val isFinding = mentions.isLoading || mentions.searchFailed
     return listOf(
         related.related.size.takeIf { related.isIndexReady && !related.isLoading },
         mentions.mentions.linked.size.takeUnless { isFinding },

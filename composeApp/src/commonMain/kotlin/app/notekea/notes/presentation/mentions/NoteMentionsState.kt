@@ -5,11 +5,13 @@ import app.notekea.notes.domain.RelativePath
 
 /**
  * The Linked and Unlinked tabs of the inspector's Connections (`ROADMAP.md` 2.5): the open [note]'s [mentions], whether
- * they are being found ([isLoading]), and the note a Link click could not change ([linkFailed]), which it says so.
+ * they are being found ([isLoading]), whether the last search failed ([searchFailed], which offers to try again; what
+ * it found before stays), and the note a Link click could not change ([linkFailed]), which it says so.
  */
 data class NoteMentionsState(
     val note: RelativePath? = null,
     val mentions: NoteMentions = NoteMentions.NONE,
     val isLoading: Boolean = false,
+    val searchFailed: Boolean = false,
     val linkFailed: RelativePath? = null
 )
