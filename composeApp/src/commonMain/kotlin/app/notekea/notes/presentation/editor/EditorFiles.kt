@@ -3,6 +3,7 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.ui.text.TextRange
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.StringPatterns.NEW_LINE
+import app.notekea.core.domain.StringPatterns.WINDOWS_NEW_LINE
 import app.notekea.notes.domain.AttachmentSource
 import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.FormatAction
@@ -86,7 +87,8 @@ internal class EditorFiles(
             }
             val text = withContext(context = tools.dispatchers.io) { tools.clipboardReader.text() }
             if (!isOpen(note = note)) return@launch
-            text?.let { pasted ->
+            // The text being edited only has `\n` breaks, as [app.notekea.notes.domain.NoteDocument] says.
+            text?.replace(oldValue = WINDOWS_NEW_LINE, newValue = NEW_LINE)?.let { pasted ->
                 host.buffer.edit {
                     val start = selection.min
                     replace(start = start, end = selection.max, text = pasted)
