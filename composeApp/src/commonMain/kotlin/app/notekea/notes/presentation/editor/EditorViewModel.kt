@@ -302,6 +302,7 @@ class EditorViewModel(
                 val renamed = outcome.value
                 disk.stop()
                 reduce { it.copy(notePath = renamed.path, titleError = null) }
+                if (renamed.path in renamed.links?.updated.orEmpty()) disk.followRewrite(path = renamed.path)
                 disk.watch(path = renamed.path)
                 emit(effect = EditorEffect.Renamed(from = from, to = renamed.path, links = renamed.links))
             }

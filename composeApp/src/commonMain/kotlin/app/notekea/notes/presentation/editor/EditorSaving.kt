@@ -76,14 +76,21 @@ internal class EditorSaving(
         }
     }
 
+    /** Takes [document] as what the file holds now, the text in the editor staying as it is. */
+    fun rebase(
+        document: NoteDocument
+    ) {
+        opened = document
+        onDisk = document.toText()
+        host.reduce { describeFile(state = it, document = document) }
+    }
+
     /** Shows [document] as the saved state of the note; a new note starts at the top with a fresh undo history. */
     fun show(
         document: NoteDocument,
         isNewNote: Boolean
     ) {
-        opened = document
-        onDisk = document.toText()
-        host.reduce { describeFile(state = it, document = document) }
+        rebase(document = document)
         noteInfo.readTimes()
         replaceBuffer(body = document.body, isNewNote = isNewNote)
     }
