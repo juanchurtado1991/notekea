@@ -9,6 +9,7 @@ import app.notekea.notes.domain.FillTemplateUseCase
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.KeepUnsavedTextUseCase
 import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
 import co.touchlab.kermit.Logger
@@ -38,7 +39,8 @@ class EditorViewModel(
     attachmentTools: AttachmentTools,
     fillTemplate: FillTemplateUseCase,
     propertyTools: PropertyTools,
-    noteInfoTools: NoteInfoTools
+    noteInfoTools: NoteInfoTools,
+    keepUnsavedText: KeepUnsavedTextUseCase
 ) : BaseViewModel<EditorState, EditorIntent, EditorEffect>(initialState = EditorState()) {
     /** The body of the open note, edited in place by the text field. */
     val buffer = TextFieldState()
@@ -65,6 +67,7 @@ class EditorViewModel(
     private val noteInfo = EditorNoteInfo(host, vaultPath, noteInfoTools, propertyTools, attachmentTools.dispatchers)
     private val files = EditorFiles(host, vaultPath, attachmentTools, textEdits) { focus.request(path = null) }
     private val saving = EditorSaving(host = host, vaultPath = vaultPath, saveNote = saveNote, noteInfo = noteInfo)
+    private val unsaved = EditorUnsaved(host = host, vaultPath = vaultPath, keepUnsavedText = keepUnsavedText)
     private val properties = EditorProperties(host, saving, noteInfo, editorPreferences)
     private val disk = EditorDisk(host, vaultPath, openNote, observeNoteOnDisk, saving) { autosaveJob?.cancel() }
     private val templates = EditorTemplates(host, vaultPath, fillTemplate, saving, textEdits) { chooseMode(false) }
@@ -237,6 +240,7 @@ class EditorViewModel(
         if (path == state.value.notePath && !isRetry) return
         files.forgetFiles()
         saveNow()
+        keepWhatWasNotSaved()
         disk.stop()
         saving.forget()
         focus.leave(path = path)
@@ -264,6 +268,7 @@ class EditorViewModel(
                 saving.show(document = outcome.value, isNewNote = true)
                 focus.arrive(path = path)
                 reduce { it.copy(isLoading = false) }
+                unsaved.takeDraft(path = path)?.let { saving.replaceBuffer(body = it, isNewNote = false) }
                 focus.onShown(path = path)
                 disk.watch(path = path)
             }
@@ -305,7 +310,17 @@ class EditorViewModel(
 
     private suspend fun flush() {
         saveNow()
+        keepWhatWasNotSaved()
         emit(effect = EditorEffect.Flushed)
+    }
+
+    /** After [saveNow], whatever the file still does not hold (a save was blocked or failed) is kept, never dropped. */
+    private suspend fun keepWhatWasNotSaved() {
+        val path = state.value.notePath ?: return
+        val document = saving.opened ?: return
+        val header = properties.headerWithPendingSource(document = document)
+        if (!saving.hasEdits() && header == document.header) return
+        unsaved.keep(path = path, document = document.copy(header = header, body = buffer.text.toString()))
     }
 
     private suspend fun closeDeleted() {

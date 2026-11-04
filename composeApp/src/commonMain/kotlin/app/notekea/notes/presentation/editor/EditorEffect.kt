@@ -51,6 +51,12 @@ sealed interface EditorEffect {
     /** A `#tag` was clicked in Read mode: the window searches it in all notes. */
     data class SearchTag(val tag: String) : EditorEffect
 
+    /** What could not be saved of [note] is kept in [copy], or by this pane when even that failed (null). */
+    data class UnsavedKept(
+        val note: RelativePath,
+        val copy: RelativePath?
+    ) : EditorEffect
+
     /** The title renamed the note from [from] to [to]; [links] is how the links to it were updated, if any. */
     data class Renamed(
         val from: RelativePath,

@@ -322,7 +322,8 @@ private fun editorCallbacksOf(
             viewModels.onTemplatePicker(TemplatePickerIntent.OnOpen(target = TemplateTarget.CurrentNote))
         },
         onDayStep = { tree.onIntent(intent = VaultTreeIntent.OnDayStep(step = it)) },
-        onRevealFolder = { tree.onIntent(intent = VaultTreeIntent.OnRevealInTree(path = it)) }
+        onRevealFolder = { tree.onIntent(intent = VaultTreeIntent.OnRevealInTree(path = it)) },
+        onUnsavedKept = { tree.onIntent(intent = VaultTreeIntent.OnUnsavedKept(note = it.note, copy = it.copy)) }
     )
 }
 

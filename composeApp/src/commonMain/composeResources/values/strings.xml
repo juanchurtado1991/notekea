@@ -363,6 +363,8 @@
     <string name="tree_new_note">New note</string>
     <string name="tree_new_note_from_template">New note from template</string>
     <string name="tree_notice_dismiss">OK</string>
+    <string name="tree_unsaved_in_memory">“%1$s” could not be saved. Its text stays here: go back to the note before closing Notekea.</string>
+    <string name="tree_unsaved_kept">“%1$s” could not be saved, so your text is in “%2$s”, beside it.</string>
     <string name="tree_open_folder">Open or close folder</string>
     <string name="tree_rename">Rename</string>
     <string name="tree_retry">Try again</string>
