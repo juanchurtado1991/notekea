@@ -16,7 +16,9 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.SystemAppearance
 import app.notekea.core.platform.domain.SystemEnvironment
 import app.notekea.core.platform.domain.SystemMotion
+import app.notekea.core.presentation.platform.AppEnvironment
 import com.russhwolf.settings.Settings
+import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
 /** Binds the desktop implementations of the platform ports (the system's dark theme too), the dispatchers, the app settings file and database. */
@@ -31,6 +33,7 @@ val jvmPlatformModule = module {
         SqliteDatabaseFactory(appDataDirectory = get<PlatformConventions>().appDataDirectory).create()
     }
     single<SystemEnvironment> { JvmSystemEnvironment() }
+    factoryOf(::AppEnvironment)
     single<SystemMotion> {
         CommandSystemMotion(operatingSystem = get<PlatformConventions>().operatingSystem, dispatchers = get())
     }

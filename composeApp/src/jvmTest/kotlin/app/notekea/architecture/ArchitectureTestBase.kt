@@ -152,6 +152,7 @@ abstract class ArchitectureTestBase {
         const val COMPOSABLE_ANNOTATION = "Composable"
         const val MATERIAL3_PACKAGE = "androidx.compose.material3"
         const val PREVIEW_ANNOTATION = "Preview"
+        const val ROOT_FILE = "NotekeaRoot"
         const val FOLLOWER_PREFIX = "Follow"
         const val THEME_PACKAGE = "app.notekea.core.presentation.theme"
         val NON_FEATURE_PACKAGES = setOf("architecture", "core", "db", "di", "resources")
