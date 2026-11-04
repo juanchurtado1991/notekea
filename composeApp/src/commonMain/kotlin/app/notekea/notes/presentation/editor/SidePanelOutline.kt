@@ -114,7 +114,8 @@ private fun OutlineList(
         if (isFocused && !hasFocus) focused = current.coerceIn(minimumValue = 0, maximumValue = outline.lastIndex)
         hasFocus = isFocused
     }
-    NotekeaLazyScrollArea(state = listState, modifier = modifier) {
+    val contentHeight = NotekeaDimensions.TreeRowHeight * outline.size + NotekeaDimensions.SpacingXs * 2
+    NotekeaLazyScrollArea(state = listState, modifier = modifier, contentHeight = contentHeight) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()

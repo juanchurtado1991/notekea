@@ -195,8 +195,9 @@ private fun OutlinePart(
 }
 
 /**
- * Outline, then Connections and Note info when a note is open, stacked. Note info takes what it needs; Outline takes up to
- * half of the rest, or more when Connections need less; Connections take what is left. Each scrolls inside its share.
+ * Outline, then Connections and Note info when a note is open, stacked. Note info takes what it needs; Connections take
+ * up to half of the rest, or more when the outline needs less, which it says without being measured (Connections cannot:
+ * their rows are lazy); Outline takes what is left. Each scrolls inside its share.
  */
 private val InspectorMeasurePolicy = MeasurePolicy { measurables, constraints ->
     val loose = constraints.copy(minHeight = 0)
@@ -204,10 +205,9 @@ private val InspectorMeasurePolicy = MeasurePolicy { measurables, constraints ->
     val connections = measurables.getOrNull(index = 1)
     val info = measurables.getOrNull(index = 2)?.measure(constraints = loose)
     val free = (constraints.maxHeight - (info?.height ?: 0)).coerceAtLeast(minimumValue = 0)
-    val connectionsNeed = connections?.maxIntrinsicHeight(width = constraints.maxWidth) ?: 0
-    val outlineMax = maxOf(free / 2, free - connectionsNeed)
-    val top = outline.measure(constraints = loose.copy(maxHeight = outlineMax))
-    val middle = connections?.measure(constraints = loose.copy(maxHeight = free - top.height))
+    val outlineNeed = outline.maxIntrinsicHeight(width = constraints.maxWidth)
+    val middle = connections?.measure(constraints = loose.copy(maxHeight = maxOf(free / 2, free - outlineNeed)))
+    val top = outline.measure(constraints = loose.copy(maxHeight = free - (middle?.height ?: 0)))
     layout(width = constraints.maxWidth, height = constraints.maxHeight) {
         top.placeRelative(x = 0, y = 0)
         middle?.placeRelative(x = 0, y = top.height)
