@@ -40,7 +40,9 @@ import app.notekea.core.presentation.platform.LocalFileDrop
 import app.notekea.core.presentation.platform.LocalWindowCloseGuard
 import app.notekea.core.presentation.platform.awtFileDrop
 import app.notekea.core.presentation.platform.ShortcutDispatcher
+import app.notekea.core.presentation.platform.SystemQuit
 import app.notekea.core.presentation.platform.WindowCloseGuard
+import app.notekea.core.presentation.platform.WindowQuit
 import app.notekea.core.presentation.theme.LocalAppearance
 import app.notekea.core.presentation.theme.LocalSystemDarkTheme
 import app.notekea.core.presentation.theme.NotekeaTheme
@@ -71,7 +73,6 @@ import app.notekea.vault.presentation.welcome.WelcomeScreen
 import io.github.vinceglb.filekit.FileKit
 import java.awt.Cursor
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.koin.core.context.startKoin
 
 private const val APP_ID = "Notekea"
@@ -180,8 +181,8 @@ private fun ApplicationScope.GalleryWindow() {
 
 /**
  * The app window. Every key event goes through the [ShortcutDispatcher] first, the desktop resize cursor is provided
- * to the design system, and the welcome flow shows the vault workspace once a vault is open. Closing the window first
- * lets the [WindowCloseGuard] finish (the editor saving the note being typed), then quits.
+ * to the design system, and the welcome flow shows the vault workspace once a vault is open. However Notekea ends
+ * ([WindowQuit]), the [WindowCloseGuard] finishes first (the editor saving the note being typed).
  */
 @Composable
 private fun ApplicationScope.NotekeaWindow(
@@ -192,21 +193,14 @@ private fun ApplicationScope.NotekeaWindow(
     val shortcutDispatcher = remember { ShortcutDispatcher() }
     val closeGuard = remember { WindowCloseGuard() }
     val scope = rememberCoroutineScope()
-    var isClosing by remember { mutableStateOf(value = false) }
+    val quit = remember { WindowQuit(closeGuard = closeGuard, scope = scope) }
+    LaunchedEffect(quit) { SystemQuit(quit = quit).install() }
     val windowState = rememberWindowState(
         size = WindowSizes.system.initial,
         position = WindowPosition.Aligned(alignment = Alignment.Center)
     )
     Window(
-        onCloseRequest = {
-            if (!isClosing) {
-                isClosing = true
-                scope.launch {
-                    closeGuard.beforeClose()
-                    exitApplication()
-                }
-            }
-        },
+        onCloseRequest = { quit.request(then = ::exitApplication) },
         title = windowTitle(vaultName = vaultName),
         icon = rememberVectorPainter(image = NotekeaBrand.Logo),
         state = windowState,
