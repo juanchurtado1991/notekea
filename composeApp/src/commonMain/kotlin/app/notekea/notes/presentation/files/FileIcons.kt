@@ -10,8 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import app.notekea.core.presentation.theme.NotekeaColors
 import app.notekea.core.presentation.theme.NotekeaIcons
-import app.notekea.notes.domain.AttachmentKind
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.RelativePath
 
 private const val EXTENSION_MARK = "."
 private const val PDF_EXTENSION = "pdf"

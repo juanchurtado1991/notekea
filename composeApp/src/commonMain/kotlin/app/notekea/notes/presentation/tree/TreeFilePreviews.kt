@@ -3,9 +3,9 @@ package app.notekea.notes.presentation.tree
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.images.decodedImage
-import app.notekea.notes.domain.AttachmentKind
-import app.notekea.notes.domain.AttachmentStore
-import app.notekea.notes.domain.NoteFile
+import app.notekea.core.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.AttachmentStore
+import app.notekea.core.notes.domain.NoteFile
 
 /** Reads and decodes the files of the vault at [vaultPath] that the tree shows beside it ([FilePreview]). */
 class TreeFilePreviews(

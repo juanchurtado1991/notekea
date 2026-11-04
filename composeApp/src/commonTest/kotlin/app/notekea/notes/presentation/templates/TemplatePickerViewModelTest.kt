@@ -2,17 +2,17 @@ package app.notekea.notes.presentation.templates
 
 import androidx.lifecycle.viewModelScope
 import app.notekea.notes.domain.CreateTemplatesFolderUseCase
-import app.notekea.notes.domain.FakeNoteContentStore
-import app.notekea.notes.domain.FakeNoteFileOperations
-import app.notekea.notes.domain.FakeVaultSettingsReader
-import app.notekea.notes.domain.FuzzyMatcher
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.FakeNoteFileOperations
+import app.notekea.core.notes.domain.FakeVaultSettingsReader
+import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.notes.domain.GetTemplateSettingsUseCase
-import app.notekea.notes.domain.NoteFixtures.VAULT
-import app.notekea.notes.domain.NoteFixtures.entry
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.TemplateSettings
-import app.notekea.notes.domain.TextFolder
-import app.notekea.notes.domain.VaultTree
+import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TemplateSettings
+import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.VaultTree
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel

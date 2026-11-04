@@ -11,15 +11,15 @@ import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaTheme
-import app.notekea.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.notes.domain.FlattenTreeUseCase
-import app.notekea.notes.domain.NaturalNameComparator
-import app.notekea.notes.domain.NoteEntry
-import app.notekea.notes.domain.NoteFile
-import app.notekea.notes.domain.NoteMetadata
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeSort
-import app.notekea.notes.domain.VaultTree
+import app.notekea.core.notes.domain.VaultTree
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

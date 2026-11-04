@@ -3,9 +3,9 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.text.TextRange
 import androidx.lifecycle.viewModelScope
-import app.notekea.notes.domain.NoteFixtures.file
-import app.notekea.notes.domain.OutlineHeading
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NoteFixtures.file
+import app.notekea.core.notes.domain.OutlineHeading
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel

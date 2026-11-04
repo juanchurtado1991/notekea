@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import app.notekea.notes.domain.FormatAction
-import app.notekea.notes.domain.LinkResolver
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.LinkResolver
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.presentation.connections.ConnectionActions
 import app.notekea.notes.presentation.connections.ConnectionsSection
 import app.notekea.notes.presentation.editor.EditorIntent

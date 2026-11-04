@@ -1,8 +1,8 @@
 package app.notekea.notes.presentation.tree
 
-import app.notekea.notes.domain.LinkKind
-import app.notekea.notes.domain.LinkUpdateResult
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.LinkKind
+import app.notekea.core.notes.domain.LinkUpdateResult
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeSort
 
 /** What the user did in the vault sidebar. Actions without a path apply to the selected entry. */

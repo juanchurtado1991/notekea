@@ -14,9 +14,9 @@ import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaTheme
-import app.notekea.notes.domain.OutlineFinder
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.SidePanelPreferences
+import app.notekea.core.notes.domain.OutlineFinder
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.SidePanelPreferences
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

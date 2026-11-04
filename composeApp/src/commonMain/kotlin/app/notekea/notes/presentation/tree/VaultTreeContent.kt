@@ -13,7 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.components.NotekeaSplitPane
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.TreePreferences
 import kotlin.math.roundToInt
 

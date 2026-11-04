@@ -4,12 +4,13 @@ import app.notekea.core.domain.AppDispatchers
 import app.notekea.db.NotekeaDatabase
 import app.notekea.notes.domain.IndexStateStore
 import app.notekea.notes.domain.IndexedNote
-import app.notekea.notes.domain.NoteFile
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.SkipReason
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
 import kotlin.time.Instant
+import app.notekea.core.notes.data.isDatabaseFailure
 
 /**
  * [IndexStateStore] on SQLDelight, in the app's database. A database error only costs time: reading answers as empty

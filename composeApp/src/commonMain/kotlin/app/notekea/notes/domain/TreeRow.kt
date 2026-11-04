@@ -1,6 +1,7 @@
 package app.notekea.notes.domain
 
 import kotlin.time.Instant
+import app.notekea.core.notes.domain.RelativePath
 
 /** One visible row of the vault tree, in display order; [depth] is 0 for entries at the top of the vault. */
 sealed interface TreeRow {

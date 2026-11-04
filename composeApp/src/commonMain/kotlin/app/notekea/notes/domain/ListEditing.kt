@@ -4,6 +4,7 @@ import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.StringPatterns.NEW_LINE
 import app.notekea.core.domain.StringPatterns
+import app.notekea.core.notes.domain.TextEdit
 /**
  * Lists and quotes behave as in other editors (`ROADMAP.md` 1.17), as one [TextEdit] per key, or null where the key
  * keeps its usual meaning (plain text, code blocks, the cursor inside a marker, a selection for Enter):

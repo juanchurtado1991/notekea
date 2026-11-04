@@ -4,6 +4,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlin.time.Duration.Companion.seconds
+import app.notekea.core.notes.domain.NoteContentStore
+import app.notekea.core.notes.domain.NoteScanner
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * Watches the one note open in the editor and reports when its file changes or disappears (`ROADMAP.md` 1.5: external

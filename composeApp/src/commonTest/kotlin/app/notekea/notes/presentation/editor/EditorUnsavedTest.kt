@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.editor
 
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlin.test.Test

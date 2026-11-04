@@ -1,6 +1,7 @@
 package app.notekea.notes.data
 
 import app.notekea.notes.domain.MentionFinder
+import app.notekea.core.notes.data.MarkdownCodeRanges
 
 /**
  * [MentionFinder] with patterns: each name as a whole word in any letter case (no letter, digit, `_` or `#` right

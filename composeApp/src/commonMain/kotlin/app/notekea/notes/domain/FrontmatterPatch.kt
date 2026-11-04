@@ -3,6 +3,9 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.domain.time.MomentFormat
+import app.notekea.core.notes.domain.FrontmatterBlocks
+import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.YamlValues
 
 /**
  * Edits one property of a note's frontmatter (`ROADMAP.md` 1.14) by rewriting only that property's lines: the other

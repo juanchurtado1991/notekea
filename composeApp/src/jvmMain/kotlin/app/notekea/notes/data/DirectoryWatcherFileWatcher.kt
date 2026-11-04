@@ -2,7 +2,7 @@ package app.notekea.notes.data
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.notes.domain.FileWatcher
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.VaultChange
 import io.methvin.watcher.DirectoryChangeEvent
 import io.methvin.watcher.DirectoryWatcher
@@ -22,6 +22,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import app.notekea.core.notes.data.HiddenSkippingFileTreeVisitor
 
 /**
  * [FileWatcher] on directory-watcher, which uses native events on every desktop (FSEvents on macOS, where the JDK

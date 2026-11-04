@@ -1,8 +1,12 @@
 package app.notekea.notes.domain
 
-import app.notekea.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteFixtures.entry
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.FuzzyMatcher
+import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.TextFolder
 
 class SearchNotesUseCaseTest {
     private val search = SearchNotesUseCase(

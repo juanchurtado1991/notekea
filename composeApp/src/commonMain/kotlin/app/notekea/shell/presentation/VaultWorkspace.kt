@@ -14,10 +14,10 @@ import app.notekea.core.presentation.components.EmptyState
 import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.core.presentation.platform.WindowDialog
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.notes.domain.FolderCards
-import app.notekea.notes.domain.NaturalNameComparator
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.presentation.editor.EditorCallbacks
 import app.notekea.notes.presentation.editor.EditorIntent
 import app.notekea.notes.presentation.editor.EditorPaneTools

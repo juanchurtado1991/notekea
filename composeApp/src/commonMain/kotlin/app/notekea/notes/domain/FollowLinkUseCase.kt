@@ -2,6 +2,13 @@ package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.files.ValidateFileNameUseCase
+import app.notekea.core.notes.domain.LinkKind
+import app.notekea.core.notes.domain.LinkResolver
+import app.notekea.core.notes.domain.NoteFileOperations
+import app.notekea.core.notes.domain.NoteLink
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.wikiPath
 
 /**
  * Where a link clicked in Read mode leads (`ROADMAP.md` 1.5), resolved among `notes` the way Obsidian and the link

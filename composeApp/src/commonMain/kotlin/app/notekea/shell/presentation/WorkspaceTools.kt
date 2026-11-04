@@ -2,7 +2,7 @@ package app.notekea.shell.presentation
 
 import app.notekea.shell.domain.WorkspaceStore
 import app.notekea.core.domain.AppDispatchers
-import app.notekea.notes.domain.AttachmentStore
+import app.notekea.core.notes.domain.AttachmentStore
 import app.notekea.shell.domain.GetNoteCoverUseCase
 import app.notekea.shell.domain.GetSidePanelUseCase
 import app.notekea.shell.domain.GetWorkspaceUseCase

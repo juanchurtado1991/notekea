@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.NoteFile
+
 /**
  * A note as the search index holds it (`ROADMAP.md` 2.3): its [file] when it was indexed (size and date), the
  * [contentHash] of the text it was indexed from, and the index [version] it was indexed with. A note left out on

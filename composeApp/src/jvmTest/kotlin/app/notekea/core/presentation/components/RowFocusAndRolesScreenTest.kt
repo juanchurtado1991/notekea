@@ -20,8 +20,8 @@ import app.notekea.core.presentation.keyDown
 import app.notekea.core.presentation.nodes
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.core.presentation.theme.NotekeaTheme
-import app.notekea.notes.domain.FrontmatterContent
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.FrontmatterContent
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.presentation.connections.ConnectionActions
 import app.notekea.notes.presentation.editor.EditorPreviewData
 import app.notekea.notes.presentation.editor.EditorState

@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.RelativePath
+
 /** One change inside a watched vault, with its path relative to the vault. */
 sealed interface VaultChange {
     data class Created(

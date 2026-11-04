@@ -1,12 +1,13 @@
 package app.notekea.notes.data
 
 import app.notekea.core.domain.AppDispatchers
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.TreePreferences
 import app.notekea.notes.domain.TreePreferencesStore
 import app.notekea.notes.domain.TreeSort
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.withContext
+import app.notekea.core.notes.data.VaultKeyHash
 
 /**
  * [TreePreferencesStore] on Multiplatform Settings. The sort order is one key for all vaults; the expanded folders of

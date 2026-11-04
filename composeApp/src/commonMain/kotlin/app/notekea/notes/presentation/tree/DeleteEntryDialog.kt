@@ -5,8 +5,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.presentation.components.NotekeaConfirmDialog
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.VaultTree
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 import app.notekea.resources.Res
 import app.notekea.resources.tree_cancel
 import app.notekea.resources.tree_delete_file

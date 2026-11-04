@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.RelativePath
+
 /**
  * The entries a vault has bookmarked (`ROADMAP.md` 1.13), in the order the user gave them: notes, folders or other
  * files, each at most once. A bookmark follows its entry when it is renamed or moved in Notekea, and goes when the

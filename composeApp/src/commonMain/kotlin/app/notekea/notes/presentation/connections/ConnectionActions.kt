@@ -1,6 +1,6 @@
 package app.notekea.notes.presentation.connections
 
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * What a row of the inspector's Connections can do (`ROADMAP.md` 2.4, 2.5): open its note, open it there at the place

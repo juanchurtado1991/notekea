@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.RelativePath
+
 /**
  * A note that names the open one (`ROADMAP.md` 2.5): [source], where it first does ([range], in its body: the whole
  * link, or the plain words), how many times it does ([count]), and the [passage] around it as a reader sees it (its

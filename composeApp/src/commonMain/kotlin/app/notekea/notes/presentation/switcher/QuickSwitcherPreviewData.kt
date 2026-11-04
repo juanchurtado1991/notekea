@@ -1,6 +1,6 @@
 package app.notekea.notes.presentation.switcher
 
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /** Sample values shared by the quick switcher's previews and screen tests: notes of the smoke vault. */
 internal object QuickSwitcherPreviewData {

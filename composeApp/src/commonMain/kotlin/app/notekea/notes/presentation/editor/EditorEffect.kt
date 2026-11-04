@@ -1,9 +1,9 @@
 package app.notekea.notes.presentation.editor
 
-import app.notekea.notes.domain.LinkKind
-import app.notekea.notes.domain.LinkUpdateResult
-import app.notekea.notes.domain.OutlineHeading
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.LinkKind
+import app.notekea.core.notes.domain.LinkUpdateResult
+import app.notekea.core.notes.domain.OutlineHeading
+import app.notekea.core.notes.domain.RelativePath
 
 /** One-shot events of the note editor for the window around it. */
 sealed interface EditorEffect {

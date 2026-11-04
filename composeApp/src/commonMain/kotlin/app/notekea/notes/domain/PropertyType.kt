@@ -1,6 +1,7 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.time.CalendarDate
+import app.notekea.core.notes.domain.PropertyValue
 
 /** The types a new property can have (`ROADMAP.md` 1.14), each with the empty value it starts with. */
 enum class PropertyType {

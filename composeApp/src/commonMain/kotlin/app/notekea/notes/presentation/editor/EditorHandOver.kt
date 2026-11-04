@@ -1,6 +1,6 @@
 package app.notekea.notes.presentation.editor
 
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.CompletableDeferred
 
 /**

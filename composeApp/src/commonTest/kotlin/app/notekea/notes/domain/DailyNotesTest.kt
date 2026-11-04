@@ -3,6 +3,9 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.time.CalendarDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.DailyNoteSettings
+import app.notekea.core.notes.domain.DayNeighbors
+import app.notekea.core.notes.domain.RelativePath
 
 class DailyNotesTest {
     private val dailyNotes = DailyNotes()

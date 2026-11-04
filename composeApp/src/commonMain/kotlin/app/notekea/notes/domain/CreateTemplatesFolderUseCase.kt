@@ -1,6 +1,13 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.NoteContentStore
+import app.notekea.core.notes.domain.NoteFileOperations
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TemplateSettings
+import app.notekea.core.notes.domain.VaultSettingsReader
+import app.notekea.core.notes.domain.createMissingFolders
 
 /**
  * Creates the vault's templates folder ([TemplateSettings.folder], `Templates` by default) with an example template

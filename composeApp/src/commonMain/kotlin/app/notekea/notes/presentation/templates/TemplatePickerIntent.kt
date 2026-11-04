@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.templates
 
 import app.notekea.core.presentation.FeedIntent
-import app.notekea.notes.domain.VaultTree
+import app.notekea.core.notes.domain.VaultTree
 
 /** What the user did in the template picker, plus the vault tree as it changes. */
 sealed interface TemplatePickerIntent {

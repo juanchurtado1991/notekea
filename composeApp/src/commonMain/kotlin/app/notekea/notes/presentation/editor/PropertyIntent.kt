@@ -1,8 +1,8 @@
 package app.notekea.notes.presentation.editor
 
 import app.notekea.notes.domain.PropertyType
-import app.notekea.notes.domain.PropertyValue
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.RelativePath
 
 /** What the user did in the properties above the note (`ROADMAP.md` 1.14). */
 sealed interface PropertyIntent : EditorIntent {

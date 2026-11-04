@@ -2,10 +2,10 @@ package app.notekea.notes.presentation.editor
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.time.LocalMoment
-import app.notekea.notes.domain.FrontmatterContent
-import app.notekea.notes.domain.OutlineFinder
+import app.notekea.core.notes.domain.FrontmatterContent
+import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.notes.domain.PropertyKeys
-import app.notekea.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.PropertyValue
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext

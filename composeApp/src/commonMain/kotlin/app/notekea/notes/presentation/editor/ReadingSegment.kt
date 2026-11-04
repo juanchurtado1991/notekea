@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.editor
 
 import app.notekea.core.domain.StringPatterns
-import app.notekea.notes.domain.OutlineHeading
+import app.notekea.core.notes.domain.OutlineHeading
 
 /**
  * A piece of a note as Read mode shows it: Markdown for the renderer, or a file embedded on a line of its own, which

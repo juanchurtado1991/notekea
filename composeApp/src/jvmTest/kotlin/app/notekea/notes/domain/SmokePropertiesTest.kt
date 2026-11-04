@@ -4,6 +4,10 @@ import app.notekea.core.domain.time.CalendarDate
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.FrontmatterContent
+import app.notekea.core.notes.domain.FrontmatterReader
+import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.PropertyValue
 
 /**
  * The properties cases of `MVP_SMOKE_TEST.md` (1.14) on the smoke data itself: `Properties practice` reads one property

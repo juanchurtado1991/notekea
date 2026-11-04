@@ -1,12 +1,12 @@
 package app.notekea.shell.domain
 
-import app.notekea.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.notes.domain.FakeNoteContentStore
-import app.notekea.notes.domain.FakeVaultSettingsReader
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.FakeVaultSettingsReader
+import app.notekea.core.notes.domain.RelativePath
 
 class GetNoteCoverUseCaseTest {
     private val store = FakeNoteContentStore()

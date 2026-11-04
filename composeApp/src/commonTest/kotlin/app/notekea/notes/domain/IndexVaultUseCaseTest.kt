@@ -10,6 +10,17 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
+import app.notekea.core.notes.domain.ChunkNoteUseCase
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.FakeVectorIndex
+import app.notekea.core.notes.domain.IndexError
+import app.notekea.core.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.NoteChunk
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.NoteSections
+import app.notekea.core.notes.domain.OutlineFinder
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VectorIndex
 
 /**
  * Bringing a vault's search index up to date (`ROADMAP.md` 2.3): every note the first time, then only what changed;

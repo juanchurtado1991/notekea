@@ -34,8 +34,8 @@ import app.notekea.core.presentation.components.focusBorder
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
-import app.notekea.notes.domain.FrontmatterContent
-import app.notekea.notes.domain.NoteProperty
+import app.notekea.core.notes.domain.FrontmatterContent
+import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.resources.Res
 import app.notekea.resources.properties_show_form
 import app.notekea.resources.properties_show_source

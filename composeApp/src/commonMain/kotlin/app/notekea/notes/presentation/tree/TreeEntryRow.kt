@@ -37,7 +37,8 @@ import app.notekea.resources.tree_select_note
 import org.jetbrains.compose.resources.stringResource
 import app.notekea.notes.presentation.files.fileIconOf
 import app.notekea.notes.presentation.files.fileTintOf
-import app.notekea.notes.domain.NotesError
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.presentation.notesErrorMessage
 
 private const val PREVIEW_WIDTH_DP = 260
 

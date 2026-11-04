@@ -1,5 +1,8 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.SidePanelPreferences
+
 /**
  * How the user left the vault sidebar: which folders were open, how notes are sorted, how wide the sidebar is
  * (between [MIN_SIDEBAR_WIDTH_DP] and [MAX_SIDEBAR_WIDTH_DP]) and whether it is hidden. Folders are per vault; the

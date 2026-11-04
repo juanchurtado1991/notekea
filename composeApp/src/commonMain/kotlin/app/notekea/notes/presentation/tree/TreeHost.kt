@@ -1,6 +1,6 @@
 package app.notekea.notes.presentation.tree
 
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 

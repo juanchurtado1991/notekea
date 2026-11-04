@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.Gate
+
 /** Bookmarks in memory, per vault, as the settings would keep them; every call goes through [gate]. */
 class FakeBookmarkStore : BookmarkStore {
     val saved = mutableMapOf<String, Bookmarks>()

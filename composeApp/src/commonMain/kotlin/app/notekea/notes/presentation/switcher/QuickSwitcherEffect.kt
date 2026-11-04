@@ -1,6 +1,6 @@
 package app.notekea.notes.presentation.switcher
 
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /** One-shot events of the quick switcher. */
 sealed interface QuickSwitcherEffect {

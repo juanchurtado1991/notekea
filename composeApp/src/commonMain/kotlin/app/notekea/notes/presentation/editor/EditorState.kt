@@ -1,10 +1,10 @@
 package app.notekea.notes.presentation.editor
 
 import app.notekea.core.domain.time.CalendarDate
-import app.notekea.notes.domain.FrontmatterContent
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.OutlineHeading
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.FrontmatterContent
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.OutlineHeading
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * State of the note editor (`ROADMAP.md` 1.5). The text itself is not here: it lives in the ViewModel's text buffer,

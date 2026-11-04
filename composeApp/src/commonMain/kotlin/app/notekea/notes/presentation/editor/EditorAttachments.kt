@@ -6,20 +6,20 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.images.decodedImage
 import app.notekea.notes.domain.AttachFileUseCase
 import app.notekea.notes.domain.AttachmentFolder
-import app.notekea.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.notes.domain.AttachmentResolver
 import app.notekea.notes.domain.AttachmentSource
-import app.notekea.notes.domain.AttachmentStore
+import app.notekea.core.notes.domain.AttachmentStore
 import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.EmbedFinder
 import app.notekea.notes.domain.EmbeddedNoteText
 import app.notekea.notes.domain.EmbedProblem
-import app.notekea.notes.domain.LinkResolver
+import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.notes.domain.EmbedText
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.VaultSettingsReader
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultSettingsReader
 import kotlinx.coroutines.withContext
 
 /**

@@ -2,8 +2,8 @@ package app.notekea.notes.data
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.Trash
 import app.notekea.notes.domain.TrashLocation
 import kotlinx.coroutines.withContext

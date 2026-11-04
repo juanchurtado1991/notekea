@@ -2,8 +2,8 @@ package app.notekea.notes.presentation.switcher
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.presentation.BaseViewModel
-import app.notekea.notes.domain.NoteEntry
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.SearchNoteContentUseCase
 import app.notekea.notes.domain.SearchNotesUseCase
 import co.touchlab.kermit.Logger

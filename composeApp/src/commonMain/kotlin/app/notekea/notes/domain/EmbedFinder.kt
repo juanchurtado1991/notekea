@@ -3,6 +3,8 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.percentDecoded
 
 /**
  * The embedded files of a note's text (`ROADMAP.md` 1.8), as Obsidian reads them: `![[file]]` with an optional

@@ -2,9 +2,9 @@ package app.notekea.notes.presentation.related
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
-import app.notekea.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.notes.domain.FindRelatedNotesUseCase
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

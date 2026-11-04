@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.MarkdownLineStripper
+
 /**
  * The passage a mention shows (`ROADMAP.md` 2.5): the line of [body] that holds [range], as a reader sees it
  * ([MarkdownLineStripper]), shortened to about [MAX_LENGTH] characters around the mention, with an ellipsis where it

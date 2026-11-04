@@ -1,10 +1,10 @@
 package app.notekea.notes.presentation.editor
 
-import app.notekea.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.EmbedKind
-import app.notekea.notes.domain.OutlineFinder
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.OutlineFinder
+import app.notekea.core.notes.domain.RelativePath
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -11,8 +11,8 @@ import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaTheme
-import app.notekea.notes.domain.DayNeighbors
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.DayNeighbors
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.presentation.editor.EditorContent
 import app.notekea.notes.presentation.editor.EditorIntent
 import app.notekea.notes.presentation.editor.EditorState

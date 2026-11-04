@@ -1,7 +1,7 @@
 package app.notekea.shell.domain
 
 import kotlinx.coroutines.delay
-import app.notekea.notes.domain.Gate
+import app.notekea.core.notes.domain.Gate
 
 /**
  * Each vault's tabs in memory; every call goes through [gate], as the disk takes its time, and a write takes as long

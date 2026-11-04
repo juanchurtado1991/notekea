@@ -4,7 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
-import app.notekea.notes.domain.OutlineHeading
+import app.notekea.core.notes.domain.OutlineHeading
 import kotlinx.coroutines.channels.Channel
 
 /**

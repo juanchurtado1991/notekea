@@ -1,6 +1,6 @@
 package app.notekea.shell.domain
 
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * One pane of the editor (`ROADMAP.md` 1.11): its open [tabs], each a note or another file of the vault, in the order

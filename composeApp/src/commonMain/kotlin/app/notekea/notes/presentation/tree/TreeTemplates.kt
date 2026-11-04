@@ -1,7 +1,7 @@
 package app.notekea.notes.presentation.tree
 
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * New notes from a template in the sidebar (`ROADMAP.md` 1.12): the template picker opens for the selected folder, the

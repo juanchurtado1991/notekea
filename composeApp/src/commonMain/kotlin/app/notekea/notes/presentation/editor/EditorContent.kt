@@ -37,8 +37,8 @@ import app.notekea.core.presentation.platform.LocalFileDrop
 import app.notekea.core.presentation.platform.PressedModifiers
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.notes.domain.DayNeighbors
-import app.notekea.notes.domain.NotesError
+import app.notekea.core.notes.domain.DayNeighbors
+import app.notekea.core.notes.domain.NotesError
 import app.notekea.resources.Res
 import app.notekea.resources.editor_find_count
 import app.notekea.resources.editor_find_none

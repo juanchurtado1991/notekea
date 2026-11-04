@@ -3,7 +3,7 @@ package app.notekea.notes.presentation.switcher
 import app.notekea.notes.domain.ContentSearchResult
 import app.notekea.notes.domain.NoteMatchField
 import app.notekea.notes.domain.NoteSearchResult
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 // Pure state transitions of the quick switcher, unit tested directly (`ARCHITECTURE.md` §4).
 

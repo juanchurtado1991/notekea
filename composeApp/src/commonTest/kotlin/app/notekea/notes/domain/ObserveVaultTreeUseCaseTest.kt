@@ -2,13 +2,18 @@ package app.notekea.notes.domain
 
 import app.cash.turbine.test
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.NoteFixtures.VAULT
-import app.notekea.notes.domain.NoteFixtures.entry
-import app.notekea.notes.domain.NoteFixtures.file
-import app.notekea.notes.domain.NoteFixtures.tags
+import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteFixtures.file
+import app.notekea.core.notes.domain.NoteFixtures.tags
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.FakeNoteScanner
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 
 class ObserveVaultTreeUseCaseTest {
     private val scanner = FakeNoteScanner()

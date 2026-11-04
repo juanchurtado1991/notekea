@@ -1,5 +1,10 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
+
 /**
  * What a folder's grid shows (`ROADMAP.md` 1.11): what is directly inside `folder` in `tree`, subfolders first, then
  * notes and files together, each group in the tree's name order (notes by their name without `.md`).

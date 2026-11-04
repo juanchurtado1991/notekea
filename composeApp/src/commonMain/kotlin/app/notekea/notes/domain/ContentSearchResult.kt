@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.NoteEntry
+
 /**
  * A note found by content search. [snippet] is the first line of the body that holds a searched word or `#tag`
  * (shortened around the match when long, with `…`), and [ranges] its matched characters; both are null and empty when

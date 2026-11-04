@@ -3,17 +3,17 @@ package app.notekea.notes.presentation.templates
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.CreateTemplatesFolderUseCase
-import app.notekea.notes.domain.FuzzyMatcher
+import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.notes.domain.GetTemplateSettingsUseCase
-import app.notekea.notes.domain.NoteEntry
-import app.notekea.notes.domain.NoteMetadata
-import app.notekea.notes.domain.NoteFile
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.TemplateListing
-import app.notekea.notes.domain.TemplateSettings
-import app.notekea.notes.domain.Templates
-import app.notekea.notes.domain.VaultTree
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TemplateListing
+import app.notekea.core.notes.domain.TemplateSettings
+import app.notekea.core.notes.domain.Templates
+import app.notekea.core.notes.domain.VaultTree
 import co.touchlab.kermit.Logger
 
 /**

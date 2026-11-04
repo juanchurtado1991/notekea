@@ -2,8 +2,8 @@ package app.notekea.notes.presentation.editor
 
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.time.CalendarDate
-import app.notekea.notes.domain.FrontmatterBlocks
-import app.notekea.notes.domain.FrontmatterContent
+import app.notekea.core.notes.domain.FrontmatterBlocks
+import app.notekea.core.notes.domain.FrontmatterContent
 import app.notekea.notes.domain.FrontmatterPatch
 import app.notekea.notes.domain.PropertyKeys
 

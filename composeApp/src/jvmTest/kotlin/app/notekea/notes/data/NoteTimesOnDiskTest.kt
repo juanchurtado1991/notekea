@@ -2,7 +2,7 @@ package app.notekea.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.notes.domain.NoteTimes
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem

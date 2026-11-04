@@ -8,7 +8,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * The text being edited only has `\n` breaks, as [app.notekea.notes.domain.NoteDocument] says: Windows breaks in text
+ * The text being edited only has `\n` breaks, as [app.notekea.core.notes.domain.NoteDocument] says: Windows breaks in text
  * that reaches the field by itself (its own Paste menu, Shift+Insert) lose their `\r`, or a save would write `\r\r\n`.
  */
 @OptIn(ExperimentalFoundationApi::class)

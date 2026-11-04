@@ -4,8 +4,8 @@ import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.notes.domain.FileRevealer
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.withContext
 import java.nio.file.Path
 import kotlin.io.path.Path

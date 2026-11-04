@@ -1,6 +1,6 @@
 package app.notekea.notes.domain
 
-import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
+import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

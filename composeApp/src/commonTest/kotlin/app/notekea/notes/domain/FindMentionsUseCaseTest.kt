@@ -1,10 +1,13 @@
 package app.notekea.notes.domain
 
-import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
+import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.notes.data.JetBrainsMarkdownMentionFinder
-import app.notekea.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteFixtures.entry
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteText
+import app.notekea.core.notes.domain.RelativePath
 
 class FindMentionsUseCaseTest {
     private val findMentions = FindMentionsUseCase(

@@ -3,6 +3,9 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.domain.time.MomentFormat
+import app.notekea.core.notes.domain.DailyNoteSettings
+import app.notekea.core.notes.domain.DayNeighbors
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * Daily notes as Obsidian names them (`ROADMAP.md` 1.10): the note of a date is its name in the settings' format,

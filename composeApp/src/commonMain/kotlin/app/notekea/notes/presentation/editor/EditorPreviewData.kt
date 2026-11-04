@@ -5,11 +5,11 @@ import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.notes.domain.NoteStats
-import app.notekea.notes.domain.FrontmatterContent
-import app.notekea.notes.domain.NoteProperty
-import app.notekea.notes.domain.PropertyValue
-import app.notekea.notes.domain.OutlineFinder
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.FrontmatterContent
+import app.notekea.core.notes.domain.NoteProperty
+import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.OutlineFinder
+import app.notekea.core.notes.domain.RelativePath
 
 /** Sample values shared by the editor's previews: the Arepas recipe of the smoke vault. */
 internal object EditorPreviewData {

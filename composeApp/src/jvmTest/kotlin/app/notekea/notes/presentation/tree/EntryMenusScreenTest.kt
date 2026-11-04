@@ -17,8 +17,8 @@ import app.notekea.core.presentation.rightClickText
 import app.notekea.core.presentation.texts
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.notes.domain.FolderCard
-import app.notekea.notes.domain.OutlineFinder
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.OutlineFinder
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.presentation.editor.OutlineSection
 import app.notekea.notes.presentation.editor.SidePanelActions
 import app.notekea.shell.presentation.FolderGrid

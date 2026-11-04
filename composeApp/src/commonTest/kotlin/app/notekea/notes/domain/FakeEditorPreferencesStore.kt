@@ -1,6 +1,7 @@
 package app.notekea.notes.domain
 
 import kotlinx.coroutines.delay
+import app.notekea.core.notes.domain.SidePanelPreferences
 
 /**
  * The editor's mode, side panel and properties fold in memory; a side panel save takes as long as the next of

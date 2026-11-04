@@ -2,12 +2,22 @@ package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.files.ValidateFileNameUseCase
-import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
-import app.notekea.notes.domain.NoteFixtures.VAULT
-import app.notekea.notes.domain.NoteFixtures.file
+import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
+import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NoteFixtures.file
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.FakeNoteFileOperations
+import app.notekea.core.notes.domain.FakeNoteScanner
+import app.notekea.core.notes.domain.LinkUpdateResult
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.PlanLinkUpdatesUseCase
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RenameEntryUseCase
+import app.notekea.core.notes.domain.UpdateLinksAfterRenameUseCase
 
 class RenameAndUpdateLinksUseCaseTest {
     private val scanner = FakeNoteScanner()

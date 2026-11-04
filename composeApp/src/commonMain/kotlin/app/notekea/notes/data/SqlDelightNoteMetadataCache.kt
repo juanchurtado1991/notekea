@@ -2,14 +2,15 @@ package app.notekea.notes.data
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.db.NotekeaDatabase
-import app.notekea.notes.domain.NoteEntry
-import app.notekea.notes.domain.NoteFile
-import app.notekea.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.notes.domain.NoteMetadataCache
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
 import kotlin.time.Instant
+import app.notekea.core.notes.data.isDatabaseFailure
 
 /**
  * [NoteMetadataCache] on SQLDelight, in the app's database (never inside the vault). Dates are stored as epoch

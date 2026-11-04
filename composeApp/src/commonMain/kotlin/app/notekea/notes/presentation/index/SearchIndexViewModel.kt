@@ -4,11 +4,11 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.DescribeElapsedTimeUseCase
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.IndexProgress
-import app.notekea.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.notes.domain.IndexStateStore
 import app.notekea.notes.domain.IndexVaultUseCase
-import app.notekea.notes.domain.NoteFile
-import app.notekea.notes.domain.VectorIndex
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.VectorIndex
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable

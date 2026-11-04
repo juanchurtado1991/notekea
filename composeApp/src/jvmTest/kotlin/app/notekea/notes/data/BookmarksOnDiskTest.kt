@@ -3,7 +3,7 @@ package app.notekea.notes.data
 import app.notekea.core.data.PropertiesFileSettingsFactory
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.notes.domain.Bookmarks
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.io.path.createTempDirectory

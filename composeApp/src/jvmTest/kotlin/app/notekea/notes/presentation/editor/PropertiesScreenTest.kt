@@ -14,10 +14,10 @@ import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaTheme
-import app.notekea.notes.domain.FrontmatterContent
-import app.notekea.notes.domain.FrontmatterReader
-import app.notekea.notes.domain.PropertyValue
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.FrontmatterContent
+import app.notekea.core.notes.domain.FrontmatterReader
+import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.RelativePath
 import javax.swing.JPanel
 import kotlin.test.Test
 import kotlin.test.assertEquals

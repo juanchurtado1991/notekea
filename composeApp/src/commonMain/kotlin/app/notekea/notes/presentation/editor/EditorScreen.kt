@@ -18,9 +18,9 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.platform.BeforeWindowClose
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.notes.domain.DayNeighbors
-import app.notekea.notes.domain.OutlineHeading
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.DayNeighbors
+import app.notekea.core.notes.domain.OutlineHeading
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.channels.Channel
 
 private const val PREVIEW_HEIGHT_DP = 420

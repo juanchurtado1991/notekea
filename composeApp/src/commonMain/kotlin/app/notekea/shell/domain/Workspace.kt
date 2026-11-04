@@ -1,6 +1,6 @@
 package app.notekea.shell.domain
 
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * The editor's tabs (`ROADMAP.md` 1.11): one pane, or two side by side ([MAX_PANES]), and the [activePane], the one

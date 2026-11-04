@@ -10,7 +10,7 @@ import app.notekea.core.presentation.components.NotekeaStatusRing
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.IndexProgress
-import app.notekea.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.resources.Res
 import app.notekea.resources.search_index_indexing
 import app.notekea.resources.search_index_ready

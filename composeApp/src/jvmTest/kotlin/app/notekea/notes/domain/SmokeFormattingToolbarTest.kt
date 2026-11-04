@@ -3,6 +3,10 @@ package app.notekea.notes.domain
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.LinkResolver
+import app.notekea.core.notes.domain.NoteLink
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.relativeTo
 
 /**
  * The formatting toolbar cases of `MVP_SMOKE_TEST.md` (1.17) on the practice note itself: each case's steps are

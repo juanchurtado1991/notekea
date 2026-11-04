@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.IndexRunError
+
 /**
  * How an indexing run goes (`ROADMAP.md` 2.3): [done] of the vault's [total] notes (the ones indexed before the run
  * count as done, so a resumed run goes on from where the last one stopped), how many it [indexed] again (the others'

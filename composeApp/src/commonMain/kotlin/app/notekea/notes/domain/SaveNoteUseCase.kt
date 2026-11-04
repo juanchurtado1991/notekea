@@ -1,6 +1,10 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.NoteContentStore
+import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * Writes the editor's [NoteDocument] back to its note, never over a change made elsewhere: `expectedOnDisk` is the

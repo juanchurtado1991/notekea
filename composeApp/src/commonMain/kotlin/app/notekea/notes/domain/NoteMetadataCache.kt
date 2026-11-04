@@ -1,5 +1,8 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.RelativePath
+
 /**
  * What was last read from the notes of a vault, kept between runs so a vault opens at once. It is only a cache: a
  * cache that cannot be read answers as empty, and the notes are read from disk again.

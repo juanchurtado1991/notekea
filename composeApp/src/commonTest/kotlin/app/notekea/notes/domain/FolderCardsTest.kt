@@ -1,8 +1,13 @@
 package app.notekea.notes.domain
 
-import app.notekea.notes.domain.NoteFixtures.file
+import app.notekea.core.notes.domain.NoteFixtures.file
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 
 class FolderCardsTest {
     @Test

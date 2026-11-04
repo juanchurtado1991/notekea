@@ -1,8 +1,8 @@
 package app.notekea.notes.presentation.switcher
 
 import app.notekea.core.presentation.FeedIntent
-import app.notekea.notes.domain.NoteEntry
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.RelativePath
 
 /** What the user did in the quick switcher, plus the vault's notes as they change. */
 sealed interface QuickSwitcherIntent {

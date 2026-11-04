@@ -10,14 +10,14 @@ import app.notekea.core.presentation.components.NotekeaEmbeddedNote
 import app.notekea.core.presentation.components.NotekeaFileChip
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.MarkdownSyntax
-import app.notekea.notes.domain.LinkKind
+import app.notekea.core.notes.domain.LinkKind
 import app.notekea.resources.embedded_note_open
 import app.notekea.core.presentation.components.NotekeaMissingFile
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.notes.domain.Embed
 import app.notekea.notes.domain.EmbedKind
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.resources.Res
 import app.notekea.resources.attachment_locate
 import app.notekea.resources.attachment_missing

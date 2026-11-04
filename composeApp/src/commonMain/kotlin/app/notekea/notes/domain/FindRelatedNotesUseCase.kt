@@ -3,6 +3,16 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.TextEmbedder
+import app.notekea.core.notes.domain.ChunkNoteUseCase
+import app.notekea.core.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.LinkFinder
+import app.notekea.core.notes.domain.LinkResolver
+import app.notekea.core.notes.domain.NoteContentStore
+import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.SearchHit
+import app.notekea.core.notes.domain.VectorIndex
+import app.notekea.core.notes.domain.embedChunks
 
 /**
  * The notes closest in meaning to the open note (`ROADMAP.md` 2.4), from its [text] as the editor has it: each of its

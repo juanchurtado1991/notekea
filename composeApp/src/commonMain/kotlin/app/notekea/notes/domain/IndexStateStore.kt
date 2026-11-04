@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.RelativePath
+
 /** Where the search index keeps what it holds of each note, per vault (`ROADMAP.md` 2.3), in the app's data. */
 interface IndexStateStore {
     suspend fun read(

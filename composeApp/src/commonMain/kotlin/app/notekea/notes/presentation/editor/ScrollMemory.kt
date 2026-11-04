@@ -1,6 +1,6 @@
 package app.notekea.notes.presentation.editor
 
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * Where the view was in each note shown in one pane (`ROADMAP.md` 1.11), so going back to a note's tab shows the same

@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.RelativePath
+
 /**
  * [IndexStateStore] in memory, per vault, as the database keeps it: a note's state replaced by its next save. With
  * [isClearRefused], clearing fails as a locked database does.

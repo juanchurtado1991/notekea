@@ -3,13 +3,17 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
-import app.notekea.notes.data.ObsidianVaultSettingsReader
+import app.notekea.core.notes.data.ObsidianVaultSettingsReader
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.DailyNoteSettings
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TemplateFiller
+import app.notekea.core.notes.domain.relativeTo
 
 /**
  * The daily notes cases of `MVP_SMOKE_TEST.md` (1.10) on the smoke data itself: the Playground Vault's journal under

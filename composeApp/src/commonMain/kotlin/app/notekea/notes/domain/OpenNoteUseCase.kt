@@ -1,6 +1,10 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.NoteContentStore
+import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 
 /** Reads a note for the editor, split into the header it keeps untouched and the body the user edits. */
 class OpenNoteUseCase(private val noteContentStore: NoteContentStore) {

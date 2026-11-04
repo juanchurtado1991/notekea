@@ -2,8 +2,8 @@ package app.notekea.notes.presentation.mentions
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import app.notekea.notes.domain.NoteEntry
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.RelativePath
 
 /** The Linked and Unlinked tabs follow the vault (`ROADMAP.md` 2.5): the active pane's [note] and the vault's [notes]. */
 @Composable

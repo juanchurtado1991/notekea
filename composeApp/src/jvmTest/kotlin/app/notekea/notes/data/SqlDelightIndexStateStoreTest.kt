@@ -8,8 +8,8 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.db.NotekeaDatabase
 import app.notekea.notes.domain.IndexedNote
-import app.notekea.notes.domain.NoteFile
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.SkipReason
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest

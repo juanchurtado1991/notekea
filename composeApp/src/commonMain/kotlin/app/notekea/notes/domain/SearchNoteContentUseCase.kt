@@ -6,6 +6,13 @@ import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.markdown.FenceTracker
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import app.notekea.core.notes.domain.MarkdownLineStripper
+import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteText
+import app.notekea.core.notes.domain.NoteTextCache
+import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.TextTagFinder
 
 /**
  * Content search (`ROADMAP.md` 1.6, `Mod+Shift+F`; plain text until hybrid search in 2.6). Every word of `query` must

@@ -14,7 +14,7 @@ import app.notekea.core.presentation.components.NotekeaFold
 import app.notekea.core.presentation.components.NotekeaSectionHeader
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.notes.domain.ConnectionsTab
+import app.notekea.core.notes.domain.ConnectionsTab
 import app.notekea.notes.presentation.mentions.NoteMentionsIntent
 import app.notekea.notes.presentation.mentions.NoteMentionsState
 import app.notekea.notes.presentation.related.RelatedList

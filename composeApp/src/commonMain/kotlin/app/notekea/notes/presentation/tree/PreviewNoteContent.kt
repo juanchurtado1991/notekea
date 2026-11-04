@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 private const val PREVIEW_BODY = "Planting starts in March.\n\n- [ ] Buy **seeds**\n- [ ] Prepare the beds #garden\n"
 private const val PREVIEW_HEIGHT_DP = 320

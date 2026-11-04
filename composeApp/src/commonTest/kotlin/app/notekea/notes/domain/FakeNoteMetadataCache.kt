@@ -1,5 +1,8 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.RelativePath
+
 /** The cache in memory, per vault, recording every update. */
 class FakeNoteMetadataCache : NoteMetadataCache {
     val entries = mutableMapOf<RelativePath, NoteEntry>()

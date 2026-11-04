@@ -1,5 +1,7 @@
 package app.notekea.notes.domain
 
+import app.notekea.core.notes.domain.SidePanelPreferences
+
 /**
  * Keeps the editor's choices between notes and runs, for every vault: whether notes open in Read mode, how the panel
  * on its right was left, and whether the properties above notes are folded (`ROADMAP.md` 1.14).

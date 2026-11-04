@@ -2,14 +2,14 @@ package app.notekea.shell.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.shell.domain.EditorPane
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.shell.domain.Workspace
 import com.russhwolf.settings.MapSettings
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.notes.data.VaultKeyHash
+import app.notekea.core.notes.data.VaultKeyHash
 
 class SettingsWorkspaceStoreTest {
     private val testDispatcher = StandardTestDispatcher()

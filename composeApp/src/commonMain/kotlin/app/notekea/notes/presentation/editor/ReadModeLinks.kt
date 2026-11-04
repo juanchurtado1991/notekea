@@ -1,14 +1,14 @@
 package app.notekea.notes.presentation.editor
 
-import app.notekea.notes.domain.AttachmentKind
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.StringPatterns.NEW_LINE
-import app.notekea.notes.domain.LinkKind
-import app.notekea.notes.domain.percentDecoded
+import app.notekea.core.notes.domain.LinkKind
+import app.notekea.core.notes.domain.percentDecoded
 
 /**
  * Links in Read mode. The renderer knows Markdown links but not Obsidian's `[[wiki links]]` or `#tags`, so [prepare]

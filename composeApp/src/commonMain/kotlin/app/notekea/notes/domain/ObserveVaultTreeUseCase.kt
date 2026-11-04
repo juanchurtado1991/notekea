@@ -14,6 +14,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlin.time.Duration.Companion.milliseconds
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteScanner
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 
 /**
  * The notes, other files and folders of a vault, kept up to date while collected. What the cache remembers is shown at once, then

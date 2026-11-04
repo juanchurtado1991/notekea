@@ -1,6 +1,7 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.markdown.MarkdownSyntax
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * How Notekea writes an embed of a file in a note, as Obsidian does by default: `![[name.png]]` when no other file of

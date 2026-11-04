@@ -5,12 +5,12 @@ import androidx.compose.runtime.snapshotFlow
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.EditorPreferencesStore
-import app.notekea.notes.domain.FillTemplateUseCase
+import app.notekea.core.notes.domain.FillTemplateUseCase
 import app.notekea.notes.domain.ObserveNoteOnDiskUseCase
 import app.notekea.notes.domain.OpenNoteUseCase
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.KeepUnsavedTextUseCase
-import app.notekea.notes.domain.NotesError
+import app.notekea.core.notes.domain.NotesError
 import app.notekea.notes.domain.RenameAndUpdateLinksUseCase
 import app.notekea.notes.domain.SaveNoteUseCase
 import co.touchlab.kermit.Logger

@@ -3,6 +3,11 @@ package app.notekea.notes.domain
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.FrontmatterBlocks
+import app.notekea.core.notes.domain.FrontmatterContent
+import app.notekea.core.notes.domain.FrontmatterReader
+import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * The "Done when" of `ROADMAP.md` 1.14 on every note of `smoke-data`: its frontmatter reads as properties (but the one

@@ -2,9 +2,9 @@ package app.notekea.notes.presentation.editor
 
 import androidx.compose.ui.text.TextRange
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.FillTemplateUseCase
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.domain.TemplateInsertion
+import app.notekea.core.notes.domain.FillTemplateUseCase
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TemplateInsertion
 
 /**
  * Insert template (`ROADMAP.md` 1.12): the template picker opens for the open note, Read mode turning to Edit first

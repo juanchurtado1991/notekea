@@ -34,10 +34,10 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.motionTween
 import app.notekea.core.presentation.theme.NotekeaIcons
-import app.notekea.notes.domain.OutlineHeading
-import app.notekea.notes.domain.SidePanelMode
-import app.notekea.notes.domain.SidePanelPreferences
-import app.notekea.notes.domain.SidePanelSection
+import app.notekea.core.notes.domain.OutlineHeading
+import app.notekea.core.notes.domain.SidePanelMode
+import app.notekea.core.notes.domain.SidePanelPreferences
+import app.notekea.core.notes.domain.SidePanelSection
 import app.notekea.resources.Res
 import app.notekea.resources.note_info_title
 import app.notekea.resources.outline_title

@@ -1,10 +1,10 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.runtime.snapshots.Snapshot
-import app.notekea.notes.domain.LinkUpdateResult
-import app.notekea.notes.domain.NoteFixtures.file
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.LinkUpdateResult
+import app.notekea.core.notes.domain.NoteFixtures.file
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi

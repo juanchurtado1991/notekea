@@ -2,6 +2,7 @@ package app.notekea.notes.domain
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.core.notes.domain.RelativePath
 
 /** A vault's bookmarks (`ROADMAP.md` 1.13): toggled, reordered, and following renames and deletions. */
 class BookmarksTest {

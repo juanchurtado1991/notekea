@@ -1,6 +1,6 @@
 package app.notekea.notes.presentation.tree
 
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 
 /** One-shot events of the vault sidebar for the panes around it. */
 sealed interface VaultTreeEffect {

@@ -3,10 +3,10 @@ package app.notekea.notes.presentation.editor
 import androidx.compose.foundation.ExperimentalFoundationApi
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
-import app.notekea.notes.domain.FrontmatterReader
-import app.notekea.notes.domain.NoteDocument
-import app.notekea.notes.domain.NotesError
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.FrontmatterReader
+import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.domain.SaveNoteUseCase
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.sync.Mutex

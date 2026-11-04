@@ -3,6 +3,8 @@ package app.notekea.notes.domain
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.RelativePath
 
 /** What an indexing run does (`ROADMAP.md` 2.3): only the notes that are new, changed or of another version. */
 class PlanIndexUseCaseTest {

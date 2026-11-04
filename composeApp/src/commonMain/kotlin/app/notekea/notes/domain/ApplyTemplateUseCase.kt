@@ -1,6 +1,12 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.FillTemplateUseCase
+import app.notekea.core.notes.domain.NoteContentStore
+import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TemplateInsertion
 
 /**
  * Fills the note at `note` on disk from `template` (`ROADMAP.md` 1.12), for a note made with "New note from template":

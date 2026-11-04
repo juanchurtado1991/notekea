@@ -1,6 +1,9 @@
 package app.notekea.notes.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.Gate
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 
 /** Records what was trashed and answers with [outcome]; every call goes through [gate], as the disk takes its time. */
 class FakeTrash(

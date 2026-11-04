@@ -3,12 +3,20 @@ package app.notekea.notes.domain
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.FakeTextEmbedder
-import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
+import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
+import app.notekea.core.notes.domain.ChunkNoteUseCase
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.FakeVectorIndex
+import app.notekea.core.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.NoteSections
+import app.notekea.core.notes.domain.OutlineFinder
+import app.notekea.core.notes.domain.RelativePath
 
 /**
  * The open note's related notes (`ROADMAP.md` 2.4): closest in meaning first, never itself nor a note it links, at

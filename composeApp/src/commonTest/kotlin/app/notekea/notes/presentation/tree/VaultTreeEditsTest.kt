@@ -2,9 +2,9 @@ package app.notekea.notes.presentation.tree
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.LinkUpdateResult
-import app.notekea.notes.domain.NoteFixtures.file
-import app.notekea.notes.domain.NotesError
+import app.notekea.core.notes.domain.LinkUpdateResult
+import app.notekea.core.notes.domain.NoteFixtures.file
+import app.notekea.core.notes.domain.NotesError
 import app.notekea.notes.domain.TrashLocation
 import kotlin.test.Test
 import kotlin.test.assertEquals

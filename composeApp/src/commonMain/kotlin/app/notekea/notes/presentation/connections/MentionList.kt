@@ -34,7 +34,7 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.NoteMention
 import app.notekea.notes.domain.NoteMentions
-import app.notekea.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.notes.presentation.mentions.NoteMentionsIntent
 import app.notekea.notes.presentation.mentions.NoteMentionsState
 import app.notekea.resources.Res

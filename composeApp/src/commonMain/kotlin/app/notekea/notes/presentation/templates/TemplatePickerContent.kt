@@ -21,8 +21,8 @@ import app.notekea.core.presentation.components.NotekeaPaletteItem
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.presentation.tree.notesErrorMessage
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.presentation.notesErrorMessage
 import app.notekea.resources.Res
 import app.notekea.resources.template_example_name
 import app.notekea.resources.template_example_text
