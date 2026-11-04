@@ -162,6 +162,24 @@ class SearchIndexViewModelTest {
     }
 
     @Test
+    fun `a Rebuild whose state cannot be forgotten leaves the index as it was and says so`() = runTest(
+        context = testDispatcher
+    ) {
+        val viewModel = viewModel()
+        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = write(count = 2), isLoaded = true))
+        advanceUntilIdle()
+        states.isClearRefused = true
+
+        viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = 2 to IndexRunError.Index,
+            actual = index.notes.getValue(VAULT).size to viewModel.state.value.error
+        )
+    }
+
+    @Test
     fun `a large first run shows its notice until dismissed, and the details tell when the last run was`() = runTest(
         context = testDispatcher
     ) {
