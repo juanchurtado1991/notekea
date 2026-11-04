@@ -8,7 +8,6 @@ import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.RelativePath
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Instant
 
 /**
@@ -74,9 +73,8 @@ class SqlDelightIndexStateStore(
         block: () -> T
     ): T = try {
         block()
-    } catch (cancellation: CancellationException) {
-        throw cancellation
     } catch (exception: Exception) {
+        if (!isDatabaseFailure(exception = exception)) throw exception
         logger.w(throwable = exception) { FAILED_MESSAGE }
         fallback
     }
