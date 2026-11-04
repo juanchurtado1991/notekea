@@ -85,6 +85,22 @@ class FindMentionsUseCaseTest {
         )
     }
 
+    // Audit: a click opened the closest of two notes, yet its Linked tab left the link out, as resolving found no single one.
+    @Test
+    fun `a link to a name two notes share is linked to the note a click opens, and only to that one`() {
+        val shared = "Recipes/Arepas.md"
+        val root = "Arepas.md"
+        val source = RelativePath(value = "Travel/Lisbon.md")
+        val texts = mapOf(source to NoteText(body = "Try [[Arepas]].", folded = "try [[arepas]]."))
+        val notes = texts.keys + RelativePath(value = root) + RelativePath(value = shared)
+
+        val linked = listOf(root, shared).map { path ->
+            findMentions(note = entry(path = path), notes = notes, texts = texts).linked.size
+        }
+
+        assertEquals(expected = listOf(1, 0), actual = linked)
+    }
+
     private fun find(
         vararg notes: Pair<String, String>
     ): NoteMentions {

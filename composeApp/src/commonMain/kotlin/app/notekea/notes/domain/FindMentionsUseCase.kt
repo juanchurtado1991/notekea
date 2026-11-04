@@ -1,8 +1,8 @@
 package app.notekea.notes.domain
 
 /**
- * The notes that name [note] (`ROADMAP.md` 2.5), read from [texts] (each note's body): those with a link that resolves
- * to it as Obsidian resolves links ([LinkResolver]: wiki links, embeds and Markdown links), and those that only write
+ * The notes that name [note] (`ROADMAP.md` 2.5), read from [texts] (each note's body): those with a link that leads
+ * to it when clicked ([LinkResolver.closest]: wiki links, embeds and Markdown links), and those that only write
  * its name or one of its aliases as plain text ([MentionFinder]). A note that links to it is not also an unlinked
  * mention. The note itself is left out. Only notes whose text holds the name (or an alias) at all are parsed, which
  * keeps large vaults fast; it needs nothing from the search index.
@@ -41,7 +41,7 @@ class FindMentionsUseCase(
         target: RelativePath,
         resolver: LinkResolver
     ): List<IntRange> = linkFinder.find(markdown = body)
-        .filter { resolver.resolve(link = it, source = source)?.target == target }
+        .filter { resolver.closest(link = it, source = source) == target }
         .map { spanOf(body = body, link = it) }
 
     private fun spanOf(
