@@ -81,7 +81,8 @@ private fun Rows(
         modifier = Modifier.fillMaxWidth().heightIn(max = ROWS_MAX_HEIGHT_DP.dp),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
     ) {
-        itemsIndexed(items = rows, key = { _, row -> row.name to row.isNew }) { index, row ->
+        // A new tag's name is never one of the found tags', so the name alone tells the rows apart.
+        itemsIndexed(items = rows, key = { _, row -> row.name }) { index, row ->
             NotekeaPaletteItem(
                 title = if (row.isNew) stringResource(Res.string.tag_picker_new, row.name) else TAG_MARK + row.name,
                 onClick = { onIntent(TagPickerIntent.OnRowClick(index = index)) },

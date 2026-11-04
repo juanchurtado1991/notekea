@@ -233,7 +233,7 @@ private fun FolderTab(
     val folderCards = remember { FolderCards(naturalNameComparator = NaturalNameComparator()) }
     FolderGrid(
         folder = folder,
-        fileCount = (tree.notes.keys + tree.attachments.keys).count { it.isWithin(folder = folder) },
+        fileCount = remember(tree, folder) { tree.fileCountIn(folder = folder) },
         cards = remember(tree, folder) { folderCards.of(folder = folder, tree = tree) },
         covers = context.workspaceState.covers,
         onOpen = { workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = it)) },
