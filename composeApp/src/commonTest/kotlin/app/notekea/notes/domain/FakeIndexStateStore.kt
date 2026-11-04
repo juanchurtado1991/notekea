@@ -1,8 +1,12 @@
 package app.notekea.notes.domain
 
-/** [IndexStateStore] in memory, per vault, as the database keeps it: a note's state replaced by its next save. */
+/**
+ * [IndexStateStore] in memory, per vault, as the database keeps it: a note's state replaced by its next save. With
+ * [isClearRefused], clearing fails as a locked database does.
+ */
 class FakeIndexStateStore : IndexStateStore {
     val states = mutableMapOf<String, MutableMap<RelativePath, IndexedNote>>()
+    var isClearRefused = false
 
     override suspend fun read(
         vaultPath: String
@@ -24,7 +28,9 @@ class FakeIndexStateStore : IndexStateStore {
 
     override suspend fun clear(
         vaultPath: String
-    ) {
+    ): Boolean {
+        if (isClearRefused) return false
         states.remove(key = vaultPath)
+        return true
     }
 }

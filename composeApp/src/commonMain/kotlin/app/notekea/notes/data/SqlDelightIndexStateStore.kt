@@ -67,8 +67,11 @@ class SqlDelightIndexStateStore(
 
     override suspend fun clear(
         vaultPath: String
-    ) = withContext(context = dispatchers.io) {
-        guarded<Unit>(fallback = Unit) { queries.deleteVault(vault = vaultPath) }
+    ): Boolean = withContext(context = dispatchers.io) {
+        guarded(fallback = false) {
+            queries.deleteVault(vault = vaultPath)
+            true
+        }
     }
 
     private fun <T> guarded(

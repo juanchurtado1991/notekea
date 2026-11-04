@@ -155,11 +155,10 @@ class SearchIndexViewModel(
     /**
      * Forgets what the index holds, whether it could be emptied. The state goes first and nothing stops the two halfway:
      * notes the index still holds are only replaced by the next run, but a state left saying "done" over an empty
-     * index would keep them out of it for good.
+     * index would keep them out of it for good, so the index is not emptied unless the state was.
      */
     private suspend fun forgetIndex(): Boolean = withContext(context = NonCancellable) {
-        indexStateStore.clear(vaultPath = vaultPath)
-        vectorIndex.clear(vaultPath = vaultPath) is Outcome.Success
+        indexStateStore.clear(vaultPath = vaultPath) && vectorIndex.clear(vaultPath = vaultPath) is Outcome.Success
     }
 
     private fun logUnexpectedError(

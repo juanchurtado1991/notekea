@@ -16,8 +16,8 @@ interface IndexStateStore {
         path: RelativePath
     )
 
-    /** Forgets every note of the vault, so the next run indexes them all (Rebuild index). */
+    /** Forgets every note of the vault, so the next run indexes them all (Rebuild index); false when it could not. */
     suspend fun clear(
         vaultPath: String
-    )
+    ): Boolean
 }
