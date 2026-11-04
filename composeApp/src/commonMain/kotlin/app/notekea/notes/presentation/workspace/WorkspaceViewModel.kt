@@ -114,6 +114,8 @@ class WorkspaceViewModel(
 
             is WorkspaceIntent.OnSidePanelModeSelect -> updateSidePanel { it.copy(mode = intent.mode) }
 
+            is WorkspaceIntent.OnConnectionsTabSelect -> updateSidePanel { it.copy(connections = intent.tab) }
+
             is WorkspaceIntent.OnSidePanelSectionToggle -> updateSidePanel {
                 val folded = it.foldedSections
                 it.copy(

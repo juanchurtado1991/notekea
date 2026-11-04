@@ -71,7 +71,7 @@ fun WithSidePanel(
                     actions = actions,
                     info = info,
                     outlineFocus = sidePanel.outlineFocus,
-                    related = sidePanel.related
+                    connections = sidePanel.connections
                 )
             },
             content = content,

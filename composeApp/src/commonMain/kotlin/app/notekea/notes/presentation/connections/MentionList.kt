@@ -1,0 +1,176 @@
+package app.notekea.notes.presentation.connections
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.core.presentation.components.NotekeaPassageRow
+import app.notekea.core.presentation.components.focusBorder
+import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.theme.NotekeaIcons
+import app.notekea.notes.domain.NoteMention
+import app.notekea.notes.domain.NoteMentions
+import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.presentation.mentions.NoteMentionsIntent
+import app.notekea.notes.presentation.mentions.NoteMentionsState
+import app.notekea.resources.Res
+import app.notekea.resources.mentions_count
+import app.notekea.resources.mentions_link
+import app.notekea.resources.mentions_link_failed
+import app.notekea.resources.mentions_linked_empty
+import app.notekea.resources.mentions_unlinked_empty
+import app.notekea.resources.related_open_beside
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
+
+private const val PILL_HEIGHT_DP = 22
+private const val PILL_ICON_DP = 12
+private const val PILL_GAP_DP = 4
+
+/**
+ * Connections' Linked or Unlinked tab (`ROADMAP.md` 2.5, design A): a row per note that names the open one, with the
+ * line where it does and the mention highlighted (and how many times, when more than once); a click opens that note
+ * there. A linked row offers Open to the side; an unlinked one a Link button, the only way it becomes a link.
+ */
+@Composable
+fun MentionList(
+    state: NoteMentionsState,
+    isLinked: Boolean,
+    onIntent: (NoteMentionsIntent) -> Unit,
+    actions: ConnectionActions
+) {
+    val mentions = if (isLinked) state.mentions.linked else state.mentions.unlinked
+    Column {
+        state.linkFailed?.takeUnless { isLinked }?.let {
+            ConnectionsMuted(text = stringResource(Res.string.mentions_link_failed, it.nameWithoutExtension))
+        }
+        if (mentions.isEmpty() && !state.isLoading) {
+            val name = state.note?.nameWithoutExtension.orEmpty()
+            ConnectionsMuted(
+                text = if (isLinked) {
+                    stringResource(resource = Res.string.mentions_linked_empty)
+                } else {
+                    stringResource(Res.string.mentions_unlinked_empty, name)
+                }
+            )
+        }
+        mentions.forEach { mention ->
+            MentionRow(mention = mention, isLinked = isLinked, onIntent = onIntent, actions = actions)
+        }
+    }
+}
+
+@Composable
+private fun MentionRow(
+    mention: NoteMention,
+    isLinked: Boolean,
+    onIntent: (NoteMentionsIntent) -> Unit,
+    actions: ConnectionActions
+) {
+    val source = mention.source
+    val folder = folderOf(path = source)
+    val times = if (mention.count >
+        1
+    ) {
+        pluralStringResource(Res.plurals.mentions_count, mention.count, mention.count)
+    } else {
+        ""
+    }
+    NotekeaPassageRow(
+        title = source.nameWithoutExtension,
+        subtitle = listOf(folder, times).filter { it.isNotEmpty() }.joinToString(separator = SUBTITLE_SEPARATOR),
+        text = mention.passage,
+        highlight = mention.highlight,
+        icon = NotekeaIcons.Note,
+        onClick = { actions.onReveal(source, mention.range) }
+    ) {
+        if (isLinked) {
+            NotekeaIconButton(
+                icon = NotekeaIcons.SidePanel,
+                label = stringResource(Res.string.related_open_beside),
+                onClick = { actions.onOpenBeside(source) }
+            )
+        } else {
+            LinkButton(onClick = { onIntent(NoteMentionsIntent.OnLink(mention = mention)) })
+        }
+    }
+}
+
+/** Unlinked's Link: small, in the accent color, the row's one action. */
+@Composable
+private fun LinkButton(
+    onClick: () -> Unit
+) {
+    val colors = MaterialTheme.colorScheme
+    val shape = MaterialTheme.shapes.small
+    Row(
+        modifier = Modifier
+            .height(height = PILL_HEIGHT_DP.dp)
+            .clip(shape = shape)
+            .focusBorder(color = colors.onPrimary, shape = shape)
+            .background(color = colors.primary)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = NotekeaDimensions.SpacingS),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = NotekeaIcons.NoteLink,
+            contentDescription = null,
+            modifier = Modifier.size(size = PILL_ICON_DP.dp),
+            tint = colors.onPrimary
+        )
+        Spacer(modifier = Modifier.width(width = PILL_GAP_DP.dp))
+        Text(
+            text = stringResource(resource = Res.string.mentions_link),
+            style = MaterialTheme.typography.labelMedium,
+            color = colors.onPrimary
+        )
+    }
+}
+
+private const val SUBTITLE_SEPARATOR = " · "
+
+@Preview
+@Composable
+private fun MentionListPreview() {
+    val passage = "We found arepas at a small place by the river."
+    NotekeaPreviewThemes {
+        MentionList(
+            state = NoteMentionsState(
+                note = RelativePath(value = "Recipes/Arepas.md"),
+                mentions = NoteMentions(
+                    linked = emptyList(),
+                    unlinked = listOf(
+                        NoteMention(
+                            source = RelativePath(value = "Travel/Lisbon trip.md"),
+                            range = 9..14,
+                            count = 2,
+                            passage = passage,
+                            highlight = 9..14
+                        )
+                    )
+                )
+            ),
+            isLinked = false,
+            onIntent = {},
+            actions = ConnectionActions(onOpen = {}, onReveal = { _, _ -> }, onOpenBeside = {}, onInsertLink = {})
+        )
+    }
+}

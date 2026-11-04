@@ -1,8 +1,11 @@
 package app.notekea.notes.domain
 
-/** The sections of the panel on the right of the editor, each folded on its own: its headings and Note info. */
+/**
+ * The sections of the panel on the right of the editor, each folded on its own: its headings, its connections (related
+ * notes and mentions) and Note info.
+ */
 enum class SidePanelSection {
     OUTLINE,
-    RELATED,
+    CONNECTIONS,
     NOTE_INFO
 }

@@ -68,7 +68,7 @@ fun SidePanel(
     info: NoteInfo?,
     modifier: Modifier = Modifier,
     outlineFocus: FocusRequester = remember { FocusRequester() },
-    related: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit = { _, _ -> }
+    connections: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit = { _, _ -> }
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Column(modifier = Modifier.padding(vertical = NotekeaDimensions.SpacingXs)) {
@@ -87,7 +87,7 @@ fun SidePanel(
                         actions = actions,
                         outlineFocus = outlineFocus,
                         info = info,
-                        related = related
+                        connections = connections
                     )
 
                     SidePanelMode.CHAT -> SidePanelChat()
@@ -127,7 +127,7 @@ private fun PanelHeader(
     }
 }
 
-/** The inspector's sections: Outline, and Related and Note info while a note is open. */
+/** The inspector's sections: Outline, and Connections and Note info while a note is open. */
 @Composable
 private fun InspectorSections(
     outline: List<OutlineHeading>,
@@ -137,7 +137,7 @@ private fun InspectorSections(
     actions: SidePanelActions,
     outlineFocus: FocusRequester,
     info: NoteInfo?,
-    related: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit
+    connections: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit
 ) {
     Layout(
         modifier = Modifier.fillMaxSize(),
@@ -152,8 +152,8 @@ private fun InspectorSections(
             )
             if (info != null) {
                 Column {
-                    related(SidePanelSection.RELATED !in foldedSections) {
-                        actions.onSectionToggle(SidePanelSection.RELATED)
+                    connections(SidePanelSection.CONNECTIONS !in foldedSections) {
+                        actions.onSectionToggle(SidePanelSection.CONNECTIONS)
                     }
                 }
                 Column {
@@ -195,19 +195,19 @@ private fun OutlinePart(
 }
 
 /**
- * Outline, then Related and Note info when a note is open, stacked. Note info takes what it needs; Outline takes up to
- * half of the rest, or more when Related needs less; Related takes what is left. Each scrolls inside its share.
+ * Outline, then Connections and Note info when a note is open, stacked. Note info takes what it needs; Outline takes up to
+ * half of the rest, or more when Connections need less; Connections take what is left. Each scrolls inside its share.
  */
 private val InspectorMeasurePolicy = MeasurePolicy { measurables, constraints ->
     val loose = constraints.copy(minHeight = 0)
     val outline = measurables.first()
-    val related = measurables.getOrNull(index = 1)
+    val connections = measurables.getOrNull(index = 1)
     val info = measurables.getOrNull(index = 2)?.measure(constraints = loose)
     val free = (constraints.maxHeight - (info?.height ?: 0)).coerceAtLeast(minimumValue = 0)
-    val relatedNeeds = related?.maxIntrinsicHeight(width = constraints.maxWidth) ?: 0
-    val outlineMax = maxOf(free / 2, free - relatedNeeds)
+    val connectionsNeed = connections?.maxIntrinsicHeight(width = constraints.maxWidth) ?: 0
+    val outlineMax = maxOf(free / 2, free - connectionsNeed)
     val top = outline.measure(constraints = loose.copy(maxHeight = outlineMax))
-    val middle = related?.measure(constraints = loose.copy(maxHeight = free - top.height))
+    val middle = connections?.measure(constraints = loose.copy(maxHeight = free - top.height))
     layout(width = constraints.maxWidth, height = constraints.maxHeight) {
         top.placeRelative(x = 0, y = 0)
         middle?.placeRelative(x = 0, y = top.height)

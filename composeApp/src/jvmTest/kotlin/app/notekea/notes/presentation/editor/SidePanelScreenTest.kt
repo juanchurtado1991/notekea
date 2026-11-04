@@ -98,7 +98,7 @@ class SidePanelScreenTest {
     ): Pair<Rect, Rect> {
         var bounds = Rect.Zero to Rect.Zero
         UiThread.run {
-            scene(actions = mutableListOf(), body = body, related = { _, _ ->
+            scene(actions = mutableListOf(), body = body, connections = { _, _ ->
                 Box(modifier = Modifier.weight(weight = 1f, fill = false).fillMaxWidth().testTag(tag = RELATED)) {
                     Box(modifier = Modifier.fillMaxWidth().height(height = relatedHeight.dp))
                 }
@@ -118,7 +118,7 @@ class SidePanelScreenTest {
         actions: MutableList<Any>,
         mode: SidePanelMode = SidePanelMode.INSPECTOR,
         body: String = BODY,
-        related: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit = { _, _ -> }
+        connections: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit = { _, _ -> }
     ) = ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
         NotekeaTheme(darkTheme = false) {
             SidePanel(
@@ -134,7 +134,7 @@ class SidePanelScreenTest {
                     onLeave = {}
                 ),
                 info = EditorPreviewData.info,
-                related = related
+                connections = connections
             )
         }
     }

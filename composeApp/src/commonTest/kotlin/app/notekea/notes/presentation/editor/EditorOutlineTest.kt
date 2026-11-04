@@ -98,6 +98,22 @@ class EditorOutlineTest {
         }
 
     @Test
+    fun `a mention chosen in Connections is selected once its note opens, or at once in the open note`() =
+        runOutlineTest {
+            open(path = PLAIN)
+            send(intent = EditorIntent.OnRevealRequest(path = AREPAS, range = 10..17))
+            val waiting = viewModel.buffer.selection
+            open(path = AREPAS)
+            val opened = viewModel.buffer.selection
+            send(intent = EditorIntent.OnRevealRequest(path = AREPAS, range = 2..7))
+
+            assertEquals(
+                expected = Triple(TextRange(index = 0), TextRange(start = 10, end = 18), TextRange(start = 2, end = 8)),
+                actual = Triple(waiting, opened, viewModel.buffer.selection)
+            )
+        }
+
+    @Test
     fun `going back to a note puts the cursor where it was left`() = runOutlineTest {
         open(path = AREPAS)
         viewModel.buffer.edit { selection = TextRange(start = 2, end = 8) }

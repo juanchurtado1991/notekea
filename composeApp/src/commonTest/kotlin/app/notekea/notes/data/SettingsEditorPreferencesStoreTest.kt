@@ -1,6 +1,7 @@
 package app.notekea.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.notes.domain.ConnectionsTab
 import app.notekea.notes.domain.SidePanelMode
 import app.notekea.notes.domain.SidePanelPreferences
 import app.notekea.notes.domain.SidePanelSection
@@ -67,7 +68,8 @@ class SettingsEditorPreferencesStoreTest {
             widthDp = 420,
             isVisible = false,
             mode = SidePanelMode.CHAT,
-            foldedSections = setOf(SidePanelSection.OUTLINE, SidePanelSection.NOTE_INFO)
+            foldedSections = setOf(SidePanelSection.OUTLINE, SidePanelSection.NOTE_INFO),
+            connections = ConnectionsTab.UNLINKED
         )
     }
 }

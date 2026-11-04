@@ -6,6 +6,11 @@ import app.notekea.notes.data.SettingsBookmarkStore
 import app.notekea.notes.domain.BookmarkStore
 import app.notekea.notes.data.GhostFrontmatterParser
 import app.notekea.notes.data.JetBrainsMarkdownLinkFinder
+import app.notekea.notes.data.JetBrainsMarkdownMentionFinder
+import app.notekea.notes.domain.FindMentionsUseCase
+import app.notekea.notes.domain.LinkMentionUseCase
+import app.notekea.notes.domain.MentionFinder
+import app.notekea.notes.presentation.mentions.NoteMentionsViewModel
 import app.notekea.notes.data.SettingsEditorPreferencesStore
 import app.notekea.notes.data.SettingsTreePreferencesStore
 import app.notekea.notes.data.SqlDelightNoteMetadataCache
@@ -78,6 +83,7 @@ import org.koin.dsl.module
  */
 val notesModule = module {
     single<LinkFinder> { JetBrainsMarkdownLinkFinder() }
+    single<MentionFinder> { JetBrainsMarkdownMentionFinder() }
     single<NoteMetadataCache> { SqlDelightNoteMetadataCache(database = get(), dispatchers = get()) }
     single<IndexStateStore> { SqlDelightIndexStateStore(database = get(), dispatchers = get()) }
     single<TreePreferencesStore> { SettingsTreePreferencesStore(settings = get(), dispatchers = get()) }
@@ -90,7 +96,18 @@ val notesModule = module {
     factoryOf(::PlanIndexUseCase)
     factoryOf(::IndexVaultUseCase)
     factoryOf(::FindRelatedNotesUseCase)
+    factoryOf(::FindMentionsUseCase)
+    factoryOf(::LinkMentionUseCase)
     viewModel { parameters -> RelatedNotesViewModel(vaultPath = parameters.get(), findRelatedNotes = get()) }
+    viewModel { parameters ->
+        NoteMentionsViewModel(
+            vaultPath = parameters.get(),
+            findMentions = get(),
+            linkMention = get(),
+            noteTextCache = get(),
+            dispatchers = get()
+        )
+    }
     viewModel { parameters ->
         SearchIndexViewModel(
             vaultPath = parameters.get(),
