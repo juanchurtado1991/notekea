@@ -45,6 +45,17 @@ class ArchitectureTest : ArchitectureTestBase() {
     }
 
     @Test
+    fun `domain classes hold no mutable state`() {
+        filesInLayer(
+            layer = DOMAIN_LAYER
+        ).assertFalse(additionalMessage = "compose-stability.conf declares them stable") {
+            it.classes().any { domainClass ->
+                domainClass.properties(includeNested = false).any { property -> property.isVar }
+            }
+        }
+    }
+
+    @Test
     fun `core depends on no feature`() {
         productionScope.files
             .filter { it.packagee?.name?.startsWith(prefix = CORE_PACKAGE_PREFIX) == true }
