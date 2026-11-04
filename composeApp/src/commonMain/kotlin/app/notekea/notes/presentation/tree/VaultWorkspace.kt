@@ -239,6 +239,9 @@ private fun FolderTab(
         onOpen = { workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = it)) },
         onCoverNeeded = { path, size ->
             workspace.onIntent(intent = WorkspaceIntent.OnCoverRequest(path = path, size = size))
+        },
+        cardMenu = { card, content ->
+            EntryMenuArea(card.asTreeRow(), context.state, context.viewModels.tree::onIntent, content = content)
         }
     )
 }

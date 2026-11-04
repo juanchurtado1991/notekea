@@ -13,6 +13,7 @@ import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickDescription
 import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.nodes
+import app.notekea.core.presentation.rightClickText
 import app.notekea.core.presentation.texts
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.notes.domain.ConnectionsTab
@@ -121,6 +122,25 @@ class ConnectionsSectionScreenTest {
             actual = intents
         )
         assertTrue(actual = "No other note names “Arepas” without a link." in empty, message = empty.toString())
+    }
+
+    @Test
+    fun `a row's menu opens its note, or opens it to the side`() {
+        render(tab = ConnectionsTab.LINKED, mentions = MENTIONS, onScene = { scene ->
+            scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
+            scene.clickText(text = "Open") { repeat(times = MENU_CLOSE_SETTLES) { settle(scene = scene) } }
+            scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
+            scene.clickText(text = "Open to the side") { settle(scene = scene) }
+        })
+        render(
+            related = RELATED.copy(linked = listOf(RelativePath(value = MENU)), isLinkedOpen = true),
+            onScene = { scene ->
+                scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
+                scene.clickText(text = "Open to the side") { settle(scene = scene) }
+            }
+        )
+
+        assertEquals(expected = listOf("reveal $MENU 8..17", "beside $MENU", "beside $MENU"), actual = sent)
     }
 
     @Test
@@ -261,6 +281,7 @@ class ConnectionsSectionScreenTest {
         const val SOUP = "Recipes/Tomato soup.md"
         const val PASSAGE = "Summer tomatoes from the beds make it sweeter."
         const val FRAME_NANOS = 16_000_000L
+        const val MENU_CLOSE_SETTLES = 10
         const val SETTLE_FRAMES = 5
         const val WIDTH = 320
         const val HEIGHT = 600

@@ -19,6 +19,7 @@ fun SuiteBuilder.backlinksCases() {
     linkedMentions()
     linkUnlinked()
     connectionsLook()
+    rightClickMenus()
 }
 
 private fun SuiteBuilder.linkedMentions() {
@@ -43,6 +44,22 @@ private fun SuiteBuilder.linkUnlinked() {
         expectFile(path = "$SAMPLE/Guides/Tasks.md", containing = "Buy flour for the [[Arepas|arepas]]")
         click(text = "Linked")
         expectText(text = "Buy flour for the arepas", substring = true)
+    }
+}
+
+private fun SuiteBuilder.rightClickMenus() {
+    manual(id = "2.5-04", reason = ManualReason.EYES) {
+        prepare(SAMPLE)
+        title(text = "A right click offers a menu on rows, headings, cards and recent vaults")
+        steps(
+            text = "$OPEN_AREPAS\n3. Click Linked and right-click a row.\n4. Right-click a heading of the " +
+                "Outline.\n5. Click the Recipes folder in the tree to open its tab, and right-click a card.\n" +
+                "6. Close the vault and right-click a recent vault."
+        )
+        expected(
+            text = "The row offers Open and Open to the side, the heading Go to heading, the card Bookmark, " +
+                "Rename, Show in Files and Delete, and the recent vault Open vault and Remove."
+        )
     }
 }
 

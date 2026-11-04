@@ -21,6 +21,7 @@ import app.notekea.notes.domain.RelatedNote
 import app.notekea.notes.domain.RelatedSnippet
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.presentation.connections.ConnectionActions
+import app.notekea.notes.presentation.connections.ConnectionMenu
 import app.notekea.notes.presentation.connections.ConnectionsMuted
 import app.notekea.notes.presentation.connections.ConnectionsSkeleton
 import app.notekea.notes.presentation.connections.connectionAction
@@ -51,7 +52,7 @@ fun RelatedList(
         statusText(state = state)?.let { ConnectionsMuted(text = it) }
         if (state.related.isEmpty() && state.isLoading && state.error == null) ConnectionsSkeleton()
         state.related.forEach { RelatedRow(note = it, actions = actions) }
-        Linked(state = state, onIntent = onIntent, onOpen = actions.onOpen)
+        Linked(state = state, onIntent = onIntent, actions = actions)
     }
 }
 
@@ -76,28 +77,30 @@ private fun RelatedRow(
     val path = note.path
     val beside = stringResource(Res.string.related_open_beside)
     val insertLink = stringResource(Res.string.related_insert_link)
-    NotekeaPassageRow(
-        title = path.nameWithoutExtension,
-        subtitle = folderOf(path = path),
-        text = note.snippet.text,
-        highlight = note.snippet.highlight,
-        icon = NotekeaIcons.Note,
-        onClick = { actions.onOpen(path) },
-        accessibilityActions = listOf(
-            connectionAction(label = beside) { actions.onOpenBeside(path) },
-            connectionAction(label = insertLink) { actions.onInsertLink(path) }
-        )
-    ) {
-        NotekeaIconButton(
-            icon = NotekeaIcons.SidePanel,
-            label = beside,
-            onClick = { actions.onOpenBeside(path) }
-        )
-        NotekeaIconButton(
-            icon = NotekeaIcons.NoteLink,
-            label = insertLink,
-            onClick = { actions.onInsertLink(path) }
-        )
+    ConnectionMenu(onOpen = { actions.onOpen(path) }, onOpenBeside = { actions.onOpenBeside(path) }) {
+        NotekeaPassageRow(
+            title = path.nameWithoutExtension,
+            subtitle = folderOf(path = path),
+            text = note.snippet.text,
+            highlight = note.snippet.highlight,
+            icon = NotekeaIcons.Note,
+            onClick = { actions.onOpen(path) },
+            accessibilityActions = listOf(
+                connectionAction(label = beside) { actions.onOpenBeside(path) },
+                connectionAction(label = insertLink) { actions.onInsertLink(path) }
+            )
+        ) {
+            NotekeaIconButton(
+                icon = NotekeaIcons.SidePanel,
+                label = beside,
+                onClick = { actions.onOpenBeside(path) }
+            )
+            NotekeaIconButton(
+                icon = NotekeaIcons.NoteLink,
+                label = insertLink,
+                onClick = { actions.onInsertLink(path) }
+            )
+        }
     }
 }
 
@@ -106,7 +109,7 @@ private fun RelatedRow(
 private fun Linked(
     state: RelatedNotesState,
     onIntent: (RelatedNotesIntent) -> Unit,
-    onOpen: (RelativePath) -> Unit
+    actions: ConnectionActions
 ) {
     if (state.linked.isEmpty()) return
     NotekeaSectionHeader(
@@ -117,15 +120,17 @@ private fun Linked(
     )
     if (!state.isLinkedOpen) return
     state.linked.forEach { path ->
-        Text(
-            text = path.nameWithoutExtension,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(role = Role.Button) { onOpen(path) }
-                .padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingXs),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        ConnectionMenu(onOpen = { actions.onOpen(path) }, onOpenBeside = { actions.onOpenBeside(path) }) {
+            Text(
+                text = path.nameWithoutExtension,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(role = Role.Button) { actions.onOpen(path) }
+                    .padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingXs),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 

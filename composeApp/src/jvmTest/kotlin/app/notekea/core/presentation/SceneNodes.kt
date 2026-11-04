@@ -2,6 +2,8 @@ package app.notekea.core.presentation
 
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerButton
+import androidx.compose.ui.input.pointer.PointerButtons
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -30,6 +32,27 @@ fun ImageComposeScene.clickText(
     frames: () -> Unit
 ) = clickNode(occurrence = occurrence, frames = frames) { node ->
     node.config.getOrNull(SemanticsProperties.Text).orEmpty().any { it.text == text }
+}
+
+/** Moves the pointer onto the node showing [text], presses and releases the right button, then renders [frames]. */
+fun ImageComposeScene.rightClickText(
+    text: String,
+    frames: () -> Unit
+) {
+    val center = nodes().first { node ->
+        node.config.getOrNull(SemanticsProperties.Text).orEmpty().any { it.text == text }
+    }.boundsInRoot.center
+    val pressed = PointerButtons(isSecondaryPressed = true)
+    sendPointerEvent(eventType = PointerEventType.Move, position = center)
+    sendPointerEvent(
+        eventType = PointerEventType.Press,
+        position = center,
+        buttons = pressed,
+        button = PointerButton.Secondary
+    )
+    frames()
+    sendPointerEvent(eventType = PointerEventType.Release, position = center, button = PointerButton.Secondary)
+    frames()
 }
 
 /** As [clickText], on the node named [description] (an icon button). */

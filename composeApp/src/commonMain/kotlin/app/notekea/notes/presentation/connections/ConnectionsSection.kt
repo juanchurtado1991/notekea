@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.connections
 
+import app.notekea.core.presentation.components.NotekeaScrollArea
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
@@ -10,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.components.NotekeaCountTabs
 import app.notekea.core.presentation.components.NotekeaFold
-import app.notekea.core.presentation.components.NotekeaScrollArea
 import app.notekea.core.presentation.components.NotekeaSectionHeader
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
