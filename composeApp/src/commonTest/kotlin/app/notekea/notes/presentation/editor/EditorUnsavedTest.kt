@@ -62,6 +62,21 @@ class EditorUnsavedTest : EditorViewModelTestBase() {
     }
 
     @Test
+    fun `text no copy could hold comes back each time, however many times the note is left`() = runEditorTest {
+        open(path = AREPAS)
+        store.refused += AREPAS
+        operations.failure = NotesError.OperationFailed(path = AREPAS.value)
+        type(text = "Typed here")
+
+        repeat(times = 2) {
+            open(path = WELCOME)
+            open(path = AREPAS)
+        }
+
+        assertEquals(expected = "Typed here", actual = viewModel.buffer.text.toString())
+    }
+
+    @Test
     fun `a note that fails unexpectedly while it opens says so, and never shows as the previous note's text`() =
         runEditorTest {
             open(path = AREPAS)

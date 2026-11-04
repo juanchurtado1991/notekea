@@ -25,9 +25,11 @@ internal class EditorUnsaved(
     ) {
         val text = document.toText()
         if (lastKept == path to text) return
-        lastKept = path to text
         when (val outcome = keepUnsavedText(vaultPath = vaultPath, note = path, text = text)) {
-            is Outcome.Success -> host.emit(effect = EditorEffect.UnsavedKept(note = path, copy = outcome.value))
+            is Outcome.Success -> {
+                lastKept = path to text
+                host.emit(effect = EditorEffect.UnsavedKept(note = path, copy = outcome.value))
+            }
 
             is Outcome.Failure -> {
                 drafts[path] = document.body
