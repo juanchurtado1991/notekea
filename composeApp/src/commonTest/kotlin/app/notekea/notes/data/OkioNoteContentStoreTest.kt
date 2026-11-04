@@ -7,6 +7,7 @@ import app.notekea.notes.domain.RelativePath
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import okio.FileHandle
 import okio.FileSystem
 import okio.ForwardingFileSystem
 import okio.IOException
@@ -67,6 +68,45 @@ class OkioNoteContentStoreTest {
             expected = listOf("Arepas.md"),
             actual = fakeFileSystem.list(dir = VAULT.toPath() / FOLDER).map { it.name }
         )
+    }
+
+    @Test
+    fun `a save reaches the disk before it replaces the note, so a power cut cannot lose both`() = runStoreTest {
+        writeNote(content = ORIGINAL)
+        val steps = mutableListOf<String>()
+        val recording = object : ForwardingFileSystem(delegate = fakeFileSystem) {
+            override fun openReadWrite(
+                file: Path,
+                mustCreate: Boolean,
+                mustExist: Boolean
+            ): FileHandle = RecordingFileHandle(
+                delegate = super.openReadWrite(file = file, mustCreate = mustCreate, mustExist = mustExist),
+                onFlush = { steps += "flush" }
+            )
+
+            override fun atomicMove(
+                source: Path,
+                target: Path
+            ) {
+                steps += "move"
+                super.atomicMove(source = source, target = target)
+            }
+        }
+
+        store(fileSystem = recording).write(vaultPath = VAULT, path = NOTE, content = TEXT)
+
+        assertEquals(expected = listOf("flush", "move"), actual = steps)
+        assertEquals(expected = TEXT, actual = store().read(vaultPath = VAULT, path = NOTE))
+    }
+
+    @Test
+    fun `a longer temporary file left by a crash leaves nothing of itself in the next save`() = runStoreTest {
+        writeNote(content = ORIGINAL)
+        fakeFileSystem.write(file = VAULT.toPath() / FOLDER / ".Arepas.md.notekea-tmp") { writeUtf8(TEXT + TEXT) }
+
+        store().write(vaultPath = VAULT, path = NOTE, content = TEXT)
+
+        assertEquals(expected = TEXT, actual = store().read(vaultPath = VAULT, path = NOTE))
     }
 
     @Test
