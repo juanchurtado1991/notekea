@@ -62,4 +62,35 @@ class EmbeddedNoteTextTest {
             }
         )
     }
+
+    @Test
+    fun `a line of a code block is not a heading, neither where the section starts nor where it ends`() {
+        val text = "```\n# Setup\n```\n\n# Setup\n\n```bash\n# comment\nrun\n```\n\nAfter.\n\n# Next\n"
+
+        assertEquals(
+            expected = "# Setup\n\n```bash\n# comment\nrun\n```\n\nAfter.",
+            actual = embeddedNoteText.of(text = text, target = "Note#Setup")
+        )
+    }
+
+    @Test
+    fun `the frontmatter is what NoteDocument says it is`() {
+        assertEquals(
+            expected = listOf("Body", "---\nfoo\n---bar\nBody", "Body", "Body"),
+            actual = listOf(
+                "---\n---\nBody",
+                "---\nfoo\n---bar\nBody",
+                "\uFEFF---\ntags: a\n---\nBody",
+                "\uFEFFBody"
+            ).map { embeddedNoteText.of(text = it, target = "Note") }
+        )
+    }
+
+    @Test
+    fun `a section of a note with Windows line breaks reads as any other`() {
+        assertEquals(
+            expected = "# One\n\nText.",
+            actual = embeddedNoteText.of(text = "---\r\na: b\r\n---\r\n# One\r\n\r\nText.\r\n", target = "Note#One")
+        )
+    }
 }
