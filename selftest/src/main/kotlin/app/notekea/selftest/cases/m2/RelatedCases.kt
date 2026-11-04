@@ -3,12 +3,15 @@ package app.notekea.selftest.cases.m2
 import app.notekea.selftest.openNote
 import app.notekea.selftest.openVault
 import app.notekea.selftest.typeAtEnd
+import com.testbuddy.CaseFailure
+import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val SAMPLE = "Sample Vault"
 private const val SAMPLE_READY = "40 notes ready to search"
 private const val ALREADY_LINKED = "ALREADY LINKED"
+private const val WAIT_MILLIS = 10_000L
 private const val OPEN_AREPAS =
     "1. In Notekea, open the Sample Vault (see TEST DATA above) and wait until the bar at " +
         "the bottom says \"$SAMPLE_READY\".\n2. Open Recipes/Arepas and look at Connections, on Related, in the " +
@@ -27,7 +30,7 @@ private fun SuiteBuilder.linkedLeftOut() {
         openVault(name = SAMPLE, shownText = "Recipes")
         expectText(text = SAMPLE_READY)
         openNote(name = "Weekly menu", shownText = "Monday")
-        expectText(text = ALREADY_LINKED)
+        expectAlreadyLinked()
     }
 }
 
@@ -36,10 +39,17 @@ private fun SuiteBuilder.newLinkLeftOut() {
         openVault(name = SAMPLE, shownText = "Recipes")
         expectText(text = SAMPLE_READY)
         openNote(name = "Arepas", shownText = "pre-cooked corn flour")
-        expectNoText(text = ALREADY_LINKED)
+        if (runCatching { scrollTo(text = ALREADY_LINKED) }.isSuccess) {
+            throw CaseFailure(message = "expected no \"$ALREADY_LINKED\" before the note links one")
+        }
         typeAtEnd(part = "pre-cooked corn flour", text = "\nSee [[Pancakes]].")
-        expectText(text = ALREADY_LINKED)
+        expectAlreadyLinked()
     }
+}
+
+/** The header sits below Related's rows, in a lazy list that makes it only when it is scrolled to. */
+private fun CaseScope.expectAlreadyLinked() {
+    ui.waitUntil(timeoutMillis = WAIT_MILLIS) { runCatching { scrollTo(text = ALREADY_LINKED) }.isSuccess }
 }
 
 private fun SuiteBuilder.byMeaning() {
