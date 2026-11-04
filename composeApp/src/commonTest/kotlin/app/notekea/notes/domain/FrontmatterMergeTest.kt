@@ -43,4 +43,33 @@ class FrontmatterMergeTest {
             actual = merge.merge(noteHeader = note, templateHeader = template)
         )
     }
+
+    @Test
+    fun `a list that gains items keeps each one as written, and a new one is quoted when YAML needs it`() {
+        val note = "---\ntags:\n  - \"Foo: bar\"\n  - \"#a\"\n  - 'old'\n---\n"
+        val template = "---\ntags:\n  - \"New: one\"\n  - \"#b\"\n  - old\n---\n"
+
+        assertEquals(
+            expected = "---\ntags:\n  - \"Foo: bar\"\n  - \"#a\"\n  - 'old'\n  - \"New: one\"\n  - \"#b\"\n---\n",
+            actual = merge.merge(noteHeader = note, templateHeader = template)
+        )
+    }
+
+    @Test
+    fun `a list property the note holds as a nested value or text stays as it is`() {
+        val nested = "---\ntags:\n  group: work\n---\n"
+        val text = "---\naliases: |\n  first\n  second\n---\n"
+        val template = "---\ntags:\n  - meeting\naliases:\n  - Plan\n---\n"
+
+        assertEquals(
+            expected = listOf(
+                "---\ntags:\n  group: work\naliases:\n  - Plan\n---\n",
+                "---\naliases: |\n  first\n  second\ntags:\n  - meeting\n---\n"
+            ),
+            actual = listOf(
+                merge.merge(noteHeader = nested, templateHeader = template),
+                merge.merge(noteHeader = text, templateHeader = template)
+            )
+        )
+    }
 }

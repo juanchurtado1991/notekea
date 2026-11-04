@@ -4,7 +4,8 @@ package app.notekea.notes.domain
  * Merges a template's frontmatter into a note's (`ROADMAP.md` 1.12), as Obsidian does when a template with properties is
  * inserted: a property the note lacks is added with the template's value, one it has keeps its own value, and the list
  * properties (tags, aliases, CSS classes) get the template's items they lack, in a block list. The note's other lines
- * stay byte for byte, its line breaks included; only a list that gains items is written again.
+ * stay byte for byte, its line breaks included; only a list that gains items is written again, its items as they were,
+ * and a value that is not a list is left alone.
  */
 class FrontmatterMerge {
     private val reader = FrontmatterReader()
@@ -33,17 +34,21 @@ class FrontmatterMerge {
         block: FrontmatterBlocks.Block,
         added: FrontmatterBlocks.Block
     ): FrontmatterBlocks.Block {
-        val items = itemsOf(block = block)
-        val missing = itemsOf(block = added).filterNot { it in items }
+        val items = itemsOf(block = block) ?: return block
+        val missing = itemsOf(block = added).orEmpty().filterNot { it in items }
         if (missing.isEmpty()) return block
+        val written = YamlValues.writtenItems(block = block)
+        val kept = items.map { written[it] ?: YamlValues.written(text = it) }
         val key = block.lines.first().substringBefore(delimiter = FrontmatterBlocks.KEY_SEPARATOR)
-        val lines = listOf(key + FrontmatterBlocks.KEY_SEPARATOR) + (items + missing).map { ITEM_PREFIX + it }
+        val lines = listOf(key + FrontmatterBlocks.KEY_SEPARATOR) +
+            (kept + missing.map { YamlValues.written(text = it) }).map { ITEM_PREFIX + it }
         return block.copy(lines = lines)
     }
 
+    /** The items of a list [block], each once; null when it holds anything else, which only the source can edit. */
     private fun itemsOf(
         block: FrontmatterBlocks.Block
-    ): List<String> = (reader.valueOf(block = block) as? PropertyValue.Items)?.items.orEmpty().distinct()
+    ): List<String>? = (reader.valueOf(block = block) as? PropertyValue.Items)?.items?.distinct()
 
     companion object {
         private const val BYTE_ORDER_MARK = "\uFEFF"

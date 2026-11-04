@@ -9,10 +9,9 @@ internal object YamlValues {
     const val ITEM_MARK = "-"
     const val TRUE = "true"
     private const val APOSTROPHE = '\''
-    private const val BACKSLASH = "\\"
     private const val ITEM_SEPARATOR = ","
+    private const val KEY_END = ':'
     private const val QUOTE = '"'
-    private const val QUOTE_TEXT = "\""
     private const val SPECIAL_STARTS = "-?:,[]{}#&*!|>'\"%@`"
     private val SPECIAL_PARTS = listOf(": ", " #")
     private val TYPED_WORDS = setOf("true", "false", "null", "~", "yes", "no", "on", "off")
@@ -35,7 +34,7 @@ internal object YamlValues {
     ): String = when {
         !isQuoted(text = text) -> text
         text.first() == APOSTROPHE -> text.substring(1, text.lastIndex).replace("''", "'")
-        else -> text.substring(1, text.lastIndex).replace("\\\"", QUOTE_TEXT).replace("\\\\", BACKSLASH)
+        else -> YamlEscapes.decoded(text = text.substring(1, text.lastIndex))
     }
 
     /** `[a, "b c"]` as its items. */
@@ -71,10 +70,10 @@ internal object YamlValues {
         quote: Char? = null
     ): String {
         if (quote == null && !needsQuotes(text = text)) return text
-        return if (quote == APOSTROPHE) {
+        return if (quote == APOSTROPHE && !YamlEscapes.needsEscapes(text = text)) {
             APOSTROPHE + text.replace("'", "''") + APOSTROPHE
         } else {
-            QUOTE + text.replace(BACKSLASH, "\\\\").replace(QUOTE_TEXT, "\\\"") + QUOTE
+            QUOTE + YamlEscapes.encoded(text = text) + QUOTE
         }
     }
 
@@ -82,6 +81,7 @@ internal object YamlValues {
         text: String
     ): Boolean = text.isNotEmpty() && (
         text != text.trim() || text.lowercase() in TYPED_WORDS || NUMBER.matches(input = text) ||
-            DATE_LIKE.matches(input = text) || text.first() in SPECIAL_STARTS || SPECIAL_PARTS.any { it in text }
+            DATE_LIKE.matches(input = text) || text.first() in SPECIAL_STARTS || SPECIAL_PARTS.any { it in text } ||
+            text.last() == KEY_END || YamlEscapes.needsEscapes(text = text)
         )
 }
