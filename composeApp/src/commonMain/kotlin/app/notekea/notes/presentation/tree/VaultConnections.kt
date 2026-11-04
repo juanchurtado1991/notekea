@@ -20,28 +20,17 @@ import app.notekea.notes.presentation.workspace.WorkspaceViewModel
 
 /**
  * The side panel's host, with the inspector's Connections (`ROADMAP.md` 2.4, 2.5): a row opens its note (a mention at
- * the place it names the open one, in the active pane), opens it beside, or inserts a link to it at the active
- * [editor]'s cursor, resolved among the vault's [notes]; the tab shown is the tabs' side panel preference.
+ * the place it names the open one, in the pane that shows it), opens it beside, or inserts a link to it at the active
+ * editor's cursor, resolved among the vault's [notes]; the tab shown is the tabs' side panel preference.
  */
 internal fun connectionsSidePanel(
     workspace: WorkspaceViewModel,
     related: RelatedNotesViewModel,
     mentions: NoteMentionsViewModel,
-    editor: () -> EditorViewModel,
+    editors: PaneEditors,
     notes: () -> Set<RelativePath>
 ): SidePanelHost {
-    val actions = ConnectionActions(
-        onOpen = { workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = it)) },
-        onReveal = { path, range ->
-            workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = path))
-            editor().onIntent(intent = EditorIntent.OnRevealRequest(path = path, range = range))
-        },
-        onOpenBeside = { workspace.onIntent(intent = WorkspaceIntent.OnOpenBeside(path = it)) },
-        onInsertLink = { path ->
-            val target = LinkResolver(notePaths = notes()).wikiTarget(path = path)
-            editor().onIntent(intent = EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target)))
-        }
-    )
+    val actions = connectionActions(workspace = workspace, editors = editors, notes = notes)
     return SidePanelHost(send = { workspace.onIntent(intent = workspaceIntentOf(intent = it)) }) { isOpen, onToggle ->
         val workspaceState by workspace.state.collectAsState()
         val relatedState by related.state.collectAsState()
@@ -59,6 +48,24 @@ internal fun connectionsSidePanel(
         )
     }
 }
+
+/** What Connections' rows do on the tabs and the [editors]. */
+internal fun connectionActions(
+    workspace: WorkspaceViewModel,
+    editors: PaneEditors,
+    notes: () -> Set<RelativePath>
+) = ConnectionActions(
+    onOpen = { workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = it)) },
+    onReveal = { path, range ->
+        workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = path))
+        editors.of(path = path).onIntent(intent = EditorIntent.OnRevealRequest(path = path, range = range))
+    },
+    onOpenBeside = { workspace.onIntent(intent = WorkspaceIntent.OnOpenBeside(path = it)) },
+    onInsertLink = { path ->
+        val target = LinkResolver(notePaths = notes()).wikiTarget(path = path)
+        editors.active.onIntent(intent = EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target)))
+    }
+)
 
 /**
  * Connections follow the vault (`ROADMAP.md` 2.4, 2.5): Related the active [editor]'s note, its edits and the index's

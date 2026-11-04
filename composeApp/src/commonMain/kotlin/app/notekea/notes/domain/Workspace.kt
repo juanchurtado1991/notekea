@@ -25,6 +25,11 @@ data class Workspace(
         it.tabs.indexOf(element = path).takeIf { tab -> tab >= 0 }?.let { tab -> pane to tab }
     }
 
+    /** The pane that shows [path] once it is opened: the one holding its tab, or the active one, where it would go. */
+    fun paneOpening(
+        path: RelativePath
+    ): Int = find(path = path)?.first ?: activePane
+
     /**
      * Opens [path]: goes to its tab when it is open, otherwise adds a tab after the active one of the active pane. A tab
      * opened [inBackground] (a link clicked with `Mod`, or the middle button) is added without leaving the current one.

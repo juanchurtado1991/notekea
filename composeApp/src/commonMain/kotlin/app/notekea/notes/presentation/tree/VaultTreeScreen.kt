@@ -96,13 +96,14 @@ fun VaultTreeScreen(
     ) { parametersOf(vaultPath) },
     mentionsViewModel: NoteMentionsViewModel = koinViewModel(
         key = MENTIONS_KEY_PREFIX + vaultPath
-    ) { parametersOf(vaultPath) }
+    ) { parametersOf(vaultPath) },
+    panes: List<EditorPaneTools> = remember(vaultPath) { List(size = Workspace.MAX_PANES) { EditorPaneTools() } }
 ) {
     val state by viewModel.state.collectAsState()
     val workspaceState by workspaceViewModel.state.collectAsState()
     val activeEditor = editorViewModels[workspaceState.workspace.activePane]
-    val panes = remember(vaultPath) { List(size = Workspace.MAX_PANES) { EditorPaneTools() } }
-    val sidePanel = rememberSidePanel(workspaceViewModel, relatedViewModel, mentionsViewModel, activeEditor, state)
+    val editors = remember(workspaceViewModel, editorViewModels) { PaneEditors(workspaceViewModel, editorViewModels) }
+    val sidePanel = rememberSidePanel(workspaceViewModel, relatedViewModel, mentionsViewModel, editors, state)
     val viewModels = WorkspaceViewModels(
         tree = viewModel,
         workspace = workspaceViewModel,
@@ -130,6 +131,7 @@ fun VaultTreeScreen(
             workspaceState = workspaceState,
             tree = viewModel,
             editor = activeEditor,
+            editors = editors,
             switcher = switcherViewModel,
             tagPicker = tagPickerViewModel,
             templatePicker = templatePickerViewModel
@@ -148,19 +150,18 @@ private fun FollowActiveTab(
     DisposableEffect(Unit) { onDispose { currentOnChange(null) } }
 }
 
-/** The side panel with the inspector's Connections ([connectionsSidePanel]), on the active [editor] and the [tree]. */
+/** The side panel with the inspector's Connections ([connectionsSidePanel]), on the [editors] and the [tree]. */
 @Composable
 private fun rememberSidePanel(
     workspace: WorkspaceViewModel,
     related: RelatedNotesViewModel,
     mentions: NoteMentionsViewModel,
-    editor: EditorViewModel,
+    editors: PaneEditors,
     tree: VaultTreeState
 ): SidePanelHost {
-    val currentEditor by rememberUpdatedState(newValue = editor)
     val currentNotes by rememberUpdatedState(newValue = tree.tree.notes.keys)
-    return remember(workspace, related, mentions) {
-        connectionsSidePanel(workspace, related, mentions, { currentEditor }, { currentNotes })
+    return remember(workspace, related, mentions, editors) {
+        connectionsSidePanel(workspace, related, mentions, editors) { currentNotes }
     }
 }
 
@@ -219,11 +220,12 @@ private fun Pickers(
     workspaceState: WorkspaceState,
     tree: VaultTreeViewModel,
     editor: EditorViewModel,
+    editors: PaneEditors,
     switcher: QuickSwitcherViewModel,
     tagPicker: TagPickerViewModel,
     templatePicker: TemplatePickerViewModel
 ) {
-    FollowQuickSwitcher(switcher = switcher, tree = tree, editor = editor, notes = state.tree.notes)
+    FollowQuickSwitcher(switcher = switcher, tree = tree, editors = editors, notes = state.tree.notes)
     FollowTagPicker(tagPicker = tagPicker, editor = editor, notes = state.tree.notes.values)
     FollowTemplatePicker(templatePicker = templatePicker, tree = tree, editor = editor, state = state)
     TemplateShortcut(
