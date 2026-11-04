@@ -31,6 +31,8 @@ private const val OPEN_FOLDER = "Open folder…"
 private const val FIND_NOTE = "Find a note by name or alias"
 private const val WAIT_MILLIS = 10_000L
 private const val RELAUNCH_MILLIS = 30_000L
+
+// A busy machine (CI, several builds at once) indexes the Playground Vault in far more than a text's usual wait.
 private const val INDEX_MILLIS = 60_000L
 
 /** The Notekea a case drives, to set what its pickers answer. */
@@ -41,7 +43,17 @@ fun CaseScope.notekea(): CaseApp = CaseApps.of(vaults = folders.data)
  * changing files meanwhile) and launches it again on the same data, waiting until the new one is up.
  */
 fun CaseScope.relaunch(whileClosed: () -> Unit = {}) {
-    val quitting = CaseApps.quit(vaults = folders.data, whileClosed = whileClosed)
+    awaitNewNotekea(quitting = CaseApps.quit(vaults = folders.data, whileClosed = whileClosed))
+}
+
+/** Closes the window with [shortcut] (the open note is saved first) and waits until Notekea is up again. */
+fun CaseScope.closeWindowWith(shortcut: Shortcut) {
+    val quitting = notekea()
+    pressInWindow(shortcut = shortcut)
+    awaitNewNotekea(quitting = quitting)
+}
+
+private fun CaseScope.awaitNewNotekea(quitting: CaseApp) {
     // Quitting waits for the window's close guard, which gives each of its handlers a few seconds.
     ui.waitUntil(timeoutMillis = RELAUNCH_MILLIS) {
         runCatching { CaseApps.of(vaults = folders.data) !== quitting }.getOrDefault(false)
@@ -114,6 +126,13 @@ fun CaseScope.expectNoResult(name: String) {
 fun CaseScope.expectNotInTree(text: String) {
     step(description = "Expect no “$text” in the tree")
     awaitNone(matcher = inTree(text = text), failure = "expected \"$text\" to leave the tree, it stayed")
+}
+
+/** Waits until the note's text field no longer holds [part]; the same words elsewhere in the window do not count. */
+fun CaseScope.expectNotInNoteText(part: String) {
+    step(description = "Expect no “$part” in the note's text")
+    val inField = hasText(text = part, substring = true) and hasSetTextAction()
+    awaitNone(matcher = inField, failure = "expected the note's text to stop showing \"$part\"")
 }
 
 private fun paletteResult(
