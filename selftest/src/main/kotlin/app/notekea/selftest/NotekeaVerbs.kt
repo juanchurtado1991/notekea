@@ -31,6 +31,7 @@ private const val OPEN_FOLDER = "Open folder…"
 private const val FIND_NOTE = "Find a note by name or alias"
 private const val WAIT_MILLIS = 10_000L
 private const val RELAUNCH_MILLIS = 30_000L
+private const val INDEX_MILLIS = 60_000L
 
 /** The Notekea a case drives, to set what its pickers answer. */
 fun CaseScope.notekea(): CaseApp = CaseApps.of(vaults = folders.data)
@@ -61,7 +62,22 @@ fun CaseScope.openVault(
     notekea().folderPicker.nextPick = notekea().vaultPath(name = name)
     click(text = OPEN_FOLDER)
     expectText(text = shownText)
-    if (waitsForIndex) expectText(text = INDEX_READY, substring = true)
+    if (waitsForIndex) awaitIndex()
+}
+
+/** Waits for the index with [INDEX_MILLIS]: it runs the real model, which takes its time on a busy machine. */
+private fun CaseScope.awaitIndex() {
+    step(description = "Expect “$INDEX_READY”")
+    try {
+        ui.waitUntilAtLeastOneExists(
+            matcher = hasText(text = INDEX_READY, substring = true),
+            timeoutMillis = INDEX_MILLIS
+        )
+    } catch (exception: ComposeTimeoutException) {
+        throw CaseFailure(message = "expected to see \"$INDEX_READY\", it did not appear").apply {
+            initCause(exception)
+        }
+    }
 }
 
 /** Opens the note [name] with the quick switcher (Mod+P) as a person who knows its name, until [shownText] shows. */
