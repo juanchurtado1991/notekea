@@ -14,6 +14,8 @@ import app.notekea.notes.domain.SidePanelSection
 import app.notekea.notes.domain.Workspace
 import app.notekea.notes.presentation.tree.TreeFilePreviews
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.decodeToImageBitmap
 
@@ -34,6 +36,10 @@ class WorkspaceViewModel(
         attachmentStore = tools.attachmentStore,
         dispatchers = tools.dispatchers
     )
+
+    // One save at a time, each writing the latest state, so a slow save never lands after a newer one.
+    private val savingPanel = Mutex()
+    private val savingTabs = Mutex()
 
     // The tabs of the last run, until the vault's files are known ([treeLoaded]).
     private var saved: Workspace? = null
@@ -139,12 +145,7 @@ class WorkspaceViewModel(
     ) {
         val before = state.value.workspace
         reduce { it.copy(workspace = transform(it.workspace)) }
-        val after = state.value.workspace
-        if (after != before && state.value.isRestored) {
-            launchGuarded(onError = ::showUnexpectedError) {
-                tools.workspaceStore.write(vaultPath = vaultPath, workspace = after)
-            }
-        }
+        if (state.value.workspace != before && state.value.isRestored) saveTabs()
         readPreviews()
     }
 
@@ -178,10 +179,16 @@ class WorkspaceViewModel(
             tabs.open(path)
         }
         reduce { it.copy(workspace = restored, isRestored = true) }
-        launchGuarded(onError = ::showUnexpectedError) {
-            tools.workspaceStore.write(vaultPath = vaultPath, workspace = restored)
-        }
+        saveTabs()
         readPreviews()
+    }
+
+    private fun saveTabs() {
+        launchGuarded(onError = ::showUnexpectedError) {
+            savingTabs.withLock {
+                tools.workspaceStore.write(vaultPath = vaultPath, workspace = state.value.workspace)
+            }
+        }
     }
 
     /**
@@ -254,9 +261,10 @@ class WorkspaceViewModel(
     private fun updateSidePanel(
         change: (SidePanelPreferences) -> SidePanelPreferences
     ) {
-        val panel = change(state.value.sidePanel)
-        reduce { it.copy(sidePanel = panel) }
-        launchGuarded(onError = ::showUnexpectedError) { tools.saveSidePanel(preferences = panel) }
+        reduce { it.copy(sidePanel = change(it.sidePanel)) }
+        launchGuarded(onError = ::showUnexpectedError) {
+            savingPanel.withLock { tools.saveSidePanel(preferences = state.value.sidePanel) }
+        }
     }
 
     private fun showUnexpectedError(

@@ -1,7 +1,13 @@
 package app.notekea.notes.domain
 
-/** The editor's mode, side panel and properties fold in memory. */
+import kotlinx.coroutines.delay
+
+/**
+ * The editor's mode, side panel and properties fold in memory; a side panel save takes as long as the next of
+ * [sidePanelSaveMillis], as a disk may.
+ */
 class FakeEditorPreferencesStore : EditorPreferencesStore {
+    val sidePanelSaveMillis = ArrayDeque<Long>()
     var isReading = false
     var sidePanel = SidePanelPreferences.DEFAULT
     var isPropertiesExpanded = true
@@ -19,6 +25,7 @@ class FakeEditorPreferencesStore : EditorPreferencesStore {
     override suspend fun setSidePanel(
         preferences: SidePanelPreferences
     ) {
+        sidePanelSaveMillis.removeFirstOrNull()?.let { delay(timeMillis = it) }
         sidePanel = preferences
     }
 

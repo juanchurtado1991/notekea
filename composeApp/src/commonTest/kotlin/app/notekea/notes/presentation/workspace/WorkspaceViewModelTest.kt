@@ -270,6 +270,32 @@ class WorkspaceViewModelTest {
         )
     }
 
+    @Test
+    fun `a slow save of the panel never lands after a newer one`() = runWorkspaceTest {
+        val viewModel = started()
+        preferences.sidePanelSaveMillis += listOf(SLOW_SAVE_MILLIS, 0L)
+
+        viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelResize(widthDp = 300))
+        runCurrent()
+        viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelResize(widthDp = 360))
+        advanceUntilIdle()
+
+        assertEquals(expected = 360, actual = preferences.sidePanel.widthDp)
+    }
+
+    @Test
+    fun `a slow save of the tabs never lands after a newer one`() = runWorkspaceTest {
+        val viewModel = started()
+        workspaces.writeMillis += listOf(SLOW_SAVE_MILLIS, 0L)
+
+        viewModel.onIntent(intent = WorkspaceIntent.OnOpen(path = AREPAS))
+        runCurrent()
+        viewModel.onIntent(intent = WorkspaceIntent.OnOpen(path = WELCOME))
+        advanceUntilIdle()
+
+        assertEquals(expected = viewModel.state.value.workspace, actual = workspaces.workspaces[VAULT])
+    }
+
     private fun TestScope.started(
         isLoaded: Boolean = true
     ): WorkspaceViewModel {
@@ -299,6 +325,7 @@ class WorkspaceViewModelTest {
     ) = runTest(context = testDispatcher) { body() }
 
     companion object {
+        private const val SLOW_SAVE_MILLIS = 1_000L
         private val COVER_SIZE = IntSize(width = 336, height = 252)
         private const val PNG_BASE64 =
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
