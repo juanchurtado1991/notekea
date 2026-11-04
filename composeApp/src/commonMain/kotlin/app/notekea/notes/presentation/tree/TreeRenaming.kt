@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.tree
 
 import app.notekea.core.domain.Outcome
+import app.notekea.notes.domain.LinkUpdateResult
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.RenameEntryUseCase
 import app.notekea.notes.domain.UpdateLinksAfterRenameUseCase
@@ -26,6 +27,7 @@ internal class TreeRenaming(
     private val logger = Logger.withTag(tag = LOG_TAG)
     private val updatingLinks = Mutex()
     private var job: Job? = null
+    private var renames = 0
 
     fun start(
         path: RelativePath?
@@ -44,14 +46,16 @@ internal class TreeRenaming(
         val draft = host.state.value.renaming ?: return
         if (job?.isActive == true) return
         job = host.launch {
-            val notesBefore = host.state.value.tree.notes.keys
             val outcome = renameEntry(vaultPath = vaultPath, path = draft.path, newName = draft.text)
             val isMoved = outcome is Outcome.Success && outcome.value != draft.path
             if (isMoved) host.emit(effect = VaultTreeEffect.EntryRenamed(from = draft.path, to = outcome.value))
             host.updateTree { reduceRenameOutcome(state = it, from = draft.path, outcome = outcome) }
-            if (isMoved) bookmarks.change { it.renamed(from = draft.path, to = outcome.value) }
+            if (isMoved) {
+                renames++
+                bookmarks.change { it.renamed(from = draft.path, to = outcome.value) }
+            }
             host.launch {
-                if (isMoved) updateLinks(notesBefore = notesBefore, from = draft.path, to = outcome.value)
+                if (isMoved) updateLinks(from = draft.path, to = outcome.value)
                 if (outcome is Outcome.Success) templates.apply(note = draft.path, named = outcome.value)
             }
         }
@@ -70,21 +74,39 @@ internal class TreeRenaming(
         host.updateTree {
             reduceRenameOutcome(state = it, from = intent.from, outcome = Outcome.Success(value = intent.to))
         }
+        renames++
         bookmarks.change { it.renamed(from = intent.from, to = intent.to) }
         intent.links?.let { result -> host.reduce { reduceLinksUpdated(state = it, result = result) } }
     }
 
     /** Rewrites the links to [from] in the notes that had them, now that it is [to]; nothing when none link to it. */
     private suspend fun updateLinks(
-        notesBefore: Set<RelativePath>,
         from: RelativePath,
         to: RelativePath
     ) {
-        val result = updatingLinks.withLock {
-            updateLinksAfterRename(vaultPath = vaultPath, notesBefore = notesBefore, from = from, to = to)
-        } ?: return
+        val result = updatingLinks.withLock { linksUpdated(from = from, to = to) } ?: return
         logger.i { LINKS_UPDATED_MESSAGE + result.updatedCount + NOTES_SKIPPED + result.skipped.size }
         host.reduce { reduceLinksUpdated(state = it, result = result) }
+    }
+
+    /** A rename meanwhile may have moved a note from under the update, so the vault is gone through again. */
+    private suspend fun linksUpdated(
+        from: RelativePath,
+        to: RelativePath
+    ): LinkUpdateResult? {
+        val updated = mutableListOf<RelativePath>()
+        var skipped = emptyList<RelativePath>()
+        do {
+            val seen = renames
+            val notesBefore = host.state.value.tree.notes.keys.mapTo(destination = mutableSetOf()) {
+                it.rebased(from = to, to = from)
+            }
+            val pass = updateLinksAfterRename(vaultPath = vaultPath, notesBefore = notesBefore, from = from, to = to)
+            updated += pass?.updated.orEmpty()
+            skipped = pass?.skipped.orEmpty()
+        } while (seen != renames)
+        val result = LinkUpdateResult(updated = updated, skipped = skipped)
+        return result.takeIf { updated.isNotEmpty() || skipped.isNotEmpty() }
     }
 
     companion object {

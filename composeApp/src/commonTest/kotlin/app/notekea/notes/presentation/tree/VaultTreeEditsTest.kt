@@ -106,6 +106,22 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
     }
 
     @Test
+    fun `a note renamed while the links are updated still gets its link`() = runTreeTest {
+        operations.onMove = { from, to -> contents.texts.remove(key = from)?.let { contents.texts[to] = it } }
+        contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
+        val viewModel = startedViewModel()
+        val slowDisk = CompletableDeferred<Unit>()
+        contents.readGate = slowDisk
+        rename(viewModel = viewModel, from = WELCOME, to = "Start here")
+
+        rename(viewModel = viewModel, from = ROADMAP, to = "Plan")
+        slowDisk.complete(value = Unit)
+        advanceUntilIdle()
+
+        assertEquals(expected = "Begin with [[Start here]].", actual = contents.texts[path("$PROJECTS/Plan.md")])
+    }
+
+    @Test
     fun `renaming a linked note updates the notes that link to it and says so`() = runTreeTest {
         contents.texts[path("Start here.md")] = ""
         contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
