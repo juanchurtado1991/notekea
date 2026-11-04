@@ -1,7 +1,6 @@
 package app.notekea.notes.presentation.editor
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +32,7 @@ import app.notekea.core.presentation.components.NotekeaSegmentedControl
 import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.theme.motionTween
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.notes.domain.OutlineHeading
 import app.notekea.notes.domain.SidePanelMode
@@ -76,7 +76,7 @@ fun SidePanel(
             // Inspector and Chat fade into each other, so the switch reads as one panel changing.
             Crossfade(
                 targetState = preferences.mode,
-                animationSpec = tween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
+                animationSpec = motionTween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
             ) { mode ->
                 when (mode) {
                     SidePanelMode.INSPECTOR -> InspectorSections(

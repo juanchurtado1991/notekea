@@ -1,7 +1,6 @@
 package app.notekea.core.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -11,8 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.theme.motionTween
 
 private const val PREVIEW_CONTENT = "What the section holds"
 
@@ -26,14 +27,13 @@ fun NotekeaFold(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    val spec = { tween<Float>(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS) }
+    val fade = motionTween<Float>(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
+    val fold = motionTween<IntSize>(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
     AnimatedVisibility(
         visible = isOpen,
         modifier = modifier,
-        enter = expandVertically(animationSpec = tween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)) +
-            fadeIn(animationSpec = spec()),
-        exit = shrinkVertically(animationSpec = tween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)) +
-            fadeOut(animationSpec = spec())
+        enter = expandVertically(animationSpec = fold) + fadeIn(animationSpec = fade),
+        exit = shrinkVertically(animationSpec = fold) + fadeOut(animationSpec = fade)
     ) {
         Column { content() }
     }

@@ -36,7 +36,10 @@ fun NotekeaTheme(
         typography = notekeaTypography(),
         shapes = shapes
     ) {
-        CompositionLocalProvider(LocalNotekeaCodeTextStyle provides notekeaCodeTextStyle()) {
+        CompositionLocalProvider(
+            LocalNotekeaCodeTextStyle provides notekeaCodeTextStyle(),
+            LocalReduceMotion provides (LocalAppearance.current.reduceMotion || LocalSystemReduceMotion.current)
+        ) {
             content()
         }
     }

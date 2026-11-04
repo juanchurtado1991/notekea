@@ -1,7 +1,6 @@
 package app.notekea.core.presentation.components
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -52,6 +51,7 @@ import androidx.compose.ui.zIndex
 import app.notekea.core.presentation.platform.onMiddleClick
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.theme.motionTween
 import app.notekea.core.presentation.theme.NotekeaIcons
 import kotlin.math.roundToInt
 
@@ -118,7 +118,7 @@ private fun tabOffset(
     val isDragged = drag?.index == index
     val shift by animateFloatAsState(
         targetValue = if (drag == null || isDragged) 0f else targets.shiftOf(index = index, drag = drag),
-        animationSpec = tween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
+        animationSpec = motionTween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
     )
     return {
         when {

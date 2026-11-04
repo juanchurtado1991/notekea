@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -36,6 +37,7 @@ import app.notekea.core.platform.domain.SystemAppearance
 import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.appearance.domain.WindowBoundsStore
 import app.notekea.core.platform.domain.SystemEnvironment
+import app.notekea.core.platform.domain.SystemMotion
 import app.notekea.core.presentation.gallery.DesignSystemGallery
 import app.notekea.core.presentation.menu.AppMenuEntry
 import app.notekea.core.presentation.menu.AppMenus
@@ -56,6 +58,7 @@ import app.notekea.core.presentation.platform.WindowQuit
 import app.notekea.core.presentation.platform.keyShortcut
 import app.notekea.core.presentation.theme.LocalAppearance
 import app.notekea.core.presentation.theme.LocalSystemDarkTheme
+import app.notekea.core.presentation.theme.LocalSystemReduceMotion
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.di.desktopModules
 import app.notekea.notes.presentation.tree.VaultScope
@@ -112,6 +115,7 @@ fun runNotekea(
     val showGallery = System.getProperty(GALLERY_PROPERTY).toBoolean()
     val isCrashTest = koin.get<SystemEnvironment>().environmentVariable(name = CRASH_TEST_VARIABLE) == CRASH_TEST_ON
     val systemDarkTheme = koin.get<SystemAppearance>().observeDarkTheme()
+    val systemMotion = koin.get<SystemMotion>()
     val appearances = koin.get<AppearanceStore>().observe()
     // Read before the first window, so it never opens in the default theme first.
     val keptAppearance = runBlocking { appearances.first() }
@@ -119,9 +123,11 @@ fun runNotekea(
     application {
         val isSystemDark by systemDarkTheme.collectAsState(initial = null)
         val appearance by appearances.collectAsState(initial = keptAppearance)
+        val isSystemMotionReduced by produceState(initialValue = false) { value = systemMotion.isReduced() }
         CompositionLocalProvider(
             LocalWindowExceptionHandlerFactory provides crashBuddy.windowExceptionHandlers(),
             LocalSystemDarkTheme provides isSystemDark,
+            LocalSystemReduceMotion provides isSystemMotionReduced,
             LocalAppearance provides appearance,
             LocalFileDrop provides ::awtFileDrop,
             LocalAppVersion provides koin.get<SystemEnvironment>().appVersion

@@ -20,6 +20,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import app.notekea.core.presentation.theme.LocalReduceMotion
+import app.notekea.core.presentation.theme.followItem
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -149,9 +151,10 @@ private fun FollowCurrent(
     listState: LazyListState,
     index: Int
 ) {
+    val reduceMotion = LocalReduceMotion.current
     LaunchedEffect(key1 = index) {
         val isVisible = listState.layoutInfo.visibleItemsInfo.any { it.index == index && it.offset >= 0 }
-        if (index >= 0 && !isVisible) listState.animateScrollToItem(index = index)
+        if (index >= 0 && !isVisible) listState.followItem(index = index, reduceMotion = reduceMotion)
     }
 }
 

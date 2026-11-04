@@ -10,12 +10,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.appearance.domain.Appearance
 import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.appearance.domain.ThemeMode
+import app.notekea.core.presentation.components.NotekeaCheckbox
 import app.notekea.core.presentation.components.NotekeaScrollArea
 import app.notekea.core.presentation.components.NotekeaSegment
 import app.notekea.core.presentation.components.NotekeaSegmentedControl
@@ -30,6 +32,8 @@ import app.notekea.resources.appearance_mode_dark
 import app.notekea.resources.appearance_mode_hint
 import app.notekea.resources.appearance_mode_light
 import app.notekea.resources.appearance_mode_system
+import app.notekea.resources.appearance_reduce_motion
+import app.notekea.resources.appearance_reduce_motion_hint
 import app.notekea.resources.appearance_theme
 import app.notekea.resources.settings_section_appearance
 import app.notekea.resources.theme_azure_cloud
@@ -49,7 +53,7 @@ import org.jetbrains.compose.resources.stringResource
 private const val THEMES_PER_ROW = 3
 
 /**
- * Settings → Appearance (`ROADMAP.md` 2.12, design A): the mode (System, Light or Dark) and the color themes as a grid
+ * Settings → Appearance (`ROADMAP.md` 2.12, design A): the mode (System, Light or Dark), reduce motion and the color themes as a grid
  * of cards, three per row, each with its light and dark sketch; the chosen one is outlined and checked. It scrolls when
  * the dialog is too short for it.
  */
@@ -74,6 +78,7 @@ fun AppearanceSettings(
                 color = MaterialTheme.colorScheme.onSurface
             )
             ModeChoice(mode = state.appearance.mode, onIntent = onIntent)
+            ReduceMotionChoice(isOn = state.appearance.reduceMotion, onIntent = onIntent)
             ThemeChoice(theme = state.appearance.theme, onIntent = onIntent)
         }
     }
@@ -109,6 +114,32 @@ private fun ModeChoice(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+private fun ReduceMotionChoice(
+    isOn: Boolean,
+    onIntent: (AppearanceIntent) -> Unit
+) {
+    val label = stringResource(resource = Res.string.appearance_reduce_motion)
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        NotekeaCheckbox(
+            checked = isOn,
+            onClick = { onIntent(AppearanceIntent.OnReduceMotionToggle) },
+            label = label
+        )
+        Column {
+            GroupLabel(text = label)
+            Text(
+                text = stringResource(resource = Res.string.appearance_reduce_motion_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 

@@ -49,6 +49,8 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeRow
 import androidx.compose.ui.Modifier
+import app.notekea.core.presentation.theme.LocalReduceMotion
+import app.notekea.core.presentation.theme.followItem
 import app.notekea.core.presentation.TestTags
 
 private const val EMPTY_ROWS_BELOW = 2
@@ -99,7 +101,7 @@ internal fun TreeList(
             ) {
                 items(items = state.rows, key = { it.path.value }, contentType = ::contentTypeOf) { row ->
                     // A folder's rows fade in as it opens, and the rows below slide down to make room.
-                    Box(modifier = Modifier.animateItem()) {
+                    Box(modifier = if (LocalReduceMotion.current) Modifier else Modifier.animateItem()) {
                         TreeEntryRow(
                             row = row,
                             state = state,
@@ -178,10 +180,11 @@ private fun FollowSelection(
     state: VaultTreeState
 ) {
     val index = state.rows.indexOfFirst { it.path == state.selectedPath }
+    val reduceMotion = LocalReduceMotion.current
     LaunchedEffect(key1 = index) {
         val visible = listState.layoutInfo.visibleItemsInfo
         val isVisible = visible.any { it.index == index && it.offset >= 0 }
-        if (index >= 0 && !isVisible) listState.animateScrollToItem(index = index)
+        if (index >= 0 && !isVisible) listState.followItem(index = index, reduceMotion = reduceMotion)
     }
 }
 

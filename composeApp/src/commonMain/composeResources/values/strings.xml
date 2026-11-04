@@ -46,6 +46,8 @@
     <string name="appearance_mode_hint">System follows your computer’s light or dark setting.</string>
     <string name="appearance_mode_light">Light</string>
     <string name="appearance_mode_system">System</string>
+    <string name="appearance_reduce_motion">Reduce motion</string>
+    <string name="appearance_reduce_motion_hint">Panels and lists change at once, without sliding. It is also on when your computer asks for less motion.</string>
     <string name="appearance_theme">Theme</string>
     <string name="attachment_locate">Locate…</string>
     <string name="attachment_missing">This file is missing</string>

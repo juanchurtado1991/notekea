@@ -10,4 +10,7 @@ sealed interface AppearanceIntent {
 
     /** System, Light or Dark. */
     data class OnModeChoose(val mode: ThemeMode) : AppearanceIntent
+
+    /** Reduce motion, clicked. */
+    data object OnReduceMotionToggle : AppearanceIntent
 }
