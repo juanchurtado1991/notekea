@@ -29,11 +29,11 @@ import app.notekea.shell.presentation.WorkspaceTools
 import app.notekea.shell.presentation.WorkspaceViewModel
 import app.notekea.notes.domain.GetDailyNoteSettingsUseCase
 import app.notekea.notes.domain.OpenDailyNoteUseCase
-import app.notekea.notes.presentation.templates.TemplatePickerViewModel
-import app.notekea.notes.domain.CreateTemplatesFolderUseCase
+import app.notekea.templates.presentation.TemplatePickerViewModel
+import app.notekea.templates.domain.CreateTemplatesFolderUseCase
 import app.notekea.notes.domain.ApplyTemplateUseCase
 import app.notekea.core.notes.domain.FillTemplateUseCase
-import app.notekea.notes.domain.GetTemplateSettingsUseCase
+import app.notekea.templates.domain.GetTemplateSettingsUseCase
 import app.notekea.notes.presentation.tree.DailyNoteTools
 import app.notekea.notes.presentation.tree.NewNoteTools
 import app.notekea.shell.domain.SaveSidePanelUseCase

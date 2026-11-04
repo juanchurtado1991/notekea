@@ -1,12 +1,12 @@
-package app.notekea.notes.presentation.templates
+package app.notekea.templates.presentation
 
 import androidx.lifecycle.viewModelScope
-import app.notekea.notes.domain.CreateTemplatesFolderUseCase
+import app.notekea.templates.domain.CreateTemplatesFolderUseCase
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeNoteFileOperations
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.core.notes.domain.FuzzyMatcher
-import app.notekea.notes.domain.GetTemplateSettingsUseCase
+import app.notekea.templates.domain.GetTemplateSettingsUseCase
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.RelativePath

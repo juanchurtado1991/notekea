@@ -1,10 +1,10 @@
-package app.notekea.notes.presentation.templates
+package app.notekea.templates.presentation
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
-import app.notekea.notes.domain.CreateTemplatesFolderUseCase
+import app.notekea.templates.domain.CreateTemplatesFolderUseCase
 import app.notekea.core.notes.domain.FuzzyMatcher
-import app.notekea.notes.domain.GetTemplateSettingsUseCase
+import app.notekea.templates.domain.GetTemplateSettingsUseCase
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteFile

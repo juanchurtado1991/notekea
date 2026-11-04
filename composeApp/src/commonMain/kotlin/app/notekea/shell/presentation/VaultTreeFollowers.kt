@@ -22,10 +22,10 @@ import app.notekea.notes.presentation.switcher.QuickSwitcherViewModel
 import app.notekea.notes.presentation.tags.TagPickerEffect
 import app.notekea.notes.presentation.tags.TagPickerIntent
 import app.notekea.notes.presentation.tags.TagPickerViewModel
-import app.notekea.notes.presentation.templates.TemplatePickerEffect
-import app.notekea.notes.presentation.templates.TemplatePickerIntent
-import app.notekea.notes.presentation.templates.TemplatePickerViewModel
-import app.notekea.notes.presentation.templates.TemplateTarget
+import app.notekea.templates.presentation.TemplatePickerEffect
+import app.notekea.templates.presentation.TemplatePickerIntent
+import app.notekea.templates.presentation.TemplatePickerViewModel
+import app.notekea.templates.presentation.TemplateTarget
 import app.notekea.shell.presentation.WorkspaceEffect
 import app.notekea.shell.presentation.WorkspaceIntent
 import app.notekea.shell.presentation.WorkspaceShortcuts
