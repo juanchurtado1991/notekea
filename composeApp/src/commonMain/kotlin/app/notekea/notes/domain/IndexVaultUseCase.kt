@@ -5,13 +5,15 @@ import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.TextEmbedder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Brings a vault's search index up to date with its [notes] (`ROADMAP.md` 2.3), as [PlanIndexUseCase] decides: each
  * note read is chunked ([ChunkNoteUseCase]), embedded ([TextEmbedder]) and put in the index ([VectorIndex]) only when
  * its text changed (by its [ContentHash]), then marked done ([IndexStateStore]), so a run stopped anywhere (the app closed,
  * the vault switched) resumes with the notes left. Gone notes leave the index. The [Flow] tells the progress after
- * every note, over all the vault's notes (those already indexed count as done); a model or index failure stops the run, the rest waiting for the next one.
+ * every note, over all the vault's notes (those already indexed count as done); a model or index failure stops the run, the rest waiting for the next one,
+ * while an unexpected failure on one note only skips it.
  */
 class IndexVaultUseCase(
     private val planIndex: PlanIndexUseCase,
@@ -41,12 +43,25 @@ class IndexVaultUseCase(
         var progress = IndexProgress(total = plan.read.size + plan.unchanged, done = plan.unchanged)
         emit(value = progress)
         for (file in plan.read) {
-            val step = indexNote(vaultPath = vaultPath, file = file, heldHash = hashes[file.path])
+            val step = indexGuarded(vaultPath = vaultPath, file = file, heldHash = hashes[file.path])
             progress = progress.after(step = step, path = file.path)
             emit(value = progress)
             if (progress.error != null) return@flow
         }
         emit(value = progress.copy(isFinished = true))
+    }
+
+    /** [indexNote], where what nobody expected from one note skips it instead of ending the run for every other. */
+    private suspend fun indexGuarded(
+        vaultPath: String,
+        file: NoteFile,
+        heldHash: String?
+    ): NoteStep = try {
+        indexNote(vaultPath = vaultPath, file = file, heldHash = heldHash)
+    } catch (cancellation: CancellationException) {
+        throw cancellation
+    } catch (exception: Exception) {
+        NoteStep.Skipped(reason = SkipReason.FAILED, cause = exception)
     }
 
     /** What indexing [file] did: indexed it again, found its text as indexed ([heldHash]), skipped it, or failed. */
@@ -105,8 +120,14 @@ class IndexVaultUseCase(
         path: RelativePath
     ): IndexProgress = when (step) {
         NoteStep.Indexed -> copy(done = done + 1, indexed = indexed + 1)
+
         NoteStep.Unchanged -> copy(done = done + 1)
-        is NoteStep.Skipped -> copy(done = done + 1, skipped = skipped + SkippedNote(path = path, reason = step.reason))
+
+        is NoteStep.Skipped -> copy(
+            done = done + 1,
+            skipped = skipped + SkippedNote(path = path, reason = step.reason, cause = step.cause)
+        )
+
         is NoteStep.Failed -> copy(error = step.error)
     }
 
@@ -116,7 +137,10 @@ class IndexVaultUseCase(
 
         data object Unchanged : NoteStep
 
-        data class Skipped(val reason: SkipReason) : NoteStep
+        data class Skipped(
+            val reason: SkipReason,
+            val cause: Throwable? = null
+        ) : NoteStep
 
         data class Failed(val error: IndexRunError) : NoteStep
     }

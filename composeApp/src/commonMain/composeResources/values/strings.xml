@@ -431,6 +431,7 @@
     <string name="search_index_rebuild">Rebuild index</string>
     <string name="search_index_skipped">Skipped</string>
     <string name="search_index_title">Search index</string>
+    <string name="search_index_failed">could not be indexed</string>
     <string name="search_index_too_large">larger than 5 MB</string>
     <string name="search_index_too_long">too long to index</string>
     <string name="search_index_took">Took</string>
