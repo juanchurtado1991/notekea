@@ -65,6 +65,30 @@ class NoteDocumentTest {
     }
 
     @Test
+    fun `a body typed after a closing line that ended the file starts on a line of its own`() {
+        val headers = listOf(
+            "---\na: 1\n---" to "---\na: 1\n---\nhello",
+            "---\r\na: 1\r\n---" to "---\r\na: 1\r\n---\r\nhello",
+            "---\na: 1\n---\r" to "---\na: 1\n---\r\nhello",
+            "\uFEFF---\na: 1\n---" to "\uFEFF---\na: 1\n---\nhello"
+        )
+
+        headers.forEach { (text, expected) ->
+            val saved = NoteDocument.fromText(text = text).copy(body = "hello").toText()
+
+            assertEquals(expected = expected, actual = saved)
+            assertEquals(expected = "hello", actual = NoteDocument.fromText(text = saved).body)
+        }
+    }
+
+    @Test
+    fun `a body after a byte order mark alone gets no line break before it`() {
+        val document = NoteDocument.fromText(text = "\uFEFF").copy(body = "hello")
+
+        assertEquals(expected = "\uFEFFhello", actual = document.toText())
+    }
+
+    @Test
     fun `every note is written back exactly as it was read`() {
         val texts = listOf(
             "---\ntags: [recipe]\n---\n# Arepas\n",

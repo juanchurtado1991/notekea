@@ -15,6 +15,20 @@ import kotlinx.coroutines.test.runCurrent
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditorFileChangesTest : EditorViewModelTestBase() {
     @Test
+    fun `text typed in a note whose properties end its file is saved below them and counted from there`() =
+        runEditorTest {
+            putOnDisk(path = TASKS, text = "---\ntitle: x\n---")
+            open(path = TASKS)
+
+            type(text = "hello")
+            advanceTimeBy(delayTimeMillis = SECOND_MILLIS + 1)
+            runCurrent()
+
+            assertEquals(expected = "---\ntitle: x\n---\nhello", actual = store.texts[TASKS])
+            assertEquals(expected = 3, actual = viewModel.state.value.bodyStartLine)
+        }
+
+    @Test
     fun `an outside change reloads a note without unsaved edits`() = runEditorTest {
         open(path = AREPAS)
 

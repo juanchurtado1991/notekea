@@ -23,6 +23,28 @@ class TemplateUseCasesTest {
     private val meeting = RelativePath(value = "Templates/Meeting notes.md")
 
     @Test
+    fun `a template's text after a closing line that ended the file leaves the properties in place`() = runTest {
+        val note = RelativePath(value = "Untitled.md")
+        store.texts[note] = "---\na: 1\n---"
+        store.texts[meeting] = "# {{title}}\n"
+
+        ApplyTemplateUseCase(fillTemplate, store)(vaultPath = VAULT, note = note, template = meeting)
+
+        assertEquals(expected = "---\na: 1\n---\n# Untitled\n", actual = store.texts[note])
+    }
+
+    @Test
+    fun `a template's properties that end its file stay properties above the note's text`() = runTest {
+        val note = RelativePath(value = "Untitled.md")
+        store.texts[note] = "Some text"
+        store.texts[meeting] = "---\ntags: meeting\n---"
+
+        ApplyTemplateUseCase(fillTemplate, store)(vaultPath = VAULT, note = note, template = meeting)
+
+        assertEquals(expected = "---\ntags: meeting\n---\nSome text", actual = store.texts[note])
+    }
+
+    @Test
     fun `a template is filled in with the title, and now where the user is in the vault's formats`() = runTest {
         store.texts[meeting] = "---\ntags: meeting\n---\n# {{title}}\n{{date}} at {{time}}\n"
         val defaults = fillTemplate(vaultPath = VAULT, template = meeting, title = "Team sync")
