@@ -36,7 +36,11 @@ class TemplatesOnDiskTest {
     private val vaultPath = vault.toString()
     private val settings = ObsidianVaultSettingsReader(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
     private val operations = OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
-    private val store = OkioNoteContentStore(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
+    private val store = OkioNoteContentStore(
+        fileSystem = FileSystem.SYSTEM,
+        dispatchers = dispatchers,
+        attributes = NioNoteFileAttributes()
+    )
 
     @AfterTest
     fun deleteVault() {
