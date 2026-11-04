@@ -71,20 +71,28 @@ class EditorAttachments(
     ): List<AttachmentView> {
         val embeds = embedFinder.embeds(text = text, includeNotes = true)
         if (embeds.isEmpty()) return emptyList()
-        var vaultFiles = vaultFiles()
-        val resolverOf = { files: List<RelativePath> ->
-            AttachmentResolver(
-                files = files,
-                attachmentFolder = AttachmentFolder(setting = folderSetting).folderFor(note = note)
-            )
+        val views = viewsAmong(files = vaultFiles(), embeds = embeds, note = note, chain = chain)
+        // A file or note added, moved or renamed outside Notekea since the last listing is found by listing again once.
+        val isAnyMissing = views.any { it.path == null }
+        return if (isAnyMissing) {
+            viewsAmong(files = vaultFiles(refresh = true), embeds = embeds, note = note, chain = chain)
+        } else {
+            views
         }
-        var resolver = resolverOf(vaultFiles)
-        // A file added outside Notekea since the last listing is found by listing again once.
-        if (embeds.any { !it.isNote && resolver.resolve(embed = it, note = note) == null }) {
-            vaultFiles = vaultFiles(refresh = true)
-            resolver = resolverOf(vaultFiles)
-        }
-        val notes = noteResolverOf(files = vaultFiles)
+    }
+
+    /** The [embeds] of [note], resolved among [files]. */
+    private suspend fun viewsAmong(
+        files: List<RelativePath>,
+        embeds: List<Embed>,
+        note: RelativePath,
+        chain: List<RelativePath>
+    ): List<AttachmentView> {
+        val resolver = AttachmentResolver(
+            files = files,
+            attachmentFolder = AttachmentFolder(setting = folderSetting).folderFor(note = note)
+        )
+        val notes = noteResolverOf(files = files)
         return embeds.mapNotNull { embed ->
             // A note embedded inside a sentence stays a link, so only notes on their own line are read.
             if (embed.isNote) return@mapNotNull embed.takeIf { it.isOwnLine }?.let { noteView(it, notes, chain) }

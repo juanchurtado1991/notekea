@@ -149,6 +149,35 @@ class EditorAttachmentsTest {
     }
 
     @Test
+    fun `an embedded note added outside Notekea is found once the text changes`() = runAttachmentsTest {
+        open(text = "![[Later]]\n")
+        fixture.attachmentStore.contents[RelativePath(value = "Later.md")] = "Now here".encodeToByteArray()
+
+        type(text = "![[Later]]\nMore\n")
+
+        assertEquals(
+            expected = "Now here" to null,
+            actual = viewModel.state.value.attachments.single().run { noteText to problem }
+        )
+    }
+
+    @Test
+    fun `an embedded note moved outside Notekea is found where it went`() = runAttachmentsTest {
+        val moved = RelativePath(value = "New/Later.md")
+        fixture.attachmentStore.contents[RelativePath(value = "Old/Later.md")] = "Here".encodeToByteArray()
+        open(text = "![[Later]]\n")
+        fixture.attachmentStore.contents.remove(key = RelativePath(value = "Old/Later.md"))
+        fixture.attachmentStore.contents[moved] = "Here".encodeToByteArray()
+
+        type(text = "![[Later]]\nMore\n")
+
+        assertEquals(
+            expected = moved to null,
+            actual = viewModel.state.value.attachments.single().run { path to problem }
+        )
+    }
+
+    @Test
     fun `text pasted with windows line breaks goes in with plain ones, so a windows note saves them once`() =
         runAttachmentsTest {
             open(text = "Intro\r\n")
