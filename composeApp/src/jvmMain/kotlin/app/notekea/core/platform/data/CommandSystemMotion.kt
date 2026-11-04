@@ -26,7 +26,7 @@ class CommandSystemMotion(
     }
 
     companion object {
-        private const val LINUX_ANIMATIONS_OFF = "<<false>>"
+        private const val LINUX_ANIMATIONS_OFF = "<false>"
         private const val LOG_TAG = "SystemMotion"
         private const val MACOS_REDUCED = "1"
         private const val UNAVAILABLE_MESSAGE = "The system's reduce motion setting cannot be read"
