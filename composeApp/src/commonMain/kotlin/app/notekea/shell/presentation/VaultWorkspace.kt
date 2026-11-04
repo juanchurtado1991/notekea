@@ -24,9 +24,9 @@ import app.notekea.notes.presentation.editor.EditorPaneTools
 import app.notekea.notes.presentation.editor.EditorScreen
 import app.notekea.notes.presentation.editor.SidePanelHost
 import app.notekea.notes.presentation.editor.WithSidePanel
-import app.notekea.notes.presentation.switcher.QuickSwitcherIntent
-import app.notekea.notes.presentation.switcher.QuickSwitcherMode
-import app.notekea.notes.presentation.switcher.QuickSwitcherPurpose
+import app.notekea.search.presentation.switcher.QuickSwitcherIntent
+import app.notekea.search.presentation.switcher.QuickSwitcherMode
+import app.notekea.search.presentation.switcher.QuickSwitcherPurpose
 import app.notekea.notes.presentation.tags.TagPickerIntent
 import app.notekea.templates.presentation.TemplatePickerIntent
 import app.notekea.templates.presentation.TemplateTarget

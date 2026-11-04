@@ -25,8 +25,8 @@ import app.notekea.notes.presentation.editor.EditorIntent
 import app.notekea.notes.presentation.editor.EditorPaneTools
 import app.notekea.notes.presentation.editor.EditorViewModel
 import app.notekea.notes.presentation.editor.SidePanelHost
-import app.notekea.notes.presentation.switcher.QuickSwitcherContent
-import app.notekea.notes.presentation.switcher.QuickSwitcherViewModel
+import app.notekea.search.presentation.switcher.QuickSwitcherContent
+import app.notekea.search.presentation.switcher.QuickSwitcherViewModel
 import app.notekea.notes.presentation.tags.TagPickerContent
 import app.notekea.notes.presentation.tags.TagPickerViewModel
 import app.notekea.templates.presentation.TemplatePickerContent
@@ -37,12 +37,12 @@ import app.notekea.shell.presentation.TabKind
 import app.notekea.shell.presentation.WorkspaceIntent
 import app.notekea.shell.presentation.WorkspaceState
 import app.notekea.shell.presentation.WorkspaceViewModel
-import app.notekea.notes.presentation.index.SearchIndexIntent
+import app.notekea.search.presentation.index.SearchIndexIntent
 import app.notekea.connections.presentation.NoteMentionsViewModel
 import app.notekea.connections.presentation.RelatedNotesViewModel
-import app.notekea.notes.presentation.index.SearchIndexNotice
-import app.notekea.notes.presentation.index.SearchIndexStatus
-import app.notekea.notes.presentation.index.SearchIndexViewModel
+import app.notekea.search.presentation.index.SearchIndexNotice
+import app.notekea.search.presentation.index.SearchIndexStatus
+import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.notes.domain.FormatAction
 import org.koin.compose.viewmodel.koinViewModel

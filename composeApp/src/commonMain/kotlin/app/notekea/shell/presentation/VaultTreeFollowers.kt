@@ -15,10 +15,10 @@ import app.notekea.notes.domain.TagRanking
 import app.notekea.notes.presentation.editor.EditorIntent
 import app.notekea.notes.presentation.editor.EditorViewModel
 import app.notekea.notes.presentation.editor.SidePanelHost
-import app.notekea.notes.presentation.switcher.QuickSwitcherEffect
-import app.notekea.notes.presentation.switcher.QuickSwitcherIntent
-import app.notekea.notes.presentation.switcher.QuickSwitcherMode
-import app.notekea.notes.presentation.switcher.QuickSwitcherViewModel
+import app.notekea.search.presentation.switcher.QuickSwitcherEffect
+import app.notekea.search.presentation.switcher.QuickSwitcherIntent
+import app.notekea.search.presentation.switcher.QuickSwitcherMode
+import app.notekea.search.presentation.switcher.QuickSwitcherViewModel
 import app.notekea.notes.presentation.tags.TagPickerEffect
 import app.notekea.notes.presentation.tags.TagPickerIntent
 import app.notekea.notes.presentation.tags.TagPickerViewModel

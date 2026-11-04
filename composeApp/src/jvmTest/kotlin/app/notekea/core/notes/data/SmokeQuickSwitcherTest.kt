@@ -8,11 +8,11 @@ import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.notes.domain.NoteMatchField
+import app.notekea.search.domain.NoteMatchField
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.notes.domain.ObserveVaultTreeUseCase
-import app.notekea.notes.domain.SearchNoteContentUseCase
-import app.notekea.notes.domain.SearchNotesUseCase
+import app.notekea.search.domain.SearchNoteContentUseCase
+import app.notekea.search.domain.SearchNotesUseCase
 import app.notekea.core.notes.domain.TextFolder
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher

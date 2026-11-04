@@ -17,9 +17,9 @@ import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.NoteSections
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.notes.domain.FakeIndexStateStore
-import app.notekea.notes.domain.IndexVaultUseCase
-import app.notekea.notes.domain.PlanIndexUseCase
+import app.notekea.search.domain.FakeIndexStateStore
+import app.notekea.search.domain.IndexVaultUseCase
+import app.notekea.search.domain.PlanIndexUseCase
 
 /**
  * The open note's related notes (`ROADMAP.md` 2.4): closest in meaning first, never itself nor a note it links, at
