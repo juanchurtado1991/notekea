@@ -119,7 +119,7 @@ class IndexVaultUseCaseTest {
         val busy = indexVault(vaultPath = VAULT, notes = notes).last()
 
         assertEquals(
-            expected = listOf(IndexRunError.MODEL, IndexRunError.INDEX) to emptyList(),
+            expected = listOf(IndexRunError.Model, IndexRunError.Index) to emptyList(),
             actual = listOf(model.error, busy.error) to states.read(vaultPath = VAULT)
         )
     }

@@ -1,5 +1,6 @@
 package com.testbuddy.crash
 
+import java.time.Clock
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -17,8 +18,11 @@ public object Breadcrumbs {
     private val timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss")
 
     /** Keeps [step] (`Editor: OnSaveShortcut`) with the time, dropping the oldest once there are [MAX_STEPS]. */
-    public fun record(step: String) {
-        val time = LocalTime.now().format(timeFormat)
+    public fun record(
+        step: String,
+        clock: Clock = Clock.systemDefaultZone()
+    ) {
+        val time = LocalTime.now(clock).format(timeFormat)
         synchronized(steps) {
             val last = steps.lastOrNull()
             if (last?.name == step) {

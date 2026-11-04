@@ -1,7 +1,9 @@
 package com.testbuddy.crash
 
 import java.nio.file.Files
+import java.time.Clock
 import java.time.Instant
+import java.time.ZoneOffset
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -50,7 +52,7 @@ class CrashReportsTest {
             record(
                 error = IllegalStateException("crash $second"),
                 steps = emptyList(),
-                now = Instant.parse("2026-10-26T10:15:${10 + second}Z")
+                now = "2026-10-26T10:15:${10 + second}Z"
             )
         }
 
@@ -74,12 +76,12 @@ class CrashReportsTest {
     private fun record(
         error: Throwable,
         steps: List<String>,
-        now: Instant = Instant.parse("2026-10-26T10:15:30Z")
+        now: String = "2026-10-26T10:15:30Z"
     ) = CrashReports.record(
         config = config,
         error = error,
         threadName = "AWT",
-        now = now,
+        clock = Clock.fixed(Instant.parse(now), ZoneOffset.UTC),
         environment = environment,
         steps = steps
     )

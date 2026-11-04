@@ -106,7 +106,7 @@ class SearchIndexViewModel(
                 took = if (changedSomething) now - startedAt else it.took
             )
         }
-        if (progress?.error == IndexRunError.INDEX) start(after = RETRY_DELAY)
+        if (progress?.error == IndexRunError.Index) start(after = RETRY_DELAY)
     }
 
     /**
@@ -137,7 +137,7 @@ class SearchIndexViewModel(
         throwable: Throwable
     ) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
-        reduce { it.copy(isRunning = false, error = IndexRunError.INDEX) }
+        reduce { it.copy(isRunning = false, error = IndexRunError.Index) }
     }
 
     private companion object {

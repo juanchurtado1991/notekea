@@ -12,8 +12,19 @@ abstract class ArchitectureTestBase {
     protected val allCodeScope = Konsist.scopeFromModule(moduleName = MODULE_NAME) +
         Konsist.scopeFromModule(moduleName = KTLINT_RULES_MODULE_NAME) +
         Konsist.scopeFromModule(moduleName = TEST_BUDDY_MODULE_NAME) +
-        Konsist.scopeFromModule(moduleName = SELF_TEST_MODULE_NAME)
+        Konsist.scopeFromModule(moduleName = TEST_BUDDY_CRASH_MODULE_NAME) +
+        Konsist.scopeFromModule(moduleName = SELF_TEST_MODULE_NAME) +
+        Konsist.scopeFromModule(moduleName = BUILD_SRC_MODULE_NAME)
     protected val productionScope = Konsist.scopeFromProduction(moduleName = MODULE_NAME)
+
+    /** What reaches the people who use Notekea: the app and the crash reporting it ships. */
+    protected val shippedScope =
+        productionScope + Konsist.scopeFromProduction(moduleName = TEST_BUDDY_CRASH_MODULE_NAME)
+
+    /** Everything that runs outside a test task, the Self-Test and Test Buddy included. */
+    protected val runningCodeScope = shippedScope +
+        Konsist.scopeFromProduction(moduleName = TEST_BUDDY_MODULE_NAME) +
+        Konsist.scopeFromProduction(moduleName = SELF_TEST_MODULE_NAME)
 
     protected val designSystemOnlyImports = listOf(
         "AlertDialog",
@@ -60,10 +71,14 @@ abstract class ArchitectureTestBase {
 
     protected val forbiddenDomainImportPrefixes = listOf(
         "androidx.",
+        "app.cash.sqldelight.",
+        "co.touchlab.kermit.",
+        "com.ghost.",
+        "com.russhwolf.",
         "de.kherud.",
         "io.ktor.",
-        "java.io.",
-        "java.nio.",
+        "java.",
+        "javax.",
         "okio.",
         "org.apache.lucene.",
         "org.eclipse.jgit.",
@@ -110,22 +125,29 @@ abstract class ArchitectureTestBase {
     companion object {
         const val APP_PACKAGE_PREFIX = "app.notekea."
         const val BASE_VIEW_MODEL = "BaseViewModel"
+        const val BUILD_SRC_MODULE_NAME = "buildSrc"
         const val COLOR_LITERAL = "Color(0x"
+        const val COMMON_MAIN = "commonMain"
+        const val CORE_PACKAGE_PREFIX = "app.notekea.core"
         const val DATA_LAYER = "data"
         const val DI_LAYER = "di"
         const val DIRECT_DISPATCHER_PATTERN = "Dispatchers\\.(IO|Default|Main|Unconfined)"
         const val DISPATCHERS_IMPLEMENTATION = "JvmAppDispatchers"
         const val DOMAIN_LAYER = "domain"
+        const val DIRECT_TIME_PATTERN =
+            "\\b(Instant|Local(Date|DateTime|Time)|(Offset|Zoned)DateTime)\\.now\\(\\)|currentTimeMillis\\(\\)"
         const val ICON_LIBRARY_PACKAGE = "com.composables.icons"
         const val ICONS_FILE = "NotekeaIcons"
         const val KTLINT_RULES_MODULE_NAME = "ktlint-rules"
         const val KOIN_COMPONENT_IMPORT = "org.koin.core.component.KoinComponent"
         const val MODULE_NAME = "composeApp"
+        const val JAVA_REFERENCE_PATTERN = "\\bjavax?\\.[a-z]+\\."
         const val OS_NAME_PROPERTY = "\"os.name\""
         const val PRESENTATION_LAYER = "presentation"
         const val SELF_TEST_MODULE_NAME = "selftest"
         const val SYSTEM_CLOCK = "Clock.System"
         const val SYSTEM_ENVIRONMENT_IMPLEMENTATION = "JvmSystemEnvironment"
+        const val TEST_BUDDY_CRASH_MODULE_NAME = "test-buddy-crash"
         const val TEST_BUDDY_MODULE_NAME = "test-buddy"
         const val COMPOSABLE_ANNOTATION = "Composable"
         const val MATERIAL3_PACKAGE = "androidx.compose.material3"

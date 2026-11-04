@@ -27,9 +27,9 @@ class FindRelatedNotesUseCase(
         if (chunks.isEmpty()) return Outcome.Success(value = RelatedNotes(related = emptyList(), linked = linked))
         val texts = chunks.map { chunk -> embeddingText(note = note, chunk = chunk) }
         val vectors = (textEmbedder.embed(texts = texts) as? Outcome.Success)?.value
-            ?: return Outcome.Failure(error = IndexRunError.MODEL)
+            ?: return Outcome.Failure(error = IndexRunError.Model)
         val best = closest(vaultPath = vaultPath, vectors = vectors, leftOut = linked + note)
-            ?: return Outcome.Failure(error = IndexRunError.INDEX)
+            ?: return Outcome.Failure(error = IndexRunError.Index)
         val words = WORD.findAll(input = text.lowercase()).map { it.value }.toSet()
         val related = best.take(n = LIMIT).mapNotNull { relatedOf(vaultPath = vaultPath, hit = it, words = words) }
         return Outcome.Success(value = RelatedNotes(related = related, linked = linked))

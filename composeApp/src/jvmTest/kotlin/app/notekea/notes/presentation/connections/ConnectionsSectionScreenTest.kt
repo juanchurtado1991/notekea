@@ -46,7 +46,7 @@ class ConnectionsSectionScreenTest {
         val states = listOf(
             RelatedNotesState(),
             RelatedNotesState(isIndexReady = true),
-            RelatedNotesState(isIndexReady = true, error = IndexRunError.MODEL)
+            RelatedNotesState(isIndexReady = true, error = IndexRunError.Model)
         )
 
         val said = states.map {

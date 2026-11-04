@@ -121,8 +121,8 @@ private fun ErrorText(
 ) {
     Text(
         text = when (error) {
-            IndexRunError.MODEL -> stringResource(Res.string.search_index_error_model)
-            IndexRunError.INDEX -> stringResource(Res.string.search_index_error_busy)
+            IndexRunError.Model -> stringResource(Res.string.search_index_error_model)
+            IndexRunError.Index -> stringResource(Res.string.search_index_error_busy)
         },
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.error

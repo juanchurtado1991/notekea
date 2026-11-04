@@ -32,7 +32,7 @@ class IndexVaultUseCase(
         val plan = planIndex(notes = notes, indexed = held, version = version)
         plan.remove.forEach { path ->
             if (vectorIndex.remove(vaultPath = vaultPath, note = path) is Outcome.Failure) {
-                return@flow emit(value = IndexProgress(total = notes.size, error = IndexRunError.INDEX))
+                return@flow emit(value = IndexProgress(total = notes.size, error = IndexRunError.Index))
             }
             indexStateStore.delete(vaultPath = vaultPath, path = path)
         }
@@ -83,7 +83,7 @@ class IndexVaultUseCase(
         }
         return when (vectorIndex.put(vaultPath = vaultPath, note = file.path, chunks = chunks, vectors = vectors)) {
             is Outcome.Success -> NoteStep.Indexed
-            is Outcome.Failure -> NoteStep.Failed(error = IndexRunError.INDEX)
+            is Outcome.Failure -> NoteStep.Failed(error = IndexRunError.Index)
         }
     }
 
@@ -97,7 +97,7 @@ class IndexVaultUseCase(
         error: EmbeddingError
     ): NoteStep = when (error) {
         is EmbeddingError.TextTooLong -> NoteStep.Skipped(reason = SkipReason.TOO_LONG)
-        else -> NoteStep.Failed(error = IndexRunError.MODEL)
+        else -> NoteStep.Failed(error = IndexRunError.Model)
     }
 
     private fun IndexProgress.after(

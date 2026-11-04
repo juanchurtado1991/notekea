@@ -3,7 +3,7 @@ package com.testbuddy.crash
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
-import java.time.Instant
+import java.time.Clock
 import java.time.temporal.ChronoUnit
 
 /**
@@ -21,11 +21,11 @@ public object CrashReports {
         config: CrashConfig,
         error: Throwable,
         threadName: String,
-        now: Instant = Instant.now(),
+        clock: Clock = Clock.systemUTC(),
         environment: AppEnvironment = AppEnvironment.current(),
         steps: List<String> = Breadcrumbs.recent()
     ): CrashReport {
-        val time = now.truncatedTo(ChronoUnit.SECONDS).toString()
+        val time = clock.instant().truncatedTo(ChronoUnit.SECONDS).toString()
         val text = text(config, error, threadName, time, environment, steps)
         val path = try {
             save(folder = config.reportFolder, name = "crash-${time.replace(':', '-')}.txt", text = text)
