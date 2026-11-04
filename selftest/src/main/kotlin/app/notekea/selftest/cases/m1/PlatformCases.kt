@@ -26,6 +26,7 @@ fun SuiteBuilder.platformCases() {
     quitSavesTheNote()
     closeWindowShortcuts()
     menuCases()
+    windowCases()
     shortcutModifier()
     dialogButtonOrder()
     appDataFolder()
