@@ -150,6 +150,7 @@ class EditorViewModel(
             EditorIntent.OnRestore -> saving.runSave { disk.restore() }
             EditorIntent.OnCloseDeleted -> saving.runSave { closeDeleted() }
             is EditorIntent.OnNoteMoved -> disk.moveTo(path = intent.path)
+            is EditorIntent.OnNoteRewritten -> saving.runSave { disk.followRewrite(path = intent.path) }
             is EditorIntent.OnTitleCommit -> saving.runSave { rename(name = intent.name) }
             EditorIntent.OnTitleErrorDismiss -> reduce { it.copy(titleError = null) }
             EditorIntent.OnReadModeToggle -> chooseMode(isReading = !state.value.isReading)

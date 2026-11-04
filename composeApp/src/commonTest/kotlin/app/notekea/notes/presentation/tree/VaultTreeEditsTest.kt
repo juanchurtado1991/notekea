@@ -122,6 +122,22 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
     }
 
     @Test
+    fun `a rename says which notes its link update rewrote`() = runTreeTest {
+        contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
+        val viewModel = startedViewModel()
+        val effects = mutableListOf<VaultTreeEffect>()
+        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+        rename(viewModel = viewModel, from = WELCOME, to = "Start here")
+        advanceUntilIdle()
+        runCurrent()
+
+        assertEquals(
+            expected = VaultTreeEffect.LinksRewritten(notes = listOf(path(ROADMAP))),
+            actual = effects.filterIsInstance<VaultTreeEffect.LinksRewritten>().single()
+        )
+    }
+
+    @Test
     fun `renaming a linked note updates the notes that link to it and says so`() = runTreeTest {
         contents.texts[path("Start here.md")] = ""
         contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."

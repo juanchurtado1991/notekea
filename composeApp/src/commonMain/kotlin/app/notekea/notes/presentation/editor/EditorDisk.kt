@@ -79,11 +79,13 @@ internal class EditorDisk(
 
     /**
      * Notekea itself rewrote the open note at [path] (a rename updated its links to itself): the editor takes the new
-     * text, or with edits of its own keeps them on top of it, so the next save is no conflict.
+     * text, or with edits of its own keeps them on top of it, so the next save is no conflict, nor is a change the
+     * watcher already took for an outside one.
      */
     suspend fun followRewrite(
         path: RelativePath
     ) {
+        if (host.state.value.notePath != path) return
         val document = (openNote(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value ?: return
         if (saving.hasEdits()) {
             saving.rebase(
@@ -92,6 +94,7 @@ internal class EditorDisk(
         } else {
             saving.show(document = document, isNewNote = false)
         }
+        host.reduce { it.copy(hasConflict = false) }
     }
 
     /** Brings back a file that is gone; one that came back meanwhile is replaced only if it holds what was last seen. */

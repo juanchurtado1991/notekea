@@ -49,6 +49,36 @@ class EditorSelfLinkRenameTest : EditorViewModelTestBase() {
         )
     }
 
+    @Test
+    fun `a link update from the tree reaches the open note, whose next save is no conflict`() = runEditorTest {
+        open(path = AREPAS)
+        store.texts[AREPAS] = "See [[Reina]].\n"
+
+        viewModel.onIntent(intent = EditorIntent.OnNoteRewritten(path = AREPAS))
+        runCurrent()
+        typeAndSave(text = "See [[Reina]], typed.\n")
+
+        assertEquals(
+            expected = false to "See [[Reina]], typed.\n",
+            actual = viewModel.state.value.hasConflict to store.texts[AREPAS]
+        )
+    }
+
+    @Test
+    fun `a link update from the tree clears the conflict the watcher saw first`() = runEditorTest {
+        open(path = AREPAS)
+        type(text = "See [[Arepas]], mine.\n")
+        changeOutside(text = "See [[Reina]].\n")
+
+        viewModel.onIntent(intent = EditorIntent.OnNoteRewritten(path = AREPAS))
+        runCurrent()
+
+        assertEquals(
+            expected = false to "See [[Arepas]], mine.\n",
+            actual = viewModel.state.value.hasConflict to viewModel.buffer.text.toString()
+        )
+    }
+
     private fun TestScope.rename() {
         viewModel.onIntent(intent = EditorIntent.OnTitleCommit(name = "Reina"))
         runCurrent()
