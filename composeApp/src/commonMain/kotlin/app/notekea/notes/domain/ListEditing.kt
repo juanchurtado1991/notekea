@@ -136,9 +136,11 @@ class ListEditing {
         line: String,
         step: Int
     ): String {
-        if (step >= 0) return StringPatterns.SPACE.repeat(n = step) + line
-        val removable = line.takeWhile { StringPatterns.isIndent(char = it) }.length
-        return line.substring(startIndex = minOf(-step, removable))
+        val quote = ListLine.of(line = line).quote
+        val item = line.removePrefix(prefix = quote)
+        if (step >= 0) return quote + StringPatterns.SPACE.repeat(n = step) + item
+        val removable = item.takeWhile { StringPatterns.isIndent(char = it) }.length
+        return quote + item.substring(startIndex = minOf(-step, removable))
     }
 
     /** [offset] in the text after the shift: moved with its line, and never into the indentation it lost. */

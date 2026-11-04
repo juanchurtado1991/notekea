@@ -101,6 +101,41 @@ class ListEditingTest {
         )
     }
 
+    @Test
+    fun `tab nests an item of a quote or callout after its quote marks, and shift+tab takes it back`() {
+        assertEquals(
+            expected = listOf(
+                "> - a\n>   - b|",
+                "> [!tip] Tip\n> - a\n>   - b|",
+                "> > 1. a\n> >    1. b|",
+                ">- a\n>  - b|",
+                "  > - a\n  >   - b|",
+                "> - a\n> - b|",
+                "> - a\n>   - b\n>   - c|"
+            ),
+            actual = listOf(
+                apply(marked = "> - a\n> - b|", action = ListAction.INDENT),
+                apply(marked = "> [!tip] Tip\n> - a\n> - b|", action = ListAction.INDENT),
+                apply(marked = "> > 1. a\n> > 1. b|", action = ListAction.INDENT),
+                apply(marked = ">- a\n>- b|", action = ListAction.INDENT),
+                apply(marked = "  > - a\n  > - b|", action = ListAction.INDENT),
+                apply(marked = "> - a\n>   - b|", action = ListAction.OUTDENT),
+                apply(marked = "> - a\n>   - b\n>     - c|", action = ListAction.OUTDENT)
+            )
+        )
+    }
+
+    @Test
+    fun `an item nested in a quote is a list item, for enter and backspace too`() {
+        assertEquals(
+            expected = listOf("> - a\n>   - b\n>   - |", "> - a\n>   |"),
+            actual = listOf(
+                apply(marked = "> - a\n>   - b|", action = ListAction.NEW_ITEM),
+                apply(marked = "> - a\n>   - |", action = ListAction.REMOVE_MARKER)
+            )
+        )
+    }
+
     private fun apply(
         marked: String,
         action: ListAction
