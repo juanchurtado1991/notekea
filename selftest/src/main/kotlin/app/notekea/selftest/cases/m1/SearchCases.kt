@@ -2,6 +2,7 @@ package app.notekea.selftest.cases.m1
 
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.performClick
+import app.notekea.selftest.expectNotInNoteText
 import app.notekea.selftest.SmokeScenarios
 import app.notekea.selftest.expectOrderOnScreen
 import app.notekea.selftest.openNote
@@ -77,7 +78,8 @@ private fun SuiteBuilder.tagLink() {
         openNote(name = "2026-10-21", shownText = "#travel")
         pressInWindow(shortcut = Mod + Key.E)
         // Wait for Preview before clicking the tag: until it shows, the words are the editor's text, not a link.
-        expectNoText(text = "[[Lisbon trip]]", substring = true)
+        // Connections can quote the same line, so only the note's own text field counts.
+        expectNotInNoteText(part = "[[Lisbon trip]]")
         expectText(text = "#travel", substring = true)
         clickWords(words = "#travel")
         waitForResult(name = "Lisbon trip")
