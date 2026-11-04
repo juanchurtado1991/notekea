@@ -65,8 +65,20 @@ class OkioNoteContentStore(
             moveRetrying(source = temporary, target = file)
             Outcome.Success(value = Unit)
         } catch (_: IOException) {
-            fileSystem.delete(path = temporary, mustExist = false)
             Outcome.Failure(error = NotesError.OperationFailed(path = path.value))
+        } finally {
+            removeLeftover(file = temporary)
+        }
+    }
+
+    /** Runs however a write ends, a cancelled one too: nothing else knows this random name. */
+    private fun removeLeftover(
+        file: Path
+    ) {
+        try {
+            fileSystem.delete(path = file, mustExist = false)
+        } catch (_: IOException) {
+            // The note is as it should be; a locked temporary file stays hidden.
         }
     }
 
