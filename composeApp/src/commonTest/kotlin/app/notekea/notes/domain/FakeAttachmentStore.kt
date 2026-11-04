@@ -5,25 +5,31 @@ import app.notekea.core.domain.Outcome
 /**
  * A vault's files in memory, like the disk: a write or copy to a path in use fails with [NotesError.NameTaken], and
  * every file written is also seen by [fileOperations], as the real disk is. [outside] holds files on the computer
- * outside the vault, by absolute path, to copy from; a path under `VAULT` is inside it.
+ * outside the vault, by absolute path, to copy from; a path under `VAULT` is inside it. Every call that touches the
+ * disk goes through [gate].
  */
 class FakeAttachmentStore(
     private val fileOperations: FakeNoteFileOperations = FakeNoteFileOperations()
 ) : AttachmentStore {
     val contents = mutableMapOf<RelativePath, ByteArray>()
     val outside = mutableMapOf<String, ByteArray>()
+    val gate = Gate()
 
     /** Every file read, in order, so a test can tell a picture decoded again from one kept. */
     val reads = mutableListOf<RelativePath>()
 
     override suspend fun files(
         vaultPath: String
-    ): Outcome<List<RelativePath>, NotesError> = Outcome.Success(value = contents.keys.sortedBy { it.value })
+    ): Outcome<List<RelativePath>, NotesError> {
+        gate.pass()
+        return Outcome.Success(value = contents.keys.sortedBy { it.value })
+    }
 
     override suspend fun read(
         vaultPath: String,
         path: RelativePath
     ): Outcome<ByteArray, NotesError> {
+        gate.pass()
         reads += path
         return contents[path]?.let { Outcome.Success(value = it) }
             ?: Outcome.Failure(error = NotesError.EntryMissing(path.value))
@@ -34,6 +40,7 @@ class FakeAttachmentStore(
         path: RelativePath,
         bytes: ByteArray
     ): Outcome<Unit, NotesError> {
+        gate.pass()
         if (path in contents || path in fileOperations.existing) {
             return Outcome.Failure(error = NotesError.NameTaken(name = path.name))
         }

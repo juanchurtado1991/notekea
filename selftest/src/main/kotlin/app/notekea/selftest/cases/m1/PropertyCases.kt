@@ -48,7 +48,7 @@ private fun SuiteBuilder.propertiesShown() {
         expectNoText(text = "draft")
         click(text = "Properties")
         expectText(text = "draft")
-        expectUnchanged(path = PRACTICE_FILE, content = original)
+        expectFileStays(path = PRACTICE_FILE, content = original)
     }
 }
 
@@ -58,7 +58,7 @@ private fun SuiteBuilder.propertiesEdited() {
         editField(current = "draft", text = "ready")
         expectFile(path = PRACTICE_FILE, containing = "status: ready\n")
         editField(current = "4", text = "five")
-        expectUnchanged(path = PRACTICE_FILE, content = Files.readString(file(path = PRACTICE_FILE)))
+        expectFileStays(path = PRACTICE_FILE, content = Files.readString(file(path = PRACTICE_FILE)))
         editField(current = "five", text = "5")
         expectFile(path = PRACTICE_FILE, containing = "rating: 5\n")
         clickIcon(label = "done")

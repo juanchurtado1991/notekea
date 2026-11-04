@@ -117,8 +117,7 @@ private fun SuiteBuilder.embedsInEdit() {
 /** Goes back to the tab of Embeds practice, once it has scrolled back to where it was left. */
 private fun CaseScope.backToEmbeds() {
     tab(name = EMBEDS).performClick()
-    ui.waitForIdle()
-    Thread.sleep(SCROLL_RESTORE_MILLIS)
+    settle(millis = SCROLL_RESTORE_MILLIS)
     ui.waitForIdle()
 }
 
