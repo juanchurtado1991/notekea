@@ -5,8 +5,12 @@ import app.notekea.core.domain.Outcome
 import app.notekea.notes.domain.FakeNoteFileAttributes
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import okio.FileHandle
 import okio.FileSystem
@@ -18,6 +22,7 @@ import okio.fakefilesystem.FakeFileSystem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class OkioNoteContentStoreTest {
     private val testDispatcher = StandardTestDispatcher()
     private val fakeFileSystem = FakeFileSystem().apply { createDirectories(dir = VAULT.toPath() / FOLDER) }
@@ -53,6 +58,38 @@ class OkioNoteContentStoreTest {
         assertEquals(
             expected = listOf("Arepas.md"),
             actual = fakeFileSystem.list(dir = VAULT.toPath() / FOLDER).map { it.name }
+        )
+    }
+
+    @Test
+    fun `a write cancelled between two tries of the move leaves no temporary file behind`() = runStoreTest {
+        writeNote(content = ORIGINAL)
+
+        val write = launch { store(fileSystem = refusingMoves()).write(vaultPath = VAULT, path = NOTE, content = TEXT) }
+        runCurrent()
+        write.cancelAndJoin()
+
+        assertEquals(
+            expected = listOf("Arepas.md"),
+            actual = fakeFileSystem.list(dir = VAULT.toPath() / FOLDER).map { it.name }
+        )
+    }
+
+    @Test
+    fun `a temporary file that cannot be removed does not hide the failed save`() = runStoreTest {
+        writeNote(content = ORIGINAL)
+        val refusingDeletes = object : ForwardingFileSystem(delegate = refusingMoves()) {
+            override fun delete(
+                path: Path,
+                mustExist: Boolean
+            ) = throw IOException(DENIED)
+        }
+
+        val outcome = store(fileSystem = refusingDeletes).write(vaultPath = VAULT, path = NOTE, content = TEXT)
+
+        assertEquals(
+            expected = Outcome.Failure(error = NotesError.OperationFailed(path = NOTE.value)),
+            actual = outcome
         )
     }
 
