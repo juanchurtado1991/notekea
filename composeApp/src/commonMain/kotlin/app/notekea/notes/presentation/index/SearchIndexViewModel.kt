@@ -1,5 +1,6 @@
 package app.notekea.notes.presentation.index
 
+import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.DescribeElapsedTimeUseCase
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.notes.domain.IndexProgress
@@ -10,7 +11,9 @@ import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.VectorIndex
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -20,7 +23,8 @@ import kotlin.time.Instant
  * Keeps the search index of the vault at [vaultPath] up to date while it is open (`ROADMAP.md` 2.3): every change of
  * its notes starts a run ([IndexVaultUseCase]) a moment later, the run before it stopped (it resumes where it was), so
  * an edited note is in the index within seconds. An index another Notekea holds is tried again later. Rebuild index
- * forgets it and reads every note again. Closing the vault stops the run with this ViewModel.
+ * forgets it and reads every note again, unless the index cannot be emptied. Closing the vault stops the run with
+ * this ViewModel.
  */
 class SearchIndexViewModel(
     private val vaultPath: String,
@@ -65,10 +69,21 @@ class SearchIndexViewModel(
         after: Duration
     ) {
         val current = notes ?: return
-        run?.cancel()
-        run = launchGuarded(onError = ::logUnexpectedError) {
+        replaceRun {
             delay(duration = after)
             runOnce(notes = current)
+        }
+    }
+
+    /** Stops the current run and does [work] once it has ended, so two never touch the index at the same time. */
+    private fun replaceRun(
+        work: suspend () -> Unit
+    ) {
+        val previous = run
+        previous?.cancel()
+        run = launchGuarded(onError = ::logUnexpectedError) {
+            previous?.join()
+            work()
         }
     }
 
@@ -127,13 +142,24 @@ class SearchIndexViewModel(
     }
 
     private fun rebuild() {
-        run?.cancel()
-        run = launchGuarded(onError = ::logUnexpectedError) {
-            vectorIndex.clear(vaultPath = vaultPath)
-            indexStateStore.clear(vaultPath = vaultPath)
-            notes?.let { runOnce(notes = it) }
+        replaceRun {
+            if (forgetIndex()) {
+                notes?.let { runOnce(notes = it) }
+            } else {
+                reduce { it.copy(isRunning = false, error = IndexRunError.INDEX) }
+            }
         }
         reduce { it.copy(isDetailsOpen = false, isNoticeDismissed = false) }
+    }
+
+    /**
+     * Forgets what the index holds, whether it could be emptied. The state goes first and nothing stops the two halfway:
+     * notes the index still holds are only replaced by the next run, but a state left saying "done" over an empty
+     * index would keep them out of it for good.
+     */
+    private suspend fun forgetIndex(): Boolean = withContext(context = NonCancellable) {
+        indexStateStore.clear(vaultPath = vaultPath)
+        vectorIndex.clear(vaultPath = vaultPath) is Outcome.Success
     }
 
     private fun logUnexpectedError(

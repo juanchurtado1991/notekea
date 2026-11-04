@@ -1,6 +1,7 @@
 package app.notekea.notes.presentation.index
 
 import app.notekea.core.domain.FakeClock
+import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.DescribeElapsedTimeUseCase
 import app.notekea.core.domain.time.ElapsedTime
 import app.notekea.core.embedding.domain.FakeTextEmbedder
@@ -8,14 +9,18 @@ import app.notekea.notes.domain.ChunkNoteUseCase
 import app.notekea.notes.domain.FakeIndexStateStore
 import app.notekea.notes.domain.FakeNoteContentStore
 import app.notekea.notes.domain.FakeVectorIndex
+import app.notekea.notes.domain.IndexError
+import app.notekea.notes.domain.IndexRunError
 import app.notekea.notes.domain.IndexVaultUseCase
 import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.NoteSections
 import app.notekea.notes.domain.OutlineFinder
 import app.notekea.notes.domain.PlanIndexUseCase
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.VectorIndex
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -52,17 +57,19 @@ class SearchIndexViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = SearchIndexViewModel(
+    private fun viewModel(
+        vectorIndex: VectorIndex = index
+    ) = SearchIndexViewModel(
         vaultPath = VAULT,
         indexVault = IndexVaultUseCase(
             planIndex = PlanIndexUseCase(),
             chunkNote = ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder())),
             noteContentStore = contents,
             textEmbedder = embedder,
-            vectorIndex = index,
+            vectorIndex = vectorIndex,
             indexStateStore = states
         ),
-        vectorIndex = index,
+        vectorIndex = vectorIndex,
         indexStateStore = states,
         describeElapsedTime = DescribeElapsedTimeUseCase(clock = clock),
         clock = clock
@@ -110,6 +117,48 @@ class SearchIndexViewModelTest {
         advanceUntilIdle()
 
         assertEquals(expected = 2, actual = index.puts.size)
+    }
+
+    // Audit: a change of the tree cancelled Rebuild between emptying the index and forgetting the state, which went on
+    // saying every note was done: the index stayed empty.
+    @Test
+    fun `a change of the notes in the middle of Rebuild still leaves every note in the index`() = runTest(
+        context = testDispatcher
+    ) {
+        val slowToClear = object : VectorIndex by index {
+            override suspend fun clear(
+                vaultPath: String
+            ): Outcome<Unit, IndexError> = index.clear(vaultPath = vaultPath).also { delay(timeMillis = 100) }
+        }
+        val viewModel = viewModel(vectorIndex = slowToClear)
+        val notes = write(count = 2)
+        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = notes, isLoaded = true))
+        advanceUntilIdle()
+
+        viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
+        advanceTimeBy(delayTimeMillis = 50)
+        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = notes, isLoaded = true))
+        advanceUntilIdle()
+
+        assertEquals(expected = 2, actual = index.notes.getValue(VAULT).size)
+    }
+
+    @Test
+    fun `a Rebuild that cannot empty the index stops there and says so`() = runTest(context = testDispatcher) {
+        val busyToClear = object : VectorIndex by index {
+            override suspend fun clear(
+                vaultPath: String
+            ): Outcome<Unit, IndexError> = Outcome.Failure(error = IndexError.Busy)
+        }
+        val viewModel = viewModel(vectorIndex = busyToClear)
+        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = write(count = 2), isLoaded = true))
+        advanceUntilIdle()
+        index.puts.clear()
+
+        viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
+        advanceUntilIdle()
+
+        assertEquals(expected = 0 to IndexRunError.INDEX, actual = index.puts.size to viewModel.state.value.error)
     }
 
     @Test
