@@ -50,7 +50,7 @@ public class CaseScope internal constructor(
         onStep(description)
     }
 
-    private val files = CaseFiles(folders = folders, waitFor = ::holdsInTime)
+    private val files = CaseFiles(folders = folders, waitFor = { holdsInTime(condition = it) })
 
     /** Clicks the first element that shows [text] (or contains it, with [substring]), once it shows. */
     public fun click(
@@ -179,13 +179,32 @@ public class CaseScope internal constructor(
         substring: Boolean = false
     ) {
         step(description = "Expect no “$text”")
-        val holds = holdsInTime {
-            val nodes = ui.onAllNodes(matcher = hasText(text = text, substring = substring))
-            val count = nodes.fetchSemanticsNodes().size
-            // A node can leave between counting and looking at it: gone is what this waits for.
-            (0 until count).none { nodes[it].isShown() }
-        }
+        val holds = holdsInTime { !isTextShown(text = text, substring = substring) }
         if (!holds) throw CaseFailure(message = "expected \"$text\" to go away, it stayed")
+    }
+
+    /**
+     * Watches for [settleMillis] that [text] never shows, for what would come late. [expectNoText] waits for a text
+     * to leave and is done the moment it is gone, so a text that is yet to appear passes it.
+     */
+    public fun expectTextStaysAway(
+        text: String,
+        substring: Boolean = false,
+        settleMillis: Long = DEFAULT_SETTLE_MILLIS
+    ) {
+        step(description = "Expect “$text” never to show")
+        val appeared = holdsInTime(timeoutMillis = settleMillis) { isTextShown(text = text, substring = substring) }
+        if (appeared) throw CaseFailure(message = "expected \"$text\" to stay away, it appeared")
+    }
+
+    private fun isTextShown(
+        text: String,
+        substring: Boolean
+    ): Boolean {
+        val nodes = ui.onAllNodes(matcher = hasText(text = text, substring = substring))
+        val count = nodes.fetchSemanticsNodes().size
+        // A node can leave between counting and looking at it: gone counts as not shown.
+        return (0 until count).any { nodes[it].isShown() }
     }
 
     /** The file at [path] in the case's data folder (`"Personal Notes/Welcome.md"`), to read or change. */
@@ -226,8 +245,11 @@ public class CaseScope internal constructor(
         return (0 until count).map { nodes[it] }.firstOrNull { it.isShown() } ?: nodes.onFirst()
     }
 
-    private fun holdsInTime(condition: () -> Boolean): Boolean = try {
-        ui.waitUntil(timeoutMillis = waitMillis, condition = condition)
+    private fun holdsInTime(
+        timeoutMillis: Long = waitMillis,
+        condition: () -> Boolean
+    ): Boolean = try {
+        ui.waitUntil(timeoutMillis = timeoutMillis, condition = condition)
         true
     } catch (_: ComposeTimeoutException) {
         false
@@ -237,5 +259,10 @@ public class CaseScope internal constructor(
         val focused = ui.onAllNodes(matcher = isFocused())
         val hasFocus = focused.fetchSemanticsNodes().isNotEmpty()
         return if (hasFocus) focused.onFirst() else ui.onAllNodes(matcher = isRoot()).onFirst()
+    }
+
+    private companion object {
+        // Long enough for what a click sets off in the background to reach the screen.
+        const val DEFAULT_SETTLE_MILLIS = 2_000L
     }
 }

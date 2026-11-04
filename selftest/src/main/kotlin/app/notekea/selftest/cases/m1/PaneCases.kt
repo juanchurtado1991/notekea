@@ -156,8 +156,7 @@ private fun SuiteBuilder.quickFolderClicks() {
         openVault(name = PLAYGROUND, shownText = WELCOME)
         clickIcon(label = "Collapse all folders")
         repeat(times = QUICK_CLICKS) { clickInTree(text = if (it % 2 == 0) "Recipes" else "Travel") }
-        expectNoText(text = "Something went wrong. Please try again.")
-        expectNoText(text = "Something went wrong", substring = true)
+        expectTextStaysAway(text = "Something went wrong", substring = true)
     }
 }
 
