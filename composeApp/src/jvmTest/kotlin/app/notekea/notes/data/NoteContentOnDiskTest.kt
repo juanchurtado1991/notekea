@@ -48,6 +48,20 @@ class NoteContentOnDiskTest {
     }
 
     @Test
+    fun `a note with the longest name the disk takes can be saved`() = runTest(context = testDispatcher) {
+        val longest = RelativePath(value = "a".repeat(n = 252) + ".md")
+        Files.writeString(vault.resolve(longest.value), TEXT)
+
+        val saved = store.write(vaultPath = vaultPath, path = longest, content = EDITED)
+
+        assertEquals(
+            expected = Outcome.Success(value = Unit) to EDITED,
+            actual =
+            saved to store.read(vaultPath, longest)
+        )
+    }
+
+    @Test
     fun `a save keeps the permissions of the note it replaces, and a new note is written as usual`() =
         runTest(context = testDispatcher) {
             if ("posix" !in FileSystems.getDefault().supportedFileAttributeViews()) return@runTest
