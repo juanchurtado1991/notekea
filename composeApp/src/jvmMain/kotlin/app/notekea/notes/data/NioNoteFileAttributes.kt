@@ -19,12 +19,23 @@ class NioNoteFileAttributes : NoteFileAttributes {
     ) {
         val source = Path.of(sourcePath)
         val target = Path.of(targetPath)
-        try {
+        keeping {
             val created = Files.readAttributes(source, BasicFileAttributes::class.java).creationTime()
             Files.getFileAttributeView(target, BasicFileAttributeView::class.java).setTimes(null, null, created)
+        }
+        keeping {
             Files.getFileAttributeView(source, PosixFileAttributeView::class.java)?.let {
                 Files.setPosixFilePermissions(target, it.readAttributes().permissions())
             }
+        }
+    }
+
+    /** Each attribute apart: a volume that refuses a creation time still takes the permissions. */
+    private inline fun keeping(
+        attribute: () -> Unit
+    ) {
+        try {
+            attribute()
         } catch (_: IOException) {
             // A new note has nothing to keep, and a save never fails over its attributes.
         }
