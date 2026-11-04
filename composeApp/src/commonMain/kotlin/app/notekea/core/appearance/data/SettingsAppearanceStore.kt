@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 /**
- * [AppearanceStore] on Multiplatform Settings: `app.theme` and `app.theme_mode`, by their ids. It is read once, on the
+ * [AppearanceStore] on Multiplatform Settings: `app.theme` and `app.theme_mode`, by their ids, and `app.reduce_motion`. It is read once, on the
  * first [observe], and then held, so every window sees each [save] at once.
  */
 class SettingsAppearanceStore(
@@ -34,6 +34,7 @@ class SettingsAppearanceStore(
         withContext(context = dispatchers.io) {
             settings.putString(key = THEME_KEY, value = appearance.theme.id)
             settings.putString(key = MODE_KEY, value = appearance.mode.id)
+            settings.putBoolean(key = REDUCE_MOTION_KEY, value = appearance.reduceMotion)
         }
         current.value = appearance
     }
@@ -41,12 +42,14 @@ class SettingsAppearanceStore(
     private suspend fun read(): Appearance = withContext(context = dispatchers.io) {
         Appearance(
             theme = ColorTheme.fromId(id = settings.getStringOrNull(key = THEME_KEY)),
-            mode = ThemeMode.fromId(id = settings.getStringOrNull(key = MODE_KEY))
+            mode = ThemeMode.fromId(id = settings.getStringOrNull(key = MODE_KEY)),
+            reduceMotion = settings.getBoolean(key = REDUCE_MOTION_KEY, defaultValue = false)
         )
     }
 
     private companion object {
         const val MODE_KEY = "app.theme_mode"
+        const val REDUCE_MOTION_KEY = "app.reduce_motion"
         const val THEME_KEY = "app.theme"
     }
 }

@@ -133,7 +133,8 @@ below is that palette, now the Cobalt Tangerine theme; the app starts in Workspa
 - **Menu bar:** File, Edit, View, Window and Help, in the window on Windows and Linux and at the top of the screen on
   macOS, whose app menu holds About, Settings and Quit (`PLATFORM_GUIDELINES.md` §4). Each entry runs what its shortcut
   runs and is dimmed while no screen offers it, so every command can be found without knowing its shortcut.
-- **Motion:** 150–200 ms for panel open/close; no animation longer than 250 ms; respect "reduce motion".
+- **Motion:** 150–200 ms for panel open/close; no animation longer than 250 ms; respect "reduce motion": the setting
+  in Settings → Appearance or the system's turns animations off.
 - **Themes:** light and dark, following the system by default; since 2.12 also chosen in Settings → Appearance,
   with eleven color themes, Workspace Blue the one it starts with.
 - **Accessibility:** WCAG AA contrast for text, every action reachable by keyboard, visible focus ring,

@@ -2,7 +2,6 @@ package app.notekea.core.presentation.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -30,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.theme.motionTween
 import app.notekea.core.presentation.theme.NotekeaIcons
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -208,6 +208,9 @@ private fun rememberTabRelease(
     val scope = rememberCoroutineScope()
     val currentOnReorder by rememberUpdatedState(newValue = onReorder)
     val currentOnDrop by rememberUpdatedState(newValue = onDrop)
+    val glide by rememberUpdatedState(
+        newValue = motionTween<Offset>(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
+    )
     return remember(targets, scope) {
         release@{
             val drag = targets.drag ?: return@release
@@ -221,7 +224,7 @@ private fun rememberTabRelease(
             scope.launch {
                 Animatable(initialValue = drag.travel, typeConverter = Offset.VectorConverter).animateTo(
                     targetValue = Offset(x = targets.glideTo(slot = slot, drag = drag), y = 0f),
-                    animationSpec = tween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
+                    animationSpec = glide
                 ) { drag.travel = value }
                 if (slot == drag.index) targets.drag = null else currentOnReorder(drag.index, slot)
             }

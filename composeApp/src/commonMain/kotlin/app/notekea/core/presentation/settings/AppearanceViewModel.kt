@@ -26,6 +26,7 @@ class AppearanceViewModel(
         when (intent) {
             is AppearanceIntent.OnThemeChoose -> save { it.copy(theme = intent.theme) }
             is AppearanceIntent.OnModeChoose -> save { it.copy(mode = intent.mode) }
+            AppearanceIntent.OnReduceMotionToggle -> save { it.copy(reduceMotion = !it.reduceMotion) }
         }
     }
 

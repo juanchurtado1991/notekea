@@ -2,7 +2,6 @@ package app.notekea.core.presentation.components
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.DraggableState
 import androidx.compose.foundation.gestures.Orientation
@@ -35,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.platform.LocalResizePointerIcon
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.theme.motionTween
 
 private const val HANDLE_WIDTH_DP = 8
 private const val OVERLAY_SHADOW_DP = 8
@@ -70,7 +70,7 @@ fun NotekeaSplitPane(
     var isDragging by remember { mutableStateOf(value = false) }
     val shownWidth by animateDpAsState(
         targetValue = if (isPanelVisible) draggedWidth else 0.dp,
-        animationSpec = if (isDragging) snap() else tween(durationMillis = NotekeaDimensions.MOTION_PANEL_MILLIS)
+        animationSpec = if (isDragging) snap() else motionTween(durationMillis = NotekeaDimensions.MOTION_PANEL_MILLIS)
     )
     val isStart = panelSide == PaneSide.START
     val dragState = rememberPanelDrag(isStart = isStart, width = { draggedWidth }) {

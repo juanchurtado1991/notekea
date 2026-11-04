@@ -18,6 +18,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import app.notekea.core.presentation.theme.LocalReduceMotion
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -238,13 +239,15 @@ private fun ScrollToCurrentMatch(
 ) {
     val margin = with(LocalDensity.current) { MATCH_SCROLL_MARGIN_DP.dp.toPx() }
     val match = find?.current?.let { find.matches.getOrNull(index = it) }
+    val reduceMotion = LocalReduceMotion.current
     LaunchedEffect(match) {
         if (match == null) return@LaunchedEffect
         // The text may not be laid out yet (Find opened with the note): wait for its first layout.
         val result = snapshotFlow { layout() }.filterNotNull().first()
         if (match.first >= result.layoutInput.text.length) return@LaunchedEffect
         val lineTop = result.getLineTop(lineIndex = result.getLineForOffset(offset = match.first))
-        scrollState.animateScrollTo(value = (top() + lineTop - margin).roundToInt().coerceAtLeast(minimumValue = 0))
+        val target = (top() + lineTop - margin).roundToInt().coerceAtLeast(minimumValue = 0)
+        if (reduceMotion) scrollState.scrollTo(value = target) else scrollState.animateScrollTo(value = target)
     }
 }
 

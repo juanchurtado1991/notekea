@@ -40,6 +40,17 @@ class SettingsAppearanceStoreTest {
         }
 
     @Test
+    fun `reduce motion starts off and a choice is kept for the next run`() = runTest(context = testDispatcher) {
+        val firstRun = store().observe().first()
+        store().save(appearance = Appearance(reduceMotion = true))
+
+        assertEquals(
+            expected = listOf(false, true),
+            actual = listOf(firstRun.reduceMotion, store().observe().first().reduceMotion)
+        )
+    }
+
+    @Test
     fun `whoever kept the first palette while it was the default keeps it, now as Cobalt Tangerine`() =
         runTest(context = testDispatcher) {
             settings.putString(key = "app.theme", value = "default")

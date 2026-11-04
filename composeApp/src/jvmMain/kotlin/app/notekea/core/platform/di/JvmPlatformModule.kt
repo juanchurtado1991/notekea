@@ -9,11 +9,13 @@ import app.notekea.core.data.SqliteDatabaseFactory
 import app.notekea.db.NotekeaDatabase
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.LocalTimeFormatter
+import app.notekea.core.platform.data.CommandSystemMotion
 import app.notekea.core.platform.data.JvmSystemEnvironment
 import app.notekea.core.platform.data.PortalSystemAppearance
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.SystemAppearance
 import app.notekea.core.platform.domain.SystemEnvironment
+import app.notekea.core.platform.domain.SystemMotion
 import com.russhwolf.settings.Settings
 import org.koin.dsl.module
 
@@ -29,6 +31,9 @@ val jvmPlatformModule = module {
         SqliteDatabaseFactory(appDataDirectory = get<PlatformConventions>().appDataDirectory).create()
     }
     single<SystemEnvironment> { JvmSystemEnvironment() }
+    single<SystemMotion> {
+        CommandSystemMotion(operatingSystem = get<PlatformConventions>().operatingSystem, dispatchers = get())
+    }
     single<SystemAppearance> {
         PortalSystemAppearance(operatingSystem = get<PlatformConventions>().operatingSystem, dispatchers = get())
     }
