@@ -2,6 +2,7 @@ package app.notekea.notes.presentation.connections
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaButtonStyle
 import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.core.presentation.components.NotekeaLazyScrollArea
 import app.notekea.core.presentation.components.NotekeaPassageRow
 import app.notekea.core.presentation.components.focusBorder
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
@@ -46,6 +51,7 @@ import org.jetbrains.compose.resources.stringResource
 
 private const val PILL_HEIGHT_DP = 22
 private const val PILL_ICON_DP = 12
+private const val PREVIEW_HEIGHT_DP = 160
 private const val PILL_GAP_DP = 4
 
 /**
@@ -62,6 +68,27 @@ fun MentionList(
     actions: ConnectionActions
 ) {
     val mentions = if (isLinked) state.mentions.linked else state.mentions.unlinked
+    val listState = rememberLazyListState()
+    NotekeaLazyScrollArea(state = listState) {
+        LazyColumn(state = listState) {
+            item(key = STATUS_ITEM, contentType = STATUS_ITEM) {
+                MentionsStatus(state = state, isLinked = isLinked, isEmpty = mentions.isEmpty(), onIntent = onIntent)
+            }
+            items(items = mentions, key = { it.source.value }, contentType = { MENTION_ITEM }) { mention ->
+                MentionRow(mention = mention, isLinked = isLinked, onIntent = onIntent, actions = actions)
+            }
+        }
+    }
+}
+
+/** What is said above the rows: a Link that failed, and a search that failed, under way or that found nothing. */
+@Composable
+private fun MentionsStatus(
+    state: NoteMentionsState,
+    isLinked: Boolean,
+    isEmpty: Boolean,
+    onIntent: (NoteMentionsIntent) -> Unit
+) {
     Column {
         state.linkFailed?.takeUnless { isLinked }?.let {
             ConnectionsMuted(text = stringResource(Res.string.mentions_link_failed, it.nameWithoutExtension))
@@ -69,9 +96,9 @@ fun MentionList(
         when {
             state.searchFailed -> MentionsFailed(onRetry = { onIntent(NoteMentionsIntent.OnRetry) })
 
-            mentions.isEmpty() && state.isLoading -> ConnectionsSkeleton()
+            isEmpty && state.isLoading -> ConnectionsSkeleton()
 
-            mentions.isEmpty() -> {
+            isEmpty -> {
                 val name = state.note?.nameWithoutExtension.orEmpty()
                 ConnectionsMuted(
                     text = if (isLinked) {
@@ -81,9 +108,6 @@ fun MentionList(
                     }
                 )
             }
-        }
-        mentions.forEach { mention ->
-            MentionRow(mention = mention, isLinked = isLinked, onIntent = onIntent, actions = actions)
         }
     }
 }
@@ -185,6 +209,8 @@ private fun LinkButton(
     }
 }
 
+private const val MENTION_ITEM = "mention"
+private const val STATUS_ITEM = "status"
 private const val SUBTITLE_SEPARATOR = " · "
 
 @Preview
@@ -192,25 +218,27 @@ private const val SUBTITLE_SEPARATOR = " · "
 private fun MentionListPreview() {
     val passage = "We found arepas at a small place by the river."
     NotekeaPreviewThemes {
-        MentionList(
-            state = NoteMentionsState(
-                note = RelativePath(value = "Recipes/Arepas.md"),
-                mentions = NoteMentions(
-                    linked = emptyList(),
-                    unlinked = listOf(
-                        NoteMention(
-                            source = RelativePath(value = "Travel/Lisbon trip.md"),
-                            range = 9..14,
-                            count = 2,
-                            passage = passage,
-                            highlight = 9..14
+        Box(modifier = Modifier.height(height = PREVIEW_HEIGHT_DP.dp)) {
+            MentionList(
+                state = NoteMentionsState(
+                    note = RelativePath(value = "Recipes/Arepas.md"),
+                    mentions = NoteMentions(
+                        linked = emptyList(),
+                        unlinked = listOf(
+                            NoteMention(
+                                source = RelativePath(value = "Travel/Lisbon trip.md"),
+                                range = 9..14,
+                                count = 2,
+                                passage = passage,
+                                highlight = 9..14
+                            )
                         )
                     )
-                )
-            ),
-            isLinked = false,
-            onIntent = {},
-            actions = ConnectionActions(onOpen = {}, onReveal = { _, _ -> }, onOpenBeside = {}, onInsertLink = {})
-        )
+                ),
+                isLinked = false,
+                onIntent = {},
+                actions = ConnectionActions(onOpen = {}, onReveal = { _, _ -> }, onOpenBeside = {}, onInsertLink = {})
+            )
+        }
     }
 }

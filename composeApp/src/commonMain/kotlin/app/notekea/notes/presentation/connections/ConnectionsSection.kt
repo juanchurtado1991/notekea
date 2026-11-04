@@ -1,14 +1,14 @@
 package app.notekea.notes.presentation.connections
 
-import app.notekea.core.presentation.components.NotekeaScrollArea
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.components.NotekeaCountTabs
 import app.notekea.core.presentation.components.NotekeaFold
 import app.notekea.core.presentation.components.NotekeaSectionHeader
@@ -26,6 +26,8 @@ import app.notekea.resources.connections_related
 import app.notekea.resources.connections_title
 import app.notekea.resources.connections_unlinked
 import org.jetbrains.compose.resources.stringResource
+
+private const val PREVIEW_HEIGHT_DP = 240
 
 /**
  * The inspector's Connections (`ROADMAP.md` 2.4, 2.5, design A): its header ([isOpen], [onToggle]), then a picker of
@@ -61,23 +63,20 @@ fun ColumnScope.ConnectionsSection(
                     vertical = NotekeaDimensions.SpacingXs
                 )
             )
-            val scroll = rememberScrollState()
-            NotekeaScrollArea(state = scroll) {
-                Column(modifier = Modifier.verticalScroll(state = scroll)) {
-                    when (tab) {
-                        ConnectionsTab.RELATED -> RelatedList(
-                            state = related,
-                            onIntent = onRelatedIntent,
-                            actions = actions
-                        )
+            key(tab) {
+                when (tab) {
+                    ConnectionsTab.RELATED -> RelatedList(
+                        state = related,
+                        onIntent = onRelatedIntent,
+                        actions = actions
+                    )
 
-                        ConnectionsTab.LINKED, ConnectionsTab.UNLINKED -> MentionList(
-                            state = mentions,
-                            isLinked = tab == ConnectionsTab.LINKED,
-                            onIntent = onMentionsIntent,
-                            actions = actions
-                        )
-                    }
+                    ConnectionsTab.LINKED, ConnectionsTab.UNLINKED -> MentionList(
+                        state = mentions,
+                        isLinked = tab == ConnectionsTab.LINKED,
+                        onIntent = onMentionsIntent,
+                        actions = actions
+                    )
                 }
             }
         }
@@ -101,7 +100,7 @@ private fun countsOf(
 @Composable
 private fun ConnectionsSectionPreview() {
     NotekeaPreviewThemes {
-        Column {
+        Column(modifier = Modifier.height(height = PREVIEW_HEIGHT_DP.dp)) {
             ConnectionsSection(
                 tab = ConnectionsTab.LINKED,
                 onTabSelect = {},
