@@ -58,6 +58,16 @@ class JetBrainsMarkdownLinkFinderTest {
         )
     }
 
+    // Audit: an angle link with no `)` was found, and the mentions that looked for its end crashed.
+    @Test
+    fun `an angle link must be closed, and may carry a title`() {
+        assertEquals(expected = emptyList(), actual = finder.find(markdown = "[x](<Target.md>"))
+        assertEquals(
+            expected = listOf("Target.md"),
+            actual = finder.find(markdown = "[x](<Target.md> \"A title\")").map { it.target }
+        )
+    }
+
     @Test
     fun `links inside code are left alone`() {
         val markdown =

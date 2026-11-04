@@ -101,6 +101,13 @@ class FindMentionsUseCaseTest {
         assertEquals(expected = listOf(1, 0), actual = linked)
     }
 
+    @Test
+    fun `a Markdown link never closed is not a link, and finding mentions goes on`() {
+        val mentions = find("Travel/Lisbon.md" to "See [x](<Arepas.md>")
+
+        assertEquals(expected = 0, actual = mentions.linked.size)
+    }
+
     private fun find(
         vararg notes: Pair<String, String>
     ): NoteMentions {
