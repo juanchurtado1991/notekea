@@ -2,6 +2,7 @@ package app.notekea.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
+import app.notekea.notes.domain.FakeNoteFileAttributes
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.RelativePath
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -20,6 +21,7 @@ import kotlin.test.assertEquals
 class OkioNoteContentStoreTest {
     private val testDispatcher = StandardTestDispatcher()
     private val fakeFileSystem = FakeFileSystem().apply { createDirectories(dir = VAULT.toPath() / FOLDER) }
+    private val attributes = FakeNoteFileAttributes()
 
     @Test
     fun `text round-trips exactly, byte order mark and windows line endings included`() = runStoreTest {
@@ -100,6 +102,19 @@ class OkioNoteContentStoreTest {
     }
 
     @Test
+    fun `the temporary file takes the note's attributes before it replaces the note`() = runStoreTest {
+        writeNote(content = ORIGINAL)
+        var noteAtCopy: String? = null
+        attributes.onCopy = { noteAtCopy = fakeFileSystem.read(VAULT.toPath() / NOTE.value) { readUtf8() } }
+
+        store().write(vaultPath = VAULT, path = NOTE, content = TEXT)
+
+        assertEquals(expected = "$VAULT/${NOTE.value}", actual = attributes.copies.single().first)
+        assertEquals(expected = "$VAULT/$FOLDER", actual = attributes.copies.single().second.substringBeforeLast("/"))
+        assertEquals(expected = ORIGINAL, actual = noteAtCopy)
+    }
+
+    @Test
     fun `a longer temporary file left by a crash leaves nothing of itself in the next save`() = runStoreTest {
         writeNote(content = ORIGINAL)
         fakeFileSystem.write(file = VAULT.toPath() / FOLDER / ".Arepas.md.notekea-tmp") { writeUtf8(TEXT + TEXT) }
@@ -157,7 +172,8 @@ class OkioNoteContentStoreTest {
         fileSystem: FileSystem = fakeFileSystem
     ): OkioNoteContentStore = OkioNoteContentStore(
         fileSystem = fileSystem,
-        dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
+        dispatchers = FakeAppDispatchers(dispatcher = testDispatcher),
+        attributes = attributes
     )
 
     private fun writeNote(

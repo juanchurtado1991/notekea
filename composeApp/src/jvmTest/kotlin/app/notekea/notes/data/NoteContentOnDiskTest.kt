@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import java.nio.file.FileSystems
 import java.nio.file.Files
+import java.nio.file.attribute.PosixFilePermissions
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.deleteRecursively
 import kotlin.test.AfterTest
@@ -22,7 +23,11 @@ class NoteContentOnDiskTest {
     private val dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     private val vault = Files.createTempDirectory(TEMP_PREFIX)
     private val vaultPath = vault.toString()
-    private val store = OkioNoteContentStore(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
+    private val store = OkioNoteContentStore(
+        fileSystem = FileSystem.SYSTEM,
+        dispatchers = dispatchers,
+        attributes = NioNoteFileAttributes()
+    )
 
     @AfterTest
     fun deleteVault() {
@@ -42,7 +47,25 @@ class NoteContentOnDiskTest {
         )
     }
 
+    @Test
+    fun `a save keeps the permissions of the note it replaces, and a new note is written as usual`() =
+        runTest(context = testDispatcher) {
+            if ("posix" !in FileSystems.getDefault().supportedFileAttributeViews()) return@runTest
+            val file = vault.resolve(NOTE.value).also { Files.writeString(it, TEXT) }
+            val permissions = PosixFilePermissions.fromString("rw-r-----")
+            Files.setPosixFilePermissions(file, permissions)
+            val created = RelativePath(value = "New.md")
+
+            store.write(vaultPath = vaultPath, path = NOTE, content = EDITED)
+            store.write(vaultPath = vaultPath, path = created, content = TEXT)
+
+            assertEquals(expected = permissions, actual = Files.getPosixFilePermissions(file))
+            assertEquals(expected = EDITED, actual = Files.readString(file))
+            assertEquals(expected = TEXT, actual = Files.readString(vault.resolve(created.value)))
+        }
+
     companion object {
+        private const val EDITED = "# Arepas\n\nEdited.\n"
         private const val TEMP_PREFIX = "notekea-note-content"
         private const val TEXT = "# Arepas\n"
         private val NOTE = RelativePath(value = "Arepas.md")

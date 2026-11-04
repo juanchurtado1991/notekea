@@ -38,7 +38,11 @@ class SmokeQuickSwitcherTest {
     )
     private val searchContent = SearchNoteContentUseCase(
         noteTextCache = NoteTextCache(
-            contentStore = OkioNoteContentStore(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers),
+            contentStore = OkioNoteContentStore(
+                fileSystem = FileSystem.SYSTEM,
+                dispatchers = dispatchers,
+                attributes = NioNoteFileAttributes()
+            ),
             textFolder = folder
         ),
         textFolder = folder,
