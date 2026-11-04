@@ -89,6 +89,14 @@ tasks.register<GradleBuild>("check") {
     tasks = listOf("check")
 }
 
+tasks.register<GradleBuild>("ktlintFormat") {
+    description = "Formats the build's own code; every module adds its own format to the same command"
+    group = "formatting"
+    dir = file("buildSrc")
+    buildName = "buildSrcFormat"
+    tasks = listOf("ktlintFormat")
+}
+
 tasks.register<Exec>("installGitHooks") {
     description = "Points git at the versioned hooks in $gitHooksDirectory (pre-commit: ktlintFormat + check)."
     group = "git hooks"

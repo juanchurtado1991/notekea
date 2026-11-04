@@ -35,7 +35,9 @@ object EmbeddingModel {
         }
 
     /** Where the model is downloaded. */
-    fun file(project: Project): RegularFile = project.rootProject.layout.projectDirectory.file(".gradle/models/$FILE_NAME")
+    fun file(
+        project: Project
+    ): RegularFile = project.rootProject.layout.projectDirectory.file(".gradle/models/$FILE_NAME")
 
     /** A task that puts the model into [project]'s app resources, the folder `appResourcesRootDir` points to. */
     fun appResources(project: Project): TaskProvider<Sync> =
