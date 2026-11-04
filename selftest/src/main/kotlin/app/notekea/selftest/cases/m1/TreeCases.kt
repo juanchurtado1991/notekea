@@ -2,6 +2,7 @@ package app.notekea.selftest.cases.m1
 
 import androidx.compose.ui.input.key.Key
 import app.notekea.selftest.clickInTree
+import app.notekea.selftest.expectNotInTree
 import app.notekea.selftest.expectFolder
 import app.notekea.selftest.renameInTree
 import app.notekea.selftest.rightClickInTree
@@ -29,14 +30,15 @@ fun SuiteBuilder.treeCases() {
 private fun SuiteBuilder.treeOpensTabs() {
     automated(id = "1.4-01", title = "Clicking the tree opens notes and folders in tabs") {
         openVault(name = PERSONAL_NOTES, shownText = WELCOME)
-        click(text = "Projects")
-        click(text = "Garden")
-        click(text = "Tomato plan")
+        // The names also show in tabs, the note's folder and the inspector (Related, 2.4): the clicks go to the tree.
+        clickInTree(text = "Projects")
+        clickInTree(text = "Garden")
+        clickInTree(text = "Tomato plan")
         expectText(text = "Three levels deep on purpose", substring = true)
-        click(text = RECIPES)
-        click(text = "Arepas")
+        clickInTree(text = RECIPES)
+        clickInTree(text = "Arepas")
         listOf("#recipe", "#venezuelan", "Arepa", "Corn cakes").forEach { expectText(text = it) }
-        click(text = RECIPES)
+        clickInTree(text = RECIPES)
         expectText(text = "3 files")
     }
 }
@@ -44,14 +46,15 @@ private fun SuiteBuilder.treeOpensTabs() {
 private fun SuiteBuilder.treeKeyboard() {
     automated(id = "1.4-02", title = "The tree with the keyboard") {
         openVault(name = PERSONAL_NOTES, shownText = WELCOME)
-        click(text = "Journal")
-        expectText(text = "2026-10-21")
+        clickInTree(text = "Journal")
+        treeRow(text = "2026-10-21")
         press(key = Key.DirectionDown)
         pressOpen()
         expectText(text = "Planted the last tomato seedlings", substring = true)
         press(key = Key.DirectionLeft)
         press(key = Key.DirectionLeft)
-        expectNoText(text = "2026-10-21")
+        // Related (2.4) may show the day as a card: only the tree must let it go.
+        expectNotInTree(text = "2026-10-21")
     }
 }
 

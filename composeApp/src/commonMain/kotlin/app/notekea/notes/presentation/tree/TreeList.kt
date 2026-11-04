@@ -29,6 +29,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.components.NotekeaContextMenuArea
@@ -48,6 +49,7 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.TreeRow
 import androidx.compose.ui.Modifier
+import app.notekea.core.presentation.TestTags
 
 private const val EMPTY_ROWS_BELOW = 2
 private const val PREVIEW_HEIGHT_DP = 320
@@ -87,7 +89,7 @@ internal fun TreeList(
         modifier = modifier,
         onOpenByPointer = { onIntent(VaultTreeIntent.OnSelectionClear) }
     ) {
-        NotekeaLazyScrollArea(state = listState, modifier = Modifier.fillMaxSize()) {
+        NotekeaLazyScrollArea(state = listState, modifier = Modifier.fillMaxSize().testTag(tag = TestTags.TREE)) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()

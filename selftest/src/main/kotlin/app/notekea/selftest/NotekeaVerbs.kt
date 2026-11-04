@@ -7,13 +7,18 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
+import app.notekea.core.presentation.TestTags
 import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
@@ -21,6 +26,7 @@ import com.testbuddy.Shortcut
 import com.testbuddy.ShortcutModifier.Mod
 import java.nio.file.Files
 
+private const val INDEX_READY = "ready to search"
 private const val OPEN_FOLDER = "Open folder…"
 private const val FIND_NOTE = "Find a note by name or alias"
 private const val WAIT_MILLIS = 10_000L
@@ -42,14 +48,20 @@ fun CaseScope.relaunch(whileClosed: () -> Unit = {}) {
     ui.waitForIdle()
 }
 
-/** Opens the vault [name] of the case's data with Open folder…, the picker answering it, until [shownText] shows. */
+/**
+ * Opens the vault [name] of the case's data with Open folder…, the picker answering it, until [shownText] shows and,
+ * unless [waitsForIndex] is false (a vault too large to index in a case's wait), its notes are ready to search: the
+ * inspector's sections then show what they show for good, so a case meets the same window every run.
+ */
 fun CaseScope.openVault(
     name: String,
-    shownText: String
+    shownText: String,
+    waitsForIndex: Boolean = true
 ) {
     notekea().folderPicker.nextPick = notekea().vaultPath(name = name)
     click(text = OPEN_FOLDER)
     expectText(text = shownText)
+    if (waitsForIndex) expectText(text = INDEX_READY, substring = true)
 }
 
 /** Opens the note [name] with the quick switcher (Mod+P) as a person who knows its name, until [shownText] shows. */
@@ -65,17 +77,49 @@ fun CaseScope.openNote(
     expectText(text = shownText, substring = true)
 }
 
-/** Waits until the quick switcher lists [name] as a result, not only in its search field. */
+/** Waits until the open palette (the quick switcher, a picker) lists [name] among its results. */
 fun CaseScope.waitForResult(name: String) {
     try {
-        ui.waitUntilAtLeastOneExists(
-            matcher = hasText(text = name) and !hasSetTextAction(),
-            timeoutMillis = WAIT_MILLIS
-        )
+        ui.waitUntilAtLeastOneExists(matcher = paletteResult(name = name), timeoutMillis = WAIT_MILLIS)
     } catch (exception: ComposeTimeoutException) {
-        throw CaseFailure(message = "expected the quick switcher to list \"$name\", it did not").apply {
+        throw CaseFailure(message = "expected the palette to list \"$name\", it did not").apply {
             initCause(exception)
         }
+    }
+}
+
+/** Waits until the open palette no longer lists [name]; the same name elsewhere in the window does not count. */
+fun CaseScope.expectNoResult(name: String) {
+    step(description = "Expect no result “$name”")
+    awaitNone(matcher = paletteResult(name = name), failure = "expected the palette to stop listing \"$name\"")
+}
+
+/** Waits until the tree shows no row with [text]; the same name elsewhere (a tab, the inspector) does not count. */
+fun CaseScope.expectNotInTree(text: String) {
+    step(description = "Expect no “$text” in the tree")
+    awaitNone(matcher = inTree(text = text), failure = "expected \"$text\" to leave the tree, it stayed")
+}
+
+private fun paletteResult(
+    name: String
+): SemanticsMatcher = hasText(text = name) and !hasSetTextAction() and
+    hasAnyAncestor(matcher = hasTestTag(testTag = TestTags.PALETTE_RESULTS))
+
+private fun inTree(
+    text: String
+): SemanticsMatcher = hasText(text = text) and hasAnyAncestor(matcher = hasTestTag(testTag = TestTags.TREE))
+
+private fun CaseScope.awaitNone(
+    matcher: SemanticsMatcher,
+    failure: String
+) {
+    try {
+        ui.waitUntil(timeoutMillis = WAIT_MILLIS) {
+            val nodes = ui.onAllNodes(matcher = matcher)
+            (0 until nodes.fetchSemanticsNodes().size).none { nodes[it].isShown() }
+        }
+    } catch (exception: ComposeTimeoutException) {
+        throw CaseFailure(message = failure).apply { initCause(exception) }
     }
 }
 
@@ -89,16 +133,14 @@ fun CaseScope.expectFolder(path: String) {
     }
 }
 
-/**
- * The row of the sidebar's tree that shows [text]: of every element on screen showing it, the one furthest left. One
- * scrolled out of its list (a Related card, say) has no size, at the window's corner, so it is left out.
- */
+/** The row of the sidebar's tree that shows [text], once it shows; the same name elsewhere is never taken for it. */
 fun CaseScope.treeRow(text: String): SemanticsNodeInteraction {
-    expectText(text = text)
-    val nodes = ui.onAllNodes(matcher = hasText(text = text))
-    val shown = nodes.fetchSemanticsNodes().indices.filterNot { nodes[it].fetchSemanticsNode().boundsInRoot.isEmpty }
-    val leftmost = shown.minBy { nodes[it].fetchSemanticsNode().boundsInRoot.left }
-    return nodes[leftmost]
+    try {
+        ui.waitUntilAtLeastOneExists(matcher = inTree(text = text), timeoutMillis = WAIT_MILLIS)
+    } catch (exception: ComposeTimeoutException) {
+        throw CaseFailure(message = "expected the tree to show \"$text\", it did not").apply { initCause(exception) }
+    }
+    return ui.onAllNodes(matcher = inTree(text = text)).onFirst()
 }
 
 /** Clicks the row of the tree that shows [text]. */
