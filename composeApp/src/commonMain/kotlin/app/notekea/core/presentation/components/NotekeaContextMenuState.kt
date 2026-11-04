@@ -8,11 +8,15 @@ import androidx.compose.ui.geometry.Offset
 
 /**
  * Whether a [NotekeaContextMenuArea] is open and where, held in composition like a drawer state. A right click opens
- * it at the pointer; the keyboard (Shift+F10, the Menu key) opens it at the top start of its area with [open].
+ * it at the pointer; the keyboard (Shift+F10, the Menu key) opens it at the top start of its area with [open], and
+ * the menu then takes the keyboard ([isByKeyboard]).
  */
 @Stable
 class NotekeaContextMenuState {
     var position: Offset? by mutableStateOf(value = null)
+        private set
+
+    var isByKeyboard: Boolean by mutableStateOf(value = false)
         private set
 
     fun close() {
@@ -20,8 +24,10 @@ class NotekeaContextMenuState {
     }
 
     fun open(
-        at: Offset = Offset.Zero
+        at: Offset = Offset.Zero,
+        byKeyboard: Boolean = false
     ) {
         position = at
+        isByKeyboard = byKeyboard
     }
 }

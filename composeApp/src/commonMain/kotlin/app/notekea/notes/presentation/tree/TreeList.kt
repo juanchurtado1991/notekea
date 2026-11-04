@@ -24,7 +24,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
@@ -33,6 +32,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.components.NotekeaContextMenuArea
+import app.notekea.core.presentation.components.isContextMenuKey
 import app.notekea.core.presentation.platform.matches
 import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.platform.label
@@ -197,7 +197,7 @@ private fun handleTreeKey(
 ): Boolean {
     if (event.type != KeyEventType.KeyDown || state.renaming != null) return false
     val intent = treeIntentFor(event = event, state = state)
-    val isMenuKey = event.key == Key.Menu || (event.key == Key.F10 && event.isShiftPressed)
+    val isMenuKey = event.isContextMenuKey
     if (isMenuKey && state.selectedPath != null) onMenuRequest()
     intent?.let(onIntent)
     return intent != null || isMenuKey
