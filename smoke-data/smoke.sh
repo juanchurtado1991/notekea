@@ -190,7 +190,12 @@ case "${1:-}" in
         ;;
     first-launch)
         settings="$(settings_path)"
-        if [ -f "$settings" ]; then mv "$settings" "$settings$BACKUP_SUFFIX"; fi
+        # Run twice, the settings now are the ones the first launch wrote: the backup already holds the real ones.
+        if [ -f "$settings$BACKUP_SUFFIX" ]; then
+            rm -f "$settings"
+        elif [ -f "$settings" ]; then
+            mv "$settings" "$settings$BACKUP_SUFFIX"
+        fi
         echo "Notekea will start as on a first launch (backup: $settings$BACKUP_SUFFIX)"
         ;;
     restore-settings)
