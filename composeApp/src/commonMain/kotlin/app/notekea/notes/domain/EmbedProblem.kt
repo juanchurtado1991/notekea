@@ -7,6 +7,7 @@ package app.notekea.notes.domain
  */
 enum class EmbedProblem {
     MISSING_NOTE,
+    UNREADABLE_NOTE,
     MISSING_SECTION,
     CIRCULAR,
     TOO_DEEP;

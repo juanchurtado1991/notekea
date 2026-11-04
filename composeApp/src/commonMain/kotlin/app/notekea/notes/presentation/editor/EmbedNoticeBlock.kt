@@ -19,6 +19,7 @@ import app.notekea.resources.embed_missing_block
 import app.notekea.resources.embed_missing_heading
 import app.notekea.resources.embed_missing_note
 import app.notekea.resources.embed_too_deep
+import app.notekea.resources.embed_unreadable_note
 import app.notekea.resources.embedded_note_open
 import org.jetbrains.compose.resources.stringResource
 
@@ -50,7 +51,7 @@ internal fun EmbedNoticeBlock(
         actionLabel = when (problem) {
             EmbedProblem.MISSING_NOTE -> stringResource(resource = Res.string.embed_create_note)
 
-            EmbedProblem.MISSING_SECTION, EmbedProblem.TOO_DEEP -> stringResource(
+            EmbedProblem.MISSING_SECTION, EmbedProblem.UNREADABLE_NOTE, EmbedProblem.TOO_DEEP -> stringResource(
                 resource = Res.string.embedded_note_open
             )
 
@@ -74,6 +75,8 @@ private fun messageOf(
     anchor: String
 ): String = when (problem) {
     EmbedProblem.MISSING_NOTE -> stringResource(resource = Res.string.embed_missing_note)
+
+    EmbedProblem.UNREADABLE_NOTE -> stringResource(resource = Res.string.embed_unreadable_note)
 
     EmbedProblem.MISSING_SECTION -> if (anchor.startsWith(char = MarkdownSyntax.BLOCK_ANCHOR_CHAR)) {
         stringResource(Res.string.embed_missing_block, name, anchor)

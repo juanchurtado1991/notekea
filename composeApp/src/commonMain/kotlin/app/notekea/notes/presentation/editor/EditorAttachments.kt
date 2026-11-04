@@ -146,8 +146,9 @@ class EditorAttachments(
             else -> null
         }
         if (problem != null) return view.copy(path = path, problem = problem)
-        val text = (attachmentStore.read(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
-            ?.decodeToString() ?: return view.copy(problem = EmbedProblem.MISSING_NOTE)
+        val bytes = (attachmentStore.read(vaultPath = vaultPath, path = path) as? Outcome.Success)?.value
+            ?: return view.copy(problem = EmbedProblem.MISSING_NOTE)
+        val text = textOf(bytes = bytes) ?: return view.copy(path = path, problem = EmbedProblem.UNREADABLE_NOTE)
         val shown = embeddedNoteText.of(text = text, target = embed.target)
             ?: return view.copy(path = path, problem = EmbedProblem.MISSING_SECTION)
         return view.copy(
@@ -155,6 +156,15 @@ class EditorAttachments(
             noteText = shown,
             nested = viewsIn(note = path, text = shown, chain = chain + path)
         )
+    }
+
+    /** [bytes] as text; null when they are not UTF-8, as for the note itself. */
+    private fun textOf(
+        bytes: ByteArray
+    ): String? = try {
+        bytes.decodeToString(throwOnInvalidSequence = true)
+    } catch (_: CharacterCodingException) {
+        null
     }
 
     /**
