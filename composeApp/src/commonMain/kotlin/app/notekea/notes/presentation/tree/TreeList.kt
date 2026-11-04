@@ -14,9 +14,11 @@ import app.notekea.core.presentation.components.NotekeaLazyScrollArea
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -85,28 +87,28 @@ internal fun TreeList(
     var menuRequest by remember { mutableStateOf<RelativePath?>(value = null) }
     FollowSelection(listState = listState, state = state)
     LaunchedEffect(key1 = state.renaming == null) { if (state.renaming == null) focusRequester.requestFocus() }
-    val createItems = createMenuItems(state = state, onIntent = onIntent)
+    val currentState = rememberUpdatedState(newValue = state)
+    val stateNow = remember<() -> VaultTreeState> { { currentState.value } }
+    val createItems = rememberCreateItems(state = currentState, onIntent = onIntent)
+    val input = Modifier
+        .fillMaxSize()
+        .treeInput(focusRequester, state, onIntent, { menuRequest = state.selectedPath }) { hasFocus = it }
     NotekeaContextMenuArea(
-        sections = listOf(createItems),
+        menu = { listOf(createItems()) },
         modifier = modifier,
         onOpenByPointer = { onIntent(VaultTreeIntent.OnSelectionClear) }
     ) {
         NotekeaLazyScrollArea(state = listState, modifier = Modifier.fillMaxSize().testTag(tag = TestTags.TREE)) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .treeInput(focusRequester, state, onIntent, { menuRequest = state.selectedPath }) { hasFocus = it },
-                state = listState,
-                contentPadding = TREE_PADDING
-            ) {
+            LazyColumn(modifier = input, state = listState, contentPadding = TREE_PADDING) {
                 items(items = state.rows, key = { it.path.value }, contentType = ::contentTypeOf) { row ->
                     // A folder's rows fade in as it opens, and the rows below slide down to make room.
                     Box(modifier = if (LocalReduceMotion.current) Modifier else Modifier.animateItem()) {
-                        TreeEntryRow(
+                        ListedEntry(
                             row = row,
                             state = state,
+                            stateNow = stateNow,
                             createItems = createItems,
-                            isFocused = hasFocus && row.path == state.selectedPath,
+                            hasFocus = hasFocus,
                             isMenuRequested = menuRequest == row.path,
                             onMenuShown = { menuRequest = null },
                             onIntent = onIntent,
@@ -117,6 +119,43 @@ internal fun TreeList(
             }
         }
     }
+}
+
+/** The tree's New note and New folder items, built on the latest [state] when a menu opens. */
+@Composable
+private fun rememberCreateItems(
+    state: State<VaultTreeState>,
+    onIntent: (VaultTreeIntent) -> Unit
+) = remember<@Composable () -> List<NotekeaMenuItem>>(onIntent) {
+    { createMenuItems(state = state.value, onIntent = onIntent) }
+}
+
+/** One row of the list, given only what concerns it, so a change to another row leaves it alone. */
+@Composable
+private fun ListedEntry(
+    row: TreeRow,
+    state: VaultTreeState,
+    stateNow: () -> VaultTreeState,
+    createItems: @Composable () -> List<NotekeaMenuItem>,
+    hasFocus: Boolean,
+    isMenuRequested: Boolean,
+    onMenuShown: () -> Unit,
+    onIntent: (VaultTreeIntent) -> Unit,
+    onFocusTree: () -> Unit
+) {
+    TreeEntryRow(
+        row = row,
+        state = stateNow,
+        createItems = createItems,
+        isSelected = row.path == state.selectedPath,
+        isBookmarked = row.path in state.bookmarks,
+        isFocused = hasFocus && row.path == state.selectedPath,
+        isMenuRequested = isMenuRequested,
+        onMenuShown = onMenuShown,
+        onIntent = onIntent,
+        onFocusTree = onFocusTree,
+        draft = state.renaming?.takeIf { it.path == row.path }
+    )
 }
 
 /**

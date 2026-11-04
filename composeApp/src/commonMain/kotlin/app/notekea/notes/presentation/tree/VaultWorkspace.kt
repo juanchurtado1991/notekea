@@ -131,7 +131,7 @@ private fun WorkspaceBody(
             preferences = workspaceState.sidePanel,
             sidePanel = sidePanel,
             outline = if (isNoteShown) activeEditorState.outline else emptyList(),
-            current = panes[activePane].tracker.current,
+            current = { panes[activePane].tracker.current },
             platformConventions = state.platformConventions,
             onHeadingClick = { activeEditor.onIntent(EditorIntent.OnHeadingClick(index = it)) },
             onLeave = { activeEditor.onIntent(EditorIntent.OnFocusRequest()) },
@@ -241,7 +241,7 @@ private fun FolderTab(
             workspace.onIntent(intent = WorkspaceIntent.OnCoverRequest(path = path, size = size))
         },
         cardMenu = { card, content ->
-            EntryMenuArea(card.asTreeRow(), context.state, context.viewModels.tree::onIntent, content = content)
+            EntryMenuArea(card.asTreeRow(), { context.state }, context.viewModels.tree::onIntent, content = content)
         }
     )
 }
