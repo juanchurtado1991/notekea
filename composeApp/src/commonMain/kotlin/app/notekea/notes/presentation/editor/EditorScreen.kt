@@ -51,7 +51,10 @@ fun EditorScreen(
     val flushed = remember(viewModel) { Channel<Unit>(capacity = Channel.CONFLATED) }
     val textFocusRequester = remember { FocusRequester() }
     val onIntent = remember(viewModel, sidePanel) { routerOf(viewModel = viewModel, sidePanel = sidePanel) }
-    LaunchedEffect(notePath) { viewModel.onIntent(intent = EditorIntent.OnOpen(path = notePath)) }
+    LaunchedEffect(notePath) {
+        callbacks.onBeforeOpen(notePath)
+        viewModel.onIntent(intent = EditorIntent.OnOpen(path = notePath))
+    }
     EditorEffects(
         viewModel = viewModel,
         flushed = flushed,

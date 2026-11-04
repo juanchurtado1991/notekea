@@ -44,6 +44,7 @@ import app.notekea.resources.tab_missing_title
 import org.jetbrains.compose.resources.stringResource
 import app.notekea.notes.presentation.editor.SaveStatus
 import app.notekea.notes.presentation.editor.EditorViewModel
+import app.notekea.notes.presentation.editor.saveInOtherEditors
 import app.notekea.resources.tree_untitled_note
 import app.notekea.notes.presentation.workspace.WorkspaceStartActions
 
@@ -276,7 +277,7 @@ private fun NoteEditor(
         notePath = path,
         viewModel = context.viewModels.editors[pane],
         platformConventions = state.platformConventions,
-        callbacks = editorCallbacksOf(viewModels = context.viewModels, path = path),
+        callbacks = editorCallbacksOf(viewModels = context.viewModels, pane = pane, path = path),
         pane = context.panes[pane],
         sidePanel = context.sidePanel,
         isActive = context.workspaceState.workspace.activePane == pane,
@@ -285,9 +286,10 @@ private fun NoteEditor(
     )
 }
 
-/** What the editor of the note at [path] asks of the tree, the tabs and the pickers. */
+/** What the editor of [pane], on the note at [path], asks of the tree, the tabs, the pickers and the other editor. */
 private fun editorCallbacksOf(
     viewModels: WorkspaceViewModels,
+    pane: Int,
     path: RelativePath
 ): EditorCallbacks {
     val tree = viewModels.tree
@@ -323,7 +325,10 @@ private fun editorCallbacksOf(
         },
         onDayStep = { tree.onIntent(intent = VaultTreeIntent.OnDayStep(step = it)) },
         onRevealFolder = { tree.onIntent(intent = VaultTreeIntent.OnRevealInTree(path = it)) },
-        onUnsavedKept = { tree.onIntent(intent = VaultTreeIntent.OnUnsavedKept(note = it.note, copy = it.copy)) }
+        onUnsavedKept = { tree.onIntent(intent = VaultTreeIntent.OnUnsavedKept(note = it.note, copy = it.copy)) },
+        onBeforeOpen = {
+            saveInOtherEditors(path = it, editor = viewModels.editors[pane], editors = viewModels.editors)
+        }
     )
 }
 
