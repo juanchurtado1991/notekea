@@ -109,6 +109,28 @@ class CaseScopeTest {
     }
 
     @Test
+    fun `a text that shows late gets past expectNoText but not expectTextStaysAway`() {
+        assertIs<CaseResult.Passed>(
+            runCase {
+                click(text = "Fail later")
+                expectNoText(text = "Something failed")
+            }
+        )
+        val late = assertIs<CaseResult.Failed>(
+            runCase {
+                click(text = "Fail later")
+                expectTextStaysAway(text = "Something failed")
+            }
+        )
+        assertEquals("expected \"Something failed\" to stay away, it appeared", late.message)
+    }
+
+    @Test
+    fun `a text that never shows passes expectTextStaysAway`() {
+        assertIs<CaseResult.Passed>(runCase { expectTextStaysAway(text = "Never", settleMillis = 100) })
+    }
+
+    @Test
     fun `file expectations say what the file holds instead`() {
         val wrong = assertIs<CaseResult.Failed>(runCase { expectFile(path = "notes/draft.txt", content = "other") })
         assertEquals("expected \"notes/draft.txt\" to read \"other\", it reads \"first draft\"", wrong.message)
