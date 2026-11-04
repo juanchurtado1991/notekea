@@ -21,6 +21,23 @@ class OkioNoteFileOperationsTest {
     private val testDispatcher = StandardTestDispatcher()
     private val fakeFileSystem = FakeFileSystem().apply { createDirectories(dir = VAULT.toPath() / IDEAS) }
 
+    // Audit: a path with `..` wrote outside the vault, Okio taking `\\` for a separator as well.
+    @Test
+    fun `nothing is created or moved out of the vault`() = runOperationsTest {
+        val note = path(value = "$IDEAS/Note.md")
+        operations().createFile(vaultPath = VAULT, path = note)
+
+        val outcomes = listOf(
+            operations().createFile(vaultPath = VAULT, path = path(value = "..\\..\\evil.md")),
+            operations().createFile(vaultPath = VAULT, path = path(value = "../evil.md")),
+            operations().createFolder(vaultPath = VAULT, path = path(value = "$IDEAS/../../evil")),
+            operations().move(vaultPath = VAULT, from = note, to = path(value = "../evil.md"))
+        )
+
+        assertEquals(expected = List(size = 4) { Outcome.Failure(error = NotesError.InvalidName) }, actual = outcomes)
+        assertEquals(expected = true, actual = fakeFileSystem.exists(path = vaultPath(path = "$IDEAS/Note.md")))
+    }
+
     @Test
     fun `an empty note and an empty folder are created where they were asked`() = runOperationsTest {
         val outcomes = listOf(

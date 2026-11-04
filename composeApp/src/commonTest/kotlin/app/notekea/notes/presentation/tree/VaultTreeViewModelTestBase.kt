@@ -150,7 +150,11 @@ abstract class VaultTreeViewModelTestBase {
                 ),
                 applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = contents)
             ),
-            followLink = FollowLinkUseCase(createNote = CreateNoteUseCase(noteFileOperations = operations)),
+            followLink = FollowLinkUseCase(
+                createNote = CreateNoteUseCase(noteFileOperations = operations),
+                noteFileOperations = operations,
+                validateFileName = ValidateFileNameUseCase()
+            ),
             treePreferencesStore = preferences
         )
         advanceUntilIdle()
