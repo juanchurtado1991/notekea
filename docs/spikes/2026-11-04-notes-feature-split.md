@@ -1,6 +1,7 @@
 # Splitting `notes` into features before M3
 
-Date: 2026-11-04. Status: proposed, waiting for the developer's decision. No code has moved.
+Date: 2026-11-04. Status: done on 2026-11-04, in one pull request of granular commits instead of the seven below, as the
+developer asked. The numbers are from before the split.
 
 ## Result
 
