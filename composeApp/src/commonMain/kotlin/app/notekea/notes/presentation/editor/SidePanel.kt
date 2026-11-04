@@ -61,7 +61,7 @@ private const val PREVIEW_WIDTH_DP = 300
 @Composable
 fun SidePanel(
     outline: List<OutlineHeading>,
-    current: Int,
+    current: () -> Int,
     preferences: SidePanelPreferences,
     platformConventions: PlatformConventions,
     actions: SidePanelActions,
@@ -131,7 +131,7 @@ private fun PanelHeader(
 @Composable
 private fun InspectorSections(
     outline: List<OutlineHeading>,
-    current: Int,
+    current: () -> Int,
     foldedSections: Set<SidePanelSection>,
     platformConventions: PlatformConventions,
     actions: SidePanelActions,
@@ -173,7 +173,7 @@ private fun InspectorSections(
 @Composable
 private fun OutlinePart(
     outline: List<OutlineHeading>,
-    current: Int,
+    current: () -> Int,
     isOpen: Boolean,
     platformConventions: PlatformConventions,
     actions: SidePanelActions,
@@ -256,7 +256,7 @@ private fun NoteInfoSection(
 @Composable
 private fun SidePanelPreviewFrame(
     outline: List<OutlineHeading>,
-    current: Int,
+    current: () -> Int,
     foldedSections: Set<SidePanelSection> = emptySet(),
     mode: SidePanelMode = SidePanelMode.INSPECTOR
 ) {
@@ -283,19 +283,19 @@ private fun SidePanelPreviewFrame(
 @Preview
 @Composable
 private fun SidePanelPreview() {
-    SidePanelPreviewFrame(outline = EditorPreviewData.outline, current = 1)
+    SidePanelPreviewFrame(outline = EditorPreviewData.outline, current = { 1 })
 }
 
 @Preview
 @Composable
 private fun SidePanelEmptyPreview() {
-    SidePanelPreviewFrame(outline = emptyList(), current = OutlineTracker.NONE)
+    SidePanelPreviewFrame(outline = emptyList(), current = { OutlineTracker.NONE })
 }
 
 @Preview
 @Composable
 private fun SidePanelChatModePreview() {
-    SidePanelPreviewFrame(outline = EditorPreviewData.outline, current = 1, mode = SidePanelMode.CHAT)
+    SidePanelPreviewFrame(outline = EditorPreviewData.outline, current = { 1 }, mode = SidePanelMode.CHAT)
 }
 
 @Preview
@@ -303,7 +303,7 @@ private fun SidePanelChatModePreview() {
 private fun SidePanelFoldedPreview() {
     SidePanelPreviewFrame(
         outline = EditorPreviewData.outline,
-        current = 1,
+        current = { 1 },
         foldedSections = setOf(SidePanelSection.OUTLINE)
     )
 }

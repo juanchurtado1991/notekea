@@ -117,7 +117,7 @@ class OutlineScreenTest {
                         preferences = SidePanelPreferences.DEFAULT,
                         sidePanel = host,
                         outline = state.outline,
-                        current = tools.tracker.current,
+                        current = { tools.tracker.current },
                         platformConventions = PreviewPlatformConventions.linux,
                         onHeadingClick = { intents += EditorIntent.OnHeadingClick(index = it) },
                         onLeave = { intents += EditorIntent.OnFocusRequest() },

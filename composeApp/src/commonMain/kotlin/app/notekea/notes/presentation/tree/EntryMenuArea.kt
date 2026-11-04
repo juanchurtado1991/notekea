@@ -23,20 +23,20 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * [content] with the menu of a vault entry, in the tree or a folder's grid: [createItems] when there are any, then
- * bookmark, rename and show in the file manager, then delete.
+ * bookmark, rename and show in the file manager, then delete. It is built, from the latest [state], only while open.
  */
 @Composable
 internal fun EntryMenuArea(
     row: TreeRow,
-    state: VaultTreeState,
+    state: () -> VaultTreeState,
     onIntent: (VaultTreeIntent) -> Unit,
-    createItems: List<NotekeaMenuItem> = emptyList(),
+    createItems: @Composable () -> List<NotekeaMenuItem> = { emptyList() },
     menuState: NotekeaContextMenuState = remember { NotekeaContextMenuState() },
     onOpenByPointer: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     NotekeaContextMenuArea(
-        sections = menuSections(row = row, state = state, createItems = createItems, onIntent = onIntent),
+        menu = { menuSections(row = row, state = state(), createItems = createItems(), onIntent = onIntent) },
         state = menuState,
         onOpenByPointer = onOpenByPointer,
         content = content
@@ -114,7 +114,8 @@ private fun editSection(
 private fun EntryMenuAreaPreview() {
     val state = TreePreviewData.state()
     NotekeaPreviewThemes {
-        EntryMenuArea(row = state.rows.first(), state = state, onIntent = {
-        }) { Text(text = TreePreviewData.VAULT_NAME) }
+        EntryMenuArea(row = state.rows.first(), state = { state }, onIntent = {}) {
+            Text(text = TreePreviewData.VAULT_NAME)
+        }
     }
 }

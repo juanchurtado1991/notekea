@@ -180,7 +180,7 @@ class SidePanelScreenTest {
         NotekeaTheme(darkTheme = false) {
             SidePanel(
                 outline = OutlineFinder().headings(text = body),
-                current = 0,
+                current = { 0 },
                 preferences = SidePanelPreferences(mode = mode),
                 platformConventions = PreviewPlatformConventions.linux,
                 actions = SidePanelActions(

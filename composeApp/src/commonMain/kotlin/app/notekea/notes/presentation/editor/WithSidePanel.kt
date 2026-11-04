@@ -27,15 +27,15 @@ private const val PREVIEW_WIDTH_DP = 1000
  * The [content] (the panes of notes) with the side panel on its right showing [outline] (`ROADMAP.md` 1.9) and the
  * active note's [info] (null when no note is shown), its sections folded as [preferences] say, as wide as
  * [preferences] say but never leaving the notes narrower than [EDITOR_MIN_WIDTH_DP]; when not even its narrowest width
- * fits, the panel floats over them instead, open only while it is used ([sidePanel]). [current] is the heading the
- * active pane's view is in; a heading chosen goes to [onHeadingClick], and Esc in the outline to [onLeave].
+ * fits, the panel floats over them instead, open only while it is used ([sidePanel]). [current] gives the heading the
+ * active pane's view is in, which changes as it scrolls, so only the outline reads it; a heading chosen goes to [onHeadingClick], and Esc in the outline to [onLeave].
  */
 @Composable
 fun WithSidePanel(
     preferences: SidePanelPreferences,
     sidePanel: SidePanelHost,
     outline: List<OutlineHeading>,
-    current: Int,
+    current: () -> Int,
     platformConventions: PlatformConventions,
     onHeadingClick: (Int) -> Unit,
     onLeave: () -> Unit,
@@ -106,7 +106,7 @@ private fun WithSidePanelPreview() {
                 preferences = SidePanelPreferences.DEFAULT,
                 sidePanel = remember { SidePanelHost(send = {}) },
                 outline = EditorPreviewData.outline,
-                current = 0,
+                current = { 0 },
                 platformConventions = EditorPreviewData.platformConventions,
                 onHeadingClick = {},
                 onLeave = {},

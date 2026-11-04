@@ -50,7 +50,7 @@ class EntryMenusScreenTest {
                 onOpen = {},
                 onCoverNeeded = { _, _ -> },
                 cardMenu = { card, content ->
-                    EntryMenuArea(row = card.asTreeRow(), state = state, onIntent = {
+                    EntryMenuArea(row = card.asTreeRow(), state = { state }, onIntent = {
                         intents += it
                     }, content = content)
                 }
@@ -74,7 +74,7 @@ class EntryMenusScreenTest {
         scene(content = {
             OutlineSection(
                 outline = OutlineFinder().headings(text = "# First\n\n## Second\n"),
-                current = 0,
+                current = { 0 },
                 focusRequester = remember { FocusRequester() },
                 actions = SidePanelActions(
                     onHeadingClick = { chosen += it },

@@ -59,6 +59,26 @@ fun NotekeaContextMenuArea(
     takesFocus: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    NotekeaContextMenuArea(
+        menu = { sections },
+        modifier = modifier,
+        state = state,
+        onOpenByPointer = onOpenByPointer,
+        takesFocus = takesFocus,
+        content = content
+    )
+}
+
+/** A [NotekeaContextMenuArea] whose sections are built ([menu]) only while it is open, for lists of many rows. */
+@Composable
+fun NotekeaContextMenuArea(
+    menu: @Composable () -> List<List<NotekeaMenuItem>>,
+    modifier: Modifier = Modifier,
+    state: NotekeaContextMenuState = remember { NotekeaContextMenuState() },
+    onOpenByPointer: () -> Unit = {},
+    takesFocus: Boolean = true,
+    content: @Composable () -> Unit
+) {
     var areaHeight by remember { mutableIntStateOf(value = 0) }
     Box(
         modifier = modifier
@@ -82,7 +102,7 @@ fun NotekeaContextMenuArea(
             containerColor = MaterialTheme.colorScheme.surface,
             border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = MaterialTheme.colorScheme.outline)
         ) {
-            MenuRows(sections = sections, onChosen = state::close)
+            MenuRows(sections = menu(), onChosen = state::close)
         }
     }
 }

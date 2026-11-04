@@ -43,19 +43,23 @@ private const val PREVIEW_WIDTH_DP = 260
 
 /**
  * One entry of the tree with its context menu ([createItems], the tree's New note and New folder, then rename, show in
- * the file manager, delete) and, while it is
- * renamed, the name field with the reason a name was refused below it. A right click selects the entry first.
+ * the file manager, delete), built from the tree's latest [state] only when it opens, and, while it is renamed
+ * ([draft]), the name field with the reason a name was refused below it. A right click selects the entry first. Only
+ * what this row shows comes as values, so a change to another row leaves this one alone.
  */
 @Composable
 internal fun TreeEntryRow(
     row: TreeRow,
-    state: VaultTreeState,
-    createItems: List<NotekeaMenuItem>,
+    state: () -> VaultTreeState,
+    createItems: @Composable () -> List<NotekeaMenuItem>,
+    isSelected: Boolean,
+    isBookmarked: Boolean,
     isFocused: Boolean,
     isMenuRequested: Boolean,
     onMenuShown: () -> Unit,
     onIntent: (VaultTreeIntent) -> Unit,
-    onFocusTree: () -> Unit
+    onFocusTree: () -> Unit,
+    draft: RenameDraft?
 ) {
     val menuState = remember { NotekeaContextMenuState() }
     LaunchedEffect(key1 = isMenuRequested) {
@@ -73,11 +77,18 @@ internal fun TreeEntryRow(
         onOpenByPointer = { onIntent(VaultTreeIntent.OnRowSelect(path = row.path)) }
     ) {
         Column {
-            EntryItem(row = row, state = state, isFocused = isFocused, onIntent = onIntent, onFocusTree = onFocusTree)
-            val error = state.renaming?.takeIf { it.path == row.path }?.error
-            error?.let {
+            EntryItem(
+                row = row,
+                isSelected = isSelected,
+                isBookmarked = isBookmarked,
+                isFocused = isFocused,
+                onIntent = onIntent,
+                onFocusTree = onFocusTree,
+                draft = draft
+            )
+            draft?.error?.let {
                 Text(
-                    text = notesErrorMessage(error = it, platformConventions = state.platformConventions),
+                    text = notesErrorMessage(error = it, platformConventions = state().platformConventions),
                     modifier = Modifier.padding(
                         start = NotekeaDimensions.TreeIndent * (row.depth + 1),
                         bottom = NotekeaDimensions.SpacingXs
@@ -93,12 +104,13 @@ internal fun TreeEntryRow(
 @Composable
 private fun EntryItem(
     row: TreeRow,
-    state: VaultTreeState,
+    isSelected: Boolean,
+    isBookmarked: Boolean,
     isFocused: Boolean,
     onIntent: (VaultTreeIntent) -> Unit,
-    onFocusTree: () -> Unit
+    onFocusTree: () -> Unit,
+    draft: RenameDraft?
 ) {
-    val draft = state.renaming?.takeIf { it.path == row.path }
     // Mod+click or the middle button opens the entry in a tab behind the current one (`ROADMAP.md` 1.11).
     val pressed = remember { PressedModifiers() }
     val folder = row as? TreeRow.Folder
@@ -114,7 +126,7 @@ private fun EntryItem(
         modifier = pressed.tracking().onMiddleClick {
             onIntent(VaultTreeIntent.OnRowClick(path = row.path, inBackground = true))
         },
-        selected = row.path == state.selectedPath,
+        selected = isSelected,
         focused = isFocused && draft == null,
         isExpanded = folder?.isExpanded,
         onToggleExpanded = folder?.let { { onIntent(VaultTreeIntent.OnChevronClick(path = it.path)) } },
@@ -127,7 +139,7 @@ private fun EntryItem(
             }
         ),
         labelContent = draft?.let { { RenameField(draft = it, onIntent = onIntent) } },
-        badge = if (row.path in state.bookmarks) {
+        badge = if (isBookmarked) {
             { BookmarkBadge() }
         } else {
             null
@@ -191,13 +203,16 @@ private fun TreeEntryRowPreview() {
             state.rows.forEach { row ->
                 TreeEntryRow(
                     row = row,
-                    state = state,
-                    createItems = emptyList(),
+                    state = { state },
+                    createItems = { emptyList() },
+                    isSelected = row.path == state.selectedPath,
+                    isBookmarked = row.path in state.bookmarks,
                     isFocused = false,
                     isMenuRequested = false,
                     onMenuShown = {},
                     onIntent = {},
-                    onFocusTree = {}
+                    onFocusTree = {},
+                    draft = state.renaming?.takeIf { it.path == row.path }
                 )
             }
         }
