@@ -19,7 +19,7 @@ Last updated: 2026-11-03, with 2.5 in review.
 
 1. **No `m1-rc2`:** the developer decided to go straight to M2. The macOS run's fixes (#104: 1.3-09, 1.4-13, 1.8-05,
    the case text of 1.4-08, the cut-off buttons of #101, the report's last steps and the cases not run) are on
-   `main` and assumed to work; M2's QA run, from `m2-rc1`, checks them again with every M1 case.
+   `main` and assumed to work; the release run checks them again with every M1 case.
 2. **Issue #103** (1.11-16, dragging a tab is unreliable with several tabs) is the only open issue, deferred to M2:
    reproduce it on macOS at 200% before fixing, as the issue says.
 3. **`qa/README.md` piece 5** is 🟡: `MVP_SMOKE_TEST.md` is still edited by hand; making it generated from the
@@ -32,10 +32,12 @@ Last updated: 2026-11-03, with 2.5 in review.
 
 #112 (2.5) is open, waiting for the developer's review.
 
-## The M2 QA run
+## The release run
 
-When M2's last item (2.9, its performance pass) is merged, its QA run covers Windows and Linux again, with every
-General, M1 and M2 case, and macOS for M2's. The testers: the developer (macOS and Linux) and a tester who is not a
+Decided on 2026-11-04: there is no M2, M3 or M4 QA run. The only run left comes after 5.4 and before 5.5, on Windows,
+macOS and Linux, with every case (`ROADMAP.md`, `qa/README.md`). The developer also installs the app on Windows and
+macOS at the end of M3 to see the chat answer there. Study cards, PDFs, web clips and agent mode joined the MVP as M4b;
+Repositories stays after it. The testers: the developer (macOS and Linux) and a tester who is not a
 developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
 
 ## Decisions to keep
@@ -47,7 +49,7 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
   when it decides something; files at most 350 lines, functions at most 40.
 - **Test Buddy** (`:test-buddy`, `:test-buddy-crash`) is kept generic, ready to become a library of its own: nothing
   Notekea-specific in it. Notekea's cases live in `:selftest`. The Self-Test is in English only.
-- **Every feature keeps the Self-Test current** (its cases, automatic or manual), so a milestone's QA run only needs
+- **Every feature keeps the Self-Test current** (its cases, automatic or manual), so the release run only needs
   a tag. There is no quota of automatic cases: automate what is reasonable.
 - **Post-MVP repositories** (`ROADMAP.md`, post-MVP): clone the repository as it is, index it with a parser, answer
   with file and line; Notekea never writes notes about the code nor writes code.

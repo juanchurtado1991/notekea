@@ -183,13 +183,12 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
      app holds idle after one and ten minutes, whether closing notes, tabs and vaults gives memory back, startup time
      and typing latency; records the numbers in `docs/performance.md` next to the previous milestone's; and cuts what
      grew or leaks against the budgets of `ROADMAP.md` 5.4. Its smoke test also checks that nothing broke.
-  3. **Milestone QA run** (`qa/README.md`): when the last feature of a milestone is on `main`, testers install
+  3. **Release run** (`qa/README.md`), the only QA run after M1's: when 5.4 is on `main`, before 5.5, testers install
      **Notekea QA** (Notekea with its Self-Test and the Test Buddy manager) from a GitHub pre-release on **Windows,
      macOS and Linux**; the manager runs the automatic cases of `MVP_SMOKE_TEST.md` accumulated so far and walks them
-     through the manual ones, step by step (`qa/SELF_TEST.md`). The milestone is closed only when the three OSes pass. The first run, at the end of M1, is
-     retroactive: it covers everything since M0.
-  4. **Release run**: the milestone QA run of M5, with the release builds, which are not signed (`ROADMAP.md` 5.3,
-     5.5).
+     through the manual ones, step by step (`qa/SELF_TEST.md`), with the release builds, which are not signed
+     (`ROADMAP.md` 5.3, 5.5). The release waits until the three OSes pass. M1's run was the first and covered everything
+     since M0.
 - **Notekea's Self-Test (the cases of Notekea QA) is kept up to date by every feature, never at the end of a
   milestone**
   (`qa/SELF_TEST.md`). Every case of `MVP_SMOKE_TEST.md` is checked by the Self-Test, automatically (as many as is
@@ -235,9 +234,8 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   `./gradlew :selftest:smokeRun -PidleSeconds=600` runs the smoke runs alone and records the memory of each in
   `selftest/build/reports/smoke-runs/memory.csv`, the workload every performance pass measures.
 - **Every `feature/` and `fix/` branch adds its cases to `MVP_SMOKE_TEST.md`** (in a step): what a person must check on
-  each OS, including cases that only become testable with later features. Every milestone QA run executes all the
-  cases testable so far on Windows, macOS and Linux, and the release run executes the whole file; it is the main
-  source of bugs before release.
+  each OS, including cases that only become testable with later features. The release run executes the whole file on
+  Windows, macOS and Linux; it is the main source of bugs before release.
 - **The same branch revises the existing cases its change makes outdated.** The file describes the app as it
   is after the change, not as it was: when a feature replaces or extends behavior an earlier case checks (the note
   tree replacing the "12 notes found" summary), that case is rewritten in place, keeping its ID, so the release
@@ -302,9 +300,12 @@ The commit is blocked if any step fails. `git commit --no-verify` is for emergen
 Notekea's core promise is that notes never leave the user's computer. Every change must keep it:
 
 - **Zero telemetry.** No analytics, crash reporting, usage pings or "anonymous" statistics, not even opt-out ones.
-- **No network access except for explicit user actions:** downloading a model the user chose, and Git sync to the
-  remote the user configured. Each network call is visible in the UI. Any new kind of network access needs an
-  issue and an update to this section first.
+- **No network access except for explicit user actions:** downloading a model the user chose, Git sync to the
+  remote the user configured, and downloading a web page whose URL the user wrote in that request
+  (`ROADMAP.md` 4.4, 4.7, #115): only `http` and `https`, no address on the local network, with limits on size and
+  time; a URL found in a note or a page is never followed, and a page's text is data, never instructions. Each
+  network call is visible in the UI. Any new kind of network access needs an issue and an update to this section
+  first.
 - **Logs never contain note content**: no note text, titles, chunks, prompts, answers or embeddings. Log identifiers,
   counts, durations and error types instead; file paths only relative to the vault.
 - **Credentials** (Git tokens, SSH passphrases) live only in the OS keychain, never in files, settings or logs.

@@ -100,7 +100,7 @@ column of `MVP_SMOKE_TEST.md`, and every expected value of the script is checked
 scripts only as `SMOKE_SCRATCH=scratch-agent smoke-data/smoke.sh <command>`; never run them on the developer's
 `smoke-data/scratch`, and never run `clear-cache`, `first-launch` or `restore-settings`, which change the app's real
 data folder. Every case names the vault it runs in, in its own steps. Cases that check something in Obsidian are
-left for the milestone's QA run, not the feature's smoke list. Within the feature's steps:
+left for the release run, not the feature's smoke list. Within the feature's steps:
 
 1. **Data:** add what the smoke test needs to `smoke-data/` (inside the repository when Git can hold it, otherwise
    as a step of `smoke.sh` and `smoke.ps1`) and list it in `smoke-data/README.md`. The developer never invents data.
@@ -124,16 +124,15 @@ left for the milestone's QA run, not the feature's smoke list. Within the featur
 2. **Milestone performance pass** — the last item of every milestone (1.18, 2.9, 3.7, 4.3, 5.4): run the automated
    smoke runs while sampling memory, profile where it goes and idle RAM, record it in `docs/performance.md`, cut
    what grew. Its smoke test also proves nothing broke.
-3. **Milestone QA run** — `qa/README.md`. When the last feature of a milestone (M1–M4) is merged into `main`, do not
-   start the next milestone: check the "Before the first run" table in `qa/README.md` and build what is still ⬜,
-   then follow its steps: tag `m<N>-rc<k>`, open `qa/runs/M<N>.md`, hand the testers the release and their guide
+3. **Release run** — `qa/README.md`, the only QA run after M1's (decided 2026-11-04, `ROADMAP.md`). When 5.4 is merged
+   into `main`, before 5.5: check the "Before the first run" table in `qa/README.md` and build what is still ⬜, then
+   follow its steps: tag `m5-rc<k>`, open `qa/runs/M5.md`, hand the testers the release and their guide
    (`qa/GUIDE_*.md`): they install Notekea QA, follow its manager and send its report. Turn every failure in their
    reports into an issue and a `fix/` branch, publish the next release candidate and retest. The developer decides
-   when a run closes (M1 closed on macOS alone, `qa/runs/M1.md`).
-4. **Release run** — the M5 milestone run with the release builds (unsigned, `ROADMAP.md` 5.3).
+   when a run closes (M1 closed on macOS alone, `qa/runs/M1.md`). A milestone before it starts the next one as soon as
+   its performance pass is merged.
 
-**The Self-Test is never left for the end of a milestone:** every feature keeps it current, so a milestone's QA
-run only needs a tag.
+**The Self-Test is never left for later:** every feature keeps it current, so the release run only needs a tag.
 
 ## The development machine
 

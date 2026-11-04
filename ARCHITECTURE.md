@@ -285,7 +285,7 @@ Deep answer: 4 Answer ×drafts (parallel) ─▶ 5 Verify each ─▶ the draft 
 - **Parallelism with coroutines:** independent work runs with `async` + `awaitAll`, bounded by a `Semaphore` sized to
   the engine's slot count, so a burst never queues more generations than the engine can serve. Cancelling the
   answer (Stop) cancels every running step. Koog is not used for this pipeline: plain coroutines are simpler to test
-  with fakes; Koog stays for extensions after the MVP.
+  with fakes; Koog stays for extensions after the MVP, unless 3.0 shows agent mode (`ROADMAP.md` 4.7) needs it.
 - **Structured steps never parse free text:** rewrite, evidence and verification outputs are JSON constrained by a
   grammar (`jsonSchemaToGrammar`) and parsed with Ghost; only the final answer is free text.
 - **Deterministic checks first:** a cited quote must appear in its note (after normalizing whitespace) before the
