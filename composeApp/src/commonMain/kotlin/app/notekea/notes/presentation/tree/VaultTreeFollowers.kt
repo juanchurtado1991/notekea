@@ -134,6 +134,11 @@ private fun followTreeEffect(
             }
         }
 
+        is VaultTreeEffect.LinksRewritten -> viewModels.editors.forEach { editor ->
+            val open = editor.state.value.notePath ?: return@forEach
+            if (open in effect.notes) editor.onIntent(EditorIntent.OnNoteRewritten(path = open))
+        }
+
         is VaultTreeEffect.ChooseTemplate -> viewModels.onTemplatePicker(
             TemplatePickerIntent.OnOpen(target = TemplateTarget.NewNote(folder = effect.folder))
         )

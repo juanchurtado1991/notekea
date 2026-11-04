@@ -86,6 +86,7 @@ internal class TreeRenaming(
     ) {
         val result = updatingLinks.withLock { linksUpdated(from = from, to = to) } ?: return
         logger.i { LINKS_UPDATED_MESSAGE + result.updatedCount + NOTES_SKIPPED + result.skipped.size }
+        host.emit(effect = VaultTreeEffect.LinksRewritten(notes = result.updated))
         host.reduce { reduceLinksUpdated(state = it, result = result) }
     }
 
