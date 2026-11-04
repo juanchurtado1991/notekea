@@ -1,6 +1,8 @@
 package app.notekea.core.presentation.theme
 
 import androidx.compose.material3.ColorScheme
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import app.notekea.core.appearance.domain.ColorTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -42,6 +44,11 @@ class ColorThemeSchemesTest {
         )
     }
 
+    /** The lightest a card's label sits on: a white picture under the bottom of its shade. */
+    private fun shadeOverWhite(
+        scrim: Color
+    ): Color = scrim.copy(alpha = CARD_SHADE_ALPHA).compositeOver(background = Color.White)
+
     /** The texts the app draws and what they are drawn on: the page, panes, selection, buttons, tags and links. */
     private fun pairsOf(scheme: ColorScheme) = with(scheme) {
         listOf(
@@ -49,6 +56,13 @@ class ColorThemeSchemesTest {
             Triple("ink on surface", onSurface, surface),
             Triple("ink on variant", onSurface, surfaceVariant),
             Triple("muted on page", onSurfaceVariant, background),
+            Triple("missing bookmark", missingEntry.compositeOver(background = background), background),
+            Triple(
+                "missing selected bookmark",
+                missingEntry.compositeOver(background = surfaceVariant),
+                surfaceVariant
+            ),
+            Triple("card label on a white picture", NotekeaColors.onImage, shadeOverWhite(scrim = scrim)),
             Triple("muted on surface", onSurfaceVariant, surface),
             Triple("muted on variant", onSurfaceVariant, surfaceVariant),
             Triple("button text", onPrimary, primary),
@@ -57,5 +71,9 @@ class ColorThemeSchemesTest {
             Triple("link on page", primary, background),
             Triple("link on surface", primary, surface)
         )
+    }
+
+    private companion object {
+        const val CARD_SHADE_ALPHA = 0.7f
     }
 }
