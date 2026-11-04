@@ -70,12 +70,26 @@ class OkioNoteContentStoreTest {
     }
 
     @Test
-    fun `a note that cannot be read reads as null`() = runStoreTest {
+    fun `a note that is gone says so, and reads as null for who only needs the text`() = runStoreTest {
+        val gone = RelativePath(value = "Gone.md")
+
         assertEquals(
-            expected = null,
-            actual = store().read(vaultPath = VAULT, path = RelativePath(value = "Gone.md"))
+            expected = Outcome.Failure(error = NotesError.EntryMissing(path = "Gone.md")) to null,
+            actual = store().readText(vaultPath = VAULT, path = gone) to store().read(vaultPath = VAULT, path = gone)
         )
     }
+
+    @Test
+    fun `a note in another encoding is never read as text, so it is never rewritten with replaced bytes`() =
+        runStoreTest {
+            val latin1 = byteArrayOf('c'.code.toByte(), 'a'.code.toByte(), 'f'.code.toByte(), 0xE9.toByte())
+            fakeFileSystem.write(file = VAULT.toPath() / NOTE.value) { write(latin1) }
+
+            assertEquals(
+                expected = Outcome.Failure(error = NotesError.Unreadable(path = NOTE.value)),
+                actual = store().readText(vaultPath = VAULT, path = NOTE)
+            )
+        }
 
     /** A file system that refuses the first [times] moves, every move unless told. */
     private fun refusingMoves(

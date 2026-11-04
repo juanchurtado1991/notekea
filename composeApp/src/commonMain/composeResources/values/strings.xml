@@ -133,6 +133,7 @@
     <string name="error_notes_operation_failed">Notekea couldn’t change %1$s. Check that you can edit this folder and that the file isn’t locked by another app.</string>
     <string name="error_notes_permission_denied">Notekea doesn’t have permission to read %1$s. Check the folder’s permissions and try again.</string>
     <string name="error_notes_reveal_failed">Notekea couldn’t open the file manager for %1$s.</string>
+    <string name="error_notes_unreadable">“%1$s” can’t be opened: it is not UTF-8 text, or the disk could not read it. Nothing was changed.</string>
     <string name="error_notes_vault_missing">Notekea can’t find %1$s. It may have been moved, renamed or deleted.</string>
 
     <string name="folder_empty_message">Notes and files you add to it show up here as cards.</string>

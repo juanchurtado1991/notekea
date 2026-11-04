@@ -30,6 +30,9 @@ sealed interface NotesError {
 
     data class PermissionDenied(val path: String) : NotesError
 
+    /** The note is there but cannot be read as UTF-8 text: a disk error, or another encoding Notekea must not rewrite. */
+    data class Unreadable(val path: String) : NotesError
+
     /** The system file manager could not be opened on the entry. */
     data class RevealFailed(val path: String) : NotesError
 

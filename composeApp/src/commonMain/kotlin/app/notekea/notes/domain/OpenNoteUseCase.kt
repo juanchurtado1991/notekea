@@ -8,8 +8,9 @@ class OpenNoteUseCase(private val noteContentStore: NoteContentStore) {
         vaultPath: String,
         path: RelativePath
     ): Outcome<NoteDocument, NotesError> {
-        val text = noteContentStore.read(vaultPath = vaultPath, path = path)
-            ?: return Outcome.Failure(error = NotesError.OperationFailed(path = path.value))
-        return Outcome.Success(value = NoteDocument.fromText(text = text))
+        return when (val text = noteContentStore.readText(vaultPath = vaultPath, path = path)) {
+            is Outcome.Failure -> text
+            is Outcome.Success -> Outcome.Success(value = NoteDocument.fromText(text = text.value))
+        }
     }
 }

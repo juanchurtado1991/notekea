@@ -141,7 +141,7 @@ class EditorViewModelTest : EditorViewModelTestBase() {
         runCurrent()
 
         assertEquals(
-            expected = Triple(NotesError.OperationFailed(path = missing.value), null, "Found"),
+            expected = Triple(NotesError.EntryMissing(path = missing.value), null, "Found"),
             actual = Triple(failed, viewModel.state.value.loadError, viewModel.buffer.text.toString())
         )
     }

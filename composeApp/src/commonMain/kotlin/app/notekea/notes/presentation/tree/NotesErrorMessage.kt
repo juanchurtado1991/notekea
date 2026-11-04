@@ -24,6 +24,7 @@ import app.notekea.resources.error_notes_operation_failed
 import app.notekea.resources.error_notes_permission_denied
 import app.notekea.resources.error_notes_open_failed
 import app.notekea.resources.error_notes_reveal_failed
+import app.notekea.resources.error_notes_unreadable
 import app.notekea.resources.error_notes_vault_missing
 import org.jetbrains.compose.resources.stringResource
 
@@ -54,6 +55,8 @@ internal fun notesErrorMessage(
         is NotesError.NameTaken -> stringResource(Res.string.error_notes_name_taken, error.name)
 
         is NotesError.OperationFailed -> stringResource(Res.string.error_notes_operation_failed, error.path)
+
+        is NotesError.Unreadable -> stringResource(Res.string.error_notes_unreadable, error.path)
 
         is NotesError.PermissionDenied -> stringResource(
             Res.string.error_notes_permission_denied,
