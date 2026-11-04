@@ -161,7 +161,7 @@ class SearchIndexViewModelTest {
         viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
         advanceUntilIdle()
 
-        assertEquals(expected = 0 to IndexRunError.INDEX, actual = index.puts.size to viewModel.state.value.error)
+        assertEquals(expected = 0 to IndexRunError.Index, actual = index.puts.size to viewModel.state.value.error)
     }
 
     @Test
