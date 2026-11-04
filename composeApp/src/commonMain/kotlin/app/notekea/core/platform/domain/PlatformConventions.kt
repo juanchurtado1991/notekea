@@ -31,6 +31,7 @@ data class PlatformConventions(
     val previousDayShortcut: Shortcut,
     val nextDayShortcut: Shortcut,
     val closeTabShortcut: Shortcut,
+    val closeWindowShortcut: Shortcut,
     val nextTabShortcut: Shortcut,
     val previousTabShortcut: Shortcut,
     val splitRightShortcut: Shortcut,

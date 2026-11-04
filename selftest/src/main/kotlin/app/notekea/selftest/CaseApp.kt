@@ -29,6 +29,7 @@ import app.notekea.core.presentation.platform.LocalWindowCloseGuard
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.UiZoom
 import app.notekea.core.presentation.platform.WindowCloseGuard
+import app.notekea.core.presentation.platform.WindowCloseShortcuts
 import app.notekea.di.desktopModules
 import app.notekea.notes.data.VaultFolderTrash
 import app.notekea.notes.domain.AttachmentPicker
@@ -112,6 +113,10 @@ class CaseApp(
                     .focusRequester(focusRequester = windowFocus)
                     .focusable()
             ) {
+                // Closing the window quits, as in the app: the case's Notekea quits and starts again (1.1-07).
+                WindowCloseShortcuts(platformConventions = koin.get()) {
+                    CaseApps.quit(vaults = vaults, whileClosed = {})
+                }
                 // The window's zoom, as the app's main window has it (1.14-14).
                 UiZoom(
                     platformConventions = koin.get(),

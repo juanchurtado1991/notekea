@@ -11,6 +11,7 @@ import app.notekea.resources.about_group_writing
 import app.notekea.resources.about_shortcut_bold
 import app.notekea.resources.about_shortcut_bookmark
 import app.notekea.resources.about_shortcut_close_tab
+import app.notekea.resources.about_shortcut_close_window
 import app.notekea.resources.about_shortcut_delete
 import app.notekea.resources.about_shortcut_find
 import app.notekea.resources.about_shortcut_italic
@@ -22,6 +23,7 @@ import app.notekea.resources.about_shortcut_open_note
 import app.notekea.resources.about_shortcut_outline
 import app.notekea.resources.about_shortcut_previous_day
 import app.notekea.resources.about_shortcut_previous_tab
+import app.notekea.resources.about_shortcut_quit
 import app.notekea.resources.about_shortcut_read_mode
 import app.notekea.resources.about_shortcut_open_selected
 import app.notekea.resources.about_shortcut_rename
@@ -93,6 +95,8 @@ object AboutShortcuts {
                 AboutShortcut(label = Res.string.about_shortcut_side_panel, shortcut = toggleSidePanelShortcut),
                 AboutShortcut(label = Res.string.about_shortcut_outline, shortcut = outlineShortcut),
                 AboutShortcut(label = Res.string.about_shortcut_close_tab, shortcut = closeTabShortcut),
+                AboutShortcut(label = Res.string.about_shortcut_close_window, shortcut = closeWindowShortcut),
+                AboutShortcut(label = Res.string.about_shortcut_quit, shortcut = quitShortcut),
                 AboutShortcut(label = Res.string.about_shortcut_next_tab, shortcut = nextTabShortcut),
                 AboutShortcut(label = Res.string.about_shortcut_previous_tab, shortcut = previousTabShortcut),
                 AboutShortcut(label = Res.string.about_shortcut_split, shortcut = splitRightShortcut),

@@ -42,6 +42,7 @@ import app.notekea.core.presentation.platform.awtFileDrop
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.SystemQuit
 import app.notekea.core.presentation.platform.WindowCloseGuard
+import app.notekea.core.presentation.platform.WindowCloseShortcuts
 import app.notekea.core.presentation.platform.WindowQuit
 import app.notekea.core.presentation.theme.LocalAppearance
 import app.notekea.core.presentation.theme.LocalSystemDarkTheme
@@ -212,6 +213,9 @@ private fun ApplicationScope.NotekeaWindow(
             LocalResizePointerIcon provides PointerIcon(cursor = Cursor(Cursor.E_RESIZE_CURSOR))
         ) {
             if (isCrashTest) CrashTest()
+            WindowCloseShortcuts(platformConventions = zoom.platformConventions) {
+                quit.request(then = ::exitApplication)
+            }
             UiZoom(
                 platformConventions = zoom.platformConventions,
                 loadScale = { zoom.getUiScale() },

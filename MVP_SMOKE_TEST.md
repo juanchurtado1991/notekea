@@ -70,6 +70,7 @@ building 1.3. Test data comes from `smoke-data/` (see its README); run its scrip
 | 1.1-04 | After the app has saved any setting, open the app data folder | It exists at `~/Library/Application Support/Notekea` (macOS), `%APPDATA%\Notekea` (Windows), `$XDG_DATA_HOME/notekea` or `~/.local/share/notekea` (Linux); nothing is written next to the executable or inside the vault | 1.3 | Self-Test | | | | |
 | 1.1-05 | Linux only: start the app with `XDG_DATA_HOME=/tmp/xdg-test` set | App data goes to `/tmp/xdg-test/notekea` | 1.3 | Self-Test | | — | — | |
 | 1.1-06 | In the Playground Vault open Welcome, type a few words at its end and, within a second, end Notekea: Cmd+Q on macOS; from a terminal on Windows (`taskkill /PID <its id>`) and Linux (`kill <its id>`), without closing the window first; open `Welcome.md` in a text editor | Notekea closes and the words typed are in the file, none lost | 1.1 | Manual (system) | `WindowQuitTest` | | | |
+| 1.1-07 | In the Playground Vault open Recipes/Arepas, type a line and press the Close window shortcut (Cmd+Shift+W, Ctrl+Shift+W); open Notekea again and the note, type another line and press the quit shortcut (Cmd+Q, Alt+F4 on Windows, Ctrl+Q on Linux) | Each shortcut closes the window, and the line typed is in the file both times | 1.1 | Self-Test | `WindowCloseShortcutsTest` | | | |
 
 ### 1.2 Theme and design system
 
