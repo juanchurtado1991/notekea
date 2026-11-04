@@ -9,6 +9,7 @@ import app.notekea.notes.domain.TrashLocation
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -82,6 +83,25 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
         assertEquals(
             expected = path("Start here.md") to null,
             actual = viewModel.state.value.selectedPath to viewModel.state.value.renaming
+        )
+    }
+
+    @Test
+    fun `a second rename goes on while the links of the first are still being updated`() = runTreeTest {
+        contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
+        val viewModel = startedViewModel()
+        val slowDisk = CompletableDeferred<Unit>()
+        contents.readGate = slowDisk
+        rename(viewModel = viewModel, from = WELCOME, to = "Start here")
+
+        rename(viewModel = viewModel, from = ROADMAP, to = "Plan")
+        val renamed = operations.moves.map { it.second }
+        slowDisk.complete(value = Unit)
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = listOf(path("Start here.md"), path("$PROJECTS/Plan.md")) to null,
+            actual = renamed to viewModel.state.value.renaming
         )
     }
 
