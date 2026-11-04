@@ -47,8 +47,9 @@ class JetBrainsMarkdownLinkFinder : LinkFinder {
         private const val SCHEME_SEPARATOR = "://"
         private const val TARGET_GROUP = 1
 
-        // [[target]], [[target#heading]], [[target^block]], [[target|alias]], with or without a leading "!" (embeds).
-        private val WIKI_LINK = Regex(pattern = """\[\[([^\[\]|#^\n]+?)(?:[#^][^\[\]|\n]*)?(?:\|[^\[\]\n]*)?]]""")
+        // [[target]], [[target#heading]], [[target^block]], [[target|alias]], with or without a leading "!" (embeds);
+        // inside a table the alias's bar is escaped ([[target\|alias]]), and that backslash is not part of the target.
+        private val WIKI_LINK = Regex(pattern = """\[\[([^\[\]|#^\n]+?)(?:[#^][^\[\]|\n]*)?(?:\\?\|[^\[\]\n]*)?]]""")
 
         // [text](<folder/Note name.md#heading>)
         private val MARKDOWN_ANGLE_LINK =
