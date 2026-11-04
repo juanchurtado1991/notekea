@@ -130,6 +130,25 @@ class OkioNoteFileOperationsTest {
         }
 
     @Test
+    fun `a case change never replaces another note on a disk where both names exist`() = runOperationsTest {
+        fakeFileSystem.write(file = vaultPath(path = "$IDEAS/foo.md")) { writeUtf8("lower") }
+        fakeFileSystem.write(file = vaultPath(path = "$IDEAS/Foo.md")) { writeUtf8("upper") }
+
+        val outcome = operations().move(
+            vaultPath = VAULT,
+            from = path(value = "$IDEAS/foo.md"),
+            to = path(value = "$IDEAS/Foo.md")
+        )
+
+        assertEquals(
+            expected = Outcome.Failure(error = NotesError.NameTaken(name = "Foo.md")) to listOf("lower", "upper"),
+            actual = outcome to listOf("foo.md", "Foo.md").map { name ->
+                fakeFileSystem.read(file = vaultPath(path = "$IDEAS/$name")) { readUtf8() }
+            }
+        )
+    }
+
+    @Test
     fun `anything on disk exists, hidden entries included`() = runOperationsTest {
         writeNote(path = ".obsidian/app.json")
 
