@@ -57,6 +57,10 @@ object PreviewPlatformConventions {
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.ALT)
         ),
         closeTabShortcut = Shortcut(key = ShortcutKey.W, modifiers = setOf(ShortcutModifier.CONTROL)),
+        closeWindowShortcut = Shortcut(
+            key = ShortcutKey.W,
+            modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
+        ),
         nextTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = setOf(ShortcutModifier.CONTROL)),
         previousTabShortcut = Shortcut(
             key = ShortcutKey.TAB,

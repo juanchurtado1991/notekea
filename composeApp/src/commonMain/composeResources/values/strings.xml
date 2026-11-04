@@ -10,6 +10,8 @@
     <string name="about_shortcut_bold">Bold</string>
     <string name="about_shortcut_bookmark">Bookmark the note</string>
     <string name="about_shortcut_close_tab">Close the tab</string>
+    <string name="about_shortcut_close_window">Close the window</string>
+    <string name="about_shortcut_quit">Quit Notekea</string>
     <string name="about_shortcut_delete">Delete the selected file</string>
     <string name="about_shortcut_find">Find in the note</string>
     <string name="about_shortcut_italic">Italic</string>

@@ -184,6 +184,7 @@ class ResolvePlatformConventionsUseCaseTest {
         previousDayShortcut = Shortcut(key = ShortcutKey.LEFT, modifiers = setOf(primary, ShortcutModifier.ALT)),
         nextDayShortcut = Shortcut(key = ShortcutKey.RIGHT, modifiers = setOf(primary, ShortcutModifier.ALT)),
         closeTabShortcut = primary.with(ShortcutKey.W),
+        closeWindowShortcut = primary.withShift(ShortcutKey.W),
         nextTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL),
         previousTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL + ShortcutModifier.SHIFT),
         splitRightShortcut = primary.withShift(ShortcutKey.D),

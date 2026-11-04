@@ -3,6 +3,7 @@ package app.notekea.core.presentation.platform
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -51,22 +52,22 @@ class WindowQuitTest {
     @Test
     fun `a second way of quitting waits for the same run of the guard`() = runBlocking {
         saving()
+        val first = CompletableDeferred<Unit>()
         val second = CompletableDeferred<Unit>()
 
-        quit.request { steps += CLOSED }
+        quit.request {
+            steps += CLOSED
+            first.complete(value = Unit)
+        }
         quit.request {
             steps += QUIT
             second.complete(value = Unit)
         }
-        withTimeout(timeMillis = WAIT_MILLIS) { second.await() }
+        withTimeout(timeMillis = WAIT_MILLIS) { awaitAll(first, second) }
 
         assertEquals(
-            expected = setOf(SAVED, CLOSED, QUIT),
-            actual = steps.toSet()
-        )
-        assertEquals(
-            expected = SAVED,
-            actual = steps.first()
+            expected = SAVED to setOf(CLOSED, QUIT),
+            actual = steps.first() to steps.drop(n = 1).toSet()
         )
     }
 
