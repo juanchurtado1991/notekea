@@ -147,30 +147,48 @@ private fun followTreeEffect(
 internal fun FollowQuickSwitcher(
     switcher: QuickSwitcherViewModel,
     tree: VaultTreeViewModel,
-    editor: EditorViewModel,
+    editors: PaneEditors,
     notes: Map<RelativePath, NoteEntry>
 ) {
     LaunchedEffect(switcher, notes) {
         switcher.onIntent(intent = QuickSwitcherIntent.OnNotesChange(notes = notes.values))
     }
     val currentNotes by rememberUpdatedState(newValue = notes)
-    val currentEditor by rememberUpdatedState(newValue = editor)
+    val currentEditors by rememberUpdatedState(newValue = editors)
     LaunchedEffect(switcher, tree) {
         switcher.effects.collect { effect ->
-            when (effect) {
-                is QuickSwitcherEffect.OpenNote -> {
-                    tree.onIntent(intent = VaultTreeIntent.OnRevealNote(path = effect.path))
-                    currentEditor.onIntent(intent = EditorIntent.OnFocusRequest(path = effect.path))
-                }
-
-                is QuickSwitcherEffect.LinkNote -> {
-                    val target = LinkResolver(notePaths = currentNotes.keys).wikiTarget(path = effect.path)
-                    currentEditor.onIntent(EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target)))
-                }
-
-                QuickSwitcherEffect.Dismissed -> currentEditor.onIntent(intent = EditorIntent.OnFocusRequest())
-            }
+            followSwitcherEffect(
+                effect = effect,
+                onReveal = { tree.onIntent(intent = VaultTreeIntent.OnRevealNote(path = it)) },
+                editors = currentEditors,
+                notes = currentNotes.keys
+            )
         }
+    }
+}
+
+/**
+ * What the palette chose. The tree opens a chosen note a moment later, so its keyboard request goes to the editor of
+ * the pane it will show in, which keeps it until the note is there.
+ */
+internal fun followSwitcherEffect(
+    effect: QuickSwitcherEffect,
+    onReveal: (RelativePath) -> Unit,
+    editors: PaneEditors,
+    notes: Set<RelativePath>
+) {
+    when (effect) {
+        is QuickSwitcherEffect.OpenNote -> {
+            onReveal(effect.path)
+            editors.of(path = effect.path).onIntent(intent = EditorIntent.OnFocusRequest(path = effect.path))
+        }
+
+        is QuickSwitcherEffect.LinkNote -> {
+            val target = LinkResolver(notePaths = notes).wikiTarget(path = effect.path)
+            editors.active.onIntent(EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target)))
+        }
+
+        QuickSwitcherEffect.Dismissed -> editors.active.onIntent(intent = EditorIntent.OnFocusRequest())
     }
 }
 
