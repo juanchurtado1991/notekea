@@ -12,6 +12,7 @@ import app.notekea.notes.domain.FakeVectorIndex
 import app.notekea.notes.domain.IndexError
 import app.notekea.notes.domain.IndexRunError
 import app.notekea.notes.domain.IndexVaultUseCase
+import app.notekea.notes.domain.NoteChunk
 import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.NoteSections
 import app.notekea.notes.domain.OutlineFinder
@@ -20,6 +21,7 @@ import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.domain.VectorIndex
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -27,6 +29,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -159,6 +162,37 @@ class SearchIndexViewModelTest {
         advanceUntilIdle()
 
         assertEquals(expected = 0 to IndexRunError.INDEX, actual = index.puts.size to viewModel.state.value.error)
+    }
+
+    @Test
+    fun `a change of the notes while Rebuild waits for the run before it does not lose the Rebuild`() = runTest(
+        context = testDispatcher
+    ) {
+        val slowToPut = object : VectorIndex by index {
+            override suspend fun put(
+                vaultPath: String,
+                note: RelativePath,
+                chunks: List<NoteChunk>,
+                vectors: List<FloatArray>
+            ): Outcome<Unit, IndexError> = withContext(context = NonCancellable) {
+                delay(timeMillis = 100)
+                index.put(vaultPath = vaultPath, note = note, chunks = chunks, vectors = vectors)
+            }
+        }
+        val viewModel = viewModel(vectorIndex = slowToPut)
+        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = write(count = 2), isLoaded = true))
+        advanceUntilIdle()
+        val notes = write(count = 3)
+        index.puts.clear()
+
+        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = notes, isLoaded = true))
+        advanceTimeBy(delayTimeMillis = 350)
+        viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
+        advanceTimeBy(delayTimeMillis = 10)
+        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = notes, isLoaded = true))
+        advanceUntilIdle()
+
+        assertEquals(expected = notes.map { it.path }.toSet(), actual = index.puts.toSet())
     }
 
     @Test

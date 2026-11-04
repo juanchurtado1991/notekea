@@ -38,6 +38,7 @@ class SearchIndexViewModel(
     private var notes: List<NoteFile>? = null
     private var run: Job? = null
     private var lastRunAt: Instant? = null
+    private var isRebuildAsked = false
 
     override fun handleIntent(
         intent: SearchIndexIntent
@@ -71,7 +72,7 @@ class SearchIndexViewModel(
         val current = notes ?: return
         replaceRun {
             delay(duration = after)
-            runOnce(notes = current)
+            if (isRebuildAsked) rebuildNow() else runOnce(notes = current)
         }
     }
 
@@ -141,15 +142,19 @@ class SearchIndexViewModel(
         return (clock.now() - since) / doneNow * (progress.total - progress.done)
     }
 
+    /** A change of the notes may replace this run before it begins: [isRebuildAsked] makes the next run rebuild. */
     private fun rebuild() {
-        replaceRun {
-            if (forgetIndex()) {
-                notes?.let { runOnce(notes = it) }
-            } else {
-                reduce { it.copy(isRunning = false, error = IndexRunError.INDEX) }
-            }
-        }
+        isRebuildAsked = true
+        replaceRun { rebuildNow() }
         reduce { it.copy(isDetailsOpen = false, isNoticeDismissed = false) }
+    }
+
+    private suspend fun rebuildNow() {
+        if (forgetIndex()) {
+            notes?.let { runOnce(notes = it) }
+        } else {
+            reduce { it.copy(isRunning = false, error = IndexRunError.Index) }
+        }
     }
 
     /**
@@ -158,6 +163,7 @@ class SearchIndexViewModel(
      * index would keep them out of it for good, so the index is not emptied unless the state was.
      */
     private suspend fun forgetIndex(): Boolean = withContext(context = NonCancellable) {
+        isRebuildAsked = false
         indexStateStore.clear(vaultPath = vaultPath) && vectorIndex.clear(vaultPath = vaultPath) is Outcome.Success
     }
 
