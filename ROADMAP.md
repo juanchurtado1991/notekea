@@ -18,10 +18,15 @@ branch name is given next to it. Estimates assume one developer and are meant fo
   its settings for attachments, daily notes and templates folders are honored (read-only).
 - **Local only:** see the privacy rules in `GUIDELINES.md`.
 
-**Closing a milestone:** every milestone ends with its **performance pass** (its last item: 1.18, 2.9, 3.7, 4.3,
-5.4), then its **QA run**. A milestone is done when all its items are ✅ **and** its QA run passes on Windows, macOS
-and Linux (`qa/README.md`); only then does the next milestone start. The M1 run also covers M0, which never had one.
-The M5 run is the release run.
+**Closing a milestone:** every milestone ends with its **performance pass** (its last item: 1.18, 2.9, 3.7, 4.3, 4.8,
+5.4), and it is done when all its items are ✅; the next one then starts.
+
+**One QA run before the release (decided with the developer, 2026-11-04):** after M1's, the only QA run is the release
+run, between 5.4 and 5.5, on Windows, macOS and Linux (`qa/README.md`). It covers every case of `MVP_SMOKE_TEST.md`, so
+it needs one or two weeks for the run, its fixes and a new build. Until then each feature keeps its local smoke test
+and its Self-Test cases, which CI runs on the three systems, and two checks cover what those cannot see: a packaged
+app that installs and starts on each system every night (2.13), and the developer installing the app on Windows and
+macOS for half an hour at the end of M3, to see the chat answer there (no QA run, no release candidate).
 
 **Performance pass** (`GUIDELINES.md` §8, `docs/performance.md`): the milestone's **automated smoke runs** (below)
 drive the real app through its cases on the smoke data while memory is sampled, so each pass profiles where the
@@ -43,11 +48,12 @@ a person can judge (looks, feel, the operating system's own dialogs).
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
-| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks | 5 weeks | 6 / 12 |
-| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 5.5 weeks | 0 / 10 |
+| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 6 / 13 |
+| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
+| M4b — Sources, study cards and agent | Web clips, PDFs, study cards, agent mode | 9 weeks | 0 / 5 |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
-| Post-MVP | Extensions (Koog + MCP), mobile, more | — |
+| Post-MVP | Extensions (Koog + MCP), mobile, repositories, more | — |
 
 ---
 
@@ -147,7 +153,7 @@ platform guidelines, community files. See `CHANGELOG.md`.
 ## M1 — Vault and editor
 
 M1 is closed (2026-11-01): its QA run (`qa/runs/M1.md`) passed on macOS with m1-rc1. Its fixes are on `main` without a
-release candidate of their own: M2's run (from m2-rc1) checks them, with Windows and Linux; 1.11-16 (tab drag, #103) is
+release candidate of their own: the release run checks them, with Windows and Linux; 1.11-16 (tab drag, #103) is
 deferred to M2.
 
 ### ✅ 1.1 Platform conventions — `feature/platform-conventions` — [notekea#15](https://github.com/juanchurtado1991/notekea/pull/15)
@@ -703,7 +709,7 @@ directory, never inside the vault.
 Lucene stays the desktop index (weighed against SQLite FTS5 + sqlite-vec on 2026-10-29): it is plain Java in the JVM
 Notekea already runs, reads its index from disk instead of holding it in memory, and analyzes each language (Spanish
 stems and accents) where FTS5 does not; sqlite-vec is a native extension to ship and load on every system. sqlite-vec
-remains the plan for mobile (post-MVP 3).
+remains the plan for mobile (post-MVP 2).
 
 **UI — Indexing progress:**
 - Status bar: "Indexing 340 / 1,204" with a thin progress bar; "Indexed 1,204 notes" when done.
@@ -848,6 +854,14 @@ note and heading, plus 30 over the Ghost Serializer vault of 1.18, a code reposi
 notes that should be found. A test reports recall@5 and fails below the agreed baseline, so changes to chunking,
 models or ranking are measured.
 
+### ⬜ 2.13 Packaged check — `chore/packaged-check`
+
+With one QA run before the release, a problem only a packaged app shows (a Java module left out, a native library that
+does not load, as in #68) must not wait for it. Every night `nightly.yml` packages Notekea on Windows, macOS and Linux,
+installs it, starts it, checks that its window opens with no crash report, and uninstalls it.
+
+- **Done when:** a package that cannot start fails the nightly on the system where it happens.
+
 ### ⬜ 2.9 M2 performance pass — `chore/m2-performance`
 
 The performance pass of M2 (see "Closing a milestone"), on the automated smoke runs of M1 and M2: memory and time of
@@ -890,6 +904,9 @@ Before 3.2, measure with real 2B, 4B and 8B chat models on the reference machine
   the Ghost Serializer questions of 2.8 pick the Small, Medium and Large defaults.
 - `rerank()` with a small GGUF reranker (bge-reranker class): quality on the sample vault and time per 20 chunks.
 - Grammar-constrained output (`jsonSchemaToGrammar`): valid JSON every time, cost in tokens/s.
+- Plans and tools per model size: how well each model picks from about 30 actions, in one step or by kind first and
+  action second, whether it can plan up to 5 steps at once (3.9), and whether it can choose its next step from what
+  the last one found (4.7): the model sizes that can use each one.
 
 - Memory of the whole process (editor included) with each model and a context of 2k, 4k and 8k tokens, and with the
   KV cache in 8 bits instead of 16: what it saves and what it costs in quality on the 3.4 evaluation set.
@@ -1012,26 +1029,32 @@ answered exactly by the queries of 2.10 and 2.11: the model only turns the quest
 
 ### ⬜ 3.9 Actions from chat — `feature/chat-actions`
 
-The chat does things, not only answers (decided with the developer, 2026-10-29): it opens a note at the exact place,
-makes notes, sets properties, adds tasks. Built for small local models, so it is **one action per request, not an
-agent loop**: the action step reads the request and returns either an answer (3.5) or one action from a short, fixed
-list, as JSON constrained by a grammar (3.0). Notekea checks the action before doing anything (the note and the
-folder exist, the property name is valid) and carries it out with the use cases the app already has (creating a
-note, the template picker, the properties editor, opening a note scrolled to a quote); the model only chooses.
-Multi-step agents stay after the MVP (post-MVP 2).
+The chat is a way to use Notekea, not only to ask about notes (decided with the developer, 2026-10-29, widened on
+2026-11-04): it can do almost anything a person can do with their notes. A request becomes **a plan of up to 5 steps**,
+written at once as JSON constrained by a grammar (3.0), from a fixed list of actions, or an answer (3.5). Notekea
+checks every step before doing anything (the note and the folder exist, the property name is valid) and carries it
+out with the use cases the app already has; the model only chooses. Asking first for the kind of action and then for
+the action is used if 3.0 shows it picks better. A step that needs text writes it with 3.5, so a summary can be added
+to a note in the same plan. Work that must decide as it goes belongs to agent mode (4.7).
 
-- **Actions that read or move around, done at once:** open a note scrolled to a quote or a heading ("where did I
-  write about the arepa dough?"), search by text, tag or property (2.10), show tasks (2.11), open today's note, show
-  related notes and backlinks, list notes without tags and broken links.
-- **Actions that write, always confirmed first:** create a note (title, folder, text, optionally from a template),
-  set or change a property, add a tag, append text to a note or to today's note, add a task, link two notes,
-  bookmark a note or folder, make a new note from the open one (its summary, its tasks).
-- **Not in the MVP, on purpose:** deleting, renaming, moving and rewriting whole notes; a mistake there costs too
-  much.
-- **Safety:** text inside notes can look like an instruction ("delete all notes"), so writing is always confirmed,
-  deleting is not an action, and actions only reach the open vault. Every action done is listed in the chat, and
-  writing ones can be undone.
-- Asked for something outside the list (writing code, deleting), the chat says in plain words what it can do instead.
+- **Done at once, nothing changes in the notes:**
+  - Read and find: open a note at a quote or a heading, search by text, tag or property (2.10), show tasks (2.11),
+    open today's note, show related notes and backlinks, list notes without tags and broken links.
+  - The app: open a panel, split the pane, close tabs, switch between Edit and Preview, change the color theme.
+- **Written, always confirmed first:** create a note (title, folder, text, optionally from a template), add text to a
+  note or to today's note, edit a section or rewrite a note (shown as a difference), set or change a property, add a
+  tag, add or complete a task, link two notes, bookmark a note or folder, make a new note from the open one (its
+  summary, its tasks), clip a web page (4.4).
+- **Organizing, always confirmed first, listing every note:** create a folder, rename and move notes and folders (links
+  follow, without asking, as in 1.4), send to the system's trash.
+- **Several notes:** a step can cover up to 50 notes ("tag every note in Recipes"); the card lists them.
+- **Never:** deleting for good, anything outside the open vault, Settings that hold credentials, the remote or the
+  models, and writing code. Asked for one of these, the chat says in plain words what it can do instead.
+- **Safety:** text inside notes or pages can look like an instruction ("delete all notes"). The step that chooses
+  actions reads only the request and the names of notes and folders, never their text; a URL is only followed if the
+  user wrote it (`GUIDELINES.md` §13); writing is always confirmed, on one card for the whole plan, which is never
+  confirmed by itself. Every action done is listed in the chat, and the plan can be undone at once, a trashed note
+  included where the system allows it (checked on the three systems in this item; where it does not, the card says so).
 
 **UI — Action card** (in the chat panel of 3.3):
 
@@ -1047,9 +1070,9 @@ You:  create a note "Meeting with Ana" in Work from the Meeting template, status
 → "Done" with Undo (Mod+Z), and the note opens
 ```
 
-- An evaluation set of 40–50 requests with the expected action and its fields (`create_task(note, text)`), run on
+- An evaluation set of about 100 requests with the expected plan and its fields (`create_task(note, text)`), run on
   Small, Medium and Large like 3.4.
-- **Done when:** the recommended model picks the right action with the right fields for at least 90% of the set;
+- **Done when:** the recommended model writes the right plan with the right fields for at least 90% of the set;
   where a model size falls short, its writing actions are offered as suggestions the user completes instead.
 
 ### ⬜ 3.7 M3 performance pass — `chore/m3-performance`
@@ -1084,6 +1107,66 @@ The index folder is never committed. Token stored in the OS keychain (Java Keyri
 The performance pass of M4 (see "Closing a milestone"), on the automated smoke runs of M1 to M4: memory and time of
 a sync of the Sample Vault and the Ghost Serializer vault, of the auto-commit while typing, and idle memory with sync on.
 Compared with 3.7 in `docs/performance.md`.
+
+---
+
+## M4b — Sources, study cards and agent
+
+Added to the MVP with the developer on 2026-11-04. It comes after M4 so Git sync is done, and before M5 so the
+performance work of 5.4 and the release run cover all of it. Repositories stays after the MVP.
+
+### ⬜ 4.4 Web clips — `feature/web-clips`
+
+Notes from a web page: give Notekea a URL and it writes notes about the article into a folder.
+
+- **Flow:** the URL is downloaded (`GUIDELINES.md` §13), the article is taken out of the page (a library to approve in
+  `LIBRARIES.md`), the local model writes the notes with 3.5, each one checked against the article, and Notekea creates
+  `Web sources/<title>.md` with the properties `source` and `clipped`, the notes, and the article's text under
+  `## Original text`, so search and the chat keep working if the page disappears.
+- **Where:** "Clip web page…" in the editor toolbar's More menu, and in the chat as an action of 3.9.
+- **With no model installed,** it saves the article alone and says the notes need a model.
+- **What fails, in plain words:** a page that needs JavaScript or a login, a paywall, a page that is not an article. No
+  browser is built into the app.
+- **Done when:** the articles of an evaluation set of 20 saved pages make notes whose every sentence is backed by the
+  article, and a page that cannot be read leaves no note behind.
+
+### ⬜ 4.5 PDFs — `feature/pdf-sources`
+
+PDFs inside the vault are indexed like notes (a text extraction library to approve in `LIBRARIES.md`): search, Related
+and the chat find them, and a citation opens the file at its page in the system's reader. Scanned PDFs with no text
+are listed as not readable; there is no OCR.
+
+- **Done when:** a PDF's sentence can be found and cited, and a change to the file indexes it again.
+
+### ⬜ 4.6 Study cards — `feature/study-cards`
+
+Flashcards made by the local model from a note: each question cites the sentence it comes from and passes the
+verification of 3.5; reviewed with spaced repetition in a review tab, and stored in the note in the format of Obsidian's
+Spaced Repetition plugin, so they work in both. Chosen with the developer on 2026-10-28, when the answer pipeline is
+measured.
+
+### ⬜ 4.7 Agent mode — `feature/agent-mode`
+
+Work that must decide as it goes (decided with the developer, 2026-11-04): "read these 10 articles, compare them and
+reorganize my notes about it". Local models are small and choosing tools over several steps is the hardest thing asked
+of them, so it is built to be safe when they get it wrong, and 3.0 and 3.4 decide which model sizes offer it.
+
+- **The loop:** the agent chooses one step at a time, from the read-only actions of 3.9 and the URLs in the request,
+  as JSON constrained by a grammar, and sees what each one found. Notekea stops it at 30 steps, at a time limit, or on
+  Stop, and it runs in the background with its progress in the chat.
+- **Nothing is written while it works:** every change goes into a plan, shown at the end on the card of 3.9, with all
+  its notes listed, and nothing happens until the user confirms it. Undoing it undoes the whole plan.
+- **Safety:** here the agent does read notes and pages, so their text can steer what it proposes. It cannot fetch a URL
+  the user did not write, cannot leave the vault, and every change still passes the user's confirmation.
+- **Tools:** plain coroutines like the rest of the pipeline, unless 3.0 shows Koog's agent runtime is worth it.
+- **Evaluation:** about 30 tasks over the Sample Vault with the plan each should reach, in the set of 3.4.
+- **Done when:** the model sizes that offer it reach the threshold set in 3.4 on those tasks, and a failed run ends with
+  no change to the vault. A model size that falls short does not offer it; the rest of the chat is unaffected.
+
+### ⬜ 4.8 M4b performance pass — `chore/m4b-performance`
+
+The performance pass of M4b (see "Closing a milestone"): memory and time of a web clip, of indexing large PDFs and of a
+long agent run. Compared with 4.3 in `docs/performance.md`.
 
 ---
 
@@ -1150,23 +1233,18 @@ macOS, Linux) with every automated smoke run and cut what the numbers point at, 
 
 ### ⬜ 5.5 Release v0.1.0
 
-Website `notekea.app` with download links, README screenshots, announcement (Hacker News, r/ObsidianMD,
-r/LocalLLaMA, Kotlin Slack). Measure: stars in the first month, issues from real users, retention feedback.
+The release run (`qa/README.md`) comes first, on the three systems, and closes M2 to M5. Then: website `notekea.app`
+with download links, README screenshots, announcement (Hacker News, r/ObsidianMD, r/LocalLLaMA, Kotlin Slack). Measure: stars in the first month, issues from real users, retention feedback.
 
 ---
 
 ## Post-MVP (ordered by expected value)
 
-1. **Study cards** — flashcards made by the local model from a note: each question cites the sentence it comes from
-   and passes the verification of 3.5; reviewed with spaced repetition in a review tab, and stored in the note in the
-   format of Obsidian's Spaced Repetition plugin, so they work in both. Chosen with the developer as the first item
-   after the MVP (2026-10-28), when the answer pipeline is measured.
-2. **Extensions via MCP** — Koog agent runtime with `ai.koog:agents-mcp` once stable; extensions are MCP servers
-   the user enables explicitly. Agent features only when local models handle tool calling reliably.
-3. **Mobile (Android first, then iOS)** — `LlmEngine` via Llamatik, `VectorIndex` via SQLite + sqlite-vec,
+1. **Extensions via MCP** — Koog agent runtime with `ai.koog:agents-mcp` once stable; extensions are MCP servers
+   the user enables explicitly.
+2. **Mobile (Android first, then iOS)** — `LlmEngine` via Llamatik, `VectorIndex` via SQLite + sqlite-vec,
    `GitSync` via libgit2 on iOS (see "Mobile risks" in `LIBRARIES.md`).
-4. **More sources** — PDFs and web clippings inside the vault, indexed like notes.
-5. **Repositories** — a code repository becomes something the chat can answer about, with the exact file and line.
+3. **Repositories** — a code repository becomes something the chat can answer about, with the exact file and line.
    Separate from Git sync (4.1), which only versions the vault itself; it reuses its JGit clone and pull.
    **Decided with the developer (2026-10-29), replacing the plan of 2026-10-28 that wrote notes about the code:**
    Notekea writes no notes for a repository. It clones it as it is into a read-only folder of the app data (never
@@ -1193,10 +1271,10 @@ r/LocalLLaMA, Kotlin Slack). Measure: stars in the first month, issues from real
    The Ghost Serializer vault (`smoke-data/vaults/Ghost Serializer`) stays as the large vault of the tests and the
    performance passes, and its questions (2.8) as an evaluation set; the repository itself becomes the test data of
    this item.
-6. **More than two split panes** and detachable windows.
-7. **Custom title bar** with the tabs inside it (JetBrains Jewel `DecoratedWindow`).
-8. **Screenshot tests** for UI regressions (Roborazzi).
-9. **Use an installed Ollama** — when the user already runs Ollama, Notekea can use its model instead of loading its
+4. **More than two split panes** and detachable windows.
+5. **Custom title bar** with the tabs inside it (JetBrains Jewel `DecoratedWindow`).
+6. **Screenshot tests** for UI regressions (Roborazzi).
+7. **Use an installed Ollama** — when the user already runs Ollama, Notekea can use its model instead of loading its
    own, so the memory is not spent twice. For technical users; the bundled model stays the default.
 
 ## Out of scope for the MVP

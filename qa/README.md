@@ -1,16 +1,15 @@
-# Milestone QA run
+# Release run
 
-How a milestone is tested on Windows, macOS and Linux before the next one starts (`GUIDELINES.md` §8, testing
-level 2). This file is for whoever coordinates the run: the developer and the agent (Claude). Testers only need the
+How Notekea is tested on Windows, macOS and Linux before its release (`GUIDELINES.md` §8, testing level 2). It was
+run per milestone for M1; since 2026-11-04 the only run left is the one before v0.1.0 (`ROADMAP.md`). This file is for whoever coordinates the run: the developer and the agent (Claude). Testers only need the
 guide of their system: [Windows](GUIDE_WINDOWS.md), [macOS](GUIDE_MACOS.md), [Linux](GUIDE_LINUX.md).
 
 ## When
 
-- When the last item of a milestone (M1, M2, M3, M4), its performance pass (`ROADMAP.md`, "Closing a milestone"), is
-  merged into `main`, before any work on the next milestone.
-- The M5 run is the release run (`ROADMAP.md` 5.5), with the release builds, which are not signed (`ROADMAP.md` 5.3).
-- **The M1 run is the first one and is retroactive**: it covers everything built since M0 (the "General" cases and
-  all M1 cases of `MVP_SMOKE_TEST.md`), each as a Self-Test case, automatic or manual.
+- Once, when 5.4, the last item before the release, is merged into `main` and before 5.5, with the release builds,
+  which are not signed (`ROADMAP.md` 5.3). Allow one or two weeks for the run, its fixes and a new build.
+- It covers every case of `MVP_SMOKE_TEST.md`, each as a Self-Test case, automatic or manual, including the fixes of
+  M1's run (`qa/runs/M1.md`), which covered everything built since M0.
 
 ## Who
 
@@ -69,7 +68,7 @@ Change ⬜ to ✅ with the pull request link as each one lands. Already done: th
    release candidate and run again **the Self-Test and the failed cases** (plus the cases near each fix) on the
    affected systems.
 9. **Close the milestone** when the three systems pass: record the final build in `runs/M<N>.md` and mark the
-   milestone row in `ROADMAP.md` as closed by its QA run.
+   rows of M2 to M5 in `ROADMAP.md` as closed by the run.
 
 ## Files
 
