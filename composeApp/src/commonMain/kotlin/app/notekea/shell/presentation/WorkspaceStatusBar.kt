@@ -16,8 +16,8 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.notes.presentation.editor.EditorState
-import app.notekea.notes.presentation.editor.SaveStatus
+import app.notekea.editor.presentation.EditorState
+import app.notekea.editor.presentation.SaveStatus
 import app.notekea.shell.presentation.TabKind
 import app.notekea.resources.Res
 import app.notekea.resources.editor_saved

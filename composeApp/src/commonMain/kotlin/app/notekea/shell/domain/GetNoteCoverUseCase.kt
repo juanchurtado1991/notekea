@@ -1,9 +1,9 @@
 package app.notekea.shell.domain
 
-import app.notekea.notes.domain.AttachmentFolder
+import app.notekea.editor.domain.AttachmentFolder
 import app.notekea.core.notes.domain.AttachmentKind
-import app.notekea.notes.domain.AttachmentResolver
-import app.notekea.notes.domain.EmbedFinder
+import app.notekea.editor.domain.AttachmentResolver
+import app.notekea.editor.domain.EmbedFinder
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultSettingsReader

@@ -13,9 +13,9 @@ import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.notes.domain.Bookmarks
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.notes.presentation.editor.EditorContent
-import app.notekea.notes.presentation.editor.EditorIntent
-import app.notekea.notes.presentation.editor.EditorState
+import app.notekea.editor.presentation.EditorContent
+import app.notekea.editor.presentation.EditorIntent
+import app.notekea.editor.presentation.EditorState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

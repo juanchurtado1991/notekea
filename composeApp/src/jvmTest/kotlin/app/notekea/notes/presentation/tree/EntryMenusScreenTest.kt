@@ -19,8 +19,8 @@ import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.notes.domain.FolderCard
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.notes.presentation.editor.OutlineSection
-import app.notekea.notes.presentation.editor.SidePanelActions
+import app.notekea.editor.presentation.OutlineSection
+import app.notekea.editor.presentation.SidePanelActions
 import app.notekea.shell.presentation.FolderGrid
 import app.notekea.vault.domain.RecentVaultStatus
 import app.notekea.vault.domain.Vault

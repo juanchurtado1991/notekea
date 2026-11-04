@@ -1,6 +1,6 @@
 package app.notekea.selftest
 
-import app.notekea.notes.domain.AttachmentPicker
+import app.notekea.editor.domain.AttachmentPicker
 
 /** The file picker in a case: it answers [nextPick] (null as a cancel) instead of showing the system's dialog. */
 class ScriptedAttachmentPicker : AttachmentPicker {

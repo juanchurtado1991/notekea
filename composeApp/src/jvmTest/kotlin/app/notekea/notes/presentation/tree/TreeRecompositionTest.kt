@@ -18,8 +18,8 @@ import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.SidePanelPreferences
-import app.notekea.notes.presentation.editor.SidePanel
-import app.notekea.notes.presentation.editor.SidePanelActions
+import app.notekea.editor.presentation.SidePanel
+import app.notekea.editor.presentation.SidePanelActions
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
