@@ -21,7 +21,7 @@ import app.notekea.notes.domain.OutlineFinder
 import app.notekea.notes.domain.RelativePath
 import app.notekea.notes.presentation.editor.OutlineSection
 import app.notekea.notes.presentation.editor.SidePanelActions
-import app.notekea.notes.presentation.workspace.FolderGrid
+import app.notekea.shell.presentation.FolderGrid
 import app.notekea.vault.domain.RecentVaultStatus
 import app.notekea.vault.domain.Vault
 import app.notekea.vault.presentation.welcome.RecentVaultRow

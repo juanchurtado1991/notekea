@@ -11,9 +11,10 @@ import app.notekea.core.presentation.platform.UiZoomState
 import app.notekea.core.presentation.texts
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.notes.domain.RelativePath
-import app.notekea.notes.presentation.workspace.TabKind
+import app.notekea.shell.presentation.TabKind
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import app.notekea.shell.presentation.WorkspaceStatusBar
 
 /**
  * The status bar's clickable facts (`ROADMAP.md` 1.14), rendered headless: a folder or the file of the path shows it in

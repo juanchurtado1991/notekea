@@ -155,7 +155,7 @@ abstract class ArchitectureTestBase {
         const val ROOT_FILE = "NotekeaRoot"
         const val FOLLOWER_PREFIX = "Follow"
         const val THEME_PACKAGE = "app.notekea.core.presentation.theme"
-        val NON_FEATURE_PACKAGES = setOf("architecture", "core", "db", "di", "resources")
+        val NON_FEATURE_PACKAGES = setOf("architecture", "core", "db", "di", "resources", "shell")
         val DESIGN_SYSTEM_PACKAGES = listOf("app.notekea.core.presentation.components", THEME_PACKAGE)
 
         // Theme functions, the preview helper and the developer gallery are tooling, not UI elements.
