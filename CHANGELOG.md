@@ -15,8 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (the notes that write its name or an alias as plain words, with a **Link** button that turns that mention into a
   link). Each row shows the line that names the note, the name highlighted; a click opens it there, the mention
   selected. They read the vault's notes, not the search index, so they work before indexing ends.
-- **Renaming asks about links** (`ROADMAP.md` 2.5): a rename that leaves links behind asks "Update 12 links in 7
-  notes?"; Don't update keeps the old links. Until now links were updated without asking.
 - **Related notes** (`ROADMAP.md` 2.4): the inspector's new Related section lists the eight notes closest in meaning
   to the open note, from the search index, as cards with the note's name, its folder and the passage that matched,
   its closest sentence highlighted. It follows the open note and its edits. On hover a card opens its note, opens it

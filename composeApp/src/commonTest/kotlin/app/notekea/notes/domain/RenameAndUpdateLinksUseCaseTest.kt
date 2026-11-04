@@ -9,42 +9,41 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class RenameAndPlanLinksUseCaseTest {
+class RenameAndUpdateLinksUseCaseTest {
     private val scanner = FakeNoteScanner()
     private val operations = FakeNoteFileOperations()
     private val store = FakeNoteContentStore()
-    private val renameAndPlanLinks = RenameAndPlanLinksUseCase(
+    private val renameAndUpdateLinks = RenameAndUpdateLinksUseCase(
         noteScanner = scanner,
         renameEntry = RenameEntryUseCase(noteFileOperations = operations, validateFileName = ValidateFileNameUseCase()),
-        planLinkUpdates = PlanLinkUpdatesUseCase(noteContentStore = store, linkFinder = JetBrainsMarkdownLinkFinder())
+        updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
+            planLinkUpdates = PlanLinkUpdatesUseCase(
+                noteContentStore = store,
+                linkFinder = JetBrainsMarkdownLinkFinder()
+            ),
+            applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store)
+        )
     )
 
     @Test
-    fun `the note is renamed and the links to it are planned, not written`() = runTest {
+    fun `the note is renamed and the notes that link to it follow`() = runTest {
         addNote(path = AREPAS, text = "# Arepas")
         addNote(path = WELCOME, text = "Cook [[Arepas]].")
 
         val outcome =
-            renameAndPlanLinks(vaultPath = VAULT, path = RelativePath(value = AREPAS), newName = "Arepas reina")
+            renameAndUpdateLinks(vaultPath = VAULT, path = RelativePath(value = AREPAS), newName = "Arepas reina")
 
         assertEquals(
             expected = Outcome.Success(
                 value = RenamedEntry(
                     path = RelativePath(value = "Recipes/Arepas reina.md"),
-                    rewrites = listOf(
-                        NoteRewrite(
-                            path = RelativePath(value = WELCOME),
-                            original = "Cook [[Arepas]].",
-                            updated = "Cook [[Arepas reina]].",
-                            linkCount = 1
-                        )
-                    )
+                    links = LinkUpdateResult(updated = listOf(RelativePath(value = WELCOME)), skipped = emptyList())
                 )
             ),
             actual = outcome
         )
         assertEquals(
-            expected = "Cook [[Arepas]].",
+            expected = "Cook [[Arepas reina]].",
             actual = store.texts.getValue(RelativePath(value = WELCOME))
         )
     }
@@ -54,14 +53,14 @@ class RenameAndPlanLinksUseCaseTest {
         addNote(path = AREPAS, text = "# Arepas")
         addNote(path = WELCOME, text = "Cook [[Arepas]].")
 
-        val same = renameAndPlanLinks(vaultPath = VAULT, path = RelativePath(value = AREPAS), newName = "Arepas")
-        val hidden = renameAndPlanLinks(vaultPath = VAULT, path = RelativePath(value = AREPAS), newName = ".Arepas")
+        val same = renameAndUpdateLinks(vaultPath = VAULT, path = RelativePath(value = AREPAS), newName = "Arepas")
+        val hidden = renameAndUpdateLinks(vaultPath = VAULT, path = RelativePath(value = AREPAS), newName = ".Arepas")
         scanner.failure = NotesError.VaultMissing(path = VAULT)
-        val missing = renameAndPlanLinks(vaultPath = VAULT, path = RelativePath(value = AREPAS), newName = "Other")
+        val missing = renameAndUpdateLinks(vaultPath = VAULT, path = RelativePath(value = AREPAS), newName = "Other")
 
         assertEquals(
             expected = listOf(
-                Outcome.Success(value = RenamedEntry(path = RelativePath(value = AREPAS), rewrites = emptyList())),
+                Outcome.Success(value = RenamedEntry(path = RelativePath(value = AREPAS), links = null)),
                 Outcome.Failure(error = NotesError.HiddenName),
                 Outcome.Failure(error = NotesError.VaultMissing(path = VAULT))
             ),

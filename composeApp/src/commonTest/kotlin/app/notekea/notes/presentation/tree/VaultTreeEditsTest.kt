@@ -2,7 +2,7 @@ package app.notekea.notes.presentation.tree
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import app.notekea.core.domain.Outcome
-import app.notekea.notes.domain.NoteRewrite
+import app.notekea.notes.domain.LinkUpdateResult
 import app.notekea.notes.domain.NoteFixtures.file
 import app.notekea.notes.domain.NotesError
 import app.notekea.notes.domain.TrashLocation
@@ -86,6 +86,59 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
     }
 
     @Test
+    fun `renaming a linked note updates the notes that link to it and says so`() = runTreeTest {
+        contents.texts[path("Start here.md")] = ""
+        contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
+        val viewModel = startedViewModel()
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(WELCOME)))
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameTextChange(text = "Start here"))
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameConfirm)
+        advanceUntilIdle()
+
+        assertEquals(
+            expected =
+            "Begin with [[Start here]]." to TreeNotice.LinksUpdated(notes = listOf("Roadmap"), skippedCount = 0),
+            actual = contents.texts.getValue(path(ROADMAP)) to viewModel.state.value.notice
+        )
+    }
+
+    @Test
+    fun `a shown links notice never blocks the next rename, its links or its notice`() = runTreeTest {
+        contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
+        val viewModel = startedViewModel()
+        rename(viewModel = viewModel, from = WELCOME, to = "Start here")
+        val first = viewModel.state.value.notice
+
+        rename(viewModel = viewModel, from = "Start here.md", to = "Begin")
+
+        assertEquals(
+            expected = Triple(
+                TreeNotice.LinksUpdated(notes = listOf("Roadmap"), skippedCount = 0),
+                "Begin with [[Begin]].",
+                TreeNotice.LinksUpdated(notes = listOf("Roadmap"), skippedCount = 0)
+            ),
+            actual = Triple(first, contents.texts.getValue(path(ROADMAP)), viewModel.state.value.notice)
+        )
+    }
+
+    @Test
+    fun `renaming a note nothing links to changes no other note and says nothing`() = runTreeTest {
+        contents.texts[path(ROADMAP)] = "No links here."
+        val viewModel = startedViewModel()
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(WELCOME)))
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameTextChange(text = "Start here"))
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnRenameConfirm)
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = "No links here." to null,
+            actual = contents.texts.getValue(path(ROADMAP)) to viewModel.state.value.notice
+        )
+    }
+
+    @Test
     fun `a rename in the tree tells the editor where the note went`() = runTreeTest {
         val viewModel = startedViewModel()
         val effects = mutableListOf<VaultTreeEffect>()
@@ -104,6 +157,28 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
             ),
             actual = effects
         )
+    }
+
+    @Test
+    fun `a rename from the editor selects the note at its new path and reports the links`() = runTreeTest {
+        val viewModel = startedViewModel()
+        viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(WELCOME)))
+
+        viewModel.onIntent(
+            intent = VaultTreeIntent.OnEntryRenamed(
+                from = path(WELCOME),
+                to = path("Start here.md"),
+                links = LinkUpdateResult(updated = listOf(path(ROADMAP), path("Ideas/Plan.md")), skipped = emptyList())
+            )
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            expected =
+            path("Start here.md") to TreeNotice.LinksUpdated(notes = listOf("Plan", "Roadmap"), skippedCount = 0),
+            actual = viewModel.state.value.selectedPath to viewModel.state.value.notice
+        )
+        assertTrue(actual = path("Start here.md") in viewModel.state.value.tree.notes)
     }
 
     @Test

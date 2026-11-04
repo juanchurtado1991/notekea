@@ -25,11 +25,7 @@ class VaultTreeNavigationTest : VaultTreeViewModelTestBase() {
 
         rename(viewModel = viewModel, from = PROJECTS, to = "Plans")
         viewModel.onIntent(
-            intent = VaultTreeIntent.OnEntryRenamed(
-                from = path(WELCOME),
-                to = path("Start here.md"),
-                rewrites = emptyList()
-            )
+            intent = VaultTreeIntent.OnEntryRenamed(from = path(WELCOME), to = path("Start here.md"), links = null)
         )
         val renamed = viewModel.state.value.bookmarks.paths
         viewModel.onIntent(intent = VaultTreeIntent.OnDeleteRequest(path = path("Plans")))

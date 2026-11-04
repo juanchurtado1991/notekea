@@ -213,8 +213,7 @@ notes are read again.
 - Delete moves to the system trash (`gio trash` on Linux), falling back to the vault's `.trash` folder.
 - Rename updates the `[[wiki links]]`, embeds and Markdown links that point to the entry, as Obsidian does by
   default, so no link breaks; a notice says how many notes changed. A note that changes while it is rewritten is
-  left as it was and counted in the notice. Since 2.5 it asks first ("Update 12 links in 7 notes?"): Don't update
-  keeps the old links.
+  left as it was and counted in the notice. Keeping the old links is a Settings option (5.2).
 - Until the editor (1.5), the main area shows the selected note's title, folder, tags and aliases.
 - **Done when:** a 5,000-note vault lists in under 1 s after the first scan, external changes appear within 1 s.
 - Smoke test: cases 1.4-01 to 1.4-12; 1.3-02, 1.3-04 and 1.3-07 rewritten for the tree.
@@ -749,7 +748,8 @@ A link graph built from `[[wiki links]]`, Markdown links, embeds and frontmatter
   **Link** button that turns that mention into `[[Note]]` (explicit user action).
 - Count badge on the tab; click a mention to open the note scrolled to it.
 - Next to **Related**, this shows the difference between links the user made and connections the AI found.
-- Renaming a note offers to update every link to it ("Update 12 links in 7 notes?"), never silently.
+- Renaming a note updates every link to it without asking, as Obsidian does by default (1.4); decided with the
+  developer, who does not want a question on every rename.
 - **Done when:** link resolution matches Obsidian's (shortest path, aliases, headings `[[Note#Heading]]`,
   block references are kept as-is) on the sample vault.
 - Implemented in `notes`: `FindMentionsUseCase` reads the vault's texts (`NoteTextCache`, so only changed notes are
@@ -759,8 +759,8 @@ A link graph built from `[[wiki links]]`, Markdown links, embeds and frontmatter
   (`MentionPassage` on `MarkdownLineStripper`). Only notes holding the name are parsed. Obsidian does not resolve a
   bare `[[alias]]`, and neither does Notekea: aliases count for unlinked mentions. `LinkMentionUseCase` writes
   `[[Note]]` (or `[[Note|words]]`) only if the words are still there (`ApplyLinkUpdatesUseCase`).
-  `NoteMentionsViewModel` follows the open note and the tree (the file watcher). A rename plans its link updates
-  (`PlanLinkUpdatesUseCase`, `RenameAndPlanLinksUseCase`) and the tree asks (`LinkUpdateDialog`) before writing.
+  `NoteMentionsViewModel` follows the open note and the tree (the file watcher). Renaming keeps updating links
+  without a question (1.4).
   UI design A (picked 2026-11-03), following the macOS inspector: `ConnectionsSection` with the design system's
   `NotekeaCountTabs` and `NotekeaPassageRow` (rows, not cards; 2.4's Related moved to them), Note info as a compact
   table; a mention's click selects it in its note (`EditorIntent.OnRevealRequest`).
