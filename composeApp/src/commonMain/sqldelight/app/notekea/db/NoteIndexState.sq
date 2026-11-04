@@ -1,6 +1,7 @@
 -- What the search index holds of each note (ROADMAP.md 2.3): the hash of the text it was indexed from, the file's
 -- size and modification date then, and the index version (model and chunking). A note whose size or date changed is
--- read again, and indexed again only when its hash changed; a version change indexes every note again.
+-- read again, and indexed again only when its hash changed; a version change indexes every note again. A note left
+-- out on purpose keeps its skip_reason here, so it stays out, and is not read again, until it changes.
 
 CREATE TABLE note_index_state (
     vault TEXT NOT NULL,
@@ -9,14 +10,16 @@ CREATE TABLE note_index_state (
     size INTEGER,
     modified_at INTEGER,
     version TEXT NOT NULL,
+    skip_reason TEXT,
     PRIMARY KEY (vault, path)
 );
 
 selectStates:
-SELECT path, content_hash, size, modified_at, version FROM note_index_state WHERE vault = ?;
+SELECT path, content_hash, size, modified_at, version, skip_reason FROM note_index_state WHERE vault = ?;
 
 upsertState:
-INSERT OR REPLACE INTO note_index_state (vault, path, content_hash, size, modified_at, version) VALUES (?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO note_index_state (vault, path, content_hash, size, modified_at, version, skip_reason)
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 deleteState:
 DELETE FROM note_index_state WHERE vault = ? AND path = ?;

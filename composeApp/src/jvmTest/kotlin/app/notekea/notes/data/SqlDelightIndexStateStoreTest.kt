@@ -10,6 +10,7 @@ import app.notekea.db.NotekeaDatabase
 import app.notekea.notes.domain.IndexedNote
 import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.SkipReason
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -55,6 +56,15 @@ class SqlDelightIndexStateStoreTest {
             expected = listOf(listOf(AREPAS.copy(contentHash = "new")), listOf(UNKNOWN)),
             actual = listOf(store.read(vaultPath = NOTES), store.read(vaultPath = WORK))
         )
+    }
+
+    @Test
+    fun `a note left out comes back with its reason`() = runTest(context = testDispatcher) {
+        val leftOut = AREPAS.copy(skipReason = SkipReason.TOO_LONG)
+
+        store.save(vaultPath = NOTES, note = leftOut)
+
+        assertEquals(expected = listOf(leftOut), actual = store.read(vaultPath = NOTES))
     }
 
     @Test

@@ -50,6 +50,29 @@ class PlanIndexUseCaseTest {
         assertEquals(expected = listOf(unknown), actual = result.read)
     }
 
+    // Audit: a skipped note left no trace, so every run read it, and embedded it, again.
+    @Test
+    fun `a note left out stays out until it changes, and tells why`() {
+        val huge = file(path = "Huge.md", size = 10)
+        val changed = file(path = "Long.md", size = 20)
+        val gone = file(path = "Gone.md", size = 30)
+        val indexed = listOf(huge, changed.copy(size = 21), gone).map {
+            indexed(file = it).copy(skipReason = SkipReason.TOO_LARGE)
+        }
+
+        val result = plan(notes = listOf(huge, changed), indexed = indexed, version = VERSION)
+
+        assertEquals(
+            expected = IndexPlan(
+                read = listOf(changed),
+                remove = listOf(gone.path),
+                unchanged = 1,
+                skipped = listOf(SkippedNote(path = huge.path, reason = SkipReason.TOO_LARGE))
+            ),
+            actual = result
+        )
+    }
+
     @Test
     fun `nothing to do when every note is indexed as it is`() {
         val notes = listOf(file(path = "A.md", size = 1), file(path = "B.md", size = 2))

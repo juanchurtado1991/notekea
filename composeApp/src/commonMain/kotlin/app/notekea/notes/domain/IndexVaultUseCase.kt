@@ -11,7 +11,8 @@ import kotlin.coroutines.cancellation.CancellationException
  * Brings a vault's search index up to date with its [notes] (`ROADMAP.md` 2.3), as [PlanIndexUseCase] decides: each
  * note read is chunked ([ChunkNoteUseCase]), embedded ([TextEmbedder]) and put in the index ([VectorIndex]) only when
  * its text changed (by its [ContentHash]), then marked done ([IndexStateStore]), so a run stopped anywhere (the app closed,
- * the vault switched) resumes with the notes left. Gone notes leave the index. The [Flow] tells the progress after
+ * the vault switched) resumes with the notes left. Gone notes leave the index, and so do notes grown too large or
+ * too long, which are not read again until they change. The [Flow] tells the progress after
  * every note, over all the vault's notes (those already indexed count as done); a model or index failure stops the run, the rest waiting for the next one,
  * while an unexpected failure on one note only skips it.
  */
@@ -38,9 +39,15 @@ class IndexVaultUseCase(
             }
             indexStateStore.delete(vaultPath = vaultPath, path = path)
         }
-        val hashes = held.associate { it.file.path to it.contentHash.takeIf { _ -> it.version == version } }
+        val hashes = held.associate { note ->
+            note.file.path to note.contentHash.takeIf { note.version == version && note.skipReason == null }
+        }
         // Counted over the whole vault: a run that resumes shows how far the index is, not a new count from zero.
-        var progress = IndexProgress(total = plan.read.size + plan.unchanged, done = plan.unchanged)
+        var progress = IndexProgress(
+            total = plan.read.size + plan.unchanged,
+            done = plan.unchanged,
+            skipped = plan.skipped
+        )
         emit(value = progress)
         for (file in plan.read) {
             val step = indexGuarded(vaultPath = vaultPath, file = file, heldHash = hashes[file.path])
@@ -70,7 +77,9 @@ class IndexVaultUseCase(
         file: NoteFile,
         heldHash: String?
     ): NoteStep {
-        if ((file.size ?: 0) > MAX_NOTE_BYTES) return NoteStep.Skipped(reason = SkipReason.TOO_LARGE)
+        if ((file.size ?: 0) > MAX_NOTE_BYTES) {
+            return leftOut(vaultPath = vaultPath, file = file, hash = NO_HASH, reason = SkipReason.TOO_LARGE)
+        }
         val text = noteContentStore.read(vaultPath = vaultPath, path = file.path)
             ?: return NoteStep.Skipped(reason = SkipReason.UNREADABLE)
         val hash = ContentHash.of(text = text)
@@ -82,7 +91,25 @@ class IndexVaultUseCase(
                 note = IndexedNote(file = file, contentHash = hash, version = version)
             )
         }
-        return step
+        val isTooLong = step is NoteStep.Skipped && step.reason == SkipReason.TOO_LONG
+        return if (isTooLong) leftOut(vaultPath, file, hash, SkipReason.TOO_LONG) else step
+    }
+
+    /** Takes [file] out of the index, for what it held of it before, and remembers why until the file changes. */
+    private suspend fun leftOut(
+        vaultPath: String,
+        file: NoteFile,
+        hash: String,
+        reason: SkipReason
+    ): NoteStep {
+        if (vectorIndex.remove(vaultPath = vaultPath, note = file.path) is Outcome.Failure) {
+            return NoteStep.Failed(error = IndexRunError.INDEX)
+        }
+        indexStateStore.save(
+            vaultPath = vaultPath,
+            note = IndexedNote(file = file, contentHash = hash, version = version, skipReason = reason)
+        )
+        return NoteStep.Skipped(reason = reason)
     }
 
     private suspend fun embedAndPut(
@@ -150,6 +177,9 @@ class IndexVaultUseCase(
         const val MAX_NOTE_BYTES = 5L * 1024 * 1024
 
         private const val HEADING_JOIN = " › "
+
+        // The hash of a note left out without reading it.
+        private const val NO_HASH = ""
 
         // Raise it when ChunkNoteUseCase cuts notes differently, so every note is chunked again.
         private const val CHUNKING_VERSION = 1

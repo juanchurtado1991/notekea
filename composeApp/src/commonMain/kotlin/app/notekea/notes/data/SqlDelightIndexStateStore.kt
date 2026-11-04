@@ -6,6 +6,7 @@ import app.notekea.notes.domain.IndexStateStore
 import app.notekea.notes.domain.IndexedNote
 import app.notekea.notes.domain.NoteFile
 import app.notekea.notes.domain.RelativePath
+import app.notekea.notes.domain.SkipReason
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
 import kotlin.time.Instant
@@ -33,7 +34,8 @@ class SqlDelightIndexStateStore(
                         modifiedAt = row.modified_at?.let { Instant.fromEpochMilliseconds(epochMilliseconds = it) }
                     ),
                     contentHash = row.content_hash,
-                    version = row.version
+                    version = row.version,
+                    skipReason = SkipReason.entries.find { it.name == row.skip_reason }
                 )
             }
         }
@@ -50,7 +52,8 @@ class SqlDelightIndexStateStore(
                 content_hash = note.contentHash,
                 size = note.file.size,
                 modified_at = note.file.modifiedAt?.toEpochMilliseconds(),
-                version = note.version
+                version = note.version,
+                skip_reason = note.skipReason?.name
             )
         }
     }

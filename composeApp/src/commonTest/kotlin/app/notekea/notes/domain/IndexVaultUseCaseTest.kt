@@ -20,6 +20,7 @@ class IndexVaultUseCaseTest {
     private val embedder = FakeTextEmbedder()
     private val index = FakeVectorIndex()
     private val states = FakeIndexStateStore()
+    private val shortEmbedder = FakeTextEmbedder(maxTokens = SHORT_LIMIT)
     private val indexVault = indexVault(embedder = embedder)
 
     private fun indexVault(
@@ -137,6 +138,38 @@ class IndexVaultUseCaseTest {
             actual =
             last.isFinished to index.notes.getValue(VAULT).keys
         )
+    }
+
+    // Audit: both kept the vectors of their old text, in search results, and were read and embedded again every run.
+    @Test
+    fun `a note grown too large or too long leaves the index, and is not read again until it changes`() = runTest {
+        val shortModel = indexVault(embedder = shortEmbedder)
+        val small = write(AREPAS to "Corn.", LONG to "Few words.")
+        shortModel(vaultPath = VAULT, notes = small).last()
+        val grown = listOf(small[0].copy(size = IndexVaultUseCase.MAX_NOTE_BYTES + 1)) +
+            write(LONG to List(size = 50) { "word" }.joinToString(separator = " "), size = 2)
+
+        val first = shortModel(vaultPath = VAULT, notes = grown).last()
+        shortEmbedder.embedded.clear()
+        val next = shortModel(vaultPath = VAULT, notes = grown).last()
+
+        assertEquals(expected = emptySet<RelativePath>(), actual = index.notes.getValue(VAULT).keys)
+        assertEquals(expected = first.skipped, actual = next.skipped)
+        assertEquals(
+            expected = listOf(SkipReason.TOO_LONG, SkipReason.TOO_LARGE) to emptyList<String>(),
+            actual = next.skipped.map { it.reason } to shortEmbedder.embedded
+        )
+    }
+
+    @Test
+    fun `a note back to a size it can be indexed at goes in the index again`() = runTest {
+        val notes = write(AREPAS to "Corn.").map { it.copy(size = IndexVaultUseCase.MAX_NOTE_BYTES + 1) }
+        indexVault(vaultPath = VAULT, notes = notes).last()
+
+        val last = indexVault(vaultPath = VAULT, notes = write(AREPAS to "Corn.")).last()
+
+        assertEquals(expected = 1 to emptyList<SkippedNote>(), actual = last.indexed to last.skipped)
+        assertEquals(expected = setOf(AREPAS), actual = index.notes.getValue(VAULT).keys)
     }
 
     @Test
