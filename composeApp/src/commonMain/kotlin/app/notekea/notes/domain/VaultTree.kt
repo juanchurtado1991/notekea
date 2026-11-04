@@ -17,6 +17,11 @@ data class VaultTree(
         path: RelativePath
     ): Boolean = path in notes || path in attachments || path in folders
 
+    /** How many notes and other files are inside [folder], counting its subfolders. */
+    fun fileCountIn(
+        folder: RelativePath
+    ): Int = notes.keys.count { it.isWithin(folder = folder) } + attachments.keys.count { it.isWithin(folder = folder) }
+
     fun withFolder(
         path: RelativePath
     ): VaultTree = copy(folders = folders + ancestorsAndSelf(path = path))
