@@ -6,7 +6,7 @@ import app.notekea.core.embedding.domain.TextEmbedder
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.db.NotekeaDatabase
 import app.notekea.notes.domain.Trash
-import app.notekea.notes.presentation.editor.EditorViewModel
+import app.notekea.editor.presentation.EditorViewModel
 import app.notekea.notes.presentation.tree.VaultTreeViewModel
 import app.notekea.vault.domain.RecentVaultsStore
 import app.notekea.vault.presentation.welcome.WelcomeViewModel

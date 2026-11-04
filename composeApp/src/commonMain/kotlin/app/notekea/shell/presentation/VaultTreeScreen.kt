@@ -21,10 +21,10 @@ import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.shell.domain.Workspace
-import app.notekea.notes.presentation.editor.EditorIntent
-import app.notekea.notes.presentation.editor.EditorPaneTools
-import app.notekea.notes.presentation.editor.EditorViewModel
-import app.notekea.notes.presentation.editor.SidePanelHost
+import app.notekea.editor.presentation.EditorIntent
+import app.notekea.editor.presentation.EditorPaneTools
+import app.notekea.editor.presentation.EditorViewModel
+import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.search.presentation.switcher.QuickSwitcherContent
 import app.notekea.search.presentation.switcher.QuickSwitcherViewModel
 import app.notekea.notes.presentation.tags.TagPickerContent
@@ -44,7 +44,7 @@ import app.notekea.search.presentation.index.SearchIndexNotice
 import app.notekea.search.presentation.index.SearchIndexStatus
 import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.core.notes.domain.LinkResolver
-import app.notekea.notes.domain.FormatAction
+import app.notekea.editor.domain.FormatAction
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import app.notekea.notes.presentation.tree.PreviewNoteContent

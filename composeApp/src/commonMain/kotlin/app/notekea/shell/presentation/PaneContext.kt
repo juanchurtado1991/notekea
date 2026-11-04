@@ -1,7 +1,7 @@
 package app.notekea.shell.presentation
 
-import app.notekea.notes.presentation.editor.EditorPaneTools
-import app.notekea.notes.presentation.editor.SidePanelHost
+import app.notekea.editor.presentation.EditorPaneTools
+import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.shell.presentation.WorkspaceState
 import app.notekea.notes.presentation.tree.VaultTreeState
 

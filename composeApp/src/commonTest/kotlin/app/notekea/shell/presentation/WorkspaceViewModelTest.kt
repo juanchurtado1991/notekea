@@ -4,7 +4,7 @@ import androidx.compose.ui.unit.IntSize
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.shell.domain.EditorPane
 import app.notekea.core.notes.domain.FakeAttachmentStore
-import app.notekea.notes.domain.FakeEditorPreferencesStore
+import app.notekea.editor.domain.FakeEditorPreferencesStore
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.shell.domain.FakeWorkspaceStore

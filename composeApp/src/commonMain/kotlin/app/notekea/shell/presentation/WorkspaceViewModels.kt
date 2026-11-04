@@ -1,6 +1,6 @@
 package app.notekea.shell.presentation
 
-import app.notekea.notes.presentation.editor.EditorViewModel
+import app.notekea.editor.presentation.EditorViewModel
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.notes.presentation.tags.TagPickerIntent
 import app.notekea.templates.presentation.TemplatePickerIntent

@@ -1,7 +1,7 @@
 package app.notekea.shell.presentation
 
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.notes.presentation.editor.EditorViewModel
+import app.notekea.editor.presentation.EditorViewModel
 import app.notekea.shell.presentation.WorkspaceViewModel
 
 /**

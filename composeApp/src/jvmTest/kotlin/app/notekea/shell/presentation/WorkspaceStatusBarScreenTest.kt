@@ -10,10 +10,10 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.theme.NotekeaTheme
-import app.notekea.notes.domain.NoteStats
+import app.notekea.editor.domain.NoteStats
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.notes.presentation.editor.EditorState
-import app.notekea.notes.presentation.editor.NoteInfo
+import app.notekea.editor.presentation.EditorState
+import app.notekea.editor.presentation.NoteInfo
 import app.notekea.shell.presentation.TabKind
 import kotlin.test.Test
 import kotlin.test.assertEquals

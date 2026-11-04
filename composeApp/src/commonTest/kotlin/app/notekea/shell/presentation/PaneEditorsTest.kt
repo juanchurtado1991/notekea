@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.shell.domain.EditorPane
 import app.notekea.core.notes.domain.FakeAttachmentStore
-import app.notekea.notes.domain.FakeEditorPreferencesStore
+import app.notekea.editor.domain.FakeEditorPreferencesStore
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.shell.domain.FakeWorkspaceStore
@@ -20,10 +20,10 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.shell.domain.SaveSidePanelUseCase
 import app.notekea.core.notes.domain.VaultTree
 import app.notekea.shell.domain.Workspace
-import app.notekea.notes.presentation.editor.EditorEffect
-import app.notekea.notes.presentation.editor.EditorIntent
-import app.notekea.notes.presentation.editor.EditorViewModel
-import app.notekea.notes.presentation.editor.EditorViewModels
+import app.notekea.editor.presentation.EditorEffect
+import app.notekea.editor.presentation.EditorIntent
+import app.notekea.editor.presentation.EditorViewModel
+import app.notekea.editor.presentation.EditorViewModels
 import app.notekea.search.presentation.switcher.QuickSwitcherEffect
 import app.notekea.shell.presentation.WorkspaceIntent
 import app.notekea.shell.presentation.WorkspaceTools
