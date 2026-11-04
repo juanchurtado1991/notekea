@@ -4,13 +4,14 @@ import app.notekea.core.domain.Outcome
 
 /**
  * Files and folders as a set of paths. [failure] makes every change fail; [takenOnCreate] simulates names taken by
- * another app between the check and the creation.
+ * another app between the check and the creation. Every call goes through [gate], as the disk takes its time.
  */
 class FakeNoteFileOperations : NoteFileOperations {
     val existing = mutableSetOf<RelativePath>()
     val moves = mutableListOf<Pair<RelativePath, RelativePath>>()
     val takenOnCreate = mutableSetOf<RelativePath>()
     var failure: NotesError? = null
+    val gate = Gate()
 
     override suspend fun createFile(
         vaultPath: String,
@@ -25,13 +26,17 @@ class FakeNoteFileOperations : NoteFileOperations {
     override suspend fun exists(
         vaultPath: String,
         path: RelativePath
-    ): Boolean = path in existing
+    ): Boolean {
+        gate.pass()
+        return path in existing
+    }
 
     override suspend fun move(
         vaultPath: String,
         from: RelativePath,
         to: RelativePath
     ): Outcome<Unit, NotesError> {
+        gate.pass()
         failure?.let { return Outcome.Failure(error = it) }
         moves += from to to
         existing -= from
@@ -39,9 +44,10 @@ class FakeNoteFileOperations : NoteFileOperations {
         return Outcome.Success(value = Unit)
     }
 
-    private fun create(
+    private suspend fun create(
         path: RelativePath
     ): Outcome<Unit, NotesError> {
+        gate.pass()
         failure?.let { return Outcome.Failure(error = it) }
         if (path in takenOnCreate) return Outcome.Failure(error = NotesError.NameTaken(name = path.name))
         existing += path

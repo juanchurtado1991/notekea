@@ -6,6 +6,9 @@ import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.TimeSource
 
 class CaseScopeTest {
     private val workFolder = Files.createTempDirectory("case-scope-test")
@@ -128,6 +131,29 @@ class CaseScopeTest {
     @Test
     fun `a text that never shows passes expectTextStaysAway`() {
         assertIs<CaseResult.Passed>(runCase { expectTextStaysAway(text = "Never", settleMillis = 100) })
+    }
+
+    @Test
+    fun `a file changed by a late save fails expectFileStays, and one left alone passes`() {
+        val changed = assertIs<CaseResult.Failed>(
+            runCase {
+                click(text = "first draft")
+                type(text = "later ")
+                click(text = "Save later")
+                expectFileStays(path = "notes/draft.txt", content = "first draft")
+            }
+        )
+        assertEquals("expected \"notes/draft.txt\" to stay as it was, it changed", changed.message)
+        val untouched =
+            runCase { expectFileStays(path = "notes/draft.txt", content = "first draft", settleMillis = 100) }
+        assertIs<CaseResult.Passed>(untouched)
+    }
+
+    @Test
+    fun `settle lets the app run for the time it is given`() {
+        val started = TimeSource.Monotonic.markNow()
+        assertIs<CaseResult.Passed>(runCase { settle(millis = 200) })
+        assertTrue(started.elapsedNow() >= 200.milliseconds)
     }
 
     @Test

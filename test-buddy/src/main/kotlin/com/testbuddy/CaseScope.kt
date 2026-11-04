@@ -28,6 +28,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.compose.ui.test.withKeysDown
+import java.nio.file.Files
 import java.nio.file.Path
 
 /**
@@ -218,6 +219,26 @@ public class CaseScope internal constructor(
     ) {
         step(description = "Expect the file “$path”")
         files.expectFile(path = path, content = content, containing = containing)
+    }
+
+    /**
+     * Watches for [settleMillis] that the file at [path] keeps exactly [content], for what must not be saved, as a
+     * save comes a moment after the action.
+     */
+    public fun expectFileStays(
+        path: String,
+        content: String,
+        settleMillis: Long = DEFAULT_SETTLE_MILLIS
+    ) {
+        step(description = "Expect the file “$path” to stay as it is")
+        val file = files.resolve(path = path)
+        val changed = holdsInTime(timeoutMillis = settleMillis) { Files.readString(file) != content }
+        if (changed) throw CaseFailure(message = "expected \"$path\" to stay as it was, it changed")
+    }
+
+    /** Lets the app run for [millis], for what no text tells has ended, as a scroll coming back to its place. */
+    public fun settle(millis: Long = DEFAULT_SETTLE_MILLIS) {
+        holdsInTime(timeoutMillis = millis) { false }
     }
 
     /** Waits until no file is at [path]. */

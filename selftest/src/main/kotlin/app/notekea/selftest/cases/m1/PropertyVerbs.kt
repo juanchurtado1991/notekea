@@ -61,15 +61,6 @@ internal fun CaseScope.clickOnRowOf(
     onRowOf(rowText = rowText, matcher = hasContentDescription(value = label)).performClick()
 }
 
-/** Fails unless the file at [path] still has exactly [content]: opening or reading a note never writes. */
-internal fun CaseScope.expectUnchanged(
-    path: String,
-    content: String
-) {
-    Thread.sleep(SAVE_PAUSE_MILLIS)
-    expectFile(path = path, content = content)
-}
-
 private fun CaseScope.firstShownOf(
     matcher: SemanticsMatcher,
     what: String
@@ -89,6 +80,3 @@ private fun CaseScope.firstShownOf(
 // A row counts far more than a distance along it, and what is left of the anchor is never on its row.
 private const val ROW_WEIGHT = 10f
 private const val LEFT_PENALTY = 100_000f
-
-// Longer than the editor's save delay (a second), so a change it should not make has had time to land.
-private const val SAVE_PAUSE_MILLIS = 1_500L

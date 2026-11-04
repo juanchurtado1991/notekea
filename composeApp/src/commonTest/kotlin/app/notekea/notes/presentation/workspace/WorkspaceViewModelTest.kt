@@ -63,6 +63,24 @@ class WorkspaceViewModelTest {
     }.withAttachment(file = file(path = PLATE.value)).withAttachment(file = file(path = BROKEN.value))
 
     @Test
+    fun `a tab opens at once while the disk is still busy, and is saved when the disk answers`() = runWorkspaceTest {
+        val viewModel = started()
+        val onDisk = workspaces.workspaces[VAULT]
+        workspaces.gate.close()
+
+        viewModel.onIntent(intent = WorkspaceIntent.OnOpen(path = AREPAS))
+        advanceUntilIdle()
+
+        assertEquals(listOf(AREPAS), viewModel.state.value.workspace.panes.flatMap { it.tabs })
+        assertEquals(onDisk, workspaces.workspaces[VAULT])
+
+        workspaces.gate.open()
+        advanceUntilIdle()
+
+        assertEquals(viewModel.state.value.workspace, workspaces.workspaces[VAULT])
+    }
+
+    @Test
     fun `opened entries get tabs, the second pane comes and goes, and every change is saved`() = runWorkspaceTest {
         val viewModel = started()
 

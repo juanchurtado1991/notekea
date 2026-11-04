@@ -65,12 +65,7 @@ private fun SuiteBuilder.toggleWithShortcut() {
         val before = Files.readString(file(path = TASKS_FILE))
         clickWords(words = "## Tasks")
         press(shortcut = Mod + Key.Enter)
-        Thread.sleep(SAVE_PAUSE_MILLIS)
-        if (Files.readString(file(path = TASKS_FILE)) !=
-            before
-        ) {
-            throw CaseFailure(message = "expected the heading to stay as it was")
-        }
+        expectFileStays(path = TASKS_FILE, content = before)
     }
 }
 
@@ -128,5 +123,3 @@ private fun CaseScope.clickFirstTaskBox() {
     val shown = (0 until count).map { boxes[it] }.filter { it.isShown() }
     shown.minBy { it.fetchSemanticsNode().boundsInRoot.top }.performClick()
 }
-
-private const val SAVE_PAUSE_MILLIS = 1_500L
