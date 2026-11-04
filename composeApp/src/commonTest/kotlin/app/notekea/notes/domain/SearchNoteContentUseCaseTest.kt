@@ -130,6 +130,28 @@ class SearchNoteContentUseCaseTest {
         )
     }
 
+    @Test
+    fun `a link to a heading and inline code hold no tag, as the note's own tags say`() = runTest {
+        val notes = notesWith(AREPAS to "[[#Heading]] [a](#heading) `#heading`\n", IDEAS to "#heading\n")
+
+        assertEquals(
+            expected = listOf(IDEAS),
+            actual = search()(VAULT, notes, "#heading").map { it.note.file.path.value }
+        )
+    }
+
+    @Test
+    fun `a tag after a link or code is highlighted where it is`() = runTest {
+        val notes = notesWith(AREPAS to "[[Pasta]] and `code` then #corn\n")
+
+        val result = search()(VAULT, notes, "#corn").single()
+
+        assertEquals(
+            expected = listOf("#corn"),
+            actual = result.ranges.map { result.snippet.orEmpty().substring(range = it) }
+        )
+    }
+
     private fun TestScope.search(): SearchNoteContentUseCase {
         val folder = TextFolder()
         return SearchNoteContentUseCase(

@@ -23,6 +23,8 @@ class SearchNoteContentUseCase(
     private val markdownLineStripper: MarkdownLineStripper,
     private val dispatchers: AppDispatchers
 ) {
+    private val textTagFinder = TextTagFinder()
+
     suspend operator fun invoke(
         vaultPath: String,
         notes: Collection<NoteEntry>,
@@ -87,7 +89,7 @@ class SearchNoteContentUseCase(
         text.indexOf(string = word, startIndex = previous + word.length).takeIf { it >= 0 }
     }.takeWhile { it >= 0 }.map { it until it + word.length }.toList()
 
-    /** `#tags` written in the body, with their folded names, skipping fenced code blocks. */
+    /** `#tags` written in the body ([TextTagFinder]), with their folded names and places. */
     private fun inlineTagsOf(
         body: String
     ): List<InlineTag> {
@@ -96,7 +98,7 @@ class SearchNoteContentUseCase(
         var lineStart = 0
         body.split(NEW_LINE_CHAR).forEach { line ->
             if (!fences.read(text = line)) {
-                TAG.findAll(input = line).forEach { match ->
+                textTagFinder.tagsIn(line = line).forEach { match ->
                     val range = match.range.first + lineStart..match.range.last + lineStart
                     tags += InlineTag(name = textFolder.fold(text = match.groupValues[1]), range = range)
                 }
@@ -159,7 +161,6 @@ class SearchNoteContentUseCase(
         private const val MAX_SNIPPET_LENGTH = 160
         private const val NESTED_TAG_SEPARATOR = "/"
         private const val TAG_MARK = "#"
-        private val TAG = Regex(pattern = "(?<![\\w#/&])#([\\p{L}\\p{N}_/-]*[\\p{L}_/-][\\p{L}\\p{N}_/-]*)")
         private val WHITESPACE = Regex(pattern = "\\s+")
     }
 }
