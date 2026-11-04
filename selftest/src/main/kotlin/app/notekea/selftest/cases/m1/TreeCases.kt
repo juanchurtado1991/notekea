@@ -107,7 +107,10 @@ private fun SuiteBuilder.renameInTheTree() {
         renameInTree(name = WELCOME, newName = "Good morning")
         expectFile(path = "$PLAYGROUND/Good morning.md")
         expectNoFile(path = "$PLAYGROUND/Welcome.md")
-        refusedName(name = "a/b", message = "Enter a name that is not too long and has no characters like / : * ? or quotes.")
+        refusedName(
+            name = "a/b",
+            message = "Enter a name that is not too long and has no characters like / : * ? or quotes."
+        )
         refusedName(name = ".hidden", message = "Names can’t start with a dot, or the note would be hidden.")
         refusedName(name = "Packing checklist", message = "There’s already something named Packing checklist")
         press(key = Key.Escape)
