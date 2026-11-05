@@ -154,6 +154,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Color themes:** eight themes made by hand in the image of Workspace Blue (Graphite, Sage, Lagoon, Iris, Rose, Clay and
+  Honey join it) replace the eleven computed ones; whoever had one that is gone gets the closest.
 - The app no longer ships seven libraries nothing uses yet: JGit and its SSH client, Java Keyring, Koog and the Ktor
   client. They come back with the code that needs them (M3 and M4).
 - The agent instructions are in `AGENTS.md`, for any AI coding agent (`CLAUDE.md` only points there), with the

@@ -156,7 +156,7 @@ private fun Bar(
 private fun NotekeaThemeCardPreview() {
     NotekeaPreviewThemes {
         Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-            listOf(ColorTheme.WORKSPACE_BLUE, ColorTheme.MIDNIGHT_LIME).forEach { theme ->
+            listOf(ColorTheme.WORKSPACE_BLUE, ColorTheme.LAGOON).forEach { theme ->
                 NotekeaThemeCard(
                     name = theme.name,
                     light = ColorThemeSchemes.of(theme = theme, darkTheme = false),
