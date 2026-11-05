@@ -148,7 +148,7 @@ private fun MentionRow(
             title = source.nameWithoutExtension,
             subtitle = subtitleOf(mention = mention),
             text = mention.passage,
-            highlight = mention.highlight,
+            highlights = listOf(mention.highlight),
             icon = NotekeaIcons.Note,
             onClick = onReveal,
             showsActions = !isLinked,

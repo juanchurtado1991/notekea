@@ -25,4 +25,19 @@ class PassageSnippetTest {
 
         assertEquals(expected = "Quartz counters.", actual = snippet.text.substring(range = snippet.highlight).trim())
     }
+
+    // Smoke: whole lines were underlined in Related, as a passage shares many words with the note.
+    @Test
+    fun `the keywords are the few longest shared words, wherever they repeat`() {
+        val snippet = PassageSnippet.of(
+            passage = "Serializer writes the bytes of the serializer into small pooled buffers fast.",
+            words = setOf("serializer", "writes", "bytes", "small", "pooled", "buffers", "fast")
+        )
+
+        assertEquals(
+            expected = "serializer",
+            actual = snippet.text.substring(range = snippet.keywords.first()).lowercase()
+        )
+        assertEquals(expected = 4, actual = snippet.keywords.size)
+    }
 }
