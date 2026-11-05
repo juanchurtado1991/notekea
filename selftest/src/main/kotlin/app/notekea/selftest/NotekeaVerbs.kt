@@ -73,6 +73,8 @@ fun CaseScope.openVault(
 ) {
     notekea().folderPicker.nextPick = notekea().vaultPath(name = name)
     click(text = OPEN_FOLDER)
+    // A loaded machine can take longer than a text's usual wait to read a whole vault (1.1-07 on Windows).
+    ui.waitUntil(timeoutMillis = INDEX_MILLIS) { ui.onAllNodes(hasText(shownText)).fetchSemanticsNodes().isNotEmpty() }
     expectText(text = shownText)
     if (waitsForIndex) awaitIndex()
 }
