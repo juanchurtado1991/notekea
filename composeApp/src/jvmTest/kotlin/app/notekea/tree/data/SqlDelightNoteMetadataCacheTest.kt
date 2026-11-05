@@ -6,10 +6,13 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlPreparedStatement
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.db.NotekeaDatabase
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteProperty
+import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -39,6 +42,22 @@ class SqlDelightNoteMetadataCacheTest {
             expected = listOf(LISBON),
             actual = cache.read(vaultPath = WORK)
         )
+    }
+
+    @Test
+    fun `a vault cached before properties is read again from its notes`() = runTest(context = testDispatcher) {
+        val old = JdbcSqliteDriver(url = JdbcSqliteDriver.IN_MEMORY)
+        NotekeaDatabase.Schema.create(old)
+        old.execute(null, "DROP TABLE note_cache_property", 0)
+        old.execute(null, "INSERT INTO note_cache (vault, path) VALUES ('$NOTES', 'Old.md')", 0)
+        NotekeaDatabase.Schema.migrate(old, oldVersion = 4, newVersion = NotekeaDatabase.Schema.version)
+
+        val cached = SqlDelightNoteMetadataCache(
+            database = NotekeaDatabase(driver = old),
+            dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
+        ).read(vaultPath = NOTES)
+
+        assertEquals(expected = emptyList(), actual = cached)
     }
 
     @Test
@@ -101,7 +120,16 @@ class SqlDelightNoteMetadataCacheTest {
                 tags = listOf("recipe", "venezuelan"),
                 aliases = listOf("Arepa", "Corn bread"),
                 title = "Arepas",
-                textTags = listOf("weekend", "recipe/drinks")
+                textTags = listOf("weekend", "recipe/drinks"),
+                properties = listOf(
+                    NoteProperty(key = "author", value = PropertyValue.Text(text = "Ana")),
+                    NoteProperty(key = "rating", value = PropertyValue.Number(text = "4.5")),
+                    NoteProperty(key = "finished", value = PropertyValue.Checkbox(isChecked = true)),
+                    NoteProperty(key = "read", value = PropertyValue.Date(date = CalendarDate(2026, 3, 2))),
+                    NoteProperty(key = "tags", value = PropertyValue.Items(items = listOf("recipe", "venezuelan"))),
+                    NoteProperty(key = "none", value = PropertyValue.Items(items = emptyList())),
+                    NoteProperty(key = "nested", value = PropertyValue.Other(source = "nested:\n  a: 1"))
+                )
             )
         )
         private val LISBON = NoteEntry(

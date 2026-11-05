@@ -1,5 +1,6 @@
 package app.notekea.editor.domain
 
+import app.notekea.core.notes.domain.PropertyKeys
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import java.io.File
 import kotlin.test.Test

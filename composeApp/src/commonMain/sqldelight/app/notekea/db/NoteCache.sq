@@ -37,6 +37,17 @@ CREATE TABLE note_cache_alias (
     PRIMARY KEY (vault, path, position)
 );
 
+-- Each note's frontmatter properties in order, with their type (`CachedProperty`), for the vault's queries.
+CREATE TABLE note_cache_property (
+    vault TEXT NOT NULL,
+    path TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    property TEXT NOT NULL,
+    type TEXT NOT NULL,
+    value TEXT NOT NULL,
+    PRIMARY KEY (vault, path, position)
+);
+
 selectNotes:
 SELECT path, size, modified_at, title FROM note_cache WHERE vault = ?;
 
@@ -48,6 +59,9 @@ SELECT path, tag FROM note_cache_text_tag WHERE vault = ? ORDER BY path, positio
 
 selectAliases:
 SELECT path, alias FROM note_cache_alias WHERE vault = ? ORDER BY path, position;
+
+selectProperties:
+SELECT path, property, type, value FROM note_cache_property WHERE vault = ? ORDER BY path, position;
 
 upsertNote:
 INSERT OR REPLACE INTO note_cache (vault, path, size, modified_at, title) VALUES (?, ?, ?, ?, ?);
@@ -61,6 +75,9 @@ INSERT INTO note_cache_text_tag (vault, path, position, tag) VALUES (?, ?, ?, ?)
 insertAlias:
 INSERT INTO note_cache_alias (vault, path, position, alias) VALUES (?, ?, ?, ?);
 
+insertProperty:
+INSERT INTO note_cache_property (vault, path, position, property, type, value) VALUES (?, ?, ?, ?, ?, ?);
+
 deleteNote:
 DELETE FROM note_cache WHERE vault = ? AND path = ?;
 
@@ -72,3 +89,6 @@ DELETE FROM note_cache_text_tag WHERE vault = ? AND path = ?;
 
 deleteAliases:
 DELETE FROM note_cache_alias WHERE vault = ? AND path = ?;
+
+deleteProperties:
+DELETE FROM note_cache_property WHERE vault = ? AND path = ?;

@@ -1,7 +1,11 @@
 package app.notekea.tree.data
 
 import app.notekea.core.domain.AppDispatchers
+import app.notekea.core.notes.domain.FrontmatterBlocks
+import app.notekea.core.notes.domain.FrontmatterContent
+import app.notekea.core.notes.domain.FrontmatterReader
 import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.tree.domain.NoteMetadataReader
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextTagFinder
@@ -25,6 +29,7 @@ class OkioNoteMetadataReader(
     private val dispatchers: AppDispatchers,
     private val parser: GhostFrontmatterParser
 ) : NoteMetadataReader {
+    private val frontmatterReader = FrontmatterReader()
     private val textTagFinder = TextTagFinder()
 
     override suspend fun read(
@@ -37,11 +42,21 @@ class OkioNoteMetadataReader(
                 val yaml = firstLine?.takeIf { it.trimEnd() == OPENING_FENCE }?.let { frontmatterOf(source = source) }
                 val text = (if (yaml == null) sequenceOf(firstLine) else emptySequence()) + linesOf(source = source)
                 val textTags = textTagFinder.tags(lines = text.filterNotNull())
-                (yaml?.let { parser.parse(yaml = it) } ?: NoteMetadata.NONE).copy(textTags = textTags)
+                val metadata = yaml?.let { parser.parse(yaml = it) } ?: NoteMetadata.NONE
+                metadata.copy(textTags = textTags, properties = yaml?.let { propertiesOf(yaml = it) }.orEmpty())
             }
         } catch (_: IOException) {
             null
         }
+    }
+
+    /** The typed properties of [yaml], or none when it cannot be read as properties. */
+    private fun propertiesOf(
+        yaml: String
+    ): List<NoteProperty> {
+        val delimiter = FrontmatterBlocks.DELIMITER
+        val header = delimiter + LINE_SEPARATOR + yaml + LINE_SEPARATOR + delimiter
+        return (frontmatterReader.read(header = header) as? FrontmatterContent.Properties)?.properties.orEmpty()
     }
 
     /** The frontmatter after its opening `---`, or null when it is not closed in time. */

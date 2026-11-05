@@ -1,5 +1,6 @@
 package app.notekea.editor.domain
 
+import app.notekea.core.notes.domain.FrontmatterPatch
 import app.notekea.core.domain.time.CalendarDate
 import java.io.File
 import kotlin.test.Test

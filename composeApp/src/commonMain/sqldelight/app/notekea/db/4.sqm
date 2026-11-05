@@ -1,0 +1,15 @@
+-- 2.10: every property of every note. The notes already cached have none, so they are read again from disk.
+CREATE TABLE note_cache_property (
+    vault TEXT NOT NULL,
+    path TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    property TEXT NOT NULL,
+    type TEXT NOT NULL,
+    value TEXT NOT NULL,
+    PRIMARY KEY (vault, path, position)
+);
+
+DELETE FROM note_cache;
+DELETE FROM note_cache_tag;
+DELETE FROM note_cache_text_tag;
+DELETE FROM note_cache_alias;

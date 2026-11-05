@@ -57,7 +57,8 @@ class FrontmatterReader {
         return PropertyValue.Items(items = items.filter { it.isNotEmpty() })
     }
 
-    private fun scalarValue(
+    /** The value that [text] shows on a key's line: a checkbox, a number, a date or text. */
+    fun scalarValue(
         text: String
     ): PropertyValue {
         val lowered = text.lowercase()

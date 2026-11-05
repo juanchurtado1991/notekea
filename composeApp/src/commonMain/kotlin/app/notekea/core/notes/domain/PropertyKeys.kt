@@ -1,4 +1,4 @@
-package app.notekea.editor.domain
+package app.notekea.core.notes.domain
 
 /** Which names a property can have (`ROADMAP.md` 1.14): YAML keys the form writes without quotes. */
 object PropertyKeys {

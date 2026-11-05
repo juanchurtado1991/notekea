@@ -23,12 +23,13 @@ class SqlDelightNoteMetadataCache(
 ) : NoteMetadataCache {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private val queries = database.noteCacheQueries
+    private val codec = CachedPropertyCodec()
 
     override suspend fun read(
         vaultPath: String
     ): List<NoteEntry> = withContext(context = dispatchers.io) {
         guarded(fallback = emptyList(), failureMessage = READ_FAILED) {
-            // One transaction: the four reads share a connection and see the same snapshot.
+            // One transaction: the five reads share a connection and see the same snapshot.
             queries.transactionWithResult { readNotes(vaultPath = vaultPath) }
         }
     }
@@ -39,6 +40,8 @@ class SqlDelightNoteMetadataCache(
         val tags = queries.selectTags(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.tag })
         val aliases = queries.selectAliases(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.alias })
         val textTags = queries.selectTextTags(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.tag })
+        val properties = queries.selectProperties(vault = vaultPath).executeAsList()
+            .groupBy({ it.path }, { codec.decode(key = it.property_, type = it.type, value = it.value_) })
         return queries.selectNotes(vault = vaultPath).executeAsList().map { row ->
             NoteEntry(
                 file = NoteFile(
@@ -50,7 +53,8 @@ class SqlDelightNoteMetadataCache(
                     tags = tags[row.path].orEmpty(),
                     aliases = aliases[row.path].orEmpty(),
                     title = row.title,
-                    textTags = textTags[row.path].orEmpty()
+                    textTags = textTags[row.path].orEmpty(),
+                    properties = properties[row.path].orEmpty()
                 )
             )
         }
@@ -77,6 +81,7 @@ class SqlDelightNoteMetadataCache(
         queries.deleteTags(vault = vaultPath, path = path)
         queries.deleteAliases(vault = vaultPath, path = path)
         queries.deleteTextTags(vault = vaultPath, path = path)
+        queries.deleteProperties(vault = vaultPath, path = path)
     }
 
     private fun <T> guarded(
@@ -112,6 +117,10 @@ class SqlDelightNoteMetadataCache(
         }
         entry.metadata.textTags.forEachIndexed { index, tag ->
             queries.insertTextTag(vault = vaultPath, path = path, position = index.toLong(), tag = tag)
+        }
+        entry.metadata.properties.forEachIndexed { index, property ->
+            val (type, value) = codec.encode(value = property.value)
+            queries.insertProperty(vaultPath, path, index.toLong(), property.key, type, value)
         }
     }
 

@@ -44,8 +44,9 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.core.notes.domain.NoteProperty
-import app.notekea.editor.domain.PropertyKeys
+import app.notekea.core.notes.domain.PropertyKeys
 import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.presentation.PropertyValueEditor
 import app.notekea.resources.Res
 import app.notekea.resources.properties_add
 import app.notekea.resources.properties_key_label
@@ -75,7 +76,9 @@ internal fun PropertyRow(
     ) {
         PropertyKey(property = property, keys = keys, onIntent = onIntent)
         Box(modifier = Modifier.weight(weight = 1f)) {
-            PropertyValueEditor(property = property, today = today, onIntent = onIntent)
+            PropertyValueEditor(property = property, today = today, change = { value ->
+                onIntent(PropertyIntent.OnValueChange(key = property.key, value = value))
+            })
         }
         NotekeaIconButton(
             icon = NotekeaIcons.Close,
