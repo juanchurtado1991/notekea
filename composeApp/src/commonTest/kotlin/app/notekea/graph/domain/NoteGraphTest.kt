@@ -33,6 +33,15 @@ class NoteGraphTest {
     }
 
     @Test
+    fun `a link comes and goes with the count of both notes`() {
+        val linked = graph.withLink(one = A, other = D)
+
+        assertTrue(actual = GraphEdge.between(A, D) in linked.edges)
+        assertEquals(expected = 2, actual = linked.nodes.first { it.path == A }.links)
+        assertEquals(expected = graph, actual = linked.withoutLink(one = D, other = A))
+    }
+
+    @Test
     fun `folders and orphans can be left out`() {
         assertEquals(
             expected = listOf(listOf(A, B, D, ORPHAN), listOf(A, B, C, D)),

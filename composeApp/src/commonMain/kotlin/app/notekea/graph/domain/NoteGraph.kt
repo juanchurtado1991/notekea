@@ -56,6 +56,30 @@ data class NoteGraph(
         return copy(edges = edges + added)
     }
 
+    /** This graph with [one] and [other] linked, as it will be once the vault is read again. */
+    fun withLink(
+        one: RelativePath,
+        other: RelativePath
+    ): NoteGraph = copy(
+        nodes = shifted(one = one, other = other, by = 1),
+        edges = edges + GraphEdge.between(one = one, other = other)
+    )
+
+    /** This graph without the link between [one] and [other]. */
+    fun withoutLink(
+        one: RelativePath,
+        other: RelativePath
+    ): NoteGraph = copy(
+        nodes = shifted(one = one, other = other, by = -1),
+        edges = edges - GraphEdge.between(one = one, other = other)
+    )
+
+    private fun shifted(
+        one: RelativePath,
+        other: RelativePath,
+        by: Int
+    ): List<GraphNode> = nodes.map { if (it.path == one || it.path == other) it.copy(links = it.links + by) else it }
+
     /** Each note and the notes an edge joins it to. */
     fun neighbors(): Map<RelativePath, List<RelativePath>> {
         val neighbors = HashMap<RelativePath, MutableList<RelativePath>>()
