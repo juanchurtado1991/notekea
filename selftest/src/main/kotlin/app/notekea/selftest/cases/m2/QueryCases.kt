@@ -24,7 +24,7 @@ private fun SuiteBuilder.queryTab() {
         openVault(name = SAMPLE, shownText = "Home")
         clickIcon(label = "Query")
         expectText(text = "Add filter")
-        expectText(text = "40 notes")
+        expectText(text = "40 of 40 notes")
     }
 }
 
@@ -33,13 +33,15 @@ private fun SuiteBuilder.booksByRating() {
         prepare(SAMPLE)
         title(text = "Books by rating list the right notes, in order, and the query stays")
         steps(
-            text = "$OPEN_QUERY\n3. Click Add filter, Folder, Books.\n4. Click Add filter, rating, choose more than, " +
-                "type 4 and click Apply.\n5. Click Columns and choose author and rating, then close the menu.\n6. " +
-                "Click the rating chip, change 4 to 3 and click Apply.\n7. Click the rating column's name twice." +
+            text = "$OPEN_QUERY\n3. Click Add filter, keep Folder, and choose Books as its value.\n4. Click the + of " +
+                "that rule, choose rating, then more than, type 4 and press Enter.\n5. Click Columns and choose " +
+                "author and rating, then close the menu.\n6. In the rating rule, change 4 to 3 and press Enter." +
+                "\n7. Click the " +
+                "rating column's name twice." +
                 "\n8. Close and open the vault, and click Query."
         )
         expected(
-            text = "Two chips show the filters. Step 4 lists Deep Work, Dune and The Pragmatic Programmer, and step " +
+            text = "Two rules show the filters. Step 4 lists Deep Work, Dune and The Pragmatic Programmer, and step " +
                 "6 adds Atomic Habits and Sapiens. The first click sorts low first and the second high first, with " +
                 "an arrow on the column. After reopening, the same query and table are there."
         )
@@ -51,15 +53,15 @@ private fun SuiteBuilder.projectsAndMeetings() {
         prepare(SAMPLE)
         title(text = "Projects by status and meetings by date list the right notes")
         steps(
-            text = "$OPEN_QUERY\n3. Add the filter Folder, Projects, and click Sort, status.\n4. Remove the chip " +
-                "with its x, add the filter Folder, Meetings, and the filter date, after, 2026-10-22, and click " +
-                "Sort, date.\n5. Add the filter rating, more than, type high and click Apply."
+            text = "$OPEN_QUERY\n3. Add the rule Folder, Projects, and click Sort, status.\n4. Remove the rule with " +
+                "its -, add the rule Folder, Meetings, and the rule date, after, 2026-10-22, and click Sort, date." +
+                "\n5. Add the rule rating, more than, type high and press Enter."
         )
         expected(
             text = "Step 3 starts with Notekea launch (active), Kitchen renovation (on hold) and Garden plan " +
                 "(planning), and the projects with no status come last. Step 4 lists Design review, Budget and " +
-                "Retro October, oldest first. In step 5 the card asks for a value of the property's kind and " +
-                "adds no filter."
+                "Retro October, oldest first. In step 5 the field is outlined in red and " +
+                "the table does not change."
         )
     }
 }
@@ -93,7 +95,8 @@ private fun SuiteBuilder.savedInANote() {
         )
         expected(
             text = "The tab says Saved in Reading list. In Preview the block is a table under the query's chips, " +
-                "with a border; its header does not sort. Step 5 changes that book. In Edit the block is the " +
+                "with a border; its header does not sort. A second click on Save says the note already holds it. " +
+                "Step 5 changes that book. In Edit the block is the " +
                 "query's YAML between ```query and ```, at the end of the note."
         )
     }

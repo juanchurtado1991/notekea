@@ -49,7 +49,7 @@ private const val SOURCE_LINE = "status: draft"
 /**
  * The note's properties under its title (`ROADMAP.md` 1.14), on a soft card: a "Properties" header with their number,
  * which folds them, then one row per property (its type's icon, its muted name renamed in place, its value edited in
- * place, and a ✕ shown while the row is hovered), and "Add property", whose menu picks the type. "Show source" swaps the
+ * place, and a − that removes it), and "Add property", whose menu picks the type. "Show source" swaps the
  * form for the YAML as written, which can be edited too; frontmatter the form cannot read is shown that way with an
  * explanation, so nothing is lost. A note without properties shows nothing.
  */

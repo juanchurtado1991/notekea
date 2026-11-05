@@ -128,8 +128,8 @@ private fun FoundRows(
     UnknownProperties(unknown = result.unknown)
     if (result.rows.isEmpty()) return
     QueryHeader(columns = result.columns, sort = query.sort, onSortChange = null)
-    result.rows.take(n = MAX_ROWS).forEach { row ->
-        QueryTableRow(row = row, columns = result.columns, onIntent = onIntent)
+    result.rows.take(n = MAX_ROWS).forEachIndexed { index, row ->
+        QueryTableRow(row = row, index = index, columns = result.columns, onIntent = onIntent)
     }
     if (result.rows.size > MAX_ROWS) {
         Text(

@@ -24,7 +24,7 @@ class RunQueryUseCase {
             QueryRow(path = note.file.path, cells = columns.map { properties[it] })
         }
         val known = notes.flatMapTo(destination = HashSet()) { note -> note.metadata.properties.map { it.key } }
-        return QueryResult(rows = rows, columns = columns, unknown = query.properties.filter { it !in known })
+        return QueryResult(rows, columns, unknown = query.properties.filter { it !in known }, total = notes.size)
     }
 
     private fun passes(
