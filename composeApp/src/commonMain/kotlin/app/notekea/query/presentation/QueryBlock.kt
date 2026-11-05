@@ -16,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.presentation.components.NotekeaChip
 import app.notekea.core.presentation.components.NotekeaMarkdown
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
@@ -35,15 +34,16 @@ private const val PREVIEW_BLOCK = "columns: [author, rating]"
 private const val PREVIEW_SOURCE = "```query\ncolumns: [author, rating]\n```"
 
 /**
- * A ```` ```query ```` block as Preview shows it (`ROADMAP.md` 2.10): the live table of what its [text] finds ([run])
- * in the vault's [notes], under the query's chips, which are edited as the block's YAML. A block that is not a query says which line
- * cannot be read, above its [source]. A note stays light: past [MAX_ROWS], the table says how many it leaves out.
+ * A ```` ```query ```` block as Preview shows it (`ROADMAP.md` 2.10): the live table of what its [text] finds ([run]),
+ * again whenever [notesVersion] changes, under the query's chips, which are edited as the block's YAML. A block that
+ * is not a query says which line cannot be read, above its [source]. A note stays light: past [MAX_ROWS], the table
+ * says how many it leaves out.
  */
 @Composable
 fun QueryBlock(
     text: String,
     source: String,
-    notes: Collection<NoteEntry>,
+    notesVersion: Int,
     run: suspend (VaultQuery) -> QueryResult,
     onIntent: (QueryIntent) -> Unit,
     notice: QueryNotice?,
@@ -53,7 +53,7 @@ fun QueryBlock(
     Column(modifier = modifier.fillMaxWidth()) {
         when (parse) {
             is QueryParse.Invalid -> InvalidBlock(invalid = parse, source = source)
-            is QueryParse.Valid -> ValidBlock(query = parse.query, notes, run, onIntent, notice)
+            is QueryParse.Valid -> ValidBlock(query = parse.query, notesVersion, run, onIntent, notice)
         }
     }
 }
@@ -75,13 +75,13 @@ private fun InvalidBlock(
 @Composable
 private fun ValidBlock(
     query: VaultQuery,
-    notes: Collection<NoteEntry>,
+    notesVersion: Int,
     run: suspend (VaultQuery) -> QueryResult,
     onIntent: (QueryIntent) -> Unit,
     notice: QueryNotice?
 ) {
     // The last result stays until the next one, so the note does not jump when the vault changes.
-    val result by produceState<QueryResult?>(initialValue = null, query, notes) {
+    val result by produceState<QueryResult?>(initialValue = null, query, notesVersion) {
         value = run(query)
     }
     val colors = MaterialTheme.colorScheme
@@ -148,7 +148,7 @@ private fun QueryBlockPreview() {
         QueryBlock(
             text = PREVIEW_BLOCK,
             source = PREVIEW_SOURCE,
-            notes = emptyList(),
+            notesVersion = 0,
             run = { QueryPreviewData.state.result },
             onIntent = {},
             notice = null

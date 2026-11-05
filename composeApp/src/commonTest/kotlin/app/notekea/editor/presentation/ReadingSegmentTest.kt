@@ -57,6 +57,16 @@ class ReadingSegmentTest {
     }
 
     @Test
+    fun `a query fence indented past what opens a block takes nothing with it`() {
+        val text = "     ```query\nmiddle\n```kotlin\nval a = 1\n```\n"
+
+        assertEquals(
+            expected = listOf(ReadingSegment.Markdown(text = text)),
+            actual = ReadingSegment.of(text = text, attachments = emptyList())
+        )
+    }
+
+    @Test
     fun `a query shown as code inside another block, or never closed, stays Markdown`() {
         val quoted = "````\n```query\ncolumns: [a]\n```\n````\n"
         val open = "```query\ncolumns: [a]\n"

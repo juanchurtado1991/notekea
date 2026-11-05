@@ -26,6 +26,7 @@ object MarkdownSyntax {
     const val QUOTE = "> "
     const val QUOTE_MARK = '>'
     const val FENCE = "```"
+    const val QUERY_FENCE = FENCE + "query"
     const val DIVIDER = "---"
     const val TAG_MARK = "#"
     const val WIKI_LINK_OPEN = "[["

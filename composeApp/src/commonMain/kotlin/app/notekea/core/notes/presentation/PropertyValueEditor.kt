@@ -46,8 +46,8 @@ private val NUMBER = Regex(pattern = "-?\\d+(\\.\\d+)?")
 /**
  * A property's value edited in place, by its type (`ROADMAP.md` 1.14): text and numbers as fields, a checkbox, a date
  * typed or picked on a calendar that marks [today] (shown as people write it until it is edited), a list as chips with
- * a field of [itemFieldWidth] that adds one, and a value the form does not edit as it is written, with a note to edit it in the source.
- * Each change goes to [change] at once.
+ * a field of [itemFieldWidth] that adds one, and a value the form does not edit as it is written, with a note to edit
+ * it in the source. Each change goes to [change] at once.
  */
 @Composable
 fun PropertyValueEditor(

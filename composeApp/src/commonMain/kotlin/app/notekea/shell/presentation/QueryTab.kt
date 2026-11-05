@@ -6,7 +6,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.editor.presentation.EditorIntent
 import app.notekea.editor.presentation.LocalQueryBlock
 import app.notekea.editor.presentation.SidePanelHost
@@ -65,22 +64,22 @@ private fun FollowQuery(
     }
 }
 
-/** What Read mode's query blocks follow, for [content]: each runs against the vault's [notes]. */
+/** What Read mode's query blocks follow, for [content]: each runs against the notes [query] knows. */
 @Composable
 internal fun FollowQueryBlocks(
     query: QueryViewModel,
-    notes: Collection<NoteEntry>,
     content: @Composable () -> Unit
 ) {
-    val block: @Composable (String, String) -> Unit = remember(query, notes) {
+    val block: @Composable (String, String) -> Unit = remember(query) {
         { text, source ->
+            val queryState by query.state.collectAsState()
             QueryBlock(
                 text = text,
                 source = source,
-                notes = notes,
-                run = { query.resultOf(query = it, notes = notes) },
+                notesVersion = queryState.notesVersion,
+                run = query::resultOf,
                 onIntent = query::onIntent,
-                notice = query.state.collectAsState().value.notice.takeIf { it is QueryNotice.WriteFailed }
+                notice = queryState.notice.takeIf { it is QueryNotice.WriteFailed }
             )
         }
     }

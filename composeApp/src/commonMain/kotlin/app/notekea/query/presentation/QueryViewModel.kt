@@ -15,12 +15,15 @@ import app.notekea.query.domain.SetPropertyUseCase
 import app.notekea.query.domain.VaultQuery
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
  * The Query tab (`ROADMAP.md` 2.10) for the vault at [vaultPath], and the writes of the query blocks in its notes. The
  * query survives between runs, every change runs it again off the UI thread, and nothing runs while its tab is closed.
- * A cell changes its note, whose row shows the new value at once, before the vault's scan brings it.
+ * A cell changes its note, whose row shows the new value at once, before the vault's scan brings it; blocks run
+ * against the same notes, and their state's [QueryState.notesVersion] tells them to run again.
  */
 class QueryViewModel(
     private val vaultPath: String,
@@ -36,6 +39,7 @@ class QueryViewModel(
     private var isShown = false
     private var isQueryRead = false
     private var refreshJob: Job? = null
+    private val queryWrites = Mutex()
 
     init {
         launchGuarded(onError = ::logUnexpectedError) {
@@ -50,10 +54,7 @@ class QueryViewModel(
         intent: QueryIntent
     ) {
         when (intent) {
-            is QueryIntent.OnNotesChange -> {
-                notes = intent.notes
-                refresh()
-            }
+            is QueryIntent.OnNotesChange -> setNotes(changed = intent.notes)
 
             is QueryIntent.OnShownChange -> {
                 isShown = intent.isShown
@@ -116,17 +117,27 @@ class QueryViewModel(
 
     /** What [query], a block's, finds in the vault as this view model knows it. */
     suspend fun resultOf(
-        query: VaultQuery,
-        notes: Collection<NoteEntry>
-    ): QueryResult = withContext(context = dispatchers.default) { runQuery(query, notes) }
+        query: VaultQuery
+    ): QueryResult {
+        val shown = notes
+        return withContext(context = dispatchers.default) { runQuery(query, shown) }
+    }
+
+    private fun setNotes(
+        changed: Collection<NoteEntry>
+    ) {
+        notes = changed
+        reduce { it.copy(notesVersion = it.notesVersion + 1) }
+        refresh()
+    }
 
     private fun change(
         update: (VaultQuery) -> VaultQuery
     ) {
         reduce { it.copy(query = update(it.query)) }
-        val query = state.value.query
         launchGuarded(onError = ::logUnexpectedError) {
-            preferencesStore.write(vaultPath = vaultPath, query = query)
+            // The latest query, in turn: of two quick changes, the first must not be the one that stays.
+            queryWrites.withLock { preferencesStore.write(vaultPath = vaultPath, query = state.value.query) }
         }
         refresh()
     }
@@ -151,8 +162,7 @@ class QueryViewModel(
         launchGuarded(onError = ::showFailure) {
             val rewrite = setProperty(vaultPath = vaultPath, path = path, property = property)
             if (finishWrite(rewrite = rewrite)) {
-                notes = notes.map { if (it.file.path == path) withProperty(entry = it, property = property) else it }
-                refresh()
+                setNotes(changed = notes.map { if (it.file.path == path) withProperty(it, property) else it })
             }
         }
     }

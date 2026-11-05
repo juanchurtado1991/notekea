@@ -37,7 +37,7 @@ CREATE TABLE note_cache_alias (
     PRIMARY KEY (vault, path, position)
 );
 
--- Each note's frontmatter properties in order, with their type (`CachedProperty`), for the vault's queries.
+-- Each note's frontmatter properties in order, with their type (`CachedPropertyCodec`), for the vault's queries.
 CREATE TABLE note_cache_property (
     vault TEXT NOT NULL,
     path TEXT NOT NULL,

@@ -36,6 +36,24 @@ class QueryNoteWritesTest {
     }
 
     @Test
+    fun `a value the note already holds is no second key`() = runTest {
+        store.texts[NOTE] = "---\nfinished: true\n---\nDune\n"
+
+        setProperty(VAULT, NOTE, NoteProperty(key = "finished", value = PropertyValue.Checkbox(isChecked = true)))
+
+        assertEquals(expected = "---\nfinished: true\n---\nDune\n", actual = store.texts[NOTE])
+    }
+
+    @Test
+    fun `a frontmatter added to a note with Windows line breaks uses them`() = runTest {
+        store.texts[NOTE] = "Dune\r\nHerbert\r\n"
+
+        setProperty(VAULT, NOTE, NoteProperty(key = "rating", value = PropertyValue.Number(text = "5")))
+
+        assertEquals(expected = "---\r\nrating: 5\r\n---\r\nDune\r\nHerbert\r\n", actual = store.texts[NOTE])
+    }
+
+    @Test
     fun `a note that cannot be read is left alone`() = runTest {
         val rewrite = setProperty(VAULT, NOTE, NoteProperty(key = "rating", value = PropertyValue.Number(text = "5")))
 

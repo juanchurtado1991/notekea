@@ -131,7 +131,7 @@ class QueryContentTest {
                 QueryBlock(
                     text = "sorted: rating",
                     source = "```query\nsorted: rating\n```",
-                    notes = emptyList(),
+                    notesVersion = 0,
                     run = { QueryResult() },
                     onIntent = {},
                     notice = null

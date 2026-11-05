@@ -23,6 +23,7 @@ import app.notekea.resources.query_count_many
 import app.notekea.resources.query_count_one
 import app.notekea.resources.query_invalid_condition
 import app.notekea.resources.query_invalid_key
+import app.notekea.resources.query_invalid_order
 import app.notekea.resources.query_invalid_part
 import org.jetbrains.compose.resources.stringResource
 
@@ -83,6 +84,7 @@ internal fun invalidLabel(
 ): String = when (invalid.problem) {
     QueryProblem.UNKNOWN_KEY -> stringResource(resource = Res.string.query_invalid_key, invalid.line)
     QueryProblem.UNKNOWN_CONDITION -> stringResource(resource = Res.string.query_invalid_condition, invalid.line)
+    QueryProblem.UNKNOWN_ORDER -> stringResource(resource = Res.string.query_invalid_order, invalid.line)
     QueryProblem.MISSING_PART -> stringResource(resource = Res.string.query_invalid_part, invalid.line)
 }
 
