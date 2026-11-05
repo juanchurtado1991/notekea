@@ -29,9 +29,6 @@ import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 
 private const val HEIGHT_DP = 26
-private const val INSET_DP = 2
-private const val TRACK_RADIUS_DP = 7
-private const val THUMB_RADIUS_DP = 5
 private const val COUNT_GAP_DP = 5
 private const val PREVIEW_WIDTH_DP = 300
 
@@ -52,9 +49,7 @@ fun NotekeaCountTabs(
         modifier = modifier
             .fillMaxWidth()
             .height(height = HEIGHT_DP.dp)
-            .clip(shape = RoundedCornerShape(size = TRACK_RADIUS_DP.dp))
-            .background(color = MaterialTheme.colorScheme.surfaceVariant)
-            .padding(all = INSET_DP.dp)
+            .segmentTrack(colors = MaterialTheme.colorScheme)
             .selectableGroup()
     ) {
         labels.forEachIndexed { index, label ->
@@ -76,19 +71,12 @@ private fun RowScope.CountTab(
     count: Int?
 ) {
     val colors = MaterialTheme.colorScheme
-    val shape = RoundedCornerShape(size = THUMB_RADIUS_DP.dp)
     Row(
         modifier = Modifier
             .weight(weight = 1f)
             .fillMaxHeight()
-            .clip(shape = shape)
-            .background(color = if (isSelected) colors.surface else Color.Transparent)
-            .border(
-                width = NotekeaDimensions.BorderWidth,
-                color = if (isSelected) colors.outlineVariant else Color.Transparent,
-                shape = shape
-            )
-            .focusBorder(color = colors.primary, shape = shape)
+            .segmentThumb(isSelected = isSelected, colors = colors)
+            .focusBorder(color = colors.primary, shape = segmentShape)
             .selectable(selected = isSelected, role = Role.Tab, onClick = onClick),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically

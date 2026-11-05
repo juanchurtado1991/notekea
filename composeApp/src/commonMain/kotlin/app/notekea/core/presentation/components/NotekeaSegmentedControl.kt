@@ -17,13 +17,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 
-private const val INSET_DP = 2
+private const val SEGMENT_GAP_DP = 2
 private const val PREVIEW_CHAT = "Chat"
 private const val PREVIEW_INSPECTOR = "Inspector"
 private const val SEGMENT_ICON_DP = 14
@@ -31,7 +32,7 @@ private const val SEGMENT_VERTICAL_PADDING_DP = 4
 
 /**
  * A few exclusive choices side by side in a soft track, as macOS draws them: each with its icon and label, the
- * [selectedIndex] one raised on the surface with the primary icon. A click, or Enter on a segment, goes to [onSelect]
+ * [selectedIndex] one raised on the surface. A click, or Enter on a segment, goes to [onSelect]
  * with its index.
  */
 @Composable
@@ -41,14 +42,11 @@ fun NotekeaSegmentedControl(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colors = MaterialTheme.colorScheme
     Row(
         modifier = modifier
             .selectableGroup()
-            .clip(shape = MaterialTheme.shapes.small)
-            .background(color = colors.surfaceVariant)
-            .padding(all = INSET_DP.dp),
-        horizontalArrangement = Arrangement.spacedBy(space = INSET_DP.dp)
+            .segmentTrack(colors = MaterialTheme.colorScheme),
+        horizontalArrangement = Arrangement.spacedBy(space = SEGMENT_GAP_DP.dp)
     ) {
         segments.forEachIndexed { index, segment ->
             Segment(segment = segment, isSelected = index == selectedIndex, onClick = { onSelect(index) })
@@ -63,12 +61,10 @@ private fun Segment(
     onClick: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
-    val shape = MaterialTheme.shapes.extraSmall
     Row(
         modifier = Modifier
-            .focusBorder(color = colors.primary, shape = shape)
-            .clip(shape = shape)
-            .background(color = if (isSelected) colors.surface else colors.surfaceVariant)
+            .segmentThumb(isSelected = isSelected, colors = colors)
+            .focusBorder(color = colors.primary, shape = segmentShape)
             .clickable(role = Role.Tab, onClick = onClick)
             .semantics { selected = isSelected }
             .padding(horizontal = NotekeaDimensions.SpacingS, vertical = SEGMENT_VERTICAL_PADDING_DP.dp),
@@ -79,11 +75,13 @@ private fun Segment(
             imageVector = segment.icon,
             contentDescription = null,
             modifier = Modifier.size(size = SEGMENT_ICON_DP.dp),
-            tint = if (isSelected) colors.primary else colors.onSurfaceVariant
+            tint = if (isSelected) colors.onSurface else colors.onSurfaceVariant
         )
         Text(
             text = segment.label,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+            ),
             color = if (isSelected) colors.onSurface else colors.onSurfaceVariant
         )
     }

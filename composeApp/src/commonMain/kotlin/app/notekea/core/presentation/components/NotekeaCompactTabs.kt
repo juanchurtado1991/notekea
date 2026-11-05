@@ -25,19 +25,21 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 
+private const val VERTICAL_PADDING_DP = 3
 private const val PREVIEW_EDIT = "Edit"
 private const val PREVIEW_PREVIEW = "Preview"
 private const val PREVIEW_SHORTCUT = "Ctrl+E"
 private const val PREVIEW_WIDTH_DP = 240
 
 /**
- * Tabs as wide as their labels, for a toolbar (the editor's Edit | Preview, like GitHub's): the [selectedIndex] one in
- * the primary color with a square-cornered line under it. The tooltip of each tab shows [shortcutHint] when there is one, so the
+ * Tabs as wide as their labels, for a toolbar (the editor's Edit | Preview), drawn as every selector of the app: the
+ * [selectedIndex] one raised on a muted track. The tooltip of each tab shows [shortcutHint] when there is one, so the
  * shortcut that switches them is learned from the tabs themselves. With [takesFocus] false a click leaves the keyboard
  * where it was, so a shortcut and a click never leave the focus ring on a tab that is no longer selected.
  */
@@ -50,7 +52,7 @@ fun NotekeaCompactTabs(
     shortcutHint: String? = null,
     takesFocus: Boolean = true
 ) {
-    Row(modifier = modifier.selectableGroup()) {
+    Row(modifier = modifier.segmentTrack(colors = MaterialTheme.colorScheme).selectableGroup()) {
         labels.forEachIndexed { index, label ->
             CompactTab(
                 label = label,
@@ -72,33 +74,21 @@ private fun CompactTab(
     shortcutHint: String?
 ) {
     val colors = MaterialTheme.colorScheme
-    val color = if (isSelected) colors.primary else colors.onSurfaceVariant
     NotekeaTooltip(label = label, shortcutHint = shortcutHint) {
-        Column(
+        Text(
+            text = label,
             modifier = Modifier
                 .focusProperties { canFocus = takesFocus }
-                // Square corners, so the line under the selected tab meets the toolbar's line edge to edge.
-                .focusBorder(color = colors.primary, shape = RectangleShape)
+                .segmentThumb(isSelected = isSelected, colors = colors)
+                .focusBorder(color = colors.primary, shape = segmentShape)
                 .semantics { selected = isSelected }
                 .clickable(role = Role.Tab, onClick = onClick)
-                .width(intrinsicSize = IntrinsicSize.Max)
-        ) {
-            Text(
-                text = label,
-                modifier = Modifier.padding(
-                    horizontal = NotekeaDimensions.SpacingM,
-                    vertical = NotekeaDimensions.SpacingXs
-                ),
-                style = MaterialTheme.typography.labelLarge,
-                color = color
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(height = NotekeaDimensions.FocusRingWidth)
-                    .background(color = if (isSelected) colors.primary else Color.Transparent)
-            )
-        }
+                .padding(horizontal = NotekeaDimensions.SpacingM, vertical = VERTICAL_PADDING_DP.dp),
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
+            ),
+            color = if (isSelected) colors.onSurface else colors.onSurfaceVariant
+        )
     }
 }
 
