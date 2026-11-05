@@ -27,7 +27,7 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.connections.domain.RelatedNote
-import app.notekea.connections.domain.RelatedSnippet
+import app.notekea.core.notes.domain.PassageSnippet
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.connections.presentation.ConnectionActions
 import app.notekea.connections.presentation.ConnectionMenu
@@ -157,7 +157,7 @@ private fun LazyListScope.linkedItems(
 @Preview
 @Composable
 private fun RelatedListPreview() {
-    val snippet = RelatedSnippet(text = PREVIEW_TEXT, highlight = 0..PREVIEW_TEXT.lastIndex)
+    val snippet = PassageSnippet(text = PREVIEW_TEXT, highlight = 0..PREVIEW_TEXT.lastIndex)
     NotekeaPreviewThemes {
         Box(modifier = Modifier.height(height = PREVIEW_HEIGHT_DP.dp)) {
             RelatedList(
