@@ -58,7 +58,7 @@ internal fun CaseScope.clickOnRowOf(
     rowText: String,
     label: String
 ) {
-    onRowOf(rowText = rowText, matcher = hasContentDescription(value = label)).performClick()
+    onRowOf(rowText = rowText, matcher = hasContentDescription(value = label)).clickWhenStill()
 }
 
 private fun CaseScope.firstShownOf(
