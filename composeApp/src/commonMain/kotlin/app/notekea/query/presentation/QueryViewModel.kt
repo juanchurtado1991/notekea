@@ -60,10 +60,37 @@ class QueryViewModel(
                 refresh()
             }
 
+            is QueryIntent.OnNoteOpen -> emit(effect = QueryEffect.OpenNote(path = intent.path))
+
+            is QueryIntent.OnCellChange -> write(path = intent.path, property = intent.property)
+
+            is QueryIntent.OnSave -> save(path = intent.path)
+
+            QueryIntent.OnNoticeDismiss -> reduce { it.copy(notice = null) }
+
+            else -> onQueryChange(intent = intent)
+        }
+    }
+
+    /** The intents of the query's own controls. */
+    private fun onQueryChange(
+        intent: QueryIntent
+    ) {
+        when (intent) {
             is QueryIntent.OnFilterAdd -> change { it.copy(filters = it.filters + intent.filter) }
 
             is QueryIntent.OnFilterChange -> change { query ->
-                query.copy(filters = query.filters.mapIndexed { i, old -> if (i == intent.index) intent.filter else old })
+                query.copy(
+                    filters = query.filters.mapIndexed { i, old ->
+                        if (i ==
+                            intent.index
+                        ) {
+                            intent.filter
+                        } else {
+                            old
+                        }
+                    }
+                )
             }
 
             is QueryIntent.OnFilterRemove -> change { query ->
@@ -74,13 +101,7 @@ class QueryViewModel(
 
             is QueryIntent.OnColumnToggle -> change { toggled(query = it, column = intent.column) }
 
-            is QueryIntent.OnNoteOpen -> emit(effect = QueryEffect.OpenNote(path = intent.path))
-
-            is QueryIntent.OnCellChange -> write(path = intent.path, property = intent.property)
-
-            is QueryIntent.OnSave -> save(path = intent.path)
-
-            QueryIntent.OnNoticeDismiss -> reduce { it.copy(notice = null) }
+            else -> Unit
         }
     }
 

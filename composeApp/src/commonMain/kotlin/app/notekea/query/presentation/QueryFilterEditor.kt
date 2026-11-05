@@ -21,6 +21,7 @@ import app.notekea.core.presentation.components.NotekeaPopover
 import app.notekea.core.presentation.components.NotekeaTextField
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.query.domain.QueryCondition
 import app.notekea.query.domain.QueryFilter
 import app.notekea.query.domain.QueryValueKind
 import app.notekea.resources.Res
@@ -49,33 +50,28 @@ internal fun QueryFilterEditor(
     var value by remember { mutableStateOf(value = filter.value) }
     var isChecked by remember { mutableStateOf(value = filter.value != FALSE) }
     var isRejected by remember { mutableStateOf(value = false) }
-    val written = if (kind == QueryValueKind.CHECKBOX) isChecked.toString() else value.trim()
     val apply = {
-        val isValid = !condition.needsValue || isValidValue(text = written, kind = kind)
-        isRejected = !isValid
-        if (isValid) onApply(filter.copy(condition = condition, value = written.takeIf { condition.needsValue }.orEmpty()))
+        val written = if (kind == QueryValueKind.CHECKBOX) isChecked.toString() else value.trim()
+        val applied = filterOf(filter = filter, condition = condition, text = written, kind = kind)
+        isRejected = applied == null
+        applied?.let(onApply) ?: Unit
     }
     NotekeaPopover(onDismiss = onDismiss) {
         Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
             Text(text = filter.property, style = MaterialTheme.typography.titleSmall)
-            val labels = kind.conditions.map { conditionLabel(condition = it) }
-            NotekeaCompactTabs(
-                labels = labels,
-                selectedIndex = kind.conditions.indexOf(element = condition).coerceAtLeast(minimumValue = 0),
-                onSelect = { condition = kind.conditions[it] }
-            )
+            ConditionTabs(kind = kind, condition = condition, onSelect = { condition = it })
             if (condition.needsValue) {
                 ValueInput(
                     kind = kind,
                     text = value,
-                    isChecked = isChecked,
-                    error = stringResource(resource = Res.string.query_invalid_value).takeIf { isRejected },
                     onTextChange = {
                         value = it
                         isRejected = false
                     },
                     onCheckedChange = { isChecked = it },
-                    onSubmit = apply
+                    onSubmit = apply,
+                    isChecked = isChecked,
+                    error = stringResource(resource = Res.string.query_invalid_value).takeIf { isRejected }
                 )
             }
             NotekeaButton(text = stringResource(resource = Res.string.query_apply), onClick = apply)
@@ -84,14 +80,27 @@ internal fun QueryFilterEditor(
 }
 
 @Composable
+private fun ConditionTabs(
+    kind: QueryValueKind,
+    condition: QueryCondition,
+    onSelect: (QueryCondition) -> Unit
+) {
+    NotekeaCompactTabs(
+        labels = kind.conditions.map { conditionLabel(condition = it) },
+        selectedIndex = kind.conditions.indexOf(element = condition).coerceAtLeast(minimumValue = 0),
+        onSelect = { onSelect(kind.conditions[it]) }
+    )
+}
+
+@Composable
 private fun ValueInput(
     kind: QueryValueKind,
     text: String,
-    isChecked: Boolean,
-    error: String?,
     onTextChange: (String) -> Unit,
     onCheckedChange: (Boolean) -> Unit,
-    onSubmit: () -> Unit
+    onSubmit: () -> Unit,
+    isChecked: Boolean,
+    error: String?
 ) {
     if (kind == QueryValueKind.CHECKBOX) {
         NotekeaCompactTabs(
@@ -114,6 +123,18 @@ private fun ValueInput(
         )
         LaunchedEffect(focus) { focus.requestFocus() }
     }
+}
+
+/** [filter] with [condition] and [text], or null when [text] does not fit [kind]. */
+private fun filterOf(
+    filter: QueryFilter,
+    condition: QueryCondition,
+    text: String,
+    kind: QueryValueKind
+): QueryFilter? = when {
+    !condition.needsValue -> filter.copy(condition = condition, value = "")
+    isValidValue(text = text, kind = kind) -> filter.copy(condition = condition, value = text)
+    else -> null
 }
 
 private fun isValidValue(

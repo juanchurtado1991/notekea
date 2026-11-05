@@ -41,7 +41,6 @@ fun ReadingView(
     onHeadingPlaced: (Int, LayoutCoordinates) -> Unit = { _, _ -> }
 ) {
     val readLinks = remember { ReadModeLinks() }
-    val queryBlock = LocalQueryBlock.current
     val segments = remember(text, attachments) {
         ReadingSegment.of(text = text, attachments = attachments, headings = OutlineFinder().headings(text = text))
     }
@@ -54,11 +53,9 @@ fun ReadingView(
     }
     val onLinkClick = { uri: String ->
         when (val link = readLinks.classify(uri = uri)) {
-            is ReadLink.Note -> onIntent(EditorIntent.OnLinkClick(link = link))
             is ReadLink.External -> systemUriHandler.openUri(uri = link.uri)
-            is ReadLink.Tag -> onIntent(EditorIntent.OnTagClick(tag = link.name))
-            is ReadLink.File -> openFile(target = link.target, attachments = attachments, onIntent = onIntent)
             null -> Unit
+            else -> openLink(link = link, attachments = attachments, onIntent = onIntent)
         }
     }
     Column(
@@ -76,10 +73,22 @@ fun ReadingView(
 
                 is ReadingSegment.Attachment -> AttachmentBlock(view = segment.view, onIntent = onIntent)
 
-                is ReadingSegment.Query -> queryBlock?.invoke(segment.text, segment.source)
-                    ?: NotekeaMarkdown(content = segment.source)
+                is ReadingSegment.Query -> QuerySegment(segment = segment)
             }
         }
+    }
+}
+
+/** A query block as [LocalQueryBlock] draws it, or the code it is without one. */
+@Composable
+private fun QuerySegment(
+    segment: ReadingSegment.Query
+) {
+    val block = LocalQueryBlock.current
+    if (block == null) {
+        NotekeaMarkdown(content = segment.source)
+    } else {
+        block(segment.text, segment.source)
     }
 }
 
@@ -120,6 +129,20 @@ private fun headingPlace(
     heading: Int?,
     onHeadingPlaced: (Int, LayoutCoordinates) -> Unit
 ): Modifier = heading?.let { Modifier.onGloballyPositioned { onHeadingPlaced(heading, it) } } ?: Modifier
+
+/** A note or a file opens, and a tag is searched. */
+private fun openLink(
+    link: ReadLink,
+    attachments: List<AttachmentView>,
+    onIntent: (EditorIntent) -> Unit
+) {
+    when (link) {
+        is ReadLink.Note -> onIntent(EditorIntent.OnLinkClick(link = link))
+        is ReadLink.Tag -> onIntent(EditorIntent.OnTagClick(tag = link.name))
+        is ReadLink.File -> openFile(target = link.target, attachments = attachments, onIntent = onIntent)
+        is ReadLink.External -> Unit
+    }
+}
 
 /** A file link in a paragraph opens its file, or offers to locate it when it is missing. */
 private fun openFile(

@@ -33,11 +33,17 @@ internal fun conditionLabel(
 ): String = when (condition) {
     QueryCondition.IS, QueryCondition.IN_FOLDER, QueryCondition.HAS_TAG ->
         stringResource(resource = Res.string.query_condition_is)
+
     QueryCondition.CONTAINS -> stringResource(resource = Res.string.query_condition_contains)
+
     QueryCondition.MORE_THAN -> stringResource(resource = Res.string.query_condition_more_than)
+
     QueryCondition.LESS_THAN -> stringResource(resource = Res.string.query_condition_less_than)
+
     QueryCondition.BEFORE -> stringResource(resource = Res.string.query_condition_before)
+
     QueryCondition.AFTER -> stringResource(resource = Res.string.query_condition_after)
+
     QueryCondition.IS_EMPTY -> stringResource(resource = Res.string.query_condition_is_empty)
 }
 
@@ -47,7 +53,9 @@ internal fun filterLabel(
     filter: QueryFilter
 ): String = when (filter.condition) {
     QueryCondition.IN_FOLDER -> stringResource(resource = Res.string.query_chip_folder, filter.value)
+
     QueryCondition.HAS_TAG -> stringResource(resource = Res.string.query_chip_tag, filter.value)
+
     else -> stringResource(
         resource = Res.string.query_chip_filter,
         filter.property,

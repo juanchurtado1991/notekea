@@ -140,9 +140,9 @@ internal fun QueryTableRow(
             columns.forEachIndexed { index, column ->
                 Box(modifier = Modifier.weight(weight = 1f)) {
                     QueryCell(
-                        property = row.cells.getOrNull(index = index),
                         column = column,
-                        onChange = { onIntent(QueryIntent.OnCellChange(path = row.path, property = it)) }
+                        onChange = { onIntent(QueryIntent.OnCellChange(path = row.path, property = it)) },
+                        property = row.cells.getOrNull(index = index)
                     )
                 }
             }
@@ -154,23 +154,27 @@ internal fun QueryTableRow(
 /** The property, or an empty field whose text, typed as a note's property would be, adds it to the note. */
 @Composable
 private fun QueryCell(
-    property: NoteProperty?,
     column: String,
-    onChange: (NoteProperty) -> Unit
+    onChange: (NoteProperty) -> Unit,
+    property: NoteProperty?
 ) {
     if (property == null) {
         val reader = remember { FrontmatterReader() }
         NotekeaPropertyField(
             value = "",
             onCommit = { text ->
-                if (text.isNotBlank()) onChange(NoteProperty(key = column, value = reader.scalarValue(text = text.trim())))
+                if (text.isNotBlank()) {
+                    onChange(
+                        NoteProperty(key = column, value = reader.scalarValue(text = text.trim()))
+                    )
+                }
             }
         )
     } else {
         PropertyValueEditor(
             property = property,
-            today = null,
             change = { value: PropertyValue -> onChange(property.copy(value = value)) },
+            today = null,
             itemFieldWidth = ITEM_FIELD_WIDTH_DP.dp
         )
     }

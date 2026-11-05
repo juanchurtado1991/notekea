@@ -34,11 +34,16 @@ internal class CachedPropertyCodec {
         value: String
     ): PropertyValue = when (type) {
         NUMBER -> PropertyValue.Number(text = value)
+
         CHECKBOX -> PropertyValue.Checkbox(isChecked = value.toBoolean())
+
         DATE -> momentFormat.parseDate(text = value, pattern = MomentFormat.ISO_DATE)
             ?.let { PropertyValue.Date(date = it) } ?: PropertyValue.Text(text = value)
+
         ITEMS -> PropertyValue.Items(items = if (value.isEmpty()) emptyList() else value.split(ITEM_SEPARATOR))
+
         OTHER -> PropertyValue.Other(source = value)
+
         else -> PropertyValue.Text(text = value)
     }
 

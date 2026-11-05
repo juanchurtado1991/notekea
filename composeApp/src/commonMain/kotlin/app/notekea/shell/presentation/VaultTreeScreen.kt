@@ -144,7 +144,6 @@ fun VaultTreeScreen(
             state = state,
             workspaceState = workspaceState,
             tree = viewModel,
-            editor = activeEditor,
             editors = editors,
             switcher = switcherViewModel,
             tagPicker = tagPickerViewModel,
@@ -241,8 +240,7 @@ private fun FollowVault(
 ) {
     FollowWorkspace(state = state, viewModels = viewModels, sidePanel = sidePanel)
     FollowActiveTab(name = workspaceState.activeTabName, onChange = onActiveTabChange)
-    FollowQuery(viewModels = viewModels, state = state)
-    FollowGraph(viewModels = viewModels, state = state, searchIndex = searchIndex, sidePanel = sidePanel)
+    FollowTools(viewModels = viewModels, state = state, searchIndex = searchIndex, sidePanel = sidePanel)
 }
 
 /**
@@ -254,12 +252,12 @@ private fun Pickers(
     state: VaultTreeState,
     workspaceState: WorkspaceState,
     tree: VaultTreeViewModel,
-    editor: EditorViewModel,
     editors: PaneEditors,
     switcher: QuickSwitcherViewModel,
     tagPicker: TagPickerViewModel,
     templatePicker: TemplatePickerViewModel
 ) {
+    val editor = editors.active
     FollowQuickSwitcher(switcher = switcher, tree = tree, editors = editors, notes = state.tree.notes)
     FollowTagPicker(tagPicker = tagPicker, editor = editor, notes = state.tree.notes.values)
     FollowTemplatePicker(templatePicker = templatePicker, tree = tree, editor = editor, state = state)

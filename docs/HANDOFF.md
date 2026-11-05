@@ -3,7 +3,7 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-05, with 2.7 (#122) in review.
+Last updated: 2026-11-05, with 2.10 Vault queries in its smoke test.
 
 ## Milestones
 
@@ -13,8 +13,8 @@ Last updated: 2026-11-05, with 2.7 (#122) in review.
 - **M2 — Indexing, links and related notes:** started. 2.12 Color themes is done (#107), 2.1 Markdown chunking
   (#108), 2.2 Embedding engine (#109), 2.3 Hybrid index (#110), 2.4 Related notes panel (#111) and **2.5
   Backlinks** (#112) are done; Workspace Blue is the default theme (#113). `notes` was split into features (#118), and
-  **2.6 Hybrid search** (#120) and the eight hand-tuned themes (#123) are done. **2.7 Graph view** (#122) is in
-  review. Next is **2.10 Vault queries** (`feature/vault-queries`, `ROADMAP.md`).
+  **2.6 Hybrid search** (#120), the eight hand-tuned themes (#123) and **2.7 Graph view** (#122) are done. **2.10
+  Vault queries** (`feature/vault-queries`, design A, chips over a table) waits for its smoke test.
 
 ## Open work, in order
 
@@ -29,7 +29,7 @@ Last updated: 2026-11-05, with 2.7 (#122) in review.
 4. **Audit fixes:** a project-wide audit (2026-11-04) is fixed on `fix/audit-findings`, one commit per finding, waiting
    for the developer's manual review. Tree drag and multi-selection were left as a product decision, and the editor
    toolbar's submenus (Callout, Code block, More) are still mouse-only: `ROADMAP.md` decided the toolbar takes no focus.
-5. **M2** goes on with 2.10, 2.11, 2.8, 2.13 and 2.9, in that order.
+5. **M2** goes on with 2.11, 2.8, 2.13 and 2.9, in that order.
 6. **Intermittent Self-Test failures on CI:** Windows failed once each in 1.1-07 and 1.4-05, and Ubuntu in 1.14-09; none is
    explained yet. 1.12-01 (a real bug) and 1.17-04 are fixed.
 

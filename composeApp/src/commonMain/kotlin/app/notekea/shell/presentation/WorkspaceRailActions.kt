@@ -3,20 +3,20 @@ package app.notekea.shell.presentation
 import app.notekea.core.presentation.platform.WindowDialog
 import app.notekea.editor.presentation.EditorIntent
 import app.notekea.editor.presentation.SidePanelHost
+import app.notekea.shell.domain.Workspace
 import app.notekea.tree.presentation.SidebarRailActions
 
-/** The rail's actions: search, the side panel, another vault, and About or Settings opened with [onDialog]. */
+/** The rail's actions: search, the graph, queries, the side panel, another vault, and About or Settings opened with [onDialog]. */
 internal fun railActionsOf(
+    viewModels: WorkspaceViewModels,
     sidePanel: SidePanelHost,
     onSearch: () -> Unit,
-    onGraph: () -> Unit,
-    onQuery: () -> Unit,
     onSwitchVault: () -> Unit,
     onDialog: (WindowDialog) -> Unit
 ) = SidebarRailActions(
     onSearch = onSearch,
-    onGraph = onGraph,
-    onQuery = onQuery,
+    onGraph = { openGraph(viewModels = viewModels) },
+    onQuery = { viewModels.workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = Workspace.QUERY)) },
     onSidePanelToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
     onSwitchVault = onSwitchVault,
     onAbout = { onDialog(WindowDialog.ABOUT) },

@@ -38,8 +38,8 @@ class RunQueryUseCase {
             QueryCondition.IS_EMPTY -> values.isEmpty(value = value)
             QueryCondition.IS -> value != null && isEqual(value = value, other = filter.value)
             QueryCondition.CONTAINS -> value != null && contains(value = value, other = filter.value)
-            QueryCondition.MORE_THAN, QueryCondition.AFTER -> compare(value = value, filter = filter) { it > 0 }
-            QueryCondition.LESS_THAN, QueryCondition.BEFORE -> compare(value = value, filter = filter) { it < 0 }
+            QueryCondition.MORE_THAN, QueryCondition.AFTER -> compare(filter, { it > 0 }, value)
+            QueryCondition.LESS_THAN, QueryCondition.BEFORE -> compare(filter, { it < 0 }, value)
         }
     }
 
@@ -72,9 +72,9 @@ class RunQueryUseCase {
     ): Boolean = values.textsOf(value = value).any { it.contains(other = other.trim(), ignoreCase = true) }
 
     private fun compare(
-        value: PropertyValue?,
         filter: QueryFilter,
-        isPassed: (Int) -> Boolean
+        isPassed: (Int) -> Boolean,
+        value: PropertyValue?
     ): Boolean = value?.let { values.compare(value = it, other = filter.value) }?.let(isPassed) == true
 
     private fun sorted(

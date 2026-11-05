@@ -23,7 +23,7 @@ class QueryContentTest {
         val intents = mutableListOf<QueryIntent>()
         setContent {
             NotekeaTheme(darkTheme = false) {
-                QueryContent(state = QueryPreviewData.state, saveTarget = null, onIntent = { intents += it })
+                QueryContent(state = QueryPreviewData.state, onIntent = { intents += it }, saveTarget = null)
             }
         }
 
@@ -46,7 +46,7 @@ class QueryContentTest {
         val intents = mutableListOf<QueryIntent>()
         setContent {
             NotekeaTheme(darkTheme = false) {
-                QueryContent(state = QueryPreviewData.state, saveTarget = null, onIntent = { intents += it })
+                QueryContent(state = QueryPreviewData.state, onIntent = { intents += it }, saveTarget = null)
             }
         }
 
@@ -66,7 +66,7 @@ class QueryContentTest {
         val note = RelativePath(value = "Books/Reading list.md")
         setContent {
             NotekeaTheme(darkTheme = false) {
-                QueryContent(state = QueryPreviewData.state, saveTarget = note, onIntent = { intents += it })
+                QueryContent(state = QueryPreviewData.state, onIntent = { intents += it }, saveTarget = note)
             }
         }
 
@@ -92,7 +92,7 @@ class QueryContentTest {
             result = QueryResult(unknown = listOf("mood"))
         )
         setContent {
-            NotekeaTheme(darkTheme = false) { QueryContent(state = state, saveTarget = null, onIntent = {}) }
+            NotekeaTheme(darkTheme = false) { QueryContent(state = state, onIntent = {}, saveTarget = null) }
         }
 
         onNodeWithText(text = "No notes match these filters").assertExists()
@@ -107,9 +107,9 @@ class QueryContentTest {
                     text = "sorted: rating",
                     source = "```query\nsorted: rating\n```",
                     notes = emptyList(),
-                    notice = null,
                     run = { QueryResult() },
-                    onIntent = {}
+                    onIntent = {},
+                    notice = null
                 )
             }
         }
