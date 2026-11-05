@@ -8,7 +8,6 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextInputSelection
 import androidx.compose.ui.text.TextRange
@@ -106,7 +105,7 @@ private fun SuiteBuilder.embedsInEdit() {
         expectText(text = "Shopping basics › Dairy")
         val field = noteText(part = EMBEDS_TEXT)
         val text = field.fetchSemanticsNode().config[SemanticsProperties.EditableText].text
-        field.performClick()
+        field.clickWhenStill()
         field.performTextInputSelection(selection = TextRange(index = text.indexOf("![[Pantry]]")))
         field.performTextInput(text = "Shopping\n\n")
         expectFile(path = "$PLAYGROUND/Editor/Embeds/$EMBEDS.md", containing = "Shopping\n\n![[Pantry]]")
@@ -116,7 +115,7 @@ private fun SuiteBuilder.embedsInEdit() {
 
 /** Goes back to the tab of Embeds practice, once it has scrolled back to where it was left. */
 private fun CaseScope.backToEmbeds() {
-    tab(name = EMBEDS).performClick()
+    tab(name = EMBEDS).clickWhenStill()
     settle(millis = SCROLL_RESTORE_MILLIS)
     ui.waitForIdle()
 }
@@ -135,7 +134,7 @@ private fun CaseScope.clickTextOnRowOf(
 ) {
     scrollNoteTo(text = rowText)
     onRowOf(rowText = rowText, matcher = hasText(text = text) and inNote, anchor = hasText(text = rowText) and inNote)
-        .performClick()
+        .clickWhenStill()
 }
 
 private fun CaseScope.expectCount(

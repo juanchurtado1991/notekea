@@ -3,7 +3,6 @@ package app.notekea.selftest.cases.m1
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasStateDescription
-import androidx.compose.ui.test.performClick
 import app.notekea.selftest.expectOrderOnScreen
 import app.notekea.selftest.pressInWindow
 import app.notekea.selftest.waitForResult
@@ -100,7 +99,7 @@ private fun SuiteBuilder.listButtons() {
         ui.waitUntil(timeoutMillis = 10_000) { tasks.fetchSemanticsNodes().size == 3 }
         tasks.fetchSemanticsNodes().withIndex().maxBy {
             it.value.boundsInRoot.top
-        }.index.let { tasks[it].performClick() }
+        }.index.let { tasks[it].clickWhenStill() }
         expectInNote(text = "- [x] Soak the beans")
     }
 }

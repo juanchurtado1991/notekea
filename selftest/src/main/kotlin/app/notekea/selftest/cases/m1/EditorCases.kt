@@ -1,7 +1,6 @@
 package app.notekea.selftest.cases.m1
 
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
@@ -147,7 +146,7 @@ private fun CaseScope.renameFromTitle(
     newName: String
 ) {
     titleField(name = name).apply {
-        performClick()
+        clickWhenStill()
         performTextReplacement(text = newName)
     }
     // The field is drawn anew with the new text, so it is found again to confirm it.

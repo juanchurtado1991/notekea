@@ -4,7 +4,6 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.performClick
 import app.notekea.selftest.clickInTree
 import app.notekea.selftest.noteText
 import app.notekea.selftest.openVault
@@ -127,7 +126,7 @@ private fun SuiteBuilder.tabShortcuts() {
         expectShown(text = AREPAS_FLOUR)
         pressInWindow(shortcut = Mod + Key.Nine)
         expectShown(text = PASTA_TEXT)
-        noteText(part = PASTA_TEXT).performClick()
+        noteText(part = PASTA_TEXT).clickWhenStill()
         press(shortcut = Ctrl + Key.Tab)
         expectShown(text = WELCOME_TEXT)
     }

@@ -2,7 +2,6 @@ package app.notekea.selftest.cases.m1
 
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInputSelection
 import androidx.compose.ui.text.TextRange
 import app.notekea.selftest.noteText
@@ -89,7 +88,7 @@ private fun CaseScope.selectRange(
     part: String
 ) {
     val field = editor(part = part)
-    field.performClick()
+    field.clickWhenStill()
     field.performTextInputSelection(selection = range)
     ui.waitForIdle()
 }

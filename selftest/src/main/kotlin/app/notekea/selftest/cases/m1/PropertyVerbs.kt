@@ -7,7 +7,6 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isFocused
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
@@ -27,7 +26,7 @@ internal fun CaseScope.editField(
     current: String,
     text: String
 ) {
-    field(text = current).performClick()
+    field(text = current).clickWhenStill()
     // A field can show its value another way while it is edited (a date as 2026-11-02), so the focused one is used.
     val focused = ui.onNode(matcher = isFocused() and hasSetTextAction())
     focused.performTextReplacement(text = text)

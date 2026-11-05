@@ -3,7 +3,6 @@ package app.notekea.selftest.cases.m1
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onFirst
-import androidx.compose.ui.test.performClick
 import app.notekea.selftest.notekea
 import app.notekea.selftest.openVault
 import app.notekea.selftest.relaunch
@@ -100,7 +99,7 @@ private fun SuiteBuilder.movedVault() {
             Files.move(folders.data.resolve(PERSONAL_NOTES), folders.data.resolve("Personal Notes moved"))
         }
         expectText(text = NOT_FOUND)
-        ui.onAllNodes(matcher = hasText(text = "Remove")).onFirst().performClick()
+        ui.onAllNodes(matcher = hasText(text = "Remove")).onFirst().clickWhenStill()
         expectNoText(text = "Movable Vault")
         notekea().folderPicker.nextPick = folders.data.resolve("Personal Notes moved").toString()
         click(text = "Locate…")

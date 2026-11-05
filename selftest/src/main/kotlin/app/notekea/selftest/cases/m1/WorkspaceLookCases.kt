@@ -5,7 +5,6 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasStateDescription
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInputSelection
 import androidx.compose.ui.text.TextRange
 import app.notekea.selftest.clickInTree
@@ -38,7 +37,7 @@ private fun SuiteBuilder.noteInfo() {
         openPlaygroundNote(name = TASKS, shownText = TASKS_TEXT)
         listOf("Words", "236", "Reading time", "2 min", "Links", "Tags", "4 of 9", "Created", "Modified")
             .forEach { expectText(text = it) }
-        firstTask(state = "not checked").performClick()
+        firstTask(state = "not checked").clickWhenStill()
         expectText(text = "5 of 9")
         expectFile(path = "$PLAYGROUND/Editor/$TASKS.md", containing = "- [x] Buy corn flour\n")
         click(text = "OUTLINE")
@@ -70,7 +69,7 @@ private fun SuiteBuilder.statusBar() {
         openPlaygroundNote(name = TASKS, shownText = TASKS_TEXT)
         val field = noteText(part = TASKS_TEXT)
         val text = field.fetchSemanticsNode().config[SemanticsProperties.EditableText].text
-        field.performClick()
+        field.clickWhenStill()
         field.performTextInputSelection(selection = TextRange(index = text.indexOf(TASKS_TEXT)))
         listOf("Editor", TASKS, "8:7", "LF", "UTF-8", "236 words").forEach { expectText(text = it) }
         openNote(name = "Windows line endings", shownText = "Every line ends with CR LF.")

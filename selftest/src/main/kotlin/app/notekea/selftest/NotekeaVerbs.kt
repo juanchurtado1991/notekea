@@ -14,7 +14,6 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isFocused
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
@@ -182,7 +181,7 @@ fun CaseScope.treeRow(text: String): SemanticsNodeInteraction {
 
 /** Clicks the row of the tree that shows [text]. */
 fun CaseScope.clickInTree(text: String) {
-    treeRow(text = text).performClick()
+    treeRow(text = text).clickWhenStill()
 }
 
 /** Right-clicks the row of the tree that shows [text], for its menu. */
@@ -213,7 +212,7 @@ fun CaseScope.typeAtEnd(
     text: String
 ) {
     val field = noteText(part = part)
-    field.performClick()
+    field.clickWhenStill()
     val length = field.fetchSemanticsNode().config[SemanticsProperties.EditableText].text.length
     field.performTextInputSelection(selection = TextRange(index = length))
     field.performTextInput(text = text)

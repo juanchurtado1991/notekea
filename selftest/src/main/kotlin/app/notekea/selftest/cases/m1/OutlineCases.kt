@@ -8,7 +8,6 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onFirst
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import app.notekea.selftest.openVault
 import app.notekea.selftest.pressInWindow
@@ -152,7 +151,7 @@ private fun CaseScope.typeInNoteBody(text: String) {
     val body = hasSetTextAction() and hasContentDescription(value = "Note text")
     ui.waitUntil(timeoutMillis = 10_000) { ui.onAllNodes(matcher = body).fetchSemanticsNodes().isNotEmpty() }
     ui.onAllNodes(matcher = body).onFirst().apply {
-        performClick()
+        clickWhenStill()
         performTextInput(text = text)
     }
 }
@@ -165,7 +164,7 @@ private fun CaseScope.clickOutline(heading: String) {
     ui.waitUntil(timeoutMillis = 10_000) {
         ui.onAllNodes(matcher = inOutline(heading)).fetchSemanticsNodes().isNotEmpty()
     }
-    ui.onAllNodes(matcher = inOutline(heading)).onFirst().performClick()
+    ui.onAllNodes(matcher = inOutline(heading)).onFirst().clickWhenStill()
 }
 
 private fun CaseScope.expectSelected(heading: String) {
