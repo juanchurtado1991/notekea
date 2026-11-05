@@ -2,6 +2,10 @@ package app.notekea.graph.presentation
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.ImageComposeScene
+import androidx.compose.ui.InternalComposeUiApi
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.platform.LocalShortcutDispatcher
@@ -12,6 +16,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /** The graph tab beside an editor (`ROADMAP.md` 2.7). */
+@OptIn(InternalComposeUiApi::class)
 class GraphContentTest {
     // Review: in a split, the graph took Mod+F from the note the keyboard was in.
     @Test
@@ -39,7 +44,8 @@ class GraphContentTest {
                 }
             }.use { scene ->
                 scene.render(nanoTime = 0L)
-                isOffered = dispatcher.isAvailable(shortcut = conventions.findShortcut)
+                val keyPress = KeyEvent(key = Key.F, type = KeyEventType.KeyDown, isCtrlPressed = true)
+                isOffered = dispatcher.dispatch(event = keyPress)
             }
         }
         return isOffered

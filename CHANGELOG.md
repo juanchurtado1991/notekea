@@ -11,10 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Graph view: `Mod+F` finds a note and moves to its graph, with no note open the tab asks for one, and Link in the
   panel joins two notes close in meaning, with Undo.
-- Graph view: `Mod+G`, the rail or the View menu open a map of how notes connect, around a note or on the whole vault,
+- Graph view: `Mod+G` or the rail open a map of how notes connect, around a note or on the whole vault,
   with a preview of the selected note.
 - Hybrid search: `Mod+Shift+F` finds notes by meaning and keywords, shows the passage and opens the note at it.
-- **Menu bar** on macOS (File, Edit, View, Window, Help), built from the app's own shortcuts; the window comes
+- The window comes
   back as it was left, names its note in the title and has a minimum size; `Ctrl+Q` (Linux) and `Mod+Shift+W` close it,
   and every way of quitting saves first; Settings → Appearance can reduce motion; right-click menus on Connections'
   rows, headings, folder cards and recent vaults.

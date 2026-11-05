@@ -21,8 +21,6 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
-import app.notekea.core.presentation.menu.AppMenuEntry
-import app.notekea.core.presentation.menu.AppMenus
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.di.desktopModules
@@ -113,11 +111,6 @@ class CaseApp(
             }
         }
     }
-
-    /** The commands of the menu bar on this system, which the app's window shows. */
-    fun menuCommands(): List<AppMenuEntry.Command> = AppMenus.of(conventions = host.conventions)
-        .flatMap { it.entries }
-        .filterIsInstance<AppMenuEntry.Command>()
 
     /** Stops the app once: the view models' work, then Koin. */
     override fun close() {
