@@ -39,6 +39,21 @@ sealed interface GraphIntent {
 
     data object OnOrphansToggle : GraphIntent
 
+    /** `Mod+F` or the search button. */
+    data object OnSearchOpen : GraphIntent
+
+    data object OnSearchClose : GraphIntent
+
+    data class OnQueryChange(val query: String) : GraphIntent
+
+    /** The next match, or the one before when [isForward] is false: it is selected and comes into view. */
+    data class OnMatchStep(val isForward: Boolean) : GraphIntent
+
+    /** Link, in the inspector: the note it shows gets a link to [path]. */
+    data class OnLink(val path: RelativePath) : GraphIntent
+
+    data object OnLinkUndo : GraphIntent
+
     /** A folder of the legend, left out or brought back. */
     data class OnFolderToggle(val folder: String) : GraphIntent
 }

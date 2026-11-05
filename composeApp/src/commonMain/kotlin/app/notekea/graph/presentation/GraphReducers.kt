@@ -1,5 +1,6 @@
 package app.notekea.graph.presentation
 
+import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.graph.domain.GraphNode
 import app.notekea.graph.domain.GraphPoint
@@ -13,9 +14,10 @@ private const val BASE_RADIUS = 9f
 private const val RADIUS_PER_LINK = 3f
 private const val MAX_RADIUS = 26f
 private const val CENTER_RADIUS = 18f
+private const val DEPTH_SHRINK = 0.12f
 private const val SIDE_WEIGHT = 2f
 
-/** [graph] placed at [points]: more links make a bigger dot, and the center is never small. */
+/** [graph] placed at [points]: more links make a bigger dot, farther rings smaller ones; the center is never small. */
 internal fun dotsOf(
     graph: NoteGraph,
     points: Map<RelativePath, GraphPoint>,
@@ -24,13 +26,14 @@ internal fun dotsOf(
     points[node.path]?.let { point ->
         val depth = depths[node.path] ?: 0
         val isCenter = depths.isNotEmpty() && depth == 0
+        val radius = radiusOf(node = node) * (1f - depth * DEPTH_SHRINK)
         GraphDot(
             path = node.path,
             name = node.name,
             folder = node.folder,
             x = point.x,
             y = point.y,
-            radius = if (isCenter) maxOf(radiusOf(node = node), CENTER_RADIUS) else radiusOf(node = node),
+            radius = if (isCenter) maxOf(radius, CENTER_RADIUS) else radius,
             depth = depth
         )
     }
@@ -39,6 +42,19 @@ internal fun dotsOf(
 private fun radiusOf(
     node: GraphNode
 ): Float = (BASE_RADIUS + sqrt(node.links.toFloat()) * RADIUS_PER_LINK).coerceAtMost(maximumValue = MAX_RADIUS)
+
+/** The notes of [paths] named like [query], best first; the same score goes by path, so the order holds. */
+internal fun matchesOf(
+    query: String,
+    paths: Collection<RelativePath>,
+    matcher: FuzzyMatcher
+): List<RelativePath> = if (query.isBlank()) {
+    emptyList()
+} else {
+    paths.mapNotNull { path -> matcher.match(query, path.nameWithoutExtension)?.let { path to it.score } }
+        .sortedWith(compareByDescending<Pair<RelativePath, Int>> { it.second }.thenBy { it.first.value })
+        .map { it.first }
+}
 
 /** The note an arrow key leads to: of those joined to [selected], the nearest that way; null when none is. */
 internal fun noteTowards(

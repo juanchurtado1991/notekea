@@ -1,6 +1,8 @@
 package app.notekea.graph.presentation
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.animate
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -49,14 +51,14 @@ private const val MAX_ZOOM = 4f
 private const val ZOOM_STEP = 0.1f
 private const val HIT_MARGIN = 8f
 private const val PARALLAX_PER_DEPTH = 0.08f
-private const val DEPTH_SHRINK = 0.08f
 private const val VAULT_LABEL_ZOOM = 1.6f
 private const val MAX_SEMANTIC_DOTS = 120
 
 /**
  * The map of the graph (`ROADMAP.md` 2.7): drag to pan, scroll to zoom, a click selects and a double click opens.
  * Hovering a note lights up its neighbors. Notes farther from the center are smaller, fainter and move a little less,
- * for a sense of depth, and every change slides notes to their new places, unless motion is reduced.
+ * for a sense of depth, and every change slides notes to their new places, unless motion is reduced. A note found
+ * by search slides to the middle of the map.
  */
 @Composable
 internal fun GraphCanvas(
@@ -71,6 +73,7 @@ internal fun GraphCanvas(
     val places = rememberPlaces(state = state, size = size, pan = pan, zoom = zoom)
     val current by rememberUpdatedState(newValue = places)
     val dots by rememberUpdatedState(newValue = state.dots)
+    RevealNote(state = state, scale = scaleOf(state, size, zoom), pan = { pan }, onPan = { pan = it })
     val hit = { at: Offset -> noteAt(point = at, dots = dots, places = current, scale = scaleOf(state, size, zoom)) }
     Box(
         modifier = modifier
@@ -98,6 +101,28 @@ internal fun GraphCanvas(
     ) {
         Map(state = state, places = places, scale = scaleOf(state, size, zoom), zoom = zoom, hovered = hovered)
         if (state.dots.size <= MAX_SEMANTIC_DOTS) NoteTargets(state, places, scaleOf(state, size, zoom), onIntent)
+    }
+}
+
+/** Brings [GraphState.revealed] to the middle of the map; around a note it is on its way to the center already. */
+@Composable
+private fun RevealNote(
+    state: GraphState,
+    scale: Float,
+    pan: () -> Offset,
+    onPan: (Offset) -> Unit
+) {
+    val spec = motionTween<Offset>(durationMillis = NotekeaDimensions.MOTION_LONGEST_MILLIS)
+    LaunchedEffect(state.revealed) {
+        val dot = state.dots.firstOrNull { it.path == state.revealed }
+        if (state.revealed == null) return@LaunchedEffect
+        val place = dot?.takeIf { state.scope == GraphScope.WHOLE_VAULT }?.let { Offset(x = it.x, y = it.y) }
+        animate(
+            typeConverter = Offset.VectorConverter,
+            initialValue = pan(),
+            targetValue = -(place ?: Offset.Zero) * scale,
+            animationSpec = spec
+        ) { value, _ -> onPan(value) }
     }
 }
 
@@ -163,6 +188,9 @@ private fun Map(
         scale = scale,
         hovered = hovered?.let { neighborhoodOf(path = it, lines = state.lines) }.orEmpty(),
         selected = state.selected,
+        matches = remember(state.matches, state.query) {
+            state.matches.toSet().takeIf { state.query.isNotBlank() }
+        },
         showsAllLabels = state.scope == GraphScope.THIS_NOTE || zoom >= VAULT_LABEL_ZOOM,
         lineColor = colors.outline,
         accent = colors.primary,

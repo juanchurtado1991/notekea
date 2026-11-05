@@ -212,8 +212,9 @@ private fun PaneContent(
         TabKind.FOLDER -> FolderTab(folder = path, context = context)
 
         TabKind.GRAPH -> GraphContent(
-            context.viewModels.graph.state.collectAsState().value,
-            context.viewModels.graph::onIntent
+            state = context.viewModels.graph.state.collectAsState().value,
+            platformConventions = state.platformConventions,
+            onIntent = context.viewModels.graph::onIntent
         )
 
         TabKind.MISSING -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

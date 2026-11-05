@@ -1,10 +1,10 @@
 package app.notekea.shell.presentation
 
-import app.notekea.core.platform.domain.graphShortcut
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import app.notekea.core.platform.domain.graphShortcut
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.editor.presentation.EditorIntent
 import app.notekea.graph.presentation.GraphEffect

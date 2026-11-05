@@ -9,6 +9,7 @@ internal object GraphPreviewData {
     private val MENU = RelativePath(value = "Recipes/Weekly menu.md")
     private val TASKS = RelativePath(value = "Guides/Tasks.md")
     private val GARDEN = RelativePath(value = "Projects/Garden plan.md")
+    private val SOUP = RelativePath(value = "Recipes/Tomato soup.md")
 
     val state = GraphState(
         isLoading = false,
@@ -32,7 +33,8 @@ internal object GraphPreviewData {
             name = "Weekly menu",
             folder = "Recipes",
             snippet = "Monday arepas, Tuesday tomato soup, Wednesday leftovers.",
-            connected = listOf(AREPAS)
+            connected = listOf(AREPAS),
+            suggested = listOf(GARDEN, SOUP)
         )
     )
 }
