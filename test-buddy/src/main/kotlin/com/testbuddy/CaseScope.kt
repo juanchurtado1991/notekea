@@ -60,6 +60,8 @@ public class CaseScope internal constructor(
     ) {
         step(description = "Click “$text”")
         awaitText(text = text, substring = substring)
+        // What opened just now, such as a menu, may not take a click until it settles.
+        ui.waitForIdle()
         firstShown(matcher = hasText(text = text, substring = substring)).apply {
             runCatching { performScrollTo() }
             performClick()
@@ -70,6 +72,7 @@ public class CaseScope internal constructor(
     public fun rightClick(text: String) {
         step(description = "Right-click “$text”")
         awaitText(text = text, substring = false)
+        ui.waitForIdle()
         firstShown(matcher = hasText(text = text)).performMouseInput { rightClick() }
     }
 
@@ -106,6 +109,7 @@ public class CaseScope internal constructor(
         step(description = "Click the $label button")
         val icon = hasContentDescription(value = label)
         expect(matcher = icon, failure = "expected a button labeled \"$label\", it did not appear")
+        ui.waitForIdle()
         firstShown(matcher = icon).performClick()
     }
 
