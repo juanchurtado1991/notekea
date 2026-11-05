@@ -1,7 +1,7 @@
 package app.notekea.connections.presentation
 
 import app.notekea.core.notes.domain.IndexRunError
-import app.notekea.connections.domain.RelatedNote
+import app.notekea.core.notes.domain.RelatedNote
 import app.notekea.core.notes.domain.RelativePath
 
 /**

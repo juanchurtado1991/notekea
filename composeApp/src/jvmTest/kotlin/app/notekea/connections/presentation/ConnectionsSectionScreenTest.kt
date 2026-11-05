@@ -20,7 +20,7 @@ import app.notekea.core.notes.domain.ConnectionsTab
 import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.connections.domain.NoteMention
 import app.notekea.connections.domain.NoteMentions
-import app.notekea.connections.domain.RelatedNote
+import app.notekea.core.notes.domain.RelatedNote
 import app.notekea.core.notes.domain.PassageSnippet
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.connections.presentation.NoteMentionsIntent

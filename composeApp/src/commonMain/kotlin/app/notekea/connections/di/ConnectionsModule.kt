@@ -2,7 +2,7 @@ package app.notekea.connections.di
 
 import app.notekea.connections.data.JetBrainsMarkdownMentionFinder
 import app.notekea.connections.domain.FindMentionsUseCase
-import app.notekea.connections.domain.FindRelatedNotesUseCase
+import app.notekea.core.notes.domain.FindRelatedNotesUseCase
 import app.notekea.connections.domain.LinkMentionUseCase
 import app.notekea.connections.domain.MentionFinder
 import app.notekea.connections.presentation.NoteMentionsViewModel

@@ -7,7 +7,7 @@ import app.notekea.core.notes.domain.ChunkNoteUseCase
 import app.notekea.search.domain.FakeIndexStateStore
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
-import app.notekea.connections.domain.FindRelatedNotesUseCase
+import app.notekea.core.notes.domain.FindRelatedNotesUseCase
 import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.search.domain.IndexVaultUseCase
 import app.notekea.core.notes.domain.NoteFile

@@ -3,7 +3,7 @@ package app.notekea.connections.presentation
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.core.notes.domain.IndexRunError
-import app.notekea.connections.domain.FindRelatedNotesUseCase
+import app.notekea.core.notes.domain.FindRelatedNotesUseCase
 import app.notekea.core.notes.domain.RelativePath
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
