@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -30,16 +32,27 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.platform.domain.Shortcut
 import app.notekea.core.presentation.components.EmptyState
 import app.notekea.core.presentation.components.NotekeaCheckbox
 import app.notekea.core.presentation.components.NotekeaCountTabs
+import app.notekea.core.presentation.components.NotekeaFindBar
+import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.core.presentation.platform.label
+import app.notekea.core.presentation.platform.matches
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.resources.Res
+import app.notekea.resources.editor_find_count
+import app.notekea.resources.editor_find_none
 import app.notekea.resources.graph_depth_one
 import app.notekea.resources.graph_depth_two
 import app.notekea.resources.graph_empty_message
 import app.notekea.resources.graph_empty_title
+import app.notekea.resources.graph_find
 import app.notekea.resources.graph_index_not_ready
 import app.notekea.resources.graph_orphans
 import app.notekea.resources.graph_related
@@ -57,26 +70,31 @@ private const val MAX_DEPTH = 2
 /**
  * The graph tab (`ROADMAP.md` 2.7): a compact toolbar, the map, the legend of folders, which also leaves a folder out
  * when clicked, and the inspector of the selected note. The keyboard walks the map: arrows move between connected notes,
- * `Enter` opens one, `Space` shows or hides the inspector and `Esc` goes back to the note.
+ * `Enter` opens one, `Space` shows or hides the inspector, `Esc` goes back to the note and `Mod+F` finds a note, with
+ * the keyboard back on the map when the search closes.
  */
 @Composable
 fun GraphContent(
     state: GraphState,
+    platformConventions: PlatformConventions,
     onIntent: (GraphIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val focus = remember { FocusRequester() }
-    LaunchedEffect(focus) { focus.requestFocus() }
+    LaunchedEffect(focus, state.isSearching) { if (!state.isSearching) focus.requestFocus() }
     Row(
         modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surface)
             .focusRequester(focusRequester = focus)
-            .onPreviewKeyEvent { event -> event.type == KeyEventType.KeyDown && onKey(event.key, onIntent) }
+            .onPreviewKeyEvent { event ->
+                !state.isSearching && event.type == KeyEventType.KeyDown &&
+                    onKey(event, platformConventions.findShortcut, onIntent)
+            }
             .focusable()
     ) {
         Column(modifier = Modifier.weight(weight = 1f)) {
-            Toolbar(state = state, onIntent = onIntent)
+            Toolbar(state = state, platformConventions = platformConventions, onIntent = onIntent)
             Box(modifier = Modifier.weight(weight = 1f).fillMaxWidth()) {
                 GraphCanvas(state = state, onIntent = onIntent, modifier = Modifier.fillMaxSize())
                 if (state.isEmpty) {
@@ -86,19 +104,33 @@ fun GraphContent(
                         modifier = Modifier.align(alignment = Alignment.Center)
                     )
                 }
+                if (state.isSearching) {
+                    SearchBar(
+                        state = state,
+                        onIntent = onIntent,
+                        modifier = Modifier.align(alignment = Alignment.TopEnd).padding(all = NotekeaDimensions.SpacingS)
+                    )
+                }
             }
             Footer(state = state, onIntent = onIntent)
         }
         val preview = state.preview
-        if (state.isInspectorOpen && preview != null) GraphInspector(preview = preview, onIntent = onIntent)
+        if (state.isInspectorOpen && preview != null) {
+            GraphInspector(state = state, preview = preview, onIntent = onIntent)
+        }
     }
 }
 
 private fun onKey(
-    key: Key,
+    event: KeyEvent,
+    findShortcut: Shortcut,
     onIntent: (GraphIntent) -> Unit
 ): Boolean {
-    val intent = when (key) {
+    if (findShortcut.matches(event)) {
+        onIntent(GraphIntent.OnSearchOpen)
+        return true
+    }
+    val intent = when (event.key) {
         Key.DirectionLeft -> GraphIntent.OnMove(direction = GraphDirection.LEFT)
         Key.DirectionRight -> GraphIntent.OnMove(direction = GraphDirection.RIGHT)
         Key.DirectionUp -> GraphIntent.OnMove(direction = GraphDirection.UP)
@@ -112,9 +144,34 @@ private fun onKey(
     return true
 }
 
+/** Finds notes by name on the map: Enter goes through them, Esc closes. */
+@Composable
+private fun SearchBar(
+    state: GraphState,
+    onIntent: (GraphIntent) -> Unit,
+    modifier: Modifier
+) {
+    val label = when {
+        state.query.isBlank() -> ""
+        state.matches.isEmpty() -> stringResource(resource = Res.string.editor_find_none)
+        else -> stringResource(Res.string.editor_find_count, state.matchIndex + 1, state.matches.size)
+    }
+    NotekeaFindBar(
+        query = state.query,
+        onQueryChange = { onIntent(GraphIntent.OnQueryChange(query = it)) },
+        matchLabel = label,
+        onNext = { onIntent(GraphIntent.OnMatchStep(isForward = true)) },
+        onPrevious = { onIntent(GraphIntent.OnMatchStep(isForward = false)) },
+        onClose = { onIntent(GraphIntent.OnSearchClose) },
+        modifier = modifier,
+        placeholder = stringResource(resource = Res.string.graph_find)
+    )
+}
+
 @Composable
 private fun Toolbar(
     state: GraphState,
+    platformConventions: PlatformConventions,
     onIntent: (GraphIntent) -> Unit
 ) {
     val isAround = state.scope == GraphScope.THIS_NOTE
@@ -126,17 +183,17 @@ private fun Toolbar(
         ScopeTabs(state = state, onIntent = onIntent)
         if (isAround) DepthTabs(state = state, onIntent = onIntent)
         Toggle(
-            label = stringResource(resource = Res.string.graph_related),
-            isChecked = state.showsRelated,
-            onClick = { onIntent(GraphIntent.OnRelatedToggle) }
+            label = stringResource(if (isAround) Res.string.graph_related else Res.string.graph_orphans),
+            isChecked = if (isAround) state.showsRelated else state.showsOrphans,
+            onClick = { onIntent(if (isAround) GraphIntent.OnRelatedToggle else GraphIntent.OnOrphansToggle) }
         )
-        if (!isAround) {
-            Toggle(
-                label = stringResource(resource = Res.string.graph_orphans),
-                isChecked = state.showsOrphans,
-                onClick = { onIntent(GraphIntent.OnOrphansToggle) }
-            )
-        }
+        Spacer(modifier = Modifier.weight(weight = 1f))
+        NotekeaIconButton(
+            icon = NotekeaIcons.Find,
+            label = stringResource(resource = Res.string.graph_find),
+            onClick = { onIntent(GraphIntent.OnSearchOpen) },
+            shortcutHint = platformConventions.findShortcut.label(operatingSystem = platformConventions.operatingSystem)
+        )
     }
 }
 
@@ -197,7 +254,8 @@ private fun Footer(
 ) {
     val message = when {
         state.isTooLarge -> Res.string.graph_too_large
-        !state.isIndexReady && state.showsRelated -> Res.string.graph_index_not_ready
+        !state.isIndexReady && state.scope == GraphScope.THIS_NOTE && state.showsRelated ->
+            Res.string.graph_index_not_ready
         else -> null
     }
     Row(
@@ -254,6 +312,10 @@ private fun LegendItem(
 @Composable
 private fun GraphContentPreview() {
     NotekeaPreviewThemes {
-        GraphContent(state = GraphPreviewData.state, onIntent = {})
+        GraphContent(
+            state = GraphPreviewData.state.copy(isSearching = true, query = "are"),
+            platformConventions = PreviewPlatformConventions.linux,
+            onIntent = {}
+        )
     }
 }

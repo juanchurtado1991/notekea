@@ -5,29 +5,28 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.zoomInShortcut
 import app.notekea.core.platform.domain.zoomOutShortcut
 import app.notekea.core.platform.domain.zoomResetShortcut
-import app.notekea.resources.Res
 import app.notekea.resources.about_group_notes
 import app.notekea.resources.about_group_workspace
 import app.notekea.resources.about_group_writing
 import app.notekea.resources.about_shortcut_bold
 import app.notekea.resources.about_shortcut_bookmark
-import app.notekea.resources.about_shortcut_graph
 import app.notekea.resources.about_shortcut_close_tab
 import app.notekea.resources.about_shortcut_close_window
 import app.notekea.resources.about_shortcut_delete
 import app.notekea.resources.about_shortcut_find
+import app.notekea.resources.about_shortcut_graph
 import app.notekea.resources.about_shortcut_italic
 import app.notekea.resources.about_shortcut_new_note
 import app.notekea.resources.about_shortcut_next_day
 import app.notekea.resources.about_shortcut_next_tab
 import app.notekea.resources.about_shortcut_note_link
 import app.notekea.resources.about_shortcut_open_note
+import app.notekea.resources.about_shortcut_open_selected
 import app.notekea.resources.about_shortcut_outline
 import app.notekea.resources.about_shortcut_previous_day
 import app.notekea.resources.about_shortcut_previous_tab
 import app.notekea.resources.about_shortcut_quit
 import app.notekea.resources.about_shortcut_read_mode
-import app.notekea.resources.about_shortcut_open_selected
 import app.notekea.resources.about_shortcut_rename
 import app.notekea.resources.about_shortcut_save
 import app.notekea.resources.about_shortcut_search_notes
@@ -41,6 +40,7 @@ import app.notekea.resources.about_shortcut_web_link
 import app.notekea.resources.about_shortcut_zoom_in
 import app.notekea.resources.about_shortcut_zoom_out
 import app.notekea.resources.about_shortcut_zoom_reset
+import app.notekea.resources.Res
 
 /** About's shortcuts in three groups, each ordered from the most used: notes, writing, and the workspace. */
 object AboutShortcuts {

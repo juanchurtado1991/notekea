@@ -46,7 +46,7 @@ private const val PREVIEW_QUERY = "arepas"
 private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
 
 /**
- * An inline bar that finds text in the current page (Find in note, `Mod+F`): a field that takes focus when the bar
+ * An inline bar that finds text in the current page (Find in note, `Mod+F`) or the notes on the graph: a field that takes focus when the bar
  * appears, how many matches there are ([matchLabel], "2 of 5"), previous and next buttons and close. Enter goes to the
  * next match, Shift+Enter to the previous one and Esc closes, as in browsers and editors on every platform.
  */
@@ -58,7 +58,8 @@ fun NotekeaFindBar(
     onNext: () -> Unit,
     onPrevious: () -> Unit,
     onClose: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    placeholder: String = stringResource(resource = Res.string.find_bar_placeholder)
 ) {
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(focusRequester) { focusRequester.requestFocus() }
@@ -70,6 +71,7 @@ fun NotekeaFindBar(
         ) {
             FindField(
                 query = query,
+                placeholder = placeholder,
                 onQueryChange = onQueryChange,
                 modifier = Modifier.focusRequester(focusRequester = focusRequester).onPreviewKeyEvent { event ->
                     handleFindKey(event = event, onNext = onNext, onPrevious = onPrevious, onClose = onClose)
@@ -103,11 +105,11 @@ fun NotekeaFindBar(
 @Composable
 private fun FindField(
     query: String,
+    placeholder: String,
     onQueryChange: (String) -> Unit,
     modifier: Modifier
 ) {
     val colors = MaterialTheme.colorScheme
-    val placeholder = stringResource(resource = Res.string.find_bar_placeholder)
     BasicTextField(
         value = query,
         onValueChange = onQueryChange,

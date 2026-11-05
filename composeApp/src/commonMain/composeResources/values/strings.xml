@@ -516,14 +516,20 @@
         <item>Su</item>
     </string-array>
     <string name="graph_connected_to">Connected to</string>
+    <string name="graph_find">Find a note</string>
     <string name="graph_depth_one">1</string>
     <string name="graph_depth_two">2</string>
     <string name="graph_empty_message">Link notes with [[ ]] to see them connected here.</string>
     <string name="graph_empty_title">Nothing connected yet</string>
     <string name="graph_index_not_ready">Related notes show once your notes are ready to search.</string>
+    <string name="graph_link">Link</string>
+    <string name="graph_link_failed">Couldn’t change the note. It may have been edited meanwhile.</string>
+    <string name="graph_link_undo">Undo</string>
+    <string name="graph_linked">Linked to %1$s</string>
     <string name="graph_open">Open note</string>
     <string name="graph_orphans">Show orphans</string>
     <string name="graph_related">Related by meaning</string>
+    <string name="graph_suggested">Related, not linked</string>
     <string name="graph_this_note">This note</string>
     <string name="graph_too_large">This vault is large. Open the graph from a note to see it clearly.</string>
     <string name="graph_whole_vault">Whole vault</string>
