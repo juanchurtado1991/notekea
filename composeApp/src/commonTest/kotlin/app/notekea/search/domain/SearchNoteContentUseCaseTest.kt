@@ -64,6 +64,19 @@ class SearchNoteContentUseCaseTest {
     }
 
     @Test
+    fun `the snippet quotes the line the note opens at, and a tag alone opens no line`() = runTest {
+        val notes = notesWith(AREPAS to "# Arepas on a hot pan\n\nA pan and a hot pan, a pan.\n#recipe\n")
+
+        val words = search()(VAULT, notes, "pan").single()
+        val tag = search()(VAULT, notes, "#recipe").single()
+
+        assertEquals(
+            expected = "A pan and a hot pan, a pan." to null,
+            actual = words.snippet to tag.line
+        )
+    }
+
+    @Test
     fun `a long line is shortened around the first match`() = runTest {
         val line = "a".repeat(n = 100) + " corn " + "b".repeat(n = 200)
         val result = search()(VAULT, notesWith(AREPAS to line), "corn").single()

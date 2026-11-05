@@ -15,8 +15,8 @@ import app.notekea.core.notes.domain.VectorIndex
 /**
  * Hybrid search (`ROADMAP.md` 2.6): the query's words, embedded, reach the index by meaning and keywords together, and
  * each note counts once, with its best passage. The index answers with its closest chunks however far they are, so a
- * chunk stays only if it holds a searched word or is close enough in meaning ([MIN_CLOSENESS]). A `#tag` in the query
- * keeps the notes that have it. A query of tags alone finds nothing here: content search answers it.
+ * chunk stays only if it holds every searched word or is close enough in meaning ([MIN_CLOSENESS]). A `#tag` in the
+ * query limits the search to the notes that have it. A query of tags alone finds nothing here: content search answers it.
  */
 class SearchPassagesUseCase(
     private val textEmbedder: TextEmbedder,
@@ -37,14 +37,14 @@ class SearchPassagesUseCase(
         val text = words.joinToString(separator = WORD_SEPARATOR)
         val vector = (textEmbedder.embed(texts = listOf(text)) as? Outcome.Success)?.value?.single()
             ?: return Outcome.Failure(error = IndexRunError.Model)
-        val hits = (vectorIndex.search(vaultPath, text, vector, CANDIDATES) as? Outcome.Success)?.value
-            ?: return Outcome.Failure(error = IndexRunError.Index)
         val allowed = allowedNotes(vaultPath = vaultPath, notes = notes, tags = tags)
+        val only = allowed.keys.takeIf { tags.isNotEmpty() }
+        val hits = (vectorIndex.search(vaultPath, text, vector, CANDIDATES, only) as? Outcome.Success)?.value
+            ?: return Outcome.Failure(error = IndexRunError.Index)
         val texts = noteTextCache.textsOf(vaultPath = vaultPath, notes = allowed.values)
         val folded = words.map { textFolder.fold(text = it) }
         val results = hits.asSequence()
             .filter { it.hasWords || it.closeness >= MIN_CLOSENESS }
-            .distinctBy { it.note }
             .mapNotNull { hit ->
                 val note = allowed[hit.note]
                 val body = texts[hit.note]?.body?.takeIf { hit.range.last < it.length }
@@ -56,6 +56,7 @@ class SearchPassagesUseCase(
                     resultOf(note = note, hit = hit, body = body, words = folded)
                 }
             }
+            .distinctBy { it.note.file.path }
             .take(n = SearchNoteContentUseCase.DEFAULT_LIMIT)
             .toList()
         return Outcome.Success(value = results)
@@ -86,9 +87,9 @@ class SearchPassagesUseCase(
         hit: SearchHit,
         body: String,
         words: List<String>
-    ): PassageResult {
+    ): PassageResult? {
         val passage = body.substring(range = hit.range)
-        val lines = LINE.findAll(input = passage).map { it.range }.toList()
+        val lines = LINE.findAll(input = passage).map { it.range }.toList().ifEmpty { return null }
         val best = lines.filterNot { isHeading(line = passage.substring(range = it)) }
             .maxByOrNull { range -> sharedWords(line = passage.substring(range = range), words = words) }
             ?: lines.first()
@@ -123,7 +124,7 @@ class SearchPassagesUseCase(
         words: List<String>
     ): Pair<String, List<IntRange>> {
         val plain = markdownLineStripper.strip(line = line, ranges = emptyList()).text
-        val found = PassageSnippet.of(passage = plain, words = words.toSet())
+        val found = PassageSnippet.of(passage = plain, words = words.toSet(), normalized = textFolder::fold)
         val cut = found.text.drop(n = found.highlight.first).trimStart()
         val snippet = if (cut.length > MAX_SNIPPET) cut.take(n = MAX_SNIPPET).trimEnd() + ELLIPSIS else cut
         val folded = textFolder.fold(text = snippet)

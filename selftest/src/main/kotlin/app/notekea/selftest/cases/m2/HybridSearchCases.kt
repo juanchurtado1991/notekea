@@ -86,8 +86,8 @@ private fun SuiteBuilder.nothingClose() {
     manual(id = "2.6-03", reason = ManualReason.EYES) {
         prepare(SAMPLE)
         title(text = "A search with nothing close finds nothing, instead of the closest notes")
-        steps(text = "$OPEN_SEARCH\n3. Type: football match results")
-        expected(text = "The palette says \"No notes match\".")
+        steps(text = "$OPEN_SEARCH\n3. Type: football match results\n4. Clear it and type: football in the park")
+        expected(text = "The palette says \"No notes match\" both times.")
     }
 }
 
