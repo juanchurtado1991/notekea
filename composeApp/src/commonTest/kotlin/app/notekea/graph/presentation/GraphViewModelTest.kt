@@ -36,7 +36,21 @@ class GraphViewModelTest : GraphViewModelFixture() {
         send(GraphIntent.OnOpen(note = null))
 
         val state = viewModel.state.value
-        assertEquals(expected = Triple(true, false, 0), actual = Triple(state.needsNote, state.isEmpty, state.dots.size))
+        assertEquals(expected = true to false, actual = state.needsNote to state.isEmpty)
+        assertEquals(expected = emptyList(), actual = state.dots)
+    }
+
+    // Review: a selected note in a folder left out read as no note selected.
+    @Test
+    fun `a note in a folder left out is not a missing note, and one deleted is`() = runGraphTest {
+        send(GraphIntent.OnOpen(note = AREPAS))
+        send(GraphIntent.OnFolderToggle(folder = "Recipes"))
+        assertEquals(expected = false, actual = viewModel.state.value.needsNote)
+
+        send(GraphIntent.OnFolderToggle(folder = "Recipes"))
+        send(GraphIntent.OnNotesChange(notes = listOf(MENU, TASKS).map { entry(path = it.value) }))
+
+        assertEquals(expected = true, actual = viewModel.state.value.needsNote)
     }
 
     @Test

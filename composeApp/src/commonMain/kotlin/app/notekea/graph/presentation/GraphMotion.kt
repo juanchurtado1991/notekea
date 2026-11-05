@@ -31,8 +31,8 @@ internal class GraphMotion private constructor(
     companion object {
         /** The move after [previous], the first of all arriving at once. */
         fun after(
-            previous: GraphMotion?,
             dots: List<GraphDot>,
+            previous: GraphMotion?,
             center: RelativePath?
         ): GraphMotion {
             val paths = dots.mapTo(destination = HashSet()) { it.path }

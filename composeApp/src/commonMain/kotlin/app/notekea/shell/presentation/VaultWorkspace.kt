@@ -214,7 +214,8 @@ private fun PaneContent(
         TabKind.GRAPH -> GraphContent(
             state = context.viewModels.graph.state.collectAsState().value,
             platformConventions = state.platformConventions,
-            onIntent = context.viewModels.graph::onIntent
+            onIntent = context.viewModels.graph::onIntent,
+            isActive = context.workspaceState.workspace.activePane == pane
         )
 
         TabKind.MISSING -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

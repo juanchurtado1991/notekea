@@ -1,7 +1,7 @@
 package app.notekea.graph.presentation
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -72,15 +72,13 @@ internal fun GraphCanvas(
     var pan by remember { mutableStateOf(value = Offset.Zero) }
     var zoom by remember { mutableFloatStateOf(value = 1f) }
     var hovered by remember { mutableStateOf<RelativePath?>(value = null) }
-    val spec = motionTween<Float>(durationMillis = NotekeaDimensions.MOTION_LONGEST_MILLIS)
-    val fit by animateFloatAsState(targetValue = fitOf(state = state, size = size), animationSpec = spec)
-    val scale = fit * zoom
+    val scale = rememberFit(target = fitOf(state = state, size = size)) * zoom
     val motion = rememberMotion(state = state)
     val places = placesOf(dots = state.dots, motion = motion, size = size, pan = pan, scale = scale)
     val current by rememberUpdatedState(newValue = places)
     val dots by rememberUpdatedState(newValue = state.dots)
     val currentScale by rememberUpdatedState(newValue = scale)
-    RevealNote(state.revealed, pan = { pan }, zoom = { zoom }) { newPan, newZoom ->
+    RevealNote(state.reveals, pan = { pan }, zoom = { zoom }) { newPan, newZoom ->
         pan = newPan
         zoom = newZoom
     }
@@ -88,44 +86,61 @@ internal fun GraphCanvas(
     Box(
         modifier = modifier
             .onSizeChanged { size = it }
-            .pointerInput(onIntent) {
-                detectTapGestures(
-                    onTap = { at -> hit(at)?.let { onIntent(GraphIntent.OnNoteSelect(path = it)) } },
-                    onDoubleTap = { at -> hit(at)?.let { onIntent(GraphIntent.OnNoteOpen(path = it)) } }
-                )
-            }
-            .pointerInput(Unit) { detectDragGestures { _, drag -> pan += drag } }
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val change = event.changes.first()
-                        if (event.type == PointerEventType.Move) hovered = hit(change.position)
-                        if (event.type == PointerEventType.Exit) hovered = null
-                        if (event.type == PointerEventType.Scroll) {
-                            zoom = (zoom * (1f - change.scrollDelta.y * ZOOM_STEP))
-                                .coerceIn(minimumValue = MIN_ZOOM, maximumValue = MAX_ZOOM)
-                        }
-                    }
-                }
-            }
+            .mapGestures(
+                hit = hit,
+                onIntent = onIntent,
+                onPan = { pan += it },
+                onScroll = { zoom = zoomedBy(zoom = zoom, scroll = it) },
+                onHover = { hovered = it }
+            )
     ) {
         Map(state = state, motion = motion, places = places, scale = scale, zoom = zoom, hovered = hovered)
         if (state.dots.size <= MAX_SEMANTIC_DOTS) NoteTargets(state, places, scale, onIntent)
     }
 }
 
+/** Drag to pan, scroll to zoom, a click selects, a double click opens, and hovering says which note is under. */
+private fun Modifier.mapGestures(
+    hit: (Offset) -> RelativePath?,
+    onIntent: (GraphIntent) -> Unit,
+    onPan: (Offset) -> Unit,
+    onScroll: (Float) -> Unit,
+    onHover: (RelativePath?) -> Unit
+): Modifier = pointerInput(onIntent) {
+    detectTapGestures(
+        onTap = { at -> hit(at)?.let { onIntent(GraphIntent.OnNoteSelect(path = it)) } },
+        onDoubleTap = { at -> hit(at)?.let { onIntent(GraphIntent.OnNoteOpen(path = it)) } }
+    )
+}.pointerInput(Unit) {
+    detectDragGestures { _, drag -> onPan(drag) }
+}.pointerInput(Unit) {
+    awaitPointerEventScope {
+        while (true) {
+            val event = awaitPointerEvent()
+            val change = event.changes.first()
+            if (event.type == PointerEventType.Move) onHover(hit(change.position))
+            if (event.type == PointerEventType.Exit) onHover(null)
+            if (event.type == PointerEventType.Scroll) onScroll(change.scrollDelta.y)
+        }
+    }
+}
+
+private fun zoomedBy(
+    zoom: Float,
+    scroll: Float
+): Float = (zoom * (1f - scroll * ZOOM_STEP)).coerceIn(minimumValue = MIN_ZOOM, maximumValue = MAX_ZOOM)
+
 /** Moving to a note found by search also takes the map back to the middle, at its usual zoom. */
 @Composable
 private fun RevealNote(
-    revealed: RelativePath?,
+    reveals: Int,
     pan: () -> Offset,
     zoom: () -> Float,
     onMove: (Offset, Float) -> Unit
 ) {
     val spec = motionTween<Float>(durationMillis = NotekeaDimensions.MOTION_LONGEST_MILLIS)
-    LaunchedEffect(revealed) {
-        if (revealed == null) return@LaunchedEffect
+    LaunchedEffect(reveals) {
+        if (reveals == 0) return@LaunchedEffect
         val startPan = pan()
         val startZoom = zoom()
         animate(initialValue = 0f, targetValue = 1f, animationSpec = spec) { value, _ ->
@@ -134,13 +149,26 @@ private fun RevealNote(
     }
 }
 
+/** The scale that fits the notes, moving to a new one, except from the first, when the map had no size yet. */
+@Composable
+private fun rememberFit(
+    target: Float
+): Float {
+    val fit = remember { Animatable(initialValue = target) }
+    val spec = motionTween<Float>(durationMillis = NotekeaDimensions.MOTION_LONGEST_MILLIS)
+    LaunchedEffect(target) {
+        if (fit.value == 0f) fit.snapTo(targetValue = target) else fit.animateTo(target, animationSpec = spec)
+    }
+    return fit.value
+}
+
 /** The move that goes on now, a new one each time the notes change. */
 @Composable
 private fun rememberMotion(
     state: GraphState
 ): GraphMotion {
     var last by remember { mutableStateOf<GraphMotion?>(value = null) }
-    val motion = remember(state.dots) { GraphMotion.after(previous = last, dots = state.dots, center = state.center) }
+    val motion = remember(state.dots) { GraphMotion.after(dots = state.dots, previous = last, center = state.center) }
     val spec = motionTween<Float>(durationMillis = NotekeaDimensions.MOTION_LONGEST_MILLIS)
     SideEffect { last = motion }
     LaunchedEffect(motion) { motion.progress.animateTo(targetValue = 1f, animationSpec = spec) }

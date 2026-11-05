@@ -14,7 +14,7 @@ sealed interface GraphIntent {
         GraphIntent,
         FeedIntent
 
-    /** The graph's tab came to be, or stopped being, open in a pane: it works only then. */
+    /** The graph's tab came to be, or stopped being, the one a pane shows: it works only then. */
     data class OnShownChange(val isShown: Boolean) :
         GraphIntent,
         FeedIntent

@@ -7,12 +7,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,56 +32,46 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.components.EmptyState
 import app.notekea.core.presentation.components.NotekeaButton
-import app.notekea.core.presentation.components.NotekeaCheckbox
-import app.notekea.core.presentation.components.NotekeaCountTabs
 import app.notekea.core.presentation.components.NotekeaFindBar
-import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.platform.WindowShortcut
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.resources.Res
 import app.notekea.resources.editor_find_count
 import app.notekea.resources.editor_find_none
-import app.notekea.resources.graph_depth_one
-import app.notekea.resources.graph_depth_two
 import app.notekea.resources.graph_empty_message
 import app.notekea.resources.graph_empty_title
 import app.notekea.resources.graph_find
 import app.notekea.resources.graph_index_not_ready
 import app.notekea.resources.graph_no_note_message
 import app.notekea.resources.graph_no_note_title
-import app.notekea.resources.graph_orphans
-import app.notekea.resources.graph_related
-import app.notekea.resources.graph_this_note
 import app.notekea.resources.graph_too_large
-import app.notekea.resources.graph_whole_vault
 import org.jetbrains.compose.resources.stringResource
 
-private const val SCOPE_WIDTH_DP = 200
-private const val DEPTH_WIDTH_DP = 72
 private const val LEGEND_DOT_DP = 8
 private const val EXCLUDED_ALPHA = 0.45f
-private const val MAX_DEPTH = 2
 
 /**
  * The graph tab (`ROADMAP.md` 2.7): a compact toolbar, the map, the legend of folders, which also leaves a folder out
  * when clicked, and the inspector of the selected note. The keyboard walks the map: arrows move between connected notes,
  * `Enter` opens one, `Space` shows or hides the inspector, `Esc` goes back to the note and `Mod+F` finds a note, with
- * the keyboard back on the map when the search closes. A focused control gets its keys first.
+ * the keyboard back on the map when the search closes, in the pane the keyboard is in ([isActive]). A focused control
+ * gets its keys first.
  */
 @Composable
 fun GraphContent(
     state: GraphState,
     platformConventions: PlatformConventions,
     onIntent: (GraphIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isActive: Boolean = true
 ) {
     val focus = remember { FocusRequester() }
     LaunchedEffect(focus, state.isSearching) { if (!state.isSearching) focus.requestFocus() }
-    WindowShortcut(shortcut = platformConventions.findShortcut) { onIntent(GraphIntent.OnSearchOpen) }
+    if (isActive) {
+        WindowShortcut(shortcut = platformConventions.findShortcut) { onIntent(GraphIntent.OnSearchOpen) }
+    }
     Row(
         modifier = modifier
             .fillMaxSize()
@@ -95,37 +83,8 @@ fun GraphContent(
             .focusable()
     ) {
         Column(modifier = Modifier.weight(weight = 1f)) {
-            Toolbar(state = state, platformConventions = platformConventions, onIntent = onIntent)
-            Box(modifier = Modifier.weight(weight = 1f).fillMaxWidth()) {
-                GraphCanvas(state = state, onIntent = onIntent, modifier = Modifier.fillMaxSize())
-                if (state.needsNote) {
-                    EmptyState(
-                        title = stringResource(resource = Res.string.graph_no_note_title),
-                        message = stringResource(resource = Res.string.graph_no_note_message),
-                        modifier = Modifier.align(alignment = Alignment.Center),
-                        action = {
-                            NotekeaButton(
-                                text = stringResource(resource = Res.string.graph_find),
-                                onClick = { onIntent(GraphIntent.OnSearchOpen) }
-                            )
-                        }
-                    )
-                }
-                if (state.isEmpty) {
-                    EmptyState(
-                        title = stringResource(resource = Res.string.graph_empty_title),
-                        message = stringResource(resource = Res.string.graph_empty_message),
-                        modifier = Modifier.align(alignment = Alignment.Center)
-                    )
-                }
-                if (state.isSearching) {
-                    SearchBar(
-                        state = state,
-                        onIntent = onIntent,
-                        modifier = Modifier.align(alignment = Alignment.TopEnd).padding(all = NotekeaDimensions.SpacingS)
-                    )
-                }
-            }
+            GraphToolbar(state = state, platformConventions = platformConventions, onIntent = onIntent)
+            MapArea(state = state, onIntent = onIntent, modifier = Modifier.weight(weight = 1f).fillMaxWidth())
             Footer(state = state, onIntent = onIntent)
         }
         val preview = state.preview
@@ -133,6 +92,51 @@ fun GraphContent(
             GraphInspector(state = state, preview = preview, onIntent = onIntent)
         }
     }
+}
+
+/** The map, with what the tab has to say over it, and the search. */
+@Composable
+private fun MapArea(
+    state: GraphState,
+    onIntent: (GraphIntent) -> Unit,
+    modifier: Modifier
+) {
+    Box(modifier = modifier) {
+        GraphCanvas(state = state, onIntent = onIntent, modifier = Modifier.fillMaxSize())
+        if (state.needsNote) NoNote(onIntent = onIntent, modifier = Modifier.align(alignment = Alignment.Center))
+        if (state.isEmpty) {
+            EmptyState(
+                title = stringResource(resource = Res.string.graph_empty_title),
+                message = stringResource(resource = Res.string.graph_empty_message),
+                modifier = Modifier.align(alignment = Alignment.Center)
+            )
+        }
+        if (state.isSearching) {
+            SearchBar(
+                state = state,
+                onIntent = onIntent,
+                modifier = Modifier.align(alignment = Alignment.TopEnd).padding(all = NotekeaDimensions.SpacingS)
+            )
+        }
+    }
+}
+
+@Composable
+private fun NoNote(
+    onIntent: (GraphIntent) -> Unit,
+    modifier: Modifier
+) {
+    EmptyState(
+        title = stringResource(resource = Res.string.graph_no_note_title),
+        message = stringResource(resource = Res.string.graph_no_note_message),
+        modifier = modifier,
+        action = {
+            NotekeaButton(
+                text = stringResource(resource = Res.string.graph_find),
+                onClick = { onIntent(GraphIntent.OnSearchOpen) }
+            )
+        }
+    )
 }
 
 private fun onKey(
@@ -168,7 +172,7 @@ private fun SearchBar(
     val label = when {
         state.query.isBlank() -> ""
         state.matches.isEmpty() -> stringResource(resource = Res.string.editor_find_none)
-        else -> stringResource(Res.string.editor_find_count, state.matchIndex + 1, state.matches.size)
+        else -> matchCount(index = maxOf(state.matchIndex, 0), count = state.matches.size)
     }
     NotekeaFindBar(
         query = state.query,
@@ -183,82 +187,10 @@ private fun SearchBar(
 }
 
 @Composable
-private fun Toolbar(
-    state: GraphState,
-    platformConventions: PlatformConventions,
-    onIntent: (GraphIntent) -> Unit
-) {
-    val isAround = state.scope == GraphScope.THIS_NOTE
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(all = NotekeaDimensions.SpacingS),
-        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        ScopeTabs(state = state, onIntent = onIntent)
-        if (isAround) DepthTabs(state = state, onIntent = onIntent)
-        Toggle(
-            label = stringResource(if (isAround) Res.string.graph_related else Res.string.graph_orphans),
-            isChecked = if (isAround) state.showsRelated else state.showsOrphans,
-            onClick = { onIntent(if (isAround) GraphIntent.OnRelatedToggle else GraphIntent.OnOrphansToggle) }
-        )
-        Spacer(modifier = Modifier.weight(weight = 1f))
-        NotekeaIconButton(
-            icon = NotekeaIcons.Find,
-            label = stringResource(resource = Res.string.graph_find),
-            onClick = { onIntent(GraphIntent.OnSearchOpen) },
-            shortcutHint = platformConventions.findShortcut.label(operatingSystem = platformConventions.operatingSystem)
-        )
-    }
-}
-
-@Composable
-private fun ScopeTabs(
-    state: GraphState,
-    onIntent: (GraphIntent) -> Unit
-) {
-    NotekeaCountTabs(
-        labels = listOf(
-            stringResource(resource = Res.string.graph_this_note),
-            stringResource(resource = Res.string.graph_whole_vault)
-        ),
-        counts = listOf(null, null),
-        selectedIndex = state.scope.ordinal,
-        onSelect = { onIntent(GraphIntent.OnScopeSelect(scope = GraphScope.entries[it])) },
-        modifier = Modifier.width(width = SCOPE_WIDTH_DP.dp)
-    )
-}
-
-@Composable
-private fun DepthTabs(
-    state: GraphState,
-    onIntent: (GraphIntent) -> Unit
-) {
-    NotekeaCountTabs(
-        labels = listOf(
-            stringResource(resource = Res.string.graph_depth_one),
-            stringResource(resource = Res.string.graph_depth_two)
-        ),
-        counts = listOf(null, null),
-        selectedIndex = (state.depth - 1).coerceIn(minimumValue = 0, maximumValue = MAX_DEPTH - 1),
-        onSelect = { onIntent(GraphIntent.OnDepthSelect(depth = it + 1)) },
-        modifier = Modifier.width(width = DEPTH_WIDTH_DP.dp)
-    )
-}
-
-@Composable
-private fun Toggle(
-    label: String,
-    isChecked: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
-    ) {
-        NotekeaCheckbox(checked = isChecked, onClick = onClick, label = label)
-        Text(text = label, style = MaterialTheme.typography.bodySmall, maxLines = 1)
-    }
-}
+private fun matchCount(
+    index: Int,
+    count: Int
+): String = stringResource(Res.string.editor_find_count, index + 1, count)
 
 /** The legend, and what the graph has to say: the index is not ready, or the vault is too large. */
 @Composable
@@ -268,8 +200,7 @@ private fun Footer(
 ) {
     val message = when {
         state.isTooLarge -> Res.string.graph_too_large
-        !state.isIndexReady && state.scope == GraphScope.THIS_NOTE && state.showsRelated ->
-            Res.string.graph_index_not_ready
+        state.isWaitingForIndex -> Res.string.graph_index_not_ready
         else -> null
     }
     Row(

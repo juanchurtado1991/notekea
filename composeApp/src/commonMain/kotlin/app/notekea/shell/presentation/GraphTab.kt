@@ -14,7 +14,7 @@ import app.notekea.shell.domain.Workspace
 import app.notekea.tree.presentation.VaultTreeState
 
 /**
- * What the graph follows while the vault is open: its notes, its index and whether its tab is open, as it works only
+ * What the graph follows while the vault is open: its notes, its index and whether its tab shows, as it works only
  * then. `Mod+G` opens it, a note chosen on it opens in a tab with the keyboard in its text, and a note it wrote reaches
  * the editor that has it open.
  */
@@ -28,7 +28,7 @@ internal fun FollowGraph(
     val index by searchIndex.state.collectAsState()
     val isIndexReady = !index.isRunning && index.readyNotes != null
     val tabs by viewModels.workspace.state.collectAsState()
-    val isShown = tabs.workspace.panes.any { Workspace.GRAPH in it.tabs }
+    val isShown = tabs.workspace.panes.any { it.activePath == Workspace.GRAPH }
     LaunchedEffect(graph, state.tree.notes) {
         graph.onIntent(intent = GraphIntent.OnNotesChange(notes = state.tree.notes.values))
     }

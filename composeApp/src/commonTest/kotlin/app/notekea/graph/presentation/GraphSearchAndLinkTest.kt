@@ -43,14 +43,14 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
         send(GraphIntent.OnMatchStep(isForward = true))
         val found = viewModel.state.value
         assertEquals(
-            expected = listOf(GraphScope.THIS_NOTE, first, first, first),
-            actual = listOf(found.scope, found.center, found.selected, found.revealed)
+            expected = listOf(GraphScope.THIS_NOTE, first, first),
+            actual = listOf(found.scope, found.center, found.selected)
         )
 
         send(GraphIntent.OnMatchStep(isForward = false))
         send(GraphIntent.OnSearchClose)
         val state = viewModel.state.value
-        assertEquals(expected = Triple(false, "", null), actual = Triple(state.isSearching, state.query, state.revealed))
+        assertEquals(expected = Triple(false, "", 2), actual = Triple(state.isSearching, state.query, state.reveals))
         assertEquals(expected = emptyList(), actual = state.matches)
     }
 
@@ -62,7 +62,20 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
 
         send(GraphIntent.OnMatchStep(isForward = true))
 
-        assertEquals(expected = TASKS to false, actual = viewModel.state.value.center to viewModel.state.value.needsNote)
+        val state = viewModel.state.value
+        assertEquals(expected = TASKS to false, actual = state.center to state.needsNote)
+    }
+
+    // Review: with one match, Enter did nothing once the map had been dragged away.
+    @Test
+    fun `Enter on a single match moves the map to it every time`() = runGraphTest {
+        send(GraphIntent.OnOpen(note = AREPAS))
+        send(GraphIntent.OnQueryChange(query = "tasks"))
+
+        send(GraphIntent.OnMatchStep(isForward = true))
+        send(GraphIntent.OnMatchStep(isForward = true))
+
+        assertEquals(expected = 2, actual = viewModel.state.value.reveals)
     }
 
     @Test

@@ -23,6 +23,7 @@ fun SuiteBuilder.graphCases() {
     findANote()
     linkFromTheGraph()
     noNote()
+    doubleClickAndSplit()
 }
 
 private fun SuiteBuilder.graphFromNote() {
@@ -107,8 +108,8 @@ private fun SuiteBuilder.findANote() {
         )
         expected(
             text = "The matching notes keep their color and name while the rest fade, and the bar counts them. Enter " +
-                "slides the map to that note's graph: it reaches the center, its neighbors come out around it and the " +
-                "other notes fade. Esc closes the bar and the arrow keys walk the map again."
+                "slides the map to that note's graph: it reaches the center, its neighbors come out around it and " +
+                "the other notes fade. Esc closes the bar and the arrow keys walk the map again."
         )
     }
 }
@@ -119,8 +120,8 @@ private fun SuiteBuilder.linkFromTheGraph() {
         title(text = "Link joins two notes from the graph, and Undo takes it back")
         steps(
             text = "$OPEN_GRAPH\n3. Click circles until the panel shows Related, not linked.\n4. Click Link on a row." +
-                "\n5. Open that note from the panel and look at its end, then go back to the graph's tab.\n6. Click " +
-                "Link on another row, then Undo."
+                "\n5. Click Open note and look at the end of the note, the one the panel showed, then go back to the " +
+                "graph's tab.\n6. Click Link on another row, then Undo."
         )
         expected(
             text = "The dashed line turns solid and the panel says Linked to that note. The note ends with the new " +
@@ -138,8 +139,24 @@ private fun SuiteBuilder.noNote() {
                 "(Cmd+G on macOS).\n3. Click Find a note, type arepas and press Enter."
         )
         expected(
-            text = "The tab says No note selected and offers Find a note; nothing else shows on the map. Enter brings " +
-                "the graph of Arepas, its notes coming out of the center."
+            text = "The tab says No note selected and offers Find a note; nothing else shows on the map. Enter " +
+                "brings the graph of Arepas, its notes coming out of the center."
+        )
+    }
+}
+
+private fun SuiteBuilder.doubleClickAndSplit() {
+    manual(id = "2.7-09", reason = ManualReason.EYES) {
+        prepare(SAMPLE)
+        title(text = "A double click opens that note, and Find stays with the pane in use")
+        steps(
+            text = "$OPEN_GRAPH\n3. Double-click a circle that is not selected.\n4. Open the graph's tab beside that " +
+                "note (drag its tab to the right), click in the note and press Ctrl+F (Cmd+F on macOS).\n5. Click " +
+                "the graph's map and press Ctrl+F (Cmd+F on macOS)."
+        )
+        expected(
+            text = "The note double-clicked opens, not the one selected before. In step 4 Find opens in the note, and " +
+                "in step 5 the search bar opens on the graph."
         )
     }
 }
