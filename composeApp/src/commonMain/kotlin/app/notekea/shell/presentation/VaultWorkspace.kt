@@ -24,6 +24,7 @@ import app.notekea.editor.presentation.EditorPaneTools
 import app.notekea.editor.presentation.EditorScreen
 import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.editor.presentation.WithSidePanel
+import app.notekea.graph.presentation.GraphContent
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherMode
 import app.notekea.search.presentation.switcher.QuickSwitcherPurpose
@@ -187,22 +188,6 @@ private fun startActionsOf(
     )
 }
 
-/** The rail's actions: search, the side panel, another vault, and About or Settings opened with [onDialog]. */
-private fun railActionsOf(
-    sidePanel: SidePanelHost,
-    onSearch: () -> Unit,
-    onGraph: () -> Unit,
-    onSwitchVault: () -> Unit,
-    onDialog: (WindowDialog) -> Unit
-) = SidebarRailActions(
-    onSearch = onSearch,
-    onGraph = onGraph,
-    onSidePanelToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
-    onSwitchVault = onSwitchVault,
-    onAbout = { onDialog(WindowDialog.ABOUT) },
-    onSettings = { onDialog(WindowDialog.SETTINGS) }
-)
-
 /** What a pane's active tab shows, by what [path] is. */
 @Composable
 private fun PaneContent(
@@ -226,7 +211,10 @@ private fun PaneContent(
 
         TabKind.FOLDER -> FolderTab(folder = path, context = context)
 
-        TabKind.GRAPH -> GraphTab(viewModels = context.viewModels)
+        TabKind.GRAPH -> GraphContent(
+            context.viewModels.graph.state.collectAsState().value,
+            context.viewModels.graph::onIntent
+        )
 
         TabKind.MISSING -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             EmptyState(

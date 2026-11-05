@@ -123,9 +123,7 @@ fun VaultTreeScreen(
         onTagPicker = tagPickerViewModel::onIntent,
         onTemplatePicker = templatePickerViewModel::onIntent
     )
-    FollowWorkspace(state = state, viewModels = viewModels, sidePanel = sidePanel)
-    FollowActiveTab(name = workspaceState.activeTabName, onChange = onActiveTabChange)
-    FollowGraph(viewModels = viewModels, state = state, searchIndex = searchIndexViewModel)
+    FollowVault(state, workspaceState, viewModels, sidePanel, searchIndexViewModel, onActiveTabChange)
     Box(modifier = modifier) {
         VaultWorkspace(
             state = state,
@@ -225,6 +223,21 @@ private fun BoxScope.IndexFollower(
             .padding(all = NotekeaDimensions.SpacingL)
             .widthIn(max = NOTICE_MAX_WIDTH_DP.dp)
     )
+}
+
+/** What goes on around the workspace while the vault is open, whatever its tabs show. */
+@Composable
+private fun FollowVault(
+    state: VaultTreeState,
+    workspaceState: WorkspaceState,
+    viewModels: WorkspaceViewModels,
+    sidePanel: SidePanelHost,
+    searchIndex: SearchIndexViewModel,
+    onActiveTabChange: (String?) -> Unit
+) {
+    FollowWorkspace(state = state, viewModels = viewModels, sidePanel = sidePanel)
+    FollowActiveTab(name = workspaceState.activeTabName, onChange = onActiveTabChange)
+    FollowGraph(viewModels = viewModels, state = state, searchIndex = searchIndex)
 }
 
 /**

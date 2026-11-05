@@ -1,26 +1,17 @@
 package app.notekea.shell.presentation
 
+import app.notekea.core.platform.domain.graphShortcut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.editor.presentation.EditorIntent
-import app.notekea.graph.presentation.GraphContent
 import app.notekea.graph.presentation.GraphEffect
 import app.notekea.graph.presentation.GraphIntent
 import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.shell.domain.Workspace
 import app.notekea.tree.presentation.VaultTreeState
-
-/** The graph in its tab (`ROADMAP.md` 2.7). */
-@Composable
-internal fun GraphTab(
-    viewModels: WorkspaceViewModels
-) {
-    val state by viewModels.graph.state.collectAsState()
-    GraphContent(state = state, onIntent = viewModels.graph::onIntent)
-}
 
 /**
  * What the graph follows while the vault is open, tab shown or not: the vault's notes and its index. `Mod+G` opens it,
