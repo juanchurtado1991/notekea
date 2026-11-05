@@ -37,16 +37,13 @@ import app.notekea.resources.appearance_reduce_motion_hint
 import app.notekea.resources.appearance_save_failed
 import app.notekea.resources.appearance_theme
 import app.notekea.resources.settings_section_appearance
-import app.notekea.resources.theme_azure_cloud
-import app.notekea.resources.theme_clay_butter
-import app.notekea.resources.theme_cobalt_tangerine
-import app.notekea.resources.theme_cosmic_violet
-import app.notekea.resources.theme_deep_sage
-import app.notekea.resources.theme_forest_mint
-import app.notekea.resources.theme_midnight_lime
-import app.notekea.resources.theme_neon_porcelain
-import app.notekea.resources.theme_prompt_green
-import app.notekea.resources.theme_signal_almond
+import app.notekea.resources.theme_clay
+import app.notekea.resources.theme_graphite
+import app.notekea.resources.theme_honey
+import app.notekea.resources.theme_iris
+import app.notekea.resources.theme_lagoon
+import app.notekea.resources.theme_rose
+import app.notekea.resources.theme_sage
 import app.notekea.resources.theme_workspace_blue
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -190,16 +187,13 @@ private fun nameOf(
     theme: ColorTheme
 ): StringResource = when (theme) {
     ColorTheme.WORKSPACE_BLUE -> Res.string.theme_workspace_blue
-    ColorTheme.COBALT_TANGERINE -> Res.string.theme_cobalt_tangerine
-    ColorTheme.MIDNIGHT_LIME -> Res.string.theme_midnight_lime
-    ColorTheme.DEEP_SAGE -> Res.string.theme_deep_sage
-    ColorTheme.SIGNAL_ALMOND -> Res.string.theme_signal_almond
-    ColorTheme.COSMIC_VIOLET -> Res.string.theme_cosmic_violet
-    ColorTheme.AZURE_CLOUD -> Res.string.theme_azure_cloud
-    ColorTheme.NEON_PORCELAIN -> Res.string.theme_neon_porcelain
-    ColorTheme.FOREST_MINT -> Res.string.theme_forest_mint
-    ColorTheme.PROMPT_GREEN -> Res.string.theme_prompt_green
-    ColorTheme.CLAY_BUTTER -> Res.string.theme_clay_butter
+    ColorTheme.GRAPHITE -> Res.string.theme_graphite
+    ColorTheme.SAGE -> Res.string.theme_sage
+    ColorTheme.LAGOON -> Res.string.theme_lagoon
+    ColorTheme.IRIS -> Res.string.theme_iris
+    ColorTheme.ROSE -> Res.string.theme_rose
+    ColorTheme.CLAY -> Res.string.theme_clay
+    ColorTheme.HONEY -> Res.string.theme_honey
 }
 
 private val MODES = listOf(ThemeMode.SYSTEM, ThemeMode.LIGHT, ThemeMode.DARK)
@@ -209,7 +203,7 @@ private val MODES = listOf(ThemeMode.SYSTEM, ThemeMode.LIGHT, ThemeMode.DARK)
 private fun AppearanceSettingsPreview() {
     NotekeaPreviewThemes {
         AppearanceSettings(
-            state = AppearanceState(appearance = Appearance(theme = ColorTheme.MIDNIGHT_LIME)),
+            state = AppearanceState(appearance = Appearance(theme = ColorTheme.LAGOON)),
             onIntent = {}
         )
     }

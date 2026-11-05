@@ -5,7 +5,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import app.notekea.core.presentation.theme.palette.WorkspaceBluePalette
 
-/** The light and dark schemes of the Workspace Blue theme, with the same roles as [NotekeaColorSchemes]. */
+/** The light and dark schemes of the Workspace Blue theme, with the same roles as the app's theme roles. */
 object WorkspaceBlueSchemes {
     val dark: ColorScheme = darkColorScheme(
         primary = WorkspaceBluePalette.PrimaryDark,
