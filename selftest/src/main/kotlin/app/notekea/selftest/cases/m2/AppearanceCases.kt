@@ -14,7 +14,7 @@ import com.testbuddy.SuiteBuilder
 
 private const val OPEN_PLAYGROUND = "1. In Notekea, open the Playground Vault (see TEST DATA above)."
 private const val OPEN_APPEARANCE = "Click Settings (the gear at the bottom of the narrow bar on the far left)"
-private const val THEME = "Deep Sage"
+private const val THEME = "Sage"
 private const val SELECTED_MILLIS = 10_000L
 
 /** The cases of 2.12, color themes (`MVP_SMOKE_TEST.md`): Settings → Appearance's mode and themes. */

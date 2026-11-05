@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import app.notekea.core.presentation.theme.palette.NotekeaPalette
 
-/** Colors with a meaning of their own that the Material roles of `NotekeaColorSchemes` have no slot for. */
+/** Colors with a meaning of their own that the Material roles of `ColorThemeSchemes` have no slot for. */
 object NotekeaColors {
     /** The star of a bookmarked note or entry (`ROADMAP.md` 1.13): a warm yellow, lighter on the dark theme. */
     val bookmark: Color

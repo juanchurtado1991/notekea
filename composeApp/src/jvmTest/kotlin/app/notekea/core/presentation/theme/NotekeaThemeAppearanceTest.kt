@@ -21,9 +21,9 @@ class NotekeaThemeAppearanceTest {
     @Test
     fun `the theme draws the chosen color theme in the chosen mode, or the system's under System`() {
         val cases = listOf(
-            Appearance(theme = ColorTheme.DEEP_SAGE, mode = ThemeMode.DARK) to false,
-            Appearance(theme = ColorTheme.SIGNAL_ALMOND, mode = ThemeMode.LIGHT) to true,
-            Appearance(theme = ColorTheme.MIDNIGHT_LIME, mode = ThemeMode.SYSTEM) to true,
+            Appearance(theme = ColorTheme.SAGE, mode = ThemeMode.DARK) to false,
+            Appearance(theme = ColorTheme.ROSE, mode = ThemeMode.LIGHT) to true,
+            Appearance(theme = ColorTheme.LAGOON, mode = ThemeMode.SYSTEM) to true,
             Appearance() to false
         )
 
@@ -31,9 +31,9 @@ class NotekeaThemeAppearanceTest {
 
         assertEquals(
             expected = listOf(
-                ColorThemeSchemes.of(theme = ColorTheme.DEEP_SAGE, darkTheme = true),
-                ColorThemeSchemes.of(theme = ColorTheme.SIGNAL_ALMOND, darkTheme = false),
-                ColorThemeSchemes.of(theme = ColorTheme.MIDNIGHT_LIME, darkTheme = true),
+                ColorThemeSchemes.of(theme = ColorTheme.SAGE, darkTheme = true),
+                ColorThemeSchemes.of(theme = ColorTheme.ROSE, darkTheme = false),
+                ColorThemeSchemes.of(theme = ColorTheme.LAGOON, darkTheme = true),
                 WorkspaceBlueSchemes.light
             ),
             actual = drawn

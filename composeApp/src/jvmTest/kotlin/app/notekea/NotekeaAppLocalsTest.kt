@@ -27,7 +27,7 @@ import kotlin.test.assertNotEquals
 
 /** What every window reads comes from one place, which the Self-Test's cases share with the app (audit 64). */
 class NotekeaAppLocalsTest {
-    private val appearance = Appearance(theme = ColorTheme.DEEP_SAGE)
+    private val appearance = Appearance(theme = ColorTheme.SAGE)
     private val environment = AppEnvironment(
         systemAppearance = object : SystemAppearance {
             override fun observeDarkTheme(): Flow<Boolean?> = flowOf(value = true)

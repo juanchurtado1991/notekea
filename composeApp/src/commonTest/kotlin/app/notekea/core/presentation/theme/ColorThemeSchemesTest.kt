@@ -8,7 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
-/** Every color theme in light and dark reads at WCAG AA (`ROADMAP.md` 2.12); two have palettes of their own. */
+/** Every color theme in light and dark reads at WCAG AA (`ROADMAP.md` 2.12). */
 class ColorThemeSchemesTest {
     @Test
     fun `every text of every theme and mode reads on its background at WCAG AA`() {
@@ -25,15 +25,7 @@ class ColorThemeSchemesTest {
     }
 
     @Test
-    fun `Cobalt Tangerine is the app's first palette and Workspace Blue the default`() {
-        assertSame(
-            expected = NotekeaColorSchemes.light,
-            actual = ColorThemeSchemes.of(ColorTheme.COBALT_TANGERINE, darkTheme = false)
-        )
-        assertSame(
-            expected = NotekeaColorSchemes.dark,
-            actual = ColorThemeSchemes.of(ColorTheme.COBALT_TANGERINE, darkTheme = true)
-        )
+    fun `Workspace Blue is the default and uses its own palette`() {
         assertSame(
             expected = WorkspaceBlueSchemes.light,
             actual = ColorThemeSchemes.of(ColorTheme.DEFAULT, darkTheme = false)
