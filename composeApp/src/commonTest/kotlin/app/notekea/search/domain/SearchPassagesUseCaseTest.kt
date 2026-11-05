@@ -120,6 +120,38 @@ class SearchPassagesUseCaseTest {
     }
 
     @Test
+    fun `a common word alone keeps nothing that is not close in meaning`() = runTest(testDispatcher) {
+        val notes = listOf(note(path = SONG, body = "The slow guitar."))
+        indexed(path = SONG, body = "The slow guitar.", passage = "The slow guitar.")
+
+        assertEquals(expected = emptyList(), actual = found(notes = notes, query = "the football park"))
+    }
+
+    @Test
+    fun `a chunk with no text left is skipped, and the others still answer`() = runTest(testDispatcher) {
+        val body = "\n\n\nCorn flour."
+        val notes = listOf(note(path = AREPAS, body = body), note(path = SONG, body = "Corn fields."))
+        val blank = NoteChunk(AREPAS, 0, emptyList(), 0..1, "corn", tokens = 1)
+        val vector = (embedder.embed(texts = listOf("corn")) as Outcome.Success).value.single()
+        index.put(VAULT, AREPAS, listOf(blank), listOf(vector))
+        indexed(path = SONG, body = "Corn fields.", passage = "Corn fields.")
+
+        assertEquals(expected = listOf(SONG), actual = found(notes, "corn").map { it.note.file.path })
+    }
+
+    @Test
+    fun `the snippet starts at the sentence with the word, accents or not`() = runTest(testDispatcher) {
+        val body = "Empieza aquí. Una canción lenta. Y sigue."
+        val notes = listOf(note(path = AREPAS, body = body))
+        indexed(path = AREPAS, body = body, passage = body)
+
+        assertEquals(
+            expected = "Una canción lenta. Y sigue.",
+            actual = found(notes = notes, query = "canción").single().snippet
+        )
+    }
+
+    @Test
     fun `a model or an index that cannot answer says which`() = runTest(testDispatcher) {
         val notes = listOf(note(path = AREPAS, body = "Corn"))
         embedder.failure = EmbeddingError.EngineFailed

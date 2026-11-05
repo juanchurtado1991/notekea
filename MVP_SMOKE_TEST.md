@@ -448,7 +448,7 @@ leaves it; wait until the status bar says "40 notes ready to search". Mod+Shift+
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
-| 2.6-01 | Press Mod+Shift+F and type `rest five minutes`, then press Enter | Arepas is listed with "Recipes › Steps" and the line from the note; Enter opens it with that passage selected, in Edit even from Preview, and a note already open goes to it | 2.6 | Self-Test | 2.6-01 | | | |
+| 2.6-01 | Press Mod+Shift+F and type `rest five minutes`, then press Enter | Arepas is listed with "Recipes › Steps" and the line from the note; Enter opens it with that passage selected, in Edit for that note even from Preview (the next note opens in the mode chosen), and a note already open goes to it | 2.6 | Self-Test | 2.6-01 | | | |
 | 2.6-02 | Press Mod+Shift+F and type `cómo hacer la masa`; clear it and type `trip to Portugal` | Arepas is near the top with a line about its dough, without those words; Trip to Lisbon comes first in the second search | 2.6 | Manual (eyes) | | | | |
-| 2.6-03 | Press Mod+Shift+F and type `football match results` | "No notes match" | 2.6 | Manual (eyes) | | | | |
+| 2.6-03 | Press Mod+Shift+F and type `football match results`, then `football in the park` | "No notes match" both times | 2.6 | Manual (eyes) | | | | |
 | 2.6-04 | Click the index status in the status bar and choose Rebuild index; while it runs press Mod+Shift+F and type `tomato` | Notes with the word are listed with "Showing exact words only until your notes are ready to search." below them; the line goes once the index is ready | 2.6 | Manual (eyes) | | | | |

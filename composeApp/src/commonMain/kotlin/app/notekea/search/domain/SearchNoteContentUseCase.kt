@@ -80,13 +80,15 @@ class SearchNoteContentUseCase(
         }
         if (!hasEveryTag) return null
         val hits = (wordHits.flatten() + tagHits.flatten()).sortedBy { it.first }
-        val snippet = hits.firstOrNull()?.let { snippetAround(body = text.body, hits = hits, first = it.first) }
+        val line = bestLine(body = text.body, hits = hits)
+        val first = hits.firstOrNull { line != null && it.first in line }
+        val snippet = first?.let { snippetAround(body = text.body, hits = hits, first = it.first) }
         return ContentSearchResult(
             note = note,
             ranges = snippet?.second.orEmpty(),
             matchCount = hits.size + tagHits.count { it.isEmpty() },
             snippet = snippet?.first,
-            line = bestLine(body = text.body, hits = hits)
+            line = line.takeIf { terms.words.isNotEmpty() }
         )
     }
 
@@ -94,10 +96,21 @@ class SearchNoteContentUseCase(
     private fun bestLine(
         body: String,
         hits: List<IntRange>
-    ): IntRange? = hits.groupingBy { lineAround(body = body, offset = it.first) }
-        .eachCount()
-        .maxByOrNull { (_, count) -> count }
-        ?.key
+    ): IntRange? {
+        var best: IntRange? = null
+        var bestCount = 0
+        var next = 0
+        while (next < hits.size) {
+            val line = lineAround(body = body, offset = hits[next].first)
+            val start = next
+            while (next < hits.size && hits[next].first <= line.last) next++
+            if (next - start > bestCount) {
+                best = line
+                bestCount = next - start
+            }
+        }
+        return best
+    }
 
     private fun lineAround(
         body: String,
