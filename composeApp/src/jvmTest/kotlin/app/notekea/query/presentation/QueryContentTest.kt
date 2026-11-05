@@ -93,6 +93,21 @@ class QueryContentTest {
     }
 
     @Test
+    fun `a vault with no folders starts a rule on what it has`() = runComposeUiTest {
+        val state = QueryPreviewData.state.copy(
+            query = VaultQuery(),
+            catalog = QueryPreviewData.state.catalog.copy(folders = emptyList(), tags = emptyList())
+        )
+        showRules(state = state, intents = mutableListOf())
+
+        onNodeWithText(text = "Add filter").performClick()
+        waitForIdle()
+
+        onNodeWithText(text = "Value").assertExists()
+        onNodeWithText(text = "Folder").assertDoesNotExist()
+    }
+
+    @Test
     fun `the foot says how many of the vault's notes were found`() = runComposeUiTest {
         showRules(state = QueryPreviewData.state, intents = mutableListOf())
 

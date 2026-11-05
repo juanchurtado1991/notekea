@@ -110,7 +110,6 @@ object NotekeaIcons {
         "l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
     ).joinToString(separator = StringPatterns.EMPTY)
 
-    val AddProperty: ImageVector get() = Lucide.Plus
     val AddRow: ImageVector get() = Lucide.Plus
     val AttachFile: ImageVector get() = Lucide.ImagePlus
     val Attachment: ImageVector get() = Lucide.Paperclip

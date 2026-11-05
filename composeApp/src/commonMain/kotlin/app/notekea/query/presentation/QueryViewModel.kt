@@ -136,7 +136,7 @@ class QueryViewModel(
     private fun change(
         update: (VaultQuery) -> VaultQuery
     ) {
-        reduce { it.copy(query = update(it.query)) }
+        reduce { it.copy(query = update(it.query), notice = null) }
         launchGuarded(onError = ::logUnexpectedError) {
             // The latest query, in turn: of two quick changes, the first must not be the one that stays.
             queryWrites.withLock { preferencesStore.write(vaultPath = vaultPath, query = state.value.query) }

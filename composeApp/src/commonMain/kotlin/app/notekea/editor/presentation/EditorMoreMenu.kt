@@ -140,7 +140,7 @@ private fun addPropertyItem(
 ): NotekeaMenuItem = NotekeaMenuItem(
     label = stringResource(resource = Res.string.properties_add),
     onClick = {},
-    icon = NotekeaIcons.AddProperty,
+    icon = NotekeaIcons.AddRow,
     items = listOf(
         PropertyTypes.all.map { (type, label, icon) ->
             NotekeaMenuItem(
