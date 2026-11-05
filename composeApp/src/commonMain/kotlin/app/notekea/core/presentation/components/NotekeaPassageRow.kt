@@ -35,6 +35,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,7 +45,6 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 
 private const val TEXT_LINES = 2
-private const val HIGHLIGHT_ALPHA = 0.18f
 private const val HOVER_ALPHA = 0.05f
 private const val ICON_DP = 14
 private const val TITLE_ROW_DP = 22
@@ -60,7 +60,7 @@ private const val PREVIEW_HIGHLIGHT_START = 35
 /**
  * A row of a list that quotes a passage, as an inspector lists things (`ROADMAP.md` 2.4, 2.5, design A): its [icon],
  * [title] and, beside it in the muted color, [subtitle] (the folder); below, up to two lines of [text] with its
- * [highlight] on the accent color. No border: the row tints softly under the pointer, and its [actions] show at the
+ * [highlight] underlined. No border: the row tints softly under the pointer, and its [actions] show at the
  * end of the title's row while the pointer is over it or the keyboard is on it or on one of them, so Tab reaches them,
  * or always when [showsActions] (the one thing a row is there for). Screen readers get them as [accessibilityActions].
  * A click or Enter on the row goes to [onClick].
@@ -171,9 +171,7 @@ private fun Passage(
     Text(
         text = buildAnnotatedString {
             append(text.substring(startIndex = 0, endIndex = lit.first))
-            withStyle(
-                style = SpanStyle(background = colors.tertiary.copy(alpha = HIGHLIGHT_ALPHA), color = colors.onSurface)
-            ) {
+            withStyle(style = SpanStyle(color = colors.onSurface, textDecoration = TextDecoration.Underline)) {
                 append(text.substring(startIndex = lit.first, endIndex = (lit.last + 1).coerceAtLeast(lit.first)))
             }
             append(text.substring(startIndex = (lit.last + 1).coerceAtLeast(lit.first)))
