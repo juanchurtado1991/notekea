@@ -1,5 +1,6 @@
 package app.notekea.core.presentation.about
 
+import app.notekea.core.platform.domain.graphShortcut
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.zoomInShortcut
 import app.notekea.core.platform.domain.zoomOutShortcut
