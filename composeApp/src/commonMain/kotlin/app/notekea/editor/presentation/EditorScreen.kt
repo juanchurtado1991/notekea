@@ -155,21 +155,25 @@ private fun EditorEffects(
 }
 
 /**
- * Gives the keyboard to the note's text one frame later, once the text field that replaced the loading skeleton is
- * laid out. Read mode has no cursor, so nothing takes focus there.
+ * Gives the keyboard to the note's text once the text field that replaced the loading skeleton or Preview is there,
+ * which takes more than one frame after leaving Preview. Read mode has no cursor, so nothing takes focus there.
  */
 private suspend fun focusText(
     requester: FocusRequester,
     isReading: Boolean
 ) {
     if (isReading) return
-    withFrameNanos { }
-    try {
-        requester.requestFocus()
-    } catch (_: IllegalStateException) {
-        // The text is not shown (the note failed to open or was closed meanwhile): there is nothing to focus.
+    repeat(times = FOCUS_FRAMES) {
+        withFrameNanos { }
+        try {
+            if (requester.requestFocus()) return
+        } catch (_: IllegalStateException) {
+            // The text is not shown yet, or the note failed to open or was closed meanwhile.
+        }
     }
 }
+
+private const val FOCUS_FRAMES = 5
 
 /** Save, Find in note, Edit / Read and toggling a task work whatever has focus while the editor's pane is active. */
 @Composable
