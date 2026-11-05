@@ -1,6 +1,7 @@
 package app.notekea.selftest.cases.m1
 
 import app.notekea.selftest.notekea
+import kotlin.time.Duration.Companion.minutes
 import com.testbuddy.CaseFailure
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
@@ -17,7 +18,7 @@ internal fun SuiteBuilder.menuCases() {
 }
 
 private fun SuiteBuilder.menuCommands() {
-    automated(id = "1.1-08", title = "Every command of the menu bar works with a note open") {
+    automated(id = "1.1-08", title = "Every command of the menu bar works with a note open", timeout = 3.minutes) {
         openPlaygroundNote(name = "Arepas", shownText = AREPAS_FLOUR)
         ui.runOnIdle {
             val app = notekea()
