@@ -45,7 +45,7 @@ private fun SuiteBuilder.passageRows() {
         expectNoText(text = "Search the text of your notes")
         expectLineSelected(line = HOT_PAN_LINE)
         pressInWindow(shortcut = Mod + Key.E)
-        expectNoText(text = HOT_PAN_LINE)
+        expectNoText(text = "## Steps", substring = true)
         pressInWindow(shortcut = Mod + Shift + Key.F)
         type(text = "rest five minutes")
         waitForResult(name = "Arepas")

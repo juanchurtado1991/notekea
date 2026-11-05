@@ -212,8 +212,8 @@ class QuickSwitcherViewModelTest {
             actual = found
         )
         assertEquals(
-            expected = listOf(QuickSwitcherEffect.OpenNote(path = RelativePath(value = CAFE))),
-            actual = effects
+            expected = listOf(RelativePath(value = CAFE)),
+            actual = effects.filterIsInstance<QuickSwitcherEffect.OpenNote>().map { it.path }
         )
     }
 

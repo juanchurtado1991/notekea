@@ -52,7 +52,8 @@ internal fun contentRowOf(
         name = path.nameWithoutExtension,
         detailRanges = result.ranges,
         folder = folderOf(path = path),
-        detail = result.snippet
+        detail = result.snippet,
+        passage = result.line
     )
 }
 
