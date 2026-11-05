@@ -1,4 +1,4 @@
-package app.notekea.connections.domain
+package app.notekea.core.notes.domain
 
 import app.notekea.core.notes.domain.PassageSnippet
 import app.notekea.core.notes.domain.RelativePath
