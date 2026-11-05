@@ -19,6 +19,11 @@ sealed interface QuickSwitcherIntent {
         QuickSwitcherIntent,
         FeedIntent
 
+    /** Whether the search index holds the vault, sent as it changes: content search says when it does not. */
+    data class OnIndexChange(val isReady: Boolean) :
+        QuickSwitcherIntent,
+        FeedIntent
+
     /** `Mod+P`, `Mod+Shift+F` or a clicked `#tag`, which opens content search with the tag already typed. */
     data class OnOpen(
         val mode: QuickSwitcherMode,

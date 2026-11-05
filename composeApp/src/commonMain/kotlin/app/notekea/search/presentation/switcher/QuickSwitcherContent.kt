@@ -2,6 +2,7 @@ package app.notekea.search.presentation.switcher
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -31,6 +32,7 @@ import app.notekea.resources.switcher_content_hint_title
 import app.notekea.resources.switcher_empty_vault_message
 import app.notekea.resources.switcher_empty_vault_title
 import app.notekea.resources.switcher_error
+import app.notekea.resources.switcher_exact_words
 import app.notekea.resources.switcher_mode_content
 import app.notekea.resources.switcher_mode_notes
 import app.notekea.resources.switcher_no_match_content
@@ -106,16 +108,25 @@ private fun SwitcherBody(
             color = MaterialTheme.colorScheme.error
         )
 
-        state.rows.isNotEmpty() -> Results(
-            rows = state.rows,
-            selectedIndex = state.selectedIndex,
-            onIntent = onIntent
-        )
+        state.rows.isNotEmpty() -> Column {
+            Results(rows = state.rows, selectedIndex = state.selectedIndex, onIntent = onIntent)
+            if (state.showsExactWords) ExactWordsNote()
+        }
 
         state.isSearching -> Unit
 
         else -> NoResults(state = state)
     }
+}
+
+@Composable
+private fun ExactWordsNote() {
+    Text(
+        text = stringResource(resource = Res.string.switcher_exact_words),
+        modifier = Modifier.padding(all = NotekeaDimensions.SpacingS),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 }
 
 @Composable

@@ -6,6 +6,7 @@ import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.search.domain.SearchNoteContentUseCase
 import app.notekea.search.domain.SearchNotesUseCase
+import app.notekea.search.domain.SearchPassagesUseCase
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -14,7 +15,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Quick switcher palette (`ROADMAP.md` 1.6) for the vault at [vaultPath]: `Mod+P` finds notes by name and alias, at
- * once; `Mod+Shift+F` searches their content, waiting for a short pause in typing. Every new search cancels the one
+ * once; `Mod+Shift+F` searches their content, waiting for a short pause in typing: the exact words show first and the
+ * hybrid search (`ROADMAP.md` 2.6) reorders them, by meaning too, when it answers. Every new search cancels the one
  * before, so a slow search never shows results for text that was already changed. The notes come from the vault tree
  * ([QuickSwitcherIntent.OnNotesChange]), so the palette never scans the vault itself. Choosing a result closes the
  * palette and asks the workspace to open the note.
@@ -23,6 +25,7 @@ class QuickSwitcherViewModel(
     private val vaultPath: String,
     private val searchNotes: SearchNotesUseCase,
     private val searchNoteContent: SearchNoteContentUseCase,
+    private val searchPassages: SearchPassagesUseCase,
     private val dispatchers: AppDispatchers
 ) : BaseViewModel<QuickSwitcherState, QuickSwitcherIntent, QuickSwitcherEffect>(initialState = QuickSwitcherState()) {
     private val logger = Logger.withTag(tag = LOG_TAG)
@@ -36,6 +39,7 @@ class QuickSwitcherViewModel(
             QuickSwitcherIntent.OnClose -> dismiss()
             QuickSwitcherIntent.OnConfirm -> confirm()
             QuickSwitcherIntent.OnModeSwitch -> switchMode()
+            is QuickSwitcherIntent.OnIndexChange -> reduce { it.copy(isIndexReady = intent.isReady) }
             is QuickSwitcherIntent.OnNotesChange -> changeNotes(notes = intent.notes)
             is QuickSwitcherIntent.OnOpen -> openPalette(intent = intent)
             is QuickSwitcherIntent.OnQueryChange -> changeQuery(query = intent.query)
@@ -78,7 +82,7 @@ class QuickSwitcherViewModel(
         val purpose = state.value.purpose
         close()
         val effect = when (purpose) {
-            QuickSwitcherPurpose.OPEN -> QuickSwitcherEffect.OpenNote(path = row.path)
+            QuickSwitcherPurpose.OPEN -> QuickSwitcherEffect.OpenNote(path = row.path, passage = row.passage)
             QuickSwitcherPurpose.LINK -> QuickSwitcherEffect.LinkNote(path = row.path)
         }
         emit(effect = effect)
@@ -121,23 +125,32 @@ class QuickSwitcherViewModel(
         val (mode, query) = state.value.let { it.mode to it.query }
         val notes = notes
         searchJob = launchGuarded(onError = ::showUnexpectedError) {
-            val rows = when (mode) {
-                QuickSwitcherMode.NOTES -> withContext(context = dispatchers.default) {
-                    searchNotes(notes = notes, query = query).map(transform = ::noteRowOf)
+            when (mode) {
+                QuickSwitcherMode.NOTES -> {
+                    val rows = withContext(context = dispatchers.default) {
+                        searchNotes(notes = notes, query = query).map(transform = ::noteRowOf)
+                    }
+                    reduce { it.copy(rows = rows, selectedIndex = 0, isSearching = false) }
                 }
 
-                QuickSwitcherMode.CONTENT -> {
-                    reduce { it.copy(isSearching = query.isNotBlank()) }
-                    if (debounce) delay(duration = CONTENT_DEBOUNCE)
-                    searchNoteContent(
-                        vaultPath = vaultPath,
-                        notes = notes,
-                        query = query
-                    ).map(transform = ::contentRowOf)
-                }
+                QuickSwitcherMode.CONTENT -> searchContent(notes = notes, query = query, debounce = debounce)
             }
-            reduce { it.copy(rows = rows, selectedIndex = 0, isSearching = false) }
         }
+    }
+
+    /** The exact words at once, then the same results by meaning and keywords, which keep the row selected. */
+    private suspend fun searchContent(
+        notes: Collection<NoteEntry>,
+        query: String,
+        debounce: Boolean
+    ) {
+        reduce { it.copy(isSearching = query.isNotBlank()) }
+        if (debounce) delay(duration = CONTENT_DEBOUNCE)
+        val exact = searchNoteContent(vaultPath = vaultPath, notes = notes, query = query)
+            .map(transform = ::contentRowOf)
+        reduce { it.copy(rows = exact, selectedIndex = 0) }
+        val passages = searchPassages(vaultPath = vaultPath, notes = notes, query = query)
+        reduce { reduceHybridAnswer(state = it, exact = exact, outcome = passages) }
     }
 
     private fun showUnexpectedError(

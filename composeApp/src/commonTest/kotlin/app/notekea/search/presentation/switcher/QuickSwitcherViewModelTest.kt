@@ -2,7 +2,9 @@ package app.notekea.search.presentation.switcher
 
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NaturalNameComparator
@@ -14,6 +16,7 @@ import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.search.domain.SearchNoteContentUseCase
 import app.notekea.search.domain.SearchNotesUseCase
+import app.notekea.search.domain.SearchPassagesUseCase
 import app.notekea.core.notes.domain.TextFolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,6 +39,7 @@ import kotlin.test.assertEquals
 class QuickSwitcherViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val store = FakeNoteContentStore().apply { suspendsLikeDisk = true }
+    private val embedder = FakeTextEmbedder()
     private val notes = listOf(
         note(path = AREPAS, text = "Mix the corn flour.\n", modified = 3, aliases = listOf("Corn cakes")),
         note(path = CAFE, text = "Coffee with milk. #drinks\n", modified = 2),
@@ -46,18 +50,28 @@ class QuickSwitcherViewModelTest {
         val folder = TextFolder()
         val dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
         val naturalNames = NaturalNameComparator()
+        val cache = NoteTextCache(contentStore = store, textFolder = folder)
+        val content = SearchNoteContentUseCase(
+            noteTextCache = cache,
+            textFolder = folder,
+            naturalNameComparator = naturalNames,
+            markdownLineStripper = MarkdownLineStripper(),
+            dispatchers = dispatchers
+        )
         QuickSwitcherViewModel(
             vaultPath = VAULT,
             searchNotes = SearchNotesUseCase(
                 fuzzyMatcher = FuzzyMatcher(textFolder = folder),
                 naturalNameComparator = naturalNames
             ),
-            searchNoteContent = SearchNoteContentUseCase(
-                noteTextCache = NoteTextCache(contentStore = store, textFolder = folder),
+            searchNoteContent = content,
+            searchPassages = SearchPassagesUseCase(
+                textEmbedder = embedder,
+                vectorIndex = FakeVectorIndex(),
+                noteTextCache = cache,
                 textFolder = folder,
-                naturalNameComparator = naturalNames,
                 markdownLineStripper = MarkdownLineStripper(),
-                dispatchers = dispatchers
+                searchNoteContent = content
             ),
             dispatchers = dispatchers
         ).apply { onIntent(intent = QuickSwitcherIntent.OnNotesChange(notes = notes)) }
