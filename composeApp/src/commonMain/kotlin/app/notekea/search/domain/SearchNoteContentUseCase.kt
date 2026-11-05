@@ -85,8 +85,27 @@ class SearchNoteContentUseCase(
             note = note,
             ranges = snippet?.second.orEmpty(),
             matchCount = hits.size + tagHits.count { it.isEmpty() },
-            snippet = snippet?.first
+            snippet = snippet?.first,
+            line = bestLine(body = text.body, hits = hits)
         )
+    }
+
+    /** The line of [body] with the most [hits], the first of them on a tie: a word as short as `a` hits everywhere. */
+    private fun bestLine(
+        body: String,
+        hits: List<IntRange>
+    ): IntRange? = hits.groupingBy { lineAround(body = body, offset = it.first) }
+        .eachCount()
+        .maxByOrNull { (_, count) -> count }
+        ?.key
+
+    private fun lineAround(
+        body: String,
+        offset: Int
+    ): IntRange {
+        val start = body.lastIndexOf(char = NEW_LINE_CHAR, startIndex = offset) + 1
+        val end = body.indexOf(char = NEW_LINE_CHAR, startIndex = offset).takeIf { it >= 0 } ?: body.length
+        return start until end
     }
 
     private fun occurrences(

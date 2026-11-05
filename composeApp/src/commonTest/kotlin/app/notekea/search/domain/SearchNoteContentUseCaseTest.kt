@@ -54,6 +54,15 @@ class SearchNoteContentUseCaseTest {
         )
     }
 
+    // Enter before the hybrid answer opened the note with no passage (2.6 smoke).
+    @Test
+    fun `a result knows its line, so the note opens there before the hybrid search answers`() = runTest {
+        val body = "# Corn\n\nMix the corn flour, more corn.\nServe warm.\n"
+        val line = search()(VAULT, notesWith(AREPAS to body), "corn").single().line
+
+        assertEquals(expected = "Mix the corn flour, more corn.", actual = line?.let { body.substring(range = it) })
+    }
+
     @Test
     fun `a long line is shortened around the first match`() = runTest {
         val line = "a".repeat(n = 100) + " corn " + "b".repeat(n = 200)
