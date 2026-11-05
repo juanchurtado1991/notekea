@@ -785,7 +785,8 @@ A link graph built from `[[wiki links]]`, Markdown links, embeds and frontmatter
 ### ⬜ 2.6 Hybrid search — `feature/hybrid-search`
 
 `Mod+Shift+F` searches by meaning and keywords together (design A, chosen 2026-11-04): each note once, with the passage
-that matched, its heading beside the folder, and a click or `Enter` that opens the note with that passage selected.
+that matched, its heading beside the folder, and a click or `Enter` that opens the note with that passage selected, in
+Edit mode, as Find does, since Preview shows no selection; a note already open goes to the passage.
 
 - **Order:** the exact words of 1.6 show at once, and the hybrid answer replaces them: its passages first, then what
   only the exact words found. The row that was selected stays selected.

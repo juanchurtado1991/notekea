@@ -1,16 +1,22 @@
 package app.notekea.selftest.cases.m2
 
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.isFocused
 import app.notekea.selftest.pressInWindow
 import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.ShortcutModifier.Shift
 import app.notekea.selftest.openVault
 import app.notekea.selftest.waitForResult
+import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val SAMPLE = "Sample Vault"
 private const val HOME = "Home"
+private const val REST_LINE = "Mix the flour, the water and the salt, then let it rest five minutes. ^dough"
+private const val HOT_PAN_LINE = "Shape discs and cook them on a hot pan, five minutes a side."
 private const val OPEN_SEARCH =
     "1. In Notekea, open the Sample Vault (see TEST DATA above) and wait until the bar at the bottom says " +
         "\"40 notes ready to search\".\n2. Press Ctrl+Shift+F (Cmd+Shift+F on macOS)."
@@ -31,8 +37,36 @@ private fun SuiteBuilder.passageRows() {
         waitForResult(name = "Arepas")
         expectText(text = "Recipes › Steps", substring = true)
         press(key = Key.Enter)
-        expectText(text = "Mix the flour, the water and the salt", substring = true)
+        expectPassageSelected()
+        pressInWindow(shortcut = Mod + Shift + Key.F)
+        type(text = "cook them on a hot pan")
+        waitForResult(name = "Arepas")
+        press(key = Key.Enter)
         expectNoText(text = "Search the text of your notes")
+        expectLineSelected(line = HOT_PAN_LINE)
+        pressInWindow(shortcut = Mod + Key.E)
+        expectNoText(text = HOT_PAN_LINE)
+        pressInWindow(shortcut = Mod + Shift + Key.F)
+        type(text = "rest five minutes")
+        waitForResult(name = "Arepas")
+        press(key = Key.Enter)
+        expectPassageSelected()
+    }
+}
+
+private fun CaseScope.expectPassageSelected() = expectLineSelected(line = REST_LINE)
+
+/** The text field holds the keyboard with exactly [line] selected. */
+private fun CaseScope.expectLineSelected(
+    line: String
+) {
+    val field = isFocused() and hasSetTextAction()
+    ui.waitUntil(timeoutMillis = 10_000) {
+        ui.onAllNodes(matcher = field).fetchSemanticsNodes().any { node ->
+            val text = node.config[SemanticsProperties.EditableText].text
+            val selection = node.config[SemanticsProperties.TextSelectionRange]
+            text.substring(selection.min, selection.max) == line
+        }
     }
 }
 
