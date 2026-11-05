@@ -6,6 +6,7 @@ import app.notekea.search.domain.IndexVaultUseCase
 import app.notekea.search.domain.PlanIndexUseCase
 import app.notekea.search.domain.SearchNoteContentUseCase
 import app.notekea.search.domain.SearchNotesUseCase
+import app.notekea.search.domain.SearchPassagesUseCase
 import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.search.presentation.switcher.QuickSwitcherViewModel
 import org.koin.core.module.dsl.factoryOf
@@ -30,12 +31,14 @@ val searchModule = module {
         )
     }
     factoryOf(::SearchNoteContentUseCase)
+    factoryOf(::SearchPassagesUseCase)
     factoryOf(::SearchNotesUseCase)
     viewModel { parameters ->
         QuickSwitcherViewModel(
             vaultPath = parameters.get(),
             searchNotes = get(),
             searchNoteContent = get(),
+            searchPassages = get(),
             dispatchers = get()
         )
     }

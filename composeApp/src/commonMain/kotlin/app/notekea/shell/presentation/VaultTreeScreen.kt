@@ -26,6 +26,7 @@ import app.notekea.editor.presentation.EditorPaneTools
 import app.notekea.editor.presentation.EditorViewModel
 import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.search.presentation.switcher.QuickSwitcherContent
+import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherViewModel
 import app.notekea.tree.presentation.tags.TagPickerContent
 import app.notekea.tree.presentation.tags.TagPickerViewModel
@@ -131,7 +132,7 @@ fun VaultTreeScreen(
             onSwitchVault = onSwitchVault,
             searchIndex = { SearchIndexStatusOf(viewModel = searchIndexViewModel) }
         )
-        SearchIndexFollower(state, activeEditor, searchIndexViewModel, relatedViewModel, mentionsViewModel)
+        IndexFollower(state, activeEditor, searchIndexViewModel, relatedViewModel, mentionsViewModel, switcherViewModel)
         Pickers(
             state = state,
             workspaceState = workspaceState,
@@ -186,18 +187,23 @@ private fun SearchIndexStatusOf(
  * index's runs and the vault (2.4, 2.5).
  */
 @Composable
-private fun BoxScope.SearchIndexFollower(
+private fun BoxScope.IndexFollower(
     tree: VaultTreeState,
     editor: EditorViewModel,
     viewModel: SearchIndexViewModel,
     related: RelatedNotesViewModel,
-    mentions: NoteMentionsViewModel
+    mentions: NoteMentionsViewModel,
+    switcher: QuickSwitcherViewModel
 ) {
     val state by viewModel.state.collectAsState()
+    val isIndexReady = !state.isRunning && state.readyNotes != null
+    LaunchedEffect(switcher, isIndexReady) {
+        switcher.onIntent(intent = QuickSwitcherIntent.OnIndexChange(isReady = isIndexReady))
+    }
     FollowConnections(
         tree = tree,
         editor = editor,
-        isIndexReady = !state.isRunning && state.readyNotes != null,
+        isIndexReady = isIndexReady,
         related = related,
         mentions = mentions
     )

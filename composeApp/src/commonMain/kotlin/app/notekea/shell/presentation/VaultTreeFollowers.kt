@@ -191,7 +191,15 @@ internal fun followSwitcherEffect(
     when (effect) {
         is QuickSwitcherEffect.OpenNote -> {
             onReveal(effect.path)
-            editors.of(path = effect.path).onIntent(intent = EditorIntent.OnFocusRequest(path = effect.path))
+            val editor = editors.of(path = effect.path)
+            val passage = effect.passage
+            editor.onIntent(
+                intent = if (passage == null) {
+                    EditorIntent.OnFocusRequest(path = effect.path)
+                } else {
+                    EditorIntent.OnRevealRequest(path = effect.path, range = passage)
+                }
+            )
         }
 
         is QuickSwitcherEffect.LinkNote -> {

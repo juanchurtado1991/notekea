@@ -270,6 +270,7 @@
     <string name="switcher_empty_vault_message">Create a note and find it here.</string>
     <string name="switcher_empty_vault_title">No notes yet</string>
     <string name="switcher_error">The search could not finish. Close the palette and try again.</string>
+    <string name="switcher_exact_words">Showing exact words only until your notes are ready to search.</string>
     <string name="switcher_mode_content">Content</string>
     <string name="switcher_mode_notes">Notes</string>
     <string name="switcher_no_match_content">Try other words, or a #tag.</string>
