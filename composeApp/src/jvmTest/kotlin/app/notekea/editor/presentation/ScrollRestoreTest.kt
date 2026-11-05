@@ -52,6 +52,7 @@ class ScrollRestoreTest {
     fun `a page laid out again shorter for a moment, as Preview does, goes back to its place`() = runComposeUiTest {
         val scrollState = ScrollState(initial = 0)
         var height by mutableStateOf(value = PAGE)
+        var isFullAgain by mutableStateOf(value = false)
         setContent {
             Column(modifier = Modifier.height(height = VIEWPORT.dp).verticalScroll(state = scrollState)) {
                 Spacer(modifier = Modifier.height(height = height.dp))
@@ -63,10 +64,11 @@ class ScrollRestoreTest {
                 height = SHORT_PAGE
                 withContext(context = Dispatchers.IO) { Thread.sleep(SHRINK_MILLIS) }
                 height = PAGE
+                isFullAgain = true
             }
         }
 
-        pumpFrames(until = { false }, millis = SHRINK_MILLIS * 3)
+        pumpFrames(until = { isFullAgain && scrollState.value == TARGET }, millis = WAIT_MILLIS)
 
         assertEquals(TARGET, scrollState.value)
     }
