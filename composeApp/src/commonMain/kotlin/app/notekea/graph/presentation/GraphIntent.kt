@@ -14,6 +14,11 @@ sealed interface GraphIntent {
         GraphIntent,
         FeedIntent
 
+    /** The graph's tab came to be, or stopped being, open in a pane: it works only then. */
+    data class OnShownChange(val isShown: Boolean) :
+        GraphIntent,
+        FeedIntent
+
     /** The graph was asked for from [note], or with no note open. */
     data class OnOpen(val note: RelativePath?) : GraphIntent
 
@@ -26,8 +31,11 @@ sealed interface GraphIntent {
 
     data class OnMove(val direction: GraphDirection) : GraphIntent
 
-    /** `Enter`, a double click or Open. */
+    /** `Enter` or Open. */
     data object OnOpenSelected : GraphIntent
+
+    /** A double click on the note at [path], which a first click did not select. */
+    data class OnNoteOpen(val path: RelativePath) : GraphIntent
 
     /** `Esc`: back to the note the graph was opened from. */
     data object OnBack : GraphIntent
@@ -46,7 +54,7 @@ sealed interface GraphIntent {
 
     data class OnQueryChange(val query: String) : GraphIntent
 
-    /** The next match, or the one before when [isForward] is false: it is selected and comes into view. */
+    /** The next match, or the one before when [isForward] is false: the map moves to its graph. */
     data class OnMatchStep(val isForward: Boolean) : GraphIntent
 
     /** Link, in the inspector: the note it shows gets a link to [path]. */

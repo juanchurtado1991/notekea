@@ -4,8 +4,8 @@ import app.notekea.core.notes.domain.RelativePath
 
 /**
  * The editor's tabs (`ROADMAP.md` 1.11): one pane, or two side by side ([MAX_PANES]), and the [activePane], the one
- * the keyboard works in. A tab shows a note, another file, a folder (its notes as a grid) or the graph. A path is open in one tab
- * at most, in either pane, so two editors never write the same note:
+ * the keyboard works in. A tab shows a note, another file, a folder (its notes as a grid) or the graph. A path is
+ * open in one tab at most, in either pane, so two editors never write the same note:
  * opening it again goes to its tab. Every change returns a new workspace; the active tab always exists while its pane
  * has tabs, and a second pane left without tabs closes.
  */

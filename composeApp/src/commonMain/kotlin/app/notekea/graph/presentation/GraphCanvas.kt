@@ -1,8 +1,7 @@
 package app.notekea.graph.presentation
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -37,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.GraphPalette
@@ -57,8 +59,8 @@ private const val MAX_SEMANTIC_DOTS = 120
 /**
  * The map of the graph (`ROADMAP.md` 2.7): drag to pan, scroll to zoom, a click selects and a double click opens.
  * Hovering a note lights up its neighbors. Notes farther from the center are smaller, fainter and move a little less,
- * for a sense of depth, and every change slides notes to their new places, unless motion is reduced. A note found
- * by search slides to the middle of the map.
+ * for a sense of depth, and every change moves notes to their new places ([GraphMotion]) and the map to its new
+ * scale, unless motion is reduced.
  */
 @Composable
 internal fun GraphCanvas(
@@ -70,18 +72,26 @@ internal fun GraphCanvas(
     var pan by remember { mutableStateOf(value = Offset.Zero) }
     var zoom by remember { mutableFloatStateOf(value = 1f) }
     var hovered by remember { mutableStateOf<RelativePath?>(value = null) }
-    val places = rememberPlaces(state = state, size = size, pan = pan, zoom = zoom)
+    val spec = motionTween<Float>(durationMillis = NotekeaDimensions.MOTION_LONGEST_MILLIS)
+    val fit by animateFloatAsState(targetValue = fitOf(state = state, size = size), animationSpec = spec)
+    val scale = fit * zoom
+    val motion = rememberMotion(state = state)
+    val places = placesOf(dots = state.dots, motion = motion, size = size, pan = pan, scale = scale)
     val current by rememberUpdatedState(newValue = places)
     val dots by rememberUpdatedState(newValue = state.dots)
-    RevealNote(state = state, scale = scaleOf(state, size, zoom), pan = { pan }, onPan = { pan = it })
-    val hit = { at: Offset -> noteAt(point = at, dots = dots, places = current, scale = scaleOf(state, size, zoom)) }
+    val currentScale by rememberUpdatedState(newValue = scale)
+    RevealNote(state.revealed, pan = { pan }, zoom = { zoom }) { newPan, newZoom ->
+        pan = newPan
+        zoom = newZoom
+    }
+    val hit = { at: Offset -> noteAt(point = at, dots = dots, places = current, scale = currentScale) }
     Box(
         modifier = modifier
             .onSizeChanged { size = it }
             .pointerInput(onIntent) {
                 detectTapGestures(
                     onTap = { at -> hit(at)?.let { onIntent(GraphIntent.OnNoteSelect(path = it)) } },
-                    onDoubleTap = { at -> hit(at)?.let { onIntent(GraphIntent.OnOpenSelected) } }
+                    onDoubleTap = { at -> hit(at)?.let { onIntent(GraphIntent.OnNoteOpen(path = it)) } }
                 )
             }
             .pointerInput(Unit) { detectDragGestures { _, drag -> pan += drag } }
@@ -91,6 +101,7 @@ internal fun GraphCanvas(
                         val event = awaitPointerEvent()
                         val change = event.changes.first()
                         if (event.type == PointerEventType.Move) hovered = hit(change.position)
+                        if (event.type == PointerEventType.Exit) hovered = null
                         if (event.type == PointerEventType.Scroll) {
                             zoom = (zoom * (1f - change.scrollDelta.y * ZOOM_STEP))
                                 .coerceIn(minimumValue = MIN_ZOOM, maximumValue = MAX_ZOOM)
@@ -99,67 +110,64 @@ internal fun GraphCanvas(
                 }
             }
     ) {
-        Map(state = state, places = places, scale = scaleOf(state, size, zoom), zoom = zoom, hovered = hovered)
-        if (state.dots.size <= MAX_SEMANTIC_DOTS) NoteTargets(state, places, scaleOf(state, size, zoom), onIntent)
+        Map(state = state, motion = motion, places = places, scale = scale, zoom = zoom, hovered = hovered)
+        if (state.dots.size <= MAX_SEMANTIC_DOTS) NoteTargets(state, places, scale, onIntent)
     }
 }
 
-/** Brings [GraphState.revealed] to the middle of the map; around a note it is on its way to the center already. */
+/** Moving to a note found by search also takes the map back to the middle, at its usual zoom. */
 @Composable
 private fun RevealNote(
-    state: GraphState,
-    scale: Float,
+    revealed: RelativePath?,
     pan: () -> Offset,
-    onPan: (Offset) -> Unit
+    zoom: () -> Float,
+    onMove: (Offset, Float) -> Unit
 ) {
-    val spec = motionTween<Offset>(durationMillis = NotekeaDimensions.MOTION_LONGEST_MILLIS)
-    LaunchedEffect(state.revealed) {
-        val dot = state.dots.firstOrNull { it.path == state.revealed }
-        if (state.revealed == null) return@LaunchedEffect
-        val place = dot?.takeIf { state.scope == GraphScope.WHOLE_VAULT }?.let { Offset(x = it.x, y = it.y) }
-        animate(
-            typeConverter = Offset.VectorConverter,
-            initialValue = pan(),
-            targetValue = -(place ?: Offset.Zero) * scale,
-            animationSpec = spec
-        ) { value, _ -> onPan(value) }
+    val spec = motionTween<Float>(durationMillis = NotekeaDimensions.MOTION_LONGEST_MILLIS)
+    LaunchedEffect(revealed) {
+        if (revealed == null) return@LaunchedEffect
+        val startPan = pan()
+        val startZoom = zoom()
+        animate(initialValue = 0f, targetValue = 1f, animationSpec = spec) { value, _ ->
+            onMove(lerp(start = startPan, stop = Offset.Zero, fraction = value), lerp(startZoom, 1f, value))
+        }
     }
 }
 
-/** Where each note is drawn now, sliding from where it was. */
+/** The move that goes on now, a new one each time the notes change. */
 @Composable
-private fun rememberPlaces(
-    state: GraphState,
+private fun rememberMotion(
+    state: GraphState
+): GraphMotion {
+    var last by remember { mutableStateOf<GraphMotion?>(value = null) }
+    val motion = remember(state.dots) { GraphMotion.after(previous = last, dots = state.dots, center = state.center) }
+    val spec = motionTween<Float>(durationMillis = NotekeaDimensions.MOTION_LONGEST_MILLIS)
+    SideEffect { last = motion }
+    LaunchedEffect(motion) { motion.progress.animateTo(targetValue = 1f, animationSpec = spec) }
+    return motion
+}
+
+/** Where each note is drawn now, those leaving too. */
+private fun placesOf(
+    dots: List<GraphDot>,
+    motion: GraphMotion,
     size: IntSize,
     pan: Offset,
-    zoom: Float
+    scale: Float
 ): Map<RelativePath, Offset> {
-    val progress = remember { Animatable(initialValue = 1f) }
-    var previous by remember { mutableStateOf<Map<RelativePath, Offset>>(value = emptyMap()) }
-    val spec = motionTween<Float>(durationMillis = NotekeaDimensions.MOTION_LONGEST_MILLIS)
-    LaunchedEffect(state.dots) {
-        progress.snapTo(targetValue = 0f)
-        progress.animateTo(targetValue = 1f, animationSpec = spec)
-        previous = state.dots.associate { it.path to Offset(x = it.x, y = it.y) }
-    }
-    val scale = scaleOf(state, size, zoom)
     val middle = Offset(x = size.width / 2f, y = size.height / 2f)
-    return state.dots.associate { dot ->
-        val target = Offset(x = dot.x, y = dot.y)
-        val from = previous[dot.path] ?: target
-        val place = from + (target - from) * progress.value
-        dot.path to middle + place * scale + pan * (1f - dot.depth * PARALLAX_PER_DEPTH)
+    return (dots + motion.leaving).associate { dot ->
+        dot.path to middle + motion.placeOf(dot = dot) * scale + pan * (1f - dot.depth * PARALLAX_PER_DEPTH)
     }
 }
 
-private fun scaleOf(
+/** The scale that fits every note in [size], never above their own size. */
+private fun fitOf(
     state: GraphState,
-    size: IntSize,
-    zoom: Float
+    size: IntSize
 ): Float {
     val reach = state.dots.maxOfOrNull { max(kotlin.math.abs(it.x), kotlin.math.abs(it.y)) } ?: 1f
-    val fit = if (reach <= 0f) 1f else min(size.width, size.height) * FIT_MARGIN / reach
-    return min(a = fit, b = 1f) * zoom
+    return min(a = if (reach <= 0f) 1f else min(size.width, size.height) * FIT_MARGIN / reach, b = 1f)
 }
 
 private fun noteAt(
@@ -175,6 +183,7 @@ private fun noteAt(
 @Composable
 private fun Map(
     state: GraphState,
+    motion: GraphMotion,
     places: Map<RelativePath, Offset>,
     scale: Float,
     zoom: Float,
@@ -198,12 +207,9 @@ private fun Map(
         colorOf = { dot -> folderColor(folder = dot.folder, folders = state.folders, root = colors.onSurfaceVariant) }
     )
     Canvas(modifier = Modifier.fillMaxSize()) {
+        drawDots(dots = motion.leaving, paint = paint, measurer = measurer, fade = motion.fade)
         drawLines(lines = state.lines, paint = paint)
-        drawDots(
-            dots = state.dots.sortedBy { -it.depth },
-            paint = paint,
-            measurer = measurer
-        )
+        drawDots(dots = state.dots.sortedBy { -it.depth }, paint = paint, measurer = measurer, fade = 1f)
     }
 }
 

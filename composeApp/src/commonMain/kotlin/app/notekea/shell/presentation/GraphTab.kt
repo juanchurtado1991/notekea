@@ -1,9 +1,9 @@
 package app.notekea.shell.presentation
 
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import app.notekea.core.platform.domain.graphShortcut
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.editor.presentation.EditorIntent
@@ -14,8 +14,9 @@ import app.notekea.shell.domain.Workspace
 import app.notekea.tree.presentation.VaultTreeState
 
 /**
- * What the graph follows while the vault is open, tab shown or not: the vault's notes and its index. `Mod+G` opens it,
- * and a note chosen on it opens in a tab with the keyboard in its text.
+ * What the graph follows while the vault is open: its notes, its index and whether its tab is open, as it works only
+ * then. `Mod+G` opens it, a note chosen on it opens in a tab with the keyboard in its text, and a note it wrote reaches
+ * the editor that has it open.
  */
 @Composable
 internal fun FollowGraph(
@@ -26,10 +27,13 @@ internal fun FollowGraph(
     val graph = viewModels.graph
     val index by searchIndex.state.collectAsState()
     val isIndexReady = !index.isRunning && index.readyNotes != null
+    val tabs by viewModels.workspace.state.collectAsState()
+    val isShown = tabs.workspace.panes.any { Workspace.GRAPH in it.tabs }
     LaunchedEffect(graph, state.tree.notes) {
         graph.onIntent(intent = GraphIntent.OnNotesChange(notes = state.tree.notes.values))
     }
     LaunchedEffect(graph, isIndexReady) { graph.onIntent(intent = GraphIntent.OnIndexChange(isReady = isIndexReady)) }
+    LaunchedEffect(graph, isShown) { graph.onIntent(intent = GraphIntent.OnShownChange(isShown = isShown)) }
     LaunchedEffect(graph) {
         graph.effects.collect { effect ->
             when (effect) {
@@ -38,13 +42,17 @@ internal fun FollowGraph(
                     val pane = viewModels.workspace.state.value.workspace.paneOpening(path = effect.path)
                     viewModels.editors[pane].onIntent(intent = EditorIntent.OnFocusRequest(path = effect.path))
                 }
+
+                is GraphEffect.NoteRewritten -> viewModels.editors.forEach { editor ->
+                    editor.onIntent(intent = EditorIntent.OnNoteRewritten(path = effect.path))
+                }
             }
         }
     }
     WindowShortcut(shortcut = state.platformConventions.graphShortcut) { openGraph(viewModels = viewModels) }
 }
 
-/** Opens the graph's tab, around the note being read, or the whole vault when no note is. */
+/** Opens the graph's tab, around the note being read; with none, it asks for one. */
 internal fun openGraph(
     viewModels: WorkspaceViewModels
 ) {

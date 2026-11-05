@@ -2,7 +2,7 @@ package app.notekea.graph.domain
 
 import app.notekea.core.notes.domain.RelativePath
 
-/** Two notes joined by a link, or close in meaning when [isRelated]. It has no direction: [first] sorts before [second]. */
+/** Two notes joined by a link, or close in meaning when [isRelated]; no direction: [first] sorts before [second]. */
 data class GraphEdge(
     val first: RelativePath,
     val second: RelativePath,

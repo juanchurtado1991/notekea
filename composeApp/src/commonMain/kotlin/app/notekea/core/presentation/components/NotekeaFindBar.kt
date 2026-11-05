@@ -46,8 +46,8 @@ private const val PREVIEW_QUERY = "arepas"
 private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
 
 /**
- * An inline bar that finds text in the current page (Find in note, `Mod+F`) or the notes on the graph: a field that takes focus when the bar
- * appears, how many matches there are ([matchLabel], "2 of 5"), previous and next buttons and close. Enter goes to the
+ * An inline bar that finds text in the current page (Find in note, `Mod+F`) or the notes on the graph: a field that
+ * takes focus when the bar appears, how many matches there are ([matchLabel], "2 of 5"), previous and next buttons and close. Enter goes to the
  * next match, Shift+Enter to the previous one and Esc closes, as in browsers and editors on every platform.
  */
 @Composable

@@ -526,6 +526,8 @@
     <string name="graph_link_failed">Couldn’t change the note. It may have been edited meanwhile.</string>
     <string name="graph_link_undo">Undo</string>
     <string name="graph_linked">Linked to %1$s</string>
+    <string name="graph_no_note_message">Find a note to see what it connects to.</string>
+    <string name="graph_no_note_title">No note selected</string>
     <string name="graph_open">Open note</string>
     <string name="graph_orphans">Show orphans</string>
     <string name="graph_related">Related by meaning</string>
