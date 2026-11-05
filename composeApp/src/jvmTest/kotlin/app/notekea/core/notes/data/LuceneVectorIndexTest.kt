@@ -62,6 +62,22 @@ class LuceneVectorIndexTest {
         assertEquals(expected = listOf(SONG, AREPAS), actual = hits.map { it.note })
     }
 
+    @Test
+    fun `a chunk has the words only if it holds all of them, and a search can keep to some notes`() =
+        runTest(context = testDispatcher) {
+            val index = index()
+            index.put(VAULT, AREPAS, listOf(chunk(note = AREPAS, text = "the corn flour")), listOf(EAST))
+            index.put(VAULT, SONG, listOf(chunk(note = SONG, text = "the slow guitar")), listOf(NORTH))
+
+            val all = (index.search(VAULT, "the guitar", NORTH, limit = 10, only = null) as Outcome.Success).value
+            val some = (index.search(VAULT, "the", EAST, limit = 10, only = setOf(SONG)) as Outcome.Success).value
+
+            assertEquals(
+                expected = mapOf(SONG to true, AREPAS to false) to listOf(SONG),
+                actual = all.associate { it.note to it.hasWords } to some.map { it.note }
+            )
+        }
+
     // Audit: a question of over 1,024 different words threw out of the search instead of answering.
     @Test
     fun `a very long question is answered from its first words`() = runTest(context = testDispatcher) {
@@ -69,7 +85,7 @@ class LuceneVectorIndexTest {
         index.put(vaultPath = VAULT, note = SONG, chunks = listOf(chunk(SONG, "palabra1")), vectors = listOf(NORTH))
         val question = (1..2_000).joinToString(separator = " ") { "palabra$it" }
 
-        val found = index.search(vaultPath = VAULT, text = question, vector = NORTH, limit = 1)
+        val found = index.search(vaultPath = VAULT, text = question, vector = NORTH, limit = 1, only = null)
 
         assertEquals(expected = listOf(SONG), actual = (found as Outcome.Success).value.map { it.note })
     }
@@ -149,10 +165,17 @@ class LuceneVectorIndexTest {
         text: String,
         vector: FloatArray,
         vaultPath: String = VAULT
-    ): List<RelativePath> =
-        (index.search(vaultPath = vaultPath, text = text, vector = vector, limit = 10) as Outcome.Success).value.map {
-            it.note
-        }
+    ): List<RelativePath> = (
+        index.search(
+            vaultPath = vaultPath,
+            text = text,
+            vector = vector,
+            limit = 10,
+            only = null
+        ) as Outcome.Success
+        ).value.map {
+        it.note
+    }
 
     private companion object {
         const val VAULT = "/home/ana/Notes"

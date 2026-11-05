@@ -45,9 +45,10 @@ class FakeVectorIndex : VectorIndex {
         vaultPath: String,
         text: String,
         vector: FloatArray,
-        limit: Int
+        limit: Int,
+        only: Set<RelativePath>?
     ): Outcome<List<SearchHit>, IndexError> {
-        val chunks = notes[vaultPath].orEmpty().values.flatten()
+        val chunks = notes[vaultPath].orEmpty().filterKeys { only == null || it in only }.values.flatten()
         val byMeaning = chunks.sortedByDescending { (_, v) -> v.indices.sumOf { (v[it] * vector[it]).toDouble() } }
         val words = text.lowercase().split(' ').filter { it.isNotBlank() }
         val byWords = chunks.filter { (chunk, _) -> words.any { it in chunk.text.lowercase() } }
@@ -55,7 +56,8 @@ class FakeVectorIndex : VectorIndex {
         return Outcome.Success(
             value = hits.take(n = limit).map { (chunk, score) ->
                 val closeness = (1f + dot(chunks.first { it.first == chunk }.second, vector)) / 2f
-                hitOf(chunk, score).copy(hasWords = byWords.any { it.first == chunk }, closeness = closeness)
+                val hasEvery = words.all { it in chunk.text.lowercase() }
+                hitOf(chunk, score).copy(hasWords = hasEvery, closeness = closeness)
             }
         )
     }

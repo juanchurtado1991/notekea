@@ -29,9 +29,11 @@ import org.apache.lucene.search.BooleanQuery
 import org.apache.lucene.search.IndexSearcher
 import org.apache.lucene.search.KnnFloatVectorQuery
 import org.apache.lucene.search.Query
+import org.apache.lucene.search.TermInSetQuery
 import org.apache.lucene.search.TermQuery
 import org.apache.lucene.store.FSDirectory
 import org.apache.lucene.store.LockObtainFailedException
+import org.apache.lucene.util.BytesRef
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -41,7 +43,7 @@ import java.security.MessageDigest
  * [VectorIndex] on Lucene, one index per vault in [indexRoot] (the app's data), named by a hash of the vault's path.
  * Each chunk is a document: its note, place and headings stored, its headings and text indexed for BM25 by
  * [NoteAnalyzer], and its vector for nearest-neighbour search (HNSW, dot product of unit vectors). A search takes the
- * best [CANDIDATES] of each and merges them ([RankFusion]). Every change opens the index, commits and closes it, so
+ * best of each as the search asks and merges them ([RankFusion]). Every change opens the index, commits and closes it, so
  * it is on disk when the call returns and another Notekea on the same vault only waits ([IndexError.Busy]).
  */
 class LuceneVectorIndex(
@@ -86,8 +88,9 @@ class LuceneVectorIndex(
         vaultPath: String,
         text: String,
         vector: FloatArray,
-        limit: Int
-    ): Outcome<List<SearchHit>, IndexError> = read(vaultPath = vaultPath) { hitsOf(it, text, vector, limit) }
+        limit: Int,
+        only: Set<RelativePath>?
+    ): Outcome<List<SearchHit>, IndexError> = read(vaultPath = vaultPath) { hitsOf(it, text, vector, limit, only) }
 
     /** [query] on the vault's index as it is on disk; nothing found when it has none yet. */
     private suspend fun read(
@@ -111,18 +114,27 @@ class LuceneVectorIndex(
         searcher: IndexSearcher,
         text: String,
         vector: FloatArray,
-        limit: Int
+        limit: Int,
+        only: Set<RelativePath>?
     ): List<SearchHit> {
-        val byMeaning = searcher.search(KnnFloatVectorQuery(VECTOR, vector, CANDIDATES), CANDIDATES).scoreDocs
-        val byWords = keywordQuery(text = text)?.let { searcher.search(it, CANDIDATES).scoreDocs }.orEmpty()
+        val notes = only?.let { paths -> TermInSetQuery(NOTE, paths.map { BytesRef(it.value) }) }
+        val byMeaning = searcher.search(KnnFloatVectorQuery(VECTOR, vector, limit, notes), limit).scoreDocs
+        val byWords = keywordQuery(text, BooleanClause.Occur.SHOULD, notes)?.let {
+            searcher.search(it, limit).scoreDocs
+        }
+            .orEmpty()
+        val withEveryWord = keywordQuery(text, BooleanClause.Occur.MUST, notes)?.let {
+            searcher.search(it, limit).scoreDocs
+        }
+            .orEmpty()
+            .mapTo(destination = HashSet()) { it.doc }
         val fields = searcher.storedFields()
         val closeness = byMeaning.associate { it.doc to it.score }
-        val withWords = byWords.mapTo(destination = HashSet()) { it.doc }
         return RankFusion.merge(rankings = listOf(byMeaning.map { it.doc }, byWords.map { it.doc }))
             .take(n = limit)
             .map { (document, score) ->
                 hitOf(document = fields.document(document), score = score).copy(
-                    hasWords = document in withWords,
+                    hasWords = document in withEveryWord,
                     closeness = closeness[document] ?: 0f
                 )
             }
@@ -130,7 +142,9 @@ class LuceneVectorIndex(
 
     /** Any of the first [MAX_QUERY_TERMS] words of the question, as the index reads them; null when it has none. */
     private fun keywordQuery(
-        text: String
+        text: String,
+        occur: BooleanClause.Occur,
+        notes: Query?
     ): Query? {
         val terms = mutableListOf<String>()
         analyzer.tokenStream(TEXT, text).use { stream ->
@@ -142,8 +156,9 @@ class LuceneVectorIndex(
         if (terms.isEmpty()) return null
         val query = BooleanQuery.Builder()
         terms.distinct().take(n = MAX_QUERY_TERMS).forEach {
-            query.add(TermQuery(Term(TEXT, it)), BooleanClause.Occur.SHOULD)
+            query.add(TermQuery(Term(TEXT, it)), occur)
         }
+        notes?.let { query.add(it, BooleanClause.Occur.FILTER) }
         return query.build()
     }
 
@@ -218,7 +233,6 @@ class LuceneVectorIndex(
         private const val HEADING_SEPARATOR = "\u001f"
 
         // The best chunks of each ranking merged: enough for the related notes and the chat to pick from.
-        private const val CANDIDATES = 50
         private const val FOLDER_BYTES = 8
 
         // Lucene refuses a query of over 1,024 clauses, and a pasted page is no sharper a question for its last words.
