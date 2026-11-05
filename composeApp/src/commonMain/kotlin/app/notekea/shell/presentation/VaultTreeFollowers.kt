@@ -37,6 +37,7 @@ import app.notekea.tree.presentation.VaultTreeEffect
 import app.notekea.tree.presentation.VaultTreeIntent
 import app.notekea.tree.presentation.VaultTreeState
 import app.notekea.tree.presentation.VaultTreeViewModel
+import app.notekea.shell.domain.Workspace
 
 /** The window shortcuts of the workspace, and the view models following each other's effects. */
 @Composable
@@ -57,7 +58,8 @@ internal fun FollowWorkspace(
     }
     DailyNoteShortcuts(platformConventions = conventions, onIntent = tree::onIntent)
     WindowShortcut(shortcut = conventions.bookmarkShortcut) {
-        val path = workspace.state.value.workspace.activePath ?: tree.state.value.selectedPath
+        val active = workspace.state.value.workspace.activePath?.takeIf { it != Workspace.GRAPH }
+        val path = active ?: tree.state.value.selectedPath
         path?.let { tree.onIntent(intent = BookmarkIntent.OnToggle(path = it)) }
     }
     QuickSwitcherShortcuts(platformConventions = conventions, onIntent = viewModels.onSwitcher)
@@ -106,7 +108,7 @@ private fun FollowTree(
     val activePath = workspaceState.workspace.activePath
     val selected by rememberUpdatedState(newValue = state.selectedPath)
     LaunchedEffect(activePath) {
-        if (activePath != null && activePath != selected) {
+        if (activePath != null && activePath != selected && activePath != Workspace.GRAPH) {
             viewModel.onIntent(intent = VaultTreeIntent.OnRowSelect(path = activePath))
         }
     }

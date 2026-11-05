@@ -10,6 +10,7 @@
     <string name="about_group_writing">Writing</string>
     <string name="about_shortcut_bold">Bold</string>
     <string name="about_shortcut_bookmark">Bookmark the note</string>
+    <string name="about_shortcut_graph">Open the graph</string>
     <string name="about_shortcut_close_tab">Close the tab</string>
     <string name="about_shortcut_close_window">Close the window</string>
     <string name="about_shortcut_quit">Quit Notekea</string>
@@ -235,6 +236,7 @@
     <string name="rail_about">About Notekea</string>
     <string name="rail_label">Sidebar tools</string>
     <string name="rail_settings">Settings</string>
+    <string name="rail_graph">Graph</string>
     <string name="rail_side_panel">Side panel</string>
     <string name="settings_close">Close</string>
     <string name="settings_section_ai">AI model</string>
@@ -296,6 +298,7 @@
         <item quantity="other">%1$d words</item>
     </plurals>
     <string name="tab_unsaved">Unsaved changes</string>
+    <string name="tab_graph">Graph</string>
     <string name="tab_all">All open tabs</string>
     <string name="tab_close">Close tab</string>
     <string name="tab_close_others">Close other tabs</string>
@@ -509,6 +512,18 @@
         <item>Sa</item>
         <item>Su</item>
     </string-array>
+    <string name="graph_connected_to">Connected to</string>
+    <string name="graph_depth_one">1</string>
+    <string name="graph_depth_two">2</string>
+    <string name="graph_empty_message">Link notes with [[ ]] to see them connected here.</string>
+    <string name="graph_empty_title">Nothing connected yet</string>
+    <string name="graph_index_not_ready">Related notes show once your notes are ready to search.</string>
+    <string name="graph_open">Open note</string>
+    <string name="graph_orphans">Show orphans</string>
+    <string name="graph_related">Related by meaning</string>
+    <string name="graph_this_note">This note</string>
+    <string name="graph_too_large">This vault is large. Open the graph from a note to see it clearly.</string>
+    <string name="graph_whole_vault">Whole vault</string>
     <string name="menu_file">File</string>
     <string name="menu_edit">Edit</string>
     <string name="menu_view">View</string>
@@ -529,6 +544,7 @@
     <string name="menu_toggle_task">Toggle task</string>
     <string name="menu_bookmark">Bookmark</string>
     <string name="menu_sidebar">Show or hide Files</string>
+    <string name="menu_graph">Graph</string>
     <string name="menu_side_panel">Show or hide the side panel</string>
     <string name="menu_outline">Go to the outline</string>
     <string name="menu_read_mode">Edit / Preview</string>

@@ -134,7 +134,7 @@ private fun WorkspaceBody(
         state = state,
         vaultName = vaultName,
         onIntent = viewModels.tree::onIntent,
-        rail = railActionsOf(sidePanel, findNote, onSwitchVault) { dialogs.shown = it },
+        rail = railActionsOf(sidePanel, findNote, { openGraph(viewModels) }, onSwitchVault) { dialogs.shown = it },
         modifier = modifier,
         isSidePanelVisible = if (sidePanel.isOverlay) sidePanel.isOverlayOpen else workspaceState.sidePanel.isVisible
     ) {
@@ -191,10 +191,12 @@ private fun startActionsOf(
 private fun railActionsOf(
     sidePanel: SidePanelHost,
     onSearch: () -> Unit,
+    onGraph: () -> Unit,
     onSwitchVault: () -> Unit,
     onDialog: (WindowDialog) -> Unit
 ) = SidebarRailActions(
     onSearch = onSearch,
+    onGraph = onGraph,
     onSidePanelToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
     onSwitchVault = onSwitchVault,
     onAbout = { onDialog(WindowDialog.ABOUT) },
@@ -223,6 +225,8 @@ private fun PaneContent(
         }
 
         TabKind.FOLDER -> FolderTab(folder = path, context = context)
+
+        TabKind.GRAPH -> GraphTab(viewModels = context.viewModels)
 
         TabKind.MISSING -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             EmptyState(

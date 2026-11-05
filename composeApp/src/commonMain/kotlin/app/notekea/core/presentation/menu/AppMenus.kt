@@ -18,6 +18,7 @@ import app.notekea.resources.menu_edit
 import app.notekea.resources.menu_exit
 import app.notekea.resources.menu_file
 import app.notekea.resources.menu_find
+import app.notekea.resources.menu_graph
 import app.notekea.resources.menu_help
 import app.notekea.resources.menu_new_note
 import app.notekea.resources.menu_next_tab
@@ -103,6 +104,7 @@ object AppMenus {
             Command(label = Res.string.menu_sidebar, shortcut = toggleSidebarShortcut),
             Command(label = Res.string.menu_side_panel, shortcut = toggleSidePanelShortcut),
             Command(label = Res.string.menu_outline, shortcut = outlineShortcut),
+            Command(label = Res.string.menu_graph, shortcut = graphShortcut),
             Command(label = Res.string.menu_read_mode, shortcut = toggleReadModeShortcut),
             Separator,
             Command(label = Res.string.menu_zoom_in, shortcut = zoomInShortcut),

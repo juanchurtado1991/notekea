@@ -75,6 +75,7 @@ object PreviewPlatformConventions {
             key = ShortcutKey.B,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
+        graphShortcut = Shortcut(key = ShortcutKey.G, modifiers = setOf(ShortcutModifier.CONTROL)),
         goToTabShortcuts = ShortcutKey.entries
             .filter { it.name.startsWith(prefix = "DIGIT_") && it != ShortcutKey.DIGIT_0 }
             .map { Shortcut(key = it, modifiers = setOf(ShortcutModifier.CONTROL)) },

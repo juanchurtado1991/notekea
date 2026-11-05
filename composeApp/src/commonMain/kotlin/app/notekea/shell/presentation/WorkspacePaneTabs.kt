@@ -22,6 +22,7 @@ import app.notekea.tree.presentation.fileTintOf
 import app.notekea.resources.Res
 import app.notekea.resources.tab_all
 import app.notekea.resources.tab_close
+import app.notekea.resources.tab_graph
 import app.notekea.resources.tab_close_others
 import app.notekea.resources.tab_move_to_other_pane
 import app.notekea.resources.tab_new
@@ -123,10 +124,15 @@ private fun tabMenu(
     }
 }
 
+@Composable
 private fun labelOf(
     path: RelativePath,
     state: WorkspaceState
-): String = if (state.kindOf(path = path) == TabKind.NOTE) path.nameWithoutExtension else path.name
+): String = when (state.kindOf(path = path)) {
+    TabKind.NOTE -> path.nameWithoutExtension
+    TabKind.GRAPH -> stringResource(resource = Res.string.tab_graph)
+    else -> path.name
+}
 
 private fun iconOf(
     path: RelativePath,
@@ -134,6 +140,7 @@ private fun iconOf(
 ): ImageVector = when (state.kindOf(path = path)) {
     TabKind.NOTE -> NotekeaIcons.Note
     TabKind.FOLDER -> NotekeaIcons.Folder
+    TabKind.GRAPH -> NotekeaIcons.Graph
     TabKind.MISSING -> NotekeaIcons.MissingFile
     TabKind.FILE -> fileIconOf(path = path)
 }

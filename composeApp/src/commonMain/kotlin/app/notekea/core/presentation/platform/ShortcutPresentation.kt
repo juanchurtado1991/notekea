@@ -105,6 +105,7 @@ internal fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.ENTER -> Key.Enter
     ShortcutKey.EQUALS -> Key.Equals
     ShortcutKey.F -> Key.F
+    ShortcutKey.G -> Key.G
     ShortcutKey.F2 -> Key.F2
     ShortcutKey.F4 -> Key.F4
     ShortcutKey.I -> Key.I

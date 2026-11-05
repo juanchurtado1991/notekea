@@ -190,6 +190,7 @@ class ResolvePlatformConventionsUseCaseTest {
         splitRightShortcut = primary.withShift(ShortcutKey.D),
         templateShortcut = primary.with(ShortcutKey.T),
         bookmarkShortcut = primary.withShift(ShortcutKey.B),
+        graphShortcut = primary.with(ShortcutKey.G),
         goToTabShortcuts = DIGITS.map { primary.with(it) },
         dialogButtonOrder = buttonOrder,
         appDataDirectory = appDataDirectory,

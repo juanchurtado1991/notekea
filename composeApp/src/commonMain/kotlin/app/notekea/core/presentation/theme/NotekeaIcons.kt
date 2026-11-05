@@ -30,6 +30,7 @@ import com.composables.icons.lucide.ArrowDown
 import com.composables.icons.lucide.ChevronsDownUp
 import com.composables.icons.lucide.ChevronsUpDown
 import com.composables.icons.lucide.FolderTree
+import com.composables.icons.lucide.Network
 import com.composables.icons.lucide.Minus
 import com.composables.icons.lucide.Calendar
 import com.composables.icons.lucide.CalendarDays
@@ -159,6 +160,7 @@ object NotekeaIcons {
     val FeatureObsidian: ImageVector get() = Lucide.BookOpen
     val FeaturePrivate: ImageVector get() = Lucide.ShieldCheck
     val Files: ImageVector get() = Lucide.FolderTree
+    val Graph: ImageVector get() = Lucide.Network
     val Find: ImageVector get() = Lucide.Search
     val FindNext: ImageVector get() = Lucide.ArrowDown
     val FindPrevious: ImageVector get() = Lucide.ArrowUp
