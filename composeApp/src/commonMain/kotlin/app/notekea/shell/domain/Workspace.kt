@@ -4,7 +4,7 @@ import app.notekea.core.notes.domain.RelativePath
 
 /**
  * The editor's tabs (`ROADMAP.md` 1.11): one pane, or two side by side ([MAX_PANES]), and the [activePane], the one
- * the keyboard works in. A tab shows a note, another file or a folder (its notes as a grid). A path is open in one tab
+ * the keyboard works in. A tab shows a note, another file, a folder (its notes as a grid) or the graph. A path is open in one tab
  * at most, in either pane, so two editors never write the same note:
  * opening it again goes to its tab. Every change returns a new workspace; the active tab always exists while its pane
  * has tabs, and a second pane left without tabs closes.
@@ -180,7 +180,7 @@ data class Workspace(
     /** Closes the tabs whose file is not in [existing] (files deleted while the vault was closed). */
     fun keepingOnly(
         existing: Set<RelativePath>
-    ): Workspace = closeWhere { it !in existing }
+    ): Workspace = closeWhere { it !in existing && it != GRAPH }
 
     private fun closeWhere(
         predicate: (RelativePath) -> Boolean
@@ -208,6 +208,8 @@ data class Workspace(
     }
 
     companion object {
+        /** The graph's tab (`ROADMAP.md` 2.7). It is no file of the vault, and the name of none: a dot starts it. */
+        val GRAPH = RelativePath(value = ".notekea-graph")
         const val MAX_PANES = 2
         private const val LAST_TAB_NUMBER = 9
         val EMPTY = Workspace()

@@ -26,6 +26,7 @@ import app.notekea.editor.presentation.EditorPaneTools
 import app.notekea.editor.presentation.EditorViewModel
 import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.search.presentation.switcher.QuickSwitcherContent
+import app.notekea.graph.presentation.GraphViewModel
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherViewModel
 import app.notekea.tree.presentation.tags.TagPickerContent
@@ -57,6 +58,7 @@ import app.notekea.tree.presentation.VaultTreeViewModel
 
 private const val TEMPLATE_PICKER_KEY_PREFIX = "templates:"
 private const val EDITOR_KEY_PREFIX = "editor:"
+private const val GRAPH_KEY_PREFIX = "graph:"
 private const val SWITCHER_KEY_PREFIX = "switcher:"
 private const val SEARCH_INDEX_KEY_PREFIX = "search-index:"
 private const val NOTICE_MAX_WIDTH_DP = 640
@@ -95,6 +97,7 @@ fun VaultTreeScreen(
     templatePickerViewModel: TemplatePickerViewModel = koinViewModel(
         key = TEMPLATE_PICKER_KEY_PREFIX + vaultPath
     ) { parametersOf(vaultPath) },
+    graphViewModel: GraphViewModel = koinViewModel(key = GRAPH_KEY_PREFIX + vaultPath) { parametersOf(vaultPath) },
     searchIndexViewModel: SearchIndexViewModel = koinViewModel(
         key = SEARCH_INDEX_KEY_PREFIX + vaultPath
     ) { parametersOf(vaultPath) },
@@ -112,6 +115,7 @@ fun VaultTreeScreen(
     val editors = remember(workspaceViewModel, editorViewModels) { PaneEditors(workspaceViewModel, editorViewModels) }
     val sidePanel = rememberSidePanel(workspaceViewModel, relatedViewModel, mentionsViewModel, editors, state)
     val viewModels = WorkspaceViewModels(
+        graph = graphViewModel,
         tree = viewModel,
         workspace = workspaceViewModel,
         editors = editorViewModels,
@@ -121,6 +125,7 @@ fun VaultTreeScreen(
     )
     FollowWorkspace(state = state, viewModels = viewModels, sidePanel = sidePanel)
     FollowActiveTab(name = workspaceState.activeTabName, onChange = onActiveTabChange)
+    FollowGraph(viewModels = viewModels, state = state, searchIndex = searchIndexViewModel)
     Box(modifier = modifier) {
         VaultWorkspace(
             state = state,

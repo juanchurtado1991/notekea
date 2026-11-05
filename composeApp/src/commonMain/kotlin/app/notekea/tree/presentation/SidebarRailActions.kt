@@ -10,6 +10,7 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class SidebarRailActions(
     val onSearch: () -> Unit = {},
+    val onGraph: () -> Unit = {},
     val onSidePanelToggle: () -> Unit = {},
     val onSwitchVault: () -> Unit = {},
     val onAbout: () -> Unit = {},

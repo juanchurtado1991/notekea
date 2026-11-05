@@ -37,6 +37,7 @@ import kotlin.math.roundToInt
 import app.notekea.resources.status_zoom_tooltip
 import app.notekea.resources.status_zoom
 import app.notekea.resources.status_reveal
+import app.notekea.resources.tab_graph
 import app.notekea.core.presentation.platform.LocalUiZoom
 
 private const val PERCENT = 100
@@ -93,10 +94,15 @@ private fun Breadcrumbs(
     NotekeaStatusLabel(
         tooltip = reveal,
         onClick = { onReveal(path) },
-        text = if (kind == TabKind.NOTE) path.nameWithoutExtension else path.name,
+        text = when (kind) {
+            TabKind.NOTE -> path.nameWithoutExtension
+            TabKind.GRAPH -> stringResource(resource = Res.string.tab_graph)
+            else -> path.name
+        },
         icon = when (kind) {
             TabKind.NOTE -> NotekeaIcons.Note
             TabKind.FOLDER -> NotekeaIcons.Folder
+            TabKind.GRAPH -> NotekeaIcons.Graph
             else -> NotekeaIcons.OtherFile
         }
     )

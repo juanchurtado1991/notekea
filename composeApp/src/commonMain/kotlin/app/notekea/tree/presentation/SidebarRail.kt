@@ -15,6 +15,7 @@ import app.notekea.resources.Res
 import app.notekea.resources.rail_about
 import app.notekea.resources.rail_label
 import app.notekea.resources.rail_settings
+import app.notekea.resources.rail_graph
 import app.notekea.resources.rail_side_panel
 import app.notekea.resources.tree_files
 import app.notekea.resources.tree_search
@@ -82,6 +83,12 @@ private fun topItems(
             label = stringResource(resource = Res.string.tree_search),
             onClick = actions.onSearch,
             shortcutHint = shortcut(conventions.quickSwitcherShortcut)
+        ),
+        NotekeaToolRailItem(
+            icon = NotekeaIcons.Graph,
+            label = stringResource(resource = Res.string.rail_graph),
+            onClick = actions.onGraph,
+            shortcutHint = shortcut(conventions.graphShortcut)
         ),
         NotekeaToolRailItem(
             icon = NotekeaIcons.Today,

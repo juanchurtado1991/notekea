@@ -10,6 +10,7 @@ import app.notekea.resources.about_group_workspace
 import app.notekea.resources.about_group_writing
 import app.notekea.resources.about_shortcut_bold
 import app.notekea.resources.about_shortcut_bookmark
+import app.notekea.resources.about_shortcut_graph
 import app.notekea.resources.about_shortcut_close_tab
 import app.notekea.resources.about_shortcut_close_window
 import app.notekea.resources.about_shortcut_delete
@@ -57,6 +58,7 @@ object AboutShortcuts {
                     AboutShortcut(label = Res.string.about_shortcut_next_day, shortcut = nextDayShortcut),
                     AboutShortcut(label = Res.string.about_shortcut_template, shortcut = templateShortcut),
                     AboutShortcut(label = Res.string.about_shortcut_bookmark, shortcut = bookmarkShortcut),
+                    AboutShortcut(label = Res.string.about_shortcut_graph, shortcut = graphShortcut),
                     AboutShortcut(label = Res.string.about_shortcut_open_selected, shortcut = openSelectedShortcut),
                     AboutShortcut(label = Res.string.about_shortcut_rename, shortcut = renameShortcut),
                     AboutShortcut(label = Res.string.about_shortcut_delete, shortcut = deleteShortcut)
