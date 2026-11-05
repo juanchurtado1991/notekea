@@ -12,7 +12,8 @@ import app.notekea.core.notes.domain.createMissingFolders
 /**
  * Creates the vault's templates folder ([TemplateSettings.folder], `Templates` by default) with an example template
  * named `exampleName` holding `exampleText` (`ROADMAP.md` 1.12), so someone who never used a template sees one at once.
- * An example already there is kept as it is. Returns the example's path.
+ * An example already there is kept as it is. It is written whole, never created empty first: the vault's watcher lists
+ * a new file at once, and a template chosen while it was empty inserted nothing. Returns the example's path.
  */
 class CreateTemplatesFolderUseCase(
     private val vaultSettingsReader: VaultSettingsReader,
@@ -30,10 +31,6 @@ class CreateTemplatesFolderUseCase(
             ?.let { return it }
         val example = folder.child(name = exampleName + RelativePath.MARKDOWN_EXTENSION)
         if (noteFileOperations.exists(vaultPath = vaultPath, path = example)) return Outcome.Success(value = example)
-        when (val created = noteFileOperations.createFile(vaultPath = vaultPath, path = example)) {
-            is Outcome.Failure -> return created
-            is Outcome.Success -> Unit
-        }
         return when (
             val written = noteContentStore.write(
                 vaultPath = vaultPath,
