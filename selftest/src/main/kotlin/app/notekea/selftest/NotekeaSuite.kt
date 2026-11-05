@@ -26,6 +26,7 @@ import app.notekea.selftest.cases.m1.vaultCases
 import app.notekea.selftest.cases.m1.workspaceLookCases
 import app.notekea.selftest.cases.m2.appearanceCases
 import app.notekea.selftest.cases.m2.backlinksCases
+import app.notekea.selftest.cases.m2.hybridSearchCases
 import app.notekea.selftest.cases.m2.indexCases
 import app.notekea.selftest.cases.m2.relatedCases
 import com.testbuddy.Suite
@@ -74,6 +75,7 @@ object NotekeaSuite {
             indexCases()
             relatedCases()
             backlinksCases()
+            hybridSearchCases()
             // Free use comes last, after every other manual case.
             freeUseCase()
         }

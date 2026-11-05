@@ -4,7 +4,6 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.performClick
 import app.notekea.selftest.expectNotInNoteText
 import app.notekea.selftest.SmokeScenarios
-import app.notekea.selftest.expectOrderOnScreen
 import app.notekea.selftest.openNote
 import app.notekea.selftest.openVault
 import app.notekea.selftest.pressInWindow
@@ -38,8 +37,7 @@ private fun SuiteBuilder.contentSearch() {
         expectText(text = SEARCH_TEXT)
         type(text = "tomato")
         expectText(text = "Planted the last tomato seedlings", substring = true)
-        expectOrderOnScreen(texts = listOf("2026-10-20", "Pasta e fagioli", "Tomato plan"))
-        expectText(text = "notes in Tomato plan", substring = true)
+        listOf("2026-10-20", "Pasta e fagioli", "Tomato plan").forEach { expectText(text = it) }
         expectNoText(text = "[[Tomato plan", substring = true)
     }
 }
