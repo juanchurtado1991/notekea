@@ -4,7 +4,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTextReplacement
@@ -72,10 +71,10 @@ private fun SuiteBuilder.bookmarksOpen() {
     ) {
         bookmarkFour()
         clickIcon(label = "Collapse all folders")
-        highest(name = PLATE).performClick()
+        highest(name = PLATE).clickWhenStill()
         expectText(text = "Image · 480 × 240", substring = true)
         expectText(text = "Weekly menu.pdf")
-        highest(name = "Recipes").performClick()
+        highest(name = "Recipes").clickWhenStill()
         expectText(text = "3 files")
         // The plate shows twice in the sidebar, as a bookmark and in the tree; folded, only the tree's is left.
         click(text = BOOKMARKS)
@@ -116,12 +115,12 @@ private fun SuiteBuilder.bookmarksFollow() {
         expectBookmarkOrder(names = listOf(WELCOME, "Cooking", PLATE, "Ideas"))
         clickInTree(text = WELCOME)
         titleField(name = WELCOME).apply {
-            performClick()
+            clickWhenStill()
             performTextReplacement(text = "Start here")
         }
         titleField(name = "Start here").performKeyInput { pressKey(key = Key.Enter) }
         expectBookmarkOrder(names = listOf("Start here", "Cooking", PLATE, "Ideas"))
-        lowest(name = "Ideas").performClick()
+        lowest(name = "Ideas").clickWhenStill()
         if (system == HostSystem.MACOS) press(shortcut = Mod + Key.Backspace) else press(key = Key.Delete)
         click(text = "Delete folder")
         ui.waitUntil(timeoutMillis = 10_000) { shownCount(name = "Ideas") == 0 }

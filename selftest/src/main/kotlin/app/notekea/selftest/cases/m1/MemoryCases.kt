@@ -2,7 +2,6 @@ package app.notekea.selftest.cases.m1
 
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.performClick
 import app.notekea.selftest.clickInTree
 import app.notekea.selftest.expectOrderOnScreen
 import app.notekea.selftest.openNote
@@ -61,7 +60,7 @@ private fun SuiteBuilder.picturesComeBack() {
         pressInWindow(shortcut = Mod + Key.E)
         expectPictures(atLeast = 2)
         openNote(name = "Arepas", shownText = AREPAS_FLOUR)
-        tab(name = IMAGES).performClick()
+        tab(name = IMAGES).clickWhenStill()
         expectPictures(atLeast = 2)
     }
 }

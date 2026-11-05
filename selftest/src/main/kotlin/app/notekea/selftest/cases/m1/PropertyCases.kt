@@ -3,7 +3,6 @@ package app.notekea.selftest.cases.m1
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import app.notekea.selftest.noteText
 import app.notekea.selftest.openNote
@@ -120,7 +119,7 @@ private fun SuiteBuilder.propertiesSource() {
         val yaml = source.fetchSemanticsNode().config[SemanticsProperties.EditableText]
         source.performTextReplacement(text = yaml.text.replace("page: 12", "page: 13"))
         expectFile(path = PRACTICE_FILE, containing = "  page: 13\n")
-        noteText(part = PRACTICE_TEXT).performClick()
+        noteText(part = PRACTICE_TEXT).clickWhenStill()
         clickIcon(label = "Show properties")
         expectText(text = "page: 13", substring = true)
         expectText(text = "book: Abuela's notebook", substring = true)
@@ -136,7 +135,7 @@ private fun SuiteBuilder.brokenProperties() {
         source.performTextReplacement(text = yaml.text.lines().filterNot { it == BROKEN_LINE }.joinToString("\n"))
         expectNoText(text = "not valid YAML (line 2)", substring = true)
         expectFile(path = BROKEN_FILE, content = "---\ntitle: Broken on purpose\n---\n" + brokenBody())
-        noteText(part = "Its frontmatter is not valid YAML").performClick()
+        noteText(part = "Its frontmatter is not valid YAML").clickWhenStill()
         expectText(text = "Broken on purpose")
     }
 }
@@ -161,7 +160,7 @@ private fun CaseScope.addToList(
     property: String,
     item: String
 ) {
-    onRowOf(rowText = property, matcher = hasSetTextAction() and hasText(text = "")).performClick()
+    onRowOf(rowText = property, matcher = hasSetTextAction() and hasText(text = "")).clickWhenStill()
     type(text = item)
     press(key = Key.Enter)
 }

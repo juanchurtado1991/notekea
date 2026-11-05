@@ -4,7 +4,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.performClick
 import app.notekea.selftest.SmokeScenarios
 import app.notekea.selftest.clickInTree
 import app.notekea.selftest.relaunch
@@ -64,7 +63,7 @@ private fun SuiteBuilder.splitRight() {
         expectText(text = "Move to the other pane")
         expectNoText(text = "Split right")
         press(key = Key.Escape)
-        noteText(part = WELCOME_TEXT).performClick()
+        noteText(part = WELCOME_TEXT).clickWhenStill()
         expectNoText(text = "Ingredients")
     }
 }
@@ -89,7 +88,7 @@ private fun SuiteBuilder.placeKept() {
         clickInOutline(heading = "Serving")
         expectOnScreen(text = OUTLINE_MIDDLE)
         clickInTree(text = WELCOME)
-        tab(name = "Outline practice").performClick()
+        tab(name = "Outline practice").clickWhenStill()
         expectOnScreen(text = OUTLINE_MIDDLE)
     }
 }
@@ -118,7 +117,7 @@ private fun SuiteBuilder.folderCards() {
         if (card(name = "Embeds").top() > card(name = "Read mode").top()) {
             throw CaseFailure(message = "expected the subfolder Embeds before the notes")
         }
-        card(name = "Read mode").performClick()
+        card(name = "Read mode").clickWhenStill()
         expectShown(text = "Some **bold**")
         clickInTree(text = "attachments")
         listOf("Arepas plate.png", "Market photo.jpg", "broken.png").forEach { card(name = it) }
@@ -244,7 +243,7 @@ private fun CaseScope.clickInOutline(heading: String) {
         matcher = hasContentDescription(value = "Headings of this note")
     )
     ui.waitUntil(timeoutMillis = 10_000) { ui.onAllNodes(matcher = row).fetchSemanticsNodes().isNotEmpty() }
-    ui.onAllNodes(matcher = row)[0].performClick()
+    ui.onAllNodes(matcher = row)[0].clickWhenStill()
 }
 
 private const val DROP_MARGIN = 8f

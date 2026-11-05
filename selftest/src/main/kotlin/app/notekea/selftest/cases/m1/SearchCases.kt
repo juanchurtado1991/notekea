@@ -1,7 +1,6 @@
 package app.notekea.selftest.cases.m1
 
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.test.performClick
 import app.notekea.selftest.expectNotInNoteText
 import app.notekea.selftest.SmokeScenarios
 import app.notekea.selftest.openNote
@@ -126,7 +125,7 @@ private fun SuiteBuilder.largeVaultSearch() {
 private fun SuiteBuilder.typingAfterThePalette() {
     automated(id = "1.6-11", title = "After the palette, typing goes on in the note") {
         openPlaygroundNote(name = "Arepas", shownText = AREPAS_FLOUR)
-        noteText(part = AREPAS_FLOUR).performClick()
+        noteText(part = AREPAS_FLOUR).clickWhenStill()
         press(shortcut = Mod + Key.P)
         press(key = Key.Escape)
         type(text = "First")
