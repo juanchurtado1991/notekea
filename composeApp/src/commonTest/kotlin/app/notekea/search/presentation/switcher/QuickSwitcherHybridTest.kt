@@ -30,6 +30,17 @@ class QuickSwitcherHybridTest {
     }
 
     @Test
+    fun `a note with every word always stays, and passages found by meaning give way`() {
+        val tenExact = (0 until 10).map { row(path = RelativePath(value = "Exact $it.md")) }
+        val state = QuickSwitcherState(mode = QuickSwitcherMode.CONTENT, query = "corn", rows = tenExact)
+        val byMeaning = (0 until 10).map { passage(path = RelativePath(value = "Meaning $it.md")) }
+
+        val answered = reduceHybridAnswer(state, tenExact, Outcome.Success(value = byMeaning))
+
+        assertEquals(expected = tenExact.map { it.path }, actual = answered.rows.map { it.path })
+    }
+
+    @Test
     fun `a search that could not run keeps the exact words and says so`() {
         val state = QuickSwitcherState(mode = QuickSwitcherMode.CONTENT, query = "corn", rows = exact)
 

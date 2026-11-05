@@ -63,7 +63,7 @@ class QuickSwitcherViewModel(
 
     private fun close() {
         searchJob?.cancel()
-        reduce { QuickSwitcherState() }
+        reduce { QuickSwitcherState(isIndexReady = it.isIndexReady) }
     }
 
     private fun confirm() {

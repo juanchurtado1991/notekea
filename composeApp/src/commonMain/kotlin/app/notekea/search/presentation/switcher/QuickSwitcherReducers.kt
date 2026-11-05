@@ -75,7 +75,8 @@ internal fun passageRowOf(
 
 /**
  * The hybrid search answered: its passages come first, then the notes only the exact words found, and the row that was
- * selected stays selected. A search that could not run leaves the exact words, and says so.
+ * selected stays selected. A note with every searched word always stays: passages found only by meaning give way to it.
+ * A search that could not run leaves the exact words, and says so.
  */
 internal fun reduceHybridAnswer(
     state: QuickSwitcherState,
@@ -84,7 +85,11 @@ internal fun reduceHybridAnswer(
 ): QuickSwitcherState {
     val passages = (outcome as? Outcome.Success)?.value.orEmpty().map(transform = ::passageRowOf)
     val found = passages.mapTo(destination = HashSet()) { it.path }
-    val rows = (passages + exact.filter { it.path !in found }).take(n = SearchNoteContentUseCase.DEFAULT_LIMIT)
+    val exactPaths = exact.mapTo(destination = HashSet()) { it.path }
+    val roomForMeaning = SearchNoteContentUseCase.DEFAULT_LIMIT - exact.size
+    var meaning = 0
+    val kept = passages.filter { it.path in exactPaths || meaning++ < roomForMeaning }
+    val rows = kept + exact.filter { it.path !in found }
     val selected = state.rows.getOrNull(index = state.selectedIndex)?.path
     return state.copy(
         rows = rows,

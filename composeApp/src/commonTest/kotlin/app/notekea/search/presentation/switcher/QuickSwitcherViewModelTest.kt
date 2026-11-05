@@ -212,8 +212,8 @@ class QuickSwitcherViewModelTest {
             actual = found
         )
         assertEquals(
-            expected = listOf(RelativePath(value = CAFE)),
-            actual = effects.filterIsInstance<QuickSwitcherEffect.OpenNote>().map { it.path }
+            expected = listOf(QuickSwitcherEffect.OpenNote(path = RelativePath(value = CAFE))),
+            actual = effects
         )
     }
 
@@ -234,6 +234,15 @@ class QuickSwitcherViewModelTest {
             ),
             actual = Triple(mode, effects.toList(), viewModel.state.value.purpose)
         )
+    }
+
+    @Test
+    fun `closing the palette keeps what it knows about the index`() = runSwitcherTest {
+        send(QuickSwitcherIntent.OnIndexChange(isReady = false))
+        send(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.CONTENT))
+        send(QuickSwitcherIntent.OnClose)
+
+        assertEquals(expected = false, actual = viewModel.state.value.isIndexReady)
     }
 
     @Test
