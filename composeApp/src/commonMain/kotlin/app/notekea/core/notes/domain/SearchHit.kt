@@ -10,6 +10,7 @@ data class SearchHit(
     val headingPath: List<String>,
     val range: IntRange,
     val score: Float,
+    // Whether the chunk holds every word searched, so a common word alone proves nothing.
     val hasWords: Boolean = false,
     val closeness: Float = 0f
 )

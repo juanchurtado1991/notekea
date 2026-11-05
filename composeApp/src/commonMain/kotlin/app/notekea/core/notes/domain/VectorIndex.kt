@@ -33,11 +33,15 @@ interface VectorIndex {
         limit: Int
     ): Outcome<List<SearchHit>, IndexError>
 
-    /** The [limit] chunks closest to the question, by its [text] and its [vector] together, best first. */
+    /**
+     * The [limit] chunks closest to the question, by its [text] and its [vector] together, best first, among the notes
+     * [only] names, or all of them when null.
+     */
     suspend fun search(
         vaultPath: String,
         text: String,
         vector: FloatArray,
-        limit: Int
+        limit: Int,
+        only: Set<RelativePath>?
     ): Outcome<List<SearchHit>, IndexError>
 }
