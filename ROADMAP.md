@@ -136,7 +136,7 @@ below is that first palette, which the logo keeps; the app's themes are in 2.12.
 - **Motion:** 150–200 ms for panel open/close; no animation longer than 250 ms; respect "reduce motion": the setting
   in Settings → Appearance or the system's turns animations off.
 - **Themes:** light and dark, following the system by default; since 2.12 also chosen in Settings → Appearance,
-  with eleven color themes, Workspace Blue the one it starts with.
+  with eight color themes, Workspace Blue the one it starts with.
 - **Accessibility:** WCAG AA contrast for text, every action reachable by keyboard, visible focus ring,
   semantics for screen readers on all interactive elements.
 
@@ -177,7 +177,7 @@ status bar item, empty state, error banner.
 
 - **Done when:** the window renders with the theme in both modes; components have a preview gallery screen
   available in debug builds.
-- Implemented in `core.presentation.theme` (internal `palette` + semantic `NotekeaColorSchemes`, typography,
+- Implemented in `core.presentation.theme` (internal `palette` + semantic `ColorThemeSchemes`, typography,
   dimensions) and `core.presentation.components`; a test gates WCAG AA contrast for every text pair. The gallery
   opens with `./gradlew :composeApp:run -Pgallery`.
 
