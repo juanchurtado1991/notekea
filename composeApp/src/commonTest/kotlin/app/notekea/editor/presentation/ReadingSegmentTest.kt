@@ -34,7 +34,6 @@ class ReadingSegmentTest {
         )
     }
 
-
     @Test
     fun `a query block is cut out with its YAML, between the Markdown around it`() {
         val block = "```query\ncolumns: [rating]\n```"

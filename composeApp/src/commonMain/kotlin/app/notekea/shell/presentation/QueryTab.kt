@@ -1,17 +1,34 @@
 package app.notekea.shell.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.editor.presentation.EditorIntent
+import app.notekea.editor.presentation.LocalQueryBlock
+import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.query.presentation.QueryBlock
 import app.notekea.query.presentation.QueryEffect
 import app.notekea.query.presentation.QueryIntent
 import app.notekea.query.presentation.QueryViewModel
+import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.shell.domain.Workspace
 import app.notekea.tree.presentation.VaultTreeState
+
+/** What the vault's tools follow: the graph and queries. */
+@Composable
+internal fun FollowTools(
+    viewModels: WorkspaceViewModels,
+    state: VaultTreeState,
+    searchIndex: SearchIndexViewModel,
+    sidePanel: SidePanelHost
+) {
+    FollowQuery(viewModels = viewModels, state = state)
+    FollowGraph(viewModels = viewModels, state = state, searchIndex = searchIndex, sidePanel = sidePanel)
+}
 
 /**
  * What queries follow while the vault is open: its notes and whether their tab shows, as they run only then. A note
@@ -19,7 +36,7 @@ import app.notekea.tree.presentation.VaultTreeState
  * it open.
  */
 @Composable
-internal fun FollowQuery(
+private fun FollowQuery(
     viewModels: WorkspaceViewModels,
     state: VaultTreeState
 ) {
@@ -47,17 +64,24 @@ internal fun FollowQuery(
     }
 }
 
-/** How Read mode draws a query block of this vault. */
-internal fun queryBlockOf(
+/** What Read mode's query blocks follow, for [content]: each runs against the vault's [notes]. */
+@Composable
+internal fun FollowQueryBlocks(
     query: QueryViewModel,
-    notes: Collection<NoteEntry>
-): @Composable (String, String) -> Unit = { text, source ->
-    QueryBlock(
-        text = text,
-        source = source,
-        notes = notes,
-        notice = query.state.collectAsState().value.notice,
-        run = { query.resultOf(query = it, notes = notes) },
-        onIntent = query::onIntent
-    )
+    notes: Collection<NoteEntry>,
+    content: @Composable () -> Unit
+) {
+    val block: @Composable (String, String) -> Unit = remember(query, notes) {
+        { text, source ->
+            QueryBlock(
+                text = text,
+                source = source,
+                notes = notes,
+                run = { query.resultOf(query = it, notes = notes) },
+                onIntent = query::onIntent,
+                notice = query.state.collectAsState().value.notice
+            )
+        }
+    }
+    CompositionLocalProvider(LocalQueryBlock provides block, content = content)
 }

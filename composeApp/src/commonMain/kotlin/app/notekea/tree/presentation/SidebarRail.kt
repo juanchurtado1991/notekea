@@ -79,7 +79,20 @@ private fun topItems(
             onClick = actions.onSidePanelToggle,
             shortcutHint = shortcut(conventions.toggleSidePanelShortcut),
             isSelected = isSidePanelVisible
-        ),
+        )
+    ) + toolItems(state = state, onIntent = onIntent, actions = actions)
+}
+
+/** Search notes, the graph, queries and Today, with their shortcuts. */
+@Composable
+private fun toolItems(
+    state: VaultTreeState,
+    onIntent: (VaultTreeIntent) -> Unit,
+    actions: SidebarRailActions
+): List<NotekeaToolRailItem> {
+    val conventions = state.platformConventions
+    val shortcut = { it: Shortcut -> it.label(operatingSystem = conventions.operatingSystem) }
+    return listOf(
         NotekeaToolRailItem(
             icon = NotekeaIcons.Find,
             label = stringResource(resource = Res.string.tree_search),

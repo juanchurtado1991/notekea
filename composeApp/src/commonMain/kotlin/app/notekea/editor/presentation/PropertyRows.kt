@@ -76,9 +76,11 @@ internal fun PropertyRow(
     ) {
         PropertyKey(property = property, keys = keys, onIntent = onIntent)
         Box(modifier = Modifier.weight(weight = 1f)) {
-            PropertyValueEditor(property = property, today = today, change = { value ->
-                onIntent(PropertyIntent.OnValueChange(key = property.key, value = value))
-            })
+            PropertyValueEditor(
+                property = property,
+                change = { onIntent(PropertyIntent.OnValueChange(key = property.key, value = it)) },
+                today = today
+            )
         }
         NotekeaIconButton(
             icon = NotekeaIcons.Close,

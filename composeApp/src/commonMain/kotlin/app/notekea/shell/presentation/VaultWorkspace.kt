@@ -4,38 +4,29 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.components.EmptyState
 import app.notekea.core.presentation.platform.LocalWindowDialogs
-import app.notekea.core.presentation.platform.WindowDialog
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.tree.domain.FolderCards
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.editor.presentation.EditorCallbacks
 import app.notekea.editor.presentation.EditorIntent
 import app.notekea.editor.presentation.EditorPaneTools
 import app.notekea.editor.presentation.EditorScreen
-import app.notekea.editor.presentation.LocalQueryBlock
 import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.editor.presentation.WithSidePanel
 import app.notekea.graph.presentation.GraphContent
 import app.notekea.graph.presentation.GraphInspector
 import app.notekea.query.presentation.QueryContent
-import app.notekea.shell.domain.Workspace
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherMode
-import app.notekea.search.presentation.switcher.QuickSwitcherPurpose
-import app.notekea.tree.presentation.tags.TagPickerIntent
-import app.notekea.templates.presentation.TemplatePickerIntent
-import app.notekea.templates.presentation.TemplateTarget
 import app.notekea.shell.presentation.FolderGrid
 import app.notekea.shell.presentation.TabKind
 import app.notekea.shell.presentation.WorkspaceContent
@@ -47,10 +38,8 @@ import app.notekea.resources.tab_missing_title
 import org.jetbrains.compose.resources.stringResource
 import app.notekea.editor.presentation.SaveStatus
 import app.notekea.editor.presentation.EditorViewModel
-import app.notekea.editor.presentation.saveInOtherEditors
 import app.notekea.resources.tree_untitled_note
 import app.notekea.shell.presentation.WorkspaceStartActions
-import app.notekea.tree.presentation.BookmarkIntent
 import app.notekea.tree.presentation.EntryMenuArea
 import app.notekea.tree.presentation.FileDetails
 import app.notekea.tree.presentation.FilePreview
@@ -141,14 +130,7 @@ private fun WorkspaceBody(
         state = state,
         vaultName = vaultName,
         onIntent = viewModels.tree::onIntent,
-        rail = railActionsOf(
-            sidePanel = sidePanel,
-            onSearch = findNote,
-            onGraph = { openGraph(viewModels) },
-            onQuery = { viewModels.workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = Workspace.QUERY)) },
-            onSwitchVault = onSwitchVault,
-            onDialog = { dialogs.shown = it }
-        ),
+        rail = railActionsOf(viewModels, sidePanel, findNote, onSwitchVault) { dialogs.shown = it },
         modifier = modifier,
         isSidePanelVisible = if (sidePanel.isOverlay) sidePanel.isOverlayOpen else workspaceState.sidePanel.isVisible
     ) {
@@ -163,20 +145,28 @@ private fun WorkspaceBody(
             info = activeEditorState.info.takeIf { isNoteShown },
             inspector = graphInspectorOf(viewModels = viewModels).takeIf { activeKind == TabKind.GRAPH }
         ) {
-            val queryBlock = remember(viewModels.query, state.tree.notes) {
-                queryBlockOf(query = viewModels.query, notes = state.tree.notes.values)
-            }
-            CompositionLocalProvider(LocalQueryBlock provides queryBlock) {
-                WorkspaceContent(
-                    state = workspaceState,
-                    platformConventions = state.platformConventions,
-                    onIntent = viewModels.workspace::onIntent,
-                    startActions = startActionsOf(viewModels = viewModels, onFindNote = findNote),
-                    unsavedPaths = unsavedPathsOf(editors = viewModels.editors)
-                ) { pane, path, kind -> PaneContent(pane = pane, path = path, kind = kind, context = context) }
+            FollowQueryBlocks(query = viewModels.query, notes = state.tree.notes.values) {
+                PaneArea(state = state, context = context, onFindNote = findNote)
             }
         }
     }
+}
+
+/** The tabs and the panes. */
+@Composable
+private fun PaneArea(
+    state: VaultTreeState,
+    context: PaneContext,
+    onFindNote: () -> Unit
+) {
+    val viewModels = context.viewModels
+    WorkspaceContent(
+        state = context.workspaceState,
+        platformConventions = state.platformConventions,
+        onIntent = viewModels.workspace::onIntent,
+        startActions = startActionsOf(viewModels = viewModels, onFindNote = onFindNote),
+        unsavedPaths = unsavedPathsOf(editors = viewModels.editors)
+    ) { pane, path, kind -> PaneContent(pane = pane, path = path, kind = kind, context = context) }
 }
 
 /** What the side panel's inspector shows while the graph's tab is the active one. */
@@ -246,8 +236,8 @@ private fun PaneContent(
 
         TabKind.QUERY -> QueryContent(
             state = context.viewModels.query.state.collectAsState().value,
-            saveTarget = context.workspaceState.noteShown,
-            onIntent = context.viewModels.query::onIntent
+            onIntent = context.viewModels.query::onIntent,
+            saveTarget = context.workspaceState.noteShown
         )
 
         TabKind.MISSING -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -307,54 +297,6 @@ private fun NoteEditor(
         isBookmarked = path in state.bookmarks
     )
 }
-
-/** What the editor of [pane], on the note at [path], asks of the tree, the tabs, the pickers and the other editor. */
-private fun editorCallbacksOf(
-    viewModels: WorkspaceViewModels,
-    pane: Int,
-    path: RelativePath
-): EditorCallbacks {
-    val tree = viewModels.tree
-    val workspace = viewModels.workspace
-    return EditorCallbacks(
-        onRenamed = {
-            tree.onIntent(intent = VaultTreeIntent.OnEntryRenamed(from = it.from, to = it.to, links = it.links))
-            workspace.onIntent(intent = WorkspaceIntent.OnRenamed(from = it.from, to = it.to))
-        },
-        onClosed = { workspace.onIntent(intent = WorkspaceIntent.OnDeleted(path = path)) },
-        onOpenLink = {
-            tree.onIntent(
-                intent = VaultTreeIntent.OnFollowLink(
-                    source = it.source,
-                    target = it.target,
-                    kind = it.kind,
-                    inBackground = it.inBackground
-                )
-            )
-        },
-        onSearchTag = { tag ->
-            viewModels.onSwitcher(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.CONTENT, query = TAG_MARK + tag))
-        },
-        onRequestNoteLink = {
-            viewModels.onSwitcher(
-                QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES, purpose = QuickSwitcherPurpose.LINK)
-            )
-        },
-        onRequestTag = { query -> viewModels.onTagPicker(TagPickerIntent.OnOpen(query = query)) },
-        onBookmarkToggle = { tree.onIntent(intent = BookmarkIntent.OnToggle(path = it)) },
-        onRequestTemplate = {
-            viewModels.onTemplatePicker(TemplatePickerIntent.OnOpen(target = TemplateTarget.CurrentNote))
-        },
-        onDayStep = { tree.onIntent(intent = VaultTreeIntent.OnDayStep(step = it)) },
-        onRevealFolder = { tree.onIntent(intent = VaultTreeIntent.OnRevealInTree(path = it)) },
-        onUnsavedKept = { tree.onIntent(intent = VaultTreeIntent.OnUnsavedKept(note = it.note, copy = it.copy)) },
-        onBeforeOpen = {
-            saveInOtherEditors(path = it, editor = viewModels.editors[pane], editors = viewModels.editors)
-        }
-    )
-}
-
-private const val TAG_MARK = "#"
 
 @Preview
 @Composable

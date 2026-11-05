@@ -86,7 +86,9 @@ class QueryYaml {
         filter: QueryFilter
     ): List<String> {
         val parts = listOfNotNull(
-            filter.property.takeIf { filter.condition.needsProperty }?.let { PROPERTY to YamlValues.written(text = it) },
+            filter.property.takeIf {
+                filter.condition.needsProperty
+            }?.let { PROPERTY to YamlValues.written(text = it) },
             CONDITION to filter.condition.written,
             filter.value.takeIf { filter.condition.needsValue }?.let { VALUE to YamlValues.written(text = it) }
         )
@@ -129,7 +131,8 @@ class QueryYaml {
         val condition = parts[CONDITION]?.let { QueryCondition.of(text = it) } ?: return null
         val property = parts[PROPERTY].orEmpty()
         val value = parts[VALUE].orEmpty()
-        val isWhole = (!condition.needsProperty || property.isNotBlank()) && (!condition.needsValue || value.isNotBlank())
+        val isWhole =
+            (!condition.needsProperty || property.isNotBlank()) && (!condition.needsValue || value.isNotBlank())
         return QueryFilter(condition = condition, property = property, value = value).takeIf { isWhole }
     }
 

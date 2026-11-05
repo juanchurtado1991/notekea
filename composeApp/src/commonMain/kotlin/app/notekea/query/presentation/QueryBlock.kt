@@ -44,16 +44,16 @@ fun QueryBlock(
     text: String,
     source: String,
     notes: Collection<NoteEntry>,
-    notice: QueryNotice?,
     run: suspend (VaultQuery) -> QueryResult,
     onIntent: (QueryIntent) -> Unit,
+    notice: QueryNotice?,
     modifier: Modifier = Modifier
 ) {
     val parse = remember(text) { QueryYaml().read(text = text) }
     Column(modifier = modifier.fillMaxWidth()) {
         when (parse) {
             is QueryParse.Invalid -> InvalidBlock(invalid = parse, source = source)
-            is QueryParse.Valid -> ValidBlock(query = parse.query, notes, notice, run, onIntent)
+            is QueryParse.Valid -> ValidBlock(query = parse.query, notes, run, onIntent, notice)
         }
     }
 }
@@ -76,9 +76,9 @@ private fun InvalidBlock(
 private fun ValidBlock(
     query: VaultQuery,
     notes: Collection<NoteEntry>,
-    notice: QueryNotice?,
     run: suspend (VaultQuery) -> QueryResult,
-    onIntent: (QueryIntent) -> Unit
+    onIntent: (QueryIntent) -> Unit,
+    notice: QueryNotice?
 ) {
     // The last result stays until the next one, so the note does not jump when the vault changes.
     val result by produceState<QueryResult?>(initialValue = null, query, notes) {
@@ -149,9 +149,9 @@ private fun QueryBlockPreview() {
             text = PREVIEW_BLOCK,
             source = PREVIEW_SOURCE,
             notes = emptyList(),
-            notice = null,
             run = { QueryPreviewData.state.result },
-            onIntent = {}
+            onIntent = {},
+            notice = null
         )
     }
 }

@@ -52,8 +52,8 @@ private val NUMBER = Regex(pattern = "-?\\d+(\\.\\d+)?")
 @Composable
 fun PropertyValueEditor(
     property: NoteProperty,
-    today: CalendarDate?,
     change: (PropertyValue) -> Unit,
+    today: CalendarDate?,
     itemFieldWidth: Dp = ITEM_FIELD_WIDTH_DP.dp
 ) {
     when (val value = property.value) {
@@ -173,8 +173,8 @@ private fun PropertyValueEditorPreview() {
         Box(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
             PropertyValueEditor(
                 property = NoteProperty(key = PREVIEW_KEY, value = PropertyValue.Items(items = PREVIEW_ITEMS)),
-                today = null,
-                change = {}
+                change = {},
+                today = null
             )
         }
     }

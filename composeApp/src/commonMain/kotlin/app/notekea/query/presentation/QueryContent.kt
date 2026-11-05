@@ -40,8 +40,8 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun QueryContent(
     state: QueryState,
-    saveTarget: RelativePath?,
     onIntent: (QueryIntent) -> Unit,
+    saveTarget: RelativePath?,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -148,6 +148,6 @@ private fun UnknownPropertiesPreview() {
 @Composable
 private fun QueryContentPreview() {
     NotekeaPreviewThemes {
-        QueryContent(state = QueryPreviewData.state, saveTarget = null, onIntent = {})
+        QueryContent(state = QueryPreviewData.state, onIntent = {}, saveTarget = null)
     }
 }
