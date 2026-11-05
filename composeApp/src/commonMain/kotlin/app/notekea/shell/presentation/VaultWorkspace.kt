@@ -145,7 +145,7 @@ private fun WorkspaceBody(
             info = activeEditorState.info.takeIf { isNoteShown },
             inspector = graphInspectorOf(viewModels = viewModels).takeIf { activeKind == TabKind.GRAPH }
         ) {
-            FollowQueryBlocks(query = viewModels.query, notes = state.tree.notes.values) {
+            FollowQueryBlocks(query = viewModels.query) {
                 PaneArea(state = state, context = context, onFindNote = findNote)
             }
         }
@@ -237,7 +237,7 @@ private fun PaneContent(
         TabKind.QUERY -> QueryContent(
             state = context.viewModels.query.state.collectAsState().value,
             onIntent = context.viewModels.query::onIntent,
-            saveTarget = context.workspaceState.noteShown
+            saveTarget = context.workspaceState.noteAtHand
         )
 
         TabKind.MISSING -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

@@ -4,5 +4,6 @@ package app.notekea.query.domain
 enum class QueryProblem {
     UNKNOWN_KEY,
     UNKNOWN_CONDITION,
+    UNKNOWN_ORDER,
     MISSING_PART
 }

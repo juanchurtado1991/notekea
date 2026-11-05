@@ -7,9 +7,9 @@ import app.notekea.core.notes.domain.OutlineHeading
 
 /**
  * A piece of a note as Read mode shows it: Markdown for the renderer, a file embedded on a line of its own, which
- * Notekea draws itself (`ROADMAP.md` 1.8), or a query block, with its YAML, drawn as its table (`ROADMAP.md` 2.10). Files embedded inside a paragraph stay in the Markdown, as links. A piece
- * of Markdown that starts with a heading of the outline knows its index ([Markdown.heading]), so the outline can
- * scroll to it (`ROADMAP.md` 1.9).
+ * Notekea draws itself (`ROADMAP.md` 1.8), or a query block, with its YAML, drawn as its table (`ROADMAP.md` 2.10).
+ * Files embedded inside a paragraph stay in the Markdown, as links. A piece of Markdown that starts with a heading of
+ * the outline knows its index ([Markdown.heading]), so the outline can scroll to it (`ROADMAP.md` 1.9).
  */
 sealed interface ReadingSegment {
     data class Markdown(
@@ -82,7 +82,7 @@ sealed interface ReadingSegment {
         private fun queriesOf(
             text: String
         ): List<Cut> {
-            if (QUERY_FENCE !in text) return emptyList()
+            if (MarkdownSyntax.QUERY_FENCE !in text) return emptyList()
             val tracker = FenceTracker()
             val cuts = mutableListOf<Cut>()
             var opened: Int? = null
@@ -93,7 +93,7 @@ sealed interface ReadingSegment {
                 val wasOpen = tracker.isOpen
                 tracker.read(text = text, start = lineStart, end = lineEnd)
                 val line = text.substring(startIndex = lineStart, endIndex = lineEnd).trim()
-                if (!wasOpen && line == QUERY_FENCE) opened = lineStart
+                if (!wasOpen && tracker.isOpen && line == MarkdownSyntax.QUERY_FENCE) opened = lineStart
                 if (wasOpen && !tracker.isOpen) {
                     opened?.let { cuts += queryCut(text = text, start = it, lastLine = lineStart, end = lineEnd) }
                     opened = null
@@ -114,8 +114,6 @@ sealed interface ReadingSegment {
             val source = text.substring(startIndex = start, endIndex = end)
             return Cut(lineStart = start, lineEnd = end, query = Query(text = yaml, source = source))
         }
-
-        private const val QUERY_FENCE = MarkdownSyntax.FENCE + "query"
 
         /** One place [of] cuts the text: an embedded file's line ([view]), a query block or a heading's ([heading]). */
         private data class Cut(

@@ -83,6 +83,38 @@ class QueryYamlTest {
     }
 
     @Test
+    fun `a columns key with nothing under it names no column`() {
+        val read = QueryYaml().read(text = "columns:") as QueryParse.Valid
+
+        assertEquals(expected = emptyList(), actual = read.query.columns)
+    }
+
+    @Test
+    fun `filters written on their key's line are no filters`() {
+        assertEquals(
+            expected = QueryParse.Invalid(line = 1, problem = QueryProblem.MISSING_PART),
+            actual = QueryYaml().read(text = "filters: rating")
+        )
+    }
+
+    @Test
+    fun `an order that is neither way names its line`() {
+        assertEquals(
+            expected = QueryParse.Invalid(line = 3, problem = QueryProblem.UNKNOWN_ORDER),
+            actual = QueryYaml().read(text = "sort:\n  property: rating\n  order: down")
+        )
+    }
+
+    @Test
+    fun `no columns at all stay chosen`() {
+        val query = VaultQuery(columns = emptyList())
+
+        val yaml = QueryYaml()
+
+        assertEquals(expected = QueryParse.Valid(query = query), actual = yaml.read(text = yaml.write(query = query)))
+    }
+
+    @Test
     fun `an empty block is the query of every note`() {
         assertEquals(expected = QueryParse.Valid(query = VaultQuery()), actual = yaml.read(text = ""))
     }

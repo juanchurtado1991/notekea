@@ -75,8 +75,8 @@ class QueryYaml {
             lines += NESTED + PROPERTY + KEY_VALUE + YamlValues.written(text = sort.property)
             lines += NESTED + ORDER + KEY_VALUE + if (sort.isDescending) DESCENDING else ASCENDING
         }
-        if (query.columns.isNotEmpty()) {
-            val written = query.columns.joinToString(separator = ITEM_SEPARATOR) { YamlValues.writtenInline(text = it) }
+        query.columns?.let { columns ->
+            val written = columns.joinToString(separator = ITEM_SEPARATOR) { YamlValues.writtenInline(text = it) }
             lines += COLUMNS + KEY_VALUE + YamlValues.INLINE_OPEN + written + YamlValues.INLINE_CLOSE
         }
         return lines.joinToString(separator = NL)
@@ -110,6 +110,9 @@ class QueryYaml {
         block: FrontmatterBlocks.Block,
         line: Int
     ): Read<List<QueryFilter>> {
+        if (block.inlineValue.isNotEmpty()) {
+            return Read.Failed(invalid = QueryParse.Invalid(line = line, problem = QueryProblem.MISSING_PART))
+        }
         val filters = mutableListOf<QueryFilter>()
         var parts = mutableMapOf<String, String>()
         var partsLine = line
@@ -163,6 +166,9 @@ class QueryYaml {
             if (isIgnored(line = text)) return@forEachIndexed
             val part = partOf(text = text)?.takeIf { it.first in SORT_KEYS }
                 ?: return Read.Failed(unknownKey(line = line + index + 1))
+            if (part.first == ORDER && part.second !in ORDERS) {
+                return Read.Failed(QueryParse.Invalid(line = line + index + 1, problem = QueryProblem.UNKNOWN_ORDER))
+            }
             parts[part.first] = part.second
         }
         val property = parts[PROPERTY]
@@ -175,7 +181,7 @@ class QueryYaml {
         block: FrontmatterBlocks.Block
     ): List<String>? = when (val value = frontmatterReader.valueOf(block = block)) {
         is PropertyValue.Items -> value.items
-        is PropertyValue.Text -> listOf(value.text)
+        is PropertyValue.Text -> listOf(value.text).filter { it.isNotBlank() }
         else -> null
     }
 
@@ -223,6 +229,7 @@ class QueryYaml {
         const val SORT = "sort"
         const val VALUE = "value"
         val FILTER_KEYS = setOf(CONDITION, PROPERTY, VALUE)
+        val ORDERS = setOf(ASCENDING, DESCENDING)
         val SORT_KEYS = setOf(ORDER, PROPERTY)
     }
 }

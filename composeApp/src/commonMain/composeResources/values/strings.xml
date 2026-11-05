@@ -552,6 +552,7 @@
     <string name="query_filter_tag">Tag</string>
     <string name="query_invalid_condition">Line %1$d: this condition is not one a query knows.</string>
     <string name="query_invalid_key">Line %1$d: a query holds only filters, sort and columns.</string>
+    <string name="query_invalid_order">Line %1$d: an order is ascending or descending.</string>
     <string name="query_invalid_part">Line %1$d: a part is missing here.</string>
     <string name="query_invalid_title">This query can't be read</string>
     <string name="query_invalid_value">Enter a value of this property's kind.</string>

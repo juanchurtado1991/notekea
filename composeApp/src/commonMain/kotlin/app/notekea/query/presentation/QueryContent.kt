@@ -35,7 +35,7 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The Query tab (`ROADMAP.md` 2.10): the query in chips over a table of the notes it finds, computed exactly from the
  * notes' properties. A property no note has says so, and no match says what to do. [saveTarget] is the note a query
- * can be saved in, the one beside the tab.
+ * can be saved in.
  */
 @Composable
 fun QueryContent(
@@ -140,7 +140,7 @@ private fun QueryNoticeLinePreview() {
 @Composable
 private fun UnknownPropertiesPreview() {
     NotekeaPreviewThemes {
-        UnknownProperties(unknown = QueryPreviewData.state.query.columns)
+        UnknownProperties(unknown = QueryPreviewData.state.result.columns)
     }
 }
 

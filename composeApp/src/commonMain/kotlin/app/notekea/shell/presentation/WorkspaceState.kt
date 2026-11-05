@@ -32,6 +32,10 @@ data class WorkspaceState(
         get() = (listOf(workspace.activePath) + workspace.panes.map { it.activePath })
             .firstOrNull { it != null && kindOf(path = it) == TabKind.NOTE }
 
+    /** The note something can be written to from a tool's tab: [noteShown], or else the last one open in a tab. */
+    val noteAtHand: RelativePath?
+        get() = noteShown ?: workspace.panes.flatMap { it.tabs }.lastOrNull { kindOf(path = it) == TabKind.NOTE }
+
     fun kindOf(
         path: RelativePath
     ): TabKind = when (path) {

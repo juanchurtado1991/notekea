@@ -106,6 +106,31 @@ class QueryViewModelTest {
     }
 
     @Test
+    fun `the last column shown can be hidden`() = test {
+        val rated = QueryFilter(condition = QueryCondition.MORE_THAN, property = "rating", value = "1")
+        show()
+        viewModel.onIntent(intent = QueryIntent.OnFilterAdd(filter = rated))
+        viewModel.onIntent(intent = QueryIntent.OnColumnToggle(column = "rating"))
+        advanceUntilIdle()
+
+        assertEquals(expected = emptyList(), actual = viewModel.state.value.result.columns)
+    }
+
+    @Test
+    fun `a block runs on the note a cell just wrote, before the scan`() = test {
+        store.texts[DUNE] = "---\nrating: 5\n---\nDune\n"
+        show()
+        val version = viewModel.state.value.notesVersion
+        viewModel.onIntent(intent = QueryIntent.OnCellChange(path = DUNE, property = rating(text = "1")))
+        advanceUntilIdle()
+
+        val first = viewModel.resultOf(query = VaultQuery(columns = listOf("rating"))).rows.first()
+
+        assertTrue(actual = viewModel.state.value.notesVersion > version)
+        assertEquals(expected = rating(text = "1"), actual = first.cells.single())
+    }
+
+    @Test
     fun `the vault's change reaches the table`() = test {
         show()
 
@@ -256,6 +281,10 @@ class QueryViewModelTest {
                 properties = listOf(NoteProperty(key = "rating", value = PropertyValue.Number(text = rating)))
             )
         )
+
+        fun rating(
+            text: String
+        ) = NoteProperty(key = "rating", value = PropertyValue.Number(text = text))
 
         val NOTES = listOf(note(path = DUNE, rating = "5"), note(path = RelativePath("Books/Emma.md"), rating = "2"))
     }

@@ -6,7 +6,7 @@ import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.shell.domain.Workspace
 import app.notekea.tree.presentation.SidebarRailActions
 
-/** The rail's actions: search, the graph, queries, the side panel, another vault, and About or Settings opened with [onDialog]. */
+/** The rail's actions: search, the tools, the side panel, another vault, and About or Settings, with [onDialog]. */
 internal fun railActionsOf(
     viewModels: WorkspaceViewModels,
     sidePanel: SidePanelHost,

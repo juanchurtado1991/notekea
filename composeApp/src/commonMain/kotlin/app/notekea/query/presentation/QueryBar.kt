@@ -49,7 +49,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The query above its table (`ROADMAP.md` 2.10, design A): a chip per filter, which edits it or removes it, Add filter,
- * and at the end Sort, Columns, how many notes it found and, with a note beside it, saving it in [saveTarget].
+ * and at the end Sort, Columns, how many notes it found and, with a note at hand, saving it in [saveTarget].
  */
 @Composable
 internal fun QueryBar(

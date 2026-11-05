@@ -1,6 +1,8 @@
 package app.notekea.query.domain
 
+import app.notekea.core.domain.StringPatterns
 import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.FrontmatterBlocks
 import app.notekea.core.notes.domain.FrontmatterPatch
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteDocument
@@ -26,11 +28,11 @@ class SetPropertyUseCase(
     ): NoteRewrite? {
         val original = noteContentStore.read(vaultPath = vaultPath, path = path) ?: return null
         val document = NoteDocument.fromText(text = original)
-        val patched = patch.set(header = document.header, key = property.key, value = property.value)
-        val header = if (patched != document.header) {
-            patched
+        val isKnown = FrontmatterBlocks.of(header = document.header)?.blockOf(key = property.key) != null
+        val header = if (isKnown) {
+            patch.set(header = document.header, key = property.key, value = property.value)
         } else {
-            patch.add(header = document.header, key = property.key, value = property.value)
+            patch.add(document.header, property.key, property.value, lineBreakOf(document = document))
         }
         val rewrite = NoteRewrite(
             path = path,
@@ -40,4 +42,8 @@ class SetPropertyUseCase(
         )
         return rewrite.takeIf { applyLinkUpdates(vaultPath, listOf(it)).updated.isNotEmpty() }
     }
+
+    private fun lineBreakOf(
+        document: NoteDocument
+    ): String = if (document.usesCrLf) StringPatterns.WINDOWS_NEW_LINE else StringPatterns.NEW_LINE
 }

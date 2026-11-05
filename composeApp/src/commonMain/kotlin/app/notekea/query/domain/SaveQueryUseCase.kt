@@ -37,11 +37,7 @@ class SaveQueryUseCase(
 
     private fun blockOf(
         query: VaultQuery
-    ): String = listOf(OPENING, queryYaml.write(query = query), MarkdownSyntax.FENCE)
+    ): String = listOf(MarkdownSyntax.QUERY_FENCE, queryYaml.write(query = query), MarkdownSyntax.FENCE)
         .filter { it.isNotEmpty() }
         .joinToString(separator = StringPatterns.NEW_LINE, postfix = StringPatterns.NEW_LINE)
-
-    private companion object {
-        const val OPENING = MarkdownSyntax.FENCE + QueryBlocks.LANGUAGE
-    }
 }
