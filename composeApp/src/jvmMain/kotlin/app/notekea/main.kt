@@ -115,7 +115,7 @@ private fun ApplicationScope.GalleryWindow() {
 
 /**
  * The app window: its native parts around the [NotekeaRoot] it shares with the Self-Test's cases. Every key event goes
- * through the [ShortcutDispatcher] first, it has the menu bar and remembers where it is left. However Notekea ends
+ * through the [ShortcutDispatcher] first, it remembers where it is left. However Notekea ends
  * ([WindowQuit]), the [WindowCloseGuard] finishes first (the editor saving the note being typed).
  */
 @Composable

@@ -8,8 +8,8 @@ How Notekea looks and behaves on Windows, macOS and Linux.
 
 - There is one visual design, not three. Notekea has its own identity (colors, typography, icons) and does not
   imitate macOS or Windows inside the window, the same way Obsidian, Notion or Linear do.
-- The window frame and the behaviors users rely on (shortcuts, menus, dialogs) follow each platform, so the app
-  feels at home everywhere.
+- The window frame and the behaviors users rely on (shortcuts, dialogs) follow each platform, so the app feels at home
+  everywhere; the app adds no menu bar, so its window is the same on all three (§4).
 - Platform differences are resolved in one place (see "Implementation"), never with `if (isMac)` scattered across
   composables.
 
