@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -60,7 +61,7 @@ private const val PREVIEW_HIGHLIGHT_START = 35
 /**
  * A row of a list that quotes a passage, as an inspector lists things (`ROADMAP.md` 2.4, 2.5, design A): its [icon],
  * [title] and, beside it in the muted color, [subtitle] (the folder); below, up to two lines of [text] with its
- * [highlight] underlined. No border: the row tints softly under the pointer, and its [actions] show at the
+ * [highlights] underlined. No border: the row tints softly under the pointer, and its [actions] show at the
  * end of the title's row while the pointer is over it or the keyboard is on it or on one of them, so Tab reaches them,
  * or always when [showsActions] (the one thing a row is there for). Screen readers get them as [accessibilityActions].
  * A click or Enter on the row goes to [onClick].
@@ -70,7 +71,7 @@ fun NotekeaPassageRow(
     title: String,
     subtitle: String,
     text: String,
-    highlight: IntRange,
+    highlights: List<IntRange>,
     icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -110,7 +111,7 @@ fun NotekeaPassageRow(
             showsActions = showsActions || isHovered || hasFocus,
             actions = actions
         )
-        Passage(text = text, highlight = highlight)
+        Passage(text = text, highlights = highlights)
     }
 }
 
@@ -161,27 +162,31 @@ private fun TitleRow(
 @Composable
 private fun Passage(
     text: String,
-    highlight: IntRange
+    highlights: List<IntRange>
 ) {
     val colors = MaterialTheme.colorScheme
-    val lit = highlight.first.coerceIn(
-        minimumValue = 0,
-        maximumValue = text.length
-    )..highlight.last.coerceIn(minimumValue = -1, maximumValue = text.length - 1)
     Text(
-        text = buildAnnotatedString {
-            append(text.substring(startIndex = 0, endIndex = lit.first))
-            withStyle(style = SpanStyle(color = colors.onSurface, textDecoration = TextDecoration.Underline)) {
-                append(text.substring(startIndex = lit.first, endIndex = (lit.last + 1).coerceAtLeast(lit.first)))
-            }
-            append(text.substring(startIndex = (lit.last + 1).coerceAtLeast(lit.first)))
-        },
-        modifier = Modifier.padding(start = (ICON_DP.dp + NotekeaDimensions.SpacingS)),
-        style = MaterialTheme.typography.bodySmall,
+        text = marked(text = text, ranges = highlights, ink = colors.onSurface),
         color = colors.onSurfaceVariant,
         maxLines = TEXT_LINES,
         overflow = TextOverflow.Ellipsis
     )
+}
+
+/** [text] with [ranges] underlined in [ink]; a range outside the text, or crossing one before it, is left out. */
+private fun marked(
+    text: String,
+    ranges: List<IntRange>,
+    ink: Color
+): AnnotatedString = buildAnnotatedString {
+    append(text)
+    ranges.filter { it.first in text.indices && it.last in text.indices }.forEach { range ->
+        addStyle(
+            style = SpanStyle(color = ink, textDecoration = TextDecoration.Underline),
+            start = range.first,
+            end = range.last + 1
+        )
+    }
 }
 
 @Preview
@@ -192,7 +197,7 @@ private fun NotekeaPassageRowPreview() {
             title = PREVIEW_TITLE,
             subtitle = PREVIEW_FOLDER,
             text = PREVIEW_TEXT,
-            highlight = PREVIEW_HIGHLIGHT_START..PREVIEW_TEXT.lastIndex,
+            highlights = listOf(PREVIEW_HIGHLIGHT_START..PREVIEW_TEXT.lastIndex),
             icon = NotekeaIcons.Note,
             onClick = {}
         )

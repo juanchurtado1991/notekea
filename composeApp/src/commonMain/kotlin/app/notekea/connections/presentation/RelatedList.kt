@@ -100,7 +100,7 @@ private fun RelatedRow(
             title = path.nameWithoutExtension,
             subtitle = folderOf(path = path),
             text = note.snippet.text,
-            highlight = note.snippet.highlight,
+            highlights = note.snippet.keywords,
             icon = NotekeaIcons.Note,
             onClick = { actions.onOpen(path) },
             accessibilityActions = listOf(
