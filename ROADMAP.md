@@ -784,7 +784,17 @@ A link graph built from `[[wiki links]]`, Markdown links, embeds and frontmatter
 
 ### ⬜ 2.6 Hybrid search — `feature/hybrid-search`
 
-`Mod+Shift+F` switches to hybrid search: results ranked by meaning and keywords, each with its snippet.
+`Mod+Shift+F` searches by meaning and keywords together (design A, chosen 2026-11-04): each note once, with the passage
+that matched, its heading beside the folder, and a click or `Enter` that opens the note with that passage selected.
+
+- **Order:** the exact words of 1.6 show at once, and the hybrid answer replaces them: its passages first, then what
+  only the exact words found. The row that was selected stays selected.
+- **What counts:** the index always has a closest chunk, so one stays only if it holds a searched word or is close
+  enough in meaning (`SearchPassagesUseCase`, measured on the Sample Vault).
+- **`#tag`** keeps the notes that have it; a search of tags alone stays as in 1.6.
+- **While the index is not ready,** or the model cannot answer, the exact words stay and a line below them says so.
+- **Done when:** a note is found without its words, in another language too; a search with nothing close finds nothing;
+  and search never stops working because of the index.
 
 ### ⬜ 2.7 Graph view — `feature/graph-view`
 
