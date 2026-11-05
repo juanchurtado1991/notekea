@@ -9,6 +9,7 @@ import app.notekea.core.presentation.BaseViewModel
 import app.notekea.query.domain.BuildQueryCatalogUseCase
 import app.notekea.query.domain.QueryPreferencesStore
 import app.notekea.query.domain.QueryResult
+import app.notekea.query.domain.QuerySave
 import app.notekea.query.domain.RunQueryUseCase
 import app.notekea.query.domain.SaveQueryUseCase
 import app.notekea.query.domain.SetPropertyUseCase
@@ -40,6 +41,7 @@ class QueryViewModel(
     private var isQueryRead = false
     private var refreshJob: Job? = null
     private val queryWrites = Mutex()
+    private val noteSaves = Mutex()
 
     init {
         launchGuarded(onError = ::logUnexpectedError) {
@@ -172,8 +174,18 @@ class QueryViewModel(
     ) {
         val query = state.value.query
         launchGuarded(onError = ::showFailure) {
-            val rewrite = saveQuery(vaultPath = vaultPath, path = path, query = query)
-            if (finishWrite(rewrite = rewrite)) reduce { it.copy(notice = QueryNotice.Saved(path = path)) }
+            // In turn: the second of two quick clicks must find the first one's block.
+            val saved = noteSaves.withLock { saveQuery(vaultPath = vaultPath, path = path, query = query) }
+            when (saved) {
+                is QuerySave.Written -> {
+                    finishWrite(rewrite = saved.rewrite)
+                    reduce { it.copy(notice = QueryNotice.Saved(path = path)) }
+                }
+
+                QuerySave.AlreadyThere -> reduce { it.copy(notice = QueryNotice.AlreadySaved(path = path)) }
+
+                QuerySave.Failed -> finishWrite(rewrite = null)
+            }
         }
     }
 

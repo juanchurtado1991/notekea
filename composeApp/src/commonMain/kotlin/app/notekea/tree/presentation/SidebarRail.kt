@@ -29,9 +29,9 @@ private const val LOGO_SIZE_DP = 24
 
 /**
  * The vault's tool rail on the window's left edge (`ROADMAP.md` 1.11), there whether the sidebar is shown or not, as in
- * Android Studio: the two panels first, Files (the sidebar, selected while it is shown) and the side panel (selected
- * while [isSidePanelVisible]), then Search notes and Today; at the bottom, as in Obsidian, Open another vault, About and Settings.
- * Each has a tooltip naming it and its shortcut; Notekea's logo tops the rail.
+ * Android Studio: Search notes first, then the two panels, Files (the sidebar, selected while it is shown) and the
+ * side panel (selected while [isSidePanelVisible]), and the tools; at the bottom, as in Obsidian, Open another vault,
+ * About and Settings. Each has a tooltip naming it and its shortcut; Notekea's logo tops the rail.
  */
 @Composable
 internal fun SidebarRail(
@@ -55,7 +55,7 @@ internal fun SidebarRail(
     )
 }
 
-/** Files and the side panel, then Search notes and Today, with their shortcuts. */
+/** Search notes, Files and the side panel, then the tools, with their shortcuts. */
 @Composable
 private fun topItems(
     state: VaultTreeState,
@@ -66,6 +66,12 @@ private fun topItems(
     val conventions = state.platformConventions
     val shortcut = { it: Shortcut -> it.label(operatingSystem = conventions.operatingSystem) }
     return listOf(
+        NotekeaToolRailItem(
+            icon = NotekeaIcons.Find,
+            label = stringResource(resource = Res.string.tree_search),
+            onClick = actions.onSearch,
+            shortcutHint = shortcut(conventions.quickSwitcherShortcut)
+        ),
         NotekeaToolRailItem(
             icon = NotekeaIcons.Files,
             label = stringResource(resource = Res.string.tree_files),
@@ -83,7 +89,7 @@ private fun topItems(
     ) + toolItems(state = state, onIntent = onIntent, actions = actions)
 }
 
-/** Search notes, the graph, queries and Today, with their shortcuts. */
+/** The graph, queries and Today, with their shortcuts. */
 @Composable
 private fun toolItems(
     state: VaultTreeState,
@@ -93,12 +99,6 @@ private fun toolItems(
     val conventions = state.platformConventions
     val shortcut = { it: Shortcut -> it.label(operatingSystem = conventions.operatingSystem) }
     return listOf(
-        NotekeaToolRailItem(
-            icon = NotekeaIcons.Find,
-            label = stringResource(resource = Res.string.tree_search),
-            onClick = actions.onSearch,
-            shortcutHint = shortcut(conventions.quickSwitcherShortcut)
-        ),
         NotekeaToolRailItem(
             icon = NotekeaIcons.Graph,
             label = stringResource(resource = Res.string.rail_graph),

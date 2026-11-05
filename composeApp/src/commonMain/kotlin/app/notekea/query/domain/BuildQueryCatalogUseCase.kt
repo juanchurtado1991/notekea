@@ -36,5 +36,8 @@ class BuildQueryCatalogUseCase {
 
     private fun foldersOf(
         path: RelativePath
-    ): List<String> = generateSequence(path.parent) { it.parent }.map { it.value }.toList()
+    ): List<String> = generateSequence(path.parent) { it.parent }
+        .filterNot { it.isRoot }
+        .map { it.value }
+        .toList()
 }

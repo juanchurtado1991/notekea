@@ -130,6 +130,30 @@ class QueryViewModelTest {
         assertEquals(expected = rating(text = "1"), actual = first.cells.single())
     }
 
+    // Smoke: the Folder menu opened with an empty row, the vault's root.
+    @Test
+    fun `the vault's root is no folder to choose`() = test {
+        val file = NoteFile(path = RelativePath(value = "Inbox.md"), size = null, modifiedAt = null)
+        val inbox = NoteEntry(file = file, metadata = NoteMetadata.NONE)
+        viewModel.onIntent(intent = QueryIntent.OnNotesChange(notes = NOTES + inbox))
+        viewModel.onIntent(intent = QueryIntent.OnShownChange(isShown = true))
+        advanceUntilIdle()
+
+        assertEquals(expected = listOf("Books"), actual = viewModel.state.value.catalog.folders)
+    }
+
+    // Smoke: five clicks on Save in Reading list left five blocks in the note.
+    @Test
+    fun `clicking Save again and again leaves one block and says it is there`() = test {
+        store.texts[DUNE] = "Dune\n"
+        show()
+        repeat(times = 5) { viewModel.onIntent(intent = QueryIntent.OnSave(path = DUNE)) }
+        advanceUntilIdle()
+
+        assertEquals(expected = 1, actual = store.texts.getValue(DUNE).split("```query").size - 1)
+        assertEquals(expected = QueryNotice.AlreadySaved(path = DUNE), actual = viewModel.state.value.notice)
+    }
+
     @Test
     fun `the vault's change reaches the table`() = test {
         show()
