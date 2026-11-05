@@ -837,7 +837,7 @@ attachments never are, so the graph never turns into a hairball of everything in
 - **Done when:** opening the graph from a note shows a readable local graph without any setup, the global graph
   stays responsive on a 2,000-note vault, and every node can be reached and opened with the keyboard.
 
-### ⬜ 2.10 Vault queries — `feature/vault-queries`
+### ✅ 2.10 Vault queries — `feature/vault-queries` — [notekea#124](https://github.com/juanchurtado1991/notekea/pull/124)
 
 What Obsidian users get from the Dataview plugin and Bases, without a query language to learn: lists and tables of
 notes chosen by their properties, computed exactly from the index. The AI only writes the query, in 3.8; the result
