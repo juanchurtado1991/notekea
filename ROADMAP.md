@@ -48,7 +48,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
-| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 6 / 13 |
+| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 7 / 13 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M4b — Sources, study cards and agent | Web clips, documents, study cards, agent mode | 10 weeks | 0 / 5 |
@@ -782,7 +782,7 @@ A link graph built from `[[wiki links]]`, Markdown links, embeds and frontmatter
   `NotekeaCountTabs` and `NotekeaPassageRow` (rows, not cards; 2.4's Related moved to them), Note info as a compact
   table; a mention's click selects it in its note (`EditorIntent.OnRevealRequest`).
 
-### ⬜ 2.6 Hybrid search — `feature/hybrid-search`
+### ✅ 2.6 Hybrid search — `feature/hybrid-search` — [notekea#120](https://github.com/juanchurtado1991/notekea/pull/120)
 
 `Mod+Shift+F` searches by meaning and keywords together (design A, chosen 2026-11-04): each note once, with the passage
 that matched, its heading beside the folder, and a click or `Enter` that opens the note with that passage selected, in
