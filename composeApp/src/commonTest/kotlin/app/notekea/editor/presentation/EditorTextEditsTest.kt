@@ -196,6 +196,23 @@ class EditorTextEditsTest : EditorViewModelTestBase() {
     }
 
     @Test
+    fun `a note linked in read mode goes at the end of the note, which stays rendered and is saved`() = runEditorTest {
+        open(path = AREPAS)
+        type(text = "Corn flour.\n")
+        viewModel.onIntent(intent = EditorIntent.OnReadModeToggle)
+
+        viewModel.onIntent(intent = EditorIntent.OnFormat(action = FormatAction.NoteLink(target = "Pancakes")))
+        Snapshot.sendApplyNotifications()
+        advanceTimeBy(delayTimeMillis = TWO_SECONDS_MILLIS)
+        runCurrent()
+
+        assertEquals(
+            expected = true to "---\ntags: [recipe]\n---\nCorn flour.\n\n[[Pancakes]]\n",
+            actual = viewModel.state.value.isReading to store.texts.getValue(AREPAS)
+        )
+    }
+
+    @Test
     fun `the selection is kept while the quick switcher picks a note, which links it, or comes back on closing`() =
         runEditorTest {
             putOnDisk(path = TASKS, text = TASKS_TEXT)

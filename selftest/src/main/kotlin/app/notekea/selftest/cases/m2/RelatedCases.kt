@@ -77,9 +77,9 @@ private fun SuiteBuilder.rowActions() {
         )
         expected(
             text = "Two buttons show on the row under the pointer (Open to the side, Insert link). Insert link " +
-                "writes a link to that note where the cursor is in Arepas, and the note moves to Already linked. " +
-                "Open to the side splits the editor and opens the note in the other pane. Clicking a row opens " +
-                "its note."
+                "writes a link to that note where the cursor is in Arepas (at the end of the note in Preview), " +
+                "and the note moves to Already linked. Open to the side splits the editor and opens the note in " +
+                "the other pane. Clicking a row opens its note."
         )
     }
 }

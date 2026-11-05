@@ -255,6 +255,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Related's Insert link did nothing in Preview: the link now goes at the end of the note.
+
 A full audit of the project (`fix/audit-findings`):
 
 - **Notes are never lost or damaged:** text that cannot be saved goes to a "Name (unsaved)" note beside it instead of
