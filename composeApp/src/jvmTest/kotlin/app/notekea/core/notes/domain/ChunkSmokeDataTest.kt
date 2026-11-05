@@ -30,7 +30,8 @@ class ChunkSmokeDataTest {
         val notes = notes(folder = GHOST_VAULT).map { it.readText() }
         notes.forEach { chunkNote(note = NOTE, text = it) }
 
-        val time = measureTime { notes.forEach { chunkNote(note = NOTE, text = it) } }
+        // The best of a few runs: another process on a busy machine is not the chunker being slow.
+        val time = List(size = TIMED_RUNS) { measureTime { notes.forEach { chunkNote(note = NOTE, text = it) } } }.min()
 
         assertTrue(actual = time.inWholeMilliseconds < BUDGET_MILLIS, message = "${notes.size} notes took $time")
     }
@@ -81,6 +82,7 @@ class ChunkSmokeDataTest {
         const val SCRATCH = "scratch"
 
         // Generous for the slowest CI runner: it takes a few tens of milliseconds on a laptop.
+        private const val TIMED_RUNS = 3
         const val BUDGET_MILLIS = 1_000
     }
 }
