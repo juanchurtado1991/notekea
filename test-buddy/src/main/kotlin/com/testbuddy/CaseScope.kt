@@ -30,6 +30,8 @@ import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.compose.ui.test.withKeysDown
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.TimeSource
 
 /**
  * What a case's body can do, in a person's words: click what shows a text, type, press a shortcut, and expect texts
@@ -60,11 +62,9 @@ public class CaseScope internal constructor(
     ) {
         step(description = "Click “$text”")
         awaitText(text = text, substring = substring)
-        // What opened just now, such as a menu, may not take a click until it settles.
-        ui.waitForIdle()
         firstShown(matcher = hasText(text = text, substring = substring)).apply {
             runCatching { performScrollTo() }
-            performClick()
+            clickWhenStill()
         }
     }
 
@@ -109,8 +109,7 @@ public class CaseScope internal constructor(
         step(description = "Click the $label button")
         val icon = hasContentDescription(value = label)
         expect(matcher = icon, failure = "expected a button labeled \"$label\", it did not appear")
-        ui.waitForIdle()
-        firstShown(matcher = icon).performClick()
+        firstShown(matcher = icon).clickWhenStill()
     }
 
     /** Types [text] where the keyboard is: the focused text field. */
@@ -266,6 +265,26 @@ public class CaseScope internal constructor(
 
     // The first element matching [matcher] that is on screen: a panel being hidden (the editor while Preview takes its
     // place) can still hold the same text, and a person only clicks what they see.
+
+    /**
+     * Clicks this element once it has stopped moving. What opened just now may not take a click yet, and a panel still
+     * filling in can move it between the press and the release, which leaves a press with no click.
+     */
+    public fun SemanticsNodeInteraction.clickWhenStill() {
+        ui.waitForIdle()
+        var bounds = fetchSemanticsNode().boundsInRoot
+        var stillSince = TimeSource.Monotonic.markNow()
+        holdsInTime {
+            val now = runCatching { fetchSemanticsNode().boundsInRoot }.getOrNull() ?: bounds
+            if (now != bounds) {
+                bounds = now
+                stillSince = TimeSource.Monotonic.markNow()
+            }
+            stillSince.elapsedNow() >= STILL_TIME
+        }
+        performClick()
+    }
+
     private fun firstShown(matcher: SemanticsMatcher): SemanticsNodeInteraction {
         val nodes = ui.onAllNodes(matcher = matcher)
         val count = nodes.fetchSemanticsNodes().size
@@ -291,5 +310,6 @@ public class CaseScope internal constructor(
     private companion object {
         // Long enough for what a click sets off in the background to reach the screen.
         const val DEFAULT_SETTLE_MILLIS = 2_000L
+        val STILL_TIME = 150.milliseconds
     }
 }
