@@ -237,7 +237,7 @@ private fun FollowVault(
 ) {
     FollowWorkspace(state = state, viewModels = viewModels, sidePanel = sidePanel)
     FollowActiveTab(name = workspaceState.activeTabName, onChange = onActiveTabChange)
-    FollowGraph(viewModels = viewModels, state = state, searchIndex = searchIndex)
+    FollowGraph(viewModels = viewModels, state = state, searchIndex = searchIndex, sidePanel = sidePanel)
 }
 
 /**

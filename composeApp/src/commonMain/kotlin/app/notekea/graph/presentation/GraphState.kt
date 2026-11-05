@@ -4,7 +4,7 @@ import app.notekea.core.notes.domain.RelativePath
 
 /**
  * State of the graph tab (`ROADMAP.md` 2.7). [scope] and [depth] say what [dots] and [lines] hold, around [center];
- * [selected] is the note the inspector shows as [preview], open while [isInspectorOpen]. [folders] are the vault's
+ * [selected] is the note the inspector shows as [preview]. [folders] are the vault's
  * top-level folders, which color the dots and the legend, and [excludedFolders] those left out. [showsRelated] adds the
  * dashed edges, which need the index ([isIndexReady]); [showsOrphans] the notes with no edge, in the whole vault.
  * [isTooLarge] suggests going back to one note. While [isSearching], [matches] are the notes named like [query], best
@@ -20,7 +20,6 @@ data class GraphState(
     val lines: List<GraphLine> = emptyList(),
     val selected: RelativePath? = null,
     val preview: GraphPreview? = null,
-    val isInspectorOpen: Boolean = true,
     val folders: List<String> = emptyList(),
     val excludedFolders: Set<String> = emptySet(),
     val showsRelated: Boolean = true,
@@ -35,13 +34,17 @@ data class GraphState(
     val linked: RelativePath? = null,
     val linkFailed: Boolean = false
 ) {
+    /** No note to go around, loaded or not. */
+    val hasNoNote: Boolean
+        get() = scope == GraphScope.THIS_NOTE && center == null
+
     /** Related notes are asked for, and the index is not there yet. */
     val isWaitingForIndex: Boolean
         get() = !isIndexReady && scope == GraphScope.THIS_NOTE && showsRelated
 
     /** No note to go around: the tab asks to find one. */
     val needsNote: Boolean
-        get() = !isLoading && scope == GraphScope.THIS_NOTE && center == null
+        get() = !isLoading && hasNoNote
 
     /** A note with nothing to show around it, or a vault with no links: the tab teaches how to link. */
     val isEmpty: Boolean

@@ -25,6 +25,7 @@ import app.notekea.editor.presentation.EditorScreen
 import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.editor.presentation.WithSidePanel
 import app.notekea.graph.presentation.GraphContent
+import app.notekea.graph.presentation.GraphInspector
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherMode
 import app.notekea.search.presentation.switcher.QuickSwitcherPurpose
@@ -128,7 +129,8 @@ private fun WorkspaceBody(
     val activePane = workspaceState.workspace.activePane
     val activeEditor = viewModels.editors[activePane]
     val activeEditorState by activeEditor.state.collectAsState()
-    val isNoteShown = workspaceState.workspace.activePath?.let { workspaceState.kindOf(path = it) } == TabKind.NOTE
+    val activeKind = workspaceState.workspace.activePath?.let { workspaceState.kindOf(path = it) }
+    val isNoteShown = activeKind == TabKind.NOTE
     val findNote = { viewModels.onSwitcher(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES)) }
     val dialogs = LocalWindowDialogs.current
     VaultTreeContent(
@@ -147,7 +149,8 @@ private fun WorkspaceBody(
             platformConventions = state.platformConventions,
             onHeadingClick = { activeEditor.onIntent(EditorIntent.OnHeadingClick(index = it)) },
             onLeave = { activeEditor.onIntent(EditorIntent.OnFocusRequest()) },
-            info = activeEditorState.info.takeIf { isNoteShown }
+            info = activeEditorState.info.takeIf { isNoteShown },
+            inspector = graphInspectorOf(viewModels = viewModels).takeIf { activeKind == TabKind.GRAPH }
         ) {
             WorkspaceContent(
                 state = workspaceState,
@@ -158,6 +161,13 @@ private fun WorkspaceBody(
             ) { pane, path, kind -> PaneContent(pane = pane, path = path, kind = kind, context = context) }
         }
     }
+}
+
+/** What the side panel's inspector shows while the graph's tab is the active one. */
+private fun graphInspectorOf(
+    viewModels: WorkspaceViewModels
+): @Composable () -> Unit = {
+    GraphInspector(state = viewModels.graph.state.collectAsState().value, onIntent = viewModels.graph::onIntent)
 }
 
 /** The notes the panes' editors hold with changes not saved yet, for their tabs' dots. */

@@ -54,8 +54,8 @@ private const val EXCLUDED_ALPHA = 0.45f
 
 /**
  * The graph tab (`ROADMAP.md` 2.7): a compact toolbar, the map, the legend of folders, which also leaves a folder out
- * when clicked, and the inspector of the selected note. The keyboard walks the map: arrows move between connected notes,
- * `Enter` opens one, `Space` shows or hides the inspector, `Esc` goes back to the note and `Mod+F` finds a note, with
+ * when clicked; the inspector of the selected note is in the side panel. The keyboard walks the map: arrows move between connected notes,
+ * `Enter` opens one, `Space` shows or hides the side panel, `Esc` goes back to the note and `Mod+F` finds a note, with
  * the keyboard back on the map when the search closes, in the pane the keyboard is in ([isActive]). A focused control
  * gets its keys first.
  */
@@ -72,7 +72,7 @@ fun GraphContent(
     if (isActive) {
         WindowShortcut(shortcut = platformConventions.findShortcut) { onIntent(GraphIntent.OnSearchOpen) }
     }
-    Row(
+    Column(
         modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surface)
@@ -82,15 +82,9 @@ fun GraphContent(
             }
             .focusable()
     ) {
-        Column(modifier = Modifier.weight(weight = 1f)) {
-            GraphToolbar(state = state, platformConventions = platformConventions, onIntent = onIntent)
-            MapArea(state = state, onIntent = onIntent, modifier = Modifier.weight(weight = 1f).fillMaxWidth())
-            Footer(state = state, onIntent = onIntent)
-        }
-        val preview = state.preview
-        if (state.isInspectorOpen && preview != null) {
-            GraphInspector(state = state, preview = preview, onIntent = onIntent)
-        }
+        GraphToolbar(state = state, platformConventions = platformConventions, onIntent = onIntent)
+        MapArea(state = state, onIntent = onIntent, modifier = Modifier.weight(weight = 1f).fillMaxWidth())
+        Footer(state = state, onIntent = onIntent)
     }
 }
 

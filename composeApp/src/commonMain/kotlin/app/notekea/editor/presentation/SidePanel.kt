@@ -56,7 +56,8 @@ private const val PREVIEW_WIDTH_DP = 300
  * [current], the one the editor's view is in, and goes to a heading when it is clicked; a note without headings says
  * how to add one. The list is one focus stop, taken with [outlineFocus] (`Mod+Shift+O`): the arrows move, Enter goes
  * to the heading and Esc gives the keyboard back to the note. Note info, shown while a note is open ([info]), says what
- * it holds and when it was created and modified. Chat says it is coming (`ROADMAP.md` 3.3).
+ * it holds and when it was created and modified. A tab that is no note fills the inspector with its own [inspector].
+ * Chat says it is coming (`ROADMAP.md` 3.3).
  */
 @Composable
 fun SidePanel(
@@ -68,9 +69,10 @@ fun SidePanel(
     info: NoteInfo?,
     modifier: Modifier = Modifier,
     outlineFocus: FocusRequester = remember { FocusRequester() },
+    inspector: (@Composable () -> Unit)? = null,
     connections: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit = { _, _ -> }
 ) {
-    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(modifier = Modifier.padding(vertical = NotekeaDimensions.SpacingXs)) {
             PanelHeader(mode = preferences.mode, platformConventions = platformConventions, actions = actions)
             // Inspector and Chat fade into each other, so the switch reads as one panel changing.
@@ -78,8 +80,12 @@ fun SidePanel(
                 targetState = preferences.mode,
                 animationSpec = motionTween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
             ) { mode ->
-                when (mode) {
-                    SidePanelMode.INSPECTOR -> InspectorSections(
+                when {
+                    mode == SidePanelMode.CHAT -> SidePanelChat()
+
+                    inspector != null -> inspector()
+
+                    else -> InspectorSections(
                         outline = outline,
                         current = current,
                         foldedSections = preferences.foldedSections,
@@ -89,8 +95,6 @@ fun SidePanel(
                         info = info,
                         connections = connections
                     )
-
-                    SidePanelMode.CHAT -> SidePanelChat()
                 }
             }
         }

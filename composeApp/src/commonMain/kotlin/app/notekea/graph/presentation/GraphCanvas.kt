@@ -55,6 +55,7 @@ private const val HIT_MARGIN = 8f
 private const val PARALLAX_PER_DEPTH = 0.08f
 private const val VAULT_LABEL_ZOOM = 1.6f
 private const val MAX_SEMANTIC_DOTS = 120
+private const val LABEL_BACKGROUND_ALPHA = 0.82f
 
 /**
  * The map of the graph (`ROADMAP.md` 2.7): drag to pan, scroll to zoom, a click selects and a double click opens.
@@ -232,6 +233,7 @@ private fun Map(
         lineColor = colors.outline,
         accent = colors.primary,
         labelStyle = labelStyle,
+        labelBackground = colors.surface.copy(alpha = LABEL_BACKGROUND_ALPHA),
         colorOf = { dot -> folderColor(folder = dot.folder, folders = state.folders, root = colors.onSurfaceVariant) }
     )
     Canvas(modifier = Modifier.fillMaxSize()) {
