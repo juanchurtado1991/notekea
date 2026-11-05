@@ -811,7 +811,7 @@ attachments never are, so the graph never turns into a hairball of everything in
   With more than 2,000 nodes the global graph suggests local mode.
 - **Nodes and edges:** nodes sized by number of links; `[[links]]` as solid edges; semantic relations (above a
   similarity threshold) as dashed edges in `accent`, on the ring outside the last, labeled "Related by meaning" and
-  toggleable: on by default in local mode, off in global mode.
+  toggleable, in local mode only.
 - **Automatic colors:** nodes colored by top-level folder from the design system palette, with a legend, and no
   setup needed. Custom color groups by tag are a later option.
 - **Focus on hover:** hovering a note highlights it, its edges and its neighbors and dims the rest.
@@ -823,6 +823,10 @@ attachments never are, so the graph never turns into a hairball of everything in
 - **Interaction:** pan and zoom; a click selects a note, and around a note moves it to the center; a double click or
   Open opens it. Keyboard: arrow keys move between connected nodes, `Enter` opens the focused note, `Esc` returns to the
   note.
+- **Search:** a button and `Mod+F` open a bar that finds notes by name: matches keep their color and name, the rest fade,
+  and `Enter` goes through them, each sliding into view. Around a note it finds any note and moves there.
+- **Link from the graph:** the inspector lists notes close in meaning that no link joins yet, each with Link, which adds
+  `[[note]]` at the end of the selected note and can be undone there. A note edited meanwhile is never overwritten.
 - **States:**
   - Empty vault, or a note with no links: a hint that teaches ("Link notes with `[[ ]]` to see them connected
     here").
