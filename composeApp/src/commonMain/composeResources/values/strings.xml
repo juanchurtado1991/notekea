@@ -548,8 +548,6 @@
     <string name="menu_save">Save</string>
     <string name="menu_close_tab">Close tab</string>
     <string name="menu_close_window">Close window</string>
-    <string name="menu_settings">Settings…</string>
-    <string name="menu_exit">Exit</string>
     <string name="menu_find">Find in note…</string>
     <string name="menu_search_notes">Search in notes…</string>
     <string name="menu_toggle_task">Toggle task</string>
@@ -565,6 +563,5 @@
     <string name="menu_next_tab">Next tab</string>
     <string name="menu_previous_tab">Previous tab</string>
     <string name="menu_split_right">Split right</string>
-    <string name="menu_about">About Notekea</string>
     <string name="menu_shortcuts">Keyboard shortcuts</string>
 </resources>

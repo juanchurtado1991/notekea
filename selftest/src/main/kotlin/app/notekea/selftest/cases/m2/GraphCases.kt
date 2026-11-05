@@ -155,7 +155,8 @@ private fun SuiteBuilder.doubleClickAndSplit() {
                 "the graph's map and press Ctrl+F (Cmd+F on macOS)."
         )
         expected(
-            text = "The note double-clicked opens, not the one selected before. In step 4 Find opens in the note, and " +
+            text =
+            "The note double-clicked opens, not the one selected before. In step 4 Find opens in the note, and " +
                 "in step 5 the search bar opens on the graph."
         )
     }

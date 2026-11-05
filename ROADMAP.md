@@ -61,12 +61,12 @@ a person can judge (looks, feel, the operating system's own dialogs).
 
 ### Layout
 
-One main window with three resizable panes, a status bar, and the native window frame and menu bar
+One main window with three resizable panes, a status bar and the native window frame; macOS also has its menu bar
 (`PLATFORM_GUIDELINES.md`).
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────┐
-│ (native title bar / menu bar)                                                      │
+│ (native title bar)                                                                 │
 ├──┬─────────────┬──────────────────────────────────────────┬────────────────────────┤
 │N │ Vault ⇅ ⌄ – │ ╭Pricing ✕╮ 2026-10-23 •│ plate.png  ⌄ + │ [Inspector][Chat]    – │
 │▤ │ BOOKMARKS   │──────────────────────────────────────────│ ▾ OUTLINE              │
@@ -130,9 +130,9 @@ below is that palette, now the Cobalt Tangerine theme; the app starts in Workspa
 - **Typography:** one bundled UI typeface (Inter, SIL OFL) for UI and editor body; a bundled monospaced typeface
   (JetBrains Mono, SIL OFL) for code blocks. Scale: 12 / 14 (body) / 16 / 20 / 28.
 - **Spacing:** 4 dp grid (4, 8, 12, 16, 24, 32). **Corner radius:** 6 dp controls, 10 dp cards.
-- **Menu bar:** File, Edit, View, Window and Help, in the window on Windows and Linux and at the top of the screen on
-  macOS, whose app menu holds About, Settings and Quit (`PLATFORM_GUIDELINES.md` §4). Each entry runs what its shortcut
-  runs and is dimmed while no screen offers it, so every command can be found without knowing its shortcut.
+- **Menu bar:** only on macOS, at the top of the screen: File, Edit, View, Window and Help, with an app menu that holds
+  About, Settings and Quit (`PLATFORM_GUIDELINES.md` §4). Each entry runs what its shortcut runs and is dimmed while no
+  screen offers it. Windows and Linux have none: Swing would draw it in the window, outside the app's theme.
 - **Motion:** 150–200 ms for panel open/close; no animation longer than 250 ms; respect "reduce motion": the setting
   in Settings → Appearance or the system's turns animations off.
 - **Themes:** light and dark, following the system by default; since 2.12 also chosen in Settings → Appearance,
