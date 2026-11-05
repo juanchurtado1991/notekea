@@ -1305,15 +1305,20 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
    The Ghost Serializer vault (`smoke-data/vaults/Ghost Serializer`) stays as the large vault of the tests and the
    performance passes, and its questions (2.8) as an evaluation set; the repository itself becomes the test data of
    this item.
-4. **More than two split panes** and detachable windows.
-5. **Custom title bar** with the tabs inside it (JetBrains Jewel `DecoratedWindow`).
-6. **Screenshot tests** for UI regressions (Roborazzi).
-7. **Web search for agent mode** — the agent finds its own sources instead of using the URLs it is given. Decided with
+4. **One editing mode** — a note looks finished and is edited right there, so Edit and Preview become one. Decided with
+   the developer on 2026-11-05, as a feature of its own. It is built in steps: first Edit hides the Markdown marks except
+   on the cursor's line, then tables, embeds and images show and are edited in place. Preview stays until the new mode
+   matches it on long notes, within the memory targets of 1.18 and 5.4, and the raw Markdown stays one action away for
+   what does not render well. Design options are shown first.
+5. **More than two split panes** and detachable windows.
+6. **Custom title bar** with the tabs inside it (JetBrains Jewel `DecoratedWindow`).
+7. **Screenshot tests** for UI regressions (Roborazzi).
+8. **Web search for agent mode** — the agent finds its own sources instead of using the URLs it is given. Decided with
    the developer on 2026-11-04 to come after the MVP. It needs an outside search service, so searches leave the computer
    and the privacy promise changes: off by default, each search shown and approved first, with the user's own provider,
    its own issue and an update to `GUIDELINES.md` §13.
-8. **OCR** — text from scanned PDFs and pictures, on the computer. Tesseract first, as an optional download.
-9. **Use an installed Ollama** — when the user already runs Ollama, Notekea can use its model instead of loading its
+9. **OCR** — text from scanned PDFs and pictures, on the computer. Tesseract first, as an optional download.
+10. **Use an installed Ollama** — when the user already runs Ollama, Notekea can use its model instead of loading its
    own, so the memory is not spent twice. For technical users; the bundled model stays the default.
 
 ## Out of scope for the MVP
