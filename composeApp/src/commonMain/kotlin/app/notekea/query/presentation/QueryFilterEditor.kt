@@ -46,7 +46,8 @@ internal fun QueryFilterEditor(
     onApply: (QueryFilter) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var condition by remember { mutableStateOf(value = filter.condition) }
+    val first = filter.condition.takeIf { it in kind.conditions } ?: kind.conditions.first()
+    var condition by remember { mutableStateOf(value = first) }
     var value by remember { mutableStateOf(value = filter.value) }
     var isChecked by remember { mutableStateOf(value = filter.value != FALSE) }
     var isRejected by remember { mutableStateOf(value = false) }

@@ -26,6 +26,8 @@ import app.notekea.resources.query_invalid_key
 import app.notekea.resources.query_invalid_part
 import org.jetbrains.compose.resources.stringResource
 
+private const val TAG_MARK = "#"
+
 /** How a person reads [condition]; the note's own conditions are named by their chips, not by these words. */
 @Composable
 internal fun conditionLabel(
@@ -54,7 +56,8 @@ internal fun filterLabel(
 ): String = when (filter.condition) {
     QueryCondition.IN_FOLDER -> stringResource(resource = Res.string.query_chip_folder, filter.value)
 
-    QueryCondition.HAS_TAG -> stringResource(resource = Res.string.query_chip_tag, filter.value)
+    QueryCondition.HAS_TAG ->
+        stringResource(resource = Res.string.query_chip_tag, filter.value.removePrefix(prefix = TAG_MARK))
 
     else -> stringResource(
         resource = Res.string.query_chip_filter,
