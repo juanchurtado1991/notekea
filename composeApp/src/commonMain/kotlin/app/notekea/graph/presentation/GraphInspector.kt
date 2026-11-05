@@ -43,8 +43,8 @@ private const val MAX_SUGGESTED = 5
 
 /**
  * The side panel's inspector while the graph is shown: the selected note, as Finder's inspector shows a file, with its
- * name, a few lines and Open, then what it connects to and what it could link to, under the panel's own section
- * headers. A link just made can be undone here.
+ * name and a few lines, then what it connects to and what it could link to, under the panel's own section headers,
+ * with Open always in reach at the panel's foot. A link just made can be undone here.
  */
 @Composable
 fun GraphInspector(
@@ -53,27 +53,37 @@ fun GraphInspector(
     modifier: Modifier = Modifier
 ) {
     val preview = state.preview
-    Column(
-        modifier = modifier.fillMaxSize().verticalScroll(state = rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
-    ) {
-        if (preview == null) {
-            Muted(text = stringResource(resource = Res.string.graph_inspector_empty), modifier = InsetModifier)
-        } else {
-            Summary(preview = preview, onIntent = onIntent)
-            Connected(preview = preview, onIntent = onIntent)
-            Suggested(preview = preview, onIntent = onIntent)
-            LinkResult(state = state, onIntent = onIntent)
+    Column(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.weight(weight = 1f).fillMaxWidth().verticalScroll(state = rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
+        ) {
+            if (preview == null) {
+                Muted(text = stringResource(resource = Res.string.graph_inspector_empty), modifier = InsetModifier)
+            } else {
+                Summary(preview = preview)
+                Connected(preview = preview, onIntent = onIntent)
+                Suggested(preview = preview, onIntent = onIntent)
+                LinkResult(state = state, onIntent = onIntent)
+            }
+        }
+        if (preview != null) {
+            NotekeaButton(
+                text = stringResource(resource = Res.string.graph_open),
+                onClick = { onIntent(GraphIntent.OnOpenSelected) },
+                modifier = Modifier.fillMaxWidth().padding(all = NotekeaDimensions.SpacingS),
+                style = NotekeaButtonStyle.SECONDARY
+            )
         }
     }
 }
 
-private val InsetModifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingM)
+/** Where a section header's title starts and its count ends, so the text lines up under them. */
+private val InsetModifier = Modifier.padding(start = NotekeaDimensions.SpacingM * 2, end = NotekeaDimensions.SpacingS)
 
 @Composable
 private fun Summary(
-    preview: GraphPreview,
-    onIntent: (GraphIntent) -> Unit
+    preview: GraphPreview
 ) {
     Column(
         modifier = InsetModifier.fillMaxWidth(),
@@ -86,11 +96,6 @@ private fun Summary(
             style = MaterialTheme.typography.bodySmall,
             maxLines = SNIPPET_LINES,
             overflow = TextOverflow.Ellipsis
-        )
-        NotekeaButton(
-            text = stringResource(resource = Res.string.graph_open),
-            onClick = { onIntent(GraphIntent.OnOpenSelected) },
-            style = NotekeaButtonStyle.SECONDARY
         )
     }
 }
