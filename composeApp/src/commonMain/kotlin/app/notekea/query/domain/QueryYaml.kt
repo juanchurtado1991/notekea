@@ -90,11 +90,20 @@ class QueryYaml {
                 filter.condition.needsProperty
             }?.let { PROPERTY to YamlValues.written(text = it) },
             CONDITION to filter.condition.written,
-            filter.value.takeIf { filter.condition.needsValue }?.let { VALUE to YamlValues.written(text = it) }
+            filter.value.takeIf { filter.condition.needsValue }?.let { VALUE to writtenValue(text = it) }
         )
         return parts.mapIndexed { index, (key, value) ->
             (if (index == 0) ITEM_START else ITEM_NEXT) + key + KEY_VALUE + value
         }
+    }
+
+    /** A value is always read back as text, so a number or a date needs no quotes to stay one. */
+    private fun writtenValue(
+        text: String
+    ): String = if (frontmatterReader.scalarValue(text = text) is PropertyValue.Text) {
+        YamlValues.written(text = text)
+    } else {
+        text
     }
 
     private fun filtersOf(

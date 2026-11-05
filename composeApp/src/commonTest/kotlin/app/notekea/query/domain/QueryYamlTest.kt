@@ -56,6 +56,33 @@ class QueryYamlTest {
     }
 
     @Test
+    fun `numbers and dates are written as a person writes them, and text is quoted only when it must be`() {
+        val query = VaultQuery(
+            filters = listOf(
+                QueryFilter(condition = QueryCondition.MORE_THAN, property = "rating", value = "3"),
+                QueryFilter(condition = QueryCondition.AFTER, property = "date", value = "2026-10-22"),
+                QueryFilter(condition = QueryCondition.IS, property = "status", value = "on: hold")
+            )
+        )
+
+        assertEquals(
+            expected = """
+                filters:
+                  - property: rating
+                    condition: more than
+                    value: 3
+                  - property: date
+                    condition: after
+                    value: 2026-10-22
+                  - property: status
+                    condition: is
+                    value: "on: hold"
+            """.trimIndent(),
+            actual = yaml.write(query = query)
+        )
+    }
+
+    @Test
     fun `an empty block is the query of every note`() {
         assertEquals(expected = QueryParse.Valid(query = VaultQuery()), actual = yaml.read(text = ""))
     }

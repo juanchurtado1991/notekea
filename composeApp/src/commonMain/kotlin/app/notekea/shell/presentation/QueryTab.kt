@@ -13,6 +13,7 @@ import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.query.presentation.QueryBlock
 import app.notekea.query.presentation.QueryEffect
 import app.notekea.query.presentation.QueryIntent
+import app.notekea.query.presentation.QueryNotice
 import app.notekea.query.presentation.QueryViewModel
 import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.shell.domain.Workspace
@@ -79,7 +80,7 @@ internal fun FollowQueryBlocks(
                 notes = notes,
                 run = { query.resultOf(query = it, notes = notes) },
                 onIntent = query::onIntent,
-                notice = query.state.collectAsState().value.notice
+                notice = query.state.collectAsState().value.notice.takeIf { it is QueryNotice.WriteFailed }
             )
         }
     }

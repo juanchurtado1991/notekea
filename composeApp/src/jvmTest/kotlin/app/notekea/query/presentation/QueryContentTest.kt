@@ -60,6 +60,31 @@ class QueryContentTest {
         assertEquals(expected = emptyList(), actual = intents)
     }
 
+    // Review: a query kept from before showed one condition on its tabs and applied another.
+    @Test
+    fun `a filter on a property no note has any more applies the condition its card shows`() = runComposeUiTest {
+        val gone = QueryFilter(condition = QueryCondition.MORE_THAN, property = "gone", value = "3")
+        val state = QueryPreviewData.state.copy(query = QueryPreviewData.state.query.copy(filters = listOf(gone)))
+        val intents = mutableListOf<QueryIntent>()
+        setContent {
+            NotekeaTheme(darkTheme = false) {
+                QueryContent(state = state, onIntent = { intents += it }, saveTarget = null)
+            }
+        }
+
+        onNodeWithText(text = "gone more than 3").performClick()
+        waitForIdle()
+        onNodeWithText(text = "Apply").performClick()
+        waitForIdle()
+
+        assertEquals(
+            expected = listOf<QueryIntent>(
+                QueryIntent.OnFilterChange(index = 0, filter = gone.copy(condition = QueryCondition.IS))
+            ),
+            actual = intents
+        )
+    }
+
     @Test
     fun `a name opens its note, and the note beside the tab can keep the query`() = runComposeUiTest {
         val intents = mutableListOf<QueryIntent>()
