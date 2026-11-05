@@ -805,8 +805,8 @@ attachments never are, so the graph never turns into a hairball of everything in
 
 **UI — Graph** (opened with `Mod+G` or from the sidebar, as an editor tab):
 - **Design 1, "Finder inspector" (picked 2026-11-05):** a compact toolbar, a map of circles with their names below, a
-  halo on the selected note, an inspector on the right, shown and hidden with `Space`, and a legend whose folders leave
-  the map when clicked. 2D, with depth instead of 3D: notes farther from the center are smaller, fainter and move a
+  halo on the selected note, its details in the side panel's inspector, shown and hidden with `Space`, and a legend whose
+  folders leave the map when clicked. 2D, with depth instead of 3D: notes farther from the center are smaller, fainter and move a
   little less, zooming reveals names, and a chosen note slides to the center, unless motion is reduced.
 - **Local first:** opened from a note, the graph is local, on rings: that note and its direct neighbors (depth 1), with
   a 1 / 2 depth selector. The global graph is an explicit choice ("Whole vault"). With no note open the tab asks to find

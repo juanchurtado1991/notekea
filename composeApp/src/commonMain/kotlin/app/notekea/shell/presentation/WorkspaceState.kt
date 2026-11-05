@@ -27,6 +27,11 @@ data class WorkspaceState(
             if (kindOf(path = it) == TabKind.NOTE) it.nameWithoutExtension else it.name
         }
 
+    /** The note being read: the active pane's, or the one in the other pane, beside a tab that shows no note. */
+    val noteShown: RelativePath?
+        get() = (listOf(workspace.activePath) + workspace.panes.map { it.activePath })
+            .firstOrNull { it != null && kindOf(path = it) == TabKind.NOTE }
+
     fun kindOf(
         path: RelativePath
     ): TabKind = when (path) {

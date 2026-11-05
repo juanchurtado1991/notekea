@@ -76,7 +76,7 @@ class GraphViewModel(
             GraphIntent.OnOpenSelected -> state.value.selected?.let { emit(effect = GraphEffect.OpenNote(path = it)) }
             is GraphIntent.OnNoteOpen -> emit(effect = GraphEffect.OpenNote(path = intent.path))
             GraphIntent.OnBack -> openedFrom?.let { emit(effect = GraphEffect.OpenNote(path = it)) }
-            GraphIntent.OnInspectorToggle -> reduce { it.copy(isInspectorOpen = !it.isInspectorOpen) }
+            GraphIntent.OnInspectorToggle -> emit(effect = GraphEffect.ToggleInspector)
             GraphIntent.OnRelatedToggle -> change { it.copy(showsRelated = !it.showsRelated) }
             GraphIntent.OnOrphansToggle -> change { it.copy(showsOrphans = !it.showsOrphans) }
             is GraphIntent.OnFolderToggle -> toggleFolder(folder = intent.folder)

@@ -41,6 +41,7 @@ fun WithSidePanel(
     onLeave: () -> Unit,
     info: NoteInfo?,
     modifier: Modifier = Modifier,
+    inspector: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     val actions = remember(sidePanel, onHeadingClick, onLeave) {
@@ -71,6 +72,7 @@ fun WithSidePanel(
                     actions = actions,
                     info = info,
                     outlineFocus = sidePanel.outlineFocus,
+                    inspector = inspector,
                     connections = sidePanel.connections
                 )
             },

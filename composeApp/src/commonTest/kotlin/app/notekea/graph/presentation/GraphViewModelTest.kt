@@ -95,6 +95,16 @@ class GraphViewModelTest : GraphViewModelFixture() {
         )
     }
 
+    @Test
+    fun `Space asks for the side panel, where the inspector lives`() = runGraphTest {
+        val effects = mutableListOf<GraphEffect>()
+        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+
+        send(GraphIntent.OnInspectorToggle)
+
+        assertEquals(expected = listOf<GraphEffect>(GraphEffect.ToggleInspector), actual = effects)
+    }
+
     // Review: a double click opened the note selected before it, as a double tap never selects.
     @Test
     fun `a double click opens the note clicked, not the one selected`() = runGraphTest {

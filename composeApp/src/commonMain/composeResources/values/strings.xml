@@ -522,6 +522,7 @@
     <string name="graph_empty_message">Link notes with [[ ]] to see them connected here.</string>
     <string name="graph_empty_title">Nothing connected yet</string>
     <string name="graph_index_not_ready">Related notes show once your notes are ready to search.</string>
+    <string name="graph_inspector_empty">Select a note on the graph to see it here.</string>
     <string name="graph_link">Link</string>
     <string name="graph_link_failed">Couldn’t change the note. It may have been edited meanwhile.</string>
     <string name="graph_link_undo">Undo</string>

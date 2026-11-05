@@ -1,6 +1,8 @@
 package app.notekea.graph.presentation
 
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -17,6 +19,7 @@ private const val HALO_GROWTH = 8f
 private const val HALO_ALPHA = 0.22f
 private const val LABEL_GAP = 6f
 private const val LABEL_WIDTH = 150
+private const val LABEL_PADDING = 3f
 private const val LINK_WIDTH = 1.4f
 private const val RELATED_WIDTH = 1.2f
 private val RELATED_DASH = floatArrayOf(4f, 6f)
@@ -81,5 +84,11 @@ private fun DrawScope.drawName(
         constraints = Constraints(maxWidth = LABEL_WIDTH)
     )
     val topLeft = Offset(x = center.x - text.size.width / 2f, y = center.y + radius + LABEL_GAP)
+    drawRoundRect(
+        color = paint.labelBackground.copy(alpha = paint.labelBackground.alpha * alpha),
+        topLeft = topLeft - Offset(x = LABEL_PADDING, y = LABEL_PADDING / 2),
+        size = Size(width = text.size.width + LABEL_PADDING * 2, height = text.size.height + LABEL_PADDING),
+        cornerRadius = CornerRadius(x = LABEL_PADDING, y = LABEL_PADDING)
+    )
     drawText(textLayoutResult = text, topLeft = topLeft, alpha = alpha)
 }

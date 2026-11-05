@@ -33,9 +33,9 @@ private fun SuiteBuilder.graphFromNote() {
         pressInWindow(shortcut = Mod + Key.G)
         expectText(text = "This note")
         clickIcon(label = "Weekly menu")
-        expectText(text = "Connected to")
+        expectText(text = "CONNECTED TO")
         click(text = "Open note")
-        expectNoText(text = "Connected to")
+        expectNoText(text = "CONNECTED TO")
     }
 }
 
@@ -77,7 +77,7 @@ private fun SuiteBuilder.keyboard() {
                 "graph's tab and press Esc."
         )
         expected(
-            text = "Arrows move between connected notes. Space hides and shows the panel. Enter opens the note. " +
+            text = "Arrows move between connected notes. Space hides and shows the side panel. Enter opens the note. " +
                 "Esc goes back to Arepas."
         )
     }
@@ -119,7 +119,8 @@ private fun SuiteBuilder.linkFromTheGraph() {
         prepare(SAMPLE)
         title(text = "Link joins two notes from the graph, and Undo takes it back")
         steps(
-            text = "$OPEN_GRAPH\n3. Click circles until the panel shows Related, not linked.\n4. Click Link on a row." +
+            text =
+            "$OPEN_GRAPH\n3. Click circles until the side panel shows RELATED, NOT LINKED.\n4. Click Link on a row." +
                 "\n5. Click Open note and look at the end of the note, the one the panel showed, then go back to the " +
                 "graph's tab.\n6. Click Link on another row, then Undo."
         )

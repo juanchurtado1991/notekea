@@ -14,6 +14,7 @@ internal class GraphPaint(
     val lineColor: Color,
     val accent: Color,
     val labelStyle: TextStyle,
+    val labelBackground: Color,
     val colorOf: (GraphDot) -> Color,
     val selected: RelativePath?,
     val matches: Set<RelativePath>?
