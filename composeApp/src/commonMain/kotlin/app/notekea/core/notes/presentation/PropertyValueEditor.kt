@@ -1,4 +1,4 @@
-package app.notekea.editor.presentation
+package app.notekea.core.notes.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +25,7 @@ import app.notekea.core.presentation.components.NotekeaPropertyField
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.notes.domain.NoteProperty
-import app.notekea.editor.domain.PropertyKeys
+import app.notekea.core.notes.domain.PropertyKeys
 import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.resources.Res
 import app.notekea.resources.properties_add_item
@@ -46,15 +46,14 @@ private val NUMBER = Regex(pattern = "-?\\d+(\\.\\d+)?")
  * A property's value edited in place, by its type (`ROADMAP.md` 1.14): text and numbers as fields, a checkbox, a date
  * typed or picked on a calendar that marks [today] (shown as people write it until it is edited), a list as chips with
  * a field that adds one, and a value the form does not edit as it is written, with a note to edit it in the source.
- * Each change goes to the note at once.
+ * Each change goes to [change] at once.
  */
 @Composable
-internal fun PropertyValueEditor(
+fun PropertyValueEditor(
     property: NoteProperty,
     today: CalendarDate?,
-    onIntent: (EditorIntent) -> Unit
+    change: (PropertyValue) -> Unit
 ) {
-    val change = { value: PropertyValue -> onIntent(PropertyIntent.OnValueChange(key = property.key, value = value)) }
     when (val value = property.value) {
         is PropertyValue.Text -> NotekeaPropertyField(
             value = value.text,
@@ -161,6 +160,8 @@ private fun OtherValue(
 }
 
 private const val SOURCE_KEY_SEPARATOR = ":"
+private const val PREVIEW_KEY = "tags"
+private val PREVIEW_ITEMS = listOf("recipe", "breakfast")
 
 @Preview
 @Composable
@@ -168,9 +169,9 @@ private fun PropertyValueEditorPreview() {
     NotekeaPreviewThemes {
         Box(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
             PropertyValueEditor(
-                property = EditorPreviewData.typedProperties.properties.first(),
+                property = NoteProperty(key = PREVIEW_KEY, value = PropertyValue.Items(items = PREVIEW_ITEMS)),
                 today = null,
-                onIntent = {}
+                change = {}
             )
         }
     }

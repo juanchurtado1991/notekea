@@ -1,5 +1,6 @@
 package app.notekea.editor.domain
 
+import app.notekea.core.notes.domain.FrontmatterPatch
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

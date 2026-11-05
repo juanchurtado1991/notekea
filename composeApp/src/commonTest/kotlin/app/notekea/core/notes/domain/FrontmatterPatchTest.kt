@@ -1,9 +1,8 @@
-package app.notekea.editor.domain
+package app.notekea.core.notes.domain
 
 import app.notekea.core.domain.time.CalendarDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.core.notes.domain.PropertyValue
 
 /** Editing one property rewrites only its lines (`ROADMAP.md` 1.14), in the style it already had. */
 class FrontmatterPatchTest {

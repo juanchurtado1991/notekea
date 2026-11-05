@@ -4,8 +4,8 @@ import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.notes.domain.FrontmatterBlocks
 import app.notekea.core.notes.domain.FrontmatterContent
-import app.notekea.editor.domain.FrontmatterPatch
-import app.notekea.editor.domain.PropertyKeys
+import app.notekea.core.notes.domain.FrontmatterPatch
+import app.notekea.core.notes.domain.PropertyKeys
 
 /**
  * The note's frontmatter after an edit of its properties ([PropertyIntent]): one property patched, added, renamed or

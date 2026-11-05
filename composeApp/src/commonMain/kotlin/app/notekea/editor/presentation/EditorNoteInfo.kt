@@ -4,7 +4,7 @@ import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.notes.domain.FrontmatterContent
 import app.notekea.core.notes.domain.OutlineFinder
-import app.notekea.editor.domain.PropertyKeys
+import app.notekea.core.notes.domain.PropertyKeys
 import app.notekea.core.notes.domain.PropertyValue
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

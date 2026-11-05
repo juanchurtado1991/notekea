@@ -1,7 +1,10 @@
 package app.notekea.tree.data
 
 import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteProperty
+import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -22,6 +25,23 @@ class OkioNoteMetadataReaderTest {
     )
 
     @Test
+    fun `every property keeps its type, and frontmatter that is not properties gives none`() = runReaderTest {
+        writeNote(content = "---\nrating: 4\nfinished: true\nread: 2026-03-02\nauthor: Frank\n---\nDune\n")
+        val typed = readNote()?.properties
+        writeNote(content = "---\nrating: 4\nnot a property\n---\nDune\n")
+
+        assertEquals(
+            expected = listOf(
+                NoteProperty(key = "rating", value = PropertyValue.Number(text = "4")),
+                NoteProperty(key = "finished", value = PropertyValue.Checkbox(isChecked = true)),
+                NoteProperty(key = "read", value = PropertyValue.Date(date = CalendarDate(2026, 3, 2))),
+                NoteProperty(key = "author", value = PropertyValue.Text(text = "Frank"))
+            ) to emptyList(),
+            actual = typed to readNote()?.properties
+        )
+    }
+
+    @Test
     fun `frontmatter at the top of a note is read, and the body only for its tags`() = runReaderTest {
         writeNote(content = "---\ntags: [travel]\n---\n\n# Lisbon trip #trip\n\n---\ntags: [body]\n---\n")
 
@@ -30,7 +50,10 @@ class OkioNoteMetadataReaderTest {
                 tags = listOf("travel"),
                 aliases = emptyList(),
                 title = null,
-                textTags = listOf("trip")
+                textTags = listOf("trip"),
+                properties = listOf(
+                    NoteProperty(key = "tags", value = PropertyValue.Items(items = listOf("travel")))
+                )
             ),
             actual = readNote()
         )
