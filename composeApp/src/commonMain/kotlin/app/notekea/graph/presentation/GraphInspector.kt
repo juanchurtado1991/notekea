@@ -14,6 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,8 +43,8 @@ private const val MAX_SUGGESTED = 5
 
 /**
  * The side panel's inspector while the graph is shown: the selected note, as Finder's inspector shows a file, with its
- * name, a few lines and Open, then what it connects to and what it could link to, under the panel's own section headers.
- * A link just made can be undone here.
+ * name, a few lines and Open, then what it connects to and what it could link to, under the panel's own section
+ * headers. A link just made can be undone here.
  */
 @Composable
 fun GraphInspector(
@@ -116,7 +119,7 @@ private fun Connected(
         count = preview.connected.size
     )
     preview.connected.take(n = MAX_CONNECTED).forEach { path ->
-        NoteRow(path = path, onIntent = onIntent)
+        NoteRow(path = path, color = MaterialTheme.colorScheme.primary, onIntent = onIntent)
     }
 }
 
@@ -131,7 +134,7 @@ private fun Suggested(
         count = preview.suggested.size
     )
     preview.suggested.take(n = MAX_SUGGESTED).forEach { path ->
-        NoteRow(path = path, onIntent = onIntent) {
+        NoteRow(path = path, color = MaterialTheme.colorScheme.onSurface, onIntent = onIntent) {
             TextAction(
                 text = stringResource(resource = Res.string.graph_link),
                 onClick = { onIntent(GraphIntent.OnLink(path = path)) }
@@ -144,6 +147,7 @@ private fun Suggested(
 @Composable
 private fun NoteRow(
     path: RelativePath,
+    color: Color,
     onIntent: (GraphIntent) -> Unit,
     action: @Composable () -> Unit = {}
 ) {
@@ -152,8 +156,10 @@ private fun NoteRow(
             text = path.nameWithoutExtension,
             modifier = Modifier
                 .weight(weight = 1f)
+                .pointerHoverIcon(icon = PointerIcon.Hand)
                 .clickable(role = Role.Button) { onIntent(GraphIntent.OnNoteSelect(path = path)) },
             style = MaterialTheme.typography.bodySmall,
+            color = color,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -170,6 +176,7 @@ private fun TextAction(
     Text(
         text = text,
         modifier = Modifier
+            .pointerHoverIcon(icon = PointerIcon.Hand)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(start = NotekeaDimensions.SpacingS),
         style = MaterialTheme.typography.bodySmall,

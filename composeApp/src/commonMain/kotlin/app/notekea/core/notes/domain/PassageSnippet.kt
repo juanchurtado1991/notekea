@@ -2,8 +2,8 @@ package app.notekea.core.notes.domain
 
 /**
  * What a result quotes of a note (`ROADMAP.md` 2.4, 2.6): the passage found ([text]) with the sentence that shares the
- * most words with what was looked for as [highlight], and in it the [keywords] that say why it was found: the few longest
- * words it shares, so a row marks those and not whole lines.
+ * most words with what was looked for as [highlight], and in it the [keywords] that say why it was found: the few
+ * longest words it shares, so a row marks those and not whole lines.
  */
 data class PassageSnippet(
     val text: String,
