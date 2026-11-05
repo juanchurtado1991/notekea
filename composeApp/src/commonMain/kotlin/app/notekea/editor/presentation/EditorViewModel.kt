@@ -175,7 +175,11 @@ class EditorViewModel(
 
             is EditorIntent.OnHeadingClick -> focus.revealHeading(index = intent.index)
 
-            is EditorIntent.OnRevealRequest -> focus.reveal(path = intent.path, range = intent.range)
+            is EditorIntent.OnRevealRequest -> {
+                // A selection only shows in the Markdown, so this leaves Preview, as Find does.
+                chooseMode(isReading = false)
+                focus.reveal(path = intent.path, range = intent.range)
+            }
 
             is EditorIntent.OnDayStep -> emit(effect = EditorEffect.DayStep(step = intent.step))
 

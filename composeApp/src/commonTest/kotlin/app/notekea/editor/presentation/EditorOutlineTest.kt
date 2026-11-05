@@ -114,6 +114,19 @@ class EditorOutlineTest {
         }
 
     @Test
+    fun `a passage chosen in Preview shows in Edit, the only mode with a selection`() = runOutlineTest {
+        open(path = AREPAS)
+        send(intent = EditorIntent.OnReadModeToggle)
+
+        send(intent = EditorIntent.OnRevealRequest(path = AREPAS, range = 2..7))
+
+        assertEquals(
+            expected = false to TextRange(start = 2, end = 8),
+            actual = viewModel.state.value.isReading to viewModel.buffer.selection
+        )
+    }
+
+    @Test
     fun `going back to a note puts the cursor where it was left`() = runOutlineTest {
         open(path = AREPAS)
         viewModel.buffer.edit { selection = TextRange(start = 2, end = 8) }
