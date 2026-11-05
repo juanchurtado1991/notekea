@@ -80,6 +80,8 @@ public class CaseScope internal constructor(
     public fun clickWords(words: String) {
         step(description = "Click “$words”")
         awaitText(text = words, substring = true)
+        // A text's links can follow it by a frame: a click before they settle lands on plain words.
+        ui.waitForIdle()
         val node = firstShown(matcher = hasText(text = words, substring = true))
         // A person scrolls to what they click; a text in a scrolling view may be below the window.
         runCatching { node.performScrollTo() }
