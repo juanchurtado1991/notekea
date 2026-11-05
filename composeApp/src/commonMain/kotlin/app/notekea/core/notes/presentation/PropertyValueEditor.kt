@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
@@ -45,14 +46,15 @@ private val NUMBER = Regex(pattern = "-?\\d+(\\.\\d+)?")
 /**
  * A property's value edited in place, by its type (`ROADMAP.md` 1.14): text and numbers as fields, a checkbox, a date
  * typed or picked on a calendar that marks [today] (shown as people write it until it is edited), a list as chips with
- * a field that adds one, and a value the form does not edit as it is written, with a note to edit it in the source.
+ * a field of [itemFieldWidth] that adds one, and a value the form does not edit as it is written, with a note to edit it in the source.
  * Each change goes to [change] at once.
  */
 @Composable
 fun PropertyValueEditor(
     property: NoteProperty,
     today: CalendarDate?,
-    change: (PropertyValue) -> Unit
+    change: (PropertyValue) -> Unit,
+    itemFieldWidth: Dp = ITEM_FIELD_WIDTH_DP.dp
 ) {
     when (val value = property.value) {
         is PropertyValue.Text -> NotekeaPropertyField(
@@ -76,7 +78,7 @@ fun PropertyValueEditor(
 
         is PropertyValue.Date -> DateEditor(value = value, today = today, change = change)
 
-        is PropertyValue.Items -> ItemsEditor(property = property, items = value.items, change = change)
+        is PropertyValue.Items -> ItemsEditor(property, value.items, itemFieldWidth, change)
 
         is PropertyValue.Other -> OtherValue(source = value.source)
     }
@@ -110,6 +112,7 @@ private fun DateEditor(
 private fun ItemsEditor(
     property: NoteProperty,
     items: List<String>,
+    fieldWidth: Dp,
     change: (PropertyValue) -> Unit
 ) {
     val isTags = PropertyKeys.isTags(key = property.key)
@@ -129,7 +132,7 @@ private fun ItemsEditor(
         }
         // A new field after each change, so what was typed does not stay once it is added.
         key(items) {
-            Box(modifier = Modifier.width(width = ITEM_FIELD_WIDTH_DP.dp)) {
+            Box(modifier = Modifier.width(width = fieldWidth)) {
                 NotekeaPropertyField(
                     value = "",
                     onCommit = { text ->

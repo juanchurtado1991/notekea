@@ -6,5 +6,6 @@ enum class TabKind {
     FILE,
     FOLDER,
     GRAPH,
+    QUERY,
     MISSING
 }

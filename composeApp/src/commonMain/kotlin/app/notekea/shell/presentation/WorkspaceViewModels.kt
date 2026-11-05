@@ -2,6 +2,7 @@ package app.notekea.shell.presentation
 
 import app.notekea.editor.presentation.EditorViewModel
 import app.notekea.graph.presentation.GraphViewModel
+import app.notekea.query.presentation.QueryViewModel
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.tree.presentation.tags.TagPickerIntent
 import app.notekea.templates.presentation.TemplatePickerIntent
@@ -16,6 +17,7 @@ import app.notekea.tree.presentation.VaultTreeViewModel
  */
 internal class WorkspaceViewModels(
     val graph: GraphViewModel,
+    val query: QueryViewModel,
     val tree: VaultTreeViewModel,
     val workspace: WorkspaceViewModel,
     val editors: List<EditorViewModel>,

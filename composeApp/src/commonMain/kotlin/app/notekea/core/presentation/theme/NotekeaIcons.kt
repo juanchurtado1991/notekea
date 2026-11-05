@@ -84,6 +84,7 @@ import com.composables.icons.lucide.SeparatorHorizontal
 import com.composables.icons.lucide.SquareArrowOutUpRight
 import com.composables.icons.lucide.SquareCode
 import com.composables.icons.lucide.Table
+import com.composables.icons.lucide.TableProperties
 import com.composables.icons.lucide.TextQuote
 import com.composables.icons.lucide.Trash2
 import com.composables.icons.lucide.TriangleAlert
@@ -212,6 +213,7 @@ object NotekeaIcons {
     val SortByModified: ImageVector get() = Lucide.ClockArrowDown
     val SortByName: ImageVector get() = Lucide.ArrowDownAZ
     val Table: ImageVector get() = Lucide.Table
+    val Query: ImageVector get() = Lucide.TableProperties
     val Today: ImageVector get() = Lucide.CalendarDays
     val Tag: ImageVector get() = Lucide.Hash
     val Template: ImageVector get() = Lucide.LayoutTemplate

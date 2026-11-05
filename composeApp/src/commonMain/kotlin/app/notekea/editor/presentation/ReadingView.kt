@@ -28,7 +28,8 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
  * place ([AttachmentBlock]). A click opens a note, searches a tag, opens a file with its app (or offers to locate a
  * missing one), or opens the browser for a web address. Each heading of the outline starts a piece of its own, whose
  * place is told to [onHeadingPlaced] with the heading's index, so the outline can scroll to it (`ROADMAP.md` 1.9). An
- * embedded note is drawn the same way inside its frame, with no [topPadding].
+ * embedded note is drawn the same way inside its frame, with no [topPadding]. A query block is drawn by
+ * [LocalQueryBlock].
  */
 @Composable
 fun ReadingView(
@@ -40,6 +41,7 @@ fun ReadingView(
     onHeadingPlaced: (Int, LayoutCoordinates) -> Unit = { _, _ -> }
 ) {
     val readLinks = remember { ReadModeLinks() }
+    val queryBlock = LocalQueryBlock.current
     val segments = remember(text, attachments) {
         ReadingSegment.of(text = text, attachments = attachments, headings = OutlineFinder().headings(text = text))
     }
@@ -73,6 +75,9 @@ fun ReadingView(
                 )
 
                 is ReadingSegment.Attachment -> AttachmentBlock(view = segment.view, onIntent = onIntent)
+
+                is ReadingSegment.Query -> queryBlock?.invoke(segment.text, segment.source)
+                    ?: NotekeaMarkdown(content = segment.source)
             }
         }
     }
