@@ -55,7 +55,6 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             splitRightShortcut = primary(ShortcutKey.D, ShortcutModifier.SHIFT),
             templateShortcut = primary(ShortcutKey.T, null),
             bookmarkShortcut = primary(ShortcutKey.B, ShortcutModifier.SHIFT),
-            graphShortcut = primary(ShortcutKey.G, null),
             goToTabShortcuts = DIGITS.map { primary(it, null) },
             dialogButtonOrder = dialogButtonOrderFor(operatingSystem = operatingSystem),
             appDataDirectory = appDataDirectoryFor(operatingSystem = operatingSystem),
