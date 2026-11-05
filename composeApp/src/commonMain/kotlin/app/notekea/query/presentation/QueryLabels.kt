@@ -29,7 +29,7 @@ import org.jetbrains.compose.resources.stringResource
 
 private const val TAG_MARK = "#"
 
-/** How a person reads [condition]; the note's own conditions are named by their chips, not by these words. */
+/** How a person reads [condition]; a folder and a tag are just "is". */
 @Composable
 internal fun conditionLabel(
     condition: QueryCondition

@@ -159,7 +159,7 @@ internal fun AddPropertyRow(
                 .clickable(role = Role.Button) { menuState.open(at = belowRow) }
         ) {
             Icon(
-                imageVector = NotekeaIcons.AddProperty,
+                imageVector = NotekeaIcons.AddRow,
                 contentDescription = null,
                 modifier = Modifier
                     .padding(start = NotekeaDimensions.SpacingXs)

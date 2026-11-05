@@ -155,6 +155,31 @@ class QueryViewModelTest {
     }
 
     @Test
+    fun `a note about a save goes once the query changes`() = test {
+        store.texts[DUNE] = "Dune\n"
+        show()
+        viewModel.onIntent(intent = QueryIntent.OnSave(path = DUNE))
+        advanceUntilIdle()
+        viewModel.onIntent(intent = QueryIntent.OnColumnToggle(column = "rating"))
+        advanceUntilIdle()
+
+        assertEquals(expected = null, actual = viewModel.state.value.notice)
+    }
+
+    @Test
+    fun `the result counts the vault's notes, not only those found`() = test {
+        show()
+        viewModel.onIntent(
+            intent = QueryIntent.OnFilterAdd(
+                filter = QueryFilter(condition = QueryCondition.MORE_THAN, property = "rating", value = "3")
+            )
+        )
+        advanceUntilIdle()
+
+        assertEquals(expected = 1 to 2, actual = viewModel.state.value.result.let { it.rows.size to it.total })
+    }
+
+    @Test
     fun `the vault's change reaches the table`() = test {
         show()
 

@@ -45,6 +45,7 @@ private const val FALSE = "false"
 private const val POPUP_WIDTH_DP = 120
 private const val TRUE = "true"
 private val NEW_RULE = QueryFilter(condition = QueryCondition.IN_FOLDER)
+private val TAG_RULE = QueryFilter(condition = QueryCondition.HAS_TAG)
 
 /**
  * The query's filters as rules, one a row, as a Finder smart folder writes them (`ROADMAP.md` 2.10, design A). A rule
@@ -93,7 +94,7 @@ private fun QueryRule(
     filter: QueryFilter?,
     onAdd: (() -> Unit)?
 ) {
-    var draft by remember(filter) { mutableStateOf(value = filter ?: NEW_RULE) }
+    var draft by remember(filter) { mutableStateOf(value = filter ?: newRule(catalog = catalog)) }
     val kind = kindOf(filter = draft, catalog = catalog)
     val change = { changed: QueryFilter ->
         draft = changed
@@ -156,7 +157,7 @@ private fun fieldLabel(
     else -> filter.property
 }
 
-/** Folder and Tag, then the vault's properties; choosing another leaves the rule waiting for its value. */
+/** Folder and Tag, when the vault has any, then its properties; another one waits for its value. */
 @Composable
 private fun fieldSections(
     catalog: QueryCatalog,
@@ -167,17 +168,17 @@ private fun fieldSections(
         if (field.condition.needsProperty) field.property == draft.property else field.condition == draft.condition
     }
     val choose = { field: QueryFilter -> if (!isChosen(field)) onChange(field) }
-    val noteItems = listOf(
+    val noteItems = listOfNotNull(
         NotekeaMenuItem(
             label = stringResource(resource = Res.string.query_filter_folder),
             onClick = { choose(NEW_RULE) },
             isChecked = draft.condition == QueryCondition.IN_FOLDER
-        ),
+        ).takeIf { catalog.folders.isNotEmpty() },
         NotekeaMenuItem(
             label = stringResource(resource = Res.string.query_filter_tag),
-            onClick = { choose(QueryFilter(condition = QueryCondition.HAS_TAG)) },
+            onClick = { choose(TAG_RULE) },
             isChecked = draft.condition == QueryCondition.HAS_TAG
-        )
+        ).takeIf { catalog.tags.isNotEmpty() }
     )
     val keyItems = catalog.keys.map { key ->
         NotekeaMenuItem(
@@ -281,6 +282,19 @@ private fun TypedValue(
             placeholder = stringResource(resource = Res.string.query_value),
             isValid = { it.isBlank() || fits(text = it.trim(), kind = kind) }
         )
+    }
+}
+
+/** Where a rule starts: on the first of Folder, Tag and the properties that the vault has any of. */
+private fun newRule(
+    catalog: QueryCatalog
+): QueryFilter {
+    val key = catalog.keys.firstOrNull()
+    return when {
+        catalog.folders.isNotEmpty() -> NEW_RULE
+        catalog.tags.isNotEmpty() -> TAG_RULE
+        key != null -> QueryFilter(condition = key.kind.conditions.first(), property = key.name)
+        else -> NEW_RULE
     }
 }
 
