@@ -9,16 +9,17 @@ import kotlin.test.assertEquals
 class GraphMotionTest {
     @Test
     fun `the first notes arrive at once`() {
-        val motion = GraphMotion.after(previous = null, dots = listOf(dotAt(A, x = 40f)), center = null)
+        val motion = GraphMotion.after(dots = listOf(dotAt(A, x = 40f)), previous = null, center = null)
 
         assertEquals(expected = Offset(x = 40f, y = 0f), actual = motion.placeOf(dot = dotAt(A, x = 40f)))
     }
 
     @Test
     fun `a note found on the vault leads its neighbors out of its place, and the rest fade`() {
-        val vault = GraphMotion.after(null, listOf(dotAt(A, x = 300f), dotAt(B, x = -80f)), center = null)
+        val vault = GraphMotion.after(listOf(dotAt(A, x = 300f), dotAt(B, x = -80f)), null, center = null)
 
-        val around = GraphMotion.after(previous = vault, dots = listOf(dotAt(A, x = 0f), dotAt(C, x = 170f)), center = A)
+        val dots = listOf(dotAt(A, x = 0f), dotAt(C, x = 170f))
+        val around = GraphMotion.after(dots = dots, previous = vault, center = A)
 
         assertEquals(expected = Offset(x = 300f, y = 0f), actual = around.placeOf(dot = dotAt(A, x = 0f)))
         assertEquals(expected = Offset(x = 300f, y = 0f), actual = around.placeOf(dot = dotAt(C, x = 170f)))
@@ -27,9 +28,9 @@ class GraphMotionTest {
 
     @Test
     fun `notes come out of the middle when nothing was on the map`() {
-        val empty = GraphMotion.after(previous = null, dots = emptyList(), center = null)
+        val empty = GraphMotion.after(dots = emptyList(), previous = null, center = null)
 
-        val around = GraphMotion.after(previous = empty, dots = listOf(dotAt(C, x = 170f)), center = A)
+        val around = GraphMotion.after(dots = listOf(dotAt(C, x = 170f)), previous = empty, center = A)
 
         assertEquals(expected = Offset.Zero, actual = around.placeOf(dot = dotAt(C, x = 170f)))
     }

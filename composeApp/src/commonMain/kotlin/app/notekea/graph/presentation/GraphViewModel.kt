@@ -153,13 +153,13 @@ class GraphViewModel(
     }
 
     private fun closeSearch() {
-        reduce { it.copy(isSearching = false, query = "", matches = emptyList(), matchIndex = 0, revealed = null) }
+        reduce { it.copy(isSearching = false, query = "", matches = emptyList(), matchIndex = -1) }
     }
 
     private fun changeQuery(
         query: String
     ) {
-        reduce { withMatches(state = it.copy(query = query, matchIndex = 0, revealed = null)) }
+        reduce { withMatches(state = it.copy(query = query, matchIndex = -1)) }
     }
 
     private fun withMatches(
@@ -167,8 +167,8 @@ class GraphViewModel(
     ): GraphState {
         val paths = graph?.withoutFolders(folders = state.excludedFolders)?.nodes?.map { it.path }.orEmpty()
         val matches = matchesOf(query = state.query, paths = paths, matcher = fuzzyMatcher)
-        val lastIndex = matches.lastIndex.coerceAtLeast(minimumValue = 0)
-        return state.copy(matches = matches, matchIndex = state.matchIndex.coerceAtMost(maximumValue = lastIndex))
+        val matchIndex = state.matchIndex.coerceAtMost(maximumValue = matches.lastIndex)
+        return state.copy(matches = matches, matchIndex = matchIndex)
     }
 
     private fun stepMatch(
@@ -178,7 +178,7 @@ class GraphViewModel(
         val count = current.matches.size
         if (count == 0) return
         val index = when {
-            current.revealed != null -> (current.matchIndex + if (isForward) 1 else count - 1) % count
+            current.matchIndex >= 0 -> (current.matchIndex + if (isForward) 1 else count - 1) % count
             isForward -> 0
             else -> count - 1
         }
@@ -189,7 +189,7 @@ class GraphViewModel(
                 center = path,
                 selected = path,
                 matchIndex = index,
-                revealed = path,
+                reveals = it.reveals + 1,
                 linked = null,
                 linkFailed = false
             )
@@ -268,6 +268,7 @@ class GraphViewModel(
                 withMatches(
                     state = it.copy(
                         isLoading = false,
+                        center = center,
                         dots = dots,
                         lines = lines,
                         folders = folders,
@@ -321,7 +322,7 @@ class GraphViewModel(
         val entry = path?.let { notes[it] } ?: return reduce { it.copy(preview = null) }
         val kept = current.preview?.takeIf { it.path == path }?.suggested.orEmpty()
         val preview = previews.of(entry = entry, lines = current.lines, suggested = kept)
-        reduce { it.copy(preview = preview) }
+        reduce { if ((it.selected ?: it.center) == path) it.copy(preview = preview) else it }
         val shown = graph?.withoutFolders(folders = current.excludedFolders)
         if (shown == null || !current.isIndexReady) return
         val suggested = relatedNotes.notLinked(note = path, graph = shown, notes = notes)

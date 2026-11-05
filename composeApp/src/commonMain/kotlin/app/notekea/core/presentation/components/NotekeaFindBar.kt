@@ -83,23 +83,32 @@ fun NotekeaFindBar(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            NotekeaIconButton(
-                icon = NotekeaIcons.FindPrevious,
-                label = stringResource(resource = Res.string.find_bar_previous),
-                onClick = onPrevious
-            )
-            NotekeaIconButton(
-                icon = NotekeaIcons.FindNext,
-                label = stringResource(resource = Res.string.find_bar_next),
-                onClick = onNext
-            )
-            NotekeaIconButton(
-                icon = NotekeaIcons.Close,
-                label = stringResource(resource = Res.string.find_bar_close),
-                onClick = onClose
-            )
+            FindButtons(onNext = onNext, onPrevious = onPrevious, onClose = onClose)
         }
     }
+}
+
+@Composable
+private fun FindButtons(
+    onNext: () -> Unit,
+    onPrevious: () -> Unit,
+    onClose: () -> Unit
+) {
+    NotekeaIconButton(
+        icon = NotekeaIcons.FindPrevious,
+        label = stringResource(resource = Res.string.find_bar_previous),
+        onClick = onPrevious
+    )
+    NotekeaIconButton(
+        icon = NotekeaIcons.FindNext,
+        label = stringResource(resource = Res.string.find_bar_next),
+        onClick = onNext
+    )
+    NotekeaIconButton(
+        icon = NotekeaIcons.Close,
+        label = stringResource(resource = Res.string.find_bar_close),
+        onClick = onClose
+    )
 }
 
 @Composable

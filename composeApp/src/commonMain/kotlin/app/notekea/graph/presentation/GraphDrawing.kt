@@ -57,8 +57,10 @@ internal fun DrawScope.drawDots(
             drawCircle(color = paint.accent.copy(alpha = HALO_ALPHA), radius = radius + HALO_GROWTH, center = center)
         }
         drawCircle(color = paint.colorOf(dot).copy(alpha = alpha), radius = radius, center = center)
-        val isNamed = paint.showsAllLabels || dot.path == paint.selected || dot.path in paint.hovered ||
-            paint.isNamedMatch(path = dot.path)
+        val isNamed = fade == 1f && (
+            paint.showsAllLabels || dot.path == paint.selected || dot.path in paint.hovered ||
+                paint.isNamedMatch(path = dot.path)
+            )
         if (isNamed) drawName(dot, center, radius, alpha, paint, measurer)
     }
 }
