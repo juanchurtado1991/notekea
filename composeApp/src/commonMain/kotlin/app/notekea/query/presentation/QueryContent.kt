@@ -24,6 +24,7 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.query.domain.QueryResult
 import app.notekea.resources.Res
+import app.notekea.resources.query_already_saved
 import app.notekea.resources.query_no_matches
 import app.notekea.resources.query_no_matches_message
 import app.notekea.resources.query_notice_dismiss
@@ -99,12 +100,17 @@ internal fun QueryNoticeLine(
 ) {
     val message = when (notice) {
         is QueryNotice.Saved -> stringResource(resource = Res.string.query_saved, notice.path.nameWithoutExtension)
+
+        is QueryNotice.AlreadySaved ->
+            stringResource(resource = Res.string.query_already_saved, notice.path.nameWithoutExtension)
+
         QueryNotice.WriteFailed -> stringResource(resource = Res.string.query_write_failed)
+
         null -> return
     }
     NotekeaNotice(
         message = message,
-        icon = if (notice is QueryNotice.Saved) NotekeaIcons.Checked else NotekeaIcons.CalloutWarning,
+        icon = if (notice == QueryNotice.WriteFailed) NotekeaIcons.CalloutWarning else NotekeaIcons.Checked,
         dismissLabel = stringResource(resource = Res.string.query_notice_dismiss),
         onDismiss = { onIntent(QueryIntent.OnNoticeDismiss) },
         modifier = Modifier.fillMaxWidth().padding(all = NotekeaDimensions.SpacingS)

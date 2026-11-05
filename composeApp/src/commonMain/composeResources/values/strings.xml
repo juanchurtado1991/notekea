@@ -564,6 +564,7 @@
     <string name="query_notice_dismiss">Dismiss</string>
     <string name="query_remove_filter">Remove filter</string>
     <string name="query_save_in">Save in %1$s</string>
+    <string name="query_already_saved">%1$s already holds this query.</string>
     <string name="query_saved">Saved in %1$s.</string>
     <string name="query_sort">Sort</string>
     <string name="query_sort_ascending">Low first</string>

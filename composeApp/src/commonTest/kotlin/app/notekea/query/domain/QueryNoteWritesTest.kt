@@ -73,6 +73,21 @@ class QueryNoteWritesTest {
         )
     }
 
+    // Smoke: five clicks on Save in Reading list left five blocks in the note.
+    @Test
+    fun `a query the note already holds is not saved twice, and another one is`() = runTest {
+        store.texts[NOTE] = "Dune\n"
+        val rated = VaultQuery(columns = listOf("rating"))
+
+        repeat(times = 5) { saveQuery(VAULT, NOTE, rated) }
+        saveQuery(VAULT, NOTE, VaultQuery(columns = listOf("author")))
+
+        assertEquals(
+            expected = "Dune\n\n```query\ncolumns: [rating]\n```\n\n```query\ncolumns: [author]\n```\n",
+            actual = store.texts[NOTE]
+        )
+    }
+
     @Test
     fun `an empty query in an empty note is a block with nothing in it`() = runTest {
         store.texts[NOTE] = ""
