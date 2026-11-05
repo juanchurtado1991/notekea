@@ -57,25 +57,6 @@ class ShortcutDispatcherTest {
         )
     }
 
-    @Test
-    fun `the menu bar runs what a shortcut does, and sees what no screen offers`() {
-        var triggered = 0
-        val unregister = dispatcher.register(shortcut = openFolder) { triggered++ }
-
-        val available = dispatcher.isAvailable(shortcut = openFolder) to dispatcher.trigger(shortcut = openFolder)
-        unregister()
-        val gone = dispatcher.isAvailable(shortcut = openFolder) to dispatcher.trigger(shortcut = openFolder)
-
-        assertEquals(
-            expected = listOf(true to true, false to false),
-            actual = listOf(available, gone)
-        )
-        assertEquals(
-            expected = 1,
-            actual = triggered
-        )
-    }
-
     private fun keyEvent(
         type: KeyEventType,
         isCtrlPressed: Boolean

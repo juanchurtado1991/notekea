@@ -72,16 +72,11 @@ of the platform as keycaps, so a new shortcut is added there too (`AboutShortcut
 
 ## 4. Menu bar
 
-| | macOS | Windows / Linux |
-|---|---|---|
-| Location | Global menu bar at the top of the screen | None: Swing would draw it in the window, outside the app's theme |
-| App menu | `Notekea` menu with About, Settings… (`Cmd+,`) and Quit Notekea (`Cmd+Q`) | No app menu |
-| About and Settings | In the `Notekea` menu | In the tool rail |
-| Quit | Provided by macOS in the app menu | The window's close button and the quit shortcut |
+There is none, so the UI is the same on the three systems: commands live in the tool rail, the toolbars and their
+shortcuts, which About lists. Swing would draw a menu bar in the window on Windows and Linux, outside the app's theme.
 
-- On macOS, enable the global menu bar (`apple.laf.useScreenMenuBar=true`).
-- Menu items without a shortcut must pass an explicit "no shortcut"; otherwise Compose may show an unwanted one
-  on Windows.
+macOS always shows its own `Notekea` menu: About, Settings… (`Cmd+,`) and Quit Notekea (`Cmd+Q`) open the app's own
+dialogs and quit as the app does.
 
 ## 5. Dialogs
 

@@ -11,9 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.LocalWindowExceptionHandlerFactory
-import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -27,19 +25,15 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import app.notekea.core.logging.data.FileLogWriter
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.platformLogWriter
-import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.appearance.domain.WindowBoundsStore
 import app.notekea.core.platform.domain.SystemEnvironment
 import app.notekea.core.presentation.gallery.DesignSystemGallery
-import app.notekea.core.presentation.menu.AppMenuEntry
-import app.notekea.core.presentation.menu.AppMenus
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.SystemAppMenu
 import app.notekea.core.presentation.platform.SystemQuit
 import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.core.presentation.platform.WindowQuit
-import app.notekea.core.presentation.platform.keyShortcut
 import app.notekea.core.presentation.theme.NotekeaTheme
 import app.notekea.di.desktopModules
 import app.notekea.core.presentation.IntentTrail
@@ -47,7 +41,6 @@ import com.testbuddy.crash.Breadcrumbs
 import com.testbuddy.crash.CrashNotice
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.compose.resources.stringResource
 import org.koin.core.module.Module
 import io.github.vinceglb.filekit.FileKit
 import kotlinx.coroutines.delay
@@ -63,7 +56,6 @@ private const val GALLERY_HEIGHT_DP = 900
 private const val GALLERY_PROPERTY = "notekea.gallery"
 private const val GALLERY_TITLE = "Notekea — Design system gallery"
 private const val GALLERY_WIDTH_DP = 1280
-private const val SCREEN_MENU_BAR_PROPERTY = "apple.laf.useScreenMenuBar"
 
 /**
  * Starts Notekea. Errors are kept as crash reports from the first moment (`CrashBuddy`, `test-buddy-crash`): any
@@ -82,7 +74,6 @@ fun runNotekea(
     modules: List<Module> = desktopModules,
     extraWindows: @Composable ApplicationScope.() -> Unit = {}
 ) {
-    System.setProperty(SCREEN_MENU_BAR_PROPERTY, true.toString())
     val koin = startKoin { modules(modules) }.koin
     val crashBuddy = crashBuddyOf(koin = koin, appName = APP_ID)
     crashBuddy.installThreadHandler()
@@ -144,7 +135,6 @@ private fun ApplicationScope.NotekeaWindow(
         state = windowState,
         onPreviewKeyEvent = host.shortcuts::dispatch
     ) {
-        if (host.conventions.operatingSystem == OperatingSystem.MACOS) NotekeaMenuBar(host = host)
         FollowWindowBounds(state = windowState)
         if (isCrashTest) CrashTest()
         NotekeaRoot(host = host, onClose = onClose)
@@ -163,42 +153,6 @@ private fun rememberSystemIntegration(
         SystemAppMenu(dialogs = host.dialogs).install()
     }
     return quit
-}
-
-/**
- * The menu bar of macOS, at the top of the screen ([AppMenus]); Windows and Linux have none, as Swing would draw it in
- * the window, outside the app's theme. A command runs what its shortcut runs, and is disabled while no screen offers
- * it.
- */
-@Composable
-private fun FrameWindowScope.NotekeaMenuBar(
-    host: WindowHost
-) {
-    val shortcuts = host.shortcuts
-    MenuBar {
-        AppMenus.of(conventions = host.conventions).forEach { menu ->
-            Menu(text = stringResource(resource = menu.title)) {
-                menu.entries.forEach { entry ->
-                    when (entry) {
-                        is AppMenuEntry.Command -> Item(
-                            text = stringResource(resource = entry.label),
-                            enabled = shortcuts.isAvailable(shortcut = entry.shortcut),
-                            shortcut = entry.shortcut.keyShortcut(),
-                            onClick = { shortcuts.trigger(shortcut = entry.shortcut) }
-                        )
-
-                        is AppMenuEntry.OpensDialog -> Item(
-                            text = stringResource(resource = entry.label),
-                            shortcut = null,
-                            onClick = { host.dialogs.shown = entry.dialog }
-                        )
-
-                        AppMenuEntry.Separator -> Separator()
-                    }
-                }
-            }
-        }
-    }
 }
 
 /** Fails the window on purpose after a few seconds, so the smoke test sees a crash report (`NOTEKEA_CRASH_TEST=1`). */

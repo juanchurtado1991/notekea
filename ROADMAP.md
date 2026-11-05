@@ -61,8 +61,8 @@ a person can judge (looks, feel, the operating system's own dialogs).
 
 ### Layout
 
-One main window with three resizable panes, a status bar and the native window frame; macOS also has its menu bar
-(`PLATFORM_GUIDELINES.md`).
+One main window with three resizable panes, a status bar and the native window frame, the same on every system, with no
+menu bar (`PLATFORM_GUIDELINES.md`).
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────┐
@@ -130,9 +130,8 @@ below is that first palette, which the logo keeps; the app's themes are in 2.12.
 - **Typography:** one bundled UI typeface (Inter, SIL OFL) for UI and editor body; a bundled monospaced typeface
   (JetBrains Mono, SIL OFL) for code blocks. Scale: 12 / 14 (body) / 16 / 20 / 28.
 - **Spacing:** 4 dp grid (4, 8, 12, 16, 24, 32). **Corner radius:** 6 dp controls, 10 dp cards.
-- **Menu bar:** only on macOS, at the top of the screen: File, Edit, View, Window and Help, with an app menu that holds
-  About, Settings and Quit (`PLATFORM_GUIDELINES.md` §4). Each entry runs what its shortcut runs and is dimmed while no
-  screen offers it. Windows and Linux have none: Swing would draw it in the window, outside the app's theme.
+- **No menu bar:** the UI is the same on the three systems. Commands live in the tool rail, the toolbars and their
+  shortcuts, listed in About. macOS's own app menu keeps About, Settings and Quit (`PLATFORM_GUIDELINES.md` §4).
 - **Motion:** 150–200 ms for panel open/close; no animation longer than 250 ms; respect "reduce motion": the setting
   in Settings → Appearance or the system's turns animations off.
 - **Themes:** light and dark, following the system by default; since 2.12 also chosen in Settings → Appearance,
@@ -737,7 +736,7 @@ For the open note, the top 8 most similar notes (excluding notes already linked 
 changes.
 
 **UI — Right panel, Related section:**
-- Cards with note title, folder and the most relevant snippet (matching passage highlighted with `accent`).
+- Cards with note title, folder and the most relevant snippet (matching passage underlined).
 - Actions on hover: Open, Open to the side, **Insert link** (adds `[[Note]]` at the cursor). Relations are never
   written to the note automatically; "Insert link" is the only way a suggestion becomes a real link.
 - Section "Already linked" collapsed at the bottom.
