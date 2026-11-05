@@ -137,7 +137,8 @@ private fun RememberScroll(
     val path = state.notePath
     LaunchedEffect(path, state.isLoading, state.isReading) {
         if (path == null || state.isLoading) return@LaunchedEffect
-        scrollState.scrollWhenLaidOut(target = memory.of(path = path))
+        // A place just selected scrolls the text there, and the place remembered must not pull it back.
+        if (!state.isRevealing) scrollState.scrollWhenLaidOut(target = memory.of(path = path))
         snapshotFlow { scrollState.value }.collect { memory.keep(path = path, offset = it) }
     }
 }

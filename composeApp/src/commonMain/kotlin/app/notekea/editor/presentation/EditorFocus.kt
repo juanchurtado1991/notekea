@@ -8,7 +8,8 @@ import app.notekea.core.notes.domain.RelativePath
  * Where the keyboard and the cursor go in the editor: a focus request gives the keyboard to the text once its note is
  * open (after the quick switcher closes), each note left in this pane gets its cursor back when it opens again, an
  * outline heading chosen (`ROADMAP.md` 1.9) is scrolled to, with the cursor at the end of its line in Edit mode, and a
- * mention chosen in Connections (2.5) is selected once its note opens, which scrolls the text to it.
+ * mention chosen in Connections (2.5) or a passage found (2.6) is selected once its note opens, which scrolls the text
+ * to it. A selection only shows in Edit mode, so this note leaves Preview, without changing the mode remembered.
  */
 internal class EditorFocus(
     private val host: EditorHost,
@@ -73,6 +74,7 @@ internal class EditorFocus(
         range: IntRange
     ) {
         revealed = null
+        host.reduce { it.copy(isReading = false, isRevealing = true) }
         val length = host.buffer.text.length
         host.buffer.edit {
             selection = TextRange(start = range.first.coerceAtMost(length), end = (range.last + 1).coerceAtMost(length))
