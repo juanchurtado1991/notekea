@@ -72,6 +72,9 @@ import com.composables.icons.lucide.ListOrdered
 import com.composables.icons.lucide.ListTodo
 import com.composables.icons.lucide.LayoutTemplate
 import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.ChevronUp
+import com.composables.icons.lucide.ArrowUpDown
+import com.composables.icons.lucide.Columns3
 import com.composables.icons.lucide.Star
 import com.composables.icons.lucide.MessageSquareQuote
 import com.composables.icons.lucide.PanelLeftClose
@@ -108,6 +111,7 @@ object NotekeaIcons {
     ).joinToString(separator = StringPatterns.EMPTY)
 
     val AddProperty: ImageVector get() = Lucide.Plus
+    val AddRow: ImageVector get() = Lucide.Plus
     val AttachFile: ImageVector get() = Lucide.ImagePlus
     val Attachment: ImageVector get() = Lucide.Paperclip
     val Bookmark: ImageVector get() = Lucide.Star
@@ -208,11 +212,17 @@ object NotekeaIcons {
     val Reveal: ImageVector get() = Lucide.SquareArrowOutUpRight
     val SearchNotes: ImageVector get() = Lucide.TextSearch
     val SidePanel: ImageVector get() = Lucide.PanelRight
+    val RemoveRow: ImageVector get() = Lucide.Minus
     val Settings: ImageVector get() = Lucide.Settings
     val SwitchVault: ImageVector get() = Lucide.Library
     val SortByModified: ImageVector get() = Lucide.ClockArrowDown
     val SortByName: ImageVector get() = Lucide.ArrowDownAZ
     val Table: ImageVector get() = Lucide.Table
+    val QueryColumns: ImageVector get() = Lucide.Columns3
+    val QuerySave: ImageVector get() = Lucide.FilePlus
+    val QuerySort: ImageVector get() = Lucide.ArrowUpDown
+    val QuerySortAscending: ImageVector get() = Lucide.ChevronUp
+    val QuerySortDescending: ImageVector get() = Lucide.ChevronDown
     val Query: ImageVector get() = Lucide.TableProperties
     val Today: ImageVector get() = Lucide.CalendarDays
     val Tag: ImageVector get() = Lucide.Hash

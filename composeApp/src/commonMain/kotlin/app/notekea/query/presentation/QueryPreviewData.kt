@@ -25,7 +25,8 @@ internal object QueryPreviewData {
         ),
         result = QueryResult(
             rows = listOf(row(name = "Dune", author = "Frank Herbert", rating = "5")),
-            columns = listOf("author", "rating")
+            columns = listOf("author", "rating"),
+            total = 40
         ),
         catalog = QueryCatalog(
             keys = listOf(

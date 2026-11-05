@@ -19,15 +19,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
@@ -37,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.presentation.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.components.NotekeaContextMenuState
+import app.notekea.core.presentation.components.NotekeaFieldFrame
 import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaMenuItem
 import app.notekea.core.presentation.components.NotekeaPropertyField
@@ -57,8 +54,8 @@ private const val HOVER_ALPHA = 0.05f
 private const val KEY_WIDTH_DP = 150
 
 /**
- * One property: its type's icon, its name (muted, renamed in place), its value, and a ✕ that removes it, shown while the
- * row is hovered or being edited; the hovered row is lightly highlighted.
+ * One property, as a query's rule: its type's icon and name (muted, renamed in place) on a filled control, its value in
+ * an outlined field, and a − that removes it.
  */
 @Composable
 internal fun PropertyRow(
@@ -67,15 +64,9 @@ internal fun PropertyRow(
     today: CalendarDate?,
     onIntent: (EditorIntent) -> Unit
 ) {
-    val hover = remember { MutableInteractionSource() }
-    val isHovered by hover.collectIsHoveredAsState()
-    var isEditing by remember { mutableStateOf(value = false) }
-    RowFrame(
-        isHighlighted = isHovered,
-        modifier = Modifier.hoverable(interactionSource = hover).onFocusChanged { isEditing = it.hasFocus }
-    ) {
+    RowFrame(isHighlighted = false) {
         PropertyKey(property = property, keys = keys, onIntent = onIntent)
-        Box(modifier = Modifier.weight(weight = 1f)) {
+        NotekeaFieldFrame(modifier = Modifier.weight(weight = 1f).padding(start = NotekeaDimensions.SpacingXs)) {
             PropertyValueEditor(
                 property = property,
                 change = { onIntent(PropertyIntent.OnValueChange(key = property.key, value = it)) },
@@ -83,10 +74,9 @@ internal fun PropertyRow(
             )
         }
         NotekeaIconButton(
-            icon = NotekeaIcons.Close,
+            icon = NotekeaIcons.RemoveRow,
             label = stringResource(resource = Res.string.properties_remove),
             onClick = { onIntent(PropertyIntent.OnRemove(key = property.key)) },
-            modifier = Modifier.alpha(alpha = if (isHovered || isEditing) 1f else 0f),
             takesFocus = false
         )
     }
@@ -113,14 +103,21 @@ private fun RowFrame(
     )
 }
 
-/** The type's icon and the property's name in the muted color, renamed in place. */
+/** The type's icon and the property's name in the muted color, renamed in place, on a filled control. */
 @Composable
 private fun PropertyKey(
     property: NoteProperty,
     keys: List<String>,
     onIntent: (EditorIntent) -> Unit
 ) {
-    Row(modifier = Modifier.width(width = KEY_WIDTH_DP.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .width(width = KEY_WIDTH_DP.dp)
+            .heightIn(min = NotekeaDimensions.CompactControlSize)
+            .clip(shape = MaterialTheme.shapes.small)
+            .background(color = MaterialTheme.colorScheme.surfaceVariant),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Icon(
             imageVector = iconOf(property = property),
             contentDescription = null,
@@ -148,7 +145,7 @@ internal fun AddPropertyRow(
     val hover = remember { MutableInteractionSource() }
     val isHovered by hover.collectIsHoveredAsState()
     val belowRow = with(LocalDensity.current) { Offset(x = 0f, y = NotekeaDimensions.MenuItemHeight.toPx()) }
-    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val accent = MaterialTheme.colorScheme.primary
     NotekeaContextMenuArea(
         sections = listOf(propertyTypeItems(onIntent = onIntent)),
         state = menuState,
@@ -167,13 +164,13 @@ internal fun AddPropertyRow(
                 modifier = Modifier
                     .padding(start = NotekeaDimensions.SpacingXs)
                     .size(size = NotekeaDimensions.IconSize),
-                tint = muted
+                tint = accent
             )
             Text(
                 text = stringResource(resource = Res.string.properties_add),
                 modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingS),
                 style = MaterialTheme.typography.bodyMedium,
-                color = muted
+                color = accent
             )
         }
     }

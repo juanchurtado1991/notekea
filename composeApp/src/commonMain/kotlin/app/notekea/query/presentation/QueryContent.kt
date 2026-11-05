@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.components.EmptyState
@@ -25,6 +26,7 @@ import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.query.domain.QueryResult
 import app.notekea.resources.Res
 import app.notekea.resources.query_already_saved
+import app.notekea.resources.query_count_of
 import app.notekea.resources.query_no_matches
 import app.notekea.resources.query_no_matches_message
 import app.notekea.resources.query_notice_dismiss
@@ -34,8 +36,8 @@ import app.notekea.resources.query_write_failed
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The Query tab (`ROADMAP.md` 2.10): the query in chips over a table of the notes it finds, computed exactly from the
- * notes' properties. A property no note has says so, and no match says what to do. [saveTarget] is the note a query
+ * The Query tab (`ROADMAP.md` 2.10): the query as rules over a table of the notes it finds, computed exactly from the
+ * notes' properties, and how many at its foot. A property no note has says so, and no match says what to do. [saveTarget] is the note a query
  * can be saved in.
  */
 @Composable
@@ -65,7 +67,23 @@ fun QueryContent(
 
             else -> ResultTable(state = state, onIntent = onIntent, modifier = Modifier.weight(weight = 1f))
         }
+        if (!state.isLoading) StatusBar(result = state.result)
     }
+}
+
+/** How many notes the query found, at the window's foot as Finder says it. */
+@Composable
+private fun StatusBar(
+    result: QueryResult
+) {
+    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    Text(
+        text = stringResource(resource = Res.string.query_count_of, result.rows.size, result.total),
+        modifier = Modifier.fillMaxWidth().padding(vertical = NotekeaDimensions.SpacingXs),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center
+    )
 }
 
 @Composable
@@ -84,8 +102,8 @@ private fun ResultTable(
         )
         NotekeaLazyScrollArea(state = list, modifier = Modifier.weight(weight = 1f)) {
             LazyColumn(state = list, modifier = Modifier.fillMaxSize()) {
-                items(items = result.rows, key = { it.path.value }) { row ->
-                    QueryTableRow(row = row, columns = result.columns, onIntent = onIntent)
+                itemsIndexed(items = result.rows, key = { _, row -> row.path.value }) { index, row ->
+                    QueryTableRow(row = row, index = index, columns = result.columns, onIntent = onIntent)
                 }
             }
         }

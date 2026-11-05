@@ -9,6 +9,11 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.v2.runComposeUiTest
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.query.domain.VaultQuery
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.ComposeUiTest
+import androidx.compose.ui.input.key.Key
 import app.notekea.query.domain.QueryCondition
 import app.notekea.query.domain.QueryFilter
 import app.notekea.query.domain.QueryResult
@@ -18,20 +23,33 @@ import kotlin.test.assertEquals
 /** The Query tab and its blocks on screen (`ROADMAP.md` 2.10). */
 @OptIn(ExperimentalTestApi::class)
 class QueryContentTest {
-    @Test
-    fun `a chip opens its filter, and Apply changes it`() = runComposeUiTest {
-        val intents = mutableListOf<QueryIntent>()
-        setContent {
-            NotekeaTheme(darkTheme = false) {
-                QueryContent(state = QueryPreviewData.state, onIntent = { intents += it }, saveTarget = null)
-            }
+    private fun ComposeUiTest.showRules(
+        state: QueryState,
+        intents: MutableList<QueryIntent>
+    ) = setContent {
+        NotekeaTheme(darkTheme = false) {
+            QueryContent(state = state, onIntent = { intents += it }, saveTarget = null)
         }
+    }
 
-        onNodeWithText(text = "rating more than 3").performClick()
+    private fun ComposeUiTest.typeValue(
+        from: String,
+        to: String
+    ) {
+        onNode(matcher = hasSetTextAction() and hasText(text = from)).run {
+            performClick()
+            performTextReplacement(text = to)
+        }
+        onNode(matcher = hasSetTextAction() and hasText(text = to)).performKeyInput { pressKey(key = Key.Enter) }
         waitForIdle()
-        onNode(matcher = hasSetTextAction() and hasText(text = "3")).performTextReplacement(text = "4")
-        onNodeWithText(text = "Apply").performClick()
-        waitForIdle()
+    }
+
+    @Test
+    fun `a rule's value changes its filter`() = runComposeUiTest {
+        val intents = mutableListOf<QueryIntent>()
+        showRules(state = QueryPreviewData.state, intents = intents)
+
+        typeValue(from = "3", to = "4")
 
         assertEquals(
             expected = listOf<QueryIntent>(
@@ -44,45 +62,41 @@ class QueryContentTest {
     @Test
     fun `a value that does not fit the property is refused`() = runComposeUiTest {
         val intents = mutableListOf<QueryIntent>()
-        setContent {
-            NotekeaTheme(darkTheme = false) {
-                QueryContent(state = QueryPreviewData.state, onIntent = { intents += it }, saveTarget = null)
-            }
-        }
+        showRules(state = QueryPreviewData.state, intents = intents)
 
-        onNodeWithText(text = "rating more than 3").performClick()
-        waitForIdle()
-        onNode(matcher = hasSetTextAction() and hasText(text = "3")).performTextReplacement(text = "high")
-        onNodeWithText(text = "Apply").performClick()
-        waitForIdle()
+        typeValue(from = "3", to = "high")
 
-        onNodeWithText(text = "Enter a value of this property's kind.").assertExists()
         assertEquals(expected = emptyList(), actual = intents)
     }
 
-    // Review: a query kept from before showed one condition on its tabs and applied another.
     @Test
-    fun `a filter on a property no note has any more applies the condition its card shows`() = runComposeUiTest {
-        val gone = QueryFilter(condition = QueryCondition.MORE_THAN, property = "gone", value = "3")
-        val state = QueryPreviewData.state.copy(query = QueryPreviewData.state.query.copy(filters = listOf(gone)))
+    fun `a new rule reaches the query only with its value`() = runComposeUiTest {
+        val state = QueryPreviewData.state.copy(query = VaultQuery())
         val intents = mutableListOf<QueryIntent>()
-        setContent {
-            NotekeaTheme(darkTheme = false) {
-                QueryContent(state = state, onIntent = { intents += it }, saveTarget = null)
-            }
-        }
+        showRules(state = state, intents = intents)
 
-        onNodeWithText(text = "gone more than 3").performClick()
+        onNodeWithText(text = "Add filter").performClick()
         waitForIdle()
-        onNodeWithText(text = "Apply").performClick()
+        onNodeWithText(text = "Notes matching all of these").assertExists()
+        assertEquals(expected = emptyList(), actual = intents)
+        onNodeWithText(text = "Choose…").performClick()
+        waitForIdle()
+        onNodeWithText(text = "Books").performClick()
         waitForIdle()
 
         assertEquals(
             expected = listOf<QueryIntent>(
-                QueryIntent.OnFilterChange(index = 0, filter = gone.copy(condition = QueryCondition.IS))
+                QueryIntent.OnFilterAdd(filter = QueryFilter(condition = QueryCondition.IN_FOLDER, value = "Books"))
             ),
             actual = intents
         )
+    }
+
+    @Test
+    fun `the foot says how many of the vault's notes were found`() = runComposeUiTest {
+        showRules(state = QueryPreviewData.state, intents = mutableListOf())
+
+        onNodeWithText(text = "1 of 40 notes").assertExists()
     }
 
     @Test

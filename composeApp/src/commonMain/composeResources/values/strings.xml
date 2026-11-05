@@ -534,7 +534,6 @@
     <string name="graph_too_large">This vault is large. Open the graph from a note to see it clearly.</string>
     <string name="graph_whole_vault">Whole vault</string>
     <string name="query_add_filter">Add filter</string>
-    <string name="query_apply">Apply</string>
     <string name="query_chip_filter">%1$s %2$s %3$s</string>
     <string name="query_chip_folder">Folder is %1$s</string>
     <string name="query_chip_tag">Tag is #%1$s</string>
@@ -547,6 +546,9 @@
     <string name="query_condition_less_than">less than</string>
     <string name="query_condition_more_than">more than</string>
     <string name="query_count_many">%1$d notes</string>
+    <string name="query_count_of">%1$d of %2$d notes</string>
+    <string name="query_choose">Choose…</string>
+    <string name="query_matching">Notes matching all of these</string>
     <string name="query_count_one">1 note</string>
     <string name="query_filter_folder">Folder</string>
     <string name="query_filter_tag">Tag</string>
@@ -555,12 +557,11 @@
     <string name="query_invalid_order">Line %1$d: an order is ascending or descending.</string>
     <string name="query_invalid_part">Line %1$d: a part is missing here.</string>
     <string name="query_invalid_title">This query can't be read</string>
-    <string name="query_invalid_value">Enter a value of this property's kind.</string>
     <string name="query_more_rows">Showing the first %1$d of %2$d notes.</string>
     <string name="query_no">No</string>
     <string name="query_no_matches">No notes match these filters</string>
     <string name="query_no_matches_message">Change or remove a filter to see more notes.</string>
-    <string name="query_note_column">Note</string>
+    <string name="query_note_column">Name</string>
     <string name="query_notice_dismiss">Dismiss</string>
     <string name="query_remove_filter">Remove filter</string>
     <string name="query_save_in">Save in %1$s</string>
