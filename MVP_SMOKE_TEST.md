@@ -452,3 +452,16 @@ leaves it; wait until the status bar says "40 notes ready to search". Mod+Shift+
 | 2.6-02 | Press Mod+Shift+F and type `cómo hacer la masa`; clear it and type `trip to Portugal` | Arepas is near the top with a line about its dough, without those words; Trip to Lisbon comes first in the second search | 2.6 | Manual (eyes) | | | | |
 | 2.6-03 | Press Mod+Shift+F and type `football match results`, then `football in the park` | "No notes match" both times | 2.6 | Manual (eyes) | | | | |
 | 2.6-04 | Click the index status in the status bar and choose Rebuild index; while it runs press Mod+Shift+F and type `tomato` | Notes with the word are listed with "Showing exact words only until your notes are ready to search." below them; the line goes once the index is ready | 2.6 | Manual (eyes) | | | | |
+
+### 2.7 Graph view
+
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes), as `smoke.sh prepare` (`smoke.ps1 prepare` on Windows)
+leaves it; wait until the status bar says "40 notes ready to search". Mod+G is ⌘G or Ctrl+G.
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 2.7-01 | Open Recipes/Arepas, press Mod+G, click the Weekly menu circle, then Open note | The graph opens in a tab around Arepas; the panel shows Weekly menu; Open note opens it | 2.7 | Self-Test | 2.7-01 | | | |
+| 2.7-02 | Open Recipes/Arepas and press Mod+G; hover a circle, then click another | Arepas in the center, names below; solid links, dashed related notes; hover lights up a note and its neighbors; the clicked note slides to the center | 2.7 | Manual (eyes) | | | | |
+| 2.7-03 | In the graph click Whole vault; scroll to zoom and drag; click Show orphans; click a folder in the legend and reopen the vault | One color per folder; names appear as you zoom; orphans appear; the folder stays out after reopening | 2.7 | Manual (eyes) | | | | |
+| 2.7-04 | In the graph press the arrow keys, Space twice, Enter; go back to the tab and press Esc | Arrows walk connected notes, Space hides and shows the panel, Enter opens the note, Esc goes back to Arepas | 2.7 | Manual (eyes) | | | | |
+| 2.7-05 | In the graph click 2 and drag the map; turn on Reduce motion and click a circle | A second ring, smaller and fainter, moves a little less; with Reduce motion the note jumps to the center | 2.7 | Manual (eyes) | | | | |

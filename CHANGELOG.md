@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Graph view: `Mod+G`, the rail or the View menu open a map of how notes connect, around a note or on the whole vault,
+  with a preview of the selected note.
 - Hybrid search: `Mod+Shift+F` finds notes by meaning and keywords, shows the passage and opens the note at it.
 - **Menu bar** on every system (File, Edit, View, Window, Help), built from the app's own shortcuts; the window comes
   back as it was left, names its note in the title and has a minimum size; `Ctrl+Q` (Linux) and `Mod+Shift+W` close it,
