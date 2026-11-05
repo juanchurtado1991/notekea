@@ -116,9 +116,16 @@ class LuceneVectorIndex(
         val byMeaning = searcher.search(KnnFloatVectorQuery(VECTOR, vector, CANDIDATES), CANDIDATES).scoreDocs
         val byWords = keywordQuery(text = text)?.let { searcher.search(it, CANDIDATES).scoreDocs }.orEmpty()
         val fields = searcher.storedFields()
+        val closeness = byMeaning.associate { it.doc to it.score }
+        val withWords = byWords.mapTo(destination = HashSet()) { it.doc }
         return RankFusion.merge(rankings = listOf(byMeaning.map { it.doc }, byWords.map { it.doc }))
             .take(n = limit)
-            .map { (document, score) -> hitOf(document = fields.document(document), score = score) }
+            .map { (document, score) ->
+                hitOf(document = fields.document(document), score = score).copy(
+                    hasWords = document in withWords,
+                    closeness = closeness[document] ?: 0f
+                )
+            }
     }
 
     /** Any of the first [MAX_QUERY_TERMS] words of the question, as the index reads them; null when it has none. */

@@ -1,10 +1,10 @@
-package app.notekea.connections.domain
+package app.notekea.core.notes.domain
 
 /**
- * What a related note's card quotes (`ROADMAP.md` 2.4): its passage closest in meaning ([text]) with the sentence that
- * shares the most words with the open note [highlight]ed, so the person sees why it is related.
+ * What a result quotes of a note (`ROADMAP.md` 2.4, 2.6): the passage found ([text]) with the sentence that shares the
+ * most words with what was looked for [highlight]ed, so the person sees why it was found.
  */
-data class RelatedSnippet(
+data class PassageSnippet(
     val text: String,
     val highlight: IntRange
 ) {
@@ -16,11 +16,11 @@ data class RelatedSnippet(
         fun of(
             passage: String,
             words: Set<String>
-        ): RelatedSnippet {
+        ): PassageSnippet {
             val text = passage.lines().filterNot { HEADING.matches(input = it) }.joinToString(separator = " ").trim()
             val sentences = SENTENCE.findAll(input = text).map { it.range }.toList().ifEmpty { listOf(text.indices) }
             val best = sentences.maxBy { range -> sharedWords(sentence = text.substring(range = range), words = words) }
-            return RelatedSnippet(text = text, highlight = best)
+            return PassageSnippet(text = text, highlight = best)
         }
 
         private fun sharedWords(

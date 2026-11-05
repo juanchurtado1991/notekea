@@ -53,7 +53,10 @@ class FakeVectorIndex : VectorIndex {
         val byWords = chunks.filter { (chunk, _) -> words.any { it in chunk.text.lowercase() } }
         val hits = RankFusion.merge(rankings = listOf(byMeaning.map { it.first }, byWords.map { it.first }))
         return Outcome.Success(
-            value = hits.take(n = limit).map { (chunk, score) -> hitOf(chunk, score) }
+            value = hits.take(n = limit).map { (chunk, score) ->
+                val closeness = (1f + dot(chunks.first { it.first == chunk }.second, vector)) / 2f
+                hitOf(chunk, score).copy(hasWords = byWords.any { it.first == chunk }, closeness = closeness)
+            }
         )
     }
 

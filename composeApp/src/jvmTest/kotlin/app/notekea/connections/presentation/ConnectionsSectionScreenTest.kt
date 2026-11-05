@@ -21,7 +21,7 @@ import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.connections.domain.NoteMention
 import app.notekea.connections.domain.NoteMentions
 import app.notekea.connections.domain.RelatedNote
-import app.notekea.connections.domain.RelatedSnippet
+import app.notekea.core.notes.domain.PassageSnippet
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.connections.presentation.NoteMentionsIntent
 import app.notekea.connections.presentation.NoteMentionsState
@@ -290,7 +290,7 @@ class ConnectionsSectionScreenTest {
                 RelatedNote(
                     path = RelativePath(value = SOUP),
                     score = 1f,
-                    snippet = RelatedSnippet(text = PASSAGE, highlight = PASSAGE.indices)
+                    snippet = PassageSnippet(text = PASSAGE, highlight = PASSAGE.indices)
                 )
             ),
             isIndexReady = true

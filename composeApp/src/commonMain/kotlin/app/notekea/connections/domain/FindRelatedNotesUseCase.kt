@@ -9,6 +9,7 @@ import app.notekea.core.notes.domain.LinkFinder
 import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.PassageSnippet
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.SearchHit
 import app.notekea.core.notes.domain.VectorIndex
@@ -18,7 +19,7 @@ import app.notekea.core.notes.domain.embedChunks
  * The notes closest in meaning to the open note (`ROADMAP.md` 2.4), from its [text] as the editor has it: each of its
  * chunks is embedded as the index embeds them and its nearest chunks found ([VectorIndex.nearest]); a note scores its
  * closest chunk, the open note and those it already links are left out, and the [LIMIT] best are kept, each with the
- * passage that matched ([RelatedSnippet]). The notes it links come apart, for "Already linked".
+ * passage that matched ([PassageSnippet]). The notes it links come apart, for "Already linked".
  */
 class FindRelatedNotesUseCase(
     private val chunkNote: ChunkNoteUseCase,
@@ -96,7 +97,7 @@ class FindRelatedNotesUseCase(
         val stored = noteContentStore.read(vaultPath = vaultPath, path = hit.note) ?: return null
         val body = NoteDocument.fromText(text = stored).body
         if (hit.range.last >= body.length) return null
-        val snippet = RelatedSnippet.of(passage = body.substring(range = hit.range), words = words)
+        val snippet = PassageSnippet.of(passage = body.substring(range = hit.range), words = words)
         return RelatedNote(path = hit.note, score = hit.score, snippet = snippet)
     }
 

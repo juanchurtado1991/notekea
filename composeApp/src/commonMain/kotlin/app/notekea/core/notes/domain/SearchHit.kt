@@ -9,5 +9,7 @@ data class SearchHit(
     val index: Int,
     val headingPath: List<String>,
     val range: IntRange,
-    val score: Float
+    val score: Float,
+    val hasWords: Boolean = false,
+    val closeness: Float = 0f
 )
