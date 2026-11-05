@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Graph view: `Mod+F` finds a note on the map, and Link in the panel joins two notes close in meaning, with Undo.
+- Graph view: `Mod+F` finds a note and moves to its graph, with no note open the tab asks for one, and Link in the
+  panel joins two notes close in meaning, with Undo.
 - Graph view: `Mod+G`, the rail or the View menu open a map of how notes connect, around a note or on the whole vault,
   with a preview of the selected note.
 - Hybrid search: `Mod+Shift+F` finds notes by meaning and keywords, shows the passage and opens the note at it.

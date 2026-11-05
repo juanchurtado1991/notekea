@@ -22,6 +22,7 @@ fun SuiteBuilder.graphCases() {
     depthAndMotion()
     findANote()
     linkFromTheGraph()
+    noNote()
 }
 
 private fun SuiteBuilder.graphFromNote() {
@@ -99,15 +100,15 @@ private fun SuiteBuilder.depthAndMotion() {
 private fun SuiteBuilder.findANote() {
     manual(id = "2.7-06", reason = ManualReason.EYES) {
         prepare(SAMPLE)
-        title(text = "Search finds a note on the map and brings it into view")
+        title(text = "Search takes you to a note's graph with a slide")
         steps(
-            text = "$OPEN_GRAPH\n3. Click Whole vault and drag the map to one side.\n4. Click the magnifying glass at " +
-                "the top right, or press Ctrl+F (Cmd+F on macOS), and type soup.\n5. Press Enter twice, then Esc."
+            text = "$OPEN_GRAPH\n3. Click Whole vault, drag the map to one side and zoom.\n4. Click the magnifying " +
+                "glass at the top right, or press Ctrl+F (Cmd+F on macOS), and type soup.\n5. Press Enter, then Esc."
         )
         expected(
             text = "The matching notes keep their color and name while the rest fade, and the bar counts them. Enter " +
-                "selects a match and slides it to the middle, the next Enter goes to the next one. Esc closes the bar, " +
-                "every note comes back, and the arrow keys walk the map again."
+                "slides the map to that note's graph: it reaches the center, its neighbors come out around it and the " +
+                "other notes fade. Esc closes the bar and the arrow keys walk the map again."
         )
     }
 }
@@ -124,6 +125,21 @@ private fun SuiteBuilder.linkFromTheGraph() {
         expected(
             text = "The dashed line turns solid and the panel says Linked to that note. The note ends with the new " +
                 "[[link]], and the rest of it is unchanged. Undo removes the link from the note and from the map."
+        )
+    }
+}
+
+private fun SuiteBuilder.noNote() {
+    manual(id = "2.7-08", reason = ManualReason.EYES) {
+        prepare(SAMPLE)
+        title(text = "With no note open the graph asks to find one")
+        steps(
+            text = "1. In Notekea, open the Sample Vault (see TEST DATA above) and close every tab.\n2. Press Ctrl+G " +
+                "(Cmd+G on macOS).\n3. Click Find a note, type arepas and press Enter."
+        )
+        expected(
+            text = "The tab says No note selected and offers Find a note; nothing else shows on the map. Enter brings " +
+                "the graph of Arepas, its notes coming out of the center."
         )
     }
 }

@@ -9,7 +9,8 @@ import app.notekea.shell.presentation.WorkspaceViewModel
 import app.notekea.tree.presentation.VaultTreeViewModel
 
 /**
- * The view models the vault workspace is drawn from, given together: the [graph], the [tree], the [workspace] of tabs, one editor
+ * The view models the vault workspace is drawn from, given together: the [graph], the [tree], the [workspace] of tabs,
+ * one editor
  * per pane ([editors]), and how to ask the quick switcher, the tag picker and the template picker to open ([onSwitcher],
  * [onTagPicker], [onTemplatePicker]).
  */

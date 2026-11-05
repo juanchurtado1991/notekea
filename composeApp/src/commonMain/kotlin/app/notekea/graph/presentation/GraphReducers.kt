@@ -79,6 +79,18 @@ internal fun noteTowards(
         ?.path
 }
 
+/** The notes a link joins to [path]; related notes are not. */
+internal fun connectedTo(
+    path: RelativePath,
+    lines: List<GraphLine>
+): List<RelativePath> = lines.filter { !it.isRelated }.mapNotNull {
+    when (path) {
+        it.first -> it.second
+        it.second -> it.first
+        else -> null
+    }
+}
+
 // Lower is better; null when the note lies the other way. Being off to the side counts more than being far.
 private fun scoreOf(
     direction: GraphDirection,

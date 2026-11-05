@@ -1,8 +1,8 @@
 package app.notekea.core.presentation.menu
 
-import app.notekea.core.platform.domain.graphShortcut
 import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.platform.domain.graphShortcut
 import app.notekea.core.platform.domain.zoomInShortcut
 import app.notekea.core.platform.domain.zoomOutShortcut
 import app.notekea.core.platform.domain.zoomResetShortcut
@@ -10,6 +10,7 @@ import app.notekea.core.presentation.menu.AppMenuEntry.Command
 import app.notekea.core.presentation.menu.AppMenuEntry.OpensDialog
 import app.notekea.core.presentation.menu.AppMenuEntry.Separator
 import app.notekea.core.presentation.platform.WindowDialog
+import app.notekea.resources.Res
 import app.notekea.resources.menu_about
 import app.notekea.resources.menu_bookmark
 import app.notekea.resources.menu_close_tab
@@ -42,7 +43,6 @@ import app.notekea.resources.menu_window
 import app.notekea.resources.menu_zoom_in
 import app.notekea.resources.menu_zoom_out
 import app.notekea.resources.menu_zoom_reset
-import app.notekea.resources.Res
 
 /**
  * The window's menu bar (`PLATFORM_GUIDELINES.md` §4), so every command can be found without knowing its shortcut:

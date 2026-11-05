@@ -8,13 +8,12 @@ import app.notekea.core.notes.domain.RelativePath
  * top-level folders, which color the dots and the legend, and [excludedFolders] those left out. [showsRelated] adds the
  * dashed edges, which need the index ([isIndexReady]); [showsOrphans] the notes with no edge, in the whole vault.
  * [isTooLarge] suggests going back to one note. While [isSearching], [matches] are the notes named like [query], best
- * first: those on the map, or any note around one, as a match moves there. [matchIndex] is the one [revealed], which the
- * map brings into view. [linked] is the note just linked to, which can be undone, and [linkFailed] says a note could
+ * first, on the map or not. [matchIndex] is the one [revealed], whose graph the map moved to. [linked] is the note just linked to, which can be undone, and [linkFailed] says a note could
  * not be changed.
  */
 data class GraphState(
     val isLoading: Boolean = true,
-    val scope: GraphScope = GraphScope.WHOLE_VAULT,
+    val scope: GraphScope = GraphScope.THIS_NOTE,
     val depth: Int = 1,
     val center: RelativePath? = null,
     val dots: List<GraphDot> = emptyList(),
@@ -36,7 +35,11 @@ data class GraphState(
     val linked: RelativePath? = null,
     val linkFailed: Boolean = false
 ) {
+    /** No note to go around: the tab asks to find one. */
+    val needsNote: Boolean
+        get() = !isLoading && scope == GraphScope.THIS_NOTE && dots.isEmpty()
+
     /** A note with nothing to show around it, or a vault with no links: the tab teaches how to link. */
     val isEmpty: Boolean
-        get() = !isLoading && lines.isEmpty() && (dots.size <= 1 || !showsOrphans)
+        get() = !isLoading && !needsNote && lines.isEmpty() && (dots.size <= 1 || !showsOrphans)
 }

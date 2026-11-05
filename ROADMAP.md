@@ -807,7 +807,8 @@ attachments never are, so the graph never turns into a hairball of everything in
   the map when clicked. 2D, with depth instead of 3D: notes farther from the center are smaller, fainter and move a
   little less, zooming reveals names, and a chosen note slides to the center, unless motion is reduced.
 - **Local first:** opened from a note, the graph is local, on rings: that note and its direct neighbors (depth 1), with
-  a 1 / 2 depth selector. The global graph is an explicit choice ("Whole vault"), and the default when no note is open.
+  a 1 / 2 depth selector. The global graph is an explicit choice ("Whole vault"). With no note open the tab asks to find
+  one ("No note selected").
   With more than 2,000 nodes the global graph suggests local mode.
 - **Nodes and edges:** nodes sized by number of links; `[[links]]` as solid edges; semantic relations (above a
   similarity threshold) as dashed edges in `accent`, on the ring outside the last, labeled "Related by meaning" and
@@ -823,8 +824,9 @@ attachments never are, so the graph never turns into a hairball of everything in
 - **Interaction:** pan and zoom; a click selects a note, and around a note moves it to the center; a double click or
   Open opens it. Keyboard: arrow keys move between connected nodes, `Enter` opens the focused note, `Esc` returns to the
   note.
-- **Search:** a button and `Mod+F` open a bar that finds notes by name: matches keep their color and name, the rest fade,
-  and `Enter` goes through them, each sliding into view. Around a note it finds any note and moves there.
+- **Search:** a button and `Mod+F` open a bar that finds any note by name: matches keep their color and name, the rest
+  fade, and `Enter` goes through them. Each brings its own graph with a move: the note reaches the center, its neighbors
+  come out around it and the other notes fade, unless motion is reduced.
 - **Link from the graph:** the inspector lists notes close in meaning that no link joins yet, each with Link, which adds
   `[[note]]` at the end of the selected note and can be undone there. A note edited meanwhile is never overwritten.
 - **States:**

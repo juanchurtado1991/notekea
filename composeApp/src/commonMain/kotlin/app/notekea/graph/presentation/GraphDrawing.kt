@@ -46,12 +46,13 @@ internal fun DrawScope.drawLines(
 internal fun DrawScope.drawDots(
     dots: List<GraphDot>,
     paint: GraphPaint,
-    measurer: TextMeasurer
+    measurer: TextMeasurer,
+    fade: Float
 ) {
     dots.forEach { dot ->
         val center = paint.places[dot.path] ?: return@forEach
         val radius = dot.radius * paint.scale
-        val alpha = if (paint.isDimmed(path = dot.path)) DIMMED else 1f - dot.depth * DEPTH_FADE / 2
+        val alpha = fade * if (paint.isDimmed(path = dot.path)) DIMMED else 1f - dot.depth * DEPTH_FADE / 2
         if (dot.path == paint.selected) {
             drawCircle(color = paint.accent.copy(alpha = HALO_ALPHA), radius = radius + HALO_GROWTH, center = center)
         }

@@ -24,23 +24,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.platform.domain.Shortcut
 import app.notekea.core.presentation.components.EmptyState
+import app.notekea.core.presentation.components.NotekeaButton
 import app.notekea.core.presentation.components.NotekeaCheckbox
 import app.notekea.core.presentation.components.NotekeaCountTabs
 import app.notekea.core.presentation.components.NotekeaFindBar
 import app.notekea.core.presentation.components.NotekeaIconButton
+import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.platform.label
-import app.notekea.core.presentation.platform.matches
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.theme.NotekeaDimensions
@@ -54,6 +53,8 @@ import app.notekea.resources.graph_empty_message
 import app.notekea.resources.graph_empty_title
 import app.notekea.resources.graph_find
 import app.notekea.resources.graph_index_not_ready
+import app.notekea.resources.graph_no_note_message
+import app.notekea.resources.graph_no_note_title
 import app.notekea.resources.graph_orphans
 import app.notekea.resources.graph_related
 import app.notekea.resources.graph_this_note
@@ -71,7 +72,7 @@ private const val MAX_DEPTH = 2
  * The graph tab (`ROADMAP.md` 2.7): a compact toolbar, the map, the legend of folders, which also leaves a folder out
  * when clicked, and the inspector of the selected note. The keyboard walks the map: arrows move between connected notes,
  * `Enter` opens one, `Space` shows or hides the inspector, `Esc` goes back to the note and `Mod+F` finds a note, with
- * the keyboard back on the map when the search closes.
+ * the keyboard back on the map when the search closes. A focused control gets its keys first.
  */
 @Composable
 fun GraphContent(
@@ -82,14 +83,14 @@ fun GraphContent(
 ) {
     val focus = remember { FocusRequester() }
     LaunchedEffect(focus, state.isSearching) { if (!state.isSearching) focus.requestFocus() }
+    WindowShortcut(shortcut = platformConventions.findShortcut) { onIntent(GraphIntent.OnSearchOpen) }
     Row(
         modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surface)
             .focusRequester(focusRequester = focus)
-            .onPreviewKeyEvent { event ->
-                !state.isSearching && event.type == KeyEventType.KeyDown &&
-                    onKey(event, platformConventions.findShortcut, onIntent)
+            .onKeyEvent { event ->
+                event.type == KeyEventType.KeyDown && onKey(event.key, state.isSearching, onIntent)
             }
             .focusable()
     ) {
@@ -97,6 +98,19 @@ fun GraphContent(
             Toolbar(state = state, platformConventions = platformConventions, onIntent = onIntent)
             Box(modifier = Modifier.weight(weight = 1f).fillMaxWidth()) {
                 GraphCanvas(state = state, onIntent = onIntent, modifier = Modifier.fillMaxSize())
+                if (state.needsNote) {
+                    EmptyState(
+                        title = stringResource(resource = Res.string.graph_no_note_title),
+                        message = stringResource(resource = Res.string.graph_no_note_message),
+                        modifier = Modifier.align(alignment = Alignment.Center),
+                        action = {
+                            NotekeaButton(
+                                text = stringResource(resource = Res.string.graph_find),
+                                onClick = { onIntent(GraphIntent.OnSearchOpen) }
+                            )
+                        }
+                    )
+                }
                 if (state.isEmpty) {
                     EmptyState(
                         title = stringResource(resource = Res.string.graph_empty_title),
@@ -122,15 +136,15 @@ fun GraphContent(
 }
 
 private fun onKey(
-    event: KeyEvent,
-    findShortcut: Shortcut,
+    key: Key,
+    isSearching: Boolean,
     onIntent: (GraphIntent) -> Unit
 ): Boolean {
-    if (findShortcut.matches(event)) {
-        onIntent(GraphIntent.OnSearchOpen)
-        return true
+    if (isSearching) {
+        if (key == Key.Escape) onIntent(GraphIntent.OnSearchClose)
+        return key == Key.Escape
     }
-    val intent = when (event.key) {
+    val intent = when (key) {
         Key.DirectionLeft -> GraphIntent.OnMove(direction = GraphDirection.LEFT)
         Key.DirectionRight -> GraphIntent.OnMove(direction = GraphDirection.RIGHT)
         Key.DirectionUp -> GraphIntent.OnMove(direction = GraphDirection.UP)

@@ -1,10 +1,11 @@
 package app.notekea.core.presentation.about
 
-import app.notekea.core.platform.domain.graphShortcut
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.platform.domain.graphShortcut
 import app.notekea.core.platform.domain.zoomInShortcut
 import app.notekea.core.platform.domain.zoomOutShortcut
 import app.notekea.core.platform.domain.zoomResetShortcut
+import app.notekea.resources.Res
 import app.notekea.resources.about_group_notes
 import app.notekea.resources.about_group_workspace
 import app.notekea.resources.about_group_writing
@@ -40,7 +41,6 @@ import app.notekea.resources.about_shortcut_web_link
 import app.notekea.resources.about_shortcut_zoom_in
 import app.notekea.resources.about_shortcut_zoom_out
 import app.notekea.resources.about_shortcut_zoom_reset
-import app.notekea.resources.Res
 
 /** About's shortcuts in three groups, each ordered from the most used: notes, writing, and the workspace. */
 object AboutShortcuts {
