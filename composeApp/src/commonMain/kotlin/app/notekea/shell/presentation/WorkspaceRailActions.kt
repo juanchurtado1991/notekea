@@ -10,11 +10,13 @@ internal fun railActionsOf(
     sidePanel: SidePanelHost,
     onSearch: () -> Unit,
     onGraph: () -> Unit,
+    onQuery: () -> Unit,
     onSwitchVault: () -> Unit,
     onDialog: (WindowDialog) -> Unit
 ) = SidebarRailActions(
     onSearch = onSearch,
     onGraph = onGraph,
+    onQuery = onQuery,
     onSidePanelToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
     onSwitchVault = onSwitchVault,
     onAbout = { onDialog(WindowDialog.ABOUT) },

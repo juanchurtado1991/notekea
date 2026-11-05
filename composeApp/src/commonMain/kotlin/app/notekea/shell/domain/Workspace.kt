@@ -180,7 +180,7 @@ data class Workspace(
     /** Closes the tabs whose file is not in [existing] (files deleted while the vault was closed). */
     fun keepingOnly(
         existing: Set<RelativePath>
-    ): Workspace = closeWhere { it !in existing && it != GRAPH }
+    ): Workspace = closeWhere { it !in existing && it !in TOOL_TABS }
 
     private fun closeWhere(
         predicate: (RelativePath) -> Boolean
@@ -210,6 +210,12 @@ data class Workspace(
     companion object {
         /** The graph's tab (`ROADMAP.md` 2.7). It is no file of the vault, and the name of none: a dot starts it. */
         val GRAPH = RelativePath(value = ".notekea-graph")
+
+        /** The Query tab (`ROADMAP.md` 2.10), no file of the vault either. */
+        val QUERY = RelativePath(value = ".notekea-query")
+
+        /** The tabs that show a tool of the vault, not one of its files. */
+        val TOOL_TABS = setOf(GRAPH, QUERY)
         const val MAX_PANES = 2
         private const val LAST_TAB_NUMBER = 9
         val EMPTY = Workspace()

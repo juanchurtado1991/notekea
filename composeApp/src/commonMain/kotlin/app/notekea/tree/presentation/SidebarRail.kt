@@ -15,6 +15,7 @@ import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.resources.Res
 import app.notekea.resources.rail_about
 import app.notekea.resources.rail_graph
+import app.notekea.resources.rail_query
 import app.notekea.resources.rail_label
 import app.notekea.resources.rail_settings
 import app.notekea.resources.rail_side_panel
@@ -90,6 +91,11 @@ private fun topItems(
             label = stringResource(resource = Res.string.rail_graph),
             onClick = actions.onGraph,
             shortcutHint = shortcut(conventions.graphShortcut)
+        ),
+        NotekeaToolRailItem(
+            icon = NotekeaIcons.Query,
+            label = stringResource(resource = Res.string.rail_query),
+            onClick = actions.onQuery
         ),
         NotekeaToolRailItem(
             icon = NotekeaIcons.Today,

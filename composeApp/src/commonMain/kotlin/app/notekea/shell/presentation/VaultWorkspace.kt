@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -22,10 +23,13 @@ import app.notekea.editor.presentation.EditorCallbacks
 import app.notekea.editor.presentation.EditorIntent
 import app.notekea.editor.presentation.EditorPaneTools
 import app.notekea.editor.presentation.EditorScreen
+import app.notekea.editor.presentation.LocalQueryBlock
 import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.editor.presentation.WithSidePanel
 import app.notekea.graph.presentation.GraphContent
 import app.notekea.graph.presentation.GraphInspector
+import app.notekea.query.presentation.QueryContent
+import app.notekea.shell.domain.Workspace
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherMode
 import app.notekea.search.presentation.switcher.QuickSwitcherPurpose
@@ -137,7 +141,14 @@ private fun WorkspaceBody(
         state = state,
         vaultName = vaultName,
         onIntent = viewModels.tree::onIntent,
-        rail = railActionsOf(sidePanel, findNote, { openGraph(viewModels) }, onSwitchVault) { dialogs.shown = it },
+        rail = railActionsOf(
+            sidePanel = sidePanel,
+            onSearch = findNote,
+            onGraph = { openGraph(viewModels) },
+            onQuery = { viewModels.workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = Workspace.QUERY)) },
+            onSwitchVault = onSwitchVault,
+            onDialog = { dialogs.shown = it }
+        ),
         modifier = modifier,
         isSidePanelVisible = if (sidePanel.isOverlay) sidePanel.isOverlayOpen else workspaceState.sidePanel.isVisible
     ) {
@@ -152,13 +163,18 @@ private fun WorkspaceBody(
             info = activeEditorState.info.takeIf { isNoteShown },
             inspector = graphInspectorOf(viewModels = viewModels).takeIf { activeKind == TabKind.GRAPH }
         ) {
-            WorkspaceContent(
-                state = workspaceState,
-                platformConventions = state.platformConventions,
-                onIntent = viewModels.workspace::onIntent,
-                startActions = startActionsOf(viewModels = viewModels, onFindNote = findNote),
-                unsavedPaths = unsavedPathsOf(editors = viewModels.editors)
-            ) { pane, path, kind -> PaneContent(pane = pane, path = path, kind = kind, context = context) }
+            val queryBlock = remember(viewModels.query, state.tree.notes) {
+                queryBlockOf(query = viewModels.query, notes = state.tree.notes.values)
+            }
+            CompositionLocalProvider(LocalQueryBlock provides queryBlock) {
+                WorkspaceContent(
+                    state = workspaceState,
+                    platformConventions = state.platformConventions,
+                    onIntent = viewModels.workspace::onIntent,
+                    startActions = startActionsOf(viewModels = viewModels, onFindNote = findNote),
+                    unsavedPaths = unsavedPathsOf(editors = viewModels.editors)
+                ) { pane, path, kind -> PaneContent(pane = pane, path = path, kind = kind, context = context) }
+            }
         }
     }
 }
@@ -226,6 +242,12 @@ private fun PaneContent(
             platformConventions = state.platformConventions,
             onIntent = context.viewModels.graph::onIntent,
             isActive = context.workspaceState.workspace.activePane == pane
+        )
+
+        TabKind.QUERY -> QueryContent(
+            state = context.viewModels.query.state.collectAsState().value,
+            saveTarget = context.workspaceState.noteShown,
+            onIntent = context.viewModels.query::onIntent
         )
 
         TabKind.MISSING -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

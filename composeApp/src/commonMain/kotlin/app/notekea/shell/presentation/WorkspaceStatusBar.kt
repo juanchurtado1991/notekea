@@ -38,6 +38,7 @@ import app.notekea.resources.status_zoom_tooltip
 import app.notekea.resources.status_zoom
 import app.notekea.resources.status_reveal
 import app.notekea.resources.tab_graph
+import app.notekea.resources.tab_query
 import app.notekea.core.presentation.platform.LocalUiZoom
 
 private const val PERCENT = 100
@@ -97,12 +98,14 @@ private fun Breadcrumbs(
         text = when (kind) {
             TabKind.NOTE -> path.nameWithoutExtension
             TabKind.GRAPH -> stringResource(resource = Res.string.tab_graph)
+            TabKind.QUERY -> stringResource(resource = Res.string.tab_query)
             else -> path.name
         },
         icon = when (kind) {
             TabKind.NOTE -> NotekeaIcons.Note
             TabKind.FOLDER -> NotekeaIcons.Folder
             TabKind.GRAPH -> NotekeaIcons.Graph
+            TabKind.QUERY -> NotekeaIcons.Query
             else -> NotekeaIcons.OtherFile
         }
     )

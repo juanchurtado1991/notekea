@@ -1,11 +1,13 @@
 package app.notekea.editor.presentation
 
 import app.notekea.core.domain.StringPatterns
+import app.notekea.core.domain.markdown.FenceTracker
+import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.OutlineHeading
 
 /**
- * A piece of a note as Read mode shows it: Markdown for the renderer, or a file embedded on a line of its own, which
- * Notekea draws itself (`ROADMAP.md` 1.8). Files embedded inside a paragraph stay in the Markdown, as links. A piece
+ * A piece of a note as Read mode shows it: Markdown for the renderer, a file embedded on a line of its own, which
+ * Notekea draws itself (`ROADMAP.md` 1.8), or a query block, with its YAML, drawn as its table (`ROADMAP.md` 2.10). Files embedded inside a paragraph stay in the Markdown, as links. A piece
  * of Markdown that starts with a heading of the outline knows its index ([Markdown.heading]), so the outline can
  * scroll to it (`ROADMAP.md` 1.9).
  */
@@ -17,10 +19,15 @@ sealed interface ReadingSegment {
 
     data class Attachment(val view: AttachmentView) : ReadingSegment
 
+    data class Query(
+        val text: String,
+        val source: String
+    ) : ReadingSegment
+
     companion object {
         /**
-         * [text] cut at the lines that hold only an embedded file of [attachments], and before every line of
-         * [headings]; blank pieces are left out.
+         * [text] cut at the lines that hold only an embedded file of [attachments], around its query blocks, and
+         * before every line of [headings]; blank pieces are left out.
          */
         fun of(
             text: String,
@@ -40,13 +47,12 @@ sealed interface ReadingSegment {
                 if (cut.lineStart < start) return@forEach
                 addMarkdown(cut.lineStart)
                 start = cut.lineStart
-                when (val view = cut.view) {
-                    null -> heading = cut.heading
-
-                    else -> {
-                        segments += Attachment(view = view)
-                        start = minOf(cut.lineEnd + 1, text.length)
-                    }
+                val piece = cut.view?.let { Attachment(view = it) } ?: cut.query
+                if (piece == null) {
+                    heading = cut.heading
+                } else {
+                    segments += piece
+                    start = minOf(cut.lineEnd + 1, text.length)
                 }
             }
             addMarkdown(text.length)
@@ -69,14 +75,54 @@ sealed interface ReadingSegment {
             val titles = headings.withIndex().filter { it.value.offset < text.length }.map { (index, heading) ->
                 Cut(lineStart = heading.offset, lineEnd = heading.offset, heading = index)
             }
-            return (files + titles).sortedBy { it.lineStart }
+            return (files + titles + queriesOf(text = text)).sortedBy { it.lineStart }
         }
 
-        /** One place [of] cuts the text: an embedded file's line ([view]) or a heading's ([heading]). */
+        /** The ```` ```query ```` blocks of [text], whole: a block that is not closed is no query yet. */
+        private fun queriesOf(
+            text: String
+        ): List<Cut> {
+            if (QUERY_FENCE !in text) return emptyList()
+            val tracker = FenceTracker()
+            val cuts = mutableListOf<Cut>()
+            var opened: Int? = null
+            var lineStart = 0
+            while (lineStart < text.length) {
+                val lineEnd = text.indexOf(char = StringPatterns.NEW_LINE_CHAR, startIndex = lineStart)
+                    .takeIf { it >= 0 } ?: text.length
+                val wasOpen = tracker.isOpen
+                tracker.read(text = text, start = lineStart, end = lineEnd)
+                val line = text.substring(startIndex = lineStart, endIndex = lineEnd).trim()
+                if (!wasOpen && line == QUERY_FENCE) opened = lineStart
+                if (wasOpen && !tracker.isOpen) {
+                    opened?.let { cuts += queryCut(text = text, start = it, lastLine = lineStart, end = lineEnd) }
+                    opened = null
+                }
+                lineStart = lineEnd + 1
+            }
+            return cuts
+        }
+
+        private fun queryCut(
+            text: String,
+            start: Int,
+            lastLine: Int,
+            end: Int
+        ): Cut {
+            val firstLineEnd = text.indexOf(char = StringPatterns.NEW_LINE_CHAR, startIndex = start)
+            val yaml = text.substring(startIndex = firstLineEnd + 1, endIndex = lastLine)
+            val source = text.substring(startIndex = start, endIndex = end)
+            return Cut(lineStart = start, lineEnd = end, query = Query(text = yaml, source = source))
+        }
+
+        private const val QUERY_FENCE = MarkdownSyntax.FENCE + "query"
+
+        /** One place [of] cuts the text: an embedded file's line ([view]), a query block or a heading's ([heading]). */
         private data class Cut(
             val lineStart: Int,
             val lineEnd: Int,
             val view: AttachmentView? = null,
+            val query: Query? = null,
             val heading: Int? = null
         )
     }

@@ -58,7 +58,7 @@ internal fun FollowWorkspace(
     }
     DailyNoteShortcuts(platformConventions = conventions, onIntent = tree::onIntent)
     WindowShortcut(shortcut = conventions.bookmarkShortcut) {
-        val active = workspace.state.value.workspace.activePath?.takeIf { it != Workspace.GRAPH }
+        val active = workspace.state.value.workspace.activePath?.takeIf { it !in Workspace.TOOL_TABS }
         val path = active ?: tree.state.value.selectedPath
         path?.let { tree.onIntent(intent = BookmarkIntent.OnToggle(path = it)) }
     }
@@ -108,7 +108,7 @@ private fun FollowTree(
     val activePath = workspaceState.workspace.activePath
     val selected by rememberUpdatedState(newValue = state.selectedPath)
     LaunchedEffect(activePath) {
-        if (activePath != null && activePath != selected && activePath != Workspace.GRAPH) {
+        if (activePath != null && activePath != selected && activePath !in Workspace.TOOL_TABS) {
             viewModel.onIntent(intent = VaultTreeIntent.OnRowSelect(path = activePath))
         }
     }

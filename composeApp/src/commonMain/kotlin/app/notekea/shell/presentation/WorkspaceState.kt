@@ -23,7 +23,7 @@ data class WorkspaceState(
 ) {
     /** What the active tab shows, as a person names it: a note without its extension; null without tabs. */
     val activeTabName: String?
-        get() = workspace.activePath?.takeIf { it != Workspace.GRAPH }?.let {
+        get() = workspace.activePath?.takeIf { it !in Workspace.TOOL_TABS }?.let {
             if (kindOf(path = it) == TabKind.NOTE) it.nameWithoutExtension else it.name
         }
 
@@ -36,6 +36,7 @@ data class WorkspaceState(
         path: RelativePath
     ): TabKind = when (path) {
         Workspace.GRAPH -> TabKind.GRAPH
+        Workspace.QUERY -> TabKind.QUERY
         in tree.notes -> TabKind.NOTE
         in tree.attachments -> TabKind.FILE
         in tree.folders -> TabKind.FOLDER

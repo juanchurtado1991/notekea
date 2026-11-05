@@ -1,0 +1,14 @@
+package app.notekea.query.presentation
+
+import app.notekea.query.domain.QueryCatalog
+import app.notekea.query.domain.QueryResult
+import app.notekea.query.domain.VaultQuery
+
+/** The Query tab (`ROADMAP.md` 2.10): the [query], what it [found][result], and what it can [choose from][catalog]. */
+data class QueryState(
+    val query: VaultQuery = VaultQuery(),
+    val result: QueryResult = QueryResult(),
+    val catalog: QueryCatalog = QueryCatalog(),
+    val isLoading: Boolean = true,
+    val notice: QueryNotice? = null
+)
