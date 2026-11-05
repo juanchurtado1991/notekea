@@ -107,14 +107,34 @@ class TemplateUseCasesTest {
         )
 
         val first = createFolder(vaultPath = VAULT, exampleName = "Meeting notes", exampleText = "# {{title}}\n")
-        store.texts[RelativePath(value = "Meta/Templates/Meeting notes.md")] = "edited"
+        val example = RelativePath(value = "Meta/Templates/Meeting notes.md")
+        operations.existing += example
+        store.texts[example] = "edited"
         val second = createFolder(vaultPath = VAULT, exampleName = "Meeting notes", exampleText = "# {{title}}\n")
 
-        val example = RelativePath(value = "Meta/Templates/Meeting notes.md")
         assertEquals(
             expected = listOf(Outcome.Success(value = example), Outcome.Success(value = example)) to
                 listOf("Meta", "Meta/Templates", example.value) to "edited",
             actual = listOf(first, second) to operations.existing.map { it.value } to store.texts[example]
+        )
+    }
+
+    // A template listed while it was still empty inserted nothing (1.12-01, about 1 run in 30 under load).
+    @Test
+    fun `the example never exists without its text`() = runTest {
+        val example = RelativePath(value = "Templates/Meeting notes.md")
+        store.refused += example
+        val createFolder = CreateTemplatesFolderUseCase(
+            vaultSettingsReader = settings,
+            noteFileOperations = operations,
+            noteContentStore = store
+        )
+
+        val outcome = createFolder(vaultPath = VAULT, exampleName = "Meeting notes", exampleText = "# {{title}}\n")
+
+        assertEquals(
+            expected = Outcome.Failure(error = NotesError.OperationFailed(path = example.value)) to false,
+            actual = outcome to (example in operations.existing)
         )
     }
 }
