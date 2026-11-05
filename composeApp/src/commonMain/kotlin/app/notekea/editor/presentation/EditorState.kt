@@ -9,7 +9,7 @@ import app.notekea.core.notes.domain.RelativePath
 /**
  * State of the note editor (`ROADMAP.md` 1.5). The text itself is not here: it lives in the ViewModel's text buffer,
  * which the text field edits directly, so a keystroke does not copy the whole note. [notePath] is null when no note is
- * open. [loadError] means the note could not be read (retry opens it again); [saveError] is a failed save, retried by
+ * open. [isRevealing] says a place was just selected, so the remembered scroll stays out of the way. [loadError] means the note could not be read (retry opens it again); [saveError] is a failed save, retried by
  * the next edit or Save. [hasConflict] means the file changed outside Notekea while there were unsaved edits (Keep
  * mine / Load theirs); [isDeleted] means the file disappeared while open (Restore / Close). Autosave waits while
  * either is shown, so nothing is overwritten or lost without the user's answer. [titleError] is why a new title was
@@ -34,6 +34,7 @@ data class EditorState(
     val titleError: NotesError? = null,
     val find: FindState? = null,
     val isReading: Boolean = false,
+    val isRevealing: Boolean = false,
     val attachments: List<AttachmentView> = emptyList(),
     val actionError: NotesError? = null,
     val outline: List<OutlineHeading> = emptyList(),

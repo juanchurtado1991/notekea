@@ -175,11 +175,7 @@ class EditorViewModel(
 
             is EditorIntent.OnHeadingClick -> focus.revealHeading(index = intent.index)
 
-            is EditorIntent.OnRevealRequest -> {
-                // A selection only shows in the Markdown, so this leaves Preview, as Find does.
-                chooseMode(isReading = false)
-                focus.reveal(path = intent.path, range = intent.range)
-            }
+            is EditorIntent.OnRevealRequest -> focus.reveal(path = intent.path, range = intent.range)
 
             is EditorIntent.OnDayStep -> emit(effect = EditorEffect.DayStep(step = intent.step))
 
@@ -197,7 +193,7 @@ class EditorViewModel(
     private fun chooseMode(
         isReading: Boolean
     ) {
-        reduce { it.copy(isReading = isReading, find = if (isReading) null else it.find) }
+        reduce { it.copy(isReading = isReading, isRevealing = false, find = if (isReading) null else it.find) }
         if (isReading == isReadingChosen) return
         isReadingChosen = isReading
         launchGuarded(onError = ::showUnexpectedError) { editorPreferences.setReadMode(isReading = isReading) }

@@ -114,15 +114,18 @@ class EditorOutlineTest {
         }
 
     @Test
-    fun `a passage chosen in Preview shows in Edit, the only mode with a selection`() = runOutlineTest {
+    fun `a passage chosen in Preview shows in Edit for that note, and the mode remembered stays`() = runOutlineTest {
         open(path = AREPAS)
         send(intent = EditorIntent.OnReadModeToggle)
 
         send(intent = EditorIntent.OnRevealRequest(path = AREPAS, range = 2..7))
+        val shown =
+            Triple(viewModel.state.value.isReading, viewModel.state.value.isRevealing, viewModel.buffer.selection)
+        open(path = PLAIN)
 
         assertEquals(
-            expected = false to TextRange(start = 2, end = 8),
-            actual = viewModel.state.value.isReading to viewModel.buffer.selection
+            expected = Triple(false, true, TextRange(start = 2, end = 8)) to true,
+            actual = shown to viewModel.state.value.isReading
         )
     }
 
