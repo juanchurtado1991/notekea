@@ -20,6 +20,8 @@ fun SuiteBuilder.graphCases() {
     wholeVault()
     keyboard()
     depthAndMotion()
+    findANote()
+    linkFromTheGraph()
 }
 
 private fun SuiteBuilder.graphFromNote() {
@@ -90,6 +92,38 @@ private fun SuiteBuilder.depthAndMotion() {
         expected(
             text = "A second ring appears, its notes smaller and fainter, and it moves a little less as you drag. " +
                 "With Reduce motion the note jumps to the center at once."
+        )
+    }
+}
+
+private fun SuiteBuilder.findANote() {
+    manual(id = "2.7-06", reason = ManualReason.EYES) {
+        prepare(SAMPLE)
+        title(text = "Search finds a note on the map and brings it into view")
+        steps(
+            text = "$OPEN_GRAPH\n3. Click Whole vault and drag the map to one side.\n4. Click the magnifying glass at " +
+                "the top right, or press Ctrl+F (Cmd+F on macOS), and type soup.\n5. Press Enter twice, then Esc."
+        )
+        expected(
+            text = "The matching notes keep their color and name while the rest fade, and the bar counts them. Enter " +
+                "selects a match and slides it to the middle, the next Enter goes to the next one. Esc closes the bar, " +
+                "every note comes back, and the arrow keys walk the map again."
+        )
+    }
+}
+
+private fun SuiteBuilder.linkFromTheGraph() {
+    manual(id = "2.7-07", reason = ManualReason.EYES) {
+        prepare(SAMPLE)
+        title(text = "Link joins two notes from the graph, and Undo takes it back")
+        steps(
+            text = "$OPEN_GRAPH\n3. Click circles until the panel shows Related, not linked.\n4. Click Link on a row." +
+                "\n5. Open that note from the panel and look at its end, then go back to the graph's tab.\n6. Click " +
+                "Link on another row, then Undo."
+        )
+        expected(
+            text = "The dashed line turns solid and the panel says Linked to that note. The note ends with the new " +
+                "[[link]], and the rest of it is unchanged. Undo removes the link from the note and from the map."
         )
     }
 }
