@@ -74,11 +74,10 @@ of the platform as keycaps, so a new shortcut is added there too (`AboutShortcut
 
 | | macOS | Windows / Linux |
 |---|---|---|
-| Location | Global menu bar at the top of the screen | Inside the window |
+| Location | Global menu bar at the top of the screen | None: Swing would draw it in the window, outside the app's theme |
 | App menu | `Notekea` menu with About, Settings… (`Cmd+,`) and Quit Notekea (`Cmd+Q`) | No app menu |
-| About | In the `Notekea` menu | In the `Help` menu |
-| Settings | In the `Notekea` menu | In the `File` menu (or `Edit` on Linux desktops that expect it) |
-| Quit / Exit | Provided by macOS in the app menu | Added by us: `File → Exit` |
+| About and Settings | In the `Notekea` menu | In the tool rail |
+| Quit | Provided by macOS in the app menu | The window's close button and the quit shortcut |
 
 - On macOS, enable the global menu bar (`apple.laf.useScreenMenuBar=true`).
 - Menu items without a shortcut must pass an explicit "no shortcut"; otherwise Compose may show an unwanted one

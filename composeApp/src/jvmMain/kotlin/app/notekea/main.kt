@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import app.notekea.core.logging.data.FileLogWriter
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.platformLogWriter
+import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.appearance.domain.WindowBoundsStore
 import app.notekea.core.platform.domain.SystemEnvironment
@@ -143,7 +144,7 @@ private fun ApplicationScope.NotekeaWindow(
         state = windowState,
         onPreviewKeyEvent = host.shortcuts::dispatch
     ) {
-        NotekeaMenuBar(host = host)
+        if (host.conventions.operatingSystem == OperatingSystem.MACOS) NotekeaMenuBar(host = host)
         FollowWindowBounds(state = windowState)
         if (isCrashTest) CrashTest()
         NotekeaRoot(host = host, onClose = onClose)
@@ -164,7 +165,11 @@ private fun rememberSystemIntegration(
     return quit
 }
 
-/** The menu bar ([AppMenus]): a command runs what its shortcut runs, and is disabled while no screen offers it. */
+/**
+ * The menu bar of macOS, at the top of the screen ([AppMenus]); Windows and Linux have none, as Swing would draw it in
+ * the window, outside the app's theme. A command runs what its shortcut runs, and is disabled while no screen offers
+ * it.
+ */
 @Composable
 private fun FrameWindowScope.NotekeaMenuBar(
     host: WindowHost
