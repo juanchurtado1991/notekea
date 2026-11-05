@@ -21,23 +21,6 @@ private const val LINK_WIDTH = 1.4f
 private const val RELATED_WIDTH = 1.2f
 private val RELATED_DASH = floatArrayOf(4f, 6f)
 
-/** What the graph is drawn with: where each note is now and which notes stand out. */
-internal class GraphPaint(
-    val places: Map<RelativePath, Offset>,
-    val scale: Float,
-    val hovered: Set<RelativePath>,
-    val selected: RelativePath?,
-    val showsAllLabels: Boolean,
-    val lineColor: Color,
-    val accent: Color,
-    val labelStyle: TextStyle,
-    val colorOf: (GraphDot) -> Color
-) {
-    fun isDimmed(
-        path: RelativePath
-    ): Boolean = hovered.isNotEmpty() && path !in hovered
-}
-
 internal fun DrawScope.drawLines(
     lines: List<GraphLine>,
     paint: GraphPaint

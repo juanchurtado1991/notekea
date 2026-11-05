@@ -55,26 +55,32 @@ internal fun GraphInspector(
             maxLines = SNIPPET_LINES,
             overflow = TextOverflow.Ellipsis
         )
-        if (preview.connected.isNotEmpty()) {
-            Text(
-                text = stringResource(resource = Res.string.graph_connected_to),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            preview.connected.take(n = MAX_CONNECTED).forEach { path ->
-                Text(
-                    text = path.nameWithoutExtension,
-                    modifier = Modifier.clickable { onIntent(GraphIntent.OnNoteSelect(path = path)) },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1
-                )
-            }
-        }
+        if (preview.connected.isNotEmpty()) Connected(preview = preview, onIntent = onIntent)
         NotekeaButton(
             text = stringResource(resource = Res.string.graph_open),
             onClick = { onIntent(GraphIntent.OnOpenSelected) },
             modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun Connected(
+    preview: GraphPreview,
+    onIntent: (GraphIntent) -> Unit
+) {
+    Text(
+        text = stringResource(resource = Res.string.graph_connected_to),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    preview.connected.take(n = MAX_CONNECTED).forEach { path ->
+        Text(
+            text = path.nameWithoutExtension,
+            modifier = Modifier.clickable { onIntent(GraphIntent.OnNoteSelect(path = path)) },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+            maxLines = 1
         )
     }
 }

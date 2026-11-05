@@ -123,28 +123,8 @@ private fun Toolbar(
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        NotekeaCountTabs(
-            labels = listOf(
-                stringResource(resource = Res.string.graph_this_note),
-                stringResource(resource = Res.string.graph_whole_vault)
-            ),
-            counts = listOf(null, null),
-            selectedIndex = state.scope.ordinal,
-            onSelect = { onIntent(GraphIntent.OnScopeSelect(scope = GraphScope.entries[it])) },
-            modifier = Modifier.width(width = SCOPE_WIDTH_DP.dp)
-        )
-        if (isAround) {
-            NotekeaCountTabs(
-                labels = listOf(
-                    stringResource(resource = Res.string.graph_depth_one),
-                    stringResource(resource = Res.string.graph_depth_two)
-                ),
-                counts = listOf(null, null),
-                selectedIndex = (state.depth - 1).coerceIn(minimumValue = 0, maximumValue = MAX_DEPTH - 1),
-                onSelect = { onIntent(GraphIntent.OnDepthSelect(depth = it + 1)) },
-                modifier = Modifier.width(width = DEPTH_WIDTH_DP.dp)
-            )
-        }
+        ScopeTabs(state = state, onIntent = onIntent)
+        if (isAround) DepthTabs(state = state, onIntent = onIntent)
         Toggle(
             label = stringResource(resource = Res.string.graph_related),
             isChecked = state.showsRelated,
@@ -158,6 +138,40 @@ private fun Toolbar(
             )
         }
     }
+}
+
+@Composable
+private fun ScopeTabs(
+    state: GraphState,
+    onIntent: (GraphIntent) -> Unit
+) {
+    NotekeaCountTabs(
+        labels = listOf(
+            stringResource(resource = Res.string.graph_this_note),
+            stringResource(resource = Res.string.graph_whole_vault)
+        ),
+        counts = listOf(null, null),
+        selectedIndex = state.scope.ordinal,
+        onSelect = { onIntent(GraphIntent.OnScopeSelect(scope = GraphScope.entries[it])) },
+        modifier = Modifier.width(width = SCOPE_WIDTH_DP.dp)
+    )
+}
+
+@Composable
+private fun DepthTabs(
+    state: GraphState,
+    onIntent: (GraphIntent) -> Unit
+) {
+    NotekeaCountTabs(
+        labels = listOf(
+            stringResource(resource = Res.string.graph_depth_one),
+            stringResource(resource = Res.string.graph_depth_two)
+        ),
+        counts = listOf(null, null),
+        selectedIndex = (state.depth - 1).coerceIn(minimumValue = 0, maximumValue = MAX_DEPTH - 1),
+        onSelect = { onIntent(GraphIntent.OnDepthSelect(depth = it + 1)) },
+        modifier = Modifier.width(width = DEPTH_WIDTH_DP.dp)
+    )
 }
 
 @Composable
