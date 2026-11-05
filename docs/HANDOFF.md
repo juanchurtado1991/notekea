@@ -3,7 +3,7 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-05, with 2.7 (#122) and the eight new themes (#123) in review.
+Last updated: 2026-11-05, with 2.7 (#122) in review.
 
 ## Milestones
 
@@ -13,8 +13,8 @@ Last updated: 2026-11-05, with 2.7 (#122) and the eight new themes (#123) in rev
 - **M2 — Indexing, links and related notes:** started. 2.12 Color themes is done (#107), 2.1 Markdown chunking
   (#108), 2.2 Embedding engine (#109), 2.3 Hybrid index (#110), 2.4 Related notes panel (#111) and **2.5
   Backlinks** (#112) are done; Workspace Blue is the default theme (#113). `notes` was split into features (#118), and
-  **2.6 Hybrid search** (#120) is done. **2.7 Graph view** (#122) and the eight hand-tuned themes (#123) are in review. Next
-  is **2.10 Vault queries** (`feature/vault-queries`, `ROADMAP.md`).
+  **2.6 Hybrid search** (#120) and the eight hand-tuned themes (#123) are done. **2.7 Graph view** (#122) is in
+  review. Next is **2.10 Vault queries** (`feature/vault-queries`, `ROADMAP.md`).
 
 ## Open work, in order
 
