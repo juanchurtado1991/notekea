@@ -113,7 +113,7 @@ Notekea has its own visual identity, identical on every platform: a vivid **coba
 and a **tangerine** accent, its complementary color, that keeps a nod to the kea's orange underwings. All values live
 in the theme; composables never hard-code colors. Typefaces approved on 2026-10-23; the palette was chosen the same
 day after two earlier versions (saturated olive and orange, then sage and terracotta) were judged too dull. The table
-below is that palette, now the Cobalt Tangerine theme; the app starts in Workspace Blue (2.12).
+below is that first palette, which the logo keeps; the app's themes are in 2.12.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
@@ -640,31 +640,28 @@ the automated smoke runs of 1.16, and its smoke test also checks the code trim o
 
 ### ✅ 2.12 Color themes — `feature/color-themes` — [notekea#107](https://github.com/juanchurtado1991/notekea/pull/107)
 
-Settings → Appearance, the first section of Settings to be built: the light and dark mode, and a color theme. Nine
-themes join the first palette (above, now Cobalt Tangerine), each made from two tones (a deep one and a light one) chosen by the
-developer on 2026-11-01:
+Settings → Appearance, the first section of Settings to be built: the light and dark mode, and a color theme. Themes
+were replaced on 2026-11-05: tones computed from two brand colors painted the whole window, so the eleven first themes
+became eight made by hand, all in the image of Workspace Blue, the theme the app starts with.
 
-| Theme | Deep tone | Light tone |
-|---|---|---|
-| Midnight Lime | `#071A52` | `#A7FF83` |
-| Deep Sage | `#152D35` | `#D4ECDD` |
-| Signal Almond | `#F62440` | `#FFFAF3` |
-| Cosmic Violet | `#0C134F` | `#D4ADFC` |
-| Azure Cloud | `#1B4EF5` | `#F7DCFF` |
-| Neon Porcelain | `#FF6115` | `#FFFCF4` |
-| Forest Mint | `#18251D` | `#B7FF72` |
-| Prompt Green | `#0B132B` | `#39FF88` |
-| Clay Butter | `#6B352A` | `#FFF1A6` |
+| Theme | Character | Lead, dark | Lead, light |
+|---|---|---|---|
+| Workspace Blue | Quiet grays, a clear blue, an orange accent | `#669DF1` | `#1868DB` |
+| Graphite | Almost monochrome | `#B9C0CC` | `#4A5160` |
+| Sage | A calm green | `#7FC29C` | `#2C7A55` |
+| Lagoon | A clean teal | `#5CC2C7` | `#0B7682` |
+| Iris | A soft violet | `#A998F4` | `#6A4ED6` |
+| Rose | An elegant pink | `#F08CA8` | `#BE3468` |
+| Clay | Warm terracotta, like paper | `#E3966C` | `#AD4F28` |
+| Honey | A quiet amber | `#E5B567` | `#8F6108` |
 
-**Workspace Blue**, added on 2026-11-03 and the theme the app starts with, has a palette of its own instead of two
-tones: grays and a clear blue with an orange accent (primary `#1868DB` / `#669DF1`, page `#F8F8F8` / `#18191A`). Only
-those who never chose a theme get it: the stored id `default` stays, and it now means Cobalt Tangerine.
+Whoever kept a theme that is gone gets the closest one (`ColorTheme.fromId`), and the first palette's `default` id now
+leads to Workspace Blue.
 
-- **Colors:** every theme has a light and a dark version built from its two tones: in dark, the deep tone is the
-  page and the light tone leads (actions, selection, links, tags); in light, the light tone is the page (a tint of it
-  when it is vivid) and the deep tone leads. Every pair of text and background meets WCAG AA (4.5:1), checked by a
-  test for every theme and mode; a tone is darkened or lightened only as far as that needs. The logo takes the
-  theme's colors. The colors of meaning (bookmarks, file types, warnings, errors) stay the same in every theme.
+- **Colors:** every theme has gray surfaces with a touch of its hue and one lead color for actions, selection and links,
+  in a light and a dark version. Every pair of text and background meets WCAG AA (4.5:1), checked by a test for every
+  theme and mode. The logo takes the theme's colors. The colors of meaning (bookmarks, file types, warnings, errors)
+  stay the same in every theme.
 - **UI — Settings → Appearance** (design A, picked 2026-11-01):
   - **Mode:** System, Light or Dark (a segmented control); System follows the operating system, as before.
   - **Theme:** a grid of cards, three per row, Workspace Blue first, each showing the theme's light and dark versions side by side with
