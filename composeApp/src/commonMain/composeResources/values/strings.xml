@@ -584,7 +584,7 @@
     <string name="tasks_by_date">By date</string>
     <string name="tasks_by_note">By note</string>
     <string name="tasks_count">%1$d open of %2$d tasks</string>
-    <string name="tasks_done_label">Mark as done: %1$s</string>
+    <string name="tasks_done_label">Task: %1$s</string>
     <string name="tasks_empty_message">Write a line that starts with - [ ] in any note, or show the done ones.</string>
     <string name="tasks_empty_title">No open tasks here</string>
     <string name="tasks_filter_folder">Folder</string>

@@ -48,7 +48,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
-| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 9 / 13 |
+| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 10 / 13 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M4b — Sources, study cards and agent | Web clips, documents, study cards, agent mode | 10 weeks | 0 / 5 |
