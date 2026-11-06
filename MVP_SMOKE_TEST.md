@@ -413,8 +413,7 @@ status bar; its card opens with a click on it.
 
 ### 2.4 Related notes panel
 
-The cases run in `smoke-data/vaults/Sample Vault` (40 notes), as `smoke.sh prepare` (`smoke.ps1 prepare` on Windows)
-leaves it; wait until the status bar says "40 notes ready to search". Related is the first tab of Connections, a
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; wait until the status bar says "40 notes ready to search". Related is the first tab of Connections, a
 section of the inspector, the panel on the right of the editor. The vault is the repository's: undo any line or link a case adds before the next.
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
@@ -426,8 +425,7 @@ section of the inspector, the panel on the right of the editor. The vault is the
 
 ### 2.5 Backlinks
 
-The cases run in `smoke-data/vaults/Sample Vault` (40 notes), as `smoke.sh prepare` (`smoke.ps1 prepare` on Windows)
-leaves it; wait until the status bar says "40 notes ready to search". Linked and Unlinked are tabs of Connections, in
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; wait until the status bar says "40 notes ready to search". Linked and Unlinked are tabs of Connections, in
 the inspector on the right of the editor, next to Related. The vault is the repository's: undo any change a case makes
 before the next (Ctrl+Z / Cmd+Z in the note).
 
@@ -440,8 +438,7 @@ before the next (Ctrl+Z / Cmd+Z in the note).
 
 ### 2.6 Hybrid search
 
-The cases run in `smoke-data/vaults/Sample Vault` (40 notes), as `smoke.sh prepare` (`smoke.ps1 prepare` on Windows)
-leaves it; wait until the status bar says "40 notes ready to search". Mod+Shift+F is ⇧⌘F or Ctrl+Shift+F.
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; wait until the status bar says "40 notes ready to search". Mod+Shift+F is ⇧⌘F or Ctrl+Shift+F.
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
@@ -452,8 +449,7 @@ leaves it; wait until the status bar says "40 notes ready to search". Mod+Shift+
 
 ### 2.7 Graph view
 
-The cases run in `smoke-data/vaults/Sample Vault` (40 notes), as `smoke.sh prepare` (`smoke.ps1 prepare` on Windows)
-leaves it; wait until the status bar says "40 notes ready to search". Mod+G is ⌘G or Ctrl+G.
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; wait until the status bar says "40 notes ready to search". Mod+G is ⌘G or Ctrl+G.
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
