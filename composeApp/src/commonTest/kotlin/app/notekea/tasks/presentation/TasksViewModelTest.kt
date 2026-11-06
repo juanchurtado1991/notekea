@@ -112,6 +112,29 @@ class TasksViewModelTest {
     }
 
     @Test
+    fun `a second click before the list changes neither undoes the first nor fails`() = test {
+        store.texts[PATH] = TEXT
+        show()
+        val row = rows().first()
+        repeat(times = 2) { viewModel.onIntent(intent = TasksIntent.OnTaskToggle(row = row)) }
+        advanceUntilIdle()
+
+        assertEquals(expected = "- [x] Write\n- [ ] Ship\n", actual = store.texts[PATH])
+        assertEquals(expected = false, actual = viewModel.state.value.isWriteFailed)
+    }
+
+    @Test
+    fun `another task now at the same place is left alone`() = test {
+        store.texts[PATH] = "- [ ] Something much longer\n- [ ] Ship\n"
+        show()
+        viewModel.onIntent(intent = TasksIntent.OnTaskToggle(row = rows().first()))
+        advanceUntilIdle()
+
+        assertEquals(expected = "- [ ] Something much longer\n- [ ] Ship\n", actual = store.texts[PATH])
+        assertTrue(actual = viewModel.state.value.isWriteFailed)
+    }
+
+    @Test
     fun `a note whose task moved is left alone, and says so`() = test {
         store.texts[PATH] = "New first line\n$TEXT"
         show()
@@ -129,7 +152,7 @@ class TasksViewModelTest {
 
         val effect = assertIs<TasksEffect.OpenNote>(value = viewModel.effects.first())
 
-        assertEquals(expected = 3 until 11, actual = effect.range)
+        assertEquals(expected = 6 until 11, actual = effect.range)
     }
 
     private object FixedClock : Clock {

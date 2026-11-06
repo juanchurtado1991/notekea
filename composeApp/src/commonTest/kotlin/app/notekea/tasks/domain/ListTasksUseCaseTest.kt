@@ -64,6 +64,15 @@ class ListTasksUseCaseTest {
     }
 
     @Test
+    fun `a tag limit takes the tags nested under it, whatever their case`() {
+        val nested = note(path = "Inbox.md", tasks = listOf(task(text = "Nested")), tags = listOf("Work/Urgent"))
+
+        val result = list(TaskView(tag = "work"), listOf(nested), TODAY)
+
+        assertEquals(expected = 1, actual = result.total)
+    }
+
+    @Test
     fun `no note with tasks is no group`() {
         val result = list(TaskView(), listOf(note(path = "Empty.md")), TODAY)
 

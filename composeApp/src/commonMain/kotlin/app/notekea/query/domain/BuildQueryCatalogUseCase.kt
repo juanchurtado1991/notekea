@@ -3,7 +3,6 @@ package app.notekea.query.domain
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.PropertyValue
-import app.notekea.core.notes.domain.RelativePath
 
 /** The [QueryCatalog] of the vault's notes: a property's kind is the one most of its notes give it. */
 class BuildQueryCatalogUseCase {
@@ -19,9 +18,8 @@ class BuildQueryCatalogUseCase {
         }
         return QueryCatalog(
             keys = keys.sortedWith(compareBy(names) { it.name }),
-            folders = notes.flatMapTo(destination = HashSet()) { foldersOf(path = it.file.path) }.sortedWith(names),
-            tags = notes.flatMapTo(destination = HashSet()) { it.metadata.tags + it.metadata.textTags }
-                .sortedWith(names)
+            folders = notes.flatMapTo(destination = HashSet()) { it.folders }.sortedWith(names),
+            tags = notes.flatMapTo(destination = HashSet()) { it.allTags }.sortedWith(names)
         )
     }
 
@@ -33,11 +31,4 @@ class BuildQueryCatalogUseCase {
         is PropertyValue.Checkbox -> QueryValueKind.CHECKBOX
         else -> QueryValueKind.TEXT
     }
-
-    private fun foldersOf(
-        path: RelativePath
-    ): List<String> = generateSequence(path.parent) { it.parent }
-        .filterNot { it.isRoot }
-        .map { it.value }
-        .toList()
 }
