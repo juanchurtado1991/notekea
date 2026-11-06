@@ -1,5 +1,6 @@
 package app.notekea.editor.domain
 
+import app.notekea.core.notes.domain.TaskFinder
 import app.notekea.core.domain.markdown.CalloutFold
 import app.notekea.core.domain.markdown.CalloutKind
 import app.notekea.core.domain.markdown.CalloutParser

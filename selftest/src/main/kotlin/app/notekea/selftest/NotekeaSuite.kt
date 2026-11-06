@@ -28,6 +28,7 @@ import app.notekea.selftest.cases.m2.appearanceCases
 import app.notekea.selftest.cases.m2.backlinksCases
 import app.notekea.selftest.cases.m2.graphCases
 import app.notekea.selftest.cases.m2.queryCases
+import app.notekea.selftest.cases.m2.vaultTaskCases
 import app.notekea.selftest.cases.m2.hybridSearchCases
 import app.notekea.selftest.cases.m2.indexCases
 import app.notekea.selftest.cases.m2.relatedCases
@@ -80,6 +81,7 @@ object NotekeaSuite {
             hybridSearchCases()
             graphCases()
             queryCases()
+            vaultTaskCases()
             // Free use comes last, after every other manual case.
             freeUseCase()
         }

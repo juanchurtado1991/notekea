@@ -8,7 +8,7 @@ import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.domain.ListAction
 import app.notekea.editor.domain.ListEditing
 import app.notekea.editor.domain.MarkdownFormatter
-import app.notekea.editor.domain.TaskFinder
+import app.notekea.core.notes.domain.TaskFinder
 
 /**
  * The edits the editor makes to the text itself, each one edit undone in one step and saved like typing: a task

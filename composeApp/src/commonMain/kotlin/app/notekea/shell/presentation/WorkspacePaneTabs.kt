@@ -24,6 +24,7 @@ import app.notekea.resources.tab_all
 import app.notekea.resources.tab_close
 import app.notekea.resources.tab_graph
 import app.notekea.resources.tab_query
+import app.notekea.resources.tab_tasks
 import app.notekea.resources.tab_close_others
 import app.notekea.resources.tab_move_to_other_pane
 import app.notekea.resources.tab_new
@@ -133,6 +134,7 @@ private fun labelOf(
     TabKind.NOTE -> path.nameWithoutExtension
     TabKind.GRAPH -> stringResource(resource = Res.string.tab_graph)
     TabKind.QUERY -> stringResource(resource = Res.string.tab_query)
+    TabKind.TASKS -> stringResource(resource = Res.string.tab_tasks)
     else -> path.name
 }
 
@@ -144,6 +146,7 @@ private fun iconOf(
     TabKind.FOLDER -> NotekeaIcons.Folder
     TabKind.GRAPH -> NotekeaIcons.Graph
     TabKind.QUERY -> NotekeaIcons.Query
+    TabKind.TASKS -> NotekeaIcons.Tasks
     TabKind.MISSING -> NotekeaIcons.MissingFile
     TabKind.FILE -> fileIconOf(path = path)
 }

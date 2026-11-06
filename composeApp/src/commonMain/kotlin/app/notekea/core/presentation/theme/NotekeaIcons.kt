@@ -72,6 +72,8 @@ import com.composables.icons.lucide.ListOrdered
 import com.composables.icons.lucide.ListTodo
 import com.composables.icons.lucide.LayoutTemplate
 import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Eye
+import com.composables.icons.lucide.ListChecks
 import com.composables.icons.lucide.ChevronUp
 import com.composables.icons.lucide.ArrowUpDown
 import com.composables.icons.lucide.Columns3
@@ -222,6 +224,8 @@ object NotekeaIcons {
     val QuerySort: ImageVector get() = Lucide.ArrowUpDown
     val QuerySortAscending: ImageVector get() = Lucide.ChevronUp
     val QuerySortDescending: ImageVector get() = Lucide.ChevronDown
+    val Tasks: ImageVector get() = Lucide.ListChecks
+    val TasksShowDone: ImageVector get() = Lucide.Eye
     val Query: ImageVector get() = Lucide.TableProperties
     val Today: ImageVector get() = Lucide.CalendarDays
     val Tag: ImageVector get() = Lucide.Hash

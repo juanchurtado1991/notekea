@@ -1,11 +1,15 @@
 package app.notekea.tree.data
 
 import app.notekea.core.domain.AppDispatchers
+import app.notekea.core.domain.time.LocalMoment
+import app.notekea.core.domain.time.MomentFormat
 import app.notekea.db.NotekeaDatabase
+import app.notekea.db.SelectTasks
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.tree.domain.NoteMetadataCache
+import app.notekea.core.notes.domain.NoteTask
 import app.notekea.core.notes.domain.RelativePath
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
@@ -24,12 +28,13 @@ class SqlDelightNoteMetadataCache(
     private val logger = Logger.withTag(tag = LOG_TAG)
     private val queries = database.noteCacheQueries
     private val codec = CachedPropertyCodec()
+    private val momentFormat = MomentFormat()
 
     override suspend fun read(
         vaultPath: String
     ): List<NoteEntry> = withContext(context = dispatchers.io) {
         guarded(fallback = emptyList(), failureMessage = READ_FAILED) {
-            // One transaction: the five reads share a connection and see the same snapshot.
+            // One transaction: the six reads share a connection and see the same snapshot.
             queries.transactionWithResult { readNotes(vaultPath = vaultPath) }
         }
     }
@@ -42,6 +47,7 @@ class SqlDelightNoteMetadataCache(
         val textTags = queries.selectTextTags(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.tag })
         val properties = queries.selectProperties(vault = vaultPath).executeAsList()
             .groupBy({ it.path }, { codec.decode(key = it.property_, type = it.type, value = it.value_) })
+        val tasks = queries.selectTasks(vault = vaultPath).executeAsList().groupBy({ it.path }, ::taskOf)
         return queries.selectNotes(vault = vaultPath).executeAsList().map { row ->
             NoteEntry(
                 file = NoteFile(
@@ -54,7 +60,8 @@ class SqlDelightNoteMetadataCache(
                     aliases = aliases[row.path].orEmpty(),
                     title = row.title,
                     textTags = textTags[row.path].orEmpty(),
-                    properties = properties[row.path].orEmpty()
+                    properties = properties[row.path].orEmpty(),
+                    tasks = tasks[row.path].orEmpty()
                 )
             )
         }
@@ -82,6 +89,7 @@ class SqlDelightNoteMetadataCache(
         queries.deleteAliases(vault = vaultPath, path = path)
         queries.deleteTextTags(vault = vaultPath, path = path)
         queries.deleteProperties(vault = vaultPath, path = path)
+        queries.deleteTasks(vault = vaultPath, path = path)
     }
 
     private fun <T> guarded(
@@ -122,7 +130,31 @@ class SqlDelightNoteMetadataCache(
             val (type, value) = codec.encode(value = property.value)
             queries.insertProperty(vaultPath, path, index.toLong(), property.key, type, value)
         }
+        entry.metadata.tasks.forEachIndexed { index, task ->
+            queries.insertTask(
+                vault = vaultPath,
+                path = path,
+                position = index.toLong(),
+                state_index = task.stateIndex.toLong(),
+                end_index = task.endIndex.toLong(),
+                text = task.text,
+                is_done = task.isDone,
+                heading = task.heading,
+                date = task.date?.let { momentFormat.format(LocalMoment(date = it), MomentFormat.ISO_DATE) }
+            )
+        }
     }
+
+    private fun taskOf(
+        row: SelectTasks
+    ) = NoteTask(
+        stateIndex = row.state_index.toInt(),
+        endIndex = row.end_index.toInt(),
+        text = row.text,
+        isDone = row.is_done,
+        heading = row.heading,
+        date = row.date?.let { momentFormat.parseDate(text = it, pattern = MomentFormat.ISO_DATE) }
+    )
 
     companion object {
         private const val LOG_TAG = "NoteMetadataCache"

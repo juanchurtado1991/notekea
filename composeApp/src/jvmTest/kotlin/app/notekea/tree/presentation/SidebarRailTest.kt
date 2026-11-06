@@ -27,6 +27,7 @@ class SidebarRailTest {
             SIDE_PANEL,
             GRAPH,
             QUERY,
+            TASKS,
             VaultTreeIntent.OnTodayClick,
             SWITCH_VAULT,
             ABOUT,
@@ -60,6 +61,7 @@ class SidebarRailTest {
                             onSearch = { intents += SEARCH },
                             onGraph = { intents += GRAPH },
                             onQuery = { intents += QUERY },
+                            onTasks = { intents += TASKS },
                             onSidePanelToggle = { intents += SIDE_PANEL },
                             onSwitchVault = { intents += SWITCH_VAULT },
                             onAbout = { intents += ABOUT },
@@ -91,6 +93,8 @@ class SidebarRailTest {
         private const val SETTINGS = "settings"
         private const val SIDE_PANEL = "side panel"
         private const val SWITCH_VAULT = "switch vault"
-        private val RAIL = listOf(57f, 89f, 122f, 154f, 187f, 219f, 334f, 366f, 398f).map { Offset(x = 20f, y = it) }
+        private const val TASKS = "tasks"
+        private val RAIL_ROWS = listOf(57f, 89f, 122f, 154f, 187f, 219f, 252f, 334f, 366f, 398f)
+        private val RAIL = RAIL_ROWS.map { Offset(x = 20f, y = it) }
     }
 }

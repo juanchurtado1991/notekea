@@ -2,6 +2,7 @@ package app.notekea.tree.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.time.CalendarDate
+import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.core.notes.domain.PropertyValue
@@ -40,6 +41,23 @@ class OkioNoteMetadataReaderTest {
             actual = typed to readNote()?.properties
         )
     }
+
+    @Test
+    fun `a task's place is in the note's body, with or without frontmatter, and with Windows line breaks`() =
+        runReaderTest {
+            listOf(
+                "---\ntags: [a]\n---\n# Plan\n- [ ] Write\n",
+                "Intro\n- [ ] Write\n",
+                "---\r\ntags: [a]\r\n---\r\nIntro\r\n- [ ] Write\r\n"
+            ).forEach { content ->
+                writeNote(content = content)
+
+                val task = readNote()?.tasks?.single()
+                val body = NoteDocument.fromText(text = content).body
+
+                assertEquals(expected = "- [ ] Write", actual = task?.let { body.substring(it.stateIndex - 3, it.endIndex) })
+            }
+        }
 
     @Test
     fun `frontmatter at the top of a note is read, and the body only for its tags`() = runReaderTest {

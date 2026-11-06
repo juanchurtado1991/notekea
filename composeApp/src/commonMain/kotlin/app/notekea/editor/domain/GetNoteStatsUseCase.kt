@@ -1,5 +1,6 @@
 package app.notekea.editor.domain
 
+import app.notekea.core.notes.domain.TaskFinder
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.notes.domain.LinkFinder
 import app.notekea.core.notes.domain.TextTagFinder

@@ -7,5 +7,5 @@ aliases: [Lisbon]
 
 A week in April. Alfama on foot, a day in Sintra, pastéis de nata in Belém.
 
-- [ ] Book the flights
+- [ ] Book the flights 📅 2026-11-20
 - [ ] Find a flat near the river

@@ -41,6 +41,7 @@ data class WorkspaceState(
     ): TabKind = when (path) {
         Workspace.GRAPH -> TabKind.GRAPH
         Workspace.QUERY -> TabKind.QUERY
+        Workspace.TASKS -> TabKind.TASKS
         in tree.notes -> TabKind.NOTE
         in tree.attachments -> TabKind.FILE
         in tree.folders -> TabKind.FOLDER

@@ -481,3 +481,15 @@ leaves it.
 | 2.10-05 | Open Books/Reading list, then click Query in the rail so both tabs are open; build a query and click Save in Reading list; click the Reading list tab; in Preview change a rating in its table; click Edit; reopen the note | Saved in Reading list, and a second click says the note already holds it; Preview shows a table under the query's chips, whose header does not sort; the edit changes that book; Edit shows the query's YAML at the end of the note | 2.10 | Manual (eyes) | `QueryNoteWritesTest`, `ReadingSegmentTest` | | | |
 | 2.10-06 | In Books/Reading list write a query block holding `sorted: rating`, then one holding `columns: [mood]`, and look at each in Preview; in the Query tab add rating more than 99 | The first says it can't be read, names the line and shows the YAML; the second lists every note and says no note has mood; the tab says No notes match these filters | 2.10 | Manual (eyes) | `QueryYamlTest`, `QueryContentTest` | | | |
 | 2.10-07 | Save a query in Books/Reading list and open the vault in Obsidian | The block is a code block in Reading view and Source mode, and the rest of the note is unchanged | 2.10 | Manual (system) | | | | |
+
+### 2.11 Vault tasks
+
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes), as `smoke.sh prepare` (`smoke.ps1 prepare`) leaves it.
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 2.11-01 | In Sample Vault, click Tasks in the rail | The Tasks tab opens, grouped by note, and its foot counts every task of the vault | 2.11 | Self-Test | 2.11-01 | | | |
+| 2.11-02 | Click By date; click Show done; click Folder and choose Projects | Overdue, This week or Later and No date in order, with Write the announcement and Book the flights dated; a Done group last; only the tasks of Projects, and the foot counts them | 2.11 | Manual (eyes) | `ListTasksUseCaseTest`, `TasksContentTest` | | | |
+| 2.11-03 | Check Record a demo video in the tab; open Projects/Notekea launch; uncheck it there and go back | It leaves the list at once and its note shows it checked; back in the tab it is listed again | 2.11 | Manual (eyes) | `TasksViewModelTest` | | | |
+| 2.11-04 | Change a task's text in another editor and save | The tab shows the new text within a second | 2.11 | Manual (system) | `NoteTaskCollectorTest` | | | |
+| 2.11-05 | Click the text of Find a flat near the river | Projects/Trip to Lisbon opens with that task selected | 2.11 | Manual (eyes) | `TasksViewModelTest` | | | |
