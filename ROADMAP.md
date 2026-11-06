@@ -858,7 +858,7 @@ never comes from a model.
   a count by hand, the table follows a property edit within a second, and a note with a query block opens unchanged
   in Obsidian.
 
-### ⬜ 2.11 Vault tasks — `feature/vault-tasks`
+### ✅ 2.11 Vault tasks — `feature/vault-tasks` — [notekea#125](https://github.com/juanchurtado1991/notekea/pull/125)
 
 Every task of the vault in one view, as Obsidian users get from the Tasks plugin, with no special syntax to learn.
 
