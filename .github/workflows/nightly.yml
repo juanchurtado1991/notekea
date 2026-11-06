@@ -103,6 +103,8 @@ jobs:
       - name: Install on Linux
         if: runner.os == 'Linux'
         run: |
+          # The package's menu entry needs this folder, which a machine with no desktop lacks.
+          sudo mkdir -p /usr/share/desktop-directories
           sudo apt-get update
           sudo apt-get install -y xvfb ./composeApp/build/compose/binaries/main/deb/*.deb
 
