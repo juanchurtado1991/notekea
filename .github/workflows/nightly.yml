@@ -2,7 +2,8 @@ name: Nightly
 
 # Every night, main on the three systems: the whole check, then the automated smoke runs with their memory samples
 # (`smokeRun`, the workload of the performance passes), so a slow or flaky case shows up without waiting for a pull
-# request. It can also be started by hand from the Actions tab.
+# request; and the packaged app, installed, started and uninstalled (ROADMAP.md 2.13). It can also be started by hand
+# from the Actions tab.
 on:
   schedule:
     - cron: "0 7 * * *"
@@ -59,3 +60,83 @@ jobs:
             **/build/reports/tests/
             selftest/build/reports/smoke-runs/
           retention-days: 14
+
+  packaged:
+    name: Packaged app (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            app: /opt/notekea/bin/Notekea
+            display: xvfb-run -a
+          - os: macos-latest
+            app: /Applications/Notekea.app/Contents/MacOS/Notekea
+          - os: windows-latest
+            app: C:/Program Files/Notekea/Notekea.exe
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # The embedding model the app bundles (ROADMAP.md 2.2), 121 MB, downloaded once and kept by its SHA-256.
+      - name: Cache the embedding model
+        uses: actions/cache@v6
+        with:
+          path: .gradle/models
+          key: embedding-model-15691dfe830257f569a1e3521977351d16eac18e48e414908dc98ed9b8455e07
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Package
+        shell: bash
+        run: ./gradlew :composeApp:packageDistributionForCurrentOS --console=plain
+
+      - name: Install on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb ./composeApp/build/compose/binaries/main/deb/*.deb
+
+      - name: Install on macOS
+        if: runner.os == 'macOS'
+        run: |
+          hdiutil attach composeApp/build/compose/binaries/main/dmg/*.dmg -nobrowse -mountpoint /Volumes/Notekea
+          cp -R /Volumes/Notekea/Notekea.app /Applications/
+          hdiutil detach /Volumes/Notekea
+
+      - name: Install on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = (Get-Item composeApp/build/compose/binaries/main/msi/*.msi).FullName
+          $install = Start-Process msiexec -ArgumentList "/i `"$installer`" /qn" -Wait -PassThru
+          if ($install.ExitCode -ne 0) { throw "The installer ended with $($install.ExitCode)" }
+
+      - name: Start the installed app
+        shell: bash
+        run: ${{ matrix.display }} bash .github/scripts/check-start.sh "${{ matrix.app }}"
+
+      - name: Uninstall on Linux
+        if: runner.os == 'Linux'
+        run: sudo apt-get remove -y notekea
+
+      - name: Uninstall on macOS
+        if: runner.os == 'macOS'
+        run: rm -rf /Applications/Notekea.app
+
+      - name: Uninstall on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = (Get-Item composeApp/build/compose/binaries/main/msi/*.msi).FullName
+          $remove = Start-Process msiexec -ArgumentList "/x `"$installer`" /qn" -Wait -PassThru
+          if ($remove.ExitCode -ne 0) { throw "The uninstaller ended with $($remove.ExitCode)" }
