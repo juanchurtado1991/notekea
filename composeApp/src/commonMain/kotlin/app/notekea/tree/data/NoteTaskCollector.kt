@@ -9,16 +9,18 @@ import app.notekea.core.notes.domain.NoteTask
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.TaskFinder
 import app.notekea.core.notes.domain.TaskMarker
+import app.notekea.core.notes.domain.TextTagFinder
 
 /**
  * Collects the [tasks] of a note's body read line by line ([TaskFinder]), each with the heading above it and its date:
- * the Tasks plugin's `📅 2026-11-02`, or else a date written in its text (`ROADMAP.md` 2.11). A note's text is read once
+ * the Tasks plugin's `📅 2026-11-02`, or else a date written in its text, not in a link or code (`ROADMAP.md` 2.11). A note's text is read once
  * for all of what the cache keeps, so this sees its lines as they pass.
  */
 internal class NoteTaskCollector {
     private val finder = TaskFinder()
     private val fences = FenceTracker()
     private val outline = OutlineFinder()
+    private val tagFinder = TextTagFinder()
     private val stripper = MarkdownLineStripper()
     private val momentFormat = MomentFormat()
     private var offset = 0
@@ -61,13 +63,14 @@ internal class NoteTaskCollector {
         line: String
     ): CalendarDate? {
         val written = PLUGIN_DATE.find(input = line)?.groupValues?.get(index = 1)
-            ?: PLAIN_DATE.find(input = line)?.value
+            ?: PLAIN_DATE.find(input = tagFinder.textOf(line = line).replace(regex = ADDRESS, replacement = ""))?.value
         return written?.let { momentFormat.parseDate(text = it, pattern = MomentFormat.ISO_DATE) }
     }
 
     private companion object {
         const val HEADING_MARK = "#"
         const val TASK_MARK = '['
+        val ADDRESS = Regex(pattern = "\\S+://\\S+")
         val BLOCK_ID = Regex(pattern = "\\s+\\^[\\w-]+\\s*$")
         val PLAIN_DATE = Regex(pattern = "(?<![\\d-])\\d{4}-\\d{2}-\\d{2}(?![\\d-])")
         val PLUGIN_DATE = Regex(pattern = "\\s*📅\\s*(\\d{4}-\\d{2}-\\d{2})")

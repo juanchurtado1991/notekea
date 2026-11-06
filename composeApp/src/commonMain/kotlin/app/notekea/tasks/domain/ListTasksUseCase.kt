@@ -26,27 +26,15 @@ class ListTasksUseCase {
             groups = if (view.grouping == TaskGrouping.NOTE) byNote(shown) else byDate(rows = shown, today = today),
             open = all.count { !it.task.isDone },
             total = all.size,
-            folders = withTasks.flatMapTo(destination = HashSet()) { foldersOf(note = it) }.sortedWith(names),
-            tags = withTasks.flatMapTo(destination = HashSet()) { tagsOf(note = it) }.sortedWith(names)
+            folders = withTasks.flatMapTo(destination = HashSet()) { it.folders }.sortedWith(names),
+            tags = withTasks.flatMapTo(destination = HashSet()) { it.allTags }.sortedWith(names)
         )
     }
 
     private fun isInView(
         note: NoteEntry,
         view: TaskView
-    ): Boolean = (view.folder == null || view.folder in foldersOf(note = note)) &&
-        (view.tag == null || view.tag in tagsOf(note = note))
-
-    private fun foldersOf(
-        note: NoteEntry
-    ): List<String> = generateSequence(note.file.path.parent) { it.parent }
-        .filterNot { it.isRoot }
-        .map { it.value }
-        .toList()
-
-    private fun tagsOf(
-        note: NoteEntry
-    ): List<String> = note.metadata.tags + note.metadata.textTags
+    ): Boolean = (view.folder == null || view.folder in note.folders) && (view.tag?.let(note::hasTag) ?: true)
 
     private fun byNote(
         rows: List<TaskRow>

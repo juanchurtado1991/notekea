@@ -51,6 +51,23 @@ class NoteTaskCollectorTest {
     }
 
     @Test
+    fun `a date in a link, an address or code is no date of the task`() {
+        val tasks = tasksOf(
+            text = "- [ ] See [[2026-10-24 Budget]]\n- [ ] Read [post](https://a.b/2026-10-24)\n" +
+                "- [ ] Run `2026-10-24`\n- [ ] Visit https://a.b/2026-10-24\n"
+        )
+
+        assertEquals(expected = listOf(null, null, null, null), actual = tasks.map { it.date })
+    }
+
+    @Test
+    fun `a task in a quote or a numbered list reads as its text`() {
+        val tasks = tasksOf(text = "> - [ ] Quoted\n1. [ ] Numbered\n")
+
+        assertEquals(expected = listOf("Quoted", "Numbered"), actual = tasks.map { it.text })
+    }
+
+    @Test
     fun `code is not a task, nor a heading`() {
         val tasks = tasksOf(text = "# Real\n```\n# Fake\n- [ ] Code\n```\n- [ ] Text\n")
 

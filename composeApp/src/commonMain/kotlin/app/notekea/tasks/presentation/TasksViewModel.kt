@@ -65,7 +65,10 @@ class TasksViewModel(
 
     private fun openEffectOf(
         row: TaskRow
-    ) = TasksEffect.OpenNote(path = row.path, range = row.task.stateIndex until row.task.endIndex)
+    ): TasksEffect {
+        val textStart = minOf(row.task.stateIndex + BOX_END, row.task.endIndex)
+        return TasksEffect.OpenNote(path = row.path, range = textStart until row.task.endIndex)
+    }
 
     private fun change(
         update: (TaskView) -> TaskView
@@ -107,7 +110,7 @@ class TasksViewModel(
         row: TaskRow
     ): NoteEntry {
         val tasks = entry.metadata.tasks.map { task ->
-            if (task.stateIndex == row.task.stateIndex) task.copy(isDone = !task.isDone) else task
+            if (task.stateIndex == row.task.stateIndex) task.copy(isDone = !row.task.isDone) else task
         }
         return entry.copy(metadata = entry.metadata.copy(tasks = tasks))
     }
@@ -126,6 +129,7 @@ class TasksViewModel(
     }
 
     private companion object {
+        const val BOX_END = 3
         const val LOG_TAG = "Tasks"
         const val UNEXPECTED_ERROR = "Unexpected tasks failure"
     }

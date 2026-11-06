@@ -34,7 +34,7 @@ class RunQueryUseCase {
         val value = note.metadata.properties.firstOrNull { it.key == filter.property }?.value
         return when (filter.condition) {
             QueryCondition.IN_FOLDER -> isInFolder(note = note, folder = filter.value)
-            QueryCondition.HAS_TAG -> hasTag(note = note, tag = filter.value)
+            QueryCondition.HAS_TAG -> note.hasTag(tag = filter.value)
             QueryCondition.IS_EMPTY -> values.isEmpty(value = value)
             QueryCondition.IS -> value != null && isEqual(value = value, other = filter.value)
             QueryCondition.CONTAINS -> value != null && contains(value = value, other = filter.value)
@@ -47,18 +47,6 @@ class RunQueryUseCase {
         note: NoteEntry,
         folder: String
     ): Boolean = note.file.path.value.startsWith(prefix = folder.trim().trim(FOLDER_MARK) + FOLDER_MARK)
-
-    /** The note's tag or a tag nested under it, in its frontmatter or its text. */
-    private fun hasTag(
-        note: NoteEntry,
-        tag: String
-    ): Boolean {
-        val wanted = tag.trim().removePrefix(prefix = TAG_MARK)
-        return (note.metadata.tags + note.metadata.textTags).any {
-            it.equals(other = wanted, ignoreCase = true) ||
-                it.startsWith(prefix = wanted + FOLDER_MARK, ignoreCase = true)
-        }
-    }
 
     private fun isEqual(
         value: PropertyValue,
@@ -121,6 +109,5 @@ class RunQueryUseCase {
     private companion object {
         const val FOLDER_MARK = '/'
         const val LIST_SEPARATOR = ", "
-        const val TAG_MARK = "#"
     }
 }

@@ -33,8 +33,8 @@ class TextTagFinder {
         emptySequence()
     }
 
-    /** [line] with what is not text blanked, every other character where it was. */
-    private fun textOf(
+    /** [line] with what is not text (code, wiki links, link targets) blanked, every other character where it was. */
+    fun textOf(
         line: String
     ): String = NOT_TEXT.replace(input = line) { StringPatterns.SPACE.repeat(n = it.value.length) }
 
