@@ -14,8 +14,8 @@ Last updated: 2026-11-05, with 2.10 Vault queries in its smoke test.
   (#108), 2.2 Embedding engine (#109), 2.3 Hybrid index (#110), 2.4 Related notes panel (#111) and **2.5
   Backlinks** (#112) are done; Workspace Blue is the default theme (#113). `notes` was split into features (#118), and
   **2.6 Hybrid search** (#120), the eight hand-tuned themes (#123) and **2.7 Graph view** (#122) are done. **2.10
-  Vault queries** (#124) are done. **2.11 Vault tasks** (`feature/vault-tasks`, a grouped list, as Reminders) waits for
-  its smoke test.
+  Vault queries** (#124) are done. **2.11 Vault tasks** (`feature/vault-tasks`, a grouped list, as Reminders) passed its
+  smoke test and is in review. Left in M2: 2.8, 2.13 and 2.9.
 
 ## Open work, in order
 

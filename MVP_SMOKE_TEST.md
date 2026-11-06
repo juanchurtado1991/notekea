@@ -469,8 +469,7 @@ leaves it; wait until the status bar says "40 notes ready to search". Mod+G is â
 
 ### 2.10 Vault queries
 
-The cases run in `smoke-data/vaults/Sample Vault` (40 notes), as `smoke.sh prepare` (`smoke.ps1 prepare` on Windows)
-leaves it.
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly: `smoke.sh prepare` does not touch it.
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
@@ -484,7 +483,7 @@ leaves it.
 
 ### 2.11 Vault tasks
 
-The cases run in `smoke-data/vaults/Sample Vault` (40 notes), as `smoke.sh prepare` (`smoke.ps1 prepare`) leaves it.
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly: `smoke.sh prepare` does not touch it.
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
