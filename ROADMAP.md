@@ -48,7 +48,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
-| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 10 / 13 |
+| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 11 / 13 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M4b — Sources, study cards and agent | Web clips, documents, study cards, agent mode | 10 weeks | 0 / 5 |
@@ -871,13 +871,16 @@ Every task of the vault in one view, as Obsidian users get from the Tasks plugin
 - **Done when:** on the Sample Vault the tab lists every task of every note, checking one in the tab or in its note
   shows in the other at once, and a task changed outside Notekea updates within a second.
 
-### ⬜ 2.8 Retrieval evaluation set — `chore/rag-eval`
+### ✅ 2.8 Retrieval evaluation set — `chore/rag-eval` — [notekea#126](https://github.com/juanchurtado1991/notekea/pull/126)
 
 `smoke-data/eval/retrieval.json` (over the 1.16 sample vault): 50 questions over the sample vault with the expected
 note and heading, plus 30 over the Ghost Serializer vault of 1.18, a code repository as notes: where something is
 ("where are field names matched?"), what to read to understand a part, and how a change would be made, each with the
 notes that should be found. A test reports recall@5 and fails below the agreed baseline, so changes to chunking,
 models or ranking are measured.
+
+Done: the first measure is 0.94 on the Sample Vault and 0.90 on Ghost Serializer. The agreed baselines are 0.92 and 0.86,
+one miss of margin per vault.
 
 ### ⬜ 2.13 Packaged check — `chore/packaged-check`
 

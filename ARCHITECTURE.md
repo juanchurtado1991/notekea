@@ -188,7 +188,8 @@ abstract class BaseViewModel<S, I, E>(
   `*RealModelTest` and stay out of `check`, which every pull request runs: `./gradlew :composeApp:modelTest` runs them,
   and so does the nightly build on the three systems. Today they are the bundled embedding model's
   (`LlamaTextEmbedderRealModelTest`, `ChunkTokensRealModelTest`, `ROADMAP.md` 2.2), which also prove its native
-  library loads everywhere; the chat models' (3.2) join them.
+  library loads everywhere, and `RetrievalEvalRealModelTest` (2.8), which holds hybrid search to its recall@5 baseline;
+  the chat models' (3.2) join them.
 - Unit tests never touch the real user home, network or clock.
 
 ## 9. Logging
