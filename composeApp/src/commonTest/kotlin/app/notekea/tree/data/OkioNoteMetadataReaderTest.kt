@@ -52,10 +52,10 @@ class OkioNoteMetadataReaderTest {
             ).forEach { content ->
                 writeNote(content = content)
 
-                val task = readNote()?.tasks?.single()
+                val task = requireNotNull(readNote()).tasks.single()
                 val body = NoteDocument.fromText(text = content).body
 
-                assertEquals(expected = "- [ ] Write", actual = task?.let { body.substring(it.stateIndex - 3, it.endIndex) })
+                assertEquals(expected = "- [ ] Write", actual = body.substring(task.stateIndex - 3, task.endIndex))
             }
         }
 
