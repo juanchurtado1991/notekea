@@ -56,6 +56,8 @@ private const val GALLERY_HEIGHT_DP = 900
 private const val GALLERY_PROPERTY = "notekea.gallery"
 private const val GALLERY_TITLE = "Notekea — Design system gallery"
 private const val GALLERY_WIDTH_DP = 1280
+private const val WINDOW_LOG_TAG = "Window"
+private const val WINDOW_OPENED = "Window opened"
 
 /**
  * Starts Notekea. Errors are kept as crash reports from the first moment (`CrashBuddy`, `test-buddy-crash`): any
@@ -135,6 +137,8 @@ private fun ApplicationScope.NotekeaWindow(
         state = windowState,
         onPreviewKeyEvent = host.shortcuts::dispatch
     ) {
+        // The check of a packaged app waits for this line (.github/scripts/check-start.sh).
+        LaunchedEffect(Unit) { Logger.withTag(tag = WINDOW_LOG_TAG).i { WINDOW_OPENED } }
         FollowWindowBounds(state = windowState)
         if (isCrashTest) CrashTest()
         NotekeaRoot(host = host, onClose = onClose)
