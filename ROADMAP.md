@@ -48,7 +48,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
-| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 11 / 13 |
+| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 12 / 13 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M4b — Sources, study cards and agent | Web clips, documents, study cards, agent mode | 10 weeks | 0 / 5 |
@@ -882,7 +882,7 @@ models or ranking are measured.
 Done: the first measure is 0.94 on the Sample Vault and 0.90 on Ghost Serializer. The agreed baselines are 0.92 and 0.86,
 one miss of margin per vault.
 
-### ⬜ 2.13 Packaged check — `chore/packaged-check`
+### ✅ 2.13 Packaged check — `chore/packaged-check` — [notekea#127](https://github.com/juanchurtado1991/notekea/pull/127)
 
 With one QA run before the release, a problem only a packaged app shows (a Java module left out, a native library that
 does not load, as in #68) must not wait for it. Every night `nightly.yml` packages Notekea on Windows, macOS and Linux,
