@@ -48,6 +48,20 @@ CREATE TABLE note_cache_property (
     PRIMARY KEY (vault, path, position)
 );
 
+-- Each note's tasks in text order, for the vault's Tasks tab.
+CREATE TABLE note_cache_task (
+    vault TEXT NOT NULL,
+    path TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    state_index INTEGER NOT NULL,
+    end_index INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    is_done INTEGER AS kotlin.Boolean NOT NULL,
+    heading TEXT,
+    date TEXT,
+    PRIMARY KEY (vault, path, position)
+);
+
 selectNotes:
 SELECT path, size, modified_at, title FROM note_cache WHERE vault = ?;
 
@@ -62,6 +76,9 @@ SELECT path, alias FROM note_cache_alias WHERE vault = ? ORDER BY path, position
 
 selectProperties:
 SELECT path, property, type, value FROM note_cache_property WHERE vault = ? ORDER BY path, position;
+
+selectTasks:
+SELECT path, state_index, end_index, text, is_done, heading, date FROM note_cache_task WHERE vault = ? ORDER BY path, position;
 
 upsertNote:
 INSERT OR REPLACE INTO note_cache (vault, path, size, modified_at, title) VALUES (?, ?, ?, ?, ?);
@@ -78,6 +95,10 @@ INSERT INTO note_cache_alias (vault, path, position, alias) VALUES (?, ?, ?, ?);
 insertProperty:
 INSERT INTO note_cache_property (vault, path, position, property, type, value) VALUES (?, ?, ?, ?, ?, ?);
 
+insertTask:
+INSERT INTO note_cache_task (vault, path, position, state_index, end_index, text, is_done, heading, date)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
 deleteNote:
 DELETE FROM note_cache WHERE vault = ? AND path = ?;
 
@@ -92,3 +113,6 @@ DELETE FROM note_cache_alias WHERE vault = ? AND path = ?;
 
 deleteProperties:
 DELETE FROM note_cache_property WHERE vault = ? AND path = ?;
+
+deleteTasks:
+DELETE FROM note_cache_task WHERE vault = ? AND path = ?;

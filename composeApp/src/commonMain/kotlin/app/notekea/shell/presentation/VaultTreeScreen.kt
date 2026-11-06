@@ -28,6 +28,7 @@ import app.notekea.editor.presentation.SidePanelHost
 import app.notekea.search.presentation.switcher.QuickSwitcherContent
 import app.notekea.graph.presentation.GraphViewModel
 import app.notekea.query.presentation.QueryViewModel
+import app.notekea.tasks.presentation.TasksViewModel
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherViewModel
 import app.notekea.tree.presentation.tags.TagPickerContent
@@ -61,6 +62,7 @@ private const val TEMPLATE_PICKER_KEY_PREFIX = "templates:"
 private const val EDITOR_KEY_PREFIX = "editor:"
 private const val GRAPH_KEY_PREFIX = "graph:"
 private const val QUERY_KEY_PREFIX = "query:"
+private const val TASKS_KEY_PREFIX = "tasks:"
 private const val SWITCHER_KEY_PREFIX = "switcher:"
 private const val SEARCH_INDEX_KEY_PREFIX = "search-index:"
 private const val NOTICE_MAX_WIDTH_DP = 640
@@ -101,6 +103,7 @@ fun VaultTreeScreen(
     ) { parametersOf(vaultPath) },
     graphViewModel: GraphViewModel = koinViewModel(key = GRAPH_KEY_PREFIX + vaultPath) { parametersOf(vaultPath) },
     queryViewModel: QueryViewModel = koinViewModel(key = QUERY_KEY_PREFIX + vaultPath) { parametersOf(vaultPath) },
+    tasksViewModel: TasksViewModel = koinViewModel(key = TASKS_KEY_PREFIX + vaultPath) { parametersOf(vaultPath) },
     searchIndexViewModel: SearchIndexViewModel = koinViewModel(
         key = SEARCH_INDEX_KEY_PREFIX + vaultPath
     ) { parametersOf(vaultPath) },
@@ -114,12 +117,12 @@ fun VaultTreeScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val workspaceState by workspaceViewModel.state.collectAsState()
-    val activeEditor = editorViewModels[workspaceState.workspace.activePane]
     val editors = remember(workspaceViewModel, editorViewModels) { PaneEditors(workspaceViewModel, editorViewModels) }
     val sidePanel = rememberSidePanel(workspaceViewModel, relatedViewModel, mentionsViewModel, editors, state)
     val viewModels = WorkspaceViewModels(
         graph = graphViewModel,
         query = queryViewModel,
+        tasks = tasksViewModel,
         tree = viewModel,
         workspace = workspaceViewModel,
         editors = editorViewModels,
@@ -139,7 +142,7 @@ fun VaultTreeScreen(
             onSwitchVault = onSwitchVault,
             searchIndex = { SearchIndexStatusOf(viewModel = searchIndexViewModel) }
         )
-        IndexFollower(state, activeEditor, searchIndexViewModel, relatedViewModel, mentionsViewModel, switcherViewModel)
+        IndexFollower(state, viewModels, searchIndexViewModel, relatedViewModel, mentionsViewModel, switcherViewModel)
         Pickers(
             state = state,
             workspaceState = workspaceState,
@@ -195,20 +198,21 @@ private fun SearchIndexStatusOf(
 @Composable
 private fun BoxScope.IndexFollower(
     tree: VaultTreeState,
-    editor: EditorViewModel,
+    viewModels: WorkspaceViewModels,
     viewModel: SearchIndexViewModel,
     related: RelatedNotesViewModel,
     mentions: NoteMentionsViewModel,
     switcher: QuickSwitcherViewModel
 ) {
     val state by viewModel.state.collectAsState()
+    val tabs by viewModels.workspace.state.collectAsState()
     val isIndexReady = !state.isRunning && state.readyNotes != null
     LaunchedEffect(switcher, isIndexReady) {
         switcher.onIntent(intent = QuickSwitcherIntent.OnIndexChange(isReady = isIndexReady))
     }
     FollowConnections(
         tree = tree,
-        editor = editor,
+        editor = viewModels.editors[tabs.workspace.activePane],
         isIndexReady = isIndexReady,
         related = related,
         mentions = mentions

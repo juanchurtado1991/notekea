@@ -1,0 +1,19 @@
+-- 2.11: every task of every note. The notes already cached have none, so they are read again from disk.
+CREATE TABLE note_cache_task (
+    vault TEXT NOT NULL,
+    path TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    state_index INTEGER NOT NULL,
+    end_index INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    is_done INTEGER AS kotlin.Boolean NOT NULL,
+    heading TEXT,
+    date TEXT,
+    PRIMARY KEY (vault, path, position)
+);
+
+DELETE FROM note_cache;
+DELETE FROM note_cache_tag;
+DELETE FROM note_cache_text_tag;
+DELETE FROM note_cache_alias;
+DELETE FROM note_cache_property;

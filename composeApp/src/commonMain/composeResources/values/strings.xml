@@ -577,5 +577,27 @@
     <string name="query_write_failed">The note changed or can't be written. Try again.</string>
     <string name="query_yes">Yes</string>
     <string name="rail_query">Query</string>
+    <string name="tab_tasks">Tasks</string>
+    <string name="rail_tasks">Tasks</string>
+    <string name="tasks_all_folders">All folders</string>
+    <string name="tasks_all_tags">All tags</string>
+    <string name="tasks_by_date">By date</string>
+    <string name="tasks_by_note">By note</string>
+    <string name="tasks_count">%1$d open of %2$d tasks</string>
+    <string name="tasks_done_label">Mark as done: %1$s</string>
+    <string name="tasks_empty_message">Write a line that starts with - [ ] in any note, or show the done ones.</string>
+    <string name="tasks_empty_title">No open tasks here</string>
+    <string name="tasks_filter_folder">Folder</string>
+    <string name="tasks_filter_tag">Tag</string>
+    <string name="tasks_hide_done">Hide done</string>
+    <string name="tasks_notice_dismiss">Dismiss</string>
+    <string name="tasks_show_done">Show done</string>
+    <string name="tasks_when_done">Done</string>
+    <string name="tasks_when_later">Later</string>
+    <string name="tasks_when_no_date">No date</string>
+    <string name="tasks_when_overdue">Overdue</string>
+    <string name="tasks_when_this_week">This week</string>
+    <string name="tasks_when_today">Today</string>
+    <string name="tasks_write_failed">That note changed, so the task was left as it was.</string>
     <string name="tab_query">Query</string>
 </resources>

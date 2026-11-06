@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.components.NotekeaMenuItem
+import app.notekea.core.presentation.components.NotekeaToolButton
+import app.notekea.core.presentation.components.NotekeaToolMenu
 import app.notekea.core.presentation.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
@@ -85,7 +87,7 @@ private fun RulesTitle(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     } else {
-        QueryToolButton(
+        NotekeaToolButton(
             icon = NotekeaIcons.AddRow,
             text = stringResource(resource = Res.string.query_add_filter),
             onClick = onAdd,
@@ -99,7 +101,7 @@ private fun SaveButton(
     note: RelativePath,
     onIntent: (QueryIntent) -> Unit
 ) {
-    QueryToolButton(
+    NotekeaToolButton(
         icon = NotekeaIcons.QuerySave,
         text = stringResource(resource = Res.string.query_save_in, note.nameWithoutExtension),
         onClick = { onIntent(QueryIntent.OnSave(path = note)) },
@@ -141,7 +143,7 @@ private fun SortMenu(
             )
         )
     }
-    QueryToolMenu(
+    NotekeaToolMenu(
         icon = NotekeaIcons.QuerySort,
         text = stringResource(resource = Res.string.query_sort),
         sections = listOfNotNull(listOf(byName) + keys, order)
@@ -155,7 +157,7 @@ private fun ColumnsMenu(
     onIntent: (QueryIntent) -> Unit
 ) {
     val shown = query.shownColumns
-    QueryToolMenu(
+    NotekeaToolMenu(
         icon = NotekeaIcons.QueryColumns,
         text = stringResource(resource = Res.string.query_columns),
         sections = listOf(

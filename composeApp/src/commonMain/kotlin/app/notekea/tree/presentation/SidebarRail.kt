@@ -16,6 +16,7 @@ import app.notekea.resources.Res
 import app.notekea.resources.rail_about
 import app.notekea.resources.rail_graph
 import app.notekea.resources.rail_query
+import app.notekea.resources.rail_tasks
 import app.notekea.resources.rail_label
 import app.notekea.resources.rail_settings
 import app.notekea.resources.rail_side_panel
@@ -89,7 +90,7 @@ private fun topItems(
     ) + toolItems(state = state, onIntent = onIntent, actions = actions)
 }
 
-/** The graph, queries and Today, with their shortcuts. */
+/** The graph, queries, tasks and Today, with their shortcuts. */
 @Composable
 private fun toolItems(
     state: VaultTreeState,
@@ -109,6 +110,11 @@ private fun toolItems(
             icon = NotekeaIcons.Query,
             label = stringResource(resource = Res.string.rail_query),
             onClick = actions.onQuery
+        ),
+        NotekeaToolRailItem(
+            icon = NotekeaIcons.Tasks,
+            label = stringResource(resource = Res.string.rail_tasks),
+            onClick = actions.onTasks
         ),
         NotekeaToolRailItem(
             icon = NotekeaIcons.Today,

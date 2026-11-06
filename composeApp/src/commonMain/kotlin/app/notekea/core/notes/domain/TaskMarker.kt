@@ -1,4 +1,4 @@
-package app.notekea.editor.domain
+package app.notekea.core.notes.domain
 
 import app.notekea.core.domain.markdown.MarkdownSyntax
 

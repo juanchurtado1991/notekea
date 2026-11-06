@@ -22,7 +22,7 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.IntOffset
 import app.notekea.core.presentation.components.NotekeaCheckbox
 import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.editor.domain.TaskFinder
+import app.notekea.core.notes.domain.TaskFinder
 import app.notekea.resources.Res
 import app.notekea.resources.editor_task
 import kotlin.math.roundToInt

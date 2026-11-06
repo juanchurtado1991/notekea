@@ -6,11 +6,12 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlPreparedStatement
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.core.domain.time.CalendarDate
 import app.notekea.db.NotekeaDatabase
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteTask
 import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
@@ -45,12 +46,12 @@ class SqlDelightNoteMetadataCacheTest {
     }
 
     @Test
-    fun `a vault cached before properties is read again from its notes`() = runTest(context = testDispatcher) {
+    fun `a vault cached before tasks is read again from its notes`() = runTest(context = testDispatcher) {
         val old = JdbcSqliteDriver(url = JdbcSqliteDriver.IN_MEMORY)
         NotekeaDatabase.Schema.create(old)
-        old.execute(null, "DROP TABLE note_cache_property", 0)
+        old.execute(null, "DROP TABLE note_cache_task", 0)
         old.execute(null, "INSERT INTO note_cache (vault, path) VALUES ('$NOTES', 'Old.md')", 0)
-        NotekeaDatabase.Schema.migrate(old, oldVersion = 4, newVersion = NotekeaDatabase.Schema.version)
+        NotekeaDatabase.Schema.migrate(old, oldVersion = 5, newVersion = NotekeaDatabase.Schema.version)
 
         val cached = SqlDelightNoteMetadataCache(
             database = NotekeaDatabase(driver = old),
@@ -58,6 +59,27 @@ class SqlDelightNoteMetadataCacheTest {
         ).read(vaultPath = NOTES)
 
         assertEquals(expected = emptyList(), actual = cached)
+    }
+
+    @Test
+    fun `a note's tasks come back as they were, and go with it`() = runTest(context = testDispatcher) {
+        val task = NoteTask(
+            stateIndex = 3,
+            endIndex = 20,
+            text = "Book the flights",
+            isDone = false,
+            heading = "Bookings",
+            date = CalendarDate(year = 2026, month = 11, day = 20)
+        )
+        val planned = AREPAS.copy(metadata = AREPAS.metadata.copy(tasks = listOf(task, task.copy(stateIndex = 25))))
+
+        cache.update(vaultPath = NOTES, upserted = listOf(planned), removed = emptyList())
+        val kept = cache.read(vaultPath = NOTES).single().metadata.tasks
+        cache.update(vaultPath = NOTES, upserted = emptyList(), removed = listOf(planned.file.path))
+        cache.update(vaultPath = NOTES, upserted = listOf(AREPAS), removed = emptyList())
+
+        assertEquals(expected = planned.metadata.tasks, actual = kept)
+        assertEquals(expected = emptyList(), actual = cache.read(vaultPath = NOTES).single().metadata.tasks)
     }
 
     @Test

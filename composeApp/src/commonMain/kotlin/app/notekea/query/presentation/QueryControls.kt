@@ -16,8 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
@@ -75,50 +73,6 @@ internal fun QueryPopup(
     }
 }
 
-/** A toolbar button with its [icon] and [text], as the Mac labels them; [tint] marks the one that writes. */
-@Composable
-internal fun QueryToolButton(
-    icon: ImageVector,
-    text: String,
-    onClick: () -> Unit,
-    tint: Color = MaterialTheme.colorScheme.onSurface
-) {
-    val shape = MaterialTheme.shapes.small
-    Row(
-        modifier = Modifier
-            .heightIn(min = NotekeaDimensions.CompactControlSize)
-            .focusBorder(color = MaterialTheme.colorScheme.primary, shape = shape)
-            .clip(shape = shape)
-            .pointerHoverIcon(icon = PointerIcon.Hand)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = NotekeaDimensions.SpacingXs),
-        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-            tint = tint
-        )
-        Text(text = text, style = MaterialTheme.typography.bodySmall, color = tint, maxLines = 1)
-    }
-}
-
-/** A [QueryToolButton] that opens [sections] below itself. */
-@Composable
-internal fun QueryToolMenu(
-    icon: ImageVector,
-    text: String,
-    sections: List<List<NotekeaMenuItem>>
-) {
-    val menu = remember { NotekeaContextMenuState() }
-    val below = belowControl()
-    NotekeaContextMenuArea(sections = sections, state = menu) {
-        QueryToolButton(icon = icon, text = text, onClick = { menu.open(at = below) })
-    }
-}
-
 @Composable
 private fun belowControl(): Offset =
     with(LocalDensity.current) { Offset(x = 0f, y = NotekeaDimensions.CompactControlSize.toPx()) }
@@ -127,16 +81,4 @@ private fun belowControl(): Offset =
 @Composable
 private fun QueryPopupPreview() {
     NotekeaPreviewThemes { QueryPopup(text = PREVIEW_TEXT, sections = emptyList()) }
-}
-
-@Preview
-@Composable
-private fun QueryToolButtonPreview() {
-    NotekeaPreviewThemes { QueryToolButton(icon = NotekeaIcons.QuerySort, text = PREVIEW_TEXT, onClick = {}) }
-}
-
-@Preview
-@Composable
-private fun QueryToolMenuPreview() {
-    NotekeaPreviewThemes { QueryToolMenu(icon = NotekeaIcons.QuerySort, text = PREVIEW_TEXT, sections = emptyList()) }
 }

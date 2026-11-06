@@ -1,4 +1,4 @@
-package app.notekea.editor.domain
+package app.notekea.core.notes.domain
 
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
@@ -17,19 +17,21 @@ class TaskFinder {
         val fences = FenceTracker()
         var lineStart = 0
         text.split(NEW_LINE_CHAR).forEach { line ->
-            if (!fences.read(text = line)) {
-                TASK.find(input = line)?.groups?.get(index = 1)?.let { state ->
-                    tasks +=
-                        TaskMarker(
-                            stateIndex = lineStart + state.range.first,
-                            isDone =
-                            state.value.single() != MarkdownSyntax.TASK_OPEN_STATE
-                        )
-                }
-            }
+            if (!fences.read(text = line)) markerIn(line = line, lineStart = lineStart)?.let { tasks += it }
             lineStart += line.length + 1
         }
         return tasks
+    }
+
+    /** The task of a [line] outside fenced code that starts at [lineStart] in its text, or null when it holds none. */
+    fun markerIn(
+        line: String,
+        lineStart: Int
+    ): TaskMarker? = TASK.find(input = line)?.groups?.get(index = 1)?.let { state ->
+        TaskMarker(
+            stateIndex = lineStart + state.range.first,
+            isDone = state.value.single() != MarkdownSyntax.TASK_OPEN_STATE
+        )
     }
 
     /** The task on the line that holds [offset] (the cursor), or null when that line is not a task. */

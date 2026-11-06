@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Vault tasks: the Tasks tab lists every task of the vault by note or by date, limited by folder and tag. Checking one
+  writes it to its note, and its text opens the note at the task; `📅 2026-11-02` and dates in the text are understood.
 - Vault queries: the Query tab lists notes chosen by their properties, folder and tags, in a table whose cells edit
   them, computed exactly from the notes, with no query language. A query saved in a note is a live table in Preview.
 - Graph view: `Mod+F` finds a note and moves to its graph, with no note open the tab asks for one, and Link in the

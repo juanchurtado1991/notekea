@@ -17,6 +17,7 @@ internal fun railActionsOf(
     onSearch = onSearch,
     onGraph = { openGraph(viewModels = viewModels) },
     onQuery = { viewModels.workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = Workspace.QUERY)) },
+    onTasks = { viewModels.workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = Workspace.TASKS)) },
     onSidePanelToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
     onSwitchVault = onSwitchVault,
     onAbout = { onDialog(WindowDialog.ABOUT) },

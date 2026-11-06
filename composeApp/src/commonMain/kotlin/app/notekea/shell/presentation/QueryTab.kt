@@ -18,7 +18,7 @@ import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.shell.domain.Workspace
 import app.notekea.tree.presentation.VaultTreeState
 
-/** What the vault's tools follow: the graph and queries. */
+/** What the vault's tools follow: the graph, queries and tasks. */
 @Composable
 internal fun FollowTools(
     viewModels: WorkspaceViewModels,
@@ -27,6 +27,7 @@ internal fun FollowTools(
     sidePanel: SidePanelHost
 ) {
     FollowQuery(viewModels = viewModels, state = state)
+    FollowTasks(viewModels = viewModels, state = state)
     FollowGraph(viewModels = viewModels, state = state, searchIndex = searchIndex, sidePanel = sidePanel)
 }
 

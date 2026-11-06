@@ -12,7 +12,7 @@ The first public release, after the milestones close. See the [[Meetings/2026-10
 ## Goals
 
 - [x] Finish the editor
-- [ ] Write the announcement
+- [ ] Write the announcement 2026-10-30
 - [ ] Record a demo video
 
 ## Risks

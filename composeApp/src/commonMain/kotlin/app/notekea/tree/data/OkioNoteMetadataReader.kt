@@ -19,8 +19,8 @@ import okio.use
 import app.notekea.core.notes.data.GhostFrontmatterParser
 
 /**
- * [NoteMetadataReader] on Okio: reads the frontmatter, then the text line by line for its `#tags` ([TextTagFinder]),
- * up to [MAX_TEXT_CHARACTERS], so a huge file costs no more than a long note. Frontmatter is a `---` first line (a
+ * [NoteMetadataReader] on Okio: reads the frontmatter, then the text line by line for its `#tags` ([TextTagFinder])
+ * and tasks ([NoteTaskCollector]), up to [MAX_TEXT_CHARACTERS], so a huge file costs no more than a long note. Frontmatter is a `---` first line (a
  * UTF-8 byte order mark is tolerated) closed by `---` or `...`. An unclosed block, or one longer than
  * [MAX_FRONTMATTER_CHARACTERS], is treated as no frontmatter, as Obsidian does.
  */
@@ -41,9 +41,11 @@ class OkioNoteMetadataReader(
                 val firstLine = source.readUtf8Line()?.removePrefix(prefix = BYTE_ORDER_MARK)
                 val yaml = firstLine?.takeIf { it.trimEnd() == OPENING_FENCE }?.let { frontmatterOf(source = source) }
                 val text = (if (yaml == null) sequenceOf(firstLine) else emptySequence()) + linesOf(source = source)
-                val textTags = textTagFinder.tags(lines = text.filterNotNull())
+                val tasks = NoteTaskCollector()
+                val textTags = textTagFinder.tags(lines = text.filterNotNull().onEach { tasks.read(line = it) })
                 val metadata = yaml?.let { parser.parse(yaml = it) } ?: NoteMetadata.NONE
-                metadata.copy(textTags = textTags, properties = yaml?.let { propertiesOf(yaml = it) }.orEmpty())
+                val properties = yaml?.let { propertiesOf(yaml = it) }.orEmpty()
+                metadata.copy(textTags = textTags, properties = properties, tasks = tasks.tasks)
             }
         } catch (_: IOException) {
             null

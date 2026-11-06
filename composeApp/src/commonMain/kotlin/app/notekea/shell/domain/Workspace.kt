@@ -4,7 +4,7 @@ import app.notekea.core.notes.domain.RelativePath
 
 /**
  * The editor's tabs (`ROADMAP.md` 1.11): one pane, or two side by side ([MAX_PANES]), and the [activePane], the one
- * the keyboard works in. A tab shows a note, another file, a folder (its notes as a grid) or the graph. A path is
+ * the keyboard works in. A tab shows a note, another file, a folder (its notes as a grid) or a tool of the vault. A path is
  * open in one tab at most, in either pane, so two editors never write the same note:
  * opening it again goes to its tab. Every change returns a new workspace; the active tab always exists while its pane
  * has tabs, and a second pane left without tabs closes.
@@ -214,8 +214,11 @@ data class Workspace(
         /** The Query tab (`ROADMAP.md` 2.10), no file of the vault either. */
         val QUERY = RelativePath(value = ".notekea-query")
 
+        /** The Tasks tab (`ROADMAP.md` 2.11), no file of the vault either. */
+        val TASKS = RelativePath(value = ".notekea-tasks")
+
         /** The tabs that show a tool of the vault, not one of its files. */
-        val TOOL_TABS = setOf(GRAPH, QUERY)
+        val TOOL_TABS = setOf(GRAPH, QUERY, TASKS)
         const val MAX_PANES = 2
         private const val LAST_TAB_NUMBER = 9
         val EMPTY = Workspace()

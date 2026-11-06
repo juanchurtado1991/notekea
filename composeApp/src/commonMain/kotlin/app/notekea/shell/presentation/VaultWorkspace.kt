@@ -25,6 +25,7 @@ import app.notekea.editor.presentation.WithSidePanel
 import app.notekea.graph.presentation.GraphContent
 import app.notekea.graph.presentation.GraphInspector
 import app.notekea.query.presentation.QueryContent
+import app.notekea.tasks.presentation.TasksContent
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherMode
 import app.notekea.shell.presentation.FolderGrid
@@ -240,12 +241,22 @@ private fun PaneContent(
             saveTarget = context.workspaceState.noteAtHand
         )
 
-        TabKind.MISSING -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            EmptyState(
-                title = stringResource(resource = Res.string.tab_missing_title),
-                message = stringResource(resource = Res.string.tab_missing_message)
-            )
-        }
+        TabKind.TASKS -> TasksContent(
+            state = context.viewModels.tasks.state.collectAsState().value,
+            onIntent = context.viewModels.tasks::onIntent
+        )
+
+        TabKind.MISSING -> MissingTab()
+    }
+}
+
+@Composable
+private fun MissingTab() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        EmptyState(
+            title = stringResource(resource = Res.string.tab_missing_title),
+            message = stringResource(resource = Res.string.tab_missing_message)
+        )
     }
 }
 
