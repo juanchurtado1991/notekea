@@ -19,7 +19,7 @@ Last updated: 2026-11-07, with the 3.0 spike in review.
   check** (#127) is done: the nightly installs and starts the app on the three systems. **2.9 M2 performance pass**
   (#128) is done: the app moved to `net.ladenthin:llama`, because java-llama.cpp 4.2.0 leaked each model it loaded;
   measures in `docs/performance.md`, Linux only.
-- **M3 — Chat with citations:** started. **3.0 Parallel inference spike** is in review
+- **M3 — Chat with citations:** started. **3.0 Parallel inference spike** (#129) is in review
   (`docs/spikes/2026-11-07-llm-parallel.md`, Linux only): Qwen3.5 2B, 4B and 9B as Small, Medium and Large,
   bge-reranker-v2-m3, Vulkan or Metal for the GPU, no mmap on the CPU, slots 1 / 2 / 4 by memory. Preliminary until
   3.4. Next: 3.1 Model manager and 3.2 Chat engine, which must fit chatting with the Small model under 2.5 GB (the
