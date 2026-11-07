@@ -20,6 +20,7 @@ fun JvmApplication.notekeaDesktopApp(project: Project) {
         .get().metadata.installationPath.asFile.absolutePath
     // Skiko and java-llama.cpp load native libraries; without this the JVM warns on every launch.
     jvmArgs += "--enable-native-access=ALL-UNNAMED"
+    jvmArgs += memoryJvmArgs()
     jvmArgs += "-Dnotekea.version=${NotekeaVersions.displayVersion(project = project)}"
     nativeDistributions {
         // The embedding model goes with the app, read from compose.application.resources.dir.
@@ -32,6 +33,16 @@ fun JvmApplication.notekeaDesktopApp(project: Project) {
     val modelResources = EmbeddingModel.appResources(project)
     project.tasks.matching { it.name == "prepareAppResources" }.configureEach { dependsOn(modelResources) }
     registerRuntimeCheck(project = project)
+}
+
+/**
+ * The options 2.9 measured to cost no speed (`docs/performance.md`): two compiler threads, a collection when idle, and
+ * on Linux, where glibc keeps what the app frees, a trim of the native heap. An installer is built on its own system.
+ */
+private fun memoryJvmArgs(): List<String> {
+    val everywhere = listOf("-XX:CICompilerCount=2", "-XX:G1PeriodicGCInterval=15000")
+    val linux = listOf("-XX:+UnlockExperimentalVMOptions", "-XX:TrimNativeHeapInterval=10000")
+    return if (System.getProperty("os.name").startsWith("Linux")) everywhere + linux else everywhere
 }
 
 /** Registers `checkRuntimeModules` in `check`, reading what Compose's `suggestRuntimeModules` knows of the app. */
