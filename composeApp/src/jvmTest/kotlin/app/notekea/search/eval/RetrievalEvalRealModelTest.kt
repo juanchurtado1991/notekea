@@ -39,8 +39,7 @@ class RetrievalEvalRealModelTest {
     private val dispatchers = JvmAppDispatchers()
     private val embedder = LlamaTextEmbedder(
         modelPath = System.getProperty(MODEL_PROPERTY),
-        nativeFolder = Files.createTempDirectory("notekea-natives").toString(),
-        dispatchers = dispatchers
+        nativeFolder = Files.createTempDirectory("notekea-natives").toString()
     )
 
     @AfterTest

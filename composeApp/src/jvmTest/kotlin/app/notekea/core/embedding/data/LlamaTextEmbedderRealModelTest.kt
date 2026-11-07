@@ -1,6 +1,5 @@
 package app.notekea.core.embedding.data
 
-import app.notekea.core.data.JvmAppDispatchers
 import co.touchlab.kermit.LogWriter
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
@@ -13,7 +12,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.delay
+import net.ladenthin.llama.LlamaModel
+import net.ladenthin.llama.args.LogFormat
+import net.ladenthin.llama.value.LogLevel
+import org.junit.Assume.assumeTrue
 import java.nio.file.Files
+import java.nio.file.Path
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.function.BiConsumer
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -128,13 +134,47 @@ class LlamaTextEmbedderRealModelTest {
         assertEquals(expected = listOf(true, false), actual = listOf(loadedAfterUse, embedder.isLoaded))
     }
 
+    // 2.9: the model was never freed in java-llama.cpp 4.2.0: every load and let go kept about 275 MB for good.
+    @Test
+    fun `loading the model again and again keeps no memory`() = runBlocking {
+        assumeTrue(Files.exists(STATUS_FILE))
+        val embedder = embedder(idleMillis = IDLE_MILLIS)
+        val resident = List(size = CYCLES) {
+            embedder.embed(texts = listOf("Tomato soup"))
+            withTimeout(timeMillis = WAIT_MILLIS) { while (embedder.isLoaded) delay(timeMillis = POLL_MILLIS) }
+            residentMegabytes()
+        }
+
+        val growth = resident.last() - resident.first()
+        assertTrue(actual = growth < MAX_GROWTH_MB, message = "$resident")
+    }
+
+    // 2.9: llama.cpp's default log level writes every embedded text to stderr, and with it the words of the notes.
+    @Test
+    fun `the words of a note stay out of the engine's logs`() = runBlocking {
+        val lines = CopyOnWriteArrayList<String>()
+        val capture = object : BiConsumer<LogLevel, String> {
+            override fun accept(level: LogLevel, message: String) {
+                lines += message
+            }
+        }
+        LlamaModel.setLogger(LogFormat.TEXT, capture)
+
+        embedder().embed(texts = listOf(PRIVATE_WORD))
+
+        assertEquals(expected = emptyList(), actual = lines.filter { PRIVATE_WORD in it })
+    }
+
+    private fun residentMegabytes(): Long = Files.readAllLines(STATUS_FILE)
+        .first { it.startsWith(prefix = "VmRSS") }
+        .filter(Char::isDigit).toLong() / KILOBYTES
+
     private fun embedder(
         modelPath: String = this.modelPath,
         idleMillis: Long = DEFAULT_IDLE_MILLIS
     ) = LlamaTextEmbedder(
         modelPath = modelPath,
         nativeFolder = natives,
-        dispatchers = JvmAppDispatchers(),
         idleMillis = idleMillis
     )
 
@@ -152,5 +192,10 @@ class LlamaTextEmbedderRealModelTest {
         const val WAIT_MILLIS = 10_000L
         const val POLL_MILLIS = 50L
         const val CANCEL_AFTER_MILLIS = 300L
+        const val CYCLES = 8
+        const val MAX_GROWTH_MB = 100L
+        const val KILOBYTES = 1024
+        const val PRIVATE_WORD = "zanahoriamorada"
+        val STATUS_FILE: Path = Path.of("/proc/self/status")
     }
 }

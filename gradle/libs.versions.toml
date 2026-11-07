@@ -20,7 +20,8 @@ ksp = "2.3.12"
 ktlint-cli = "1.8.0"
 ktlint-plugin = "14.2.0"
 lifecycle = "2.11.0"
-llama = "4.2.0"
+# With a new version, change ENGINE_VERSION in LlamaTextEmbedder: its llama.cpp changes the vectors.
+llama = "6.0.0"
 lucene = "10.5.2"
 markdown-renderer = "0.46.0"
 # What people see in About and crash reports until the first public release, and the plain version installers need:
@@ -60,7 +61,7 @@ jetbrains-markdown = { module = "org.jetbrains:markdown", version.ref = "jetbrai
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 
 # Local AI
-llama = { module = "de.kherud:llama", version.ref = "llama" }
+llama = { module = "net.ladenthin:llama", version.ref = "llama" }
 lucene-core = { module = "org.apache.lucene:lucene-core", version.ref = "lucene" }
 lucene-analysis-common = { module = "org.apache.lucene:lucene-analysis-common", version.ref = "lucene" }
 
