@@ -73,6 +73,11 @@ tasks.register<Test>("smokeRun") {
     providers.gradleProperty("smokeJvmArgs").orNull?.let { jvmArgs(it.split(" ").filter(String::isNotBlank)) }
     // And the C library's memory arenas on Linux: `-PmallocArenaMax=2`.
     providers.gradleProperty("mallocArenaMax").orNull?.let { environment("MALLOC_ARENA_MAX", it) }
+    // And the bundled embedding model instead of the stand-in, as the installed app has it: `-PrealModel`.
+    providers.gradleProperty("realModel").orNull?.let {
+        val resources = rootProject.file("composeApp/build/app-resources/common")
+        systemProperty("compose.application.resources.dir", resources.path)
+    }
     // A fresh JVM per test class, so a run is measured without what the runs before it left behind.
     forkEvery = 1
     outputs.upToDateWhen { false }

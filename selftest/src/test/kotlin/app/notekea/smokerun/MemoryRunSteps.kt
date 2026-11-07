@@ -70,7 +70,7 @@ private fun ComposeUiTest.focusWindow(
 ) = runOnIdle { app.windowFocus.requestFocus() }
 
 /** Searches the text of the notes for [word] (`Mod+Shift+F`) until [result] shows, then closes the search. */
-private fun ComposeUiTest.searchText(
+internal fun ComposeUiTest.searchText(
     app: SmokeRunApp,
     word: String,
     result: String
@@ -129,7 +129,7 @@ internal fun ComposeUiTest.closeAllTabs(
 }
 
 /** With the `smokeRun` task's idle time, waits one minute and then the rest, with a sample after each. */
-private fun idle(
+internal fun idle(
     run: String
 ) {
     val idle = SmokeRunReport.idleSeconds
