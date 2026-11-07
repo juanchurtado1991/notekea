@@ -49,7 +49,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
 | M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 13 / 13 |
-| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 0 / 10 |
+| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 1 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M4b — Sources, study cards and agent | Web clips, documents, study cards, agent mode | 10 weeks | 0 / 5 |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
@@ -921,7 +921,7 @@ it: writing is limited by memory bandwidth and a batch of slots reads the weight
 so the long jobs (Deep answer, the repositories' notes) are offered as background work instead of something to wait
 for.
 
-### ⬜ 3.0 Parallel inference spike — `chore/llm-parallel-spike`
+### ✅ 3.0 Parallel inference spike — `chore/llm-parallel-spike` — [notekea#129](https://github.com/juanchurtado1991/notekea/pull/129)
 
 Before 3.2, measure with real 2B, 4B and 8B chat models on Linux (decided with the developer on 2026-11-07: only a
 Linux machine was available; Windows and macOS are measured in 3.7 and the release run):
