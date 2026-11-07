@@ -916,13 +916,15 @@ and kept only if it improves citation accuracy within the latency budget (`ARCHI
 **Hardware (decided with the developer, 2026-10-29): a dedicated GPU is always used when the machine has one, and
 the CPU is the route for modest PCs.** Models load with their layers on the GPU (Metal on Apple Silicon; CUDA or
 Vulkan on Windows and Linux, as far as the llama.cpp build allows, see 3.0), fall back to the CPU when there is no
-GPU or not enough video memory, and nobody has to choose. On CPU only, parallel slots share the same cores and
-memory bandwidth, so they save no time: the independent steps of 3.5 run one after another there, and the long jobs
-(Deep answer, the repositories' notes) are offered as background work instead of something to wait for.
+GPU or not enough video memory, and nobody has to choose. On CPU only, parallel slots still save time (3.0 measured
+it: writing is limited by memory bandwidth and a batch of slots reads the weights once), but every step is slower,
+so the long jobs (Deep answer, the repositories' notes) are offered as background work instead of something to wait
+for.
 
 ### ⬜ 3.0 Parallel inference spike — `chore/llm-parallel-spike`
 
-Before 3.2, measure with real 2B, 4B and 8B chat models on the reference machines (Windows, macOS, Linux):
+Before 3.2, measure with real 2B, 4B and 8B chat models on Linux (decided with the developer on 2026-11-07: only a
+Linux machine was available; Windows and macOS are measured in 3.7 and the release run):
 - java-llama.cpp `setParallel(n)` with continuous batching, called concurrently from coroutines: does each call get
   its own slot, and is the output identical to a single call with the same seed?
 - RAM per extra slot (KV cache) and tokens/s with 1, 2 and 4 slots, on CPU only and with GPU offload.
@@ -948,6 +950,12 @@ Before 3.2, measure with real 2B, 4B and 8B chat models on the reference machine
 Result: `docs/spikes/<date>-llm-parallel.md` with the numbers, the default slot count per RAM size (likely one on
 8 GB, since every slot adds its own KV cache), the context size and the latency budget used by 3.5 and 3.6.
 
+Done (`docs/spikes/2026-11-07-llm-parallel.md`, preliminary until 3.4): Small Qwen3.5-2B, Medium Qwen3.5-4B, Large
+Qwen3.5-9B, reranker bge-reranker-v2-m3, whose score also turns away questions the notes cannot answer. GPU by
+Vulkan (needs only the driver) and Metal; no mmap on the CPU (24–31 % less memory). Slots: 1 on 8 GB, 2 on 16 GB, 4
+on a GPU; context 4k a slot; a whole answer in 4 s on GPU and 12 s on CPU (median). Actions in one step, plans from
+Medium up. On an approximated 8 GB laptop chatting with the Small model goes over 2.5 GB; 3.2 and 3.7 fit it.
+
 ### ⬜ 3.1 Model manager — `feature/model-manager`
 
 Catalog of tested chat models (JSON parsed with Ghost): **Small (~2B)**, **Medium (~4B)** and **Large (~8B)** GGUF,
@@ -955,17 +963,16 @@ plus the reranker model (3.0), which is downloaded with whichever chat model is 
 (progress, pause, resume), SHA-256 verification, delete. Hardware check: warns when RAM is below the model's
 requirement, including the KV cache of its parallel slots (3.0) and the editor itself. The model is recommended from
 the machine's RAM and, when it has a dedicated GPU, its video memory (Small on 8 GB, Medium on 16 GB, a larger size
-when the GPU holds it), with nothing technical to choose. Sizes below are placeholders
-until 3.0 measures them.
+when the GPU holds it), with nothing technical to choose. The models and sizes are those of 3.0.
 
 **UI — Model manager** (opened from Settings or the status bar):
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ AI model                                                 │
-│ ○ Small  (~2B, 1.5 GB) · fast, basic answers             │
-│ ● Medium (~4B, 2.5 GB) · recommended for 16 GB  [Active] │
-│ ○ Large  (~8B, 5 GB) · best answers, needs 16 GB or more │
+│ ○ Small  (~2B, 1.3 GB) · fast, basic answers             │
+│ ● Medium (~4B, 2.7 GB) · recommended for 16 GB  [Active] │
+│ ○ Large  (~9B, 5.7 GB) · best answers, GPU or 32 GB      │
 │                                                          │
 │ Downloading Medium ▓▓▓▓▓▓░░░░ 61% · 1.4 / 2.3 GB  [Pause]│
 │ Models are stored in ~/Library/Application Support/...   │
@@ -986,8 +993,9 @@ chunks (hybrid index), build a prompt that requires citing chunk ids, parse cita
 citations that do not match a retrieved chunk.
 
 - **Memory:** the model is loaded when the chat opens and unloaded after a few minutes without use (5 by default,
-  in Settings), so writing notes never pays for it; its weights are read from disk with mmap, not locked in memory,
-  and the context size is the one 3.0 measured, not the model's maximum (budgets in 5.4).
+  in Settings), so writing notes never pays for it; on the CPU its weights are read without mmap (with mmap the
+  CPU keeps both the mapped file and its own copy, 3.0), never locked in memory, and the context size is the one
+  3.0 measured, not the model's maximum (budgets in 5.4).
 
 ### ⬜ 3.3 Chat panel — `feature/chat-panel`
 
