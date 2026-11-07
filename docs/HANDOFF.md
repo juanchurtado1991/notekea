@@ -16,7 +16,7 @@ Last updated: 2026-11-05, with 2.10 Vault queries in its smoke test.
   **2.6 Hybrid search** (#120), the eight hand-tuned themes (#123) and **2.7 Graph view** (#122) are done. **2.10
   Vault queries** (#124) are done. **2.11 Vault tasks** (#125, a grouped list, as Reminders) is done. **2.8 Retrieval
   evaluation set** (#126) is done: recall@5 measures 0.94 and 0.90 against baselines of 0.92 and 0.86. **2.13 Packaged
-  check** (#127) is done: the nightly installs and starts the app on the three systems. **2.9 M2 performance pass** is in
+  check** (#127) is done: the nightly installs and starts the app on the three systems. **2.9 M2 performance pass** (#128) is in
   review: the app moved to `net.ladenthin:llama`, because java-llama.cpp 4.2.0 leaked each model it loaded; measures in
   `docs/performance.md`, Linux only. M2 is complete once it merges.
 
