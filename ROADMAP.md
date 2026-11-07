@@ -890,7 +890,7 @@ installs it, starts it, checks that its window opens with no crash report, and u
 
 - **Done when:** a package that cannot start fails the nightly on the system where it happens.
 
-### ⬜ 2.9 M2 performance pass — `chore/m2-performance`
+### ✅ 2.9 M2 performance pass — `chore/m2-performance` — [notekea#128](https://github.com/juanchurtado1991/notekea/pull/128)
 
 The performance pass of M2 (see "Closing a milestone"), on the automated smoke runs of M1 and M2: memory and time of
 the first indexing and of an incremental one on the Sample Vault and the Ghost Serializer vault, memory with the embedding model
