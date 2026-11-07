@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Spike report `docs/spikes/2026-11-07-llm-parallel.md` (`ROADMAP.md` 3.0, Linux only): parallel slots, the Vulkan
+  route, prompt time, memory, grammar, reranking and actions measured on seven open models; Qwen3.5 2B, 4B and 9B
+  become the Small, Medium and Large defaults and bge-reranker-v2-m3 the reranker, until 3.4 confirms them.
 - Vault tasks: the Tasks tab lists every task of the vault by note or by date, limited by folder and tag. Checking one
   writes it to its note, and its text opens the note at the task; `📅 2026-11-02` and dates in the text are understood.
 - Vault queries: the Query tab lists notes chosen by their properties, folder and tags, in a table whose cells edit
