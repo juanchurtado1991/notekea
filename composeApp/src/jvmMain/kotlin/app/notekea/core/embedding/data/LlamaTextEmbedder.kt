@@ -1,16 +1,16 @@
 package app.notekea.core.embedding.data
 
-import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.TextEmbedder
 import co.touchlab.kermit.Logger
-import de.kherud.llama.LlamaModel
-import de.kherud.llama.ModelParameters
+import net.ladenthin.llama.LlamaModel
+import net.ladenthin.llama.parameters.ModelParameters
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -21,6 +21,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.Executors
 import kotlin.coroutines.coroutineContext
 import kotlin.math.sqrt
 
@@ -28,23 +29,29 @@ import kotlin.math.sqrt
  * [TextEmbedder] on java-llama.cpp with the bundled multilingual model at [modelPath] (`ROADMAP.md` 2.2,
  * `docs/spikes/2026-11-01-embedding-models.md`). The model loads on the first call and is let go after [idleMillis]
  * without one, a cancelled call included, so writing notes never pays for its memory; calls run one at a time on the
- * default dispatcher and a cancelled one stops between texts. java-llama.cpp extracts its native library to [nativeFolder] (the app's data),
- * not `/tmp`, which some systems mount without the right to run it. Koin closes it with its module ([close]).
+ * model's own thread and a cancelled one stops between texts. Loading on one thread matters: glibc keeps what a thread
+ * frees for that thread, so loads on many threads pile up gigabytes that a new load cannot reuse (`docs/performance.md`).
+ * java-llama.cpp extracts its native library to [nativeFolder] (the app's data), not `/tmp`, which some systems mount
+ * without the right to run it. Koin closes it with its module ([close]).
  */
 class LlamaTextEmbedder(
     private val modelPath: String,
     private val nativeFolder: String,
-    private val dispatchers: AppDispatchers,
     private val idleMillis: Long = IDLE_MILLIS
 ) : TextEmbedder,
     AutoCloseable {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private val mutex = Mutex()
-    private val scope = CoroutineScope(context = SupervisorJob() + dispatchers.default)
+    private val modelThread = Executors.newSingleThreadExecutor { Thread(it, THREAD_NAME).apply { isDaemon = true } }
+        .asCoroutineDispatcher()
+    private val scope = CoroutineScope(context = SupervisorJob() + modelThread)
+
+    @Volatile
     private var model: LlamaModel? = null
     private var release: Job? = null
 
-    override val modelId: String = MODEL_FILE
+    // The engine's version too: a new llama.cpp changes the vectors slightly, so the notes are indexed again.
+    override val modelId: String = "$MODEL_FILE/$ENGINE_VERSION"
 
     override val dimensions: Int = DIMENSIONS
 
@@ -58,7 +65,7 @@ class LlamaTextEmbedder(
 
     override suspend fun embed(
         texts: List<String>
-    ): Outcome<List<FloatArray>, EmbeddingError> = withContext(context = dispatchers.default) {
+    ): Outcome<List<FloatArray>, EmbeddingError> = withContext(context = modelThread) {
         mutex.withLock {
             release?.cancel()
             try {
@@ -79,6 +86,7 @@ class LlamaTextEmbedder(
                 mutex.unlock()
             }
         }
+        modelThread.close()
     }
 
     private fun releaseWhenIdle() {
@@ -106,8 +114,12 @@ class LlamaTextEmbedder(
         // A cancelled call (the vault closed, a new run) is not the model failing.
         throw cancellation
     } catch (exception: RuntimeException) {
-        // java-llama.cpp's LlamaException (a RuntimeException) is not public: a model that fails to load or to embed.
+        // java-llama.cpp's LlamaException and its kin: a model that fails to load or to embed.
         logger.e(throwable = exception) { ENGINE_FAILED_MESSAGE }
+        Outcome.Failure(error = EmbeddingError.EngineFailed)
+    } catch (error: LinkageError) {
+        // The native library does not load on this system: search goes on with keywords.
+        logger.e(throwable = error) { ENGINE_FAILED_MESSAGE }
         Outcome.Failure(error = EmbeddingError.EngineFailed)
     }
 
@@ -120,6 +132,7 @@ class LlamaTextEmbedder(
             .setCtxSize(CONTEXT_TOKENS)
             .setBatchSize(CONTEXT_TOKENS)
             .setUbatchSize(CONTEXT_TOKENS)
+            .setLogVerbosity(ERRORS_ONLY)
         return LlamaModel(parameters).also { model = it }
     }
 
@@ -141,13 +154,18 @@ class LlamaTextEmbedder(
         const val MODEL_FILE = "granite-embedding-107m-multilingual-Q8_0.gguf"
         const val MODEL_FOLDER = "models"
 
+        private const val ENGINE_VERSION = "llama.cpp-b11968"
         private const val CONTEXT_TOKENS = 512
         private const val DIMENSIONS = 384
 
         // The model adds a token at each end of every text, inside its context.
         private const val SPECIAL_TOKENS = 2
         private const val IDLE_MILLIS = 3 * 60_000L
-        private const val NATIVE_FOLDER_PROPERTY = "de.kherud.llama.tmpdir"
+
+        // llama.cpp's default level logs every text it embeds: the notes' words stay out of the logs.
+        private const val ERRORS_ONLY = 1
+        private const val NATIVE_FOLDER_PROPERTY = "net.ladenthin.llama.tmpdir"
+        private const val THREAD_NAME = "notekea-embedding-model"
         private const val LOG_TAG = "LlamaTextEmbedder"
         private const val ENGINE_FAILED_MESSAGE = "The embedding model failed"
     }

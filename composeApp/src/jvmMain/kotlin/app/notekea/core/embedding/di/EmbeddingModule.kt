@@ -18,8 +18,7 @@ val embeddingModule = module {
         val resources = System.getProperty(RESOURCES_PROPERTY).orEmpty()
         LlamaTextEmbedder(
             modelPath = Path.of(resources, LlamaTextEmbedder.MODEL_FOLDER, LlamaTextEmbedder.MODEL_FILE).toString(),
-            nativeFolder = Path.of(get<PlatformConventions>().appDataDirectory, NATIVE_FOLDER).toString(),
-            dispatchers = get()
+            nativeFolder = Path.of(get<PlatformConventions>().appDataDirectory, NATIVE_FOLDER).toString()
         )
     } onClose { it?.close() } bind TextEmbedder::class
 }

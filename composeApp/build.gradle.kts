@@ -79,6 +79,7 @@ kotlin {
             implementation(libs.directory.watcher)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.llama)
+            implementation(LlamaNatives.dependency(library = libs.llama.get()))
             implementation(libs.lucene.core)
             implementation(libs.lucene.analysis.common)
             implementation(libs.sqldelight.sqlite.driver)

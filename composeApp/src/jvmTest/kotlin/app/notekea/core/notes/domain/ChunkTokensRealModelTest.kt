@@ -1,7 +1,7 @@
 package app.notekea.core.notes.domain
 
-import de.kherud.llama.LlamaModel
-import de.kherud.llama.ModelParameters
+import net.ladenthin.llama.LlamaModel
+import net.ladenthin.llama.parameters.ModelParameters
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -75,7 +75,7 @@ abstract class ArchitectureTestBase {
         "co.touchlab.kermit.",
         "com.ghost.",
         "com.russhwolf.",
-        "de.kherud.",
+        "net.ladenthin.",
         "io.ktor.",
         "java.",
         "javax.",
