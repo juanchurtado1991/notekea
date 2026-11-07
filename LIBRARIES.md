@@ -57,7 +57,7 @@ Decisions:
 
 | Library | Coordinates | Version | Purpose |
 |---|---|---|---|
-| java-llama.cpp | `de.kherud:llama` | 4.2.0 | A single engine for embeddings (GGUF such as nomic-embed / bge), chat (~2B, ~4B or ~8B model) and reranking (`rerank()`). Parallel slots (`setParallel` + continuous batching) share one loaded model; grammars (`jsonSchemaToGrammar`) constrain structured output (`ARCHITECTURE.md` §12). Avoids a separate ONNX Runtime and tokenizer stack |
+| java-llama.cpp | `net.ladenthin:llama` (a maintained fork of `de.kherud:llama`, whose 4.2.0 never frees a model; `ROADMAP.md` 2.9), with one natives jar per system (`LlamaNatives`) | 6.0.0 | A single engine for embeddings (GGUF such as nomic-embed / bge), chat (~2B, ~4B or ~8B model) and reranking (`rerank()`). Parallel slots (`setParallel` + continuous batching) share one loaded model; grammars (`jsonSchemaToGrammar`) constrain structured output (`ARCHITECTURE.md` §12). Avoids a separate ONNX Runtime and tokenizer stack |
 | Embedding model (bundled) | `granite-embedding-107m-multilingual`, Q8_0 GGUF (bartowski) | Hugging Face commit `52fed1c8` | Multilingual embeddings for the index (`ROADMAP.md` 2.2): 384 dimensions, 512 tokens, 121 MB, Apache 2.0. Chosen over multilingual-e5-small and bge-m3 (`docs/spikes/2026-11-01-embedding-models.md`); downloaded by the build with its SHA-256 checked (`downloadEmbeddingModel`) and packaged in the app's resources |
 | Lucene | `org.apache.lucene:lucene-core` | 10.5.2 | Hybrid search: vectors (HNSW) + keywords (BM25). Requires Java 21 |
 | Lucene analysis | `org.apache.lucene:lucene-analysis-common` | 10.5.2 | The keywords of the index (`ROADMAP.md` 2.3) without accents and with Spanish words reduced to their stem, so "cancion" finds "canción" and "receta" finds "recetas" (approved by the developer on 2026-11-03) |
@@ -79,9 +79,9 @@ Decisions:
 - Small local models (2B–8B) are unreliable at tool calling; agent features stay out of the MVP UI until tested.
   The MVP answer pipeline uses plain coroutines, not Koog (`ARCHITECTURE.md` §12).
 
-Known limitation (spike of 2026-10-23, `docs/spikes/2026-10-23-ghost-llama.md`): java-llama.cpp bundles natives
-for Linux x64/arm64, macOS x64/arm64 and Windows x64/x86, but **not Windows ARM64**; those users would need a
-separate build.
+Known limitation: the fork has natives for Linux x64/arm64, Windows x64/arm64 and macOS on Apple silicon, but **not Intel
+macOS**, and the macOS installer is built for Apple silicon. It logs every embedded text at its default level:
+`LlamaTextEmbedder` sets errors only.
 
 Alternative to evaluate for the mobile phase: **Llamatik** (`com.llamatik:library` 1.10.1), on-device KMP LLM (Android, iOS, Desktop). Young (~200 ⭐).
 

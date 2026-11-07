@@ -10,9 +10,11 @@ the passes before it. Budgets are those of `ROADMAP.md` 5.4: the editor alone un
 ```
 
 runs the automated smoke runs (`app.notekea.smokerun`, in `:selftest` since the Self-Test), each test class in a JVM of its own, and writes
-`composeApp/build/reports/smoke-runs/memory.csv`: one line per sample, with the Java heap in use after a collection
-and the resident memory of the whole process (heap, native, Skia, compiled code), in megabytes. `-PidleSeconds` is how
-long the idle steps wait (0, no waiting, in a plain test run); `-PsmokeJvmArgs` passes JVM options to compare.
+`selftest/build/reports/smoke-runs/memory.csv` (it appends: delete it before a run): one line per sample, with the Java
+heap in use after a collection, the resident memory of the whole process (heap, native, Skia, compiled code), the peak
+since the last sample and the seconds the step took, in megabytes. `-PidleSeconds` is how
+long the idle steps wait (0, no waiting, in a plain test run); `-PsmokeJvmArgs` passes JVM options to compare;
+`-PrealModel` runs on the real embedding model instead of the stand-in.
 
 The memory runs (`ROADMAP.md` 1.18) are the workload of a pass:
 
@@ -142,3 +144,142 @@ Runtime settings compared (resident MB, Linux, `-PidleSeconds=60`):
 
 The two JVM options only act while the app is idle (a trim every ten seconds, a collection when idle for fifteen); the
 arena limit needs an environment variable, which the packaged app's launcher cannot set.
+
+## M2 — 2.9, indexing and search
+
+Same machine and JVM. Budgets of `ROADMAP.md` 5.4: indexing or searching under 700 MB and back to the editor's level
+after; the editor alone under 400 MB. The tables down to the fork describe `main` before this pass's fix; "The fix" at the end is what shipped.
+
+### The packaged app
+
+Ghost Serializer, 371 notes, real window, real model, resident megabytes:
+
+| Moment | Result |
+|---|---|
+| Welcome screen, idle | 330 (291 in 1.16) |
+| Startup to the window | 0.87–0.92 s |
+| First index, peak | 894 |
+| After indexing, idle | 893 |
+| After the model is let go and loaded again | 1172 |
+
+**The model leaks.** Each load and unload keeps about 275 MB (110 of file mapping, 165 anonymous, 11 threads): ten cycles
+take a JVM from 425 MB to 2.9 GB. `Java_de_kherud_llama_LlamaModel_delete` in `de.kherud:llama:4.2.0` only stops the task
+queue, and the line that deletes the server is commented out; 4.2.0 (June 2025) is the last release. So letting the model
+go after three idle minutes frees nothing, and the next search or edit loads another copy.
+
+Loading the model costs about 290 MB (121 of file, 170 anonymous). Threads, `parallel` and batch size do not change that,
+only the speed; the vectors stay the same.
+
+Where 915 MB went while indexing (`-XX:NativeMemoryTracking=summary`, which adds its own cost): JVM 344 (heap 98,
+metaspace 67, GC 75, code 53, symbols 27), model about 290, the rest (Skia, text layout, what glibc keeps) about 280. Live
+objects are small: 20 MB of heap after indexing. The heap's committed peak of 1 GB is not resident: capping it barely
+moves the resident peak.
+
+### The test runs
+
+The stand-in embedder, `-PidleSeconds=0`, median of three; the Idle run at `-PidleSeconds=600`. Resident:
+
+| Run | Moment | 1.18 | 2.9 |
+|---|---|---|---|
+| Personal Notes | opened | 306 | 522 |
+| | 12 notes open | 354 | 723 |
+| | long note scrolled in Edit | 616 | 890 |
+| | long note scrolled in Preview | 761 | 1057 |
+| | vault closed | 685 | 1061 |
+| Ghost Serializer | opened | 334 | 544 |
+| | 20 notes open | 468 | 787 |
+| | vault closed | 454 | 795 |
+| Idle (Sample Vault) | idle ten minutes | 357 | 598 |
+
+Committed heap went from 64–80 to about 225, and heap in use from about 30 to about 75: a vault now indexes while it
+opens. The growth in the test JVM is far larger than in the packaged app (welcome screen +39 MB); this pass did not
+attribute all of it. On the real model the runs that open several apps in one JVM climb by about 280 MB per app, up to
+2.2 GB, which is the same leak: use the stand-in to compare them.
+
+Idle does not grow over ten minutes, and closing a vault returns nothing. First index: Sample Vault (40 notes) 4.4 s,
+Ghost Serializer 48 s (26 s on the stand-in). Incremental index of one note: 0.5–0.7 s. One embedding: 8.9 ms. A search
+shows its first results in 0.2–0.4 s (0.7 s when the model has to load); keyword results can come first, so this is
+not the latency of the meaning search.
+
+### Options tested on the packaged app
+
+The same vault, resident, including the child process where there is one. Child means the model in a process of its own
+that stops after 30 idle seconds. This was a prototype whose worker used the system's `java`, not the packaged runtime.
+
+| Option | Index peak | Idle after | After a reload | Settled |
+|---|---|---|---|---|
+| Today | 894 | 893 | 1172 | 1172, and growing |
+| Model always loaded | 821 | 816 | 818 | 818 |
+| Child | 934 | 532 | 917 | 535 |
+| Child, trim | 871 | 414–421 | 866 | 432 |
+| Child, trim, two compiler threads | 806 | 379–384 | 775 | 377 |
+| The same, `-Xmx512m` | 791 | 361 | 752 | 356 |
+| The same, `-XX:MaxNewSize=64m` | 809 | 383 | 787 | 382 |
+| Child, trim, C1 only | 768 | 339–347 | 726 | 342 |
+| Child, trim, C1 only, software drawing | 723 | 283 | 670 | 285 |
+| Model always loaded, trim, C1 only | 661 | 615–631 | 625 | 621 |
+
+Trim is `-XX:+UnlockExperimentalVMOptions -XX:TrimNativeHeapInterval=10000 -XX:G1PeriodicGCInterval=15000`, where the
+native trim needs glibc, so Linux only; the periodic collection is not tied to a system. Two compiler threads is `-XX:CICompilerCount=2`. No option reached both 700 MB at the peak and 400 MB after.
+
+Speed in the test JVM, median of three, seconds:
+
+| Step | Default | Two compiler threads | C1 only |
+|---|---|---|---|
+| Long note scrolled in Edit | 27.3 | 27.8 | 69.7 |
+| Long note scrolled in Preview | 9.0 | 9.1 | 17.9 |
+| 20 notes opened | 13.7 | 13.9 | 14.0 |
+| Editor typing case | 1.8 | 2.0 | 2.3 |
+
+The typing case times a whole scripted case, not a key press, and its rounds spread 1.7–3.3 s, so it shows no difference.
+Startup: 0.94 s with two compiler threads, 0.87 s with C1, against 0.87–0.92 s. The child's first vector takes 0.7 s
+against 0.5 s for a load in the process. First index stays at 45–50 s in every configuration. `-XX:MaxHeapFreeRatio=30`
+raised the peak to 1067 MB and did not help after. The Serial collector raised it too (1000 against 883, test JVM). The
+compiler saving depends on the core count: a machine with fewer cores already runs fewer compiler threads.
+
+### The maintained fork of java-llama.cpp
+
+`net.ladenthin:llama:6.0.0` (MIT, on Maven Central, llama.cpp b11968) frees the model on close, waiting for its worker
+thread first. Tested in place of `de.kherud:llama:4.2.0`, as a temporary change, Linux only.
+
+Ten load and unload cycles in a bare JVM, resident: 352 to 2769 MB today; 352 to 357 MB on the fork. With the model
+closed: 248 MB, and 122 MB with trim. A hundred cycles, a third of them closed during a call, gave no crash: the call
+gets a `LlamaException`. Vectors are not identical (lowest cosine 0.99987 over 601 texts), 3.7 ms a text against 4.4.
+
+The packaged app, Ghost Serializer, trim and two compiler threads, resident:
+
+| Option | Index peak, three runs | Idle, model let go | Model loaded, idle |
+|---|---|---|---|
+| Fork | 669–674 | 375–387 (three reloads, no growth) | 615–646 |
+| Child | 801–803 | 374–384 | 771–780 |
+
+One longer fork run peaked at 945 MB in its first 75 seconds, and that was not explained or repeated. The model is let
+go after three idle minutes on the fork and 30 seconds on the child.
+
+Retrieval on the fork: recall@5 0.94 on Sample Vault and 0.90 on Ghost Serializer, the same as 2.8 measured (baselines
+0.92 and 0.86). All 10 `*RealModelTest` cases pass. The Linux package grows from 225 to 244 MB and the extracted natives to 74 MB. The default
+log level writes the text of every embedded note to stderr: `setLogVerbosity(1)` stops it. There is no Intel macOS native.
+
+### The fix
+
+Shipped: the fork, the model on one thread of its own, two compiler threads and the idle collection on the three systems,
+and the native trim on Linux. The packaged app as built, Ghost Serializer, twelve minutes with two reloads:
+
+| Measure | Before | After | Budget |
+|---|---|---|---|
+| Index peak | 894 | 662 | 700 |
+| Idle, model let go | 893 | 383–392 | 400 |
+| After a reload, let go | 1172, and growing | 390–392 | 400 |
+| Model loaded | 893 | 620–636 | 700 |
+| Startup to the window | 0.87–0.92 s | 0.91–0.92 s | |
+
+**Loading on one thread matters as much as the fork.** Thirty loads across a pool of threads, on the fork with no trim, took a
+bare JVM to 3 GB: the model is freed, but glibc keeps what each thread freed in that thread's arena, and the next load, on
+another thread, cannot reuse it. On one thread the same memory is reused and stays flat, which also holds where trim does
+not act. `LlamaTextEmbedderRealModelTest` covers it on Linux, and the log level too.
+
+The idle collection and the trim wake the app: idle, it uses 0.26% of one core with them and 0.08% without.
+
+Not measured: Windows and macOS. Not cut: the growth of the test runs against 1.18, which the packaged app does not show,
+and the cost of a long note open while indexing.
+

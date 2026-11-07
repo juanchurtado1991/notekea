@@ -48,7 +48,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 |---|---|---|---|
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
-| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 12 / 13 |
+| M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 13 / 13 |
 | M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 0 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M4b — Sources, study cards and agent | Web clips, documents, study cards, agent mode | 10 weeks | 0 / 5 |
@@ -896,6 +896,10 @@ The performance pass of M2 (see "Closing a milestone"), on the automated smoke r
 the first indexing and of an incremental one on the Sample Vault and the Ghost Serializer vault, memory with the embedding model
 loaded and after it is let go, search latency, and idle memory after indexing ends. Compared with 1.18 in
 `docs/performance.md`; budgets of 5.4 (indexing or searching under 700 MB, back to the editor's level after).
+
+Done: java-llama.cpp 4.2.0 never freed a model, about 275 MB lost on each reload, so the app moved to the maintained fork
+`net.ladenthin:llama`, with the model on one thread of its own, two compiler threads, a collection when idle and, on
+Linux, a native trim. Linux, Ghost Serializer: index peak 894 to 662 MB, idle 893–1172 to about 390 MB, recall unchanged.
 
 ---
 

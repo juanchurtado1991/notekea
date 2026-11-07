@@ -16,7 +16,9 @@ Last updated: 2026-11-05, with 2.10 Vault queries in its smoke test.
   **2.6 Hybrid search** (#120), the eight hand-tuned themes (#123) and **2.7 Graph view** (#122) are done. **2.10
   Vault queries** (#124) are done. **2.11 Vault tasks** (#125, a grouped list, as Reminders) is done. **2.8 Retrieval
   evaluation set** (#126) is done: recall@5 measures 0.94 and 0.90 against baselines of 0.92 and 0.86. **2.13 Packaged
-  check** (#127) is in review: the nightly installs and starts the app on the three systems. Left in M2: 2.9.
+  check** (#127) is done: the nightly installs and starts the app on the three systems. **2.9 M2 performance pass** is in
+  review: the app moved to `net.ladenthin:llama`, because java-llama.cpp 4.2.0 leaked each model it loaded; measures in
+  `docs/performance.md`, Linux only. M2 is complete once it merges.
 
 ## Open work, in order
 
@@ -31,7 +33,7 @@ Last updated: 2026-11-05, with 2.10 Vault queries in its smoke test.
 4. **Audit fixes:** a project-wide audit (2026-11-04) is fixed on `fix/audit-findings`, one commit per finding, waiting
    for the developer's manual review. Tree drag and multi-selection were left as a product decision, and the editor
    toolbar's submenus (Callout, Code block, More) are still mouse-only: `ROADMAP.md` decided the toolbar takes no focus.
-5. **M2** ends with 2.9.
+5. **After 2.9:** check on the nightly that the fork loads on Windows and macOS, then measure memory there.
 6. **Intermittent Self-Test failures on CI:** Windows failed once each in 1.1-07 and 1.4-05, and Ubuntu in 1.14-09 and 1.13-04; none is
    explained yet. 1.12-01 (a real bug) and 1.17-04 are fixed.
 
