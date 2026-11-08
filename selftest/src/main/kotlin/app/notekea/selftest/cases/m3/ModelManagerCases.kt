@@ -6,8 +6,9 @@ import app.notekea.selftest.openVault
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
-private const val OPEN_AI_MODEL = "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Click Settings (the " +
-    "gear at the bottom of the narrow bar on the far left), then AI model in the list on the left."
+private const val OPEN_AI_MODEL =
+    "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Click Settings (the " +
+        "gear at the bottom of the narrow bar on the far left), then AI model in the list on the left."
 
 /** The cases of 3.1, the model manager (`MVP_SMOKE_TEST.md`): Settings → AI model. */
 fun SuiteBuilder.modelManagerCases() {
