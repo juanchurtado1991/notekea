@@ -32,7 +32,9 @@ class RangeFileServer(
             exchange.sendResponseHeaders(status, NO_BODY)
             return
         }
-        val from = range?.takeUnless { ignoresRange }?.removePrefix(prefix = RANGE_PREFIX)?.removeSuffix(suffix = "-")?.toInt() ?: 0
+        val from =
+            range?.takeUnless { ignoresRange }?.removePrefix(prefix = RANGE_PREFIX)?.removeSuffix(suffix = "-")?.toInt()
+                ?: 0
         val bytes = body.copyOfRange(fromIndex = from, toIndex = body.size)
         exchange.sendResponseHeaders(if (from > 0) PARTIAL else OK, bytes.size.toLong())
         exchange.responseBody.write(bytes, 0, cutAfter?.coerceAtMost(maximumValue = bytes.size) ?: bytes.size)

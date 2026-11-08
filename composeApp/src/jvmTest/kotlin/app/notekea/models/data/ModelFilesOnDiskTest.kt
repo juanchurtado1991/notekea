@@ -33,7 +33,12 @@ class ModelFilesOnDiskTest {
     private val client = HttpClient(engineFactory = OkHttp) { expectSuccess = false }
     private val downloader = KtorModelDownloader(client = client, folder = folder, dispatchers = dispatchers)
     private val storage = NioModelStorage(modelFolder = folder, dispatchers = dispatchers)
-    private val file = ModelFile(fileName = FILE_NAME, url = server.url, sizeBytes = bytes.size.toLong(), sha256 = sha256(bytes = bytes))
+    private val file = ModelFile(
+        fileName = FILE_NAME,
+        url = server.url,
+        sizeBytes = bytes.size.toLong(),
+        sha256 = sha256(bytes = bytes)
+    )
 
     @AfterTest
     fun tearDown() {
@@ -50,7 +55,11 @@ class ModelFilesOnDiskTest {
         assertEquals(expected = DownloadStep.Finished(outcome = Outcome.Success(value = Unit)), actual = finished)
         assertEquals(expected = Outcome.Success(value = Unit), actual = installed)
         assertContentEquals(expected = bytes, actual = Files.readAllBytes(folder.installed(file = file)))
-        assertEquals(expected = true to 0L, actual = storage.isInstalled(file = file) to storage.partialBytes(file = file))
+        assertEquals(
+            expected = true to 0L,
+            actual =
+            storage.isInstalled(file = file) to storage.partialBytes(file = file)
+        )
     }
 
     @Test
@@ -61,7 +70,10 @@ class ModelFilesOnDiskTest {
         server.cutAfter = null
         downloader.download(file = file, fromByte = kept).last()
 
-        assertEquals(expected = DownloadStep.Finished(outcome = Outcome.Failure(error = ModelError.Network)), actual = dropped)
+        assertEquals(
+            expected = DownloadStep.Finished(outcome = Outcome.Failure(error = ModelError.Network)),
+            actual = dropped
+        )
         assertEquals(expected = 100_000L, actual = kept)
         assertEquals(expected = listOf(null, "bytes=100000-"), actual = server.ranges)
         assertEquals(expected = Outcome.Success(value = Unit), actual = storage.verifyAndInstall(file = file))
@@ -84,7 +96,10 @@ class ModelFilesOnDiskTest {
 
         val finished = downloader.download(file = file, fromByte = 0).last()
 
-        assertEquals(expected = DownloadStep.Finished(outcome = Outcome.Failure(error = ModelError.Network)), actual = finished)
+        assertEquals(
+            expected = DownloadStep.Finished(outcome = Outcome.Failure(error = ModelError.Network)),
+            actual = finished
+        )
         assertEquals(expected = 0L, actual = storage.partialBytes(file = file))
     }
 
@@ -96,7 +111,11 @@ class ModelFilesOnDiskTest {
         val installed = storage.verifyAndInstall(file = wrong)
 
         assertEquals(expected = Outcome.Failure(error = ModelError.ChecksumMismatch), actual = installed)
-        assertEquals(expected = false to 0L, actual = storage.isInstalled(file = wrong) to storage.partialBytes(file = wrong))
+        assertEquals(
+            expected = false to 0L,
+            actual =
+            storage.isInstalled(file = wrong) to storage.partialBytes(file = wrong)
+        )
     }
 
     @Test
@@ -117,6 +136,8 @@ class ModelFilesOnDiskTest {
 
         fun sha256(
             bytes: ByteArray
-        ): String = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString(separator = "") { "%02x".format(it) }
+        ): String = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString(separator = "") {
+            "%02x".format(it)
+        }
     }
 }
