@@ -1,5 +1,6 @@
 package app.notekea
 
+import app.notekea.models.presentation.ModelManagerScreen
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -119,7 +120,11 @@ private fun WindowContent(
                 }
             }
         )
-        WindowDialogsHost(platformConventions = host.conventions, dialogs = host.dialogs)
+        WindowDialogsHost(
+            platformConventions = host.conventions,
+            dialogs = host.dialogs,
+            aiModelSection = { ModelManagerScreen(modifier = it) }
+        )
     }
 }
 

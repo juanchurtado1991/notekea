@@ -39,6 +39,7 @@ class AboutAndSettingsScreenTest {
                 SETTINGS_CLOSE to {
                     SettingsDialog(
                         onDismiss = { dismissed++ },
+                        aiModelSection = {},
                         viewModel = AppearanceViewModel(appearanceStore = FakeAppearanceStore())
                     )
                 }
