@@ -52,13 +52,13 @@ class CoroutineModelInstallerTest {
     @Test
     fun `a paused installation keeps its bytes and resumes from them`() = runTest(context = testDispatcher) {
         storage.installed += ModelCatalogs.reranker.fileName
-        downloader.isHeld = true
+        downloader.held += ModelCatalogs.small.file.fileName
         installer.start(model = ModelCatalogs.small)
         advanceUntilIdle()
         installer.pause()
         advanceUntilIdle()
         val paused = installer.session.value
-        downloader.isHeld = false
+        downloader.held.clear()
         installer.start(model = ModelCatalogs.small)
         advanceUntilIdle()
 
@@ -77,7 +77,7 @@ class CoroutineModelInstallerTest {
     @Test
     fun `cancelling deletes what the model downloaded and ends the installation`() = runTest(context = testDispatcher) {
         storage.installed += ModelCatalogs.reranker.fileName
-        downloader.isHeld = true
+        downloader.held += ModelCatalogs.small.file.fileName
         installer.start(model = ModelCatalogs.small)
         advanceUntilIdle()
         installer.cancel()
@@ -100,5 +100,23 @@ class CoroutineModelInstallerTest {
 
         assertEquals(expected = InstallProgress.Failed(error = ModelError.Network), actual = failed)
         assertNull(actual = installer.session.value)
+    }
+
+    @Test
+    fun `a resumed installation keeps its total after the reranker finished`() = runTest(context = testDispatcher) {
+        downloader.held += ModelCatalogs.small.file.fileName
+        installer.start(model = ModelCatalogs.small)
+        advanceUntilIdle()
+        installer.pause()
+        advanceUntilIdle()
+        val paused = installer.session.value?.progress
+        installer.start(model = ModelCatalogs.small)
+        advanceUntilIdle()
+
+        assertEquals(expected = InstallProgress.Downloading(doneBytes = 90, totalBytes = 140), actual = paused)
+        assertEquals(
+            expected = InstallProgress.Downloading(doneBytes = 115, totalBytes = 140),
+            actual = installer.session.value?.progress
+        )
     }
 }

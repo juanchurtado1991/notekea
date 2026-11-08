@@ -13,7 +13,10 @@ class RecommendModelUseCaseTest {
             recommend(catalog = ModelCatalogs.catalog, hardware = Hardware(memoryGb = it, videoMemoryGb = null)).size
         }
 
-        assertEquals(expected = listOf(ModelSize.SMALL, ModelSize.MEDIUM, ModelSize.LARGE, ModelSize.LARGE), actual = sizes)
+        assertEquals(
+            expected = listOf(ModelSize.SMALL, ModelSize.MEDIUM, ModelSize.LARGE, ModelSize.LARGE),
+            actual = sizes
+        )
     }
 
     @Test
@@ -21,14 +24,19 @@ class RecommendModelUseCaseTest {
         val sixteenWithGpu = Hardware(memoryGb = 16, videoMemoryGb = 8)
         val eightWithGpu = Hardware(memoryGb = 8, videoMemoryGb = 12)
 
-        val sizes = listOf(sixteenWithGpu, eightWithGpu).map { recommend(catalog = ModelCatalogs.catalog, hardware = it).size }
+        val sizes = listOf(sixteenWithGpu, eightWithGpu).map {
+            recommend(catalog = ModelCatalogs.catalog, hardware = it).size
+        }
 
         assertEquals(expected = listOf(ModelSize.LARGE, ModelSize.MEDIUM), actual = sizes)
     }
 
     @Test
     fun `a computer below every minimum still gets the smallest model`() {
-        val size = recommend(catalog = ModelCatalogs.catalog, hardware = Hardware(memoryGb = 4, videoMemoryGb = null)).size
+        val size = recommend(
+            catalog = ModelCatalogs.catalog,
+            hardware = Hardware(memoryGb = 4, videoMemoryGb = null)
+        ).size
 
         assertEquals(expected = ModelSize.SMALL, actual = size)
     }

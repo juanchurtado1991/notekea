@@ -7,6 +7,8 @@ import app.notekea.models.domain.InstallProgress
 import app.notekea.models.domain.InstallSession
 import app.notekea.models.domain.ModelCatalogSource
 import app.notekea.models.domain.ModelInstaller
+import app.notekea.models.domain.ModelFile
+import app.notekea.models.domain.ModelSize
 import app.notekea.models.domain.ModelStorage
 import app.notekea.core.domain.AppDispatchers
 import kotlinx.coroutines.CoroutineScope
@@ -34,6 +36,7 @@ class CoroutineModelInstaller(
     private val scope = CoroutineScope(context = SupervisorJob() + dispatchers.io)
     private val current = MutableStateFlow<InstallSession?>(value = null)
     private val job = MutableStateFlow<Job?>(value = null)
+    private val counted = MutableStateFlow<Counted?>(value = null)
 
     override val session: StateFlow<InstallSession?> = current.asStateFlow()
 
@@ -41,15 +44,19 @@ class CoroutineModelInstaller(
         model: ChatModel
     ) {
         val previous = job.value
+        val resumed = counted.value?.takeIf { it.size == model.size }?.files
         current.value =
             InstallSession(size = model.size, progress = InstallProgress.Downloading(doneBytes = 0, totalBytes = 0))
         job.value = scope.launch {
             previous?.cancelAndJoin()
             val reranker = catalogSource.load().reranker
-            install(model = model, reranker = reranker).collect { progress ->
+            val files = resumed ?: listOf(reranker, model.file).filterNot { storage.isInstalled(file = it) }
+            counted.value = Counted(size = model.size, files = files)
+            install(model = model, reranker = reranker, counted = files).collect { progress ->
                 current.update { it?.copy(progress = progress) }
                 if (progress == InstallProgress.Installed) {
                     activeModelStore.save(size = model.size)
+                    counted.value = null
                     current.value = null
                 }
             }
@@ -65,11 +72,18 @@ class CoroutineModelInstaller(
         val size = current.value?.size ?: return
         val previous = job.value
         current.value = null
+        counted.value = null
         job.value = scope.launch {
             previous?.cancelAndJoin()
             catalogSource.load().models.firstOrNull { it.size == size }?.let { storage.delete(file = it.file) }
         }
     }
+
+    /** The files an installation of [size] counted when it began, kept while it is paused or failed. */
+    private data class Counted(
+        val size: ModelSize,
+        val files: List<ModelFile>
+    )
 
     /** Stops every download, keeping their bytes; the installer is not used after it. */
     fun close() {
