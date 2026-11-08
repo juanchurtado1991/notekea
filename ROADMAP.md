@@ -1020,6 +1020,10 @@ Extends the eval set with expected facts per question; a manual-run task reports
 (cited paragraph actually contains the fact) for the active model. It also reports latency per step, so 3.5
 and 3.6 compare quality and speed for each model size.
 
+Spike (`docs/spikes/2026-11-08-answer-quality.md`, 2026-11-08): expected facts agree with a manual grade 0.90–0.97 of
+the time and a 9B judge 0.76–0.88, so the facts are the measure and a judge only a second opinion; the spike's facts
+and trap questions start the set, which also needs harder questions (two notes, dates, comparisons).
+
 ### ⬜ 3.5 Answer pipeline — `feature/answer-pipeline`
 
 Replaces the single "retrieve and answer" call of 3.2 with steps that make small models precise
@@ -1034,6 +1038,12 @@ Replaces the single "retrieve and answer" call of 3.2 with steps that make small
    is left the assistant says "I couldn't find this in your notes".
 
 Each step sits behind an option so 3.4 can measure it alone and in combination.
+
+Measured before it is built (`docs/spikes/2026-11-08-answer-quality.md`): on every model, one call over the five
+reranked chunks (cited, `NOT_FOUND` when they do not answer) beat extraction and removing unsupported sentences, and
+was four to eight times faster; extraction loses answers in tables and lists. So 3.2's single call is the baseline
+to beat, and a step is kept only if 3.4 shows it helps. The reranker gate is −8, not −5: the models decline on
+their own and −5 turned away answerable questions.
 - **Done when:** on the evaluation set, citation accuracy beats 3.2 for Small, Medium and Large, and the median
   answer time stays within the budget set by 3.0.
 
