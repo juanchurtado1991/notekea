@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Spike report `docs/spikes/2026-11-08-model-tournament.md` (Linux only): eight open models on 504 questions;
+  Qwen3.5 2B, 4B and 9B stay the defaults, and answers are graded strictly (facts, language, no pasted excerpt).
 - Spike report `docs/spikes/2026-11-08-answer-quality.md` (Linux only): the three default models graded on 92
   questions, by hand and automatically; answering in one call beats the extraction pipeline on every model, the
   reranker gate moves to −8, expected facts grade answers better than a model judge, and parallel calls or
