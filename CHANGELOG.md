@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Spike report `docs/spikes/2026-11-08-answer-quality.md` (Linux only): the three default models graded on 92
+  questions, by hand and automatically; answering in one call beats the extraction pipeline on every model, the
+  reranker gate moves to −8, and expected facts grade answers better than a model judge.
 - Spike report `docs/spikes/2026-11-07-llm-parallel.md` (`ROADMAP.md` 3.0, Linux only): parallel slots, the Vulkan
   route, prompt time, memory, grammar, reranking and actions measured on seven open models; Qwen3.5 2B, 4B and 9B
   become the Small, Medium and Large defaults and bge-reranker-v2-m3 the reranker, until 3.4 confirms them.

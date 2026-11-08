@@ -3,7 +3,7 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-07, with the 3.0 spike in review.
+Last updated: 2026-11-08, with the answer quality spike in review.
 
 ## Milestones
 
@@ -19,11 +19,14 @@ Last updated: 2026-11-07, with the 3.0 spike in review.
   check** (#127) is done: the nightly installs and starts the app on the three systems. **2.9 M2 performance pass**
   (#128) is done: the app moved to `net.ladenthin:llama`, because java-llama.cpp 4.2.0 leaked each model it loaded;
   measures in `docs/performance.md`, Linux only.
-- **M3 — Chat with citations:** started. **3.0 Parallel inference spike** (#129) is in review
+- **M3 — Chat with citations:** started. **3.0 Parallel inference spike** (#129) is done
   (`docs/spikes/2026-11-07-llm-parallel.md`, Linux only): Qwen3.5 2B, 4B and 9B as Small, Medium and Large,
   bge-reranker-v2-m3, Vulkan or Metal for the GPU, no mmap on the CPU, slots 1 / 2 / 4 by memory. Preliminary until
-  3.4. Next: 3.1 Model manager and 3.2 Chat engine, which must fit chatting with the Small model under 2.5 GB (the
-  spike's estimate is 2.7–3.0 GB).
+  3.4. The **answer quality spike** (`docs/spikes/2026-11-08-answer-quality.md`) is in review: answering in one call
+  beats the extraction pipeline on every model; Small is right 53 % and wrong 13 %, Medium right 71 % and wrong 3 %;
+  the reranker gate moves from −5 to −8. **The developer decides** what Small does on 8 GB (the report's three
+  options). Next: 3.1 Model manager and 3.2 Chat engine, which must fit chatting with the Small model under 2.5 GB
+  (the spike's estimate is 2.7–3.0 GB).
 
 ## Open work, in order
 
@@ -42,7 +45,9 @@ Last updated: 2026-11-07, with the 3.0 spike in review.
 6. **Intermittent Self-Test failures on CI:** Windows failed once each in 1.1-07 and 1.4-05, and Ubuntu in 1.14-09 and 1.13-04; none is
    explained yet. 1.12-01 (a real bug) and 1.17-04 are fixed.
 7. **The 3.0 bench** (a Java server and Python scripts, outside the repository) is in the developer's
-   `~/.cache/notekea-spike`, with every model and result; 3.4 can reuse its 30 actions and its unanswerable questions.
+   `~/.cache/notekea-spike`, with every model and result; 3.4 can reuse its 30 actions and its unanswerable questions,
+   and the answer quality spike's expected facts and trap questions (`bench/facts.json`) and manual grades
+   (`bench/mine.py`).
 
 ## The release run
 
