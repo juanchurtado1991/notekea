@@ -34,6 +34,7 @@ import app.notekea.core.presentation.components.NotekeaIconButton
 import app.notekea.core.presentation.components.NotekeaMissingFile
 import app.notekea.core.presentation.components.NotekeaPalette
 import app.notekea.core.presentation.components.NotekeaPaletteItem
+import app.notekea.core.presentation.components.NotekeaProgressBar
 import app.notekea.core.presentation.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.components.NotekeaTab
 import app.notekea.core.presentation.components.NotekeaTabRow
@@ -152,6 +153,11 @@ internal fun FeedbackSection() {
         NotekeaProgressIndicator(label = PROGRESS_LABEL)
         Text(text = PROGRESS_LABEL, style = MaterialTheme.typography.bodySmall)
     }
+    NotekeaProgressBar(
+        fraction = PROGRESS_FRACTION,
+        label = PROGRESS_LABEL,
+        modifier = Modifier.width(width = PROGRESS_WIDTH_DP.dp)
+    )
     ErrorBanner(
         message = SAMPLE_ERROR,
         onDismiss = {},

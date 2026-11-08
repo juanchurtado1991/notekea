@@ -6,6 +6,7 @@ import app.notekea.core.platform.di.jvmPlatformModule
 import app.notekea.core.notes.di.jvmCoreNotesModule
 import app.notekea.tree.di.jvmTreeModule
 import app.notekea.editor.di.jvmEditorModule
+import app.notekea.models.di.jvmModelsModule
 import app.notekea.vault.di.jvmVaultModule
 import org.koin.core.module.Module
 
@@ -18,5 +19,6 @@ val desktopModules: List<Module> = listOf(
     jvmCoreNotesModule,
     jvmTreeModule,
     jvmEditorModule,
+    jvmModelsModule,
     jvmVaultModule
 )

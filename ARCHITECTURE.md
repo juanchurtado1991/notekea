@@ -236,7 +236,7 @@ themselves.
   draggable, with a menu), tool rails, grid cards with a picture, toolbar capsules, chips, property fields edited in
   place, date fields with a compact month calendar, tooltips that name shortcuts, segmented controls, dialogs, keycaps, coming-soon notices, the logo, badges, status items, cards,
   section headers (small capitals, folding, with a count) and the animated fold under them, a status bar with
-  clickable labels, separators and a progress item, scroll areas with a desktop scrollbar (`NotekeaScrollArea`,
+  clickable labels, separators and a progress item, a progress bar, scroll areas with a desktop scrollbar (`NotekeaScrollArea`,
   `NotekeaLazyScrollArea`), action rows with keycaps (an empty pane's start actions),
   empty states, error banners, context menus (nestable, with checked choices, explained options and submenus) and menu
   buttons, a grid size picker, attachments (image, file chip, missing file, embedded note), confirmation dialogs and a

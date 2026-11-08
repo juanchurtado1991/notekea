@@ -1,6 +1,12 @@
 package app.notekea.core.presentation.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import app.notekea.core.presentation.components.focusBorder
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,8 +35,6 @@ import app.notekea.core.presentation.theme.NotekeaDimensions
 import app.notekea.core.presentation.theme.NotekeaIcons
 import app.notekea.resources.Res
 import app.notekea.resources.settings_close
-import app.notekea.resources.settings_section_ai
-import app.notekea.resources.settings_section_appearance
 import app.notekea.resources.settings_section_daily_notes
 import app.notekea.resources.settings_section_editor
 import app.notekea.resources.settings_section_files
@@ -55,37 +59,56 @@ private val SECTIONS_TO_COME = listOf(
     Res.string.settings_section_files,
     Res.string.settings_section_daily_notes,
     Res.string.settings_section_templates,
-    Res.string.settings_section_ai,
     Res.string.settings_section_sync,
     Res.string.settings_section_shortcuts
 )
 
 /**
- * Settings: the sections on the left, Appearance (`ROADMAP.md` 2.12) chosen and shown on the right, and the sections to
- * come dimmed under "Coming soon" (5.2). Esc, a click outside or ✕ closes it ([onDismiss]).
+ * Settings: the sections on the left, Appearance (`ROADMAP.md` 2.12) and AI model (3.1) to choose from, the chosen one
+ * on the right, and the sections to come dimmed under "Coming soon" (5.2). AI model belongs to a feature, so the app
+ * gives it as [aiModelSection]. Esc, a click outside or ✕ closes it ([onDismiss]).
  */
 @Composable
 fun SettingsDialog(
     onDismiss: () -> Unit,
+    aiModelSection: @Composable (Modifier) -> Unit,
     viewModel: AppearanceViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    var section by remember { mutableStateOf(value = SettingsSection.APPEARANCE) }
     NotekeaDialog(
         onDismiss = onDismiss,
         modifier = Modifier.size(width = DIALOG_WIDTH_DP.dp, height = DIALOG_HEIGHT_DP.dp)
-    ) { SettingsContent(state = state, onIntent = viewModel::onIntent, onDismiss = onDismiss) }
+    ) {
+        SettingsContent(
+            section = section,
+            onSectionChoose = { section = it },
+            onDismiss = onDismiss
+        ) {
+            when (section) {
+                SettingsSection.APPEARANCE -> AppearanceSettings(
+                    state = state,
+                    onIntent = viewModel::onIntent,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                SettingsSection.AI_MODEL -> aiModelSection(Modifier.fillMaxSize())
+            }
+        }
+    }
 }
 
 @Composable
 private fun SettingsContent(
-    state: AppearanceState,
-    onIntent: (AppearanceIntent) -> Unit,
-    onDismiss: () -> Unit
+    section: SettingsSection,
+    onSectionChoose: (SettingsSection) -> Unit,
+    onDismiss: () -> Unit,
+    content: @Composable () -> Unit
 ) {
     Row {
-        SectionList()
+        SectionList(section = section, onSectionChoose = onSectionChoose)
         Box(modifier = Modifier.weight(weight = 1f).fillMaxHeight()) {
-            AppearanceSettings(state = state, onIntent = onIntent, modifier = Modifier.fillMaxSize())
+            content()
             Box(modifier = Modifier.align(alignment = Alignment.TopEnd).padding(all = NotekeaDimensions.SpacingS)) {
                 NotekeaIconButton(
                     icon = NotekeaIcons.Close,
@@ -98,9 +121,12 @@ private fun SettingsContent(
     }
 }
 
-/** "Settings", Appearance chosen, then the sections to come, dimmed under "Coming soon": they cannot be chosen yet. */
+/** "Settings", the sections that can be chosen, then the sections to come, dimmed under "Coming soon". */
 @Composable
-private fun SectionList() {
+private fun SectionList(
+    section: SettingsSection,
+    onSectionChoose: (SettingsSection) -> Unit
+) {
     Column(
         modifier = Modifier
             .width(width = NAV_WIDTH_DP.dp)
@@ -114,45 +140,62 @@ private fun SectionList() {
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.onSurface
         )
-        ChosenSection(name = Res.string.settings_section_appearance)
-        Text(
-            text = stringResource(resource = Res.string.settings_soon_badge),
-            modifier = Modifier.padding(
-                start = NotekeaDimensions.SpacingS,
-                top = NotekeaDimensions.SpacingL,
-                bottom = NotekeaDimensions.SpacingXs
-            ),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        SECTIONS_TO_COME.forEach {
-            Text(
-                text = stringResource(resource = it),
-                modifier = Modifier.padding(
-                    horizontal = NotekeaDimensions.SpacingS,
-                    vertical = NotekeaDimensions.SpacingXs
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = SECTION_ALPHA)
+        SettingsSection.entries.forEach {
+            SectionRow(
+                name = it.label,
+                isChosen = it == section,
+                onClick = { onSectionChoose(it) }
             )
         }
+        SectionsToCome()
     }
 }
 
-/** The section shown on the right, highlighted as the selected row. */
+/** "Coming soon" and the sections still to come under it, dimmed: they cannot be chosen yet. */
 @Composable
-private fun ChosenSection(
-    name: StringResource
+private fun SectionsToCome() {
+    Text(
+        text = stringResource(resource = Res.string.settings_soon_badge),
+        modifier = Modifier.padding(
+            start = NotekeaDimensions.SpacingS,
+            top = NotekeaDimensions.SpacingL,
+            bottom = NotekeaDimensions.SpacingXs
+        ),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    SECTIONS_TO_COME.forEach {
+        Text(
+            text = stringResource(resource = it),
+            modifier = Modifier.padding(
+                horizontal = NotekeaDimensions.SpacingS,
+                vertical = NotekeaDimensions.SpacingXs
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = SECTION_ALPHA)
+        )
+    }
+}
+
+/** A section that can be chosen, highlighted as the selected row while it is shown on the right. */
+@Composable
+private fun SectionRow(
+    name: StringResource,
+    isChosen: Boolean,
+    onClick: () -> Unit
 ) {
+    val shape = RoundedCornerShape(size = NotekeaDimensions.ControlRadius)
     Text(
         text = stringResource(resource = name),
         modifier = Modifier
             .fillMaxWidth()
-            .clip(shape = RoundedCornerShape(size = NotekeaDimensions.ControlRadius))
-            .background(color = MaterialTheme.colorScheme.primaryContainer)
+            .clip(shape = shape)
+            .focusBorder(color = MaterialTheme.colorScheme.primary, shape = shape)
+            .background(color = if (isChosen) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+            .clickable(onClick = onClick)
             .padding(horizontal = NotekeaDimensions.SpacingS, vertical = NotekeaDimensions.SpacingXs),
         style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onPrimaryContainer
+        color = if (isChosen) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
     )
 }
 
@@ -161,7 +204,9 @@ private fun ChosenSection(
 private fun SettingsDialogPreview() {
     NotekeaPreviewThemes {
         Box(modifier = Modifier.size(width = DIALOG_WIDTH_DP.dp, height = DIALOG_HEIGHT_DP.dp)) {
-            SettingsContent(state = AppearanceState(), onIntent = {}, onDismiss = {})
+            SettingsContent(section = SettingsSection.APPEARANCE, onSectionChoose = {}, onDismiss = {}) {
+                AppearanceSettings(state = AppearanceState(), onIntent = {}, modifier = Modifier.fillMaxSize())
+            }
         }
     }
 }
