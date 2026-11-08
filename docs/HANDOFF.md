@@ -25,9 +25,11 @@ Last updated: 2026-11-08, with the answer quality spike in review.
   3.4. The **answer quality spike** (`docs/spikes/2026-11-08-answer-quality.md`) is in review: answering in one call
   beats the extraction pipeline on every model; Small is right 53 % and wrong 13 %, Medium right 71 % and wrong 3 %;
   the reranker gate moves from −5 to −8; parallel calls and judges did not improve Small, and voting over 3 drafts
-  helped only Medium (3.6's starting point). On 8 GB, Small answers with its sources first and a line asking to check
-  them (decided 2026-11-08, in 3.3). Next: 3.1 Model manager and 3.2 Chat engine, which must fit chatting with the
-  Small model under 2.5 GB (the spike's estimate is 2.7–3.0 GB).
+  helped only Medium (3.6's starting point). A **model tournament** on 504 questions
+  (`docs/spikes/2026-11-08-model-tournament.md`) kept Qwen3.5 2B, 4B and 9B against five other open models. On 8 GB,
+  Small answers with its sources first and a line asking to check them (decided 2026-11-08, in 3.3). Next: 3.1 Model
+  manager and 3.2 Chat engine, which must fit chatting with the Small model under 2.5 GB (the spike's estimate is
+  2.7–3.0 GB).
 
 ## Open work, in order
 
@@ -47,8 +49,9 @@ Last updated: 2026-11-08, with the answer quality spike in review.
    explained yet. 1.12-01 (a real bug) and 1.17-04 are fixed.
 7. **The 3.0 bench** (a Java server and Python scripts, outside the repository) is in the developer's
    `~/.cache/notekea-spike`, with every model and result; 3.4 can reuse its 30 actions and its unanswerable questions,
-   and the answer quality spike's expected facts and trap questions (`bench/facts.json`) and manual grades
-   (`bench/mine.py`).
+   the answer quality spike's expected facts and trap questions (`bench/facts.json`) and manual grades
+   (`bench/mine.py`), and the tournament's 504 questions (`bench/qset.json`) with their manual grades (`bench/mineS.py`,
+   `bench/mineS2.py`).
 
 ## The release run
 
