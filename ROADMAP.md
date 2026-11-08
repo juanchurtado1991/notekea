@@ -1026,6 +1026,10 @@ and 3.6 compare quality and speed for each model size.
 Spike (`docs/spikes/2026-11-08-answer-quality.md`, 2026-11-08): expected facts agree with a manual grade 0.90–0.97 of
 the time and a 9B judge 0.76–0.88, so the facts are the measure and a judge only a second opinion; the spike's facts
 and trap questions start the set, which also needs harder questions (two notes, dates, comparisons).
+Tournament (`docs/spikes/2026-11-08-model-tournament.md`): on 504 questions, Qwen3.5 2B, 4B and 9B beat SmolLM3,
+Ministral 3B, Phi-4-mini and Gemma 4 E2B and E4B at every size, so the 3.0 defaults stay. Plain facts can be fooled
+by a model that pastes its chunks, so 3.4 grades strictly (facts, the question's language, no pasted excerpt); the
+504 questions start its set.
 
 ### ⬜ 3.5 Answer pipeline — `feature/answer-pipeline`
 
