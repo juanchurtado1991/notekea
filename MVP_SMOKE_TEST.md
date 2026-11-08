@@ -488,3 +488,18 @@ The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly: `
 | 2.11-03 | Check Record a demo video in the tab; open Projects/Notekea launch; uncheck it there and go back | It leaves the list at once and its note shows it checked; back in the tab it is listed again | 2.11 | Manual (eyes) | `TasksViewModelTest` | | | |
 | 2.11-04 | Change a task's text in another editor and save | The tab shows the new text within a second | 2.11 | Manual (system) | `NoteTaskCollectorTest` | | | |
 | 2.11-05 | Click the text of Find a flat near the river | Projects/Trip to Lisbon opens with that task selected | 2.11 | Manual (eyes) | `TasksViewModelTest` | | | |
+
+## M3 — Chat with citations
+
+### 3.1 Model manager
+
+The cases run in `smoke-data/vaults/Playground Vault`, prepared with `smoke.sh prepare` (`smoke.ps1 prepare` on
+Windows). The downloads come from Hugging Face: 3.1-02 and 3.1-03 download up to 3.2 GB (Medium and its reranker) or
+6.1 GB (Large), so they need a connection and the disk space.
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 3.1-01 | In the Playground Vault open Settings and click AI model; click Other sizes | One size is marked Recommended (Small on 8 GB, Medium on 16 GB, Large on 32 GB or with a GPU of 8 GB and 16 GB of memory), with Download; Other sizes shows the other two, and a size this computer lacks the memory for says how much it needs | 3.1 | Self-Test | 3.1-01 | | | |
+| 3.1-02 | Click Download on the recommended size; at a quarter click Pause, press Esc and open AI model again; click Resume and wait | The bar grows with the gigabytes done; paused it stays where it was, also after closing Settings; Resume goes on from there, shows Checking the file… and the card ends In use, with Delete | 3.1 | Manual (costly) | `InstallModelUseCaseTest`, `CoroutineModelInstallerTest`, `ModelFilesOnDiskTest`, `ModelManagerScreenTest` | | | |
+| 3.1-03 | Under Other sizes click Download on Small and Cancel after a few seconds; on the model in use click Delete, Cancel, then Delete and confirm | Cancel ends the download and Small shows Download again; the question keeps the model on Cancel and deletes it on Delete, and no size is In use | 3.1 | Manual (costly) | `CoroutineModelInstallerTest`, `ModelManagerViewModelTest`, `ModelManagerScreenTest` | | | |
+| 3.1-04 | Start a download, turn the network off for half a minute, turn it on and click Try again | The download stops with a message to check the connection and Try again; it goes on from where it stopped | 3.1 | Manual (system) | `ModelFilesOnDiskTest`, `InstallModelUseCaseTest` | | | |

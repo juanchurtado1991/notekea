@@ -965,22 +965,34 @@ requirement, including the KV cache of its parallel slots (3.0) and the editor i
 the machine's RAM and, when it has a dedicated GPU, its video memory (Small on 8 GB, Medium on 16 GB, a larger size
 when the GPU holds it), with nothing technical to choose. The models and sizes are those of 3.0.
 
-**UI — Model manager** (opened from Settings or the status bar):
+**UI — Model manager** (Settings → AI model; design C, chosen by the developer on 2026-11-08):
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ AI model                                                 │
-│ ○ Small  (~2B, 1.3 GB) · fast, basic answers             │
-│ ● Medium (~4B, 2.7 GB) · recommended for 16 GB  [Active] │
-│ ○ Large  (~9B, 5.7 GB) · best answers, GPU or 32 GB      │
-│                                                          │
-│ Downloading Medium ▓▓▓▓▓▓░░░░ 61% · 1.4 / 2.3 GB  [Pause]│
-│ Models are stored in ~/Library/Application Support/...   │
+│ Chat answers from your notes with a model that runs on   │
+│ this computer. Medium fits it, with 16 GB of memory.     │
+│ ┌──────────────────────────────────────────────────────┐ │
+│ │ Medium · Qwen3.5 4B  [Recommended]                   │ │
+│ │ Good answers on most computers.                      │ │
+│ │ ▓▓▓▓▓▓▓▓▓▓▓░░░░░░░ 1.9 GB of 3.2 GB  [Pause] Cancel  │ │
+│ └──────────────────────────────────────────────────────┘ │
+│ › OTHER SIZES                                         2  │
+│ Models are kept in ~/.local/share/notekea/models         │
 └─────────────────────────────────────────────────────────┘
 ```
 
-- States: not downloaded, downloading (pause/resume/cancel), verifying, ready, failed checksum (retry),
-  not enough disk space.
+- States: not downloaded, downloading (pause/resume/cancel), verifying, in use or downloaded (use, delete with a
+  question), failed (network, checksum, disk space or folder) with Try again; while one size installs, the others
+  wait.
+- **Decided while building it (2026-11-08):** the catalog ships with the app (`files/model-catalog.json`), each file
+  pinned to a Hugging Face commit and checked by its SHA-256 (a mirror of our own comes later if a link ever moves).
+  A file keeps its name only once verified (`.part` until then), so a paused or dropped download resumes with a
+  `Range`. The installer outlives Settings and the window; a model that finishes installing becomes the one in use.
+  Each model names the memory it needs (8 / 16 / 32 GB on the CPU, or 2 / 4 / 8 GB of video memory with 8 / 8 / 16
+  GB of RAM), and the largest that fits is recommended. Video memory is read from `nvidia-smi` and, on Linux, AMD's
+  `/sys/class/drm`; other GPUs are recommended by RAM until 3.7 measures them. The status bar entry moves to the
+  chat panel (3.3), which links to Settings → AI model when no model is in use.
 
 ### ⬜ 3.2 Chat engine — `feature/chat-engine`
 
@@ -1014,7 +1026,9 @@ citations that do not match a retrieved chunk.
   "Reading 6 notes…", "Checking sources…"), never a bare spinner.
 - **Deep answer** toggle next to the input (3.6), off by default, with a one-line hint: "Takes longer, checks more
   drafts against your notes."
-- States: model not downloaded (inline card with "Download model"), index not ready, generating, error with retry.
+- States: model not downloaded (inline card with "Download model", which opens Settings → AI model, 3.1), index not
+  ready, generating, error with retry. While a model downloads, the status bar shows its progress and opens Settings
+  → AI model (moved here from 3.1, whose Settings section runs the download).
 - Chat history per vault, stored as JSON (Ghost) in the app data directory, with "Clear history".
 
 ### ⬜ 3.4 Answer evaluation — `chore/answer-eval`
