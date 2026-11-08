@@ -1004,6 +1004,9 @@ citations that do not match a retrieved chunk.
 - Citations rendered as `accent` chips `[1]`, `[2]`; hover shows the snippet, click opens the note scrolled to
   and highlighting the cited paragraph.
 - "Sources" list under each answer with note titles.
+- With the Small model (8 GB machines), the sources come first, above the answer, with one line saying answers
+  from the small model should be checked against them (decided with the developer, 2026-11-08: Small is right about
+  half the time and wrong one time in eight, `docs/spikes/2026-11-08-answer-quality.md`).
 - Scope selector above the input: **Whole vault** / **This note** / **This folder**.
 - Input: multiline, `Enter` sends, `Shift+Enter` new line; `Mod+L` focuses the chat from anywhere.
 - When nothing relevant is found the assistant says so instead of guessing ("I couldn't find this in your notes").

@@ -171,10 +171,10 @@ budget of 12 / 15 s, and Medium becomes usable on the CPU too.
   ones.
 - **3.4 grades with expected facts** (automatic, about 0.9–0.97 agreement with a manual grade) and uses a model judge
   only as a second opinion. The facts and traps of this spike (`bench/facts.json`) are the start of its set.
-- **Model sizes:** Medium is the first size that answers well; Small gets one answer in eight wrong, so it needs its
-  sources in view.
+- **Model sizes:** Medium is the first size that answers well; Small gets one answer in eight wrong, so it shows
+  its sources first (decided below).
 
-## Open decision for the developer
+## Small on 8 GB (decided with the developer, 2026-11-08)
 
 Small fits an 8 GB laptop and Medium does not (3.0: 2.7–3.0 GB with Small already). Options for 8 GB:
 1. **Small, with the sources first:** the answer shows its cited notes prominently and a one-line note that answers
@@ -182,6 +182,9 @@ Small fits an 8 GB laptop and Medium does not (3.0: 2.7–3.0 GB with Small alre
    the sources are useful even when the sentence is not.
 2. Small that only finds notes (search, no written answer) on 8 GB; chat from Medium up.
 3. Medium on 8 GB anyway, over the 2.5 GB budget of 5.4.
+
+**Decided: option 1.** On 8 GB the chat answers with Small, shows its cited notes first and says in one line that
+answers from the small model should be checked against them (3.3).
 
 ## Not measured
 
