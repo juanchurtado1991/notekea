@@ -40,7 +40,10 @@ class InstallModelUseCaseTest {
         val progress = install(model = ModelCatalogs.small, reranker = ModelCatalogs.reranker).toList()
 
         assertEquals(expected = listOf("small.gguf" to 60L), actual = downloader.calls)
-        assertEquals(expected = InstallProgress.Downloading(doneBytes = 60, totalBytes = 100), actual = progress.first())
+        assertEquals(
+            expected = InstallProgress.Downloading(doneBytes = 60, totalBytes = 100),
+            actual = progress.first()
+        )
     }
 
     @Test
@@ -61,7 +64,10 @@ class InstallModelUseCaseTest {
         val progress = install(model = ModelCatalogs.medium, reranker = ModelCatalogs.reranker).toList()
 
         val needed = 240L + 500_000_000L - 1_000L
-        assertEquals(expected = listOf(InstallProgress.Failed(error = ModelError.NotEnoughDisk(neededBytes = needed))), actual = progress)
+        assertEquals(
+            expected = listOf(InstallProgress.Failed(error = ModelError.NotEnoughDisk(neededBytes = needed))),
+            actual = progress
+        )
         assertEquals(expected = emptyList(), actual = downloader.calls)
     }
 
@@ -88,5 +94,23 @@ class InstallModelUseCaseTest {
             actual = progress.takeLast(n = 2)
         )
         assertEquals(expected = setOf("reranker.gguf"), actual = storage.installed)
+    }
+
+    @Test
+    fun `a resumed installation counts the files it began with, installed ones as done`() = runTest {
+        storage.installed += ModelCatalogs.reranker.fileName
+        storage.partial[ModelCatalogs.small.file.fileName] = 60
+
+        val progress = install(
+            model = ModelCatalogs.small,
+            reranker = ModelCatalogs.reranker,
+            counted = listOf(ModelCatalogs.reranker, ModelCatalogs.small.file)
+        ).toList()
+
+        assertEquals(
+            expected = InstallProgress.Downloading(doneBytes = 100, totalBytes = 140),
+            actual = progress.first()
+        )
+        assertEquals(expected = listOf("small.gguf" to 60L), actual = downloader.calls)
     }
 }

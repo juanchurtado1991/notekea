@@ -94,7 +94,9 @@ class ModelManagerViewModelTest {
     }
 
     @Test
-    fun `while one size installs, the others wait, and its end shows it downloaded`() = runTest(context = testDispatcher) {
+    fun `while one size installs, the others wait, and its end shows it downloaded`() = runTest(
+        context = testDispatcher
+    ) {
         val viewModel = viewModel()
         advanceUntilIdle()
         installer.current.value = InstallSession(
@@ -111,7 +113,10 @@ class ModelManagerViewModelTest {
         assertEquals(
             expected = listOf(
                 ModelStatus.Waiting,
-                ModelStatus.Installing(progress = InstallProgress.Downloading(doneBytes = 10, totalBytes = 240), isPaused = false),
+                ModelStatus.Installing(
+                    progress = InstallProgress.Downloading(doneBytes = 10, totalBytes = 240),
+                    isPaused = false
+                ),
                 ModelStatus.Waiting
             ),
             actual = during
@@ -121,7 +126,9 @@ class ModelManagerViewModelTest {
     }
 
     @Test
-    fun `deleting the model in use asks first, then frees it and leaves none in use`() = runTest(context = testDispatcher) {
+    fun `deleting the model in use asks first, then frees it and leaves none in use`() = runTest(
+        context = testDispatcher
+    ) {
         storage.installed += ModelCatalogs.medium.file.fileName
         activeModelStore.kept.value = ModelSize.MEDIUM
         val viewModel = viewModel()
@@ -134,8 +141,15 @@ class ModelManagerViewModelTest {
 
         assertEquals(expected = ModelSize.MEDIUM, actual = asked)
         assertEquals(expected = listOf("medium.gguf"), actual = storage.deleted)
-        assertEquals(expected = null to null, actual = activeModelStore.kept.value to viewModel.state.value.pendingDelete)
-        assertEquals(expected = ModelStatus.NotInstalled, actual = viewModel.state.value.statusOf(size = ModelSize.MEDIUM))
+        assertEquals(
+            expected = null to null,
+            actual =
+            activeModelStore.kept.value to viewModel.state.value.pendingDelete
+        )
+        assertEquals(
+            expected = ModelStatus.NotInstalled,
+            actual = viewModel.state.value.statusOf(size = ModelSize.MEDIUM)
+        )
     }
 
     @Test

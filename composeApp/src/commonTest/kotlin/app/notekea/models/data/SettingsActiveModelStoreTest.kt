@@ -14,7 +14,10 @@ class SettingsActiveModelStoreTest {
     private val testDispatcher = StandardTestDispatcher()
     private val settings = MapSettings()
 
-    private fun store() = SettingsActiveModelStore(settings = settings, dispatchers = FakeAppDispatchers(dispatcher = testDispatcher))
+    private fun store() = SettingsActiveModelStore(
+        settings = settings,
+        dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
+    )
 
     @Test
     fun `no model is in use at first, and a chosen one is kept for the next run`() = runTest(context = testDispatcher) {

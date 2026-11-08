@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.flow
 
 /**
  * [ModelDownloader] that writes into a [FakeModelStorage] in [chunks] steps: a file in [failing] stops halfway with
- * a network error, and while [isHeld] the download waits after its first half, as a slow connection does, until it
+ * a network error, and a file in [held] waits after its first half, as a slow connection does, until it
  * is cancelled (paused). Every call is kept in [calls], with the byte it resumed from.
  */
 class FakeModelDownloader(
@@ -16,7 +16,7 @@ class FakeModelDownloader(
 ) : ModelDownloader {
     val calls = mutableListOf<Pair<String, Long>>()
     val failing = mutableSetOf<String>()
-    var isHeld = false
+    val held = mutableSetOf<String>()
 
     override fun download(
         file: ModelFile,
@@ -33,7 +33,7 @@ class FakeModelDownloader(
                 emit(value = DownloadStep.Finished(outcome = Outcome.Failure(error = ModelError.Network)))
                 return@flow
             }
-            if (index == 0 && isHeld) awaitCancellation()
+            if (index == 0 && file.fileName in held) awaitCancellation()
         }
         emit(value = DownloadStep.Finished(outcome = Outcome.Success(value = Unit)))
     }

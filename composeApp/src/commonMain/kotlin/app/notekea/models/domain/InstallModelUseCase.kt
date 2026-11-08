@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.flow
 /**
  * Installs [ChatModel] and the catalog's reranker (`ROADMAP.md` 3.1): checks the disk has room for what is still to
  * download, downloads each missing file from where it stopped, checks its SHA-256 and reports the progress of both
- * files as one. It stops at the first failure.
+ * files as one. It stops at the first failure. A resumed installation passes the files it [counted] when it began, so
+ * its total stays the same after a file finished.
  */
 class InstallModelUseCase(
     private val storage: ModelStorage,
@@ -16,12 +17,14 @@ class InstallModelUseCase(
 ) {
     operator fun invoke(
         model: ChatModel,
-        reranker: ModelFile
+        reranker: ModelFile,
+        counted: List<ModelFile>? = null
     ): Flow<InstallProgress> = flow {
         val missing = listOf(reranker, model.file).filterNot { storage.isInstalled(file = it) }
         val partial = missing.associateWith { storage.partialBytes(file = it) }
-        val totalBytes = missing.sumOf { it.sizeBytes }
-        val neededBytes = totalBytes - partial.values.sum()
+        val countedFiles = counted ?: missing
+        val totalBytes = countedFiles.sumOf { it.sizeBytes }
+        val neededBytes = missing.sumOf { it.sizeBytes } - partial.values.sum()
         val freeBytes = storage.freeBytes()
         if (freeBytes < neededBytes + SPARE_BYTES) {
             emit(
@@ -34,7 +37,7 @@ class InstallModelUseCase(
             )
             return@flow
         }
-        var doneBefore = 0L
+        var doneBefore = (countedFiles - missing.toSet()).sumOf { it.sizeBytes }
         for (file in missing) {
             val failure = install(
                 file = file,
