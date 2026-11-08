@@ -1062,6 +1062,11 @@ wins; ties go to the shorter draft. It is chosen by verified support, not by maj
 - **Done when:** on the evaluation set it beats the normal mode's citation accuracy for every model size, and it is
   cancellable at any moment.
 
+Measured before it is built (`docs/spikes/2026-11-08-answer-quality.md`, "Parallel calls and judges"): choosing the
+draft by support did not beat one answer on any model; a majority of 3 drafts helped Medium (4 more right answers,
+none wrong) and not Small or Large, and a model judge did not help. 3.6 starts from the majority vote and offers
+the mode only for the sizes the 3.4 set shows it helps.
+
 ### ⬜ 3.8 Questions in plain words — `feature/plain-queries`
 
 Notes and tasks asked for in plain words ("books I rated 4 or more in 2026", "what is due this week in Garden?") and

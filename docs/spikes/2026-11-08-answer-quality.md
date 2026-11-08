@@ -11,7 +11,7 @@ agent wrote the questions' expected facts and the trap questions, so the grades 
 should have someone else check a sample.
 
 Like 3.0, it ran on Linux only, outside the repository, with the 3.0 bench (`~/.cache/notekea-spike/bench`, scripts
-`q1.py`–`q6.py`). Nothing in the app changed. Same machine and settings as 3.0: RTX 5060 Ti by Vulkan with every
+`q1.py`–`q10.py`). Nothing in the app changed. Same machine and settings as 3.0: RTX 5060 Ti by Vulkan with every
 layer on the GPU, 4 slots, context 4,096 a slot, seed 42, temperature 0.2, reasoning off; Q4_K_M files.
 
 ## Questions and graders
@@ -160,6 +160,66 @@ adds 0.6–1.1 s per 20 chunks on the CPU, 3.0).
 With search and reranking, a whole Direct answer from Small on a 4-thread CPU takes about 3.5 s, well inside 3.0's
 budget of 12 / 15 s, and Medium becomes usable on the CPU too.
 
+## Parallel calls and judges
+
+Asked by the developer the same day: can parallel calls or a judge improve the answers, Small's above all? Each
+idea was run on the same 92 questions with the −8 gate (`q7.py`–`q10.py`); the one-call answer (Direct) is the
+baseline, run again under the new gate.
+- **Top 3:** Direct over the best 3 chunks instead of 5 (less to mix up).
+- **Filter:** one call per chunk in parallel, "Does this excerpt help answer the question?" (yes / no, grammar),
+  then Direct over the chunks kept. Unlike extraction, nothing has to be copied.
+- **Vote:** 3 drafts in parallel (temperature 0.7, three seeds); the draft closest in wording to the other two wins;
+  NOT_FOUND when most drafts say so.
+- **Pick:** the same drafts; code keeps the one whose words are most found in the chunks it cites (3.6's idea of
+  choosing by support, without a model).
+- **Filter + pick:** both.
+- **Judge:** a model reads the chunks and the 3 drafts and picks the best one or none: the drafting model itself, or
+  Qwen3.5-9B as a stronger judge. Graded automatically only (expected facts; its agreement with the manual grade is
+  above).
+
+Manual grade, answerable questions out of 79; "Facts" is the automatic grade out of all 92; median time on the GPU
+(the judge's time is added to the drafts').
+
+| Model | Way | Right | Partial | Wrong | Missed | Facts | Median |
+|---|---|---|---|---|---|---|---|
+| Small | **Direct** | **43** | 15 | 10 | 11 | 56 | **0.23 s** |
+| Small | Top 3 | 38 | 22 | 10 | 9 | 56 | 0.20 s |
+| Small | Vote | 42 | 18 | 10 | 9 | 57 | 0.59 s |
+| Small | Pick | 43 | 17 | 11 | 8 | 58 | 0.59 s |
+| Small | Filter | 39 | 8 | 10 | 22 | 48 | 0.96 s |
+| Small | Filter + pick | 32 | 11 | 11 | 25 | 45 | 1.1 s |
+| Small | Judge: itself | | | | | 58 | 0.85 s |
+| Small | Judge: 9B | | | | | 56 | 1.2 s |
+| Medium | **Direct** | 59 | 14 | 2 | 4 | 70 | **0.52 s** |
+| Medium | Top 3 | 58 | 11 | 3 | 7 | 69 | 0.33 s |
+| Medium | **Vote** | **63** | 10 | **0** | 6 | **76** | 0.94 s |
+| Medium | Pick | 59 | 14 | 2 | 4 | 72 | 0.94 s |
+| Medium | Filter | 52 | 16 | 3 | 8 | 64 | 2.3 s |
+| Medium | Filter + pick | 54 | 14 | 3 | 8 | 70 | 2.5 s |
+| Medium | Judge: itself | | | | | 60 | 1.4 s |
+| Medium | Judge: 9B | | | | | 74 | 1.6 s |
+| Large | **Direct** | **62** | 11 | 2 | 4 | 74 | **0.79 s** |
+| Large | Vote | 60 | 10 | 3 | 6 | 74 | 1.5 s |
+| Large | Pick | 59 | 12 | 2 | 6 | 74 | 1.5 s |
+| Large | Top 3, Filter, Filter + pick | | | | | 72–74 | 0.6–3.0 s |
+
+**Nothing improves Small.** Its three drafts disagree: at least one of them is right in 62 of 79 questions (facts
+grade), against 48 for one answer, so a perfect chooser would help a lot. But neither the majority, nor the code
+that checks support, nor Small or the 9B as judges find the right draft: the judges pick "none" too often (13 and
+19 answerable questions end as NOT_FOUND, against 9 for one answer; Medium judging itself, 23 against 4), and the
+majority is as often wrong as the single answer. The yes / no filter throws away useful
+chunks (22 misses instead of 11), the same failure as extraction.
+
+**Voting helps Medium a little and Large not at all.** Medium with 3 drafts gets 4 more right answers and no wrong
+ones (facts: 76 against 70); Large gets 2 fewer right. A gain that shows up on one model of three, on 79 questions,
+may be chance. On the CPU 3 drafts cost Medium 9.0 s (90th percentile 15.4 s) with 2 slots and 12 threads, against
+3.4 s for one answer.
+
+What follows: the one-call answer stays the default for every size. Voting is the candidate for 3.6 Deep answer from
+Medium up, to be confirmed on the 3.4 set; choosing by verified support (3.6's current plan) did not beat Direct on
+any model here. Making Small better needs something else: a better small model, or the facts of the answer checked
+against the cited chunk by code, which these questions cannot test well.
+
 ## Decisions for 3.1–3.5 (preliminary until 3.4)
 
 - **Answer in one call (Direct) in 3.2 and keep it in 3.5 unless 3.4 shows a step that beats it:** five reranked
@@ -173,6 +233,8 @@ budget of 12 / 15 s, and Medium becomes usable on the CPU too.
   only as a second opinion. The facts and traps of this spike (`bench/facts.json`) are the start of its set.
 - **Model sizes:** Medium is the first size that answers well; Small gets one answer in eight wrong, so it shows
   its sources first (decided below).
+- **No parallel step or judge in 3.5.** None of top 3, filtering, voting, picking by support or a judge beat the
+  one-call answer for Small or Large; 3.6 starts from voting with 3 drafts, which helped Medium only.
 
 ## Small on 8 GB (decided with the developer, 2026-11-08)
 
@@ -192,4 +254,4 @@ answers from the small model should be checked against them (3.3).
   one-note questions dominate (the 2.8 set), so 3.4 needs harder ones (two notes, dates, comparisons).
 - **Windows, macOS and CUDA**, as in 3.0; and the CPU only for Direct.
 - **Gemma 4 E4B**, the other Medium candidate of 3.0, and reasoning turned on.
-- **Marking unsupported sentences** instead of removing them, and a stronger checking model.
+- **Marking unsupported sentences** instead of removing them; more than 3 drafts; a judge larger than 9B.
