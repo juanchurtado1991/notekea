@@ -245,3 +245,23 @@ fun CaseScope.expectOrderOnScreen(texts: List<String>) {
     }
     if (tops != tops.sorted()) throw CaseFailure(message = "expected ${texts.joinToString()} in that order")
 }
+
+/** Waits until a text field holds the keyboard with exactly [line] selected (a note opened at a passage or a task). */
+fun CaseScope.expectLineSelected(line: String) {
+    val field = isFocused() and hasSetTextAction()
+    ui.waitUntil(timeoutMillis = WAIT_MILLIS) {
+        ui.onAllNodes(matcher = field).fetchSemanticsNodes().any { node ->
+            val text = node.config[SemanticsProperties.EditableText].text
+            val selection = node.config[SemanticsProperties.TextSelectionRange]
+            text.substring(selection.min, selection.max) == line
+        }
+    }
+}
+
+/** Clicks the last shown element that shows exactly [text]: the item of an open menu, below the rows that name it. */
+fun CaseScope.clickLast(text: String) {
+    expectText(text = text)
+    val nodes = ui.onAllNodes(matcher = hasText(text = text))
+    val count = nodes.fetchSemanticsNodes().size
+    (0 until count).map { nodes[it] }.last { it.isShown() }.clickWhenStill()
+}
