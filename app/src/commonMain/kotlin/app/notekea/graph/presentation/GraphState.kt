@@ -3,13 +3,9 @@ package app.notekea.graph.presentation
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * State of the graph tab (`ROADMAP.md` 2.7). [scope] and [depth] say what [dots] and [lines] hold, around [center];
- * [selected] is the note the inspector shows as [preview]. [folders] are the vault's
- * top-level folders, which color the dots and the legend, and [excludedFolders] those left out. [showsRelated] adds the
- * dashed edges, which need the index ([isIndexReady]); [showsOrphans] the notes with no edge, in the whole vault.
- * [isTooLarge] suggests going back to one note. While [isSearching], [matches] are the notes named like [query], best
- * first, on the map or not. [matchIndex] is the one the map moved to, -1 before any, and [reveals] counts those moves. [linked] is the note just linked to, which can be undone, and [linkFailed] says a note could
- * not be changed.
+ * State of the graph tab. [scope] and [depth] say what [dots] and [lines] hold, around [center]; [selected] is the note
+ * the inspector shows as [preview]. [showsRelated] adds the dashed edges, which need the index ([isIndexReady]).
+ * [matchIndex] is the match the map moved to, -1 before any, and [reveals] counts those moves.
  */
 data class GraphState(
     val isLoading: Boolean = true,
@@ -40,7 +36,10 @@ data class GraphState(
 
     /** Related notes are asked for, and the index is not there yet. */
     val isWaitingForIndex: Boolean
-        get() = !isIndexReady && scope == GraphScope.THIS_NOTE && showsRelated
+        get() =
+            !isIndexReady &&
+                scope == GraphScope.THIS_NOTE &&
+                showsRelated
 
     /** No note to go around: the tab asks to find one. */
     val needsNote: Boolean
@@ -48,5 +47,9 @@ data class GraphState(
 
     /** A note with nothing to show around it, or a vault with no links: the tab teaches how to link. */
     val isEmpty: Boolean
-        get() = !isLoading && !needsNote && lines.isEmpty() && (dots.size <= 1 || !showsOrphans)
+        get() =
+            !isLoading &&
+                !needsNote &&
+                lines.isEmpty() &&
+                (dots.size <= 1 || !showsOrphans)
 }

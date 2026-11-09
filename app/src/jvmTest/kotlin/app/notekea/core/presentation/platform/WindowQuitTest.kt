@@ -16,7 +16,10 @@ import kotlin.test.assertEquals
 class WindowQuitTest {
     private val closeGuard = WindowCloseGuard()
     private val steps = CopyOnWriteArrayList<String>()
-    private val quit = WindowQuit(closeGuard = closeGuard, scope = CoroutineScope(context = Dispatchers.Default))
+    private val quit = WindowQuit(
+        closeGuard = closeGuard,
+        scope = CoroutineScope(context = Dispatchers.Default)
+    )
 
     private fun saving() {
         closeGuard.register {
@@ -29,6 +32,7 @@ class WindowQuitTest {
     fun `the system's quit goes ahead only once the guard is done`() = runBlocking {
         saving()
         val answered = CompletableDeferred<Unit>()
+
         val response = object : QuitResponse {
             override fun performQuit() {
                 steps += QUIT
@@ -41,6 +45,7 @@ class WindowQuitTest {
         }
 
         SystemQuit(quit = quit).onQuit(response = response)
+
         withTimeout(timeMillis = WAIT_MILLIS) { answered.await() }
 
         assertEquals(
@@ -59,10 +64,12 @@ class WindowQuitTest {
             steps += CLOSED
             first.complete(value = Unit)
         }
+
         quit.request {
             steps += QUIT
             second.complete(value = Unit)
         }
+
         withTimeout(timeMillis = WAIT_MILLIS) { awaitAll(first, second) }
 
         assertEquals(

@@ -8,30 +8,27 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
+import app.notekea.connections.domain.NoteMention
+import app.notekea.connections.domain.NoteMentions
+import app.notekea.core.notes.domain.ConnectionsTab
+import app.notekea.core.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.PassageSnippet
+import app.notekea.core.notes.domain.RelatedNote
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.TestTags
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickDescription
 import app.notekea.core.presentation.clickText
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.nodes
 import app.notekea.core.presentation.rightClickText
 import app.notekea.core.presentation.texts
-import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
-import app.notekea.core.notes.domain.ConnectionsTab
-import app.notekea.core.notes.domain.IndexRunError
-import app.notekea.connections.domain.NoteMention
-import app.notekea.connections.domain.NoteMentions
-import app.notekea.core.notes.domain.RelatedNote
-import app.notekea.core.notes.domain.PassageSnippet
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.connections.presentation.NoteMentionsIntent
-import app.notekea.connections.presentation.NoteMentionsState
-import app.notekea.connections.presentation.RelatedNotesState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * The inspector's Connections (`ROADMAP.md` 2.4, 2.5, design A), rendered headless: the picker and its counts, what
+ * The inspector's Connections, rendered headless: the picker and its counts, what
  * each tab says when it lists nothing, its rows, and what their clicks and hover actions send.
  */
 class ConnectionsSectionScreenTest {
@@ -49,7 +46,10 @@ class ConnectionsSectionScreenTest {
         val states = listOf(
             RelatedNotesState(),
             RelatedNotesState(isIndexReady = true),
-            RelatedNotesState(isIndexReady = true, error = IndexRunError.Model)
+            RelatedNotesState(
+                isIndexReady = true,
+                error = IndexRunError.Model
+            )
         )
 
         val said = states.map {
@@ -73,7 +73,11 @@ class ConnectionsSectionScreenTest {
     fun `the picker says how many each tab holds and a click chooses one`() {
         val chosen = mutableListOf<ConnectionsTab>()
 
-        val shown = render(mentions = MENTIONS, onTabSelect = { chosen += it }, textClicks = listOf("Unlinked"))
+        val shown = render(
+            mentions = MENTIONS,
+            onTabSelect = { chosen += it },
+            textClicks = listOf("Unlinked")
+        )
 
         assertTrue(
             actual = listOf("Related", "1", "Linked", "Unlinked").all {
@@ -81,7 +85,11 @@ class ConnectionsSectionScreenTest {
             },
             message = shown.toString()
         )
-        assertEquals(expected = listOf(ConnectionsTab.UNLINKED), actual = chosen)
+
+        assertEquals(
+            expected = listOf(ConnectionsTab.UNLINKED),
+            actual = chosen
+        )
     }
 
     @Test
@@ -92,12 +100,19 @@ class ConnectionsSectionScreenTest {
             textClicks = listOf("Tomato soup")
         )
 
-        assertEquals(expected = listOf("link $SOUP", "beside $SOUP", "open $SOUP"), actual = sent)
+        assertEquals(
+            expected = listOf("link $SOUP", "beside $SOUP", "open $SOUP"),
+            actual = sent
+        )
     }
 
     @Test
     fun `a linked row reveals the mention in its note and says how many times it names the note`() {
-        val shown = render(tab = ConnectionsTab.LINKED, mentions = MENTIONS, textClicks = listOf("Weekly menu"))
+        val shown = render(
+            tab = ConnectionsTab.LINKED,
+            mentions = MENTIONS,
+            textClicks = listOf("Weekly menu")
+        )
 
         assertTrue(
             actual = listOf("Weekly menu", "Recipes · 2 mentions", "Monday: Arepas and soup.").all {
@@ -105,56 +120,87 @@ class ConnectionsSectionScreenTest {
             },
             message = shown.toString()
         )
-        assertEquals(expected = listOf("reveal $MENU 8..17"), actual = sent)
+
+        assertEquals(
+            expected = listOf("reveal $MENU 8..17"),
+            actual = sent
+        )
     }
 
     @Test
     fun `an unlinked row links on its Link button, and a tab with nothing says so`() {
         val intents = mutableListOf<NoteMentionsIntent>()
-        render(tab = ConnectionsTab.UNLINKED, mentions = MENTIONS, onMentionsIntent = {
-            intents += it
-        }, hoverText = "Lisbon trip", textClicks = listOf("Link"))
-        val empty =
-            render(tab = ConnectionsTab.UNLINKED, mentions = NoteMentionsState(note = RelativePath(value = AREPAS)))
+
+        render(
+            tab = ConnectionsTab.UNLINKED,
+            mentions = MENTIONS,
+            onMentionsIntent = { intents += it },
+            hoverText = "Lisbon trip",
+            textClicks = listOf("Link")
+        )
+
+        val empty = render(
+            tab = ConnectionsTab.UNLINKED,
+            mentions = NoteMentionsState(note = RelativePath(value = AREPAS))
+        )
 
         assertEquals(
             expected = listOf<NoteMentionsIntent>(NoteMentionsIntent.OnLink(mention = UNLINKED)),
             actual = intents
         )
-        assertTrue(actual = "No other note names “Arepas” without a link." in empty, message = empty.toString())
+
+        assertTrue(
+            actual = "No other note names “Arepas” without a link." in empty,
+            message = empty.toString()
+        )
     }
 
     @Test
     fun `a row's menu opens its note, or opens it to the side`() {
-        render(tab = ConnectionsTab.LINKED, mentions = MENTIONS, onScene = { scene ->
-            scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
-            scene.clickText(text = "Open") { repeat(times = MENU_CLOSE_SETTLES) { settle(scene = scene) } }
-            scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
-            scene.clickText(text = "Open to the side") { settle(scene = scene) }
-        })
         render(
-            related = RELATED.copy(linked = listOf(RelativePath(value = MENU)), isLinkedOpen = true),
-            onScene = { scene ->
-                scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
-                scene.clickText(text = "Open to the side") { settle(scene = scene) }
-            }
+            tab = ConnectionsTab.LINKED,
+            mentions = MENTIONS,
+            onScene = ::openThenOpenBeside
         )
 
-        assertEquals(expected = listOf("reveal $MENU 8..17", "beside $MENU", "beside $MENU"), actual = sent)
+        render(
+            related = RELATED.copy(
+                linked = listOf(RelativePath(value = MENU)),
+                isLinkedOpen = true
+            ),
+            onScene = ::openBeside
+        )
+
+        assertEquals(
+            expected = listOf("reveal $MENU 8..17", "beside $MENU", "beside $MENU"),
+            actual = sent
+        )
     }
 
     @Test
     fun `an unlinked row shows Link without the pointer on it`() {
-        val shown = render(tab = ConnectionsTab.UNLINKED, mentions = MENTIONS)
+        val shown = render(
+            tab = ConnectionsTab.UNLINKED,
+            mentions = MENTIONS
+        )
 
-        assertTrue(actual = "Link" in shown, message = shown.toString())
+        assertTrue(
+            actual = "Link" in shown,
+            message = shown.toString()
+        )
     }
 
     @Test
     fun `a row's actions reach screen readers, with Related's on hover only on screen`() {
         var unlinked = emptyList<String>()
         var related = emptyList<String>()
-        render(tab = ConnectionsTab.UNLINKED, mentions = MENTIONS, onScene = { unlinked = it.customActionLabels() })
+
+        render(
+            tab = ConnectionsTab.UNLINKED,
+            mentions = MENTIONS,
+            onScene = { unlinked = it.customActionLabels() }
+        )
+
         val shown = render(onScene = { related = it.customActionLabels() })
 
         assertEquals(
@@ -164,7 +210,11 @@ class ConnectionsSectionScreenTest {
     }
 
     private fun ImageComposeScene.customActionLabels(): List<String> = nodes().flatMap { node ->
-        node.config.getOrNull(SemanticsActions.CustomActions).orEmpty().map { it.label }
+        node
+            .config
+            .getOrNull(SemanticsActions.CustomActions)
+            .orEmpty()
+            .map { it.label }
     }
 
     @Test
@@ -173,7 +223,10 @@ class ConnectionsSectionScreenTest {
 
         val shown = render(
             tab = ConnectionsTab.LINKED,
-            mentions = NoteMentionsState(note = RelativePath(value = AREPAS), searchFailed = true),
+            mentions = NoteMentionsState(
+                note = RelativePath(value = AREPAS),
+                searchFailed = true
+            ),
             onMentionsIntent = { intents += it },
             textClicks = listOf("Try again")
         )
@@ -190,16 +243,35 @@ class ConnectionsSectionScreenTest {
 
     @Test
     fun `bars stand in for the rows the first time they are found, in Linked and in Related`() {
-        val mentions = NoteMentionsState(note = RelativePath(value = AREPAS), isLoading = true)
-        val related = RelatedNotesState(isIndexReady = true, isLoading = true)
-
-        val loading = listOf(
-            isLoadingShown(tab = ConnectionsTab.LINKED, mentions = mentions),
-            isLoadingShown(tab = ConnectionsTab.RELATED, related = related),
-            isLoadingShown(tab = ConnectionsTab.LINKED, mentions = MENTIONS.copy(isLoading = true))
+        val mentions = NoteMentionsState(
+            note = RelativePath(value = AREPAS),
+            isLoading = true
         )
 
-        assertEquals(expected = listOf(true, true, false), actual = loading)
+        val related = RelatedNotesState(
+            isIndexReady = true,
+            isLoading = true
+        )
+
+        val loading = listOf(
+            isLoadingShown(
+                tab = ConnectionsTab.LINKED,
+                mentions = mentions
+            ),
+            isLoadingShown(
+                tab = ConnectionsTab.RELATED,
+                related = related
+            ),
+            isLoadingShown(
+                tab = ConnectionsTab.LINKED,
+                mentions = MENTIONS.copy(isLoading = true)
+            )
+        )
+
+        assertEquals(
+            expected = listOf(true, true, false),
+            actual = loading
+        )
     }
 
     private fun isLoadingShown(
@@ -208,12 +280,36 @@ class ConnectionsSectionScreenTest {
         mentions: NoteMentionsState = NoteMentionsState()
     ): Boolean {
         var isShown = false
-        render(tab = tab, related = related, mentions = mentions, onScene = { scene ->
-            isShown = scene.nodes().any { node ->
-                node.config.getOrNull(SemanticsProperties.TestTag) == TestTags.CONNECTIONS_LOADING
+
+        render(
+            tab = tab,
+            related = related,
+            mentions = mentions,
+            onScene = { scene ->
+                isShown = scene.nodes().any { node ->
+                    node.config.getOrNull(SemanticsProperties.TestTag) ==
+                        TestTags.CONNECTIONS_LOADING
+                }
             }
-        })
+        )
+
         return isShown
+    }
+
+    private fun openThenOpenBeside(scene: ImageComposeScene) {
+        scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
+
+        scene
+            .clickText(text = "Open") {
+                repeat(times = MENU_CLOSE_SETTLES) { settle(scene = scene) }
+            }
+
+        openBeside(scene = scene)
+    }
+
+    private fun openBeside(scene: ImageComposeScene) {
+        scene.rightClickText(text = "Weekly menu") { settle(scene = scene) }
+        scene.clickText(text = "Open to the side") { settle(scene = scene) }
     }
 
     private fun render(
@@ -228,8 +324,13 @@ class ConnectionsSectionScreenTest {
         onScene: (ImageComposeScene) -> Unit = {}
     ): List<String> {
         var texts = emptyList<String>()
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     Column {
                         ConnectionsSection(
@@ -247,13 +348,27 @@ class ConnectionsSectionScreenTest {
                 }
             }.use { scene ->
                 settle(scene = scene)
-                hoverText?.let { hover(scene = scene, text = it) }
+
+                hoverText?.let {
+                    hover(
+                        scene = scene,
+                        text = it
+                    )
+                }
+
                 texts = scene.texts()
                 onScene(scene)
-                clicks.forEach { scene.clickDescription(description = it) { settle(scene = scene) } }
-                textClicks.forEach { scene.clickText(text = it) { settle(scene = scene) } }
+
+                clicks.forEach {
+                    scene.clickDescription(description = it) { settle(scene = scene) }
+                }
+
+                textClicks.forEach {
+                    scene.clickText(text = it) { settle(scene = scene) }
+                }
             }
         }
+
         return texts
     }
 
@@ -262,16 +377,23 @@ class ConnectionsSectionScreenTest {
         text: String
     ) {
         val node = scene.nodes().first {
-            it.config.getOrNull(SemanticsProperties.Text)?.any { t -> t.text == text } ==
-                true
+            it
+                .config
+                .getOrNull(SemanticsProperties.Text)
+                ?.any { t ->
+                    t.text == text
+                } == true
         }
-        scene.sendPointerEvent(eventType = PointerEventType.Move, position = node.boundsInRoot.center)
+
+        scene.sendPointerEvent(
+            eventType = PointerEventType.Move,
+            position = node.boundsInRoot.center
+        )
+
         settle(scene = scene)
     }
 
-    private fun settle(
-        scene: ImageComposeScene
-    ) {
+    private fun settle(scene: ImageComposeScene) {
         repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
     }
 
@@ -290,7 +412,10 @@ class ConnectionsSectionScreenTest {
                 RelatedNote(
                     path = RelativePath(value = SOUP),
                     score = 1f,
-                    snippet = PassageSnippet(text = PASSAGE, highlight = PASSAGE.indices)
+                    snippet = PassageSnippet(
+                        text = PASSAGE,
+                        highlight = PASSAGE.indices
+                    )
                 )
             ),
             isIndexReady = true

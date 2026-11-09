@@ -8,7 +8,11 @@ import java.nio.file.Path
 internal class AnswerStore(private val file: Path) {
     fun load(): Map<String, ManualAnswer> {
         if (!Files.isRegularFile(file)) return emptyMap()
-        return Files.readAllLines(file).mapNotNull(::parse).associateBy { it.id }
+
+        return Files
+            .readAllLines(file)
+            .mapNotNull(::parse)
+            .associateBy { it.id }
     }
 
     fun save(answers: Collection<ManualAnswer>) {
@@ -22,12 +26,15 @@ internal class AnswerStore(private val file: Path) {
         is ManualAnswer.NotRun -> listOf(answer.id, NOT_RUN)
 
         is ManualAnswer.Failed ->
-            listOf(answer.id, FAILED, escape(answer.note), answer.screenshot.orEmpty()) + answer.steps.map(::escape)
+            listOf(answer.id, FAILED, escape(answer.note), answer.screenshot.orEmpty()) +
+                answer.steps.map(::escape)
     }.joinToString(separator = SEPARATOR)
 
     private fun parse(line: String): ManualAnswer? {
         val fields = line.split(SEPARATOR)
+
         val id = fields.firstOrNull()?.takeIf { it.isNotBlank() } ?: return null
+
         return when (fields.getOrNull(1)) {
             PASSED -> ManualAnswer.Passed(id = id)
 
@@ -44,12 +51,17 @@ internal class AnswerStore(private val file: Path) {
         }
     }
 
-    private fun escape(text: String): String = text.replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n")
+    private fun escape(text: String): String = text
+        .replace("\\", "\\\\")
+        .replace("\t", "\\t")
+        .replace("\n", "\\n")
 
     private fun unescape(text: String): String = buildString {
         var index = 0
+
         while (index < text.length) {
             val char = text[index]
+
             if (char == '\\' && index + 1 < text.length) {
                 append(
                     when (text[index + 1]) {
@@ -58,6 +70,7 @@ internal class AnswerStore(private val file: Path) {
                         else -> text[index + 1]
                     }
                 )
+
                 index += 2
             } else {
                 append(char)

@@ -35,24 +35,37 @@ class NoteContentOnDiskTest {
     }
 
     @Test
-    fun `a note without read permission is there but unreadable, not gone`() = runTest(context = testDispatcher) {
+    fun `a note without read permission is there but unreadable, not gone`() = runTest(
+        context = testDispatcher
+    ) {
         // Windows has no POSIX permissions to take away.
         if ("posix" !in FileSystems.getDefault().supportedFileAttributeViews()) return@runTest
+
         val file = vault.resolve(NOTE.value).also { Files.writeString(it, TEXT) }
+
         Files.setPosixFilePermissions(file, emptySet())
 
         assertEquals(
             expected = Outcome.Failure(error = NotesError.Unreadable(path = NOTE.value)),
-            actual = store.readText(vaultPath = vaultPath, path = NOTE)
+            actual = store.readText(
+                vaultPath = vaultPath,
+                path = NOTE
+            )
         )
     }
 
     @Test
-    fun `a note with the longest name the disk takes can be saved`() = runTest(context = testDispatcher) {
+    fun `a note with the longest name the disk takes can be saved`() = runTest(
+        context = testDispatcher
+    ) {
         val longest = RelativePath(value = "a".repeat(n = 252) + ".md")
         Files.writeString(vault.resolve(longest.value), TEXT)
 
-        val saved = store.write(vaultPath = vaultPath, path = longest, content = EDITED)
+        val saved = store.write(
+            vaultPath = vaultPath,
+            path = longest,
+            content = EDITED
+        )
 
         assertEquals(
             expected = Outcome.Success(value = Unit) to EDITED,
@@ -65,17 +78,39 @@ class NoteContentOnDiskTest {
     fun `a save keeps the permissions of the note it replaces, and a new note is written as usual`() =
         runTest(context = testDispatcher) {
             if ("posix" !in FileSystems.getDefault().supportedFileAttributeViews()) return@runTest
+
             val file = vault.resolve(NOTE.value).also { Files.writeString(it, TEXT) }
+
             val permissions = PosixFilePermissions.fromString("rw-r-----")
             Files.setPosixFilePermissions(file, permissions)
             val created = RelativePath(value = "New.md")
 
-            store.write(vaultPath = vaultPath, path = NOTE, content = EDITED)
-            store.write(vaultPath = vaultPath, path = created, content = TEXT)
+            store.write(
+                vaultPath = vaultPath,
+                path = NOTE,
+                content = EDITED
+            )
 
-            assertEquals(expected = permissions, actual = Files.getPosixFilePermissions(file))
-            assertEquals(expected = EDITED, actual = Files.readString(file))
-            assertEquals(expected = TEXT, actual = Files.readString(vault.resolve(created.value)))
+            store.write(
+                vaultPath = vaultPath,
+                path = created,
+                content = TEXT
+            )
+
+            assertEquals(
+                expected = permissions,
+                actual = Files.getPosixFilePermissions(file)
+            )
+
+            assertEquals(
+                expected = EDITED,
+                actual = Files.readString(file)
+            )
+
+            assertEquals(
+                expected = TEXT,
+                actual = Files.readString(vault.resolve(created.value))
+            )
         }
 
     companion object {

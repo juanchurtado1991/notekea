@@ -3,14 +3,14 @@ package app.notekea.editor.domain
 import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.FakeLocalTimeFormatter
 import app.notekea.core.domain.Outcome
-import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.time.Instant
 import app.notekea.core.notes.domain.FakeAttachmentStore
 import app.notekea.core.notes.domain.FakeNoteFileOperations
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.core.notes.domain.RelativePath
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 class AttachFileUseCaseTest {
     private val fileOperations = FakeNoteFileOperations()
@@ -27,8 +27,17 @@ class AttachFileUseCaseTest {
     @Test
     fun `a pasted image is saved in the attachments folder as Obsidian names it, numbered when the name is taken`() =
         runTest {
-            val first = attachFile(vaultPath = VAULT, note = NOTE, source = attachFile.pastedImage(bytes = PNG))
-            val second = attachFile(vaultPath = VAULT, note = NOTE, source = attachFile.pastedImage(bytes = PNG))
+            val first = attachFile(
+                vaultPath = VAULT,
+                note = NOTE,
+                source = attachFile.pastedImage(bytes = PNG)
+            )
+
+            val second = attachFile(
+                vaultPath = VAULT,
+                note = NOTE,
+                source = attachFile.pastedImage(bytes = PNG)
+            )
 
             assertEquals(
                 expected = listOf(
@@ -40,45 +49,54 @@ class AttachFileUseCaseTest {
         }
 
     @Test
-    fun `an outside file is copied next to the note when Obsidian says so, one inside is linked in place`() = runTest {
-        settings.attachmentFolder = "./"
-        store.outside["/home/ana/Downloads/menu.pdf"] = PNG
+    fun `an outside file is copied next to the note when Obsidian says so, one inside is linked in place`() =
+        runTest {
+            settings.attachmentFolder = "./"
+            store.outside["/home/ana/Downloads/menu.pdf"] = PNG
 
-        val copied = attachFile(
-            vaultPath = VAULT,
-            note = NOTE,
-            source = AttachmentSource.File(absolutePath = "/home/ana/Downloads/menu.pdf")
-        )
-        val inside = attachFile(
-            vaultPath = VAULT,
-            note = NOTE,
-            source = AttachmentSource.File(absolutePath = "$VAULT/Travel/lisbon.jpg")
-        )
+            val copied = attachFile(
+                vaultPath = VAULT,
+                note = NOTE,
+                source = AttachmentSource.File(absolutePath = "/home/ana/Downloads/menu.pdf")
+            )
 
-        assertEquals(
-            expected = listOf("Recipes/menu.pdf", "Travel/lisbon.jpg"),
-            actual = listOf(copied, inside).map { (it as Outcome.Success).value.value }
-        )
-        assertEquals(expected = setOf(RelativePath(value = "Recipes/menu.pdf")), actual = store.contents.keys)
-    }
+            val inside = attachFile(
+                vaultPath = VAULT,
+                note = NOTE,
+                source = AttachmentSource.File(absolutePath = "$VAULT/Travel/lisbon.jpg")
+            )
 
-    // Smoke 1.8-05 on macOS: a Switch game, `Game [0100][v0].nsp`, was embedded as `![[Game [0100][v0].nsp]]`, a link
-    // the first `]]` ends, so it showed as broken.
+            assertEquals(
+                expected = listOf("Recipes/menu.pdf", "Travel/lisbon.jpg"),
+                actual = listOf(copied, inside).map { (it as Outcome.Success).value.value }
+            )
+
+            assertEquals(
+                expected = setOf(RelativePath(value = "Recipes/menu.pdf")),
+                actual = store.contents.keys
+            )
+        }
+
+    // A file such as `Game [0100][v0].nsp` cannot be embedded as `![[Game [0100][v0].nsp]]`: the first `]]` ends
+    // that link, which shows as broken.
     @Test
-    fun `a file whose name would end its embed is saved under a name the embed can hold`() = runTest {
-        store.outside["/home/ana/Downloads/Game [0100][v0] #1 | demo.nsp"] = PNG
+    fun `a file whose name would end its embed is saved under a name the embed can hold`() =
+        runTest {
+            store.outside["/home/ana/Downloads/Game [0100][v0] #1 | demo.nsp"] = PNG
 
-        val copied = attachFile(
-            vaultPath = VAULT,
-            note = NOTE,
-            source = AttachmentSource.File(absolutePath = "/home/ana/Downloads/Game [0100][v0] #1 | demo.nsp")
-        )
+            val copied = attachFile(
+                vaultPath = VAULT,
+                note = NOTE,
+                source = AttachmentSource.File(
+                    absolutePath = "/home/ana/Downloads/Game [0100][v0] #1 | demo.nsp"
+                )
+            )
 
-        assertEquals(
-            expected = "attachments/Game (0100)(v0) 1 demo.nsp",
-            actual = (copied as Outcome.Success).value.value
-        )
-    }
+            assertEquals(
+                expected = "attachments/Game (0100)(v0) 1 demo.nsp",
+                actual = (copied as Outcome.Success).value.value
+            )
+        }
 
     companion object {
         private const val VAULT = "/home/ana/Notes"

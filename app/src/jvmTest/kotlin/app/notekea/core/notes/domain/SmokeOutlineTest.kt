@@ -26,16 +26,25 @@ class SmokeOutlineTest {
                 "Serving" to 0,
                 "Last section" to 1
             ),
-            actual = finder.headings(text = body).map { it.text to it.depth }
+            actual = finder.headings(text = body).map {
+                it.text to it.depth
+            }
         )
     }
 
     @Test
     fun `1_9-02 typing today at the end of the Steps heading renames it in the outline`() {
         val steps = finder.headings(text = body)[STEPS]
-        val lineEnd = body.indexOf(char = '\n', startIndex = steps.offset)
 
-        val typed = body.substring(startIndex = 0, endIndex = lineEnd) + " today" + body.substring(startIndex = lineEnd)
+        val lineEnd = body.indexOf(
+            char = '\n',
+            startIndex = steps.offset
+        )
+
+        val typed = body.substring(
+            startIndex = 0,
+            endIndex = lineEnd
+        ) + " today" + body.substring(startIndex = lineEnd)
 
         assertEquals(
             expected = "Steps today",

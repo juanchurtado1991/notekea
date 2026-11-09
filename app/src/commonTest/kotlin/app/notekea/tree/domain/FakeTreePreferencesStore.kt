@@ -6,10 +6,11 @@ class FakeTreePreferencesStore : TreePreferencesStore {
     var stored: TreePreferences = TreePreferences.DEFAULT
     var failure: Throwable? = null
 
-    override suspend fun read(
-        vaultPath: String
-    ): TreePreferences {
-        failure?.let { throw it }
+    override suspend fun read(vaultPath: String): TreePreferences {
+        failure?.let {
+            throw it
+        }
+
         return stored
     }
 

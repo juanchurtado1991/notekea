@@ -9,25 +9,30 @@ class WindowCloseGuardTest {
     private val guard = WindowCloseGuard()
 
     @Test
-    fun `closing runs every registered handler, the most recent first, and none once removed`() = runTest {
-        val ran = mutableListOf<String>()
-        guard.register { ran += "tree" }
-        val removeEditor = guard.register { ran += "editor" }
+    fun `closing runs every registered handler, the most recent first, and none once removed`() =
+        runTest {
+            val ran = mutableListOf<String>()
 
-        guard.beforeClose()
-        removeEditor()
-        guard.beforeClose()
+            guard.register { ran += "tree" }
 
-        assertEquals(
-            expected = listOf("editor", "tree", "tree"),
-            actual = ran
-        )
-    }
+            val removeEditor = guard.register { ran += "editor" }
+
+            guard.beforeClose()
+            removeEditor()
+            guard.beforeClose()
+
+            assertEquals(
+                expected = listOf("editor", "tree", "tree"),
+                actual = ran
+            )
+        }
 
     @Test
     fun `a stuck handler is given up after its timeout, so the window still closes`() = runTest {
         val ran = mutableListOf<String>()
+
         guard.register { ran += "after" }
+
         guard.register { awaitCancellation() }
 
         guard.beforeClose()

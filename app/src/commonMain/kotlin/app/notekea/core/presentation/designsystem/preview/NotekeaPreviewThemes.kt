@@ -16,9 +16,7 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
  * `@PreviewLightDark`, whose system dark mode does not reach desktop previews.
  */
 @Composable
-fun NotekeaPreviewThemes(
-    content: @Composable () -> Unit
-) {
+fun NotekeaPreviewThemes(content: @Composable () -> Unit) {
     Column {
         listOf(false, true).forEach { darkTheme ->
             NotekeaTheme(darkTheme = darkTheme) {

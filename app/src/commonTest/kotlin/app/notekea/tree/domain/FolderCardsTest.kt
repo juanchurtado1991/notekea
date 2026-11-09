@@ -1,20 +1,30 @@
 package app.notekea.tree.domain
 
-import app.notekea.core.notes.domain.NoteFixtures.file
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class FolderCardsTest {
     @Test
     fun `a folder's grid holds what is directly inside it, subfolders first, then notes and files by name`() {
-        val tree = listOf("Recipes/Pasta.md", "Recipes/Arepas.md", "Recipes/Drinks/Coffee.md", "Welcome.md")
+        val tree = listOf(
+            "Recipes/Pasta.md",
+            "Recipes/Arepas.md",
+            "Recipes/Drinks/Coffee.md",
+            "Welcome.md"
+        )
             .fold(initial = VaultTree.EMPTY) { tree, path ->
-                tree.withNote(note = NoteEntry(file = file(path = path), metadata = NoteMetadata.NONE))
+                tree.withNote(
+                    note = NoteEntry(
+                        file = file(path = path),
+                        metadata = NoteMetadata.NONE
+                    )
+                )
             }
             .withAttachment(file = file(path = "Recipes/Menu 10.pdf"))
             .withAttachment(file = file(path = "Recipes/Menu 9.png"))
@@ -30,8 +40,13 @@ class FolderCardsTest {
                 "Recipes/Pasta.md" to FolderCard.Kind.NOTE
             ),
             actual = FolderCards(naturalNameComparator = NaturalNameComparator())
-                .of(folder = RelativePath(value = "Recipes"), tree = tree)
-                .map { it.path.value to it.kind }
+                .of(
+                    folder = RelativePath(value = "Recipes"),
+                    tree = tree
+                )
+                .map {
+                    it.path.value to it.kind
+                }
         )
     }
 }

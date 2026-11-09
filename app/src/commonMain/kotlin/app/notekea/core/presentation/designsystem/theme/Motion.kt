@@ -8,9 +8,11 @@ import androidx.compose.runtime.Composable
 
 /** A tween of [durationMillis], or no animation at all where motion is reduced ([LocalReduceMotion]). */
 @Composable
-fun <T> motionTween(
-    durationMillis: Int
-): FiniteAnimationSpec<T> = if (LocalReduceMotion.current) snap() else tween(durationMillis = durationMillis)
+fun <T> motionTween(durationMillis: Int): FiniteAnimationSpec<T> = if (LocalReduceMotion.current) {
+    snap()
+} else {
+    tween(durationMillis = durationMillis)
+}
 
 /** Brings the row at [index] into view, gliding unless [reduceMotion]. */
 suspend fun LazyListState.followItem(

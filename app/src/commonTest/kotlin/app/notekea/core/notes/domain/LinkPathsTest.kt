@@ -7,7 +7,12 @@ class LinkPathsTest {
     @Test
     fun `percent runs decode as UTF-8 and everything else stays`() {
         assertEquals(
-            expected = listOf("Café con leche.md", "100% sure.md", "Lisbon trip.md", "🍅 Tomatoes.md"),
+            expected = listOf(
+                "Café con leche.md",
+                "100% sure.md",
+                "Lisbon trip.md",
+                "🍅 Tomatoes.md"
+            ),
             actual = listOf(
                 "Caf%C3%A9%20con%20leche.md",
                 "100% sure.md",
@@ -22,9 +27,22 @@ class LinkPathsTest {
         val garden = RelativePath(value = "Projects/Garden")
 
         assertEquals(
-            expected = listOf("Projects/Garden/Seeds.md", "Projects/Roadmap.md", "Recipes/Arepas.md", null),
-            actual = listOf("Seeds.md", "../Roadmap.md", "./../../Recipes/Arepas.md", "../../../Outside.md").map {
-                resolvedFrom(folder = garden, target = it)?.value
+            expected = listOf(
+                "Projects/Garden/Seeds.md",
+                "Projects/Roadmap.md",
+                "Recipes/Arepas.md",
+                null
+            ),
+            actual = listOf(
+                "Seeds.md",
+                "../Roadmap.md",
+                "./../../Recipes/Arepas.md",
+                "../../../Outside.md"
+            ).map {
+                resolvedFrom(
+                    folder = garden,
+                    target = it
+                )?.value
             }
         )
     }
@@ -34,12 +52,29 @@ class LinkPathsTest {
         val garden = RelativePath(value = "Projects/Garden")
 
         assertEquals(
-            expected = listOf("Seeds.md", "../Roadmap.md", "../../Recipes/Arepas.md", "Recipes/Arepas.md"),
+            expected = listOf(
+                "Seeds.md",
+                "../Roadmap.md",
+                "../../Recipes/Arepas.md",
+                "Recipes/Arepas.md"
+            ),
             actual = listOf(
-                relativeTo(folder = garden, target = RelativePath(value = "Projects/Garden/Seeds.md")),
-                relativeTo(folder = garden, target = RelativePath(value = "Projects/Roadmap.md")),
-                relativeTo(folder = garden, target = RelativePath(value = "Recipes/Arepas.md")),
-                relativeTo(folder = RelativePath.ROOT, target = RelativePath(value = "Recipes/Arepas.md"))
+                relativeTo(
+                    folder = garden,
+                    target = RelativePath(value = "Projects/Garden/Seeds.md")
+                ),
+                relativeTo(
+                    folder = garden,
+                    target = RelativePath(value = "Projects/Roadmap.md")
+                ),
+                relativeTo(
+                    folder = garden,
+                    target = RelativePath(value = "Recipes/Arepas.md")
+                ),
+                relativeTo(
+                    folder = RelativePath.ROOT,
+                    target = RelativePath(value = "Recipes/Arepas.md")
+                )
             )
         )
     }

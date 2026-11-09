@@ -1,6 +1,6 @@
 package app.notekea.core.notes.domain
 
-/** The vault's templates (`ROADMAP.md` 1.12), as the template picker lists them. */
+/** The vault's templates, as the template picker lists them. */
 sealed interface TemplateListing {
     /** The templates folder does not exist yet: the picker offers to create it. */
     data object NoFolder : TemplateListing

@@ -1,7 +1,7 @@
 package app.notekea.editor.domain
 
-import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.domain.StringPatterns
+import app.notekea.core.domain.markdown.MarkdownSyntax
 /**
  * A line read as a list item or a quote line: [prefix] is its indentation and quote marks (`> `), [marker] its list
  * marker (`- `, `- [ ] `, `1. `; empty for a quote line or plain text) and [content] the rest. [number] and
@@ -23,18 +23,21 @@ data class ListLine(
         get() {
             val end = prefix.lastIndexOf(char = MarkdownSyntax.QUOTE_MARK) + 1
             if (end == 0) return StringPatterns.EMPTY
-            val hasSpace = prefix.getOrNull(index = end)?.let { StringPatterns.isIndent(char = it) } == true
-            return prefix.substring(startIndex = 0, endIndex = if (hasSpace) end + 1 else end)
+
+            val hasSpace =
+                prefix.getOrNull(index = end)?.let { StringPatterns.isIndent(char = it) } == true
+
+            return prefix.substring(
+                startIndex = 0,
+                endIndex = if (hasSpace) end + 1 else end
+            )
         }
 
     /** The spaces and tabs before the marker, after any quote marks: where a list's levels are told apart. */
     val indent: Int get() = prefix.length - quote.length
 
     /** Where the item's text starts for Markdown, so a child indented this far nests under it: a task's box is text. */
-    val textOffset: Int get() = if (marker.contains(
-            other = MarkdownSyntax.TASK_BOX_OPEN
-        )
-    ) {
+    val textOffset: Int get() = if (marker.contains(other = MarkdownSyntax.TASK_BOX_OPEN)) {
         MarkdownSyntax.BULLET.length
     } else {
         marker.length
@@ -44,21 +47,26 @@ data class ListLine(
     fun nextMarker(): String = when {
         number != null -> (number + 1).toString() + delimiter + StringPatterns.SPACE
 
-        marker.contains(other = MarkdownSyntax.TASK_BOX_OPEN) -> marker.first() + StringPatterns.SPACE +
+        marker.contains(other = MarkdownSyntax.TASK_BOX_OPEN) -> marker.first() +
+            StringPatterns.SPACE +
             MarkdownSyntax.TASK_BOX
 
         else -> marker
     }
 
     companion object {
-        // `[\s\S]` and `\z`: a line can hold what `.` and `$` take for a line end (U+2028, U+2029, U+0085, a lone `\r`).
-        private val LINE =
-            Regex(pattern = "^([ \\t]*(?:>[ \\t]?)*[ \\t]*)([-*+] \\[[ xX]] |[-*+] |(\\d{1,9})([.)]) )?([\\s\\S]*)\\z")
+        // `[\s\S]` and `\z`: a line can hold what `.` and `$` take for a line end (U+2028, U+2029, U+0085, a lone
+        // `\r`).
+        private val LINE = Regex(
+            pattern = "^([ \\t]*(?:>[ \\t]?)*[ \\t]*)([-*+] \\[[ xX]] |[-*+] |(\\d{1,9})([.)]) )?([\\s\\S]*)\\z"
+        )
 
-        fun of(
-            line: String
-        ): ListLine {
-            val groups = LINE.find(input = line)?.groupValues.orEmpty()
+        fun of(line: String): ListLine {
+            val groups = LINE
+                .find(input = line)
+                ?.groupValues
+                .orEmpty()
+
             return ListLine(
                 prefix = groups.getOrElse(index = 1) { StringPatterns.EMPTY },
                 marker = groups.getOrElse(index = 2) { StringPatterns.EMPTY },

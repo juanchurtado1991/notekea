@@ -24,7 +24,8 @@ import java.nio.file.Path
 private const val CRASH_FOLDER = "crashes"
 private const val CRASH_LOG_TAG = "CrashBuddy"
 private const val CRASH_MESSAGE = "Unexpected error, kept as a crash report"
-private const val ISSUE_FORM = "https://github.com/juanchurtado1991/notekea/issues/new?template=crash_report.yml"
+private const val ISSUE_FORM =
+    "https://github.com/juanchurtado1991/notekea/issues/new?template=crash_report.yml"
 
 /** Notekea's crash reports: in the app data folder's `crashes`, with Notekea's texts and its GitHub form. */
 internal fun crashBuddyOf(
@@ -33,6 +34,7 @@ internal fun crashBuddyOf(
 ): CrashBuddy {
     val conventions = koin.get<PlatformConventions>()
     val logger = Logger.withTag(tag = CRASH_LOG_TAG)
+
     return CrashBuddy(
         config = CrashConfig(
             appName = appName,
@@ -42,7 +44,9 @@ internal fun crashBuddyOf(
             texts = runBlocking { crashTexts() },
             isCloseLast = conventions.dialogButtonOrder == DialogButtonOrder.CANCEL_THEN_PRIMARY
         ),
-        onError = { logger.e(throwable = it) { CRASH_MESSAGE } }
+        onError = {
+            logger.e(throwable = it) { CRASH_MESSAGE }
+        }
     )
 }
 

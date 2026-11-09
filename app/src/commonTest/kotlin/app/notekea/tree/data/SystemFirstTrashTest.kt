@@ -2,9 +2,9 @@ package app.notekea.tree.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
-import app.notekea.tree.domain.FakeTrash
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.tree.domain.FakeTrash
 import app.notekea.tree.domain.TrashLocation
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -18,12 +18,16 @@ class SystemFirstTrashTest {
 
     @Test
     fun `the system trash is used when it takes the entry`() = runTest(context = testDispatcher) {
-        val outcome = trash(systemTrashAccepts = true).moveToTrash(vaultPath = VAULT, path = NOTE)
+        val outcome = trash(systemTrashAccepts = true).moveToTrash(
+            vaultPath = VAULT,
+            path = NOTE
+        )
 
         assertEquals(
             expected = Outcome.Success(value = TrashLocation.SYSTEM_TRASH),
             actual = outcome
         )
+
         assertEquals(
             expected = listOf(listOf("$VAULT/${NOTE.value}"), emptyList()),
             actual = listOf(systemTrashRequests, vaultTrash.trashed.map { it.value })
@@ -31,24 +35,28 @@ class SystemFirstTrashTest {
     }
 
     @Test
-    fun `the vault trash folder takes over when the system trash refuses`() = runTest(context = testDispatcher) {
+    fun `the vault trash folder takes over when the system trash refuses`() = runTest(
+        context = testDispatcher
+    ) {
         vaultTrash.outcome = Outcome.Failure(error = NotesError.EntryMissing(path = NOTE.value))
 
-        val outcome = trash(systemTrashAccepts = false).moveToTrash(vaultPath = VAULT, path = NOTE)
+        val outcome = trash(systemTrashAccepts = false).moveToTrash(
+            vaultPath = VAULT,
+            path = NOTE
+        )
 
         assertEquals(
             expected = Outcome.Failure(error = NotesError.EntryMissing(path = NOTE.value)),
             actual = outcome
         )
+
         assertEquals(
             expected = listOf(NOTE),
             actual = vaultTrash.trashed
         )
     }
 
-    private fun trash(
-        systemTrashAccepts: Boolean
-    ): SystemFirstTrash = SystemFirstTrash(
+    private fun trash(systemTrashAccepts: Boolean): SystemFirstTrash = SystemFirstTrash(
         moveToSystemTrash = { path ->
             systemTrashRequests += path
             systemTrashAccepts

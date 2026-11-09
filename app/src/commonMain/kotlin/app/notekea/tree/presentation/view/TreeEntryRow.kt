@@ -1,18 +1,10 @@
 package app.notekea.tree.presentation.view
 
-import app.notekea.resources.tree_bookmarked
-import app.notekea.tree.presentation.model.RenameDraft
-import app.notekea.tree.presentation.model.TreePreviewData
-import app.notekea.tree.presentation.model.VaultTreeIntent
-import app.notekea.tree.presentation.model.VaultTreeState
-import app.notekea.core.presentation.designsystem.theme.NotekeaColors
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
-import app.notekea.core.presentation.platform.onMiddleClick
-import app.notekea.core.presentation.platform.PressedModifiers
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,35 +14,42 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.presentation.notesErrorMessage
 import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuState
 import app.notekea.core.presentation.designsystem.components.NotekeaInlineTextField
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.NotekeaTreeItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaColors
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
-import app.notekea.tree.domain.TreeRow
+import app.notekea.core.presentation.platform.PressedModifiers
+import app.notekea.core.presentation.platform.onMiddleClick
 import app.notekea.resources.Res
+import app.notekea.resources.tree_bookmarked
 import app.notekea.resources.tree_open_folder
 import app.notekea.resources.tree_reveal_explorer
 import app.notekea.resources.tree_reveal_files
 import app.notekea.resources.tree_reveal_finder
 import app.notekea.resources.tree_select_file
 import app.notekea.resources.tree_select_note
-import org.jetbrains.compose.resources.stringResource
+import app.notekea.tree.domain.TreeRow
 import app.notekea.tree.presentation.filepreview.fileIconOf
 import app.notekea.tree.presentation.filepreview.fileTintOf
-import app.notekea.core.notes.domain.NotesError
-import app.notekea.core.notes.presentation.notesErrorMessage
+import app.notekea.tree.presentation.model.RenameDraft
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.model.VaultTreeState
+import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_WIDTH_DP = 260
 
 /**
- * One entry of the tree with its context menu ([createItems], the tree's New note and New folder, then rename, show in
- * the file manager, delete), built from the tree's latest [state] only when it opens, and, while it is renamed
- * ([draft]), the name field with the reason a name was refused below it. A right click selects the entry first. Only
- * what this row shows comes as values, so a change to another row leaves this one alone.
+ * One entry of the tree with its context menu ([createItems], then rename, show in the file manager, delete), built
+ * from the tree's latest [state] only when it opens, and, while it is renamed ([draft]), the name field with the reason
+ * a name was refused. Only what this row shows comes as values, so a change to another row leaves this one alone.
  */
 @Composable
 internal fun TreeEntryRow(
@@ -67,12 +66,14 @@ internal fun TreeEntryRow(
     draft: RenameDraft?
 ) {
     val menuState = remember { NotekeaContextMenuState() }
+
     LaunchedEffect(key1 = isMenuRequested) {
         if (isMenuRequested) {
             menuState.open()
             onMenuShown()
         }
     }
+
     EntryMenuArea(
         row = row,
         state = state,
@@ -91,9 +92,13 @@ internal fun TreeEntryRow(
                 onFocusTree = onFocusTree,
                 draft = draft
             )
+
             draft?.error?.let {
                 Text(
-                    text = notesErrorMessage(error = it, platformConventions = state().platformConventions),
+                    text = notesErrorMessage(
+                        error = it,
+                        platformConventions = state().platformConventions
+                    ),
                     modifier = Modifier.padding(
                         start = NotekeaDimensions.TreeIndent * (row.depth + 1),
                         bottom = NotekeaDimensions.SpacingXs
@@ -116,43 +121,76 @@ private fun EntryItem(
     onFocusTree: () -> Unit,
     draft: RenameDraft?
 ) {
-    // Mod+click or the middle button opens the entry in a tab behind the current one (`ROADMAP.md` 1.11).
+    // Mod+click or the middle button opens the entry in a tab behind the current one.
     val pressed = remember { PressedModifiers() }
+
     val folder = row as? TreeRow.Folder
+
+    val badge: (@Composable () -> Unit)? = if (isBookmarked) {
+        { BookmarkBadge() }
+    } else {
+        null
+    }
+
+    val clickLabelResource = when (row) {
+        is TreeRow.Folder -> Res.string.tree_open_folder
+        is TreeRow.Note -> Res.string.tree_select_note
+        is TreeRow.File -> Res.string.tree_select_file
+    }
+
+    val iconTint = if (row is TreeRow.File) fileTintOf(path = row.path) else null
+
+    fun click() {
+        onIntent(
+            VaultTreeIntent.OnRowClick(
+                path = row.path,
+                inBackground = pressed.isModPressed
+            )
+        )
+
+        onFocusTree()
+    }
+
     NotekeaTreeItem(
         label = if (row is TreeRow.Note) row.path.nameWithoutExtension else row.path.name,
         icon = iconOf(row = row),
-        iconTint = if (row is TreeRow.File) fileTintOf(path = row.path) else null,
+        iconTint = iconTint,
         depth = row.depth,
-        onClick = {
-            onIntent(VaultTreeIntent.OnRowClick(path = row.path, inBackground = pressed.isModPressed))
-            onFocusTree()
-        },
+        onClick = { click() },
         modifier = pressed.tracking().onMiddleClick {
-            onIntent(VaultTreeIntent.OnRowClick(path = row.path, inBackground = true))
+            onIntent(
+                VaultTreeIntent.OnRowClick(
+                    path = row.path,
+                    inBackground = true
+                )
+            )
         },
         selected = isSelected,
         focused = isFocused && draft == null,
         isExpanded = folder?.isExpanded,
-        onToggleExpanded = folder?.let { { onIntent(VaultTreeIntent.OnChevronClick(path = it.path)) } },
-        trailingText = folder?.fileCount?.takeIf { it > 0 }?.toString(),
-        onClickLabel = stringResource(
-            resource = when (row) {
-                is TreeRow.Folder -> Res.string.tree_open_folder
-                is TreeRow.Note -> Res.string.tree_select_note
-                is TreeRow.File -> Res.string.tree_select_file
+        onToggleExpanded = folder?.let {
+            { onIntent(VaultTreeIntent.OnChevronClick(path = it.path)) }
+        },
+        trailingText = folder
+            ?.fileCount
+            ?.takeIf {
+                it > 0
             }
-        ),
-        labelContent = draft?.let { { RenameField(draft = it, onIntent = onIntent) } },
-        badge = if (isBookmarked) {
-            { BookmarkBadge() }
-        } else {
-            null
-        }
+            ?.toString(),
+        onClickLabel = stringResource(resource = clickLabelResource),
+        labelContent = draft?.let {
+            {
+                RenameField(
+                    draft = it,
+                    onIntent = onIntent
+                )
+            }
+        },
+        badge = badge
     )
 }
 
-/** The small yellow star after a bookmarked entry's name (`ROADMAP.md` 1.13). */
+/** The small yellow star after a bookmarked entry's name. */
 @Composable
 private fun BookmarkBadge() {
     Icon(
@@ -166,9 +204,7 @@ private fun BookmarkBadge() {
 }
 
 /** A folder open or closed, a note, or another file by its kind. */
-private fun iconOf(
-    row: TreeRow
-): ImageVector = when (row) {
+private fun iconOf(row: TreeRow): ImageVector = when (row) {
     is TreeRow.Folder -> if (row.isExpanded) NotekeaIcons.FolderOpen else NotekeaIcons.Folder
     is TreeRow.Note -> NotekeaIcons.Note
     is TreeRow.File -> fileIconOf(path = row.path)
@@ -189,9 +225,7 @@ private fun RenameField(
     )
 }
 
-internal fun revealLabel(
-    operatingSystem: OperatingSystem
-) = when (operatingSystem) {
+internal fun revealLabel(operatingSystem: OperatingSystem) = when (operatingSystem) {
     OperatingSystem.LINUX -> Res.string.tree_reveal_files
     OperatingSystem.MACOS -> Res.string.tree_reveal_finder
     OperatingSystem.WINDOWS -> Res.string.tree_reveal_explorer
@@ -203,6 +237,7 @@ private fun TreeEntryRowPreview() {
     val state = TreePreviewData.renamingState().let {
         it.copy(renaming = it.renaming?.copy(error = NotesError.HiddenName))
     }
+
     NotekeaPreviewThemes {
         Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
             state.rows.forEach { row ->
@@ -217,7 +252,9 @@ private fun TreeEntryRowPreview() {
                     onMenuShown = {},
                     onIntent = {},
                     onFocusTree = {},
-                    draft = state.renaming?.takeIf { it.path == row.path }
+                    draft = state.renaming?.takeIf {
+                        it.path == row.path
+                    }
                 )
             }
         }

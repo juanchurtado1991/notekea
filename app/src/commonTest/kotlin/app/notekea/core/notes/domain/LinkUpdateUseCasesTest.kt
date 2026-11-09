@@ -8,25 +8,31 @@ import kotlin.test.assertEquals
 
 class LinkUpdateUseCasesTest {
     private val store = FakeNoteContentStore()
-    private val planLinkUpdates =
-        PlanLinkUpdatesUseCase(noteContentStore = store, linkFinder = JetBrainsMarkdownLinkFinder())
+    private val planLinkUpdates = PlanLinkUpdatesUseCase(
+        noteContentStore = store,
+        linkFinder = JetBrainsMarkdownLinkFinder()
+    )
     private val applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store)
 
     @Test
-    fun `bare links follow a renamed note and keep their alias, heading, embed and extension`() = runTest {
-        val rewrites =
-            renameArepas(source = "Try [[Arepas]], [[arepas|the arepas]], ![[Arepas#Dough]] and [[Arepas.md]].")
+    fun `bare links follow a renamed note and keep their alias, heading, embed and extension`() =
+        runTest {
+            val rewrites = renameArepas(
+                source = "Try [[Arepas]], [[arepas|the arepas]], ![[Arepas#Dough]] and [[Arepas.md]]."
+            )
 
-        assertEquals(
-            expected = "Try [[Arepas reina]], [[Arepas reina|the arepas]], ![[Arepas reina#Dough]] " +
-                "and [[Arepas reina.md]].",
-            actual = rewrites.single().updated
-        )
-        assertEquals(
-            expected = 4,
-            actual = rewrites.single().linkCount
-        )
-    }
+            assertEquals(
+                expected =
+                "Try [[Arepas reina]], [[Arepas reina|the arepas]], ![[Arepas reina#Dough]] " +
+                    "and [[Arepas reina.md]].",
+                actual = rewrites.single().updated
+            )
+
+            assertEquals(
+                expected = 4,
+                actual = rewrites.single().linkCount
+            )
+        }
 
     @Test
     fun `path links stay paths and markdown links keep their base and encoding`() = runTest {
@@ -37,7 +43,8 @@ class LinkUpdateUseCasesTest {
         )
 
         assertEquals(
-            expected = "[[Recipes/Arepas reina]] [x](../Recipes/Arepas%20reina.md) [y](<Recipes/Arepas reina.md>) " +
+            expected =
+            "[[Recipes/Arepas reina]] [x](../Recipes/Arepas%20reina.md) [y](<Recipes/Arepas reina.md>) " +
                 "[z](Recipes/Arepas%20reina.md#Dough)",
             actual = rewrites.single().updated
         )
@@ -47,7 +54,10 @@ class LinkUpdateUseCasesTest {
     fun `a new name shared by another note is written as a path`() = runTest {
         store.texts[path("Ideas/Arepas reina.md")] = "# Another note with that name"
 
-        val rewrites = renameArepas(source = "[[Arepas]]", others = setOf(path("Ideas/Arepas reina.md")))
+        val rewrites = renameArepas(
+            source = "[[Arepas]]",
+            others = setOf(path("Ideas/Arepas reina.md"))
+        )
 
         assertEquals(
             expected = "[[Recipes/Arepas reina]]",
@@ -61,7 +71,12 @@ class LinkUpdateUseCasesTest {
         val notes = setOf(path(AREPAS), path("Ideas/Arepas.md"), path(SOURCE))
         store.texts[path(SOURCE)] = "`[[Recipes/Arepas]]` [[Pasta e fagioli]] [[Arepas]]"
 
-        val rewrites = planLinkUpdates(vaultPath = VAULT, notesBefore = notes, from = path(AREPAS), to = path(RENAMED))
+        val rewrites = planLinkUpdates(
+            vaultPath = VAULT,
+            notesBefore = notes,
+            from = path(AREPAS),
+            to = path(RENAMED)
+        )
 
         assertEquals(
             expected = emptyList(),
@@ -74,8 +89,12 @@ class LinkUpdateUseCasesTest {
         val notes = setOf(path(AREPAS), path(SOURCE))
         store.texts[path(SOURCE)] = "[[Recipes/Arepas]] [[Arepas]] [x](Recipes/Arepas.md)"
 
-        val rewrites =
-            planLinkUpdates(vaultPath = VAULT, notesBefore = notes, from = path("Recipes"), to = path("Cooking"))
+        val rewrites = planLinkUpdates(
+            vaultPath = VAULT,
+            notesBefore = notes,
+            from = path("Recipes"),
+            to = path("Cooking")
+        )
 
         assertEquals(
             expected = "[[Cooking/Arepas]] [[Arepas]] [x](Cooking/Arepas.md)",
@@ -85,30 +104,43 @@ class LinkUpdateUseCasesTest {
 
     // Audit: the text was only searched for the name as written, so these links broke without a word.
     @Test
-    fun `a link that only holds the name percent-encoded is rewritten, for a note and for a folder`() = runTest {
-        val note = "Travel/My Note.md"
-        store.texts[path(SOURCE)] = "[x](Travel/My%20Note.md) [y](My%20Folder/a.md)"
-        val notes = setOf(path(note), path("My Folder/a.md"), path(SOURCE))
+    fun `a link that only holds the name percent-encoded is rewritten, for a note and for a folder`() =
+        runTest {
+            val note = "Travel/My Note.md"
+            store.texts[path(SOURCE)] = "[x](Travel/My%20Note.md) [y](My%20Folder/a.md)"
+            val notes = setOf(path(note), path("My Folder/a.md"), path(SOURCE))
 
-        val renamedNote =
-            planLinkUpdates(vaultPath = VAULT, notesBefore = notes, from = path(note), to = path("Travel/New.md"))
-        val renamedFolder =
-            planLinkUpdates(vaultPath = VAULT, notesBefore = notes, from = path("My Folder"), to = path("Other"))
+            val renamedNote = planLinkUpdates(
+                vaultPath = VAULT,
+                notesBefore = notes,
+                from = path(note),
+                to = path("Travel/New.md")
+            )
 
-        assertEquals(
-            expected = listOf(
-                "[x](Travel/New.md) [y](My%20Folder/a.md)",
-                "[x](Travel/My%20Note.md) [y](Other/a.md)"
-            ),
-            actual = (renamedNote + renamedFolder).map { it.updated }
-        )
-    }
+            val renamedFolder = planLinkUpdates(
+                vaultPath = VAULT,
+                notesBefore = notes,
+                from = path("My Folder"),
+                to = path("Other")
+            )
+
+            assertEquals(
+                expected = listOf(
+                    "[x](Travel/New.md) [y](My%20Folder/a.md)",
+                    "[x](Travel/My%20Note.md) [y](Other/a.md)"
+                ),
+                actual = (renamedNote + renamedFolder).map { it.updated }
+            )
+        }
 
     @Test
     fun `a link in a table follows a rename and keeps its escaped bar`() = runTest {
         val rewrites = renameArepas(source = "| [[Arepas\\|the arepas]] | x |")
 
-        assertEquals(expected = "| [[Arepas reina\\|the arepas]] | x |", actual = rewrites.single().updated)
+        assertEquals(
+            expected = "| [[Arepas reina\\|the arepas]] | x |",
+            actual = rewrites.single().updated
+        )
     }
 
     @Test
@@ -124,7 +156,9 @@ class LinkUpdateUseCasesTest {
 
         assertEquals(
             expected = path(RENAMED) to "Back to [[#Dough]] and [[Arepas reina#Filling]]",
-            actual = rewrites.single().let { it.path to it.updated }
+            actual = rewrites.single().let {
+                it.path to it.updated
+            }
         )
     }
 
@@ -132,17 +166,31 @@ class LinkUpdateUseCasesTest {
     fun `only notes unchanged since planning are written`() = runTest {
         val rewrites = listOf("A.md", "B.md", "C.md").map { name ->
             store.texts[path(name)] = "[[Arepas]]"
-            NoteRewrite(path = path(name), original = "[[Arepas]]", updated = "[[Arepas reina]]", linkCount = 1)
+
+            NoteRewrite(
+                path = path(name),
+                original = "[[Arepas]]",
+                updated = "[[Arepas reina]]",
+                linkCount = 1
+            )
         }
+
         store.texts[path("B.md")] = "[[Arepas]] edited meanwhile"
         store.refused += path("C.md")
 
-        val result = applyLinkUpdates(vaultPath = VAULT, rewrites = rewrites)
+        val result = applyLinkUpdates(
+            vaultPath = VAULT,
+            rewrites = rewrites
+        )
 
         assertEquals(
-            expected = LinkUpdateResult(updated = listOf(path("A.md")), skipped = listOf(path("B.md"), path("C.md"))),
+            expected = LinkUpdateResult(
+                updated = listOf(path("A.md")),
+                skipped = listOf(path("B.md"), path("C.md"))
+            ),
             actual = result
         )
+
         assertEquals(
             expected = listOf("[[Arepas reina]]", "[[Arepas]] edited meanwhile", "[[Arepas]]"),
             actual = listOf("A.md", "B.md", "C.md").map { store.texts.getValue(path(it)) }
@@ -155,6 +203,7 @@ class LinkUpdateUseCasesTest {
         others: Set<RelativePath> = emptySet()
     ): List<NoteRewrite> {
         store.texts[path(sourcePath)] = source
+
         return planLinkUpdates(
             vaultPath = VAULT,
             notesBefore = setOf(path(AREPAS), path(sourcePath)) + others,
@@ -163,9 +212,7 @@ class LinkUpdateUseCasesTest {
         )
     }
 
-    private fun path(
-        value: String
-    ): RelativePath = RelativePath(value = value)
+    private fun path(value: String): RelativePath = RelativePath(value = value)
 
     companion object {
         private const val AREPAS = "Recipes/Arepas.md"

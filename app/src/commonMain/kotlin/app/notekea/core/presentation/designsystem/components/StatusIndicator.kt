@@ -9,9 +9,7 @@ enum class StatusIndicator {
     ERROR,
     IDLE;
 
-    fun color(
-        colorScheme: ColorScheme
-    ): Color = when (this) {
+    fun color(colorScheme: ColorScheme): Color = when (this) {
         ACTIVE -> colorScheme.primary
         ERROR -> colorScheme.error
         IDLE -> colorScheme.onSurfaceVariant

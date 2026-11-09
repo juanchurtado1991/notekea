@@ -103,15 +103,26 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
 
 - A function does one thing, and its name says what that thing is. If a function needs a comment to explain
   what it does, rename it or split it.
-- **Files may not exceed 350 lines** (aim for 300), production code and tests alike, counting everything (imports,
-  KDoc, previews). Enforced by the `notekea:max-file-length` ktlint rule (added in `ROADMAP.md` 1.16). A file that
-  grows is split by sub-feature, never by moving code into one long helper: a ViewModel keeps routing intents and
+- **Files may not exceed 350 lines of code** (aim for 300), production code and tests alike: imports, KDoc and
+  previews count, blank lines and lines of brackets alone do not (`notekea:max-file-length`). A file that grows is
+  split by sub-feature, never by moving code into one long helper: a ViewModel keeps routing intents and
   delegates each sub-feature to its reducers and handlers; a screen keeps its layout and moves each section to its own
   file; a test class is split by behavior.
-- **Function bodies may not exceed 40 lines.** This is enforced by the `notekea:max-function-length` ktlint rule
-  (the signature is not counted). When a function grows, extract private helpers whose names describe each step.
-- Long or multi-line conditions go into a well-named `val` (e.g. `val isExpressionOnNextLine = ...`) instead of
-  being inlined in the `if`.
+- **Function bodies may not exceed 60 lines of code**, counted the same way (the signature is not counted). Enforced
+  by the `notekea:max-function-length` ktlint rule. When a function grows, extract private helpers whose names
+  describe each step.
+- **Compound expressions get a name** (`notekea:name-compound-expression`). A condition joined with `&&` or `||` that
+  makes two or more calls, or is over 40 characters, goes into a well-named `val` (`val isInAngles = …`, then
+  `if (isInAngles)`); a condition that checks a type or `null` may stay, as the compiler needs it in place. An `if`
+  or a `when` passed as a named argument goes to a `val` before the call, unless it fits on one line and calls
+  nothing (`color = if (isSelected) colors.primary else colors.outline`).
+- **A callback of two or more statements is a named function** with a verb for a name
+  (`notekea:callback-lambda`): a member is passed by reference (`onRename = ::rename`). One statement stays a
+  lambda: `onClick = { onReveal(path) }`.
+- **A function declared inside another one is never passed by reference** (`notekea:local-function-reference`): it
+  is called from a lambda (`onStart = { startDrag(it) }`). Two references to it are equal whatever they captured,
+  so Compose skips the composable that gets the new one, which goes on calling the old one with the values of an
+  earlier composition (this broke dragging a tab to reorder, Auto-Test 1.11-15).
 - Prefer names over comments: `tryAddKspDependency()` instead of `addKspDependency() // returns false if...`.
 - **Every UI element and every screen has a `@Preview`** in its own file, at the end, `private`, named
   `<Composable>…Preview`, and wrapped in `NotekeaPreviewThemes` so it shows the light and dark themes side by side.
@@ -120,9 +131,46 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   (empty, loading, error, content, and any feature-specific state). Enforced by Konsist; theme functions, the
   preview helper and the developer gallery are exempt, and so are composables that draw nothing and only make view
   models follow each other's effects, which are named `Follow…` (`FollowTree`, `FollowQuickSwitcher`).
-- **Parameters go one per line**, in functions and constructors. Exception: a class whose primary constructor has
-  a **single parameter** keeps it on the class line when the line fits in 120 columns:
-  `class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnvironment) {`.
+
+### Layout
+
+`./gradlew ktlintFormat` applies these; the ones marked *lint only* need a name or a decision and are fixed by hand.
+
+- **A line of code has at most 100 characters** (`notekea:code-line-length`, lint only). A string, a test's name in
+  backticks and an import may pass it, and so may the punctuation that closes them; a comment has up to 120. A
+  call that does not fit puts its arguments one per line, even when they are positional:
+
+  ```kotlin
+  FollowVault(
+      state,
+      workspaceState,
+      viewModels
+  )
+  ```
+
+- **Imports** are in IntelliJ's order (everything else, then `java`, `javax`, `kotlin`, aliases last), with no
+  wildcard, no unused import and none of the file's own package (`notekea:no-same-package-import`).
+- **Parameters**: one stays on the signature's line when it fits, three or more go one per line, two either way
+  (`notekea:parameters-layout`). Their order is mandatory, then nullable, then with a default value
+  (`notekea:parameter-order`, lint only).
+- **A call with two or more named arguments** puts one on each line, in tests and Compose too
+  (`notekea:named-arguments-per-line`). Inside a condition the call may stay on one line.
+- **A chain of three or more `.`** puts the receiver and each segment on its own line (`notekea:chain-per-line`).
+  A call on a receiver with arguments and a trailing lambda of several lines leaves the receiver alone on its line;
+  with a lambda of one line it stays whole: `logger.e(throwable = throwable) { MESSAGE }`.
+- **A lambda of one short statement** (a property path, a call, an assignment) goes on one line when it fits:
+  `{ it.path }`, `onClick = { onReveal(path) }`. A comparison, an `if`, a `when` or several statements go on their
+  own lines (`notekea:lambda-body-line`).
+- **`&&` and `||` with three or more operands** put one operand on each line, the operator at the end
+  (`notekea:logical-operands-per-line`). A comparison is never broken after its operator when it fits on its line:
+  `if (path == null) {`, not `if (path ==` and `null` below.
+- **Blank lines**: one before `return` when the function has other statements, and one around a statement of
+  several lines; one-line statements that belong together stay together (`notekea:statement-spacing`).
+- **An expression stays on the line of its `=`** when it fits (`notekea:expression-on-assignment-line`).
+- **KDoc** has at most three lines of text, says more than the name it documents, and tells what the code does, not
+  the story of how it got there: no roadmap steps, PR numbers or smoke findings (`notekea:kdoc`, lint only). Its
+  `[Name]` links name something the file declares, imports or shares a package with, and the project files it names
+  in backticks exist (`KDocLinksTest`).
 
 ## 7. No warnings, no dead code
 
@@ -257,7 +305,8 @@ It runs, in this order:
 ./gradlew check koverVerify
 ```
 
-`ktlintFormat` applies the standard rules plus Notekea's custom rules (`:ktlint-rules`) and the reformatted files
+`ktlintFormat` applies the standard rules plus Notekea's custom rules (`:ktlint-rules`, listed in §6 *Layout* and in
+`.editorconfig`) and the reformatted files
 are re-staged; `check` runs lint and every test; `koverVerify` enforces the minimum line coverage (80% in every module, UI excluded).
 The commit is blocked if any step fails. `git commit --no-verify` is for emergencies only and CI will still fail.
 

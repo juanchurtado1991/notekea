@@ -19,21 +19,30 @@ import kotlin.time.Duration
 /**
  * The manager's work for one [suite]: runs the automatic cases in their own process ([startRun]), walks the tester
  * through the manual ones a step at a time, preparing each case's data, and writes the report. What the tester did is
- * kept in [folders], so the app can close or restart and the manager goes on where it was. [startRun] is how a run
- * starts, given what to tell about it and when it ends ([AutomaticRun] in the app).
+ * kept in [folders], so the app can close or restart and the manager goes on where it was.
  */
 internal class ManagerSession(
     private val suite: Suite,
     private val folders: AutoTestFolders,
     private val environment: () -> AppEnvironment = AppEnvironment::current,
-    private val startRun: (onEvent: (RunnerEvent) -> Unit, onEnd: (Int) -> Unit) -> AutomaticRun = { onEvent, onEnd ->
-        AutomaticRun(log = folders.report.resolve(RUN_LOG), onEvent = onEvent, onEnd = onEnd).also { it.start() }
+    private val startRun: (
+        onEvent: (RunnerEvent) -> Unit,
+        onEnd: (Int) -> Unit
+    ) -> AutomaticRun = { onEvent, onEnd ->
+        AutomaticRun(
+            log = folders.report.resolve(RUN_LOG),
+            onEvent = onEvent,
+            onEnd = onEnd
+        ).also { it.start() }
     }
 ) {
     private val resultStore = ResultStore(file = folders.work.resolve(RESULTS))
     private val answerStore = AnswerStore(file = folders.work.resolve(ANSWERS))
     private val position = PositionStore(file = folders.work.resolve(POSITION))
-    private val manualData = ManualData(sources = suite.dataSources, target = folders.data)
+    private val manualData = ManualData(
+        sources = suite.dataSources,
+        target = folders.data
+    )
     private val mutableState = MutableStateFlow(value = restoredState())
     private var run: AutomaticRun? = null
 
@@ -48,9 +57,16 @@ internal class ManagerSession(
         if (mutableState.value.isRunning) return
         isStopping = false
         sawDone = false
+
         mutableState.update {
-            it.copy(results = emptyMap(), isRunning = true, runningId = null, startedAt = System.currentTimeMillis())
+            it.copy(
+                results = emptyMap(),
+                isRunning = true,
+                runningId = null,
+                startedAt = System.currentTimeMillis()
+            )
         }
+
         run = startRun(::onEvent, ::onEnd)
     }
 
@@ -61,12 +77,16 @@ internal class ManagerSession(
 
     fun select(tab: ManagerTab) {
         if (tab == ManagerTab.REPORT) writeReport()
-        if (tab ==
-            ManagerTab.MANUAL
-        ) {
-            showManual(index = mutableState.value.manualIndex, step = mutableState.value.manualStep)
+
+        if (tab == ManagerTab.MANUAL) {
+            showManual(
+                index = mutableState.value.manualIndex,
+                step = mutableState.value.manualStep
+            )
         }
+
         mutableState.update { it.copy(tab = tab) }
+
         savePosition()
     }
 
@@ -81,30 +101,62 @@ internal class ManagerSession(
         screenshot: Path?
     ) {
         val id = currentManual().id
-        val name = screenshot?.let { copyIntoReport(file = it, name = "$id.${it.extension}") }
+
+        val name = screenshot?.let {
+            copyIntoReport(
+                file = it,
+                name = "$id.${it.extension}"
+            )
+        }
+
         answer(
-            answer = ManualAnswer.Failed(id = id, note = note.trim(), screenshot = name, steps = Breadcrumbs.recent())
+            answer = ManualAnswer.Failed(
+                id = id,
+                note = note.trim(),
+                screenshot = name,
+                steps = Breadcrumbs.recent()
+            )
         )
     }
 
-    fun skip() = showManual(index = mutableState.value.manualIndex + 1, step = 0)
+    fun skip() = showManual(
+        index = mutableState.value.manualIndex + 1,
+        step = 0
+    )
 
-    fun previousCase() = showManual(index = mutableState.value.manualIndex - 1, step = 0)
+    fun previousCase() = showManual(
+        index = mutableState.value.manualIndex - 1,
+        step = 0
+    )
 
     /** The current case's own variables for a restart (a crash test), none for the others. */
-    fun launchEnvironment(): Map<String, String> =
-        suite.manual.getOrNull(mutableState.value.manualIndex)?.launchEnvironment.orEmpty()
+    fun launchEnvironment(): Map<String, String> = suite
+        .manual
+        .getOrNull(mutableState.value.manualIndex)
+        ?.launchEnvironment
+        .orEmpty()
 
     private fun onEvent(event: RunnerEvent) {
         when (event) {
-            is RunnerEvent.Started -> mutableState.update { it.copy(runningId = event.id, runningSteps = emptyList()) }
+            is RunnerEvent.Started -> mutableState.update {
+                it.copy(
+                    runningId = event.id,
+                    runningSteps = emptyList()
+                )
+            }
 
             is RunnerEvent.Step -> mutableState.update {
                 it.copy(runningSteps = (it.runningSteps + event.text).takeLast(n = SHOWN_STEPS))
             }
 
             is RunnerEvent.Ended -> {
-                mutableState.update { it.copy(results = it.results + (event.result.id to event.result)) }
+                mutableState.update {
+                    it.copy(
+                        results =
+                        it.results + (event.result.id to event.result)
+                    )
+                }
+
                 resultStore.save(results = mutableState.value.results.values)
             }
 
@@ -114,39 +166,73 @@ internal class ManagerSession(
 
     /** A run that ends without its [RunnerEvent.Done] or with an error died, unless the tester stopped it. */
     private fun onEnd(exitCode: Int) {
-        if (!isStopping && (!sawDone || exitCode != 0)) failStoppedCase(exitCode = exitCode)
-        mutableState.update { it.copy(isRunning = false, runningId = null) }
+        val hasDied = !isStopping && (!sawDone || exitCode != 0)
+        if (hasDied) failStoppedCase(exitCode = exitCode)
+
+        mutableState.update {
+            it.copy(
+                isRunning = false,
+                runningId = null
+            )
+        }
     }
 
     /** The case the dead process was in, or the next one when it died between two: the rest are left skipped. */
     private fun failStoppedCase(exitCode: Int) {
         val current = mutableState.value
-        val id = current.runningId?.takeUnless { it in current.results }
-            ?: suite.automated.firstOrNull { it.id !in current.results }?.id
+
+        val id = current.runningId?.takeUnless {
+            it in current.results
+        }
+            ?: suite
+                .automated
+                .firstOrNull {
+                    it.id !in current.results
+                }
+                ?.id
             ?: return
+
         val failed = CaseResult.Failed(
             id = id,
             message = "the test process stopped (exit code $exitCode)",
             duration = Duration.ZERO,
             steps = current.runningSteps
         )
+
         mutableState.update { it.copy(results = it.results + (id to failed)) }
+
         resultStore.save(results = mutableState.value.results.values)
     }
 
     private fun moveStep(by: Int) {
         val steps = currentManual().stepList.size
+
         mutableState.update {
-            it.copy(manualStep = (it.manualStep + by).coerceIn(minimumValue = 0, maximumValue = steps))
+            it.copy(
+                manualStep = (it.manualStep + by).coerceIn(
+                    minimumValue = 0,
+                    maximumValue = steps
+                )
+            )
         }
+
         savePosition()
     }
 
     private fun answer(answer: ManualAnswer) {
         mutableState.update { it.copy(answers = it.answers + (answer.id to answer)) }
+
         answerStore.save(answers = mutableState.value.answers.values)
         val next = mutableState.value.manualIndex + 1
-        if (next < suite.manual.size) showManual(index = next, step = 0) else select(tab = ManagerTab.REPORT)
+
+        if (next < suite.manual.size) {
+            showManual(
+                index = next,
+                step = 0
+            )
+        } else {
+            select(tab = ManagerTab.REPORT)
+        }
     }
 
     private fun showManual(
@@ -155,7 +241,14 @@ internal class ManagerSession(
     ) {
         val case = suite.manual.getOrNull(index) ?: return
         manualData.prepare(folders = case.data)
-        mutableState.update { it.copy(manualIndex = index, manualStep = step) }
+
+        mutableState.update {
+            it.copy(
+                manualIndex = index,
+                manualStep = step
+            )
+        }
+
         savePosition()
     }
 
@@ -163,16 +256,32 @@ internal class ManagerSession(
 
     private fun writeReport() {
         val current = mutableState.value
-        val automatic = suite.automated.map { current.results[it.id] ?: CaseResult.Skipped(id = it.id) }
-        val manual = suite.manual.map { current.answers[it.id] ?: ManualAnswer.NotRun(id = it.id) }
-        automatic.filterIsInstance<CaseResult.Failed>().forEach { failed ->
-            failed.screenshot?.takeIf(Files::isRegularFile)?.let {
-                copyIntoReport(file = it, name = it.fileName.toString())
-            }
+
+        val automatic = suite.automated.map {
+            current.results[it.id] ?: CaseResult.Skipped(id = it.id)
         }
+
+        val manual = suite.manual.map {
+            current.answers[it.id] ?: ManualAnswer.NotRun(id = it.id)
+        }
+
+        automatic.filterIsInstance<CaseResult.Failed>().forEach { failed ->
+            failed
+                .screenshot
+                ?.takeIf(Files::isRegularFile)
+                ?.let {
+                    copyIntoReport(
+                        file = it,
+                        name = it.fileName.toString()
+                    )
+                }
+        }
+
         val diagnostics = runCatching { suite.diagnostics() }.getOrNull()
+
         val report = formatReport(suite, environment(), automatic, manual, diagnostics)
         Files.writeString(folders.report.resolve(REPORT), report)
+
         mutableState.update { it.copy(report = report) }
     }
 
@@ -181,16 +290,22 @@ internal class ManagerSession(
         name: String
     ): String {
         Files.copy(file, folders.report.resolve(name), StandardCopyOption.REPLACE_EXISTING)
+
         return name
     }
 
     private fun savePosition() = mutableState.value.let {
-        position.save(tab = it.tab, index = it.manualIndex, step = it.manualStep)
+        position.save(
+            tab = it.tab,
+            index = it.manualIndex,
+            step = it.manualStep
+        )
     }
 
     private fun restoredState(): ManagerState {
         folders.create()
         val saved = position.load()
+
         val state = ManagerState(
             tab = saved?.tab ?: ManagerTab.AUTOMATIC,
             results = resultStore.load(),
@@ -198,6 +313,7 @@ internal class ManagerSession(
             manualStep = saved?.step ?: 0,
             answers = answerStore.load()
         )
+
         return if (state.tab == ManagerTab.REPORT) state.copy(tab = ManagerTab.MANUAL) else state
     }
 

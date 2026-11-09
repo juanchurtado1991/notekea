@@ -14,11 +14,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Base class of every screen ViewModel (`ARCHITECTURE.md` §4).
- * [state] is the single source of truth, changed only through [reduce]; [effects] delivers one-shot events
- * exactly once (buffered until collected); [onIntent] is the only public entry point: it names the intent in the
- * [IntentTrail] (the steps a crash or test report lists), then the ViewModel handles it ([handleIntent]).
- * [launchGuarded] catches unexpected exceptions at the edge of the app while always rethrowing cancellation.
+ * Base class of every screen ViewModel (`ARCHITECTURE.md` §4). [state] changes only through [reduce]; [effects]
+ * delivers one-shot events exactly once; [onIntent], the only public entry point, names the intent in the [IntentTrail]
+ * and hands it to [handleIntent]. [launchGuarded] catches unexpected exceptions while always rethrowing cancellation.
  */
 abstract class BaseViewModel<S, I, E>(initialState: S) : ViewModel() {
     private val effectChannel = Channel<E>(capacity = Channel.BUFFERED)
@@ -27,20 +25,18 @@ abstract class BaseViewModel<S, I, E>(initialState: S) : ViewModel() {
     val effects: Flow<E> = effectChannel.receiveAsFlow()
     val state: StateFlow<S> = mutableState.asStateFlow()
 
-    fun onIntent(
-        intent: I
-    ) {
-        IntentTrail.record(owner = this, intent = intent)
+    fun onIntent(intent: I) {
+        IntentTrail.record(
+            owner = this,
+            intent = intent
+        )
+
         handleIntent(intent = intent)
     }
 
-    protected abstract fun handleIntent(
-        intent: I
-    )
+    protected abstract fun handleIntent(intent: I)
 
-    protected fun emit(
-        effect: E
-    ) {
+    protected fun emit(effect: E) {
         effectChannel.trySend(element = effect)
     }
 
@@ -58,9 +54,7 @@ abstract class BaseViewModel<S, I, E>(initialState: S) : ViewModel() {
         }
     }
 
-    protected fun reduce(
-        transform: (S) -> S
-    ) {
+    protected fun reduce(transform: (S) -> S) {
         mutableState.update(function = transform)
     }
 }

@@ -46,22 +46,40 @@ fun NotekeaGridSizePicker(
     initialRows: Int = 2
 ) {
     var size by remember { mutableStateOf(value = initialColumns to initialRows) }
+
     val step = with(LocalDensity.current) { (CELL_DP + CELL_GAP_DP).dp.toPx() }
+
     val cellOf = { x: Float, y: Float ->
-        ((x / step).toInt() + 1).coerceIn(range = 1..columns) to ((y / step).toInt() + 1).coerceIn(range = 1..rows)
+        ((x / step).toInt() + 1).coerceIn(range = 1..columns) to
+            ((y / step).toInt() + 1).coerceIn(range = 1..rows)
     }
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
+    ) {
         Column(
-            modifier = Modifier.pointerInput(columns, rows) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val position = event.changes.first().position
-                        if (event.type != PointerEventType.Exit) size = cellOf(position.x, position.y)
-                        if (event.type == PointerEventType.Release) onPick(size.first, size.second)
+            modifier = Modifier
+                .pointerInput(columns, rows) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+
+                            val position = event
+                                .changes
+                                .first()
+                                .position
+
+                            if (event.type != PointerEventType.Exit) {
+                                size = cellOf(position.x, position.y)
+                            }
+
+                            if (event.type == PointerEventType.Release) {
+                                onPick(size.first, size.second)
+                            }
+                        }
                     }
-                }
-            },
+                },
             verticalArrangement = Arrangement.spacedBy(space = CELL_GAP_DP.dp)
         ) {
             repeat(times = rows) { row ->
@@ -72,6 +90,7 @@ fun NotekeaGridSizePicker(
                 }
             }
         }
+
         Text(
             text = label(size.first, size.second),
             style = MaterialTheme.typography.labelMedium,
@@ -81,15 +100,16 @@ fun NotekeaGridSizePicker(
 }
 
 @Composable
-private fun GridCell(
-    isSelected: Boolean
-) {
+private fun GridCell(isSelected: Boolean) {
     val colors = MaterialTheme.colorScheme
+
+    val fill = if (isSelected) colors.primary.copy(alpha = SELECTED_ALPHA) else colors.surface
+
     Box(
         modifier = Modifier
             .size(size = CELL_DP.dp)
             .background(
-                color = if (isSelected) colors.primary.copy(alpha = SELECTED_ALPHA) else colors.surface,
+                color = fill,
                 shape = RectangleShape
             )
             .border(

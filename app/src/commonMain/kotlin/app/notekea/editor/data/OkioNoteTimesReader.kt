@@ -1,9 +1,9 @@
 package app.notekea.editor.data
 
 import app.notekea.core.domain.AppDispatchers
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.domain.NoteTimes
 import app.notekea.editor.domain.NoteTimesReader
-import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.IOException
@@ -24,9 +24,14 @@ class OkioNoteTimesReader(
         } catch (_: IOException) {
             null
         }
+
         NoteTimes(
-            createdAt = metadata?.createdAtMillis?.let { Instant.fromEpochMilliseconds(epochMilliseconds = it) },
-            modifiedAt = metadata?.lastModifiedAtMillis?.let { Instant.fromEpochMilliseconds(epochMilliseconds = it) }
+            createdAt = metadata?.createdAtMillis?.let {
+                Instant.fromEpochMilliseconds(epochMilliseconds = it)
+            },
+            modifiedAt = metadata?.lastModifiedAtMillis?.let {
+                Instant.fromEpochMilliseconds(epochMilliseconds = it)
+            }
         )
     }
 }

@@ -1,17 +1,17 @@
 package app.notekea.editor.presentation.view
 
 import androidx.compose.foundation.text.input.TextFieldState
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.model.EditorState
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
-import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -24,11 +24,19 @@ class ReadModeTagClickTest {
     @Test
     fun `clicking a tag in read mode asks to search it`() {
         val intents = mutableListOf<EditorIntent>()
+
         UiThread.run {
-            ImageComposeScene(width = WINDOW_WIDTH, height = WINDOW_HEIGHT, density = Density(density = DENSITY)) {
+            ImageComposeScene(
+                width = WINDOW_WIDTH,
+                height = WINDOW_HEIGHT,
+                density = Density(density = DENSITY)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     EditorContent(
-                        state = EditorState(notePath = RelativePath(value = NOTE), isReading = true),
+                        state = EditorState(
+                            notePath = RelativePath(value = NOTE),
+                            isReading = true
+                        ),
                         buffer = TextFieldState(initialText = BODY),
                         platformConventions = PreviewPlatformConventions.linux,
                         onIntent = { intents += it }
@@ -39,8 +47,17 @@ class ReadModeTagClickTest {
                     scene.render(nanoTime = frame * FRAME_NANOS)
                     Thread.sleep(PARSE_PAUSE_MILLIS)
                 }
-                scene.sendPointerEvent(eventType = PointerEventType.Press, position = TAG_POSITION)
-                scene.sendPointerEvent(eventType = PointerEventType.Release, position = TAG_POSITION)
+
+                scene.sendPointerEvent(
+                    eventType = PointerEventType.Press,
+                    position = TAG_POSITION
+                )
+
+                scene.sendPointerEvent(
+                    eventType = PointerEventType.Release,
+                    position = TAG_POSITION
+                )
+
                 scene.render(nanoTime = PARSE_FRAMES * FRAME_NANOS)
             }
         }
@@ -60,6 +77,9 @@ class ReadModeTagClickTest {
         private const val PARSE_PAUSE_MILLIS = 30L
         private const val WINDOW_HEIGHT = 500
         private const val WINDOW_WIDTH = 900
-        private val TAG_POSITION = Offset(x = 225f, y = 305f)
+        private val TAG_POSITION = Offset(
+            x = 225f,
+            y = 305f
+        )
     }
 }

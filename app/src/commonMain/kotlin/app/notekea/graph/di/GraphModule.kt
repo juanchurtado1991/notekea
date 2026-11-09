@@ -11,9 +11,16 @@ import org.koin.dsl.module
 
 /** The graph tab: its data from the vault's links and one view model per vault. */
 val graphModule = module {
-    single<GraphPreferencesStore> { SettingsGraphPreferencesStore(settings = get(), dispatchers = get()) }
+    single<GraphPreferencesStore> {
+        SettingsGraphPreferencesStore(
+            settings = get(),
+            dispatchers = get()
+        )
+    }
+
     factoryOf(::BuildNoteGraphUseCase)
     factoryOf(::LinkNotesUseCase)
+
     viewModel { parameters ->
         GraphViewModel(
             vaultPath = parameters.get(),

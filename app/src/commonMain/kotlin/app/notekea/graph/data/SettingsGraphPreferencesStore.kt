@@ -12,11 +12,17 @@ class SettingsGraphPreferencesStore(
     private val settings: Settings,
     private val dispatchers: AppDispatchers
 ) : GraphPreferencesStore {
-    override suspend fun read(
-        vaultPath: String
-    ): GraphPreferences = withContext(context = dispatchers.io) {
+    override suspend fun read(vaultPath: String): GraphPreferences = withContext(
+        context = dispatchers.io
+    ) {
         val text = settings.getStringOrNull(key = keyOf(vaultPath = vaultPath)).orEmpty()
-        GraphPreferences(excludedFolders = text.split(LINE_SEPARATOR).filter { it.isNotBlank() }.toSet())
+
+        GraphPreferences(
+            excludedFolders = text
+                .split(LINE_SEPARATOR)
+                .filter { it.isNotBlank() }
+                .toSet()
+        )
     }
 
     override suspend fun write(
@@ -24,12 +30,15 @@ class SettingsGraphPreferencesStore(
         preferences: GraphPreferences
     ) = withContext(context = dispatchers.io) {
         val text = preferences.excludedFolders.joinToString(separator = LINE_SEPARATOR)
-        settings.putString(key = keyOf(vaultPath = vaultPath), value = text)
+
+        settings.putString(
+            key = keyOf(vaultPath = vaultPath),
+            value = text
+        )
     }
 
-    private fun keyOf(
-        vaultPath: String
-    ): String = KEY_PREFIX + VaultKeyHash.of(vaultPath = vaultPath)
+    private fun keyOf(vaultPath: String): String =
+        KEY_PREFIX + VaultKeyHash.of(vaultPath = vaultPath)
 
     private companion object {
         const val KEY_PREFIX = "graph."

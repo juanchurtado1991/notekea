@@ -13,8 +13,12 @@ object EditorNotes {
     fun write(folder: Path) {
         Files.createDirectories(folder)
         folder.resolve("Read mode.md").writeText(READ_MODE)
+
         folder.resolve("Shared note.md")
-            .writeText("# Shared note\n\nAnother app changes or deletes this note while it is open in Notekea.\n")
+            .writeText(
+                "# Shared note\n\nAnother app changes or deletes this note while it is open in Notekea.\n"
+            )
+
         folder.resolve("Windows line endings.md").writeText(
             "---\r\ntitle: Written on Windows\r\ntags: [crlf]\r\n---\r\n# Windows line endings\r\n\r\n" +
                 "Every line ends with CR LF.\r\n"

@@ -38,6 +38,7 @@ class FakeNoteFileOperations : NoteFileOperations {
         path: RelativePath
     ): Boolean {
         gate.pass()
+
         return path in existing
     }
 
@@ -47,21 +48,32 @@ class FakeNoteFileOperations : NoteFileOperations {
         to: RelativePath
     ): Outcome<Unit, NotesError> {
         gate.pass()
-        failure?.let { return Outcome.Failure(error = it) }
+
+        failure?.let {
+            return Outcome.Failure(error = it)
+        }
+
         moves += from to to
         existing -= from
         existing += to
         onMove(from, to)
+
         return Outcome.Success(value = Unit)
     }
 
-    private suspend fun create(
-        path: RelativePath
-    ): Outcome<Unit, NotesError> {
+    private suspend fun create(path: RelativePath): Outcome<Unit, NotesError> {
         gate.pass()
-        failure?.let { return Outcome.Failure(error = it) }
-        if (path in takenOnCreate) return Outcome.Failure(error = NotesError.NameTaken(name = path.name))
+
+        failure?.let {
+            return Outcome.Failure(error = it)
+        }
+
+        if (path in takenOnCreate) {
+            return Outcome.Failure(error = NotesError.NameTaken(name = path.name))
+        }
+
         existing += path
+
         return Outcome.Success(value = Unit)
     }
 }

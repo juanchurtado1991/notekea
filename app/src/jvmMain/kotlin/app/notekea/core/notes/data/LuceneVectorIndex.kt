@@ -40,11 +40,9 @@ import java.nio.file.Path
 import java.security.MessageDigest
 
 /**
- * [VectorIndex] on Lucene, one index per vault in [indexRoot] (the app's data), named by a hash of the vault's path.
- * Each chunk is a document: its note, place and headings stored, its headings and text indexed for BM25 by
- * [NoteAnalyzer], and its vector for nearest-neighbour search (HNSW, dot product of unit vectors). A search takes the
- * best of each as the search asks and merges them ([RankFusion]). Every change opens the index, commits and closes it, so
- * it is on disk when the call returns and another Notekea on the same vault only waits ([IndexError.Busy]).
+ * [VectorIndex] on Lucene, one index per vault in [indexRoot], named by a hash of the vault's path. Each chunk is a
+ * document: its text indexed for BM25 by [NoteAnalyzer], and its vector for nearest-neighbour search; a search merges
+ * both ([RankFusion]). Every change commits and closes the index, so another Notekea only waits ([IndexError.Busy]).
  */
 class LuceneVectorIndex(
     private val indexRoot: String,
@@ -61,17 +59,22 @@ class LuceneVectorIndex(
         vectors: List<FloatArray>
     ): Outcome<Unit, IndexError> = write(vaultPath = vaultPath) { writer ->
         writer.deleteDocuments(Term(NOTE, note.value))
-        chunks.zip(other = vectors).forEach { (chunk, vector) -> writer.addDocument(documentOf(chunk, vector)) }
+
+        chunks.zip(other = vectors).forEach { (chunk, vector) ->
+            writer.addDocument(documentOf(chunk, vector))
+        }
     }
 
     override suspend fun remove(
         vaultPath: String,
         note: RelativePath
-    ): Outcome<Unit, IndexError> = write(vaultPath = vaultPath) { it.deleteDocuments(Term(NOTE, note.value)) }
+    ): Outcome<Unit, IndexError> = write(vaultPath = vaultPath) {
+        it.deleteDocuments(Term(NOTE, note.value))
+    }
 
-    override suspend fun clear(
-        vaultPath: String
-    ): Outcome<Unit, IndexError> = write(vaultPath = vaultPath) { it.deleteAll() }
+    override suspend fun clear(vaultPath: String): Outcome<Unit, IndexError> = write(
+        vaultPath = vaultPath
+    ) { it.deleteAll() }
 
     override suspend fun nearest(
         vaultPath: String,
@@ -79,9 +82,16 @@ class LuceneVectorIndex(
         limit: Int
     ): Outcome<List<SearchHit>, IndexError> = read(vaultPath = vaultPath) { searcher ->
         val fields = searcher.storedFields()
-        searcher.search(KnnFloatVectorQuery(VECTOR, vector, limit), limit).scoreDocs.map {
-            hitOf(document = fields.document(it.doc), score = it.score)
-        }
+
+        searcher
+            .search(KnnFloatVectorQuery(VECTOR, vector, limit), limit)
+            .scoreDocs
+            .map {
+                hitOf(
+                    document = fields.document(it.doc),
+                    score = it.score
+                )
+            }
     }
 
     override suspend fun search(
@@ -90,7 +100,9 @@ class LuceneVectorIndex(
         vector: FloatArray,
         limit: Int,
         only: Set<RelativePath>?
-    ): Outcome<List<SearchHit>, IndexError> = read(vaultPath = vaultPath) { hitsOf(it, text, vector, limit, only) }
+    ): Outcome<List<SearchHit>, IndexError> = read(vaultPath = vaultPath) {
+        hitsOf(it, text, vector, limit, only)
+    }
 
     /** [query] on the vault's index as it is on disk; nothing found when it has none yet. */
     private suspend fun read(
@@ -99,6 +111,7 @@ class LuceneVectorIndex(
     ): Outcome<List<SearchHit>, IndexError> = withContext(context = dispatchers.io) {
         val folder = folderOf(vaultPath = vaultPath)
         if (!Files.exists(folder)) return@withContext Outcome.Success(value = emptyList())
+
         guarded {
             FSDirectory.open(folder).use { directory ->
                 if (DirectoryReader.indexExists(directory)) {
@@ -117,23 +130,42 @@ class LuceneVectorIndex(
         limit: Int,
         only: Set<RelativePath>?
     ): List<SearchHit> {
-        val notes = only?.let { paths -> TermInSetQuery(NOTE, paths.map { BytesRef(it.value) }) }
-        val byMeaning = searcher.search(KnnFloatVectorQuery(VECTOR, vector, limit, notes), limit).scoreDocs
+        val notes = only?.let { paths ->
+            TermInSetQuery(
+                NOTE,
+                paths.map { BytesRef(it.value) }
+            )
+        }
+
+        val byMeaning = searcher.search(
+            KnnFloatVectorQuery(VECTOR, vector, limit, notes),
+            limit
+        ).scoreDocs
+
         val byWords = keywordQuery(text, BooleanClause.Occur.SHOULD, notes)?.let {
             searcher.search(it, limit).scoreDocs
         }
             .orEmpty()
-        val withEveryWord = keywordQuery(text, BooleanClause.Occur.MUST, notes)?.let {
-            searcher.search(it, limit).scoreDocs
-        }
+
+        val withEveryWord = keywordQuery(text, BooleanClause.Occur.MUST, notes)
+            ?.let { searcher.search(it, limit).scoreDocs }
             .orEmpty()
             .mapTo(destination = HashSet()) { it.doc }
+
         val fields = searcher.storedFields()
-        val closeness = byMeaning.associate { it.doc to it.score }
-        return RankFusion.merge(rankings = listOf(byMeaning.map { it.doc }, byWords.map { it.doc }))
+
+        val closeness = byMeaning.associate {
+            it.doc to it.score
+        }
+
+        return RankFusion
+            .merge(rankings = listOf(byMeaning.map { it.doc }, byWords.map { it.doc }))
             .take(n = limit)
             .map { (document, score) ->
-                hitOf(document = fields.document(document), score = score).copy(
+                hitOf(
+                    document = fields.document(document),
+                    score = score
+                ).copy(
                     hasWords = document in withEveryWord,
                     closeness = closeness[document] ?: 0f
                 )
@@ -147,18 +179,24 @@ class LuceneVectorIndex(
         notes: Query?
     ): Query? {
         val terms = mutableListOf<String>()
+
         analyzer.tokenStream(TEXT, text).use { stream ->
             val term = stream.addAttribute(CharTermAttribute::class.java)
             stream.reset()
             while (stream.incrementToken()) terms += term.toString()
             stream.end()
         }
+
         if (terms.isEmpty()) return null
         val query = BooleanQuery.Builder()
-        terms.distinct().take(n = MAX_QUERY_TERMS).forEach {
-            query.add(TermQuery(Term(TEXT, it)), occur)
-        }
+
+        terms
+            .distinct()
+            .take(n = MAX_QUERY_TERMS)
+            .forEach { query.add(TermQuery(Term(TEXT, it)), occur) }
+
         notes?.let { query.add(it, BooleanClause.Occur.FILTER) }
+
         return query.build()
     }
 
@@ -171,7 +209,15 @@ class LuceneVectorIndex(
         add(StoredField(HEADINGS, chunk.headingPath.joinToString(separator = HEADING_SEPARATOR)))
         add(StoredField(START, chunk.range.first))
         add(StoredField(END, chunk.range.last))
-        add(TextField(TEXT, (chunk.headingPath + chunk.text).joinToString(separator = "\n"), Field.Store.NO))
+
+        add(
+            TextField(
+                TEXT,
+                (chunk.headingPath + chunk.text).joinToString(separator = "\n"),
+                Field.Store.NO
+            )
+        )
+
         add(KnnFloatVectorField(VECTOR, vector, VectorSimilarityFunction.DOT_PRODUCT))
     }
 
@@ -180,9 +226,21 @@ class LuceneVectorIndex(
         score: Float
     ): SearchHit = SearchHit(
         note = RelativePath(value = document.get(NOTE)),
-        index = document.getField(CHUNK).numericValue().toInt(),
-        headingPath = document.get(HEADINGS).split(HEADING_SEPARATOR).filter { it.isNotEmpty() },
-        range = document.getField(START).numericValue().toInt()..document.getField(END).numericValue().toInt(),
+        index = document
+            .getField(CHUNK)
+            .numericValue()
+            .toInt(),
+        headingPath = document
+            .get(HEADINGS)
+            .split(HEADING_SEPARATOR)
+            .filter { it.isNotEmpty() },
+        range = document
+            .getField(START)
+            .numericValue()
+            .toInt()..document
+            .getField(END)
+            .numericValue()
+            .toInt(),
         score = score
     )
 
@@ -193,6 +251,7 @@ class LuceneVectorIndex(
         mutex.withLock {
             guarded<Unit> {
                 val folder = Files.createDirectories(folderOf(vaultPath = vaultPath))
+
                 FSDirectory.open(folder).use { directory ->
                     IndexWriter(directory, IndexWriterConfig(analyzer)).use { writer ->
                         change(writer)
@@ -203,9 +262,7 @@ class LuceneVectorIndex(
         }
     }
 
-    private fun <T> guarded(
-        block: () -> T
-    ): Outcome<T, IndexError> = try {
+    private fun <T> guarded(block: () -> T): Outcome<T, IndexError> = try {
         Outcome.Success(value = block())
     } catch (_: LockObtainFailedException) {
         Outcome.Failure(error = IndexError.Busy)
@@ -215,11 +272,17 @@ class LuceneVectorIndex(
     }
 
     /** The vault's index folder: a hash of its path, so no path is written in the folder's name. */
-    private fun folderOf(
-        vaultPath: String
-    ): Path {
-        val hash = MessageDigest.getInstance(SHA_256).digest(vaultPath.toByteArray(charset = Charsets.UTF_8))
-        return Path.of(indexRoot, hash.take(n = FOLDER_BYTES).joinToString(separator = "") { "%02x".format(it) })
+    private fun folderOf(vaultPath: String): Path {
+        val hash = MessageDigest.getInstance(
+            SHA_256
+        ).digest(vaultPath.toByteArray(charset = Charsets.UTF_8))
+
+        return Path.of(
+            indexRoot,
+            hash
+                .take(n = FOLDER_BYTES)
+                .joinToString(separator = "") { "%02x".format(it) }
+        )
     }
 
     companion object {

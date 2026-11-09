@@ -8,9 +8,7 @@ import app.notekea.core.notes.domain.RelativePath
  * cache that cannot be read answers as empty, and the notes are read from disk again.
  */
 interface NoteMetadataCache {
-    suspend fun read(
-        vaultPath: String
-    ): List<NoteEntry>
+    suspend fun read(vaultPath: String): List<NoteEntry>
 
     /** Stores [upserted] (new or changed notes) and forgets [removed], in one transaction. */
     suspend fun update(

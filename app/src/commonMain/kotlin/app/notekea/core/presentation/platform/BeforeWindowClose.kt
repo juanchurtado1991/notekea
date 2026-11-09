@@ -15,13 +15,13 @@ private const val PREVIEW_TEXT = "Saves before the window closes while this is s
  * for it; [action] always runs its latest version. It draws nothing.
  */
 @Composable
-fun BeforeWindowClose(
-    action: suspend () -> Unit
-) {
+fun BeforeWindowClose(action: suspend () -> Unit) {
     val guard = LocalWindowCloseGuard.current
     val currentAction by rememberUpdatedState(newValue = action)
+
     DisposableEffect(guard) {
         val unregister = guard.register { currentAction() }
+
         onDispose { unregister() }
     }
 }

@@ -29,7 +29,12 @@ internal fun WelcomeErrorBanner(
     modifier: Modifier = Modifier
 ) {
     ErrorBanner(
-        message = error?.let { vaultErrorMessage(error = it, platformConventions = platformConventions) }
+        message = error?.let {
+            vaultErrorMessage(
+                error = it,
+                platformConventions = platformConventions
+            )
+        }
             ?: stringResource(resource = Res.string.error_unexpected),
         modifier = modifier,
         onDismiss = onDismiss,

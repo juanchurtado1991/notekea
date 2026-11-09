@@ -38,10 +38,9 @@ private const val PREVIEW_SHORTCUT = "Ctrl+E"
 private const val PREVIEW_WIDTH_DP = 240
 
 /**
- * Tabs as wide as their labels, for a toolbar (the editor's Edit | Preview), drawn as every selector of the app: the
- * [selectedIndex] one raised on a muted track. The tooltip of each tab shows [shortcutHint] when there is one, so the
- * shortcut that switches them is learned from the tabs themselves. With [takesFocus] false a click leaves the keyboard
- * where it was, so a shortcut and a click never leave the focus ring on a tab that is no longer selected.
+ * Tabs as wide as their labels, for a toolbar (the editor's Edit | Preview): the [selectedIndex] one raised on a muted
+ * track. Each tab's tooltip shows its [shortcutHint], so the shortcut is learned from the tabs. With [takesFocus] false
+ * a click leaves the keyboard where it was, so the focus ring never stays on a tab that is not selected.
  */
 @Composable
 fun NotekeaCompactTabs(
@@ -74,19 +73,36 @@ private fun CompactTab(
     shortcutHint: String?
 ) {
     val colors = MaterialTheme.colorScheme
-    NotekeaTooltip(label = label, shortcutHint = shortcutHint) {
+
+    NotekeaTooltip(
+        label = label,
+        shortcutHint = shortcutHint
+    ) {
         Text(
             text = label,
             modifier = Modifier
                 .focusProperties { canFocus = takesFocus }
-                .segmentThumb(isSelected = isSelected, colors = colors)
-                .focusBorder(color = colors.primary, shape = segmentShape)
+                .segmentThumb(
+                    isSelected = isSelected,
+                    colors = colors
+                )
+                .focusBorder(
+                    color = colors.primary,
+                    shape = segmentShape
+                )
                 .semantics { selected = isSelected }
-                .clickable(role = Role.Tab, onClick = onClick)
-                .padding(horizontal = NotekeaDimensions.SpacingM, vertical = VERTICAL_PADDING_DP.dp),
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
-            ),
+                .clickable(
+                    role = Role.Tab,
+                    onClick = onClick
+                )
+                .padding(
+                    horizontal = NotekeaDimensions.SpacingM,
+                    vertical = VERTICAL_PADDING_DP.dp
+                ),
+            style = MaterialTheme
+                .typography
+                .labelMedium
+                .copy(fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium),
             color = if (isSelected) colors.onSurface else colors.onSurfaceVariant
         )
     }
@@ -97,6 +113,7 @@ private fun CompactTab(
 private fun NotekeaCompactTabsPreview() {
     NotekeaPreviewThemes {
         var selected by remember { mutableIntStateOf(value = 0) }
+
         Box(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
             NotekeaCompactTabs(
                 labels = listOf(PREVIEW_EDIT, PREVIEW_PREVIEW),

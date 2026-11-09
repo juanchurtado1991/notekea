@@ -9,8 +9,14 @@ class ListLineTest {
     @Test
     fun `a line holding a character Regex takes for a line end is still read, whole`() {
         assertEquals(
-            expected = LINE_ENDS.map { "- " to "a${it}b" },
-            actual = LINE_ENDS.map { char -> ListLine.of(line = "- a${char}b").let { it.marker to it.content } }
+            expected = LINE_ENDS.map {
+                "- " to "a${it}b"
+            },
+            actual = LINE_ENDS.map { char ->
+                ListLine.of(line = "- a${char}b").let {
+                    it.marker to it.content
+                }
+            }
         )
     }
 
@@ -30,15 +36,29 @@ class ListLineTest {
 
             assertEquals(
                 expected = "- a\n- b${char}c\n- ",
-                actual = applied(text = text, cursor = end, action = ListAction.NEW_ITEM)
+                actual = applied(
+                    text = text,
+                    cursor = end,
+                    action = ListAction.NEW_ITEM
+                )
             )
+
             assertEquals(
                 expected = "- a\n  - b${char}c",
-                actual = applied(text = text, cursor = end, action = ListAction.INDENT)
+                actual = applied(
+                    text = text,
+                    cursor = end,
+                    action = ListAction.INDENT
+                )
             )
+
             assertEquals(
                 expected = "- a\nb${char}c",
-                actual = applied(text = text, cursor = text.indexOf(char = 'b'), action = ListAction.REMOVE_MARKER)
+                actual = applied(
+                    text = text,
+                    cursor = text.indexOf(char = 'b'),
+                    action = ListAction.REMOVE_MARKER
+                )
             )
         }
     }
@@ -49,9 +69,19 @@ class ListLineTest {
         action: ListAction
     ): String {
         val edit = requireNotNull(
-            editing.edit(text = text, selectionStart = cursor, selectionEnd = cursor, action = action)
+            editing.edit(
+                text = text,
+                selectionStart = cursor,
+                selectionEnd = cursor,
+                action = action
+            )
         )
-        return text.replaceRange(startIndex = edit.start, endIndex = edit.end, replacement = edit.replacement)
+
+        return text.replaceRange(
+            startIndex = edit.start,
+            endIndex = edit.end,
+            replacement = edit.replacement
+        )
     }
 
     private companion object {

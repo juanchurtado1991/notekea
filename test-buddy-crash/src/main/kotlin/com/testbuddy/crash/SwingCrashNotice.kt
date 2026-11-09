@@ -9,8 +9,19 @@ import javax.swing.JOptionPane
 internal class SwingCrashNotice(private val config: CrashConfig) {
     fun show(crash: CrashReport) {
         val texts = config.texts
-        val message = texts.message + "\n\n" + (crash.path?.let { texts.saved + "\n" + it } ?: texts.notSaved)
-        val options = listOfNotNull(texts.copy, config.issueFormUrl?.let { texts.report }, texts.close).toTypedArray()
+
+        val message = texts.message + "\n\n" + (
+            crash.path?.let {
+                texts.saved + "\n" + it
+            } ?: texts.notSaved
+            )
+
+        val options = listOfNotNull(
+            texts.copy,
+            config.issueFormUrl?.let { texts.report },
+            texts.close
+        ).toTypedArray()
+
         while (true) {
             val choice = JOptionPane.showOptionDialog(
                 null,
@@ -22,9 +33,17 @@ internal class SwingCrashNotice(private val config: CrashConfig) {
                 options,
                 options.last()
             )
+
             when (options.getOrNull(choice)) {
                 texts.copy -> CrashActions.copy(text = crash.text)
-                texts.report -> config.issueFormUrl?.let { CrashActions.report(text = crash.text, url = it) }
+
+                texts.report -> config.issueFormUrl?.let {
+                    CrashActions.report(
+                        text = crash.text,
+                        url = it
+                    )
+                }
+
                 else -> return
             }
         }

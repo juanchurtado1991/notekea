@@ -33,6 +33,7 @@ fun NotekeaPopover(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val gap = with(LocalDensity.current) { NotekeaDimensions.SpacingXs.roundToPx() }
+
     Popup(
         popupPositionProvider = remember(gap) { DropdownPositionProvider(gap = gap) },
         onDismissRequest = onDismiss,
@@ -42,10 +43,16 @@ fun NotekeaPopover(
             modifier = Modifier.width(width = WIDTH_DP.dp),
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = MaterialTheme.colorScheme.outline),
+            border = BorderStroke(
+                width = NotekeaDimensions.BorderWidth,
+                color = MaterialTheme.colorScheme.outline
+            ),
             shadowElevation = NotekeaDimensions.SpacingS
         ) {
-            Column(modifier = Modifier.padding(all = NotekeaDimensions.SpacingL), content = content)
+            Column(
+                modifier = Modifier.padding(all = NotekeaDimensions.SpacingL),
+                content = content
+            )
         }
     }
 }
@@ -53,5 +60,7 @@ fun NotekeaPopover(
 @Preview
 @Composable
 private fun NotekeaPopoverPreview() {
-    NotekeaPreviewThemes { NotekeaPopover(onDismiss = {}) { Text(text = PREVIEW_TEXT) } }
+    NotekeaPreviewThemes {
+        NotekeaPopover(onDismiss = {}) { Text(text = PREVIEW_TEXT) }
+    }
 }

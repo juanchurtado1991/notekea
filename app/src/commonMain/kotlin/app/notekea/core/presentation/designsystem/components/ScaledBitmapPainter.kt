@@ -22,15 +22,28 @@ class ScaledBitmapPainter(
         drawImage(
             image = bitmap,
             srcOffset = IntOffset.Zero,
-            srcSize = IntSize(width = bitmap.width, height = bitmap.height),
-            dstSize = IntSize(width = this.size.width.roundToInt(), height = this.size.height.roundToInt())
+            srcSize = IntSize(
+                width = bitmap.width,
+                height = bitmap.height
+            ),
+            dstSize = IntSize(
+                width = this
+                    .size
+                    .width
+                    .roundToInt(),
+                height = this
+                    .size
+                    .height
+                    .roundToInt()
+            )
         )
     }
 
     // Equal for the same image at the same size, so a recomposition that builds it again redraws nothing.
-    override fun equals(
-        other: Any?
-    ): Boolean = other is ScaledBitmapPainter && other.bitmap == bitmap && other.size == size
+    override fun equals(other: Any?): Boolean =
+        other is ScaledBitmapPainter &&
+            other.bitmap == bitmap &&
+            other.size == size
 
     override fun hashCode(): Int = 31 * bitmap.hashCode() + size.hashCode()
 }

@@ -26,7 +26,14 @@ class RenameAndUpdateLinksUseCase(
             is Outcome.Failure -> return scanned
             is Outcome.Success -> scanned.value
         }
-        return when (val renamed = renameEntry(vaultPath = vaultPath, path = path, newName = newName)) {
+
+        return when (
+            val renamed = renameEntry(
+                vaultPath = vaultPath,
+                path = path,
+                newName = newName
+            )
+        ) {
             is Outcome.Failure -> renamed
 
             is Outcome.Success -> {
@@ -35,12 +42,21 @@ class RenameAndUpdateLinksUseCase(
                 } else {
                     updateLinksAfterRename(
                         vaultPath = vaultPath,
-                        notesBefore = listing.files.map { it.path }.toSet(),
+                        notesBefore = listing
+                            .files
+                            .map { it.path }
+                            .toSet(),
                         from = path,
                         to = renamed.value
                     )
                 }
-                Outcome.Success(value = RenamedEntry(path = renamed.value, links = links))
+
+                Outcome.Success(
+                    value = RenamedEntry(
+                        path = renamed.value,
+                        links = links
+                    )
+                )
             }
         }
     }

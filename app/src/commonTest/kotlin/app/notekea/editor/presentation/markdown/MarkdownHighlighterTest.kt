@@ -12,10 +12,15 @@ class MarkdownHighlighterTest {
             expected = listOf("# Title" to HighlightKind.HEADING_1, "# " to HighlightKind.SYNTAX),
             actual = shown(text = "# Title")
         )
+
         assertEquals(
-            expected = listOf("### Deep" to HighlightKind.HEADING_3, "### " to HighlightKind.SYNTAX),
+            expected = listOf(
+                "### Deep" to HighlightKind.HEADING_3,
+                "### " to HighlightKind.SYNTAX
+            ),
             actual = shown(text = "### Deep")
         )
+
         assertEquals(
             expected = listOf("#hashtag" to HighlightKind.TAG),
             actual = shown(text = "#hashtag"),
@@ -83,7 +88,9 @@ class MarkdownHighlighterTest {
     fun `spaces ending a code line keep the text's font, so the cursor moves past them`() {
         assertEquals(
             expected = listOf("```" to HighlightKind.CODE_BLOCK, "val" to HighlightKind.CODE_BLOCK),
-            actual = shown(text = "```\nval \n").filter { it.second == HighlightKind.CODE_BLOCK }
+            actual = shown(text = "```\nval \n").filter {
+                it.second == HighlightKind.CODE_BLOCK
+            }
         )
     }
 
@@ -149,12 +156,18 @@ class MarkdownHighlighterTest {
     fun `a fence indented four spaces is code, not the end of the block`() {
         val text = "```\n    ```\n```"
 
-        assertEquals(expected = listOf(0..text.lastIndex), actual = MarkdownHighlighter().codeBlocks(text = text))
+        assertEquals(
+            expected = listOf(0..text.lastIndex),
+            actual = MarkdownHighlighter().codeBlocks(text = text)
+        )
     }
 
-    private fun shown(
-        text: String
-    ): List<Pair<String, HighlightKind>> = highlighter.highlight(text = text).map {
-        text.substring(startIndex = it.start, endIndex = it.end) to it.kind
+    private fun shown(text: String): List<Pair<String, HighlightKind>> = highlighter.highlight(
+        text = text
+    ).map {
+        text.substring(
+            startIndex = it.start,
+            endIndex = it.end
+        ) to it.kind
     }
 }

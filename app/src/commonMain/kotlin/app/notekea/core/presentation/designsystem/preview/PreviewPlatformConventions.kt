@@ -15,30 +15,78 @@ object PreviewPlatformConventions {
     val linux = PlatformConventions(
         operatingSystem = OperatingSystem.LINUX,
         primaryModifier = ShortcutModifier.CONTROL,
-        openFolderShortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(ShortcutModifier.CONTROL)),
-        quitShortcut = Shortcut(key = ShortcutKey.Q, modifiers = setOf(ShortcutModifier.CONTROL)),
-        newNoteShortcut = Shortcut(key = ShortcutKey.N, modifiers = setOf(ShortcutModifier.CONTROL)),
-        renameShortcut = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
-        openSelectedShortcut = Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet()),
-        deleteShortcut = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
-        toggleSidebarShortcut = Shortcut(key = ShortcutKey.BACKSLASH, modifiers = setOf(ShortcutModifier.CONTROL)),
-        saveShortcut = Shortcut(key = ShortcutKey.S, modifiers = setOf(ShortcutModifier.CONTROL)),
-        findShortcut = Shortcut(key = ShortcutKey.F, modifiers = setOf(ShortcutModifier.CONTROL)),
-        toggleReadModeShortcut = Shortcut(key = ShortcutKey.E, modifiers = setOf(ShortcutModifier.CONTROL)),
-        quickSwitcherShortcut = Shortcut(key = ShortcutKey.P, modifiers = setOf(ShortcutModifier.CONTROL)),
+        openFolderShortcut = Shortcut(
+            key = ShortcutKey.O,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
+        quitShortcut = Shortcut(
+            key = ShortcutKey.Q,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
+        newNoteShortcut = Shortcut(
+            key = ShortcutKey.N,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
+        renameShortcut = Shortcut(
+            key = ShortcutKey.F2,
+            modifiers = emptySet()
+        ),
+        openSelectedShortcut = Shortcut(
+            key = ShortcutKey.ENTER,
+            modifiers = emptySet()
+        ),
+        deleteShortcut = Shortcut(
+            key = ShortcutKey.DELETE,
+            modifiers = emptySet()
+        ),
+        toggleSidebarShortcut = Shortcut(
+            key = ShortcutKey.BACKSLASH,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
+        saveShortcut = Shortcut(
+            key = ShortcutKey.S,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
+        findShortcut = Shortcut(
+            key = ShortcutKey.F,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
+        toggleReadModeShortcut = Shortcut(
+            key = ShortcutKey.E,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
+        quickSwitcherShortcut = Shortcut(
+            key = ShortcutKey.P,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
         searchNotesShortcut = Shortcut(
             key = ShortcutKey.F,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
-        toggleTaskShortcut = Shortcut(key = ShortcutKey.ENTER, modifiers = setOf(ShortcutModifier.CONTROL)),
-        boldShortcut = Shortcut(key = ShortcutKey.B, modifiers = setOf(ShortcutModifier.CONTROL)),
-        italicShortcut = Shortcut(key = ShortcutKey.I, modifiers = setOf(ShortcutModifier.CONTROL)),
-        noteLinkShortcut = Shortcut(key = ShortcutKey.K, modifiers = setOf(ShortcutModifier.CONTROL)),
+        toggleTaskShortcut = Shortcut(
+            key = ShortcutKey.ENTER,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
+        boldShortcut = Shortcut(
+            key = ShortcutKey.B,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
+        italicShortcut = Shortcut(
+            key = ShortcutKey.I,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
+        noteLinkShortcut = Shortcut(
+            key = ShortcutKey.K,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
         webLinkShortcut = Shortcut(
             key = ShortcutKey.K,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
-        pasteShortcut = Shortcut(key = ShortcutKey.V, modifiers = setOf(ShortcutModifier.CONTROL)),
+        pasteShortcut = Shortcut(
+            key = ShortcutKey.V,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
         toggleSidePanelShortcut = Shortcut(
             key = ShortcutKey.BACKSLASH,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
@@ -47,7 +95,10 @@ object PreviewPlatformConventions {
             key = ShortcutKey.O,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
-        todayShortcut = Shortcut(key = ShortcutKey.D, modifiers = setOf(ShortcutModifier.CONTROL)),
+        todayShortcut = Shortcut(
+            key = ShortcutKey.D,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
         previousDayShortcut = Shortcut(
             key = ShortcutKey.LEFT,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.ALT)
@@ -56,12 +107,18 @@ object PreviewPlatformConventions {
             key = ShortcutKey.RIGHT,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.ALT)
         ),
-        closeTabShortcut = Shortcut(key = ShortcutKey.W, modifiers = setOf(ShortcutModifier.CONTROL)),
+        closeTabShortcut = Shortcut(
+            key = ShortcutKey.W,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
         closeWindowShortcut = Shortcut(
             key = ShortcutKey.W,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
-        nextTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = setOf(ShortcutModifier.CONTROL)),
+        nextTabShortcut = Shortcut(
+            key = ShortcutKey.TAB,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
         previousTabShortcut = Shortcut(
             key = ShortcutKey.TAB,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
@@ -70,14 +127,25 @@ object PreviewPlatformConventions {
             key = ShortcutKey.D,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
-        templateShortcut = Shortcut(key = ShortcutKey.T, modifiers = setOf(ShortcutModifier.CONTROL)),
+        templateShortcut = Shortcut(
+            key = ShortcutKey.T,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
         bookmarkShortcut = Shortcut(
             key = ShortcutKey.B,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
-        goToTabShortcuts = ShortcutKey.entries
-            .filter { it.name.startsWith(prefix = "DIGIT_") && it != ShortcutKey.DIGIT_0 }
-            .map { Shortcut(key = it, modifiers = setOf(ShortcutModifier.CONTROL)) },
+        goToTabShortcuts = ShortcutKey
+            .entries
+            .filter {
+                it.name.startsWith(prefix = "DIGIT_") && it != ShortcutKey.DIGIT_0
+            }
+            .map {
+                Shortcut(
+                    key = it,
+                    modifiers = setOf(ShortcutModifier.CONTROL)
+                )
+            },
         dialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
         appDataDirectory = APP_DATA,
         homeDirectory = HOME,

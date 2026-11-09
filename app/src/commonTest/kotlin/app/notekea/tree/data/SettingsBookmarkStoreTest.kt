@@ -1,31 +1,50 @@
 package app.notekea.tree.data
 
 import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.tree.domain.Bookmarks
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.tree.domain.Bookmarks
 import com.russhwolf.settings.MapSettings
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** Each vault's bookmarks kept in the app settings (`ROADMAP.md` 1.13), in order, and gone when none are left. */
+/** Each vault's bookmarks kept in the app settings, in order, and gone when none are left. */
 class SettingsBookmarkStoreTest {
     private val testDispatcher = StandardTestDispatcher()
     private val settings = MapSettings()
-    private val store =
-        SettingsBookmarkStore(settings = settings, dispatchers = FakeAppDispatchers(dispatcher = testDispatcher))
+    private val store = SettingsBookmarkStore(
+        settings = settings,
+        dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
+    )
 
     @Test
     fun `each vault keeps its own bookmarks in order, names with spaces and accents included`() =
         runTest(context = testDispatcher) {
-            val notes =
-                Bookmarks(paths = listOf("Recipes/Café con leche.md", "Welcome.md", "Recipes").map(::RelativePath))
-            store.write(vaultPath = NOTES, bookmarks = notes)
-            store.write(vaultPath = WORK, bookmarks = Bookmarks(paths = listOf(RelativePath(value = "Clients"))))
+            val notes = Bookmarks(
+                paths = listOf(
+                    "Recipes/Café con leche.md",
+                    "Welcome.md",
+                    "Recipes"
+                ).map(::RelativePath)
+            )
+
+            store.write(
+                vaultPath = NOTES,
+                bookmarks = notes
+            )
+
+            store.write(
+                vaultPath = WORK,
+                bookmarks = Bookmarks(paths = listOf(RelativePath(value = "Clients")))
+            )
 
             assertEquals(
-                expected = listOf(notes, Bookmarks(paths = listOf(RelativePath(value = "Clients"))), Bookmarks()),
+                expected = listOf(
+                    notes,
+                    Bookmarks(paths = listOf(RelativePath(value = "Clients"))),
+                    Bookmarks()
+                ),
                 actual = listOf(
                     store.read(vaultPath = NOTES),
                     store.read(vaultPath = WORK),
@@ -36,10 +55,20 @@ class SettingsBookmarkStoreTest {
 
     @Test
     fun `no bookmarks left removes the vault's key`() = runTest(context = testDispatcher) {
-        store.write(vaultPath = NOTES, bookmarks = Bookmarks(paths = listOf(RelativePath(value = "Welcome.md"))))
-        store.write(vaultPath = NOTES, bookmarks = Bookmarks())
+        store.write(
+            vaultPath = NOTES,
+            bookmarks = Bookmarks(paths = listOf(RelativePath(value = "Welcome.md")))
+        )
 
-        assertEquals(expected = emptySet(), actual = settings.keys)
+        store.write(
+            vaultPath = NOTES,
+            bookmarks = Bookmarks()
+        )
+
+        assertEquals(
+            expected = emptySet(),
+            actual = settings.keys
+        )
     }
 
     companion object {

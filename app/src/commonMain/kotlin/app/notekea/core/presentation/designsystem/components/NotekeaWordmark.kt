@@ -22,28 +22,29 @@ private const val WORDMARK_TAIL = "kea"
  * tangerine half is exempt from the WCAG text contrast minimum; it is never used for regular text.
  */
 @Composable
-fun NotekeaWordmark(
-    modifier: Modifier = Modifier
-) {
+fun NotekeaWordmark(modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
+
     Text(
         text = buildAnnotatedString {
             withStyle(style = SpanStyle(color = colors.primary)) { append(WORDMARK_HEAD) }
+
             withStyle(style = SpanStyle(color = colors.tertiary)) { append(WORDMARK_TAIL) }
         },
         modifier = modifier,
-        style = MaterialTheme.typography.headlineMedium.copy(
-            fontSize = WORDMARK_SIZE_SP.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = LETTER_SPACING_SP.sp
-        )
+        style = MaterialTheme
+            .typography
+            .headlineMedium
+            .copy(
+                fontSize = WORDMARK_SIZE_SP.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = LETTER_SPACING_SP.sp
+            )
     )
 }
 
 @Preview
 @Composable
 private fun NotekeaWordmarkPreview() {
-    NotekeaPreviewThemes {
-        NotekeaWordmark()
-    }
+    NotekeaPreviewThemes { NotekeaWordmark() }
 }

@@ -15,18 +15,33 @@ class JetBrainsMarkdownMentionFinder : MentionFinder {
         markdown: String,
         names: List<String>
     ): List<IntRange> {
-        val found = names.filter {
-            it.isNotBlank()
-        }.flatMap { name -> wordsOf(name = name).findAll(input = markdown).map { it.range }.toList() }
+        val found = names.filter { it.isNotBlank() }.flatMap { name ->
+            wordsOf(name = name)
+                .findAll(input = markdown)
+                .map { it.range }
+                .toList()
+        }
+
         if (found.isEmpty()) return emptyList()
+
         val excluded = codeRanges.of(markdown = markdown) +
-            EXCLUDED.flatMap { pattern -> pattern.findAll(input = markdown).map { it.range }.toList() }
-        val kept = found.filterNot { place -> excluded.any { place.first in it || place.last in it } }
-        return kept.sortedWith(compareBy<IntRange> { it.first }.thenByDescending { it.last })
+            EXCLUDED.flatMap { pattern ->
+                pattern
+                    .findAll(input = markdown)
+                    .map { it.range }
+                    .toList()
+            }
+
+        val kept = found.filterNot { place ->
+            excluded.any {
+                place.first in it || place.last in it
+            }
+        }
+
+        return kept
+            .sortedWith(compareBy<IntRange> { it.first }.thenByDescending { it.last })
             .fold(initial = emptyList()) { taken, place ->
-                if (taken.lastOrNull()?.let { place.first <= it.last } ==
-                    true
-                ) {
+                if (taken.lastOrNull()?.let { place.first <= it.last } == true) {
                     taken
                 } else {
                     taken + listOf(place)
@@ -34,10 +49,9 @@ class JetBrainsMarkdownMentionFinder : MentionFinder {
             }
     }
 
-    private fun wordsOf(
-        name: String
-    ): Regex = Regex(
-        pattern = "(?<![\\p{L}\\p{N}_#])" + Regex.escape(literal = name.trim()) + "(?![\\p{L}\\p{N}_])",
+    private fun wordsOf(name: String): Regex = Regex(
+        pattern =
+        "(?<![\\p{L}\\p{N}_#])" + Regex.escape(literal = name.trim()) + "(?![\\p{L}\\p{N}_])",
         option = RegexOption.IGNORE_CASE
     )
 

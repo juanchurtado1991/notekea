@@ -15,13 +15,21 @@ fun ModelManagerScreen(
     viewModel: ModelManagerViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    ModelManagerContent(state = state, onIntent = viewModel::onIntent, modifier = modifier)
+
+    ModelManagerContent(
+        state = state,
+        onIntent = viewModel::onIntent,
+        modifier = modifier
+    )
 }
 
 @Preview
 @Composable
 private fun ModelManagerScreenPreview() {
     NotekeaPreviewThemes {
-        ModelManagerContent(state = ModelManagerSamples.notInstalled, onIntent = {})
+        ModelManagerContent(
+            state = ModelManagerSamples.notInstalled,
+            onIntent = {}
+        )
     }
 }

@@ -1,14 +1,14 @@
 package app.notekea.editor.domain
 
-import app.notekea.core.notes.domain.FrontmatterPatch
 import app.notekea.core.domain.time.CalendarDate
-import java.io.File
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import app.notekea.core.notes.domain.FrontmatterContent
+import app.notekea.core.notes.domain.FrontmatterPatch
 import app.notekea.core.notes.domain.FrontmatterReader
 import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.PropertyValue
+import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * The properties cases of `MVP_SMOKE_TEST.md` (1.14) on the smoke data itself: `Properties practice` reads one property
@@ -28,13 +28,22 @@ class SmokePropertiesTest {
                 "status" to PropertyValue.Text(text = "draft"),
                 "rating" to PropertyValue.Number(text = "4"),
                 "done" to PropertyValue.Checkbox(isChecked = false),
-                "due" to PropertyValue.Date(date = CalendarDate(year = 2026, month = 11, day = 2)),
+                "due" to PropertyValue.Date(
+                    date = CalendarDate(
+                        year = 2026,
+                        month = 11,
+                        day = 2
+                    )
+                ),
                 "tags" to PropertyValue.Items(items = listOf("recipe", "weekend")),
                 "aliases" to PropertyValue.Items(items = listOf("Practice", "Form test")),
-                "source" to PropertyValue.Other(source = "source:\n  book: Abuela's notebook\n  page: 12")
+                "source" to
+                    PropertyValue.Other(source = "source:\n  book: Abuela's notebook\n  page: 12")
             ) to FrontmatterContent.Invalid(line = 2),
             actual = (reader.read(header = header) as FrontmatterContent.Properties).properties
-                .map { it.key to it.value } to reader.read(header = broken)
+                .map {
+                    it.key to it.value
+                } to reader.read(header = broken)
         )
     }
 
@@ -44,13 +53,25 @@ class SmokePropertiesTest {
             "status" to PropertyValue.Text(text = "ready"),
             "rating" to PropertyValue.Number(text = "5"),
             "done" to PropertyValue.Checkbox(isChecked = true),
-            "due" to PropertyValue.Date(date = CalendarDate(year = 2026, month = 11, day = 9)),
+            "due" to PropertyValue.Date(
+                date = CalendarDate(
+                    year = 2026,
+                    month = 11,
+                    day = 9
+                )
+            ),
             "tags" to PropertyValue.Items(items = listOf("recipe", "weekend", "brunch")),
             "aliases" to PropertyValue.Items(items = listOf("Form test", "Notekea"))
         )
-        val edited = edits.fold(initial = header) { text, (key, value) ->
-            patch.set(header = text, key = key, value = value)
-        }
+
+        val edited = edits
+            .fold(initial = header) { text, (key, value) ->
+                patch.set(
+                    header = text,
+                    key = key,
+                    value = value
+                )
+            }
 
         assertEquals(
             expected = header

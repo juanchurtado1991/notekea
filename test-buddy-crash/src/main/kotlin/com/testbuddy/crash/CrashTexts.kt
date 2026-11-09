@@ -14,7 +14,8 @@ public data class CrashTexts(
     public companion object {
         public fun english(appName: String): CrashTexts = CrashTexts(
             title = "$appName needs to close",
-            message = "Something went wrong and $appName has to close. Your open work is saved before it closes.\n\n" +
+            message =
+            "Something went wrong and $appName has to close. Your open work is saved before it closes.\n\n" +
                 "To help fix it, click Report on GitHub and paste the details (already copied) into the form, or " +
                 "copy them and send them to us.",
             saved = "A report was saved to:",

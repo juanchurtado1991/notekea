@@ -23,10 +23,9 @@ import com.testbuddy.ManualCase
 import java.nio.file.Path
 
 /**
- * A manual case's result, after its last step: the case's [header], what the tester should have seen, then the
- * case's two answers ([ManualCase.passLabel], [ManualCase.failLabel]). The second asks what they saw and takes a
- * screenshot; the steps they took in the app are added to the report for them. Save (or Back to the steps) and
- * [otherCases] stay under it.
+ * A manual case's result, after its last step: the case's [header], what the tester should have seen, then the case's
+ * two answers ([ManualCase.passLabel], [ManualCase.failLabel]). The second asks what they saw and takes a screenshot;
+ * the steps they took in the app are added to the report. Save and [otherCases] stay under it.
  */
 @Composable
 internal fun ManualResult(
@@ -36,32 +35,49 @@ internal fun ManualResult(
     otherCases: @Composable ColumnScope.() -> Unit
 ) {
     var isFailing by remember(case.id) { mutableStateOf(value = false) }
+
     var note by remember(case.id) { mutableStateOf(value = "") }
+
     var screenshot by remember(case.id) { mutableStateOf<Path?>(value = null) }
+
     TabLayout(actions = {
         if (isFailing) {
-            Button(onClick = {
-                actions.onFail(note, screenshot)
-            }, enabled = note.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
-                Text(text = "Save and go to the next case")
-            }
+            Button(
+                onClick = { actions.onFail(note, screenshot) },
+                enabled = note.isNotBlank(),
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(text = "Save and go to the next case") }
         } else {
-            OutlinedButton(onClick = actions.onPreviousStep, modifier = Modifier.fillMaxWidth()) {
-                Text(text = "‹ Back to the steps")
-            }
+            OutlinedButton(
+                onClick = actions.onPreviousStep,
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(text = "‹ Back to the steps") }
         }
+
         otherCases()
     }) {
         header()
         SectionLabel(text = "YOU SHOULD HAVE SEEN")
-        Text(text = case.expected, fontSize = 13.sp)
-        Answers(case = case, actions = actions, onFail = { isFailing = true })
+
+        Text(
+            text = case.expected,
+            fontSize = 13.sp
+        )
+
+        Answers(
+            case = case,
+            actions = actions,
+            onFail = { isFailing = true }
+        )
+
         if (isFailing) {
             WhatYouSaw(
                 note = note,
                 hasScreenshot = screenshot != null,
                 onNote = { note = it },
-                onPickScreenshot = { actions.onPickScreenshot()?.let { screenshot = it } }
+                onPickScreenshot = {
+                    actions.onPickScreenshot()?.let { screenshot = it }
+                }
             )
         }
     }
@@ -79,6 +95,7 @@ private fun Answers(
             colors = ButtonDefaults.buttonColors(containerColor = AutoTestColors.Passed),
             modifier = Modifier.weight(weight = 1f)
         ) { Text(text = case.passLabel) }
+
         Button(
             onClick = onFail,
             colors = ButtonDefaults.buttonColors(containerColor = AutoTestColors.Failed),
@@ -101,10 +118,22 @@ private fun WhatYouSaw(
         label = { Text(text = "What did you see?") },
         modifier = Modifier.fillMaxWidth().height(height = 96.dp)
     )
-    Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         OutlinedButton(onClick = onPickScreenshot) {
-            Text(text = if (hasScreenshot) "Screenshot added" else "Add a screenshot", fontSize = 12.sp)
+            Text(
+                text = if (hasScreenshot) "Screenshot added" else "Add a screenshot",
+                fontSize = 12.sp
+            )
         }
-        Text(text = "Your last steps in the app are added for you.", fontSize = 10.sp, color = AutoTestColors.Muted)
+
+        Text(
+            text = "Your last steps in the app are added for you.",
+            fontSize = 10.sp,
+            color = AutoTestColors.Muted
+        )
     }
 }

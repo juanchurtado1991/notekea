@@ -6,19 +6,19 @@ import app.notekea.core.domain.time.DescribeElapsedTimeUseCase
 import app.notekea.core.domain.time.ElapsedTime
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.notes.domain.ChunkNoteUseCase
-import app.notekea.search.domain.FakeIndexStateStore
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.IndexError
 import app.notekea.core.notes.domain.IndexRunError
-import app.notekea.search.domain.IndexVaultUseCase
 import app.notekea.core.notes.domain.NoteChunk
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.NoteSections
 import app.notekea.core.notes.domain.OutlineFinder
-import app.notekea.search.domain.PlanIndexUseCase
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VectorIndex
+import app.notekea.search.domain.FakeIndexStateStore
+import app.notekea.search.domain.IndexVaultUseCase
+import app.notekea.search.domain.PlanIndexUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
@@ -38,7 +38,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
 /**
- * The vault's search index while it is open (`ROADMAP.md` 2.3): a change of its notes starts one run a moment later,
+ * The vault's search index while it is open: a change of its notes starts one run a moment later,
  * a busy index is tried again, Rebuild index starts over, and a large first run shows its notice.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -60,13 +60,13 @@ class SearchIndexViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel(
-        vectorIndex: VectorIndex = index
-    ) = SearchIndexViewModel(
+    private fun viewModel(vectorIndex: VectorIndex = index) = SearchIndexViewModel(
         vaultPath = VAULT,
         indexVault = IndexVaultUseCase(
             planIndex = PlanIndexUseCase(),
-            chunkNote = ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder())),
+            chunkNote = ChunkNoteUseCase(
+                noteSections = NoteSections(outlineFinder = OutlineFinder())
+            ),
             noteContentStore = contents,
             textEmbedder = embedder,
             vectorIndex = vectorIndex,
@@ -79,166 +79,309 @@ class SearchIndexViewModelTest {
     )
 
     @Test
-    fun `a burst of changes once the tree is loaded starts one run, which ends with the notes ready`() = runTest(
+    fun `a burst of changes once the tree is loaded starts one run, which ends with the notes ready`() =
+        runTest(
+            context = testDispatcher
+        ) {
+            val viewModel = viewModel()
+            val notes = write(count = 2)
+
+            viewModel.onIntent(
+                intent = SearchIndexIntent.OnNotesChange(
+                    notes = notes,
+                    isLoaded = false
+                )
+            )
+
+            advanceUntilIdle()
+            val beforeLoaded = index.puts.size
+
+            repeat(times = 3) {
+                viewModel.onIntent(
+                    intent = SearchIndexIntent.OnNotesChange(
+                        notes = notes,
+                        isLoaded = true
+                    )
+                )
+            }
+
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = 0 to 2,
+                actual = beforeLoaded to index.puts.size
+            )
+
+            assertEquals(
+                expected = false to 2,
+                actual = viewModel
+                    .state
+                    .value
+                    .let {
+                        it.isRunning to it.readyNotes
+                    }
+            )
+        }
+
+    @Test
+    fun `an index another Notekea holds is tried again later`() = runTest(
         context = testDispatcher
     ) {
         val viewModel = viewModel()
-        val notes = write(count = 2)
-        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = notes, isLoaded = false))
-        advanceUntilIdle()
-        val beforeLoaded = index.puts.size
-        repeat(times = 3) {
-            viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = notes, isLoaded = true))
-        }
-        advanceUntilIdle()
-
-        assertEquals(expected = 0 to 2, actual = beforeLoaded to index.puts.size)
-        assertEquals(expected = false to 2, actual = viewModel.state.value.let { it.isRunning to it.readyNotes })
-    }
-
-    @Test
-    fun `an index another Notekea holds is tried again later`() = runTest(context = testDispatcher) {
-        val viewModel = viewModel()
         index.isBusy = true
-        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = write(count = 1), isLoaded = true))
+
+        viewModel.onIntent(
+            intent = SearchIndexIntent.OnNotesChange(
+                notes = write(count = 1),
+                isLoaded = true
+            )
+        )
+
         advanceTimeBy(delayTimeMillis = 1_000)
         val whileBusy = index.puts.size
         index.isBusy = false
         advanceUntilIdle()
 
-        assertEquals(expected = 0 to 1, actual = whileBusy to index.puts.size)
+        assertEquals(
+            expected = 0 to 1,
+            actual = whileBusy to index.puts.size
+        )
     }
 
     @Test
-    fun `Rebuild index forgets the index and reads every note again`() = runTest(context = testDispatcher) {
+    fun `Rebuild index forgets the index and reads every note again`() = runTest(
+        context = testDispatcher
+    ) {
         val viewModel = viewModel()
-        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = write(count = 2), isLoaded = true))
+
+        viewModel.onIntent(
+            intent = SearchIndexIntent.OnNotesChange(
+                notes = write(count = 2),
+                isLoaded = true
+            )
+        )
+
         advanceUntilIdle()
         index.puts.clear()
 
         viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
         advanceUntilIdle()
 
-        assertEquals(expected = 2, actual = index.puts.size)
+        assertEquals(
+            expected = 2,
+            actual = index.puts.size
+        )
     }
 
     // Audit: a change of the tree cancelled Rebuild between emptying the index and forgetting the state, which went on
     // saying every note was done: the index stayed empty.
     @Test
-    fun `a change of the notes in the middle of Rebuild still leaves every note in the index`() = runTest(
-        context = testDispatcher
-    ) {
-        val slowToClear = object : VectorIndex by index {
-            override suspend fun clear(
-                vaultPath: String
-            ): Outcome<Unit, IndexError> = index.clear(vaultPath = vaultPath).also { delay(timeMillis = 100) }
-        }
-        val viewModel = viewModel(vectorIndex = slowToClear)
-        val notes = write(count = 2)
-        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = notes, isLoaded = true))
-        advanceUntilIdle()
-
-        viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
-        advanceTimeBy(delayTimeMillis = 50)
-        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = notes, isLoaded = true))
-        advanceUntilIdle()
-
-        assertEquals(expected = 2, actual = index.notes.getValue(VAULT).size)
-    }
-
-    @Test
-    fun `a Rebuild that cannot empty the index stops there and says so`() = runTest(context = testDispatcher) {
-        val busyToClear = object : VectorIndex by index {
-            override suspend fun clear(
-                vaultPath: String
-            ): Outcome<Unit, IndexError> = Outcome.Failure(error = IndexError.Busy)
-        }
-        val viewModel = viewModel(vectorIndex = busyToClear)
-        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = write(count = 2), isLoaded = true))
-        advanceUntilIdle()
-        index.puts.clear()
-
-        viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
-        advanceUntilIdle()
-
-        assertEquals(expected = 0 to IndexRunError.Index, actual = index.puts.size to viewModel.state.value.error)
-    }
-
-    @Test
-    fun `a change of the notes while Rebuild waits for the run before it does not lose the Rebuild`() = runTest(
-        context = testDispatcher
-    ) {
-        val slowToPut = object : VectorIndex by index {
-            override suspend fun put(
-                vaultPath: String,
-                note: RelativePath,
-                chunks: List<NoteChunk>,
-                vectors: List<FloatArray>
-            ): Outcome<Unit, IndexError> = withContext(context = NonCancellable) {
-                delay(timeMillis = 100)
-                index.put(vaultPath = vaultPath, note = note, chunks = chunks, vectors = vectors)
+    fun `a change of the notes in the middle of Rebuild still leaves every note in the index`() =
+        runTest(
+            context = testDispatcher
+        ) {
+            val slowToClear = object : VectorIndex by index {
+                override suspend fun clear(vaultPath: String): Outcome<Unit, IndexError> =
+                    index.clear(
+                        vaultPath = vaultPath
+                    ).also { delay(timeMillis = 100) }
             }
+
+            val viewModel = viewModel(vectorIndex = slowToClear)
+            val notes = write(count = 2)
+
+            viewModel.onIntent(
+                intent = SearchIndexIntent.OnNotesChange(
+                    notes = notes,
+                    isLoaded = true
+                )
+            )
+
+            advanceUntilIdle()
+
+            viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
+            advanceTimeBy(delayTimeMillis = 50)
+
+            viewModel.onIntent(
+                intent = SearchIndexIntent.OnNotesChange(
+                    notes = notes,
+                    isLoaded = true
+                )
+            )
+
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = 2,
+                actual = index
+                    .notes
+                    .getValue(VAULT)
+                    .size
+            )
         }
-        val viewModel = viewModel(vectorIndex = slowToPut)
-        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = write(count = 2), isLoaded = true))
+
+    @Test
+    fun `a Rebuild that cannot empty the index stops there and says so`() = runTest(
+        context = testDispatcher
+    ) {
+        val busyToClear = object : VectorIndex by index {
+            override suspend fun clear(vaultPath: String): Outcome<Unit, IndexError> =
+                Outcome.Failure(
+                    error = IndexError.Busy
+                )
+        }
+
+        val viewModel = viewModel(vectorIndex = busyToClear)
+
+        viewModel.onIntent(
+            intent = SearchIndexIntent.OnNotesChange(
+                notes = write(count = 2),
+                isLoaded = true
+            )
+        )
+
         advanceUntilIdle()
-        val notes = write(count = 3)
         index.puts.clear()
 
-        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = notes, isLoaded = true))
-        advanceTimeBy(delayTimeMillis = 350)
-        viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
-        advanceTimeBy(delayTimeMillis = 10)
-        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = notes, isLoaded = true))
-        advanceUntilIdle()
-
-        assertEquals(expected = notes.map { it.path }.toSet(), actual = index.puts.toSet())
-    }
-
-    @Test
-    fun `a Rebuild whose state cannot be forgotten leaves the index as it was and says so`() = runTest(
-        context = testDispatcher
-    ) {
-        val viewModel = viewModel()
-        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = write(count = 2), isLoaded = true))
-        advanceUntilIdle()
-        states.isClearRefused = true
-
         viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
         advanceUntilIdle()
 
         assertEquals(
-            expected = 2 to IndexRunError.Index,
-            actual = index.notes.getValue(VAULT).size to viewModel.state.value.error
+            expected = 0 to IndexRunError.Index,
+            actual = index.puts.size to viewModel.state.value.error
         )
     }
 
     @Test
-    fun `a large first run shows its notice until dismissed, and the details tell when the last run was`() = runTest(
-        context = testDispatcher
-    ) {
-        val viewModel = viewModel()
-        embedder.millisPerText = 10
-        viewModel.onIntent(intent = SearchIndexIntent.OnNotesChange(notes = write(count = 120), isLoaded = true))
-        advanceTimeBy(delayTimeMillis = 400)
-        val showsNotice = viewModel.state.value.showsNotice
-        viewModel.onIntent(intent = SearchIndexIntent.OnNoticeDismiss)
-        val afterDismiss = viewModel.state.value.showsNotice
-        advanceUntilIdle()
-        clock.currentTime = NOW + 5.minutes
-        viewModel.onIntent(intent = SearchIndexIntent.OnDetailsToggle)
+    fun `a change of the notes while Rebuild waits for the run before it does not lose the Rebuild`() =
+        runTest(
+            context = testDispatcher
+        ) {
+            val slowToPut = object : VectorIndex by index {
+                override suspend fun put(
+                    vaultPath: String,
+                    note: RelativePath,
+                    chunks: List<NoteChunk>,
+                    vectors: List<FloatArray>
+                ): Outcome<Unit, IndexError> = withContext(context = NonCancellable) {
+                    delay(timeMillis = 100)
 
-        assertEquals(
-            expected = listOf<Any?>(true, false, ElapsedTime.Minutes(count = 5)),
-            actual = listOf(showsNotice, afterDismiss, viewModel.state.value.lastRun)
-        )
-    }
+                    index.put(
+                        vaultPath = vaultPath,
+                        note = note,
+                        chunks = chunks,
+                        vectors = vectors
+                    )
+                }
+            }
+
+            val viewModel = viewModel(vectorIndex = slowToPut)
+
+            viewModel.onIntent(
+                intent = SearchIndexIntent.OnNotesChange(
+                    notes = write(count = 2),
+                    isLoaded = true
+                )
+            )
+
+            advanceUntilIdle()
+            val notes = write(count = 3)
+            index.puts.clear()
+
+            viewModel.onIntent(
+                intent = SearchIndexIntent.OnNotesChange(
+                    notes = notes,
+                    isLoaded = true
+                )
+            )
+
+            advanceTimeBy(delayTimeMillis = 350)
+            viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
+            advanceTimeBy(delayTimeMillis = 10)
+
+            viewModel.onIntent(
+                intent = SearchIndexIntent.OnNotesChange(
+                    notes = notes,
+                    isLoaded = true
+                )
+            )
+
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = notes.map { it.path }.toSet(),
+                actual = index.puts.toSet()
+            )
+        }
+
+    @Test
+    fun `a Rebuild whose state cannot be forgotten leaves the index as it was and says so`() =
+        runTest(
+            context = testDispatcher
+        ) {
+            val viewModel = viewModel()
+
+            viewModel.onIntent(
+                intent = SearchIndexIntent.OnNotesChange(
+                    notes = write(count = 2),
+                    isLoaded = true
+                )
+            )
+
+            advanceUntilIdle()
+            states.isClearRefused = true
+
+            viewModel.onIntent(intent = SearchIndexIntent.OnRebuildClick)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = 2 to IndexRunError.Index,
+                actual = index
+                    .notes
+                    .getValue(VAULT)
+                    .size to viewModel.state.value.error
+            )
+        }
+
+    @Test
+    fun `a large first run shows its notice until dismissed, and the details tell when the last run was`() =
+        runTest(
+            context = testDispatcher
+        ) {
+            val viewModel = viewModel()
+            embedder.millisPerText = 10
+
+            viewModel.onIntent(
+                intent = SearchIndexIntent.OnNotesChange(
+                    notes = write(count = 120),
+                    isLoaded = true
+                )
+            )
+
+            advanceTimeBy(delayTimeMillis = 400)
+            val showsNotice = viewModel.state.value.showsNotice
+            viewModel.onIntent(intent = SearchIndexIntent.OnNoticeDismiss)
+            val afterDismiss = viewModel.state.value.showsNotice
+            advanceUntilIdle()
+            clock.currentTime = NOW + 5.minutes
+            viewModel.onIntent(intent = SearchIndexIntent.OnDetailsToggle)
+
+            assertEquals(
+                expected = listOf<Any?>(true, false, ElapsedTime.Minutes(count = 5)),
+                actual = listOf(showsNotice, afterDismiss, viewModel.state.value.lastRun)
+            )
+        }
 
     /** [count] notes written to the vault, as the tree reports them. */
     private fun write(count: Int): List<NoteFile> = (1..count).map { number ->
         val path = RelativePath(value = "Note $number.md")
         contents.texts[path] = "# Note $number\nSome words of note $number."
-        NoteFile(path = path, size = 1, modifiedAt = NOW)
+
+        NoteFile(
+            path = path,
+            size = 1,
+            modifiedAt = NOW
+        )
     }
 
     private companion object {

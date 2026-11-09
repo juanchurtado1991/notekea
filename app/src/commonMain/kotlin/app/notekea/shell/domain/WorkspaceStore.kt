@@ -1,11 +1,9 @@
 package app.notekea.shell.domain
 
-/** Keeps each vault's open tabs and panes between runs (`ROADMAP.md` 1.11). */
+/** Keeps each vault's open tabs and panes between runs. */
 interface WorkspaceStore {
     /** The tabs the vault was left with, or null when it has none saved. */
-    suspend fun read(
-        vaultPath: String
-    ): Workspace?
+    suspend fun read(vaultPath: String): Workspace?
 
     suspend fun write(
         vaultPath: String,

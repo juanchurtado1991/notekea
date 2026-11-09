@@ -15,6 +15,7 @@ class VaultTreeTest {
             expected = setOf(path(value = PROJECTS), path(value = GARDEN)),
             actual = tree.folders
         )
+
         assertEquals(
             expected = setOf(path(value = TOMATO_PLAN)),
             actual = tree.notes.keys
@@ -25,12 +26,20 @@ class VaultTreeTest {
     fun `files that are not notes join with their folders, move with a renamed folder and leave with a removed one`() {
         val plate = file(path = "Recipes/attachments/plate.png")
         val tree = VaultTree.EMPTY.withAttachment(file = plate)
-        val moved = tree.renamed(from = RelativePath(value = "Recipes"), to = RelativePath(value = "Food"))
+
+        val moved = tree.renamed(
+            from = RelativePath(value = "Recipes"),
+            to = RelativePath(value = "Food")
+        )
 
         assertEquals(
-            expected = setOf(RelativePath(value = "Recipes"), RelativePath(value = "Recipes/attachments")),
+            expected = setOf(
+                RelativePath(value = "Recipes"),
+                RelativePath(value = "Recipes/attachments")
+            ),
             actual = tree.folders
         )
+
         assertEquals(
             expected = mapOf(
                 RelativePath(value = "Food/attachments/plate.png") to
@@ -38,6 +47,7 @@ class VaultTreeTest {
             ),
             actual = moved.attachments
         )
+
         assertEquals(
             expected = emptyMap(),
             actual = tree.without(path = RelativePath(value = "Recipes/attachments")).attachments
@@ -46,18 +56,26 @@ class VaultTreeTest {
 
     @Test
     fun `a folder counts the notes and files inside it, subfolders too`() {
-        val tree = VaultTree.EMPTY.withNote(note = note(path = TOMATO_PLAN))
+        val tree = VaultTree.EMPTY
+            .withNote(note = note(path = TOMATO_PLAN))
             .withAttachment(file = file(path = "$PROJECTS/plate.png"))
             .withAttachment(file = file(path = "Other/plate.png"))
 
-        assertEquals(expected = 2, actual = tree.fileCountIn(folder = path(value = PROJECTS)))
+        assertEquals(
+            expected = 2,
+            actual = tree.fileCountIn(folder = path(value = PROJECTS))
+        )
     }
 
     @Test
     fun `adding a note again replaces it`() {
-        val updated = note(path = TOMATO_PLAN).copy(metadata = NoteMetadata.NONE.copy(title = TITLE))
+        val updated = note(
+            path = TOMATO_PLAN
+        ).copy(metadata = NoteMetadata.NONE.copy(title = TITLE))
 
-        val tree = VaultTree.EMPTY.withNote(note = note(path = TOMATO_PLAN)).withNote(note = updated)
+        val tree = VaultTree.EMPTY.withNote(
+            note = note(path = TOMATO_PLAN)
+        ).withNote(note = updated)
 
         assertEquals(
             expected = mapOf(path(value = TOMATO_PLAN) to updated),
@@ -69,13 +87,22 @@ class VaultTreeTest {
     fun `adding a note already known as it is, or removing a path the tree does not have, keeps the same tree`() {
         val tree = VaultTree.EMPTY.withNote(note = note(path = TOMATO_PLAN))
 
-        assertSame(expected = tree, actual = tree.withNote(note = note(path = TOMATO_PLAN)))
-        assertSame(expected = tree, actual = tree.without(path = path(value = PROJECTS_PLAN)))
+        assertSame(
+            expected = tree,
+            actual = tree.withNote(note = note(path = TOMATO_PLAN))
+        )
+
+        assertSame(
+            expected = tree,
+            actual = tree.without(path = path(value = PROJECTS_PLAN))
+        )
     }
 
     @Test
     fun `adding a nested empty folder adds its parents and never the root`() {
-        val tree = VaultTree.EMPTY.withFolder(path = path(value = GARDEN)).withFolder(path = RelativePath.ROOT)
+        val tree = VaultTree.EMPTY.withFolder(
+            path = path(value = GARDEN)
+        ).withFolder(path = RelativePath.ROOT)
 
         assertEquals(
             expected = setOf(path(value = PROJECTS), path(value = GARDEN)),
@@ -103,10 +130,15 @@ class VaultTreeTest {
 
     @Test
     fun `removing a note keeps its folder`() {
-        val tree = VaultTree.EMPTY.withNote(note = note(path = TOMATO_PLAN)).without(path = path(value = TOMATO_PLAN))
+        val tree = VaultTree.EMPTY.withNote(
+            note = note(path = TOMATO_PLAN)
+        ).without(path = path(value = TOMATO_PLAN))
 
         assertEquals(
-            expected = VaultTree(folders = setOf(path(value = PROJECTS), path(value = GARDEN)), notes = emptyMap()),
+            expected = VaultTree(
+                folders = setOf(path(value = PROJECTS), path(value = GARDEN)),
+                notes = emptyMap()
+            ),
             actual = tree
         )
     }
@@ -116,9 +148,10 @@ class VaultTreeTest {
         val tagged = note(path = TOMATO_PLAN).copy(metadata = NoteMetadata.NONE.copy(title = TITLE))
 
         val tree = VaultTree.EMPTY
-            .withNote(
-                note = tagged
-            ).renamed(from = path(value = TOMATO_PLAN), to = path(value = "$GARDEN/Tomatoes.md"))
+            .withNote(note = tagged).renamed(
+                from = path(value = TOMATO_PLAN),
+                to = path(value = "$GARDEN/Tomatoes.md")
+            )
 
         assertEquals(
             expected = mapOf(
@@ -136,21 +169,30 @@ class VaultTreeTest {
             .withNote(note = note(path = PROJECTS_PLAN))
             .withFolder(path = path(value = "Projects/Empty"))
 
-        val renamed = tree.renamed(from = path(value = PROJECTS), to = path(value = "Work"))
+        val renamed = tree.renamed(
+            from = path(value = PROJECTS),
+            to = path(value = "Work")
+        )
 
         assertEquals(
-            expected = setOf(path(value = "Work"), path(value = "Work/Garden"), path(value = "Work/Empty")),
+            expected = setOf(
+                path(value = "Work"),
+                path(value = "Work/Garden"),
+                path(value = "Work/Empty")
+            ),
             actual = renamed.folders
         )
+
         assertEquals(
-            expected = setOf(path(value = "Work/Garden/Tomato plan.md"), path(value = PROJECTS_PLAN)),
+            expected = setOf(
+                path(value = "Work/Garden/Tomato plan.md"),
+                path(value = PROJECTS_PLAN)
+            ),
             actual = renamed.notes.keys
         )
     }
 
-    private fun note(
-        path: String
-    ): NoteEntry = NoteEntry(
+    private fun note(path: String): NoteEntry = NoteEntry(
         file = NoteFile(
             path = path(value = path),
             size = SIZE,
@@ -159,9 +201,7 @@ class VaultTreeTest {
         metadata = NoteMetadata.NONE
     )
 
-    private fun path(
-        value: String
-    ): RelativePath = RelativePath(value = value)
+    private fun path(value: String): RelativePath = RelativePath(value = value)
 
     companion object {
         private const val GARDEN = "Projects/Garden"

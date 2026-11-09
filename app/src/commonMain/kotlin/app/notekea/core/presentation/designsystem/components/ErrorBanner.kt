@@ -1,26 +1,26 @@
 package app.notekea.core.presentation.designsystem.components
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
 import app.notekea.resources.error_banner_dismiss
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.width
-import androidx.compose.ui.unit.dp
 
 private const val PREVIEW_ACTION = "Load theirs"
 private const val PREVIEW_MESSAGE = "This note changed outside Notekea."
@@ -41,30 +41,52 @@ fun ErrorBanner(
     action: (@Composable () -> Unit)? = null
 ) {
     val colors = MaterialTheme.colorScheme
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .border(width = NotekeaDimensions.BorderWidth, color = colors.error, shape = MaterialTheme.shapes.small),
+            .border(
+                width = NotekeaDimensions.BorderWidth,
+                color = colors.error,
+                shape = MaterialTheme.shapes.small
+            ),
         shape = MaterialTheme.shapes.small,
         color = colors.surface,
         contentColor = colors.error
     ) {
         BoxWithConstraints(
-            modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingS)
+            modifier = Modifier.padding(
+                horizontal = NotekeaDimensions.SpacingM,
+                vertical = NotekeaDimensions.SpacingS
+            )
         ) {
-            val buttons: @Composable () -> Unit = { BannerButtons(onDismiss = onDismiss, action = action) }
+            val buttons: @Composable () -> Unit = {
+                BannerButtons(
+                    onDismiss = onDismiss,
+                    action = action
+                )
+            }
+
             if (maxWidth < STACKED_BELOW_DP.dp) {
-                Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-                    BannerMessage(message = message, modifier = Modifier)
-                    if (action != null ||
-                        onDismiss != null
-                    ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
+                ) {
+                    BannerMessage(
+                        message = message,
+                        modifier = Modifier
+                    )
+
+                    if (action != null || onDismiss != null) {
                         Row(modifier = Modifier.align(alignment = Alignment.End)) { buttons() }
                     }
                 }
             } else {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    BannerMessage(message = message, modifier = Modifier.weight(weight = 1f))
+                    BannerMessage(
+                        message = message,
+                        modifier = Modifier.weight(weight = 1f)
+                    )
+
                     buttons()
                 }
             }
@@ -77,7 +99,11 @@ private fun BannerMessage(
     message: String,
     modifier: Modifier
 ) {
-    Text(text = message, modifier = modifier, style = MaterialTheme.typography.bodyMedium)
+    Text(
+        text = message,
+        modifier = modifier,
+        style = MaterialTheme.typography.bodyMedium
+    )
 }
 
 @Composable
@@ -86,6 +112,7 @@ private fun BannerButtons(
     action: (@Composable () -> Unit)?
 ) {
     action?.invoke()
+
     onDismiss?.let {
         NotekeaButton(
             text = stringResource(resource = Res.string.error_banner_dismiss),
@@ -106,8 +133,15 @@ private fun ErrorBannerPreview() {
             ErrorBanner(
                 message = PREVIEW_MESSAGE,
                 onDismiss = {},
-                action = { NotekeaButton(text = PREVIEW_ACTION, onClick = {}, style = NotekeaButtonStyle.SECONDARY) }
+                action = {
+                    NotekeaButton(
+                        text = PREVIEW_ACTION,
+                        onClick = {},
+                        style = NotekeaButtonStyle.SECONDARY
+                    )
+                }
             )
+
             ErrorBanner(message = PREVIEW_MESSAGE)
         }
     }
@@ -121,7 +155,13 @@ private fun ErrorBannerNarrowPreview() {
             ErrorBanner(
                 message = PREVIEW_MESSAGE,
                 onDismiss = {},
-                action = { NotekeaButton(text = PREVIEW_ACTION, onClick = {}, style = NotekeaButtonStyle.SECONDARY) }
+                action = {
+                    NotekeaButton(
+                        text = PREVIEW_ACTION,
+                        onClick = {},
+                        style = NotekeaButtonStyle.SECONDARY
+                    )
+                }
             )
         }
     }

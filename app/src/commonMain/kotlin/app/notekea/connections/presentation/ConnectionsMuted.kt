@@ -11,12 +11,13 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 
 /** A line of Connections that says why a tab lists nothing, or what went wrong, in the muted color. */
 @Composable
-fun ConnectionsMuted(
-    text: String
-) {
+fun ConnectionsMuted(text: String) {
     Text(
         text = text,
-        modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingS),
+        modifier = Modifier.padding(
+            horizontal = NotekeaDimensions.SpacingM,
+            vertical = NotekeaDimensions.SpacingS
+        ),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )

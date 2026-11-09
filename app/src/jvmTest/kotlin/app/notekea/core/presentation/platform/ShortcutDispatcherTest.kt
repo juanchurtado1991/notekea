@@ -1,12 +1,12 @@
 package app.notekea.core.presentation.platform
 
+import androidx.compose.ui.InternalComposeUiApi
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
 import app.notekea.core.platform.domain.Shortcut
 import app.notekea.core.platform.domain.ShortcutKey
 import app.notekea.core.platform.domain.ShortcutModifier
-import androidx.compose.ui.InternalComposeUiApi
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -17,24 +17,47 @@ import kotlin.test.assertEquals
  */
 @OptIn(InternalComposeUiApi::class)
 class ShortcutDispatcherTest {
-    private val openFolder = Shortcut(key = ShortcutKey.O, modifiers = setOf(ShortcutModifier.CONTROL))
+    private val openFolder = Shortcut(
+        key = ShortcutKey.O,
+        modifiers = setOf(ShortcutModifier.CONTROL)
+    )
     private val dispatcher = ShortcutDispatcher()
 
     @Test
     fun `a registered shortcut handles its key press and nothing else`() {
         var triggered = 0
-        dispatcher.register(shortcut = openFolder) { triggered++ }
+
+        dispatcher
+            .register(shortcut = openFolder) {
+                triggered++
+            }
 
         val handled = listOf(
-            dispatcher.dispatch(event = keyEvent(type = KeyEventType.KeyDown, isCtrlPressed = true)),
-            dispatcher.dispatch(event = keyEvent(type = KeyEventType.KeyUp, isCtrlPressed = true)),
-            dispatcher.dispatch(event = keyEvent(type = KeyEventType.KeyDown, isCtrlPressed = false))
+            dispatcher.dispatch(
+                event = keyEvent(
+                    type = KeyEventType.KeyDown,
+                    isCtrlPressed = true
+                )
+            ),
+            dispatcher.dispatch(
+                event = keyEvent(
+                    type = KeyEventType.KeyUp,
+                    isCtrlPressed = true
+                )
+            ),
+            dispatcher.dispatch(
+                event = keyEvent(
+                    type = KeyEventType.KeyDown,
+                    isCtrlPressed = false
+                )
+            )
         )
 
         assertEquals(
             expected = listOf(true, false, false),
             actual = handled
         )
+
         assertEquals(
             expected = 1,
             actual = triggered
@@ -47,9 +70,21 @@ class ShortcutDispatcherTest {
         dispatcher.register(shortcut = openFolder) { calls += FIRST }
         val unregister = dispatcher.register(shortcut = openFolder) { calls += SECOND }
 
-        dispatcher.dispatch(event = keyEvent(type = KeyEventType.KeyDown, isCtrlPressed = true))
+        dispatcher.dispatch(
+            event = keyEvent(
+                type = KeyEventType.KeyDown,
+                isCtrlPressed = true
+            )
+        )
+
         unregister()
-        dispatcher.dispatch(event = keyEvent(type = KeyEventType.KeyDown, isCtrlPressed = true))
+
+        dispatcher.dispatch(
+            event = keyEvent(
+                type = KeyEventType.KeyDown,
+                isCtrlPressed = true
+            )
+        )
 
         assertEquals(
             expected = listOf(SECOND, FIRST),

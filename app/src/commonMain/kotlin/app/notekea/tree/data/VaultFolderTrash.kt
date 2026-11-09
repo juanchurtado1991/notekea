@@ -1,8 +1,8 @@
 package app.notekea.tree.data
 
-import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.StringPatterns
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.tree.domain.Trash
@@ -26,13 +26,23 @@ class VaultFolderTrash(
         path: RelativePath
     ): Outcome<TrashLocation, NotesError> = withContext(context = dispatchers.io) {
         val source = vaultPath.toPath() / path.value
+
         if (fileSystem.metadataOrNull(path = source) == null) {
             return@withContext Outcome.Failure(error = NotesError.EntryMissing(path = path.value))
         }
+
         try {
             val trashFolder = vaultPath.toPath() / TRASH_FOLDER
             fileSystem.createDirectories(dir = trashFolder)
-            fileSystem.atomicMove(source = source, target = freeTarget(trashFolder = trashFolder, path = path))
+
+            fileSystem.atomicMove(
+                source = source,
+                target = freeTarget(
+                    trashFolder = trashFolder,
+                    path = path
+                )
+            )
+
             Outcome.Success(value = TrashLocation.VAULT_TRASH_FOLDER)
         } catch (_: IOException) {
             Outcome.Failure(error = NotesError.OperationFailed(path = path.value))
@@ -44,15 +54,21 @@ class VaultFolderTrash(
         path: RelativePath
     ): Path {
         val extension = path.name.removePrefix(prefix = path.nameWithoutExtension)
-        return generateSequence(seed = FIRST_SUFFIX) { it + 1 }
+
+        return generateSequence(seed = FIRST_SUFFIX) {
+            it + 1
+        }
             .map { number ->
                 val name = if (number == FIRST_SUFFIX) {
                     path.name
                 } else {
                     path.nameWithoutExtension + StringPatterns.SPACE + number + extension
                 }
+
                 trashFolder / name
-            }.first { fileSystem.metadataOrNull(path = it) == null }
+            }.first {
+                fileSystem.metadataOrNull(path = it) == null
+            }
     }
 
     companion object {

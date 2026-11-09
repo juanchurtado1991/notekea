@@ -16,7 +16,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** Settings → Appearance (`ROADMAP.md` 2.12): it shows the kept appearance and keeps each choice. */
+/** Settings → Appearance: it shows the kept appearance and keeps each choice. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppearanceViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
@@ -32,8 +32,11 @@ class AppearanceViewModelTest {
     }
 
     @Test
-    fun `a choice that cannot be kept says so, until the next one is`() = runTest(context = testDispatcher) {
+    fun `a choice that cannot be kept says so, until the next one is`() = runTest(
+        context = testDispatcher
+    ) {
         val store = FakeAppearanceStore().apply { failure = IllegalStateException("bug") }
+
         val viewModel = AppearanceViewModel(appearanceStore = store)
         advanceUntilIdle()
 
@@ -44,11 +47,16 @@ class AppearanceViewModelTest {
         viewModel.onIntent(intent = AppearanceIntent.OnThemeChoose(theme = ColorTheme.SAGE))
         advanceUntilIdle()
 
-        assertEquals(expected = true to false, actual = failed to viewModel.state.value.hasSaveFailed)
+        assertEquals(
+            expected = true to false,
+            actual = failed to viewModel.state.value.hasSaveFailed
+        )
     }
 
     @Test
-    fun `reduce motion is kept with the theme, and off again on a second click`() = runTest(context = testDispatcher) {
+    fun `reduce motion is kept with the theme, and off again on a second click`() = runTest(
+        context = testDispatcher
+    ) {
         val store = FakeAppearanceStore(initial = Appearance(theme = ColorTheme.SAGE))
         val viewModel = AppearanceViewModel(appearanceStore = store)
         advanceUntilIdle()
@@ -61,7 +69,10 @@ class AppearanceViewModelTest {
 
         assertEquals(
             expected = listOf(
-                Appearance(theme = ColorTheme.SAGE, reduceMotion = true),
+                Appearance(
+                    theme = ColorTheme.SAGE,
+                    reduceMotion = true
+                ),
                 Appearance(theme = ColorTheme.SAGE)
             ),
             actual = listOf(turnedOn, store.kept)
@@ -81,7 +92,11 @@ class AppearanceViewModelTest {
         viewModel.onIntent(intent = AppearanceIntent.OnThemeChoose(theme = ColorTheme.IRIS))
         advanceUntilIdle()
 
-        val chosen = Appearance(theme = ColorTheme.IRIS, mode = ThemeMode.DARK)
+        val chosen = Appearance(
+            theme = ColorTheme.IRIS,
+            mode = ThemeMode.DARK
+        )
+
         assertEquals(
             expected = listOf(Appearance(theme = ColorTheme.SAGE), chosen, chosen),
             actual = listOf(shown, viewModel.state.value.appearance, store.kept)

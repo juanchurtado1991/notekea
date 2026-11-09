@@ -44,18 +44,34 @@ class DirectoryWatcherFileWatcherTest {
     @Test
     fun `notes and folders that change are reported relative to the vault`() = watching { changes ->
         vault.resolve(IDEAS).createDirectories()
-        awaitChange(
-            changes = changes
-        ) { it == VaultChange.Created(path = RelativePath(value = IDEAS), isFolder = true) }
+
+        awaitChange(changes = changes) {
+            it == VaultChange.Created(
+                path = RelativePath(value = IDEAS),
+                isFolder = true
+            )
+        }
 
         vault.resolve(NEW_NOTE).writeText(text = CONTENT)
-        awaitChange(changes = changes) { isCreatedOrModified(change = it, path = NEW_NOTE) }
+
+        awaitChange(changes = changes) {
+            isCreatedOrModified(
+                change = it,
+                path = NEW_NOTE
+            )
+        }
 
         vault.resolve(NEW_NOTE).writeText(text = CONTENT + CONTENT)
-        awaitChange(changes = changes) { it == VaultChange.Modified(path = RelativePath(value = NEW_NOTE)) }
+
+        awaitChange(changes = changes) {
+            it == VaultChange.Modified(path = RelativePath(value = NEW_NOTE))
+        }
 
         vault.resolve(NEW_NOTE).deleteIfExists()
-        awaitChange(changes = changes) { it == VaultChange.Deleted(path = RelativePath(value = NEW_NOTE)) }
+
+        awaitChange(changes = changes) {
+            it == VaultChange.Deleted(path = RelativePath(value = NEW_NOTE))
+        }
     }
 
     @Test
@@ -67,14 +83,28 @@ class DirectoryWatcherFileWatcherTest {
         vault.resolve(SENTINEL).writeText(text = CONTENT)
 
         val beforeSentinel = mutableListOf<VaultChange>()
+
         awaitChange(changes = changes) { change ->
-            isCreatedOrModified(change = change, path = SENTINEL).also { if (!it) beforeSentinel += change }
+            isCreatedOrModified(
+                change = change,
+                path = SENTINEL
+            ).also {
+                if (!it) beforeSentinel += change
+            }
         }
 
         assertEquals(
             expected = setOf(RelativePath(value = "image.png")),
-            actual = beforeSentinel.filterNot { isCreatedOrModified(change = it, path = PROBE) }
-                .mapNotNull { (it as? VaultChange.Created)?.path ?: (it as? VaultChange.Modified)?.path }
+            actual = beforeSentinel
+                .filterNot {
+                    isCreatedOrModified(
+                        change = it,
+                        path = PROBE
+                    )
+                }
+                .mapNotNull {
+                    (it as? VaultChange.Created)?.path ?: (it as? VaultChange.Modified)?.path
+                }
                 .toSet()
         )
     }
@@ -84,7 +114,9 @@ class DirectoryWatcherFileWatcherTest {
         vault.moveTo(target = vault.resolveSibling(vault.fileName.toString() + MOVED_SUFFIX))
 
         try {
-            awaitChange(changes = changes) { it == VaultChange.Overflow }
+            awaitChange(changes = changes) {
+                it == VaultChange.Overflow
+            }
         } finally {
             vault.resolveSibling(vault.fileName.toString() + MOVED_SUFFIX).moveTo(target = vault)
         }
@@ -93,13 +125,18 @@ class DirectoryWatcherFileWatcherTest {
     @Test
     fun `a vault that cannot be watched asks for a rescan`() = runBlocking {
         val changes = Channel<VaultChange>(capacity = Channel.UNLIMITED)
-        val collection =
-            launch { watcher.watch(vaultPath = vault.resolve("Missing").toString()).collect { changes.send(it) } }
+
+        val collection = launch {
+            watcher.watch(vaultPath = vault.resolve("Missing").toString()).collect {
+                changes.send(it)
+            }
+        }
 
         assertEquals(
             expected = VaultChange.Overflow,
             actual = withTimeout(timeout = TIMEOUT) { changes.receive() }
         )
+
         collection.cancel()
     }
 
@@ -124,22 +161,31 @@ class DirectoryWatcherFileWatcherTest {
     private fun isCreatedOrModified(
         change: VaultChange,
         path: String
-    ): Boolean = change == VaultChange.Created(path = RelativePath(value = path), isFolder = false) ||
-        change == VaultChange.Modified(path = RelativePath(value = path))
+    ): Boolean =
+        change == VaultChange.Created(path = RelativePath(value = path), isFolder = false) ||
+            change == VaultChange.Modified(path = RelativePath(value = path))
 
-    private fun watching(
-        block: suspend CoroutineScope.(Channel<VaultChange>) -> Unit
-    ) = runBlocking {
-        val changes = Channel<VaultChange>(capacity = Channel.UNLIMITED)
-        val collection = launch(context = JvmAppDispatchers().io) {
-            watcher.watch(vaultPath = vault.toString()).collect { changes.send(it) }
+    private fun watching(block: suspend CoroutineScope.(Channel<VaultChange>) -> Unit) =
+        runBlocking {
+            val changes = Channel<VaultChange>(capacity = Channel.UNLIMITED)
+
+            val collection = launch(context = JvmAppDispatchers().io) {
+                watcher.watch(vaultPath = vault.toString()).collect { changes.send(it) }
+            }
+
+            val probe = startProbe()
+
+            awaitChange(changes = changes) {
+                isCreatedOrModified(
+                    change = it,
+                    path = PROBE
+                )
+            }
+
+            probe.cancel()
+            block(changes)
+            collection.cancel()
         }
-        val probe = startProbe()
-        awaitChange(changes = changes) { isCreatedOrModified(change = it, path = PROBE) }
-        probe.cancel()
-        block(changes)
-        collection.cancel()
-    }
 
     companion object {
         private const val CONTENT = "# Note\n"

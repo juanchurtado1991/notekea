@@ -18,15 +18,26 @@ fun WindowCloseShortcuts(
     platformConventions: PlatformConventions,
     onClose: () -> Unit
 ) {
-    WindowShortcut(shortcut = platformConventions.quitShortcut, onTrigger = onClose)
-    WindowShortcut(shortcut = platformConventions.closeWindowShortcut, onTrigger = onClose)
+    WindowShortcut(
+        shortcut = platformConventions.quitShortcut,
+        onTrigger = onClose
+    )
+
+    WindowShortcut(
+        shortcut = platformConventions.closeWindowShortcut,
+        onTrigger = onClose
+    )
 }
 
 @Preview
 @Composable
 private fun WindowCloseShortcutsPreview() {
     NotekeaPreviewThemes {
-        WindowCloseShortcuts(platformConventions = PreviewPlatformConventions.linux, onClose = {})
+        WindowCloseShortcuts(
+            platformConventions = PreviewPlatformConventions.linux,
+            onClose = {}
+        )
+
         Text(text = PREVIEW_TEXT)
     }
 }

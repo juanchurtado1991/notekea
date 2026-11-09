@@ -1,6 +1,6 @@
 package app.notekea.editor.domain
 
-/** What a key does in a list item, as in other editors (`ROADMAP.md` 1.17); see [ListEditing]. */
+/** What a key does in a list item, as in other editors; see [ListEditing]. */
 enum class ListAction {
     /** Enter: a new item of the same list, or the end of the list on an empty item. */
     NEW_ITEM,

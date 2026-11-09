@@ -3,7 +3,7 @@ package app.notekea.core.notes.domain
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** A related note's quote (`ROADMAP.md` 2.4): its passage without headings, the sentence that shares most words lit. */
+/** A related note's quote: its passage without headings, the sentence that shares most words lit. */
 class PassageSnippetTest {
     @Test
     fun `the sentence sharing most words with the open note is the highlight, headings left out`() {
@@ -14,19 +14,35 @@ class PassageSnippetTest {
 
         assertEquals(
             expected = "Summer tomatoes from the beds make it sweeter.",
-            actual = snippet.text.substring(range = snippet.highlight).trim()
+            actual = snippet
+                .text
+                .substring(range = snippet.highlight)
+                .trim()
         )
-        assertEquals(expected = false, actual = "## Soup" in snippet.text)
+
+        assertEquals(
+            expected = false,
+            actual = "## Soup" in snippet.text
+        )
     }
 
     @Test
     fun `with no word in common the first sentence is the highlight`() {
-        val snippet = PassageSnippet.of(passage = "Quartz counters. Six weeks.", words = setOf("garden"))
+        val snippet = PassageSnippet.of(
+            passage = "Quartz counters. Six weeks.",
+            words = setOf("garden")
+        )
 
-        assertEquals(expected = "Quartz counters.", actual = snippet.text.substring(range = snippet.highlight).trim())
+        assertEquals(
+            expected = "Quartz counters.",
+            actual = snippet
+                .text
+                .substring(range = snippet.highlight)
+                .trim()
+        )
     }
 
-    // Smoke: whole lines were underlined in Related, as a passage shares many words with the note.
+    // A passage shares many words with its note: underlining them all would underline whole lines in Related.
     @Test
     fun `the keywords are the few longest shared words, wherever they repeat`() {
         val snippet = PassageSnippet.of(
@@ -36,8 +52,15 @@ class PassageSnippetTest {
 
         assertEquals(
             expected = "serializer",
-            actual = snippet.text.substring(range = snippet.keywords.first()).lowercase()
+            actual = snippet
+                .text
+                .substring(range = snippet.keywords.first())
+                .lowercase()
         )
-        assertEquals(expected = 4, actual = snippet.keywords.size)
+
+        assertEquals(
+            expected = 4,
+            actual = snippet.keywords.size
+        )
     }
 }

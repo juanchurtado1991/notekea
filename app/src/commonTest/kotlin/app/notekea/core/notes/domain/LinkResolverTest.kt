@@ -7,7 +7,9 @@ class LinkResolverTest {
     @Test
     fun `a new wiki link names a note by its name when unique, and by its path when another shares it`() {
         val resolver = LinkResolver(
-            notePaths = listOf("Recipes/Arepas.md", "Ideas/Soup.md", "Recipes/Soup.md").map { RelativePath(value = it) }
+            notePaths = listOf("Recipes/Arepas.md", "Ideas/Soup.md", "Recipes/Soup.md").map {
+                RelativePath(value = it)
+            }
         )
 
         assertEquals(
@@ -25,17 +27,32 @@ class LinkResolverTest {
 
         assertEquals(
             expected = listOf(
-                ResolvedLink(target = RelativePath(value = "Recipes/Arepas.md"), isRelativeToSource = true),
-                ResolvedLink(target = RelativePath(value = "Recipes/Arepas.md"), isRelativeToSource = false),
-                ResolvedLink(target = RelativePath(value = "C/Note.md"), isRelativeToSource = false)
+                ResolvedLink(
+                    target = RelativePath(value = "Recipes/Arepas.md"),
+                    isRelativeToSource = true
+                ),
+                ResolvedLink(
+                    target = RelativePath(value = "Recipes/Arepas.md"),
+                    isRelativeToSource = false
+                ),
+                ResolvedLink(
+                    target = RelativePath(value = "C/Note.md"),
+                    isRelativeToSource = false
+                )
             ),
             actual = listOf(
                 resolver.resolve(
                     link = markdownLink(target = "arepas.md"),
                     source = RelativePath(value = "Recipes/x.md")
                 ),
-                resolver.resolve(link = markdownLink(target = "recipes/AREPAS.md"), source = A_NOTE),
-                resolver.resolve(link = markdownLink(target = "Note.md"), source = A_NOTE)
+                resolver.resolve(
+                    link = markdownLink(target = "recipes/AREPAS.md"),
+                    source = A_NOTE
+                ),
+                resolver.resolve(
+                    link = markdownLink(target = "Note.md"),
+                    source = A_NOTE
+                )
             )
         )
     }
@@ -46,21 +63,31 @@ class LinkResolverTest {
 
         assertEquals(
             expected = RelativePath(value = "Note.md"),
-            actual = resolver.resolve(link = markdownLink(target = "Note.md"), source = A_NOTE)?.target
+            actual = resolver.resolve(
+                link = markdownLink(target = "Note.md"),
+                source = A_NOTE
+            )?.target
         )
+
         assertEquals(
             expected = null,
-            actual = resolver.resolve(link = markdownLink(target = "Soup.md"), source = A_NOTE)
+            actual = resolver.resolve(
+                link = markdownLink(target = "Soup.md"),
+                source = A_NOTE
+            )
         )
     }
 
-    private fun resolver(
-        vararg paths: String
-    ) = LinkResolver(notePaths = paths.map { RelativePath(value = it) })
+    private fun resolver(vararg paths: String) = LinkResolver(
+        notePaths = paths.map { RelativePath(value = it) }
+    )
 
-    private fun markdownLink(
-        target: String
-    ) = NoteLink(targetStart = 0, targetEnd = target.length, target = target, kind = LinkKind.MARKDOWN_ANGLE)
+    private fun markdownLink(target: String) = NoteLink(
+        targetStart = 0,
+        targetEnd = target.length,
+        target = target,
+        kind = LinkKind.MARKDOWN_ANGLE
+    )
 
     private companion object {
         val A_NOTE = RelativePath(value = "A/b.md")

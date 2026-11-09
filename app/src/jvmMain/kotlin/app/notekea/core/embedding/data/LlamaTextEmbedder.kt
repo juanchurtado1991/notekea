@@ -4,8 +4,6 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.TextEmbedder
 import co.touchlab.kermit.Logger
-import net.ladenthin.llama.LlamaModel
-import net.ladenthin.llama.parameters.ModelParameters
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -19,6 +17,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import net.ladenthin.llama.LlamaModel
+import net.ladenthin.llama.parameters.ModelParameters
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.Executors
@@ -26,13 +26,9 @@ import kotlin.coroutines.coroutineContext
 import kotlin.math.sqrt
 
 /**
- * [TextEmbedder] on java-llama.cpp with the bundled multilingual model at [modelPath] (`ROADMAP.md` 2.2,
- * `docs/spikes/2026-11-01-embedding-models.md`). The model loads on the first call and is let go after [idleMillis]
- * without one, a cancelled call included, so writing notes never pays for its memory; calls run one at a time on the
- * model's own thread and a cancelled one stops between texts. Loading on one thread matters: glibc keeps what a thread
- * frees for that thread, so loads on many threads pile up gigabytes that a new load cannot reuse (`docs/performance.md`).
- * java-llama.cpp extracts its native library to [nativeFolder] (the app's data), not `/tmp`, which some systems mount
- * without the right to run it. Koin closes it with its module ([close]).
+ * [TextEmbedder] on java-llama.cpp with the bundled model at [modelPath]. The model loads on the first call and is let
+ * go after [idleMillis] without one; calls run one at a time on the model's own thread, which keeps glibc from piling
+ * up freed memory per thread (`docs/performance.md`). The native library is extracted to [nativeFolder], not `/tmp`.
  */
 class LlamaTextEmbedder(
     private val modelPath: String,
@@ -42,7 +38,9 @@ class LlamaTextEmbedder(
     AutoCloseable {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private val mutex = Mutex()
-    private val modelThread = Executors.newSingleThreadExecutor { Thread(it, THREAD_NAME).apply { isDaemon = true } }
+    private val modelThread = Executors.newSingleThreadExecutor {
+        Thread(it, THREAD_NAME).apply { isDaemon = true }
+    }
         .asCoroutineDispatcher()
     private val scope = CoroutineScope(context = SupervisorJob() + modelThread)
 
@@ -63,22 +61,25 @@ class LlamaTextEmbedder(
     /** Whether it was closed. */
     val isClosed: Boolean get() = !scope.isActive
 
-    override suspend fun embed(
-        texts: List<String>
-    ): Outcome<List<FloatArray>, EmbeddingError> = withContext(context = modelThread) {
-        mutex.withLock {
-            release?.cancel()
-            try {
-                embedAll(texts = texts)
-            } finally {
-                releaseWhenIdle()
+    override suspend fun embed(texts: List<String>): Outcome<List<FloatArray>, EmbeddingError> =
+        withContext(
+            context = modelThread
+        ) {
+            mutex.withLock {
+                release?.cancel()
+
+                try {
+                    embedAll(texts = texts)
+                } finally {
+                    releaseWhenIdle()
+                }
             }
         }
-    }
 
     /** Stops the idle timer and lets the model go; a call still running lets it go as it ends. */
     override fun close() {
         scope.cancel()
+
         if (mutex.tryLock()) {
             try {
                 unload()
@@ -86,46 +87,62 @@ class LlamaTextEmbedder(
                 mutex.unlock()
             }
         }
+
         modelThread.close()
     }
 
     private fun releaseWhenIdle() {
         if (isClosed) return unload()
+
         release = scope.launch {
             delay(timeMillis = idleMillis)
+
             mutex.withLock { unload() }
         }
     }
 
-    private suspend fun embedAll(
-        texts: List<String>
-    ): Outcome<List<FloatArray>, EmbeddingError> = try {
-        val loaded = model ?: load() ?: return Outcome.Failure(error = EmbeddingError.ModelMissing(path = modelPath))
-        val vectors = ArrayList<FloatArray>(texts.size)
-        texts.forEachIndexed { index, text ->
-            coroutineContext.ensureActive()
-            val tokens = loaded.encode(text).size
-            val tooLong = EmbeddingError.TextTooLong(index = index, tokens = tokens)
-            if (tokens > maxTokens) return Outcome.Failure(error = tooLong)
-            vectors += normalized(vector = loaded.embed(text))
+    private suspend fun embedAll(texts: List<String>): Outcome<List<FloatArray>, EmbeddingError> =
+        try {
+            val loaded = model ?: load()
+                ?: return Outcome.Failure(error = EmbeddingError.ModelMissing(path = modelPath))
+
+            val vectors = ArrayList<FloatArray>(texts.size)
+
+            texts.forEachIndexed { index, text ->
+                coroutineContext.ensureActive()
+                val tokens = loaded.encode(text).size
+
+                val tooLong = EmbeddingError.TextTooLong(
+                    index = index,
+                    tokens = tokens
+                )
+
+                if (tokens > maxTokens) return Outcome.Failure(error = tooLong)
+                vectors += normalized(vector = loaded.embed(text))
+            }
+
+            Outcome.Success(value = vectors)
+        } catch (cancellation: CancellationException) {
+            // A cancelled call (the vault closed, a new run) is not the model failing.
+            throw cancellation
+        } catch (exception: RuntimeException) {
+            // java-llama.cpp's LlamaException and its kin: a model that fails to load or to embed.
+            logger.e(throwable = exception) { ENGINE_FAILED_MESSAGE }
+            Outcome.Failure(error = EmbeddingError.EngineFailed)
+        } catch (error: LinkageError) {
+            // The native library does not load on this system: search goes on with keywords.
+            logger.e(throwable = error) { ENGINE_FAILED_MESSAGE }
+            Outcome.Failure(error = EmbeddingError.EngineFailed)
         }
-        Outcome.Success(value = vectors)
-    } catch (cancellation: CancellationException) {
-        // A cancelled call (the vault closed, a new run) is not the model failing.
-        throw cancellation
-    } catch (exception: RuntimeException) {
-        // java-llama.cpp's LlamaException and its kin: a model that fails to load or to embed.
-        logger.e(throwable = exception) { ENGINE_FAILED_MESSAGE }
-        Outcome.Failure(error = EmbeddingError.EngineFailed)
-    } catch (error: LinkageError) {
-        // The native library does not load on this system: search goes on with keywords.
-        logger.e(throwable = error) { ENGINE_FAILED_MESSAGE }
-        Outcome.Failure(error = EmbeddingError.EngineFailed)
-    }
 
     private fun load(): LlamaModel? {
         if (!Files.isRegularFile(Path.of(modelPath))) return null
-        System.setProperty(NATIVE_FOLDER_PROPERTY, Files.createDirectories(Path.of(nativeFolder)).toString())
+
+        System.setProperty(
+            NATIVE_FOLDER_PROPERTY,
+            Files.createDirectories(Path.of(nativeFolder)).toString()
+        )
+
         val parameters = ModelParameters()
             .setModel(modelPath)
             .enableEmbedding()
@@ -133,6 +150,7 @@ class LlamaTextEmbedder(
             .setBatchSize(CONTEXT_TOKENS)
             .setUbatchSize(CONTEXT_TOKENS)
             .setLogVerbosity(ERRORS_ONLY)
+
         return LlamaModel(parameters).also { model = it }
     }
 
@@ -142,11 +160,12 @@ class LlamaTextEmbedder(
     }
 
     /** [vector] scaled to length 1, so a dot product is a cosine similarity. */
-    private fun normalized(
-        vector: FloatArray
-    ): FloatArray {
+    private fun normalized(vector: FloatArray): FloatArray {
         val length = sqrt(vector.sumOf { (it * it).toDouble() }).toFloat()
-        return FloatArray(size = vector.size) { vector[it] / length }
+
+        return FloatArray(size = vector.size) {
+            vector[it] / length
+        }
     }
 
     companion object {

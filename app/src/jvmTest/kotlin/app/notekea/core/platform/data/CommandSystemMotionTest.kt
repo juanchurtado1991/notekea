@@ -11,12 +11,18 @@ import kotlin.test.assertEquals
 class CommandSystemMotionTest {
     @Test
     fun `each system's answer says reduced or not, and no answer says not`() = runTest {
-        val dispatchers = FakeAppDispatchers(dispatcher = StandardTestDispatcher(scheduler = testScheduler))
+        val dispatchers =
+            FakeAppDispatchers(dispatcher = StandardTestDispatcher(scheduler = testScheduler))
+
         val answers = listOf(
             Triple(OperatingSystem.LINUX, "(<false>,)\n", true),
             Triple(OperatingSystem.LINUX, "(<<false>>,)\n", true),
             Triple(OperatingSystem.LINUX, "(<true>,)\n", false),
-            Triple(OperatingSystem.LINUX, "Error: GDBus.Error:org.freedesktop.portal.Error.NotFound", false),
+            Triple(
+                OperatingSystem.LINUX,
+                "Error: GDBus.Error:org.freedesktop.portal.Error.NotFound",
+                false
+            ),
             Triple(OperatingSystem.LINUX, null, false),
             Triple(OperatingSystem.MACOS, "1\n", true),
             Triple(OperatingSystem.MACOS, "0\n", false),
@@ -28,7 +34,11 @@ class CommandSystemMotionTest {
         assertEquals(
             expected = answers.map { it.third },
             actual = answers.map { (system, output, _) ->
-                CommandSystemMotion(operatingSystem = system, dispatchers = dispatchers, run = { output }).isReduced()
+                CommandSystemMotion(
+                    operatingSystem = system,
+                    dispatchers = dispatchers,
+                    run = { output }
+                ).isReduced()
             }
         )
     }

@@ -1,27 +1,28 @@
 package app.notekea.core.notes.domain
 
 /**
- * How many tokens a text is for the embedding model, estimated without its tokenizer (`ROADMAP.md` 2.1): one token
- * every two characters, or every character in scripts written without spaces (Chinese, Japanese, Thai…), which have
- * no words to count, and at least two per word, whichever is larger, so a chunk is never larger than it is counted.
- * Measured against the bundled multilingual model's tokenizer on every chunk of `smoke-data`
- * (`docs/spikes/2026-11-01-embedding-models.md`): it cuts code and rare words into many pieces, down to 2.13
- * characters a token, and this estimate never undercounts (`ChunkTokensRealModelTest`).
+ * How many tokens a text is for the embedding model, estimated without its tokenizer: one every two characters, or
+ * every character in scripts written without spaces, and at least two per word, whichever is larger. It never
+ * undercounts the bundled model's tokenizer (`docs/spikes/2026-11-01-embedding-models.md`).
  */
 object TokenEstimate {
-    fun of(
-        text: String
-    ): Int {
+    fun of(text: String): Int {
         val unspaced = text.count { isUnspaced(character = it) }
+
         val spaced = text.length - unspaced
-        val byCharacters = unspaced + (spaced * TENTHS + CHARACTERS_PER_TOKEN_TENTHS - 1) / CHARACTERS_PER_TOKEN_TENTHS
+
+        val byCharacters = unspaced +
+            (spaced * TENTHS + CHARACTERS_PER_TOKEN_TENTHS - 1) / CHARACTERS_PER_TOKEN_TENTHS
+
         val byWords = WORD.findAll(input = text).count() * TOKENS_PER_WORD
+
         return maxOf(byCharacters, byWords)
     }
 
-    private fun isUnspaced(
-        character: Char
-    ): Boolean = character.code >= FIRST_UNSPACED && UNSPACED_SCRIPTS.any { character.code in it }
+    private fun isUnspaced(character: Char): Boolean =
+        character.code >= FIRST_UNSPACED && UNSPACED_SCRIPTS.any {
+            character.code in it
+        }
 
     private const val CHARACTERS_PER_TOKEN_TENTHS = 20
     private const val FIRST_UNSPACED = 0x0E00

@@ -1,10 +1,6 @@
 package app.notekea.editor.presentation.sidepanel
 
 import androidx.compose.foundation.text.input.TextFieldState
-import app.notekea.editor.presentation.view.EditorContent
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.view.EditorPaneTools
-import app.notekea.editor.presentation.model.EditorState
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.focus.FocusRequester
@@ -15,17 +11,21 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
-import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
-import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.SidePanelPreferences
+import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorState
+import app.notekea.editor.presentation.view.EditorContent
+import app.notekea.editor.presentation.view.EditorPaneTools
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The side panel's outline beside the editor (`ROADMAP.md` 1.9): a click or Enter on a heading asks to go to it, the
+ * The side panel's outline beside the editor: a click or Enter on a heading asks to go to it, the
  * editor scrolls a heading asked for to the top of its view in both modes, and the panel floats over a narrow window.
  */
 class OutlineScreenTest {
@@ -35,9 +35,18 @@ class OutlineScreenTest {
     @Test
     fun `clicking a heading in the outline asks the editor to go to it`() {
         val intents = mutableListOf<EditorIntent>()
+
         scene(intents = intents) { scene, _, _ ->
-            scene.sendPointerEvent(eventType = PointerEventType.Press, position = STEPS_ROW)
-            scene.sendPointerEvent(eventType = PointerEventType.Release, position = STEPS_ROW)
+            scene.sendPointerEvent(
+                eventType = PointerEventType.Press,
+                position = STEPS_ROW
+            )
+
+            scene.sendPointerEvent(
+                eventType = PointerEventType.Release,
+                position = STEPS_ROW
+            )
+
             settle(scene = scene)
         }
 
@@ -51,18 +60,25 @@ class OutlineScreenTest {
     fun `a heading asked for is scrolled to the top of the view, in edit and read mode, and becomes the current one`() {
         val currents = listOf(false, true).map { isReading ->
             var current = 0
+
             scene(isReading = isReading) { scene, _, tools ->
                 tools.tracker.reveal(heading = outline[3])
                 settle(scene = scene)
+
                 // A little further down: still in Steps only if Steps was brought to the top.
                 scene.sendPointerEvent(
                     eventType = PointerEventType.Scroll,
                     position = TEXT,
-                    scrollDelta = Offset(x = 0f, y = 1f)
+                    scrollDelta = Offset(
+                        x = 0f,
+                        y = 1f
+                    )
                 )
+
                 settle(scene = scene)
                 current = tools.tracker.current
             }
+
             current
         }
 
@@ -75,9 +91,11 @@ class OutlineScreenTest {
     @Test
     fun `the outline is moved with the keyboard from the current heading, Enter goes and Esc leaves`() {
         val intents = mutableListOf<EditorIntent>()
+
         scene(intents = intents) { scene, host, _ ->
             host.outlineFocus.requestFocus()
             settle(scene = scene)
+
             listOf(Key.DirectionDown, Key.DirectionDown, Key.Enter, Key.Escape).forEach { key ->
                 scene.sendKeyEvent(event = keyDown(key = key))
                 settle(scene = scene)
@@ -85,7 +103,10 @@ class OutlineScreenTest {
         }
 
         assertEquals(
-            expected = listOf(EditorIntent.OnHeadingClick(index = 2), EditorIntent.OnFocusRequest()),
+            expected = listOf(
+                EditorIntent.OnHeadingClick(index = 2),
+                EditorIntent.OnFocusRequest()
+            ),
             actual = intents
         )
     }
@@ -94,7 +115,9 @@ class OutlineScreenTest {
     fun `the panel sits beside the editor while both fit, and floats over it, closed, when its narrowest does not`() {
         val layouts = listOf(WIDE, NARROW).map { width ->
             var layout = false to false
+
             scene(width = width) { _, host, _ -> layout = host.isOverlay to host.isOverlayOpen }
+
             layout
         }
 
@@ -111,11 +134,23 @@ class OutlineScreenTest {
         actions: (ImageComposeScene, SidePanelHost, EditorPaneTools) -> Unit
     ) {
         val host = SidePanelHost(send = { intents += it })
+
         val tools = EditorPaneTools()
-        val state = EditorState(notePath = RelativePath(value = NOTE), isReading = isReading, outline = outline)
+
+        val state = EditorState(
+            notePath = RelativePath(value = NOTE),
+            isReading = isReading,
+            outline = outline
+        )
+
         val buffer = TextFieldState(initialText = BODY)
+
         UiThread.run {
-            ImageComposeScene(width = width, height = HEIGHT, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = width,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     WithSidePanel(
                         preferences = SidePanelPreferences.DEFAULT,
@@ -146,13 +181,12 @@ class OutlineScreenTest {
 
     /** A key pressed alone, as the window sends it. */
     @OptIn(InternalComposeUiApi::class)
-    private fun keyDown(
-        key: Key
-    ): KeyEvent = KeyEvent(key = key, type = KeyEventType.KeyDown)
+    private fun keyDown(key: Key): KeyEvent = KeyEvent(
+        key = key,
+        type = KeyEventType.KeyDown
+    )
 
-    private fun settle(
-        scene: ImageComposeScene
-    ) {
+    private fun settle(scene: ImageComposeScene) {
         // Read mode's Markdown is parsed away from the UI thread: frames alone do not wait for it.
         repeat(times = SETTLE_FRAMES) {
             frame += FRAME_NANOS
@@ -170,13 +204,25 @@ class OutlineScreenTest {
         private const val SETTLE_FRAMES = 20
         private const val WIDE = 1100
         private val BODY = buildString {
-            append("# Arepas\n\nA corn bread.\n\n## Ingredients\n\n- Corn flour\n\n### For the filling\n\n- Cheese\n\n")
+            append(
+                "# Arepas\n\nA corn bread.\n\n## Ingredients\n\n- Corn flour\n\n### For the filling\n\n- Cheese\n\n"
+            )
+
             append("## Steps\n\n")
+
             repeat(times = 8) { append("Step ${it + 1}: knead the dough a little longer.\n\n") }
+
             append("### Cooking\n\n")
+
             repeat(times = 20) { append("More about cooking, line ${it + 1}.\n\n") }
         }
-        private val STEPS_ROW = Offset(x = 850f, y = 172f)
-        private val TEXT = Offset(x = 300f, y = 400f)
+        private val STEPS_ROW = Offset(
+            x = 850f,
+            y = 172f
+        )
+        private val TEXT = Offset(
+            x = 300f,
+            y = 400f
+        )
     }
 }

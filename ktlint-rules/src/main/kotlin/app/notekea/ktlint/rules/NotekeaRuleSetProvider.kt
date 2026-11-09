@@ -10,10 +10,22 @@ import com.pinterest.ktlint.rule.engine.core.api.RuleSetId
  */
 class NotekeaRuleSetProvider : RuleSetProviderV3(id = RuleSetId(RULE_SET_ID)) {
     override fun getRuleProviders(): Set<RuleProvider> = setOf(
+        RuleProvider { CallbackLambdaRule() },
+        RuleProvider { ChainPerLineRule() },
+        RuleProvider { CodeLineLengthRule() },
         RuleProvider { ExpressionOnAssignmentLineRule() },
+        RuleProvider { KdocRule() },
+        RuleProvider { LambdaBodyLineRule() },
+        RuleProvider { LocalFunctionReferenceRule() },
+        RuleProvider { LogicalOperandsPerLineRule() },
         RuleProvider { MaxFileLengthRule() },
         RuleProvider { MaxFunctionLengthRule() },
-        RuleProvider { ParameterOrderRule() }
+        RuleProvider { NameCompoundExpressionRule() },
+        RuleProvider { NamedArgumentsPerLineRule() },
+        RuleProvider { NoSamePackageImportRule() },
+        RuleProvider { ParameterOrderRule() },
+        RuleProvider { ParametersLayoutRule() },
+        RuleProvider { StatementSpacingRule() }
     )
 
     companion object {

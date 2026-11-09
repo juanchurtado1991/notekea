@@ -38,11 +38,15 @@ fun NotekeaMissingFile(
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.small,
         color = colors.surfaceVariant,
-        border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = colors.outline)
+        border = BorderStroke(
+            width = NotekeaDimensions.BorderWidth,
+            color = colors.outline
+        )
     ) {
         Row(
             modifier = Modifier.padding(all = NotekeaDimensions.SpacingM),
@@ -55,8 +59,14 @@ fun NotekeaMissingFile(
                 modifier = Modifier.size(size = NotekeaDimensions.IconSize),
                 tint = colors.onSurfaceVariant
             )
+
             Column(modifier = Modifier.weight(weight = 1f)) {
-                Text(text = title, style = MaterialTheme.typography.bodyMedium, color = colors.onSurface)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurface
+                )
+
                 Text(
                     text = path,
                     style = LocalNotekeaCodeTextStyle.current.copy(color = colors.onSurfaceVariant),
@@ -64,7 +74,12 @@ fun NotekeaMissingFile(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            NotekeaButton(text = locateLabel, onClick = onLocate, style = NotekeaButtonStyle.SECONDARY)
+
+            NotekeaButton(
+                text = locateLabel,
+                onClick = onLocate,
+                style = NotekeaButtonStyle.SECONDARY
+            )
         }
     }
 }
@@ -73,6 +88,11 @@ fun NotekeaMissingFile(
 @Composable
 private fun NotekeaMissingFilePreview() {
     NotekeaPreviewThemes {
-        NotekeaMissingFile(title = PREVIEW_TITLE, path = PREVIEW_PATH, locateLabel = PREVIEW_LOCATE, onLocate = {})
+        NotekeaMissingFile(
+            title = PREVIEW_TITLE,
+            path = PREVIEW_PATH,
+            locateLabel = PREVIEW_LOCATE,
+            onLocate = {}
+        )
     }
 }

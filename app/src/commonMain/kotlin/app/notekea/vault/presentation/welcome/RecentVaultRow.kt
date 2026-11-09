@@ -18,10 +18,10 @@ import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.designsystem.components.NotekeaListItem
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
-import app.notekea.core.presentation.platform.displayPath
-import app.notekea.core.presentation.elapsedTimeText
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.elapsedTimeText
+import app.notekea.core.presentation.platform.displayPath
 import app.notekea.resources.Res
 import app.notekea.resources.welcome_recent_locate
 import app.notekea.resources.welcome_recent_missing
@@ -47,6 +47,7 @@ internal fun RecentVaultRow(
     enabled: Boolean = true
 ) {
     val path = recentVault.vault.path
+
     NotekeaContextMenuArea(
         sections = recentVaultMenu(
             isMissing = recentVault.isMissing,
@@ -56,19 +57,28 @@ internal fun RecentVaultRow(
             onRemove = onRemove
         )
     ) {
+        val supportingText = if (recentVault.isMissing) {
+            stringResource(resource = Res.string.welcome_recent_missing)
+        } else {
+            displayPath(
+                path = path,
+                platformConventions = platformConventions
+            )
+        }
+
         NotekeaListItem(
             title = recentVault.vault.name,
             onClick = onOpen,
-            supportingText = if (recentVault.isMissing) {
-                stringResource(resource = Res.string.welcome_recent_missing)
-            } else {
-                displayPath(path = path, platformConventions = platformConventions)
-            },
+            supportingText = supportingText,
             enabled = enabled && !recentVault.isMissing,
             onClickLabel = stringResource(resource = Res.string.welcome_recent_open),
             trailingContent = {
                 if (recentVault.isMissing) {
-                    MissingVaultActions(enabled = enabled, onLocate = onLocate, onRemove = onRemove)
+                    MissingVaultActions(
+                        enabled = enabled,
+                        onLocate = onLocate,
+                        onRemove = onRemove
+                    )
                 } else {
                     Text(
                         text = elapsedTimeText(elapsed = recentVault.lastOpened),
@@ -95,16 +105,19 @@ private fun recentVaultMenu(
         onClick = onOpen,
         enabled = enabled
     )
+
     val locate = NotekeaMenuItem(
         label = stringResource(resource = Res.string.welcome_recent_locate),
         onClick = onLocate,
         enabled = enabled
     )
+
     val remove = NotekeaMenuItem(
         label = stringResource(resource = Res.string.welcome_recent_remove),
         onClick = onRemove,
         enabled = enabled
     )
+
     return listOf(listOf(if (isMissing) locate else open), listOf(remove))
 }
 
@@ -124,6 +137,7 @@ private fun MissingVaultActions(
             style = NotekeaButtonStyle.TEXT,
             enabled = enabled
         )
+
         NotekeaButton(
             text = stringResource(resource = Res.string.welcome_recent_locate),
             onClick = onLocate,

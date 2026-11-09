@@ -18,9 +18,9 @@ private const val THUMB_RADIUS_DP = 5
 internal val segmentShape = RoundedCornerShape(size = THUMB_RADIUS_DP.dp)
 
 /** The muted track every selector of the app sits on, as macOS draws segmented controls. */
-internal fun Modifier.segmentTrack(
-    colors: ColorScheme
-): Modifier = clip(shape = RoundedCornerShape(size = TRACK_RADIUS_DP.dp))
+internal fun Modifier.segmentTrack(colors: ColorScheme): Modifier = clip(
+    shape = RoundedCornerShape(size = TRACK_RADIUS_DP.dp)
+)
     .background(color = colors.surfaceVariant)
     .padding(all = INSET_DP.dp)
 

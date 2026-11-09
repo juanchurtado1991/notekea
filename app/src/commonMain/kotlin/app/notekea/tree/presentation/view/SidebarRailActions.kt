@@ -4,9 +4,8 @@ import androidx.compose.runtime.Immutable
 
 /**
  * What the tool rail's buttons beyond the tree do: Search notes ([onSearch]), the graph ([onGraph]), queries
- * ([onQuery]), tasks ([onTasks]), show or hide the side panel ([onSidePanelToggle]), and at the bottom Open another vault
- * ([onSwitchVault]), About ([onAbout]) and Settings ([onSettings]). Each does nothing unless given, as in previews and
- * tests.
+ * ([onQuery]), tasks ([onTasks]), the side panel ([onSidePanelToggle]), and at the bottom Open another vault
+ * ([onSwitchVault]), About ([onAbout]) and Settings ([onSettings]). Each does nothing unless given.
  */
 @Immutable
 data class SidebarRailActions(

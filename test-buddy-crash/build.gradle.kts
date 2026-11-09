@@ -6,9 +6,7 @@ plugins {
     alias(libs.plugins.kover)
 }
 
-kotlin {
-    explicitApi()
-}
+kotlin { explicitApi() }
 
 // Test Buddy Crash ships in the app's release (test-buddy-crash/README.md): it depends on no Notekea module and on no
 // test library, only on Compose for its dialog.
@@ -24,6 +22,4 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
+tasks.test { useJUnitPlatform() }

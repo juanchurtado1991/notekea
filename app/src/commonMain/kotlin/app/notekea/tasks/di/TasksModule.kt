@@ -11,6 +11,7 @@ import org.koin.dsl.module
 val tasksModule = module {
     factoryOf(::ListTasksUseCase)
     factoryOf(::SetTaskDoneUseCase)
+
     viewModel { parameters ->
         TasksViewModel(
             vaultPath = parameters.get(),

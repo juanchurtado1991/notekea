@@ -15,9 +15,9 @@ class SettingsQueryPreferencesStore(
     private val queryYaml: QueryYaml,
     private val dispatchers: AppDispatchers
 ) : QueryPreferencesStore {
-    override suspend fun read(
-        vaultPath: String
-    ): VaultQuery = withContext(context = dispatchers.io) {
+    override suspend fun read(vaultPath: String): VaultQuery = withContext(
+        context = dispatchers.io
+    ) {
         val text = settings.getStringOrNull(key = keyOf(vaultPath = vaultPath)).orEmpty()
         (queryYaml.read(text = text) as? QueryParse.Valid)?.query ?: VaultQuery()
     }
@@ -26,12 +26,14 @@ class SettingsQueryPreferencesStore(
         vaultPath: String,
         query: VaultQuery
     ) = withContext(context = dispatchers.io) {
-        settings.putString(key = keyOf(vaultPath = vaultPath), value = queryYaml.write(query = query))
+        settings.putString(
+            key = keyOf(vaultPath = vaultPath),
+            value = queryYaml.write(query = query)
+        )
     }
 
-    private fun keyOf(
-        vaultPath: String
-    ): String = KEY_PREFIX + VaultKeyHash.of(vaultPath = vaultPath)
+    private fun keyOf(vaultPath: String): String =
+        KEY_PREFIX + VaultKeyHash.of(vaultPath = vaultPath)
 
     private companion object {
         const val KEY_PREFIX = "query."

@@ -4,11 +4,11 @@ import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.Outcome
-import app.notekea.tree.domain.ApplyTemplateUseCase
-import app.notekea.templates.domain.CreateTemplatesFolderUseCase
 import app.notekea.core.notes.domain.FillTemplateUseCase
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TemplateSettings
+import app.notekea.templates.domain.CreateTemplatesFolderUseCase
+import app.notekea.tree.domain.ApplyTemplateUseCase
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
@@ -25,7 +25,7 @@ import kotlin.test.assertEquals
 import kotlin.time.Instant
 
 /**
- * Templates on real files (`ROADMAP.md` 1.12): Obsidian's `templates.json` read from a temporary vault, the templates
+ * Templates on real files: Obsidian's `templates.json` read from a temporary vault, the templates
  * folder made with its example, and a note filled from a template by the real adapters, in a real time zone.
  */
 @OptIn(ExperimentalPathApi::class)
@@ -34,8 +34,14 @@ class TemplatesOnDiskTest {
     private val dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     private val vault = Files.createTempDirectory(TEMP_PREFIX)
     private val vaultPath = vault.toString()
-    private val settings = ObsidianVaultSettingsReader(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
-    private val operations = OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
+    private val settings = ObsidianVaultSettingsReader(
+        fileSystem = FileSystem.SYSTEM,
+        dispatchers = dispatchers
+    )
+    private val operations = OkioNoteFileOperations(
+        fileSystem = FileSystem.SYSTEM,
+        dispatchers = dispatchers
+    )
     private val store = OkioNoteContentStore(
         fileSystem = FileSystem.SYSTEM,
         dispatchers = dispatchers,
@@ -52,9 +58,11 @@ class TemplatesOnDiskTest {
         runTest(context = testDispatcher) {
             val missing = settings.templates(vaultPath = vaultPath)
             vault.resolve(".obsidian").createDirectories()
+
             vault.resolve(".obsidian/templates.json").writeText(
                 text = """{"folder":"/Meta/Templates/","dateFormat":"DD.MM.YYYY","timeFormat":"h:mm A"}"""
             )
+
             val full = settings.templates(vaultPath = vaultPath)
             vault.resolve(".obsidian/templates.json").writeText(text = """{"folder":""}""")
             val blank = settings.templates(vaultPath = vaultPath)
@@ -62,8 +70,16 @@ class TemplatesOnDiskTest {
             assertEquals(
                 expected = listOf(
                     null,
-                    TemplateSettings(folder = "Meta/Templates", dateFormat = "DD.MM.YYYY", timeFormat = "h:mm A"),
-                    TemplateSettings(folder = "", dateFormat = "YYYY-MM-DD", timeFormat = "HH:mm")
+                    TemplateSettings(
+                        folder = "Meta/Templates",
+                        dateFormat = "DD.MM.YYYY",
+                        timeFormat = "h:mm A"
+                    ),
+                    TemplateSettings(
+                        folder = "",
+                        dateFormat = "YYYY-MM-DD",
+                        timeFormat = "HH:mm"
+                    )
                 ),
                 actual = listOf(missing, full, blank)
             )
@@ -76,10 +92,18 @@ class TemplatesOnDiskTest {
                 vaultSettingsReader = settings,
                 noteFileOperations = operations,
                 noteContentStore = store
-            )(vaultPath = vaultPath, exampleName = "Meeting notes", exampleText = EXAMPLE)
+            )(
+                vaultPath = vaultPath,
+                exampleName = "Meeting notes",
+                exampleText = EXAMPLE
+            )
+
             vault.resolve("Kickoff.md").writeText(text = "")
 
-            val applied = ApplyTemplateUseCase(fillTemplate = fillTemplate(), noteContentStore = store)(
+            val applied = ApplyTemplateUseCase(
+                fillTemplate = fillTemplate(),
+                noteContentStore = store
+            )(
                 vaultPath = vaultPath,
                 note = RelativePath(value = "Kickoff.md"),
                 template = RelativePath(value = "Templates/Meeting notes.md")
@@ -106,6 +130,7 @@ class TemplatesOnDiskTest {
         private const val TEMP_PREFIX = "notekea-templates"
 
         // Written on Windows: the new note still uses one kind of line break.
-        private const val EXAMPLE = "---\r\ntags: meeting\r\n---\r\n# {{title}}\r\n{{date}} {{time}}\r\n"
+        private const val EXAMPLE =
+            "---\r\ntags: meeting\r\n---\r\n# {{title}}\r\n{{date}} {{time}}\r\n"
     }
 }

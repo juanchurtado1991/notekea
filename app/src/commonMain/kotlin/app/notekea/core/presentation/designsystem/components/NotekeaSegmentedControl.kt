@@ -49,7 +49,11 @@ fun NotekeaSegmentedControl(
         horizontalArrangement = Arrangement.spacedBy(space = SEGMENT_GAP_DP.dp)
     ) {
         segments.forEachIndexed { index, segment ->
-            Segment(segment = segment, isSelected = index == selectedIndex, onClick = { onSelect(index) })
+            Segment(
+                segment = segment,
+                isSelected = index == selectedIndex,
+                onClick = { onSelect(index) }
+            )
         }
     }
 }
@@ -61,13 +65,26 @@ private fun Segment(
     onClick: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
+
     Row(
         modifier = Modifier
-            .segmentThumb(isSelected = isSelected, colors = colors)
-            .focusBorder(color = colors.primary, shape = segmentShape)
-            .clickable(role = Role.Tab, onClick = onClick)
+            .segmentThumb(
+                isSelected = isSelected,
+                colors = colors
+            )
+            .focusBorder(
+                color = colors.primary,
+                shape = segmentShape
+            )
+            .clickable(
+                role = Role.Tab,
+                onClick = onClick
+            )
             .semantics { selected = isSelected }
-            .padding(horizontal = NotekeaDimensions.SpacingS, vertical = SEGMENT_VERTICAL_PADDING_DP.dp),
+            .padding(
+                horizontal = NotekeaDimensions.SpacingS,
+                vertical = SEGMENT_VERTICAL_PADDING_DP.dp
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
     ) {
@@ -77,11 +94,13 @@ private fun Segment(
             modifier = Modifier.size(size = SEGMENT_ICON_DP.dp),
             tint = if (isSelected) colors.onSurface else colors.onSurfaceVariant
         )
+
         Text(
             text = segment.label,
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
-            ),
+            style = MaterialTheme
+                .typography
+                .labelMedium
+                .copy(fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium),
             color = if (isSelected) colors.onSurface else colors.onSurfaceVariant
         )
     }
@@ -93,8 +112,14 @@ private fun NotekeaSegmentedControlPreview() {
     NotekeaPreviewThemes {
         NotekeaSegmentedControl(
             segments = listOf(
-                NotekeaSegment(icon = NotekeaIcons.Inspector, label = PREVIEW_INSPECTOR),
-                NotekeaSegment(icon = NotekeaIcons.Chat, label = PREVIEW_CHAT)
+                NotekeaSegment(
+                    icon = NotekeaIcons.Inspector,
+                    label = PREVIEW_INSPECTOR
+                ),
+                NotekeaSegment(
+                    icon = NotekeaIcons.Chat,
+                    label = PREVIEW_CHAT
+                )
             ),
             selectedIndex = 0,
             onSelect = {}

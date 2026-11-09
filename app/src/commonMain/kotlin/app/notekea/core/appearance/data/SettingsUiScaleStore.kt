@@ -12,13 +12,17 @@ class SettingsUiScaleStore(
     private val dispatchers: AppDispatchers
 ) : UiScaleStore {
     override suspend fun scale(): Float = withContext(context = dispatchers.io) {
-        settings.getFloat(key = SCALE_KEY, defaultValue = UiScale.DEFAULT)
+        settings.getFloat(
+            key = SCALE_KEY,
+            defaultValue = UiScale.DEFAULT
+        )
     }
 
-    override suspend fun setScale(
-        scale: Float
-    ) = withContext(context = dispatchers.io) {
-        settings.putFloat(key = SCALE_KEY, value = scale)
+    override suspend fun setScale(scale: Float) = withContext(context = dispatchers.io) {
+        settings.putFloat(
+            key = SCALE_KEY,
+            value = scale
+        )
     }
 
     private companion object {

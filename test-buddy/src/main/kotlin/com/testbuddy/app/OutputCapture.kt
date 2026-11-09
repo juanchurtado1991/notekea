@@ -14,8 +14,26 @@ internal object OutputCapture {
     fun start(file: Path) {
         Files.createDirectories(file.parent)
         val copy = FileOutputStream(file.toFile(), true)
-        System.setOut(PrintStream(Both(first = System.out, second = copy), true))
-        System.setErr(PrintStream(Both(first = System.err, second = copy), true))
+
+        System.setOut(
+            PrintStream(
+                Both(
+                    first = System.out,
+                    second = copy
+                ),
+                true
+            )
+        )
+
+        System.setErr(
+            PrintStream(
+                Both(
+                    first = System.err,
+                    second = copy
+                ),
+                true
+            )
+        )
     }
 
     private class Both(

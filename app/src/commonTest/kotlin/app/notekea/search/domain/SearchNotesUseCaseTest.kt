@@ -1,12 +1,12 @@
 package app.notekea.search.domain
 
-import app.notekea.core.notes.domain.NoteFixtures.entry
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.NaturalNameComparator
+import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.TextFolder
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class SearchNotesUseCaseTest {
     private val search = SearchNotesUseCase(
@@ -14,14 +14,23 @@ class SearchNotesUseCaseTest {
         naturalNameComparator = NaturalNameComparator()
     )
     private val notes = listOf(
-        entry(path = AREPAS, modifiedOffsetMillis = 3),
+        entry(
+            path = AREPAS,
+            modifiedOffsetMillis = 3
+        ),
         entry(
             path = CAFE,
             modifiedOffsetMillis = 1,
             metadata = NoteMetadata.NONE.copy(aliases = listOf("Morning coffee"))
         ),
-        entry(path = PREPARE, modifiedOffsetMillis = 2),
-        entry(path = WELCOME, metadata = NoteMetadata.NONE.copy(title = "Start here"))
+        entry(
+            path = PREPARE,
+            modifiedOffsetMillis = 2
+        ),
+        entry(
+            path = WELCOME,
+            metadata = NoteMetadata.NONE.copy(title = "Start here")
+        )
     )
 
     @Test
@@ -29,7 +38,12 @@ class SearchNotesUseCaseTest {
         // "Start here" (Welcome's title) holds a, r and e in order, far apart, so it comes last.
         assertEquals(
             expected = listOf(AREPAS, CAFE, PREPARE, WELCOME),
-            actual = paths(results = search(notes = notes, query = "are"))
+            actual = paths(
+                results = search(
+                    notes = notes,
+                    query = "are"
+                )
+            )
         )
     }
 
@@ -50,17 +64,28 @@ class SearchNotesUseCaseTest {
                     ranges = listOf(0..4)
                 )
             ),
-            actual = listOf("morning", "start").map { search(notes = notes, query = it).single() }
+            actual = listOf("morning", "start").map {
+                search(
+                    notes = notes,
+                    query = it
+                ).single()
+            }
         )
     }
 
     @Test
     fun `the name wins over an alias that matches as well`() {
-        val note = entry(path = AREPAS, metadata = NoteMetadata.NONE.copy(aliases = listOf("Arepas reina")))
+        val note = entry(
+            path = AREPAS,
+            metadata = NoteMetadata.NONE.copy(aliases = listOf("Arepas reina"))
+        )
 
         assertEquals(
             expected = NoteMatchField.NAME,
-            actual = search(notes = listOf(note), query = "arepas").single().field
+            actual = search(
+                notes = listOf(note),
+                query = "arepas"
+            ).single().field
         )
     }
 
@@ -69,28 +94,38 @@ class SearchNotesUseCaseTest {
         assertEquals(
             expected = listOf(listOf(NoteMatchField.PATH), emptyList()),
             actual = listOf("rec/are", "recare").map { query ->
-                search(notes = notes, query = query).filter { it.note == notes[0] }.map { it.field }
+                search(
+                    notes = notes,
+                    query = query
+                ).filter {
+                    it.note == notes[0]
+                }.map { it.field }
             }
         )
     }
 
     @Test
     fun `an empty search lists the most recently modified notes, up to the limit`() {
-        val results = search(notes = notes, query = " ", limit = 3)
+        val results = search(
+            notes = notes,
+            query = " ",
+            limit = 3
+        )
 
         assertEquals(
             expected = listOf(AREPAS, PREPARE, CAFE),
             actual = paths(results = results)
         )
+
         assertEquals(
             expected = setOf(NoteMatchField.RECENT),
             actual = results.map { it.field }.toSet()
         )
     }
 
-    private fun paths(
-        results: List<NoteSearchResult>
-    ): List<String> = results.map { it.note.file.path.value }
+    private fun paths(results: List<NoteSearchResult>): List<String> = results.map {
+        it.note.file.path.value
+    }
 
     companion object {
         private const val AREPAS = "Recipes/Arepas.md"

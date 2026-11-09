@@ -4,7 +4,7 @@ import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * What an indexing run does (`ROADMAP.md` 2.3): the notes to [read] (new, changed on disk, or indexed with another
+ * What an indexing run does: the notes to [read] (new, changed on disk, or indexed with another
  * version), the indexed notes to [remove] (gone from the vault), how many are [unchanged], and which of those stay
  * [skipped] as the last run left them.
  */

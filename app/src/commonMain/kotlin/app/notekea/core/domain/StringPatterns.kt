@@ -23,7 +23,5 @@ object StringPatterns {
     val WHITESPACE = Regex(pattern = "\\s+")
 
     /** Whether [char] is a space or a tab, the characters that indent a line. */
-    fun isIndent(
-        char: Char
-    ): Boolean = char == SPACE_CHAR || char == TAB_CHAR
+    fun isIndent(char: Char): Boolean = char == SPACE_CHAR || char == TAB_CHAR
 }

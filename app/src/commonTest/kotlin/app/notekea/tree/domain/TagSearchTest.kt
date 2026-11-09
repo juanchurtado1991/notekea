@@ -16,9 +16,21 @@ class TagSearchTest {
                 listOf("travel")
             ),
             actual = listOf(
-                search.search(tags = tags, query = "", limit = 2),
-                search.search(tags = tags, query = "Rec", limit = 10),
-                search.search(tags = tags, query = "#trav", limit = 10)
+                search.search(
+                    tags = tags,
+                    query = "",
+                    limit = 2
+                ),
+                search.search(
+                    tags = tags,
+                    query = "Rec",
+                    limit = 10
+                ),
+                search.search(
+                    tags = tags,
+                    query = "#trav",
+                    limit = 10
+                )
             )
         )
     }
@@ -28,7 +40,10 @@ class TagSearchTest {
         assertEquals(
             expected = listOf("weekend-plan", "lunch", null, null, null),
             actual = listOf("weekend plan", "#lunch", "Recipe", "2026", "a.b").map {
-                search.newTag(tags = tags, query = it)
+                search.newTag(
+                    tags = tags,
+                    query = it
+                )
             }
         )
     }

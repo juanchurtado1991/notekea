@@ -12,9 +12,24 @@ class OutlineFinderTest {
 
         assertEquals(
             expected = listOf(
-                OutlineHeading(level = 1, text = "Arepas", offset = 0, depth = 0),
-                OutlineHeading(level = 2, text = "Dough and fillings", offset = 16, depth = 1),
-                OutlineHeading(level = 3, text = "1. Mix", offset = 55, depth = 2)
+                OutlineHeading(
+                    level = 1,
+                    text = "Arepas",
+                    offset = 0,
+                    depth = 0
+                ),
+                OutlineHeading(
+                    level = 2,
+                    text = "Dough and fillings",
+                    offset = 16,
+                    depth = 1
+                ),
+                OutlineHeading(
+                    level = 3,
+                    text = "1. Mix",
+                    offset = 55,
+                    depth = 2
+                )
             ),
             actual = finder.headings(text = text)
         )
@@ -32,7 +47,8 @@ class OutlineFinderTest {
 
     @Test
     fun `code blocks, tags, empty headings and seven marks are not headings`() {
-        val text = "```\n# not a heading\n```\n#tag\n#\n## \n####### seven\n~~~~\n# still code\n~~~\n~~~~\n## After"
+        val text =
+            "```\n# not a heading\n```\n#tag\n#\n## \n####### seven\n~~~~\n# still code\n~~~\n~~~~\n## After"
 
         assertEquals(
             expected = listOf("After"),
@@ -43,7 +59,14 @@ class OutlineFinderTest {
     @Test
     fun `windows line endings are read like the others`() {
         assertEquals(
-            expected = listOf(OutlineHeading(level = 2, text = "Dairy", offset = 7, depth = 0)),
+            expected = listOf(
+                OutlineHeading(
+                    level = 2,
+                    text = "Dairy",
+                    offset = 7,
+                    depth = 0
+                )
+            ),
             actual = finder.headings(text = "Intro\r\n## Dairy\r\nCheese")
         )
     }

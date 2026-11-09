@@ -8,5 +8,8 @@ data class NoteRewrite(
     val linkCount: Int
 ) {
     /** The same change the other way, which takes it back. */
-    fun reversed(): NoteRewrite = copy(original = updated, updated = original)
+    fun reversed(): NoteRewrite = copy(
+        original = updated,
+        updated = original
+    )
 }

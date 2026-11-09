@@ -14,12 +14,18 @@ import kotlin.time.toJavaInstant
 class JvmLocalCalendar(
     private val zone: () -> ZoneId = { ZoneId.systemDefault() }
 ) : LocalCalendar {
-    override fun momentOf(
-        instant: Instant
-    ): LocalMoment {
-        val local = instant.toJavaInstant().atZone(zone()).toLocalDateTime()
+    override fun momentOf(instant: Instant): LocalMoment {
+        val local = instant
+            .toJavaInstant()
+            .atZone(zone())
+            .toLocalDateTime()
+
         return LocalMoment(
-            date = CalendarDate(year = local.year, month = local.monthValue, day = local.dayOfMonth),
+            date = CalendarDate(
+                year = local.year,
+                month = local.monthValue,
+                day = local.dayOfMonth
+            ),
             hour = local.hour,
             minute = local.minute,
             second = local.second

@@ -33,12 +33,37 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 @Composable
 internal fun ButtonsSection() {
     Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-        NotekeaButton(text = BUTTON_OPEN_FOLDER, onClick = {}, shortcutHint = BUTTON_OPEN_SHORTCUT)
-        NotekeaButton(text = BUTTON_CANCEL, onClick = {}, style = NotekeaButtonStyle.SECONDARY)
-        NotekeaButton(text = BUTTON_DELETE, onClick = {}, style = NotekeaButtonStyle.DESTRUCTIVE)
-        NotekeaButton(text = BUTTON_REMOVE, onClick = {}, style = NotekeaButtonStyle.TEXT)
-        NotekeaButton(text = BUTTON_DISABLED, onClick = {}, enabled = false)
+        NotekeaButton(
+            text = BUTTON_OPEN_FOLDER,
+            onClick = {},
+            shortcutHint = BUTTON_OPEN_SHORTCUT
+        )
+
+        NotekeaButton(
+            text = BUTTON_CANCEL,
+            onClick = {},
+            style = NotekeaButtonStyle.SECONDARY
+        )
+
+        NotekeaButton(
+            text = BUTTON_DELETE,
+            onClick = {},
+            style = NotekeaButtonStyle.DESTRUCTIVE
+        )
+
+        NotekeaButton(
+            text = BUTTON_REMOVE,
+            onClick = {},
+            style = NotekeaButtonStyle.TEXT
+        )
+
+        NotekeaButton(
+            text = BUTTON_DISABLED,
+            onClick = {},
+            enabled = false
+        )
     }
+
     Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)) {
         NotekeaIconButton(
             icon = NotekeaIcons.NewNote,
@@ -46,8 +71,19 @@ internal fun ButtonsSection() {
             onClick = {},
             shortcutHint = BUTTON_NEW_NOTE_SHORTCUT
         )
-        NotekeaIconButton(icon = NotekeaIcons.NewFolder, label = BUTTON_NEW_FOLDER, onClick = {})
-        NotekeaIconButton(icon = NotekeaIcons.SortByName, label = BUTTON_SORT, onClick = {}, enabled = false)
+
+        NotekeaIconButton(
+            icon = NotekeaIcons.NewFolder,
+            label = BUTTON_NEW_FOLDER,
+            onClick = {}
+        )
+
+        NotekeaIconButton(
+            icon = NotekeaIcons.SortByName,
+            label = BUTTON_SORT,
+            onClick = {},
+            enabled = false
+        )
     }
 }
 
@@ -55,15 +91,35 @@ internal fun ButtonsSection() {
 @Composable
 private fun PageInputsSamples() {
     var title by remember { mutableStateOf(value = NOTE_PRICING) }
+
     var findQuery by remember { mutableStateOf(value = "") }
-    NotekeaTitleField(value = title, onCommit = { title = it }, label = NOTE_PRICING)
-    NotekeaSearchButton(label = SEARCH_LABEL, onClick = {}, shortcutHint = SEARCH_SHORTCUT)
+
+    NotekeaTitleField(
+        value = title,
+        onCommit = { title = it },
+        label = NOTE_PRICING
+    )
+
+    NotekeaSearchButton(
+        label = SEARCH_LABEL,
+        onClick = {},
+        shortcutHint = SEARCH_SHORTCUT
+    )
+
     var isTaskDone by remember { mutableStateOf(value = false) }
-    NotekeaCheckbox(checked = isTaskDone, onClick = { isTaskDone = !isTaskDone }, label = SEARCH_LABEL)
+
+    NotekeaCheckbox(
+        checked = isTaskDone,
+        onClick = { isTaskDone = !isTaskDone },
+        label = SEARCH_LABEL
+    )
+
+    val matchLabel = if (findQuery.isEmpty()) "" else FIND_COUNT
+
     NotekeaFindBar(
         query = findQuery,
         onQueryChange = { findQuery = it },
-        matchLabel = if (findQuery.isEmpty()) "" else FIND_COUNT,
+        matchLabel = matchLabel,
         onNext = {},
         onPrevious = {},
         onClose = { findQuery = "" }
@@ -73,13 +129,17 @@ private fun PageInputsSamples() {
 @Composable
 internal fun InputsSection() {
     var query by remember { mutableStateOf(value = "") }
+
     var selectedNote by remember { mutableIntStateOf(value = 0) }
+
     PageInputsSamples()
+
     NotekeaTextField(
         value = query,
         onValueChange = { query = it },
         placeholder = SAMPLE_PLACEHOLDER
     )
+
     NotekeaCard {
         NotekeaListItem(
             title = NOTE_PRICING,
@@ -87,13 +147,20 @@ internal fun InputsSection() {
             supportingText = NOTE_FOLDER_PROJECTS,
             selected = selectedNote == 0
         )
+
         NotekeaListItem(
             title = NOTE_MEETING,
             onClick = { selectedNote = 1 },
             supportingText = NOTE_FOLDER_JOURNAL,
             selected = selectedNote == 1,
-            trailingContent = { Text(text = NOTE_EDITED, style = MaterialTheme.typography.bodySmall) }
+            trailingContent = {
+                Text(
+                    text = NOTE_EDITED,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         )
+
         NotekeaListItem(
             title = NOTE_ARCHIVE,
             onClick = {},
@@ -113,6 +180,7 @@ internal fun InputsSection() {
 @Composable
 internal fun TreeSection() {
     var isExpanded by remember { mutableStateOf(value = true) }
+
     Column(modifier = Modifier.width(width = TREE_WIDTH_DP.dp)) {
         NotekeaTreeItem(
             label = TREE_FOLDER_PROJECTS,
@@ -123,16 +191,29 @@ internal fun TreeSection() {
             onToggleExpanded = { isExpanded = !isExpanded },
             trailingText = TREE_COUNT_PROJECTS
         )
+
         if (isExpanded) TreeSectionChildren()
         NotekeaSkeletonRow(widthFraction = SKELETON_SHORT_FRACTION)
-        NotekeaSkeletonRow(widthFraction = SKELETON_LONG_FRACTION, depth = 1)
+
+        NotekeaSkeletonRow(
+            widthFraction = SKELETON_LONG_FRACTION,
+            depth = 1
+        )
     }
 }
 
 @Composable
 private fun TreeSectionChildren() {
     var renamed by remember { mutableStateOf(value = TREE_NOTE_RENAMED) }
-    NotekeaTreeItem(label = TREE_FOLDER_GARDEN, icon = NotekeaIcons.Folder, depth = 1, onClick = {}, isExpanded = false)
+
+    NotekeaTreeItem(
+        label = TREE_FOLDER_GARDEN,
+        icon = NotekeaIcons.Folder,
+        depth = 1,
+        onClick = {},
+        isExpanded = false
+    )
+
     NotekeaTreeItem(
         label = TREE_NOTE_TOMATO,
         icon = NotekeaIcons.Note,
@@ -141,13 +222,19 @@ private fun TreeSectionChildren() {
         selected = true,
         focused = true
     )
+
     NotekeaTreeItem(
         label = TREE_NOTE_TOMATO,
         icon = NotekeaIcons.Note,
         depth = 1,
         onClick = {},
         labelContent = {
-            NotekeaInlineTextField(value = renamed, onValueChange = { renamed = it }, onSubmit = {}, onCancel = {})
+            NotekeaInlineTextField(
+                value = renamed,
+                onValueChange = { renamed = it },
+                onSubmit = {},
+                onCancel = {}
+            )
         }
     )
 }

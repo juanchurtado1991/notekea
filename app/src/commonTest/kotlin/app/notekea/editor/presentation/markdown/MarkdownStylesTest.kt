@@ -1,11 +1,11 @@
 package app.notekea.editor.presentation.markdown
 
 import androidx.compose.material3.Typography
-import app.notekea.editor.presentation.view.NO_LIGATURES
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import app.notekea.editor.presentation.view.NO_LIGATURES
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -21,7 +21,12 @@ class MarkdownStylesTest {
     @Test
     fun `every kind has a style taken from the theme`() {
         assertEquals(
-            expected = listOf(colors.primary, colors.primary, colors.tertiary, colors.onSurfaceVariant),
+            expected = listOf(
+                colors.primary,
+                colors.primary,
+                colors.tertiary,
+                colors.onSurfaceVariant
+            ),
             actual = listOf(
                 HighlightKind.LINK,
                 HighlightKind.WIKI_LINK,
@@ -29,10 +34,16 @@ class MarkdownStylesTest {
                 HighlightKind.SYNTAX
             ).map { styles.of(kind = it).color }
         )
+
         assertEquals(
-            expected = listOf(FontFamily.Monospace to Color.Unspecified, FontFamily.Monospace to colors.surfaceVariant),
+            expected = listOf(
+                FontFamily.Monospace to Color.Unspecified,
+                FontFamily.Monospace to colors.surfaceVariant
+            ),
             actual = listOf(HighlightKind.CODE_BLOCK, HighlightKind.CODE_INLINE).map { kind ->
-                styles.of(kind = kind).let { it.fontFamily to it.background }
+                styles.of(kind = kind).let {
+                    it.fontFamily to it.background
+                }
             }
         )
     }
@@ -56,6 +67,7 @@ class MarkdownStylesTest {
             expected = listOf(colors.tertiary.red, colors.tertiary.red),
             actual = listOf(match.red, current.red)
         )
+
         assertEquals(
             expected = true,
             actual = current.alpha > match.alpha
@@ -70,10 +82,13 @@ class MarkdownStylesTest {
                 typography.titleLarge.fontSize,
                 typography.titleMedium.fontSize
             ),
-            actual = listOf(HighlightKind.HEADING_1, HighlightKind.HEADING_2, HighlightKind.HEADING_6).map {
-                styles.of(kind = it).fontSize
-            }
+            actual = listOf(
+                HighlightKind.HEADING_1,
+                HighlightKind.HEADING_2,
+                HighlightKind.HEADING_6
+            ).map { styles.of(kind = it).fontSize }
         )
+
         assertEquals(
             expected = FontWeight.SemiBold,
             actual = styles.of(kind = HighlightKind.HEADING_1).fontWeight

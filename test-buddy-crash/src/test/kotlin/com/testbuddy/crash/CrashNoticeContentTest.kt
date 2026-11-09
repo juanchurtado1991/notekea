@@ -30,10 +30,14 @@ class CrashNoticeContentTest {
     @Test
     fun `the buttons copy, report and close`() = runComposeUiTest {
         val events = mutableListOf<String>()
+
         setContent {
             MaterialTheme {
                 CrashNoticeContent(
-                    crash = CrashReport(text = "report", path = "/reports/crash.txt"),
+                    crash = CrashReport(
+                        text = "report",
+                        path = "/reports/crash.txt"
+                    ),
                     config = config,
                     onCopy = { events += "copy" },
                     onReport = { events += "report $it" },
@@ -51,15 +55,23 @@ class CrashNoticeContentTest {
         assertEquals(listOf("copy", "report https://example.com/issues/new", "close"), events)
     }
 
-    // Issue #101, the QA run of m1-rc1: on macOS at 200% and on Windows the buttons were cut off at the bottom of the
-    // notice. In a window too short for its text, the text scrolls and the buttons stay inside it.
+    // On macOS at 200% and on Windows the notice's window is shorter than its text: the text scrolls and the buttons
+    // stay inside it.
     @Test
     fun `in a short window the buttons stay inside it`() = runComposeUiTest {
         setContent {
             MaterialTheme {
-                Box(modifier = Modifier.size(width = WIDTH_DP.dp, height = SHORT_HEIGHT_DP.dp)) {
+                Box(
+                    modifier = Modifier.size(
+                        width = WIDTH_DP.dp,
+                        height = SHORT_HEIGHT_DP.dp
+                    )
+                ) {
                     CrashNoticeContent(
-                        crash = CrashReport(text = "report", path = "/reports/" + "long folder/".repeat(n = 20)),
+                        crash = CrashReport(
+                            text = "report",
+                            path = "/reports/" + "long folder/".repeat(n = 20)
+                        ),
                         config = config,
                         onCopy = {},
                         onReport = {},
@@ -70,8 +82,15 @@ class CrashNoticeContentTest {
         }
 
         val close = onNodeWithText("Close Sample").fetchSemanticsNode().boundsInRoot
-        val (height, bottom) = with(density) { BUTTON_HEIGHT_DP.dp.toPx() to SHORT_HEIGHT_DP.dp.toPx() }
-        assertTrue(close.height >= height && close.bottom <= bottom, "The Close button is at $close")
+
+        val (height, bottom) = with(density) {
+            BUTTON_HEIGHT_DP.dp.toPx() to SHORT_HEIGHT_DP.dp.toPx()
+        }
+
+        assertTrue(
+            close.height >= height && close.bottom <= bottom,
+            "The Close button is at $close"
+        )
     }
 
     @Test
@@ -79,7 +98,10 @@ class CrashNoticeContentTest {
         setContent {
             MaterialTheme {
                 CrashNoticeContent(
-                    crash = CrashReport(text = "report", path = null),
+                    crash = CrashReport(
+                        text = "report",
+                        path = null
+                    ),
                     config = config.copy(issueFormUrl = null),
                     onCopy = {},
                     onReport = {},

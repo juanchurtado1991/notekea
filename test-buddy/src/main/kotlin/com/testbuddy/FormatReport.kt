@@ -18,9 +18,19 @@ public fun formatReport(
 ): String = buildString {
     appendLine("${suite.appName} QA report")
     appendLine("${suite.appName} ${suite.version}")
+
     environment.lines().forEach { appendLine(it) }
-    appendAutomatic(suite = suite, results = automatic)
-    appendManual(suite = suite, answers = manual)
+
+    appendAutomatic(
+        suite = suite,
+        results = automatic
+    )
+
+    appendManual(
+        suite = suite,
+        answers = manual
+    )
+
     if (!diagnostics.isNullOrBlank()) {
         appendLine("Diagnostics:")
         appendLine(diagnostics.trimEnd())
@@ -31,15 +41,42 @@ private fun StringBuilder.appendAutomatic(
     suite: Suite,
     results: List<CaseResult>
 ) {
-    val passed = results.count { it is CaseResult.Passed }
+    val passed = results.count {
+        it is CaseResult.Passed
+    }
+
     val failed = results.filterIsInstance<CaseResult.Failed>()
-    val skipped = results.count { it is CaseResult.Skipped }
-    appendLine("Automatic: $passed passed, ${failed.size} failed, $skipped skipped (${totalTime(results = results)})")
+
+    val skipped = results.count {
+        it is CaseResult.Skipped
+    }
+
+    appendLine(
+        "Automatic: $passed passed, ${failed.size} failed, $skipped skipped (${totalTime(
+            results = results
+        )})"
+    )
+
     failed.forEach { result ->
-        val title = suite.automated.firstOrNull { it.id == result.id }?.title.orEmpty()
-        val screenshot = result.screenshot?.let { " (screenshot: ${it.fileName})" }.orEmpty()
+        val title = suite
+            .automated
+            .firstOrNull {
+                it.id == result.id
+            }
+            ?.title
+            .orEmpty()
+
+        val screenshot = result
+            .screenshot
+            ?.let { " (screenshot: ${it.fileName})" }
+            .orEmpty()
+
         appendLine("  ❌ ${result.id} $title: ${result.message}$screenshot")
-        appendSteps(title = "Last steps of the test", steps = result.steps)
+
+        appendSteps(
+            title = "Last steps of the test",
+            steps = result.steps
+        )
     }
 }
 
@@ -47,16 +84,36 @@ private fun StringBuilder.appendManual(
     suite: Suite,
     answers: List<ManualAnswer>
 ) {
-    val passed = answers.count { it is ManualAnswer.Passed }
+    val passed = answers.count {
+        it is ManualAnswer.Passed
+    }
+
     val failed = answers.filterIsInstance<ManualAnswer.Failed>()
     val notRun = answers.filterIsInstance<ManualAnswer.NotRun>()
     appendLine("Manual: $passed passed, ${failed.size} failed, ${notRun.size} not run")
+
     failed.forEach { answer ->
-        val title = suite.manual.firstOrNull { it.id == answer.id }?.title.orEmpty()
-        val screenshot = answer.screenshot?.let { " (screenshot: $it)" }.orEmpty()
+        val title = suite
+            .manual
+            .firstOrNull {
+                it.id == answer.id
+            }
+            ?.title
+            .orEmpty()
+
+        val screenshot = answer
+            .screenshot
+            ?.let { " (screenshot: $it)" }
+            .orEmpty()
+
         appendLine("  ❌ ${answer.id} $title: \"${answer.note}\"$screenshot")
-        appendSteps(title = "Last steps in ${suite.appName}", steps = answer.steps)
+
+        appendSteps(
+            title = "Last steps in ${suite.appName}",
+            steps = answer.steps
+        )
     }
+
     // Named, so the run's record can tell them from the passed ones (the macOS run of m1-rc1 could not).
     if (notRun.isNotEmpty()) appendLine("  Not run: ${notRun.joinToString { it.id }}")
 }
@@ -67,12 +124,21 @@ private fun StringBuilder.appendSteps(
 ) {
     if (steps.isEmpty()) return
     appendLine("     $title:")
+
     steps.forEach { appendLine("       $it") }
 }
 
 private fun totalTime(results: List<CaseResult>): String {
-    val total = results.fold(ZERO) { sum, result -> sum + duration(result = result) }
-    return if (total.inWholeMinutes > 0) "${total.inWholeMinutes} min" else "${total.inWholeSeconds} s"
+    val total = results
+        .fold(ZERO) { sum, result ->
+            sum + duration(result = result)
+        }
+
+    return if (total.inWholeMinutes > 0) {
+        "${total.inWholeMinutes} min"
+    } else {
+        "${total.inWholeSeconds} s"
+    }
 }
 
 private fun duration(result: CaseResult): Duration = when (result) {

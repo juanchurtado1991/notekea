@@ -14,8 +14,8 @@ sealed interface EditorEffect {
     data object Flushed : EditorEffect
 
     /**
-     * A link to [target] was clicked in [source]: the panes around the editor open the note it leads to, in a tab behind
-     * the current one when [inBackground].
+     * A link to [target] was clicked in [source]: the panes around the editor open the note it leads to, in a tab
+     * behind the current one when [inBackground].
      */
     data class OpenLink(
         val source: RelativePath,

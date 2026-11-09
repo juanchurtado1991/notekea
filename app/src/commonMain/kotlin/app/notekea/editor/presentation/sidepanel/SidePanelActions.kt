@@ -6,7 +6,8 @@ import app.notekea.core.notes.domain.SidePanelSection
 
 /**
  * What the side panel's controls do: a heading chosen in the outline ([onHeadingClick], by its index), Inspector or
- * Chat chosen ([onModeSelect]), a section's header clicked ([onSectionToggle]), the hide button ([onHide]), and Esc in the outline ([onLeave]).
+ * Chat chosen ([onModeSelect]), a section's header clicked ([onSectionToggle]), the hide button ([onHide]), and Esc in
+ * the outline ([onLeave]).
  */
 @Immutable
 class SidePanelActions(

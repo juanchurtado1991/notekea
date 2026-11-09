@@ -10,6 +10,15 @@ internal fun reduceOpenOutcome(
     state: WelcomeState,
     outcome: Outcome<Vault, VaultError>
 ): WelcomeState = when (outcome) {
-    is Outcome.Failure -> state.copy(isBusy = false, error = outcome.error)
-    is Outcome.Success -> state.copy(isBusy = false, openedVault = outcome.value, newVaultForm = null, error = null)
+    is Outcome.Failure -> state.copy(
+        isBusy = false,
+        error = outcome.error
+    )
+
+    is Outcome.Success -> state.copy(
+        isBusy = false,
+        openedVault = outcome.value,
+        newVaultForm = null,
+        error = null
+    )
 }

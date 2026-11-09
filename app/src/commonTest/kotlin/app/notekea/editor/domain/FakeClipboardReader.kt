@@ -12,8 +12,9 @@ class FakeClipboardReader(
     var text: String? = null,
     var imageError: NotesError? = null
 ) : ClipboardReader {
-    override fun image(): Outcome<ByteArray?, NotesError> =
-        imageError?.let { Outcome.Failure(error = it) } ?: Outcome.Success(value = image)
+    override fun image(): Outcome<ByteArray?, NotesError> = imageError?.let {
+        Outcome.Failure(error = it)
+    } ?: Outcome.Success(value = image)
 
     override fun text(): String? = text
 }

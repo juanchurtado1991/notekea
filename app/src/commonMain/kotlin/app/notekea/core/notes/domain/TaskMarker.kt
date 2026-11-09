@@ -11,5 +11,6 @@ data class TaskMarker(
     val isDone: Boolean
 ) {
     /** The character that toggles the task: `x` checks it, a space unchecks it. */
-    val toggledState: Char get() = if (isDone) MarkdownSyntax.TASK_OPEN_STATE else MarkdownSyntax.TASK_DONE_STATE
+    val toggledState: Char get() =
+        if (isDone) MarkdownSyntax.TASK_OPEN_STATE else MarkdownSyntax.TASK_DONE_STATE
 }

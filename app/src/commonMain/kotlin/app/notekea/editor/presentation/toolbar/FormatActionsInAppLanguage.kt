@@ -39,30 +39,44 @@ import org.jetbrains.compose.resources.stringResource
 fun formatActions(): FormatActions {
     val headingPlaceholder = stringResource(resource = Res.string.format_heading_placeholder)
     val listPlaceholder = stringResource(resource = Res.string.format_list_placeholder)
+
     return FormatActions(
-        bold = FormatAction.Bold(placeholder = stringResource(resource = Res.string.format_bold_placeholder)),
-        italic = FormatAction.Italic(placeholder = stringResource(resource = Res.string.format_italic_placeholder)),
-        headings = (1..3).map { FormatAction.Heading(level = it, placeholder = headingPlaceholder) },
-        webLink = FormatAction.WebLink(placeholder = stringResource(resource = Res.string.format_web_link_placeholder)),
+        bold = FormatAction.Bold(
+            placeholder = stringResource(resource = Res.string.format_bold_placeholder)
+        ),
+        italic = FormatAction.Italic(
+            placeholder = stringResource(resource = Res.string.format_italic_placeholder)
+        ),
+        headings = (1..3).map {
+            FormatAction.Heading(
+                level = it,
+                placeholder = headingPlaceholder
+            )
+        },
+        webLink = FormatAction.WebLink(
+            placeholder = stringResource(resource = Res.string.format_web_link_placeholder)
+        ),
         bulletList = FormatAction.BulletList(placeholder = listPlaceholder),
         numberedList = FormatAction.NumberedList(placeholder = listPlaceholder),
         checklist = FormatAction.Checklist(
             placeholder = stringResource(resource = Res.string.format_checklist_placeholder)
         ),
-        quote = FormatAction.Quote(placeholder = stringResource(resource = Res.string.format_quote_placeholder)),
+        quote = FormatAction.Quote(
+            placeholder = stringResource(resource = Res.string.format_quote_placeholder)
+        ),
         codePlaceholder = stringResource(resource = Res.string.format_code_placeholder),
         tableColumnNames = (1..FormatActions.TABLE_MAX_COLUMNS).map {
             stringResource(Res.string.format_table_column, it)
         },
         tableCellText = stringResource(resource = Res.string.format_table_cell),
         calloutPlaceholder = stringResource(resource = Res.string.format_callout_placeholder),
-        calloutTitles = CalloutKind.entries.associateWith { stringResource(resource = calloutTitle(kind = it)) }
+        calloutTitles = CalloutKind.entries.associateWith {
+            stringResource(resource = calloutTitle(kind = it))
+        }
     )
 }
 
-private fun calloutTitle(
-    kind: CalloutKind
-): StringResource = when (kind) {
+private fun calloutTitle(kind: CalloutKind): StringResource = when (kind) {
     CalloutKind.NOTE -> Res.string.format_callout_note
     CalloutKind.ABSTRACT -> Res.string.format_callout_abstract
     CalloutKind.INFO -> Res.string.format_callout_info
@@ -82,6 +96,11 @@ private fun calloutTitle(
 @Composable
 private fun formatActionsPreview() {
     NotekeaPreviewThemes {
-        Text(text = formatActions().calloutTitles.values.joinToString())
+        Text(
+            text = formatActions()
+                .calloutTitles
+                .values
+                .joinToString()
+        )
     }
 }

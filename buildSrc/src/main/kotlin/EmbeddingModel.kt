@@ -4,13 +4,14 @@ import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskProvider
 
 /**
- * The multilingual embedding model Notekea bundles (`ROADMAP.md` 2.2, `docs/spikes/2026-11-01-embedding-models.md`):
+ * The multilingual embedding model Notekea bundles:
  * granite-embedding-107m-multilingual (IBM, Apache 2.0) in bartowski's Q8_0 conversion, 121 MB.
  */
 object EmbeddingModel {
     const val FILE_NAME = "granite-embedding-107m-multilingual-Q8_0.gguf"
-    const val URL = "https://huggingface.co/bartowski/granite-embedding-107m-multilingual-GGUF/resolve/" +
-        "52fed1c818636b7cb8c4e4e3ae73189efeb78081/$FILE_NAME"
+    const val URL =
+        "https://huggingface.co/bartowski/granite-embedding-107m-multilingual-GGUF/resolve/" +
+            "52fed1c818636b7cb8c4e4e3ae73189efeb78081/$FILE_NAME"
     const val SHA_256 = "15691dfe830257f569a1e3521977351d16eac18e48e414908dc98ed9b8455e07"
 
     /** Where the app finds it, inside its resources (`compose.application.resources.dir`). */
@@ -44,7 +45,11 @@ object EmbeddingModel {
         project.tasks.register("embeddingModelResources", Sync::class.java) {
             dependsOn(DOWNLOAD_TASK_PATH)
             from(file(project))
-            into(project.layout.buildDirectory.dir("app-resources/$COMMON_RESOURCES/$RESOURCE_FOLDER"))
+            into(
+                project.layout.buildDirectory.dir(
+                    "app-resources/$COMMON_RESOURCES/$RESOURCE_FOLDER"
+                )
+            )
         }
 
     private const val DOWNLOAD_TASK_PATH = ":app:downloadEmbeddingModel"

@@ -4,21 +4,29 @@ import kotlinx.coroutines.launch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** The graph tab (`ROADMAP.md` 2.7): finding a note, and linking notes close in meaning. */
+/** The graph tab: finding a note, and linking notes close in meaning. */
 class GraphSearchAndLinkTest : GraphViewModelFixture() {
 
     // Review: a note open in an editor went on with its old text, and the next save was a conflict.
     @Test
     fun `Link and Undo tell the editors the note changed`() = runGraphTest {
         val effects = mutableListOf<GraphEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+
+        backgroundScope.launch {
+            viewModel.effects.collect { effects += it }
+        }
+
         send(GraphIntent.OnOpen(note = AREPAS))
 
         send(GraphIntent.OnLink(path = TASKS))
         send(GraphIntent.OnLinkUndo)
 
         val rewritten = GraphEffect.NoteRewritten(path = AREPAS)
-        assertEquals(expected = listOf<GraphEffect>(rewritten, rewritten), actual = effects)
+
+        assertEquals(
+            expected = listOf<GraphEffect>(rewritten, rewritten),
+            actual = effects
+        )
     }
 
     // Review: a quick second click wrote the link twice, and Undo took back one.
@@ -30,7 +38,10 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
         viewModel.onIntent(intent = GraphIntent.OnLink(path = TASKS))
         send(GraphIntent.OnLink(path = TASKS))
 
-        assertEquals(expected = "$text\n\n[[Tasks]]\n", actual = store.texts[AREPAS])
+        assertEquals(
+            expected = "$text\n\n[[Tasks]]\n",
+            actual = store.texts[AREPAS]
+        )
     }
 
     @Test
@@ -38,10 +49,16 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
         send(GraphIntent.OnScopeSelect(scope = GraphScope.WHOLE_VAULT))
         send(GraphIntent.OnSearchOpen)
         send(GraphIntent.OnQueryChange(query = "a"))
-        val first = viewModel.state.value.matches.first()
+
+        val first = viewModel
+            .state
+            .value
+            .matches
+            .first()
 
         send(GraphIntent.OnMatchStep(isForward = true))
         val found = viewModel.state.value
+
         assertEquals(
             expected = listOf(GraphScope.THIS_NOTE, first, first),
             actual = listOf(found.scope, found.center, found.selected)
@@ -50,20 +67,36 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
         send(GraphIntent.OnMatchStep(isForward = false))
         send(GraphIntent.OnSearchClose)
         val state = viewModel.state.value
-        assertEquals(expected = Triple(false, "", 2), actual = Triple(state.isSearching, state.query, state.reveals))
-        assertEquals(expected = emptyList(), actual = state.matches)
+
+        assertEquals(
+            expected = Triple(false, "", 2),
+            actual = Triple(state.isSearching, state.query, state.reveals)
+        )
+
+        assertEquals(
+            expected = emptyList(),
+            actual = state.matches
+        )
     }
 
     @Test
     fun `with no note, search finds any note and goes to its graph`() = runGraphTest {
         send(GraphIntent.OnOpen(note = null))
         send(GraphIntent.OnQueryChange(query = "tasks"))
-        assertEquals(expected = listOf(TASKS), actual = viewModel.state.value.matches)
+
+        assertEquals(
+            expected = listOf(TASKS),
+            actual = viewModel.state.value.matches
+        )
 
         send(GraphIntent.OnMatchStep(isForward = true))
 
         val state = viewModel.state.value
-        assertEquals(expected = TASKS to false, actual = state.center to state.needsNote)
+
+        assertEquals(
+            expected = TASKS to false,
+            actual = state.center to state.needsNote
+        )
     }
 
     // Review: with one match, Enter did nothing once the map had been dragged away.
@@ -75,7 +108,10 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
         send(GraphIntent.OnMatchStep(isForward = true))
         send(GraphIntent.OnMatchStep(isForward = true))
 
-        assertEquals(expected = 2, actual = viewModel.state.value.reveals)
+        assertEquals(
+            expected = 2,
+            actual = viewModel.state.value.reveals
+        )
     }
 
     @Test
@@ -85,7 +121,10 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
 
         send(GraphIntent.OnMatchStep(isForward = true))
 
-        assertEquals(expected = AREPAS, actual = viewModel.state.value.center)
+        assertEquals(
+            expected = AREPAS,
+            actual = viewModel.state.value.center
+        )
     }
 
     @Test
@@ -94,13 +133,45 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
         val text = store.texts[AREPAS]
 
         send(GraphIntent.OnLink(path = TASKS))
-        assertEquals(expected = "$text\n\n[[Tasks]]\n", actual = store.texts[AREPAS])
-        assertEquals(expected = TASKS, actual = viewModel.state.value.linked)
-        assertEquals(expected = true, actual = viewModel.state.value.dots.any { it.path == TASKS })
+
+        assertEquals(
+            expected = "$text\n\n[[Tasks]]\n",
+            actual = store.texts[AREPAS]
+        )
+
+        assertEquals(
+            expected = TASKS,
+            actual = viewModel.state.value.linked
+        )
+
+        assertEquals(
+            expected = true,
+            actual = viewModel
+                .state
+                .value
+                .dots
+                .any {
+                    it.path == TASKS
+                }
+        )
 
         send(GraphIntent.OnLinkUndo)
-        assertEquals(expected = text, actual = store.texts[AREPAS])
-        assertEquals(expected = false, actual = viewModel.state.value.dots.any { it.path == TASKS })
+
+        assertEquals(
+            expected = text,
+            actual = store.texts[AREPAS]
+        )
+
+        assertEquals(
+            expected = false,
+            actual = viewModel
+                .state
+                .value
+                .dots
+                .any {
+                    it.path == TASKS
+                }
+        )
     }
 
     @Test
@@ -111,8 +182,15 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
 
         send(GraphIntent.OnLinkUndo)
 
-        assertEquals(expected = "Edited meanwhile.", actual = store.texts[AREPAS])
-        assertEquals(expected = true, actual = viewModel.state.value.linkFailed)
+        assertEquals(
+            expected = "Edited meanwhile.",
+            actual = store.texts[AREPAS]
+        )
+
+        assertEquals(
+            expected = true,
+            actual = viewModel.state.value.linkFailed
+        )
     }
 
     @Test
@@ -128,7 +206,10 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
 
         send(GraphIntent.OnNoteSelect(path = TASKS))
 
-        assertEquals(expected = listOf(LONE), actual = viewModel.state.value.preview?.suggested)
+        assertEquals(
+            expected = listOf(LONE),
+            actual = viewModel.state.value.preview?.suggested
+        )
     }
 
     // Review: a note of a folder left out of the graph was offered, and Link joined it out of sight.
@@ -145,6 +226,9 @@ class GraphSearchAndLinkTest : GraphViewModelFixture() {
 
         send(GraphIntent.OnNoteSelect(path = TASKS))
 
-        assertEquals(expected = emptyList(), actual = viewModel.state.value.preview?.suggested)
+        assertEquals(
+            expected = emptyList(),
+            actual = viewModel.state.value.preview?.suggested
+        )
     }
 }

@@ -1,7 +1,7 @@
 package app.notekea.core.notes.domain
 
 /**
- * The sizes of a note's chunks, in estimated tokens ([TokenEstimate], `ROADMAP.md` 2.1): sections shorter than [MIN]
+ * The sizes of a note's chunks, in estimated tokens ([TokenEstimate]): sections shorter than [MIN]
  * join the next ones, chunks are packed up to [TARGET], none is larger than [MAX], and a chunk of a long section starts
  * with the previous one's last sentence or line when it is at most [OVERLAP].
  */

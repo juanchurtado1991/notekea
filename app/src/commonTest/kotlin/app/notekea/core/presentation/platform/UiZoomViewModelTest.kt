@@ -37,15 +37,15 @@ class UiZoomViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel(
-        uiScaleStore: UiScaleStore = store
-    ) = UiZoomViewModel(
+    private fun viewModel(uiScaleStore: UiScaleStore = store) = UiZoomViewModel(
         getUiScale = GetUiScaleUseCase(uiScaleStore = uiScaleStore),
         saveUiScale = SaveUiScaleUseCase(uiScaleStore = uiScaleStore)
     )
 
     @Test
-    fun `the zoom starts where it was left, moves a step at a time and is kept`() = runTest(context = testDispatcher) {
+    fun `the zoom starts where it was left, moves a step at a time and is kept`() = runTest(
+        context = testDispatcher
+    ) {
         store.setScale(scale = 1.3f)
         val viewModel = viewModel()
         advanceUntilIdle()
@@ -68,7 +68,9 @@ class UiZoomViewModelTest {
     }
 
     @Test
-    fun `a zoom that cannot be read or kept still changes the window`() = runTest(context = testDispatcher) {
+    fun `a zoom that cannot be read or kept still changes the window`() = runTest(
+        context = testDispatcher
+    ) {
         val viewModel = viewModel(uiScaleStore = FailingStore())
         advanceUntilIdle()
 
@@ -84,9 +86,7 @@ class UiZoomViewModelTest {
     private class FailingStore : UiScaleStore {
         override suspend fun scale(): Float = error(MESSAGE)
 
-        override suspend fun setScale(
-            scale: Float
-        ) = error(MESSAGE)
+        override suspend fun setScale(scale: Float) = error(MESSAGE)
     }
 
     private companion object {

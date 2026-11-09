@@ -9,5 +9,8 @@ class FakeNoteTimesReader : NoteTimesReader {
     override suspend fun times(
         vaultPath: String,
         path: RelativePath
-    ): NoteTimes = times[path] ?: NoteTimes(createdAt = null, modifiedAt = null)
+    ): NoteTimes = times[path] ?: NoteTimes(
+        createdAt = null,
+        modifiedAt = null
+    )
 }

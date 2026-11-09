@@ -30,7 +30,10 @@ class FenceTrackerTest {
 
     @Test
     fun `text outside a block is not code`() {
-        assertEquals(expected = listOf(false, false), actual = codeLines("plain", "`` inline ``"))
+        assertEquals(
+            expected = listOf(false, false),
+            actual = codeLines("plain", "`` inline ``")
+        )
     }
 
     @Test
@@ -41,15 +44,18 @@ class FenceTrackerTest {
         assertEquals(
             expected = listOf(true, true, true, false),
             actual = listOf(0..3, 4..8, 9..12, 13..18).map {
-                tracker.read(text = text, start = it.first, end = it.last)
+                tracker.read(
+                    text = text,
+                    start = it.first,
+                    end = it.last
+                )
             }
         )
     }
 
-    private fun codeLines(
-        vararg lines: String
-    ): List<Boolean> {
+    private fun codeLines(vararg lines: String): List<Boolean> {
         val tracker = FenceTracker()
+
         return lines.map { tracker.read(text = it) }
     }
 }

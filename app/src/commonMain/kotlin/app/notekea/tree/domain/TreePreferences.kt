@@ -15,17 +15,21 @@ data class TreePreferences(
     val isSidebarCollapsed: Boolean = false
 ) {
     companion object {
-        /** As wide as the outline panel on the other side, so the note sits in the middle (1.12 smoke request). */
+        /** As wide as the outline panel on the other side, so the note sits in the middle. */
         const val DEFAULT_SIDEBAR_WIDTH_DP = SidePanelPreferences.DEFAULT_WIDTH_DP
         const val MAX_SIDEBAR_WIDTH_DP = 480
         const val MIN_SIDEBAR_WIDTH_DP = 200
 
-        /** In a window narrower than this the sidebar floats over the note (`ROADMAP.md`, the main layout). */
+        /** In a window narrower than this the sidebar floats over the note. */
         const val SIDEBAR_OVERLAY_BELOW_DP = 760
-        val DEFAULT = TreePreferences(expandedFolders = emptySet(), sort = TreeSort.NAME)
+        val DEFAULT = TreePreferences(
+            expandedFolders = emptySet(),
+            sort = TreeSort.NAME
+        )
 
-        fun clampSidebarWidth(
-            widthDp: Int
-        ): Int = widthDp.coerceIn(minimumValue = MIN_SIDEBAR_WIDTH_DP, maximumValue = MAX_SIDEBAR_WIDTH_DP)
+        fun clampSidebarWidth(widthDp: Int): Int = widthDp.coerceIn(
+            minimumValue = MIN_SIDEBAR_WIDTH_DP,
+            maximumValue = MAX_SIDEBAR_WIDTH_DP
+        )
     }
 }

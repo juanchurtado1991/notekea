@@ -1,39 +1,37 @@
 package app.notekea.core.platform.domain
 
 /**
- * Maps the raw [SystemEnvironment] to the [PlatformConventions] defined in `PLATFORM_GUIDELINES.md`:
- * primary modifier (Cmd on macOS, Ctrl elsewhere), open-folder shortcut (primary modifier + O), quit shortcut
- * (Cmd+Q, Alt+F4 on Windows, Ctrl+Q on Linux), the vault tree shortcuts (new note with primary modifier + N, rename
- * with Enter on macOS and F2 elsewhere, delete with Cmd+Backspace on macOS and Delete elsewhere, toggle the sidebar
- * with primary modifier + \), save with primary modifier + S, find in note with primary modifier + F, Edit / Read
- * with primary modifier + E, the quick switcher with primary modifier + P and search in all notes with primary
- * modifier + Shift + F, toggling the task on the cursor line with primary modifier + Enter, bold, italic, a note link and a web link
- * with primary modifier + B, I, K and Shift + K, the side panel and the outline with primary modifier + Shift + \ and
- * Shift + O, today's daily note with primary modifier + D and the days around it with primary modifier + Alt + ← and →,
- * dialog button order, the user's home folder and the standard per-user application data directory, honoring
- * `APPDATA` and `XDG_DATA_HOME` when they are set.
+ * Maps the raw [SystemEnvironment] to the [PlatformConventions] defined in `PLATFORM_GUIDELINES.md`: the primary
+ * modifier (Cmd on macOS, Ctrl elsewhere) and every shortcut built on it, the dialog button order, the user's home
+ * folder and the per-user application data directory, honoring `APPDATA` and `XDG_DATA_HOME` when they are set.
  */
 class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnvironment) {
     private val macosNamePattern = Regex(pattern = MACOS_NAME_MARKERS)
 
-    operator fun invoke(): PlatformConventions =
-        conventionsFor(operatingSystem = detectOperatingSystem(name = systemEnvironment.operatingSystemName))
+    operator fun invoke(): PlatformConventions = conventionsFor(
+        operatingSystem = detectOperatingSystem(name = systemEnvironment.operatingSystemName)
+    )
 
     /** The shortcuts and conventions of [operatingSystem]: most shortcuts use its primary modifier (Cmd or Ctrl). */
-    private fun conventionsFor(
-        operatingSystem: OperatingSystem
-    ): PlatformConventions {
+    private fun conventionsFor(operatingSystem: OperatingSystem): PlatformConventions {
         val primaryModifier = primaryModifierFor(operatingSystem = operatingSystem)
-        val primary = { key: ShortcutKey, extra: ShortcutModifier? -> shortcut(key, primaryModifier, extra) }
+
+        val primary = { key: ShortcutKey, extra: ShortcutModifier? ->
+            shortcut(key, primaryModifier, extra)
+        }
+
         return PlatformConventions(
-            operatingSystem = operatingSystem, primaryModifier = primaryModifier,
-            openFolderShortcut = primary(ShortcutKey.O, null), newNoteShortcut = primary(ShortcutKey.N, null),
+            operatingSystem = operatingSystem,
+            primaryModifier = primaryModifier,
+            openFolderShortcut = primary(ShortcutKey.O, null),
+            newNoteShortcut = primary(ShortcutKey.N, null),
             quitShortcut = quitShortcutFor(operatingSystem = operatingSystem),
             renameShortcut = renameShortcutFor(operatingSystem = operatingSystem),
             openSelectedShortcut = openSelectedShortcutFor(operatingSystem = operatingSystem),
             deleteShortcut = deleteShortcutFor(operatingSystem = operatingSystem),
             toggleSidebarShortcut = primary(ShortcutKey.BACKSLASH, null),
-            saveShortcut = primary(ShortcutKey.S, null), findShortcut = primary(ShortcutKey.F, null),
+            saveShortcut = primary(ShortcutKey.S, null),
+            findShortcut = primary(ShortcutKey.F, null),
             toggleReadModeShortcut = primary(ShortcutKey.E, null),
             quickSwitcherShortcut = primary(ShortcutKey.P, null),
             searchNotesShortcut = primary(ShortcutKey.F, ShortcutModifier.SHIFT),
@@ -64,47 +62,59 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
     }
 
     /** Ctrl+Tab on every system, macOS included, as browsers and editors do; with Shift ([extra]) the other way. */
-    private fun controlTab(
-        extra: ShortcutModifier?
-    ): Shortcut = shortcut(ShortcutKey.TAB, ShortcutModifier.CONTROL, extra)
+    private fun controlTab(extra: ShortcutModifier?): Shortcut = shortcut(
+        ShortcutKey.TAB,
+        ShortcutModifier.CONTROL,
+        extra
+    )
 
     /** [key] with [modifier], and [extra] when there is one. */
     private fun shortcut(
         key: ShortcutKey,
         modifier: ShortcutModifier,
         extra: ShortcutModifier?
-    ): Shortcut = Shortcut(key = key, modifiers = setOfNotNull(modifier, extra))
+    ): Shortcut = Shortcut(
+        key = key,
+        modifiers = setOfNotNull(modifier, extra)
+    )
 
-    private fun appDataDirectoryFor(
-        operatingSystem: OperatingSystem
-    ): String = when (operatingSystem) {
-        OperatingSystem.LINUX -> linuxAppDataDirectory()
+    private fun appDataDirectoryFor(operatingSystem: OperatingSystem): String =
+        when (operatingSystem) {
+            OperatingSystem.LINUX -> linuxAppDataDirectory()
 
-        OperatingSystem.MACOS -> joinUnixPath(
-            systemEnvironment.userHome,
-            MACOS_APPLICATION_SUPPORT,
-            APP_DATA_FOLDER
-        )
+            OperatingSystem.MACOS -> joinUnixPath(
+                systemEnvironment.userHome,
+                MACOS_APPLICATION_SUPPORT,
+                APP_DATA_FOLDER
+            )
 
-        OperatingSystem.WINDOWS -> windowsAppDataDirectory()
-    }
+            OperatingSystem.WINDOWS -> windowsAppDataDirectory()
+        }
 
-    private fun deleteShortcutFor(
-        operatingSystem: OperatingSystem
-    ): Shortcut = when (operatingSystem) {
-        OperatingSystem.MACOS -> Shortcut(key = ShortcutKey.BACKSPACE, modifiers = setOf(ShortcutModifier.COMMAND))
-        OperatingSystem.LINUX, OperatingSystem.WINDOWS -> Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet())
-    }
+    private fun deleteShortcutFor(operatingSystem: OperatingSystem): Shortcut =
+        when (operatingSystem) {
+            OperatingSystem.MACOS -> Shortcut(
+                key = ShortcutKey.BACKSPACE,
+                modifiers = setOf(ShortcutModifier.COMMAND)
+            )
 
-    private fun alternateDeleteShortcutFor(
-        operatingSystem: OperatingSystem
-    ): Shortcut? = Shortcut(key = ShortcutKey.BACKSPACE, modifiers = emptySet())
-        .takeIf { operatingSystem == OperatingSystem.MACOS }
+            OperatingSystem.LINUX, OperatingSystem.WINDOWS -> Shortcut(
+                key = ShortcutKey.DELETE,
+                modifiers = emptySet()
+            )
+        }
 
-    private fun detectOperatingSystem(
-        name: String
-    ): OperatingSystem {
+    private fun alternateDeleteShortcutFor(operatingSystem: OperatingSystem): Shortcut? = Shortcut(
+        key = ShortcutKey.BACKSPACE,
+        modifiers = emptySet()
+    )
+        .takeIf {
+            operatingSystem == OperatingSystem.MACOS
+        }
+
+    private fun detectOperatingSystem(name: String): OperatingSystem {
         val normalizedName = name.trim().lowercase()
+
         return when {
             normalizedName.startsWith(prefix = WINDOWS_NAME_PREFIX) -> OperatingSystem.WINDOWS
             macosNamePattern.containsMatchIn(input = normalizedName) -> OperatingSystem.MACOS
@@ -112,75 +122,84 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
         }
     }
 
-    private fun dialogButtonOrderFor(
-        operatingSystem: OperatingSystem
-    ): DialogButtonOrder = when (operatingSystem) {
-        OperatingSystem.WINDOWS -> DialogButtonOrder.PRIMARY_THEN_CANCEL
-        OperatingSystem.LINUX, OperatingSystem.MACOS -> DialogButtonOrder.CANCEL_THEN_PRIMARY
-    }
+    private fun dialogButtonOrderFor(operatingSystem: OperatingSystem): DialogButtonOrder =
+        when (operatingSystem) {
+            OperatingSystem.WINDOWS -> DialogButtonOrder.PRIMARY_THEN_CANCEL
+            OperatingSystem.LINUX, OperatingSystem.MACOS -> DialogButtonOrder.CANCEL_THEN_PRIMARY
+        }
 
-    private fun joinUnixPath(
-        vararg segments: String
-    ): String = segments.joinToString(separator = UNIX_SEPARATOR) { it.removeSuffix(suffix = UNIX_SEPARATOR) }
+    private fun joinUnixPath(vararg segments: String): String = segments
+        .joinToString(separator = UNIX_SEPARATOR) { it.removeSuffix(suffix = UNIX_SEPARATOR) }
 
-    private fun joinWindowsPath(
-        vararg segments: String
-    ): String = segments.joinToString(separator = WINDOWS_SEPARATOR) { it.removeSuffix(suffix = WINDOWS_SEPARATOR) }
+    private fun joinWindowsPath(vararg segments: String): String = segments
+        .joinToString(separator = WINDOWS_SEPARATOR) { it.removeSuffix(suffix = WINDOWS_SEPARATOR) }
 
     private fun linuxAppDataDirectory(): String {
         val dataHome = nonBlankVariable(name = XDG_DATA_HOME_VARIABLE)
             ?: joinUnixPath(systemEnvironment.userHome, LINUX_DEFAULT_DATA_HOME)
+
         return joinUnixPath(dataHome, LINUX_APP_DATA_FOLDER)
     }
 
-    private fun nonBlankVariable(
-        name: String
-    ): String? = systemEnvironment.environmentVariable(name = name)?.takeIf { it.isNotBlank() }
+    private fun nonBlankVariable(name: String): String? = systemEnvironment.environmentVariable(
+        name = name
+    )?.takeIf { it.isNotBlank() }
 
-    private fun primaryModifierFor(
-        operatingSystem: OperatingSystem
-    ): ShortcutModifier = when (operatingSystem) {
-        OperatingSystem.MACOS -> ShortcutModifier.COMMAND
-        OperatingSystem.LINUX, OperatingSystem.WINDOWS -> ShortcutModifier.CONTROL
-    }
+    private fun primaryModifierFor(operatingSystem: OperatingSystem): ShortcutModifier =
+        when (operatingSystem) {
+            OperatingSystem.MACOS -> ShortcutModifier.COMMAND
+            OperatingSystem.LINUX, OperatingSystem.WINDOWS -> ShortcutModifier.CONTROL
+        }
 
-    private fun quitShortcutFor(
-        operatingSystem: OperatingSystem
-    ): Shortcut = when (operatingSystem) {
-        OperatingSystem.LINUX -> Shortcut(
-            key = ShortcutKey.Q,
-            modifiers = setOf(ShortcutModifier.CONTROL)
-        )
+    private fun quitShortcutFor(operatingSystem: OperatingSystem): Shortcut =
+        when (operatingSystem) {
+            OperatingSystem.LINUX -> Shortcut(
+                key = ShortcutKey.Q,
+                modifiers = setOf(ShortcutModifier.CONTROL)
+            )
 
-        OperatingSystem.MACOS -> Shortcut(
-            key = ShortcutKey.Q,
-            modifiers = setOf(ShortcutModifier.COMMAND)
-        )
+            OperatingSystem.MACOS -> Shortcut(
+                key = ShortcutKey.Q,
+                modifiers = setOf(ShortcutModifier.COMMAND)
+            )
 
-        OperatingSystem.WINDOWS -> Shortcut(
-            key = ShortcutKey.F4,
-            modifiers = setOf(ShortcutModifier.ALT)
-        )
-    }
+            OperatingSystem.WINDOWS -> Shortcut(
+                key = ShortcutKey.F4,
+                modifiers = setOf(ShortcutModifier.ALT)
+            )
+        }
 
     // Finder renames with Enter and opens with Cmd+Down; File Explorer and Linux file managers open with Enter.
-    private fun openSelectedShortcutFor(
-        operatingSystem: OperatingSystem
-    ): Shortcut = when (operatingSystem) {
-        OperatingSystem.MACOS -> Shortcut(key = ShortcutKey.DOWN, modifiers = setOf(ShortcutModifier.COMMAND))
-        OperatingSystem.LINUX, OperatingSystem.WINDOWS -> Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet())
-    }
+    private fun openSelectedShortcutFor(operatingSystem: OperatingSystem): Shortcut =
+        when (operatingSystem) {
+            OperatingSystem.MACOS -> Shortcut(
+                key = ShortcutKey.DOWN,
+                modifiers = setOf(ShortcutModifier.COMMAND)
+            )
 
-    private fun renameShortcutFor(
-        operatingSystem: OperatingSystem
-    ): Shortcut = when (operatingSystem) {
-        OperatingSystem.MACOS -> Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet())
-        OperatingSystem.LINUX, OperatingSystem.WINDOWS -> Shortcut(key = ShortcutKey.F2, modifiers = emptySet())
-    }
+            OperatingSystem.LINUX, OperatingSystem.WINDOWS -> Shortcut(
+                key = ShortcutKey.ENTER,
+                modifiers = emptySet()
+            )
+        }
+
+    private fun renameShortcutFor(operatingSystem: OperatingSystem): Shortcut =
+        when (operatingSystem) {
+            OperatingSystem.MACOS -> Shortcut(
+                key = ShortcutKey.ENTER,
+                modifiers = emptySet()
+            )
+
+            OperatingSystem.LINUX, OperatingSystem.WINDOWS -> Shortcut(
+                key = ShortcutKey.F2,
+                modifiers = emptySet()
+            )
+        }
 
     private fun windowsAppDataDirectory(): String {
         val appData = nonBlankVariable(name = WINDOWS_APP_DATA_VARIABLE)
             ?: joinWindowsPath(systemEnvironment.userHome, WINDOWS_DEFAULT_APP_DATA)
+
         return joinWindowsPath(appData, APP_DATA_FOLDER)
     }
 

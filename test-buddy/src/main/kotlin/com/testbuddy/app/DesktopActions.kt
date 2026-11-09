@@ -10,7 +10,10 @@ import java.nio.file.Path
 /** What the manager asks of the desktop: the clipboard, the file manager and a picture to add. */
 internal object DesktopActions {
     fun copy(text: String) {
-        Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
+        Toolkit
+            .getDefaultToolkit()
+            .systemClipboard
+            .setContents(StringSelection(text), null)
     }
 
     fun open(folder: Path) {
@@ -21,6 +24,7 @@ internal object DesktopActions {
         val dialog = FileDialog(null as Frame?, "Add a screenshot", FileDialog.LOAD)
         dialog.isVisible = true
         val name = dialog.file ?: return null
+
         return Path.of(dialog.directory, name)
     }
 }

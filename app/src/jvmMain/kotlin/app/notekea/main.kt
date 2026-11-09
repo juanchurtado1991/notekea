@@ -9,43 +9,43 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.LocalWindowExceptionHandlerFactory
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import app.notekea.core.appearance.domain.WindowBoundsStore
+import app.notekea.core.logging.data.FileLogWriter
+import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.platform.domain.SystemEnvironment
+import app.notekea.core.presentation.IntentTrail
+import app.notekea.core.presentation.designsystem.gallery.DesignSystemGallery
+import app.notekea.core.presentation.designsystem.theme.NotekeaBrand
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.platform.AppEnvironment
 import app.notekea.core.presentation.platform.FollowWindowBounds
-import app.notekea.core.presentation.platform.WindowHost
-import app.notekea.core.presentation.platform.WindowOpening
-import app.notekea.core.presentation.platform.WindowSizes
-import app.notekea.core.presentation.designsystem.theme.NotekeaBrand
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import app.notekea.core.logging.data.FileLogWriter
-import co.touchlab.kermit.Logger
-import co.touchlab.kermit.platformLogWriter
-import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.appearance.domain.WindowBoundsStore
-import app.notekea.core.platform.domain.SystemEnvironment
-import app.notekea.core.presentation.designsystem.gallery.DesignSystemGallery
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.SystemAppMenu
 import app.notekea.core.presentation.platform.SystemQuit
 import app.notekea.core.presentation.platform.WindowCloseGuard
+import app.notekea.core.presentation.platform.WindowHost
+import app.notekea.core.presentation.platform.WindowOpening
 import app.notekea.core.presentation.platform.WindowQuit
-import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
+import app.notekea.core.presentation.platform.WindowSizes
 import app.notekea.di.desktopModules
-import app.notekea.core.presentation.IntentTrail
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.platformLogWriter
 import com.testbuddy.crash.Breadcrumbs
 import com.testbuddy.crash.CrashNotice
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import org.koin.core.module.Module
 import io.github.vinceglb.filekit.FileKit
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.core.module.Module
 
 private const val APP_ID = "Notekea"
 private const val CRASH_TEST_DELAY_MILLIS = 3_000L
@@ -60,10 +60,9 @@ private const val WINDOW_LOG_TAG = "Window"
 private const val WINDOW_OPENED = "Window opened"
 
 /**
- * Starts Notekea. Errors are kept as crash reports from the first moment (`CrashBuddy`, `test-buddy-crash`): any
- * thread, and the window, whose failure shows a notice instead of Compose's raw message; each report lists the last
- * steps ([IntentTrail]) and the machine. With `NOTEKEA_CRASH_TEST=1` the window fails on purpose a few seconds after
- * it opens, so the smoke test can check the crash report without a real bug.
+ * Starts Notekea. Errors are kept as crash reports from the first moment (`CrashBuddy`): any thread, and the window,
+ * whose failure shows a notice instead of Compose's raw message; each report lists the last steps ([IntentTrail]) and
+ * the machine. With `NOTEKEA_CRASH_TEST=1` the window fails on purpose a few seconds after it opens.
  */
 fun main() = runNotekea()
 
@@ -77,30 +76,68 @@ fun runNotekea(
     extraWindows: @Composable ApplicationScope.() -> Unit = {}
 ) {
     val koin = startKoin { modules(modules) }.koin
-    val crashBuddy = crashBuddyOf(koin = koin, appName = APP_ID)
+
+    val crashBuddy = crashBuddyOf(
+        koin = koin,
+        appName = APP_ID
+    )
+
     crashBuddy.installThreadHandler()
     IntentTrail.listener = Breadcrumbs::record
     // What the app logs goes to the console and to the log file Copy diagnostics reads (qa/README.md, piece 6).
     Logger.setLogWriters(platformLogWriter(), koin.get<FileLogWriter>())
     FileKit.init(appId = APP_ID)
     val showGallery = System.getProperty(GALLERY_PROPERTY).toBoolean()
-    val isCrashTest = koin.get<SystemEnvironment>().environmentVariable(name = CRASH_TEST_VARIABLE) == CRASH_TEST_ON
+
+    val isCrashTest =
+        koin.get<SystemEnvironment>().environmentVariable(name = CRASH_TEST_VARIABLE) ==
+            CRASH_TEST_ON
+
     val conventions = koin.get<PlatformConventions>()
     val environment = koin.get<AppEnvironment>()
+
     // Read before the first window, so it never opens in the default theme first.
-    val keptAppearance = runBlocking { environment.appearanceStore.observe().first() }
-    val windowOpening = WindowSizes.system.opening(kept = runBlocking { koin.get<WindowBoundsStore>().bounds() })
+    val keptAppearance = runBlocking {
+        environment
+            .appearanceStore
+            .observe()
+            .first()
+    }
+
+    val windowOpening = WindowSizes.system.opening(
+        kept = runBlocking { koin.get<WindowBoundsStore>().bounds() }
+    )
+
     application {
-        NotekeaAppLocals(environment = environment, initialAppearance = keptAppearance) {
+        NotekeaAppLocals(
+            environment = environment,
+            initialAppearance = keptAppearance
+        ) {
             CompositionLocalProvider(
                 LocalWindowExceptionHandlerFactory provides crashBuddy.windowExceptionHandlers()
             ) {
-                if (showGallery) GalleryWindow() else NotekeaWindow(isCrashTest, windowOpening, conventions)
-                CrashNotice(crashBuddy = crashBuddy, theme = { NotekeaTheme { it() } })
+                if (showGallery) {
+                    GalleryWindow()
+                } else {
+                    NotekeaWindow(
+                        isCrashTest,
+                        windowOpening,
+                        conventions
+                    )
+                }
+
+                CrashNotice(
+                    crashBuddy = crashBuddy,
+                    theme = {
+                        NotekeaTheme { it() }
+                    }
+                )
+
                 extraWindows()
             }
         }
     }
+
     stopKoin()
 }
 
@@ -109,10 +146,11 @@ private fun ApplicationScope.GalleryWindow() {
     Window(
         onCloseRequest = ::exitApplication,
         title = GALLERY_TITLE,
-        state = rememberWindowState(width = GALLERY_WIDTH_DP.dp, height = GALLERY_HEIGHT_DP.dp)
-    ) {
-        DesignSystemGallery()
-    }
+        state = rememberWindowState(
+            width = GALLERY_WIDTH_DP.dp,
+            height = GALLERY_HEIGHT_DP.dp
+        )
+    ) { DesignSystemGallery() }
 }
 
 /**
@@ -127,9 +165,17 @@ private fun ApplicationScope.NotekeaWindow(
     conventions: PlatformConventions
 ) {
     val host = remember { WindowHost(conventions = conventions) }
+
     val quit = rememberSystemIntegration(host = host)
-    val windowState = rememberWindowState(opening.placement, position = opening.position, size = opening.size)
+
+    val windowState = rememberWindowState(
+        opening.placement,
+        position = opening.position,
+        size = opening.size
+    )
+
     val onClose = { quit.request(then = ::exitApplication) }
+
     Window(
         onCloseRequest = onClose,
         title = host.title,
@@ -138,24 +184,37 @@ private fun ApplicationScope.NotekeaWindow(
         onPreviewKeyEvent = host.shortcuts::dispatch
     ) {
         // The check of a packaged app waits for this line (.github/scripts/check-start.sh).
-        LaunchedEffect(Unit) { Logger.withTag(tag = WINDOW_LOG_TAG).i { WINDOW_OPENED } }
+        LaunchedEffect(Unit) {
+            Logger.withTag(tag = WINDOW_LOG_TAG).i { WINDOW_OPENED }
+        }
+
         FollowWindowBounds(state = windowState)
         if (isCrashTest) CrashTest()
-        NotekeaRoot(host = host, onClose = onClose)
+
+        NotekeaRoot(
+            host = host,
+            onClose = onClose
+        )
     }
 }
 
 /** The [WindowQuit] of the [host], with the system's quit and its app menu leading to it and to its dialogs. */
 @Composable
-private fun rememberSystemIntegration(
-    host: WindowHost
-): WindowQuit {
+private fun rememberSystemIntegration(host: WindowHost): WindowQuit {
     val scope = rememberCoroutineScope()
-    val quit = remember { WindowQuit(closeGuard = host.closeGuard, scope = scope) }
+
+    val quit = remember {
+        WindowQuit(
+            closeGuard = host.closeGuard,
+            scope = scope
+        )
+    }
+
     LaunchedEffect(quit) {
         SystemQuit(quit = quit).install()
         SystemAppMenu(dialogs = host.dialogs).install()
     }
+
     return quit
 }
 
@@ -163,9 +222,11 @@ private fun rememberSystemIntegration(
 @Composable
 private fun CrashTest() {
     var isTime by remember { mutableStateOf(value = false) }
+
     LaunchedEffect(Unit) {
         delay(timeMillis = CRASH_TEST_DELAY_MILLIS)
         isTime = true
     }
+
     check(value = !isTime) { CRASH_TEST_MESSAGE }
 }

@@ -5,9 +5,8 @@ import com.testbuddy.ManualAnswer
 
 /**
  * What the manager shows: the [tab]; the automatic [results] by case ID, whether a run [isRunning], the case it runs
- * ([runningId]) with the [runningSteps] it took so far and when the run started ([startedAt], epoch milliseconds);
- * the manual case at [manualIndex] and its step at [manualStep] (its step count means the result is asked), the
- * [answers] given; and the [report].
+ * ([runningId]) with its [runningSteps] and when the run started ([startedAt], epoch milliseconds); the manual case at
+ * [manualIndex] and its step at [manualStep], the [answers]; and the [report].
  */
 internal data class ManagerState(
     val tab: ManagerTab = ManagerTab.AUTOMATIC,

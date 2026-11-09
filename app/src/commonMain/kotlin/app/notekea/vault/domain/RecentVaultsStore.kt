@@ -4,7 +4,5 @@ package app.notekea.vault.domain
 interface RecentVaultsStore {
     suspend fun read(): List<RecentVault>
 
-    suspend fun write(
-        recentVaults: List<RecentVault>
-    )
+    suspend fun write(recentVaults: List<RecentVault>)
 }

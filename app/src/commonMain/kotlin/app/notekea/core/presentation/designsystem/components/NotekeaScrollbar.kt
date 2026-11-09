@@ -1,19 +1,19 @@
 package app.notekea.core.presentation.designsystem.components
 
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
@@ -46,11 +46,21 @@ expect fun NotekeaLazyScrollbar(
 private fun NotekeaScrollbarPreview() {
     NotekeaPreviewThemes {
         val state = rememberScrollState()
-        Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
+
+        Box(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
             Column(modifier = Modifier.verticalScroll(state = state)) {
                 repeat(times = PREVIEW_ROWS) { Text(text = PREVIEW_ROW + it) }
             }
-            NotekeaScrollbar(state = state, modifier = Modifier.align(alignment = Alignment.CenterEnd).fillMaxHeight())
+
+            NotekeaScrollbar(
+                state = state,
+                modifier = Modifier.align(alignment = Alignment.CenterEnd).fillMaxHeight()
+            )
         }
     }
 }
@@ -60,8 +70,17 @@ private fun NotekeaScrollbarPreview() {
 private fun NotekeaLazyScrollbarPreview() {
     NotekeaPreviewThemes {
         val state = rememberLazyListState()
-        Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
-            LazyColumn(state = state) { items(count = PREVIEW_ROWS) { Text(text = PREVIEW_ROW + it) } }
+
+        Box(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
+            LazyColumn(state = state) {
+                items(count = PREVIEW_ROWS) { Text(text = PREVIEW_ROW + it) }
+            }
+
             NotekeaLazyScrollbar(
                 state = state,
                 modifier = Modifier.align(alignment = Alignment.CenterEnd).fillMaxHeight()

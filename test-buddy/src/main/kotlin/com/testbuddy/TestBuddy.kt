@@ -8,4 +8,7 @@ public fun testBuddy(
     appName: String,
     version: String,
     build: SuiteBuilder.() -> Unit
-): Suite = SuiteBuilder(appName = appName, version = version).apply(build).build()
+): Suite = SuiteBuilder(
+    appName = appName,
+    version = version
+).apply(build).build()

@@ -1,10 +1,10 @@
 package app.notekea.editor.presentation.viewmodel
 
 import app.notekea.core.domain.Outcome
-import app.notekea.editor.presentation.model.EditorEffect
-import app.notekea.editor.domain.KeepUnsavedTextUseCase
 import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.domain.KeepUnsavedTextUseCase
+import app.notekea.editor.presentation.model.EditorEffect
 
 /**
  * What the editor could not save when it leaves a note or the window closes: an outside change waiting for an answer,
@@ -26,21 +26,32 @@ internal class EditorUnsaved(
     ) {
         val text = document.toText()
         if (lastKept == path to text) return
+
         when (val outcome = keepUnsavedText(vaultPath = vaultPath, note = path, text = text)) {
             is Outcome.Success -> {
                 lastKept = path to text
-                host.emit(effect = EditorEffect.UnsavedKept(note = path, copy = outcome.value))
+
+                host.emit(
+                    effect = EditorEffect.UnsavedKept(
+                        note = path,
+                        copy = outcome.value
+                    )
+                )
             }
 
             is Outcome.Failure -> {
                 drafts[path] = document.body
-                host.emit(effect = EditorEffect.UnsavedKept(note = path, copy = null))
+
+                host.emit(
+                    effect = EditorEffect.UnsavedKept(
+                        note = path,
+                        copy = null
+                    )
+                )
             }
         }
     }
 
     /** The text kept in memory for [path], if any; it goes back to the editor once. */
-    fun takeDraft(
-        path: RelativePath
-    ): String? = drafts.remove(key = path)
+    fun takeDraft(path: RelativePath): String? = drafts.remove(key = path)
 }

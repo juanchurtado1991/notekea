@@ -32,21 +32,32 @@ class TagPickerViewModelTest {
     }
 
     @Test
-    fun `it opens on the most used tags, and typing filters them and offers a new one last`() = runTest(
-        testDispatcher
-    ) {
-        viewModel.onIntent(intent = TagPickerIntent.OnOpen())
-        val suggested = names()
-        viewModel.onIntent(intent = TagPickerIntent.OnQueryChange(query = "rec"))
+    fun `it opens on the most used tags, and typing filters them and offers a new one last`() =
+        runTest(
+            testDispatcher
+        ) {
+            viewModel.onIntent(intent = TagPickerIntent.OnOpen())
+            val suggested = names()
+            viewModel.onIntent(intent = TagPickerIntent.OnQueryChange(query = "rec"))
 
-        assertEquals(
-            expected = TAGS.take(n = 8) to listOf("recipe" to false, "recipe/drinks" to false, "rec" to true),
-            actual = suggested to viewModel.state.value.rows.map { it.name to it.isNew }
-        )
-    }
+            assertEquals(
+                expected =
+                TAGS.take(n = 8) to
+                    listOf("recipe" to false, "recipe/drinks" to false, "rec" to true),
+                actual = suggested to viewModel
+                    .state
+                    .value
+                    .rows
+                    .map {
+                        it.name to it.isNew
+                    }
+            )
+        }
 
     @Test
-    fun `enter adds the selected tag, a click adds its row, and closing says so`() = runTest(testDispatcher) {
+    fun `enter adds the selected tag, a click adds its row, and closing says so`() = runTest(
+        testDispatcher
+    ) {
         val effects = collectEffects()
         viewModel.onIntent(intent = TagPickerIntent.OnOpen(query = "weekend plan"))
         viewModel.onIntent(intent = TagPickerIntent.OnConfirm)
@@ -65,7 +76,11 @@ class TagPickerViewModelTest {
             ),
             actual = effects
         )
-        assertEquals(expected = TagPickerState(), actual = viewModel.state.value)
+
+        assertEquals(
+            expected = TagPickerState(),
+            actual = viewModel.state.value
+        )
     }
 
     @Test
@@ -78,15 +93,33 @@ class TagPickerViewModelTest {
             expected = listOf("lunch") to listOf("lunch"),
             actual = before to names()
         )
-        assertEquals(expected = false, actual = viewModel.state.value.rows.single().isNew)
+
+        assertEquals(
+            expected = false,
+            actual = viewModel
+                .state
+                .value
+                .rows
+                .single()
+                .isNew
+        )
     }
 
-    private fun names(): List<String> = viewModel.state.value.rows.map { it.name }
+    private fun names(): List<String> = viewModel
+        .state
+        .value
+        .rows
+        .map { it.name }
 
     private fun TestScope.collectEffects(): List<TagPickerEffect> {
         val effects = mutableListOf<TagPickerEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+
+        backgroundScope.launch {
+            viewModel.effects.collect { effects += it }
+        }
+
         runCurrent()
+
         return effects
     }
 

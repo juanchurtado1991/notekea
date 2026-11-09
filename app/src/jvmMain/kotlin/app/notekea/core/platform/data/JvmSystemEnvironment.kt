@@ -12,11 +12,10 @@ class JvmSystemEnvironment : SystemEnvironment {
     override val operatingSystemVersion: String = System.getProperty(OS_VERSION_PROPERTY).orEmpty()
     override val userHome: String = System.getProperty(USER_HOME_PROPERTY).orEmpty()
     override val javaVersion: String = System.getProperty(JAVA_VERSION_PROPERTY).orEmpty()
-    override val appVersion: String = System.getProperty(APP_VERSION_PROPERTY) ?: DEVELOPMENT_VERSION
+    override val appVersion: String =
+        System.getProperty(APP_VERSION_PROPERTY) ?: DEVELOPMENT_VERSION
 
-    override fun environmentVariable(
-        name: String
-    ): String? = System.getenv(name)
+    override fun environmentVariable(name: String): String? = System.getenv(name)
 
     companion object {
         private const val APP_VERSION_PROPERTY = "notekea.version"

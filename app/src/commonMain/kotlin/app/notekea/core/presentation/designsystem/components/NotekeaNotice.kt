@@ -38,11 +38,15 @@ fun NotekeaNotice(
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
+
     Row(
         modifier = modifier
             .clip(shape = MaterialTheme.shapes.medium)
             .background(color = colors.primaryContainer)
-            .padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingS)
+            .padding(
+                horizontal = NotekeaDimensions.SpacingM,
+                vertical = NotekeaDimensions.SpacingS
+            )
             .semantics { liveRegion = LiveRegionMode.Polite },
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),
         verticalAlignment = Alignment.CenterVertically
@@ -53,13 +57,19 @@ fun NotekeaNotice(
             modifier = Modifier.size(size = NotekeaDimensions.IconSize),
             tint = colors.primary
         )
+
         Text(
             text = message,
             modifier = Modifier.weight(weight = 1f),
             style = MaterialTheme.typography.bodyMedium,
             color = colors.onPrimaryContainer
         )
-        NotekeaButton(text = dismissLabel, onClick = onDismiss, style = NotekeaButtonStyle.SECONDARY)
+
+        NotekeaButton(
+            text = dismissLabel,
+            onClick = onDismiss,
+            style = NotekeaButtonStyle.SECONDARY
+        )
     }
 }
 

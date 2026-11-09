@@ -25,8 +25,14 @@ class AttachmentsOnDiskTest {
     private val dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     private val vault = Files.createTempDirectory(TEMP_PREFIX)
     private val vaultPath = vault.toString()
-    private val store = OkioAttachmentStore(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
-    private val settings = ObsidianVaultSettingsReader(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
+    private val store = OkioAttachmentStore(
+        fileSystem = FileSystem.SYSTEM,
+        dispatchers = dispatchers
+    )
+    private val settings = ObsidianVaultSettingsReader(
+        fileSystem = FileSystem.SYSTEM,
+        dispatchers = dispatchers
+    )
 
     @AfterTest
     fun deleteVault() {
@@ -38,7 +44,9 @@ class AttachmentsOnDiskTest {
         runTest(context = testDispatcher) {
             // Windows has no POSIX permissions to take away.
             if ("posix" !in FileSystems.getDefault().supportedFileAttributeViews()) return@runTest
+
             val file = vault.resolve("private.png").also { Files.write(it, PNG) }
+
             val private = RelativePath(value = "private.png")
             Files.setPosixFilePermissions(file, emptySet())
 
@@ -49,8 +57,18 @@ class AttachmentsOnDiskTest {
                     NotesError.VaultMissing(path = "$vaultPath/gone")
                 ),
                 actual = listOf(
-                    (store.read(vaultPath = vaultPath, path = private) as Outcome.Failure).error,
-                    (store.read(vaultPath = vaultPath, path = IMAGE) as Outcome.Failure).error,
+                    (
+                        store.read(
+                            vaultPath = vaultPath,
+                            path = private
+                        ) as Outcome.Failure
+                        ).error,
+                    (
+                        store.read(
+                            vaultPath = vaultPath,
+                            path = IMAGE
+                        ) as Outcome.Failure
+                        ).error,
                     (store.files(vaultPath = "$vaultPath/gone") as Outcome.Failure).error
                 )
             )
@@ -60,13 +78,28 @@ class AttachmentsOnDiskTest {
     fun `files are written and copied into new folders, never over another, and listed without hidden ones`() =
         runTest(context = testDispatcher) {
             val outside = Files.createTempFile(TEMP_PREFIX, ".pdf").also { Files.write(it, PDF) }
+
             Files.createDirectories(vault.resolve(".obsidian"))
             Files.write(vault.resolve(".obsidian/workspace.json"), PDF)
             Files.write(vault.resolve("Welcome.md"), PDF)
 
-            val written = store.write(vaultPath = vaultPath, path = IMAGE, bytes = PNG)
-            val again = store.write(vaultPath = vaultPath, path = IMAGE, bytes = PDF)
-            val copied = store.copy(vaultPath = vaultPath, absolutePath = outside.toString(), path = MENU)
+            val written = store.write(
+                vaultPath = vaultPath,
+                path = IMAGE,
+                bytes = PNG
+            )
+
+            val again = store.write(
+                vaultPath = vaultPath,
+                path = IMAGE,
+                bytes = PDF
+            )
+
+            val copied = store.copy(
+                vaultPath = vaultPath,
+                absolutePath = outside.toString(),
+                path = MENU
+            )
 
             assertEquals(
                 expected = listOf<Any>(
@@ -76,16 +109,31 @@ class AttachmentsOnDiskTest {
                 ),
                 actual = listOf(written, (again as Outcome.Failure).error, copied)
             )
+
             assertEquals(
                 expected = listOf(PNG.toList(), PDF.toList()),
                 actual = listOf(IMAGE, MENU).map {
-                    (store.read(vaultPath = vaultPath, path = it) as Outcome.Success).value.toList()
+                    (
+                        store.read(
+                            vaultPath = vaultPath,
+                            path = it
+                        ) as Outcome.Success
+                        ).value.toList()
                 }
             )
+
             assertEquals(
-                expected = listOf("Welcome.md", "attachments/Pasted image.png", "attachments/docs/menu.pdf"),
-                actual = (store.files(vaultPath = vaultPath) as Outcome.Success).value.map { it.value }.sorted()
+                expected = listOf(
+                    "Welcome.md",
+                    "attachments/Pasted image.png",
+                    "attachments/docs/menu.pdf"
+                ),
+                actual = (store.files(vaultPath = vaultPath) as Outcome.Success)
+                    .value
+                    .map { it.value }
+                    .sorted()
             )
+
             Files.delete(outside)
         }
 
@@ -94,10 +142,22 @@ class AttachmentsOnDiskTest {
         assertEquals(
             expected = listOf("Travel/lisbon.jpg", null, null),
             actual = listOf(
-                vault.resolve("Travel/lisbon.jpg").toOkioPath().toString(),
-                vault.parent.resolve("other.png").toOkioPath().toString(),
+                vault
+                    .resolve("Travel/lisbon.jpg")
+                    .toOkioPath()
+                    .toString(),
+                vault
+                    .parent
+                    .resolve("other.png")
+                    .toOkioPath()
+                    .toString(),
                 vaultPath
-            ).map { store.pathInVault(vaultPath = vaultPath, absolutePath = it)?.value }
+            ).map {
+                store.pathInVault(
+                    vaultPath = vaultPath,
+                    absolutePath = it
+                )?.value
+            }
         )
     }
 
@@ -118,9 +178,9 @@ class AttachmentsOnDiskTest {
     fun `the local time is written as Obsidian names pasted images`() {
         assertEquals(
             expected = 14,
-            actual = JvmLocalTimeFormatter().compact(instant = Instant.parse(input = "2026-10-26T14:30:05Z")).count {
-                it.isDigit()
-            }
+            actual = JvmLocalTimeFormatter().compact(
+                instant = Instant.parse(input = "2026-10-26T14:30:05Z")
+            ).count { it.isDigit() }
         )
     }
 

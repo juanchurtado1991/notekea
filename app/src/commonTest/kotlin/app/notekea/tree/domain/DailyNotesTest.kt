@@ -1,25 +1,46 @@
 package app.notekea.tree.domain
 
 import app.notekea.core.domain.time.CalendarDate
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import app.notekea.core.notes.domain.DailyNoteSettings
 import app.notekea.core.notes.domain.DayNeighbors
 import app.notekea.core.notes.domain.RelativePath
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class DailyNotesTest {
     private val dailyNotes = DailyNotes()
-    private val date = CalendarDate(year = 2026, month = 10, day = 26)
+    private val date = CalendarDate(
+        year = 2026,
+        month = 10,
+        day = 26
+    )
 
     @Test
     fun `a date's note is its name in the format, in the folder, or at the root when the folder is empty`() {
         assertEquals(
-            expected = listOf("Journal/2026-10-26.md", "2026-10-26.md", "Daily/2026/10/Monday 26.md"),
+            expected = listOf(
+                "Journal/2026-10-26.md",
+                "2026-10-26.md",
+                "Daily/2026/10/Monday 26.md"
+            ),
             actual = listOf(
                 DailyNoteSettings.DEFAULT,
-                DailyNoteSettings(folder = "", format = "YYYY-MM-DD", template = null),
-                DailyNoteSettings(folder = "Daily", format = "YYYY/MM/dddd D", template = null)
-            ).map { dailyNotes.pathOf(date = date, settings = it).value }
+                DailyNoteSettings(
+                    folder = "",
+                    format = "YYYY-MM-DD",
+                    template = null
+                ),
+                DailyNoteSettings(
+                    folder = "Daily",
+                    format = "YYYY/MM/dddd D",
+                    template = null
+                )
+            ).map {
+                dailyNotes.pathOf(
+                    date = date,
+                    settings = it
+                ).value
+            }
         )
     }
 
@@ -33,7 +54,12 @@ class DailyNotesTest {
                 "Journal/Ideas.md",
                 "Journal/2026-10-26.pdf",
                 "Journal/Old/2026-10-26.md"
-            ).map { dailyNotes.dateOf(path = RelativePath(value = it), settings = DailyNoteSettings.DEFAULT) }
+            ).map {
+                dailyNotes.dateOf(
+                    path = RelativePath(value = it),
+                    settings = DailyNoteSettings.DEFAULT
+                )
+            }
         )
     }
 
@@ -50,14 +76,26 @@ class DailyNotesTest {
         assertEquals(
             expected = listOf(
                 DayNeighbors(
-                    date = CalendarDate(year = 2026, month = 10, day = 22),
+                    date = CalendarDate(
+                        year = 2026,
+                        month = 10,
+                        day = 22
+                    ),
                     previous = RelativePath(value = "Journal/2026-10-20.md"),
                     next = RelativePath(value = "Journal/2026-10-26.md")
                 ),
-                DayNeighbors(date = date, previous = RelativePath(value = "Journal/2026-10-22.md"), next = null),
+                DayNeighbors(
+                    date = date,
+                    previous = RelativePath(value = "Journal/2026-10-22.md"),
+                    next = null
+                ),
                 null
             ),
-            actual = listOf("Journal/2026-10-22.md", "Journal/2026-10-26.md", "Journal/Ideas.md").map {
+            actual = listOf(
+                "Journal/2026-10-22.md",
+                "Journal/2026-10-26.md",
+                "Journal/Ideas.md"
+            ).map {
                 dailyNotes.neighborsOf(
                     path = RelativePath(value = it),
                     notes = notes,

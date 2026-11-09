@@ -51,29 +51,59 @@ fun SuiteBuilder.templateCases() {
 }
 
 private fun SuiteBuilder.firstTemplate() {
-    automated(id = "1.12-01", title = "Without templates, Create makes an example and inserts it") {
-        openVault(name = PLAYGROUND, shownText = WELCOME)
+    automated(
+        id = "1.12-01",
+        title = "Without templates, Create makes an example and inserts it"
+    ) {
+        openVault(
+            name = PLAYGROUND,
+            shownText = WELCOME
+        )
+
         clickInTree(text = WELCOME)
         cursorAtEnd(part = WELCOME_TEXT)
         press(shortcut = Mod + Key.T)
         expectText(text = "No templates folder yet")
-        expectText(text = "Create a Templates folder to add templates. It starts with an example you can change.")
+
+        expectText(
+            text = "Create a Templates folder to add templates. It starts with an example you can change."
+        )
+
         click(text = "Create")
         expectFile(path = "$PLAYGROUND/Templates/Meeting notes.md")
         waitForResult(name = "Meeting notes")
         click(text = "Meeting notes")
         val welcome = "$PLAYGROUND/Welcome.md"
-        expectFile(path = welcome, containing = "Date: ${LocalDate.now()} at ")
+
+        expectFile(
+            path = welcome,
+            containing = "Date: ${LocalDate.now()} at "
+        )
+
         listOf("## Attendees", "## Action items", "tags: meeting").forEach {
-            expectFile(path = welcome, containing = it)
+            expectFile(
+                path = welcome,
+                containing = it
+            )
         }
     }
 }
 
 private fun SuiteBuilder.templatesFromSettings() {
-    automated(id = "1.12-02", title = "Obsidian's template settings decide the folder and the formats") {
-        openVault(name = TEMPLATES_VAULT, shownText = "Projects")
-        openNote(name = KICKOFF, shownText = KICKOFF_TEXT)
+    automated(
+        id = "1.12-02",
+        title = "Obsidian's template settings decide the folder and the formats"
+    ) {
+        openVault(
+            name = TEMPLATES_VAULT,
+            shownText = "Projects"
+        )
+
+        openNote(
+            name = KICKOFF,
+            shownText = KICKOFF_TEXT
+        )
+
         cursorAtEnd(part = KICKOFF_TEXT)
         press(shortcut = Mod + Key.T)
         expectText(text = "Find a template to insert")
@@ -86,18 +116,23 @@ private fun SuiteBuilder.templatesFromSettings() {
         waitForResult(name = "Meeting")
         press(key = Key.Enter)
         val today = LocalDate.now()
+
         val date = today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " (" +
             today.format(DateTimeFormatter.ofPattern("EEEE", Locale.ENGLISH)) + ")"
-        expectFile(path = KICKOFF_FILE, containing = "Date: $date at ")
+
+        expectFile(
+            path = KICKOFF_FILE,
+            containing = "Date: $date at "
+        )
+
         val text = Files.readString(file(path = KICKOFF_FILE))
         val isTwelveHour = Regex(pattern = """at \d{1,2}:\d{2} (AM|PM)""").containsMatchIn(text)
+
         val hasProperties = listOf("project", "meeting", "status: active", "type: meeting").all {
-            it in
-                text.substringBefore("# ")
+            it in text.substringBefore("# ")
         }
-        if (!isTwelveHour ||
-            !hasProperties
-        ) {
+
+        if (!isTwelveHour || !hasProperties) {
             throw CaseFailure(message = "expected h:mm AM or PM and the merged properties")
         }
     }
@@ -108,23 +143,45 @@ private fun SuiteBuilder.emptyNoteBecomesTemplate() {
     automated(
         id = "1.12-03",
         title = "Insert template in the toolbar fills an empty note with the template",
-        window = WindowSize(width = WIDE_WIDTH, height = WIDE_HEIGHT)
+        window = WindowSize(
+            width = WIDE_WIDTH,
+            height = WIDE_HEIGHT
+        )
     ) {
-        openVault(name = TEMPLATES_VAULT, shownText = "Projects")
-        openNote(name = "Empty note", shownText = "Empty note")
+        openVault(
+            name = TEMPLATES_VAULT,
+            shownText = "Projects"
+        )
+
+        openNote(
+            name = "Empty note",
+            shownText = "Empty note"
+        )
+
         clickIcon(label = "Insert template")
         waitForResult(name = "Meeting")
         press(key = Key.Enter)
         val note = "$TEMPLATES_VAULT/Projects/Empty note.md"
+
         listOf("meeting", "type: meeting", "# Empty note", "## Attendees").forEach {
-            expectFile(path = note, containing = it)
+            expectFile(
+                path = note,
+                containing = it
+            )
         }
     }
 }
 
 private fun SuiteBuilder.newNoteFromTemplate() {
-    automated(id = "1.12-04", title = "New note from template makes a named note from it") {
-        openVault(name = TEMPLATES_VAULT, shownText = "Projects")
+    automated(
+        id = "1.12-04",
+        title = "New note from template makes a named note from it"
+    ) {
+        openVault(
+            name = TEMPLATES_VAULT,
+            shownText = "Projects"
+        )
+
         rightClickInTree(text = "Projects")
         click(text = "New note from template")
         expectText(text = "Choose a template for the new note")
@@ -136,14 +193,29 @@ private fun SuiteBuilder.newNoteFromTemplate() {
         type(text = "Team sync")
         press(key = Key.Enter)
         val note = "$TEMPLATES_VAULT/Projects/Team sync.md"
-        expectFile(path = note, containing = "# Team sync")
-        expectFile(path = note, containing = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
+
+        expectFile(
+            path = note,
+            containing = "# Team sync"
+        )
+
+        expectFile(
+            path = note,
+            containing = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+        )
     }
 }
 
 private fun SuiteBuilder.templateForFolder() {
-    automated(id = "1.12-05", title = "Mod+T on a folder makes a new note there from a template") {
-        openVault(name = TEMPLATES_VAULT, shownText = "Projects")
+    automated(
+        id = "1.12-05",
+        title = "Mod+T on a folder makes a new note there from a template"
+    ) {
+        openVault(
+            name = TEMPLATES_VAULT,
+            shownText = "Projects"
+        )
+
         clickInTree(text = "Projects")
         pressInWindow(shortcut = Mod + Key.T)
         type(text = "weekly")
@@ -152,52 +224,110 @@ private fun SuiteBuilder.templateForFolder() {
         waitForNameField(name = "Untitled")
         press(key = Key.Escape)
         val week = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM d", Locale.ENGLISH))
-        expectFile(path = "$TEMPLATES_VAULT/Projects/Untitled.md", containing = "## Week of $week")
-        expectFile(path = "$TEMPLATES_VAULT/Projects/Untitled.md", containing = "- Next:")
+
+        expectFile(
+            path = "$TEMPLATES_VAULT/Projects/Untitled.md",
+            containing = "## Week of $week"
+        )
+
+        expectFile(
+            path = "$TEMPLATES_VAULT/Projects/Untitled.md",
+            containing = "- Next:"
+        )
     }
 }
 
 private fun SuiteBuilder.templateReplacesSelection() {
-    automated(id = "1.12-06", title = "A template replaces the selection, and one undo takes it back") {
-        openVault(name = TEMPLATES_VAULT, shownText = "Projects")
-        openNote(name = KICKOFF, shownText = KICKOFF_TEXT)
+    automated(
+        id = "1.12-06",
+        title = "A template replaces the selection, and one undo takes it back"
+    ) {
+        openVault(
+            name = TEMPLATES_VAULT,
+            shownText = "Projects"
+        )
+
+        openNote(
+            name = KICKOFF,
+            shownText = KICKOFF_TEXT
+        )
+
         pressInWindow(shortcut = Mod + Key.E)
         pressInWindow(shortcut = Mod + Key.T)
         expectText(text = "Find a template to insert")
         press(key = Key.Escape)
         val field = noteText(part = KICKOFF_TEXT)
-        val start = field.fetchSemanticsNode().config[SemanticsProperties.EditableText].text.indexOf("Goals")
-        field.performTextInputSelection(selection = TextRange(start = start, end = start + "Goals".length))
+
+        val start = field
+            .fetchSemanticsNode()
+            .config[SemanticsProperties.EditableText]
+            .text
+            .indexOf("Goals")
+
+        field.performTextInputSelection(
+            selection = TextRange(
+                start = start,
+                end = start + "Goals".length
+            )
+        )
+
         press(shortcut = Mod + Key.T)
         type(text = "weekly")
         waitForResult(name = "Work/Weekly review")
         press(key = Key.Enter)
-        expectFile(path = KICKOFF_FILE, containing = "- Next:")
-        expectNoText(text = "Goals for", substring = true)
+
+        expectFile(
+            path = KICKOFF_FILE,
+            containing = "- Next:"
+        )
+
+        expectNoText(
+            text = "Goals for",
+            substring = true
+        )
+
         press(shortcut = Mod + Key.Z)
-        expectFile(path = KICKOFF_FILE, containing = KICKOFF_TEXT)
+
+        expectFile(
+            path = KICKOFF_FILE,
+            containing = KICKOFF_TEXT
+        )
     }
 }
 
 private fun SuiteBuilder.templatesInObsidian() {
-    manual(id = "1.12-07", reason = ManualReason.SYSTEM) {
+    manual(
+        id = "1.12-07",
+        reason = ManualReason.SYSTEM
+    ) {
         prepare(TEMPLATES_VAULT)
         title(text = "Obsidian lists the same templates")
+
         steps(
-            text = "If Obsidian is not installed, press Skip for now.\n1. Open the Templates Vault from the Test " +
+            text =
+            "If Obsidian is not installed, press Skip for now.\n1. Open the Templates Vault from the Test " +
                 "data folder in Obsidian and turn on the Templates core plugin.\n2. Open Projects › Kickoff notes " +
                 "and run \"Templates: Insert template\"."
         )
+
         expected(
-            text = "Obsidian lists the same templates of Snippets and fills in the date and time in the same formats " +
+            text =
+            "Obsidian lists the same templates of Snippets and fills in the date and time in the same formats " +
                 "as Notekea."
         )
     }
 }
 
 private fun SuiteBuilder.panelsFirstWidth() {
-    automated(id = "1.12-08", title = "On a first launch the sidebar and the side panel are as wide") {
-        openPlaygroundNote(name = "Outline practice", shownText = "Arepas guide")
+    automated(
+        id = "1.12-08",
+        title = "On a first launch the sidebar and the side panel are as wide"
+    ) {
+        openPlaygroundNote(
+            name = "Outline practice",
+            shownText = "Arepas guide"
+        )
+
         expectSameWidths()
         relaunch()
         expectSameWidths()
@@ -206,21 +336,27 @@ private fun SuiteBuilder.panelsFirstWidth() {
 
 /** Waits until the tree's name field of a new entry, showing [name], has the keyboard. */
 private fun CaseScope.waitForNameField(name: String) {
-    ui.waitUntil(timeoutMillis = 10_000) {
-        ui.onAllNodes(
-            matcher = isFocused() and hasSetTextAction() and hasText(text = name)
-        ).fetchSemanticsNodes().isNotEmpty()
-    }
+    ui
+        .waitUntil(timeoutMillis = 10_000) {
+            ui
+                .onAllNodes(matcher = isFocused() and hasSetTextAction() and hasText(text = name))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
 }
 
 // Both panels open 340 dp wide on a first launch: a row of the tree and a row of the outline span their panel.
 private fun CaseScope.expectSameWidths() {
     expectText(text = "Ingredients")
-    val tree = treeRow(text = WELCOME).fetchSemanticsNode().boundsInRoot.width
+
+    val tree = treeRow(text = WELCOME)
+        .fetchSemanticsNode()
+        .boundsInRoot
+        .width
+
     val outline = treeRowOf(text = "Ingredients")
-    if (abs(tree - outline) >
-        PANEL_WIDTH_SLACK
-    ) {
+
+    if (abs(tree - outline) > PANEL_WIDTH_SLACK) {
         throw CaseFailure(message = "expected the panels as wide, $tree and $outline")
     }
 }
@@ -228,7 +364,18 @@ private fun CaseScope.expectSameWidths() {
 private fun CaseScope.treeRowOf(text: String): Float {
     val nodes = ui.onAllNodes(matcher = hasText(text = text))
     val count = nodes.fetchSemanticsNodes().size
-    return (0 until count).maxOf { nodes[it].fetchSemanticsNode().boundsInRoot.left }.let { left ->
-        (0 until count).map { nodes[it].fetchSemanticsNode().boundsInRoot }.first { it.left == left }.width
+
+    return (0 until count).maxOf {
+        nodes[it]
+            .fetchSemanticsNode()
+            .boundsInRoot
+            .left
+    }.let { left ->
+        (0 until count)
+            .map { nodes[it].fetchSemanticsNode().boundsInRoot }
+            .first {
+                it.left == left
+            }
+            .width
     }
 }

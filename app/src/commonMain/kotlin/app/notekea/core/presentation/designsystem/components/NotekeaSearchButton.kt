@@ -44,15 +44,27 @@ fun NotekeaSearchButton(
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = MaterialTheme.shapes.small
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(height = NotekeaDimensions.CompactControlSize + NotekeaDimensions.SpacingXs)
-            .focusBorder(color = colors.primary, shape = shape)
+            .focusBorder(
+                color = colors.primary,
+                shape = shape
+            )
             .clip(shape = shape)
             .background(color = colors.surfaceVariant)
-            .border(width = NotekeaDimensions.BorderWidth, color = colors.outlineVariant, shape = shape)
-            .clickable(onClickLabel = label, role = Role.Button, onClick = onClick)
+            .border(
+                width = NotekeaDimensions.BorderWidth,
+                color = colors.outlineVariant,
+                shape = shape
+            )
+            .clickable(
+                onClickLabel = label,
+                role = Role.Button,
+                onClick = onClick
+            )
             .padding(horizontal = NotekeaDimensions.SpacingS),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
         verticalAlignment = Alignment.CenterVertically
@@ -63,6 +75,7 @@ fun NotekeaSearchButton(
             modifier = Modifier.size(size = NotekeaDimensions.IconSize),
             tint = colors.onSurfaceVariant
         )
+
         Text(
             text = label,
             modifier = Modifier.weight(weight = 1f),
@@ -71,8 +84,14 @@ fun NotekeaSearchButton(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
         shortcutHint?.let {
-            Text(text = it, style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant, maxLines = 1)
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.onSurfaceVariant,
+                maxLines = 1
+            )
         }
     }
 }
@@ -85,8 +104,16 @@ private fun NotekeaSearchButtonPreview() {
             modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp),
             verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
         ) {
-            NotekeaSearchButton(label = PREVIEW_LABEL, onClick = {}, shortcutHint = PREVIEW_SHORTCUT)
-            NotekeaSearchButton(label = PREVIEW_LABEL, onClick = {})
+            NotekeaSearchButton(
+                label = PREVIEW_LABEL,
+                onClick = {},
+                shortcutHint = PREVIEW_SHORTCUT
+            )
+
+            NotekeaSearchButton(
+                label = PREVIEW_LABEL,
+                onClick = {}
+            )
         }
     }
 }

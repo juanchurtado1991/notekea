@@ -4,16 +4,16 @@ import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.notes.data.ObsidianVaultSettingsReader
+import app.notekea.core.notes.domain.DailyNoteSettings
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TemplateFiller
+import app.notekea.core.notes.domain.relativeTo
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.core.notes.domain.DailyNoteSettings
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TemplateFiller
-import app.notekea.core.notes.domain.relativeTo
 
 /**
  * The daily notes cases of `MVP_SMOKE_TEST.md` (1.10) on the smoke data itself: the Playground Vault's journal under
@@ -32,8 +32,14 @@ class SmokeDailyNotesTest {
             expected = listOf(null, "Journal/2026-10-20.md", "Journal/2026-10-21.md") to
                 listOf("Journal/2026-10-21.md", "Journal/2026-10-22.md", null),
             actual = JOURNAL.map {
-                dailyNotes.neighborsOf(path = it, notes = notes, settings = DailyNoteSettings.DEFAULT)
-            }.let { found -> found.map { it?.previous?.value } to found.map { it?.next?.value } }
+                dailyNotes.neighborsOf(
+                    path = it,
+                    notes = notes,
+                    settings = DailyNoteSettings.DEFAULT
+                )
+            }.let { found ->
+                found.map { it?.previous?.value } to found.map { it?.next?.value }
+            }
         )
     }
 
@@ -44,10 +50,20 @@ class SmokeDailyNotesTest {
                 fileSystem = FileSystem.SYSTEM,
                 dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
             )
+
             val settings = reader.dailyNotes(vaultPath = DAILY_VAULT)!!
             val notes = notesOf(folder = DAILY_VAULT)
-            val today = CalendarDate(year = 2026, month = 10, day = 27)
-            val template = File(DAILY_VAULT, settings.template + RelativePath.MARKDOWN_EXTENSION).readText()
+
+            val today = CalendarDate(
+                year = 2026,
+                month = 10,
+                day = 27
+            )
+
+            val template = File(
+                DAILY_VAULT,
+                settings.template + RelativePath.MARKDOWN_EXTENSION
+            ).readText()
 
             assertEquals(
                 expected = listOf(
@@ -57,16 +73,35 @@ class SmokeDailyNotesTest {
                     "# Tuesday, October 27th 2026\n\nCreated at 09:15.\n\n## Plan for Tuesday\n\n- [ ] \n"
                 ),
                 actual = listOf(
-                    dailyNotes.pathOf(date = today, settings = settings).value,
-                    dailyNotes.neighborsOf(
-                        path = dailyNotes.pathOf(date = today, settings = settings),
-                        notes = notes + dailyNotes.pathOf(date = today, settings = settings),
+                    dailyNotes.pathOf(
+                        date = today,
                         settings = settings
-                    )?.previous?.value,
-                    dailyNotes.dateOf(path = RelativePath(value = "Diary/Ideas.md"), settings = settings),
+                    ).value,
+                    dailyNotes
+                        .neighborsOf(
+                            path = dailyNotes.pathOf(
+                                date = today,
+                                settings = settings
+                            ),
+                            notes = notes + dailyNotes.pathOf(
+                                date = today,
+                                settings = settings
+                            ),
+                            settings = settings
+                        )
+                        ?.previous
+                        ?.value,
+                    dailyNotes.dateOf(
+                        path = RelativePath(value = "Diary/Ideas.md"),
+                        settings = settings
+                    ),
                     TemplateFiller().fill(
                         template = template,
-                        moment = LocalMoment(date = today, hour = 9, minute = 15),
+                        moment = LocalMoment(
+                            date = today,
+                            hour = 9,
+                            minute = 15
+                        ),
                         title = "Tuesday, October 27th 2026",
                         dateFormat = settings.format
                     )
@@ -75,19 +110,26 @@ class SmokeDailyNotesTest {
         }
 
     /** Every note of the vault at [folder], hidden folders left out, as the tree lists them. */
-    private fun notesOf(
-        folder: String
-    ): List<RelativePath> = File(folder).walkTopDown()
-        .filter { it.isFile && it.name.endsWith(suffix = RelativePath.MARKDOWN_EXTENSION) }
+    private fun notesOf(folder: String): List<RelativePath> = File(folder)
+        .walkTopDown()
+        .filter {
+            it.isFile && it.name.endsWith(suffix = RelativePath.MARKDOWN_EXTENSION)
+        }
         .map { it.relativeTo(base = File(folder)).invariantSeparatorsPath }
-        .filterNot { path -> path.split("/").any { it.startsWith(".") } }
+        .filterNot { path ->
+            path.split("/").any { it.startsWith(".") }
+        }
         .map { RelativePath(value = it) }
         .toList()
 
     companion object {
         private const val DAILY_VAULT = "../smoke-data/daily"
         private const val PERSONAL_NOTES = "../smoke-data/vaults/Personal Notes"
-        private val JOURNAL = listOf("Journal/2026-10-20.md", "Journal/2026-10-21.md", "Journal/2026-10-22.md")
+        private val JOURNAL = listOf(
+            "Journal/2026-10-20.md",
+            "Journal/2026-10-21.md",
+            "Journal/2026-10-22.md"
+        )
             .map { RelativePath(value = it) }
     }
 }

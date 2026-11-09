@@ -9,7 +9,9 @@ class AboutShortcutsTest {
 
     @Test
     fun `About lists notes, writing and the workspace, opening a note first, and no shortcut twice`() {
-        val shortcuts = groups.flatMap { group -> group.shortcuts.map { it.shortcut } }
+        val shortcuts = groups.flatMap { group ->
+            group.shortcuts.map { it.shortcut }
+        }
 
         assertEquals(
             expected = Triple(
@@ -19,7 +21,11 @@ class AboutShortcutsTest {
             ),
             actual = Triple(
                 groups.map { it.shortcuts.size },
-                groups.first().shortcuts.first().shortcut,
+                groups
+                    .first()
+                    .shortcuts
+                    .first()
+                    .shortcut,
                 shortcuts.distinct().size
             )
         )

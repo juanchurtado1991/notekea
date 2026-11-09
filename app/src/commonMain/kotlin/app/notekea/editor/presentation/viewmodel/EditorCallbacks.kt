@@ -1,16 +1,13 @@
 package app.notekea.editor.presentation.viewmodel
 
 import androidx.compose.runtime.Immutable
-import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.presentation.model.EditorEffect
 
 /**
- * What the editor of a pane asks of the panes around it: the title renamed the note ([onRenamed]), a deleted note was
- * closed ([onClosed]), a link was clicked ([onOpenLink]), a `#tag` is searched ([onSearchTag]), a note to link or a
- * tag is picked ([onRequestNoteLink], [onRequestTag]), a template is picked ([onRequestTemplate]), the note's star was
- * clicked ([onBookmarkToggle]), a daily note's arrow went to another day ([onDayStep]), or the note's folder was clicked
- * ([onRevealFolder]), or text that could not be saved was kept ([onUnsavedKept]); and [onBeforeOpen] runs, and is
- * waited for, before it opens a note.
+ * What the editor of a pane asks of the panes around it: a rename, a deleted note closed, a link or folder clicked, a
+ * tag searched, a picker for a note link, a tag or a template, the star toggled, a daily note's arrow, or unsaved text
+ * that was kept. [onBeforeOpen] runs, and is waited for, before it opens a note.
  */
 @Immutable
 data class EditorCallbacks(

@@ -1,10 +1,6 @@
 package app.notekea.tree.presentation.filepreview
 
 import androidx.compose.runtime.Composable
-import app.notekea.tree.presentation.view.SidebarRailActions
-import app.notekea.tree.presentation.view.VaultTreeContent
-import app.notekea.tree.presentation.model.VaultTreeIntent
-import app.notekea.tree.presentation.model.VaultTreeState
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
@@ -12,44 +8,64 @@ import androidx.compose.ui.graphics.ImageBitmapConfig
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
-import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
-import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.notes.domain.AttachmentKind
-import app.notekea.tree.domain.FlattenTreeUseCase
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.tree.domain.TreeSort
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
+import app.notekea.tree.domain.FlattenTreeUseCase
+import app.notekea.tree.domain.TreeSort
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.model.VaultTreeState
+import app.notekea.tree.presentation.view.SidebarRailActions
+import app.notekea.tree.presentation.view.VaultTreeContent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * 1.8 smoke finding: the attachments folder looked empty, because the tree listed notes only. Files that are not notes
- * are rows of their own, and a selected picture shows beside the tree with Open with its app and Show in Files.
+ * The tree lists every file, so the attachments folder never looks empty: files that are not notes are rows of
+ * their own, and a selected picture shows beside the tree with Open with its app and Show in Files.
  */
 class TreeFilesScreenTest {
     @Test
     fun `a file row selects the file, whose picture offers to open it or show it in the file manager`() {
         val intents = mutableListOf<VaultTreeIntent>()
+
         UiThread.run {
-            ImageComposeScene(width = WINDOW_WIDTH, height = WINDOW_HEIGHT, density = Density(density = DENSITY)) {
+            ImageComposeScene(
+                width = WINDOW_WIDTH,
+                height = WINDOW_HEIGHT,
+                density = Density(density = DENSITY)
+            ) {
                 NotekeaTheme(darkTheme = true) {
                     VaultTreeContent(
                         state = state(),
                         vaultName = VAULT_NAME,
                         onIntent = { intents += it },
                         rail = SidebarRailActions()
-                    ) { PlatePreview(onIntent = { intents += it }) }
+                    ) {
+                        PlatePreview(onIntent = { intents += it })
+                    }
                 }
             }.use { scene ->
                 scene.render(nanoTime = 0L)
+
                 listOf(MENU_ROW, OPEN_BUTTON, REVEAL_BUTTON).forEachIndexed { index, position ->
-                    scene.sendPointerEvent(eventType = PointerEventType.Press, position = position)
-                    scene.sendPointerEvent(eventType = PointerEventType.Release, position = position)
+                    scene.sendPointerEvent(
+                        eventType = PointerEventType.Press,
+                        position = position
+                    )
+
+                    scene.sendPointerEvent(
+                        eventType = PointerEventType.Release,
+                        position = position
+                    )
+
                     scene.render(nanoTime = FRAME_NANOS * (index + 1))
                 }
             }
@@ -62,22 +78,25 @@ class TreeFilesScreenTest {
                 VaultTreeIntent.OnRevealRequest(path = PLATE)
             ),
             actual = intents.filter {
-                it is VaultTreeIntent.OnRowClick || it is VaultTreeIntent.OnFileOpen ||
+                it is VaultTreeIntent.OnRowClick ||
+                    it is VaultTreeIntent.OnFileOpen ||
                     it is VaultTreeIntent.OnRevealRequest
             }
         )
     }
 
-    /** The picture's tab beside the tree, as the tabs show a file (`ROADMAP.md` 1.11). */
+    /** The picture's tab beside the tree, as the tabs show a file. */
     @Composable
-    private fun PlatePreview(
-        onIntent: (VaultTreeIntent) -> Unit
-    ) {
+    private fun PlatePreview(onIntent: (VaultTreeIntent) -> Unit) {
         FileDetails(
             preview = FilePreview(
                 file = file(path = PLATE),
                 kind = AttachmentKind.IMAGE,
-                image = ImageBitmap(width = IMAGE_WIDTH, height = IMAGE_HEIGHT, config = ImageBitmapConfig.Argb8888)
+                image = ImageBitmap(
+                    width = IMAGE_WIDTH,
+                    height = IMAGE_HEIGHT,
+                    config = ImageBitmapConfig.Argb8888
+                )
             ),
             platformConventions = PreviewPlatformConventions.linux,
             onIntent = onIntent
@@ -86,10 +105,17 @@ class TreeFilesScreenTest {
 
     private fun state(): VaultTreeState {
         val tree = VaultTree.EMPTY
-            .withNote(note = NoteEntry(file = file(path = WELCOME), metadata = NoteMetadata.NONE))
+            .withNote(
+                note = NoteEntry(
+                    file = file(path = WELCOME),
+                    metadata = NoteMetadata.NONE
+                )
+            )
             .withAttachment(file = file(path = PLATE))
             .withAttachment(file = file(path = MENU))
+
         val expanded = setOf(RelativePath(value = ATTACHMENTS))
+
         return VaultTreeState(
             vaultPath = VAULT_PATH,
             platformConventions = PreviewPlatformConventions.linux,
@@ -105,9 +131,11 @@ class TreeFilesScreenTest {
         )
     }
 
-    private fun file(
-        path: RelativePath
-    ): NoteFile = NoteFile(path = path, size = null, modifiedAt = null)
+    private fun file(path: RelativePath): NoteFile = NoteFile(
+        path = path,
+        size = null,
+        modifiedAt = null
+    )
 
     companion object {
         private const val ATTACHMENTS = "attachments"
@@ -120,10 +148,19 @@ class TreeFilesScreenTest {
         private const val WINDOW_HEIGHT = 800
         private const val WINDOW_WIDTH = 1_300
         private val MENU = RelativePath(value = "attachments/Weekly menu.pdf")
-        private val MENU_ROW = Offset(x = 168f, y = 154f)
-        private val OPEN_BUTTON = Offset(x = 463f, y = 388f)
+        private val MENU_ROW = Offset(
+            x = 168f,
+            y = 154f
+        )
+        private val OPEN_BUTTON = Offset(
+            x = 463f,
+            y = 388f
+        )
         private val PLATE = RelativePath(value = "attachments/Arepas plate.png")
-        private val REVEAL_BUTTON = Offset(x = 623f, y = 388f)
+        private val REVEAL_BUTTON = Offset(
+            x = 623f,
+            y = 388f
+        )
         private val WELCOME = RelativePath(value = "Welcome.md")
     }
 }

@@ -1,8 +1,6 @@
 package app.notekea.tree.presentation.view
 
 import androidx.compose.ui.ImageComposeScene
-import app.notekea.tree.presentation.model.TreePreviewData
-import app.notekea.tree.presentation.model.VaultTreeIntent
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
@@ -16,12 +14,14 @@ import app.notekea.core.platform.domain.ShortcutModifier
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.model.VaultTreeIntent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Smoke 1.4-13 on macOS: the Delete key of a Mac keyboard (Backspace) did nothing in the list of notes, where only
- * Cmd+Backspace deleted. Both ask to delete the selected note now.
+ * The Delete key of a Mac keyboard (Backspace) asks to delete the selected note in the list of notes, as
+ * Cmd+Backspace does.
  */
 @OptIn(InternalComposeUiApi::class)
 class TreeDeleteKeyScreenTest {
@@ -30,32 +30,55 @@ class TreeDeleteKeyScreenTest {
     @Test
     fun `on macOS backspace alone asks to delete the selected note, as cmd+backspace does`() {
         val intents = mutableListOf<VaultTreeIntent>()
+
         val macos = PreviewPlatformConventions.linux.copy(
             operatingSystem = OperatingSystem.MACOS,
-            deleteShortcut = Shortcut(key = ShortcutKey.BACKSPACE, modifiers = setOf(ShortcutModifier.COMMAND)),
-            alternateDeleteShortcut = Shortcut(key = ShortcutKey.BACKSPACE, modifiers = emptySet())
+            deleteShortcut = Shortcut(
+                key = ShortcutKey.BACKSPACE,
+                modifiers = setOf(ShortcutModifier.COMMAND)
+            ),
+            alternateDeleteShortcut = Shortcut(
+                key = ShortcutKey.BACKSPACE,
+                modifiers = emptySet()
+            )
         )
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
                 NotekeaTheme(darkTheme = false) {
-                    TreeList(state = TreePreviewData.state().copy(platformConventions = macos), onIntent = {
-                        intents +=
-                            it
-                    })
+                    TreeList(
+                        state = TreePreviewData.state().copy(platformConventions = macos),
+                        onIntent = {
+                            intents +=
+                                it
+                        }
+                    )
                 }
             }.use { scene ->
                 settle(scene = scene)
-                scene.sendKeyEvent(event = KeyEvent(key = Key.Backspace, type = KeyEventType.KeyDown))
+
+                scene.sendKeyEvent(
+                    event = KeyEvent(
+                        key = Key.Backspace,
+                        type = KeyEventType.KeyDown
+                    )
+                )
+
                 settle(scene = scene)
             }
         }
 
-        assertEquals(expected = listOf<VaultTreeIntent>(VaultTreeIntent.OnDeleteRequest()), actual = intents)
+        assertEquals(
+            expected = listOf<VaultTreeIntent>(VaultTreeIntent.OnDeleteRequest()),
+            actual = intents
+        )
     }
 
-    private fun settle(
-        scene: ImageComposeScene
-    ) {
+    private fun settle(scene: ImageComposeScene) {
         repeat(times = SETTLE_FRAMES) {
             frame += FRAME_NANOS
             scene.render(nanoTime = frame)

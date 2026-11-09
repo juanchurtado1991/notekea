@@ -14,5 +14,9 @@ fun attachmentImageSize(
 ): Size {
     if (imageWidth <= 0 || imageHeight <= 0) return Size.Zero
     val width = minOf(requestedWidth ?: imageWidth.toFloat(), maxWidth)
-    return Size(width = width, height = width * imageHeight / imageWidth)
+
+    return Size(
+        width = width,
+        height = width * imageHeight / imageWidth
+    )
 }

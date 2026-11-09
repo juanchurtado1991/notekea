@@ -11,7 +11,10 @@ class ChunkBlocksTest {
 
         assertEquals(
             expected = listOf(code, "after"),
-            actual = ChunkBlocks.of(body = body, range = body.indices).map { body.substring(range = it) }
+            actual = ChunkBlocks.of(
+                body = body,
+                range = body.indices
+            ).map { body.substring(range = it) }
         )
     }
 }

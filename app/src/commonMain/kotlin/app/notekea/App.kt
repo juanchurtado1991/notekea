@@ -12,9 +12,7 @@ import app.notekea.vault.presentation.welcome.WelcomePreviewData
 
 /** Root of the window: the Notekea theme and background around the current screen. */
 @Composable
-fun App(
-    content: @Composable () -> Unit
-) {
+fun App(content: @Composable () -> Unit) {
     NotekeaTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -28,6 +26,10 @@ fun App(
 @Composable
 private fun AppPreview() {
     App {
-        WelcomeContent(state = WelcomePreviewData.state(), onIntent = {}, openedVaultContent = { _, _ -> })
+        WelcomeContent(
+            state = WelcomePreviewData.state(),
+            onIntent = {},
+            openedVaultContent = { _, _ -> }
+        )
     }
 }

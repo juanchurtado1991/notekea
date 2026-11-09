@@ -18,22 +18,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.components.EmptyState
 import app.notekea.core.presentation.designsystem.components.NotekeaGridCard
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
-import app.notekea.tree.domain.FolderCard
-import app.notekea.core.notes.domain.RelativePath
 import app.notekea.resources.Res
 import app.notekea.resources.folder_empty_message
 import app.notekea.resources.folder_empty_title
 import app.notekea.resources.note_panel_folder_notes
+import app.notekea.tree.domain.FolderCard
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -44,12 +44,9 @@ private const val PREVIEW_HEIGHT_DP = 420
 private const val PREVIEW_WIDTH_DP = 720
 
 /**
- * A folder shown in a tab (`ROADMAP.md` 1.11): its name and how many files it holds in all ([fileCount], as its row
- * in the tree says), then a grid of cards for what is
- * directly inside it ([cards]): subfolders, notes and files. A note's card shows the first picture it embeds and an
- * image's card the image itself ([covers], asked for with [onCoverNeeded] as cards come into view); the others show
- * their icon. A click opens the card's folder, note or file in a tab ([onOpen]); [cardMenu] wraps each card with its
- * menu.
+ * A folder shown in a tab: its name, how many files it holds in all ([fileCount]) and a grid of [cards] for what is
+ * directly inside it. A note's card shows the first picture it embeds and an image's card the image ([covers], asked
+ * for with [onCoverNeeded] as cards come into view). [cardMenu] wraps each card with its menu.
  */
 @Composable
 fun FolderGrid(
@@ -62,16 +59,31 @@ fun FolderGrid(
     cardMenu: @Composable (FolderCard, @Composable () -> Unit) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.surface
+    ) {
         Column(modifier = Modifier.padding(all = NotekeaDimensions.SpacingXl)) {
-            Text(text = folder.name, style = MaterialTheme.typography.headlineSmall)
             Text(
-                text = pluralStringResource(Res.plurals.note_panel_folder_notes, fileCount, fileCount),
+                text = folder.name,
+                style = MaterialTheme.typography.headlineSmall
+            )
+
+            Text(
+                text = pluralStringResource(
+                    Res.plurals.note_panel_folder_notes,
+                    fileCount,
+                    fileCount
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
             if (cards.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.TopCenter
+                ) {
                     EmptyState(
                         title = stringResource(resource = Res.string.folder_empty_title),
                         message = stringResource(resource = Res.string.folder_empty_message)
@@ -100,20 +112,33 @@ private fun Cards(
 ) {
     // The largest a card is drawn, in pixels: below twice the narrowest card, or the grid would fit another column.
     val coverSize = with(LocalDensity.current) {
-        IntSize(width = CARD_MAX_WIDTH_DP.dp.roundToPx(), height = (CARD_MAX_WIDTH_DP / CARD_RATIO).dp.roundToPx())
+        IntSize(
+            width = CARD_MAX_WIDTH_DP.dp.roundToPx(),
+            height = (CARD_MAX_WIDTH_DP / CARD_RATIO).dp.roundToPx()
+        )
     }
+
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = CARD_MIN_WIDTH_DP.dp),
         contentPadding = PaddingValues(top = NotekeaDimensions.SpacingL),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
     ) {
-        items(items = cards, key = { it.path.value }) { card ->
+        items(
+            items = cards,
+            key = { it.path.value }
+        ) { card ->
             val hasCover = card.kind == FolderCard.Kind.NOTE || card.kind == FolderCard.Kind.IMAGE
-            if (hasCover) LaunchedEffect(card.path) { onCoverNeeded(card.path, coverSize) }
+
+            if (hasCover) {
+                LaunchedEffect(card.path) { onCoverNeeded(card.path, coverSize) }
+            }
+
+            val isNote = card.kind == FolderCard.Kind.NOTE
+
             cardMenu(card) {
                 NotekeaGridCard(
-                    label = if (card.kind == FolderCard.Kind.NOTE) card.path.nameWithoutExtension else card.path.name,
+                    label = if (isNote) card.path.nameWithoutExtension else card.path.name,
                     icon = iconOf(kind = card.kind),
                     onClick = { onOpen(card.path) },
                     image = covers[card.path]
@@ -123,9 +148,7 @@ private fun Cards(
     }
 }
 
-private fun iconOf(
-    kind: FolderCard.Kind
-): ImageVector = when (kind) {
+private fun iconOf(kind: FolderCard.Kind): ImageVector = when (kind) {
     FolderCard.Kind.FOLDER -> NotekeaIcons.Folder
     FolderCard.Kind.NOTE -> NotekeaIcons.Note
     FolderCard.Kind.IMAGE -> NotekeaIcons.ImageFile
@@ -136,18 +159,25 @@ private fun iconOf(
 @Composable
 private fun FolderGridPreview() {
     NotekeaPreviewThemes {
-        Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
+        Box(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
             FolderGrid(
                 folder = RelativePath(value = "Recipes"),
                 fileCount = 3,
                 cards = listOf("Recipes/Breakfast", "Recipes/Arepas.md", "Recipes/Menu.pdf").map {
+                    val kind = when {
+                        it.endsWith(suffix = ".md") -> FolderCard.Kind.NOTE
+                        it.endsWith(suffix = ".pdf") -> FolderCard.Kind.FILE
+                        else -> FolderCard.Kind.FOLDER
+                    }
+
                     FolderCard(
                         path = RelativePath(value = it),
-                        kind = when {
-                            it.endsWith(suffix = ".md") -> FolderCard.Kind.NOTE
-                            it.endsWith(suffix = ".pdf") -> FolderCard.Kind.FILE
-                            else -> FolderCard.Kind.FOLDER
-                        }
+                        kind = kind
                     )
                 },
                 covers = emptyMap(),
@@ -163,7 +193,12 @@ private fun FolderGridPreview() {
 @Composable
 private fun FolderGridEmptyPreview() {
     NotekeaPreviewThemes {
-        Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
+        Box(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
             FolderGrid(
                 folder = RelativePath(value = "Empty"),
                 fileCount = 0,

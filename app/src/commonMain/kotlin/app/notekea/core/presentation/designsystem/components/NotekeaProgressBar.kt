@@ -34,13 +34,25 @@ fun NotekeaProgressBar(
     val barModifier = modifier
         .height(height = HEIGHT_DP.dp)
         .semantics { contentDescription = label }
+
     val color = MaterialTheme.colorScheme.primary
     val track = MaterialTheme.colorScheme.surfaceVariant
+
     if (fraction == null) {
-        LinearProgressIndicator(modifier = barModifier, color = color, trackColor = track, strokeCap = StrokeCap.Round)
+        LinearProgressIndicator(
+            modifier = barModifier,
+            color = color,
+            trackColor = track,
+            strokeCap = StrokeCap.Round
+        )
     } else {
         LinearProgressIndicator(
-            progress = { fraction.coerceIn(minimumValue = 0f, maximumValue = 1f) },
+            progress = {
+                fraction.coerceIn(
+                    minimumValue = 0f,
+                    maximumValue = 1f
+                )
+            },
             modifier = barModifier,
             color = color,
             trackColor = track,
@@ -61,6 +73,7 @@ private fun NotekeaProgressBarPreview() {
                 label = PREVIEW_LABEL,
                 modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)
             )
+
             NotekeaProgressBar(
                 fraction = null,
                 label = PREVIEW_LABEL,

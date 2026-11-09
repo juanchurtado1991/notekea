@@ -13,15 +13,25 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 
 /**
- * Issue #101, the QA run of m1-rc1: at 200% on macOS and on Windows the manager's buttons were cut off at the bottom of
- * its window. In a window too short for a case, the case scrolls and its buttons stay inside the window, whole.
+ * At 200% on macOS and on Windows the manager's window is too short for a case: the case scrolls and its buttons
+ * stay inside the window, whole.
  */
 class ManagerContentTest {
     private val suite = sampleSuite {
-        manual(id = "1.2-01", reason = ManualReason.SYSTEM) {
+        manual(
+            id = "1.2-01",
+            reason = ManualReason.SYSTEM
+        ) {
             prepare("notes")
             title(text = "Opens the note")
-            steps(text = (1..STEPS).joinToString(separator = "\n") { "$it. Do a long step number $it of the case." })
+
+            steps(
+                text = (1..STEPS)
+                    .joinToString(separator = "\n") {
+                        "$it. Do a long step number $it of the case."
+                    }
+            )
+
             expected(text = "It opens")
         }
     }
@@ -45,7 +55,12 @@ class ManagerContentTest {
     fun `in a short window a case's buttons stay whole inside it`() = runComposeUiTest {
         setContent {
             AutoTestTheme {
-                Box(modifier = Modifier.size(width = WIDTH_DP.dp, height = SHORT_HEIGHT_DP.dp)) {
+                Box(
+                    modifier = Modifier.size(
+                        width = WIDTH_DP.dp,
+                        height = SHORT_HEIGHT_DP.dp
+                    )
+                ) {
                     ManagerContent(
                         suite = suite,
                         machine = "Linux · 1920×1080",
@@ -57,7 +72,10 @@ class ManagerContentTest {
             }
         }
 
-        val (height, bottom) = with(density) { BUTTON_HEIGHT_DP.dp.toPx() to SHORT_HEIGHT_DP.dp.toPx() }
+        val (height, bottom) = with(density) {
+            BUTTON_HEIGHT_DP.dp.toPx() to SHORT_HEIGHT_DP.dp.toPx()
+        }
+
         listOf("Done, next step ›", "Skip this case ›").forEach { text ->
             val button = onNodeWithText(text).fetchSemanticsNode().boundsInRoot
             assertTrue(button.height >= height && button.bottom <= bottom, "$text is at $button")

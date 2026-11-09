@@ -1,14 +1,6 @@
 package app.notekea.tree.presentation
 
 import androidx.compose.foundation.layout.Box
-import app.notekea.tree.presentation.view.BookmarksSection
-import app.notekea.tree.presentation.view.SidebarHeader
-import app.notekea.tree.presentation.view.SidebarHeaderActions
-import app.notekea.tree.presentation.view.TreeList
-import app.notekea.tree.presentation.model.TreeNotice
-import app.notekea.tree.presentation.model.TreePreviewData
-import app.notekea.tree.presentation.model.VaultTreeIntent
-import app.notekea.tree.presentation.model.VaultTreeState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +19,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.presentation.notesErrorMessage
 import app.notekea.core.presentation.designsystem.components.EmptyState
 import app.notekea.core.presentation.designsystem.components.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
@@ -35,7 +29,6 @@ import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeade
 import app.notekea.core.presentation.designsystem.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.core.notes.domain.NotesError
 import app.notekea.resources.Res
 import app.notekea.resources.error_unexpected
 import app.notekea.resources.tree_empty_message
@@ -44,30 +37,45 @@ import app.notekea.resources.tree_files
 import app.notekea.resources.tree_links_more
 import app.notekea.resources.tree_links_skipped
 import app.notekea.resources.tree_links_updated
-import app.notekea.resources.tree_unsaved_in_memory
-import app.notekea.resources.tree_unsaved_kept
 import app.notekea.resources.tree_loading
 import app.notekea.resources.tree_moved_to_vault_trash
 import app.notekea.resources.tree_new_note
 import app.notekea.resources.tree_notice_dismiss
 import app.notekea.resources.tree_retry
+import app.notekea.resources.tree_unsaved_in_memory
+import app.notekea.resources.tree_unsaved_kept
 import app.notekea.resources.tree_untitled_note
+import app.notekea.tree.presentation.model.TreeNotice
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.model.VaultTreeState
+import app.notekea.tree.presentation.view.BookmarksSection
+import app.notekea.tree.presentation.view.SidebarHeader
+import app.notekea.tree.presentation.view.SidebarHeaderActions
+import app.notekea.tree.presentation.view.TreeList
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import app.notekea.core.notes.presentation.notesErrorMessage
 
 private const val NAMED_NOTES = 3
 private const val NAME_SEPARATOR = ", "
 private const val NOTICE_SEPARATOR = " "
 private const val NOTICE_VISIBLE_MILLIS = 10_000L
 private const val PREVIEW_HEIGHT_DP = 520
-private val SKELETON_ROWS = listOf(0 to 0.55f, 0 to 0.4f, 1 to 0.6f, 1 to 0.5f, 0 to 0.45f, 0 to 0.65f, 1 to 0.5f)
+private val SKELETON_ROWS = listOf(
+    0 to 0.55f,
+    0 to 0.4f,
+    1 to 0.6f,
+    1 to 0.5f,
+    0 to 0.45f,
+    0 to 0.65f,
+    1 to 0.5f
+)
 
 /**
- * The vault sidebar: header with the vault's name and the tree actions, then the tree in one of its states (skeleton while the first scan
- * runs, the error with Retry, the empty vault with a New note action, or the notes); another vault opens from the tool
- * rail. Action errors and notices sit above the tree until dismissed.
+ * The vault sidebar: header with the vault's name and the tree actions, then the tree in one of its states (skeleton
+ * while the first scan runs, the error with Retry, the empty vault with a New note action, or the notes); another vault
+ * opens from the tool rail. Action errors and notices sit above the tree until dismissed.
  */
 @Composable
 internal fun VaultSidebar(
@@ -76,7 +84,11 @@ internal fun VaultSidebar(
     onIntent: (VaultTreeIntent) -> Unit
 ) {
     val untitledNote = stringResource(resource = Res.string.tree_untitled_note)
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.surface
+    ) {
         Column {
             SidebarHeader(
                 vaultName = vaultName,
@@ -90,18 +102,32 @@ internal fun VaultSidebar(
                     onMinimize = { onIntent(VaultTreeIntent.OnSidebarToggle) }
                 )
             )
-            SidebarMessages(state = state, onIntent = onIntent)
+
+            SidebarMessages(
+                state = state,
+                onIntent = onIntent
+            )
+
             BookmarksSection(
                 state = state,
                 onIntent = onIntent,
                 modifier = Modifier.padding(top = NotekeaDimensions.SpacingS)
             )
+
             NotekeaSectionHeader(
                 title = stringResource(resource = Res.string.tree_files),
-                modifier = Modifier.padding(top = NotekeaDimensions.SpacingS, start = NotekeaDimensions.SpacingXs)
+                modifier = Modifier.padding(
+                    top = NotekeaDimensions.SpacingS,
+                    start = NotekeaDimensions.SpacingXs
+                )
             )
+
             Box(modifier = Modifier.weight(weight = 1f).fillMaxWidth()) {
-                SidebarBody(state = state, onIntent = onIntent, untitledNote = untitledNote)
+                SidebarBody(
+                    state = state,
+                    onIntent = onIntent,
+                    untitledNote = untitledNote
+                )
             }
         }
     }
@@ -114,11 +140,15 @@ private fun SidebarBody(
     untitledNote: String
 ) {
     val loadError = state.loadError
+
     when {
         state.isLoading -> SkeletonTree()
 
         loadError != null -> ErrorBanner(
-            message = notesErrorMessage(error = loadError, platformConventions = state.platformConventions),
+            message = notesErrorMessage(
+                error = loadError,
+                platformConventions = state.platformConventions
+            ),
             modifier = Modifier.padding(all = NotekeaDimensions.SpacingS),
             action = {
                 NotekeaButton(
@@ -140,7 +170,10 @@ private fun SidebarBody(
             }
         )
 
-        else -> TreeList(state = state, onIntent = onIntent)
+        else -> TreeList(
+            state = state,
+            onIntent = onIntent
+        )
     }
 }
 
@@ -150,34 +183,46 @@ private fun SidebarMessages(
     onIntent: (VaultTreeIntent) -> Unit
 ) {
     val actionError = state.actionError
+
     val messageModifier = Modifier.padding(
         start = NotekeaDimensions.SpacingS,
         end = NotekeaDimensions.SpacingS,
         top = NotekeaDimensions.SpacingS
     )
+
     if (actionError != null || state.hasUnexpectedError) {
         val actionMessage = actionError?.let {
-            notesErrorMessage(error = it, platformConventions = state.platformConventions)
+            notesErrorMessage(
+                error = it,
+                platformConventions = state.platformConventions
+            )
         }
+
         ErrorBanner(
             message = actionMessage ?: stringResource(resource = Res.string.error_unexpected),
             modifier = messageModifier,
             onDismiss = { onIntent(VaultTreeIntent.OnErrorDismiss) }
         )
     }
+
     state.notice?.let { notice ->
         // A notice reports something that went well: it leaves by itself, and OK closes it sooner.
         LaunchedEffect(notice) {
             delay(timeMillis = NOTICE_VISIBLE_MILLIS)
             onIntent(VaultTreeIntent.OnNoticeDismiss)
         }
-        Row(modifier = messageModifier, verticalAlignment = Alignment.CenterVertically) {
+
+        Row(
+            modifier = messageModifier,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text = noticeText(notice = notice),
                 modifier = Modifier.weight(weight = 1f),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
             NotekeaButton(
                 text = stringResource(resource = Res.string.tree_notice_dismiss),
                 onClick = { onIntent(VaultTreeIntent.OnNoticeDismiss) },
@@ -189,18 +234,19 @@ private fun SidebarMessages(
 
 /** Up to three note names (`Welcome, 2026-10-20, Read mode`), then how many more. */
 @Composable
-private fun namedNotes(
-    notes: List<String>
-): String {
+private fun namedNotes(notes: List<String>): String {
     val shown = notes.take(n = NAMED_NOTES).joinToString(separator = NAME_SEPARATOR)
     val more = notes.size - NAMED_NOTES
-    return if (more > 0) pluralStringResource(Res.plurals.tree_links_more, more, shown, more) else shown
+
+    return if (more > 0) {
+        pluralStringResource(Res.plurals.tree_links_more, more, shown, more)
+    } else {
+        shown
+    }
 }
 
 @Composable
-private fun noticeText(
-    notice: TreeNotice
-): String = when (notice) {
+private fun noticeText(notice: TreeNotice): String = when (notice) {
     is TreeNotice.LinksUpdated -> listOfNotNull(
         pluralStringResource(
             Res.plurals.tree_links_updated,
@@ -208,29 +254,47 @@ private fun noticeText(
             notice.notes.size,
             namedNotes(notes = notice.notes)
         ),
-        notice.skippedCount.takeIf { it > 0 }?.let { pluralStringResource(Res.plurals.tree_links_skipped, it, it) }
+        notice
+            .skippedCount
+            .takeIf {
+                it > 0
+            }
+            ?.let { pluralStringResource(Res.plurals.tree_links_skipped, it, it) }
     ).joinToString(separator = NOTICE_SEPARATOR)
 
-    is TreeNotice.MovedToVaultTrash -> stringResource(Res.string.tree_moved_to_vault_trash, notice.name)
+    is TreeNotice.MovedToVaultTrash -> stringResource(
+        Res.string.tree_moved_to_vault_trash,
+        notice.name
+    )
 
-    is TreeNotice.UnsavedKept -> notice.copy?.let { stringResource(Res.string.tree_unsaved_kept, notice.note, it) }
+    is TreeNotice.UnsavedKept -> notice.copy?.let {
+        stringResource(Res.string.tree_unsaved_kept, notice.note, it)
+    }
         ?: stringResource(Res.string.tree_unsaved_in_memory, notice.note)
 }
 
 @Composable
 private fun SkeletonTree() {
     val loading = stringResource(resource = Res.string.tree_loading)
+
     Column(modifier = Modifier.semantics { contentDescription = loading }) {
-        SKELETON_ROWS.forEach { (depth, fraction) -> NotekeaSkeletonRow(widthFraction = fraction, depth = depth) }
+        SKELETON_ROWS.forEach { (depth, fraction) ->
+            NotekeaSkeletonRow(
+                widthFraction = fraction,
+                depth = depth
+            )
+        }
     }
 }
 
 @Composable
-private fun SidebarPreviewFrame(
-    state: VaultTreeState
-) {
+private fun SidebarPreviewFrame(state: VaultTreeState) {
     NotekeaPreviewThemes {
-        Box(modifier = Modifier.width(width = state.sidebarWidthDp.dp).height(height = PREVIEW_HEIGHT_DP.dp)) {
+        Box(
+            modifier = Modifier.width(
+                width = state.sidebarWidthDp.dp
+            ).height(height = PREVIEW_HEIGHT_DP.dp)
+        ) {
             VaultSidebar(
                 state = state,
                 vaultName = TreePreviewData.VAULT_NAME,

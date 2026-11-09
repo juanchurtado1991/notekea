@@ -2,7 +2,6 @@ package app.notekea.shell.presentation
 
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.presentation.viewmodel.EditorViewModel
-import app.notekea.shell.presentation.WorkspaceViewModel
 
 /**
  * One editor per pane of the [workspace], read from its current tabs, so a request sent right after opening a note
@@ -16,7 +15,11 @@ internal class PaneEditors(
         get() = editors[workspace.state.value.workspace.activePane]
 
     /** The editor of the pane that shows, or is about to show, the note at [path]. */
-    fun of(
-        path: RelativePath
-    ): EditorViewModel = editors[workspace.state.value.workspace.paneOpening(path = path)]
+    fun of(path: RelativePath): EditorViewModel = editors[
+        workspace
+            .state
+            .value
+            .workspace
+            .paneOpening(path = path)
+    ]
 }

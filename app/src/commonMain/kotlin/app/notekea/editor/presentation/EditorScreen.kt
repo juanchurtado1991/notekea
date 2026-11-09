@@ -1,14 +1,6 @@
 package app.notekea.editor.presentation
 
 import androidx.compose.foundation.layout.Box
-import app.notekea.editor.presentation.viewmodel.EditorCallbacks
-import app.notekea.editor.presentation.view.EditorContent
-import app.notekea.editor.presentation.model.EditorEffect
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.view.EditorPaneTools
-import app.notekea.editor.presentation.model.EditorPreviewData
-import app.notekea.editor.presentation.viewmodel.EditorViewModel
-import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -22,25 +14,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.platform.BeforeWindowClose
-import app.notekea.core.presentation.platform.WindowShortcut
-import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.notes.domain.DayNeighbors
 import app.notekea.core.notes.domain.OutlineHeading
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.platform.BeforeWindowClose
+import app.notekea.core.presentation.platform.WindowShortcut
+import app.notekea.editor.presentation.model.EditorEffect
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorPreviewData
+import app.notekea.editor.presentation.sidepanel.SidePanelHost
+import app.notekea.editor.presentation.view.EditorContent
+import app.notekea.editor.presentation.view.EditorPaneTools
+import app.notekea.editor.presentation.viewmodel.EditorCallbacks
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
 import kotlinx.coroutines.channels.Channel
 
 private const val PREVIEW_HEIGHT_DP = 420
 private const val PREVIEW_WIDTH_DP = 720
 
 /**
- * Editor entry point for [notePath] in one pane: opens it (saving the previous note first), saves before the window
- * closes and when the editor leaves the screen (a folder selected, another vault opened), and reports a rename from the
- * title (`onRenamed`), a deleted note closed (`onClosed`) or a link clicked in Read mode (`onOpenLink`) to the panes
- * around it. Find, Edit / Read and the other shortcuts work in the pane the keyboard is in ([isActive]). The
- * [viewModel] belongs to the vault's pane, so it outlives one note. The outline beside the panes follows this pane
- * through `tracker`; the side panel's requests go to [sidePanel]; `scrollMemory` keeps where each note was.
+ * Editor entry point for [notePath] in one pane: opens it (saving the previous note first) and saves before the window
+ * closes and when the editor leaves the screen. Shortcuts work in the pane the keyboard is in ([isActive]). The
+ * [viewModel] belongs to the vault's pane, so it outlives one note; the side panel's requests go to [sidePanel].
  */
 @Composable
 fun EditorScreen(
@@ -56,26 +53,52 @@ fun EditorScreen(
     isBookmarked: Boolean = false
 ) {
     val state by viewModel.state.collectAsState()
+
     val flushed = remember(viewModel) { Channel<Unit>(capacity = Channel.CONFLATED) }
+
     val textFocusRequester = remember { FocusRequester() }
-    val onIntent = remember(viewModel, sidePanel) { routerOf(viewModel = viewModel, sidePanel = sidePanel) }
+
+    val onIntent = remember(viewModel, sidePanel) {
+        routerOf(
+            viewModel = viewModel,
+            sidePanel = sidePanel
+        )
+    }
+
     LaunchedEffect(notePath) {
         callbacks.onBeforeOpen(notePath)
         viewModel.onIntent(intent = EditorIntent.OnOpen(path = notePath))
     }
+
+    fun revealHeading(heading: OutlineHeading) {
+        sidePanel.isOverlayOpen = false
+        pane.tracker.reveal(heading = heading)
+    }
+
     EditorEffects(
         viewModel = viewModel,
         flushed = flushed,
         textFocusRequester = textFocusRequester,
         callbacks = callbacks,
-        onRevealHeading = { heading ->
-            sidePanel.isOverlayOpen = false
-            pane.tracker.reveal(heading = heading)
-        }
+        onRevealHeading = { revealHeading(it) }
     )
-    DisposableEffect(viewModel) { onDispose { viewModel.onIntent(intent = EditorIntent.OnFlushRequest) } }
-    if (isActive) EditorShortcuts(platformConventions = platformConventions, onIntent = onIntent)
-    FlushBeforeWindowClose(viewModel = viewModel, flushed = flushed)
+
+    DisposableEffect(viewModel) {
+        onDispose { viewModel.onIntent(intent = EditorIntent.OnFlushRequest) }
+    }
+
+    if (isActive) {
+        EditorShortcuts(
+            platformConventions = platformConventions,
+            onIntent = onIntent
+        )
+    }
+
+    FlushBeforeWindowClose(
+        viewModel = viewModel,
+        flushed = flushed
+    )
+
     EditorContent(
         state = state,
         buffer = viewModel.buffer,
@@ -95,7 +118,11 @@ private fun routerOf(
     viewModel: EditorViewModel,
     sidePanel: SidePanelHost
 ): (EditorIntent) -> Unit = { intent ->
-    if (SidePanelHost.isRequest(intent = intent)) sidePanel.onIntent(intent = intent) else viewModel.onIntent(intent)
+    if (SidePanelHost.isRequest(intent = intent)) {
+        sidePanel.onIntent(intent = intent)
+    } else {
+        viewModel.onIntent(intent)
+    }
 }
 
 /** Saves the note before the window closes, waiting for that save ([flushed]) rather than one asked for earlier. */
@@ -108,6 +135,7 @@ private fun FlushBeforeWindowClose(
         while (flushed.tryReceive().isSuccess) {
             // A flush from an earlier save is not this one: wait for the save asked for now.
         }
+
         viewModel.onIntent(intent = EditorIntent.OnFlushRequest)
         flushed.receive()
     }
@@ -124,6 +152,7 @@ private fun EditorEffects(
 ) {
     val current by rememberUpdatedState(newValue = callbacks)
     val currentOnRevealHeading by rememberUpdatedState(newValue = onRevealHeading)
+
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
@@ -171,8 +200,10 @@ private suspend fun focusText(
     isReading: Boolean
 ) {
     if (isReading) return
+
     repeat(times = FOCUS_FRAMES) {
         withFrameNanos { }
+
         try {
             if (requester.requestFocus()) return
         } catch (_: IllegalStateException) {
@@ -189,17 +220,33 @@ private fun EditorShortcuts(
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit
 ) {
-    WindowShortcut(shortcut = platformConventions.saveShortcut) { onIntent(EditorIntent.OnSaveShortcut) }
-    WindowShortcut(shortcut = platformConventions.findShortcut) { onIntent(EditorIntent.OnFindOpen) }
-    WindowShortcut(shortcut = platformConventions.toggleReadModeShortcut) { onIntent(EditorIntent.OnReadModeToggle) }
-    WindowShortcut(shortcut = platformConventions.toggleTaskShortcut) { onIntent(EditorIntent.OnTaskToggleShortcut) }
+    WindowShortcut(shortcut = platformConventions.saveShortcut) {
+        onIntent(EditorIntent.OnSaveShortcut)
+    }
+
+    WindowShortcut(shortcut = platformConventions.findShortcut) {
+        onIntent(EditorIntent.OnFindOpen)
+    }
+
+    WindowShortcut(shortcut = platformConventions.toggleReadModeShortcut) {
+        onIntent(EditorIntent.OnReadModeToggle)
+    }
+
+    WindowShortcut(shortcut = platformConventions.toggleTaskShortcut) {
+        onIntent(EditorIntent.OnTaskToggleShortcut)
+    }
 }
 
 @Preview
 @Composable
 private fun EditorScreenPreview() {
     NotekeaPreviewThemes {
-        Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
+        Box(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
             EditorContent(
                 state = EditorPreviewData.state(),
                 buffer = EditorPreviewData.buffer(),

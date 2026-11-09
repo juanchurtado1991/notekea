@@ -29,6 +29,9 @@ class TextTagFinderTest {
     fun `a shorter fence inside a longer one does not end the code`() {
         val lines = sequenceOf("````", "```", "#inside", "````", "#outside")
 
-        assertEquals(expected = listOf("outside"), actual = TextTagFinder().tags(lines = lines))
+        assertEquals(
+            expected = listOf("outside"),
+            actual = TextTagFinder().tags(lines = lines)
+        )
     }
 }

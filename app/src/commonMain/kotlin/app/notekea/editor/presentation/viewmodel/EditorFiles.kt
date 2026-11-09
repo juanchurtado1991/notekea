@@ -1,28 +1,26 @@
 package app.notekea.editor.presentation.viewmodel
 
 import androidx.compose.ui.text.TextRange
+import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.StringPatterns.NEW_LINE
+import app.notekea.core.domain.StringPatterns.WINDOWS_NEW_LINE
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.domain.AttachmentSource
+import app.notekea.editor.domain.Embed
+import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.presentation.attachments.AttachmentTools
 import app.notekea.editor.presentation.attachments.EditorAttachments
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.EditorState
-import app.notekea.core.domain.Outcome
-import app.notekea.core.domain.StringPatterns.NEW_LINE
-import app.notekea.core.domain.StringPatterns.WINDOWS_NEW_LINE
-import app.notekea.editor.domain.AttachmentSource
-import app.notekea.editor.domain.Embed
-import app.notekea.editor.domain.FormatAction
-import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * The files of the open note (`ROADMAP.md` 1.8, 1.15): what it embeds, resolved and read a moment after the last
- * change; a pasted image, dropped or picked files attached and embedded where the selection was; a file opened with its
- * app; and a missing one located. [onPickCancelled] gives the keyboard back to the text when the file picker closes
- * without a choice. Reading the clipboard, the picker and copying a file take time, and another note may open
- * meanwhile: the edit is then dropped, never made in that note.
+ * The files of the open note: what it embeds, resolved a moment after the last change; a pasted image and dropped or
+ * picked files attached and embedded where the selection was; a file opened with its app; a missing one located.
+ * Reading the clipboard, the picker and copying take time: when another note opened meanwhile, the edit is dropped.
  */
 internal class EditorFiles(
     private val host: EditorHost,
@@ -40,9 +38,7 @@ internal class EditorFiles(
     )
     private var attachmentsJob: Job? = null
 
-    fun onIntent(
-        intent: EditorIntent
-    ) {
+    fun onIntent(intent: EditorIntent) {
         when (intent) {
             EditorIntent.OnPaste -> paste()
             is EditorIntent.OnFilesDrop -> drop(paths = intent.paths)
@@ -58,15 +54,21 @@ internal class EditorFiles(
     fun forgetFiles() = attachments.forgetFiles()
 
     /** The files [body] embeds, resolved and read a moment after the last change, so typing is never held up. */
-    fun update(
-        body: String
-    ) {
+    fun update(body: String) {
         val note = host.state.value.notePath ?: return
         attachmentsJob?.cancel()
+
         attachmentsJob = host.launch {
             delay(duration = PAUSE)
-            val views = attachments.viewsOf(note = note, text = body)
-            host.reduce { if (it.notePath == note) it.copy(attachments = views) else it }
+
+            val views = attachments.viewsOf(
+                note = note,
+                text = body
+            )
+
+            host.reduce {
+                if (it.notePath == note) it.copy(attachments = views) else it
+            }
         }
     }
 
@@ -74,40 +76,66 @@ internal class EditorFiles(
     private fun paste() {
         val note = host.state.value.notePath ?: return
         if (!host.state.value.isEditable) return
+
         host.launch {
-            val image = withContext(context = tools.dispatchers.io) { tools.clipboardReader.image() }
+            val image =
+                withContext(context = tools.dispatchers.io) { tools.clipboardReader.image() }
+
             if (!isOpen(note = note)) return@launch
+
             when {
                 // An image the clipboard cannot give is explained, instead of pasting nothing or other text.
                 image is Outcome.Failure -> {
                     host.reduce { it.copy(actionError = image.error) }
+
                     return@launch
                 }
 
                 image is Outcome.Success && image.value != null -> {
-                    attachAndEmbed(note = note, sources = listOf(attachments.pastedImage(bytes = image.value)))
+                    attachAndEmbed(
+                        note = note,
+                        sources = listOf(attachments.pastedImage(bytes = image.value))
+                    )
+
                     return@launch
                 }
             }
+
             val text = withContext(context = tools.dispatchers.io) { tools.clipboardReader.text() }
+
             if (!isOpen(note = note)) return@launch
+
             // The text being edited only has `\n` breaks, as [app.notekea.core.notes.domain.NoteDocument] says.
-            text?.replace(oldValue = WINDOWS_NEW_LINE, newValue = NEW_LINE)?.let { pasted ->
+            text?.replace(
+                oldValue = WINDOWS_NEW_LINE,
+                newValue = NEW_LINE
+            )?.let { pasted ->
                 host.buffer.edit {
                     val start = selection.min
-                    replace(start = start, end = selection.max, text = pasted)
+
+                    replace(
+                        start = start,
+                        end = selection.max,
+                        text = pasted
+                    )
+
                     selection = TextRange(index = start + pasted.length)
                 }
             }
         }
     }
 
-    private fun drop(
-        paths: List<String>
-    ) {
+    private fun drop(paths: List<String>) {
         val note = host.state.value.notePath ?: return
-        if (!host.state.value.isEditable || paths.isEmpty()) return
-        host.launch { attachAndEmbed(note = note, sources = paths.map { AttachmentSource.File(absolutePath = it) }) }
+        val hasNothingToDrop = !host.state.value.isEditable || paths.isEmpty()
+        if (hasNothingToDrop) return
+
+        host.launch {
+            attachAndEmbed(
+                note = note,
+                sources = paths.map { AttachmentSource.File(absolutePath = it) }
+            )
+        }
     }
 
     /** Image or file: the system's picker takes the keyboard, so the selection is kept for the embed. */
@@ -115,12 +143,17 @@ internal class EditorFiles(
         val note = host.state.value.notePath ?: return
         if (!host.state.value.isEditable) return
         textEdits.keepSelectionForPicker()
+
         host.launch {
             val picked = tools.attachmentPicker.pickFile()
+
             if (picked == null) {
                 onPickCancelled()
             } else {
-                attachAndEmbed(note = note, sources = listOf(AttachmentSource.File(absolutePath = picked)))
+                attachAndEmbed(
+                    note = note,
+                    sources = listOf(AttachmentSource.File(absolutePath = picked))
+                )
             }
         }
     }
@@ -134,12 +167,20 @@ internal class EditorFiles(
         sources: List<AttachmentSource>
     ) {
         val embeds = mutableListOf<String>()
+
         for (source in sources) {
-            when (val attached = attachments.attach(note = note, source = source, withDefaultWidth = true)) {
+            when (
+                val attached = attachments.attach(
+                    note = note,
+                    source = source,
+                    withDefaultWidth = true
+                )
+            ) {
                 is Outcome.Success -> embeds += attached.value
                 is Outcome.Failure -> host.reduce { it.copy(actionError = attached.error) }
             }
         }
+
         if (!isOpen(note = note)) {
             textEdits.releasePickerSelection(isCancelled = false)
         } else if (embeds.isNotEmpty()) {
@@ -148,33 +189,50 @@ internal class EditorFiles(
     }
 
     /** Whether [note], which an edit started from, is still the one in the text. */
-    private fun isOpen(
-        note: RelativePath
-    ): Boolean = host.state.value.notePath == note
+    private fun isOpen(note: RelativePath): Boolean = host.state.value.notePath == note
 
-    private fun open(
-        path: RelativePath
-    ) {
+    private fun open(path: RelativePath) {
         host.launch {
-            val opened = tools.fileOpener.open(vaultPath = vaultPath, path = path)
-            if (opened is Outcome.Failure) host.reduce { it.copy(actionError = opened.error) }
+            val opened = tools.fileOpener.open(
+                vaultPath = vaultPath,
+                path = path
+            )
+
+            if (opened is Outcome.Failure) {
+                host.reduce { it.copy(actionError = opened.error) }
+            }
         }
     }
 
     /** Locate…: the chosen file, copied into the vault when it is outside it, takes the missing embed's place. */
-    private fun locate(
-        embed: Embed
-    ) {
+    private fun locate(embed: Embed) {
         val note = host.state.value.notePath ?: return
-        val written = host.buffer.text.toString().substring(range = embed.range)
+
+        val written = host
+            .buffer
+            .text
+            .toString()
+            .substring(range = embed.range)
+
         host.launch {
             val picked = tools.attachmentPicker.pickFile() ?: return@launch
             val source = AttachmentSource.File(absolutePath = picked)
-            when (val attached = attachments.attach(note = note, source = source, width = embed.width)) {
+
+            when (
+                val attached = attachments.attach(
+                    note = note,
+                    source = source,
+                    width = embed.width
+                )
+            ) {
                 is Outcome.Failure -> host.reduce { it.copy(actionError = attached.error) }
 
                 is Outcome.Success -> if (isOpen(note = note)) {
-                    replaceEmbed(embed = embed, written = written, replacement = attached.value)
+                    replaceEmbed(
+                        embed = embed,
+                        written = written,
+                        replacement = attached.value
+                    )
                 }
             }
         }
@@ -186,9 +244,23 @@ internal class EditorFiles(
         written: String,
         replacement: String
     ) {
-        val text = host.buffer.text.toString()
-        if (embed.range.last >= text.length || text.substring(range = embed.range) != written) return
-        host.buffer.edit { replace(start = embed.range.first, end = embed.range.last + 1, text = replacement) }
+        val text = host
+            .buffer
+            .text
+            .toString()
+
+        val isEmbedChanged =
+            embed.range.last >= text.length || text.substring(range = embed.range) != written
+
+        if (isEmbedChanged) return
+
+        host.buffer.edit {
+            replace(
+                start = embed.range.first,
+                end = embed.range.last + 1,
+                text = replacement
+            )
+        }
     }
 
     companion object {

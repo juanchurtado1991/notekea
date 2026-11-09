@@ -3,7 +3,7 @@ package app.notekea.smokerun
 import androidx.compose.ui.test.ExperimentalTestApi
 import kotlin.test.Test
 
-/** The index memory run of the Ghost Serializer vault (`ROADMAP.md` 2.9), in a JVM of its own in `smokeRun`. */
+/** The index memory run of the Ghost Serializer vault, in a JVM of its own in `smokeRun`. */
 @OptIn(ExperimentalTestApi::class)
 class GhostSerializerIndexRunTest {
     @Test
@@ -11,8 +11,20 @@ class GhostSerializerIndexRunTest {
         name = RUN,
         vaults = listOf(VAULT)
     ) { app ->
-        openVault(app = app, name = VAULT, shownNote = FIRST_MODULE, timeoutMillis = OPEN_MILLIS)
-        measureIndexing(app = app, run = RUN, vault = VAULT, notes = NOTES, search = SEARCH)
+        openVault(
+            app = app,
+            name = VAULT,
+            shownNote = FIRST_MODULE,
+            timeoutMillis = OPEN_MILLIS
+        )
+
+        measureIndexing(
+            app = app,
+            run = RUN,
+            vault = VAULT,
+            notes = NOTES,
+            search = SEARCH
+        )
     }
 
     companion object {

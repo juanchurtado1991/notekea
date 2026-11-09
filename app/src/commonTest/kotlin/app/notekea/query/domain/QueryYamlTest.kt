@@ -10,16 +10,36 @@ class QueryYamlTest {
     fun `a query written as its block reads back the same`() {
         val query = VaultQuery(
             filters = listOf(
-                QueryFilter(condition = QueryCondition.MORE_THAN, property = "rating", value = "3"),
-                QueryFilter(condition = QueryCondition.IN_FOLDER, value = "Books"),
-                QueryFilter(condition = QueryCondition.IS_EMPTY, property = "due"),
-                QueryFilter(condition = QueryCondition.IS, property = "status", value = "on: hold")
+                QueryFilter(
+                    condition = QueryCondition.MORE_THAN,
+                    property = "rating",
+                    value = "3"
+                ),
+                QueryFilter(
+                    condition = QueryCondition.IN_FOLDER,
+                    value = "Books"
+                ),
+                QueryFilter(
+                    condition = QueryCondition.IS_EMPTY,
+                    property = "due"
+                ),
+                QueryFilter(
+                    condition = QueryCondition.IS,
+                    property = "status",
+                    value = "on: hold"
+                )
             ),
-            sort = QuerySort(property = "rating", isDescending = true),
+            sort = QuerySort(
+                property = "rating",
+                isDescending = true
+            ),
             columns = listOf("author", "first, last")
         )
 
-        assertEquals(expected = QueryParse.Valid(query = query), actual = yaml.read(text = yaml.write(query = query)))
+        assertEquals(
+            expected = QueryParse.Valid(query = query),
+            actual = yaml.read(text = yaml.write(query = query))
+        )
     }
 
     @Test
@@ -44,8 +64,15 @@ class QueryYamlTest {
             expected = QueryParse.Valid(
                 query = VaultQuery(
                     filters = listOf(
-                        QueryFilter(condition = QueryCondition.MORE_THAN, property = "rating", value = "3"),
-                        QueryFilter(condition = QueryCondition.HAS_TAG, value = "book")
+                        QueryFilter(
+                            condition = QueryCondition.MORE_THAN,
+                            property = "rating",
+                            value = "3"
+                        ),
+                        QueryFilter(
+                            condition = QueryCondition.HAS_TAG,
+                            value = "book"
+                        )
                     ),
                     sort = QuerySort(property = "rating"),
                     columns = listOf("author", "rating")
@@ -59,9 +86,21 @@ class QueryYamlTest {
     fun `numbers and dates are written as a person writes them, and text is quoted only when it must be`() {
         val query = VaultQuery(
             filters = listOf(
-                QueryFilter(condition = QueryCondition.MORE_THAN, property = "rating", value = "3"),
-                QueryFilter(condition = QueryCondition.AFTER, property = "date", value = "2026-10-22"),
-                QueryFilter(condition = QueryCondition.IS, property = "status", value = "on: hold")
+                QueryFilter(
+                    condition = QueryCondition.MORE_THAN,
+                    property = "rating",
+                    value = "3"
+                ),
+                QueryFilter(
+                    condition = QueryCondition.AFTER,
+                    property = "date",
+                    value = "2026-10-22"
+                ),
+                QueryFilter(
+                    condition = QueryCondition.IS,
+                    property = "status",
+                    value = "on: hold"
+                )
             )
         )
 
@@ -86,13 +125,19 @@ class QueryYamlTest {
     fun `a columns key with nothing under it names no column`() {
         val read = QueryYaml().read(text = "columns:") as QueryParse.Valid
 
-        assertEquals(expected = emptyList(), actual = read.query.columns)
+        assertEquals(
+            expected = emptyList(),
+            actual = read.query.columns
+        )
     }
 
     @Test
     fun `filters written on their key's line are no filters`() {
         assertEquals(
-            expected = QueryParse.Invalid(line = 1, problem = QueryProblem.MISSING_PART),
+            expected = QueryParse.Invalid(
+                line = 1,
+                problem = QueryProblem.MISSING_PART
+            ),
             actual = QueryYaml().read(text = "filters: rating")
         )
     }
@@ -100,7 +145,10 @@ class QueryYamlTest {
     @Test
     fun `an order that is neither way names its line`() {
         assertEquals(
-            expected = QueryParse.Invalid(line = 3, problem = QueryProblem.UNKNOWN_ORDER),
+            expected = QueryParse.Invalid(
+                line = 3,
+                problem = QueryProblem.UNKNOWN_ORDER
+            ),
             actual = QueryYaml().read(text = "sort:\n  property: rating\n  order: down")
         )
     }
@@ -111,30 +159,63 @@ class QueryYamlTest {
 
         val yaml = QueryYaml()
 
-        assertEquals(expected = QueryParse.Valid(query = query), actual = yaml.read(text = yaml.write(query = query)))
+        assertEquals(
+            expected = QueryParse.Valid(query = query),
+            actual = yaml.read(text = yaml.write(query = query))
+        )
     }
 
     @Test
     fun `an empty block is the query of every note`() {
-        assertEquals(expected = QueryParse.Valid(query = VaultQuery()), actual = yaml.read(text = ""))
+        assertEquals(
+            expected = QueryParse.Valid(query = VaultQuery()),
+            actual = yaml.read(text = "")
+        )
     }
 
     @Test
     fun `what cannot be read names its line and why`() {
         val cases = mapOf(
-            "sorted: rating" to QueryParse.Invalid(line = 1, problem = QueryProblem.UNKNOWN_KEY),
-            "not a query" to QueryParse.Invalid(line = 1, problem = QueryProblem.UNKNOWN_KEY),
+            "sorted: rating" to QueryParse.Invalid(
+                line = 1,
+                problem = QueryProblem.UNKNOWN_KEY
+            ),
+            "not a query" to QueryParse.Invalid(
+                line = 1,
+                problem = QueryProblem.UNKNOWN_KEY
+            ),
             "columns: [a]\nfilters:\n  - condition: about\n    property: a\n    value: b" to
-                QueryParse.Invalid(line = 3, problem = QueryProblem.UNKNOWN_CONDITION),
+                QueryParse.Invalid(
+                    line = 3,
+                    problem = QueryProblem.UNKNOWN_CONDITION
+                ),
             "filters:\n  - property: rating\n    condition: more than" to
-                QueryParse.Invalid(line = 2, problem = QueryProblem.MISSING_PART),
+                QueryParse.Invalid(
+                    line = 2,
+                    problem = QueryProblem.MISSING_PART
+                ),
             "filters:\n  - condition: has tag\n    value: a\n  - condition: is\n    wrong: b" to
-                QueryParse.Invalid(line = 5, problem = QueryProblem.UNKNOWN_KEY),
-            "sort:\n  order: descending" to QueryParse.Invalid(line = 1, problem = QueryProblem.MISSING_PART),
-            "sort:\n  property: a\n  by: b" to QueryParse.Invalid(line = 3, problem = QueryProblem.UNKNOWN_KEY),
-            "columns: [a]\nnot a query" to QueryParse.Invalid(line = 1, problem = QueryProblem.UNKNOWN_KEY)
+                QueryParse.Invalid(
+                    line = 5,
+                    problem = QueryProblem.UNKNOWN_KEY
+                ),
+            "sort:\n  order: descending" to QueryParse.Invalid(
+                line = 1,
+                problem = QueryProblem.MISSING_PART
+            ),
+            "sort:\n  property: a\n  by: b" to QueryParse.Invalid(
+                line = 3,
+                problem = QueryProblem.UNKNOWN_KEY
+            ),
+            "columns: [a]\nnot a query" to QueryParse.Invalid(
+                line = 1,
+                problem = QueryProblem.UNKNOWN_KEY
+            )
         )
 
-        assertEquals(expected = cases.values.toList(), actual = cases.keys.map { yaml.read(text = it) })
+        assertEquals(
+            expected = cases.values.toList(),
+            actual = cases.keys.map { yaml.read(text = it) }
+        )
     }
 }

@@ -38,9 +38,22 @@ internal fun AutomaticTab(
     actions: ManagerActions
 ) {
     when {
-        state.isRunning -> Running(cases = cases, state = state, onStop = actions.onStop)
-        state.results.isEmpty() -> Idle(total = cases.size, onStart = actions.onStart)
-        else -> Finished(cases = cases, state = state, actions = actions)
+        state.isRunning -> Running(
+            cases = cases,
+            state = state,
+            onStop = actions.onStop
+        )
+
+        state.results.isEmpty() -> Idle(
+            total = cases.size,
+            onStart = actions.onStart
+        )
+
+        else -> Finished(
+            cases = cases,
+            state = state,
+            actions = actions
+        )
     }
 }
 
@@ -49,14 +62,24 @@ private fun Idle(
     total: Int,
     onStart: () -> Unit
 ) = TabLayout(actions = {}) {
-    Text(text = "Automatic tests", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
     Text(
-        text = "$total cases check the app on their own, on copies of the test data, out of sight. It takes a while " +
+        text = "Automatic tests",
+        fontSize = 16.sp,
+        fontWeight = FontWeight.SemiBold
+    )
+
+    Text(
+        text =
+        "$total cases check the app on their own, on copies of the test data, out of sight. It takes a while " +
             "and you can keep using the computer.",
         fontSize = 12.sp,
         color = AutoTestColors.Muted
     )
-    Button(onClick = onStart, modifier = Modifier.fillMaxWidth()) { Text(text = "Start the automatic tests") }
+
+    Button(
+        onClick = onStart,
+        modifier = Modifier.fillMaxWidth()
+    ) { Text(text = "Start the automatic tests") }
 }
 
 @Composable
@@ -72,32 +95,68 @@ private fun Running(
             color = AutoTestColors.Muted,
             modifier = Modifier.weight(weight = 1f)
         )
+
         OutlinedButton(onClick = onStop) { Text(text = "Stop") }
     }
 }) {
     val elapsed = rememberElapsedMillis(startedAt = state.startedAt)
     val done = state.results.size
+
     Row(verticalAlignment = Alignment.CenterVertically) {
-        CircularProgressIndicator(modifier = Modifier.size(size = 16.dp), strokeWidth = 2.dp)
+        CircularProgressIndicator(
+            modifier = Modifier.size(size = 16.dp),
+            strokeWidth = 2.dp
+        )
+
         Text(
             text = "Running tests",
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(start = 8.dp).weight(weight = 1f)
         )
-        Text(text = clock(millis = elapsed), fontSize = 12.sp, color = AutoTestColors.Muted)
+
+        Text(
+            text = clock(millis = elapsed),
+            fontSize = 12.sp,
+            color = AutoTestColors.Muted
+        )
     }
-    LinearProgressIndicator(progress = {
-        done / cases.size.coerceAtLeast(minimumValue = 1).toFloat()
-    }, modifier = Modifier.fillMaxWidth())
+
+    LinearProgressIndicator(
+        progress = {
+            done / cases
+                .size
+                .coerceAtLeast(minimumValue = 1)
+                .toFloat()
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+
     Text(
         text = "$done of ${cases.size}" + timeLeft(done, cases.size, elapsed),
         fontSize = 11.sp,
         color = AutoTestColors.Muted
     )
-    Counts(results = state.results.values, waiting = cases.size - done)
-    NowCard(steps = state.runningSteps, case = cases.firstOrNull { it.id == state.runningId })
-    Recent(cases = cases, results = state.results.values.toList())
+
+    Counts(
+        results = state.results.values,
+        waiting = cases.size - done
+    )
+
+    NowCard(
+        steps = state.runningSteps,
+        case = cases.firstOrNull {
+            it.id == state.runningId
+        }
+    )
+
+    Recent(
+        cases = cases,
+        results = state
+            .results
+            .values
+            .toList()
+    )
 }
 
 @Composable
@@ -107,14 +166,17 @@ private fun NowCard(
 ) {
     Card {
         SectionLabel(text = "NOW")
+
         Text(
-            text = case?.let {
-                "${it.id} · ${it.title}"
-            } ?: "Starting…",
+            text = case?.let { "${it.id} · ${it.title}" } ?: "Starting…",
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold
         )
-        StepTimeline(done = steps.dropLast(n = 1), current = steps.lastOrNull())
+
+        StepTimeline(
+            done = steps.dropLast(n = 1),
+            current = steps.lastOrNull()
+        )
     }
 }
 
@@ -125,9 +187,21 @@ private fun Recent(
 ) {
     if (results.isEmpty()) return
     SectionLabel(text = "RECENT")
-    results.takeLast(n = RECENT).asReversed().forEach { result ->
-        ResultRow(title = cases.firstOrNull { it.id == result.id }?.title.orEmpty(), result = result)
-    }
+
+    results
+        .takeLast(n = RECENT)
+        .asReversed()
+        .forEach { result ->
+            ResultRow(
+                title = cases
+                    .firstOrNull {
+                        it.id == result.id
+                    }
+                    ?.title
+                    .orEmpty(),
+                result = result
+            )
+        }
 }
 
 @Composable
@@ -138,25 +212,49 @@ private fun Finished(
 ) = TabLayout(actions = {
     Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
         OutlinedButton(onClick = actions.onStart) { Text(text = "Run again") }
+
         Spacer(modifier = Modifier.weight(weight = 1f))
-        Button(onClick = { actions.onTab(ManagerTab.MANUAL) }) { Text(text = "Next: manual cases ›") }
+
+        Button(onClick = {
+            actions.onTab(ManagerTab.MANUAL)
+        }) { Text(text = "Next: manual cases ›") }
     }
 }) {
-    val failed = state.results.values.filterIsInstance<CaseResult.Failed>()
+    val failed = state
+        .results
+        .values
+        .filterIsInstance<CaseResult.Failed>()
+
+    val title = if (failed.isEmpty()) "All automatic tests passed" else "Automatic tests done"
+
     Text(
-        text = if (failed.isEmpty()) "All automatic tests passed" else "Automatic tests done",
+        text = title,
         fontSize = 16.sp,
         fontWeight = FontWeight.SemiBold
     )
-    Counts(results = state.results.values, waiting = cases.size - state.results.size)
+
+    Counts(
+        results = state.results.values,
+        waiting = cases.size - state.results.size
+    )
+
     if (failed.isNotEmpty()) {
         Text(
             text = "The failures go in the report: there is nothing to do about them now.",
             fontSize = 12.sp,
             color = AutoTestColors.Muted
         )
+
         failed.take(n = SHOWN_FAILURES).forEach { result ->
-            ResultRow(title = cases.firstOrNull { it.id == result.id }?.title.orEmpty(), result = result)
+            ResultRow(
+                title = cases
+                    .firstOrNull {
+                        it.id == result.id
+                    }
+                    ?.title
+                    .orEmpty(),
+                result = result
+            )
         }
     }
 }
@@ -167,9 +265,22 @@ private fun Counts(
     waiting: Int
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
-        CountChip(text = "✓ ${results.count { it is CaseResult.Passed }} passed", color = AutoTestColors.Passed)
-        CountChip(text = "✕ ${results.count { it is CaseResult.Failed }} failed", color = AutoTestColors.Failed)
-        if (waiting > 0) CountChip(text = "$waiting to go", color = AutoTestColors.Muted)
+        CountChip(
+            text = "✓ ${results.count { it is CaseResult.Passed }} passed",
+            color = AutoTestColors.Passed
+        )
+
+        CountChip(
+            text = "✕ ${results.count { it is CaseResult.Failed }} failed",
+            color = AutoTestColors.Failed
+        )
+
+        if (waiting > 0) {
+            CountChip(
+                text = "$waiting to go",
+                color = AutoTestColors.Muted
+            )
+        }
     }
 }
 
@@ -183,9 +294,18 @@ private fun ResultRow(
         is CaseResult.Failed -> CaseStatus.FAILED
         is CaseResult.Skipped -> CaseStatus.SKIPPED
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         StatusBadge(status = status)
-        Text(text = "${result.id} · $title", fontSize = 12.sp, maxLines = 1)
+
+        Text(
+            text = "${result.id} · $title",
+            fontSize = 12.sp,
+            maxLines = 1
+        )
     }
 }
 
@@ -193,17 +313,20 @@ private fun ResultRow(
 @Composable
 private fun rememberElapsedMillis(startedAt: Long?): Long {
     var now by remember { mutableLongStateOf(value = System.currentTimeMillis()) }
+
     LaunchedEffect(startedAt) {
         while (true) {
             now = System.currentTimeMillis()
             delay(timeMillis = SECOND_MILLIS)
         }
     }
+
     return startedAt?.let { (now - it).coerceAtLeast(minimumValue = 0) } ?: 0
 }
 
 private fun clock(millis: Long): String {
     val seconds = millis / SECOND_MILLIS
+
     return "%02d:%02d".format(seconds / SECONDS_PER_MINUTE, seconds % SECONDS_PER_MINUTE)
 }
 
@@ -214,7 +337,12 @@ private fun timeLeft(
     elapsed: Long
 ): String {
     if (done == 0 || done >= total) return ""
-    val minutes = (elapsed / done * (total - done) / SECOND_MILLIS / SECONDS_PER_MINUTE).coerceAtLeast(minimumValue = 1)
+
+    val minutes =
+        (elapsed / done * (total - done) / SECOND_MILLIS / SECONDS_PER_MINUTE).coerceAtLeast(
+            minimumValue = 1
+        )
+
     return " · about $minutes minute${if (minutes == 1L) "" else "s"} left"
 }
 

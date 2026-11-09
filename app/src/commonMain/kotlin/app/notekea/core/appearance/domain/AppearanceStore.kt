@@ -7,7 +7,5 @@ interface AppearanceStore {
     /** The kept appearance, then each one [save]d, so every window follows a change at once. */
     fun observe(): Flow<Appearance>
 
-    suspend fun save(
-        appearance: Appearance
-    )
+    suspend fun save(appearance: Appearance)
 }

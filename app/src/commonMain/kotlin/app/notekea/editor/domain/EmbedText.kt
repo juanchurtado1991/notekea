@@ -16,8 +16,13 @@ class EmbedText(files: Collection<RelativePath>) {
     ): String {
         val isUnique = (names[path.name.lowercase()] ?: 0) <= 1
         val target = if (isUnique) path.name else path.value
-        val size = width?.let { MarkdownSyntax.LINK_LABEL_SEPARATOR + it }.orEmpty()
-        return EMBED_MARK + MarkdownSyntax.WIKI_LINK_OPEN + target + size + MarkdownSyntax.WIKI_LINK_CLOSE
+
+        val size = width?.let {
+            MarkdownSyntax.LINK_LABEL_SEPARATOR + it
+        }.orEmpty()
+
+        return EMBED_MARK + MarkdownSyntax.WIKI_LINK_OPEN + target + size +
+            MarkdownSyntax.WIKI_LINK_CLOSE
     }
 
     companion object {

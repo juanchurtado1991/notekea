@@ -14,7 +14,11 @@ internal fun FileSystem.readFailureOf(
     file: Path,
     path: RelativePath
 ): NotesError = try {
-    if (exists(path = file)) NotesError.Unreadable(path = path.value) else NotesError.EntryMissing(path = path.value)
+    if (exists(path = file)) {
+        NotesError.Unreadable(path = path.value)
+    } else {
+        NotesError.EntryMissing(path = path.value)
+    }
 } catch (_: IOException) {
     NotesError.Unreadable(path = path.value)
 }

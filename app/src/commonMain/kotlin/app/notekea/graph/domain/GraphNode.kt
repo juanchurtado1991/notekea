@@ -2,7 +2,7 @@ package app.notekea.graph.domain
 
 import app.notekea.core.notes.domain.RelativePath
 
-/** A note on the graph (`ROADMAP.md` 2.7): its [path], and how many [links] it has, which size its dot. */
+/** A note on the graph: its [path], and how many [links] it has, which size its dot. */
 data class GraphNode(
     val path: RelativePath,
     val links: Int
@@ -12,5 +12,8 @@ data class GraphNode(
 
     /** The top-level folder that colors it; empty at the vault's root. */
     val folder: String
-        get() = path.value.substringBefore(delimiter = RelativePath.SEPARATOR, missingDelimiterValue = "")
+        get() = path.value.substringBefore(
+            delimiter = RelativePath.SEPARATOR,
+            missingDelimiterValue = ""
+        )
 }

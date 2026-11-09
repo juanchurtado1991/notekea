@@ -14,11 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.ai.domain.ModelSize
 import app.notekea.core.presentation.designsystem.components.NotekeaCard
 import app.notekea.core.presentation.designsystem.components.NotekeaChip
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.ai.domain.ModelSize
 import app.notekea.resources.Res
 import app.notekea.resources.models_hint_large
 import app.notekea.resources.models_hint_medium
@@ -48,23 +48,41 @@ internal fun ModelCard(
     modifier: Modifier = Modifier
 ) {
     val body: @Composable () -> Unit = {
+        val bodyModifier = if (isFeatured) {
+            Modifier.padding(
+                all = NotekeaDimensions.SpacingM
+            )
+        } else {
+            Modifier
+        }
+
         Column(
-            modifier = if (isFeatured) Modifier.padding(all = NotekeaDimensions.SpacingM) else Modifier,
+            modifier = bodyModifier,
             verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
         ) {
-            ModelHeading(row = row, isRecommended = row.size == state.recommended)
+            ModelHeading(
+                row = row,
+                isRecommended = row.size == state.recommended
+            )
+
             Text(
                 text = stringResource(resource = hintOf(size = row.size)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
             if (!row.fits) {
                 Text(
-                    text = stringResource(resource = Res.string.models_too_big, row.minimumMemoryGb, state.memoryGb),
+                    text = stringResource(
+                        resource = Res.string.models_too_big,
+                        row.minimumMemoryGb,
+                        state.memoryGb
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
                 )
             }
+
             ModelActions(
                 row = row,
                 status = state.statusOf(size = row.size),
@@ -75,6 +93,7 @@ internal fun ModelCard(
             )
         }
     }
+
     if (isFeatured) {
         NotekeaCard(modifier = modifier) { body() }
     } else {
@@ -97,9 +116,13 @@ private fun ModelHeading(
                 stringResource(resource = nameOf(size = row.size)),
                 row.name
             ),
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            style = MaterialTheme
+                .typography
+                .titleSmall
+                .copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.onSurface
         )
+
         if (isRecommended) {
             NotekeaChip(
                 label = stringResource(resource = Res.string.models_recommended),
@@ -110,17 +133,13 @@ private fun ModelHeading(
 }
 
 /** The name of [size] as the person reads it. */
-internal fun nameOf(
-    size: ModelSize
-): StringResource = when (size) {
+internal fun nameOf(size: ModelSize): StringResource = when (size) {
     ModelSize.SMALL -> Res.string.models_size_small
     ModelSize.MEDIUM -> Res.string.models_size_medium
     ModelSize.LARGE -> Res.string.models_size_large
 }
 
-private fun hintOf(
-    size: ModelSize
-): StringResource = when (size) {
+private fun hintOf(size: ModelSize): StringResource = when (size) {
     ModelSize.SMALL -> Res.string.models_hint_small
     ModelSize.MEDIUM -> Res.string.models_hint_medium
     ModelSize.LARGE -> Res.string.models_hint_large
@@ -135,8 +154,20 @@ private fun ModelCardPreview() {
             verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
         ) {
             val state = ModelManagerSamples.downloading
-            ModelCard(row = ModelManagerSamples.medium, state = state, isFeatured = true, onIntent = {})
-            ModelCard(row = ModelManagerSamples.large, state = state, isFeatured = false, onIntent = {})
+
+            ModelCard(
+                row = ModelManagerSamples.medium,
+                state = state,
+                isFeatured = true,
+                onIntent = {}
+            )
+
+            ModelCard(
+                row = ModelManagerSamples.large,
+                state = state,
+                isFeatured = false,
+                onIntent = {}
+            )
         }
     }
 }

@@ -21,7 +21,10 @@ public class SuiteRunner(
     private val system: HostSystem = HostSystem.current(),
     private val waitMillis: Long = DEFAULT_WAIT_MILLIS
 ) {
-    private val workspace = CaseWorkspace(workFolder = workFolder, dataSources = suite.dataSources)
+    private val workspace = CaseWorkspace(
+        workFolder = workFolder,
+        dataSources = suite.dataSources
+    )
 
     /**
      * Runs [cases] in order, telling [onStart] when each starts, [onStep] each of its steps and [onResult] how it
@@ -38,8 +41,13 @@ public class SuiteRunner(
             CaseResult.Skipped(id = case.id)
         } else {
             onStart(case)
-            run(case = case, onStep = onStep)
+
+            run(
+                case = case,
+                onStep = onStep
+            )
         }
+
         result.also(onResult)
     }
 
@@ -48,18 +56,30 @@ public class SuiteRunner(
         onStep: (String) -> Unit = {}
     ): CaseResult {
         val steps = ArrayDeque<String>()
+
         val keepStep: (String) -> Unit = { step ->
             steps.addLast(step)
             if (steps.size > KEPT_STEPS) steps.removeFirst()
             onStep(step)
         }
+
         val folders = workspace.prepare(caseId = case.id)
         val started = TimeSource.Monotonic.markNow()
-        val (failure, screenshot) = runInApp(case = case, folders = folders, onStep = keepStep)
+
+        val (failure, screenshot) = runInApp(
+            case = case,
+            folders = folders,
+            onStep = keepStep
+        )
+
         workspace.clean(caseId = case.id)
         val duration = started.elapsedNow()
+
         return if (failure == null) {
-            CaseResult.Passed(id = case.id, duration = duration)
+            CaseResult.Passed(
+                id = case.id,
+                duration = duration
+            )
         } else {
             CaseResult.Failed(
                 id = case.id,
@@ -78,6 +98,7 @@ public class SuiteRunner(
         onStep: (String) -> Unit
     ): Pair<Throwable?, Path?> {
         var screenshot: Path? = null
+
         val failure = runCatching {
             runDesktopComposeUiTest(
                 width = (case.window ?: suite.window).width,
@@ -85,6 +106,7 @@ public class SuiteRunner(
                 testTimeout = case.timeout
             ) {
                 setContent { suite.content(folders) }
+
                 try {
                     case.body(
                         CaseScope(
@@ -101,11 +123,16 @@ public class SuiteRunner(
                 }
             }
         }.exceptionOrNull()
+
         return failure to screenshot
     }
 
     private fun ComposeUiTest.capture(caseId: String): Path? = runCatching {
-        val image = onAllNodes(matcher = isRoot()).onFirst().captureToImage().toAwtImage()
+        val image = onAllNodes(matcher = isRoot())
+            .onFirst()
+            .captureToImage()
+            .toAwtImage()
+
         workspace.screenshotFile(caseId = caseId).also { ImageIO.write(image, PNG, it.toFile()) }
     }.getOrNull()
 

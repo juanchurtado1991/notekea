@@ -12,10 +12,9 @@ import kotlin.time.Instant
  * moved backwards) count as "just now" instead of producing negative values.
  */
 class DescribeElapsedTimeUseCase(private val clock: Clock) {
-    operator fun invoke(
-        since: Instant
-    ): ElapsedTime {
+    operator fun invoke(since: Instant): ElapsedTime {
         val elapsed = clock.now() - since
+
         return when {
             elapsed < 1.minutes -> ElapsedTime.JustNow
             elapsed < 1.hours -> ElapsedTime.Minutes(count = elapsed.inWholeMinutes.toInt())
@@ -27,9 +26,7 @@ class DescribeElapsedTimeUseCase(private val clock: Clock) {
         }
     }
 
-    private fun Duration.wholeUnits(
-        unit: Duration
-    ): Int = (this / unit).toInt()
+    private fun Duration.wholeUnits(unit: Duration): Int = (this / unit).toInt()
 
     companion object {
         private const val DAYS_PER_MONTH = 30

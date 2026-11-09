@@ -1,17 +1,16 @@
 package app.notekea.tree.domain
 
-import kotlin.time.Instant
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
+import kotlin.time.Instant
 
 /**
  * Turns the vault tree into the rows the sidebar shows: inside each folder, subfolders first by name, then notes and
- * other files together (as Obsidian lists them) by name or most recently modified first (entries without a date
- * last); a note is named without `.md`, another file with its extension. Only the contents of expanded folders are
- * listed. Each folder shows how many files it holds, notes and others, counting its subfolders.
+ * other files together by name or most recently modified first (entries without a date last). Only the contents of
+ * expanded folders are listed. Each folder shows how many files it holds, counting its subfolders.
  */
 class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparator) {
     operator fun invoke(
@@ -20,11 +19,24 @@ class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparato
         sort: TreeSort
     ): List<TreeRow> {
         val index = TreeIndex(
-            foldersByParent = tree.folders.groupBy { it.parent ?: RelativePath.ROOT },
-            notesByParent = tree.notes.values.groupBy { it.file.path.parent ?: RelativePath.ROOT },
-            attachmentsByParent = tree.attachments.values.groupBy { it.path.parent ?: RelativePath.ROOT },
+            foldersByParent = tree.folders.groupBy {
+                it.parent ?: RelativePath.ROOT
+            },
+            notesByParent = tree
+                .notes
+                .values
+                .groupBy {
+                    it.file.path.parent ?: RelativePath.ROOT
+                },
+            attachmentsByParent = tree
+                .attachments
+                .values
+                .groupBy {
+                    it.path.parent ?: RelativePath.ROOT
+                },
             fileCounts = fileCountsOf(tree = tree)
         )
+
         return buildList {
             addChildren(
                 index = index,
@@ -43,8 +55,12 @@ class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparato
         expandedFolders: Set<RelativePath>,
         sort: TreeSort
     ) {
-        subfoldersByName(index = index, folder = folder).forEach { child ->
+        subfoldersByName(
+            index = index,
+            folder = folder
+        ).forEach { child ->
             val isExpanded = child in expandedFolders
+
             add(
                 TreeRow.Folder(
                     path = child,
@@ -53,6 +69,7 @@ class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparato
                     isExpanded = isExpanded
                 )
             )
+
             if (isExpanded) {
                 addChildren(
                     index = index,
@@ -63,34 +80,60 @@ class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparato
                 )
             }
         }
-        val notes = index.notesByParent[folder].orEmpty().map { note ->
-            TreeRow.Note(path = note.file.path, depth = depth, modifiedAt = note.file.modifiedAt)
-        }
-        val files = index.attachmentsByParent[folder].orEmpty().map { file ->
-            TreeRow.File(path = file.path, depth = depth, modifiedAt = file.modifiedAt)
-        }
+
+        val notes = index
+            .notesByParent[folder]
+            .orEmpty()
+            .map { note ->
+                TreeRow.Note(
+                    path = note.file.path,
+                    depth = depth,
+                    modifiedAt = note.file.modifiedAt
+                )
+            }
+
+        val files = index
+            .attachmentsByParent[folder]
+            .orEmpty()
+            .map { file ->
+                TreeRow.File(
+                    path = file.path,
+                    depth = depth,
+                    modifiedAt = file.modifiedAt
+                )
+            }
+
         addAll(elements = (notes + files).sortedWith(entryOrder(sort = sort)))
     }
 
-    private fun fileCountsOf(
-        tree: VaultTree
-    ): Map<RelativePath, Int> {
+    private fun fileCountsOf(tree: VaultTree): Map<RelativePath, Int> {
         val counts = mutableMapOf<RelativePath, Int>()
+
         val count = { path: RelativePath ->
             generateSequence(seed = path.parent) { it.parent }
-                .takeWhile { !it.isRoot }
+                .takeWhile {
+                    !it.isRoot
+                }
                 .forEach { counts[it] = (counts[it] ?: 0) + 1 }
         }
+
         // Each key set on its own: joining them would copy every path of the vault into a new set first.
-        tree.notes.keys.forEach(count)
-        tree.attachments.keys.forEach(count)
+        tree
+            .notes
+            .keys
+            .forEach(count)
+
+        tree
+            .attachments
+            .keys
+            .forEach(count)
+
         return counts
     }
 
-    private fun entryOrder(
-        sort: TreeSort
-    ): Comparator<TreeRow> {
+    private fun entryOrder(sort: TreeSort): Comparator<TreeRow> {
         val byName = compareBy(naturalNameComparator) { row: TreeRow -> displayName(row = row) }
+
         return when (sort) {
             TreeSort.NAME -> byName
 
@@ -101,13 +144,10 @@ class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparato
         }
     }
 
-    private fun displayName(
-        row: TreeRow
-    ): String = if (row is TreeRow.Note) row.path.nameWithoutExtension else row.path.name
+    private fun displayName(row: TreeRow): String =
+        if (row is TreeRow.Note) row.path.nameWithoutExtension else row.path.name
 
-    private fun modifiedAt(
-        row: TreeRow
-    ): Instant? = when (row) {
+    private fun modifiedAt(row: TreeRow): Instant? = when (row) {
         is TreeRow.Note -> row.modifiedAt
         is TreeRow.File -> row.modifiedAt
         is TreeRow.Folder -> null
@@ -116,9 +156,10 @@ class FlattenTreeUseCase(private val naturalNameComparator: NaturalNameComparato
     private fun subfoldersByName(
         index: TreeIndex,
         folder: RelativePath
-    ): List<RelativePath> = index.foldersByParent[folder].orEmpty().sortedWith(
-        compareBy(naturalNameComparator) { it.name }
-    )
+    ): List<RelativePath> = index
+        .foldersByParent[folder]
+        .orEmpty()
+        .sortedWith(compareBy(naturalNameComparator) { it.name })
 
     /** The tree grouped once per flattening, so building the rows never scans it again. */
     private class TreeIndex(

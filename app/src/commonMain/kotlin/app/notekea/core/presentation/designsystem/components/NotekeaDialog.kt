@@ -31,8 +31,14 @@ fun NotekeaDialog(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        NotekeaDialogSurface(modifier = modifier, content = content)
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        NotekeaDialogSurface(
+            modifier = modifier,
+            content = content
+        )
     }
 }
 
@@ -46,7 +52,10 @@ private fun NotekeaDialogSurface(
         modifier = modifier,
         shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = MaterialTheme.colorScheme.outline),
+        border = BorderStroke(
+            width = NotekeaDimensions.BorderWidth,
+            color = MaterialTheme.colorScheme.outline
+        ),
         shadowElevation = ELEVATION_DP.dp,
         content = content
     )
@@ -56,8 +65,15 @@ private fun NotekeaDialogSurface(
 @Composable
 private fun NotekeaDialogPreview() {
     NotekeaPreviewThemes {
-        NotekeaDialogSurface(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
-            Box(modifier = Modifier.padding(all = NotekeaDimensions.SpacingXl)) { Text(text = PREVIEW_TEXT) }
+        NotekeaDialogSurface(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
+            Box(modifier = Modifier.padding(all = NotekeaDimensions.SpacingXl)) {
+                Text(text = PREVIEW_TEXT)
+            }
         }
     }
 }

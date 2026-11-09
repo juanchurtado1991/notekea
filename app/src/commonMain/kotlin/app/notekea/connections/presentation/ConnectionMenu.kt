@@ -23,11 +23,20 @@ fun ConnectionMenu(
 ) {
     val open = stringResource(resource = Res.string.connections_open)
     val beside = stringResource(resource = Res.string.related_open_beside)
+
     NotekeaContextMenuArea(
         sections = listOf(
             listOf(
-                NotekeaMenuItem(label = open, onClick = onOpen, icon = NotekeaIcons.Note),
-                NotekeaMenuItem(label = beside, onClick = onOpenBeside, icon = NotekeaIcons.SidePanel)
+                NotekeaMenuItem(
+                    label = open,
+                    onClick = onOpen,
+                    icon = NotekeaIcons.Note
+                ),
+                NotekeaMenuItem(
+                    label = beside,
+                    onClick = onOpenBeside,
+                    icon = NotekeaIcons.SidePanel
+                )
             )
         ),
         content = content
@@ -38,6 +47,9 @@ fun ConnectionMenu(
 @Composable
 private fun ConnectionMenuPreview() {
     NotekeaPreviewThemes {
-        ConnectionMenu(onOpen = {}, onOpenBeside = {}) { Text(text = PREVIEW_ROW) }
+        ConnectionMenu(
+            onOpen = {},
+            onOpenBeside = {}
+        ) { Text(text = PREVIEW_ROW) }
     }
 }

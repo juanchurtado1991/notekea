@@ -53,20 +53,40 @@ fun GraphInspector(
     modifier: Modifier = Modifier
 ) {
     val preview = state.preview
+
     Column(modifier = modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.weight(weight = 1f).fillMaxWidth().verticalScroll(state = rememberScrollState()),
+            modifier = Modifier
+                .weight(weight = 1f)
+                .fillMaxWidth()
+                .verticalScroll(state = rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
         ) {
             if (preview == null) {
-                Muted(text = stringResource(resource = Res.string.graph_inspector_empty), modifier = InsetModifier)
+                Muted(
+                    text = stringResource(resource = Res.string.graph_inspector_empty),
+                    modifier = InsetModifier
+                )
             } else {
                 Summary(preview = preview)
-                Connected(preview = preview, onIntent = onIntent)
-                Suggested(preview = preview, onIntent = onIntent)
-                LinkResult(state = state, onIntent = onIntent)
+
+                Connected(
+                    preview = preview,
+                    onIntent = onIntent
+                )
+
+                Suggested(
+                    preview = preview,
+                    onIntent = onIntent
+                )
+
+                LinkResult(
+                    state = state,
+                    onIntent = onIntent
+                )
             }
         }
+
         if (preview != null) {
             NotekeaButton(
                 text = stringResource(resource = Res.string.graph_open),
@@ -79,18 +99,25 @@ fun GraphInspector(
 }
 
 /** Where a section header's title starts and its count ends, so the text lines up under them. */
-private val InsetModifier = Modifier.padding(start = NotekeaDimensions.SpacingM * 2, end = NotekeaDimensions.SpacingS)
+private val InsetModifier = Modifier.padding(
+    start = NotekeaDimensions.SpacingM * 2,
+    end = NotekeaDimensions.SpacingS
+)
 
 @Composable
-private fun Summary(
-    preview: GraphPreview
-) {
+private fun Summary(preview: GraphPreview) {
     Column(
         modifier = InsetModifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
     ) {
-        Text(text = preview.name, style = MaterialTheme.typography.titleMedium, maxLines = 2)
+        Text(
+            text = preview.name,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 2
+        )
+
         if (preview.folder.isNotEmpty()) Muted(text = preview.folder)
+
         Text(
             text = preview.snippet,
             style = MaterialTheme.typography.bodySmall,
@@ -119,13 +146,22 @@ private fun Connected(
     onIntent: (GraphIntent) -> Unit
 ) {
     if (preview.connected.isEmpty()) return
+
     NotekeaSectionHeader(
         title = stringResource(resource = Res.string.graph_connected_to),
         count = preview.connected.size
     )
-    preview.connected.take(n = MAX_CONNECTED).forEach { path ->
-        NoteRow(path = path, color = MaterialTheme.colorScheme.primary, onIntent = onIntent)
-    }
+
+    preview
+        .connected
+        .take(n = MAX_CONNECTED)
+        .forEach { path ->
+            NoteRow(
+                path = path,
+                color = MaterialTheme.colorScheme.primary,
+                onIntent = onIntent
+            )
+        }
 }
 
 @Composable
@@ -134,18 +170,27 @@ private fun Suggested(
     onIntent: (GraphIntent) -> Unit
 ) {
     if (preview.suggested.isEmpty()) return
+
     NotekeaSectionHeader(
         title = stringResource(resource = Res.string.graph_suggested),
         count = preview.suggested.size
     )
-    preview.suggested.take(n = MAX_SUGGESTED).forEach { path ->
-        NoteRow(path = path, color = MaterialTheme.colorScheme.onSurface, onIntent = onIntent) {
-            TextAction(
-                text = stringResource(resource = Res.string.graph_link),
-                onClick = { onIntent(GraphIntent.OnLink(path = path)) }
-            )
+
+    preview
+        .suggested
+        .take(n = MAX_SUGGESTED)
+        .forEach { path ->
+            NoteRow(
+                path = path,
+                color = MaterialTheme.colorScheme.onSurface,
+                onIntent = onIntent
+            ) {
+                TextAction(
+                    text = stringResource(resource = Res.string.graph_link),
+                    onClick = { onIntent(GraphIntent.OnLink(path = path)) }
+                )
+            }
         }
-    }
 }
 
 /** A note's name, which selects it, and what can be done with it at the end. */
@@ -156,7 +201,10 @@ private fun NoteRow(
     onIntent: (GraphIntent) -> Unit,
     action: @Composable () -> Unit = {}
 ) {
-    Row(modifier = InsetModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = InsetModifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             text = path.nameWithoutExtension,
             modifier = Modifier
@@ -168,6 +216,7 @@ private fun NoteRow(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
         action()
     }
 }
@@ -182,7 +231,10 @@ private fun TextAction(
         text = text,
         modifier = Modifier
             .pointerHoverIcon(icon = PointerIcon.Hand)
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
             .padding(start = NotekeaDimensions.SpacingS),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.primary
@@ -196,6 +248,7 @@ private fun LinkResult(
     onIntent: (GraphIntent) -> Unit
 ) {
     val linked = state.linked
+
     if (state.linkFailed) {
         Text(
             text = stringResource(resource = Res.string.graph_link_failed),
@@ -204,11 +257,15 @@ private fun LinkResult(
             color = MaterialTheme.colorScheme.error
         )
     } else if (linked != null) {
-        Row(modifier = InsetModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = InsetModifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Muted(
                 text = stringResource(Res.string.graph_linked, linked.nameWithoutExtension),
                 modifier = Modifier.weight(weight = 1f)
             )
+
             TextAction(
                 text = stringResource(resource = Res.string.graph_link_undo),
                 onClick = { onIntent(GraphIntent.OnLinkUndo) }
@@ -221,7 +278,10 @@ private fun LinkResult(
 @Composable
 private fun GraphInspectorPreview() {
     NotekeaPreviewThemes {
-        GraphInspector(state = GraphPreviewData.state, onIntent = {})
+        GraphInspector(
+            state = GraphPreviewData.state,
+            onIntent = {}
+        )
     }
 }
 
@@ -229,6 +289,9 @@ private fun GraphInspectorPreview() {
 @Composable
 private fun GraphInspectorEmptyPreview() {
     NotekeaPreviewThemes {
-        GraphInspector(state = GraphPreviewData.state.copy(preview = null), onIntent = {})
+        GraphInspector(
+            state = GraphPreviewData.state.copy(preview = null),
+            onIntent = {}
+        )
     }
 }

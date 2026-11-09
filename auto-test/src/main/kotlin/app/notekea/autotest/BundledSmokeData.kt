@@ -16,13 +16,22 @@ object BundledSmokeData {
         index().forEach { relative ->
             val file = target.resolve(relative)
             Files.createDirectories(file.parent)
-            resource(path = relative).use { Files.copy(it, file, StandardCopyOption.REPLACE_EXISTING) }
+
+            resource(path = relative).use {
+                Files.copy(it, file, StandardCopyOption.REPLACE_EXISTING)
+            }
         }
+
         return target
     }
 
-    private fun index(): List<String> = resource(path = INDEX).bufferedReader().readLines().filter(String::isNotBlank)
+    private fun index(): List<String> = resource(path = INDEX)
+        .bufferedReader()
+        .readLines()
+        .filter(String::isNotBlank)
 
     private fun resource(path: String) =
-        requireNotNull(BundledSmokeData::class.java.getResourceAsStream(ROOT + path)) { "The smoke data lacks $path" }
+        requireNotNull(BundledSmokeData::class.java.getResourceAsStream(ROOT + path)) {
+            "The smoke data lacks $path"
+        }
 }

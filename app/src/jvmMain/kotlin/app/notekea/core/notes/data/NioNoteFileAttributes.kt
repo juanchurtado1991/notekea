@@ -19,10 +19,19 @@ class NioNoteFileAttributes : NoteFileAttributes {
     ) {
         val source = Path.of(sourcePath)
         val target = Path.of(targetPath)
+
         keeping {
-            val created = Files.readAttributes(source, BasicFileAttributes::class.java).creationTime()
-            Files.getFileAttributeView(target, BasicFileAttributeView::class.java).setTimes(null, null, created)
+            val created = Files.readAttributes(
+                source,
+                BasicFileAttributes::class.java
+            ).creationTime()
+
+            Files.getFileAttributeView(
+                target,
+                BasicFileAttributeView::class.java
+            ).setTimes(null, null, created)
         }
+
         keeping {
             Files.getFileAttributeView(source, PosixFileAttributeView::class.java)?.let {
                 Files.setPosixFilePermissions(target, it.readAttributes().permissions())
@@ -31,9 +40,7 @@ class NioNoteFileAttributes : NoteFileAttributes {
     }
 
     /** Each attribute apart: a volume that refuses a creation time still takes the permissions. */
-    private inline fun keeping(
-        attribute: () -> Unit
-    ) {
+    private inline fun keeping(attribute: () -> Unit) {
         try {
             attribute()
         } catch (_: IOException) {

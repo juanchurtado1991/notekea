@@ -6,12 +6,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.platform.displayPath
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.presentation.platform.displayPath
 import app.notekea.resources.Res
 import app.notekea.resources.error_notes_changed_on_disk
 import app.notekea.resources.error_notes_clipboard_image_unreadable
@@ -20,9 +20,9 @@ import app.notekea.resources.error_notes_entry_missing
 import app.notekea.resources.error_notes_hidden_name
 import app.notekea.resources.error_notes_invalid_name
 import app.notekea.resources.error_notes_name_taken
+import app.notekea.resources.error_notes_open_failed
 import app.notekea.resources.error_notes_operation_failed
 import app.notekea.resources.error_notes_permission_denied
-import app.notekea.resources.error_notes_open_failed
 import app.notekea.resources.error_notes_reveal_failed
 import app.notekea.resources.error_notes_unreadable
 import app.notekea.resources.error_notes_vault_missing
@@ -42,11 +42,23 @@ internal fun notesErrorMessage(
     error: NotesError,
     platformConventions: PlatformConventions
 ): String {
-    val shownVault: (String) -> String = { displayPath(path = it, platformConventions = platformConventions) }
-    return when (error) {
-        is NotesError.ChangedOnDisk -> stringResource(Res.string.error_notes_changed_on_disk, error.path)
+    val shownVault: (String) -> String = {
+        displayPath(
+            path = it,
+            platformConventions = platformConventions
+        )
+    }
 
-        is NotesError.EntryMissing -> stringResource(Res.string.error_notes_entry_missing, error.path)
+    return when (error) {
+        is NotesError.ChangedOnDisk -> stringResource(
+            Res.string.error_notes_changed_on_disk,
+            error.path
+        )
+
+        is NotesError.EntryMissing -> stringResource(
+            Res.string.error_notes_entry_missing,
+            error.path
+        )
 
         NotesError.HiddenName -> stringResource(resource = Res.string.error_notes_hidden_name)
 
@@ -54,7 +66,10 @@ internal fun notesErrorMessage(
 
         is NotesError.NameTaken -> stringResource(Res.string.error_notes_name_taken, error.name)
 
-        is NotesError.OperationFailed -> stringResource(Res.string.error_notes_operation_failed, error.path)
+        is NotesError.OperationFailed -> stringResource(
+            Res.string.error_notes_operation_failed,
+            error.path
+        )
 
         is NotesError.Unreadable -> stringResource(Res.string.error_notes_unreadable, error.path)
 
@@ -63,15 +78,26 @@ internal fun notesErrorMessage(
             shownVault(error.path)
         )
 
-        is NotesError.RevealFailed -> stringResource(Res.string.error_notes_reveal_failed, error.path)
+        is NotesError.RevealFailed -> stringResource(
+            Res.string.error_notes_reveal_failed,
+            error.path
+        )
 
         is NotesError.OpenFailed -> stringResource(Res.string.error_notes_open_failed, error.path)
 
-        NotesError.ClipboardImageUnreadable -> stringResource(Res.string.error_notes_clipboard_image_unreadable)
+        NotesError.ClipboardImageUnreadable -> stringResource(
+            Res.string.error_notes_clipboard_image_unreadable
+        )
 
-        is NotesError.ClipboardToolMissing -> stringResource(Res.string.error_notes_clipboard_tool_missing, error.tool)
+        is NotesError.ClipboardToolMissing -> stringResource(
+            Res.string.error_notes_clipboard_tool_missing,
+            error.tool
+        )
 
-        is NotesError.VaultMissing -> stringResource(Res.string.error_notes_vault_missing, shownVault(error.path))
+        is NotesError.VaultMissing -> stringResource(
+            Res.string.error_notes_vault_missing,
+            shownVault(error.path)
+        )
     }
 }
 
@@ -92,11 +118,15 @@ private fun notesErrorMessagePreview() {
         NotesError.ClipboardToolMissing(tool = PREVIEW_TOOL),
         NotesError.VaultMissing(path = PREVIEW_VAULT)
     )
+
     NotekeaPreviewThemes {
         Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
             errors.forEach {
                 Text(
-                    text = notesErrorMessage(error = it, platformConventions = PreviewPlatformConventions.linux),
+                    text = notesErrorMessage(
+                        error = it,
+                        platformConventions = PreviewPlatformConventions.linux
+                    ),
                     style = MaterialTheme.typography.bodySmall
                 )
             }

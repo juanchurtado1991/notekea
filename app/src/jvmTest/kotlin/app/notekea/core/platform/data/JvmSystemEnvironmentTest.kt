@@ -19,18 +19,28 @@ class JvmSystemEnvironmentTest {
             expected = System.getProperty(OS_NAME_PROPERTY),
             actual = environment.operatingSystemName
         )
+
         assertEquals(
             expected = System.getProperty(USER_HOME_PROPERTY),
             actual = environment.userHome
         )
+
         assertTrue(actual = environment.userHome.isNotBlank())
     }
 
     @Test
     fun `versions come from the JVM, and the app is in development when not packaged`() {
         assertEquals(
-            expected = Triple(System.getProperty("os.version"), System.getProperty("java.version"), "development"),
-            actual = Triple(environment.operatingSystemVersion, environment.javaVersion, environment.appVersion)
+            expected = Triple(
+                System.getProperty("os.version"),
+                System.getProperty("java.version"),
+                "development"
+            ),
+            actual = Triple(
+                environment.operatingSystemVersion,
+                environment.javaVersion,
+                environment.appVersion
+            )
         )
     }
 

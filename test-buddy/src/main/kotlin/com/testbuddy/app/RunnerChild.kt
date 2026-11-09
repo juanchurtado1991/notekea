@@ -19,10 +19,15 @@ internal fun runAutomatedCases(
         out.println(event.line())
         out.flush()
     }
-    SuiteRunner(suite = suite, workFolder = workFolder).run(
+
+    SuiteRunner(
+        suite = suite,
+        workFolder = workFolder
+    ).run(
         onStart = { send(RunnerEvent.Started(id = it.id)) },
         onStep = { send(RunnerEvent.Step(text = it)) },
         onResult = { send(RunnerEvent.Ended(result = it)) }
     )
+
     send(RunnerEvent.Done)
 }

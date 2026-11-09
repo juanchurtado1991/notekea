@@ -1,15 +1,15 @@
 package app.notekea.shell.data
 
 import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.shell.domain.EditorPane
+import app.notekea.core.notes.data.VaultKeyHash
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.shell.domain.EditorPane
 import app.notekea.shell.domain.Workspace
 import com.russhwolf.settings.MapSettings
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.core.notes.data.VaultKeyHash
 
 class SettingsWorkspaceStoreTest {
     private val testDispatcher = StandardTestDispatcher()
@@ -25,16 +25,29 @@ class SettingsWorkspaceStoreTest {
             val split = Workspace(
                 panes = listOf(
                     EditorPane(
-                        tabs = listOf("Recipes/Arepas.md", "attachments/plate.png").map(::RelativePath),
+                        tabs = listOf(
+                            "Recipes/Arepas.md",
+                            "attachments/plate.png"
+                        ).map(::RelativePath),
                         active = 1
                     ),
-                    EditorPane(tabs = listOf(RelativePath(value = "Projects")), active = 0)
+                    EditorPane(
+                        tabs = listOf(RelativePath(value = "Projects")),
+                        active = 0
+                    )
                 ),
                 activePane = 1
             )
 
-            store.write(vaultPath = "/home/ana/Notes", workspace = split)
-            store.write(vaultPath = "/home/ana/Work", workspace = Workspace.EMPTY)
+            store.write(
+                vaultPath = "/home/ana/Notes",
+                workspace = split
+            )
+
+            store.write(
+                vaultPath = "/home/ana/Work",
+                workspace = Workspace.EMPTY
+            )
 
             assertEquals(
                 expected = listOf(split, Workspace.EMPTY, null),
@@ -45,14 +58,22 @@ class SettingsWorkspaceStoreTest {
         }
 
     @Test
-    fun `text that does not make a workspace is no workspace`() = runTest(context = testDispatcher) {
+    fun `text that does not make a workspace is no workspace`() = runTest(
+        context = testDispatcher
+    ) {
         val key = "workspace." + VaultKeyHash.of(vaultPath = "/v")
-        val broken = listOf("x\n/0\nA.md", "0\nA.md", "3\n/0\nA.md", "0\n/5\nA.md", "0\n/0\n/0\n/0\nA.md")
+
+        val broken =
+            listOf("x\n/0\nA.md", "0\nA.md", "3\n/0\nA.md", "0\n/5\nA.md", "0\n/0\n/0\n/0\nA.md")
 
         assertEquals(
             expected = broken.map { null },
             actual = broken.map { text ->
-                settings.putString(key = key, value = text)
+                settings.putString(
+                    key = key,
+                    value = text
+                )
+
                 store.read(vaultPath = "/v")
             }
         )

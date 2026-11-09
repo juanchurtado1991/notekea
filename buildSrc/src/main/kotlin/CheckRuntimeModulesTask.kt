@@ -15,8 +15,8 @@ import javax.inject.Inject
 
 /**
  * Asks jdeps which JDK modules an app and its libraries need, as Compose's `suggestRuntimeModules` does, and fails when
- * one is missing from [packagedModules]: without it the installed app crashes the first time it reaches that code
- * (issue #68). Shared by Notekea and Notekea QA, which ship the same runtime.
+ * one is missing from [packagedModules]: without it the installed app crashes the first time it reaches that code.
+ * Shared by Notekea and Notekea QA, which ship the same runtime.
  */
 abstract class CheckRuntimeModulesTask : DefaultTask() {
     @get:InputFiles
@@ -53,7 +53,9 @@ abstract class CheckRuntimeModulesTask : DefaultTask() {
             )
             standardOutput = output
         }
-        val needed = output.toString().trim().split(",").map(String::trim).filter(String::isNotEmpty)
+        val needed = output.toString().trim().split(
+            ","
+        ).map(String::trim).filter(String::isNotEmpty)
         val missing = needed - packagedModules.get().toSet()
         if (missing.isNotEmpty()) {
             throw GradleException(

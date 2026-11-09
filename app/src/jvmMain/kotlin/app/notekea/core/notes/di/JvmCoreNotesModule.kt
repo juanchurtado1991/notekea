@@ -17,9 +17,9 @@ import app.notekea.core.notes.domain.NoteScanner
 import app.notekea.core.notes.domain.VaultSettingsReader
 import app.notekea.core.notes.domain.VectorIndex
 import app.notekea.core.platform.domain.PlatformConventions
-import java.nio.file.Path
 import okio.FileSystem
 import org.koin.dsl.module
+import java.nio.file.Path
 
 private const val INDEX_FOLDER = "index"
 
@@ -28,13 +28,17 @@ private const val INDEX_FOLDER = "index"
  * opener and the search indexes on Lucene.
  */
 val jvmCoreNotesModule = module {
-    // The search indexes (ROADMAP.md 2.3), one per vault, in the app data's `index` folder: never inside a vault.
+    // The search indexes, one per vault, in the app data's `index` folder: never inside a vault.
     single<VectorIndex> {
         LuceneVectorIndex(
-            indexRoot = Path.of(get<PlatformConventions>().appDataDirectory, INDEX_FOLDER).toString(),
+            indexRoot = Path.of(
+                get<PlatformConventions>().appDataDirectory,
+                INDEX_FOLDER
+            ).toString(),
             dispatchers = get()
         )
     }
+
     single<FileOpener> {
         ProcessFileOpener(
             operatingSystem = get<PlatformConventions>().operatingSystem,
@@ -42,6 +46,7 @@ val jvmCoreNotesModule = module {
             dispatchers = get()
         )
     }
+
     single<NoteContentStore> {
         OkioNoteContentStore(
             fileSystem = FileSystem.SYSTEM,
@@ -49,8 +54,32 @@ val jvmCoreNotesModule = module {
             attributes = NioNoteFileAttributes()
         )
     }
-    single<NoteFileOperations> { OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
-    single<AttachmentStore> { OkioAttachmentStore(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
-    single<VaultSettingsReader> { ObsidianVaultSettingsReader(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
-    single<NoteScanner> { OkioNoteScanner(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
+
+    single<NoteFileOperations> {
+        OkioNoteFileOperations(
+            fileSystem = FileSystem.SYSTEM,
+            dispatchers = get()
+        )
+    }
+
+    single<AttachmentStore> {
+        OkioAttachmentStore(
+            fileSystem = FileSystem.SYSTEM,
+            dispatchers = get()
+        )
+    }
+
+    single<VaultSettingsReader> {
+        ObsidianVaultSettingsReader(
+            fileSystem = FileSystem.SYSTEM,
+            dispatchers = get()
+        )
+    }
+
+    single<NoteScanner> {
+        OkioNoteScanner(
+            fileSystem = FileSystem.SYSTEM,
+            dispatchers = get()
+        )
+    }
 }

@@ -17,6 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.PassageSnippet
+import app.notekea.core.notes.domain.RelatedNote
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.NotekeaLazyScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaPassageRow
@@ -25,16 +29,6 @@ import app.notekea.core.presentation.designsystem.components.focusBorder
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
-import app.notekea.core.notes.domain.IndexRunError
-import app.notekea.core.notes.domain.RelatedNote
-import app.notekea.core.notes.domain.PassageSnippet
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.connections.presentation.ConnectionActions
-import app.notekea.connections.presentation.ConnectionMenu
-import app.notekea.connections.presentation.ConnectionsMuted
-import app.notekea.connections.presentation.ConnectionsSkeleton
-import app.notekea.connections.presentation.connectionAction
-import app.notekea.connections.presentation.folderOf
 import app.notekea.resources.Res
 import app.notekea.resources.related_empty
 import app.notekea.resources.related_error_index
@@ -42,12 +36,12 @@ import app.notekea.resources.related_error_model
 import app.notekea.resources.related_insert_link
 import app.notekea.resources.related_linked
 import app.notekea.resources.related_not_ready
-import app.notekea.resources.related_too_long
 import app.notekea.resources.related_open_beside
+import app.notekea.resources.related_too_long
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Connections' Related tab (`ROADMAP.md` 2.4, design A): a row per related note (name, folder, the passage that
+ * Connections' Related tab: a row per related note (name, folder, the passage that
  * matched) with Open to the side and Insert link on hover, a click opening it; or why there is none, bars standing in
  * for the rows the first time they are found; then "Already linked", folded unless opened.
  */
@@ -58,27 +52,48 @@ fun RelatedList(
     actions: ConnectionActions
 ) {
     val listState = rememberLazyListState()
+
     NotekeaLazyScrollArea(state = listState) {
         LazyColumn(state = listState) {
-            item(key = STATUS_ITEM, contentType = STATUS_ITEM) {
+            item(
+                key = STATUS_ITEM,
+                contentType = STATUS_ITEM
+            ) {
                 Column {
                     statusText(state = state)?.let { ConnectionsMuted(text = it) }
-                    if (state.related.isEmpty() && state.isLoading && state.error == null) ConnectionsSkeleton()
+
+                    if (state.related.isEmpty() &&
+                        state.isLoading &&
+                        state.error == null
+                    ) {
+                        ConnectionsSkeleton()
+                    }
                 }
             }
-            items(items = state.related, key = { it.path.value }, contentType = { RELATED_ITEM }) {
-                RelatedRow(note = it, actions = actions)
+
+            items(
+                items = state.related,
+                key = { it.path.value },
+                contentType = { RELATED_ITEM }
+            ) {
+                RelatedRow(
+                    note = it,
+                    actions = actions
+                )
             }
-            linkedItems(state = state, onIntent = onIntent, actions = actions)
+
+            linkedItems(
+                state = state,
+                onIntent = onIntent,
+                actions = actions
+            )
         }
     }
 }
 
 /** Why no row shows, if none does: the index not ready yet, an error, or nothing related. */
 @Composable
-private fun statusText(
-    state: RelatedNotesState
-): String? = when {
+private fun statusText(state: RelatedNotesState): String? = when {
     state.error == IndexRunError.Model -> stringResource(Res.string.related_error_model)
     state.error == IndexRunError.Index -> stringResource(Res.string.related_error_index)
     state.related.isNotEmpty() || state.isLoading -> null
@@ -95,7 +110,11 @@ private fun RelatedRow(
     val path = note.path
     val beside = stringResource(Res.string.related_open_beside)
     val insertLink = stringResource(Res.string.related_insert_link)
-    ConnectionMenu(onOpen = { actions.onOpen(path) }, onOpenBeside = { actions.onOpenBeside(path) }) {
+
+    ConnectionMenu(
+        onOpen = { actions.onOpen(path) },
+        onOpenBeside = { actions.onOpenBeside(path) }
+    ) {
         NotekeaPassageRow(
             title = path.nameWithoutExtension,
             subtitle = folderOf(path = path),
@@ -113,6 +132,7 @@ private fun RelatedRow(
                 label = beside,
                 onClick = { actions.onOpenBeside(path) }
             )
+
             NotekeaIconButton(
                 icon = NotekeaIcons.NoteLink,
                 label = insertLink,
@@ -129,7 +149,11 @@ private fun LazyListScope.linkedItems(
     actions: ConnectionActions
 ) {
     if (state.linked.isEmpty()) return
-    item(key = LINKED_HEADER_ITEM, contentType = LINKED_HEADER_ITEM) {
+
+    item(
+        key = LINKED_HEADER_ITEM,
+        contentType = LINKED_HEADER_ITEM
+    ) {
         NotekeaSectionHeader(
             title = stringResource(Res.string.related_linked),
             isOpen = state.isLinkedOpen,
@@ -137,16 +161,33 @@ private fun LazyListScope.linkedItems(
             count = state.linked.size
         )
     }
+
     if (!state.isLinkedOpen) return
-    items(items = state.linked, key = { LINKED_KEY_PREFIX + it.value }, contentType = { LINKED_ITEM }) { path ->
-        ConnectionMenu(onOpen = { actions.onOpen(path) }, onOpenBeside = { actions.onOpenBeside(path) }) {
+
+    items(
+        items = state.linked,
+        key = {
+            LINKED_KEY_PREFIX + it.value
+        },
+        contentType = { LINKED_ITEM }
+    ) { path ->
+        ConnectionMenu(
+            onOpen = { actions.onOpen(path) },
+            onOpenBeside = { actions.onOpenBeside(path) }
+        ) {
             Text(
                 text = path.nameWithoutExtension,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusBorder(color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.small)
+                    .focusBorder(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = MaterialTheme.shapes.small
+                    )
                     .clickable(role = Role.Button) { actions.onOpen(path) }
-                    .padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingXs),
+                    .padding(
+                        horizontal = NotekeaDimensions.SpacingM,
+                        vertical = NotekeaDimensions.SpacingXs
+                    ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -157,19 +198,32 @@ private fun LazyListScope.linkedItems(
 @Preview
 @Composable
 private fun RelatedListPreview() {
-    val snippet = PassageSnippet(text = PREVIEW_TEXT, highlight = 0..PREVIEW_TEXT.lastIndex)
+    val snippet = PassageSnippet(
+        text = PREVIEW_TEXT,
+        highlight = 0..PREVIEW_TEXT.lastIndex
+    )
+
     NotekeaPreviewThemes {
         Box(modifier = Modifier.height(height = PREVIEW_HEIGHT_DP.dp)) {
             RelatedList(
                 state = RelatedNotesState(
                     related = listOf(
-                        RelatedNote(path = RelativePath(value = PREVIEW_NOTE), score = 1f, snippet = snippet)
+                        RelatedNote(
+                            path = RelativePath(value = PREVIEW_NOTE),
+                            score = 1f,
+                            snippet = snippet
+                        )
                     ),
                     linked = listOf(RelativePath(value = PREVIEW_LINKED)),
                     isIndexReady = true
                 ),
                 onIntent = {},
-                actions = ConnectionActions(onOpen = {}, onReveal = { _, _ -> }, onOpenBeside = {}, onInsertLink = {})
+                actions = ConnectionActions(
+                    onOpen = {},
+                    onReveal = { _, _ -> },
+                    onOpenBeside = {},
+                    onInsertLink = {}
+                )
             )
         }
     }

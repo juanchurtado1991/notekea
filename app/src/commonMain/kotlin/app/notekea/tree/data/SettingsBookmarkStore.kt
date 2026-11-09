@@ -1,12 +1,12 @@
 package app.notekea.tree.data
 
 import app.notekea.core.domain.AppDispatchers
+import app.notekea.core.notes.data.VaultKeyHash
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.tree.domain.BookmarkStore
 import app.notekea.tree.domain.Bookmarks
-import app.notekea.core.notes.domain.RelativePath
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.withContext
-import app.notekea.core.notes.data.VaultKeyHash
 
 /**
  * [BookmarkStore] on Multiplatform Settings: one key per vault (`bookmarks.<hash>`, [VaultKeyHash]) holding the
@@ -16,11 +16,16 @@ class SettingsBookmarkStore(
     private val settings: Settings,
     private val dispatchers: AppDispatchers
 ) : BookmarkStore {
-    override suspend fun read(
-        vaultPath: String
-    ): Bookmarks = withContext(context = dispatchers.io) {
+    override suspend fun read(vaultPath: String): Bookmarks = withContext(
+        context = dispatchers.io
+    ) {
         val text = settings.getStringOrNull(key = keyOf(vaultPath = vaultPath)).orEmpty()
-        val paths = text.split(LINE_SEPARATOR).filter { it.isNotBlank() }.map { RelativePath(value = it) }
+
+        val paths = text
+            .split(LINE_SEPARATOR)
+            .filter { it.isNotBlank() }
+            .map { RelativePath(value = it) }
+
         Bookmarks(paths = paths.distinct())
     }
 
@@ -29,17 +34,23 @@ class SettingsBookmarkStore(
         bookmarks: Bookmarks
     ) = withContext(context = dispatchers.io) {
         val key = keyOf(vaultPath = vaultPath)
+
         if (bookmarks.paths.isEmpty()) {
             settings.remove(key = key)
         } else {
-            val text = bookmarks.paths.joinToString(separator = LINE_SEPARATOR) { it.value }
-            settings.putString(key = key, value = text)
+            val text = bookmarks
+                .paths
+                .joinToString(separator = LINE_SEPARATOR) { it.value }
+
+            settings.putString(
+                key = key,
+                value = text
+            )
         }
     }
 
-    private fun keyOf(
-        vaultPath: String
-    ): String = KEY_PREFIX + VaultKeyHash.of(vaultPath = vaultPath)
+    private fun keyOf(vaultPath: String): String =
+        KEY_PREFIX + VaultKeyHash.of(vaultPath = vaultPath)
 
     companion object {
         private const val KEY_PREFIX = "bookmarks."

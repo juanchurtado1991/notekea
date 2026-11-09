@@ -1,15 +1,14 @@
 package com.testbuddy
 
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.test.ComposeTimeoutException
-import androidx.compose.ui.test.click
-import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.semantics.getOrNull
-import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
@@ -20,25 +19,24 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
-import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.compose.ui.test.withKeysDown
+import androidx.compose.ui.text.TextLayoutResult
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
 
 /**
- * What a case's body can do, in a person's words: click what shows a text, type, press a shortcut, and expect texts
- * and files. Every expectation waits up to [waitMillis] for the app, which works in the background, and fails with a
- * [CaseFailure] a tester can read. [ui] is Compose UI Test itself, for what the verbs do not cover. Each verb tells
- * [onStep] what it does (`Click “Personal Notes”`), which the manager shows while the case runs; a host's own verbs can
- * name a step of theirs with [step].
+ * What a case's body can do, in a person's words: click what shows a text, type, press a shortcut, and expect texts and
+ * files. Every expectation waits up to [waitMillis] and fails with a [CaseFailure] a tester can read. [ui] is Compose
+ * UI Test itself. Each verb tells [onStep] what it does; a host's own verbs can name a step with [step].
  */
 @TestBuddyDsl
 public class CaseScope internal constructor(
@@ -53,7 +51,10 @@ public class CaseScope internal constructor(
         onStep(description)
     }
 
-    private val files = CaseFiles(folders = folders, waitFor = { holdsInTime(condition = it) })
+    private val files = CaseFiles(
+        folders = folders,
+        waitFor = { holdsInTime(condition = it) }
+    )
 
     /** Clicks the first element that shows [text] (or contains it, with [substring]), once it shows. */
     public fun click(
@@ -61,9 +62,20 @@ public class CaseScope internal constructor(
         substring: Boolean = false
     ) {
         step(description = "Click “$text”")
-        awaitText(text = text, substring = substring)
-        firstShown(matcher = hasText(text = text, substring = substring)).apply {
+
+        awaitText(
+            text = text,
+            substring = substring
+        )
+
+        firstShown(
+            matcher = hasText(
+                text = text,
+                substring = substring
+            )
+        ).apply {
             runCatching { performScrollTo() }
+
             clickWhenStill()
         }
     }
@@ -71,8 +83,14 @@ public class CaseScope internal constructor(
     /** Right-clicks the first element that shows [text], once it shows, to open its context menu. */
     public fun rightClick(text: String) {
         step(description = "Right-click “$text”")
-        awaitText(text = text, substring = false)
+
+        awaitText(
+            text = text,
+            substring = false
+        )
+
         ui.waitForIdle()
+
         firstShown(matcher = hasText(text = text)).performMouseInput { rightClick() }
     }
 
@@ -82,25 +100,52 @@ public class CaseScope internal constructor(
      */
     public fun clickWords(words: String) {
         step(description = "Click “$words”")
-        awaitText(text = words, substring = true)
+
+        awaitText(
+            text = words,
+            substring = true
+        )
+
         // A text's links can follow it by a frame: a click before they settle lands on plain words.
         ui.waitForIdle()
-        val node = firstShown(matcher = hasText(text = words, substring = true))
+
+        val node = firstShown(
+            matcher = hasText(
+                text = words,
+                substring = true
+            )
+        )
+
         // A person scrolls to what they click; a text in a scrolling view may be below the window.
         runCatching { node.performScrollTo() }
+
         val semantics = node.fetchSemanticsNode()
+
         val shown = (
-            semantics.config.getOrNull(SemanticsProperties.Text).orEmpty() +
+            semantics
+                .config
+                .getOrNull(SemanticsProperties.Text)
+                .orEmpty() +
                 listOfNotNull(semantics.config.getOrNull(SemanticsProperties.EditableText))
             ).map { it.text }
+
         val text = shown.first { it.contains(words) }
+
         val layouts = mutableListOf<TextLayoutResult>()
-        semantics.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts)
-        val layout =
-            layouts.firstOrNull() ?: throw CaseFailure(message = "\"$words\" is not in a text that can be clicked")
+
+        semantics
+            .config
+            .getOrNull(SemanticsActions.GetTextLayoutResult)
+            ?.action
+            ?.invoke(layouts)
+
+        val layout = layouts.firstOrNull()
+            ?: throw CaseFailure(message = "\"$words\" is not in a text that can be clicked")
+
         // The middle of the first word: words that wrap onto two lines have a line's end between them, not the link.
         val firstWord = words.substringBefore(delimiter = ' ')
         val box = layout.getBoundingBox(offset = text.indexOf(words) + firstWord.length / 2)
+
         node.performMouseInput { click(position = box.center) }
     }
 
@@ -108,7 +153,12 @@ public class CaseScope internal constructor(
     public fun clickIcon(label: String) {
         step(description = "Click the $label button")
         val icon = hasContentDescription(value = label)
-        expect(matcher = icon, failure = "expected a button labeled \"$label\", it did not appear")
+
+        expect(
+            matcher = icon,
+            failure = "expected a button labeled \"$label\", it did not appear"
+        )
+
         firstShown(matcher = icon).clickWhenStill()
     }
 
@@ -116,7 +166,12 @@ public class CaseScope internal constructor(
     public fun type(text: String) {
         step(description = "Type “$text”")
         val field = isFocused() and hasSetTextAction()
-        expect(matcher = field, failure = "nothing was ready to type \"$text\" in: click a text field first")
+
+        expect(
+            matcher = field,
+            failure = "nothing was ready to type \"$text\" in: click a text field first"
+        )
+
         ui.onNode(matcher = field).performTextInput(text = text)
     }
 
@@ -124,21 +179,30 @@ public class CaseScope internal constructor(
     public fun clearText() {
         step(description = "Clear the field")
         val field = isFocused() and hasSetTextAction()
-        expect(matcher = field, failure = "nothing was ready to clear: click a text field first")
+
+        expect(
+            matcher = field,
+            failure = "nothing was ready to clear: click a text field first"
+        )
+
         ui.onNode(matcher = field).performTextClearance()
     }
 
     /** Presses [shortcut] with this system's keys (`Mod` is Cmd on macOS, Ctrl elsewhere). */
     public fun press(shortcut: Shortcut) {
         step(description = "Press ${shortcut.describe(system = system)}")
+
         keyboardTarget().performKeyInput {
-            withKeysDown(keys = shortcut.modifierKeysOn(system = system)) { pressKey(key = shortcut.key) }
+            withKeysDown(keys = shortcut.modifierKeysOn(system = system)) {
+                pressKey(key = shortcut.key)
+            }
         }
     }
 
     /** Presses [key] alone: Enter, Escape, an arrow. */
     public fun press(key: Key) {
         step(description = "Press ${keyName(key = key)}")
+
         keyboardTarget().performKeyInput { pressKey(key = key) }
     }
 
@@ -146,18 +210,36 @@ public class CaseScope internal constructor(
     public fun scrollTo(text: String) {
         step(description = "Scroll to “$text”")
         val target = hasText(text = text)
-        val isMade = ui.onAllNodes(matcher = target).fetchSemanticsNodes().isNotEmpty()
+
+        val isMade = ui
+            .onAllNodes(matcher = target)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+
         if (isMade) {
-            ui.onAllNodes(matcher = target).onFirst().performScrollTo()
+            ui
+                .onAllNodes(matcher = target)
+                .onFirst()
+                .performScrollTo()
+
             return
         }
+
         val lists = ui.onAllNodes(matcher = hasScrollToNodeAction())
         val count = lists.fetchSemanticsNodes().size
+
         val list = (0 until count).firstOrNull { index ->
             runCatching { lists[index].performScrollToNode(matcher = target) }.isSuccess
         }
-        if (list == null) throw CaseFailure(message = "expected a list holding \"$text\", none had it")
-        awaitText(text = text, substring = false)
+
+        if (list == null) {
+            throw CaseFailure(message = "expected a list holding \"$text\", none had it")
+        }
+
+        awaitText(
+            text = text,
+            substring = false
+        )
     }
 
     /** Waits until something shows [text] (or contains it, with [substring]). */
@@ -166,7 +248,11 @@ public class CaseScope internal constructor(
         substring: Boolean = false
     ) {
         step(description = "Expect “$text”")
-        awaitText(text = text, substring = substring)
+
+        awaitText(
+            text = text,
+            substring = substring
+        )
     }
 
     /** Waits until [text] shows, without naming a step: what a verb does before acting on the text. */
@@ -175,7 +261,10 @@ public class CaseScope internal constructor(
         substring: Boolean
     ) {
         expect(
-            matcher = hasText(text = text, substring = substring),
+            matcher = hasText(
+                text = text,
+                substring = substring
+            ),
             failure = "expected to see \"$text\", it did not appear"
         )
     }
@@ -185,7 +274,14 @@ public class CaseScope internal constructor(
         substring: Boolean = false
     ) {
         step(description = "Expect no “$text”")
-        val holds = holdsInTime { !isTextShown(text = text, substring = substring) }
+
+        val holds = holdsInTime {
+            !isTextShown(
+                text = text,
+                substring = substring
+            )
+        }
+
         if (!holds) throw CaseFailure(message = "expected \"$text\" to go away, it stayed")
     }
 
@@ -199,7 +295,14 @@ public class CaseScope internal constructor(
         settleMillis: Long = DEFAULT_SETTLE_MILLIS
     ) {
         step(description = "Expect “$text” never to show")
-        val appeared = holdsInTime(timeoutMillis = settleMillis) { isTextShown(text = text, substring = substring) }
+
+        val appeared = holdsInTime(timeoutMillis = settleMillis) {
+            isTextShown(
+                text = text,
+                substring = substring
+            )
+        }
+
         if (appeared) throw CaseFailure(message = "expected \"$text\" to stay away, it appeared")
     }
 
@@ -207,8 +310,15 @@ public class CaseScope internal constructor(
         text: String,
         substring: Boolean
     ): Boolean {
-        val nodes = ui.onAllNodes(matcher = hasText(text = text, substring = substring))
+        val nodes = ui.onAllNodes(
+            matcher = hasText(
+                text = text,
+                substring = substring
+            )
+        )
+
         val count = nodes.fetchSemanticsNodes().size
+
         // A node can leave between counting and looking at it: gone counts as not shown.
         return (0 until count).any { nodes[it].isShown() }
     }
@@ -223,7 +333,12 @@ public class CaseScope internal constructor(
         containing: String? = null
     ) {
         step(description = "Expect the file “$path”")
-        files.expectFile(path = path, content = content, containing = containing)
+
+        files.expectFile(
+            path = path,
+            content = content,
+            containing = containing
+        )
     }
 
     /**
@@ -237,7 +352,11 @@ public class CaseScope internal constructor(
     ) {
         step(description = "Expect the file “$path” to stay as it is")
         val file = files.resolve(path = path)
-        val changed = holdsInTime(timeoutMillis = settleMillis) { Files.readString(file) != content }
+
+        val changed = holdsInTime(timeoutMillis = settleMillis) {
+            Files.readString(file) != content
+        }
+
         if (changed) throw CaseFailure(message = "expected \"$path\" to stay as it was, it changed")
     }
 
@@ -257,7 +376,10 @@ public class CaseScope internal constructor(
         failure: String
     ) {
         try {
-            ui.waitUntilAtLeastOneExists(matcher = matcher, timeoutMillis = waitMillis)
+            ui.waitUntilAtLeastOneExists(
+                matcher = matcher,
+                timeoutMillis = waitMillis
+            )
         } catch (exception: ComposeTimeoutException) {
             throw CaseFailure(message = failure).apply { initCause(exception) }
         }
@@ -274,28 +396,39 @@ public class CaseScope internal constructor(
         ui.waitForIdle()
         var bounds = fetchSemanticsNode().boundsInRoot
         var stillSince = TimeSource.Monotonic.markNow()
+
         holdsInTime {
             val now = runCatching { fetchSemanticsNode().boundsInRoot }.getOrNull() ?: bounds
+
             if (now != bounds) {
                 bounds = now
                 stillSince = TimeSource.Monotonic.markNow()
             }
+
             stillSince.elapsedNow() >= STILL_TIME
         }
+
         performClick()
     }
 
     private fun firstShown(matcher: SemanticsMatcher): SemanticsNodeInteraction {
         val nodes = ui.onAllNodes(matcher = matcher)
         val count = nodes.fetchSemanticsNodes().size
-        return (0 until count).map { nodes[it] }.firstOrNull { it.isShown() } ?: nodes.onFirst()
+
+        return (0 until count).map {
+            nodes[it]
+        }.firstOrNull { it.isShown() } ?: nodes.onFirst()
     }
 
     private fun holdsInTime(
         timeoutMillis: Long = waitMillis,
         condition: () -> Boolean
     ): Boolean = try {
-        ui.waitUntil(timeoutMillis = timeoutMillis, condition = condition)
+        ui.waitUntil(
+            timeoutMillis = timeoutMillis,
+            condition = condition
+        )
+
         true
     } catch (_: ComposeTimeoutException) {
         false
@@ -304,6 +437,7 @@ public class CaseScope internal constructor(
     private fun keyboardTarget(): SemanticsNodeInteraction {
         val focused = ui.onAllNodes(matcher = isFocused())
         val hasFocus = focused.fetchSemanticsNodes().isNotEmpty()
+
         return if (hasFocus) focused.onFirst() else ui.onAllNodes(matcher = isRoot()).onFirst()
     }
 

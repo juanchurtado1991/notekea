@@ -15,9 +15,9 @@ import app.notekea.core.appearance.domain.ThemeMode
 val LocalNotekeaCodeTextStyle = staticCompositionLocalOf { TextStyle.Default }
 
 /**
- * Root theme of the app: the color [theme] chosen in Settings → Appearance ([LocalAppearance], `ROADMAP.md` 2.12) in
- * light or dark as its mode says (System follows the system's setting, [LocalSystemDarkTheme] where Compose cannot read
- * it), bundled typography, 6 dp control and 10 dp card corners. Every screen and the component gallery render inside it.
+ * Root theme of the app: the color [theme] chosen in Settings → Appearance ([LocalAppearance]) in light or dark as its
+ * mode says (System follows the system's setting, [LocalSystemDarkTheme] where Compose cannot read it), bundled
+ * typography, 6 dp control and 10 dp card corners. Every screen and the component gallery render inside it.
  */
 @Composable
 fun NotekeaTheme(
@@ -31,25 +31,26 @@ fun NotekeaTheme(
         medium = RoundedCornerShape(size = NotekeaDimensions.CardRadius),
         large = RoundedCornerShape(size = NotekeaDimensions.CardRadius)
     )
+
     MaterialTheme(
-        colorScheme = ColorThemeSchemes.of(theme = theme, darkTheme = darkTheme),
+        colorScheme = ColorThemeSchemes.of(
+            theme = theme,
+            darkTheme = darkTheme
+        ),
         typography = notekeaTypography(),
         shapes = shapes
     ) {
         CompositionLocalProvider(
             LocalNotekeaCodeTextStyle provides notekeaCodeTextStyle(),
-            LocalReduceMotion provides (LocalAppearance.current.reduceMotion || LocalSystemReduceMotion.current)
-        ) {
-            content()
-        }
+            LocalReduceMotion provides
+                (LocalAppearance.current.reduceMotion || LocalSystemReduceMotion.current)
+        ) { content() }
     }
 }
 
 /** Whether [mode] draws the app dark: always or never, or as the system is set. */
 @Composable
-private fun isDark(
-    mode: ThemeMode
-): Boolean = when (mode) {
+private fun isDark(mode: ThemeMode): Boolean = when (mode) {
     ThemeMode.SYSTEM -> LocalSystemDarkTheme.current ?: isSystemInDarkTheme()
     ThemeMode.LIGHT -> false
     ThemeMode.DARK -> true

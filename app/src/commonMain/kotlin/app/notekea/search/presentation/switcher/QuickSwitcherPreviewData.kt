@@ -42,7 +42,11 @@ internal object QuickSwitcherPreviewData {
         )
     )
 
-    fun notes(): QuickSwitcherState = QuickSwitcherState(isOpen = true, query = "are", rows = noteRows)
+    fun notes(): QuickSwitcherState = QuickSwitcherState(
+        isOpen = true,
+        query = "are",
+        rows = noteRows
+    )
 
     fun content(): QuickSwitcherState = QuickSwitcherState(
         isOpen = true,

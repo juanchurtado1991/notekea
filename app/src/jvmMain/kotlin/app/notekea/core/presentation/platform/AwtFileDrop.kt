@@ -15,17 +15,20 @@ import kotlin.io.path.toPath
  * the `file:` addresses the system hands over.
  */
 @OptIn(ExperimentalComposeUiApi::class)
-fun awtFileDrop(
-    onDrop: (List<String>) -> Unit
-): Modifier = Modifier.dragAndDropTarget(
-    shouldStartDragAndDrop = { it.dragData() is DragData.FilesList },
+fun awtFileDrop(onDrop: (List<String>) -> Unit): Modifier = Modifier.dragAndDropTarget(
+    shouldStartDragAndDrop = {
+        it.dragData() is DragData.FilesList
+    },
     target = object : DragAndDropTarget {
-        override fun onDrop(
-            event: DragAndDropEvent
-        ): Boolean {
+        override fun onDrop(event: DragAndDropEvent): Boolean {
             val files = (event.dragData() as? DragData.FilesList)?.readFiles().orEmpty()
-            val paths = files.mapNotNull { runCatching { URI(it).toPath().toString() }.getOrNull() }
+
+            val paths = files.mapNotNull {
+                runCatching { URI(it).toPath().toString() }.getOrNull()
+            }
+
             if (paths.isNotEmpty()) onDrop(paths)
+
             return paths.isNotEmpty()
         }
     }

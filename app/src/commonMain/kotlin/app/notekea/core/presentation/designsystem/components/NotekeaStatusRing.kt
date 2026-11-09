@@ -23,7 +23,12 @@ fun NotekeaStatusRing(
     modifier: Modifier = Modifier
 ) {
     CircularProgressIndicator(
-        progress = { fraction.coerceIn(minimumValue = 0f, maximumValue = 1f) },
+        progress = {
+            fraction.coerceIn(
+                minimumValue = 0f,
+                maximumValue = 1f
+            )
+        },
         modifier = modifier.size(size = RING_DP.dp),
         color = MaterialTheme.colorScheme.primary,
         strokeWidth = STROKE_DP.dp,

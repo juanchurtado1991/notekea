@@ -7,9 +7,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.platform.displayPath
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.platform.displayPath
 import app.notekea.resources.Res
 import app.notekea.resources.error_vault_creation_failed
 import app.notekea.resources.error_vault_folder_exists
@@ -27,13 +27,35 @@ internal fun vaultErrorMessage(
     error: VaultError,
     platformConventions: PlatformConventions
 ): String {
-    val shown: (String) -> String = { displayPath(path = it, platformConventions = platformConventions) }
+    val shown: (String) -> String = {
+        displayPath(
+            path = it,
+            platformConventions = platformConventions
+        )
+    }
+
     return when (error) {
-        is VaultError.CreationFailed -> stringResource(Res.string.error_vault_creation_failed, shown(error.path))
-        is VaultError.FolderAlreadyExists -> stringResource(Res.string.error_vault_folder_exists, shown(error.path))
-        is VaultError.FolderMissing -> stringResource(Res.string.error_vault_folder_missing, shown(error.path))
+        is VaultError.CreationFailed -> stringResource(
+            Res.string.error_vault_creation_failed,
+            shown(error.path)
+        )
+
+        is VaultError.FolderAlreadyExists -> stringResource(
+            Res.string.error_vault_folder_exists,
+            shown(error.path)
+        )
+
+        is VaultError.FolderMissing -> stringResource(
+            Res.string.error_vault_folder_missing,
+            shown(error.path)
+        )
+
         VaultError.InvalidName -> stringResource(resource = Res.string.error_vault_invalid_name)
-        is VaultError.PermissionDenied -> stringResource(Res.string.error_vault_permission_denied, shown(error.path))
+
+        is VaultError.PermissionDenied -> stringResource(
+            Res.string.error_vault_permission_denied,
+            shown(error.path)
+        )
     }
 }
 
@@ -47,11 +69,15 @@ private fun vaultErrorMessagePreview() {
         VaultError.InvalidName,
         VaultError.PermissionDenied(path = PREVIEW_PATH)
     )
+
     NotekeaPreviewThemes {
         Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
             errors.forEach {
                 Text(
-                    text = vaultErrorMessage(error = it, platformConventions = WelcomePreviewData.platformConventions),
+                    text = vaultErrorMessage(
+                        error = it,
+                        platformConventions = WelcomePreviewData.platformConventions
+                    ),
                     style = MaterialTheme.typography.bodySmall
                 )
             }

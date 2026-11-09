@@ -1,7 +1,5 @@
 package app.notekea.ai.presentation
 
-import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.BaseViewModel
 import app.notekea.ai.domain.ActiveModelStore
 import app.notekea.ai.domain.HardwareProbe
 import app.notekea.ai.domain.ModelCatalog
@@ -10,10 +8,12 @@ import app.notekea.ai.domain.ModelInstaller
 import app.notekea.ai.domain.ModelSize
 import app.notekea.ai.domain.ModelStorage
 import app.notekea.ai.domain.RecommendModelUseCase
+import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.presentation.BaseViewModel
 import co.touchlab.kermit.Logger
 
 /**
- * Settings → AI model (`ROADMAP.md` 3.1): reads the catalog and this computer once, recommends a size, and follows the
+ * Settings → AI model: reads the catalog and this computer once, recommends a size, and follows the
  * model in use and the installation, which runs in [ModelInstaller] and so goes on when Settings closes.
  */
 class ModelManagerViewModel(
@@ -34,23 +34,29 @@ class ModelManagerViewModel(
 
     init {
         launchGuarded(onError = ::onLoadError) { load() }
+
         launchGuarded(onError = ::onLoadError) {
-            activeModelStore.observe().collect { active -> reduce { it.copy(active = active) } }
+            activeModelStore.observe().collect { active ->
+                reduce { it.copy(active = active) }
+            }
         }
+
         launchGuarded(onError = ::onLoadError) {
             installer.session.collect { session ->
                 val finished = session == null && state.value.session != null
+
                 reduce { it.copy(session = session) }
+
                 if (finished) refreshInstalled()
             }
         }
     }
 
-    override fun handleIntent(
-        intent: ModelManagerIntent
-    ) {
+    override fun handleIntent(intent: ModelManagerIntent) {
         when (intent) {
-            is ModelManagerIntent.OnInstall -> modelOf(size = intent.size)?.let { installer.start(model = it) }
+            is ModelManagerIntent.OnInstall -> modelOf(size = intent.size)?.let {
+                installer.start(model = it)
+            }
 
             ModelManagerIntent.OnPause -> installer.pause()
 
@@ -66,13 +72,16 @@ class ModelManagerViewModel(
 
             ModelManagerIntent.OnDeleteDismiss -> reduce { it.copy(pendingDelete = null) }
 
-            ModelManagerIntent.OnOtherSizesToggle -> reduce { it.copy(isOtherSizesShown = !it.isOtherSizesShown) }
+            ModelManagerIntent.OnOtherSizesToggle -> reduce {
+                it.copy(isOtherSizesShown = !it.isOtherSizesShown)
+            }
         }
     }
 
     private suspend fun load() {
         val catalog = catalogSource.load()
         val hardware = hardwareProbe.probe()
+
         val rows = catalog.models.map { model ->
             ModelRow(
                 size = model.size,
@@ -83,14 +92,19 @@ class ModelManagerViewModel(
                 minimumMemoryGb = model.minimumMemoryGb
             )
         }
+
         loadedCatalog = catalog
         val rerankerInstalled = storage.isInstalled(file = catalog.reranker)
+
         reduce {
             it.copy(
                 isLoading = false,
                 memoryGb = hardware.memoryGb,
                 models = rows,
-                recommended = recommendModel(catalog = catalog, hardware = hardware).size,
+                recommended = recommendModel(
+                    catalog = catalog,
+                    hardware = hardware
+                ).size,
                 rerankerBytes = catalog.reranker.sizeBytes,
                 isRerankerInstalled = rerankerInstalled,
                 folder = storage.folder
@@ -100,8 +114,13 @@ class ModelManagerViewModel(
 
     private suspend fun refreshInstalled() {
         val catalog = loadedCatalog ?: return
-        val installed = catalog.models.associate { it.size to storage.isInstalled(file = it.file) }
+
+        val installed = catalog.models.associate {
+            it.size to storage.isInstalled(file = it.file)
+        }
+
         val rerankerInstalled = storage.isInstalled(file = catalog.reranker)
+
         reduce { state ->
             state.copy(
                 models = state.models.map { it.copy(isInstalled = installed[it.size] == true) },
@@ -112,9 +131,12 @@ class ModelManagerViewModel(
 
     private fun deletePending() {
         val size = state.value.pendingDelete ?: return
+
         reduce { it.copy(pendingDelete = null) }
+
         launchGuarded(onError = ::onLoadError) {
             modelOf(size = size)?.let { storage.delete(file = it.file) }
+
             if (state.value.active == size) activeModelStore.save(size = null)
             deleteRerankerIfAlone()
             refreshInstalled()
@@ -124,18 +146,28 @@ class ModelManagerViewModel(
     /** The reranker only serves the chat models, so it goes with the last of them. */
     private suspend fun deleteRerankerIfAlone() {
         val catalog = loadedCatalog ?: return
-        if (catalog.models.none { storage.isInstalled(file = it.file) }) storage.delete(file = catalog.reranker)
+
+        if (catalog.models.none {
+                storage.isInstalled(file = it.file)
+            }
+        ) {
+            storage.delete(file = catalog.reranker)
+        }
     }
 
-    private fun modelOf(
-        size: ModelSize
-    ) = loadedCatalog?.models?.firstOrNull { it.size == size }
+    private fun modelOf(size: ModelSize) = loadedCatalog?.models?.firstOrNull {
+        it.size == size
+    }
 
-    private fun onLoadError(
-        throwable: Throwable
-    ) {
+    private fun onLoadError(throwable: Throwable) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
-        reduce { it.copy(isLoading = false, hasLoadFailed = true) }
+
+        reduce {
+            it.copy(
+                isLoading = false,
+                hasLoadFailed = true
+            )
+        }
     }
 
     private companion object {

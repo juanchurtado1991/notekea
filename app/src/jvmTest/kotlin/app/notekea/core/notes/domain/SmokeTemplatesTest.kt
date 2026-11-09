@@ -24,7 +24,15 @@ class SmokeTemplatesTest {
         dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     )
     private val templates = Templates()
-    private val moment = LocalMoment(date = CalendarDate(year = 2026, month = 10, day = 27), hour = 14, minute = 5)
+    private val moment = LocalMoment(
+        date = CalendarDate(
+            year = 2026,
+            month = 10,
+            day = 27
+        ),
+        hour = 14,
+        minute = 5
+    )
 
     @Test
     fun `1_12-01 the Playground Vault has no templates folder and no Obsidian templates settings`() =
@@ -32,7 +40,10 @@ class SmokeTemplatesTest {
             assertEquals(
                 expected = null to TemplateListing.NoFolder,
                 actual = reader.templates(vaultPath = PERSONAL_NOTES) to
-                    templates.listing(tree = treeOf(folder = PERSONAL_NOTES), settings = TemplateSettings.DEFAULT)
+                    templates.listing(
+                        tree = treeOf(folder = PERSONAL_NOTES),
+                        settings = TemplateSettings.DEFAULT
+                    )
             )
         }
 
@@ -40,10 +51,19 @@ class SmokeTemplatesTest {
     fun `1_12-02 Snippets' templates are listed, and Meeting goes into Kickoff notes with its properties`() =
         runTest(context = testDispatcher) {
             val settings = reader.templates(vaultPath = TEMPLATES_VAULT)!!
-            val listing = templates.listing(tree = treeOf(folder = TEMPLATES_VAULT), settings = settings)
+
+            val listing = templates.listing(
+                tree = treeOf(folder = TEMPLATES_VAULT),
+                settings = settings
+            )
+
             val note = NoteDocument.fromText(text = read(path = "Projects/Kickoff notes.md"))
 
-            val result = insert(note = note, title = "Kickoff notes", settings = settings)
+            val result = insert(
+                note = note,
+                title = "Kickoff notes",
+                settings = settings
+            )
 
             assertEquals(
                 expected = listOf(
@@ -54,7 +74,10 @@ class SmokeTemplatesTest {
                 ),
                 actual = listOf(
                     (listing as TemplateListing.Found).templates.map {
-                        templates.nameOf(template = it, settings = settings)
+                        templates.nameOf(
+                            template = it,
+                            settings = settings
+                        )
                     },
                     result.first,
                     result.second
@@ -63,7 +86,9 @@ class SmokeTemplatesTest {
         }
 
     @Test
-    fun `1_12-03 the empty note becomes Meeting whole, titled with its name`() = runTest(context = testDispatcher) {
+    fun `1_12-03 the empty note becomes Meeting whole, titled with its name`() = runTest(
+        context = testDispatcher
+    ) {
         val settings = reader.templates(vaultPath = TEMPLATES_VAULT)!!
 
         val result = insert(
@@ -73,7 +98,8 @@ class SmokeTemplatesTest {
         )
 
         assertEquals(
-            expected = "---\ntags: [meeting]\ntype: meeting\n---\n" to "# Empty note\n\n$MEETING_BODY",
+            expected =
+            "---\ntags: [meeting]\ntype: meeting\n---\n" to "# Empty note\n\n$MEETING_BODY",
             actual = result
         )
     }
@@ -91,29 +117,38 @@ class SmokeTemplatesTest {
             dateFormat = settings.dateFormat,
             timeFormat = settings.timeFormat
         )
+
         val end = note.body.length
+
         val result = TemplateInsertion().insert(
             note = note,
             selectionStart = end,
             selectionEnd = end,
             template = NoteDocument.fromText(text = filled)
         )
+
         val edit = result.edit
+
         return result.header to
-            note.body.replaceRange(startIndex = edit.start, endIndex = edit.end, replacement = edit.replacement)
+            note.body.replaceRange(
+                startIndex = edit.start,
+                endIndex = edit.end,
+                replacement = edit.replacement
+            )
     }
 
-    private fun read(
-        path: String
-    ): String = File(TEMPLATES_VAULT, path).readText()
+    private fun read(path: String): String = File(TEMPLATES_VAULT, path).readText()
 
     /** The notes and folders of the vault at [folder], hidden folders left out, as the tree lists them. */
-    private fun treeOf(
-        folder: String
-    ): VaultTree = File(folder).walkTopDown()
-        .filter { it.isFile && it.name.endsWith(suffix = RelativePath.MARKDOWN_EXTENSION) }
+    private fun treeOf(folder: String): VaultTree = File(folder)
+        .walkTopDown()
+        .filter {
+            it.isFile && it.name.endsWith(suffix = RelativePath.MARKDOWN_EXTENSION)
+        }
         .map { it.relativeTo(base = File(folder)).invariantSeparatorsPath }
-        .filterNot { path -> path.split("/").any { it.startsWith(".") } }
+        .filterNot { path ->
+            path.split("/").any { it.startsWith(".") }
+        }
         .fold(initial = VaultTree.EMPTY) { tree, path -> tree.withNote(note = entry(path = path)) }
 
     companion object {

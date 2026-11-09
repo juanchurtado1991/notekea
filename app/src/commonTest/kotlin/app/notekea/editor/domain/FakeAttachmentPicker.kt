@@ -13,6 +13,7 @@ class FakeAttachmentPicker(var picked: String? = null) : AttachmentPicker {
     override suspend fun pickFile(): String? {
         opened++
         closes?.await()
+
         return picked
     }
 }

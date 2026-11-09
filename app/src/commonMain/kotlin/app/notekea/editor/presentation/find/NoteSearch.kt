@@ -8,11 +8,23 @@ class NoteSearch {
     ): List<IntRange> {
         if (query.isEmpty()) return emptyList()
         val found = mutableListOf<IntRange>()
-        var start = text.indexOf(string = query, startIndex = 0, ignoreCase = true)
+
+        var start = text.indexOf(
+            string = query,
+            startIndex = 0,
+            ignoreCase = true
+        )
+
         while (start >= 0) {
             found += start until start + query.length
-            start = text.indexOf(string = query, startIndex = start + query.length, ignoreCase = true)
+
+            start = text.indexOf(
+                string = query,
+                startIndex = start + query.length,
+                ignoreCase = true
+            )
         }
+
         return found
     }
 }

@@ -27,7 +27,11 @@ private const val FIELD_WIDTH_DP = 132
 private const val PREVIEW_CALENDAR = "Choose a date"
 private const val PREVIEW_DISPLAY = "Oct 27, 2026"
 private const val PREVIEW_WIDTH_DP = 260
-private val PREVIEW_DATE = CalendarDate(year = 2026, month = 10, day = 27)
+private val PREVIEW_DATE = CalendarDate(
+    year = 2026,
+    month = 10,
+    day = 27
+)
 
 /**
  * A date edited in place: its [text] typed as in a [NotekeaPropertyField] (handed to [onTextCommit], which reads it)
@@ -47,6 +51,7 @@ fun NotekeaDateField(
     isValid: (String) -> Boolean = { true }
 ) {
     var isOpen by remember { mutableStateOf(value = false) }
+
     Box(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.width(width = FIELD_WIDTH_DP.dp)) {
@@ -57,6 +62,7 @@ fun NotekeaDateField(
                     isValid = isValid
                 )
             }
+
             NotekeaIconButton(
                 icon = NotekeaIcons.Calendar,
                 label = calendarLabel,
@@ -64,14 +70,17 @@ fun NotekeaDateField(
                 takesFocus = false
             )
         }
+
+        fun pick(picked: CalendarDate) {
+            isOpen = false
+            onDatePick(picked)
+        }
+
         if (isOpen) {
             CalendarPopup(
                 date = date,
                 today = today,
-                onPick = {
-                    isOpen = false
-                    onDatePick(it)
-                },
+                onPick = { pick(it) },
                 onDismiss = { isOpen = false }
             )
         }
@@ -87,6 +96,7 @@ private fun CalendarPopup(
     today: CalendarDate?
 ) {
     val gap = with(LocalDensity.current) { NotekeaDimensions.SpacingXs.roundToPx() }
+
     Popup(
         popupPositionProvider = remember(gap) { DropdownPositionProvider(gap = gap) },
         onDismissRequest = onDismiss,
@@ -95,10 +105,17 @@ private fun CalendarPopup(
         Surface(
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = MaterialTheme.colorScheme.outline),
+            border = BorderStroke(
+                width = NotekeaDimensions.BorderWidth,
+                color = MaterialTheme.colorScheme.outline
+            ),
             shadowElevation = NotekeaDimensions.SpacingS
         ) {
-            NotekeaCalendar(selected = date, onPick = onPick, today = today)
+            NotekeaCalendar(
+                selected = date,
+                onPick = onPick,
+                today = today
+            )
         }
     }
 }

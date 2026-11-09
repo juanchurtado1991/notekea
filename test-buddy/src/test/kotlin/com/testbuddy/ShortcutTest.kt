@@ -21,11 +21,17 @@ class ShortcutTest {
     @Test
     fun `modifiers chain in the order they are written`() {
         val shortcut = Mod + Shift + Alt + Key.F
+
         assertEquals(
             listOf(Key.MetaLeft, Key.ShiftLeft, Key.AltLeft),
             shortcut.modifierKeysOn(system = HostSystem.MACOS)
         )
-        assertEquals(listOf(Key.CtrlLeft), (Ctrl + Key.Tab).modifierKeysOn(system = HostSystem.MACOS))
+
+        assertEquals(
+            listOf(Key.CtrlLeft),
+            (Ctrl + Key.Tab).modifierKeysOn(system = HostSystem.MACOS)
+        )
+
         assertEquals("Mod+Shift+${Key.F}", (Mod + Shift + Key.F).toString())
     }
 

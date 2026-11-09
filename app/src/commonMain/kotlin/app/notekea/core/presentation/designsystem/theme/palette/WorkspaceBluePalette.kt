@@ -3,9 +3,9 @@ package app.notekea.core.presentation.designsystem.theme.palette
 import androidx.compose.ui.graphics.Color
 
 /**
- * Raw colors of the Workspace Blue theme (chosen 2026-11-03): quiet grays, a clear blue for actions and selection and
- * an orange accent. Only the theme package reads them; everything else uses the semantic roles of `WorkspaceBlueSchemes`.
- * Text on the orange accent and on the dark-theme blue is dark because white on them does not reach WCAG AA.
+ * Raw colors of the Workspace Blue theme: quiet grays, a clear blue for actions and selection and an orange accent.
+ * Only the theme package reads them; everything else uses the semantic roles of `WorkspaceBlueSchemes`. Text on the
+ * orange accent and on the dark-theme blue is dark because white on them does not reach WCAG AA.
  */
 internal object WorkspaceBluePalette {
     val AccentDark = Color(0xFFF68909)

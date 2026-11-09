@@ -2,18 +2,18 @@ package app.notekea.tree.domain
 
 import app.cash.turbine.test
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.FakeNoteScanner
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NoteFixtures.tags
-import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import app.notekea.core.notes.domain.FakeNoteScanner
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class ObserveVaultTreeUseCaseTest {
     private val scanner = FakeNoteScanner()
@@ -38,7 +38,12 @@ class ObserveVaultTreeUseCaseTest {
                 expected = success(
                     tree = VaultTree(
                         folders = setOf(RelativePath(value = RECIPES)),
-                        notes = mapOf(RelativePath(value = AREPAS) to entry(path = AREPAS, metadata = tags("recipe")))
+                        notes = mapOf(
+                            RelativePath(value = AREPAS) to entry(
+                                path = AREPAS,
+                                metadata = tags("recipe")
+                            )
+                        )
                     )
                 ),
                 actual = awaitItem()
@@ -55,7 +60,8 @@ class ObserveVaultTreeUseCaseTest {
             assertEquals(
                 expected = NoteMetadata.NONE,
                 actual = (awaitItem() as Outcome.Success)
-                    .value.notes
+                    .value
+                    .notes
                     .getValue(RelativePath(value = AREPAS))
                     .metadata
             )
@@ -71,6 +77,7 @@ class ObserveVaultTreeUseCaseTest {
                 expected = Outcome.Failure(error = NotesError.VaultMissing(path = VAULT)),
                 actual = awaitItem()
             )
+
             awaitComplete()
         }
     }
@@ -83,20 +90,38 @@ class ObserveVaultTreeUseCaseTest {
         observeVaultTree(vaultPath = VAULT).test {
             awaitItem()
             scanner.files.remove(RelativePath(value = LISBON))
-            scanner.addNote(file = file(path = AREPAS, modifiedOffsetMillis = 1L))
+
+            scanner.addNote(
+                file = file(
+                    path = AREPAS,
+                    modifiedOffsetMillis = 1L
+                )
+            )
+
             scanner.addNote(file = file(path = NEW_NOTE))
             watcher.emit(change = VaultChange.Deleted(path = RelativePath(value = LISBON)))
             watcher.emit(change = VaultChange.Modified(path = RelativePath(value = AREPAS)))
-            watcher.emit(change = VaultChange.Created(path = RelativePath(value = NEW_NOTE), isFolder = false))
+
+            watcher.emit(
+                change = VaultChange.Created(
+                    path = RelativePath(value = NEW_NOTE),
+                    isFolder = false
+                )
+            )
 
             assertEquals(
                 expected = setOf(RelativePath(value = AREPAS), RelativePath(value = NEW_NOTE)),
                 actual = (awaitItem() as Outcome.Success).value.notes.keys
             )
+
             assertEquals(
-                expected = file(path = AREPAS, modifiedOffsetMillis = 1L),
+                expected = file(
+                    path = AREPAS,
+                    modifiedOffsetMillis = 1L
+                ),
                 actual = scanner.files.getValue(RelativePath(value = AREPAS))
             )
+
             expectNoEvents()
         }
     }
@@ -111,13 +136,29 @@ class ObserveVaultTreeUseCaseTest {
             scanner.attachments.remove(RelativePath(value = PLATE))
             scanner.addAttachment(file = file(path = MENU))
             watcher.emit(change = VaultChange.Deleted(path = RelativePath(value = PLATE)))
-            watcher.emit(change = VaultChange.Created(path = RelativePath(value = MENU), isFolder = false))
+
+            watcher.emit(
+                change = VaultChange.Created(
+                    path = RelativePath(value = MENU),
+                    isFolder = false
+                )
+            )
 
             assertEquals(
-                expected = listOf(setOf(RelativePath(value = PLATE)), setOf(RelativePath(value = MENU))),
-                actual = listOf(first.attachments.keys, (awaitItem() as Outcome.Success).value.attachments.keys)
+                expected = listOf(
+                    setOf(RelativePath(value = PLATE)),
+                    setOf(RelativePath(value = MENU))
+                ),
+                actual = listOf(
+                    first.attachments.keys,
+                    (awaitItem() as Outcome.Success).value.attachments.keys
+                )
             )
-            assertEquals(expected = setOf(RelativePath(value = AREPAS)), actual = first.notes.keys)
+
+            assertEquals(
+                expected = setOf(RelativePath(value = AREPAS)),
+                actual = first.notes.keys
+            )
         }
     }
 
@@ -146,18 +187,36 @@ class ObserveVaultTreeUseCaseTest {
         observeVaultTree(vaultPath = VAULT).test {
             awaitItem()
             reader.reads.clear()
-            scanner.addNote(file = file(path = LISBON, modifiedOffsetMillis = 1L))
+
+            scanner.addNote(
+                file = file(
+                    path = LISBON,
+                    modifiedOffsetMillis = 1L
+                )
+            )
+
             scanner.addNote(file = file(path = "Moved in/Packing checklist.md"))
             scanner.folders += RelativePath(value = "Moved in")
-            watcher.emit(change = VaultChange.Created(path = RelativePath(value = "Moved in"), isFolder = true))
+
+            watcher.emit(
+                change = VaultChange.Created(
+                    path = RelativePath(value = "Moved in"),
+                    isFolder = true
+                )
+            )
+
             awaitItem()
             watcher.emit(change = VaultChange.Overflow)
             awaitItem()
 
             assertEquals(
-                expected = listOf(RelativePath(value = "Moved in/Packing checklist.md"), RelativePath(value = LISBON)),
+                expected = listOf(
+                    RelativePath(value = "Moved in/Packing checklist.md"),
+                    RelativePath(value = LISBON)
+                ),
                 actual = reader.reads.sortedBy { it.value }
             )
+
             assertEquals(
                 expected = 3,
                 actual = scanner.scanCount
@@ -167,7 +226,12 @@ class ObserveVaultTreeUseCaseTest {
 
     @Test
     fun `a note without size or date is always read again on a rescan`() = runTest {
-        scanner.addNote(file = file(path = AREPAS, size = null))
+        scanner.addNote(
+            file = file(
+                path = AREPAS,
+                size = null
+            )
+        )
 
         observeVaultTree(vaultPath = VAULT).test {
             awaitItem()
@@ -194,16 +258,27 @@ class ObserveVaultTreeUseCaseTest {
                 expected = Outcome.Failure(error = NotesError.PermissionDenied(path = VAULT)),
                 actual = awaitItem()
             )
+
             awaitComplete()
         }
     }
 
     @Test
     fun `the cached tree shows first and only notes that changed are read again`() = runTest {
-        cache.entries[RelativePath(value = AREPAS)] = entry(path = AREPAS, metadata = tags("recipe"))
+        cache.entries[RelativePath(value = AREPAS)] = entry(
+            path = AREPAS,
+            metadata = tags("recipe")
+        )
+
         cache.entries[RelativePath(value = LISBON)] = entry(path = LISBON)
         scanner.addNote(file = file(path = AREPAS))
-        scanner.addNote(file = file(path = LISBON, modifiedOffsetMillis = 1L))
+
+        scanner.addNote(
+            file = file(
+                path = LISBON,
+                modifiedOffsetMillis = 1L
+            )
+        )
 
         observeVaultTree(vaultPath = VAULT).test {
             val cached = (awaitItem() as Outcome.Success).value
@@ -213,18 +288,28 @@ class ObserveVaultTreeUseCaseTest {
                 expected = listOf(RelativePath(value = LISBON)),
                 actual = reader.reads
             )
+
             val arepas = scanned.notes.getValue(RelativePath(value = AREPAS))
             val lisbon = scanned.notes.getValue(RelativePath(value = LISBON))
+
             assertEquals(
-                expected = tags("recipe") to file(path = LISBON, modifiedOffsetMillis = 1L),
+                expected = tags("recipe") to file(
+                    path = LISBON,
+                    modifiedOffsetMillis = 1L
+                ),
                 actual = arepas.metadata to lisbon.file
             )
+
             assertEquals(
                 expected = setOf(RelativePath(value = "Recipes"), RelativePath(value = "Travel")),
                 actual = cached.folders
             )
+
             // Only the cached tree says so: it may still list files deleted while Notekea was closed.
-            assertEquals(expected = true to false, actual = cached.isFromCache to scanned.isFromCache)
+            assertEquals(
+                expected = true to false,
+                actual = cached.isFromCache to scanned.isFromCache
+            )
         }
     }
 
@@ -241,34 +326,40 @@ class ObserveVaultTreeUseCaseTest {
 
             assertEquals(
                 expected = listOf(
-                    listOf(RelativePath(value = AREPAS), RelativePath(value = LISBON)) to emptyList(),
+                    listOf(RelativePath(value = AREPAS), RelativePath(value = LISBON)) to
+                        emptyList(),
                     emptyList<RelativePath>() to listOf(RelativePath(value = LISBON))
                 ),
-                actual = cache.updates.map { (upserted, removed) -> upserted.sortedBy { it.value } to removed }
+                actual = cache.updates.map { (upserted, removed) ->
+                    upserted.sortedBy { it.value } to removed
+                }
             )
         }
     }
 
     @Test
-    fun `a note that cannot be read is cached without its size, so it is read again next time`() = runTest {
-        scanner.addNote(file = file(path = AREPAS))
-        reader.metadata[RelativePath(value = AREPAS)] = null
+    fun `a note that cannot be read is cached without its size, so it is read again next time`() =
+        runTest {
+            scanner.addNote(file = file(path = AREPAS))
+            reader.metadata[RelativePath(value = AREPAS)] = null
 
-        observeVaultTree(vaultPath = VAULT).test {
-            awaitItem()
+            observeVaultTree(vaultPath = VAULT).test {
+                awaitItem()
 
-            assertEquals(
-                expected = null,
-                actual = cache.entries
-                    .getValue(RelativePath(value = AREPAS))
-                    .file.size
-            )
+                assertEquals(
+                    expected = null,
+                    actual = cache
+                        .entries
+                        .getValue(RelativePath(value = AREPAS))
+                        .file
+                        .size
+                )
+            }
         }
-    }
 
-    private fun success(
-        tree: VaultTree
-    ): Outcome<VaultTree, NotesError> = Outcome.Success(value = tree)
+    private fun success(tree: VaultTree): Outcome<VaultTree, NotesError> = Outcome.Success(
+        value = tree
+    )
 
     companion object {
         private const val MENU = "Recipes/attachments/menu.pdf"

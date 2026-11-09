@@ -1,7 +1,7 @@
 package app.notekea.core.notes.domain
 
-import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.StringPatterns
 
 /*
  * New entries take the first free name, numbered as Obsidian does: `Untitled`, `Untitled 1`, `Untitled 2`… A name
@@ -20,13 +20,20 @@ suspend fun createUnderFreeName(
     createAt: suspend (RelativePath) -> Outcome<Unit, NotesError>
 ): Outcome<RelativePath, NotesError> {
     for (number in 0 until MAX_CANDIDATES) {
-        val name = if (number == 0) baseName + extension else baseName + StringPatterns.SPACE + number + extension
+        val name = if (number == 0) {
+            baseName + extension
+        } else {
+            baseName + StringPatterns.SPACE + number + extension
+        }
+
         val path = folder.child(name = name)
         if (noteFileOperations.exists(vaultPath = vaultPath, path = path)) continue
+
         when (val created = createAt(path)) {
             is Outcome.Success -> return Outcome.Success(value = path)
             is Outcome.Failure -> if (created.error !is NotesError.NameTaken) return created
         }
     }
+
     return Outcome.Failure(error = NotesError.NameTaken(name = baseName + extension))
 }

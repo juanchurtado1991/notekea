@@ -13,7 +13,13 @@ class JetBrainsMarkdownLinkFinderTest {
             "![[Garden plan^tasks]] and [[Café con leche.md]]."
 
         assertEquals(
-            expected = listOf("Arepas", "Recipes/Arepas", "Arepas", "Garden plan", "Café con leche.md"),
+            expected = listOf(
+                "Arepas",
+                "Recipes/Arepas",
+                "Arepas",
+                "Garden plan",
+                "Café con leche.md"
+            ),
             actual = finder.find(markdown = markdown).map { it.target }
         )
     }
@@ -26,21 +32,27 @@ class JetBrainsMarkdownLinkFinderTest {
 
         assertEquals(
             expected = "Reading list",
-            actual = markdown.substring(startIndex = link.targetStart, endIndex = link.targetEnd)
+            actual = markdown.substring(
+                startIndex = link.targetStart,
+                endIndex = link.targetEnd
+            )
         )
     }
 
     @Test
     fun `markdown links to notes are found in both forms, web links are not`() {
-        val markdown = "[trip](Travel/Lisbon%20trip.md#Day%201), [coffee](<Recipes/Café con leche.md>), " +
-            "[site](https://example.com/notes.md), [image](photo.png)"
+        val markdown =
+            "[trip](Travel/Lisbon%20trip.md#Day%201), [coffee](<Recipes/Café con leche.md>), " +
+                "[site](https://example.com/notes.md), [image](photo.png)"
 
         assertEquals(
             expected = listOf(
                 "Travel/Lisbon%20trip.md" to LinkKind.MARKDOWN_ENCODED,
                 "Recipes/Café con leche.md" to LinkKind.MARKDOWN_ANGLE
             ),
-            actual = finder.find(markdown = markdown).map { it.target to it.kind }
+            actual = finder.find(markdown = markdown).map {
+                it.target to it.kind
+            }
         )
     }
 
@@ -51,17 +63,28 @@ class JetBrainsMarkdownLinkFinderTest {
 
         val links = finder.find(markdown = markdown)
 
-        assertEquals(expected = listOf("Note", "Other"), actual = links.map { it.target })
+        assertEquals(
+            expected = listOf("Note", "Other"),
+            actual = links.map { it.target }
+        )
+
         assertEquals(
             expected = "Note",
-            actual = markdown.substring(startIndex = links[0].targetStart, endIndex = links[0].targetEnd)
+            actual = markdown.substring(
+                startIndex = links[0].targetStart,
+                endIndex = links[0].targetEnd
+            )
         )
     }
 
     // Audit: an angle link with no `)` was found, and the mentions that looked for its end crashed.
     @Test
     fun `an angle link must be closed, and may carry a title`() {
-        assertEquals(expected = emptyList(), actual = finder.find(markdown = "[x](<Target.md>"))
+        assertEquals(
+            expected = emptyList(),
+            actual = finder.find(markdown = "[x](<Target.md>")
+        )
+
         assertEquals(
             expected = listOf("Target.md"),
             actual = finder.find(markdown = "[x](<Target.md> \"A title\")").map { it.target }

@@ -1,12 +1,12 @@
 package app.notekea.autotest.cases.m1
 
 import androidx.compose.ui.input.key.Key
-import app.notekea.autotest.expectNotInNoteText
 import app.notekea.autotest.SmokeScenarios
+import app.notekea.autotest.expectNotInNoteText
+import app.notekea.autotest.noteText
 import app.notekea.autotest.openNote
 import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
-import app.notekea.autotest.noteText
 import app.notekea.autotest.waitForResult
 import com.testbuddy.CaseScope
 import com.testbuddy.ShortcutModifier.Mod
@@ -30,39 +30,78 @@ fun SuiteBuilder.searchCases() {
 }
 
 private fun SuiteBuilder.contentSearch() {
-    automated(id = "1.6-04", title = "Searching the notes' text lists matches as plain lines") {
-        openVault(name = PERSONAL_NOTES, shownText = WELCOME)
+    automated(
+        id = "1.6-04",
+        title = "Searching the notes' text lists matches as plain lines"
+    ) {
+        openVault(
+            name = PERSONAL_NOTES,
+            shownText = WELCOME
+        )
+
         pressInWindow(shortcut = Mod + Shift + Key.F)
         expectText(text = SEARCH_TEXT)
         type(text = "tomato")
-        expectText(text = "Planted the last tomato seedlings", substring = true)
+
+        expectText(
+            text = "Planted the last tomato seedlings",
+            substring = true
+        )
+
         listOf("2026-10-20", "Pasta e fagioli", "Tomato plan").forEach { expectText(text = it) }
-        expectNoText(text = "[[Tomato plan", substring = true)
+
+        expectNoText(
+            text = "[[Tomato plan",
+            substring = true
+        )
     }
 }
 
 private fun SuiteBuilder.tagSearch() {
-    automated(id = "1.6-05", title = "Searching a tag finds the notes that have it") {
-        openVault(name = PERSONAL_NOTES, shownText = WELCOME)
+    automated(
+        id = "1.6-05",
+        title = "Searching a tag finds the notes that have it"
+    ) {
+        openVault(
+            name = PERSONAL_NOTES,
+            shownText = WELCOME
+        )
+
         pressInWindow(shortcut = Mod + Shift + Key.F)
         type(text = "#recipe")
+
         listOf("Arepas", "Café con leche", "Pasta e fagioli").forEach { waitForResult(name = it) }
-        expectText(text = "#recipe/drinks", substring = true)
+
+        expectText(
+            text = "#recipe/drinks",
+            substring = true
+        )
+
         expectNoText(text = "Tomato plan")
     }
 }
 
 private fun SuiteBuilder.paletteKeyboard() {
-    automated(id = "1.6-06", title = "Tab switches the palette's search, Esc closes it") {
-        openVault(name = PERSONAL_NOTES, shownText = WELCOME)
+    automated(
+        id = "1.6-06",
+        title = "Tab switches the palette's search, Esc closes it"
+    ) {
+        openVault(
+            name = PERSONAL_NOTES,
+            shownText = WELCOME
+        )
+
         pressInWindow(shortcut = Mod + Key.P)
         type(text = "a")
         press(key = Key.Tab)
         expectText(text = "a")
         press(key = Key.Tab)
         expectText(text = "a")
+
         repeat(times = 3) { press(key = Key.DirectionDown) }
+
         repeat(times = 4) { press(key = Key.DirectionUp) }
+
         press(key = Key.Escape)
         expectNoText(text = "a")
         expectText(text = WELCOME)
@@ -70,23 +109,50 @@ private fun SuiteBuilder.paletteKeyboard() {
 }
 
 private fun SuiteBuilder.tagLink() {
-    automated(id = "1.6-07", title = "A tag in Preview opens the search for it") {
-        openVault(name = PERSONAL_NOTES, shownText = WELCOME)
-        openNote(name = "2026-10-21", shownText = "#travel")
+    automated(
+        id = "1.6-07",
+        title = "A tag in Preview opens the search for it"
+    ) {
+        openVault(
+            name = PERSONAL_NOTES,
+            shownText = WELCOME
+        )
+
+        openNote(
+            name = "2026-10-21",
+            shownText = "#travel"
+        )
+
         pressInWindow(shortcut = Mod + Key.E)
         // Wait for Preview before clicking the tag: until it shows, the words are the editor's text, not a link.
         // Connections can quote the same line, so only the note's own text field counts.
         expectNotInNoteText(part = "[[Lisbon trip]]")
-        expectText(text = "#travel", substring = true)
+
+        expectText(
+            text = "#travel",
+            substring = true
+        )
+
         clickWords(words = "#travel")
         waitForResult(name = "Lisbon trip")
-        expectText(text = "#journal #travel", substring = true)
+
+        expectText(
+            text = "#journal #travel",
+            substring = true
+        )
     }
 }
 
 private fun SuiteBuilder.emptyResults() {
-    automated(id = "1.6-08", title = "No match, and an empty Content search, explain themselves") {
-        openVault(name = PERSONAL_NOTES, shownText = WELCOME)
+    automated(
+        id = "1.6-08",
+        title = "No match, and an empty Content search, explain themselves"
+    ) {
+        openVault(
+            name = PERSONAL_NOTES,
+            shownText = WELCOME
+        )
+
         pressInWindow(shortcut = Mod + Key.P)
         type(text = "zzz")
         expectText(text = "No notes match")
@@ -99,19 +165,42 @@ private fun SuiteBuilder.emptyResults() {
 }
 
 private fun SuiteBuilder.outsideEditFound() {
-    automated(id = "1.6-09", title = "A note changed by another app is found by its new text") {
-        openVault(name = PLAYGROUND, shownText = WELCOME)
-        SmokeScenarios(smokeData = folders.data, scratch = folders.data).editNote(time = "10:00:00")
+    automated(
+        id = "1.6-09",
+        title = "A note changed by another app is found by its new text"
+    ) {
+        openVault(
+            name = PLAYGROUND,
+            shownText = WELCOME
+        )
+
+        SmokeScenarios(
+            smokeData = folders.data,
+            scratch = folders.data
+        ).editNote(time = "10:00:00")
+
         pressInWindow(shortcut = Mod + Shift + Key.F)
         type(text = "edited outside")
         waitForResult(name = "Shared note")
-        expectText(text = "Edited outside Notekea at 10:00:00", substring = true)
+
+        expectText(
+            text = "Edited outside Notekea at 10:00:00",
+            substring = true
+        )
     }
 }
 
 private fun SuiteBuilder.largeVaultSearch() {
-    automated(id = "1.6-10", title = "Searching the large vault by name and by text") {
-        openVault(name = "Ghost Serializer", shownText = "ghost-compiler", waitsForIndex = false)
+    automated(
+        id = "1.6-10",
+        title = "Searching the large vault by name and by text"
+    ) {
+        openVault(
+            name = "Ghost Serializer",
+            shownText = "ghost-compiler",
+            waitsForIndex = false
+        )
+
         pressInWindow(shortcut = Mod + Key.P)
         type(text = "flatreader")
         waitForResult(name = "GhostJsonFlatReader")
@@ -123,8 +212,15 @@ private fun SuiteBuilder.largeVaultSearch() {
 }
 
 private fun SuiteBuilder.typingAfterThePalette() {
-    automated(id = "1.6-11", title = "After the palette, typing goes on in the note") {
-        openPlaygroundNote(name = "Arepas", shownText = AREPAS_FLOUR)
+    automated(
+        id = "1.6-11",
+        title = "After the palette, typing goes on in the note"
+    ) {
+        openPlaygroundNote(
+            name = "Arepas",
+            shownText = AREPAS_FLOUR
+        )
+
         noteText(part = AREPAS_FLOUR).clickWhenStill()
         press(shortcut = Mod + Key.P)
         press(key = Key.Escape)
@@ -135,14 +231,29 @@ private fun SuiteBuilder.typingAfterThePalette() {
         press(key = Key.Enter)
         expectText(text = "Pasta e fagioli")
         type(text = "Second")
-        expectFile(path = "$PLAYGROUND/Recipes/Arepas.md", containing = "First")
-        expectFile(path = "$PLAYGROUND/Recipes/Pasta e fagioli.md", containing = "Second")
+
+        expectFile(
+            path = "$PLAYGROUND/Recipes/Arepas.md",
+            containing = "First"
+        )
+
+        expectFile(
+            path = "$PLAYGROUND/Recipes/Pasta e fagioli.md",
+            containing = "Second"
+        )
     }
 }
 
 private fun SuiteBuilder.railSearchButton() {
-    automated(id = "1.6-12", title = "The tool rail's magnifier opens the palette") {
-        openVault(name = PERSONAL_NOTES, shownText = WELCOME)
+    automated(
+        id = "1.6-12",
+        title = "The tool rail's magnifier opens the palette"
+    ) {
+        openVault(
+            name = PERSONAL_NOTES,
+            shownText = WELCOME
+        )
+
         openPaletteFromRail()
         press(shortcut = Mod + Key.Backslash)
         openPaletteFromRail()

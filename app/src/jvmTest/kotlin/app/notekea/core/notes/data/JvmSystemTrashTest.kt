@@ -9,6 +9,7 @@ class JvmSystemTrashTest {
     fun `linux trashes with gio and only a zero exit code counts`() {
         val commands = mutableListOf<List<String>>()
         val exitCodes = mutableListOf(0, 1, null)
+
         val trash = JvmSystemTrash(
             operatingSystem = OperatingSystem.LINUX,
             runCommand = { command ->
@@ -21,6 +22,7 @@ class JvmSystemTrashTest {
             expected = listOf(true, false, false),
             actual = List(size = 3) { trash.moveToTrash(absolutePath = NOTE) }
         )
+
         assertEquals(
             expected = listOf("gio", "trash", "--", NOTE),
             actual = commands.first()

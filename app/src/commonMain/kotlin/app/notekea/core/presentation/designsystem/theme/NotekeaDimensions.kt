@@ -2,7 +2,7 @@ package app.notekea.core.presentation.designsystem.theme
 
 import androidx.compose.ui.unit.dp
 
-/** Spacing on a 4 dp grid, corner radii and motion durations from the roadmap's design tokens. */
+/** The design tokens that are sizes: spacing on a 4 dp grid, corner radii and motion durations. */
 object NotekeaDimensions {
     const val MOTION_LONGEST_MILLIS = 250
     const val MOTION_PANEL_MILLIS = 200

@@ -1,11 +1,10 @@
 package app.notekea.vault.presentation.welcome
 
-import app.notekea.vault.domain.VaultFileSystem
-import app.notekea.vault.domain.FolderPicker
 import app.notekea.core.domain.Outcome
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.vault.domain.CreateVaultUseCase
+import app.notekea.vault.domain.FolderPicker
 import app.notekea.vault.domain.GetRecentVaultsUseCase
 import app.notekea.vault.domain.LocateVaultUseCase
 import app.notekea.vault.domain.OpenVaultUseCase
@@ -13,13 +12,13 @@ import app.notekea.vault.domain.RemoveRecentVaultUseCase
 import app.notekea.vault.domain.RestoreLastVaultUseCase
 import app.notekea.vault.domain.Vault
 import app.notekea.vault.domain.VaultError
+import app.notekea.vault.domain.VaultFileSystem
 import co.touchlab.kermit.Logger
 
 /**
- * Welcome flow (`ROADMAP.md` 1.3), the MVI reference screen (`ARCHITECTURE.md` §10): restores the last vault at
- * startup, opens, creates and locates vaults, and keeps the recent list fresh after every change. It has no one-shot
- * effects, so its effect type is [Nothing]. Picking a folder is a suspend call to the native dialog, not an effect.
- * Editing the new vault form clears its error, so a message never outlives the input it was about.
+ * Welcome flow, the MVI reference screen (`ARCHITECTURE.md` §10): restores the last vault at startup, opens, creates
+ * and locates vaults, and keeps the recent list fresh. It has no one-shot effects, so its effect type is [Nothing];
+ * picking a folder is a suspend call to the native dialog. Editing the new vault form clears its error.
  */
 class WelcomeViewModel(
     platformConventions: PlatformConventions,
@@ -40,110 +39,183 @@ class WelcomeViewModel(
         launchGuarded(onError = ::showUnexpectedError) {
             val restored = restoreLastVault()
             val recentVaults = getRecentVaults()
-            reduce { it.copy(isLoading = false, openedVault = restored, recentVaults = recentVaults) }
+
+            reduce {
+                it.copy(
+                    isLoading = false,
+                    openedVault = restored,
+                    recentVaults = recentVaults
+                )
+            }
         }
     }
 
-    override fun handleIntent(
-        intent: WelcomeIntent
-    ) {
+    override fun handleIntent(intent: WelcomeIntent) {
         when (intent) {
-            is WelcomeIntent.OnCreateVaultClick -> startNewVault(suggestedName = intent.suggestedName)
-            WelcomeIntent.OnErrorDismiss -> reduce { it.copy(error = null, hasUnexpectedError = false) }
+            is WelcomeIntent.OnCreateVaultClick -> startNewVault(
+                suggestedName = intent.suggestedName
+            )
+
+            WelcomeIntent.OnErrorDismiss -> reduce {
+                it.copy(
+                    error = null,
+                    hasUnexpectedError = false
+                )
+            }
+
             is WelcomeIntent.OnLocateVaultClick -> locate(missingPath = intent.missingPath)
-            WelcomeIntent.OnNewVaultCancel -> reduce { it.copy(newVaultForm = null, error = null) }
+
+            WelcomeIntent.OnNewVaultCancel -> reduce {
+                it.copy(
+                    newVaultForm = null,
+                    error = null
+                )
+            }
+
             WelcomeIntent.OnNewVaultConfirm -> confirmNewVault()
+
             WelcomeIntent.OnNewVaultLocationClick -> changeNewVaultLocation()
-            is WelcomeIntent.OnNewVaultNameChange -> updateNewVaultForm { it.copy(name = intent.name) }
+
+            is WelcomeIntent.OnNewVaultNameChange -> updateNewVaultForm {
+                it.copy(name = intent.name)
+            }
+
             WelcomeIntent.OnOpenFolderClick -> pickAndOpen()
+
             is WelcomeIntent.OnRecentVaultClick -> openWith { openVault(path = intent.path) }
+
             is WelcomeIntent.OnRemoveRecentVaultClick -> remove(path = intent.path)
+
             WelcomeIntent.OnSwitchVaultClick -> switchVault()
         }
     }
 
     private fun changeNewVaultLocation() {
         val form = state.value.newVaultForm ?: return
+
         launchGuarded(onError = ::showUnexpectedError) {
-            val parentPath = folderPicker.pickFolder(initialPath = form.parentPath) ?: return@launchGuarded
+            val parentPath =
+                folderPicker.pickFolder(initialPath = form.parentPath) ?: return@launchGuarded
+
             updateNewVaultForm { it.copy(parentPath = parentPath) }
         }
     }
 
     private fun confirmNewVault() {
         val form = state.value.newVaultForm ?: return
-        openWith { createVault(parentPath = form.parentPath, name = form.name) }
-    }
 
-    private fun locate(
-        missingPath: String
-    ) {
-        launchGuarded(onError = ::showUnexpectedError) {
-            val newPath = folderPicker.pickFolder(initialPath = null) ?: return@launchGuarded
-            openNow { locateVault(missingPath = missingPath, newPath = newPath) }
+        openWith {
+            createVault(
+                parentPath = form.parentPath,
+                name = form.name
+            )
         }
     }
 
-    private suspend fun openNow(
-        open: suspend () -> Outcome<Vault, VaultError>
-    ) {
-        reduce { it.copy(isBusy = true, error = null, hasUnexpectedError = false) }
-        val outcome = open()
-        val recentVaults = getRecentVaults()
-        reduce { reduceOpenOutcome(state = it, outcome = outcome).copy(recentVaults = recentVaults) }
+    private fun locate(missingPath: String) {
+        launchGuarded(onError = ::showUnexpectedError) {
+            val newPath = folderPicker.pickFolder(initialPath = null) ?: return@launchGuarded
+
+            openNow {
+                locateVault(
+                    missingPath = missingPath,
+                    newPath = newPath
+                )
+            }
+        }
     }
 
-    private fun openWith(
-        open: suspend () -> Outcome<Vault, VaultError>
-    ) {
+    private suspend fun openNow(open: suspend () -> Outcome<Vault, VaultError>) {
+        reduce {
+            it.copy(
+                isBusy = true,
+                error = null,
+                hasUnexpectedError = false
+            )
+        }
+
+        val outcome = open()
+        val recentVaults = getRecentVaults()
+
+        reduce {
+            reduceOpenOutcome(
+                state = it,
+                outcome = outcome
+            ).copy(recentVaults = recentVaults)
+        }
+    }
+
+    private fun openWith(open: suspend () -> Outcome<Vault, VaultError>) {
         launchGuarded(onError = ::showUnexpectedError) { openNow(open = open) }
     }
 
     private fun pickAndOpen() {
         launchGuarded(onError = ::showUnexpectedError) {
             val path = folderPicker.pickFolder(initialPath = null) ?: return@launchGuarded
+
             openNow { openVault(path = path) }
         }
     }
 
-    private fun remove(
-        path: String
-    ) {
+    private fun remove(path: String) {
         launchGuarded(onError = ::showUnexpectedError) {
             removeRecentVault(path = path)
             val recentVaults = getRecentVaults()
+
             reduce { it.copy(recentVaults = recentVaults) }
         }
     }
 
-    private fun showUnexpectedError(
-        throwable: Throwable
-    ) {
+    private fun showUnexpectedError(throwable: Throwable) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
-        reduce { it.copy(isLoading = false, isBusy = false, hasUnexpectedError = true) }
+
+        reduce {
+            it.copy(
+                isLoading = false,
+                isBusy = false,
+                hasUnexpectedError = true
+            )
+        }
     }
 
-    private fun startNewVault(
-        suggestedName: String
-    ) {
+    private fun startNewVault(suggestedName: String) {
         launchGuarded(onError = ::showUnexpectedError) {
             val parentPath = vaultFileSystem.suggestedParentFolder()
-            val form = NewVaultForm(name = suggestedName, parentPath = parentPath)
-            reduce { it.copy(newVaultForm = form, error = null) }
+
+            val form = NewVaultForm(
+                name = suggestedName,
+                parentPath = parentPath
+            )
+
+            reduce {
+                it.copy(
+                    newVaultForm = form,
+                    error = null
+                )
+            }
         }
     }
 
     private fun switchVault() {
         launchGuarded(onError = ::showUnexpectedError) {
             val recentVaults = getRecentVaults()
-            reduce { it.copy(openedVault = null, recentVaults = recentVaults) }
+
+            reduce {
+                it.copy(
+                    openedVault = null,
+                    recentVaults = recentVaults
+                )
+            }
         }
     }
 
-    private fun updateNewVaultForm(
-        transform: (NewVaultForm) -> NewVaultForm
-    ) {
-        reduce { state -> state.copy(newVaultForm = state.newVaultForm?.let(transform), error = null) }
+    private fun updateNewVaultForm(transform: (NewVaultForm) -> NewVaultForm) {
+        reduce { state ->
+            state.copy(
+                newVaultForm = state.newVaultForm?.let(transform),
+                error = null
+            )
+        }
     }
 
     companion object {

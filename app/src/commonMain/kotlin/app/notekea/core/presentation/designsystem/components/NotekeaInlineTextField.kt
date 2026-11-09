@@ -38,10 +38,8 @@ private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
 
 /**
  * Single-line field that edits a name in place (renaming in the tree). It takes focus and selects the whole text when
- * it appears, so typing replaces the name; Enter submits and Esc cancels. [onFocusLost] runs when the user clicks
- * elsewhere (renaming submits then, as file managers do). [isError] outlines the field in the error color; the message
- * is shown by the caller next to it. Space keys stop at the field, so it can sit inside a clickable row. The text
- * belongs to the caller; only the selection is kept here.
+ * it appears; Enter submits, Esc cancels and [onFocusLost] runs when the user clicks elsewhere. [isError] outlines it
+ * in the error color. Space keys stop at the field, so it can sit inside a clickable row.
  */
 @Composable
 fun NotekeaInlineTextField(
@@ -54,30 +52,61 @@ fun NotekeaInlineTextField(
     onFocusLost: (() -> Unit)? = null
 ) {
     val colors = MaterialTheme.colorScheme
+
     val focusRequester = remember { FocusRequester() }
-    var selection by remember { mutableStateOf(value = TextRange(start = 0, end = value.length)) }
+
+    var selection by remember {
+        mutableStateOf(
+            value = TextRange(
+                start = 0,
+                end = value.length
+            )
+        )
+    }
+
     var hasHadFocus by remember { mutableStateOf(value = false) }
+
     LaunchedEffect(key1 = focusRequester) { focusRequester.requestFocus() }
+
+    fun changeField(field: TextFieldValue) {
+        selection = field.selection
+        if (field.text != value) onValueChange(field.text)
+    }
+
     BasicTextField(
-        value = TextFieldValue(text = value, selection = selection),
-        onValueChange = {
-            selection = it.selection
-            if (it.text != value) onValueChange(it.text)
-        },
+        value = TextFieldValue(
+            text = value,
+            selection = selection
+        ),
+        onValueChange = { changeField(it) },
         modifier = modifier
             .fillMaxWidth()
             .focusRequester(focusRequester = focusRequester)
             .onFocusChanged { state ->
                 if (state.isFocused) hasHadFocus = true
                 if (!state.isFocused && hasHadFocus) onFocusLost?.invoke()
-            }.submitOrCancelOnKeys(onSubmit = onSubmit, onCancel = onCancel)
+            }
+            .submitOrCancelOnKeys(
+                onSubmit = onSubmit,
+                onCancel = onCancel
+            )
             // Space is typed as text; its key events must not reach a clickable parent (a tree row), where Space
             // clicks, which would take focus from the field and end the edit.
-            .onKeyEvent { it.key == Key.Spacebar },
-        textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.onSurface),
+            .onKeyEvent {
+                it.key == Key.Spacebar
+            },
+        textStyle = MaterialTheme
+            .typography
+            .bodyMedium
+            .copy(color = colors.onSurface),
         singleLine = true,
         cursorBrush = SolidColor(value = colors.primary),
-        decorationBox = { field -> InlineFieldFrame(isError = isError, field = field) }
+        decorationBox = { field ->
+            InlineFieldFrame(
+                isError = isError,
+                field = field
+            )
+        }
     )
 }
 
@@ -87,13 +116,17 @@ private fun InlineFieldFrame(
     field: @Composable () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
+
     Box(
         modifier = Modifier
             .border(
                 width = NotekeaDimensions.BorderWidth,
                 color = if (isError) colors.error else colors.primary,
                 shape = MaterialTheme.shapes.extraSmall
-            ).padding(horizontal = NotekeaDimensions.SpacingXs, vertical = FIELD_VERTICAL_PADDING_DP.dp)
+            ).padding(
+                horizontal = NotekeaDimensions.SpacingXs,
+                vertical = FIELD_VERTICAL_PADDING_DP.dp
+            )
     ) { field() }
 }
 
@@ -114,7 +147,12 @@ private fun Modifier.submitOrCancelOnKeys(
 private fun NotekeaInlineTextFieldPreview() {
     NotekeaPreviewThemes {
         Box(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
-            NotekeaInlineTextField(value = PREVIEW_NAME, onValueChange = {}, onSubmit = {}, onCancel = {})
+            NotekeaInlineTextField(
+                value = PREVIEW_NAME,
+                onValueChange = {},
+                onSubmit = {},
+                onCancel = {}
+            )
         }
     }
 }

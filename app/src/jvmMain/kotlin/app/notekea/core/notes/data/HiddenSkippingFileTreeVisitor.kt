@@ -20,6 +20,7 @@ class HiddenSkippingFileTreeVisitor : FileTreeVisitor {
         onFile: FileTreeVisitor.Callback
     ) {
         if (isHidden(path = file)) return
+
         Files.walkFileTree(
             file,
             object : SimpleFileVisitor<Path>() {
@@ -29,6 +30,7 @@ class HiddenSkippingFileTreeVisitor : FileTreeVisitor {
                 ): FileVisitResult {
                     if (dir != file && isHidden(path = dir)) return FileVisitResult.SKIP_SUBTREE
                     onDirectory.call(dir)
+
                     return FileVisitResult.CONTINUE
                 }
 
@@ -37,6 +39,7 @@ class HiddenSkippingFileTreeVisitor : FileTreeVisitor {
                     attrs: BasicFileAttributes
                 ): FileVisitResult {
                     if (!isHidden(path = file)) onFile.call(file)
+
                     return FileVisitResult.CONTINUE
                 }
 
@@ -48,9 +51,10 @@ class HiddenSkippingFileTreeVisitor : FileTreeVisitor {
         )
     }
 
-    private fun isHidden(
-        path: Path
-    ): Boolean = path.fileName?.toString()?.startsWith(prefix = HIDDEN_PREFIX) == true
+    private fun isHidden(path: Path): Boolean = path
+        .fileName
+        ?.toString()
+        ?.startsWith(prefix = HIDDEN_PREFIX) == true
 
     companion object {
         private const val HIDDEN_PREFIX = "."

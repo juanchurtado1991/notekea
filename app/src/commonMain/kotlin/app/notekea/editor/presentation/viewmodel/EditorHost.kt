@@ -15,15 +15,9 @@ internal interface EditorHost {
     val state: StateFlow<EditorState>
     val buffer: TextFieldState
 
-    fun reduce(
-        transform: (EditorState) -> EditorState
-    )
+    fun reduce(transform: (EditorState) -> EditorState)
 
-    fun emit(
-        effect: EditorEffect
-    )
+    fun emit(effect: EditorEffect)
 
-    fun launch(
-        block: suspend () -> Unit
-    ): Job
+    fun launch(block: suspend () -> Unit): Job
 }

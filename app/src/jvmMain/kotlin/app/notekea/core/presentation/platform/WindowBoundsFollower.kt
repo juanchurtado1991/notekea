@@ -28,11 +28,26 @@ fun FrameWindowScope.FollowWindowBounds(
 ) {
     LaunchedEffect(window) {
         val minimum = WindowSizes.MINIMUM
-        window.minimumSize = Dimension(minimum.width.value.roundToInt(), minimum.height.value.roundToInt())
+
+        window.minimumSize = Dimension(
+            minimum
+                .width
+                .value
+                .roundToInt(),
+            minimum
+                .height
+                .value
+                .roundToInt()
+        )
     }
+
     LaunchedEffect(state) {
         snapshotFlow {
-            windowBoundsIntent(placement = state.placement, size = state.size, position = state.position)
+            windowBoundsIntent(
+                placement = state.placement,
+                size = state.size,
+                position = state.position
+            )
         }.collectLatest { intent ->
             delay(timeMillis = SAVE_DELAY_MILLIS)
             intent?.let(viewModel::onIntent)
@@ -52,10 +67,24 @@ fun windowBoundsIntent(
 
     WindowPlacement.Floating -> WindowBoundsIntent.OnFloating(
         bounds = WindowBounds(
-            widthDp = size.width.value.roundToInt(),
-            heightDp = size.height.value.roundToInt(),
-            xDp = position.x.value.takeIf { position.isSpecified }?.roundToInt(),
-            yDp = position.y.value.takeIf { position.isSpecified }?.roundToInt(),
+            widthDp = size
+                .width
+                .value
+                .roundToInt(),
+            heightDp = size
+                .height
+                .value
+                .roundToInt(),
+            xDp = position
+                .x
+                .value
+                .takeIf { position.isSpecified }
+                ?.roundToInt(),
+            yDp = position
+                .y
+                .value
+                .takeIf { position.isSpecified }
+                ?.roundToInt(),
             isMaximized = false
         )
     )

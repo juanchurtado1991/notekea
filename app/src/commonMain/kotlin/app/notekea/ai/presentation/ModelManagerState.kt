@@ -1,11 +1,11 @@
 package app.notekea.ai.presentation
 
-import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.ai.domain.InstallSession
 import app.notekea.ai.domain.ModelSize
+import app.notekea.core.platform.domain.DialogButtonOrder
 
 /**
- * Settings → AI model (`ROADMAP.md` 3.1, design C): the [models] of the catalog, the one [recommended] for this
+ * Settings → AI model: the [models] of the catalog, the one [recommended] for this
  * computer's [memoryGb], the one [active], the installation under way ([session]), and the [rerankerBytes] the first
  * installation adds. Only the [featured] size is shown at first; the others wait under "Other sizes".
  */

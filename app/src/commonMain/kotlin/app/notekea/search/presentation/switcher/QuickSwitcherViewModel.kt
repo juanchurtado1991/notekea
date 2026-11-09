@@ -1,9 +1,9 @@
 package app.notekea.search.presentation.switcher
 
 import app.notekea.core.domain.AppDispatchers
-import app.notekea.core.presentation.BaseViewModel
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.BaseViewModel
 import app.notekea.search.domain.SearchNoteContentUseCase
 import app.notekea.search.domain.SearchNotesUseCase
 import app.notekea.search.domain.SearchPassagesUseCase
@@ -14,12 +14,9 @@ import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Quick switcher palette (`ROADMAP.md` 1.6) for the vault at [vaultPath]: `Mod+P` finds notes by name and alias, at
- * once; `Mod+Shift+F` searches their content, waiting for a short pause in typing: the exact words show first and the
- * hybrid search (`ROADMAP.md` 2.6) reorders them, by meaning too, when it answers. Every new search cancels the one
- * before, so a slow search never shows results for text that was already changed. The notes come from the vault tree
- * ([QuickSwitcherIntent.OnNotesChange]), so the palette never scans the vault itself. Choosing a result closes the
- * palette and asks the workspace to open the note.
+ * Quick switcher palette for the vault at [vaultPath]: names and aliases are found at once; content waits for a short
+ * pause in typing, the exact words showing first and the hybrid search reordering them when it answers. Every new
+ * search cancels the one before. The notes come from the vault tree ([QuickSwitcherIntent.OnNotesChange]).
  */
 class QuickSwitcherViewModel(
     private val vaultPath: String,
@@ -27,32 +24,59 @@ class QuickSwitcherViewModel(
     private val searchNoteContent: SearchNoteContentUseCase,
     private val searchPassages: SearchPassagesUseCase,
     private val dispatchers: AppDispatchers
-) : BaseViewModel<QuickSwitcherState, QuickSwitcherIntent, QuickSwitcherEffect>(initialState = QuickSwitcherState()) {
+) : BaseViewModel<QuickSwitcherState, QuickSwitcherIntent, QuickSwitcherEffect>(
+    initialState = QuickSwitcherState()
+) {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private var notes: Collection<NoteEntry> = emptyList()
     private var searchJob: Job? = null
 
-    override fun handleIntent(
-        intent: QuickSwitcherIntent
-    ) {
+    override fun handleIntent(intent: QuickSwitcherIntent) {
         when (intent) {
             QuickSwitcherIntent.OnClose -> dismiss()
+
             QuickSwitcherIntent.OnConfirm -> confirm()
+
             QuickSwitcherIntent.OnModeSwitch -> switchMode()
-            is QuickSwitcherIntent.OnIndexChange -> reduce { it.copy(isIndexReady = intent.isReady) }
+
+            is QuickSwitcherIntent.OnIndexChange -> reduce {
+                it.copy(isIndexReady = intent.isReady)
+            }
+
             is QuickSwitcherIntent.OnNotesChange -> changeNotes(notes = intent.notes)
+
             is QuickSwitcherIntent.OnOpen -> openPalette(intent = intent)
+
             is QuickSwitcherIntent.OnQueryChange -> changeQuery(query = intent.query)
+
             is QuickSwitcherIntent.OnRowClick -> clickRow(path = intent.path)
-            QuickSwitcherIntent.OnSelectNext -> reduce { reduceSelectionMove(state = it, step = 1) }
-            QuickSwitcherIntent.OnSelectPrevious -> reduce { reduceSelectionMove(state = it, step = -1) }
+
+            QuickSwitcherIntent.OnSelectNext -> reduce {
+                reduceSelectionMove(
+                    state = it,
+                    step = 1
+                )
+            }
+
+            QuickSwitcherIntent.OnSelectPrevious -> reduce {
+                reduceSelectionMove(
+                    state = it,
+                    step = -1
+                )
+            }
         }
     }
 
-    private fun openPalette(
-        intent: QuickSwitcherIntent.OnOpen
-    ) {
-        reduce { reduceOpened(state = it, mode = intent.mode, query = intent.query, purpose = intent.purpose) }
+    private fun openPalette(intent: QuickSwitcherIntent.OnOpen) {
+        reduce {
+            reduceOpened(
+                state = it,
+                mode = intent.mode,
+                query = intent.query,
+                purpose = intent.purpose
+            )
+        }
+
         search(debounce = false)
     }
 
@@ -63,77 +87,116 @@ class QuickSwitcherViewModel(
 
     private fun close() {
         searchJob?.cancel()
+
         reduce { QuickSwitcherState(isIndexReady = it.isIndexReady) }
     }
 
     private fun confirm() {
-        state.value.rows.getOrNull(index = state.value.selectedIndex)?.let { open(row = it) }
+        state
+            .value
+            .rows
+            .getOrNull(index = state.value.selectedIndex)
+            ?.let { open(row = it) }
     }
 
-    private fun clickRow(
-        path: RelativePath
-    ) {
-        state.value.rows.firstOrNull { it.path == path }?.let { open(row = it) }
+    private fun clickRow(path: RelativePath) {
+        state
+            .value
+            .rows
+            .firstOrNull {
+                it.path == path
+            }
+            ?.let { open(row = it) }
     }
 
-    private fun open(
-        row: QuickSwitcherRow
-    ) {
+    private fun open(row: QuickSwitcherRow) {
         val purpose = state.value.purpose
         close()
+
         val effect = when (purpose) {
-            QuickSwitcherPurpose.OPEN -> QuickSwitcherEffect.OpenNote(path = row.path, passage = row.passage)
+            QuickSwitcherPurpose.OPEN -> QuickSwitcherEffect.OpenNote(
+                path = row.path,
+                passage = row.passage
+            )
+
             QuickSwitcherPurpose.LINK -> QuickSwitcherEffect.LinkNote(path = row.path)
         }
+
         emit(effect = effect)
     }
 
-    private fun changeQuery(
-        query: String
-    ) {
+    private fun changeQuery(query: String) {
         if (query == state.value.query) return
-        reduce { it.copy(query = query, selectedIndex = 0) }
+
+        reduce {
+            it.copy(
+                query = query,
+                selectedIndex = 0
+            )
+        }
+
         search(debounce = true)
     }
 
     private fun switchMode() {
         // Linking picks a note by name: there is no content search to switch to.
         if (state.value.purpose == QuickSwitcherPurpose.LINK) return
-        val next = if (state.value.mode ==
-            QuickSwitcherMode.NOTES
-        ) {
+
+        val next = if (state.value.mode == QuickSwitcherMode.NOTES) {
             QuickSwitcherMode.CONTENT
         } else {
             QuickSwitcherMode.NOTES
         }
-        reduce { it.copy(mode = next, selectedIndex = 0) }
+
+        reduce {
+            it.copy(
+                mode = next,
+                selectedIndex = 0
+            )
+        }
+
         search(debounce = false)
     }
 
-    private fun changeNotes(
-        notes: Collection<NoteEntry>
-    ) {
+    private fun changeNotes(notes: Collection<NoteEntry>) {
         this.notes = notes
         if (state.value.isOpen) search(debounce = false)
     }
 
     /** Runs the search for the current text and mode, replacing any search still running. */
-    private fun search(
-        debounce: Boolean
-    ) {
+    private fun search(debounce: Boolean) {
         searchJob?.cancel()
-        val (mode, query) = state.value.let { it.mode to it.query }
+
+        val (mode, query) = state.value.let {
+            it.mode to it.query
+        }
+
         val notes = notes
+
         searchJob = launchGuarded(onError = ::showUnexpectedError) {
             when (mode) {
                 QuickSwitcherMode.NOTES -> {
                     val rows = withContext(context = dispatchers.default) {
-                        searchNotes(notes = notes, query = query).map(transform = ::noteRowOf)
+                        searchNotes(
+                            notes = notes,
+                            query = query
+                        ).map(transform = ::noteRowOf)
                     }
-                    reduce { it.copy(rows = rows, selectedIndex = 0, isSearching = false) }
+
+                    reduce {
+                        it.copy(
+                            rows = rows,
+                            selectedIndex = 0,
+                            isSearching = false
+                        )
+                    }
                 }
 
-                QuickSwitcherMode.CONTENT -> searchContent(notes = notes, query = query, debounce = debounce)
+                QuickSwitcherMode.CONTENT -> searchContent(
+                    notes = notes,
+                    query = query,
+                    debounce = debounce
+                )
             }
         }
     }
@@ -145,19 +208,47 @@ class QuickSwitcherViewModel(
         debounce: Boolean
     ) {
         reduce { it.copy(isSearching = query.isNotBlank()) }
+
         if (debounce) delay(duration = CONTENT_DEBOUNCE)
-        val exact = searchNoteContent(vaultPath = vaultPath, notes = notes, query = query)
+
+        val exact = searchNoteContent(
+            vaultPath = vaultPath,
+            notes = notes,
+            query = query
+        )
             .map(transform = ::contentRowOf)
-        reduce { it.copy(rows = exact, selectedIndex = 0) }
-        val passages = searchPassages(vaultPath = vaultPath, notes = notes, query = query)
-        reduce { reduceHybridAnswer(state = it, exact = exact, outcome = passages) }
+
+        reduce {
+            it.copy(
+                rows = exact,
+                selectedIndex = 0
+            )
+        }
+
+        val passages = searchPassages(
+            vaultPath = vaultPath,
+            notes = notes,
+            query = query
+        )
+
+        reduce {
+            reduceHybridAnswer(
+                state = it,
+                exact = exact,
+                outcome = passages
+            )
+        }
     }
 
-    private fun showUnexpectedError(
-        throwable: Throwable
-    ) {
+    private fun showUnexpectedError(throwable: Throwable) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
-        reduce { it.copy(isSearching = false, hasUnexpectedError = true) }
+
+        reduce {
+            it.copy(
+                isSearching = false,
+                hasUnexpectedError = true
+            )
+        }
     }
 
     companion object {

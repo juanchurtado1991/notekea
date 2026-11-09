@@ -10,8 +10,8 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 
@@ -35,7 +35,11 @@ fun NotekeaTooltip(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
             positioning = if (isBeside) TooltipAnchorPosition.End else TooltipAnchorPosition.Below
         ),
-        tooltip = { PlainTooltip { Text(text = listOfNotNull(label, shortcutHint).joinToString(TOOLTIP_SEPARATOR)) } },
+        tooltip = {
+            PlainTooltip {
+                Text(text = listOfNotNull(label, shortcutHint).joinToString(TOOLTIP_SEPARATOR))
+            }
+        },
         state = rememberTooltipState(),
         hasAction = false,
         content = content
@@ -46,8 +50,13 @@ fun NotekeaTooltip(
 @Composable
 private fun NotekeaTooltipPreview() {
     NotekeaPreviewThemes {
-        NotekeaTooltip(label = PREVIEW_LABEL, shortcutHint = PREVIEW_SHORTCUT) {
-            Box(modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)) { Text(text = PREVIEW_LABEL) }
+        NotekeaTooltip(
+            label = PREVIEW_LABEL,
+            shortcutHint = PREVIEW_SHORTCUT
+        ) {
+            Box(modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)) {
+                Text(text = PREVIEW_LABEL)
+            }
         }
     }
 }

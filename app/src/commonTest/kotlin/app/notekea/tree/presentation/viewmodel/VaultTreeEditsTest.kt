@@ -1,22 +1,22 @@
 package app.notekea.tree.presentation.viewmodel
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import app.notekea.tree.presentation.model.RenameDraft
-import app.notekea.tree.presentation.model.TreeNotice
-import app.notekea.tree.presentation.model.VaultTreeEffect
-import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.LinkUpdateResult
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.tree.domain.TrashLocation
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import app.notekea.tree.presentation.model.RenameDraft
+import app.notekea.tree.presentation.model.TreeNotice
+import app.notekea.tree.presentation.model.VaultTreeEffect
+import app.notekea.tree.presentation.model.VaultTreeIntent
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /** The sidebar's edits */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -27,7 +27,11 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
             contents.texts[path(MEETING_TEMPLATE)] = "# {{title}}\n{{date}}\n"
             val viewModel = startedViewModel()
             val effects = mutableListOf<VaultTreeEffect>()
-            backgroundScope.launch { viewModel.effects.collect { effects += it } }
+
+            backgroundScope.launch {
+                viewModel.effects.collect { effects += it }
+            }
+
             viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(ROADMAP)))
             advanceUntilIdle()
             runCurrent()
@@ -66,7 +70,8 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
 
             assertEquals(
                 expected = null to "# Untitled\n",
-                actual = viewModel.state.value.renaming to contents.texts[path("$PROJECTS/Untitled.md")]
+                actual =
+                viewModel.state.value.renaming to contents.texts[path("$PROJECTS/Untitled.md")]
             )
         }
 
@@ -84,6 +89,7 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
             expected = listOf(path(WELCOME) to path("Start here.md")),
             actual = operations.moves
         )
+
         assertEquals(
             expected = path("Start here.md") to null,
             actual = viewModel.state.value.selectedPath to viewModel.state.value.renaming
@@ -91,38 +97,68 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
     }
 
     @Test
-    fun `a second rename goes on while the links of the first are still being updated`() = runTreeTest {
+    fun `a second rename goes on while the links of the first are still being updated`() =
+        runTreeTest {
+            contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
+            val viewModel = startedViewModel()
+            val slowDisk = CompletableDeferred<Unit>()
+            contents.readGate = slowDisk
+
+            rename(
+                viewModel = viewModel,
+                from = WELCOME,
+                to = "Start here"
+            )
+
+            rename(
+                viewModel = viewModel,
+                from = ROADMAP,
+                to = "Plan"
+            )
+
+            val renamed = operations.moves.map { it.second }
+            slowDisk.complete(value = Unit)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = listOf(path("Start here.md"), path("$PROJECTS/Plan.md")) to null,
+                actual = renamed to viewModel.state.value.renaming
+            )
+        }
+
+    @Test
+    fun `a note renamed while the links are updated still gets its link`() = runTreeTest {
+        operations.onMove = { from, to ->
+            contents
+                .texts
+                .remove(key = from)
+                ?.let { contents.texts[to] = it }
+        }
+
         contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
         val viewModel = startedViewModel()
         val slowDisk = CompletableDeferred<Unit>()
         contents.readGate = slowDisk
-        rename(viewModel = viewModel, from = WELCOME, to = "Start here")
 
-        rename(viewModel = viewModel, from = ROADMAP, to = "Plan")
-        val renamed = operations.moves.map { it.second }
+        rename(
+            viewModel = viewModel,
+            from = WELCOME,
+            to = "Start here"
+        )
+
+        rename(
+            viewModel = viewModel,
+            from = ROADMAP,
+            to = "Plan"
+        )
+
         slowDisk.complete(value = Unit)
         advanceUntilIdle()
 
         assertEquals(
-            expected = listOf(path("Start here.md"), path("$PROJECTS/Plan.md")) to null,
-            actual = renamed to viewModel.state.value.renaming
+            expected = "Begin with [[Start here]].",
+            actual = contents.texts[path("$PROJECTS/Plan.md")]
         )
-    }
-
-    @Test
-    fun `a note renamed while the links are updated still gets its link`() = runTreeTest {
-        operations.onMove = { from, to -> contents.texts.remove(key = from)?.let { contents.texts[to] = it } }
-        contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
-        val viewModel = startedViewModel()
-        val slowDisk = CompletableDeferred<Unit>()
-        contents.readGate = slowDisk
-        rename(viewModel = viewModel, from = WELCOME, to = "Start here")
-
-        rename(viewModel = viewModel, from = ROADMAP, to = "Plan")
-        slowDisk.complete(value = Unit)
-        advanceUntilIdle()
-
-        assertEquals(expected = "Begin with [[Start here]].", actual = contents.texts[path("$PROJECTS/Plan.md")])
     }
 
     @Test
@@ -130,8 +166,17 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
         contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
         val viewModel = startedViewModel()
         val effects = mutableListOf<VaultTreeEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
-        rename(viewModel = viewModel, from = WELCOME, to = "Start here")
+
+        backgroundScope.launch {
+            viewModel.effects.collect { effects += it }
+        }
+
+        rename(
+            viewModel = viewModel,
+            from = WELCOME,
+            to = "Start here"
+        )
+
         advanceUntilIdle()
         runCurrent()
 
@@ -154,29 +199,53 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
 
         assertEquals(
             expected =
-            "Begin with [[Start here]]." to TreeNotice.LinksUpdated(notes = listOf("Roadmap"), skippedCount = 0),
+            "Begin with [[Start here]]." to TreeNotice.LinksUpdated(
+                notes = listOf("Roadmap"),
+                skippedCount = 0
+            ),
             actual = contents.texts.getValue(path(ROADMAP)) to viewModel.state.value.notice
         )
     }
 
     @Test
-    fun `a shown links notice never blocks the next rename, its links or its notice`() = runTreeTest {
-        contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
-        val viewModel = startedViewModel()
-        rename(viewModel = viewModel, from = WELCOME, to = "Start here")
-        val first = viewModel.state.value.notice
+    fun `a shown links notice never blocks the next rename, its links or its notice`() =
+        runTreeTest {
+            contents.texts[path(ROADMAP)] = "Begin with [[Welcome]]."
+            val viewModel = startedViewModel()
 
-        rename(viewModel = viewModel, from = "Start here.md", to = "Begin")
+            rename(
+                viewModel = viewModel,
+                from = WELCOME,
+                to = "Start here"
+            )
 
-        assertEquals(
-            expected = Triple(
-                TreeNotice.LinksUpdated(notes = listOf("Roadmap"), skippedCount = 0),
-                "Begin with [[Begin]].",
-                TreeNotice.LinksUpdated(notes = listOf("Roadmap"), skippedCount = 0)
-            ),
-            actual = Triple(first, contents.texts.getValue(path(ROADMAP)), viewModel.state.value.notice)
-        )
-    }
+            val first = viewModel.state.value.notice
+
+            rename(
+                viewModel = viewModel,
+                from = "Start here.md",
+                to = "Begin"
+            )
+
+            assertEquals(
+                expected = Triple(
+                    TreeNotice.LinksUpdated(
+                        notes = listOf("Roadmap"),
+                        skippedCount = 0
+                    ),
+                    "Begin with [[Begin]].",
+                    TreeNotice.LinksUpdated(
+                        notes = listOf("Roadmap"),
+                        skippedCount = 0
+                    )
+                ),
+                actual = Triple(
+                    first,
+                    contents.texts.getValue(path(ROADMAP)),
+                    viewModel.state.value.notice
+                )
+            )
+        }
 
     @Test
     fun `renaming a note nothing links to changes no other note and says nothing`() = runTreeTest {
@@ -198,7 +267,11 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
     fun `a rename in the tree tells the editor where the note went`() = runTreeTest {
         val viewModel = startedViewModel()
         val effects = mutableListOf<VaultTreeEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+
+        backgroundScope.launch {
+            viewModel.effects.collect { effects += it }
+        }
+
         runCurrent()
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(WELCOME)))
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameTextChange(text = "Start here"))
@@ -209,33 +282,45 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
 
         assertEquals(
             expected = listOf<VaultTreeEffect>(
-                VaultTreeEffect.EntryRenamed(from = path(WELCOME), to = path("Start here.md"))
+                VaultTreeEffect.EntryRenamed(
+                    from = path(WELCOME),
+                    to = path("Start here.md")
+                )
             ),
             actual = effects
         )
     }
 
     @Test
-    fun `a rename from the editor selects the note at its new path and reports the links`() = runTreeTest {
-        val viewModel = startedViewModel()
-        viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(WELCOME)))
+    fun `a rename from the editor selects the note at its new path and reports the links`() =
+        runTreeTest {
+            val viewModel = startedViewModel()
+            viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(WELCOME)))
 
-        viewModel.onIntent(
-            intent = VaultTreeIntent.OnEntryRenamed(
-                from = path(WELCOME),
-                to = path("Start here.md"),
-                links = LinkUpdateResult(updated = listOf(path(ROADMAP), path("Ideas/Plan.md")), skipped = emptyList())
+            viewModel.onIntent(
+                intent = VaultTreeIntent.OnEntryRenamed(
+                    from = path(WELCOME),
+                    to = path("Start here.md"),
+                    links = LinkUpdateResult(
+                        updated = listOf(path(ROADMAP), path("Ideas/Plan.md")),
+                        skipped = emptyList()
+                    )
+                )
             )
-        )
-        advanceUntilIdle()
 
-        assertEquals(
-            expected =
-            path("Start here.md") to TreeNotice.LinksUpdated(notes = listOf("Plan", "Roadmap"), skippedCount = 0),
-            actual = viewModel.state.value.selectedPath to viewModel.state.value.notice
-        )
-        assertTrue(actual = path("Start here.md") in viewModel.state.value.tree.notes)
-    }
+            advanceUntilIdle()
+
+            assertEquals(
+                expected =
+                path("Start here.md") to TreeNotice.LinksUpdated(
+                    notes = listOf("Plan", "Roadmap"),
+                    skippedCount = 0
+                ),
+                actual = viewModel.state.value.selectedPath to viewModel.state.value.notice
+            )
+
+            assertTrue(actual = path("Start here.md") in viewModel.state.value.tree.notes)
+        }
 
     @Test
     fun `a refused name stays in the field with its reason`() = runTreeTest {
@@ -247,7 +332,11 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
         advanceUntilIdle()
 
         assertEquals(
-            expected = RenameDraft(path = path(WELCOME), text = "a/b", error = NotesError.InvalidName),
+            expected = RenameDraft(
+                path = path(WELCOME),
+                text = "a/b",
+                error = NotesError.InvalidName
+            ),
             actual = viewModel.state.value.renaming
         )
     }
@@ -266,6 +355,7 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
             expected = listOf(path(WELCOME), path(WELCOME)),
             actual = listOf(asking) + trash.trashed
         )
+
         assertEquals(
             expected = TreeNotice.MovedToVaultTrash(name = "Welcome"),
             actual = viewModel.state.value.notice
@@ -284,6 +374,7 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
             expected = emptyList(),
             actual = trash.trashed
         )
+
         assertEquals(
             expected = TrashLocation.VAULT_TRASH_FOLDER,
             actual = (trash.outcome as Outcome.Success).value
@@ -297,40 +388,56 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
             viewModel.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
             val hidden = viewModel.state.value.isSidebarCollapsed
 
-            viewModel.onIntent(intent = VaultTreeIntent.OnNewFolderClick(baseName = "Untitled folder"))
+            viewModel.onIntent(
+                intent = VaultTreeIntent.OnNewFolderClick(baseName = "Untitled folder")
+            )
+
             advanceUntilIdle()
 
             assertEquals(
                 expected = Triple(true, false, path("Untitled folder")),
-                actual = Triple(hidden, viewModel.state.value.isSidebarCollapsed, viewModel.state.value.renaming?.path)
+                actual = Triple(
+                    hidden,
+                    viewModel.state.value.isSidebarCollapsed,
+                    viewModel.state.value.renaming?.path
+                )
             )
         }
 
     @Test
-    fun `a file opens with its app, a failure is shown, and a deletion is told to the tabs`() = runTreeTest {
-        scanner.addAttachment(file = file(path = PLATE))
-        scanner.addAttachment(file = file(path = MENU))
-        val viewModel = startedViewModel()
-        val effects = mutableListOf<VaultTreeEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
-        runCurrent()
+    fun `a file opens with its app, a failure is shown, and a deletion is told to the tabs`() =
+        runTreeTest {
+            scanner.addAttachment(file = file(path = PLATE))
+            scanner.addAttachment(file = file(path = MENU))
+            val viewModel = startedViewModel()
+            val effects = mutableListOf<VaultTreeEffect>()
 
-        viewModel.onIntent(intent = VaultTreeIntent.OnFileOpen(path = path(MENU)))
-        advanceUntilIdle()
-        opener.failure = NotesError.OpenFailed(path = PLATE)
-        viewModel.onIntent(intent = VaultTreeIntent.OnFileOpen(path = path(PLATE)))
-        viewModel.onIntent(intent = VaultTreeIntent.OnDeleteRequest(path = path(MENU)))
-        viewModel.onIntent(intent = VaultTreeIntent.OnDeleteConfirm)
-        advanceUntilIdle()
-        runCurrent()
+            backgroundScope.launch {
+                viewModel.effects.collect { effects += it }
+            }
 
-        assertEquals(
-            expected = Triple(
-                listOf(path(MENU)),
-                NotesError.OpenFailed(path = PLATE),
-                listOf<VaultTreeEffect>(VaultTreeEffect.EntryDeleted(path = path(MENU)))
-            ),
-            actual = Triple(opener.opened.toList(), viewModel.state.value.actionError, effects.toList())
-        )
-    }
+            runCurrent()
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnFileOpen(path = path(MENU)))
+            advanceUntilIdle()
+            opener.failure = NotesError.OpenFailed(path = PLATE)
+            viewModel.onIntent(intent = VaultTreeIntent.OnFileOpen(path = path(PLATE)))
+            viewModel.onIntent(intent = VaultTreeIntent.OnDeleteRequest(path = path(MENU)))
+            viewModel.onIntent(intent = VaultTreeIntent.OnDeleteConfirm)
+            advanceUntilIdle()
+            runCurrent()
+
+            assertEquals(
+                expected = Triple(
+                    listOf(path(MENU)),
+                    NotesError.OpenFailed(path = PLATE),
+                    listOf<VaultTreeEffect>(VaultTreeEffect.EntryDeleted(path = path(MENU)))
+                ),
+                actual = Triple(
+                    opener.opened.toList(),
+                    viewModel.state.value.actionError,
+                    effects.toList()
+                )
+            )
+        }
 }

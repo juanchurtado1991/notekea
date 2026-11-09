@@ -71,9 +71,13 @@ fun NotekeaLazyScrollArea(
 private fun NotekeaScrollAreaPreview() {
     NotekeaPreviewThemes {
         val state = rememberScrollState()
+
         NotekeaScrollArea(
             state = state,
-            modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
         ) {
             Column(modifier = Modifier.verticalScroll(state = state)) {
                 repeat(times = PREVIEW_ROWS) { Text(text = PREVIEW_ROW + it) }
@@ -87,11 +91,17 @@ private fun NotekeaScrollAreaPreview() {
 private fun NotekeaLazyScrollAreaPreview() {
     NotekeaPreviewThemes {
         val state = rememberLazyListState()
+
         NotekeaLazyScrollArea(
             state = state,
-            modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
         ) {
-            LazyColumn(state = state) { items(count = PREVIEW_ROWS) { Text(text = PREVIEW_ROW + it) } }
+            LazyColumn(state = state) {
+                items(count = PREVIEW_ROWS) { Text(text = PREVIEW_ROW + it) }
+            }
         }
     }
 }

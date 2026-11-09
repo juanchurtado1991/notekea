@@ -1,6 +1,13 @@
 package app.notekea.tree.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.NoteEntry
+import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteScanner
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -14,22 +21,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlin.time.Duration.Companion.milliseconds
-import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.core.notes.domain.NoteFile
-import app.notekea.core.notes.domain.NoteMetadata
-import app.notekea.core.notes.domain.NoteScanner
-import app.notekea.core.notes.domain.NotesError
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.VaultTree
 
 /**
- * The notes, other files and folders of a vault, kept up to date while collected. What the cache remembers is shown at once, then
- * the vault is scanned and only notes whose size or date changed are read again; every update is saved back to the
- * cache. The watcher starts before the first scan, so changes made while scanning are not lost; notes are read at most
- * [MAX_PARALLEL_READS] at a time. Changes are applied in batches gathered for [BATCH_WINDOW], so a burst (a sync, a
- * `git checkout`) produces one update instead of hundreds. A new folder or lost events cause a rescan, which reads
- * again only the notes whose size or date changed. A scan that fails emits the error and ends the flow; collecting
- * again retries.
+ * The notes, other files and folders of a vault, kept up to date while collected. What the cache remembers is shown at
+ * once; then the vault is scanned, reading only notes whose size or date changed. The watcher starts before the first
+ * scan; its changes are applied in batches gathered for [BATCH_WINDOW]. A failed scan ends the flow.
  */
 class ObserveVaultTreeUseCase(
     private val noteScanner: NoteScanner,
@@ -37,26 +33,54 @@ class ObserveVaultTreeUseCase(
     private val fileWatcher: FileWatcher,
     private val noteMetadataCache: NoteMetadataCache
 ) {
-    operator fun invoke(
-        vaultPath: String
-    ): Flow<Outcome<VaultTree, NotesError>> = channelFlow {
+    operator fun invoke(vaultPath: String): Flow<Outcome<VaultTree, NotesError>> = channelFlow {
         val changes = Channel<VaultChange>(capacity = Channel.UNLIMITED)
-        val watching = launch { fileWatcher.watch(vaultPath = vaultPath).collect { changes.send(element = it) } }
+
+        val watching = launch {
+            fileWatcher.watch(vaultPath = vaultPath).collect { changes.send(element = it) }
+        }
+
         val cached = VaultTree.fromNotes(notes = noteMetadataCache.read(vaultPath = vaultPath))
-        if (cached.notes.isNotEmpty()) send(element = Outcome.Success(value = cached.copy(isFromCache = true)))
+
+        if (cached.notes.isNotEmpty()) {
+            send(
+                element = Outcome.Success(value = cached.copy(isFromCache = true))
+            )
+        }
+
         var saved = cached
-        var tree = scanOrReport(vaultPath = vaultPath, previous = cached)
+
+        var tree = scanOrReport(
+            vaultPath = vaultPath,
+            previous = cached
+        )
+
         while (tree != null) {
             send(element = Outcome.Success(value = tree))
-            saveChanges(vaultPath = vaultPath, saved = saved, current = tree)
+
+            saveChanges(
+                vaultPath = vaultPath,
+                saved = saved,
+                current = tree
+            )
+
             saved = tree
             val batch = receiveBatch(changes = changes)
+
             tree = if (needsRescan(batch = batch)) {
-                scanOrReport(vaultPath = vaultPath, previous = tree)
+                scanOrReport(
+                    vaultPath = vaultPath,
+                    previous = tree
+                )
             } else {
-                applyChanges(vaultPath = vaultPath, tree = tree, batch = batch)
+                applyChanges(
+                    vaultPath = vaultPath,
+                    tree = tree,
+                    batch = batch
+                )
             }
         }
+
         watching.cancel()
     }
 
@@ -64,38 +88,71 @@ class ObserveVaultTreeUseCase(
         vaultPath: String,
         tree: VaultTree,
         batch: List<VaultChange>
-    ): VaultTree = batch.mapNotNull { pathOf(change = it) }.distinct().fold(initial = tree) { current, path ->
-        val note = if (path.isMarkdown) noteScanner.stat(vaultPath = vaultPath, path = path) else null
-        val attachment = if (path.isMarkdown) null else noteScanner.statAttachment(vaultPath = vaultPath, path = path)
-        when {
-            note != null -> current.withNote(note = entryOf(vaultPath = vaultPath, file = note))
-            attachment != null -> current.withAttachment(file = attachment)
-            else -> current.without(path = path)
+    ): VaultTree = batch
+        .mapNotNull { pathOf(change = it) }
+        .distinct()
+        .fold(initial = tree) { current, path ->
+            val note = if (path.isMarkdown) {
+                noteScanner.stat(
+                    vaultPath = vaultPath,
+                    path = path
+                )
+            } else {
+                null
+            }
+
+            val attachment = if (path.isMarkdown) {
+                null
+            } else {
+                noteScanner.statAttachment(
+                    vaultPath = vaultPath,
+                    path = path
+                )
+            }
+
+            when {
+                note != null -> current.withNote(
+                    note = entryOf(
+                        vaultPath = vaultPath,
+                        file = note
+                    )
+                )
+
+                attachment != null -> current.withAttachment(file = attachment)
+
+                else -> current.without(path = path)
+            }
         }
-    }
 
     private suspend fun entryOf(
         vaultPath: String,
         file: NoteFile
     ): NoteEntry {
-        val metadata = noteMetadataReader.read(vaultPath = vaultPath, path = file.path)
-        // A note that could not be read is kept without its size, so it is never trusted as unchanged and is read again.
-        return if (metadata !=
-            null
-        ) {
-            NoteEntry(file = file, metadata = metadata)
+        val metadata = noteMetadataReader.read(
+            vaultPath = vaultPath,
+            path = file.path
+        )
+
+        // A note that could not be read is kept without its size, so it is never trusted as unchanged and is read
+        // again.
+        return if (metadata != null) {
+            NoteEntry(
+                file = file,
+                metadata = metadata
+            )
         } else {
-            NoteEntry(file = file.copy(size = null), metadata = NoteMetadata.NONE)
+            NoteEntry(
+                file = file.copy(size = null),
+                metadata = NoteMetadata.NONE
+            )
         }
     }
 
-    private fun needsRescan(
-        batch: List<VaultChange>
-    ): Boolean = batch.any { it == VaultChange.Overflow || (it is VaultChange.Created && it.isFolder) }
+    private fun needsRescan(batch: List<VaultChange>): Boolean = batch.any {
+        it == VaultChange.Overflow || (it is VaultChange.Created && it.isFolder)
+    }
 
-    private fun pathOf(
-        change: VaultChange
-    ): RelativePath? = when (change) {
+    private fun pathOf(change: VaultChange): RelativePath? = when (change) {
         is VaultChange.Created -> change.path
         is VaultChange.Deleted -> change.path
         is VaultChange.Modified -> change.path
@@ -108,12 +165,26 @@ class ObserveVaultTreeUseCase(
         previous: VaultTree
     ): List<NoteEntry> = coroutineScope {
         val permits = Semaphore(permits = MAX_PARALLEL_READS)
+
         // Only a changed note starts a coroutine to read it: a rescan of a vault that changed little stays cheap.
         files
             .map { file ->
-                val known = previous.notes[file.path]?.takeIf { isUnchanged(known = it.file, current = file) }
+                val known = previous.notes[file.path]?.takeIf {
+                    isUnchanged(
+                        known = it.file,
+                        current = file
+                    )
+                }
+
                 known?.let { CompletableDeferred(value = it) }
-                    ?: async { permits.withPermit { entryOf(vaultPath = vaultPath, file = file) } }
+                    ?: async {
+                        permits.withPermit {
+                            entryOf(
+                                vaultPath = vaultPath,
+                                file = file
+                            )
+                        }
+                    }
             }.awaitAll()
     }
 
@@ -123,19 +194,36 @@ class ObserveVaultTreeUseCase(
         saved: VaultTree,
         current: VaultTree
     ) {
-        val upserted = current.notes.values.filter { saved.notes[it.file.path] != it }
-        val removed = saved.notes.keys.filterNot { it in current.notes }
-        if (upserted.isNotEmpty() || removed.isNotEmpty()) {
-            noteMetadataCache.update(vaultPath = vaultPath, upserted = upserted, removed = removed)
+        val upserted = current
+            .notes
+            .values
+            .filter {
+                saved.notes[it.file.path] != it
+            }
+
+        val removed = saved
+            .notes
+            .keys
+            .filterNot {
+                it in current.notes
+            }
+
+        val hasChanges = upserted.isNotEmpty() || removed.isNotEmpty()
+
+        if (hasChanges) {
+            noteMetadataCache.update(
+                vaultPath = vaultPath,
+                upserted = upserted,
+                removed = removed
+            )
         }
     }
 
     /** The first change, plus every change that arrives within [BATCH_WINDOW] after it. */
-    private suspend fun receiveBatch(
-        changes: Channel<VaultChange>
-    ): List<VaultChange> {
+    private suspend fun receiveBatch(changes: Channel<VaultChange>): List<VaultChange> {
         val first = changes.receive()
         delay(duration = BATCH_WINDOW)
+
         return listOf(first) + generateSequence { changes.tryReceive().getOrNull() }
     }
 
@@ -149,11 +237,19 @@ class ObserveVaultTreeUseCase(
         }
 
         is Outcome.Success -> {
-            val entries = readEntries(vaultPath = vaultPath, files = scanned.value.files, previous = previous)
+            val entries = readEntries(
+                vaultPath = vaultPath,
+                files = scanned.value.files,
+                previous = previous
+            )
+
             VaultTree(
                 folders = scanned.value.folders,
                 notes = entries.associateBy { it.file.path },
-                attachments = scanned.value.attachments.associateBy { it.path }
+                attachments = scanned
+                    .value
+                    .attachments
+                    .associateBy { it.path }
             )
         }
     }
@@ -161,7 +257,10 @@ class ObserveVaultTreeUseCase(
     private fun isUnchanged(
         known: NoteFile,
         current: NoteFile
-    ): Boolean = known.size != null && known.modifiedAt != null && known == current
+    ): Boolean =
+        known.size != null &&
+            known.modifiedAt != null &&
+            known == current
 
     companion object {
         const val MAX_PARALLEL_READS = 16

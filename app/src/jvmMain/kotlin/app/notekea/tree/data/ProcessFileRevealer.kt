@@ -2,10 +2,10 @@ package app.notekea.tree.data
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
-import app.notekea.core.platform.domain.OperatingSystem
-import app.notekea.tree.domain.FileRevealer
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.platform.domain.OperatingSystem
+import app.notekea.tree.domain.FileRevealer
 import kotlinx.coroutines.withContext
 import java.nio.file.Path
 import kotlin.io.path.Path
@@ -13,12 +13,9 @@ import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 
 /**
- * [FileRevealer] with each system's own command: `open -R` on macOS and `explorer /select,` on Windows select the
- * entry in Finder and File Explorer. On Linux the freedesktop.org `FileManager1.ShowItems` D-Bus call selects it in
- * the user's file manager when it supports the call (Nautilus, Dolphin, Nemo…); otherwise `xdg-open` opens the
- * containing folder. File Explorer exits with 1 even when it worked, so on Windows starting it counts as success.
- * An entry that no longer exists is reported instead of opening the file manager somewhere else.
- * [runCommand] runs a command and returns its exit code, or null when it could not run (see `ProcessCommands.kt`).
+ * [FileRevealer] with each system's own command: `open -R` on macOS, `explorer /select,` on Windows (which exits with 1
+ * even when it worked, so starting it counts as success) and on Linux the `FileManager1.ShowItems` D-Bus call, or
+ * `xdg-open` on the containing folder. An entry that no longer exists is reported instead.
  */
 class ProcessFileRevealer(
     private val operatingSystem: OperatingSystem,
@@ -30,20 +27,32 @@ class ProcessFileRevealer(
         path: RelativePath
     ): Outcome<Unit, NotesError> = withContext(context = dispatchers.io) {
         val entry = if (path.isRoot) Path(vaultPath) else Path(vaultPath, path.value)
+
         if (!entry.exists()) {
             return@withContext Outcome.Failure(
-                error = missingError(vaultPath = vaultPath, path = path)
+                error = missingError(
+                    vaultPath = vaultPath,
+                    path = path
+                )
             )
         }
+
         val isRevealed = when (operatingSystem) {
             OperatingSystem.LINUX -> revealOnLinux(entry = entry)
-            OperatingSystem.MACOS -> runCommand(listOf(OPEN, OPEN_REVEAL, entry.toString())) == SUCCESS
-            OperatingSystem.WINDOWS -> runCommand(listOf(EXPLORER, EXPLORER_SELECT + entry.toString())) != null
+
+            OperatingSystem.MACOS -> runCommand(listOf(OPEN, OPEN_REVEAL, entry.toString())) ==
+                SUCCESS
+
+            OperatingSystem.WINDOWS -> runCommand(
+                listOf(
+                    EXPLORER,
+                    EXPLORER_SELECT + entry.toString()
+                )
+            ) != null
         }
+
         if (isRevealed) {
-            Outcome.Success(
-                value = Unit
-            )
+            Outcome.Success(value = Unit)
         } else {
             Outcome.Failure(error = NotesError.RevealFailed(path = path.value))
         }
@@ -59,9 +68,7 @@ class ProcessFileRevealer(
         NotesError.VaultMissing(path = vaultPath)
     }
 
-    private fun revealOnLinux(
-        entry: Path
-    ): Boolean {
+    private fun revealOnLinux(entry: Path): Boolean {
         val showItems = listOf(
             DBUS_SEND,
             DBUS_SESSION,
@@ -70,10 +77,18 @@ class ProcessFileRevealer(
             DBUS_OBJECT_PATH,
             DBUS_SHOW_ITEMS,
             // dbus-send splits array items on commas, so a comma in a file name must stay escaped.
-            DBUS_URIS_PREFIX + entry.toUri().toString().replace(oldValue = COMMA, newValue = ESCAPED_COMMA),
+            DBUS_URIS_PREFIX + entry
+                .toUri()
+                .toString()
+                .replace(
+                    oldValue = COMMA,
+                    newValue = ESCAPED_COMMA
+                ),
             DBUS_STARTUP_ID
         )
+
         val folder = (entry.parent ?: entry).toString()
+
         return runCommand(showItems) == SUCCESS || runCommand(listOf(XDG_OPEN, folder)) == SUCCESS
     }
 

@@ -1,16 +1,16 @@
 package app.notekea.editor.presentation.viewmodel
 
 import app.notekea.core.notes.domain.NoteFixtures.file
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.SaveStatus
-import app.notekea.core.notes.domain.NotesError
-import app.notekea.core.notes.domain.RelativePath
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * The editor over real use cases and fake ports. The open note is polled forever, so time only moves with
@@ -19,25 +19,35 @@ import kotlinx.coroutines.test.runCurrent
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditorViewModelTest : EditorViewModelTestBase() {
     @Test
-    fun `an opened note shows its body, and edits are saved a second after the last keystroke`() = runEditorTest {
-        open(path = AREPAS)
-        val opened = viewModel.buffer.text.toString()
+    fun `an opened note shows its body, and edits are saved a second after the last keystroke`() =
+        runEditorTest {
+            open(path = AREPAS)
 
-        type(text = "# Arepas reina\n")
-        advanceTimeBy(delayTimeMillis = HALF_SECOND_MILLIS)
-        val beforeTheDelay = store.texts.getValue(AREPAS)
-        advanceTimeBy(delayTimeMillis = SECOND_MILLIS)
-        runCurrent()
+            val opened = viewModel
+                .buffer
+                .text
+                .toString()
 
-        assertEquals(
-            expected = listOf("# Arepas\n", AREPAS_TEXT, "---\ntags: [recipe]\n---\n# Arepas reina\n"),
-            actual = listOf(opened, beforeTheDelay, store.texts.getValue(AREPAS))
-        )
-        assertEquals(
-            expected = SaveStatus.SAVED,
-            actual = viewModel.state.value.saveStatus
-        )
-    }
+            type(text = "# Arepas reina\n")
+            advanceTimeBy(delayTimeMillis = HALF_SECOND_MILLIS)
+            val beforeTheDelay = store.texts.getValue(AREPAS)
+            advanceTimeBy(delayTimeMillis = SECOND_MILLIS)
+            runCurrent()
+
+            assertEquals(
+                expected = listOf(
+                    "# Arepas\n",
+                    AREPAS_TEXT,
+                    "---\ntags: [recipe]\n---\n# Arepas reina\n"
+                ),
+                actual = listOf(opened, beforeTheDelay, store.texts.getValue(AREPAS))
+            )
+
+            assertEquals(
+                expected = SaveStatus.SAVED,
+                actual = viewModel.state.value.saveStatus
+            )
+        }
 
     @Test
     fun `typing shows unsaved, and undoing every edit leaves nothing to save`() = runEditorTest {
@@ -53,6 +63,7 @@ class EditorViewModelTest : EditorViewModelTestBase() {
             expected = listOf(SaveStatus.UNSAVED, SaveStatus.NONE),
             actual = listOf(unsaved, viewModel.state.value.saveStatus)
         )
+
         assertEquals(
             expected = AREPAS_TEXT,
             actual = store.texts.getValue(AREPAS)
@@ -83,6 +94,7 @@ class EditorViewModelTest : EditorViewModelTestBase() {
             ),
             actual = listOf(bySave, bySwitch, store.texts.getValue(WELCOME))
         )
+
         assertEquals(
             expected = listOf<EditorEffect>(EditorEffect.Flushed),
             actual = effects
@@ -96,12 +108,21 @@ class EditorViewModelTest : EditorViewModelTestBase() {
         viewModel.onIntent(intent = EditorIntent.OnSaveShortcut)
         runCurrent()
 
-        scanner.addNote(file = file(path = AREPAS.value, modifiedOffsetMillis = 1L))
+        scanner.addNote(
+            file = file(
+                path = AREPAS.value,
+                modifiedOffsetMillis = 1L
+            )
+        )
+
         advanceTimeBy(delayTimeMillis = TWO_SECONDS_MILLIS)
 
         assertEquals(
             expected = false to "Mine",
-            actual = viewModel.state.value.hasConflict to viewModel.buffer.text.toString()
+            actual = viewModel.state.value.hasConflict to viewModel
+                .buffer
+                .text
+                .toString()
         )
     }
 
@@ -114,7 +135,9 @@ class EditorViewModelTest : EditorViewModelTestBase() {
         runCurrent()
 
         assertEquals(
-            expected = listOf<EditorEffect>(EditorEffect.RevealFolder(path = RelativePath(value = "Recipes"))),
+            expected = listOf<EditorEffect>(
+                EditorEffect.RevealFolder(path = RelativePath(value = "Recipes"))
+            ),
             actual = effects.filterIsInstance<EditorEffect.RevealFolder>()
         )
     }
@@ -145,7 +168,14 @@ class EditorViewModelTest : EditorViewModelTestBase() {
 
         assertEquals(
             expected = Triple(NotesError.EntryMissing(path = missing.value), null, "Found"),
-            actual = Triple(failed, viewModel.state.value.loadError, viewModel.buffer.text.toString())
+            actual = Triple(
+                failed,
+                viewModel.state.value.loadError,
+                viewModel
+                    .buffer
+                    .text
+                    .toString()
+            )
         )
     }
 
@@ -163,8 +193,16 @@ class EditorViewModelTest : EditorViewModelTestBase() {
         runCurrent()
 
         assertEquals(
-            expected = Triple(NotesError.OperationFailed(path = AREPAS.value), null, SaveStatus.SAVED),
-            actual = Triple(error, viewModel.state.value.saveError, viewModel.state.value.saveStatus)
+            expected = Triple(
+                NotesError.OperationFailed(path = AREPAS.value),
+                null,
+                SaveStatus.SAVED
+            ),
+            actual = Triple(
+                error,
+                viewModel.state.value.saveError,
+                viewModel.state.value.saveStatus
+            )
         )
     }
 
@@ -183,20 +221,23 @@ class EditorViewModelTest : EditorViewModelTestBase() {
     }
 
     @Test
-    fun `a focus request for a note chosen in the quick switcher waits until it has opened`() = runEditorTest {
-        val effects = collectEffects()
-        open(path = AREPAS)
+    fun `a focus request for a note chosen in the quick switcher waits until it has opened`() =
+        runEditorTest {
+            val effects = collectEffects()
+            open(path = AREPAS)
 
-        viewModel.onIntent(intent = EditorIntent.OnFocusRequest(path = WELCOME))
-        runCurrent()
-        val beforeOpening = effects.toList()
-        open(path = WELCOME)
+            viewModel.onIntent(intent = EditorIntent.OnFocusRequest(path = WELCOME))
+            runCurrent()
+            val beforeOpening = effects.toList()
+            open(path = WELCOME)
 
-        assertEquals(
-            expected = emptyList<EditorEffect>() to listOf<EditorEffect>(EditorEffect.FocusText),
-            actual = beforeOpening to effects
-        )
-    }
+            assertEquals(
+                expected = emptyList<EditorEffect>() to listOf<EditorEffect>(
+                    EditorEffect.FocusText
+                ),
+                actual = beforeOpening to effects
+            )
+        }
 
     @Test
     fun `a focus request is dropped when another note opens instead`() = runEditorTest {

@@ -21,13 +21,30 @@ class FenceTracker {
         end: Int = text.length
     ): Boolean {
         val open = fence
-        val hasFence = (start until end).any { text[it] in FENCE_CHARS }
-        val line = if (hasFence) text.subSequence(startIndex = start, endIndex = end) else EMPTY_LINE
-        val mark = MarkdownSyntax.FENCE_LINE.find(input = line)?.groupValues?.get(index = 1)
+
+        val hasFence = (start until end).any {
+            text[it] in FENCE_CHARS
+        }
+
+        val line = if (hasFence) {
+            text.subSequence(
+                startIndex = start,
+                endIndex = end
+            )
+        } else {
+            EMPTY_LINE
+        }
+
+        val mark = MarkdownSyntax.FENCE_LINE
+            .find(input = line)
+            ?.groupValues
+            ?.get(index = 1)
+
         when {
             open == null -> fence = mark
             mark != null && closes(line = line, mark = mark, open = open) -> fence = null
         }
+
         return open != null || mark != null
     }
 
@@ -35,7 +52,10 @@ class FenceTracker {
         line: CharSequence,
         mark: String,
         open: String
-    ): Boolean = mark.first() == open.first() && mark.length >= open.length && line.trim().length == mark.length
+    ): Boolean =
+        mark.first() == open.first() &&
+            mark.length >= open.length &&
+            line.trim().length == mark.length
 
     private companion object {
         const val EMPTY_LINE = ""

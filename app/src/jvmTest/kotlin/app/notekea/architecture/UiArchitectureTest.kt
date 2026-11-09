@@ -10,8 +10,11 @@ class UiArchitectureTest : ArchitectureTestBase() {
 
     @Test
     fun `icons come from NotekeaIcons, never from the icon library`() {
-        productionScope.files
-            .filterNot { it.name == ICONS_FILE }
+        productionScope
+            .files
+            .filterNot {
+                it.name == ICONS_FILE
+            }
             .assertFalse(
                 additionalMessage = "LIBRARIES.md §2: add the icon to NotekeaIcons and use it from there"
             ) { file ->
@@ -21,25 +24,50 @@ class UiArchitectureTest : ArchitectureTestBase() {
 
     @Test
     fun `every UI composable has a preview in its file`() {
-        productionScope.files
-            .filterNot { file -> PREVIEW_EXEMPT_PACKAGES.any { file.packagee?.name?.startsWith(prefix = it) == true } }
-            .assertTrue(additionalMessage = "GUIDELINES.md §6: add a @Preview named <Composable>…Preview") { file ->
-                val functions = file.functions(includeNested = false, includeLocal = false)
+        productionScope
+            .files
+            .filterNot { file ->
+                PREVIEW_EXEMPT_PACKAGES.any {
+                    file
+                        .packagee
+                        ?.name
+                        ?.startsWith(prefix = it) == true
+                }
+            }
+            .assertTrue(
+                additionalMessage = "GUIDELINES.md §6: add a @Preview named <Composable>…Preview"
+            ) { file ->
+                val functions = file.functions(
+                    includeNested = false,
+                    includeLocal = false
+                )
+
                 val previews = functions.filter { it.hasAnnotationWithName(PREVIEW_ANNOTATION) }
+
                 // An actual's preview is its expect's, in the common file; a Follow… composable draws nothing.
                 functions
-                    .filter { it.hasAnnotationWithName(COMPOSABLE_ANNOTATION) && !it.hasPrivateModifier }
+                    .filter {
+                        it.hasAnnotationWithName(COMPOSABLE_ANNOTATION) && !it.hasPrivateModifier
+                    }
                     .filterNot { it.hasActualModifier }
                     .filterNot { it.name.startsWith(prefix = FOLLOWER_PREFIX) }
                     .filterNot { it.hasAnnotationWithName(PREVIEW_ANNOTATION) }
-                    .all { composable -> previews.any { it.name.startsWith(prefix = composable.name) } }
+                    .all { composable ->
+                        previews.any { it.name.startsWith(prefix = composable.name) }
+                    }
             }
     }
 
     @Test
     fun `hard-coded colors only live in the theme`() {
-        productionScope.files
-            .filterNot { it.packagee?.name?.startsWith(prefix = THEME_PACKAGE) == true }
+        productionScope
+            .files
+            .filterNot {
+                it
+                    .packagee
+                    ?.name
+                    ?.startsWith(prefix = THEME_PACKAGE) == true
+            }
             .assertFalse(additionalMessage = "ARCHITECTURE.md §1: use theme tokens") {
                 it.text.contains(other = COLOR_LITERAL)
             }
@@ -47,9 +75,18 @@ class UiArchitectureTest : ArchitectureTestBase() {
 
     @Test
     fun `the window's locals are provided in one root, shared with the Auto-Test's cases`() {
-        val rootLocals = listOf("LocalShortcutDispatcher", "LocalFileDrop", "LocalAppVersion", "LocalResizePointerIcon")
-        (productionScope + Konsist.scopeFromProduction(moduleName = AUTO_TEST_MODULE_NAME)).files
-            .filterNot { it.name == ROOT_FILE }
+        val rootLocals = listOf(
+            "LocalShortcutDispatcher",
+            "LocalFileDrop",
+            "LocalAppVersion",
+            "LocalResizePointerIcon"
+        )
+
+        (productionScope + Konsist.scopeFromProduction(moduleName = AUTO_TEST_MODULE_NAME))
+            .files
+            .filterNot {
+                it.name == ROOT_FILE
+            }
             .assertFalse(additionalMessage = "audit 64: provide them in NotekeaRoot") { file ->
                 rootLocals.any { local -> file.text.contains(other = "$local provides") }
             }
@@ -57,13 +94,25 @@ class UiArchitectureTest : ArchitectureTestBase() {
 
     @Test
     fun `reusable material components are only used inside the design system`() {
-        productionScope.files
-            .filterNot { file -> DESIGN_SYSTEM_PACKAGES.any { file.packagee?.name?.startsWith(prefix = it) == true } }
+        productionScope
+            .files
+            .filterNot { file ->
+                DESIGN_SYSTEM_PACKAGES.any {
+                    file
+                        .packagee
+                        ?.name
+                        ?.startsWith(prefix = it) == true
+                }
+            }
             .assertFalse(
                 additionalMessage = "ARCHITECTURE.md §11: use or add a component in the design system's components"
             ) { file ->
                 file.imports.any {
-                    val isMaterialWildcard = it.text.trim().endsWith(suffix = "$MATERIAL3_PACKAGE.*")
+                    val isMaterialWildcard = it
+                        .text
+                        .trim()
+                        .endsWith(suffix = "$MATERIAL3_PACKAGE.*")
+
                     isMaterialWildcard || it.name in designSystemOnlyImports
                 }
             }

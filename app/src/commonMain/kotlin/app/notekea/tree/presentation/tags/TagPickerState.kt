@@ -1,7 +1,7 @@
 package app.notekea.tree.presentation.tags
 
 /**
- * State of the tag picker (`ROADMAP.md` 1.17): the vault's tags matching [query] as [rows], the most used first, and
+ * State of the tag picker: the vault's tags matching [query] as [rows], the most used first, and
  * the typed text as a new tag last when the vault lacks it; [selectedIndex] is the one `Enter` adds.
  */
 data class TagPickerState(

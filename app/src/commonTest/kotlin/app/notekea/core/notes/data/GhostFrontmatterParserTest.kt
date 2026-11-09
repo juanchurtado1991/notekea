@@ -61,7 +61,11 @@ class GhostFrontmatterParserTest {
             """.trimIndent()
 
         assertEquals(
-            expected = NoteMetadata(tags = listOf("garden"), aliases = emptyList(), title = "2026"),
+            expected = NoteMetadata(
+                tags = listOf("garden"),
+                aliases = emptyList(),
+                title = "2026"
+            ),
             actual = parser.parse(yaml = yaml)
         )
     }
@@ -79,6 +83,7 @@ class GhostFrontmatterParserTest {
             expected = NoteMetadata.NONE,
             actual = parser.parse(yaml = yaml)
         )
+
         assertEquals(
             expected = "Kept",
             actual = parser.parse(yaml = "tags: {a: b}\ntitle: Kept").title

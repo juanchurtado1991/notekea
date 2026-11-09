@@ -12,6 +12,7 @@ public enum class HostSystem {
 
         internal fun of(osName: String): HostSystem {
             val name = osName.lowercase()
+
             return when {
                 name.startsWith(prefix = "windows") -> WINDOWS
                 name.startsWith(prefix = "mac") -> MACOS

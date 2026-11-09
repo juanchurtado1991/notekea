@@ -19,13 +19,22 @@ internal object TasksPreviewData {
             text = "Write the announcement",
             isDone = false,
             heading = "Launch plan",
-            date = CalendarDate(year = 2026, month = 10, day = 30)
+            date = CalendarDate(
+                year = 2026,
+                month = 10,
+                day = 30
+            )
         )
     )
 
     val state = TasksState(
         list = TaskList(
-            groups = listOf(TaskGroup.OfNote(path = LAUNCH, rows = listOf(row))),
+            groups = listOf(
+                TaskGroup.OfNote(
+                    path = LAUNCH,
+                    rows = listOf(row)
+                )
+            ),
             open = 1,
             total = 2,
             folders = listOf("Projects"),

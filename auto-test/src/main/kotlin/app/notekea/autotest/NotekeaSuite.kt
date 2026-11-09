@@ -27,12 +27,12 @@ import app.notekea.autotest.cases.m1.workspaceLookCases
 import app.notekea.autotest.cases.m2.appearanceCases
 import app.notekea.autotest.cases.m2.backlinksCases
 import app.notekea.autotest.cases.m2.graphCases
-import app.notekea.autotest.cases.m2.queryCases
-import app.notekea.autotest.cases.m2.vaultTaskCases
-import app.notekea.autotest.cases.m3.modelManagerCases
 import app.notekea.autotest.cases.m2.hybridSearchCases
 import app.notekea.autotest.cases.m2.indexCases
+import app.notekea.autotest.cases.m2.queryCases
 import app.notekea.autotest.cases.m2.relatedCases
+import app.notekea.autotest.cases.m2.vaultTaskCases
+import app.notekea.autotest.cases.m3.modelManagerCases
 import com.testbuddy.Suite
 import com.testbuddy.testBuddy
 import java.nio.file.Files
@@ -47,11 +47,21 @@ object NotekeaSuite {
     private const val LOG_LINES = 50
 
     val suite: Suite by lazy {
-        testBuddy(appName = APP_NAME, version = System.getProperty(VERSION_PROPERTY) ?: DEVELOPMENT_VERSION) {
+        testBuddy(
+            appName = APP_NAME,
+            version = System.getProperty(VERSION_PROPERTY) ?: DEVELOPMENT_VERSION
+        ) {
             launch { folders -> NotekeaCase(folders = folders) }
+
             data(from = SmokeData.folder)
-            window(width = WINDOW_WIDTH, height = WINDOW_HEIGHT)
+
+            window(
+                width = WINDOW_WIDTH,
+                height = WINDOW_HEIGHT
+            )
+
             diagnostics { recentLog() }
+
             generalCases()
             platformCases()
             themeCases()
@@ -91,9 +101,17 @@ object NotekeaSuite {
 
     // The last lines of Notekea QA's log (logs/notekea.log, as About's Copy diagnostics reads it).
     private fun recentLog(): String? {
-        val log = QaAppData.current().resolve("logs").resolve("notekea.log")
+        val log = QaAppData
+            .current()
+            .resolve("logs")
+            .resolve("notekea.log")
+
         if (!Files.isRegularFile(log)) return null
+
         return "Notekea's recent log:\n" +
-            Files.readAllLines(log).takeLast(n = LOG_LINES).joinToString(separator = "\n")
+            Files
+                .readAllLines(log)
+                .takeLast(n = LOG_LINES)
+                .joinToString(separator = "\n")
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.ai.domain.ModelSize
 import app.notekea.core.presentation.designsystem.components.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.NotekeaConfirmDialog
 import app.notekea.core.presentation.designsystem.components.NotekeaFold
@@ -23,7 +24,6 @@ import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.ai.domain.ModelSize
 import app.notekea.resources.Res
 import app.notekea.resources.models_cancel
 import app.notekea.resources.models_checking
@@ -42,7 +42,7 @@ private const val PREVIEW_HEIGHT_DP = 560
 private const val PREVIEW_WIDTH_DP = 560
 
 /**
- * Settings → AI model (`ROADMAP.md` 3.1, design C): what the chat model is, the size for this computer as a card
+ * Settings → AI model: what the chat model is, the size for this computer as a card
  * with its download, the other sizes folded under "Other sizes", and where the models are kept. It scrolls when the
  * dialog is too short for it.
  */
@@ -53,7 +53,11 @@ fun ModelManagerContent(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
-    NotekeaScrollArea(state = scrollState, modifier = modifier) {
+
+    NotekeaScrollArea(
+        state = scrollState,
+        modifier = modifier
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -66,14 +70,29 @@ fun ModelManagerContent(
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
+
             when {
                 state.isLoading -> Checking()
-                state.hasLoadFailed -> ErrorBanner(message = stringResource(resource = Res.string.models_load_failed))
-                else -> Models(state = state, onIntent = onIntent)
+
+                state.hasLoadFailed -> ErrorBanner(
+                    message = stringResource(resource = Res.string.models_load_failed)
+                )
+
+                else -> Models(
+                    state = state,
+                    onIntent = onIntent
+                )
             }
         }
     }
-    state.pendingDelete?.let { DeleteDialog(size = it, state = state, onIntent = onIntent) }
+
+    state.pendingDelete?.let {
+        DeleteDialog(
+            size = it,
+            state = state,
+            onIntent = onIntent
+        )
+    }
 }
 
 @Composable
@@ -84,6 +103,7 @@ private fun Checking() {
     ) {
         val label = stringResource(resource = Res.string.models_checking)
         NotekeaProgressIndicator(label = label)
+
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
@@ -97,28 +117,53 @@ private fun Models(
     state: ModelManagerState,
     onIntent: (ModelManagerIntent) -> Unit
 ) {
-    val featured = state.models.firstOrNull { it.size == state.featured }
-    val others = state.models.filterNot { it == featured }
+    val featured = state.models.firstOrNull {
+        it.size == state.featured
+    }
+
+    val others = state.models.filterNot {
+        it == featured
+    }
+
     Text(
         text = stringResource(resource = Res.string.models_intro),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurface
     )
-    state.models.firstOrNull { it.size == state.recommended }?.let {
-        Text(
-            text = stringResource(
-                resource = Res.string.models_fits,
-                stringResource(resource = nameOf(size = it.size)),
-                state.memoryGb
-            ),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+
+    state
+        .models
+        .firstOrNull {
+            it.size == state.recommended
+        }
+        ?.let {
+            Text(
+                text = stringResource(
+                    resource = Res.string.models_fits,
+                    stringResource(resource = nameOf(size = it.size)),
+                    state.memoryGb
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+    featured?.let {
+        ModelCard(
+            row = it,
+            state = state,
+            isFeatured = true,
+            onIntent = onIntent,
+            modifier = Modifier.fillMaxWidth()
         )
     }
-    featured?.let {
-        ModelCard(row = it, state = state, isFeatured = true, onIntent = onIntent, modifier = Modifier.fillMaxWidth())
-    }
-    OtherSizes(others = others, state = state, onIntent = onIntent)
+
+    OtherSizes(
+        others = others,
+        state = state,
+        onIntent = onIntent
+    )
+
     Text(
         text = stringResource(resource = Res.string.models_folder, state.folder),
         style = MaterialTheme.typography.bodySmall,
@@ -140,12 +185,20 @@ private fun OtherSizes(
             onToggle = { onIntent(ModelManagerIntent.OnOtherSizesToggle) },
             count = others.size
         )
+
         NotekeaFold(isOpen = state.isOtherSizesShown) {
             Column(
                 modifier = Modifier.padding(top = NotekeaDimensions.SpacingS),
                 verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingL)
             ) {
-                others.forEach { ModelCard(row = it, state = state, isFeatured = false, onIntent = onIntent) }
+                others.forEach {
+                    ModelCard(
+                        row = it,
+                        state = state,
+                        isFeatured = false,
+                        onIntent = onIntent
+                    )
+                }
             }
         }
     }
@@ -157,7 +210,10 @@ private fun DeleteDialog(
     state: ModelManagerState,
     onIntent: (ModelManagerIntent) -> Unit
 ) {
-    val row = state.models.firstOrNull { it.size == size } ?: return
+    val row = state.models.firstOrNull {
+        it.size == size
+    } ?: return
+
     NotekeaConfirmDialog(
         title = stringResource(
             resource = Res.string.models_delete_title,
@@ -182,13 +238,23 @@ private fun ModelManagerContentPreview() {
     NotekeaPreviewThemes {
         listOf(
             ModelManagerState(),
-            ModelManagerState(isLoading = false, hasLoadFailed = true),
+            ModelManagerState(
+                isLoading = false,
+                hasLoadFailed = true
+            ),
             ModelManagerSamples.notInstalled,
             ModelManagerSamples.downloading,
             ModelManagerSamples.inUse
         ).forEach {
-            ModelManagerContent(state = it, onIntent = {
-            }, modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp))
+            ModelManagerContent(
+                state = it,
+                onIntent = {
+                },
+                modifier = Modifier.size(
+                    width = PREVIEW_WIDTH_DP.dp,
+                    height = PREVIEW_HEIGHT_DP.dp
+                )
+            )
         }
     }
 }

@@ -1,7 +1,6 @@
 package app.notekea.editor.presentation.attachments
 
 import androidx.compose.foundation.layout.Box
-import app.notekea.editor.presentation.model.EditorIntent
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
@@ -16,12 +15,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.editor.presentation.model.EditorIntent
 import kotlin.math.roundToInt
 
 private const val PREVIEW_WIDTH_DP = 480
 
 /**
- * The embedded files of the text in Edit mode (`ROADMAP.md` 1.8), each drawn under its own line, in the room its
+ * The embedded files of the text in Edit mode, each drawn under its own line, in the room its
  * [AttachmentSpace] makes there: [lineHeight] and [gap] down from the line's top, as wide as the text. Each one tells
  * [heights] how tall it is, so its line grows to fit it.
  */
@@ -38,25 +38,42 @@ fun AttachmentOverlay(
     if (attachments.none { it.embed.isOwnLine }) return
     val result = layout() ?: return
     val length = result.layoutInput.text.length
-    AttachmentSpace.of(text = buffer.text.toString(), views = attachments, heights = heights)
-        .filter { it.lineStart < length }
+
+    AttachmentSpace
+        .of(
+            text = buffer.text.toString(),
+            views = attachments,
+            heights = heights
+        )
+        .filter {
+            it.lineStart < length
+        }
         .forEach { space ->
             val top =
-                result.getLineTop(lineIndex = result.getLineForOffset(offset = space.lineStart)) + lineHeight + gap
+                result.getLineTop(lineIndex = result.getLineForOffset(offset = space.lineStart)) +
+                    lineHeight +
+                    gap
+
             key(space.key) {
                 Box(
                     modifier = Modifier
-                        .offset { IntOffset(x = 0, y = top.roundToInt()) }
+                        .offset {
+                            IntOffset(
+                                x = 0,
+                                y = top.roundToInt()
+                            )
+                        }
                         .fillMaxWidth()
                         .onSizeChanged { size ->
-                            if (heights[space.key] !=
-                                size.height
-                            ) {
+                            if (heights[space.key] != size.height) {
                                 heights[space.key] = size.height
                             }
                         }
                 ) {
-                    AttachmentBlock(view = space.view, onIntent = onIntent)
+                    AttachmentBlock(
+                        view = space.view,
+                        onIntent = onIntent
+                    )
                 }
             }
         }

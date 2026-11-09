@@ -5,24 +5,24 @@ package app.notekea.smokerun
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.v2.runComposeUiTest
-import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.compose.ui.test.withKeysDown
 import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.platform.domain.PlatformConventions
 import org.koin.mp.KoinPlatform
+import java.io.File
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import java.io.File
 
 private const val WAIT_MILLIS = 10_000L
 private val RUN_TIMEOUT = 5.minutes
@@ -33,7 +33,13 @@ internal fun ComposeUiTest.waitForText(
     text: String,
     substring: Boolean = false,
     timeoutMillis: Long = WAIT_MILLIS
-) = waitUntilAtLeastOneExists(matcher = hasText(text = text, substring = substring), timeoutMillis = timeoutMillis)
+) = waitUntilAtLeastOneExists(
+    matcher = hasText(
+        text = text,
+        substring = substring
+    ),
+    timeoutMillis = timeoutMillis
+)
 
 /** Opens the copy of the vault [name] from the welcome screen, as Open folder… with the picker answering it. */
 internal fun ComposeUiTest.openVault(
@@ -46,7 +52,11 @@ internal fun ComposeUiTest.openVault(
     // The welcome screen shows its actions only once it has read the recent vaults, later on a slow machine (CI).
     waitForText(text = OPEN_FOLDER)
     onNodeWithText(text = OPEN_FOLDER).performClick()
-    waitForText(text = shownNote, timeoutMillis = timeoutMillis)
+
+    waitForText(
+        text = shownNote,
+        timeoutMillis = timeoutMillis
+    )
 }
 
 /** The window's own root: a tooltip or a menu open over it is a root of its own, drawn in a popup. */
@@ -57,9 +67,17 @@ internal fun ComposeUiTest.pressShortcut(
     key: Key,
     withShift: Boolean = false
 ) {
-    val isMac = KoinPlatform.getKoin().get<PlatformConventions>().operatingSystem == OperatingSystem.MACOS
-    val modifiers = listOfNotNull(if (isMac) Key.MetaLeft else Key.CtrlLeft, Key.ShiftLeft.takeIf { withShift })
-    window().performKeyInput { withKeysDown(keys = modifiers) { pressKey(key = key) } }
+    val isMac = KoinPlatform
+        .getKoin()
+        .get<PlatformConventions>()
+        .operatingSystem == OperatingSystem.MACOS
+
+    val modifiers =
+        listOfNotNull(if (isMac) Key.MetaLeft else Key.CtrlLeft, Key.ShiftLeft.takeIf { withShift })
+
+    window().performKeyInput {
+        withKeysDown(keys = modifiers) { pressKey(key = key) }
+    }
 }
 
 internal const val SAMPLE_VAULT = "Sample Vault"
@@ -76,14 +94,26 @@ internal fun smokeRun(
     vaults: List<String> = listOf(SAMPLE_VAULT),
     prepare: (vaults: java.io.File) -> Unit = {},
     block: suspend ComposeUiTest.(SmokeRunApp) -> Unit
-) = SmokeRunApp(vaults = vaults, prepare = prepare).use { app ->
+) = SmokeRunApp(
+    vaults = vaults,
+    prepare = prepare
+).use { app ->
     // A run waits as long as the performance pass asks it to stay idle, on top of its own steps.
     runComposeUiTest(testTimeout = RUN_TIMEOUT + SmokeRunReport.idleSeconds.seconds * 2) {
         setContent { app.Content() }
-        SmokeRunReport.sample(run = name, moment = START)
+
+        SmokeRunReport.sample(
+            run = name,
+            moment = START
+        )
+
         block(app)
         waitForIdle()
-        SmokeRunReport.sample(run = name, moment = END)
+
+        SmokeRunReport.sample(
+            run = name,
+            moment = END
+        )
     }
 }
 
@@ -99,16 +129,31 @@ internal fun ComposeUiTest.openNote(
     pressShortcut(key = Key.P)
     waitForText(text = FIND_NOTE)
     onNode(matcher = hasSetTextAction() and hasText(text = FIND_NOTE)).performTextInput(text = name)
+
     // The name typed is in the search field at once: wait for it outside the field, as a result, before Enter.
-    waitUntilAtLeastOneExists(matcher = hasText(text = name) and !hasSetTextAction(), timeoutMillis = timeoutMillis)
-    onNode(matcher = hasSetTextAction() and hasText(text = name)).performKeyInput { pressKey(key = Key.Enter) }
-    waitForText(text = shownText, substring = true, timeoutMillis = timeoutMillis)
+    waitUntilAtLeastOneExists(
+        matcher = hasText(text = name) and !hasSetTextAction(),
+        timeoutMillis = timeoutMillis
+    )
+
+    onNode(matcher = hasSetTextAction() and hasText(text = name)).performKeyInput {
+        pressKey(key = Key.Enter)
+    }
+
+    waitForText(
+        text = shownText,
+        substring = true,
+        timeoutMillis = timeoutMillis
+    )
 }
 
 /** The note's text field, found by a part of its text. */
-internal fun ComposeUiTest.editor(
-    textPart: String
-) = onNode(matcher = hasSetTextAction() and hasText(text = textPart, substring = true))
+internal fun ComposeUiTest.editor(textPart: String) = onNode(
+    matcher = hasSetTextAction() and hasText(
+        text = textPart,
+        substring = true
+    )
+)
 
 /** Waits until the file [path] of the vault copy holds [part], as an autosave writes it. */
 internal fun ComposeUiTest.waitForFile(
@@ -118,6 +163,7 @@ internal fun ComposeUiTest.waitForFile(
 ) = waitUntil(timeoutMillis = WAIT_MILLIS) {
     // Windows refuses a read while the app is replacing the file: that is not yet, so the wait goes on.
     File(app.vaultPath(name = SAMPLE_VAULT), path).let {
-        it.exists() && runCatching { it.readText() }.getOrDefault(defaultValue = "").contains(other = part)
+        it.exists() &&
+            runCatching { it.readText() }.getOrDefault(defaultValue = "").contains(other = part)
     }
 }

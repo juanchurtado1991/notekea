@@ -10,29 +10,72 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/** What the graph tab draws (`ROADMAP.md` 2.7). */
+/** What the graph tab draws. */
 class GraphReducersTest {
     private val matcher = FuzzyMatcher(textFolder = TextFolder())
 
     @Test
     fun `notes with as many links are smaller on a farther ring`() {
         val paths = listOf(NEAR, FAR)
+
         val dots = dotsOf(
-            graph = NoteGraph(nodes = paths.map { GraphNode(path = it, links = 4) }, edges = emptyList()),
-            points = paths.associateWith { GraphPoint(x = 0f, y = 0f) },
+            graph = NoteGraph(
+                nodes = paths.map {
+                    GraphNode(
+                        path = it,
+                        links = 4
+                    )
+                },
+                edges = emptyList()
+            ),
+            points = paths.associateWith {
+                GraphPoint(
+                    x = 0f,
+                    y = 0f
+                )
+            },
             depths = mapOf(NEAR to 1, FAR to 2)
         )
 
-        assertTrue(actual = dots.first { it.path == FAR }.radius < dots.first { it.path == NEAR }.radius)
+        assertTrue(
+            actual = dots.first {
+                it.path == FAR
+            }.radius < dots.first {
+                it.path == NEAR
+            }.radius
+        )
     }
 
     @Test
     fun `matches go best first, ignore accents and need a search`() {
         val paths = listOf(FAR, NEAR, CAFE)
 
-        assertEquals(expected = listOf(NEAR), actual = matchesOf(query = "are", paths = paths, matcher = matcher))
-        assertEquals(expected = listOf(CAFE), actual = matchesOf(query = "cafe", paths = paths, matcher = matcher))
-        assertEquals(expected = emptyList(), actual = matchesOf(query = " ", paths = paths, matcher = matcher))
+        assertEquals(
+            expected = listOf(NEAR),
+            actual = matchesOf(
+                query = "are",
+                paths = paths,
+                matcher = matcher
+            )
+        )
+
+        assertEquals(
+            expected = listOf(CAFE),
+            actual = matchesOf(
+                query = "cafe",
+                paths = paths,
+                matcher = matcher
+            )
+        )
+
+        assertEquals(
+            expected = emptyList(),
+            actual = matchesOf(
+                query = " ",
+                paths = paths,
+                matcher = matcher
+            )
+        )
     }
 
     private companion object {

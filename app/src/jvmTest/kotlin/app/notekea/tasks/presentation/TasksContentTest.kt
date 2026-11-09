@@ -13,15 +13,19 @@ import app.notekea.tasks.domain.TaskList
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** The Tasks tab on screen (`ROADMAP.md` 2.11). */
+/** The Tasks tab on screen. */
 @OptIn(ExperimentalTestApi::class)
 class TasksContentTest {
     @Test
     fun `a task's text opens it, and By date changes the groups`() = runComposeUiTest {
         val intents = mutableListOf<TasksIntent>()
+
         setContent {
             NotekeaTheme(darkTheme = false) {
-                TasksContent(state = TasksPreviewData.state, onIntent = { intents += it })
+                TasksContent(
+                    state = TasksPreviewData.state,
+                    onIntent = { intents += it }
+                )
             }
         }
 
@@ -41,8 +45,14 @@ class TasksContentTest {
     @Test
     fun `the foot counts, and no task says what to do`() = runComposeUiTest {
         var state by mutableStateOf(value = TasksPreviewData.state)
+
         setContent {
-            NotekeaTheme(darkTheme = false) { TasksContent(state = state, onIntent = {}) }
+            NotekeaTheme(darkTheme = false) {
+                TasksContent(
+                    state = state,
+                    onIntent = {}
+                )
+            }
         }
 
         onNodeWithText(text = "1 open of 2 tasks").assertExists()

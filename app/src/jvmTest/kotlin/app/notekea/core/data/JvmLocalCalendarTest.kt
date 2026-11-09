@@ -15,12 +15,49 @@ class JvmLocalCalendarTest {
 
         assertEquals(
             expected = listOf(
-                LocalMoment(date = CalendarDate(year = 2026, month = 10, day = 26), hour = 23, minute = 30),
-                LocalMoment(date = CalendarDate(year = 2026, month = 10, day = 27), hour = 8, minute = 30),
-                LocalMoment(date = CalendarDate(year = 2026, month = 10, day = 26), hour = 16, minute = 30),
-                LocalMoment(date = CalendarDate(year = 2026, month = 10, day = 27), hour = 0, minute = 30)
+                LocalMoment(
+                    date = CalendarDate(
+                        year = 2026,
+                        month = 10,
+                        day = 26
+                    ),
+                    hour = 23,
+                    minute = 30
+                ),
+                LocalMoment(
+                    date = CalendarDate(
+                        year = 2026,
+                        month = 10,
+                        day = 27
+                    ),
+                    hour = 8,
+                    minute = 30
+                ),
+                LocalMoment(
+                    date = CalendarDate(
+                        year = 2026,
+                        month = 10,
+                        day = 26
+                    ),
+                    hour = 16,
+                    minute = 30
+                ),
+                LocalMoment(
+                    date = CalendarDate(
+                        year = 2026,
+                        month = 10,
+                        day = 27
+                    ),
+                    hour = 0,
+                    minute = 30
+                )
             ),
-            actual = listOf("UTC", "Asia/Tokyo", "America/Los_Angeles", "Europe/Madrid").map { zone ->
+            actual = listOf(
+                "UTC",
+                "Asia/Tokyo",
+                "America/Los_Angeles",
+                "Europe/Madrid"
+            ).map { zone ->
                 JvmLocalCalendar(zone = { ZoneId.of(zone) }).momentOf(instant = instant)
             }
         )
@@ -36,7 +73,13 @@ class JvmLocalCalendarTest {
         zone = ZoneId.of("Asia/Tokyo")
 
         assertEquals(
-            expected = listOf(26, 27).map { CalendarDate(year = 2026, month = 10, day = it) },
+            expected = listOf(26, 27).map {
+                CalendarDate(
+                    year = 2026,
+                    month = 10,
+                    day = it
+                )
+            },
             actual = listOf(before, calendar.momentOf(instant = instant).date)
         )
     }

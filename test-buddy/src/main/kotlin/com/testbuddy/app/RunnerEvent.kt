@@ -30,7 +30,12 @@ internal sealed class RunnerEvent {
 
         fun parse(line: String): RunnerEvent? {
             if (!line.startsWith(PREFIX)) return null
-            val fields = line.removePrefix(PREFIX).split(SEPARATOR).map(::unescape)
+
+            val fields = line
+                .removePrefix(PREFIX)
+                .split(SEPARATOR)
+                .map(::unescape)
+
             return when (fields.firstOrNull()) {
                 STARTED -> fields.getOrNull(1)?.let { Started(id = it) }
                 STEP -> fields.getOrNull(1)?.let { Step(text = it) }
@@ -41,7 +46,15 @@ internal sealed class RunnerEvent {
         }
 
         private fun resultFields(result: CaseResult): List<String> = when (result) {
-            is CaseResult.Passed -> listOf(ENDED, result.id, PASSED, result.duration.inWholeMilliseconds.toString())
+            is CaseResult.Passed -> listOf(
+                ENDED,
+                result.id,
+                PASSED,
+                result
+                    .duration
+                    .inWholeMilliseconds
+                    .toString()
+            )
 
             is CaseResult.Skipped -> listOf(ENDED, result.id, SKIPPED)
 
@@ -49,17 +62,33 @@ internal sealed class RunnerEvent {
                 ENDED,
                 result.id,
                 FAILED,
-                result.duration.inWholeMilliseconds.toString(),
+                result
+                    .duration
+                    .inWholeMilliseconds
+                    .toString(),
                 result.message,
-                result.screenshot?.toString().orEmpty()
+                result
+                    .screenshot
+                    ?.toString()
+                    .orEmpty()
             ) + result.steps
         }
 
         private fun parseResult(fields: List<String>): CaseResult? {
             val id = fields.firstOrNull() ?: return null
-            val duration = fields.getOrNull(2)?.toLongOrNull()?.milliseconds
+
+            val duration = fields
+                .getOrNull(2)
+                ?.toLongOrNull()
+                ?.milliseconds
+
             return when (fields.getOrNull(1)) {
-                PASSED -> duration?.let { CaseResult.Passed(id = id, duration = it) }
+                PASSED -> duration?.let {
+                    CaseResult.Passed(
+                        id = id,
+                        duration = it
+                    )
+                }
 
                 SKIPPED -> CaseResult.Skipped(id = id)
 
@@ -68,7 +97,10 @@ internal sealed class RunnerEvent {
                         id = id,
                         message = fields.getOrElse(3) { "" },
                         duration = it,
-                        screenshot = fields.getOrNull(4)?.takeIf(String::isNotBlank)?.let(Path::of),
+                        screenshot = fields
+                            .getOrNull(4)
+                            ?.takeIf(String::isNotBlank)
+                            ?.let(Path::of),
                         steps = fields.drop(n = 5)
                     )
                 }
@@ -77,12 +109,17 @@ internal sealed class RunnerEvent {
             }
         }
 
-        private fun escape(text: String) = text.replace("\\", "\\\\").replace("\t", "\\t").replace("\n", "\\n")
+        private fun escape(text: String) = text
+            .replace("\\", "\\\\")
+            .replace("\t", "\\t")
+            .replace("\n", "\\n")
 
         private fun unescape(text: String): String = buildString {
             var index = 0
+
             while (index < text.length) {
                 val char = text[index]
+
                 if (char == '\\' && index + 1 < text.length) {
                     append(
                         if (text[index + 1] == 't') {
@@ -93,6 +130,7 @@ internal sealed class RunnerEvent {
                             text[index + 1]
                         }
                     )
+
                     index += 2
                 } else {
                     append(char)

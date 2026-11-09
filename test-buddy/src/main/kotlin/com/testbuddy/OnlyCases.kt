@@ -6,10 +6,13 @@ package com.testbuddy
  */
 public fun Suite.only(prefixes: List<String>): Suite {
     if (prefixes.isEmpty()) return this
+
     fun isKept(id: String) = prefixes.any { prefix ->
-        id == prefix || id.startsWith("$prefix-") ||
+        id == prefix ||
+            id.startsWith("$prefix-") ||
             id.startsWith("$prefix.")
     }
+
     return withCases(
         automated = automated.filter { isKept(id = it.id) },
         manual = manual.filter { isKept(id = it.id) }

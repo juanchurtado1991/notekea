@@ -4,9 +4,7 @@ package app.notekea.core.logging.domain
 class FakeTextClipboard : TextClipboard {
     val copied = mutableListOf<String>()
 
-    override fun copy(
-        text: String
-    ) {
+    override fun copy(text: String) {
         copied += text
     }
 }

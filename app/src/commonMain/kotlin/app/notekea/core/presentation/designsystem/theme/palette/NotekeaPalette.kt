@@ -3,8 +3,8 @@ package app.notekea.core.presentation.designsystem.theme.palette
 import androidx.compose.ui.graphics.Color
 
 /**
- * Colors that stay the same in every theme (`ROADMAP.md` 2.12): the brand's cobalt and tangerine, which keep the logo
- * Notekea's own, and what has a meaning of its own, as files, bookmarks and warnings. Only the theme package reads them.
+ * Colors that stay the same in every theme: the brand's cobalt and tangerine, which keep the logo Notekea's own, and
+ * what has a meaning of its own, as files, bookmarks and warnings. Only the theme package reads them.
  */
 internal object NotekeaPalette {
     val AccentLight = Color(0xFFFF7A45)

@@ -6,11 +6,13 @@ class FakeFolderPicker : FolderPicker {
     var nextPick: String? = null
     var failure: Throwable? = null
 
-    override suspend fun pickFolder(
-        initialPath: String?
-    ): String? {
+    override suspend fun pickFolder(initialPath: String?): String? {
         initialPaths += initialPath
-        failure?.let { throw it }
+
+        failure?.let {
+            throw it
+        }
+
         return nextPick
     }
 }

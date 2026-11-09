@@ -14,11 +14,10 @@ data class ChatModel(
     val minimumVideoMemoryGb: Int
 ) {
     /** Whether [hardware] can chat with this model, on the CPU or on its GPU. */
-    fun fits(
-        hardware: Hardware
-    ): Boolean {
+    fun fits(hardware: Hardware): Boolean {
         val fitsGpu = (hardware.videoMemoryGb ?: 0) >= minimumVideoMemoryGb &&
             hardware.memoryGb >= minimumMemoryWithGpuGb
+
         return hardware.memoryGb >= minimumMemoryGb || fitsGpu
     }
 }

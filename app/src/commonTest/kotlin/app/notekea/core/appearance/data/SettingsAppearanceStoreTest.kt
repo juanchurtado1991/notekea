@@ -30,59 +30,127 @@ class SettingsAppearanceStoreTest {
     fun `the app starts in Workspace Blue following the system, and a choice is kept for the next run`() =
         runTest(context = testDispatcher) {
             val firstRun = store().observe().first()
-            assertEquals(expected = ColorTheme.WORKSPACE_BLUE, actual = firstRun.theme)
-            store().save(appearance = Appearance(theme = ColorTheme.SAGE, mode = ThemeMode.DARK))
 
             assertEquals(
-                expected = listOf(Appearance(), Appearance(theme = ColorTheme.SAGE, mode = ThemeMode.DARK)),
+                expected = ColorTheme.WORKSPACE_BLUE,
+                actual = firstRun.theme
+            )
+
+            store().save(
+                appearance = Appearance(
+                    theme = ColorTheme.SAGE,
+                    mode = ThemeMode.DARK
+                )
+            )
+
+            assertEquals(
+                expected = listOf(
+                    Appearance(),
+                    Appearance(
+                        theme = ColorTheme.SAGE,
+                        mode = ThemeMode.DARK
+                    )
+                ),
                 actual = listOf(firstRun, store().observe().first())
             )
         }
 
     @Test
-    fun `reduce motion starts off and a choice is kept for the next run`() = runTest(context = testDispatcher) {
+    fun `reduce motion starts off and a choice is kept for the next run`() = runTest(
+        context = testDispatcher
+    ) {
         val firstRun = store().observe().first()
         store().save(appearance = Appearance(reduceMotion = true))
 
         assertEquals(
             expected = listOf(false, true),
-            actual = listOf(firstRun.reduceMotion, store().observe().first().reduceMotion)
+            actual = listOf(
+                firstRun.reduceMotion,
+                store()
+                    .observe()
+                    .first()
+                    .reduceMotion
+            )
         )
     }
 
     @Test
-    fun `whoever kept a theme that is gone gets the closest one`() = runTest(context = testDispatcher) {
-        settings.putString(key = "app.theme", value = "deep_sage")
+    fun `whoever kept a theme that is gone gets the closest one`() = runTest(
+        context = testDispatcher
+    ) {
+        settings.putString(
+            key = "app.theme",
+            value = "deep_sage"
+        )
 
-        assertEquals(expected = ColorTheme.SAGE, actual = store().observe().first().theme)
+        assertEquals(
+            expected = ColorTheme.SAGE,
+            actual = store()
+                .observe()
+                .first()
+                .theme
+        )
     }
 
     @Test
     fun `whoever kept the first palette gets the default`() = runTest(context = testDispatcher) {
-        settings.putString(key = "app.theme", value = "default")
+        settings.putString(
+            key = "app.theme",
+            value = "default"
+        )
 
-        assertEquals(expected = ColorTheme.WORKSPACE_BLUE, actual = store().observe().first().theme)
+        assertEquals(
+            expected = ColorTheme.WORKSPACE_BLUE,
+            actual = store()
+                .observe()
+                .first()
+                .theme
+        )
     }
 
     @Test
-    fun `a window following the appearance sees each choice at once`() = runTest(context = testDispatcher) {
+    fun `a window following the appearance sees each choice at once`() = runTest(
+        context = testDispatcher
+    ) {
         val store = store()
         val seen = mutableListOf<Appearance>()
-        val following = launch { store.observe().take(count = 2).toList(destination = seen) }
+
+        val following = launch {
+            store
+                .observe()
+                .take(count = 2)
+                .toList(destination = seen)
+        }
+
         advanceUntilIdle()
 
         store.save(appearance = Appearance(theme = ColorTheme.HONEY))
         advanceUntilIdle()
         following.join()
 
-        assertEquals(expected = listOf(Appearance(), Appearance(theme = ColorTheme.HONEY)), actual = seen)
+        assertEquals(
+            expected = listOf(Appearance(), Appearance(theme = ColorTheme.HONEY)),
+            actual = seen
+        )
     }
 
     @Test
-    fun `a theme or mode this version does not know falls back to the default`() = runTest(context = testDispatcher) {
-        settings.putString(key = "app.theme", value = "a_later_theme")
-        settings.putString(key = "app.theme_mode", value = "sepia")
+    fun `a theme or mode this version does not know falls back to the default`() = runTest(
+        context = testDispatcher
+    ) {
+        settings.putString(
+            key = "app.theme",
+            value = "a_later_theme"
+        )
 
-        assertEquals(expected = Appearance(), actual = store().observe().first())
+        settings.putString(
+            key = "app.theme_mode",
+            value = "sepia"
+        )
+
+        assertEquals(
+            expected = Appearance(),
+            actual = store().observe().first()
+        )
     }
 }

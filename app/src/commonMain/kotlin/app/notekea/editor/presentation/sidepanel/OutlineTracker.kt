@@ -8,10 +8,9 @@ import app.notekea.core.notes.domain.OutlineHeading
 import kotlinx.coroutines.channels.Channel
 
 /**
- * What the editor and the outline beside it share while scrolling (`ROADMAP.md` 1.9): the [current] heading, the one
- * whose section is at the top of the editor's view, which the outline highlights; and the headings to scroll to,
- * which the outline asks for ([reveal]) and the editor shows. Both are about where the view is, so they live in the
- * screen, not in the ViewModel.
+ * What the editor and the outline beside it share while scrolling: the [current] heading, the one whose section is at
+ * the top of the editor's view, and the headings to scroll to, which the outline asks for ([reveal]) and the editor
+ * shows. Both are about where the view is, so they live in the screen, not in the ViewModel.
  */
 @Stable
 class OutlineTracker {
@@ -21,16 +20,12 @@ class OutlineTracker {
     private val requests = Channel<OutlineHeading>(capacity = Channel.CONFLATED)
 
     /** Asks the editor to scroll so [heading] sits at the top of its view. */
-    fun reveal(
-        heading: OutlineHeading
-    ) {
+    fun reveal(heading: OutlineHeading) {
         requests.trySend(element = heading)
     }
 
     /** Runs [scroll] for every heading asked for, until the editor leaves the screen. */
-    suspend fun onReveal(
-        scroll: suspend (OutlineHeading) -> Unit
-    ) {
+    suspend fun onReveal(scroll: suspend (OutlineHeading) -> Unit) {
         for (heading in requests) scroll(heading)
     }
 

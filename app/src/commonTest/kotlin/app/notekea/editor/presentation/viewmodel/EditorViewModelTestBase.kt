@@ -1,13 +1,11 @@
 package app.notekea.editor.presentation.viewmodel
 
 import androidx.compose.runtime.snapshots.Snapshot
-import app.notekea.editor.presentation.model.EditorEffect
-import app.notekea.editor.presentation.model.EditorIntent
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.RelativePath
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
+import app.notekea.editor.presentation.model.EditorEffect
+import app.notekea.editor.presentation.model.EditorIntent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -19,6 +17,8 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 
 /**
  * The editor over real use cases and fake ports. The open note is polled forever, so time only moves with
@@ -39,8 +39,16 @@ abstract class EditorViewModelTestBase {
         Dispatchers.setMain(dispatcher = testDispatcher)
         // Like the real store, which switches to the IO dispatcher: a save that cancels itself is stopped there.
         store.suspendsLikeDisk = true
-        putOnDisk(path = AREPAS, text = AREPAS_TEXT)
-        putOnDisk(path = WELCOME, text = "# Welcome\n")
+
+        putOnDisk(
+            path = AREPAS,
+            text = AREPAS_TEXT
+        )
+
+        putOnDisk(
+            path = WELCOME,
+            text = "# Welcome\n"
+        )
     }
 
     @AfterTest
@@ -49,9 +57,7 @@ abstract class EditorViewModelTestBase {
     }
 
     /** Runs [body], then stops the ViewModel: its disk polling never ends, and `runTest` would wait for it forever. */
-    protected fun runEditorTest(
-        body: suspend TestScope.() -> Unit
-    ) = runTest {
+    protected fun runEditorTest(body: suspend TestScope.() -> Unit) = runTest {
         try {
             body()
         } finally {
@@ -59,27 +65,35 @@ abstract class EditorViewModelTestBase {
         }
     }
 
-    protected fun TestScope.open(
-        path: RelativePath
-    ) {
+    protected fun TestScope.open(path: RelativePath) {
         viewModel.onIntent(intent = EditorIntent.OnOpen(path = path))
         runCurrent()
     }
 
     /** Types into the text field: replaces the body and lets the ViewModel see the change. */
-    protected fun TestScope.type(
-        text: String
-    ) {
-        viewModel.buffer.edit { replace(start = 0, end = length, text = text) }
+    protected fun TestScope.type(text: String) {
+        viewModel.buffer.edit {
+            replace(
+                start = 0,
+                end = length,
+                text = text
+            )
+        }
+
         Snapshot.sendApplyNotifications()
         runCurrent()
     }
 
-    protected fun TestScope.changeOutside(
-        text: String
-    ) {
+    protected fun TestScope.changeOutside(text: String) {
         store.texts[AREPAS] = text
-        scanner.addNote(file = file(path = AREPAS.value, modifiedOffsetMillis = 1L))
+
+        scanner.addNote(
+            file = file(
+                path = AREPAS.value,
+                modifiedOffsetMillis = 1L
+            )
+        )
+
         advanceTimeBy(delayTimeMillis = TWO_SECONDS_MILLIS)
         Snapshot.sendApplyNotifications()
         runCurrent()
@@ -93,7 +107,11 @@ abstract class EditorViewModelTestBase {
 
     protected fun TestScope.collectEffects(): List<EditorEffect> {
         val effects = mutableListOf<EditorEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+
+        backgroundScope.launch {
+            viewModel.effects.collect { effects += it }
+        }
+
         return effects
     }
 

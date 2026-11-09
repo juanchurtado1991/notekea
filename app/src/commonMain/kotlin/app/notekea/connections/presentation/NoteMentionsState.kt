@@ -4,7 +4,7 @@ import app.notekea.connections.domain.NoteMentions
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * The Linked and Unlinked tabs of the inspector's Connections (`ROADMAP.md` 2.5): the open [note]'s [mentions], whether
+ * The Linked and Unlinked tabs of the inspector's Connections: the open [note]'s [mentions], whether
  * they are being found ([isLoading]), whether the last search failed ([searchFailed], which offers to try again; what
  * it found before stays), and the note a Link click could not change ([linkFailed]), which it says so.
  */

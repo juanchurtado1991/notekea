@@ -2,11 +2,11 @@ package app.notekea.connections.di
 
 import app.notekea.connections.data.JetBrainsMarkdownMentionFinder
 import app.notekea.connections.domain.FindMentionsUseCase
-import app.notekea.core.notes.domain.FindRelatedNotesUseCase
 import app.notekea.connections.domain.LinkMentionUseCase
 import app.notekea.connections.domain.MentionFinder
 import app.notekea.connections.presentation.NoteMentionsViewModel
 import app.notekea.connections.presentation.RelatedNotesViewModel
+import app.notekea.core.notes.domain.FindRelatedNotesUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -16,10 +16,18 @@ import org.koin.dsl.module
  */
 val connectionsModule = module {
     single<MentionFinder> { JetBrainsMarkdownMentionFinder() }
+
     factoryOf(::FindRelatedNotesUseCase)
     factoryOf(::FindMentionsUseCase)
     factoryOf(::LinkMentionUseCase)
-    viewModel { parameters -> RelatedNotesViewModel(vaultPath = parameters.get(), findRelatedNotes = get()) }
+
+    viewModel { parameters ->
+        RelatedNotesViewModel(
+            vaultPath = parameters.get(),
+            findRelatedNotes = get()
+        )
+    }
+
     viewModel { parameters ->
         NoteMentionsViewModel(
             vaultPath = parameters.get(),

@@ -1,18 +1,18 @@
 package app.notekea.templates.presentation
 
 import androidx.lifecycle.viewModelScope
-import app.notekea.templates.domain.CreateTemplatesFolderUseCase
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeNoteFileOperations
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.core.notes.domain.FuzzyMatcher
-import app.notekea.templates.domain.GetTemplateSettingsUseCase
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TemplateSettings
 import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.templates.domain.CreateTemplatesFolderUseCase
+import app.notekea.templates.domain.GetTemplateSettingsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -29,7 +29,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** The template picker (`ROADMAP.md` 1.12) over real use cases and fakes. */
+/** The template picker over real use cases and fakes. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class TemplatePickerViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
@@ -64,7 +64,13 @@ class TemplatePickerViewModelTest {
         runPickerTest {
             val effects = collectEffects()
             send(intent = TemplatePickerIntent.OnTreeChange(tree = TREE))
-            send(intent = TemplatePickerIntent.OnOpen(target = TemplateTarget.NewNote(folder = PROJECTS)))
+
+            send(
+                intent = TemplatePickerIntent.OnOpen(
+                    target = TemplateTarget.NewNote(folder = PROJECTS)
+                )
+            )
+
             val all = names()
             send(intent = TemplatePickerIntent.OnQueryChange(query = "wkr"))
             val found = names()
@@ -99,33 +105,41 @@ class TemplatePickerViewModelTest {
     }
 
     @Test
-    fun `without a templates folder, Create makes it with the example, which is listed at once`() = runPickerTest {
-        send(intent = TemplatePickerIntent.OnTreeChange(tree = VaultTree.EMPTY))
-        send(intent = TemplatePickerIntent.OnOpen(target = TemplateTarget.CurrentNote))
-        val before = viewModel.state.value.hasFolder
-        send(
-            intent = TemplatePickerIntent.OnCreateFolderClick(
-                exampleName = "Meeting notes",
-                exampleText = "# {{title}}"
-            )
-        )
+    fun `without a templates folder, Create makes it with the example, which is listed at once`() =
+        runPickerTest {
+            send(intent = TemplatePickerIntent.OnTreeChange(tree = VaultTree.EMPTY))
+            send(intent = TemplatePickerIntent.OnOpen(target = TemplateTarget.CurrentNote))
+            val before = viewModel.state.value.hasFolder
 
-        assertEquals(
-            expected = listOf(false, true, listOf("Meeting notes"), "# {{title}}"),
-            actual = listOf(
-                before,
-                viewModel.state.value.hasFolder,
-                names(),
-                store.texts[RelativePath(value = "Templates/Meeting notes.md")]
+            send(
+                intent = TemplatePickerIntent.OnCreateFolderClick(
+                    exampleName = "Meeting notes",
+                    exampleText = "# {{title}}"
+                )
             )
-        )
-    }
+
+            assertEquals(
+                expected = listOf(false, true, listOf("Meeting notes"), "# {{title}}"),
+                actual = listOf(
+                    before,
+                    viewModel.state.value.hasFolder,
+                    names(),
+                    store.texts[RelativePath(value = "Templates/Meeting notes.md")]
+                )
+            )
+        }
 
     @Test
     fun `closing without choosing says so, and an empty folder or a search matching nothing is told apart`() =
         runPickerTest {
             val effects = collectEffects()
-            send(intent = TemplatePickerIntent.OnTreeChange(tree = VaultTree.EMPTY.withFolder(path = TEMPLATES)))
+
+            send(
+                intent = TemplatePickerIntent.OnTreeChange(
+                    tree = VaultTree.EMPTY.withFolder(path = TEMPLATES)
+                )
+            )
+
             send(intent = TemplatePickerIntent.OnOpen(target = TemplateTarget.CurrentNote))
             val empty = viewModel.state.value.hasFolder to viewModel.state.value.hasTemplates
             send(intent = TemplatePickerIntent.OnTreeChange(tree = TREE))
@@ -134,16 +148,22 @@ class TemplatePickerViewModelTest {
             send(intent = TemplatePickerIntent.OnClose)
 
             assertEquals(
-                expected = listOf(true to false, true to emptyList<String>(), listOf(TemplatePickerEffect.Dismissed)),
+                expected = listOf(
+                    true to false,
+                    true to emptyList<String>(),
+                    listOf(TemplatePickerEffect.Dismissed)
+                ),
                 actual = listOf(empty, noMatch, effects.toList())
             )
         }
 
-    private fun names(): List<String> = viewModel.state.value.rows.map { it.name }
+    private fun names(): List<String> = viewModel
+        .state
+        .value
+        .rows
+        .map { it.name }
 
-    private fun TestScope.send(
-        intent: TemplatePickerIntent
-    ) {
+    private fun TestScope.send(intent: TemplatePickerIntent) {
         viewModel.onIntent(intent = intent)
         advanceUntilIdle()
         // The effects' collector runs in the background scope, which waiting until idle does not wait for.
@@ -152,14 +172,19 @@ class TemplatePickerViewModelTest {
 
     private fun TestScope.collectEffects(): List<TemplatePickerEffect> {
         val effects = mutableListOf<TemplatePickerEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+
+        backgroundScope.launch {
+            viewModel.effects.collect { effects += it }
+        }
+
         runCurrent()
+
         return effects
     }
 
-    private fun runPickerTest(
-        body: suspend TestScope.() -> Unit
-    ) = runTest(context = testDispatcher) {
+    private fun runPickerTest(body: suspend TestScope.() -> Unit) = runTest(
+        context = testDispatcher
+    ) {
         try {
             body()
         } finally {
@@ -170,7 +195,13 @@ class TemplatePickerViewModelTest {
     companion object {
         private val PROJECTS = RelativePath(value = "Projects")
         private val TEMPLATES = RelativePath(value = "Templates")
-        private val TREE = listOf("Templates/Meeting notes.md", "Templates/Work/Weekly review.md", "Projects/Plan.md")
-            .fold(initial = VaultTree.EMPTY) { tree, path -> tree.withNote(note = entry(path = path)) }
+        private val TREE = listOf(
+            "Templates/Meeting notes.md",
+            "Templates/Work/Weekly review.md",
+            "Projects/Plan.md"
+        )
+            .fold(initial = VaultTree.EMPTY) { tree, path ->
+                tree.withNote(note = entry(path = path))
+            }
     }
 }

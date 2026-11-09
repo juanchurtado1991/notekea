@@ -44,10 +44,9 @@ private const val PREVIEW_WIDTH_DP = 420
 private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
 
 /**
- * A page title that edits in place (the note's name above the editor): it reads as a heading and shows a line under it
- * only while focused or refused. Enter or leaving the field commits the text through [onCommit] when it changed; Esc
- * puts [value] back. [onEdit] runs when the user types after a commit, so the caller can clear a refusal shown below.
- * [label] names the field for screen readers.
+ * A page title that edits in place (the note's name above the editor), with a line under it only while focused or
+ * refused. Enter or leaving the field commits a changed text through [onCommit]; Esc puts [value] back. [onEdit] runs
+ * when the user types after a commit, to clear a refusal; [label] names the field for screen readers.
  */
 @Composable
 fun NotekeaTitleField(
@@ -59,14 +58,22 @@ fun NotekeaTitleField(
     onEdit: () -> Unit = {}
 ) {
     val state = remember(value) { TextFieldState(initialText = value) }
+
     val focusManager = LocalFocusManager.current
+
     var isFocused by remember { mutableStateOf(value = false) }
+
     val currentOnEdit by rememberUpdatedState(newValue = onEdit)
-    LaunchedEffect(state) { snapshotFlow { state.text.toString() }.drop(count = 1).collect { currentOnEdit() } }
+
+    LaunchedEffect(state) {
+        snapshotFlow { state.text.toString() }.drop(count = 1).collect { currentOnEdit() }
+    }
+
     val commit = {
         val text = state.text.toString()
         if (text != value) onCommit(text)
     }
+
     BasicTextField(
         state = state,
         modifier = modifier
@@ -75,19 +82,35 @@ fun NotekeaTitleField(
             .onFocusChanged {
                 if (isFocused && !it.isFocused) commit()
                 isFocused = it.isFocused
-            }.onPreviewKeyEvent { event ->
+            }
+            .onPreviewKeyEvent { event ->
                 if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+
                 when (event.key) {
                     in SUBMIT_KEYS -> focusManager.clearFocus()
-                    Key.Escape -> state.setTextAndPlaceCursorAtEnd(text = value).also { focusManager.clearFocus() }
+
+                    Key.Escape -> state.setTextAndPlaceCursorAtEnd(text = value).also {
+                        focusManager.clearFocus()
+                    }
+
                     else -> return@onPreviewKeyEvent false
                 }
+
                 true
-            }.titleUnderline(color = underlineColor(isFocused = isFocused, isError = isError)),
-        textStyle = MaterialTheme.typography.headlineMedium.copy(
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.SemiBold
-        ),
+            }
+            .titleUnderline(
+                color = underlineColor(
+                    isFocused = isFocused,
+                    isError = isError
+                )
+            ),
+        textStyle = MaterialTheme
+            .typography
+            .headlineMedium
+            .copy(
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold
+            ),
         lineLimits = TextFieldLineLimits.SingleLine,
         cursorBrush = SolidColor(value = MaterialTheme.colorScheme.primary)
     )
@@ -103,12 +126,22 @@ private fun underlineColor(
     else -> Color.Transparent
 }
 
-private fun Modifier.titleUnderline(
-    color: Color
-): Modifier = drawBehind {
+private fun Modifier.titleUnderline(color: Color): Modifier = drawBehind {
     val width = NotekeaDimensions.BorderWidth.toPx()
     val y = size.height - width / 2
-    drawLine(color = color, start = Offset(x = 0f, y = y), end = Offset(x = size.width, y = y), strokeWidth = width)
+
+    drawLine(
+        color = color,
+        start = Offset(
+            x = 0f,
+            y = y
+        ),
+        end = Offset(
+            x = size.width,
+            y = y
+        ),
+        strokeWidth = width
+    )
 }
 
 @Preview
@@ -116,9 +149,20 @@ private fun Modifier.titleUnderline(
 private fun NotekeaTitleFieldPreview() {
     NotekeaPreviewThemes {
         Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
-            NotekeaTitleField(value = PREVIEW_TITLE, onCommit = {}, label = PREVIEW_TITLE)
+            NotekeaTitleField(
+                value = PREVIEW_TITLE,
+                onCommit = {},
+                label = PREVIEW_TITLE
+            )
+
             Box(modifier = Modifier.height(height = NotekeaDimensions.SpacingM))
-            NotekeaTitleField(value = PREVIEW_TITLE, onCommit = {}, label = PREVIEW_TITLE, isError = true)
+
+            NotekeaTitleField(
+                value = PREVIEW_TITLE,
+                onCommit = {},
+                label = PREVIEW_TITLE,
+                isError = true
+            )
         }
     }
 }

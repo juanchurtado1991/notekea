@@ -8,7 +8,8 @@ class ValidateFileNameUseCaseTest {
 
     @Test
     fun `names that cannot be a file or folder on every system are rejected`() {
-        val invalid = listOf("", ".", "..", "a/b", "a\\b", "a:b", "a*b", "a?b", "a\"b", "a<b", "a>b", "a|b")
+        val invalid =
+            listOf("", ".", "..", "a/b", "a\\b", "a:b", "a*b", "a?b", "a\"b", "a<b", "a>b", "a|b")
 
         assertEquals(
             expected = emptyList(),
@@ -22,7 +23,9 @@ class ValidateFileNameUseCaseTest {
 
         assertEquals(
             expected = listOf(true, false, false),
-            actual = listOf(longest, longest + "a", "é".repeat(n = 128)).map { validateFileName(name = it) }
+            actual = listOf(longest, longest + "a", "é".repeat(n = 128)).map {
+                validateFileName(name = it)
+            }
         )
     }
 

@@ -16,11 +16,20 @@ import androidx.compose.ui.unit.sp
 @Composable
 internal fun StatusBadge(status: CaseStatus) {
     val color = status.color()
+
     Box(
-        modifier = Modifier.size(size = 20.dp).background(color = color.copy(alpha = 0.15f), shape = CircleShape),
+        modifier = Modifier.size(size = 20.dp).background(
+            color = color.copy(alpha = 0.15f),
+            shape = CircleShape
+        ),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = status.symbol(), color = color, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = status.symbol(),
+            color = color,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 

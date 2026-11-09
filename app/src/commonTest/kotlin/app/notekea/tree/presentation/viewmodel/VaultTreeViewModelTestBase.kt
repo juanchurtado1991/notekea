@@ -1,43 +1,40 @@
 package app.notekea.tree.presentation.viewmodel
 
 import app.notekea.core.domain.FakeClock
-import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.domain.time.FakeLocalCalendar
-import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
-import app.notekea.tree.domain.ApplyTemplateUseCase
-import app.notekea.tree.domain.CreateFolderUseCase
-import app.notekea.tree.domain.CreateNoteUseCase
-import app.notekea.tree.domain.FakeBookmarkStore
 import app.notekea.core.notes.domain.FakeFileOpener
-import app.notekea.tree.domain.FakeFileRevealer
-import app.notekea.tree.domain.FakeFileWatcher
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeNoteFileOperations
-import app.notekea.tree.domain.FakeNoteMetadataCache
-import app.notekea.tree.domain.FakeNoteMetadataReader
 import app.notekea.core.notes.domain.FakeNoteScanner
-import app.notekea.tree.domain.FakeTrash
-import app.notekea.tree.domain.FakeTreePreferencesStore
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.core.notes.domain.FillTemplateUseCase
-import app.notekea.tree.domain.FlattenTreeUseCase
-import app.notekea.tree.domain.FollowLinkUseCase
-import app.notekea.tree.domain.GetDailyNoteSettingsUseCase
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.file
-import app.notekea.tree.domain.ObserveVaultTreeUseCase
-import app.notekea.tree.domain.OpenDailyNoteUseCase
 import app.notekea.core.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.RenameEntryUseCase
 import app.notekea.core.notes.domain.UpdateLinksAfterRenameUseCase
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.time.Instant
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
+import app.notekea.tree.domain.ApplyTemplateUseCase
+import app.notekea.tree.domain.CreateFolderUseCase
+import app.notekea.tree.domain.CreateNoteUseCase
+import app.notekea.tree.domain.FakeBookmarkStore
+import app.notekea.tree.domain.FakeFileRevealer
+import app.notekea.tree.domain.FakeFileWatcher
+import app.notekea.tree.domain.FakeNoteMetadataCache
+import app.notekea.tree.domain.FakeNoteMetadataReader
+import app.notekea.tree.domain.FakeTrash
+import app.notekea.tree.domain.FakeTreePreferencesStore
+import app.notekea.tree.domain.FlattenTreeUseCase
+import app.notekea.tree.domain.FollowLinkUseCase
+import app.notekea.tree.domain.GetDailyNoteSettingsUseCase
+import app.notekea.tree.domain.ObserveVaultTreeUseCase
+import app.notekea.tree.domain.OpenDailyNoteUseCase
+import app.notekea.tree.presentation.model.VaultTreeIntent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -46,6 +43,9 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class VaultTreeViewModelTestBase {
@@ -63,6 +63,7 @@ abstract class VaultTreeViewModelTestBase {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher = testDispatcher)
+
         listOf(WELCOME, ROADMAP).forEach { scanner.addNote(file = file(path = it)) }
     }
 
@@ -71,9 +72,7 @@ abstract class VaultTreeViewModelTestBase {
         Dispatchers.resetMain()
     }
 
-    protected fun path(
-        value: String
-    ): RelativePath = RelativePath(value = value)
+    protected fun path(value: String): RelativePath = RelativePath(value = value)
 
     /** Daily notes over the fakes, at [NOW] for a user two hours east of UTC, where it is already the next day. */
     protected fun newNoteTools(): NewNoteTools = NewNoteTools(
@@ -111,16 +110,19 @@ abstract class VaultTreeViewModelTestBase {
         from: String,
         to: String
     ) {
-        contents.texts.getOrPut(key = path("$to.md")) { "" }
+        contents
+            .texts
+            .getOrPut(key = path("$to.md")) { "" }
+
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameRequest(path = path(from)))
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameTextChange(text = to))
         viewModel.onIntent(intent = VaultTreeIntent.OnRenameConfirm)
         advanceUntilIdle()
     }
 
-    protected fun runTreeTest(
-        block: suspend TestScope.() -> Unit
-    ) = runTest(context = testDispatcher) { block() }
+    protected fun runTreeTest(block: suspend TestScope.() -> Unit) = runTest(
+        context = testDispatcher
+    ) { block() }
 
     protected fun TestScope.startedViewModel(): VaultTreeViewModel {
         val viewModel = VaultTreeViewModel(
@@ -158,7 +160,9 @@ abstract class VaultTreeViewModelTestBase {
             ),
             treePreferencesStore = preferences
         )
+
         advanceUntilIdle()
+
         return viewModel
     }
 

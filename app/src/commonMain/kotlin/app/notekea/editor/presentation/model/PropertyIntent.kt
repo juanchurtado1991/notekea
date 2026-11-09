@@ -1,11 +1,10 @@
 package app.notekea.editor.presentation.model
 
-import app.notekea.editor.domain.PropertyType
-import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.domain.PropertyType
 
-/** What the user did in the properties above the note (`ROADMAP.md` 1.14). */
+/** What the user did in the properties above the note. */
 sealed interface PropertyIntent : EditorIntent {
     /** A property's value was edited (a field left, a box checked, a date picked, a list item added or removed). */
     data class OnValueChange(

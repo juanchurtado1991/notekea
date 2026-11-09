@@ -34,12 +34,12 @@ import app.notekea.core.presentation.designsystem.components.NotekeaKeycaps
 import app.notekea.core.presentation.designsystem.components.NotekeaLogo
 import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaWordmark
-import app.notekea.core.presentation.platform.LocalAppVersion
-import app.notekea.core.presentation.platform.keys
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.platform.LocalAppVersion
+import app.notekea.core.presentation.platform.keys
 import app.notekea.resources.Res
 import app.notekea.resources.about_close
 import app.notekea.resources.about_copy_diagnostics
@@ -72,9 +72,13 @@ fun AboutDialog(
     viewModel: AboutViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+
     NotekeaDialog(
         onDismiss = onDismiss,
-        modifier = Modifier.size(width = DIALOG_WIDTH_DP.dp, height = DIALOG_HEIGHT_DP.dp)
+        modifier = Modifier.size(
+            width = DIALOG_WIDTH_DP.dp,
+            height = DIALOG_HEIGHT_DP.dp
+        )
     ) {
         AboutContent(
             platformConventions = platformConventions,
@@ -93,15 +97,23 @@ private fun AboutContent(
     onDismiss: () -> Unit
 ) {
     Row {
-        Identity(state = state, onIntent = onIntent)
+        Identity(
+            state = state,
+            onIntent = onIntent
+        )
+
         Column(modifier = Modifier.weight(weight = 1f).padding(all = NotekeaDimensions.SpacingXl)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = stringResource(resource = Res.string.about_shortcuts_title),
                     modifier = Modifier.weight(weight = 1f),
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    style = MaterialTheme
+                        .typography
+                        .titleSmall
+                        .copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
+
                 NotekeaIconButton(
                     icon = NotekeaIcons.Close,
                     label = stringResource(resource = Res.string.about_close),
@@ -109,6 +121,7 @@ private fun AboutContent(
                     takesFocus = false
                 )
             }
+
             ShortcutList(platformConventions = platformConventions)
         }
     }
@@ -124,7 +137,12 @@ private fun Identity(
         modifier = Modifier
             .width(width = IDENTITY_WIDTH_DP.dp)
             .fillMaxHeight()
-            .background(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = IDENTITY_TINT_ALPHA))
+            .background(
+                color = MaterialTheme
+                    .colorScheme
+                    .surfaceVariant
+                    .copy(alpha = IDENTITY_TINT_ALPHA)
+            )
             .padding(all = NotekeaDimensions.SpacingXl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(
@@ -134,18 +152,24 @@ private fun Identity(
     ) {
         NotekeaLogo(size = LOGO_SIZE_DP.dp)
         NotekeaWordmark()
+
         Text(
             text = stringResource(Res.string.about_version, LocalAppVersion.current),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
         Text(
             text = stringResource(resource = Res.string.about_tagline),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
-        IdentityButtons(state = state, onIntent = onIntent)
+
+        IdentityButtons(
+            state = state,
+            onIntent = onIntent
+        )
     }
 }
 
@@ -156,19 +180,21 @@ private fun IdentityButtons(
     onIntent: (AboutIntent) -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
+
     NotekeaButton(
         text = stringResource(resource = Res.string.about_github),
         onClick = { uriHandler.openUri(uri = REPOSITORY_URL) },
         style = NotekeaButtonStyle.SECONDARY
     )
+
+    val labelResource = when {
+        state.hasCopyFailed -> Res.string.about_diagnostics_failed
+        state.isDiagnosticsCopied -> Res.string.about_diagnostics_copied
+        else -> Res.string.about_copy_diagnostics
+    }
+
     NotekeaButton(
-        text = stringResource(
-            resource = when {
-                state.hasCopyFailed -> Res.string.about_diagnostics_failed
-                state.isDiagnosticsCopied -> Res.string.about_diagnostics_copied
-                else -> Res.string.about_copy_diagnostics
-            }
-        ),
+        text = stringResource(resource = labelResource),
         onClick = { onIntent(AboutIntent.OnCopyDiagnostics) },
         style = NotekeaButtonStyle.SECONDARY
     )
@@ -176,29 +202,41 @@ private fun IdentityButtons(
 
 /** Every group of shortcuts, scrolling with a scrollbar when they do not fit. */
 @Composable
-private fun ShortcutList(
-    platformConventions: PlatformConventions
-) {
+private fun ShortcutList(platformConventions: PlatformConventions) {
     val operatingSystem = platformConventions.operatingSystem
     val scrollState = rememberScrollState()
-    NotekeaScrollArea(state = scrollState, modifier = Modifier.fillMaxWidth()) {
+
+    NotekeaScrollArea(
+        state = scrollState,
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Column(
-            modifier = Modifier.fillMaxWidth().verticalScroll(
-                state = scrollState
-            ).padding(end = NotekeaDimensions.SpacingM),
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(state = scrollState)
+                .padding(end = NotekeaDimensions.SpacingM),
             verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
         ) {
             AboutShortcuts.groups(conventions = platformConventions).forEach { group ->
                 Text(
                     text = stringResource(resource = group.title).uppercase(),
                     modifier = Modifier.padding(top = NotekeaDimensions.SpacingS),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = GROUP_LETTER_SPACING_SP.sp
-                    ),
+                    style = MaterialTheme
+                        .typography
+                        .labelSmall
+                        .copy(
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = GROUP_LETTER_SPACING_SP.sp
+                        ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                group.shortcuts.forEach { ShortcutRow(shortcut = it, keys = it.shortcut.keys(operatingSystem)) }
+
+                group.shortcuts.forEach {
+                    ShortcutRow(
+                        shortcut = it,
+                        keys = it.shortcut.keys(operatingSystem)
+                    )
+                }
             }
         }
     }
@@ -209,13 +247,17 @@ private fun ShortcutRow(
     shortcut: AboutShortcut,
     keys: List<String>
 ) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             text = stringResource(resource = shortcut.label),
             modifier = Modifier.weight(weight = 1f),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
+
         NotekeaKeycaps(keys = keys)
     }
 }
@@ -224,7 +266,12 @@ private fun ShortcutRow(
 @Composable
 private fun AboutDialogPreview() {
     NotekeaPreviewThemes {
-        Box(modifier = Modifier.size(width = DIALOG_WIDTH_DP.dp, height = DIALOG_HEIGHT_DP.dp)) {
+        Box(
+            modifier = Modifier.size(
+                width = DIALOG_WIDTH_DP.dp,
+                height = DIALOG_HEIGHT_DP.dp
+            )
+        ) {
             AboutContent(
                 platformConventions = PreviewPlatformConventions.linux,
                 state = AboutState(),

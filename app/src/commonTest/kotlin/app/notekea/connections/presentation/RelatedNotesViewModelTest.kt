@@ -4,17 +4,17 @@ import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.ChunkNoteUseCase
-import app.notekea.search.domain.FakeIndexStateStore
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.FindRelatedNotesUseCase
 import app.notekea.core.notes.domain.IndexRunError
-import app.notekea.search.domain.IndexVaultUseCase
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.NoteSections
 import app.notekea.core.notes.domain.OutlineFinder
-import app.notekea.search.domain.PlanIndexUseCase
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.search.domain.FakeIndexStateStore
+import app.notekea.search.domain.IndexVaultUseCase
+import app.notekea.search.domain.PlanIndexUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.last
@@ -31,7 +31,7 @@ import kotlin.test.assertEquals
 import kotlin.time.Instant
 
 /**
- * The Related section (`ROADMAP.md` 2.4): it follows the open note, searches once the person pauses typing and when
+ * The Related section: it follows the open note, searches once the person pauses typing and when
  * the index ends a run, and tells a failing model apart.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -40,7 +40,8 @@ class RelatedNotesViewModelTest {
     private val contents = FakeNoteContentStore()
     private val embedder = FakeTextEmbedder()
     private val index = FakeVectorIndex()
-    private val chunkNote = ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder()))
+    private val chunkNote =
+        ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder()))
 
     @BeforeTest
     fun setUp() {
@@ -64,58 +65,142 @@ class RelatedNotesViewModelTest {
     )
 
     @Test
-    fun `opening a note finds its related notes, and another note starts again`() = runTest(context = testDispatcher) {
+    fun `opening a note finds its related notes, and another note starts again`() = runTest(
+        context = testDispatcher
+    ) {
         indexed()
         val viewModel = viewModel()
-        viewModel.onIntent(intent = RelatedNotesIntent.OnNoteChange(text = "Tomatoes and basil.", note = GARDEN))
-        advanceUntilIdle()
-        val garden = viewModel.state.value.related.map { it.path }
-        viewModel.onIntent(intent = RelatedNotesIntent.OnNoteChange(text = "Quartz counters.", note = KITCHEN))
-        val whileLoading = viewModel.state.value.let { it.isLoading to it.related }
 
-        assertEquals(expected = SOUP, actual = garden.first())
-        assertEquals(expected = true to emptyList(), actual = whileLoading)
+        viewModel.onIntent(
+            intent = RelatedNotesIntent.OnNoteChange(
+                text = "Tomatoes and basil.",
+                note = GARDEN
+            )
+        )
+
+        advanceUntilIdle()
+
+        val garden = viewModel
+            .state
+            .value
+            .related
+            .map { it.path }
+
+        viewModel.onIntent(
+            intent = RelatedNotesIntent.OnNoteChange(
+                text = "Quartz counters.",
+                note = KITCHEN
+            )
+        )
+
+        val whileLoading = viewModel
+            .state
+            .value
+            .let {
+                it.isLoading to it.related
+            }
+
+        assertEquals(
+            expected = SOUP,
+            actual = garden.first()
+        )
+
+        assertEquals(
+            expected = true to emptyList(),
+            actual = whileLoading
+        )
     }
 
     @Test
     fun `typing searches once the person pauses`() = runTest(context = testDispatcher) {
         indexed()
         val viewModel = viewModel()
-        viewModel.onIntent(intent = RelatedNotesIntent.OnNoteChange(text = "Tomatoes", note = GARDEN))
+
+        viewModel.onIntent(
+            intent = RelatedNotesIntent.OnNoteChange(
+                text = "Tomatoes",
+                note = GARDEN
+            )
+        )
+
         advanceUntilIdle()
         val before = embedder.embedded.size
+
         listOf("Tomatoes a", "Tomatoes an", "Tomatoes and basil").forEach {
-            viewModel.onIntent(intent = RelatedNotesIntent.OnNoteChange(text = it, note = GARDEN))
+            viewModel.onIntent(
+                intent = RelatedNotesIntent.OnNoteChange(
+                    text = it,
+                    note = GARDEN
+                )
+            )
+
             advanceTimeBy(delayTimeMillis = 300)
         }
+
         advanceUntilIdle()
 
-        assertEquals(expected = 1, actual = embedder.embedded.size - before)
+        assertEquals(
+            expected = 1,
+            actual = embedder.embedded.size - before
+        )
     }
 
     @Test
     fun `a search that fails unexpectedly says so instead of looking like nothing related`() =
         runTest(context = testDispatcher) {
             indexed()
+
             contents.onRead = { error("bug") }
+
             val viewModel = viewModel()
 
-            viewModel.onIntent(intent = RelatedNotesIntent.OnNoteChange(text = "Tomatoes.", note = GARDEN))
+            viewModel.onIntent(
+                intent = RelatedNotesIntent.OnNoteChange(
+                    text = "Tomatoes.",
+                    note = GARDEN
+                )
+            )
+
             advanceUntilIdle()
 
-            assertEquals(expected = IndexRunError.Index, actual = viewModel.state.value.error)
+            assertEquals(
+                expected = IndexRunError.Index,
+                actual = viewModel.state.value.error
+            )
         }
 
     @Test
-    fun `the end of an indexing run searches again, and a failing model is told`() = runTest(context = testDispatcher) {
+    fun `the end of an indexing run searches again, and a failing model is told`() = runTest(
+        context = testDispatcher
+    ) {
         val viewModel = viewModel()
-        viewModel.onIntent(intent = RelatedNotesIntent.OnNoteChange(text = "Tomatoes.", note = GARDEN))
+
+        viewModel.onIntent(
+            intent = RelatedNotesIntent.OnNoteChange(
+                text = "Tomatoes.",
+                note = GARDEN
+            )
+        )
+
         advanceUntilIdle()
-        val beforeIndex = viewModel.state.value.let { it.isIndexReady to it.related }
+
+        val beforeIndex = viewModel
+            .state
+            .value
+            .let {
+                it.isIndexReady to it.related
+            }
+
         indexed()
         viewModel.onIntent(intent = RelatedNotesIntent.OnIndexChange(isReady = true))
         advanceUntilIdle()
-        val afterIndex = viewModel.state.value.related.isNotEmpty()
+
+        val afterIndex = viewModel
+            .state
+            .value
+            .related
+            .isNotEmpty()
+
         embedder.failure = EmbeddingError.EngineFailed
         viewModel.onIntent(intent = RelatedNotesIntent.OnIndexChange(isReady = true))
         advanceUntilIdle()
@@ -132,7 +217,10 @@ class RelatedNotesViewModelTest {
 
         viewModel.onIntent(intent = RelatedNotesIntent.OnLinkedToggle)
 
-        assertEquals(expected = true, actual = viewModel.state.value.isLinkedOpen)
+        assertEquals(
+            expected = true,
+            actual = viewModel.state.value.isLinkedOpen
+        )
     }
 
     private suspend fun indexed() {
@@ -142,8 +230,14 @@ class RelatedNotesViewModelTest {
             GARDEN to "Tomatoes and basil grow in the beds."
         ).map { (path, text) ->
             contents.texts[path] = text
-            NoteFile(path = path, size = text.length.toLong(), modifiedAt = DATE)
+
+            NoteFile(
+                path = path,
+                size = text.length.toLong(),
+                modifiedAt = DATE
+            )
         }
+
         IndexVaultUseCase(
             planIndex = PlanIndexUseCase(),
             chunkNote = chunkNote,
@@ -151,7 +245,10 @@ class RelatedNotesViewModelTest {
             textEmbedder = embedder,
             vectorIndex = index,
             indexStateStore = FakeIndexStateStore()
-        )(vaultPath = VAULT, notes = notes).last()
+        )(
+            vaultPath = VAULT,
+            notes = notes
+        ).last()
     }
 
     private companion object {

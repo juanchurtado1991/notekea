@@ -12,9 +12,7 @@ class FakeModelInstaller : ModelInstaller {
 
     override val session: StateFlow<InstallSession?> = current
 
-    override fun start(
-        model: ChatModel
-    ) {
+    override fun start(model: ChatModel) {
         started += model.size
     }
 

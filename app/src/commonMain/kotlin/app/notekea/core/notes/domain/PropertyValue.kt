@@ -2,7 +2,7 @@ package app.notekea.core.notes.domain
 
 import app.notekea.core.domain.time.CalendarDate
 
-/** The value of one frontmatter property, by the type its text shows (`ROADMAP.md` 1.14). */
+/** The value of one frontmatter property, by the type its text shows. */
 sealed interface PropertyValue {
     data class Text(val text: String) : PropertyValue
 

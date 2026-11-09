@@ -1,8 +1,8 @@
 package app.notekea.editor.domain
 
+import app.notekea.core.notes.domain.NoteLink
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.core.notes.domain.NoteLink
 
 class MarkdownFormatterTest {
     private val formatter = MarkdownFormatter()
@@ -16,9 +16,21 @@ class MarkdownFormatterTest {
                 "Mix **bold text** flour" to "bold text"
             ),
             actual = listOf(
-                apply(text = "Mix corn flour", selected = "corn", action = BOLD),
-                apply(text = "Mix **corn** flour", selected = "corn", action = BOLD),
-                apply(text = "Mix  flour", cursor = 4, action = BOLD)
+                apply(
+                    text = "Mix corn flour",
+                    selected = "corn",
+                    action = BOLD
+                ),
+                apply(
+                    text = "Mix **corn** flour",
+                    selected = "corn",
+                    action = BOLD
+                ),
+                apply(
+                    text = "Mix  flour",
+                    cursor = 4,
+                    action = BOLD
+                )
             )
         )
     }
@@ -33,10 +45,26 @@ class MarkdownFormatterTest {
                 "Mix corn flour" to "corn"
             ),
             actual = listOf(
-                apply(text = "Mix corn flour", cursor = 6, action = BOLD),
-                apply(text = "Mix **corn** flour", cursor = 8, action = BOLD),
-                apply(text = "Mix **corn** flour", selected = "**corn**", action = BOLD),
-                apply(text = "Mix *corn* flour", cursor = 7, action = FormatAction.Italic(placeholder = "x"))
+                apply(
+                    text = "Mix corn flour",
+                    cursor = 6,
+                    action = BOLD
+                ),
+                apply(
+                    text = "Mix **corn** flour",
+                    cursor = 8,
+                    action = BOLD
+                ),
+                apply(
+                    text = "Mix **corn** flour",
+                    selected = "**corn**",
+                    action = BOLD
+                ),
+                apply(
+                    text = "Mix *corn* flour",
+                    cursor = 7,
+                    action = FormatAction.Italic(placeholder = "x")
+                )
             )
         )
     }
@@ -65,10 +93,26 @@ class MarkdownFormatterTest {
                 "Mix ***corn*** flour" to "corn"
             ),
             actual = listOf(
-                apply(text = "Mix ***corn*** flour", selected = "corn", action = italic),
-                apply(text = "Mix ***corn*** flour", cursor = 9, action = italic),
-                apply(text = "Mix *corn* flour", selected = "corn", action = italic),
-                apply(text = "Mix **corn** flour", cursor = 8, action = italic)
+                apply(
+                    text = "Mix ***corn*** flour",
+                    selected = "corn",
+                    action = italic
+                ),
+                apply(
+                    text = "Mix ***corn*** flour",
+                    cursor = 9,
+                    action = italic
+                ),
+                apply(
+                    text = "Mix *corn* flour",
+                    selected = "corn",
+                    action = italic
+                ),
+                apply(
+                    text = "Mix **corn** flour",
+                    cursor = 8,
+                    action = italic
+                )
             )
         )
     }
@@ -85,7 +129,11 @@ class MarkdownFormatterTest {
                 "Flour\nWater\nSalt"
             ),
             actual = listOf(
-                apply(text = lines, selected = lines, action = FormatAction.BulletList(placeholder = "Item")).first,
+                apply(
+                    text = lines,
+                    selected = lines,
+                    action = FormatAction.BulletList(placeholder = "Item")
+                ).first,
                 apply(
                     text = "- Flour\n- Water\n- Salt",
                     selected = "- Flour\n- Water\n- Salt",
@@ -110,8 +158,16 @@ class MarkdownFormatterTest {
         assertEquals(
             expected = listOf("Intro\n- [ ] To do" to "To do", "- [ ] Buy flour" to ""),
             actual = listOf(
-                apply(text = "Intro\n", cursor = 6, action = CHECKLIST),
-                apply(text = "Buy flour", cursor = 3, action = CHECKLIST)
+                apply(
+                    text = "Intro\n",
+                    cursor = 6,
+                    action = CHECKLIST
+                ),
+                apply(
+                    text = "Buy flour",
+                    cursor = 3,
+                    action = CHECKLIST
+                )
             )
         )
     }
@@ -121,21 +177,42 @@ class MarkdownFormatterTest {
         assertEquals(
             expected = listOf("## Arepas", "# Arepas", "Arepas"),
             actual = listOf(
-                apply(text = "Arepas", cursor = 0, action = HEADING_2).first,
+                apply(
+                    text = "Arepas",
+                    cursor = 0,
+                    action = HEADING_2
+                ).first,
                 apply(
                     text = "### Arepas",
                     cursor = 0,
-                    action = FormatAction.Heading(level = 1, placeholder = "Heading")
+                    action = FormatAction.Heading(
+                        level = 1,
+                        placeholder = "Heading"
+                    )
                 ).first,
-                apply(text = "## Arepas", cursor = 0, action = HEADING_2).first
+                apply(
+                    text = "## Arepas",
+                    cursor = 0,
+                    action = HEADING_2
+                ).first
             )
         )
     }
 
     @Test
     fun `a callout sits on lines of its own, holding the selection or a placeholder to type over`() {
-        val tip = FormatAction.Callout(type = "tip", title = "Tip", placeholder = "Write here", isFolded = false)
-        val folded = tip.copy(type = "faq", title = "Question", isFolded = true)
+        val tip = FormatAction.Callout(
+            type = "tip",
+            title = "Tip",
+            placeholder = "Write here",
+            isFolded = false
+        )
+
+        val folded = tip.copy(
+            type = "faq",
+            title = "Question",
+            isFolded = true
+        )
 
         assertEquals(
             expected = listOf(
@@ -143,8 +220,16 @@ class MarkdownFormatterTest {
                 "Intro\n\n> [!faq]- Question\n> Soak\n> overnight\n\nEnd" to ""
             ),
             actual = listOf(
-                apply(text = "Intro", cursor = 5, action = tip),
-                apply(text = "Intro\nSoak\novernight\nEnd", selected = "Soak\novernight", action = folded)
+                apply(
+                    text = "Intro",
+                    cursor = 5,
+                    action = tip
+                ),
+                apply(
+                    text = "Intro\nSoak\novernight\nEnd",
+                    selected = "Soak\novernight",
+                    action = folded
+                )
             )
         )
     }
@@ -153,7 +238,8 @@ class MarkdownFormatterTest {
     fun `a table, a code block and a divider are blocks too`() {
         assertEquals(
             expected = listOf(
-                "| A | B |\n| --- | --- |\n| Text | Text |\n| Text | Text |\n| Text | Text |\n" to "A",
+                "| A | B |\n| --- | --- |\n| Text | Text |\n| Text | Text |\n| Text | Text |\n" to
+                    "A",
                 "```\ncode\n```\n" to "code",
                 "```kotlin\ncode\n```\n" to "code",
                 "Intro\n\n---\n" to ""
@@ -162,15 +248,30 @@ class MarkdownFormatterTest {
                 apply(
                     text = "",
                     cursor = 0,
-                    action = FormatAction.Table(columnNames = listOf("A", "B"), rows = 3, cellText = "Text")
+                    action = FormatAction.Table(
+                        columnNames = listOf("A", "B"),
+                        rows = 3,
+                        cellText = "Text"
+                    )
                 ),
-                apply(text = "", cursor = 0, action = FormatAction.CodeBlock(placeholder = "code")),
                 apply(
                     text = "",
                     cursor = 0,
-                    action = FormatAction.CodeBlock(placeholder = "code", language = "kotlin")
+                    action = FormatAction.CodeBlock(placeholder = "code")
                 ),
-                apply(text = "Intro", cursor = 5, action = FormatAction.Divider)
+                apply(
+                    text = "",
+                    cursor = 0,
+                    action = FormatAction.CodeBlock(
+                        placeholder = "code",
+                        language = "kotlin"
+                    )
+                ),
+                apply(
+                    text = "Intro",
+                    cursor = 5,
+                    action = FormatAction.Divider
+                )
             )
         )
     }
@@ -187,14 +288,26 @@ class MarkdownFormatterTest {
                 "Open [link text](https://)" to "link text"
             ),
             actual = listOf(
-                apply(text = "See ", cursor = 4, action = link),
-                apply(text = "See the recipe", selected = "the recipe", action = link),
+                apply(
+                    text = "See ",
+                    cursor = 4,
+                    action = link
+                ),
+                apply(
+                    text = "See the recipe",
+                    selected = "the recipe",
+                    action = link
+                ),
                 apply(
                     text = "Open example",
                     selected = "example",
                     action = FormatAction.WebLink(placeholder = "link text")
                 ),
-                apply(text = "Open ", cursor = 5, action = FormatAction.WebLink(placeholder = "link text"))
+                apply(
+                    text = "Open ",
+                    cursor = 5,
+                    action = FormatAction.WebLink(placeholder = "link text")
+                )
             )
         )
     }
@@ -204,8 +317,16 @@ class MarkdownFormatterTest {
         assertEquals(
             expected = listOf("Dinner #recipe ", "Dinner #weekend ", "Dinner #weekly-plan "),
             actual = listOf(
-                apply(text = "Dinner", cursor = 6, action = FormatAction.Tag(name = "recipe")).first,
-                apply(text = "Dinner ", cursor = 7, action = FormatAction.Tag(name = "weekend")).first,
+                apply(
+                    text = "Dinner",
+                    cursor = 6,
+                    action = FormatAction.Tag(name = "recipe")
+                ).first,
+                apply(
+                    text = "Dinner ",
+                    cursor = 7,
+                    action = FormatAction.Tag(name = "weekend")
+                ).first,
                 apply(
                     text = "Dinner weekly plan",
                     selected = "weekly plan",
@@ -227,8 +348,16 @@ class MarkdownFormatterTest {
                 "| Dish | Photo |\n| --- | --- |\n| Arepas | ![[a.png\\|80]] |" to cell + 14
             ),
             actual = listOf(
-                embed(text = "Intro", cursor = 5, markdown = "![[a.png]]"),
-                embed(text = row, cursor = cell, markdown = "![[a.png|80]]")
+                embed(
+                    text = "Intro",
+                    cursor = 5,
+                    markdown = "![[a.png]]"
+                ),
+                embed(
+                    text = row,
+                    cursor = cell,
+                    markdown = "![[a.png|80]]"
+                )
             )
         )
     }
@@ -245,7 +374,12 @@ class MarkdownFormatterTest {
             selectionEnd = cursor,
             action = FormatAction.Embed(markdown = markdown)
         )
-        return text.replaceRange(startIndex = edit.start, endIndex = edit.end, replacement = edit.replacement) to
+
+        return text.replaceRange(
+            startIndex = edit.start,
+            endIndex = edit.end,
+            replacement = edit.replacement
+        ) to
             edit.selectionStart
     }
 
@@ -257,16 +391,37 @@ class MarkdownFormatterTest {
         cursor: Int = 0
     ): Pair<String, String> {
         val start = selected?.let { text.indexOf(string = it) } ?: cursor
-        val end = selected?.let { start + it.length } ?: cursor
-        val edit = formatter.format(text = text, selectionStart = start, selectionEnd = end, action = action)
-        val result = text.replaceRange(startIndex = edit.start, endIndex = edit.end, replacement = edit.replacement)
-        return result to result.substring(startIndex = edit.selectionStart, endIndex = edit.selectionEnd)
+
+        val end = selected?.let {
+            start + it.length
+        } ?: cursor
+
+        val edit = formatter.format(
+            text = text,
+            selectionStart = start,
+            selectionEnd = end,
+            action = action
+        )
+
+        val result = text.replaceRange(
+            startIndex = edit.start,
+            endIndex = edit.end,
+            replacement = edit.replacement
+        )
+
+        return result to result.substring(
+            startIndex = edit.selectionStart,
+            endIndex = edit.selectionEnd
+        )
     }
 
     companion object {
         private val BOLD = FormatAction.Bold(placeholder = "bold text")
         private val CHECKLIST = FormatAction.Checklist(placeholder = "To do")
-        private val HEADING_2 = FormatAction.Heading(level = 2, placeholder = "Heading")
+        private val HEADING_2 = FormatAction.Heading(
+            level = 2,
+            placeholder = "Heading"
+        )
         private val NUMBERED = FormatAction.NumberedList(placeholder = "Item")
     }
 }

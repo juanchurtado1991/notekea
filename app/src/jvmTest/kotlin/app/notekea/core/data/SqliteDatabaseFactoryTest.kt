@@ -1,8 +1,8 @@
 package app.notekea.core.data
 
 import java.nio.file.Files
-import java.sql.DriverManager
 import java.nio.file.Path
+import java.sql.DriverManager
 import kotlin.io.path.deleteRecursively
 import kotlin.io.path.exists
 import kotlin.io.path.writeText
@@ -22,20 +22,25 @@ class SqliteDatabaseFactoryTest {
 
     @Test
     fun `the database is created in the app data folder and keeps its rows`() {
-        SqliteDatabaseFactory(appDataDirectory = appData.toString()).create().noteCacheQueries.upsertNote(
-            vault = VAULT,
-            path = NOTE,
-            size = null,
-            modified_at = null,
-            title = TITLE
-        )
+        SqliteDatabaseFactory(appDataDirectory = appData.toString())
+            .create()
+            .noteCacheQueries
+            .upsertNote(
+                vault = VAULT,
+                path = NOTE,
+                size = null,
+                modified_at = null,
+                title = TITLE
+            )
 
         val reopened = SqliteDatabaseFactory(appDataDirectory = appData.toString()).create()
 
         assertTrue(actual = appData.resolve(SqliteDatabaseFactory.DATABASE_FILE_NAME).exists())
+
         assertEquals(
             expected = listOf(TITLE),
-            actual = reopened.noteCacheQueries
+            actual = reopened
+                .noteCacheQueries
                 .selectNotes(vault = VAULT)
                 .executeAsList()
                 .map { it.title }
@@ -45,32 +50,55 @@ class SqliteDatabaseFactoryTest {
     @Test
     fun `a cache from before text tags is migrated and emptied, so every note is read again`() {
         Files.createDirectories(appData)
-        DriverManager.getConnection(URL_PREFIX + appData.resolve(SqliteDatabaseFactory.DATABASE_FILE_NAME)).use {
+
+        DriverManager.getConnection(
+            URL_PREFIX + appData.resolve(SqliteDatabaseFactory.DATABASE_FILE_NAME)
+        ).use {
             it.createStatement().use { statement ->
                 VERSION_1_SCHEMA.forEach { sql -> statement.executeUpdate(sql) }
             }
         }
 
-        val queries = SqliteDatabaseFactory(appDataDirectory = appData.toString()).create().noteCacheQueries
-        queries.insertTextTag(vault = VAULT, path = NOTE, position = 0, tag = TITLE)
+        val queries = SqliteDatabaseFactory(
+            appDataDirectory = appData.toString()
+        ).create().noteCacheQueries
+
+        queries.insertTextTag(
+            vault = VAULT,
+            path = NOTE,
+            position = 0,
+            tag = TITLE
+        )
 
         assertEquals(
             expected = emptyList<String>() to listOf(TITLE),
-            actual = queries.selectNotes(vault = VAULT).executeAsList().map { it.path } to
-                queries.selectTextTags(vault = VAULT).executeAsList().map { it.tag }
+            actual = queries
+                .selectNotes(vault = VAULT)
+                .executeAsList()
+                .map { it.path } to
+                queries
+                    .selectTextTags(vault = VAULT)
+                    .executeAsList()
+                    .map { it.tag }
         )
     }
 
     @Test
     fun `an older database gains the reason a note is left out of the index`() {
         Files.createDirectories(appData)
-        DriverManager.getConnection(URL_PREFIX + appData.resolve(SqliteDatabaseFactory.DATABASE_FILE_NAME)).use {
+
+        DriverManager.getConnection(
+            URL_PREFIX + appData.resolve(SqliteDatabaseFactory.DATABASE_FILE_NAME)
+        ).use {
             it.createStatement().use { statement ->
                 VERSION_1_SCHEMA.forEach { sql -> statement.executeUpdate(sql) }
             }
         }
 
-        val queries = SqliteDatabaseFactory(appDataDirectory = appData.toString()).create().noteIndexStateQueries
+        val queries = SqliteDatabaseFactory(
+            appDataDirectory = appData.toString()
+        ).create().noteIndexStateQueries
+
         queries.upsertState(
             vault = VAULT,
             path = NOTE,
@@ -83,7 +111,10 @@ class SqliteDatabaseFactoryTest {
 
         assertEquals(
             expected = listOf("TOO_LARGE"),
-            actual = queries.selectStates(vault = VAULT).executeAsList().map { it.skip_reason }
+            actual = queries
+                .selectStates(vault = VAULT)
+                .executeAsList()
+                .map { it.skip_reason }
         )
     }
 
@@ -96,7 +127,10 @@ class SqliteDatabaseFactoryTest {
 
         assertEquals(
             expected = emptyList(),
-            actual = database.noteCacheQueries.selectNotes(vault = VAULT).executeAsList()
+            actual = database
+                .noteCacheQueries
+                .selectNotes(vault = VAULT)
+                .executeAsList()
         )
     }
 
@@ -114,7 +148,8 @@ class SqliteDatabaseFactoryTest {
             "PRAGMA user_version = 1"
         )
         private const val APP_DATA_FOLDER = "notekea"
-        private const val GARBAGE = "this is not a SQLite database, it is a note someone saved here by mistake"
+        private const val GARBAGE =
+            "this is not a SQLite database, it is a note someone saved here by mistake"
         private const val NOTE = "Welcome.md"
         private const val TEMP_PREFIX = "notekea-database"
         private const val TITLE = "Welcome"

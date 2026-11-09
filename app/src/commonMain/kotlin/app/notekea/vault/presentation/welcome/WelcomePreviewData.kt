@@ -37,7 +37,13 @@ internal object WelcomePreviewData {
         )
     )
 
-    val newVaultForm = NewVaultForm(name = NEW_VAULT_NAME, parentPath = DOCUMENTS_PATH)
+    val newVaultForm = NewVaultForm(
+        name = NEW_VAULT_NAME,
+        parentPath = DOCUMENTS_PATH
+    )
 
-    fun state(): WelcomeState = WelcomeState(platformConventions = platformConventions, isLoading = false)
+    fun state(): WelcomeState = WelcomeState(
+        platformConventions = platformConventions,
+        isLoading = false
+    )
 }

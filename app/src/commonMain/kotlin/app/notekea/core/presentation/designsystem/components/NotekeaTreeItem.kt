@@ -45,17 +45,9 @@ private const val PREVIEW_RENAMED = "Tomato plan 2027"
 private const val PREVIEW_WIDTH_DP = 260
 
 /**
- * One row of a tree (the vault sidebar, a note's outline): indentation by [depth], a chevron for folders
- * ([isExpanded] is null for leaves, which keep the chevron's space so names align), an icon unless [icon] is null (an
- * outline's headings), the [label] and optional [trailingText] (a note count). Rows are not focus stops: the tree is
- * one focusable element moved with the arrow keys. As in Finder and VS Code, the [selected] row is filled in the
- * selection color while the tree has the keyboard ([focused]) and in a quiet grey otherwise; the keyboard's row, when it
- * is not the selected one (an outline's), draws the focus ring. Rows are
- * transparent, so they sit on the panel that holds the tree. [badge] marks the row after its label (a bookmark's
- * star), and [iconTint] colors the icon (a file's kind). [labelContent] replaces the label, for renaming in place;
- * it must keep its keys (a field consumes Space), or a key leaving it would click the row. A row that [takesFocus],
- * outside a list that is one focus stop, is a focus stop of its own. Screen readers get the selection and expand /
- * collapse actions.
+ * One row of a tree: indentation by [depth], a chevron for folders ([isExpanded] is null for leaves), an [icon], the
+ * [label], a [badge] and optional [trailingText]. The [selected] row is filled in the selection color while the tree is
+ * [focused], in grey otherwise. [labelContent] replaces the label, for renaming in place.
  */
 @Composable
 fun NotekeaTreeItem(
@@ -77,32 +69,64 @@ fun NotekeaTreeItem(
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = MaterialTheme.shapes.small
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .height(height = NotekeaDimensions.TreeRowHeight)
-            .focusRing(isShown = focused && !selected, color = colors.primary, shape = shape)
-            .treeSemantics(selected = selected, isExpanded = isExpanded, onToggleExpanded = onToggleExpanded),
+            .focusRing(
+                isShown = focused && !selected,
+                color = colors.primary,
+                shape = shape
+            )
+            .treeSemantics(
+                selected = selected,
+                isExpanded = isExpanded,
+                onToggleExpanded = onToggleExpanded
+            ),
         shape = shape,
-        color = rowColor(selected = selected, focused = focused),
+        color = rowColor(
+            selected = selected,
+            focused = focused
+        ),
         contentColor = if (selected && focused) colors.onPrimaryContainer else colors.onSurface
     ) {
         Row(
             modifier = Modifier
-                .focusBorder(color = colors.primary, shape = shape)
-                .rowClick(onClick = onClick, onClickLabel = onClickLabel, takesFocus = takesFocus)
+                .focusBorder(
+                    color = colors.primary,
+                    shape = shape
+                )
+                .rowClick(
+                    onClick = onClick,
+                    onClickLabel = onClickLabel,
+                    takesFocus = takesFocus
+                )
                 .padding(
                     start = NotekeaDimensions.SpacingXs + NotekeaDimensions.TreeIndent * depth,
                     end = NotekeaDimensions.SpacingS
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Chevron(isExpanded = isExpanded, onToggleExpanded = onToggleExpanded)
-            icon?.let { RowIcon(icon = it, selected = selected && focused, tint = iconTint) }
+            Chevron(
+                isExpanded = isExpanded,
+                onToggleExpanded = onToggleExpanded
+            )
+
+            icon?.let {
+                RowIcon(
+                    icon = it,
+                    selected = selected && focused,
+                    tint = iconTint
+                )
+            }
+
             Box(modifier = Modifier.weight(weight = 1f)) {
                 labelContent?.invoke() ?: TreeLabel(label = label)
             }
+
             badge?.invoke()
+
             trailingText?.let { TrailingText(text = it) }
         }
     }
@@ -113,7 +137,15 @@ private fun Modifier.focusRing(
     isShown: Boolean,
     color: Color,
     shape: Shape
-): Modifier = if (isShown) border(width = NotekeaDimensions.FocusRingWidth, color = color, shape = shape) else this
+): Modifier = if (isShown) {
+    border(
+        width = NotekeaDimensions.FocusRingWidth,
+        color = color,
+        shape = shape
+    )
+} else {
+    this
+}
 
 /**
  * The row's icon, in the row's own color while [selected] in the selection color, else in its [tint] (a file kind's
@@ -125,15 +157,18 @@ private fun RowIcon(
     selected: Boolean,
     tint: Color?
 ) {
+    val iconColor = when {
+        selected -> LocalContentColor.current
+        else -> tint ?: MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
     Icon(
         imageVector = icon,
         contentDescription = null,
         modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-        tint = when {
-            selected -> LocalContentColor.current
-            else -> tint ?: MaterialTheme.colorScheme.onSurfaceVariant
-        }
+        tint = iconColor
     )
+
     Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
 }
 
@@ -154,8 +189,16 @@ private fun Chevron(
     onToggleExpanded: (() -> Unit)?
 ) {
     val toggle = Modifier.focusProperties { canFocus = false }.let { base ->
-        if (onToggleExpanded != null) base.clickable(role = Role.Button, onClick = onToggleExpanded) else base
+        if (onToggleExpanded != null) {
+            base.clickable(
+                role = Role.Button,
+                onClick = onToggleExpanded
+            )
+        } else {
+            base
+        }
     }
+
     Box(
         modifier = Modifier.size(size = NotekeaDimensions.IconSize).then(other = toggle),
         contentAlignment = Alignment.Center
@@ -168,13 +211,12 @@ private fun Chevron(
             )
         }
     }
+
     Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingXs))
 }
 
 @Composable
-private fun TreeLabel(
-    label: String
-) {
+private fun TreeLabel(label: String) {
     Text(
         text = label,
         style = MaterialTheme.typography.bodyMedium,
@@ -185,11 +227,14 @@ private fun TreeLabel(
 }
 
 @Composable
-private fun TrailingText(
-    text: String
-) {
+private fun TrailingText(text: String) {
     Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
-    Text(text = text, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 }
 
 /** Rows are not focus stops unless they [takesFocus] (the bookmarks): the tree is. */
@@ -198,7 +243,11 @@ private fun Modifier.rowClick(
     takesFocus: Boolean,
     onClickLabel: String?
 ): Modifier = focusProperties { canFocus = takesFocus }
-    .clickable(onClickLabel = onClickLabel, role = Role.Button, onClick = onClick)
+    .clickable(
+        onClickLabel = onClickLabel,
+        role = Role.Button,
+        onClick = onClick
+    )
 
 private fun Modifier.treeSemantics(
     selected: Boolean,
@@ -206,11 +255,13 @@ private fun Modifier.treeSemantics(
     onToggleExpanded: (() -> Unit)?
 ): Modifier = semantics {
     this.selected = selected
+
     if (isExpanded != null && onToggleExpanded != null) {
         val toggle = {
             onToggleExpanded()
             true
         }
+
         if (isExpanded) collapse(action = toggle) else expand(action = toggle)
     }
 }
@@ -229,6 +280,7 @@ private fun NotekeaTreeItemPreview() {
                 onToggleExpanded = {},
                 trailingText = PREVIEW_COUNT
             )
+
             NotekeaTreeItem(
                 label = PREVIEW_GARDEN,
                 icon = NotekeaIcons.Folder,
@@ -238,6 +290,7 @@ private fun NotekeaTreeItemPreview() {
                 onToggleExpanded = {},
                 trailingText = PREVIEW_GARDEN_COUNT
             )
+
             NotekeaTreeItem(
                 label = PREVIEW_NOTE,
                 icon = NotekeaIcons.Note,
@@ -246,7 +299,13 @@ private fun NotekeaTreeItemPreview() {
                 selected = true,
                 focused = true
             )
-            NotekeaTreeItem(label = PREVIEW_LONG, icon = NotekeaIcons.Note, depth = 1, onClick = {})
+
+            NotekeaTreeItem(
+                label = PREVIEW_LONG,
+                icon = NotekeaIcons.Note,
+                depth = 1,
+                onClick = {}
+            )
         }
     }
 }
@@ -270,7 +329,14 @@ private fun NotekeaTreeItemRenamingPreview() {
                     )
                 }
             )
-            NotekeaTreeItem(label = PREVIEW_LONG, icon = NotekeaIcons.Note, depth = 1, onClick = {}, selected = true)
+
+            NotekeaTreeItem(
+                label = PREVIEW_LONG,
+                icon = NotekeaIcons.Note,
+                depth = 1,
+                onClick = {},
+                selected = true
+            )
         }
     }
 }

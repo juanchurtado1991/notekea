@@ -9,6 +9,9 @@ data class FuzzyMatch(
     val ranges: List<IntRange>
 ) {
     companion object {
-        val EVERYTHING = FuzzyMatch(score = 0, ranges = emptyList())
+        val EVERYTHING = FuzzyMatch(
+            score = 0,
+            ranges = emptyList()
+        )
     }
 }

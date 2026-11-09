@@ -10,9 +10,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,11 +27,9 @@ private const val PREVIEW_SHORTCUT = "Ctrl+N"
 private const val PREVIEW_SORT = "Sort by name"
 
 /**
- * Compact icon-only button for dense desktop toolbars (the sidebar header), 28 dp with the 6 dp control radius.
- * [label] is what screen readers announce and what the tooltip shows on hover, followed by [shortcutHint] when there
- * is one, so an icon is never the only way to learn what a button does. With [takesFocus] false a click leaves the
- * keyboard where it was, as in a text editor's toolbar, so the text keeps its cursor and selection. With
- * [isTooltipBeside] the tooltip shows to its side instead of below, for a vertical strip of buttons (the tool rail).
+ * Compact icon-only button for dense desktop toolbars. [label] is what screen readers announce and the tooltip shows,
+ * followed by [shortcutHint], so an icon is never the only way to learn what a button does. With [takesFocus] false a
+ * click leaves the keyboard where it was; with [isTooltipBeside] the tooltip shows to its side, for a vertical strip.
  */
 @Composable
 fun NotekeaIconButton(
@@ -45,22 +43,37 @@ fun NotekeaIconButton(
     isTooltipBeside: Boolean = false,
     tint: Color? = null
 ) {
-    NotekeaTooltip(label = label, shortcutHint = shortcutHint, isBeside = isTooltipBeside) {
+    NotekeaTooltip(
+        label = label,
+        shortcutHint = shortcutHint,
+        isBeside = isTooltipBeside
+    ) {
         Box(
             modifier = modifier
                 .size(size = NotekeaDimensions.CompactControlSize)
                 .focusProperties { canFocus = takesFocus }
-                .focusBorder(color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.small)
+                .focusBorder(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = MaterialTheme.shapes.small
+                )
                 .clip(shape = MaterialTheme.shapes.small)
-                .clickable(enabled = enabled, onClickLabel = label, role = Role.Button, onClick = onClick),
+                .clickable(
+                    enabled = enabled,
+                    onClickLabel = label,
+                    role = Role.Button,
+                    onClick = onClick
+                ),
             contentAlignment = Alignment.Center
         ) {
             val color = tint ?: MaterialTheme.colorScheme.onSurfaceVariant
+
+            val iconTint = if (enabled) color else color.copy(alpha = DISABLED_ALPHA)
+
             Icon(
                 imageVector = icon,
                 contentDescription = label,
                 modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-                tint = if (enabled) color else color.copy(alpha = DISABLED_ALPHA)
+                tint = iconTint
             )
         }
     }
@@ -77,8 +90,19 @@ private fun NotekeaIconButtonPreview() {
                 onClick = {},
                 shortcutHint = PREVIEW_SHORTCUT
             )
-            NotekeaIconButton(icon = NotekeaIcons.NewFolder, label = PREVIEW_NEW_FOLDER, onClick = {})
-            NotekeaIconButton(icon = NotekeaIcons.SortByName, label = PREVIEW_SORT, onClick = {}, enabled = false)
+
+            NotekeaIconButton(
+                icon = NotekeaIcons.NewFolder,
+                label = PREVIEW_NEW_FOLDER,
+                onClick = {}
+            )
+
+            NotekeaIconButton(
+                icon = NotekeaIcons.SortByName,
+                label = PREVIEW_SORT,
+                onClick = {},
+                enabled = false
+            )
         }
     }
 }

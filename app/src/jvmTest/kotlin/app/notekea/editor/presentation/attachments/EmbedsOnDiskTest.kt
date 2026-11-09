@@ -5,9 +5,9 @@ import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.notes.data.ObsidianVaultSettingsReader
 import app.notekea.core.notes.data.OkioAttachmentStore
 import app.notekea.core.notes.data.OkioNoteFileOperations
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.domain.AttachFileUseCase
 import app.notekea.editor.domain.EmbedProblem
-import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
@@ -20,7 +20,7 @@ import kotlin.test.assertEquals
 import kotlin.time.Clock
 
 /**
- * Embedded notes on real files (`ROADMAP.md` 1.15): a temporary vault whose notes embed each other in a chain, around
+ * Embedded notes on real files: a temporary vault whose notes embed each other in a chain, around
  * in a circle, by a block and towards a note that is not there, read by the real adapters.
  */
 @OptIn(ExperimentalPathApi::class)
@@ -28,8 +28,14 @@ class EmbedsOnDiskTest {
     private val testDispatcher = StandardTestDispatcher()
     private val dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     private val vault = Files.createTempDirectory(TEMP_PREFIX)
-    private val store = OkioAttachmentStore(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
-    private val settings = ObsidianVaultSettingsReader(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
+    private val store = OkioAttachmentStore(
+        fileSystem = FileSystem.SYSTEM,
+        dispatchers = dispatchers
+    )
+    private val settings = ObsidianVaultSettingsReader(
+        fileSystem = FileSystem.SYSTEM,
+        dispatchers = dispatchers
+    )
 
     @AfterTest
     fun deleteVault() {
@@ -44,7 +50,10 @@ class EmbedsOnDiskTest {
                 "Pantry.md" to "---\ntags: [home]\n---\nCorn flour\n![[Kitchen/Shelf]]",
                 "Kitchen/Shelf.md" to "Top shelf\n![[Pantry]]"
             ).forEach { (name, text) ->
-                vault.resolve(name).also { Files.createDirectories(it.parent) }.let { Files.writeString(it, text) }
+                vault
+                    .resolve(name)
+                    .also { Files.createDirectories(it.parent) }
+                    .let { Files.writeString(it, text) }
             }
 
             val views = attachments().viewsOf(
@@ -54,6 +63,7 @@ class EmbedsOnDiskTest {
 
             val pantry = views[1].nested.single()
             val shelf = pantry.nested.single()
+
             assertEquals(
                 expected = listOf(
                     Triple("Arepas#^dough", "Dough first", null),
@@ -74,9 +84,15 @@ class EmbedsOnDiskTest {
         runTest(context = testDispatcher) {
             Files.write(vault.resolve("Latin.md"), byteArrayOf(0x41, 0xE9.toByte()))
 
-            val view = attachments().viewsOf(note = RelativePath(value = "Menu.md"), text = "![[Latin]]\n").single()
+            val view = attachments().viewsOf(
+                note = RelativePath(value = "Menu.md"),
+                text = "![[Latin]]\n"
+            ).single()
 
-            assertEquals(expected = EmbedProblem.UNREADABLE_NOTE to null, actual = view.problem to view.noteText)
+            assertEquals(
+                expected = EmbedProblem.UNREADABLE_NOTE to null,
+                actual = view.problem to view.noteText
+            )
         }
 
     private fun attachments() = EditorAttachments(
@@ -86,7 +102,10 @@ class EmbedsOnDiskTest {
         attachFile = AttachFileUseCase(
             attachmentStore = store,
             vaultSettingsReader = settings,
-            noteFileOperations = OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers),
+            noteFileOperations = OkioNoteFileOperations(
+                fileSystem = FileSystem.SYSTEM,
+                dispatchers = dispatchers
+            ),
             localTimeFormatter = JvmLocalTimeFormatter(),
             clock = Clock.System
         ),

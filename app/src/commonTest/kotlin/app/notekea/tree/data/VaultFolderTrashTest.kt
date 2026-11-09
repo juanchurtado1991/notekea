@@ -29,19 +29,26 @@ class VaultFolderTrashTest {
         val outcomes = listOf(
             "Recipes/Arepas.md",
             "Travel"
-        ).map { trash().moveToTrash(vaultPath = VAULT, path = path(it)) }
+        ).map {
+            trash().moveToTrash(
+                vaultPath = VAULT,
+                path = path(it)
+            )
+        }
 
         assertEquals(
             expected = List(size = 2) { Outcome.Success(value = TrashLocation.VAULT_TRASH_FOLDER) },
             actual = outcomes
         )
+
         assertEquals(
             expected = listOf(false, false, CONTENT, CONTENT),
             actual = listOf(
                 fakeFileSystem.exists(path = vaultPath(path = "Recipes/Arepas.md")),
                 fakeFileSystem.exists(path = vaultPath(path = "Travel")),
                 fakeFileSystem.read(file = vaultPath(path = ".trash/Arepas.md")) { readUtf8() },
-                fakeFileSystem.read(file = vaultPath(path = ".trash/Travel/Lisbon trip.md")) { readUtf8() }
+                fakeFileSystem
+                    .read(file = vaultPath(path = ".trash/Travel/Lisbon trip.md")) { readUtf8() }
             )
         )
     }
@@ -55,11 +62,19 @@ class VaultFolderTrashTest {
             "Recipes/Arepas.md"
         ).forEach { writeNote(path = it) }
 
-        listOf("Arepas.md", "Recipes/Arepas.md").forEach { trash().moveToTrash(vaultPath = VAULT, path = path(it)) }
+        listOf("Arepas.md", "Recipes/Arepas.md").forEach {
+            trash().moveToTrash(
+                vaultPath = VAULT,
+                path = path(it)
+            )
+        }
 
         assertEquals(
             expected = listOf("Arepas 2.md", "Arepas 3.md", "Arepas 4.md", "Arepas.md"),
-            actual = fakeFileSystem.list(dir = vaultPath(path = ".trash")).map { it.name }.sorted()
+            actual = fakeFileSystem
+                .list(dir = vaultPath(path = ".trash"))
+                .map { it.name }
+                .sorted()
         )
     }
 
@@ -73,15 +88,19 @@ class VaultFolderTrashTest {
                 Outcome.Failure(error = NotesError.OperationFailed(path = "Arepas.md"))
             ),
             actual = listOf(
-                trash().moveToTrash(vaultPath = VAULT, path = path("Gone.md")),
-                trash(fileSystem = refusing()).moveToTrash(vaultPath = VAULT, path = path("Arepas.md"))
+                trash().moveToTrash(
+                    vaultPath = VAULT,
+                    path = path("Gone.md")
+                ),
+                trash(fileSystem = refusing()).moveToTrash(
+                    vaultPath = VAULT,
+                    path = path("Arepas.md")
+                )
             )
         )
     }
 
-    private fun path(
-        value: String
-    ): RelativePath = RelativePath(value = value)
+    private fun path(value: String): RelativePath = RelativePath(value = value)
 
     private fun refusing(): FileSystem = object : ForwardingFileSystem(delegate = fakeFileSystem) {
         override fun atomicMove(
@@ -90,25 +109,20 @@ class VaultFolderTrashTest {
         ) = throw IOException(DENIED)
     }
 
-    private fun runTrashTest(
-        block: suspend TestScope.() -> Unit
-    ) = runTest(context = testDispatcher) { block() }
+    private fun runTrashTest(block: suspend TestScope.() -> Unit) = runTest(
+        context = testDispatcher
+    ) { block() }
 
-    private fun trash(
-        fileSystem: FileSystem = fakeFileSystem
-    ): VaultFolderTrash = VaultFolderTrash(
+    private fun trash(fileSystem: FileSystem = fakeFileSystem): VaultFolderTrash = VaultFolderTrash(
         fileSystem = fileSystem,
         dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     )
 
-    private fun vaultPath(
-        path: String
-    ): Path = VAULT.toPath() / path
+    private fun vaultPath(path: String): Path = VAULT.toPath() / path
 
-    private fun writeNote(
-        path: String
-    ) {
+    private fun writeNote(path: String) {
         val file = vaultPath(path = path)
+
         file.parent?.let { fakeFileSystem.createDirectories(dir = it) }
         fakeFileSystem.write(file = file) { writeUtf8(string = CONTENT) }
     }

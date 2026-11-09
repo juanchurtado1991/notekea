@@ -5,7 +5,7 @@ import app.notekea.editor.presentation.sidepanel.OutlineTracker
 import app.notekea.editor.presentation.viewmodel.ScrollMemory
 
 /**
- * What one pane keeps for its editor while its notes change (`ROADMAP.md` 1.11): the [tracker] the outline follows,
+ * What one pane keeps for its editor while its notes change: the [tracker] the outline follows,
  * and where each note was scrolled to ([scrollMemory]).
  */
 @Stable

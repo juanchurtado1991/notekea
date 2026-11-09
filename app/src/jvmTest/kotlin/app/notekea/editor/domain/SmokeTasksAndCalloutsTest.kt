@@ -1,14 +1,14 @@
 package app.notekea.editor.domain
 
-import app.notekea.core.notes.domain.TaskFinder
 import app.notekea.core.domain.markdown.CalloutFold
 import app.notekea.core.domain.markdown.CalloutKind
 import app.notekea.core.domain.markdown.CalloutParser
 import app.notekea.core.domain.markdown.ReadingMarkdown
+import app.notekea.core.notes.domain.NoteDocument
+import app.notekea.core.notes.domain.TaskFinder
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.core.notes.domain.NoteDocument
 
 /**
  * The tasks and callouts cases of `MVP_SMOKE_TEST.md` (1.7) on the smoke note itself: every task and callout the
@@ -20,7 +20,10 @@ class SmokeTasksAndCalloutsTest {
     @Test
     fun `1_7-01 the note has nine tasks, four of them checked, the capital X too`() {
         val tasks = TaskFinder().tasks(text = note)
-        val checked = tasks.filter { it.isDone }.map { lineOf(index = it.stateIndex).substringAfter(delimiter = "] ") }
+
+        val checked = tasks.filter { it.isDone }.map {
+            lineOf(index = it.stateIndex).substringAfter(delimiter = "] ")
+        }
 
         assertEquals(
             expected = 9 to listOf(
@@ -31,17 +34,28 @@ class SmokeTasksAndCalloutsTest {
             ),
             actual = tasks.size to checked
         )
+
         assertEquals(
             expected = 0,
-            actual = ReadingMarkdown().prepare(markdown = note).split('\n').count { it.contains(other = "[X]") }
+            actual = ReadingMarkdown()
+                .prepare(markdown = note)
+                .split('\n')
+                .count { it.contains(other = "[X]") }
         )
     }
 
     @Test
     fun `1_7-04 every callout of the note reads as the type, title and fold the guide states`() {
         val parser = CalloutParser()
-        val headers = note.split('\n')
-            .map { it.replace(regex = QUOTE_MARKS, replacement = "") }
+
+        val headers = note
+            .split('\n')
+            .map {
+                it.replace(
+                    regex = QUOTE_MARKS,
+                    replacement = ""
+                )
+            }
             .mapNotNull { parser.header(line = it) }
             .map { Triple(it.kind, it.title, it.fold) }
 
@@ -63,7 +77,11 @@ class SmokeTasksAndCalloutsTest {
                 Triple(CalloutKind.WARNING, "Caution is a warning", CalloutFold.NONE),
                 Triple(CalloutKind.ABSTRACT, "TL;DR is an abstract", CalloutFold.NONE),
                 Triple(CalloutKind.NOTE, "An unknown type is a note", CalloutFold.NONE),
-                Triple(CalloutKind.QUESTION, "A folded question (click to open)", CalloutFold.COLLAPSED),
+                Triple(
+                    CalloutKind.QUESTION,
+                    "A folded question (click to open)",
+                    CalloutFold.COLLAPSED
+                ),
                 Triple(CalloutKind.TIP, "An open tip (click to fold)", CalloutFold.EXPANDED),
                 Triple(CalloutKind.INFO, "Level one", CalloutFold.NONE),
                 Triple(CalloutKind.WARNING, "Level two", CalloutFold.NONE),
@@ -73,12 +91,23 @@ class SmokeTasksAndCalloutsTest {
         )
     }
 
-    private fun lineOf(
-        index: Int
-    ): String {
-        val start = note.lastIndexOf(char = '\n', startIndex = index) + 1
-        val end = note.indexOf(char = '\n', startIndex = index).takeIf { it >= 0 } ?: note.length
-        return note.substring(startIndex = start, endIndex = end)
+    private fun lineOf(index: Int): String {
+        val start = note.lastIndexOf(
+            char = '\n',
+            startIndex = index
+        ) + 1
+
+        val end = note.indexOf(
+            char = '\n',
+            startIndex = index
+        ).takeIf {
+            it >= 0
+        } ?: note.length
+
+        return note.substring(
+            startIndex = start,
+            endIndex = end
+        )
     }
 
     companion object {

@@ -40,20 +40,26 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** A vault of a few linked notes under the real graph and layout, for the tests of the graph tab (`ROADMAP.md` 2.7). */
+/** A vault of a few linked notes under the real graph and layout, for the tests of the graph tab. */
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class GraphViewModelFixture {
     protected val dispatcher = StandardTestDispatcher()
     protected val store = FakeNoteContentStore()
     protected val embedder = FakeTextEmbedder()
     protected val index = FakeVectorIndex()
-    protected val chunkNote = ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder()))
+    protected val chunkNote =
+        ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder()))
     protected val preferences = KeptPreferences()
     protected val viewModel by lazy {
         val folder = TextFolder()
         val dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
         val finder = JetBrainsMarkdownLinkFinder()
-        val cache = NoteTextCache(contentStore = store, textFolder = folder)
+
+        val cache = NoteTextCache(
+            contentStore = store,
+            textFolder = folder
+        )
+
         GraphViewModel(
             vaultPath = VAULT,
             buildNoteGraph = BuildNoteGraphUseCase(cache, finder, dispatchers),
@@ -88,20 +94,31 @@ abstract class GraphViewModelFixture {
         Dispatchers.resetMain()
     }
 
-    protected suspend fun indexed(
-        paths: List<RelativePath>
-    ) {
+    protected suspend fun indexed(paths: List<RelativePath>) {
         paths.forEach { path ->
-            val chunks = chunkNote(note = path, text = store.texts.getValue(key = path))
-            val embedded = embedChunks(embedder, title = path.nameWithoutExtension, chunks = chunks)
+            val chunks = chunkNote(
+                note = path,
+                text = store.texts.getValue(key = path)
+            )
+
+            val embedded = embedChunks(
+                embedder,
+                title = path.nameWithoutExtension,
+                chunks = chunks
+            )
+
             val vectors = (embedded as Outcome.Success).value.map { (_, vector) -> vector }
-            index.put(vaultPath = VAULT, note = path, chunks = chunks, vectors = vectors)
+
+            index.put(
+                vaultPath = VAULT,
+                note = path,
+                chunks = chunks,
+                vectors = vectors
+            )
         }
     }
 
-    protected fun TestScope.send(
-        intent: GraphIntent
-    ) {
+    protected fun TestScope.send(intent: GraphIntent) {
         viewModel.onIntent(intent = intent)
         advanceUntilIdle()
         runCurrent()
@@ -113,7 +130,13 @@ abstract class GraphViewModelFixture {
     ) = runTest(context = dispatcher) {
         try {
             prepare()
-            send(GraphIntent.OnNotesChange(notes = listOf(AREPAS, MENU, TASKS, LONE).map { entry(path = it.value) }))
+
+            send(
+                GraphIntent.OnNotesChange(
+                    notes = listOf(AREPAS, MENU, TASKS, LONE).map { entry(path = it.value) }
+                )
+            )
+
             send(GraphIntent.OnShownChange(isShown = true))
             body()
         } finally {
@@ -139,6 +162,7 @@ abstract class GraphViewModelFixture {
         val MENU = RelativePath(value = "Recipes/Menu.md")
         val TASKS = RelativePath(value = "Guides/Tasks.md")
         val LONE = RelativePath(value = "Lone.md")
-        const val SAME_MEANING = "Corn flour and water and salt make a soft dough for the griddle every single morning."
+        const val SAME_MEANING =
+            "Corn flour and water and salt make a soft dough for the griddle every single morning."
     }
 }

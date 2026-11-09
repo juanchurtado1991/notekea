@@ -34,10 +34,9 @@ private const val PREVIEW_FILES = "Files"
 private const val PREVIEW_WIDTH_DP = 280
 
 /**
- * A section's header, as desktop inspectors and sidebars draw it: its [title] in small capitals and, when it folds
- * ([onToggle]), a chevron showing whether it [isOpen]; a click, or Enter on it, folds or opens it. [count] (how many it holds) sits at
- * the end. Only a header with a [shortcutHint] (the shortcut that goes to the section) has a tooltip: the title says the
- * rest, and a tooltip repeating it would cover the section's first row.
+ * A section's header, as desktop inspectors draw it: its [title] in small capitals and, when it folds ([onToggle]), a
+ * chevron showing whether it [isOpen]; [count] sits at the end. Only a header with a [shortcutHint] has a tooltip: one
+ * repeating the title would cover the section's first row.
  */
 @Composable
 fun NotekeaSectionHeader(
@@ -50,10 +49,23 @@ fun NotekeaSectionHeader(
 ) {
     Box(modifier = modifier.fillMaxWidth().padding(horizontal = NotekeaDimensions.SpacingXs)) {
         if (shortcutHint == null) {
-            HeaderRow(title = title, isOpen = isOpen, onToggle = onToggle, count = count)
+            HeaderRow(
+                title = title,
+                isOpen = isOpen,
+                onToggle = onToggle,
+                count = count
+            )
         } else {
-            NotekeaTooltip(label = title, shortcutHint = shortcutHint) {
-                HeaderRow(title = title, isOpen = isOpen, onToggle = onToggle, count = count)
+            NotekeaTooltip(
+                label = title,
+                shortcutHint = shortcutHint
+            ) {
+                HeaderRow(
+                    title = title,
+                    isOpen = isOpen,
+                    onToggle = onToggle,
+                    count = count
+                )
             }
         }
     }
@@ -69,12 +81,22 @@ private fun HeaderRow(
     val colors = MaterialTheme.colorScheme
     val muted = colors.onSurfaceVariant
     val shape = MaterialTheme.shapes.small
-    val click = onToggle?.let { Modifier.clickable(role = Role.Button, onClick = it) } ?: Modifier
+
+    val click = onToggle?.let {
+        Modifier.clickable(
+            role = Role.Button,
+            onClick = it
+        )
+    } ?: Modifier
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = NotekeaDimensions.CompactControlSize)
-            .focusBorder(color = colors.primary, shape = shape)
+            .focusBorder(
+                color = colors.primary,
+                shape = shape
+            )
             .clip(shape = shape)
             .then(other = click)
             .padding(horizontal = NotekeaDimensions.SpacingXs),
@@ -91,16 +113,27 @@ private fun HeaderRow(
         } else {
             Spacer(modifier = Modifier.width(width = NotekeaDimensions.BadgeIconSize))
         }
+
         Text(
             text = title.uppercase(),
             modifier = Modifier.weight(weight = 1f),
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = LETTER_SPACING_SP.sp
-            ),
+            style = MaterialTheme
+                .typography
+                .labelSmall
+                .copy(
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = LETTER_SPACING_SP.sp
+                ),
             color = muted
         )
-        count?.let { Text(text = it.toString(), style = MaterialTheme.typography.labelSmall, color = muted) }
+
+        count?.let {
+            Text(
+                text = it.toString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = muted
+            )
+        }
     }
 }
 
@@ -109,7 +142,12 @@ private fun HeaderRow(
 private fun NotekeaSectionHeaderPreview() {
     NotekeaPreviewThemes {
         Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
-            NotekeaSectionHeader(title = PREVIEW_BOOKMARKS, onToggle = {}, count = PREVIEW_COUNT)
+            NotekeaSectionHeader(
+                title = PREVIEW_BOOKMARKS,
+                onToggle = {},
+                count = PREVIEW_COUNT
+            )
+
             NotekeaSectionHeader(title = PREVIEW_FILES)
         }
     }

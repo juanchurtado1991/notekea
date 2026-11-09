@@ -1,7 +1,7 @@
 package app.notekea.tree.presentation.filepreview
 
-import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -29,6 +29,7 @@ fun NotekeaFold(
 ) {
     val fade = motionTween<Float>(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
     val fold = motionTween<IntSize>(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
+
     AnimatedVisibility(
         visible = isOpen,
         modifier = modifier,

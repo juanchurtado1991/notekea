@@ -19,15 +19,18 @@ internal class GraphPaint(
     val selected: RelativePath?,
     val matches: Set<RelativePath>?
 ) {
-    fun isDimmed(
-        path: RelativePath
-    ): Boolean = (hovered.isNotEmpty() && path !in hovered) ||
-        (matches != null && path !in matches && path != selected)
+    fun isDimmed(path: RelativePath): Boolean = (hovered.isNotEmpty() && path !in hovered) ||
+        (
+            matches != null &&
+                path !in matches &&
+                path != selected
+            )
 
     /** A few matches say their names; many would cover the map. */
-    fun isNamedMatch(
-        path: RelativePath
-    ): Boolean = matches != null && matches.size <= MAX_NAMED_MATCHES && path in matches
+    fun isNamedMatch(path: RelativePath): Boolean =
+        matches != null &&
+            matches.size <= MAX_NAMED_MATCHES &&
+            path in matches
 
     private companion object {
         const val MAX_NAMED_MATCHES = 30

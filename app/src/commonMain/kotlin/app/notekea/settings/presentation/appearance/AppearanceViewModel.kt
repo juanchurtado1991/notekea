@@ -6,7 +6,7 @@ import app.notekea.core.presentation.BaseViewModel
 import co.touchlab.kermit.Logger
 
 /**
- * Settings → Appearance (`ROADMAP.md` 2.12): shows the kept appearance and keeps each choice, which every window then
+ * Settings → Appearance: shows the kept appearance and keeps each choice, which every window then
  * follows ([AppearanceStore.observe]).
  */
 class AppearanceViewModel(
@@ -16,31 +16,40 @@ class AppearanceViewModel(
 
     init {
         launchGuarded(onError = ::logUnexpectedError) {
-            appearanceStore.observe().collect { appearance -> reduce { it.copy(appearance = appearance) } }
+            appearanceStore.observe().collect { appearance ->
+                reduce { it.copy(appearance = appearance) }
+            }
         }
     }
 
-    override fun handleIntent(
-        intent: AppearanceIntent
-    ) {
+    override fun handleIntent(intent: AppearanceIntent) {
         when (intent) {
             is AppearanceIntent.OnThemeChoose -> save { it.copy(theme = intent.theme) }
+
             is AppearanceIntent.OnModeChoose -> save { it.copy(mode = intent.mode) }
-            AppearanceIntent.OnReduceMotionToggle -> save { it.copy(reduceMotion = !it.reduceMotion) }
+
+            AppearanceIntent.OnReduceMotionToggle -> save {
+                it.copy(reduceMotion = !it.reduceMotion)
+            }
         }
     }
 
-    private fun save(
-        change: (Appearance) -> Appearance
-    ) {
+    private fun save(change: (Appearance) -> Appearance) {
         val appearance = change(state.value.appearance)
-        reduce { it.copy(appearance = appearance, hasSaveFailed = false) }
-        launchGuarded(onError = ::logUnexpectedError) { appearanceStore.save(appearance = appearance) }
+
+        reduce {
+            it.copy(
+                appearance = appearance,
+                hasSaveFailed = false
+            )
+        }
+
+        launchGuarded(onError = ::logUnexpectedError) {
+            appearanceStore.save(appearance = appearance)
+        }
     }
 
-    private fun logUnexpectedError(
-        throwable: Throwable
-    ) {
+    private fun logUnexpectedError(throwable: Throwable) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
         reduce { it.copy(hasSaveFailed = true) }
     }

@@ -11,7 +11,5 @@ object LogFiles {
     const val MAX_BYTES = 1_000_000L
 
     /** `notekea.log` for [index] 0, the current file; `notekea.<index>.log` for the older ones. */
-    fun name(
-        index: Int
-    ): String = if (index == 0) "notekea.log" else "notekea.$index.log"
+    fun name(index: Int): String = if (index == 0) "notekea.log" else "notekea.$index.log"
 }

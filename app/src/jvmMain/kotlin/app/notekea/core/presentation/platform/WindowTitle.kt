@@ -8,5 +8,9 @@ object WindowTitle {
     fun of(
         vaultName: String?,
         activeTabName: String?
-    ): String = listOfNotNull(activeTabName, vaultName, APP_NAME).joinToString(separator = SEPARATOR)
+    ): String = listOfNotNull(
+        activeTabName,
+        vaultName,
+        APP_NAME
+    ).joinToString(separator = SEPARATOR)
 }

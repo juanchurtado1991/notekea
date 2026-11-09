@@ -8,7 +8,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** The Linux dark theme comes from the desktop portal (1.17 smoke: COSMIC in dark mode showed the light theme). */
+/** The Linux dark theme comes from the desktop portal, which is where COSMIC says it is in dark mode. */
 class PortalSystemAppearanceTest {
     private val parser = PortalColorSchemeParser()
 
@@ -31,12 +31,16 @@ class PortalSystemAppearanceTest {
 
     @Test
     fun `macOS and Windows leave the answer to Compose`() = runTest {
-        val dispatchers = FakeAppDispatchers(dispatcher = StandardTestDispatcher(scheduler = testScheduler))
+        val dispatchers =
+            FakeAppDispatchers(dispatcher = StandardTestDispatcher(scheduler = testScheduler))
 
         assertEquals(
             expected = listOf<Boolean?>(null, null),
             actual = listOf(OperatingSystem.MACOS, OperatingSystem.WINDOWS).map {
-                PortalSystemAppearance(operatingSystem = it, dispatchers = dispatchers).observeDarkTheme().first()
+                PortalSystemAppearance(
+                    operatingSystem = it,
+                    dispatchers = dispatchers
+                ).observeDarkTheme().first()
             }
         )
     }

@@ -29,10 +29,22 @@ class ResolvePlatformConventionsUseCaseTest {
             expected = expectedConventions(
                 operatingSystem = OperatingSystem.LINUX,
                 primary = ShortcutModifier.CONTROL,
-                quit = Shortcut(key = ShortcutKey.Q, modifiers = setOf(ShortcutModifier.CONTROL)),
-                rename = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
-                open = Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet()),
-                delete = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
+                quit = Shortcut(
+                    key = ShortcutKey.Q,
+                    modifiers = setOf(ShortcutModifier.CONTROL)
+                ),
+                rename = Shortcut(
+                    key = ShortcutKey.F2,
+                    modifiers = emptySet()
+                ),
+                open = Shortcut(
+                    key = ShortcutKey.ENTER,
+                    modifiers = emptySet()
+                ),
+                delete = Shortcut(
+                    key = ShortcutKey.DELETE,
+                    modifiers = emptySet()
+                ),
                 buttonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
                 appDataDirectory = "/home/ana/.local/share/notekea",
                 homeDirectory = LINUX_HOME
@@ -66,10 +78,22 @@ class ResolvePlatformConventionsUseCaseTest {
             expected = expectedConventions(
                 operatingSystem = OperatingSystem.MACOS,
                 primary = ShortcutModifier.COMMAND,
-                quit = Shortcut(key = ShortcutKey.Q, modifiers = setOf(ShortcutModifier.COMMAND)),
-                rename = Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet()),
-                open = Shortcut(key = ShortcutKey.DOWN, modifiers = setOf(ShortcutModifier.COMMAND)),
-                delete = Shortcut(key = ShortcutKey.BACKSPACE, modifiers = setOf(ShortcutModifier.COMMAND)),
+                quit = Shortcut(
+                    key = ShortcutKey.Q,
+                    modifiers = setOf(ShortcutModifier.COMMAND)
+                ),
+                rename = Shortcut(
+                    key = ShortcutKey.ENTER,
+                    modifiers = emptySet()
+                ),
+                open = Shortcut(
+                    key = ShortcutKey.DOWN,
+                    modifiers = setOf(ShortcutModifier.COMMAND)
+                ),
+                delete = Shortcut(
+                    key = ShortcutKey.BACKSPACE,
+                    modifiers = setOf(ShortcutModifier.COMMAND)
+                ),
                 buttonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
                 appDataDirectory = "/Users/ana/Library/Application Support/Notekea",
                 homeDirectory = MACOS_HOME
@@ -134,10 +158,22 @@ class ResolvePlatformConventionsUseCaseTest {
             expected = expectedConventions(
                 operatingSystem = OperatingSystem.WINDOWS,
                 primary = ShortcutModifier.CONTROL,
-                quit = Shortcut(key = ShortcutKey.F4, modifiers = setOf(ShortcutModifier.ALT)),
-                rename = Shortcut(key = ShortcutKey.F2, modifiers = emptySet()),
-                open = Shortcut(key = ShortcutKey.ENTER, modifiers = emptySet()),
-                delete = Shortcut(key = ShortcutKey.DELETE, modifiers = emptySet()),
+                quit = Shortcut(
+                    key = ShortcutKey.F4,
+                    modifiers = setOf(ShortcutModifier.ALT)
+                ),
+                rename = Shortcut(
+                    key = ShortcutKey.F2,
+                    modifiers = emptySet()
+                ),
+                open = Shortcut(
+                    key = ShortcutKey.ENTER,
+                    modifiers = emptySet()
+                ),
+                delete = Shortcut(
+                    key = ShortcutKey.DELETE,
+                    modifiers = emptySet()
+                ),
                 buttonOrder = DialogButtonOrder.PRIMARY_THEN_CANCEL,
                 appDataDirectory = "D:\\Profiles\\ana\\Roaming\\Notekea",
                 homeDirectory = WINDOWS_HOME
@@ -181,12 +217,24 @@ class ResolvePlatformConventionsUseCaseTest {
         toggleSidePanelShortcut = primary.withShift(ShortcutKey.BACKSLASH),
         outlineShortcut = primary.withShift(ShortcutKey.O),
         todayShortcut = primary.with(ShortcutKey.D),
-        previousDayShortcut = Shortcut(key = ShortcutKey.LEFT, modifiers = setOf(primary, ShortcutModifier.ALT)),
-        nextDayShortcut = Shortcut(key = ShortcutKey.RIGHT, modifiers = setOf(primary, ShortcutModifier.ALT)),
+        previousDayShortcut = Shortcut(
+            key = ShortcutKey.LEFT,
+            modifiers = setOf(primary, ShortcutModifier.ALT)
+        ),
+        nextDayShortcut = Shortcut(
+            key = ShortcutKey.RIGHT,
+            modifiers = setOf(primary, ShortcutModifier.ALT)
+        ),
         closeTabShortcut = primary.with(ShortcutKey.W),
         closeWindowShortcut = primary.withShift(ShortcutKey.W),
-        nextTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL),
-        previousTabShortcut = Shortcut(key = ShortcutKey.TAB, modifiers = CONTROL + ShortcutModifier.SHIFT),
+        nextTabShortcut = Shortcut(
+            key = ShortcutKey.TAB,
+            modifiers = CONTROL
+        ),
+        previousTabShortcut = Shortcut(
+            key = ShortcutKey.TAB,
+            modifiers = CONTROL + ShortcutModifier.SHIFT
+        ),
         splitRightShortcut = primary.withShift(ShortcutKey.D),
         templateShortcut = primary.with(ShortcutKey.T),
         bookmarkShortcut = primary.withShift(ShortcutKey.B),
@@ -194,17 +242,24 @@ class ResolvePlatformConventionsUseCaseTest {
         dialogButtonOrder = buttonOrder,
         appDataDirectory = appDataDirectory,
         homeDirectory = homeDirectory,
-        alternateDeleteShortcut = Shortcut(key = ShortcutKey.BACKSPACE, modifiers = emptySet())
-            .takeIf { operatingSystem == OperatingSystem.MACOS }
+        alternateDeleteShortcut = Shortcut(
+            key = ShortcutKey.BACKSPACE,
+            modifiers = emptySet()
+        )
+            .takeIf {
+                operatingSystem == OperatingSystem.MACOS
+            }
     )
 
-    private fun ShortcutModifier.with(
-        key: ShortcutKey
-    ) = Shortcut(key = key, modifiers = setOf(this))
+    private fun ShortcutModifier.with(key: ShortcutKey) = Shortcut(
+        key = key,
+        modifiers = setOf(this)
+    )
 
-    private fun ShortcutModifier.withShift(
-        key: ShortcutKey
-    ) = Shortcut(key = key, modifiers = setOf(this, ShortcutModifier.SHIFT))
+    private fun ShortcutModifier.withShift(key: ShortcutKey) = Shortcut(
+        key = key,
+        modifiers = setOf(this, ShortcutModifier.SHIFT)
+    )
 
     private fun resolve(
         operatingSystemName: String,
@@ -221,8 +276,9 @@ class ResolvePlatformConventionsUseCaseTest {
     companion object {
         private val CONTROL = setOf(ShortcutModifier.CONTROL)
         private val DIGITS = listOf(
-            ShortcutKey.DIGIT_1, ShortcutKey.DIGIT_2, ShortcutKey.DIGIT_3, ShortcutKey.DIGIT_4, ShortcutKey.DIGIT_5,
-            ShortcutKey.DIGIT_6, ShortcutKey.DIGIT_7, ShortcutKey.DIGIT_8, ShortcutKey.DIGIT_9
+            ShortcutKey.DIGIT_1, ShortcutKey.DIGIT_2, ShortcutKey.DIGIT_3,
+            ShortcutKey.DIGIT_4, ShortcutKey.DIGIT_5, ShortcutKey.DIGIT_6,
+            ShortcutKey.DIGIT_7, ShortcutKey.DIGIT_8, ShortcutKey.DIGIT_9
         )
         private const val APP_DATA_VARIABLE = "APPDATA"
         private const val LINUX_HOME = "/home/ana"

@@ -13,6 +13,12 @@ internal class SubmenuControl(
 ) {
     companion object {
         /** A row of a submenu, which opens none of its own. */
-        val NONE = SubmenuControl(isOpen = false, hasKeyboard = false, onHover = {}, onEnter = {}, onLeave = {})
+        val NONE = SubmenuControl(
+            isOpen = false,
+            hasKeyboard = false,
+            onHover = {},
+            onEnter = {},
+            onLeave = {}
+        )
     }
 }

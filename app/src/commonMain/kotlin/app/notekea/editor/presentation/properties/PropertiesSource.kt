@@ -1,10 +1,6 @@
 package app.notekea.editor.presentation.properties
 
 import androidx.compose.foundation.layout.Arrangement
-import app.notekea.editor.presentation.model.PropertyIntent
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.model.EditorPreviewData
-import app.notekea.editor.presentation.model.EditorState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +20,10 @@ import app.notekea.core.presentation.designsystem.components.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.NotekeaTextField
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorPreviewData
+import app.notekea.editor.presentation.model.EditorState
+import app.notekea.editor.presentation.model.PropertyIntent
 import app.notekea.resources.Res
 import app.notekea.resources.properties_invalid
 import org.jetbrains.compose.resources.stringResource
@@ -41,14 +41,32 @@ internal fun PropertiesSource(
     invalidLine: Int?
 ) {
     val path = state.notePath ?: return
+
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)) {
-        invalidLine?.let { ErrorBanner(message = stringResource(Res.string.properties_invalid, it)) }
+        invalidLine?.let {
+            ErrorBanner(message = stringResource(Res.string.properties_invalid, it))
+        }
+
         // A new field for each note, so what was typed in one note never goes to another.
         key(path) {
             PropertiesSourceField(
                 source = state.propertiesSource,
-                onEdit = { onIntent(PropertyIntent.OnSourceEdit(path = path, yaml = it)) },
-                onCommit = { onIntent(PropertyIntent.OnSourceCommit(path = path, yaml = it)) },
+                onEdit = {
+                    onIntent(
+                        PropertyIntent.OnSourceEdit(
+                            path = path,
+                            yaml = it
+                        )
+                    )
+                },
+                onCommit = {
+                    onIntent(
+                        PropertyIntent.OnSourceCommit(
+                            path = path,
+                            yaml = it
+                        )
+                    )
+                },
                 onFocusChange = onEditingChange
             )
         }
@@ -68,8 +86,18 @@ private fun PropertiesSourceField(
     onFocusChange: (Boolean) -> Unit
 ) {
     var text by remember { mutableStateOf(value = source) }
+
     var isFocused by remember { mutableStateOf(value = false) }
-    LaunchedEffect(source, isFocused) { if (!isFocused) text = source }
+
+    LaunchedEffect(source, isFocused) {
+        if (!isFocused) text = source
+    }
+
+    fun edit(edited: String) {
+        text = edited
+        onEdit(edited)
+    }
+
     Box(
         modifier = Modifier.onFocusChanged { focus ->
             if (focus.hasFocus == isFocused) return@onFocusChanged
@@ -78,10 +106,12 @@ private fun PropertiesSourceField(
             if (!focus.hasFocus && text != source) onCommit(text)
         }
     ) {
-        NotekeaTextField(value = text, onValueChange = {
-            text = it
-            onEdit(it)
-        }, modifier = Modifier.fillMaxWidth(), singleLine = false)
+        NotekeaTextField(
+            value = text,
+            onValueChange = { edit(it) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = false
+        )
     }
 }
 
@@ -91,7 +121,10 @@ private fun PropertiesSourcePreview() {
     NotekeaPreviewThemes {
         Column(modifier = Modifier.width(width = PREVIEW_SOURCE_WIDTH_DP.dp)) {
             PropertiesSource(
-                state = EditorState(notePath = EditorPreviewData.path, propertiesSource = PREVIEW_SOURCE),
+                state = EditorState(
+                    notePath = EditorPreviewData.path,
+                    propertiesSource = PREVIEW_SOURCE
+                ),
                 onEditingChange = {},
                 onIntent = {},
                 invalidLine = 1

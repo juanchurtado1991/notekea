@@ -56,7 +56,8 @@ sealed interface VaultTreeIntent {
 
     /**
      * A [template] chosen for a new note in [folder]: the note is made (named after [baseName], the localized
-     * "Untitled") with its name ready to type, and filled from the template once it is named, so `{{title}}` is its name.
+     * "Untitled") with its name ready to type, and filled from the template once it is named, so `{{title}}` is its
+     * name.
      */
     data class OnNoteFromTemplate(
         val folder: RelativePath,

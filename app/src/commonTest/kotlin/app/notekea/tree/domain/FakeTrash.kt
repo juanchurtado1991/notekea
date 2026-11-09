@@ -7,7 +7,9 @@ import app.notekea.core.notes.domain.RelativePath
 
 /** Records what was trashed and answers with [outcome]; every call goes through [gate], as the disk takes its time. */
 class FakeTrash(
-    var outcome: Outcome<TrashLocation, NotesError> = Outcome.Success(value = TrashLocation.VAULT_TRASH_FOLDER)
+    var outcome: Outcome<TrashLocation, NotesError> = Outcome.Success(
+        value = TrashLocation.VAULT_TRASH_FOLDER
+    )
 ) :
     Trash {
     val trashed = mutableListOf<RelativePath>()
@@ -19,6 +21,7 @@ class FakeTrash(
     ): Outcome<TrashLocation, NotesError> {
         gate.pass()
         trashed += path
+
         return outcome
     }
 }

@@ -2,7 +2,7 @@ package app.notekea.templates.presentation
 
 import app.notekea.core.notes.domain.RelativePath
 
-/** Where a template chosen in the picker goes (`ROADMAP.md` 1.12). */
+/** Where a template chosen in the picker goes. */
 sealed interface TemplateTarget {
     /** Into the note of the active pane, at the cursor (the whole note when it has no text yet). */
     data object CurrentNote : TemplateTarget

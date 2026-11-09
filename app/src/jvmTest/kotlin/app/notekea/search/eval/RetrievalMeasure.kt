@@ -10,6 +10,7 @@ data class RetrievalMeasure(
 
     fun report(): String {
         val found = asked - missed.size
+
         return (listOf("$vault: recall@5 $recall ($found of $asked)") + missed.map { it.question })
             .joinToString(separator = "\n- ")
     }

@@ -6,21 +6,37 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class WelcomeReducersTest {
-    private val busy = WelcomePreviewData.state().copy(isBusy = true, newVaultForm = WelcomePreviewData.newVaultForm)
+    private val busy = WelcomePreviewData.state().copy(
+        isBusy = true,
+        newVaultForm = WelcomePreviewData.newVaultForm
+    )
 
     @Test
     fun `a successful open shows the vault and closes the form`() {
         assertEquals(
-            expected = busy.copy(isBusy = false, openedVault = WelcomePreviewData.openedVault, newVaultForm = null),
-            actual = reduceOpenOutcome(state = busy, outcome = Outcome.Success(value = WelcomePreviewData.openedVault))
+            expected = busy.copy(
+                isBusy = false,
+                openedVault = WelcomePreviewData.openedVault,
+                newVaultForm = null
+            ),
+            actual = reduceOpenOutcome(
+                state = busy,
+                outcome = Outcome.Success(value = WelcomePreviewData.openedVault)
+            )
         )
     }
 
     @Test
     fun `a failed open keeps the form and shows the error`() {
         assertEquals(
-            expected = busy.copy(isBusy = false, error = VaultError.InvalidName),
-            actual = reduceOpenOutcome(state = busy, outcome = Outcome.Failure(error = VaultError.InvalidName))
+            expected = busy.copy(
+                isBusy = false,
+                error = VaultError.InvalidName
+            ),
+            actual = reduceOpenOutcome(
+                state = busy,
+                outcome = Outcome.Failure(error = VaultError.InvalidName)
+            )
         )
     }
 }

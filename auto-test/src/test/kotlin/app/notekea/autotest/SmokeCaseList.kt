@@ -8,8 +8,15 @@ object SmokeCaseList {
     private val cellSeparator = Regex(pattern = """(?<!\\)\|""")
     private const val CHECKED_BY_FROM_END = 6
 
-    fun read(file: File): List<SmokeCase> = file.readLines().filter { row.containsMatchIn(it) }.map { line ->
-        val cells = line.split(cellSeparator)
-        SmokeCase(id = cells[1].trim(), checkedBy = cells[cells.size - CHECKED_BY_FROM_END].trim())
-    }
+    fun read(file: File): List<SmokeCase> = file
+        .readLines()
+        .filter { row.containsMatchIn(it) }
+        .map { line ->
+            val cells = line.split(cellSeparator)
+
+            SmokeCase(
+                id = cells[1].trim(),
+                checkedBy = cells[cells.size - CHECKED_BY_FROM_END].trim()
+            )
+        }
 }

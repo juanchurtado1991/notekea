@@ -30,8 +30,14 @@ private const val TITLE_SIZE_SP = 20
 @Composable
 fun notekeaCodeTextStyle(): TextStyle = TextStyle(
     fontFamily = FontFamily(
-        Font(resource = Res.font.jetbrains_mono_regular, weight = FontWeight.Normal),
-        Font(resource = Res.font.jetbrains_mono_bold, weight = FontWeight.Bold)
+        Font(
+            resource = Res.font.jetbrains_mono_regular,
+            weight = FontWeight.Normal
+        ),
+        Font(
+            resource = Res.font.jetbrains_mono_bold,
+            weight = FontWeight.Bold
+        )
     ),
     fontSize = BODY_SIZE_SP.sp
 )
@@ -39,18 +45,38 @@ fun notekeaCodeTextStyle(): TextStyle = TextStyle(
 @Composable
 fun notekeaTypography(): Typography {
     val inter = FontFamily(
-        Font(resource = Res.font.inter_regular, weight = FontWeight.Normal),
-        Font(resource = Res.font.inter_medium, weight = FontWeight.Medium),
-        Font(resource = Res.font.inter_semibold, weight = FontWeight.SemiBold),
-        Font(resource = Res.font.inter_bold, weight = FontWeight.Bold)
+        Font(
+            resource = Res.font.inter_regular,
+            weight = FontWeight.Normal
+        ),
+        Font(
+            resource = Res.font.inter_medium,
+            weight = FontWeight.Medium
+        ),
+        Font(
+            resource = Res.font.inter_semibold,
+            weight = FontWeight.SemiBold
+        ),
+        Font(
+            resource = Res.font.inter_bold,
+            weight = FontWeight.Bold
+        )
     )
+
     val base = Typography()
+
     return Typography(
-        headlineMedium = base.headlineMedium.withInter(inter, FontWeight.SemiBold, HEADLINE_SIZE_SP),
+        headlineMedium = base.headlineMedium.withInter(
+            inter,
+            FontWeight.SemiBold,
+            HEADLINE_SIZE_SP
+        ),
         titleLarge = base.titleLarge.withInter(inter, FontWeight.SemiBold, TITLE_SIZE_SP),
         titleMedium = base.titleMedium.withInter(inter, FontWeight.Medium, LARGE_SIZE_SP),
         // The notes' text, in Edit and Preview: lines as far apart as long reading wants (Bear, iA Writer).
-        bodyLarge = base.bodyLarge.withInter(inter, FontWeight.Normal, LARGE_SIZE_SP)
+        bodyLarge = base
+            .bodyLarge
+            .withInter(inter, FontWeight.Normal, LARGE_SIZE_SP)
             .copy(lineHeight = (LARGE_SIZE_SP * READING_LINE_HEIGHT).sp),
         bodyMedium = base.bodyMedium.withInter(inter, FontWeight.Normal, BODY_SIZE_SP),
         bodySmall = base.bodySmall.withInter(inter, FontWeight.Normal, SMALL_SIZE_SP),

@@ -15,11 +15,13 @@ trim_trailing_whitespace = true
 ktlint_code_style = intellij_idea
 indent_size = 4
 indent_style = space
-max_line_length = 120
+max_line_length = 100
 ij_kotlin_allow_trailing_comma = false
 ij_kotlin_allow_trailing_comma_on_call_site = false
 
-ktlint_standard_import-ordering = disabled
+# Imports in IntelliJ's order: everything else first, then java, javax and kotlin, aliases last.
+ktlint_standard_import-ordering = enabled
+ij_kotlin_imports_layout = *,java.**,javax.**,kotlin.**,^
 ktlint_experimental_annotation = disabled
 ktlint_experimental_type-argument-list-spacing = disabled
 ktlint_experimental_type-parameter-list-spacing = disabled
@@ -29,14 +31,32 @@ ktlint_standard_function-signature = disabled
 ktlint_standard_class-signature = disabled
 ktlint_standard_multiline-expression-wrapping = disabled
 ktlint_standard_function-expression-body = disabled
-# Custom rules from :ktlint-rules (disable with ktlint_notekea_<rule-id> = disabled):
+# Custom rules from :ktlint-rules (disable with ktlint_notekea_<rule-id> = disabled); `GUIDELINES.md` section 6
+# shows each one with an example:
+# - chain-per-line: a chain of three or more `.` puts the receiver and each segment on its own line.
+# - lambda-body-line: a lambda of one short statement (a property path, a call or an assignment) goes on one
+#   line when it fits; any other body goes on its own lines.
+# - callback-lambda: a callback (`onClick = { … }`) of several statements is a named function (lint only).
+# - local-function-reference: a function declared inside another one is called from a lambda, never passed as
+#   `::name`, which Compose takes for the one it already has (lint only).
+# - named-arguments-per-line: a call with two or more named arguments puts one on each line.
+# - parameters-layout: one parameter stays on the signature's line, three or more go one per line.
+# - logical-operands-per-line: `&&` and `||` with three or more operands put one on each line.
+# - statement-spacing: a blank line before `return` and around a statement of several lines.
 # - expression-on-assignment-line: keeps the expression on the same line as `=` when it fits.
-# - max-function-length: function bodies may not exceed 40 lines (lint only).
+# - no-same-package-import: no import of a declaration of the file's own package.
+# - name-compound-expression: a condition of several calls, and an `if` or `when` passed as an argument, get a
+#   name (lint only).
+# - kdoc: KDoc of at most 3 lines that says more than the name and does not cite the project's past (lint only).
+# - max-function-length: function bodies may not exceed 60 lines of code (lint only).
+# - max-file-length: files may not exceed 350 lines of code (lint only).
 # - parameter-order: parameters ordered mandatory, nullable, then with a default value (lint only).
+# - code-line-length: a line of code fits in max_line_length; a string, a test's name and an import may pass it,
+#   a comment has up to 120 characters (lint only). It stands in for the standard rule, which has no such exceptions.
+ktlint_standard_max-line-length = disabled
 
 ktlint_standard_filename = disabled
 ktlint_standard_no-consecutive-comments = disabled
-ktlint_standard_no-empty-first-line-in-class-body = disabled
 
 # Compose functions are PascalCase by convention.
 ktlint_function_naming_ignore_when_annotated_with = Composable

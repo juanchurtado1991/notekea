@@ -29,8 +29,17 @@ class KeepUnsavedTextUseCase(
         when (val created = noteFileOperations.createFile(vaultPath = vaultPath, path = path)) {
             is Outcome.Failure -> created
 
-            is Outcome.Success -> noteContentStore.write(vaultPath = vaultPath, path = path, content = text).also {
-                if (it is Outcome.Failure) noteFileOperations.deleteEmptyFile(vaultPath = vaultPath, path = path)
+            is Outcome.Success -> noteContentStore.write(
+                vaultPath = vaultPath,
+                path = path,
+                content = text
+            ).also {
+                if (it is Outcome.Failure) {
+                    noteFileOperations.deleteEmptyFile(
+                        vaultPath = vaultPath,
+                        path = path
+                    )
+                }
             }
         }
     }

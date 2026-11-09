@@ -1,13 +1,13 @@
 package app.notekea.connections.domain
 
-import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.connections.data.JetBrainsMarkdownMentionFinder
+import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.NoteFixtures.entry
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteText
 import app.notekea.core.notes.domain.RelativePath
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class FindMentionsUseCaseTest {
     private val findMentions = FindMentionsUseCase(
@@ -49,7 +49,8 @@ class FindMentionsUseCaseTest {
         val mentions = find(
             "Lisbon.md" to "We found arepas by the river.",
             "Corn.md" to "Corn cakes, again.",
-            "Code.md" to "`Arepas` and https://example.com/Arepas and #arepas and [Arepas](https://example.com).",
+            "Code.md" to
+                "`Arepas` and https://example.com/Arepas and #arepas and [Arepas](https://example.com).",
             "Linked.md" to "Arepas, see [[Arepas]].",
             "Prefix.md" to "Arepasx and xArepas are other words."
         )
@@ -58,15 +59,28 @@ class FindMentionsUseCaseTest {
             expected = Triple(
                 listOf("Linked.md"),
                 listOf(
-                    mention(source = "Corn.md", count = 1, passage = "Corn cakes, again.", lit = "Corn cakes"),
-                    mention(source = "Lisbon.md", count = 1, passage = "We found arepas by the river.", lit = "arepas")
+                    mention(
+                        source = "Corn.md",
+                        count = 1,
+                        passage = "Corn cakes, again.",
+                        lit = "Corn cakes"
+                    ),
+                    mention(
+                        source = "Lisbon.md",
+                        count = 1,
+                        passage = "We found arepas by the river.",
+                        lit = "arepas"
+                    )
                 ),
                 listOf(9..14, 0..9)
             ),
             actual = Triple(
                 mentions.linked.map { it.source.value },
                 mentions.unlinked.map { it.copy(range = IntRange.EMPTY) },
-                mentions.unlinked.map { it.range }.reversed()
+                mentions
+                    .unlinked
+                    .map { it.range }
+                    .reversed()
             )
         )
     }
@@ -88,38 +102,61 @@ class FindMentionsUseCaseTest {
         )
     }
 
-    // Audit: a click opened the closest of two notes, yet its Linked tab left the link out, as resolving found no single one.
+    // Audit: a click opened the closest of two notes, yet its Linked tab left the link out, as resolving found no
+    // single one.
     @Test
     fun `a link to a name two notes share is linked to the note a click opens, and only to that one`() {
         val shared = "Recipes/Arepas.md"
         val root = "Arepas.md"
         val source = RelativePath(value = "Travel/Lisbon.md")
-        val texts = mapOf(source to NoteText(body = "Try [[Arepas]].", folded = "try [[arepas]]."))
+
+        val texts = mapOf(
+            source to NoteText(
+                body = "Try [[Arepas]].",
+                folded = "try [[arepas]]."
+            )
+        )
+
         val notes = texts.keys + RelativePath(value = root) + RelativePath(value = shared)
 
         val linked = listOf(root, shared).map { path ->
-            findMentions(note = entry(path = path), notes = notes, texts = texts).linked.size
+            findMentions(
+                note = entry(path = path),
+                notes = notes,
+                texts = texts
+            ).linked.size
         }
 
-        assertEquals(expected = listOf(1, 0), actual = linked)
+        assertEquals(
+            expected = listOf(1, 0),
+            actual = linked
+        )
     }
 
     @Test
     fun `a Markdown link never closed is not a link, and finding mentions goes on`() {
         val mentions = find("Travel/Lisbon.md" to "See [x](<Arepas.md>")
 
-        assertEquals(expected = 0, actual = mentions.linked.size)
+        assertEquals(
+            expected = 0,
+            actual = mentions.linked.size
+        )
     }
 
-    private fun find(
-        vararg notes: Pair<String, String>
-    ): NoteMentions {
+    private fun find(vararg notes: Pair<String, String>): NoteMentions {
         val texts = notes.associate { (path, body) ->
             RelativePath(value = path) to
-                NoteText(body = body, folded = body.lowercase())
+                NoteText(
+                    body = body,
+                    folded = body.lowercase()
+                )
         }
+
         return findMentions(
-            note = entry(path = AREPAS, metadata = NoteMetadata.NONE.copy(aliases = listOf("Corn cakes"))),
+            note = entry(
+                path = AREPAS,
+                metadata = NoteMetadata.NONE.copy(aliases = listOf("Corn cakes"))
+            ),
             notes = texts.keys + RelativePath(value = AREPAS),
             texts = texts
         )
@@ -132,6 +169,7 @@ class FindMentionsUseCaseTest {
         lit: String
     ): NoteMention {
         val start = passage.indexOf(string = lit)
+
         return NoteMention(
             source = RelativePath(value = source),
             range = IntRange.EMPTY,

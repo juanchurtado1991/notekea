@@ -1,13 +1,14 @@
 package app.notekea.tree.domain
 
+import app.notekea.core.notes.domain.RelativePath
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.core.notes.domain.RelativePath
 
-/** A vault's bookmarks (`ROADMAP.md` 1.13): toggled, reordered, and following renames and deletions. */
+/** A vault's bookmarks: toggled, reordered, and following renames and deletions. */
 class BookmarksTest {
-    private val bookmarks =
-        Bookmarks(paths = listOf("Welcome.md", "Recipes", "Recipes/Arepas.md", "plate.png").map(::path))
+    private val bookmarks = Bookmarks(
+        paths = listOf("Welcome.md", "Recipes", "Recipes/Arepas.md", "plate.png").map(::path)
+    )
 
     @Test
     fun `a toggle adds at the end or removes, and a move puts a bookmark among the others`() {
@@ -21,8 +22,14 @@ class BookmarksTest {
             actual = listOf(
                 bookmarks.toggled(path = path("Ideas.md")),
                 bookmarks.toggled(path = path("Recipes")),
-                bookmarks.moved(from = 3, to = 0),
-                bookmarks.moved(from = 1, to = 9)
+                bookmarks.moved(
+                    from = 3,
+                    to = 0
+                ),
+                bookmarks.moved(
+                    from = 1,
+                    to = 9
+                )
             ).map { it.paths.map(RelativePath::value) }
         )
     }
@@ -36,14 +43,18 @@ class BookmarksTest {
                 listOf("Home.md", "Recipes", "Recipes/Arepas.md", "plate.png")
             ),
             actual = listOf(
-                bookmarks.renamed(from = path("Recipes"), to = path("Cooking")),
+                bookmarks.renamed(
+                    from = path("Recipes"),
+                    to = path("Cooking")
+                ),
                 bookmarks.deleted(path = path("Recipes")),
-                bookmarks.renamed(from = path("Welcome.md"), to = path("Home.md"))
+                bookmarks.renamed(
+                    from = path("Welcome.md"),
+                    to = path("Home.md")
+                )
             ).map { it.paths.map(RelativePath::value) }
         )
     }
 
-    private fun path(
-        value: String
-    ): RelativePath = RelativePath(value = value)
+    private fun path(value: String): RelativePath = RelativePath(value = value)
 }

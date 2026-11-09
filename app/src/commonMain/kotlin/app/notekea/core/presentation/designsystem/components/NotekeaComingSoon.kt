@@ -53,11 +53,16 @@ fun NotekeaComingSoon(
         )
     ) {
         Mark(icon = icon)
+
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            style = MaterialTheme
+                .typography
+                .titleSmall
+                .copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.onSurface
         )
+
         Text(
             text = message,
             modifier = Modifier.widthIn(max = MESSAGE_MAX_WIDTH_DP.dp),
@@ -65,14 +70,13 @@ fun NotekeaComingSoon(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
+
         Badge(text = badge)
     }
 }
 
 @Composable
-private fun Mark(
-    icon: ImageVector
-) {
+private fun Mark(icon: ImageVector) {
     Box(
         modifier = Modifier
             .size(size = MARK_DP.dp)
@@ -90,19 +94,23 @@ private fun Mark(
 }
 
 @Composable
-private fun Badge(
-    text: String
-) {
+private fun Badge(text: String) {
     Text(
         text = text.uppercase(),
         modifier = Modifier
             .clip(shape = MaterialTheme.shapes.extraLarge)
             .background(color = MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = NotekeaDimensions.SpacingS, vertical = NotekeaDimensions.SpacingXs / 2),
-        style = MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.SemiBold,
-            letterSpacing = BADGE_LETTER_SPACING_SP.sp
-        ),
+            .padding(
+                horizontal = NotekeaDimensions.SpacingS,
+                vertical = NotekeaDimensions.SpacingXs / 2
+            ),
+        style = MaterialTheme
+            .typography
+            .labelSmall
+            .copy(
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = BADGE_LETTER_SPACING_SP.sp
+            ),
         color = MaterialTheme.colorScheme.primary
     )
 }

@@ -20,9 +20,7 @@ class WindowQuit(
     private val guardRun = scope.async(start = CoroutineStart.LAZY) { closeGuard.beforeClose() }
 
     /** Runs the guard, unless it already ran, and then [then]. Any thread may ask. */
-    fun request(
-        then: () -> Unit
-    ) {
+    fun request(then: () -> Unit) {
         scope.launch {
             guardRun.await()
             then()
@@ -36,6 +34,7 @@ class WindowQuit(
     fun finishBeforeShutdown() {
         runBlocking {
             guardRun.start()
+
             withTimeoutOrNull(timeout = SHUTDOWN_WAIT) { guardRun.join() }
         }
     }

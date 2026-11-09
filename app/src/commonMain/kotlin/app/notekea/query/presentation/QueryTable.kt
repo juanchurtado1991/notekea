@@ -61,18 +61,34 @@ internal fun QueryHeader(
             modifier = Modifier.fillMaxWidth().padding(horizontal = NotekeaDimensions.SpacingM),
             horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
         ) {
-            HeaderText(text = stringResource(resource = Res.string.query_note_column), weight = NAME_WEIGHT)
+            HeaderText(
+                text = stringResource(resource = Res.string.query_note_column),
+                weight = NAME_WEIGHT
+            )
+
             columns.forEach { column ->
                 HeaderText(
                     text = column,
                     weight = 1f,
                     label = stringResource(resource = Res.string.query_sort_by, column),
-                    onClick = onSortChange?.let { change -> { change(nextSort(column = column, sort = sort)) } },
+                    onClick = onSortChange?.let { change ->
+                        {
+                            change(
+                                nextSort(
+                                    column = column,
+                                    sort = sort
+                                )
+                            )
+                        }
+                    },
                     startPadding = CELL_INSET_DP.dp,
-                    order = sort?.takeIf { it.property == column }
+                    order = sort?.takeIf {
+                        it.property == column
+                    }
                 )
             }
         }
+
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
 }
@@ -102,25 +118,43 @@ private fun RowScope.HeaderText(
             onClick = it
         )
     } ?: Modifier
-    val color = if (order == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+
+    val color = if (order == null) {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
     Row(
-        modifier = Modifier.weight(weight = weight).then(other = action)
-            .padding(start = startPadding, top = NotekeaDimensions.SpacingXs, bottom = NotekeaDimensions.SpacingXs),
+        modifier = Modifier
+            .weight(weight = weight)
+            .then(other = action)
+            .padding(
+                start = startPadding,
+                top = NotekeaDimensions.SpacingXs,
+                bottom = NotekeaDimensions.SpacingXs
+            ),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs / 2),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = text,
-            modifier = Modifier.weight(weight = 1f, fill = false),
+            modifier = Modifier.weight(
+                weight = 1f,
+                fill = false
+            ),
             style = MaterialTheme.typography.labelMedium,
             color = color,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
         order?.let {
             val icons = NotekeaIcons
+            val arrow = if (it.isDescending) icons.QuerySortDescending else icons.QuerySortAscending
+
             Icon(
-                imageVector = if (it.isDescending) icons.QuerySortDescending else icons.QuerySortAscending,
+                imageVector = arrow,
                 contentDescription = null,
                 modifier = Modifier.size(size = NotekeaDimensions.BadgeIconSize),
                 tint = color
@@ -137,20 +171,40 @@ internal fun QueryTableRow(
     columns: List<String>,
     onIntent: (QueryIntent) -> Unit
 ) {
-    val stripe = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = STRIPE_ALPHA)
+    val stripe = MaterialTheme
+        .colorScheme
+        .surfaceVariant
+        .copy(alpha = STRIPE_ALPHA)
+
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .background(color = if (index % 2 == 1) stripe else Color.Transparent)
-            .padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingXs),
+            .padding(
+                horizontal = NotekeaDimensions.SpacingM,
+                vertical = NotekeaDimensions.SpacingXs
+            ),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        NoteName(row = row, onIntent = onIntent, modifier = Modifier.weight(weight = NAME_WEIGHT))
+        NoteName(
+            row = row,
+            onIntent = onIntent,
+            modifier = Modifier.weight(weight = NAME_WEIGHT)
+        )
+
         columns.forEachIndexed { column, name ->
             Box(modifier = Modifier.weight(weight = 1f)) {
                 QueryCell(
                     column = name,
-                    onChange = { onIntent(QueryIntent.OnCellChange(path = row.path, property = it)) },
+                    onChange = {
+                        onIntent(
+                            QueryIntent.OnCellChange(
+                                path = row.path,
+                                property = it
+                            )
+                        )
+                    },
                     property = row.cells.getOrNull(index = column)
                 )
             }
@@ -177,6 +231,7 @@ private fun NoteName(
             modifier = Modifier.size(size = NotekeaDimensions.IconSize),
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
         Text(
             text = row.path.nameWithoutExtension,
             style = MaterialTheme.typography.bodyMedium,
@@ -195,12 +250,16 @@ private fun QueryCell(
 ) {
     if (property == null) {
         val reader = remember { FrontmatterReader() }
+
         NotekeaPropertyField(
             value = "",
             onCommit = { text ->
                 if (text.isNotBlank()) {
                     onChange(
-                        NoteProperty(key = column, value = reader.scalarValue(text = text.trim()))
+                        NoteProperty(
+                            key = column,
+                            value = reader.scalarValue(text = text.trim())
+                        )
                     )
                 }
             }
@@ -220,7 +279,12 @@ private fun QueryCell(
 private fun QueryHeaderPreview() {
     NotekeaPreviewThemes {
         val state = QueryPreviewData.state
-        QueryHeader(columns = state.result.columns, sort = state.query.sort, onSortChange = {})
+
+        QueryHeader(
+            columns = state.result.columns,
+            sort = state.query.sort,
+            onSortChange = {}
+        )
     }
 }
 
@@ -229,8 +293,14 @@ private fun QueryHeaderPreview() {
 private fun QueryTableRowPreview() {
     NotekeaPreviewThemes {
         val result = QueryPreviewData.state.result
+
         result.rows.forEachIndexed { index, row ->
-            QueryTableRow(row = row, index = index, columns = result.columns, onIntent = {})
+            QueryTableRow(
+                row = row,
+                index = index,
+                columns = result.columns,
+                onIntent = {}
+            )
         }
     }
 }

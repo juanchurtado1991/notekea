@@ -28,12 +28,26 @@ internal fun ApplicationScope.ManagerWindow(
     folders: AutoTestFolders
 ) {
     val state by session.state.collectAsState()
+
     val windowState = rememberWindowState(
         position = WindowPosition(alignment = Alignment.BottomStart),
-        size = DpSize(width = WIDTH_DP.dp, height = heightOnScreen().dp)
+        size = DpSize(
+            width = WIDTH_DP.dp,
+            height = heightOnScreen().dp
+        )
     )
-    val machine = remember { AppEnvironment.current().let { "${it.system.substringBefore(" (")} · ${it.screen}" } }
-    val actions = remember { managerActions(session = session, folders = folders) }
+
+    val machine = remember {
+        AppEnvironment.current().let { "${it.system.substringBefore(" (")} · ${it.screen}" }
+    }
+
+    val actions = remember {
+        managerActions(
+            session = session,
+            folders = folders
+        )
+    }
+
     Window(
         onCloseRequest = { windowState.isMinimized = true },
         state = windowState,
@@ -55,34 +69,48 @@ internal fun ApplicationScope.ManagerWindow(
 private fun managerActions(
     session: ManagerSession,
     folders: AutoTestFolders
-) = ManagerActions(
-    onTab = session::select,
-    onStart = session::startAutomatic,
-    onStop = session::stopAutomatic,
-    onNextStep = session::nextStep,
-    onPreviousStep = session::previousStep,
-    onPass = session::pass,
-    onFail = session::fail,
-    onSkip = session::skip,
-    onPreviousCase = session::previousCase,
-    onRestart = {
-        AppProcess.start(arguments = emptyList(), environment = session.launchEnvironment())
+): ManagerActions {
+    fun restart() {
+        AppProcess.start(
+            arguments = emptyList(),
+            environment = session.launchEnvironment()
+        )
+
         exitProcess(status = 0)
-    },
-    onPickScreenshot = DesktopActions::pickPicture,
-    onCopy = DesktopActions::copy,
-    onOpenReport = { DesktopActions.open(folder = folders.report) }
-)
+    }
+
+    return ManagerActions(
+        onTab = session::select,
+        onStart = session::startAutomatic,
+        onStop = session::stopAutomatic,
+        onNextStep = session::nextStep,
+        onPreviousStep = session::previousStep,
+        onPass = session::pass,
+        onFail = session::fail,
+        onSkip = session::skip,
+        onPreviousCase = session::previousCase,
+        onRestart = { restart() },
+        onPickScreenshot = DesktopActions::pickPicture,
+        onCopy = DesktopActions::copy,
+        onOpenReport = { DesktopActions.open(folder = folders.report) }
+    )
+}
 
 /** [HEIGHT_DP], or less on a short screen: the room the taskbar or the Dock leaves, with a margin. */
 private fun heightOnScreen(): Int {
     val room = if (GraphicsEnvironment.isHeadless()) {
         HEIGHT_DP
     } else {
-        GraphicsEnvironment.getLocalGraphicsEnvironment()
-            .maximumWindowBounds.height - SCREEN_MARGIN_DP
+        GraphicsEnvironment
+            .getLocalGraphicsEnvironment()
+            .maximumWindowBounds
+            .height - SCREEN_MARGIN_DP
     }
-    return room.coerceIn(minimumValue = MIN_HEIGHT_DP, maximumValue = HEIGHT_DP)
+
+    return room.coerceIn(
+        minimumValue = MIN_HEIGHT_DP,
+        maximumValue = HEIGHT_DP
+    )
 }
 
 private const val WIDTH_DP = 380

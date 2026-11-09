@@ -34,10 +34,17 @@ fun NotekeaToolbarPill(
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(size = NotekeaDimensions.ControlRadius)
+
     Row(
         modifier = modifier
-            .background(color = MaterialTheme.colorScheme.surfaceVariant, shape = shape)
-            .padding(horizontal = NotekeaDimensions.SpacingXs, vertical = NotekeaDimensions.SpacingXs / 2),
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = shape
+            )
+            .padding(
+                horizontal = NotekeaDimensions.SpacingXs,
+                vertical = NotekeaDimensions.SpacingXs / 2
+            ),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -67,11 +74,32 @@ private fun NotekeaToolbarPillPreview() {
         NotekeaToolbarPill(
             groups = listOf(
                 {
-                    NotekeaIconButton(icon = NotekeaIcons.Bold, label = PREVIEW_BOLD, onClick = {})
-                    NotekeaIconButton(icon = NotekeaIcons.Italic, label = PREVIEW_ITALIC, onClick = {})
+                    NotekeaIconButton(
+                        icon = NotekeaIcons.Bold,
+                        label = PREVIEW_BOLD,
+                        onClick = {}
+                    )
+
+                    NotekeaIconButton(
+                        icon = NotekeaIcons.Italic,
+                        label = PREVIEW_ITALIC,
+                        onClick = {}
+                    )
                 },
-                { NotekeaIconButton(icon = NotekeaIcons.NoteLink, label = PREVIEW_LINK, onClick = {}) },
-                { NotekeaIconButton(icon = NotekeaIcons.More, label = PREVIEW_MORE, onClick = {}) }
+                {
+                    NotekeaIconButton(
+                        icon = NotekeaIcons.NoteLink,
+                        label = PREVIEW_LINK,
+                        onClick = {}
+                    )
+                },
+                {
+                    NotekeaIconButton(
+                        icon = NotekeaIcons.More,
+                        label = PREVIEW_MORE,
+                        onClick = {}
+                    )
+                }
             )
         )
     }

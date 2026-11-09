@@ -4,8 +4,8 @@ import kotlin.concurrent.Volatile
 
 /**
  * The person's steps as the app's ViewModels see them: each intent's name (`Editor: OnSaveShortcut`), never what it
- * carries (`GUIDELINES.md` §13), leaving out what the app feeds itself ([FeedIntent]). The desktop app sends them to the
- * crash reports' last steps ([listener]); nothing listens elsewhere, as in tests.
+ * carries (`GUIDELINES.md` §13), leaving out what the app feeds itself ([FeedIntent]). The desktop app sends them to
+ * the crash reports' last steps ([listener]); nothing listens elsewhere, as in tests.
  */
 object IntentTrail {
     @Volatile
@@ -17,7 +17,12 @@ object IntentTrail {
     ) {
         val listener = listener ?: return
         if (intent is FeedIntent) return
-        val screen = owner::class.simpleName.orEmpty().removeSuffix(suffix = VIEW_MODEL_SUFFIX)
+
+        val screen = owner::class
+            .simpleName
+            .orEmpty()
+            .removeSuffix(suffix = VIEW_MODEL_SUFFIX)
+
         listener("$screen: ${intent?.let { it::class.simpleName }}")
     }
 

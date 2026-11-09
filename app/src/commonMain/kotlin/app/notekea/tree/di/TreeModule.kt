@@ -14,10 +14,10 @@ import app.notekea.tree.domain.NoteMetadataCache
 import app.notekea.tree.domain.ObserveVaultTreeUseCase
 import app.notekea.tree.domain.OpenDailyNoteUseCase
 import app.notekea.tree.domain.TreePreferencesStore
+import app.notekea.tree.presentation.tags.TagPickerViewModel
 import app.notekea.tree.presentation.viewmodel.DailyNoteTools
 import app.notekea.tree.presentation.viewmodel.NewNoteTools
 import app.notekea.tree.presentation.viewmodel.VaultTreeViewModel
-import app.notekea.tree.presentation.tags.TagPickerViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -26,9 +26,27 @@ import org.koin.dsl.module
  * The sidebar: the vault tree, new notes, daily notes, bookmarks and the tag picker.
  */
 val treeModule = module {
-    single<NoteMetadataCache> { SqlDelightNoteMetadataCache(database = get(), dispatchers = get()) }
-    single<TreePreferencesStore> { SettingsTreePreferencesStore(settings = get(), dispatchers = get()) }
-    single<BookmarkStore> { SettingsBookmarkStore(settings = get(), dispatchers = get()) }
+    single<NoteMetadataCache> {
+        SqlDelightNoteMetadataCache(
+            database = get(),
+            dispatchers = get()
+        )
+    }
+
+    single<TreePreferencesStore> {
+        SettingsTreePreferencesStore(
+            settings = get(),
+            dispatchers = get()
+        )
+    }
+
+    single<BookmarkStore> {
+        SettingsBookmarkStore(
+            settings = get(),
+            dispatchers = get()
+        )
+    }
+
     factoryOf(::GetDailyNoteSettingsUseCase)
     factoryOf(::OpenDailyNoteUseCase)
     factoryOf(::ApplyTemplateUseCase)
@@ -39,6 +57,7 @@ val treeModule = module {
     factoryOf(::FlattenTreeUseCase)
     factoryOf(::FollowLinkUseCase)
     factoryOf(::ObserveVaultTreeUseCase)
+
     viewModel { parameters ->
         VaultTreeViewModel(
             vaultPath = parameters.get(),
@@ -58,5 +77,6 @@ val treeModule = module {
             treePreferencesStore = get()
         )
     }
+
     viewModel { TagPickerViewModel() }
 }

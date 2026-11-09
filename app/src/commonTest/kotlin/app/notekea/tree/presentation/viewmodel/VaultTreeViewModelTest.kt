@@ -1,10 +1,5 @@
 package app.notekea.tree.presentation.viewmodel
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import app.notekea.tree.presentation.model.BookmarkIntent
-import app.notekea.tree.presentation.model.RenameDraft
-import app.notekea.tree.presentation.model.VaultTreeEffect
-import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
@@ -12,18 +7,26 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.tree.domain.TreePreferences
 import app.notekea.tree.domain.TreeRow
 import app.notekea.tree.domain.TreeSort
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import app.notekea.tree.presentation.model.BookmarkIntent
+import app.notekea.tree.presentation.model.RenameDraft
+import app.notekea.tree.presentation.model.VaultTreeEffect
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class VaultTreeViewModelTest : VaultTreeViewModelTestBase() {
     @Test
     fun `the vault opens with its folders as they were left`() = runTreeTest {
-        preferences.stored = TreePreferences(expandedFolders = setOf(path(PROJECTS)), sort = TreeSort.MODIFIED)
+        preferences.stored = TreePreferences(
+            expandedFolders = setOf(path(PROJECTS)),
+            sort = TreeSort.MODIFIED
+        )
 
         val state = startedViewModel().state.value
 
@@ -31,10 +34,12 @@ class VaultTreeViewModelTest : VaultTreeViewModelTestBase() {
             expected = listOf(PROJECTS, ROADMAP, WELCOME),
             actual = state.rows.map { it.path.value }
         )
+
         assertEquals(
             expected = false to TreeSort.MODIFIED,
             actual = state.isLoading to state.sort
         )
+
         assertEquals(
             expected = emptyList(),
             actual = preferences.saved
@@ -49,12 +54,23 @@ class VaultTreeViewModelTest : VaultTreeViewModelTestBase() {
         advanceUntilIdle()
 
         assertEquals(
-            expected = listOf(TreePreferences(expandedFolders = setOf(path(PROJECTS)), sort = TreeSort.NAME)),
+            expected = listOf(
+                TreePreferences(
+                    expandedFolders = setOf(path(PROJECTS)),
+                    sort = TreeSort.NAME
+                )
+            ),
             actual = preferences.saved
         )
+
         assertTrue(
-            actual = viewModel.state.value.rows
-                .any { it is TreeRow.Note && it.path == path(ROADMAP) }
+            actual = viewModel
+                .state
+                .value
+                .rows
+                .any {
+                    it is TreeRow.Note && it.path == path(ROADMAP)
+                }
         )
     }
 
@@ -72,6 +88,7 @@ class VaultTreeViewModelTest : VaultTreeViewModelTestBase() {
             expected = NotesError.PermissionDenied(path = VAULT),
             actual = failed.loadError
         )
+
         assertEquals(
             expected = null to 2,
             actual = viewModel.state.value.loadError to viewModel.state.value.rows.size
@@ -87,26 +104,45 @@ class VaultTreeViewModelTest : VaultTreeViewModelTestBase() {
         advanceUntilIdle()
 
         assertEquals(
-            expected = RenameDraft(path = path("$PROJECTS/Untitled.md"), text = UNTITLED),
+            expected = RenameDraft(
+                path = path("$PROJECTS/Untitled.md"),
+                text = UNTITLED
+            ),
             actual = viewModel.state.value.renaming
         )
+
         assertTrue(actual = path("$PROJECTS/Untitled.md") in operations.existing)
     }
 
     @Test
-    fun `bookmarks are toggled and reordered, kept for the vault, and come back with it`() = runTreeTest {
-        val viewModel = startedViewModel()
-        listOf(WELCOME, PROJECTS, ROADMAP, WELCOME, WELCOME).forEach {
-            viewModel.onIntent(intent = BookmarkIntent.OnToggle(path = path(it)))
-        }
-        viewModel.onIntent(intent = BookmarkIntent.OnMove(from = 2, to = 0))
-        advanceUntilIdle()
+    fun `bookmarks are toggled and reordered, kept for the vault, and come back with it`() =
+        runTreeTest {
+            val viewModel = startedViewModel()
 
-        assertEquals(
-            expected = listOf(WELCOME, PROJECTS, ROADMAP).map(::path) to listOf(WELCOME, PROJECTS, ROADMAP).map(::path),
-            actual = viewModel.state.value.bookmarks.paths to startedViewModel().state.value.bookmarks.paths
-        )
-    }
+            listOf(WELCOME, PROJECTS, ROADMAP, WELCOME, WELCOME).forEach {
+                viewModel.onIntent(intent = BookmarkIntent.OnToggle(path = path(it)))
+            }
+
+            viewModel.onIntent(
+                intent = BookmarkIntent.OnMove(
+                    from = 2,
+                    to = 0
+                )
+            )
+
+            advanceUntilIdle()
+
+            assertEquals(
+                expected =
+                listOf(WELCOME, PROJECTS, ROADMAP).map(::path) to
+                    listOf(WELCOME, PROJECTS, ROADMAP).map(::path),
+                actual = viewModel.state.value.bookmarks.paths to startedViewModel()
+                    .state
+                    .value
+                    .bookmarks
+                    .paths
+            )
+        }
 
     @Test
     fun `clearing the selection sends a new folder to the vault root`() = runTreeTest {
@@ -128,7 +164,11 @@ class VaultTreeViewModelTest : VaultTreeViewModelTestBase() {
         viewModel.onIntent(intent = VaultTreeIntent.OnSortChange(sort = TreeSort.MODIFIED))
         advanceUntilIdle()
 
-        val modified = TreePreferences(expandedFolders = emptySet(), sort = TreeSort.MODIFIED)
+        val modified = TreePreferences(
+            expandedFolders = emptySet(),
+            sort = TreeSort.MODIFIED
+        )
+
         assertEquals(
             expected = TreeSort.MODIFIED to listOf(modified),
             actual = viewModel.state.value.sort to preferences.saved
@@ -136,23 +176,24 @@ class VaultTreeViewModelTest : VaultTreeViewModelTestBase() {
     }
 
     @Test
-    fun `the sidebar can be hidden and resized within bounds, and both are remembered`() = runTreeTest {
-        val viewModel = startedViewModel()
+    fun `the sidebar can be hidden and resized within bounds, and both are remembered`() =
+        runTreeTest {
+            val viewModel = startedViewModel()
 
-        viewModel.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
-        viewModel.onIntent(intent = VaultTreeIntent.OnSidebarResize(widthDp = 120))
-        advanceUntilIdle()
+            viewModel.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
+            viewModel.onIntent(intent = VaultTreeIntent.OnSidebarResize(widthDp = 120))
+            advanceUntilIdle()
 
-        assertEquals(
-            expected = TreePreferences(
-                expandedFolders = emptySet(),
-                sort = TreeSort.NAME,
-                sidebarWidthDp = TreePreferences.MIN_SIDEBAR_WIDTH_DP,
-                isSidebarCollapsed = true
-            ),
-            actual = preferences.saved.last()
-        )
-    }
+            assertEquals(
+                expected = TreePreferences(
+                    expandedFolders = emptySet(),
+                    sort = TreeSort.NAME,
+                    sidebarWidthDp = TreePreferences.MIN_SIDEBAR_WIDTH_DP,
+                    isSidebarCollapsed = true
+                ),
+                actual = preferences.saved.last()
+            )
+        }
 
     @Test
     fun `keyboard moves select rows in order`() = runTreeTest {
@@ -182,50 +223,78 @@ class VaultTreeViewModelTest : VaultTreeViewModelTestBase() {
     }
 
     @Test
-    fun `a click, Mod+click or Enter opens a note, file or folder in a tab, arrows only select`() = runTreeTest {
-        scanner.addAttachment(file = file(path = PLATE))
-        scanner.addNote(file = file(path = WELCOME))
-        val viewModel = startedViewModel()
-        val effects = mutableListOf<VaultTreeEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
-        runCurrent()
+    fun `a click, Mod+click or Enter opens a note, file or folder in a tab, arrows only select`() =
+        runTreeTest {
+            scanner.addAttachment(file = file(path = PLATE))
+            scanner.addNote(file = file(path = WELCOME))
+            val viewModel = startedViewModel()
+            val effects = mutableListOf<VaultTreeEffect>()
 
-        viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(PLATE)))
-        viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path("attachments")))
-        viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(WELCOME), inBackground = true))
-        viewModel.onIntent(intent = VaultTreeIntent.OnSelectPrevious)
-        viewModel.onIntent(intent = VaultTreeIntent.OnOpenSelected)
-        advanceUntilIdle()
+            backgroundScope.launch {
+                viewModel.effects.collect { effects += it }
+            }
 
-        assertEquals(
-            expected = listOf<VaultTreeEffect>(
-                VaultTreeEffect.OpenEntry(path = path(PLATE)),
-                VaultTreeEffect.OpenEntry(path = path("attachments")),
-                VaultTreeEffect.OpenEntry(path = path(WELCOME), inBackground = true),
-                VaultTreeEffect.OpenEntry(path = viewModel.state.value.selectedPath!!)
-            ),
-            actual = effects.toList()
-        )
-    }
+            runCurrent()
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path(PLATE)))
+            viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path("attachments")))
+
+            viewModel.onIntent(
+                intent = VaultTreeIntent.OnRowClick(
+                    path = path(WELCOME),
+                    inBackground = true
+                )
+            )
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnSelectPrevious)
+            viewModel.onIntent(intent = VaultTreeIntent.OnOpenSelected)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = listOf<VaultTreeEffect>(
+                    VaultTreeEffect.OpenEntry(path = path(PLATE)),
+                    VaultTreeEffect.OpenEntry(path = path("attachments")),
+                    VaultTreeEffect.OpenEntry(
+                        path = path(WELCOME),
+                        inBackground = true
+                    ),
+                    VaultTreeEffect.OpenEntry(path = viewModel.state.value.selectedPath!!)
+                ),
+                actual = effects.toList()
+            )
+        }
 
     @Test
-    fun `expand all opens every folder and collapse all closes them, both remembered`() = runTreeTest {
-        listOf("Projects/Garden/Tomato plan.md", "Recipes/Arepas.md").forEach {
-            scanner.addNote(file = file(path = it))
+    fun `expand all opens every folder and collapse all closes them, both remembered`() =
+        runTreeTest {
+            listOf("Projects/Garden/Tomato plan.md", "Recipes/Arepas.md").forEach {
+                scanner.addNote(file = file(path = it))
+            }
+
+            val viewModel = startedViewModel()
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnExpandAll)
+            advanceUntilIdle()
+
+            val expanded = viewModel.state.value.expandedFolders to preferences
+                .saved
+                .lastOrNull()
+                ?.expandedFolders
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnCollapseAll)
+            advanceUntilIdle()
+
+            val all = setOf(path("Projects"), path("Projects/Garden"), path("Recipes"))
+
+            assertEquals(
+                expected = (all to all) to (emptySet<RelativePath>() to emptySet<RelativePath>()),
+                actual =
+                expanded to (
+                    viewModel.state.value.expandedFolders to preferences
+                        .saved
+                        .lastOrNull()
+                        ?.expandedFolders
+                    )
+            )
         }
-        val viewModel = startedViewModel()
-
-        viewModel.onIntent(intent = VaultTreeIntent.OnExpandAll)
-        advanceUntilIdle()
-        val expanded = viewModel.state.value.expandedFolders to preferences.saved.lastOrNull()?.expandedFolders
-        viewModel.onIntent(intent = VaultTreeIntent.OnCollapseAll)
-        advanceUntilIdle()
-
-        val all = setOf(path("Projects"), path("Projects/Garden"), path("Recipes"))
-        assertEquals(
-            expected = (all to all) to (emptySet<RelativePath>() to emptySet<RelativePath>()),
-            actual =
-            expanded to (viewModel.state.value.expandedFolders to preferences.saved.lastOrNull()?.expandedFolders)
-        )
-    }
 }

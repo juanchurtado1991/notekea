@@ -19,7 +19,9 @@ class FakeVectorIndex : VectorIndex {
         vectors: List<FloatArray>
     ): Outcome<Unit, IndexError> = change {
         puts += note
-        notes.getOrPut(key = vaultPath) { mutableMapOf() }[note] = chunks.zip(other = vectors)
+
+        notes
+            .getOrPut(key = vaultPath) { mutableMapOf() }[note] = chunks.zip(other = vectors)
     }
 
     override suspend fun remove(
@@ -27,17 +29,25 @@ class FakeVectorIndex : VectorIndex {
         note: RelativePath
     ): Outcome<Unit, IndexError> = change { notes[vaultPath]?.remove(key = note) }
 
-    override suspend fun clear(
-        vaultPath: String
-    ): Outcome<Unit, IndexError> = change { notes.remove(key = vaultPath) }
+    override suspend fun clear(vaultPath: String): Outcome<Unit, IndexError> = change {
+        notes.remove(key = vaultPath)
+    }
 
     override suspend fun nearest(
         vaultPath: String,
         vector: FloatArray,
         limit: Int
     ): Outcome<List<SearchHit>, IndexError> {
-        val scored = notes[vaultPath].orEmpty().values.flatten().map { (chunk, v) -> chunk to dot(v, vector) }
+        val scored = notes[vaultPath]
+            .orEmpty()
+            .values
+            .flatten()
+            .map { (chunk, v) ->
+                chunk to dot(v, vector)
+            }
+
         val best = scored.sortedByDescending { it.second }.take(n = limit)
+
         return Outcome.Success(value = best.map { (chunk, score) -> hitOf(chunk, score) })
     }
 
@@ -48,16 +58,55 @@ class FakeVectorIndex : VectorIndex {
         limit: Int,
         only: Set<RelativePath>?
     ): Outcome<List<SearchHit>, IndexError> {
-        val chunks = notes[vaultPath].orEmpty().filterKeys { only == null || it in only }.values.flatten()
-        val byMeaning = chunks.sortedByDescending { (_, v) -> v.indices.sumOf { (v[it] * vector[it]).toDouble() } }
-        val words = text.lowercase().split(' ').filter { it.isNotBlank() }
-        val byWords = chunks.filter { (chunk, _) -> words.any { it in chunk.text.lowercase() } }
-        val hits = RankFusion.merge(rankings = listOf(byMeaning.map { it.first }, byWords.map { it.first }))
+        val chunks = notes[vaultPath]
+            .orEmpty()
+            .filterKeys {
+                only == null || it in only
+            }
+            .values
+            .flatten()
+
+        val byMeaning = chunks.sortedByDescending { (_, v) ->
+            v.indices.sumOf { (v[it] * vector[it]).toDouble() }
+        }
+
+        val words = text
+            .lowercase()
+            .split(' ')
+            .filter { it.isNotBlank() }
+
+        val byWords = chunks.filter { (chunk, _) ->
+            words.any {
+                it in chunk.text.lowercase()
+            }
+        }
+
+        val hits = RankFusion.merge(
+            rankings = listOf(
+                byMeaning.map { it.first },
+                byWords.map { it.first }
+            )
+        )
+
         return Outcome.Success(
             value = hits.take(n = limit).map { (chunk, score) ->
-                val closeness = (1f + dot(chunks.first { it.first == chunk }.second, vector)) / 2f
-                val hasEvery = words.all { it in chunk.text.lowercase() }
-                hitOf(chunk, score).copy(hasWords = hasEvery, closeness = closeness)
+                val closeness = (
+                    1f + dot(
+                        chunks.first {
+                            it.first == chunk
+                        }.second,
+                        vector
+                    )
+                    ) / 2f
+
+                val hasEvery = words.all {
+                    it in chunk.text.lowercase()
+                }
+
+                hitOf(chunk, score).copy(
+                    hasWords = hasEvery,
+                    closeness = closeness
+                )
             }
         )
     }
@@ -65,7 +114,10 @@ class FakeVectorIndex : VectorIndex {
     private fun dot(
         first: FloatArray,
         second: FloatArray
-    ): Float = first.indices.sumOf { (first[it] * second[it]).toDouble() }.toFloat()
+    ): Float = first
+        .indices
+        .sumOf { (first[it] * second[it]).toDouble() }
+        .toFloat()
 
     private fun hitOf(
         chunk: NoteChunk,
@@ -78,11 +130,10 @@ class FakeVectorIndex : VectorIndex {
         score = score
     )
 
-    private fun change(
-        block: () -> Unit
-    ): Outcome<Unit, IndexError> {
+    private fun change(block: () -> Unit): Outcome<Unit, IndexError> {
         if (isBusy) return Outcome.Failure(error = IndexError.Busy)
         block()
+
         return Outcome.Success(value = Unit)
     }
 }

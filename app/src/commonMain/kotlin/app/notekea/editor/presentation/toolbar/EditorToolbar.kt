@@ -1,8 +1,6 @@
 package app.notekea.editor.presentation.toolbar
 
 import androidx.compose.foundation.background
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.model.EditorPreviewData
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -22,10 +20,12 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaCompactTabs
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.platform.label
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorPreviewData
 import app.notekea.resources.Res
 import app.notekea.resources.editor_edit_mode
 import app.notekea.resources.editor_find
@@ -37,11 +37,9 @@ import org.jetbrains.compose.resources.stringResource
 private const val PREVIEW_WIDTH_DP = 760
 
 /**
- * The editor toolbar (`ROADMAP.md` 1.17), under the title, always one line: Edit | Preview tabs (switched with their
- * shortcut too), the formatting buttons in groups (text, links and tags, lists, blocks), each with a plain-language
- * tooltip and its shortcut, and at the end Find in note. Preview shows the note as it reads, so it keeps only the tabs
- * and Find. When the editor is too narrow for every group, the groups that do not fit move into More (⋯), the lists
- * and the template first, then the links ([ToolbarFit]). The Tag button opens the tag picker.
+ * The editor toolbar, under the title, always one line: Edit | Preview tabs, the formatting buttons in groups, each
+ * with a tooltip and its shortcut, and Find in note at the end. Preview keeps only the tabs and Find. Groups that do
+ * not fit move into More (⋯), the lists and the template first, then the links ([ToolbarFit]).
  */
 @Composable
 fun EditorToolbar(
@@ -51,24 +49,46 @@ fun EditorToolbar(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.background(color = MaterialTheme.colorScheme.surface)) {
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(top = NotekeaDimensions.SpacingS)) {
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxWidth().padding(top = NotekeaDimensions.SpacingS)
+        ) {
             val fit = ToolbarFit.of(width = maxWidth)
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-                ModeTabs(isReading = isReading, platformConventions = platformConventions, onIntent = onIntent)
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                ModeTabs(
+                    isReading = isReading,
+                    platformConventions = platformConventions,
+                    onIntent = onIntent
+                )
+
                 Spacer(modifier = Modifier.weight(weight = 1f))
+
                 // The capsule and the end buttons float a little above the line under the bar.
                 Row(
                     modifier = Modifier.padding(bottom = NotekeaDimensions.SpacingXs),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (!isReading) {
-                        FormattingGroups(fit = fit, platformConventions = platformConventions, onIntent = onIntent)
+                        FormattingGroups(
+                            fit = fit,
+                            platformConventions = platformConventions,
+                            onIntent = onIntent
+                        )
+
                         Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingM))
                     }
-                    EndButtons(platformConventions = platformConventions, onIntent = onIntent)
+
+                    EndButtons(
+                        platformConventions = platformConventions,
+                        onIntent = onIntent
+                    )
                 }
             }
         }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -85,6 +105,7 @@ private fun EndButtons(
     onIntent: (EditorIntent) -> Unit
 ) {
     val operatingSystem = platformConventions.operatingSystem
+
     ToolbarButton(
         icon = NotekeaIcons.Find,
         label = Res.string.editor_find,
@@ -106,7 +127,9 @@ private fun ModeTabs(
             stringResource(resource = Res.string.editor_preview_mode)
         ),
         selectedIndex = if (isReading) 1 else 0,
-        onSelect = { index -> if ((index == 1) != isReading) onIntent(EditorIntent.OnReadModeToggle) },
+        onSelect = { index ->
+            if ((index == 1) != isReading) onIntent(EditorIntent.OnReadModeToggle)
+        },
         shortcutHint = platformConventions.toggleReadModeShortcut.label(
             operatingSystem = platformConventions.operatingSystem
         ),
@@ -140,6 +163,7 @@ private fun EditorToolbarPreview() {
                 platformConventions = EditorPreviewData.platformConventions,
                 onIntent = {}
             )
+
             EditorToolbar(
                 isReading = true,
                 platformConventions = EditorPreviewData.platformConventions,
@@ -153,8 +177,13 @@ private fun EditorToolbarPreview() {
 @Composable
 private fun ToolbarButtonPreview() {
     NotekeaPreviewThemes {
-        ToolbarButton(icon = NotekeaIcons.Bold, label = Res.string.format_bold, onClick = {
-        }, shortcutHint = PREVIEW_HINT)
+        ToolbarButton(
+            icon = NotekeaIcons.Bold,
+            label = Res.string.format_bold,
+            onClick = {
+            },
+            shortcutHint = PREVIEW_HINT
+        )
     }
 }
 

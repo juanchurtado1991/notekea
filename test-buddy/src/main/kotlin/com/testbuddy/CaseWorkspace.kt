@@ -15,13 +15,20 @@ internal class CaseWorkspace(
     fun prepare(caseId: String): CaseFolders {
         val root = caseRoot(caseId = caseId)
         root.deleteRecursively()
+
         val folders = CaseFolders(
             appData = Files.createDirectories(root.resolve(APP_DATA)),
             data = Files.createDirectories(root.resolve(DATA))
         )
+
         dataSources.forEach {
-            it.copyToRecursively(target = folders.data, followLinks = false, copyAction = copyKeepingTimes())
+            it.copyToRecursively(
+                target = folders.data,
+                followLinks = false,
+                copyAction = copyKeepingTimes()
+            )
         }
+
         return folders
     }
 
@@ -31,16 +38,30 @@ internal class CaseWorkspace(
      */
     fun clean(caseId: String) {
         val root = caseRoot(caseId = caseId)
+
         val isDeleted = runCatching { root.deleteRecursively() }.isSuccess
-        if (!isDeleted) Runtime.getRuntime().addShutdownHook(Thread { runCatching { root.deleteRecursively() } })
+
+        if (!isDeleted) {
+            Runtime.getRuntime().addShutdownHook(
+                Thread {
+                    runCatching { root.deleteRecursively() }
+                }
+            )
+        }
     }
 
-    fun screenshotFile(caseId: String): Path =
-        Files.createDirectories(workFolder.resolve(SCREENSHOTS)).resolve("${fileName(caseId = caseId)}.png")
+    fun screenshotFile(caseId: String): Path = Files.createDirectories(
+        workFolder.resolve(SCREENSHOTS)
+    ).resolve("${fileName(caseId = caseId)}.png")
 
-    private fun caseRoot(caseId: String): Path = workFolder.resolve(CASES).resolve(fileName(caseId = caseId))
+    private fun caseRoot(caseId: String): Path = workFolder.resolve(
+        CASES
+    ).resolve(fileName(caseId = caseId))
 
-    private fun fileName(caseId: String): String = caseId.replace(Regex(pattern = "[^A-Za-z0-9._-]"), "_")
+    private fun fileName(caseId: String): String = caseId.replace(
+        Regex(pattern = "[^A-Za-z0-9._-]"),
+        "_"
+    )
 
     private companion object {
         const val CASES = "cases"

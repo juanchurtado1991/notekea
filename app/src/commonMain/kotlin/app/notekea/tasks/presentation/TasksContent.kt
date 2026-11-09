@@ -73,7 +73,7 @@ import org.jetbrains.compose.resources.stringResource
 private const val SHORT_DATE = "MMM D"
 
 /**
- * The Tasks tab (`ROADMAP.md` 2.11, design A): the vault's open tasks in groups, by note or by date, with what limits
+ * The Tasks tab: the vault's open tasks in groups, by note or by date, with what limits
  * them above and how many at the foot. A box checks its task in its note, and a task's text opens it there.
  */
 @Composable
@@ -83,22 +83,33 @@ fun TasksContent(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        TasksBar(view = state.view, list = state.list, onIntent = onIntent)
+        TasksBar(
+            view = state.view,
+            list = state.list,
+            onIntent = onIntent
+        )
+
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         if (state.isWriteFailed) WriteFailed(onIntent = onIntent)
+
         when {
             state.isLoading -> Spacer(modifier = Modifier.weight(weight = 1f))
+
             state.list.groups.isEmpty() -> EmptyTasks(modifier = Modifier.weight(weight = 1f))
-            else -> TaskGroups(list = state.list, onIntent = onIntent, modifier = Modifier.weight(weight = 1f))
+
+            else -> TaskGroups(
+                list = state.list,
+                onIntent = onIntent,
+                modifier = Modifier.weight(weight = 1f)
+            )
         }
+
         if (!state.isLoading) TasksFoot(list = state.list)
     }
 }
 
 @Composable
-private fun WriteFailed(
-    onIntent: (TasksIntent) -> Unit
-) {
+private fun WriteFailed(onIntent: (TasksIntent) -> Unit) {
     NotekeaNotice(
         message = stringResource(resource = Res.string.tasks_write_failed),
         icon = NotekeaIcons.CalloutWarning,
@@ -124,19 +135,35 @@ private fun TasksBar(
     ) {
         NotekeaSegmentedControl(
             segments = listOf(
-                NotekeaSegment(icon = NotekeaIcons.Note, label = stringResource(Res.string.tasks_by_note)),
-                NotekeaSegment(icon = NotekeaIcons.Today, label = stringResource(Res.string.tasks_by_date))
+                NotekeaSegment(
+                    icon = NotekeaIcons.Note,
+                    label = stringResource(Res.string.tasks_by_note)
+                ),
+                NotekeaSegment(
+                    icon = NotekeaIcons.Today,
+                    label = stringResource(Res.string.tasks_by_date)
+                )
             ),
             selectedIndex = view.grouping.ordinal,
-            onSelect = { onIntent(TasksIntent.OnGroupingChange(grouping = TaskGrouping.entries[it])) }
+            onSelect = {
+                onIntent(TasksIntent.OnGroupingChange(grouping = TaskGrouping.entries[it]))
+            }
         )
+
         Spacer(modifier = Modifier.weight(weight = 1f))
-        LimitMenus(view = view, list = list, onIntent = onIntent)
+
+        LimitMenus(
+            view = view,
+            list = list,
+            onIntent = onIntent
+        )
+
+        val doneLabel =
+            if (view.showsDone) Res.string.tasks_hide_done else Res.string.tasks_show_done
+
         NotekeaToolButton(
             icon = NotekeaIcons.TasksShowDone,
-            text = stringResource(
-                resource = if (view.showsDone) Res.string.tasks_hide_done else Res.string.tasks_show_done
-            ),
+            text = stringResource(resource = doneLabel),
             onClick = { onIntent(TasksIntent.OnShowDoneToggle) }
         )
     }
@@ -158,6 +185,7 @@ private fun LimitMenus(
             onChoose = { onIntent(TasksIntent.OnFolderChange(folder = it)) }
         )
     )
+
     NotekeaToolMenu(
         icon = NotekeaIcons.Tag,
         text = view.tag ?: stringResource(resource = Res.string.tasks_filter_tag),
@@ -177,15 +205,28 @@ private fun limitSections(
     chosen: String?,
     onChoose: (String?) -> Unit
 ): List<List<NotekeaMenuItem>> = listOf(
-    listOf(NotekeaMenuItem(label = all, onClick = { onChoose(null) }, isChecked = chosen == null)),
-    values.map { NotekeaMenuItem(label = it, onClick = { onChoose(it) }, isChecked = it == chosen) }
+    listOf(
+        NotekeaMenuItem(
+            label = all,
+            onClick = { onChoose(null) },
+            isChecked = chosen == null
+        )
+    ),
+    values.map {
+        NotekeaMenuItem(
+            label = it,
+            onClick = { onChoose(it) },
+            isChecked = it == chosen
+        )
+    }
 ).filter { it.isNotEmpty() }
 
 @Composable
-private fun EmptyTasks(
-    modifier: Modifier
-) {
-    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+private fun EmptyTasks(modifier: Modifier) {
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
         EmptyState(
             title = stringResource(resource = Res.string.tasks_empty_title),
             message = stringResource(resource = Res.string.tasks_empty_message)
@@ -200,31 +241,45 @@ private fun TaskGroups(
     modifier: Modifier
 ) {
     val scroll = rememberLazyListState()
-    NotekeaLazyScrollArea(state = scroll, modifier = modifier) {
-        LazyColumn(state = scroll, modifier = Modifier.fillMaxSize()) {
+
+    NotekeaLazyScrollArea(
+        state = scroll,
+        modifier = modifier
+    ) {
+        LazyColumn(
+            state = scroll,
+            modifier = Modifier.fillMaxSize()
+        ) {
             list.groups.forEach { group ->
                 item(key = keyOf(group = group)) { GroupHeader(group = group) }
-                items(items = group.rows, key = { it.path.value + it.task.stateIndex }) { row ->
-                    TaskLine(row = row, group = group, onIntent = onIntent)
+
+                items(
+                    items = group.rows,
+                    key = {
+                        it.path.value + it.task.stateIndex
+                    }
+                ) { row ->
+                    TaskLine(
+                        row = row,
+                        group = group,
+                        onIntent = onIntent
+                    )
                 }
             }
         }
     }
 }
 
-private fun keyOf(
-    group: TaskGroup
-): String = when (group) {
+private fun keyOf(group: TaskGroup): String = when (group) {
     is TaskGroup.OfNote -> group.path.value
     is TaskGroup.OfDate -> group.date.name
 }
 
 @Composable
-private fun GroupHeader(
-    group: TaskGroup
-) {
+private fun GroupHeader(group: TaskGroup) {
     val isOverdue = (group as? TaskGroup.OfDate)?.date == TaskWhen.OVERDUE
     val colors = MaterialTheme.colorScheme
+
     Row(
         modifier = Modifier.fillMaxWidth().padding(
             start = NotekeaDimensions.SpacingM,
@@ -243,8 +298,12 @@ private fun GroupHeader(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
         Text(
-            text = group.rows.size.toString(),
+            text = group
+                .rows
+                .size
+                .toString(),
             style = MaterialTheme.typography.labelSmall,
             color = colors.onSurfaceVariant
         )
@@ -252,13 +311,11 @@ private fun GroupHeader(
 }
 
 @Composable
-private fun groupTitle(
-    group: TaskGroup
-): String = when (group) {
+private fun groupTitle(group: TaskGroup): String = when (group) {
     is TaskGroup.OfNote -> group.path.nameWithoutExtension
 
-    is TaskGroup.OfDate -> stringResource(
-        resource = when (group.date) {
+    is TaskGroup.OfDate -> {
+        val titleResource = when (group.date) {
             TaskWhen.OVERDUE -> Res.string.tasks_when_overdue
             TaskWhen.TODAY -> Res.string.tasks_when_today
             TaskWhen.THIS_WEEK -> Res.string.tasks_when_this_week
@@ -266,7 +323,9 @@ private fun groupTitle(
             TaskWhen.NO_DATE -> Res.string.tasks_when_no_date
             TaskWhen.DONE -> Res.string.tasks_when_done
         }
-    )
+
+        stringResource(resource = titleResource)
+    }
 }
 
 /** A task: its box, its text, which opens it, its date, and where it is: its heading, or its note in a date's group. */
@@ -280,6 +339,7 @@ private fun TaskLine(
     val colors = MaterialTheme.colorScheme
     val isOverdue = (group as? TaskGroup.OfDate)?.date == TaskWhen.OVERDUE
     val place = if (group is TaskGroup.OfDate) row.path.nameWithoutExtension else task.heading
+
     Row(
         modifier = Modifier.fillMaxWidth().padding(
             horizontal = NotekeaDimensions.SpacingM,
@@ -293,9 +353,11 @@ private fun TaskLine(
             onClick = { onIntent(TasksIntent.OnTaskToggle(row = row)) },
             label = stringResource(resource = Res.string.tasks_done_label, task.text)
         )
+
         Text(
             text = task.text,
-            modifier = Modifier.weight(weight = 1f)
+            modifier = Modifier
+                .weight(weight = 1f)
                 .pointerHoverIcon(icon = PointerIcon.Hand)
                 .clickable(role = Role.Button) { onIntent(TasksIntent.OnTaskOpen(row = row)) },
             style = MaterialTheme.typography.bodyMedium,
@@ -304,13 +366,23 @@ private fun TaskLine(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
         task.date?.let { date ->
             TaskDetail(
-                text = MomentFormat().format(moment = LocalMoment(date = date), pattern = SHORT_DATE),
+                text = MomentFormat().format(
+                    moment = LocalMoment(date = date),
+                    pattern = SHORT_DATE
+                ),
                 color = if (isOverdue) colors.error else colors.onSurfaceVariant
             )
         }
-        place?.let { TaskDetail(text = it, color = colors.onSurfaceVariant) }
+
+        place?.let {
+            TaskDetail(
+                text = it,
+                color = colors.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -329,10 +401,9 @@ private fun TaskDetail(
 }
 
 @Composable
-private fun TasksFoot(
-    list: TaskList
-) {
+private fun TasksFoot(list: TaskList) {
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
     Text(
         text = stringResource(resource = Res.string.tasks_count, list.open, list.total),
         modifier = Modifier.fillMaxWidth().padding(vertical = NotekeaDimensions.SpacingXs),
@@ -345,5 +416,10 @@ private fun TasksFoot(
 @Preview
 @Composable
 private fun TasksContentPreview() {
-    NotekeaPreviewThemes { TasksContent(state = TasksPreviewData.state, onIntent = {}) }
+    NotekeaPreviewThemes {
+        TasksContent(
+            state = TasksPreviewData.state,
+            onIntent = {}
+        )
+    }
 }

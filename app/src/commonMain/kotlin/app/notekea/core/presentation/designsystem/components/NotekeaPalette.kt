@@ -20,12 +20,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.TextRange
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -40,6 +38,8 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.TestTags
@@ -59,11 +59,9 @@ private const val SCRIM_ALPHA = 0.32f
 private const val SHADOW_DP = 8
 
 /**
- * A command palette over the whole window (the quick switcher, `Mod+P`): a dimmed backdrop that closes it when clicked,
- * and a 560 dp card near the top with an optional [header], a search field that takes focus when the palette appears,
- * and the results below ([content], usually [NotekeaPaletteItem]s). The keyboard never leaves the field: Up and Down
- * move the selection ([onMove] with -1 or 1), Enter confirms it, Esc closes and Tab calls [onTab] (switching what is
- * searched) when given. Draw it last in a full-size box so it covers the rest of the window.
+ * A command palette over the whole window (the quick switcher): a dimmed backdrop that closes it when clicked, and a
+ * card with an optional [header], a search field and the results ([content]). The keyboard never leaves the field: Up
+ * and Down call [onMove] with -1 or 1, Enter confirms, Esc closes and Tab calls [onTab].
  */
 @Composable
 fun NotekeaPalette(
@@ -80,8 +78,10 @@ fun NotekeaPalette(
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         Scrim(onDismiss = onDismiss)
+
         PaletteCard(modifier = Modifier.align(alignment = Alignment.TopCenter)) {
             header?.invoke()
+
             PaletteField(
                 query = query,
                 onQueryChange = onQueryChange,
@@ -96,10 +96,12 @@ fun NotekeaPalette(
                     )
                 }
             )
+
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = NotekeaDimensions.SpacingS),
                 color = MaterialTheme.colorScheme.outlineVariant
             )
+
             content()
         }
     }
@@ -107,15 +109,23 @@ fun NotekeaPalette(
 
 /** The dimmed window behind the palette; clicking it closes the palette, as clicking outside a menu does. */
 @Composable
-private fun Scrim(
-    onDismiss: () -> Unit
-) {
+private fun Scrim(onDismiss: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.scrim.copy(alpha = SCRIM_ALPHA))
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onDismiss)
+            .background(
+                color = MaterialTheme
+                    .colorScheme
+                    .scrim
+                    .copy(alpha = SCRIM_ALPHA)
+            )
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onDismiss
+            )
     )
 }
 
@@ -125,17 +135,27 @@ private fun PaletteCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
+
     Surface(
         modifier = modifier
-            .padding(top = PALETTE_TOP_DP.dp, start = NotekeaDimensions.SpacingL, end = NotekeaDimensions.SpacingL)
+            .padding(
+                top = PALETTE_TOP_DP.dp,
+                start = NotekeaDimensions.SpacingL,
+                end = NotekeaDimensions.SpacingL
+            )
             .width(width = PALETTE_WIDTH_DP.dp),
         shape = MaterialTheme.shapes.medium,
         color = colors.surface,
-        border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = colors.outline),
+        border = BorderStroke(
+            width = NotekeaDimensions.BorderWidth,
+            color = colors.outline
+        ),
         shadowElevation = SHADOW_DP.dp
     ) {
         Column(
-            modifier = Modifier.padding(all = NotekeaDimensions.SpacingS).testTag(tag = TestTags.PALETTE_RESULTS),
+            modifier = Modifier.padding(
+                all = NotekeaDimensions.SpacingS
+            ).testTag(tag = TestTags.PALETTE_RESULTS),
             content = content
         )
     }
@@ -150,29 +170,52 @@ private fun PaletteField(
     modifier: Modifier
 ) {
     val colors = MaterialTheme.colorScheme
+
     val focusRequester = remember { FocusRequester() }
+
     var field by remember {
-        mutableStateOf(value = TextFieldValue(text = query, selection = TextRange(index = query.length)))
+        mutableStateOf(
+            value = TextFieldValue(
+                text = query,
+                selection = TextRange(index = query.length)
+            )
+        )
     }
-    if (field.text != query) field = TextFieldValue(text = query, selection = TextRange(index = query.length))
+
+    if (field.text != query) {
+        field = TextFieldValue(
+            text = query,
+            selection = TextRange(index = query.length)
+        )
+    }
+
     LaunchedEffect(focusRequester) { focusRequester.requestFocus() }
+
+    fun changeField(changed: TextFieldValue) {
+        field = changed
+        if (changed.text != query) onQueryChange(changed.text)
+    }
+
     BasicTextField(
         value = field,
-        onValueChange = {
-            field = it
-            if (it.text != query) onQueryChange(it.text)
-        },
+        onValueChange = { changeField(it) },
         modifier = modifier
             .fillMaxWidth()
             .focusRequester(focusRequester = focusRequester)
             .semantics { contentDescription = placeholder },
-        textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface),
+        textStyle = MaterialTheme
+            .typography
+            .bodyLarge
+            .copy(color = colors.onSurface),
         singleLine = true,
         cursorBrush = SolidColor(value = colors.primary),
         decorationBox = { field ->
             Box(
                 modifier = Modifier
-                    .height(height = NotekeaDimensions.CompactControlSize + NotekeaDimensions.SpacingS)
+                    .height(
+                        height =
+                        NotekeaDimensions.CompactControlSize + NotekeaDimensions.SpacingS
+                    )
                     .padding(horizontal = NotekeaDimensions.SpacingS),
                 contentAlignment = Alignment.CenterStart
             ) {
@@ -183,6 +226,7 @@ private fun PaletteField(
                         color = colors.onSurfaceVariant
                     )
                 }
+
                 field()
             }
         }
@@ -197,7 +241,13 @@ private fun handlePaletteKey(
     onTab: (() -> Unit)?
 ): Boolean {
     if (event.type != KeyEventType.KeyDown) return false
-    val action = PaletteKeyAction.of(key = event.key, isShiftPressed = event.isShiftPressed, canSwitch = onTab != null)
+
+    val action = PaletteKeyAction.of(
+        key = event.key,
+        isShiftPressed = event.isShiftPressed,
+        canSwitch = onTab != null
+    )
+
     when (action) {
         PaletteKeyAction.MOVE_DOWN -> onMove(1)
         PaletteKeyAction.MOVE_UP -> onMove(-1)
@@ -206,6 +256,7 @@ private fun handlePaletteKey(
         PaletteKeyAction.SWITCH -> onTab?.invoke()
         null -> return false
     }
+
     return true
 }
 
@@ -213,7 +264,12 @@ private fun handlePaletteKey(
 @Composable
 private fun NotekeaPalettePreview() {
     NotekeaPreviewThemes {
-        Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
+        Box(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
             NotekeaPalette(
                 query = PREVIEW_QUERY,
                 onQueryChange = {},
@@ -229,7 +285,12 @@ private fun NotekeaPalettePreview() {
                     selected = true,
                     supportingText = PREVIEW_FOLDER
                 )
-                NotekeaPaletteItem(title = PREVIEW_PREPARE, onClick = {}, titleHighlights = listOf(3..5))
+
+                NotekeaPaletteItem(
+                    title = PREVIEW_PREPARE,
+                    onClick = {},
+                    titleHighlights = listOf(3..5)
+                )
             }
         }
     }

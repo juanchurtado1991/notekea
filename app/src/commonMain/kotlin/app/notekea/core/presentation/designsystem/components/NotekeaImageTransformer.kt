@@ -11,7 +11,7 @@ import com.mikepenz.markdown.model.ImageTransformer
  */
 class NotekeaImageTransformer(private val painterOf: (String) -> Painter?) : ImageTransformer {
     @Composable
-    override fun transform(
-        link: String
-    ): ImageData? = painterOf(link)?.let { ImageData(painter = it) }
+    override fun transform(link: String): ImageData? = painterOf(link)?.let {
+        ImageData(painter = it)
+    }
 }

@@ -11,12 +11,12 @@ import app.notekea.core.logging.domain.FakeLogStore
 import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.logging.domain.GetDiagnosticsUseCase
 import app.notekea.core.platform.domain.FakeSystemEnvironment
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
+import app.notekea.settings.presentation.SettingsDialog
 import app.notekea.settings.presentation.about.AboutDialog
 import app.notekea.settings.presentation.about.AboutViewModel
-import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.settings.presentation.appearance.AppearanceViewModel
-import app.notekea.settings.presentation.SettingsDialog
-import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -27,30 +27,52 @@ class AboutAndSettingsScreenTest {
     @Test
     fun `About and Settings close with their close buttons`() {
         var dismissed = 0
+
         UiThread.run {
             listOf<Pair<Offset, @Composable () -> Unit>>(
                 ABOUT_CLOSE to {
                     AboutDialog(
                         platformConventions = PreviewPlatformConventions.linux,
-                        onDismiss = { dismissed++ },
+                        onDismiss = {
+                            dismissed++
+                        },
                         viewModel = aboutViewModel()
                     )
                 },
                 SETTINGS_CLOSE to {
                     SettingsDialog(
-                        onDismiss = { dismissed++ },
+                        onDismiss = {
+                            dismissed++
+                        },
                         aiModelSection = {},
                         viewModel = AppearanceViewModel(appearanceStore = FakeAppearanceStore())
                     )
                 }
             ).forEach { (close, dialog) ->
-                ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+                ImageComposeScene(
+                    width = WIDTH,
+                    height = HEIGHT,
+                    density = Density(density = 1f)
+                ) {
                     NotekeaTheme(darkTheme = false) { dialog() }
                 }.use { scene ->
                     settle(scene = scene)
-                    scene.sendPointerEvent(eventType = PointerEventType.Move, position = close)
-                    scene.sendPointerEvent(eventType = PointerEventType.Press, position = close)
-                    scene.sendPointerEvent(eventType = PointerEventType.Release, position = close)
+
+                    scene.sendPointerEvent(
+                        eventType = PointerEventType.Move,
+                        position = close
+                    )
+
+                    scene.sendPointerEvent(
+                        eventType = PointerEventType.Press,
+                        position = close
+                    )
+
+                    scene.sendPointerEvent(
+                        eventType = PointerEventType.Release,
+                        position = close
+                    )
+
                     settle(scene = scene)
                 }
             }
@@ -64,15 +86,16 @@ class AboutAndSettingsScreenTest {
 
     private fun aboutViewModel() = AboutViewModel(
         getDiagnostics = GetDiagnosticsUseCase(
-            systemEnvironment = FakeSystemEnvironment(operatingSystemName = "Linux", userHome = "/home/ana"),
+            systemEnvironment = FakeSystemEnvironment(
+                operatingSystemName = "Linux",
+                userHome = "/home/ana"
+            ),
             logStore = FakeLogStore()
         ),
         clipboard = FakeTextClipboard()
     )
 
-    private fun settle(
-        scene: ImageComposeScene
-    ) {
+    private fun settle(scene: ImageComposeScene) {
         repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
     }
 
@@ -81,7 +104,13 @@ class AboutAndSettingsScreenTest {
         private const val HEIGHT = 640
         private const val SETTLE_FRAMES = 4
         private const val WIDTH = 1000
-        private val ABOUT_CLOSE = Offset(x = 852f, y = 98f)
-        private val SETTINGS_CLOSE = Offset(x = 857f, y = 62f)
+        private val ABOUT_CLOSE = Offset(
+            x = 852f,
+            y = 98f
+        )
+        private val SETTINGS_CLOSE = Offset(
+            x = 857f,
+            y = 62f
+        )
     }
 }

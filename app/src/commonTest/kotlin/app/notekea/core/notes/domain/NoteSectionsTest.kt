@@ -3,13 +3,14 @@ package app.notekea.core.notes.domain
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** A note's sections (`ROADMAP.md` 2.1): one per heading, with the titles above it, as the outline nests them. */
+/** A note's sections: one per heading, with the titles above it, as the outline nests them. */
 class NoteSectionsTest {
     private val sections = NoteSections(outlineFinder = OutlineFinder())
 
     @Test
     fun `each heading starts a section whose path holds the headings of a lower level above it`() {
-        val body = "Intro line\n# Arepas\nCorn.\n## Dough\nKnead.\n### Rest\nWait.\n## Filling\nCheese.\n# Next\nEnd."
+        val body =
+            "Intro line\n# Arepas\nCorn.\n## Dough\nKnead.\n### Rest\nWait.\n## Filling\nCheese.\n# Next\nEnd."
 
         assertEquals(
             expected = listOf(
@@ -40,7 +41,9 @@ class NoteSectionsTest {
 
         assertEquals(
             expected = listOf(listOf("Code") to "# Code\n```\n# not a heading\n```\n"),
-            actual = sections.of(body = body).map { it.headingPath to body.substring(range = it.range) }
+            actual = sections.of(body = body).map {
+                it.headingPath to body.substring(range = it.range)
+            }
         )
     }
 

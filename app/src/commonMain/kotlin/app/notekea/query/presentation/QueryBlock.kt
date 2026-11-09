@@ -34,10 +34,9 @@ private const val PREVIEW_BLOCK = "columns: [author, rating]"
 private const val PREVIEW_SOURCE = "```query\ncolumns: [author, rating]\n```"
 
 /**
- * A ```` ```query ```` block as Preview shows it (`ROADMAP.md` 2.10): the live table of what its [text] finds ([run]),
- * again whenever [notesVersion] changes, under the query's chips, which are edited as the block's YAML. A block that
- * is not a query says which line cannot be read, above its [source]. A note stays light: past [MAX_ROWS], the table
- * says how many it leaves out.
+ * A `query` block as Preview shows it: the live table of what its [text] finds ([run]), again whenever [notesVersion]
+ * changes, under the query's chips, which are edited as the block's YAML. A block that is not a query says which line
+ * cannot be read, above its [source]. Past [MAX_ROWS], the table says how many it leaves out.
  */
 @Composable
 fun QueryBlock(
@@ -50,10 +49,21 @@ fun QueryBlock(
     modifier: Modifier = Modifier
 ) {
     val parse = remember(text) { QueryYaml().read(text = text) }
+
     Column(modifier = modifier.fillMaxWidth()) {
         when (parse) {
-            is QueryParse.Invalid -> InvalidBlock(invalid = parse, source = source)
-            is QueryParse.Valid -> ValidBlock(query = parse.query, notesVersion, run, onIntent, notice)
+            is QueryParse.Invalid -> InvalidBlock(
+                invalid = parse,
+                source = source
+            )
+
+            is QueryParse.Valid -> ValidBlock(
+                query = parse.query,
+                notesVersion,
+                run,
+                onIntent,
+                notice
+            )
         }
     }
 }
@@ -68,7 +78,12 @@ private fun InvalidBlock(
         style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.error
     )
-    Text(text = invalidLabel(invalid = invalid), style = MaterialTheme.typography.bodySmall)
+
+    Text(
+        text = invalidLabel(invalid = invalid),
+        style = MaterialTheme.typography.bodySmall
+    )
+
     NotekeaMarkdown(content = source)
 }
 
@@ -82,18 +97,38 @@ private fun ValidBlock(
 ) {
     // The last result stays until the next one, so the note does not jump when the vault changes.
     val result by produceState<QueryResult?>(initialValue = null, query, notesVersion) {
-        value = run(query)
+        value =
+            run(query)
     }
+
     val colors = MaterialTheme.colorScheme
+
     Column(
         modifier = Modifier.fillMaxWidth().border(
-            border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = colors.outlineVariant),
+            border = BorderStroke(
+                width = NotekeaDimensions.BorderWidth,
+                color = colors.outlineVariant
+            ),
             shape = MaterialTheme.shapes.medium
         )
     ) {
-        Chips(query = query, count = result?.rows?.size)
-        QueryNoticeLine(notice = notice, onIntent = onIntent)
-        result?.let { found -> FoundRows(query = query, result = found, onIntent = onIntent) }
+        Chips(
+            query = query,
+            count = result?.rows?.size
+        )
+
+        QueryNoticeLine(
+            notice = notice,
+            onIntent = onIntent
+        )
+
+        result?.let { found ->
+            FoundRows(
+                query = query,
+                result = found,
+                onIntent = onIntent
+            )
+        }
     }
 }
 
@@ -109,6 +144,7 @@ private fun Chips(
         itemVerticalAlignment = Alignment.CenterVertically
     ) {
         query.filters.forEach { NotekeaChip(label = filterLabel(filter = it)) }
+
         count?.let {
             Text(
                 text = noteCountLabel(count = it),
@@ -127,13 +163,32 @@ private fun FoundRows(
 ) {
     UnknownProperties(unknown = result.unknown)
     if (result.rows.isEmpty()) return
-    QueryHeader(columns = result.columns, sort = query.sort, onSortChange = null)
-    result.rows.take(n = MAX_ROWS).forEachIndexed { index, row ->
-        QueryTableRow(row = row, index = index, columns = result.columns, onIntent = onIntent)
-    }
+
+    QueryHeader(
+        columns = result.columns,
+        sort = query.sort,
+        onSortChange = null
+    )
+
+    result
+        .rows
+        .take(n = MAX_ROWS)
+        .forEachIndexed { index, row ->
+            QueryTableRow(
+                row = row,
+                index = index,
+                columns = result.columns,
+                onIntent = onIntent
+            )
+        }
+
     if (result.rows.size > MAX_ROWS) {
         Text(
-            text = stringResource(resource = Res.string.query_more_rows, MAX_ROWS, result.rows.size),
+            text = stringResource(
+                resource = Res.string.query_more_rows,
+                MAX_ROWS,
+                result.rows.size
+            ),
             modifier = Modifier.padding(all = NotekeaDimensions.SpacingS),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant

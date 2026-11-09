@@ -1,15 +1,15 @@
 package app.notekea.shell.domain
 
-import app.notekea.editor.domain.AttachmentFolder
 import app.notekea.core.notes.domain.AttachmentKind
-import app.notekea.editor.domain.AttachmentResolver
-import app.notekea.editor.domain.EmbedFinder
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultSettingsReader
+import app.notekea.editor.domain.AttachmentFolder
+import app.notekea.editor.domain.AttachmentResolver
+import app.notekea.editor.domain.EmbedFinder
 
 /**
- * The picture a note's card shows in a folder's grid (`ROADMAP.md` 1.11): the first image the note embeds
+ * The picture a note's card shows in a folder's grid: the first image the note embeds
  * (`![[plate.png]]` or `![alt](plate.png)`) that is a file of the vault, found as the editor finds it, or null when it
  * embeds none or its text cannot be read.
  */
@@ -24,16 +24,25 @@ class GetNoteCoverUseCase(
         note: RelativePath,
         files: Collection<RelativePath>
     ): RelativePath? {
-        val text = noteContentStore.read(vaultPath = vaultPath, path = note) ?: return null
+        val text = noteContentStore.read(
+            vaultPath = vaultPath,
+            path = note
+        ) ?: return null
+
         val embeds = embedFinder.embeds(text = text)
         if (embeds.isEmpty()) return null
         val setting = vaultSettingsReader.attachmentFolderPath(vaultPath = vaultPath)
+
         val resolver = AttachmentResolver(
             files = files,
             attachmentFolder = AttachmentFolder(setting = setting).folderFor(note = note)
         )
+
         return embeds.firstNotNullOfOrNull { embed ->
-            resolver.resolve(embed = embed, note = note)?.takeIf {
+            resolver.resolve(
+                embed = embed,
+                note = note
+            )?.takeIf {
                 AttachmentKind.of(name = it.name) == AttachmentKind.IMAGE
             }
         }

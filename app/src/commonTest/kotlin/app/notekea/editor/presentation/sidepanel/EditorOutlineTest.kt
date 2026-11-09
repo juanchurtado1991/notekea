@@ -1,14 +1,14 @@
 package app.notekea.editor.presentation.sidepanel
 
 import androidx.compose.runtime.snapshots.Snapshot
-import app.notekea.editor.presentation.viewmodel.EditorViewModels
-import app.notekea.editor.presentation.model.EditorEffect
-import app.notekea.editor.presentation.model.EditorIntent
 import androidx.compose.ui.text.TextRange
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.OutlineHeading
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.presentation.model.EditorEffect
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.viewmodel.EditorViewModels
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -25,7 +25,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** The open note's outline (`ROADMAP.md` 1.9), over real use cases and fakes, and the side panel's floating state. */
+/** The open note's outline, over real use cases and fakes, and the side panel's floating state. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditorOutlineTest {
     private val testDispatcher = StandardTestDispatcher()
@@ -35,8 +35,16 @@ class EditorOutlineTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher = testDispatcher)
-        putOnDisk(path = AREPAS, text = "---\ntags: [recipe]\n---\n# Arepas\n\n## Dough\nMix.\n")
-        putOnDisk(path = PLAIN, text = "No headings here.\n")
+
+        putOnDisk(
+            path = AREPAS,
+            text = "---\ntags: [recipe]\n---\n# Arepas\n\n## Dough\nMix.\n"
+        )
+
+        putOnDisk(
+            path = PLAIN,
+            text = "No headings here.\n"
+        )
     }
 
     @AfterTest
@@ -45,25 +53,42 @@ class EditorOutlineTest {
     }
 
     @Test
-    fun `the outline lists the body's headings and follows typing, and another note brings its own`() = runOutlineTest {
-        open(path = AREPAS)
-        val opened = viewModel.state.value.outline
-        type(text = "# Arepas\n\n## Dough\nMix.\n### Rest\n")
-        val typed = viewModel.state.value.outline.map { it.text }
-        open(path = PLAIN)
+    fun `the outline lists the body's headings and follows typing, and another note brings its own`() =
+        runOutlineTest {
+            open(path = AREPAS)
+            val opened = viewModel.state.value.outline
+            type(text = "# Arepas\n\n## Dough\nMix.\n### Rest\n")
 
-        assertEquals(
-            expected = Triple(
-                listOf(
-                    OutlineHeading(level = 1, text = "Arepas", offset = 0, depth = 0),
-                    OutlineHeading(level = 2, text = "Dough", offset = 10, depth = 1)
+            val typed = viewModel
+                .state
+                .value
+                .outline
+                .map { it.text }
+
+            open(path = PLAIN)
+
+            assertEquals(
+                expected = Triple(
+                    listOf(
+                        OutlineHeading(
+                            level = 1,
+                            text = "Arepas",
+                            offset = 0,
+                            depth = 0
+                        ),
+                        OutlineHeading(
+                            level = 2,
+                            text = "Dough",
+                            offset = 10,
+                            depth = 1
+                        )
+                    ),
+                    listOf("Arepas", "Dough", "Rest"),
+                    emptyList()
                 ),
-                listOf("Arepas", "Dough", "Rest"),
-                emptyList()
-            ),
-            actual = Triple(opened, typed, viewModel.state.value.outline)
-        )
-    }
+                actual = Triple(opened, typed, viewModel.state.value.outline)
+            )
+        }
 
     @Test
     fun `choosing a heading in edit mode puts the cursor at its end, scrolls to it and gives the text the keyboard`() =
@@ -104,44 +129,95 @@ class EditorOutlineTest {
     fun `a mention chosen in Connections is selected once its note opens, or at once in the open note`() =
         runOutlineTest {
             open(path = PLAIN)
-            send(intent = EditorIntent.OnRevealRequest(path = AREPAS, range = 10..17))
+
+            send(
+                intent = EditorIntent.OnRevealRequest(
+                    path = AREPAS,
+                    range = 10..17
+                )
+            )
+
             val waiting = viewModel.buffer.selection
             open(path = AREPAS)
             val opened = viewModel.buffer.selection
-            send(intent = EditorIntent.OnRevealRequest(path = AREPAS, range = 2..7))
+
+            send(
+                intent = EditorIntent.OnRevealRequest(
+                    path = AREPAS,
+                    range = 2..7
+                )
+            )
 
             assertEquals(
-                expected = Triple(TextRange(index = 0), TextRange(start = 10, end = 18), TextRange(start = 2, end = 8)),
+                expected = Triple(
+                    TextRange(index = 0),
+                    TextRange(
+                        start = 10,
+                        end = 18
+                    ),
+                    TextRange(
+                        start = 2,
+                        end = 8
+                    )
+                ),
                 actual = Triple(waiting, opened, viewModel.buffer.selection)
             )
         }
 
     @Test
-    fun `a passage chosen in Preview shows in Edit for that note, and the mode remembered stays`() = runOutlineTest {
-        open(path = AREPAS)
-        send(intent = EditorIntent.OnReadModeToggle)
+    fun `a passage chosen in Preview shows in Edit for that note, and the mode remembered stays`() =
+        runOutlineTest {
+            open(path = AREPAS)
+            send(intent = EditorIntent.OnReadModeToggle)
 
-        send(intent = EditorIntent.OnRevealRequest(path = AREPAS, range = 2..7))
-        val shown =
-            Triple(viewModel.state.value.isReading, viewModel.state.value.isRevealing, viewModel.buffer.selection)
-        open(path = PLAIN)
+            send(
+                intent = EditorIntent.OnRevealRequest(
+                    path = AREPAS,
+                    range = 2..7
+                )
+            )
 
-        assertEquals(
-            expected = Triple(false, true, TextRange(start = 2, end = 8)) to true,
-            actual = shown to viewModel.state.value.isReading
-        )
-    }
+            val shown = Triple(
+                viewModel.state.value.isReading,
+                viewModel.state.value.isRevealing,
+                viewModel.buffer.selection
+            )
+
+            open(path = PLAIN)
+
+            assertEquals(
+                expected = Triple(
+                    false,
+                    true,
+                    TextRange(
+                        start = 2,
+                        end = 8
+                    )
+                ) to true,
+                actual = shown to viewModel.state.value.isReading
+            )
+        }
 
     @Test
     fun `going back to a note puts the cursor where it was left`() = runOutlineTest {
         open(path = AREPAS)
-        viewModel.buffer.edit { selection = TextRange(start = 2, end = 8) }
+
+        viewModel.buffer.edit {
+            selection = TextRange(
+                start = 2,
+                end = 8
+            )
+        }
+
         open(path = PLAIN)
         val plain = viewModel.buffer.selection
         open(path = AREPAS)
 
         assertEquals(
-            expected = TextRange(index = 0) to TextRange(start = 2, end = 8),
+            expected = TextRange(index = 0) to TextRange(
+                start = 2,
+                end = 8
+            ),
             actual = plain to viewModel.buffer.selection
         )
     }
@@ -149,6 +225,7 @@ class EditorOutlineTest {
     @Test
     fun `while the panel floats over a narrow window, its button opens and closes it there only`() {
         val sent = mutableListOf<EditorIntent>()
+
         val host = SidePanelHost(send = { sent += it })
 
         host.onIntent(intent = EditorIntent.OnSidePanelToggle)
@@ -168,23 +245,24 @@ class EditorOutlineTest {
         )
     }
 
-    private fun TestScope.open(
-        path: RelativePath
-    ) {
+    private fun TestScope.open(path: RelativePath) {
         send(intent = EditorIntent.OnOpen(path = path))
     }
 
-    private fun TestScope.type(
-        text: String
-    ) {
-        viewModel.buffer.edit { replace(start = 0, end = length, text = text) }
+    private fun TestScope.type(text: String) {
+        viewModel.buffer.edit {
+            replace(
+                start = 0,
+                end = length,
+                text = text
+            )
+        }
+
         settle()
     }
 
     /** Sends [intent], then lets the edits reach the ViewModel and the outline be found again. */
-    private fun TestScope.send(
-        intent: EditorIntent
-    ) {
+    private fun TestScope.send(intent: EditorIntent) {
         viewModel.onIntent(intent = intent)
         settle()
     }
@@ -198,8 +276,13 @@ class EditorOutlineTest {
 
     private fun TestScope.collectEffects(): List<EditorEffect> {
         val effects = mutableListOf<EditorEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+
+        backgroundScope.launch {
+            viewModel.effects.collect { effects += it }
+        }
+
         runCurrent()
+
         return effects
     }
 
@@ -212,9 +295,9 @@ class EditorOutlineTest {
         fixture.operations.existing += path
     }
 
-    private fun runOutlineTest(
-        body: suspend TestScope.() -> Unit
-    ) = runTest(context = testDispatcher) {
+    private fun runOutlineTest(body: suspend TestScope.() -> Unit) = runTest(
+        context = testDispatcher
+    ) {
         try {
             body()
         } finally {

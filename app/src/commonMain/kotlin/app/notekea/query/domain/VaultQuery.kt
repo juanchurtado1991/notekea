@@ -1,7 +1,7 @@
 package app.notekea.query.domain
 
 /**
- * A list of notes chosen by their properties (`ROADMAP.md` 2.10): the [filters] a note must all pass, the order, and
+ * A list of notes chosen by their properties: the [filters] a note must all pass, the order, and
  * the [columns] to show. Until they are chosen, the table shows the properties the filters and the sort look at.
  */
 data class VaultQuery(
@@ -13,6 +13,7 @@ data class VaultQuery(
     val properties: List<String>
         get() {
             val tested = filters.map { it.property }.filter { it.isNotEmpty() }
+
             return (tested + listOfNotNull(sort?.property) + columns.orEmpty()).distinct()
         }
 

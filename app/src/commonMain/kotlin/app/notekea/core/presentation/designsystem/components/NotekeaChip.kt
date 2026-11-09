@@ -15,8 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,11 +43,18 @@ fun NotekeaChip(
 ) {
     val shape = RoundedCornerShape(percent = FULL_ROUND)
     val endPadding = if (onRemove == null) NotekeaDimensions.SpacingS else 0.dp
+
     Row(
         modifier = modifier
             .clip(shape = shape)
-            .background(color = containerColor, shape = shape)
-            .padding(start = NotekeaDimensions.SpacingS, end = endPadding),
+            .background(
+                color = containerColor,
+                shape = shape
+            )
+            .padding(
+                start = NotekeaDimensions.SpacingS,
+                end = endPadding
+            ),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs / 2),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -58,7 +65,13 @@ fun NotekeaChip(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        onRemove?.let { ChipRemove(onRemove = it, removeLabel = removeLabel) }
+
+        onRemove?.let {
+            ChipRemove(
+                onRemove = it,
+                removeLabel = removeLabel
+            )
+        }
     }
 }
 
@@ -71,11 +84,16 @@ private fun ChipRemove(
     removeLabel: String?
 ) {
     val shape = RoundedCornerShape(percent = FULL_ROUND)
+
     Box(
         modifier = Modifier
             .focusProperties { canFocus = false }
             .clip(shape = shape)
-            .clickable(onClickLabel = removeLabel, role = Role.Button, onClick = onRemove)
+            .clickable(
+                onClickLabel = removeLabel,
+                role = Role.Button,
+                onClick = onRemove
+            )
             .padding(all = NotekeaDimensions.SpacingXs),
         contentAlignment = Alignment.Center
     ) {
@@ -93,7 +111,14 @@ private fun ChipRemove(
 private fun NotekeaChipPreview() {
     NotekeaPreviewThemes {
         Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)) {
-            PREVIEW_ITEMS.forEach { NotekeaChip(label = it, onRemove = {}, removeLabel = PREVIEW_REMOVE) }
+            PREVIEW_ITEMS.forEach {
+                NotekeaChip(
+                    label = it,
+                    onRemove = {},
+                    removeLabel = PREVIEW_REMOVE
+                )
+            }
+
             NotekeaChip(label = PREVIEW_REMOVE)
         }
     }

@@ -29,26 +29,55 @@ internal fun FollowGraph(
     val graph = viewModels.graph
     val index by searchIndex.state.collectAsState()
     val isIndexReady = !index.isRunning && index.readyNotes != null
-    val tabs by viewModels.workspace.state.collectAsState()
-    val isShown = tabs.workspace.panes.any { it.activePath == Workspace.GRAPH }
+
+    val tabs by viewModels
+        .workspace
+        .state
+        .collectAsState()
+
+    val isShown = tabs
+        .workspace
+        .panes
+        .any {
+            it.activePath == Workspace.GRAPH
+        }
+
     LaunchedEffect(graph, state.tree.notes) {
         graph.onIntent(intent = GraphIntent.OnNotesChange(notes = state.tree.notes.values))
     }
-    LaunchedEffect(graph, isIndexReady) { graph.onIntent(intent = GraphIntent.OnIndexChange(isReady = isIndexReady)) }
+
+    LaunchedEffect(graph, isIndexReady) {
+        graph.onIntent(intent = GraphIntent.OnIndexChange(isReady = isIndexReady))
+    }
+
     LaunchedEffect(graph, isShown) {
         graph.onIntent(intent = GraphIntent.OnShownChange(isShown = isShown))
         if (isShown && graph.state.value.hasNoNote) openAroundNote(viewModels = viewModels)
     }
+
     LaunchedEffect(graph) {
         graph.effects.collect { effect ->
             when (effect) {
                 is GraphEffect.OpenNote -> {
-                    viewModels.workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = effect.path))
-                    val pane = viewModels.workspace.state.value.workspace.paneOpening(path = effect.path)
-                    viewModels.editors[pane].onIntent(intent = EditorIntent.OnFocusRequest(path = effect.path))
+                    viewModels.workspace.onIntent(
+                        intent = WorkspaceIntent.OnOpen(path = effect.path)
+                    )
+
+                    val pane = viewModels
+                        .workspace
+                        .state
+                        .value
+                        .workspace
+                        .paneOpening(path = effect.path)
+
+                    viewModels.editors[pane].onIntent(
+                        intent = EditorIntent.OnFocusRequest(path = effect.path)
+                    )
                 }
 
-                GraphEffect.ToggleInspector -> sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle)
+                GraphEffect.ToggleInspector -> sidePanel.onIntent(
+                    intent = EditorIntent.OnSidePanelToggle
+                )
 
                 is GraphEffect.NoteRewritten -> viewModels.editors.forEach { editor ->
                     editor.onIntent(intent = EditorIntent.OnNoteRewritten(path = effect.path))
@@ -56,22 +85,22 @@ internal fun FollowGraph(
             }
         }
     }
-    WindowShortcut(shortcut = state.platformConventions.graphShortcut) { openGraph(viewModels = viewModels) }
+
+    WindowShortcut(shortcut = state.platformConventions.graphShortcut) {
+        openGraph(viewModels = viewModels)
+    }
 }
 
 /** Opens the graph's tab, around the note being read, in either pane; with none, it asks for one. */
-internal fun openGraph(
-    viewModels: WorkspaceViewModels
-) {
+internal fun openGraph(viewModels: WorkspaceViewModels) {
     val workspace = viewModels.workspace
     val isGraphActive = workspace.state.value.workspace.activePath == Workspace.GRAPH
-    if (!isGraphActive || viewModels.graph.state.value.hasNoNote) openAroundNote(viewModels = viewModels)
+    val isNoteNeeded = !isGraphActive || viewModels.graph.state.value.hasNoNote
+    if (isNoteNeeded) openAroundNote(viewModels = viewModels)
     workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = Workspace.GRAPH))
 }
 
-private fun openAroundNote(
-    viewModels: WorkspaceViewModels
-) {
+private fun openAroundNote(viewModels: WorkspaceViewModels) {
     val note = viewModels.workspace.state.value.noteShown
     viewModels.graph.onIntent(intent = GraphIntent.OnOpen(note = note))
 }

@@ -1,13 +1,13 @@
 package app.notekea.editor.presentation.model
 
-import app.notekea.core.presentation.FeedIntent
-import app.notekea.editor.presentation.reading.ReadLink
-import app.notekea.editor.domain.Embed
-import app.notekea.editor.domain.FormatAction
-import app.notekea.editor.domain.ListAction
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.SidePanelMode
 import app.notekea.core.notes.domain.SidePanelSection
+import app.notekea.core.presentation.FeedIntent
+import app.notekea.editor.domain.Embed
+import app.notekea.editor.domain.FormatAction
+import app.notekea.editor.domain.ListAction
+import app.notekea.editor.presentation.reading.ReadLink
 import kotlinx.coroutines.CompletableDeferred
 
 /** What the user (or the window around the editor) asked of the note editor. */
@@ -23,7 +23,7 @@ sealed interface EditorIntent {
         EditorIntent,
         FeedIntent
 
-    /** A link to a note was clicked in Read mode; with `Mod` held its tab opens [inBackground] (`ROADMAP.md` 1.11). */
+    /** A link to a note was clicked in Read mode; with `Mod` held its tab opens [inBackground]. */
     data class OnLinkClick(
         val link: ReadLink.Note,
         val inBackground: Boolean = false
@@ -92,7 +92,7 @@ sealed interface EditorIntent {
     /** `Mod+T` or the toolbar's Insert template: the window opens the template picker, then sends a template. */
     data object OnTemplateRequest : EditorIntent
 
-    /** The star beside the title: bookmarks the note, or removes its bookmark (`ROADMAP.md` 1.13). */
+    /** The star beside the title: bookmarks the note, or removes its bookmark. */
     data object OnBookmarkToggle : EditorIntent
 
     /** The note's folder above its title was clicked: the window shows that folder in the tree. */
@@ -132,7 +132,7 @@ sealed interface EditorIntent {
     /** A heading of the outline was clicked or chosen with Enter: the editor goes to the [index]th heading. */
     data class OnHeadingClick(val index: Int) : EditorIntent
 
-    /** A mention was chosen in Connections (`ROADMAP.md` 2.5): [range] of [path]'s body is selected once it is open. */
+    /** A mention was chosen in Connections: [range] of [path]'s body is selected once it is open. */
     data class OnRevealRequest(
         val path: RelativePath,
         val range: IntRange

@@ -45,8 +45,16 @@ import org.jetbrains.compose.resources.stringResource
 private const val DAY_CELL_DP = 32
 private const val DAY_INSET_DP = 2
 private const val MONTH_YEAR_SEPARATOR = " "
-private val PREVIEW_SELECTED = CalendarDate(year = 2026, month = 10, day = 14)
-private val PREVIEW_TODAY = CalendarDate(year = 2026, month = 10, day = 27)
+private val PREVIEW_SELECTED = CalendarDate(
+    year = 2026,
+    month = 10,
+    day = 14
+)
+private val PREVIEW_TODAY = CalendarDate(
+    year = 2026,
+    month = 10,
+    day = 27
+)
 
 /**
  * A compact month calendar for picking a day, weeks starting on Monday: the month and year with arrows that move it,
@@ -61,22 +69,39 @@ fun NotekeaCalendar(
     modifier: Modifier = Modifier
 ) {
     var month by remember(selected) { mutableStateOf(value = selected.copy(day = 1)) }
+
     Column(
         modifier = modifier
-            .width(width = (DAY_CELL_DP * CalendarDate.DAYS_IN_WEEK).dp + NotekeaDimensions.SpacingM * 2)
+            .width(
+                width =
+                (DAY_CELL_DP * CalendarDate.DAYS_IN_WEEK).dp + NotekeaDimensions.SpacingM * 2
+            )
             .padding(all = NotekeaDimensions.SpacingM),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
     ) {
-        MonthHeader(month = month, onMove = { month = it })
+        MonthHeader(
+            month = month,
+            onMove = { month = it }
+        )
+
         WeekdayRow()
+
         weeksOf(month = month).forEach { week ->
             Row {
                 week.forEach { date ->
-                    DayCell(date = date, isSelected = date == selected, isToday = date == today, onPick = onPick)
+                    DayCell(
+                        date = date,
+                        isSelected = date == selected,
+                        isToday = date == today,
+                        onPick = onPick
+                    )
                 }
             }
         }
-        today?.let { TodayFooter(onPick = { onPick(it) }) }
+
+        today?.let {
+            TodayFooter(onPick = { onPick(it) })
+        }
     }
 }
 
@@ -87,23 +112,46 @@ private fun MonthHeader(
     onMove: (CalendarDate) -> Unit
 ) {
     val name = stringArrayResource(resource = Res.array.calendar_months)[month.month - 1]
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             text = name + MONTH_YEAR_SEPARATOR + month.year,
             modifier = Modifier.weight(weight = 1f).padding(start = NotekeaDimensions.SpacingXs),
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            style = MaterialTheme
+                .typography
+                .titleSmall
+                .copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.onSurface
         )
+
         NotekeaIconButton(
             icon = NotekeaIcons.PreviousMonth,
             label = stringResource(resource = Res.string.calendar_previous_month),
-            onClick = { onMove(shifted(month = month, by = -1)) },
+            onClick = {
+                onMove(
+                    shifted(
+                        month = month,
+                        by = -1
+                    )
+                )
+            },
             takesFocus = false
         )
+
         NotekeaIconButton(
             icon = NotekeaIcons.NextMonth,
             label = stringResource(resource = Res.string.calendar_next_month),
-            onClick = { onMove(shifted(month = month, by = 1)) },
+            onClick = {
+                onMove(
+                    shifted(
+                        month = month,
+                        by = 1
+                    )
+                )
+            },
             takesFocus = false
         )
     }
@@ -113,7 +161,10 @@ private fun MonthHeader(
 private fun WeekdayRow() {
     Row {
         stringArrayResource(resource = Res.array.calendar_weekdays).forEach { initials ->
-            Box(modifier = Modifier.size(size = DAY_CELL_DP.dp), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.size(size = DAY_CELL_DP.dp),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
                     text = initials,
                     style = MaterialTheme.typography.labelSmall,
@@ -133,8 +184,10 @@ private fun DayCell(
     date: CalendarDate?
 ) {
     val colors = MaterialTheme.colorScheme
+
     Box(modifier = Modifier.size(size = DAY_CELL_DP.dp).padding(all = DAY_INSET_DP.dp)) {
         if (date == null) return@Box
+
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -149,16 +202,24 @@ private fun DayCell(
                 .clickable(role = Role.Button) { onPick(date) },
             contentAlignment = Alignment.Center
         ) {
+            val textColor = when {
+                isSelected -> colors.onPrimary
+                isToday -> colors.primary
+                else -> colors.onSurface
+            }
+
+            val isMarked = isSelected || isToday
+            val fontWeight = if (isMarked) FontWeight.SemiBold else FontWeight.Normal
+
             Text(
                 text = date.day.toString(),
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontWeight = if (isSelected || isToday) FontWeight.SemiBold else FontWeight.Normal
-                ),
-                color = when {
-                    isSelected -> colors.onPrimary
-                    isToday -> colors.primary
-                    else -> colors.onSurface
-                }
+                style = MaterialTheme
+                    .typography
+                    .bodySmall
+                    .copy(
+                        fontWeight = fontWeight
+                    ),
+                color = textColor
             )
         }
     }
@@ -166,9 +227,7 @@ private fun DayCell(
 
 /** A hairline, then "Today", which picks today. */
 @Composable
-private fun TodayFooter(
-    onPick: () -> Unit
-) {
+private fun TodayFooter(onPick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -176,6 +235,7 @@ private fun TodayFooter(
             .height(height = NotekeaDimensions.BorderWidth)
             .background(color = MaterialTheme.colorScheme.outline)
     )
+
     NotekeaButton(
         text = stringResource(resource = Res.string.calendar_today),
         onClick = onPick,
@@ -184,12 +244,17 @@ private fun TodayFooter(
 }
 
 /** The days of [month]'s weeks, Monday to Sunday, with null before its first day and after its last. */
-private fun weeksOf(
-    month: CalendarDate
-): List<List<CalendarDate?>> {
+private fun weeksOf(month: CalendarDate): List<List<CalendarDate?>> {
     val leading = month.dayOfWeek - 1
+
     val days = List(size = leading) { null } +
-        (1..CalendarDate.lengthOfMonth(year = month.year, month = month.month)).map { month.copy(day = it) }
+        (
+            1..CalendarDate.lengthOfMonth(
+                year = month.year,
+                month = month.month
+            )
+            ).map { month.copy(day = it) }
+
     return days.chunked(size = CalendarDate.DAYS_IN_WEEK).map { week ->
         week + List(size = CalendarDate.DAYS_IN_WEEK - week.size) { null }
     }
@@ -201,6 +266,7 @@ private fun shifted(
     by: Int
 ): CalendarDate {
     val index = month.year * CalendarDate.MONTHS + month.month - 1 + by
+
     return CalendarDate(
         year = index.floorDiv(other = CalendarDate.MONTHS),
         month = index.mod(other = CalendarDate.MONTHS) + 1,
@@ -212,6 +278,10 @@ private fun shifted(
 @Composable
 private fun NotekeaCalendarPreview() {
     NotekeaPreviewThemes {
-        NotekeaCalendar(selected = PREVIEW_SELECTED, onPick = {}, today = PREVIEW_TODAY)
+        NotekeaCalendar(
+            selected = PREVIEW_SELECTED,
+            onPick = {},
+            today = PREVIEW_TODAY
+        )
     }
 }

@@ -6,8 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.vault.domain.Vault
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -25,11 +25,14 @@ fun WelcomeScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val vaultName = state.openedVault?.name
+
     LaunchedEffect(key1 = vaultName) { onVaultNameChange(vaultName) }
+
     WindowShortcut(
         shortcut = state.platformConventions.openFolderShortcut,
         onTrigger = { viewModel.onIntent(intent = WelcomeIntent.OnOpenFolderClick) }
     )
+
     WelcomeContent(
         state = state,
         onIntent = viewModel::onIntent,

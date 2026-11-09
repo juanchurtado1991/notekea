@@ -2,7 +2,7 @@ package app.notekea.core.presentation.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
-/** The colors of the graph's folders (`ROADMAP.md` 2.7): mid tones that read on light and dark surfaces alike. */
+/** The colors of the graph's folders: mid tones that read on light and dark surfaces alike. */
 object GraphPalette {
     private val colors = listOf(
         Color(color = 0xFF5FA88C),
@@ -16,7 +16,5 @@ object GraphPalette {
     )
 
     /** The color of the folder at [index], repeating when a vault has more folders than colors. */
-    fun colorAt(
-        index: Int
-    ): Color = colors[index.mod(other = colors.size)]
+    fun colorAt(index: Int): Color = colors[index.mod(other = colors.size)]
 }

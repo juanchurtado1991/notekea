@@ -12,11 +12,9 @@ import java.awt.GraphicsEnvironment
 import java.awt.HeadlessException
 
 /**
- * The main window's size (`ROADMAP.md` 1.11), the same for the welcome screen and a vault's workspace, so the window
- * never changes size by itself: large enough to show, as a vault opens, the tool rail, the sidebar, a note at a
- * readable width and the outline beside it, but never larger than the screen's usable area (without the taskbar or
- * dock), which comes from [usableArea] (none when there is no screen to ask), [system] asking the computer's. [screens]
- * are the screens connected now, as a window comes back only where one of them can show it.
+ * The main window's size, the same for the welcome screen and a vault's workspace: large enough for the tool rail, the
+ * sidebar, a note at a readable width and the outline, but never larger than the screen's usable area ([usableArea]).
+ * [screens] are those connected now: a window comes back only where one can show it.
  */
 class WindowSizes(
     private val usableArea: () -> DpSize?,
@@ -26,35 +24,58 @@ class WindowSizes(
     val initial: DpSize
         get() {
             val area = usableArea() ?: return WINDOW
-            return DpSize(width = minOf(WINDOW.width, area.width), height = minOf(WINDOW.height, area.height))
+
+            return DpSize(
+                width = minOf(WINDOW.width, area.width),
+                height = minOf(WINDOW.height, area.height)
+            )
         }
 
-    /** How the window opens: as it was [kept], on a screen that shows it and within its limits, or as the first time. */
-    fun opening(
-        kept: WindowBounds?
-    ): WindowOpening = WindowOpening(
-        placement = if (kept?.isMaximized == true) WindowPlacement.Maximized else WindowPlacement.Floating,
-        size = kept?.let { sizeOf(kept = it) } ?: initial,
-        position = kept?.let { positionOf(kept = it) } ?: WindowPosition.Aligned(alignment = Alignment.Center)
-    )
+    /**
+     * How the window opens: as it was [kept], on a screen that shows it and within its limits, or as the first time.
+     */
+    fun opening(kept: WindowBounds?): WindowOpening {
+        val isMaximized = kept?.isMaximized == true
+        val centered = WindowPosition.Aligned(alignment = Alignment.Center)
 
-    private fun sizeOf(
-        kept: WindowBounds
-    ): DpSize {
+        return WindowOpening(
+            placement = if (isMaximized) WindowPlacement.Maximized else WindowPlacement.Floating,
+            size = kept?.let { sizeOf(kept = it) } ?: initial,
+            position = kept?.let { positionOf(kept = it) } ?: centered
+        )
+    }
+
+    private fun sizeOf(kept: WindowBounds): DpSize {
         val area = usableArea() ?: WINDOW
+
         return DpSize(
-            width = kept.widthDp.dp.coerceIn(MINIMUM.width, maxOf(MINIMUM.width, area.width)),
-            height = kept.heightDp.dp.coerceIn(MINIMUM.height, maxOf(MINIMUM.height, area.height))
+            width = kept
+                .widthDp
+                .dp
+                .coerceIn(MINIMUM.width, maxOf(MINIMUM.width, area.width)),
+            height = kept
+                .heightDp
+                .dp
+                .coerceIn(MINIMUM.height, maxOf(MINIMUM.height, area.height))
         )
     }
 
     /** Where it was kept, if a screen still shows its title bar: a screen may be gone since the last run. */
-    private fun positionOf(
-        kept: WindowBounds
-    ): WindowPosition? {
+    private fun positionOf(kept: WindowBounds): WindowPosition? {
         val x = kept.xDp?.dp ?: return null
         val y = kept.yDp?.dp ?: return null
-        return WindowPosition.Absolute(x = x, y = y).takeIf { screens().any { it.shows(x = x, y = y) } }
+
+        return WindowPosition.Absolute(
+            x = x,
+            y = y
+        ).takeIf {
+            screens().any {
+                it.shows(
+                    x = x,
+                    y = y
+                )
+            }
+        }
     }
 
     private fun DpRect.shows(
@@ -64,31 +85,48 @@ class WindowSizes(
 
     companion object {
         /** The tool rail and a note at its narrowest (480 dp); below 760 dp the sidebar floats over the note. */
-        val MINIMUM = DpSize(width = 560.dp, height = 400.dp)
+        val MINIMUM = DpSize(
+            width = 560.dp,
+            height = 400.dp
+        )
         private val TITLE_BAR_GRIP = 16.dp
-        private val WINDOW = DpSize(width = 1440.dp, height = 900.dp)
+        private val WINDOW = DpSize(
+            width = 1440.dp,
+            height = 900.dp
+        )
 
         /** The sizes for this computer's main screen. */
-        val system = WindowSizes(usableArea = ::screenArea, screens = ::connectedScreens)
+        val system = WindowSizes(
+            usableArea = ::screenArea,
+            screens = ::connectedScreens
+        )
 
         /** The main screen's area without the taskbar or dock; none without a screen. */
         private fun screenArea(): DpSize? = try {
             val bounds = GraphicsEnvironment.getLocalGraphicsEnvironment().maximumWindowBounds
-            DpSize(width = bounds.width.dp, height = bounds.height.dp)
+
+            DpSize(
+                width = bounds.width.dp,
+                height = bounds.height.dp
+            )
         } catch (_: HeadlessException) {
             null
         }
 
         private fun connectedScreens(): List<DpRect> = try {
-            GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.map { screen ->
-                val bounds = screen.defaultConfiguration.bounds
-                DpRect(
-                    left = bounds.x.dp,
-                    top = bounds.y.dp,
-                    right = (bounds.x + bounds.width).dp,
-                    bottom = (bounds.y + bounds.height).dp
-                )
-            }
+            GraphicsEnvironment
+                .getLocalGraphicsEnvironment()
+                .screenDevices
+                .map { screen ->
+                    val bounds = screen.defaultConfiguration.bounds
+
+                    DpRect(
+                        left = bounds.x.dp,
+                        top = bounds.y.dp,
+                        right = (bounds.x + bounds.width).dp,
+                        bottom = (bounds.y + bounds.height).dp
+                    )
+                }
         } catch (_: HeadlessException) {
             emptyList()
         }

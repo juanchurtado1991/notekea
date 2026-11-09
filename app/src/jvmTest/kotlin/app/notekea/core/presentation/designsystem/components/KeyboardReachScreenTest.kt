@@ -10,11 +10,11 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.keyDown
 import app.notekea.core.presentation.keyUp
 import app.notekea.core.presentation.nodes
-import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
-import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -28,26 +28,47 @@ class KeyboardReachScreenTest {
     @Test
     fun `tab reaches the rail's bottom buttons, section headers, segments and bookmark rows`() {
         val reached = mutableListOf<String?>()
+
         UiThread.run {
             scene().use { scene ->
                 settle(scene = scene)
+
                 repeat(times = STOPS.size) {
                     scene.sendKeyEvent(event = keyDown(key = Key.Tab))
                     settle(scene = scene)
-                    reached += scene.nodes().firstOrNull { it.isFocused() }?.name()
+
+                    reached += scene
+                        .nodes()
+                        .firstOrNull { it.isFocused() }
+                        ?.name()
                 }
             }
         }
 
-        assertEquals(expected = STOPS, actual = reached.map { it.orEmpty() })
+        assertEquals(
+            expected = STOPS,
+            actual = reached.map { it.orEmpty() }
+        )
     }
 
     @Test
     fun `enter folds a header that has the keyboard`() {
         var folds = 0
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
-                NotekeaTheme(darkTheme = false) { NotekeaSectionHeader(title = HEADER, onToggle = { folds++ }) }
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
+                NotekeaTheme(darkTheme = false) {
+                    NotekeaSectionHeader(
+                        title = HEADER,
+                        onToggle = {
+                            folds++
+                        }
+                    )
+                }
             }.use { scene ->
                 settle(scene = scene)
                 scene.sendKeyEvent(event = keyDown(key = Key.Tab))
@@ -58,43 +79,88 @@ class KeyboardReachScreenTest {
             }
         }
 
-        assertEquals(expected = 1, actual = folds)
+        assertEquals(
+            expected = 1,
+            actual = folds
+        )
     }
 
-    private fun scene() = ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+    private fun scene() = ImageComposeScene(
+        width = WIDTH,
+        height = HEIGHT,
+        density = Density(density = 1f)
+    ) {
         NotekeaTheme(darkTheme = false) {
             Row {
                 NotekeaToolRail(
-                    items = listOf(NotekeaToolRailItem(icon = NotekeaIcons.Find, label = DAILY, onClick = {})),
+                    items = listOf(
+                        NotekeaToolRailItem(
+                            icon = NotekeaIcons.Find,
+                            label = DAILY,
+                            onClick = {}
+                        )
+                    ),
                     label = RAIL,
-                    bottomItems = listOf(NotekeaToolRailItem(icon = NotekeaIcons.Find, label = BOTTOM, onClick = {}))
+                    bottomItems = listOf(
+                        NotekeaToolRailItem(
+                            icon = NotekeaIcons.Find,
+                            label = BOTTOM,
+                            onClick = {}
+                        )
+                    )
                 )
+
                 Column {
-                    NotekeaSectionHeader(title = HEADER, onToggle = {})
+                    NotekeaSectionHeader(
+                        title = HEADER,
+                        onToggle = {}
+                    )
+
                     NotekeaSegmentedControl(
-                        segments = listOf(NotekeaSegment(icon = NotekeaIcons.Chat, label = SEGMENT)),
+                        segments = listOf(
+                            NotekeaSegment(
+                                icon = NotekeaIcons.Chat,
+                                label = SEGMENT
+                            )
+                        ),
                         selectedIndex = 0,
                         onSelect = {}
                     )
-                    NotekeaTreeItem(label = BOOKMARK, depth = 1, onClick = {}, icon = null, takesFocus = true)
-                    NotekeaTreeItem(label = TREE_ROW, depth = 1, onClick = {}, icon = null)
+
+                    NotekeaTreeItem(
+                        label = BOOKMARK,
+                        depth = 1,
+                        onClick = {},
+                        icon = null,
+                        takesFocus = true
+                    )
+
+                    NotekeaTreeItem(
+                        label = TREE_ROW,
+                        depth = 1,
+                        onClick = {},
+                        icon = null
+                    )
                 }
             }
         }
     }
 
-    private fun SemanticsNode.isFocused(): Boolean = config.getOrNull(SemanticsProperties.Focused) == true
+    private fun SemanticsNode.isFocused(): Boolean =
+        config.getOrNull(SemanticsProperties.Focused) == true
 
     /** What the node says, from itself or the text it holds. */
     private fun SemanticsNode.name(): String? {
         val own = config.getOrNull(SemanticsProperties.ContentDescription)?.firstOrNull()
-            ?: config.getOrNull(SemanticsProperties.Text)?.firstOrNull()?.text
+            ?: config
+                .getOrNull(SemanticsProperties.Text)
+                ?.firstOrNull()
+                ?.text
+
         return own ?: children.firstNotNullOfOrNull { it.name() }
     }
 
-    private fun settle(
-        scene: ImageComposeScene
-    ) {
+    private fun settle(scene: ImageComposeScene) {
         repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
     }
 

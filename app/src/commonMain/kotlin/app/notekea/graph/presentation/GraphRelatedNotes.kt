@@ -22,13 +22,33 @@ internal class GraphRelatedNotes(
         note: RelativePath,
         notes: Map<RelativePath, NoteEntry>
     ): List<RelativePath> {
-        remembered?.takeIf { it.first == note }?.let { return it.second }
+        remembered?.takeIf {
+            it.first == note
+        }?.let {
+            return it.second
+        }
+
         val entry = notes[note] ?: return emptyList()
-        val text = noteTextCache.textsOf(vaultPath = vaultPath, notes = listOf(entry))[note]?.body
+
+        val text = noteTextCache.textsOf(
+            vaultPath = vaultPath,
+            notes = listOf(entry)
+        )[note]?.body
             ?: return emptyList()
-        val found = findRelatedNotes(vaultPath, note, text, notes.keys) as? Outcome.Success ?: return emptyList()
-        val close = found.value.related.filter { it.score >= MIN_CLOSENESS }.map { it.path }
+
+        val found = findRelatedNotes(vaultPath, note, text, notes.keys) as? Outcome.Success
+            ?: return emptyList()
+
+        val close = found
+            .value
+            .related
+            .filter {
+                it.score >= MIN_CLOSENESS
+            }
+            .map { it.path }
+
         remembered = note to close
+
         return close
     }
 
@@ -38,9 +58,21 @@ internal class GraphRelatedNotes(
         graph: NoteGraph,
         notes: Map<RelativePath, NoteEntry>
     ): List<RelativePath> {
-        val joined = graph.neighbors()[note].orEmpty().toSet()
-        val paths = graph.nodes.mapTo(destination = HashSet()) { it.path }
-        return of(note = note, notes = notes).filter { it in paths && it !in joined }
+        val joined = graph
+            .neighbors()[note]
+            .orEmpty()
+            .toSet()
+
+        val paths = graph
+            .nodes
+            .mapTo(destination = HashSet()) { it.path }
+
+        return of(
+            note = note,
+            notes = notes
+        ).filter {
+            it in paths && it !in joined
+        }
     }
 
     fun forget() {

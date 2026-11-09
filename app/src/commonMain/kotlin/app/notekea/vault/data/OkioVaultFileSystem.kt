@@ -20,15 +20,16 @@ class OkioVaultFileSystem(
     private val dispatchers: AppDispatchers,
     private val homeDirectory: String
 ) : VaultFileSystem {
-    override suspend fun access(
-        path: String
-    ): FolderAccess = withContext(context = dispatchers.io) { accessOf(folder = path.toPath()) }
+    override suspend fun access(path: String): FolderAccess = withContext(
+        context = dispatchers.io
+    ) { accessOf(folder = path.toPath()) }
 
     override suspend fun createFolder(
         parentPath: String,
         name: String
     ): Outcome<String, VaultError> = withContext(context = dispatchers.io) {
         val folder = parentPath.toPath() / name
+
         when {
             accessOf(folder = parentPath.toPath()) != FolderAccess.AVAILABLE -> {
                 Outcome.Failure(error = VaultError.FolderMissing(path = parentPath))
@@ -49,9 +50,7 @@ class OkioVaultFileSystem(
         if (isDirectory(path = documents)) documents.toString() else homeDirectory
     }
 
-    private fun accessOf(
-        folder: Path
-    ): FolderAccess = try {
+    private fun accessOf(folder: Path): FolderAccess = try {
         if (isDirectory(path = folder)) {
             fileSystem.list(dir = folder)
             FolderAccess.AVAILABLE
@@ -62,26 +61,23 @@ class OkioVaultFileSystem(
         FolderAccess.NOT_READABLE
     }
 
-    private fun createDirectories(
-        folder: Path
-    ): Outcome<String, VaultError> = try {
+    private fun createDirectories(folder: Path): Outcome<String, VaultError> = try {
         fileSystem.createDirectories(dir = folder)
         Outcome.Success(value = folder.toString())
     } catch (_: IOException) {
         Outcome.Failure(error = VaultError.CreationFailed(path = folder.toString()))
     }
 
-    private fun isDirectory(
-        path: Path
-    ): Boolean = fileSystem.metadataOrNull(path = path)?.isDirectory == true
+    private fun isDirectory(path: Path): Boolean =
+        fileSystem.metadataOrNull(path = path)?.isDirectory == true
 
-    private fun isEmptyFolder(
-        folder: Path
-    ): Boolean = isDirectory(path = folder) && listOrEmpty(folder = folder).isEmpty()
+    private fun isEmptyFolder(folder: Path): Boolean = isDirectory(
+        path = folder
+    ) && listOrEmpty(folder = folder).isEmpty()
 
-    private fun listOrEmpty(
-        folder: Path
-    ): List<Path> = fileSystem.listOrNull(dir = folder).orEmpty()
+    private fun listOrEmpty(folder: Path): List<Path> = fileSystem.listOrNull(
+        dir = folder
+    ).orEmpty()
 
     companion object {
         private const val DOCUMENTS_FOLDER = "Documents"

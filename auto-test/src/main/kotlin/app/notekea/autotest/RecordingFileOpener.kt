@@ -14,6 +14,7 @@ class RecordingFileOpener : FileOpener {
         path: RelativePath
     ): Outcome<Unit, NotesError> {
         opened += path
+
         return Outcome.Success(value = Unit)
     }
 }

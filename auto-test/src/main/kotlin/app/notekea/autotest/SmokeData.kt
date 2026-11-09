@@ -20,7 +20,12 @@ object SmokeData {
         val root = Files.createTempDirectory(TEMP_PREFIX)
         val bundle = BundledSmokeData.extract(target = root.resolve("bundle"))
         val data = root.resolve("data")
-        SmokeScenarios(smokeData = bundle, scratch = data).prepare()
+
+        SmokeScenarios(
+            smokeData = bundle,
+            scratch = data
+        ).prepare()
+
         Files.list(bundle.resolve("vaults")).use { vaults ->
             vaults.forEach {
                 it.copyToRecursively(
@@ -30,6 +35,7 @@ object SmokeData {
                 )
             }
         }
+
         return data
     }
 }

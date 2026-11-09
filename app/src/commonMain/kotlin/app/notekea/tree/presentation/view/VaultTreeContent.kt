@@ -1,15 +1,8 @@
 package app.notekea.tree.presentation.view
 
 import androidx.compose.foundation.layout.BoxWithConstraints
-import app.notekea.tree.presentation.filepreview.NoteDetailsPanel
-import app.notekea.tree.presentation.filepreview.PreviewNoteContent
-import app.notekea.tree.presentation.model.TreeNotice
-import app.notekea.tree.presentation.model.TreePreviewData
-import app.notekea.tree.presentation.VaultSidebar
-import app.notekea.tree.presentation.model.VaultTreeIntent
-import app.notekea.tree.presentation.model.VaultTreeState
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -18,10 +11,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.components.NotekeaSplitPane
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
-import app.notekea.core.notes.domain.RelativePath
 import app.notekea.tree.domain.TreePreferences
+import app.notekea.tree.presentation.VaultSidebar
+import app.notekea.tree.presentation.filepreview.NoteDetailsPanel
+import app.notekea.tree.presentation.filepreview.PreviewNoteContent
+import app.notekea.tree.presentation.model.TreeNotice
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.model.VaultTreeState
 import kotlin.math.roundToInt
 
 private const val PREVIEW_HEIGHT_DP = 480
@@ -31,7 +31,7 @@ private const val PREVIEW_WIDTH_DP = 900
 /**
  * Stateless vault workspace: the tool rail on the left edge (its buttons beyond the tree doing [rail]'s actions, the
  * side panel's selected while [isSidePanelVisible]), the resizable, hideable sidebar with the tree and, beside it,
- * [content]: the editor's tabs and panes (`ROADMAP.md` 1.11); in a narrow window the sidebar floats over them. The delete question is shown over both while it waits for an answer.
+ * [content]: the editor's tabs and panes. In a narrow window the sidebar floats over them.
  */
 @Composable
 fun VaultTreeContent(
@@ -50,24 +50,46 @@ fun VaultTreeContent(
     ) {
         BoxWithConstraints {
             val isOverlay = maxWidth < TreePreferences.SIDEBAR_OVERLAY_BELOW_DP.dp
+
             Row {
-                SidebarRail(state = state, onIntent = onIntent, actions = rail, isSidePanelVisible = isSidePanelVisible)
+                SidebarRail(
+                    state = state,
+                    onIntent = onIntent,
+                    actions = rail,
+                    isSidePanelVisible = isSidePanelVisible
+                )
+
                 NotekeaSplitPane(
                     panelWidth = state.sidebarWidthDp.dp,
-                    onPanelWidthChange = { onIntent(VaultTreeIntent.OnSidebarResize(widthDp = it.value.roundToInt())) },
+                    onPanelWidthChange = {
+                        onIntent(VaultTreeIntent.OnSidebarResize(widthDp = it.value.roundToInt()))
+                    },
                     isPanelVisible = !state.isSidebarCollapsed,
                     minPanelWidth = TreePreferences.MIN_SIDEBAR_WIDTH_DP.dp,
                     maxPanelWidth = TreePreferences.MAX_SIDEBAR_WIDTH_DP.dp,
                     panel = {
-                        VaultSidebar(state = state, vaultName = vaultName, onIntent = onIntent)
+                        VaultSidebar(
+                            state = state,
+                            vaultName = vaultName,
+                            onIntent = onIntent
+                        )
                     },
-                    content = { NoteDetailsPanel(state = state, content = content) },
+                    content = {
+                        NoteDetailsPanel(
+                            state = state,
+                            content = content
+                        )
+                    },
                     isOverlay = isOverlay
                 )
             }
         }
     }
-    TreeQuestions(state = state, onIntent = onIntent)
+
+    TreeQuestions(
+        state = state,
+        onIntent = onIntent
+    )
 }
 
 @Composable
@@ -111,19 +133,26 @@ private fun VaultTreeContentPreview() {
 @Preview
 @Composable
 private fun VaultTreeContentNarrowWindowPreview() {
-    VaultTreeContentPreviewFrame(state = TreePreviewData.state(), widthDp = PREVIEW_NARROW_WIDTH_DP)
+    VaultTreeContentPreviewFrame(
+        state = TreePreviewData.state(),
+        widthDp = PREVIEW_NARROW_WIDTH_DP
+    )
 }
 
 @Preview
 @Composable
 private fun VaultTreeContentLoadingPreview() {
-    VaultTreeContentPreviewFrame(state = TreePreviewData.state(selected = null).copy(isLoading = true))
+    VaultTreeContentPreviewFrame(
+        state = TreePreviewData.state(selected = null).copy(isLoading = true)
+    )
 }
 
 @Preview
 @Composable
 private fun VaultTreeContentEmptyPreview() {
-    VaultTreeContentPreviewFrame(state = TreePreviewData.state(selected = null).copy(rows = emptyList()))
+    VaultTreeContentPreviewFrame(
+        state = TreePreviewData.state(selected = null).copy(rows = emptyList())
+    )
 }
 
 @Preview
@@ -137,7 +166,10 @@ private fun VaultTreeContentSidebarHiddenPreview() {
 private fun VaultTreeContentLinksUpdatedPreview() {
     VaultTreeContentPreviewFrame(
         state = TreePreviewData.state().copy(
-            notice = TreeNotice.LinksUpdated(notes = listOf("2026-10-20", "Welcome"), skippedCount = 0)
+            notice = TreeNotice.LinksUpdated(
+                notes = listOf("2026-10-20", "Welcome"),
+                skippedCount = 0
+            )
         )
     )
 }
@@ -145,5 +177,7 @@ private fun VaultTreeContentLinksUpdatedPreview() {
 @Preview
 @Composable
 private fun VaultTreeContentDeletePreview() {
-    VaultTreeContentPreviewFrame(state = TreePreviewData.state().copy(pendingDelete = RelativePath(value = "Projects")))
+    VaultTreeContentPreviewFrame(
+        state = TreePreviewData.state().copy(pendingDelete = RelativePath(value = "Projects"))
+    )
 }

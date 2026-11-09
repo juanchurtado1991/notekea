@@ -12,13 +12,13 @@ import app.notekea.core.platform.domain.FakeSystemEnvironment
 import app.notekea.core.platform.domain.SystemAppearance
 import app.notekea.core.platform.domain.SystemMotion
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.designsystem.theme.LocalAppearance
+import app.notekea.core.presentation.designsystem.theme.LocalSystemDarkTheme
+import app.notekea.core.presentation.designsystem.theme.LocalSystemReduceMotion
 import app.notekea.core.presentation.platform.AppEnvironment
 import app.notekea.core.presentation.platform.LocalAppVersion
 import app.notekea.core.presentation.platform.LocalFileDrop
 import app.notekea.core.presentation.platform.LocalResizePointerIcon
-import app.notekea.core.presentation.designsystem.theme.LocalAppearance
-import app.notekea.core.presentation.designsystem.theme.LocalSystemDarkTheme
-import app.notekea.core.presentation.designsystem.theme.LocalSystemReduceMotion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlin.test.Test
@@ -35,7 +35,10 @@ class NotekeaAppLocalsTest {
         systemMotion = object : SystemMotion {
             override suspend fun isReduced(): Boolean = true
         },
-        systemEnvironment = FakeSystemEnvironment(operatingSystemName = "Linux", userHome = "/home/ana"),
+        systemEnvironment = FakeSystemEnvironment(
+            operatingSystemName = "Linux",
+            userHome = "/home/ana"
+        ),
         appearanceStore = FakeAppearanceStore(initial = appearance)
     )
 
@@ -44,6 +47,7 @@ class NotekeaAppLocalsTest {
         var seen: List<Any?> = emptyList()
         var cursor: PointerIcon = PointerIcon.Hand
         var fileDrop: Modifier = Modifier
+
         render {
             seen = listOf(
                 LocalSystemDarkTheme.current,
@@ -51,6 +55,7 @@ class NotekeaAppLocalsTest {
                 LocalAppearance.current,
                 LocalAppVersion.current
             )
+
             cursor = LocalResizePointerIcon.current
             fileDrop = LocalFileDrop.current {}
         }
@@ -59,23 +64,32 @@ class NotekeaAppLocalsTest {
             expected = listOf(true, true, appearance, "1.0.0"),
             actual = seen
         )
+
         assertNotEquals(
             illegal = PointerIcon.Hand,
             actual = cursor
         )
+
         assertNotEquals(
             illegal = Modifier,
             actual = fileDrop
         )
     }
 
-    private fun render(
-        content: @Composable () -> Unit
-    ) {
+    private fun render(content: @Composable () -> Unit) {
         UiThread.run {
-            ImageComposeScene(width = SIZE, height = SIZE) {
-                NotekeaAppLocals(environment = environment, initialAppearance = Appearance(), content = content)
-            }.use { scene -> repeat(times = FRAMES) { scene.render(nanoTime = it * FRAME_NANOS) } }
+            ImageComposeScene(
+                width = SIZE,
+                height = SIZE
+            ) {
+                NotekeaAppLocals(
+                    environment = environment,
+                    initialAppearance = Appearance(),
+                    content = content
+                )
+            }.use { scene ->
+                repeat(times = FRAMES) { scene.render(nanoTime = it * FRAME_NANOS) }
+            }
         }
     }
 

@@ -12,7 +12,10 @@ class RetrievalEvalSetTest {
     @Test
     fun `it holds 50 questions on the Sample Vault and 30 on the Ghost Serializer vault`() {
         assertEquals(
-            expected = mapOf(RetrievalEvalSet.SAMPLE_VAULT to 50, RetrievalEvalSet.GHOST_VAULT to 30),
+            expected = mapOf(
+                RetrievalEvalSet.SAMPLE_VAULT to 50,
+                RetrievalEvalSet.GHOST_VAULT to 30
+            ),
             actual = questions.groupingBy { it.vault }.eachCount()
         )
     }
@@ -20,24 +23,49 @@ class RetrievalEvalSetTest {
     @Test
     fun `every question is different, and every expected note exists`() {
         val missing = questions.flatMap { question ->
-            question.notes.filterNot { noteOf(question = question, path = it).isFile }
+            question.notes.filterNot {
+                noteOf(
+                    question = question,
+                    path = it
+                ).isFile
+            }
         }
 
-        assertEquals(expected = emptyList(), actual = missing)
-        assertEquals(expected = questions.size, actual = questions.map { it.question }.distinct().size)
+        assertEquals(
+            expected = emptyList(),
+            actual = missing
+        )
+
+        assertEquals(
+            expected = questions.size,
+            actual = questions
+                .map { it.question }
+                .distinct()
+                .size
+        )
     }
 
     @Test
     fun `every expected heading is in its note`() {
         val missing = questions.filter { question ->
             val heading = question.heading
+
             heading != null && question.notes.none { path ->
-                val text = noteOf(question = question, path = path).readText()
-                OutlineFinder().headings(text = text).any { it.text == heading }
+                val text = noteOf(
+                    question = question,
+                    path = path
+                ).readText()
+
+                OutlineFinder().headings(text = text).any {
+                    it.text == heading
+                }
             }
         }
 
-        assertEquals(expected = emptyList(), actual = missing)
+        assertEquals(
+            expected = emptyList(),
+            actual = missing
+        )
     }
 
     private fun noteOf(

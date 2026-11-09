@@ -4,7 +4,5 @@ package app.notekea.core.appearance.domain
 interface UiScaleStore {
     suspend fun scale(): Float
 
-    suspend fun setScale(
-        scale: Float
-    )
+    suspend fun setScale(scale: Float)
 }

@@ -2,6 +2,7 @@ package app.notekea.tree.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.time.CalendarDate
+import app.notekea.core.notes.data.GhostFrontmatterParser
 import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteProperty
@@ -14,7 +15,6 @@ import okio.Path.Companion.toPath
 import okio.fakefilesystem.FakeFileSystem
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.core.notes.data.GhostFrontmatterParser
 
 class OkioNoteMetadataReaderTest {
     private val testDispatcher = StandardTestDispatcher()
@@ -26,21 +26,37 @@ class OkioNoteMetadataReaderTest {
     )
 
     @Test
-    fun `every property keeps its type, and frontmatter that is not properties gives none`() = runReaderTest {
-        writeNote(content = "---\nrating: 4\nfinished: true\nread: 2026-03-02\nauthor: Frank\n---\nDune\n")
-        val typed = readNote()?.properties
-        writeNote(content = "---\nrating: 4\nnot a property\n---\nDune\n")
+    fun `every property keeps its type, and frontmatter that is not properties gives none`() =
+        runReaderTest {
+            writeNote(
+                content = "---\nrating: 4\nfinished: true\nread: 2026-03-02\nauthor: Frank\n---\nDune\n"
+            )
 
-        assertEquals(
-            expected = listOf(
-                NoteProperty(key = "rating", value = PropertyValue.Number(text = "4")),
-                NoteProperty(key = "finished", value = PropertyValue.Checkbox(isChecked = true)),
-                NoteProperty(key = "read", value = PropertyValue.Date(date = CalendarDate(2026, 3, 2))),
-                NoteProperty(key = "author", value = PropertyValue.Text(text = "Frank"))
-            ) to emptyList(),
-            actual = typed to readNote()?.properties
-        )
-    }
+            val typed = readNote()?.properties
+            writeNote(content = "---\nrating: 4\nnot a property\n---\nDune\n")
+
+            assertEquals(
+                expected = listOf(
+                    NoteProperty(
+                        key = "rating",
+                        value = PropertyValue.Number(text = "4")
+                    ),
+                    NoteProperty(
+                        key = "finished",
+                        value = PropertyValue.Checkbox(isChecked = true)
+                    ),
+                    NoteProperty(
+                        key = "read",
+                        value = PropertyValue.Date(date = CalendarDate(2026, 3, 2))
+                    ),
+                    NoteProperty(
+                        key = "author",
+                        value = PropertyValue.Text(text = "Frank")
+                    )
+                ) to emptyList(),
+                actual = typed to readNote()?.properties
+            )
+        }
 
     @Test
     fun `a task's place is in the note's body, with or without frontmatter, and with Windows line breaks`() =
@@ -55,27 +71,36 @@ class OkioNoteMetadataReaderTest {
                 val task = requireNotNull(readNote()).tasks.single()
                 val body = NoteDocument.fromText(text = content).body
 
-                assertEquals(expected = "- [ ] Write", actual = body.substring(task.stateIndex - 3, task.endIndex))
+                assertEquals(
+                    expected = "- [ ] Write",
+                    actual = body.substring(task.stateIndex - 3, task.endIndex)
+                )
             }
         }
 
     @Test
-    fun `frontmatter at the top of a note is read, and the body only for its tags`() = runReaderTest {
-        writeNote(content = "---\ntags: [travel]\n---\n\n# Lisbon trip #trip\n\n---\ntags: [body]\n---\n")
+    fun `frontmatter at the top of a note is read, and the body only for its tags`() =
+        runReaderTest {
+            writeNote(
+                content = "---\ntags: [travel]\n---\n\n# Lisbon trip #trip\n\n---\ntags: [body]\n---\n"
+            )
 
-        assertEquals(
-            expected = NoteMetadata(
-                tags = listOf("travel"),
-                aliases = emptyList(),
-                title = null,
-                textTags = listOf("trip"),
-                properties = listOf(
-                    NoteProperty(key = "tags", value = PropertyValue.Items(items = listOf("travel")))
-                )
-            ),
-            actual = readNote()
-        )
-    }
+            assertEquals(
+                expected = NoteMetadata(
+                    tags = listOf("travel"),
+                    aliases = emptyList(),
+                    title = null,
+                    textTags = listOf("trip"),
+                    properties = listOf(
+                        NoteProperty(
+                            key = "tags",
+                            value = PropertyValue.Items(items = listOf("travel"))
+                        )
+                    )
+                ),
+                actual = readNote()
+            )
+        }
 
     @Test
     fun `a note without frontmatter keeps the tags of its first line`() = runReaderTest {
@@ -88,14 +113,15 @@ class OkioNoteMetadataReaderTest {
     }
 
     @Test
-    fun `windows line endings, a byte order mark and a dots closing fence are accepted`() = runReaderTest {
-        writeNote(content = "\uFEFF---\r\ntitle: Arepas\r\n...\r\nBody\r\n")
+    fun `windows line endings, a byte order mark and a dots closing fence are accepted`() =
+        runReaderTest {
+            writeNote(content = "\uFEFF---\r\ntitle: Arepas\r\n...\r\nBody\r\n")
 
-        assertEquals(
-            expected = "Arepas",
-            actual = readNote()?.title
-        )
-    }
+            assertEquals(
+                expected = "Arepas",
+                actual = readNote()?.title
+            )
+        }
 
     @Test
     fun `no frontmatter, a late fence or an unclosed block mean no metadata`() = runReaderTest {
@@ -130,19 +156,23 @@ class OkioNoteMetadataReaderTest {
     fun `a note that cannot be read gives no metadata at all`() = runReaderTest {
         assertEquals(
             expected = null,
-            actual = reader.read(vaultPath = VAULT, path = RelativePath(value = "Gone.md"))
+            actual = reader.read(
+                vaultPath = VAULT,
+                path = RelativePath(value = "Gone.md")
+            )
         )
     }
 
-    private suspend fun readNote(): NoteMetadata? = reader.read(vaultPath = VAULT, path = RelativePath(value = NOTE))
+    private suspend fun readNote(): NoteMetadata? = reader.read(
+        vaultPath = VAULT,
+        path = RelativePath(value = NOTE)
+    )
 
-    private fun runReaderTest(
-        block: suspend TestScope.() -> Unit
-    ) = runTest(context = testDispatcher) { block() }
+    private fun runReaderTest(block: suspend TestScope.() -> Unit) = runTest(
+        context = testDispatcher
+    ) { block() }
 
-    private fun writeNote(
-        content: String
-    ) {
+    private fun writeNote(content: String) {
         fakeFileSystem.createDirectories(dir = VAULT.toPath())
         fakeFileSystem.write(file = VAULT.toPath() / NOTE) { writeUtf8(string = content) }
     }
