@@ -4,6 +4,7 @@ import kotlin.math.sign
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class NaturalNameComparatorTest {
     private val comparator = NaturalNameComparator()
@@ -76,13 +77,33 @@ class NaturalNameComparatorTest {
         }
     }
 
+    @Test
+    fun `the order holds across three names when one has digits of another script`() {
+        val random = Random(seed = SEED)
+
+        repeat(times = NAME_COUNT) {
+            val (a, b, c) = List(size = TRIPLE) { randomName(random = random) }
+            val isChain = comparator.compare(a, b) < 0 && comparator.compare(b, c) < 0
+
+            if (isChain) {
+                assertTrue(
+                    actual = comparator.compare(a, c) < 0,
+                    message = "\"$a\" < \"$b\" < \"$c\", but \"$a\" is not before \"$c\""
+                )
+            }
+        }
+    }
+
     private fun randomName(random: Random): String = String(
         CharArray(size = random.nextInt(until = MAX_NAME_LENGTH)) {
             ALPHABET.random(random = random)
         }
     )
 
-    /** The comparison before 1.18, with its pattern, kept to prove the faster one orders names the same way. */
+    /**
+     * The comparison before 1.18, with its pattern, kept to prove the faster one orders names the same way; only
+     * ASCII digits are numbers, as its pattern reads them.
+     */
     private fun referenceCompare(
         a: String,
         b: String
@@ -98,7 +119,7 @@ class NaturalNameComparatorTest {
             .toList()
 
         chunksA.zip(chunksB).forEach { (chunkA, chunkB) ->
-            val areNumbers = chunkA.first().isDigit() && chunkB.first().isDigit()
+            val areNumbers = chunkA.first() in ASCII_DIGITS && chunkB.first() in ASCII_DIGITS
 
             val result = if (areNumbers) {
                 compareValuesBy(chunkA.trimStart('0'), chunkB.trimStart('0'), { it.length }, { it })
@@ -116,9 +137,11 @@ class NaturalNameComparatorTest {
 
     companion object {
         private const val ALPHABET = "aAzZ0019 -_.éÉİıß٣"
+        private val ASCII_DIGITS = '0'..'9'
         private const val MAX_NAME_LENGTH = 8
         private const val NAME_COUNT = 20_000
         private const val SEED = 118
+        private const val TRIPLE = 3
         private val CHUNK = Regex(pattern = "\\d+|\\D+")
     }
 }

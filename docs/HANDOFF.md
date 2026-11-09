@@ -3,7 +3,8 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-09, with 3.1 Model manager in review.
+Last updated: 2026-11-09, with the code layout rules (`GUIDELINES.md` §6 *Layout*, the `:ktlint-rules` module) in
+review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
 
 ## Milestones
 
