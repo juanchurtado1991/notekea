@@ -488,3 +488,19 @@ The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly: `
 | 2.11-03 | Check Record a demo video in the tab; click Show done and uncheck it | It leaves the list at once and its note holds `- [x] Record a demo video`; unchecked, its note holds `- [ ]` again and Hide done lists it | 2.11 | Self-Test | 2.11-03 | | | |
 | 2.11-04 | Change a task's text in another editor and save | The tab shows the new text within a second | 2.11 | Manual (system) | `NoteTaskCollectorTest` | | | |
 | 2.11-05 | Click the text of Find a flat near the river | Projects/Trip to Lisbon opens with that task selected | 2.11 | Self-Test | 2.11-05 | | | |
+
+## M3 — Chat with citations
+
+### 3.1 Model manager
+
+The cases run in `smoke-data/vaults/Playground Vault`, prepared with `smoke.sh prepare` (`smoke.ps1 prepare` on
+Windows). The downloads come from Hugging Face: 3.1-02 and 3.1-03 download up to 3.2 GB (Medium and its reranker) or
+6.1 GB (Large), so they need a connection and the disk space.
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 3.1-01 | In the Playground Vault open Settings and click AI model; click Other sizes | One size is marked Recommended (Small on 8 GB, Medium on 16 GB, Large on 32 GB or with a GPU of 8 GB and 16 GB of memory), with Download; Other sizes shows the other two, and a size this computer lacks the memory for says how much it needs | 3.1 | Self-Test | 3.1-01 | | | |
+| 3.1-02 | Click Download on the recommended size; at a quarter click Pause, press Esc and open AI model again; click Resume and wait | The bar grows with the gigabytes done of the total and the speed ("1.9 GB of 3.2 GB · 24.5 MB/s"); paused it stays where it was, also after closing Settings; Resume goes on from there, shows Checking the file… and the card ends In use, with Delete | 3.1 | Manual (costly) | `InstallModelUseCaseTest`, `CoroutineModelInstallerTest`, `ModelFilesOnDiskTest`, `ModelManagerScreenTest` | | | |
+| 3.1-03 | On the model in use (download one first if none is) click Delete, then Cancel; click Delete again and confirm | Cancel keeps the model; confirming deletes it, the card shows Download again and no size is In use | 3.1 | Manual (costly) | `ModelManagerViewModelTest`, `ModelManagerScreenTest`, `ModelFilesOnDiskTest` | | | |
+| 3.1-04 | Start a download, turn the network off for half a minute, turn it on and click Try again | The download stops with a message to check the connection and Try again; it goes on from where it stopped | 3.1 | Manual (system) | `ModelFilesOnDiskTest`, `InstallModelUseCaseTest` | | | |
+| 3.1-05 | Click Download on the card shown first; when the bar moves click Pause, then Cancel | The bar shows the gigabytes done of the total; paused it says Paused with Resume; Cancel ends it, the card shows Download again and nothing of it stays in the models folder | 3.1 | Self-Test | 3.1-05 | | | |

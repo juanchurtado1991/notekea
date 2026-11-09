@@ -78,6 +78,8 @@ kotlin {
 
             implementation(libs.directory.watcher)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.okhttp)
             implementation(libs.llama)
             implementation(LlamaNatives.dependency(library = libs.llama.get()))
             implementation(libs.lucene.core)

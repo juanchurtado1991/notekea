@@ -38,7 +38,11 @@ class AppearanceSettingsScreenTest {
         UiThread.run {
             ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
                 NotekeaTheme(darkTheme = false) {
-                    SettingsDialog(onDismiss = {}, viewModel = AppearanceViewModel(appearanceStore = store))
+                    SettingsDialog(
+                        onDismiss = {},
+                        aiModelSection = {},
+                        viewModel = AppearanceViewModel(appearanceStore = store)
+                    )
                 }
             }.use { scene ->
                 settle(scene = scene)

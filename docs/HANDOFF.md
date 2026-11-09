@@ -3,7 +3,7 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-08, with the answer quality spike in review.
+Last updated: 2026-11-09, with 3.1 Model manager in review.
 
 ## Milestones
 
@@ -22,14 +22,16 @@ Last updated: 2026-11-08, with the answer quality spike in review.
 - **M3 — Chat with citations:** started. **3.0 Parallel inference spike** (#129) is done
   (`docs/spikes/2026-11-07-llm-parallel.md`, Linux only): Qwen3.5 2B, 4B and 9B as Small, Medium and Large,
   bge-reranker-v2-m3, Vulkan or Metal for the GPU, no mmap on the CPU, slots 1 / 2 / 4 by memory. Preliminary until
-  3.4. The **answer quality spike** (`docs/spikes/2026-11-08-answer-quality.md`) is in review: answering in one call
+  3.4. The **answer quality spike** (`docs/spikes/2026-11-08-answer-quality.md`) (#130) is done: answering in one call
   beats the extraction pipeline on every model; Small is right 53 % and wrong 13 %, Medium right 71 % and wrong 3 %;
   the reranker gate moves from −5 to −8; parallel calls and judges did not improve Small, and voting over 3 drafts
   helped only Medium (3.6's starting point). A **model tournament** on 504 questions
   (`docs/spikes/2026-11-08-model-tournament.md`) kept Qwen3.5 2B, 4B and 9B against five other open models. On 8 GB,
-  Small answers with its sources first and a line asking to check them (decided 2026-11-08, in 3.3). Next: 3.1 Model
-  manager and 3.2 Chat engine, which must fit chatting with the Small model under 2.5 GB (the spike's estimate is
-  2.7–3.0 GB).
+  Small answers with its sources first and a line asking to check them (decided 2026-11-08, in 3.3). **3.1 Model
+  manager** (#132) is done: Settings → AI model downloads the recommended size and the reranker from pinned Hugging
+  Face commits, checked by SHA-256, into the app data's `models` folder (`app.notekea.models`). Next: 3.2 Chat engine,
+  which reads the model in use from `ActiveModelStore` and must fit chatting with the Small model under 2.5 GB (the
+  spike's estimate is 2.7–3.0 GB).
 
 ## Open work, in order
 
