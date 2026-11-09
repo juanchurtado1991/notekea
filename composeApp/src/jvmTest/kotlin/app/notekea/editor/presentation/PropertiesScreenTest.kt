@@ -1,6 +1,10 @@
 package app.notekea.editor.presentation
 
 import androidx.compose.foundation.text.input.TextFieldState
+import app.notekea.editor.presentation.view.EditorContent
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorState
+import app.notekea.editor.presentation.model.PropertyIntent
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.geometry.Offset
@@ -12,8 +16,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.preview.PreviewPlatformConventions
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.notes.domain.FrontmatterContent
 import app.notekea.core.notes.domain.FrontmatterReader
 import app.notekea.core.notes.domain.PropertyValue

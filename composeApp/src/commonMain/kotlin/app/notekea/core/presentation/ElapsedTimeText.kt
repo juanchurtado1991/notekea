@@ -4,7 +4,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.domain.time.ElapsedTime
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.resources.Res
 import app.notekea.resources.elapsed_days
 import app.notekea.resources.elapsed_hours

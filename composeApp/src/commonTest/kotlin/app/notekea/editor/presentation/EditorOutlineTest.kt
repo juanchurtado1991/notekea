@@ -1,6 +1,9 @@
 package app.notekea.editor.presentation
 
 import androidx.compose.runtime.snapshots.Snapshot
+import app.notekea.editor.presentation.model.EditorEffect
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import androidx.compose.ui.text.TextRange
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.notes.domain.NoteFixtures.file

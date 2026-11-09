@@ -13,11 +13,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.core.presentation.components.EmptyState
-import app.notekea.core.presentation.components.NotekeaPalette
-import app.notekea.core.presentation.components.NotekeaPaletteItem
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.components.EmptyState
+import app.notekea.core.presentation.designsystem.components.NotekeaPalette
+import app.notekea.core.presentation.designsystem.components.NotekeaPaletteItem
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
 import app.notekea.resources.tag_picker_empty_message
 import app.notekea.resources.tag_picker_empty_title

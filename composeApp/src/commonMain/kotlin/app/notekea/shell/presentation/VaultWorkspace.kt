@@ -10,18 +10,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.presentation.components.EmptyState
+import app.notekea.core.presentation.designsystem.components.EmptyState
 import app.notekea.core.presentation.platform.LocalWindowDialogs
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.tree.domain.FolderCards
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.editor.presentation.EditorIntent
-import app.notekea.editor.presentation.EditorPaneTools
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.view.EditorPaneTools
 import app.notekea.editor.presentation.EditorScreen
-import app.notekea.editor.presentation.SidePanelHost
-import app.notekea.editor.presentation.WithSidePanel
+import app.notekea.editor.presentation.sidepanel.SidePanelHost
+import app.notekea.editor.presentation.sidepanel.WithSidePanel
 import app.notekea.graph.presentation.GraphContent
 import app.notekea.graph.presentation.GraphInspector
 import app.notekea.query.presentation.QueryContent
@@ -37,20 +37,20 @@ import app.notekea.resources.Res
 import app.notekea.resources.tab_missing_message
 import app.notekea.resources.tab_missing_title
 import org.jetbrains.compose.resources.stringResource
-import app.notekea.editor.presentation.SaveStatus
-import app.notekea.editor.presentation.EditorViewModel
+import app.notekea.editor.presentation.model.SaveStatus
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
 import app.notekea.resources.tree_untitled_note
 import app.notekea.shell.presentation.WorkspaceStartActions
-import app.notekea.tree.presentation.EntryMenuArea
-import app.notekea.tree.presentation.FileDetails
-import app.notekea.tree.presentation.FilePreview
-import app.notekea.tree.presentation.PreviewNoteContent
-import app.notekea.tree.presentation.SidebarRailActions
-import app.notekea.tree.presentation.TreePreviewData
-import app.notekea.tree.presentation.VaultTreeContent
-import app.notekea.tree.presentation.VaultTreeIntent
-import app.notekea.tree.presentation.VaultTreeState
-import app.notekea.tree.presentation.asTreeRow
+import app.notekea.tree.presentation.view.EntryMenuArea
+import app.notekea.tree.presentation.filepreview.FileDetails
+import app.notekea.tree.presentation.filepreview.FilePreview
+import app.notekea.tree.presentation.filepreview.PreviewNoteContent
+import app.notekea.tree.presentation.view.SidebarRailActions
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.view.VaultTreeContent
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.model.VaultTreeState
+import app.notekea.tree.presentation.view.asTreeRow
 
 /**
  * The vault's sidebar beside the editor's tabs and panes (`ROADMAP.md` 1.11), with the side panel of the active pane's

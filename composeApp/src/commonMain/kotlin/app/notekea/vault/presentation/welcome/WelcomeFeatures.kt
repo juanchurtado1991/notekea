@@ -15,10 +15,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.core.presentation.components.NotekeaCard
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.core.presentation.theme.NotekeaIcons
+import app.notekea.core.presentation.designsystem.components.NotekeaCard
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res
 import app.notekea.resources.welcome_feature_ai_text
 import app.notekea.resources.welcome_feature_ai_title

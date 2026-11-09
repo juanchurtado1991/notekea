@@ -6,8 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.TestTags
-import app.notekea.core.presentation.components.NotekeaSkeletonRow
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.components.NotekeaSkeletonRow
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 
 private val ROW_WIDTHS = listOf(0.7f, 0.5f, 0.6f)
 

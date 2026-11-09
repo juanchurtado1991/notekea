@@ -14,10 +14,10 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.core.presentation.components.NotekeaCard
-import app.notekea.core.presentation.components.NotekeaScrollArea
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.components.NotekeaCard
+import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
 import app.notekea.resources.welcome_recent_title
 import org.jetbrains.compose.resources.stringResource

@@ -12,18 +12,27 @@ Decided on 2026-10-23. Changing a decision requires updating this file in the sa
 app.notekea
 ├── core
 │   ├── domain          Outcome, AppDispatchers, shared domain types
-│   ├── presentation    BaseViewModel, design system (theme, tokens, components)
+│   ├── presentation    BaseViewModel, the window's platform locals, and designsystem/ (theme, tokens, components,
+│   │                   previews, the gallery)
 │   ├── appearance      App-wide look the user sets: the UI zoom (UiScale, its store and use cases)
+│   ├── embedding       The embedding model's port, used by the index and search
 │   ├── notes           What features share about notes: paths, documents, files, links, frontmatter
 │   └── platform        Platform abstraction (PLATFORM_GUIDELINES.md)
 ├── di                  App-level Koin module that includes every feature module
-├── shell               Assembles the window: panes, tabs, side panel, what follows what
-└── <feature>           editor, tree, search, connections, templates, vault; later chat, sync, sources
+├── shell               Assembles the window: panes, tabs, side panel, dialogs (About, Settings), what follows what
+└── <feature>           editor, tree, search, connections, graph, query, tasks, templates, vault, settings, ai
     ├── domain          Entities, <Feature>Error, repository interfaces, use cases
     ├── data            Implementations of the domain interfaces, DTOs and mappers
     ├── presentation    <Screen>State, <Screen>Intent, <Screen>Effect, <Screen>ViewModel, <Screen>Screen
     └── di              <Feature>Module (Koin)
 ```
+
+**A large screen is split into folders** (decided with the developer on 2026-11-09, as in a modular Android app):
+once a feature's `presentation` holds about 15 files or more, its entry composable (`EditorScreen`, `VaultSidebar`)
+stays at its root and the rest goes into `viewmodel/` (the ViewModel and its parts), `model/` (State, Intent, Effect,
+UI models, preview data), `view/` (the composables) and one folder per self-contained section (`find/`, `toolbar/`,
+`attachments/`…), each of which may hold the same folders when it grows. A smaller feature stays flat. A sealed
+type's subtypes stay in its package (Kotlin requires it), so `PropertyIntent` lives in `model/` with `EditorIntent`.
 
 - `domain` depends on nothing but `core.domain` and the Kotlin standard library / coroutines.
 - `data` depends on `domain`; platform implementations live in `jvmMain` under the same package.
@@ -155,7 +164,7 @@ abstract class BaseViewModel<S, I, E>(
 - Composables use `stringResource(Res.string.<key>)`; keys are `snake_case`, grouped by screen prefix
   (`welcome_open_folder`).
 - Brand names and file-format literals are constants, not resources.
-- Exception: the developer-only design system gallery (`core.presentation.gallery`), never reachable from a
+- Exception: the developer-only design system gallery (`core.presentation.designsystem.gallery`), never reachable from a
   packaged build, uses constants for its sample texts.
 - Icons and fonts live in `composeResources` as well (fonts: see `LIBRARIES.md` §8).
 
@@ -210,7 +219,7 @@ New code copies the structure of these features instead of inventing its own. Re
 | Koin wiring | `core.platform.di`, `di` | `platformModule`, `jvmPlatformModule`, `appModule`, `desktopModules`, `main.kt` |
 | Unit tests with fakes | `commonTest` `core.platform.domain` | `FakeSystemEnvironment`, `ResolvePlatformConventionsUseCaseTest` |
 | Dependency graph test | `jvmTest` `di` | `DesktopModulesTest` |
-| Theme tokens and shared UI components (§11) | `core.presentation.theme`, `core.presentation.components` | `NotekeaTheme`, `NotekeaColorSchemes`, `NotekeaDimensions`, `NotekeaButton`, `NotekeaTabRow`, `EmptyState`, `ErrorBanner`… |
+| Theme tokens and shared UI components (§11) | `core.presentation.designsystem.theme`, `core.presentation.designsystem.components` | `NotekeaTheme`, `NotekeaColorSchemes`, `NotekeaDimensions`, `NotekeaButton`, `NotekeaTabRow`, `EmptyState`, `ErrorBanner`… |
 | MVI screen (State, Intent, ViewModel, Screen, Content) | `vault.presentation.welcome` | `WelcomeState`, `WelcomeIntent`, `WelcomeViewModel`, `WelcomeReducers`, `WelcomeScreen`, `WelcomeContent` (one preview per state) |
 | Data adapters on KMP libraries, tested with in-memory fakes | `vault.data` | `OkioVaultFileSystem` (Okio `FakeFileSystem`), `SettingsRecentVaultsStore` (`MapSettings`) |
 | ViewModel tests over real use cases and fake ports | `commonTest` `vault` | `VaultFixture`, `WelcomeViewModelTest` |
@@ -227,8 +236,8 @@ a test that check nothing. Review this when a use case's body becomes one line.
 
 ## 11. Design system
 
-Every reusable UI element comes from the design system in `core.presentation.components`, styled only with the
-theme tokens of `core.presentation.theme`. Screens compose these components; they never style Material components
+Every reusable UI element comes from the design system in `core.presentation.designsystem.components`, styled only with the
+theme tokens of `core.presentation.designsystem.theme`. Screens compose these components; they never style Material components
 themselves.
 
 - **Use before you write.** Buttons and compact icon buttons, text fields and inline text fields, list items, tree
@@ -255,15 +264,15 @@ themselves.
     keyboard position that is not the selection.
   - A toolbar never wraps: what does not fit moves into its More menu (`ToolbarFit`).
 - **Keyboard focus looks the same everywhere:** a 2 dp primary border on the component's own shape, with no gap
-  (`Modifier.focusBorder` in `core.presentation.components`; `NotekeaButton` draws it as its border, in the text
+  (`Modifier.focusBorder` in `core.presentation.designsystem.components`; `NotekeaButton` draws it as its border, in the text
   color on filled buttons). A new clickable component applies it before its `clickable`.
-- **Icons come from `NotekeaIcons`** (`core.presentation.theme`), named by meaning (`NewNote`, `Delete`); only that
+- **Icons come from `NotekeaIcons`** (`core.presentation.designsystem.theme`), named by meaning (`NewNote`, `Delete`); only that
   file imports the icon library (Lucide, `LIBRARIES.md` §2). Enforced by Konsist.
-- **Missing piece? Add it to the design system**, not to the feature: a new file in `core.presentation.components`
+- **Missing piece? Add it to the design system**, not to the feature: a new file in `core.presentation.designsystem.components`
   named `Notekea<Element>` (or a descriptive name such as `EmptyState`), colors and sizes from the theme, optional
   parts as nullable slots, a `@Preview` of its variants in the same file, and a sample in the gallery in the same
   pull request. Examples still to come: snackbars, the citation chip.
-- **Enforced by Konsist:** outside `core.presentation.components` and `core.presentation.theme`, importing a
+- **Enforced by Konsist:** outside `core.presentation.designsystem.components` and `core.presentation.designsystem.theme`, importing a
   Material 3 component (`Button`, `OutlinedTextField`, `Tab`, `TabRow`, `Badge`, `AlertDialog`, `Card`, chips,
   `Checkbox`, `Switch`, `DropdownMenu`, `Snackbar`… or `androidx.compose.material3.*`) fails the build.
 - Layout primitives and plain content stay allowed everywhere: `Text`, `Surface`, `Icon`, `MaterialTheme`, and the

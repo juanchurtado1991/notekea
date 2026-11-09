@@ -1,10 +1,10 @@
 package app.notekea.shell.presentation
 
 import app.notekea.core.presentation.platform.WindowDialog
-import app.notekea.editor.presentation.EditorIntent
-import app.notekea.editor.presentation.SidePanelHost
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import app.notekea.shell.domain.Workspace
-import app.notekea.tree.presentation.SidebarRailActions
+import app.notekea.tree.presentation.view.SidebarRailActions
 
 /** The rail's actions: search, the tools, the side panel, another vault, and About or Settings, with [onDialog]. */
 internal fun railActionsOf(

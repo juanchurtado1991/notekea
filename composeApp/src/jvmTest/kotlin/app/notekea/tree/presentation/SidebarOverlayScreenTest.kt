@@ -1,6 +1,9 @@
 package app.notekea.tree.presentation
 
 import androidx.compose.foundation.layout.Box
+import app.notekea.tree.presentation.view.SidebarRailActions
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.view.VaultTreeContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.Modifier
@@ -8,7 +11,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.tree.domain.TreePreferences
 import kotlin.test.Test
 import kotlin.test.assertEquals

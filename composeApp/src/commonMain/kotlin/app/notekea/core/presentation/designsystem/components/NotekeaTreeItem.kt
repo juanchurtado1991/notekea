@@ -1,0 +1,276 @@
+package app.notekea.core.presentation.designsystem.components
+
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.collapse
+import androidx.compose.ui.semantics.expand
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+
+private const val PREVIEW_COUNT = "12"
+private const val PREVIEW_FOLDER = "Projects"
+private const val PREVIEW_GARDEN = "Garden"
+private const val PREVIEW_GARDEN_COUNT = "1"
+private const val PREVIEW_LONG = "A very long note title that never fits in the sidebar"
+private const val PREVIEW_NOTE = "Tomato plan"
+private const val PREVIEW_RENAMED = "Tomato plan 2027"
+private const val PREVIEW_WIDTH_DP = 260
+
+/**
+ * One row of a tree (the vault sidebar, a note's outline): indentation by [depth], a chevron for folders
+ * ([isExpanded] is null for leaves, which keep the chevron's space so names align), an icon unless [icon] is null (an
+ * outline's headings), the [label] and optional [trailingText] (a note count). Rows are not focus stops: the tree is
+ * one focusable element moved with the arrow keys. As in Finder and VS Code, the [selected] row is filled in the
+ * selection color while the tree has the keyboard ([focused]) and in a quiet grey otherwise; the keyboard's row, when it
+ * is not the selected one (an outline's), draws the focus ring. Rows are
+ * transparent, so they sit on the panel that holds the tree. [badge] marks the row after its label (a bookmark's
+ * star), and [iconTint] colors the icon (a file's kind). [labelContent] replaces the label, for renaming in place;
+ * it must keep its keys (a field consumes Space), or a key leaving it would click the row. A row that [takesFocus],
+ * outside a list that is one focus stop, is a focus stop of its own. Screen readers get the selection and expand /
+ * collapse actions.
+ */
+@Composable
+fun NotekeaTreeItem(
+    label: String,
+    depth: Int,
+    onClick: () -> Unit,
+    icon: ImageVector?,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    focused: Boolean = false,
+    takesFocus: Boolean = false,
+    isExpanded: Boolean? = null,
+    onToggleExpanded: (() -> Unit)? = null,
+    trailingText: String? = null,
+    onClickLabel: String? = null,
+    labelContent: (@Composable () -> Unit)? = null,
+    badge: (@Composable () -> Unit)? = null,
+    iconTint: Color? = null
+) {
+    val colors = MaterialTheme.colorScheme
+    val shape = MaterialTheme.shapes.small
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height = NotekeaDimensions.TreeRowHeight)
+            .focusRing(isShown = focused && !selected, color = colors.primary, shape = shape)
+            .treeSemantics(selected = selected, isExpanded = isExpanded, onToggleExpanded = onToggleExpanded),
+        shape = shape,
+        color = rowColor(selected = selected, focused = focused),
+        contentColor = if (selected && focused) colors.onPrimaryContainer else colors.onSurface
+    ) {
+        Row(
+            modifier = Modifier
+                .focusBorder(color = colors.primary, shape = shape)
+                .rowClick(onClick = onClick, onClickLabel = onClickLabel, takesFocus = takesFocus)
+                .padding(
+                    start = NotekeaDimensions.SpacingXs + NotekeaDimensions.TreeIndent * depth,
+                    end = NotekeaDimensions.SpacingS
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Chevron(isExpanded = isExpanded, onToggleExpanded = onToggleExpanded)
+            icon?.let { RowIcon(icon = it, selected = selected && focused, tint = iconTint) }
+            Box(modifier = Modifier.weight(weight = 1f)) {
+                labelContent?.invoke() ?: TreeLabel(label = label)
+            }
+            badge?.invoke()
+            trailingText?.let { TrailingText(text = it) }
+        }
+    }
+}
+
+/** The keyboard's row's ring, when [isShown]. */
+private fun Modifier.focusRing(
+    isShown: Boolean,
+    color: Color,
+    shape: Shape
+): Modifier = if (isShown) border(width = NotekeaDimensions.FocusRingWidth, color = color, shape = shape) else this
+
+/**
+ * The row's icon, in the row's own color while [selected] in the selection color, else in its [tint] (a file kind's
+ * color) or muted, then a gap before the label.
+ */
+@Composable
+private fun RowIcon(
+    icon: ImageVector,
+    selected: Boolean,
+    tint: Color?
+) {
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        modifier = Modifier.size(size = NotekeaDimensions.IconSize),
+        tint = when {
+            selected -> LocalContentColor.current
+            else -> tint ?: MaterialTheme.colorScheme.onSurfaceVariant
+        }
+    )
+    Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
+}
+
+/** The selection color while the tree has the keyboard, a quiet grey for a selection without it, else nothing. */
+@Composable
+private fun rowColor(
+    selected: Boolean,
+    focused: Boolean
+): Color = when {
+    selected && focused -> MaterialTheme.colorScheme.primaryContainer
+    selected -> MaterialTheme.colorScheme.surfaceVariant
+    else -> Color.Transparent
+}
+
+@Composable
+private fun Chevron(
+    isExpanded: Boolean?,
+    onToggleExpanded: (() -> Unit)?
+) {
+    val toggle = Modifier.focusProperties { canFocus = false }.let { base ->
+        if (onToggleExpanded != null) base.clickable(role = Role.Button, onClick = onToggleExpanded) else base
+    }
+    Box(
+        modifier = Modifier.size(size = NotekeaDimensions.IconSize).then(other = toggle),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isExpanded != null) {
+            Icon(
+                imageVector = if (isExpanded) NotekeaIcons.Collapse else NotekeaIcons.Expand,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+    Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingXs))
+}
+
+@Composable
+private fun TreeLabel(
+    label: String
+) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.bodyMedium,
+        color = LocalContentColor.current,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+@Composable
+private fun TrailingText(
+    text: String
+) {
+    Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
+    Text(text = text, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+}
+
+/** Rows are not focus stops unless they [takesFocus] (the bookmarks): the tree is. */
+private fun Modifier.rowClick(
+    onClick: () -> Unit,
+    takesFocus: Boolean,
+    onClickLabel: String?
+): Modifier = focusProperties { canFocus = takesFocus }
+    .clickable(onClickLabel = onClickLabel, role = Role.Button, onClick = onClick)
+
+private fun Modifier.treeSemantics(
+    selected: Boolean,
+    isExpanded: Boolean?,
+    onToggleExpanded: (() -> Unit)?
+): Modifier = semantics {
+    this.selected = selected
+    if (isExpanded != null && onToggleExpanded != null) {
+        val toggle = {
+            onToggleExpanded()
+            true
+        }
+        if (isExpanded) collapse(action = toggle) else expand(action = toggle)
+    }
+}
+
+@Preview
+@Composable
+private fun NotekeaTreeItemPreview() {
+    NotekeaPreviewThemes {
+        Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
+            NotekeaTreeItem(
+                label = PREVIEW_FOLDER,
+                icon = NotekeaIcons.FolderOpen,
+                depth = 0,
+                onClick = {},
+                isExpanded = true,
+                onToggleExpanded = {},
+                trailingText = PREVIEW_COUNT
+            )
+            NotekeaTreeItem(
+                label = PREVIEW_GARDEN,
+                icon = NotekeaIcons.Folder,
+                depth = 1,
+                onClick = {},
+                isExpanded = false,
+                onToggleExpanded = {},
+                trailingText = PREVIEW_GARDEN_COUNT
+            )
+            NotekeaTreeItem(
+                label = PREVIEW_NOTE,
+                icon = NotekeaIcons.Note,
+                depth = 1,
+                onClick = {},
+                selected = true,
+                focused = true
+            )
+            NotekeaTreeItem(label = PREVIEW_LONG, icon = NotekeaIcons.Note, depth = 1, onClick = {})
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun NotekeaTreeItemRenamingPreview() {
+    NotekeaPreviewThemes {
+        Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
+            NotekeaTreeItem(
+                label = PREVIEW_NOTE,
+                icon = NotekeaIcons.Note,
+                depth = 1,
+                onClick = {},
+                labelContent = {
+                    NotekeaInlineTextField(
+                        value = PREVIEW_RENAMED,
+                        onValueChange = {},
+                        onSubmit = {},
+                        onCancel = {}
+                    )
+                }
+            )
+            NotekeaTreeItem(label = PREVIEW_LONG, icon = NotekeaIcons.Note, depth = 1, onClick = {}, selected = true)
+        }
+    }
+}

@@ -9,10 +9,10 @@ import app.notekea.editor.domain.ObserveNoteOnDiskUseCase
 import app.notekea.editor.domain.OpenNoteUseCase
 import app.notekea.editor.domain.RenameAndUpdateLinksUseCase
 import app.notekea.editor.domain.SaveNoteUseCase
-import app.notekea.editor.presentation.AttachmentTools
-import app.notekea.editor.presentation.EditorViewModel
-import app.notekea.editor.presentation.NoteInfoTools
-import app.notekea.editor.presentation.PropertyTools
+import app.notekea.editor.presentation.attachments.AttachmentTools
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
+import app.notekea.editor.presentation.noteinfo.NoteInfoTools
+import app.notekea.editor.presentation.properties.PropertyTools
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module

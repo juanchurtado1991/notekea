@@ -1,6 +1,10 @@
 package app.notekea.tree.presentation
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.notekea.tree.presentation.model.RenameDraft
+import app.notekea.tree.presentation.model.TreeNotice
+import app.notekea.tree.presentation.model.VaultTreeEffect
+import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.LinkUpdateResult
 import app.notekea.core.notes.domain.NoteFixtures.file
@@ -283,22 +287,6 @@ class VaultTreeEditsTest : VaultTreeViewModelTestBase() {
         assertEquals(
             expected = TrashLocation.VAULT_TRASH_FOLDER,
             actual = (trash.outcome as Outcome.Success).value
-        )
-    }
-
-    @Test
-    fun `a file manager that cannot open shows a dismissible error`() = runTreeTest {
-        revealer.outcome = Outcome.Failure(error = NotesError.RevealFailed(path = WELCOME))
-        val viewModel = startedViewModel()
-
-        viewModel.onIntent(intent = VaultTreeIntent.OnRevealRequest(path = path(WELCOME)))
-        advanceUntilIdle()
-        val failed = viewModel.state.value.actionError
-        viewModel.onIntent(intent = VaultTreeIntent.OnErrorDismiss)
-
-        assertEquals(
-            expected = NotesError.RevealFailed(path = WELCOME) to null,
-            actual = failed to viewModel.state.value.actionError
         )
     }
 

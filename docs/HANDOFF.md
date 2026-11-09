@@ -29,7 +29,7 @@ Last updated: 2026-11-09, with 3.1 Model manager in review.
   (`docs/spikes/2026-11-08-model-tournament.md`) kept Qwen3.5 2B, 4B and 9B against five other open models. On 8 GB,
   Small answers with its sources first and a line asking to check them (decided 2026-11-08, in 3.3). **3.1 Model
   manager** (#132) is done: Settings → AI model downloads the recommended size and the reranker from pinned Hugging
-  Face commits, checked by SHA-256, into the app data's `models` folder (`app.notekea.models`). Next: 3.2 Chat engine,
+  Face commits, checked by SHA-256, into the app data's `models` folder (`app.notekea.ai`). Next: 3.2 Chat engine,
   which reads the model in use from `ActiveModelStore` and must fit chatting with the Small model under 2.5 GB (the
   spike's estimate is 2.7–3.0 GB).
 

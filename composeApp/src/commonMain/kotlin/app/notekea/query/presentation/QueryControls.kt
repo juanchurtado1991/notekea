@@ -22,13 +22,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.presentation.components.NotekeaContextMenuArea
-import app.notekea.core.presentation.components.NotekeaContextMenuState
-import app.notekea.core.presentation.components.NotekeaMenuItem
-import app.notekea.core.presentation.components.focusBorder
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.core.presentation.theme.NotekeaIcons
+import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
+import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuState
+import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
+import app.notekea.core.presentation.designsystem.components.focusBorder
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 
 private const val PREVIEW_TEXT = "more than"
 

@@ -8,16 +8,16 @@ import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.connections.presentation.ConnectionActions
 import app.notekea.connections.presentation.ConnectionsSection
-import app.notekea.editor.presentation.EditorIntent
-import app.notekea.editor.presentation.EditorViewModel
-import app.notekea.editor.presentation.SidePanelHost
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
+import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import app.notekea.connections.presentation.FollowNoteMentions
 import app.notekea.connections.presentation.NoteMentionsViewModel
 import app.notekea.connections.presentation.FollowRelatedNotes
 import app.notekea.connections.presentation.RelatedNotesViewModel
 import app.notekea.shell.presentation.WorkspaceIntent
 import app.notekea.shell.presentation.WorkspaceViewModel
-import app.notekea.tree.presentation.VaultTreeState
+import app.notekea.tree.presentation.model.VaultTreeState
 
 /**
  * The side panel's host, with the inspector's Connections (`ROADMAP.md` 2.4, 2.5): a row opens its note (a mention at

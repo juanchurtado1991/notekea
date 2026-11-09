@@ -1,7 +1,7 @@
 package app.notekea.shell.presentation
 
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.editor.presentation.EditorCallbacks
+import app.notekea.editor.presentation.viewmodel.EditorCallbacks
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherMode
 import app.notekea.search.presentation.switcher.QuickSwitcherPurpose
@@ -9,9 +9,9 @@ import app.notekea.tree.presentation.tags.TagPickerIntent
 import app.notekea.templates.presentation.TemplatePickerIntent
 import app.notekea.templates.presentation.TemplateTarget
 import app.notekea.shell.presentation.WorkspaceIntent
-import app.notekea.editor.presentation.saveInOtherEditors
-import app.notekea.tree.presentation.BookmarkIntent
-import app.notekea.tree.presentation.VaultTreeIntent
+import app.notekea.editor.presentation.viewmodel.saveInOtherEditors
+import app.notekea.tree.presentation.model.BookmarkIntent
+import app.notekea.tree.presentation.model.VaultTreeIntent
 
 /** What the editor of [pane], on the note at [path], asks of the tree, the tabs, the pickers and the other editor. */
 internal fun editorCallbacksOf(

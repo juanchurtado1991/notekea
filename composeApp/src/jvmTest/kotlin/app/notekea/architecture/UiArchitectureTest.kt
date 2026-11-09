@@ -60,7 +60,7 @@ class UiArchitectureTest : ArchitectureTestBase() {
         productionScope.files
             .filterNot { file -> DESIGN_SYSTEM_PACKAGES.any { file.packagee?.name?.startsWith(prefix = it) == true } }
             .assertFalse(
-                additionalMessage = "ARCHITECTURE.md §11: use or add a component in core.presentation.components"
+                additionalMessage = "ARCHITECTURE.md §11: use or add a component in the design system's components"
             ) { file ->
                 file.imports.any {
                     val isMaterialWildcard = it.text.trim().endsWith(suffix = "$MATERIAL3_PACKAGE.*")

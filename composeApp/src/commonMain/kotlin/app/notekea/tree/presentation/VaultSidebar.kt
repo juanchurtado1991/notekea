@@ -1,6 +1,14 @@
 package app.notekea.tree.presentation
 
 import androidx.compose.foundation.layout.Box
+import app.notekea.tree.presentation.view.BookmarksSection
+import app.notekea.tree.presentation.view.SidebarHeader
+import app.notekea.tree.presentation.view.SidebarHeaderActions
+import app.notekea.tree.presentation.view.TreeList
+import app.notekea.tree.presentation.model.TreeNotice
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.model.VaultTreeState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,14 +27,14 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.core.presentation.components.EmptyState
-import app.notekea.core.presentation.components.ErrorBanner
-import app.notekea.core.presentation.components.NotekeaButton
-import app.notekea.core.presentation.components.NotekeaButtonStyle
-import app.notekea.core.presentation.components.NotekeaSectionHeader
-import app.notekea.core.presentation.components.NotekeaSkeletonRow
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.components.EmptyState
+import app.notekea.core.presentation.designsystem.components.ErrorBanner
+import app.notekea.core.presentation.designsystem.components.NotekeaButton
+import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
+import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
+import app.notekea.core.presentation.designsystem.components.NotekeaSkeletonRow
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.resources.Res
 import app.notekea.resources.error_unexpected

@@ -8,7 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.v2.runComposeUiTest
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.query.domain.VaultQuery
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.performKeyInput

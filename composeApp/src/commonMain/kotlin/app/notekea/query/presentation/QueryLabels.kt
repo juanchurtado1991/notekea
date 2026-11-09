@@ -3,7 +3,7 @@ package app.notekea.query.presentation
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.query.domain.QueryCondition
 import app.notekea.query.domain.QueryFilter
 import app.notekea.query.domain.QueryParse

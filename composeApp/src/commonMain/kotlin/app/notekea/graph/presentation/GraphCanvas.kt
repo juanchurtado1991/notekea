@@ -40,10 +40,10 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.theme.GraphPalette
-import app.notekea.core.presentation.theme.NotekeaDimensions
-import app.notekea.core.presentation.theme.motionTween
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.GraphPalette
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.theme.motionTween
 import kotlin.math.max
 import kotlin.math.min
 

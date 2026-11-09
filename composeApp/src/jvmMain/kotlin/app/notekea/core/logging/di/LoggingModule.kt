@@ -8,10 +8,8 @@ import app.notekea.core.logging.domain.GetDiagnosticsUseCase
 import app.notekea.core.logging.domain.LogStore
 import app.notekea.core.logging.domain.TextClipboard
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.about.AboutViewModel
 import okio.FileSystem
 import org.koin.core.module.dsl.factoryOf
-import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import java.nio.file.Path
 
@@ -32,5 +30,4 @@ val loggingModule = module {
     }
     single<TextClipboard> { AwtTextClipboard() }
     factoryOf(::GetDiagnosticsUseCase)
-    viewModelOf(::AboutViewModel)
 }

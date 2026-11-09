@@ -14,9 +14,9 @@ import app.notekea.tree.domain.NoteMetadataCache
 import app.notekea.tree.domain.ObserveVaultTreeUseCase
 import app.notekea.tree.domain.OpenDailyNoteUseCase
 import app.notekea.tree.domain.TreePreferencesStore
-import app.notekea.tree.presentation.DailyNoteTools
-import app.notekea.tree.presentation.NewNoteTools
-import app.notekea.tree.presentation.VaultTreeViewModel
+import app.notekea.tree.presentation.viewmodel.DailyNoteTools
+import app.notekea.tree.presentation.viewmodel.NewNoteTools
+import app.notekea.tree.presentation.viewmodel.VaultTreeViewModel
 import app.notekea.tree.presentation.tags.TagPickerViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel

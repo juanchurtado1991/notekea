@@ -1,9 +1,9 @@
 package app.notekea.shell.presentation
 
-import app.notekea.editor.presentation.EditorPaneTools
-import app.notekea.editor.presentation.SidePanelHost
+import app.notekea.editor.presentation.view.EditorPaneTools
+import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import app.notekea.shell.presentation.WorkspaceState
-import app.notekea.tree.presentation.VaultTreeState
+import app.notekea.tree.presentation.model.VaultTreeState
 
 /** What every pane's content is drawn from: the tree's and the tabs' states, the view models and each pane's tools. */
 internal data class PaneContext(

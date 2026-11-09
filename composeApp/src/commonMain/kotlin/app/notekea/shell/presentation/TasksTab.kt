@@ -4,11 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import app.notekea.editor.presentation.EditorIntent
+import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.shell.domain.Workspace
 import app.notekea.tasks.presentation.TasksEffect
 import app.notekea.tasks.presentation.TasksIntent
-import app.notekea.tree.presentation.VaultTreeState
+import app.notekea.tree.presentation.model.VaultTreeState
 
 /**
  * What the Tasks tab follows while the vault is open: its notes and whether the tab shows, as it runs only then. A task

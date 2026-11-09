@@ -9,7 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.Shortcut
 import app.notekea.core.platform.domain.ShortcutKey
 import app.notekea.core.platform.domain.ShortcutModifier
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 
 private const val PREVIEW_TEXT = "Ctrl+O is handled while this is shown"
 

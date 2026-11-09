@@ -1,6 +1,10 @@
 package app.notekea.tree.presentation
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.notekea.tree.presentation.model.BookmarkIntent
+import app.notekea.tree.presentation.model.VaultTreeEffect
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.notes.domain.DailyNoteSettings
 import app.notekea.core.notes.domain.DayNeighbors
@@ -211,6 +215,22 @@ class VaultTreeNavigationTest : VaultTreeViewModelTestBase() {
         assertEquals(
             expected = path("Diary/27.10.2026.md") to path("Diary/25.10.2026.md"),
             actual = viewModel.state.value.selectedPath to viewModel.state.value.dayNeighbors?.previous
+        )
+    }
+
+    @Test
+    fun `a file manager that cannot open shows a dismissible error`() = runTreeTest {
+        revealer.outcome = Outcome.Failure(error = NotesError.RevealFailed(path = WELCOME))
+        val viewModel = startedViewModel()
+
+        viewModel.onIntent(intent = VaultTreeIntent.OnRevealRequest(path = path(WELCOME)))
+        advanceUntilIdle()
+        val failed = viewModel.state.value.actionError
+        viewModel.onIntent(intent = VaultTreeIntent.OnErrorDismiss)
+
+        assertEquals(
+            expected = NotesError.RevealFailed(path = WELCOME) to null,
+            actual = failed to viewModel.state.value.actionError
         )
     }
 }

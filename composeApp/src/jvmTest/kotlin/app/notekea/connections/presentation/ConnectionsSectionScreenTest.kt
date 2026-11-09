@@ -15,7 +15,7 @@ import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.nodes
 import app.notekea.core.presentation.rightClickText
 import app.notekea.core.presentation.texts
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.notes.domain.ConnectionsTab
 import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.connections.domain.NoteMention

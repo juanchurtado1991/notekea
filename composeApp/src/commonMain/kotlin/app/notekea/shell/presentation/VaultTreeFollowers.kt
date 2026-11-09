@@ -12,9 +12,9 @@ import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.tree.domain.TagRanking
-import app.notekea.editor.presentation.EditorIntent
-import app.notekea.editor.presentation.EditorViewModel
-import app.notekea.editor.presentation.SidePanelHost
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
+import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import app.notekea.search.presentation.switcher.QuickSwitcherEffect
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherMode
@@ -32,11 +32,11 @@ import app.notekea.shell.presentation.WorkspaceShortcuts
 import app.notekea.resources.Res
 import app.notekea.resources.tree_untitled_note
 import org.jetbrains.compose.resources.stringResource
-import app.notekea.tree.presentation.BookmarkIntent
-import app.notekea.tree.presentation.VaultTreeEffect
-import app.notekea.tree.presentation.VaultTreeIntent
-import app.notekea.tree.presentation.VaultTreeState
-import app.notekea.tree.presentation.VaultTreeViewModel
+import app.notekea.tree.presentation.model.BookmarkIntent
+import app.notekea.tree.presentation.model.VaultTreeEffect
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.model.VaultTreeState
+import app.notekea.tree.presentation.viewmodel.VaultTreeViewModel
 import app.notekea.shell.domain.Workspace
 
 /** The window shortcuts of the workspace, and the view models following each other's effects. */

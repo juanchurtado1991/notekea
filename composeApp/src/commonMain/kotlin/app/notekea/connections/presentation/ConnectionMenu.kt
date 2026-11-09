@@ -3,10 +3,10 @@ package app.notekea.connections.presentation
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.presentation.components.NotekeaContextMenuArea
-import app.notekea.core.presentation.components.NotekeaMenuItem
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.theme.NotekeaIcons
+import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
+import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res
 import app.notekea.resources.connections_open
 import app.notekea.resources.related_open_beside

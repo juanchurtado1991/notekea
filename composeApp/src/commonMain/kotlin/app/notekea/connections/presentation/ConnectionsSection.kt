@@ -9,11 +9,11 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.core.presentation.components.NotekeaCountTabs
-import app.notekea.core.presentation.components.NotekeaFold
-import app.notekea.core.presentation.components.NotekeaSectionHeader
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.components.NotekeaCountTabs
+import app.notekea.core.presentation.designsystem.components.NotekeaFold
+import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.notes.domain.ConnectionsTab
 import app.notekea.connections.presentation.NoteMentionsIntent
 import app.notekea.connections.presentation.NoteMentionsState

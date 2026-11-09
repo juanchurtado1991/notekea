@@ -1,6 +1,13 @@
 package app.notekea.editor.presentation
 
 import app.notekea.core.notes.domain.FrontmatterContent
+import app.notekea.editor.presentation.attachments.AttachmentTools
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
+import app.notekea.editor.presentation.noteinfo.NoteInfoTools
+import app.notekea.editor.presentation.model.PropertyIntent
+import app.notekea.editor.presentation.properties.PropertyTools
+import app.notekea.editor.presentation.model.SaveStatus
 import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.FillTemplateUseCase
 import app.notekea.core.domain.time.FakeLocalCalendar
