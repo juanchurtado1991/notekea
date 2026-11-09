@@ -624,6 +624,7 @@
     <string name="models_pause">Pause</string>
     <string name="models_paused">Paused · %1$s of %2$s</string>
     <string name="models_progress">%1$s of %2$s</string>
+    <string name="models_progress_speed">%1$s of %2$s · %3$s</string>
     <string name="models_progress_label">Downloading the AI model</string>
     <string name="models_recommended">Recommended</string>
     <string name="models_resume">Resume</string>

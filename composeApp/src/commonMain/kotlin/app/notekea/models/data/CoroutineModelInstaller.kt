@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 
 /**
  * [ModelInstaller] on a coroutine of its own scope, which outlives every window and dialog until [close]. Pausing cancels the
@@ -31,7 +32,8 @@ class CoroutineModelInstaller(
     private val catalogSource: ModelCatalogSource,
     private val storage: ModelStorage,
     private val activeModelStore: ActiveModelStore,
-    dispatchers: AppDispatchers
+    dispatchers: AppDispatchers,
+    private val clock: Clock
 ) : ModelInstaller {
     private val scope = CoroutineScope(context = SupervisorJob() + dispatchers.io)
     private val current = MutableStateFlow<InstallSession?>(value = null)
@@ -52,8 +54,12 @@ class CoroutineModelInstaller(
             val reranker = catalogSource.load().reranker
             val files = resumed ?: listOf(reranker, model.file).filterNot { storage.isInstalled(file = it) }
             counted.value = Counted(size = model.size, files = files)
+            val speed = DownloadSpeedMeter(clock = clock)
             install(model = model, reranker = reranker, counted = files).collect { progress ->
-                current.update { it?.copy(progress = progress) }
+                val measured = (progress as? InstallProgress.Downloading)
+                    ?.let { it.copy(bytesPerSecond = speed.measure(doneBytes = it.doneBytes)) }
+                    ?: progress
+                current.update { it?.copy(progress = measured) }
                 if (progress == InstallProgress.Installed) {
                     activeModelStore.save(size = model.size)
                     counted.value = null

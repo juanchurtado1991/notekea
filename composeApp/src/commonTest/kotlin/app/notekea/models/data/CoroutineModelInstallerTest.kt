@@ -1,6 +1,7 @@
 package app.notekea.models.data
 
 import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.core.domain.FakeClock
 import app.notekea.models.domain.FakeActiveModelStore
 import app.notekea.models.domain.FakeModelCatalogSource
 import app.notekea.models.domain.FakeModelDownloader
@@ -19,6 +20,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.time.Instant
 
 /** `ROADMAP.md` 3.1: one installation at a time, paused, resumed or cancelled, that outlives Settings. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -32,7 +34,8 @@ class CoroutineModelInstallerTest {
         catalogSource = FakeModelCatalogSource(),
         storage = storage,
         activeModelStore = activeModelStore,
-        dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
+        dispatchers = FakeAppDispatchers(dispatcher = testDispatcher),
+        clock = FakeClock(currentTime = Instant.fromEpochMilliseconds(epochMilliseconds = 0))
     )
 
     @AfterTest
