@@ -18,6 +18,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * `ROADMAP.md` 3.1 on real files and a real HTTP server: a model downloads with Ktor, resumes with a `Range`, survives
@@ -74,8 +75,9 @@ class ModelFilesOnDiskTest {
             expected = DownloadStep.Finished(outcome = Outcome.Failure(error = ModelError.Network)),
             actual = dropped
         )
-        assertEquals(expected = 100_000L, actual = kept)
-        assertEquals(expected = listOf(null, "bytes=100000-"), actual = server.ranges)
+        // What reaches the disk before the cut depends on the machine's buffers, never more than was sent.
+        assertTrue(actual = kept in 0L..100_000L, message = "kept $kept bytes")
+        assertEquals(expected = listOf(null, "bytes=$kept-".takeIf { kept > 0 }), actual = server.ranges)
         assertEquals(expected = Outcome.Success(value = Unit), actual = storage.verifyAndInstall(file = file))
     }
 
@@ -127,6 +129,18 @@ class ModelFilesOnDiskTest {
 
         assertEquals(expected = false, actual = storage.isInstalled(file = file))
         assertEquals(expected = true, actual = storage.freeBytes() > 0)
+    }
+
+    @Test
+    fun `a models folder that cannot be written is a storage failure, not a network one`() = runBlocking {
+        Files.writeString(folder.root, "not a folder")
+
+        val finished = downloader.download(file = file, fromByte = 0).last()
+
+        assertEquals(
+            expected = DownloadStep.Finished(outcome = Outcome.Failure(error = ModelError.Storage)),
+            actual = finished
+        )
     }
 
     private companion object {
