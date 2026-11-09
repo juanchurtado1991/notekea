@@ -9,7 +9,7 @@ Write an app's smoke cases once, in a few lines of plain verbs, and get three th
   which ships in the app's release too.
 
 Built on the official Compose UI Test, for **Compose Desktop** apps, including Kotlin Multiplatform projects with a
-desktop target. Test Buddy lives in the Notekea repository for now (`qa/SELF_TEST.md`) but knows nothing about
+desktop target. Test Buddy lives in the Notekea repository for now (`qa/AUTO_TEST.md`) but knows nothing about
 Notekea: its package is `com.testbuddy`, it depends on no Notekea module (a Konsist test checks it), and the host app
 gives it its name.
 
@@ -139,8 +139,8 @@ minimizes it.
 3. **Report:** the report to copy, and the Report folder with the screenshots, `output.txt` (everything the app
    printed) and a copy of the report.
 
-Everything is kept in `<Documents>/<app> QA` (`SelfTestFolders`): `Test data`, `Report` and Test Buddy's own
-`.self-test`, so the app can close or restart and the manager goes on where it was.
+Everything is kept in `<Documents>/<app> QA` (`AutoTestFolders`): `Test data`, `Report` and Test Buddy's own
+`.auto-test`, so the app can close or restart and the manager goes on where it was.
 
 ## The report
 

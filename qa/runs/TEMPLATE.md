@@ -10,7 +10,7 @@ Copy this file to `M<N>.md` when the run starts (`qa/README.md`, step 3).
 
 ## Testers
 
-| System | Version | Tester | Build tested | Self-Test |
+| System | Version | Tester | Build tested | Auto-Test |
 |---|---|---|---|---|
 | Windows | | | | |
 | macOS | | | | |

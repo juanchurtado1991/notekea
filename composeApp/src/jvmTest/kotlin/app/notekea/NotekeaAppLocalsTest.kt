@@ -25,7 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-/** What every window reads comes from one place, which the Self-Test's cases share with the app (audit 64). */
+/** What every window reads comes from one place, which the Auto-Test's cases share with the app (audit 64). */
 class NotekeaAppLocalsTest {
     private val appearance = Appearance(theme = ColorTheme.SAGE)
     private val environment = AppEnvironment(

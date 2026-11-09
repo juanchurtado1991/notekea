@@ -8,7 +8,7 @@ guide of their system: [Windows](GUIDE_WINDOWS.md), [macOS](GUIDE_MACOS.md), [Li
 
 - Once, when 5.4, the last item before the release, is merged into `main` and before 5.5, with the release builds,
   which are not signed (`ROADMAP.md` 5.3). Allow one or two weeks for the run, its fixes and a new build.
-- It covers every case of `MVP_SMOKE_TEST.md`, each as a Self-Test case, automatic or manual, including the fixes of
+- It covers every case of `MVP_SMOKE_TEST.md`, each as a Auto-Test case, automatic or manual, including the fixes of
   M1's run (`qa/runs/M1.md`), which covered everything built since M0.
 
 ## Who
@@ -20,30 +20,30 @@ guide of their system: [Windows](GUIDE_WINDOWS.md), [macOS](GUIDE_MACOS.md), [Li
 | Linux | The developer, with the agent | No: installs the `.deb` from the release |
 
 Testers never build anything, open a terminal or prepare data: they install **Notekea QA**, Notekea with the Test
-Buddy manager, which runs the automatic cases and walks them through the manual ones ([SELF_TEST.md](SELF_TEST.md)). They never
+Buddy manager, which runs the automatic cases and walks them through the manual ones ([AUTO_TEST.md](AUTO_TEST.md)). They never
 measure memory or time with tools either: the milestone's performance pass does, on the automated smoke runs
 (`docs/performance.md`).
 
 ## Before the first run (status)
 
 The process below needs these pieces, built in this order before the M1 run, one pull request each (the agent checks
-this list and builds what is missing). The design is in [SELF_TEST.md](SELF_TEST.md).
+this list and builds what is missing). The design is in [AUTO_TEST.md](AUTO_TEST.md).
 
 | # | Piece | What it is | Status |
 |---|---|---|---|
-| 1 | Rules and design | `SELF_TEST.md`, this table, `GUIDELINES.md` §8, `CLAUDE.md`, `MVP_SMOKE_TEST.md`'s **Checked by** column | ✅ [#72](https://github.com/juanchurtado1991/notekea/pull/72) |
-| 2 | Triage | **Checked by** filled in for every General and M1 case, splitting mixed ones; the share that is `Self-Test` | ✅ [#74](https://github.com/juanchurtado1991/notekea/pull/74): 122 of 167 cases `Self-Test` |
-| 3a | Test Buddy core | `:test-buddy`, the Self-Test SDK: case types and DSL, verbs, runner, JUnit bridge, report. The spike before it showed Compose UI Test driving an app inside a packaged app on Windows, macOS and Linux, also with a window open | ✅ [#75](https://github.com/juanchurtado1991/notekea/pull/75) |
-| 3b | Test Buddy app | The Self-Test window (design A, a wizard: Automatic, Manual, Send report), the manual walk-through with Passed/Failed, a note and a screenshot, pausing, back up and restore, `testBuddyApp(suite)` | ✅ [#76](https://github.com/juanchurtado1991/notekea/pull/76) |
-| 4 | Notekea's suite | `:selftest`: `CaseApp` (the real Notekea on a case's folders), the smoke runs of `app.notekea.smokerun` moved in, the bundled smoke data, the `smoke.sh` scenarios in Kotlin (checked against the script), back up, the first cases (1.6-01 to 1.6-03), `pending-cases.txt` and the consistency test, `run -Pcases=…`, `packageSelfTest` | ✅ [#77](https://github.com/juanchurtado1991/notekea/pull/77) |
-| 5 | M1 cases | Every General and M1 case as an `AutomatedCase` or a `ManualCase`, in four pull requests: 1.1–1.5, 1.6–1.9, 1.10–1.13, 1.14–1.18 and General. The last one makes `MVP_SMOKE_TEST.md` generated from the cases (`SELF_TEST.md`) | 🟡 1.1–1.5 in [#78](https://github.com/juanchurtado1991/notekea/pull/78), 1.6–1.9 in [#80](https://github.com/juanchurtado1991/notekea/pull/80), 1.10–1.13 in [#81](https://github.com/juanchurtado1991/notekea/pull/81), 1.14–1.18, 1.11-10 and General (with the free use case G-09) in the next pull request; generating `MVP_SMOKE_TEST.md` to do |
-| 6 | File logs and Copy diagnostics | Logs written to a rotating file in the app data folder (never note content, `ARCHITECTURE.md` §9), **About → Copy diagnostics** (version, OS, last log lines), read by the Self-Test's report | ✅ Crash reports with Copy details and Report on GitHub; rotating log file, About's Copy diagnostics and the Self-Test's report ending with the installed Notekea's log in this pull request |
-| 7 | Milestone build workflow | `.github/workflows/milestone-build.yml`: on a tag `m<N>-rc<k>`, packages Notekea and Notekea Self-Test (`.msi`, `.dmg`, `.deb`) on the three runners and publishes a GitHub **pre-release** with them and the testers' guides. Unsigned until `ROADMAP.md` 5.3 | ✅ this pull request: `m<N>-rc<k>` installs as version `1.<N>.<k>`, so each candidate installs over the last; a pull request changing the workflow builds the installers without publishing |
-| 8 | Testers' guides | `GUIDE_*.md` rewritten as: install both apps, run the Self-Test, send the report; `M1_SMOKE_TEST.md` and `REPORT_TEMPLATE.txt` deleted, their steps now living in the manual cases | ✅ this pull request |
+| 1 | Rules and design | `AUTO_TEST.md`, this table, `GUIDELINES.md` §8, `CLAUDE.md`, `MVP_SMOKE_TEST.md`'s **Checked by** column | ✅ [#72](https://github.com/juanchurtado1991/notekea/pull/72) |
+| 2 | Triage | **Checked by** filled in for every General and M1 case, splitting mixed ones; the share that is `Auto-Test` | ✅ [#74](https://github.com/juanchurtado1991/notekea/pull/74): 122 of 167 cases `Auto-Test` |
+| 3a | Test Buddy core | `:test-buddy`, the Auto-Test SDK: case types and DSL, verbs, runner, JUnit bridge, report. The spike before it showed Compose UI Test driving an app inside a packaged app on Windows, macOS and Linux, also with a window open | ✅ [#75](https://github.com/juanchurtado1991/notekea/pull/75) |
+| 3b | Test Buddy app | The Auto-Test window (design A, a wizard: Automatic, Manual, Send report), the manual walk-through with Passed/Failed, a note and a screenshot, pausing, back up and restore, `testBuddyApp(suite)` | ✅ [#76](https://github.com/juanchurtado1991/notekea/pull/76) |
+| 4 | Notekea's suite | `:auto-test`: `CaseApp` (the real Notekea on a case's folders), the smoke runs of `app.notekea.smokerun` moved in, the bundled smoke data, the `smoke.sh` scenarios in Kotlin (checked against the script), back up, the first cases (1.6-01 to 1.6-03), `pending-cases.txt` and the consistency test, `run -Pcases=…`, `packageAutoTest` | ✅ [#77](https://github.com/juanchurtado1991/notekea/pull/77) |
+| 5 | M1 cases | Every General and M1 case as an `AutomatedCase` or a `ManualCase`, in four pull requests: 1.1–1.5, 1.6–1.9, 1.10–1.13, 1.14–1.18 and General. The last one makes `MVP_SMOKE_TEST.md` generated from the cases (`AUTO_TEST.md`) | 🟡 1.1–1.5 in [#78](https://github.com/juanchurtado1991/notekea/pull/78), 1.6–1.9 in [#80](https://github.com/juanchurtado1991/notekea/pull/80), 1.10–1.13 in [#81](https://github.com/juanchurtado1991/notekea/pull/81), 1.14–1.18, 1.11-10 and General (with the free use case G-09) in the next pull request; generating `MVP_SMOKE_TEST.md` to do |
+| 6 | File logs and Copy diagnostics | Logs written to a rotating file in the app data folder (never note content, `ARCHITECTURE.md` §9), **About → Copy diagnostics** (version, OS, last log lines), read by the Auto-Test's report | ✅ Crash reports with Copy details and Report on GitHub; rotating log file, About's Copy diagnostics and the Auto-Test's report ending with the installed Notekea's log in this pull request |
+| 7 | Milestone build workflow | `.github/workflows/milestone-build.yml`: on a tag `m<N>-rc<k>`, packages Notekea and Notekea Auto-Test (`.msi`, `.dmg`, `.deb`) on the three runners and publishes a GitHub **pre-release** with them and the testers' guides. Unsigned until `ROADMAP.md` 5.3 | ✅ this pull request: `m<N>-rc<k>` installs as version `1.<N>.<k>`, so each candidate installs over the last; a pull request changing the workflow builds the installers without publishing |
+| 8 | Testers' guides | `GUIDE_*.md` rewritten as: install both apps, run the Auto-Test, send the report; `M1_SMOKE_TEST.md` and `REPORT_TEMPLATE.txt` deleted, their steps now living in the manual cases | ✅ this pull request |
 | 9 | Notekea QA | One app for testers: Notekea with the **Test Buddy manager** (a small window, always on top: Automatic with Running tests and each case's steps live, Manual one step at a time, Report), automatic cases in a process of their own, `testBuddyMain`; crash notice and reports in **Test Buddy Crash** (`:test-buddy-crash`), with the last steps and the machine in every report | ✅ this pull request |
 
 Change ⬜ to ✅ with the pull request link as each one lands. Already done: the automated smoke runs (1.16,
-`app.notekea.smokerun`), which piece 4 moves into `:selftest`.
+`app.notekea.smokerun`), which piece 4 moves into `:auto-test`.
 
 ## Steps
 
@@ -56,7 +56,7 @@ Change ⬜ to ✅ with the pull request link as each one lands. Already done: th
 3. **Open the run record**: copy `runs/TEMPLATE.md` to `runs/M<N>.md` and list every case to run (the "General"
    section plus every milestone up to this one; skip cases whose "Testable from" is a later feature).
 4. **Send each tester** the link to the pre-release and to the guide of their system.
-5. **Testers run the Self-Test's automatic part**, then the manual part, even when an automatic case failed: the
+5. **Testers run the Auto-Test's automatic part**, then the manual part, even when an automatic case failed: the
    failures go in the same report. A failure that makes the manual part pointless (Notekea does not open) is the
    developer's call: they tell the testers to wait for the next build.
 6. **Testers run the manual part** in the manager, step by step, then **Copy report**, and send it with the Report
@@ -65,7 +65,7 @@ Change ⬜ to ✅ with the pull request link as each one lands. Already done: th
    system (`windows`, `macos`, `linux`), with the steps, the expected and actual result, the diagnostics and the
    screenshot.
 8. **Fix** each issue on a `fix/` branch to `main` (feature smoke test, `GUIDELINES.md` §8), then publish the next
-   release candidate and run again **the Self-Test and the failed cases** (plus the cases near each fix) on the
+   release candidate and run again **the Auto-Test and the failed cases** (plus the cases near each fix) on the
    affected systems.
 9. **Close the milestone** when the three systems pass: record the final build in `runs/M<N>.md` and mark the
    rows of M2 to M5 in `ROADMAP.md` as closed by the run.
@@ -74,5 +74,5 @@ Change ⬜ to ✅ with the pull request link as each one lands. Already done: th
 
 - `GUIDE_WINDOWS.md`, `GUIDE_MACOS.md`, `GUIDE_LINUX.md`: step by step for testers, written for people who are not
   developers.
-- `SELF_TEST.md`: the Self-Test's design and how every feature keeps it up to date.
+- `AUTO_TEST.md`: the Auto-Test's design and how every feature keeps it up to date.
 - `runs/TEMPLATE.md`: the record of one run; `runs/M<N>.md` once it starts.

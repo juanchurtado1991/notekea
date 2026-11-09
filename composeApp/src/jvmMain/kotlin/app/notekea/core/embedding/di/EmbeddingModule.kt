@@ -11,7 +11,7 @@ import java.nio.file.Path
 /**
  * The embedding model (`ROADMAP.md` 2.2): the bundled one, in the resources Compose gives the app
  * (`compose.application.resources.dir`), with java-llama.cpp's native library in the app data's `natives` folder,
- * closed with Koin so its timer and memory do not outlive it (the Self-Test starts Koin once per case).
+ * closed with Koin so its timer and memory do not outlive it (the Auto-Test starts Koin once per case).
  */
 val embeddingModule = module {
     single {

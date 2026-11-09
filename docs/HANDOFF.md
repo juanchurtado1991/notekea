@@ -41,13 +41,13 @@ Last updated: 2026-11-09, with 3.1 Model manager in review.
 2. **Issue #103** (1.11-16, dragging a tab is unreliable with several tabs) is the only open issue, deferred to M2:
    reproduce it on macOS at 200% before fixing, as the issue says.
 3. **`qa/README.md` piece 5** is 🟡: `MVP_SMOKE_TEST.md` is still edited by hand; making it generated from the
-   Self-Test's cases (`./gradlew :selftest:smokeCases`, `qa/SELF_TEST.md`) is still to do. Until then, every case
-   change goes both in `:selftest` and in `MVP_SMOKE_TEST.md`.
+   Auto-Test's cases (`./gradlew :auto-test:smokeCases`, `qa/AUTO_TEST.md`) is still to do. Until then, every case
+   change goes both in `:auto-test` and in `MVP_SMOKE_TEST.md`.
 4. **Audit fixes:** a project-wide audit (2026-11-04) was fixed in #114 (merged). Tree drag and multi-selection were
    left as a product decision, and the editor toolbar's submenus (Callout, Code block, More) are still mouse-only:
    `ROADMAP.md` decided the toolbar takes no focus.
 5. **After 2.9:** check on the nightly that the fork loads on Windows and macOS, then measure memory there.
-6. **Intermittent Self-Test failures on CI:** Windows failed once each in 1.1-07 and 1.4-05, and Ubuntu in 1.14-09 and 1.13-04; none is
+6. **Intermittent Auto-Test failures on CI:** Windows failed once each in 1.1-07 and 1.4-05, and Ubuntu in 1.14-09 and 1.13-04; none is
    explained yet. 1.12-01 (a real bug) and 1.17-04 are fixed.
 7. **The 3.0 bench** (a Java server and Python scripts, outside the repository) is in the developer's
    `~/.cache/notekea-spike`, with every model and result; 3.4 can reuse its 30 actions and its unanswerable questions,
@@ -71,8 +71,8 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
 - **Architecture:** Clean Architecture + MVI + Koin + ports with fakes stays (decided 2026-10-28). A use case only
   when it decides something; files at most 350 lines, functions at most 40.
 - **Test Buddy** (`:test-buddy`, `:test-buddy-crash`) is kept generic, ready to become a library of its own: nothing
-  Notekea-specific in it. Notekea's cases live in `:selftest`. The Self-Test is in English only.
-- **Every feature keeps the Self-Test current** (its cases, automatic or manual), so the release run only needs
+  Notekea-specific in it. Notekea's cases live in `:auto-test`. The Auto-Test is in English only.
+- **Every feature keeps the Auto-Test current** (its cases, automatic or manual), so the release run only needs
   a tag. There is no quota of automatic cases: automate what is reasonable.
 - **Post-MVP repositories** (`ROADMAP.md`, post-MVP): clone the repository as it is, index it with a parser, answer
   with file and line; Notekea never writes notes about the code nor writes code.

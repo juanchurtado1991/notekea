@@ -15,7 +15,7 @@ import java.util.Properties
  * `java.util.prefs`, would write outside it. Each change is written to a temporary file and moved into place, so a
  * crash never leaves a half-written file; an unreadable file is logged and replaced by empty settings. Saves run one at
  * a time in the whole process: features save from several threads at once (the tree's open folders and the tabs, on
- * one click), and the Self-Test runs a quitting Notekea and the next one side by side. Each save also writes a
+ * one click), and the Auto-Test runs a quitting Notekea and the next one side by side. Each save also writes a
  * temporary file of its own, so even two processes never move one away from the other (1.3-03 failed on CI with
  * `NoSuchFileException: settings.properties.tmp`).
  */

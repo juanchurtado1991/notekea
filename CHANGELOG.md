@@ -170,6 +170,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The Self-Test is now the Auto-Test: the module is `auto-test`, its guide `qa/AUTO_TEST.md` and its package
+  `app.notekea.autotest`. Older entries and the QA runs keep the name they were written with.
+- Packages: the editor and the tree split their presentation into `viewmodel`, `model`, `view` and one folder per
+  section; `llm` and `models` are the `ai` feature, the design system is `core/presentation/designsystem`, and
+  Settings and About are the `settings` feature (`ARCHITECTURE.md` §1).
 - **Color themes:** eight themes made by hand in the image of Workspace Blue (Graphite, Sage, Lagoon, Iris, Rose, Clay and
   Honey join it) replace the eleven computed ones; whoever had one that is gone gets the closest.
 - The app no longer ships seven libraries nothing uses yet: JGit and its SSH client, Java Keyring, Koog and the Ktor

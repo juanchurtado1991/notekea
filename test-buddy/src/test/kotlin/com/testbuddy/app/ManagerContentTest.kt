@@ -44,7 +44,7 @@ class ManagerContentTest {
     @Test
     fun `in a short window a case's buttons stay whole inside it`() = runComposeUiTest {
         setContent {
-            SelfTestTheme {
+            AutoTestTheme {
                 Box(modifier = Modifier.size(width = WIDTH_DP.dp, height = SHORT_HEIGHT_DP.dp)) {
                     ManagerContent(
                         suite = suite,

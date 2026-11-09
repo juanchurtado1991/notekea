@@ -13,7 +13,7 @@ abstract class ArchitectureTestBase {
         Konsist.scopeFromModule(moduleName = KTLINT_RULES_MODULE_NAME) +
         Konsist.scopeFromModule(moduleName = TEST_BUDDY_MODULE_NAME) +
         Konsist.scopeFromModule(moduleName = TEST_BUDDY_CRASH_MODULE_NAME) +
-        Konsist.scopeFromModule(moduleName = SELF_TEST_MODULE_NAME) +
+        Konsist.scopeFromModule(moduleName = AUTO_TEST_MODULE_NAME) +
         Konsist.scopeFromModule(moduleName = BUILD_SRC_MODULE_NAME)
     protected val productionScope = Konsist.scopeFromProduction(moduleName = MODULE_NAME)
 
@@ -21,10 +21,10 @@ abstract class ArchitectureTestBase {
     protected val shippedScope =
         productionScope + Konsist.scopeFromProduction(moduleName = TEST_BUDDY_CRASH_MODULE_NAME)
 
-    /** Everything that runs outside a test task, the Self-Test and Test Buddy included. */
+    /** Everything that runs outside a test task, the Auto-Test and Test Buddy included. */
     protected val runningCodeScope = shippedScope +
         Konsist.scopeFromProduction(moduleName = TEST_BUDDY_MODULE_NAME) +
-        Konsist.scopeFromProduction(moduleName = SELF_TEST_MODULE_NAME)
+        Konsist.scopeFromProduction(moduleName = AUTO_TEST_MODULE_NAME)
 
     protected val designSystemOnlyImports = listOf(
         "AlertDialog",
@@ -145,7 +145,7 @@ abstract class ArchitectureTestBase {
         const val JAVA_REFERENCE_PATTERN = "\\bjavax?\\.[a-z]+\\."
         const val OS_NAME_PROPERTY = "\"os.name\""
         const val PRESENTATION_LAYER = "presentation"
-        const val SELF_TEST_MODULE_NAME = "selftest"
+        const val AUTO_TEST_MODULE_NAME = "auto-test"
         const val SYSTEM_CLOCK = "Clock.System"
         const val SYSTEM_ENVIRONMENT_IMPLEMENTATION = "JvmSystemEnvironment"
         const val TEST_BUDDY_CRASH_MODULE_NAME = "test-buddy-crash"

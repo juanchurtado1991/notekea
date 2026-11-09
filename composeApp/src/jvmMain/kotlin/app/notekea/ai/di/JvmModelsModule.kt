@@ -20,7 +20,7 @@ import java.nio.file.Path
 
 /**
  * The desktop side of the model manager: the `models` folder of the app data, downloads with Ktor on OkHttp, the
- * hardware read from the JVM, and the installer's coroutines, cancelled with Koin (the Self-Test starts it per case).
+ * hardware read from the JVM, and the installer's coroutines, cancelled with Koin (the Auto-Test starts it per case).
  */
 val jvmModelsModule = module {
     single { ModelFolder(root = Path.of(get<PlatformConventions>().appDataDirectory, MODELS_FOLDER)) }

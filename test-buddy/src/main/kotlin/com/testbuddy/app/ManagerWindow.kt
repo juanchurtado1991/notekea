@@ -25,7 +25,7 @@ import kotlin.system.exitProcess
 internal fun ApplicationScope.ManagerWindow(
     suite: Suite,
     session: ManagerSession,
-    folders: SelfTestFolders
+    folders: AutoTestFolders
 ) {
     val state by session.state.collectAsState()
     val windowState = rememberWindowState(
@@ -40,7 +40,7 @@ internal fun ApplicationScope.ManagerWindow(
         title = "${suite.appName} QA",
         alwaysOnTop = true
     ) {
-        SelfTestTheme {
+        AutoTestTheme {
             ManagerContent(
                 suite = suite,
                 machine = machine,
@@ -54,7 +54,7 @@ internal fun ApplicationScope.ManagerWindow(
 
 private fun managerActions(
     session: ManagerSession,
-    folders: SelfTestFolders
+    folders: AutoTestFolders
 ) = ManagerActions(
     onTab = session::select,
     onStart = session::startAutomatic,

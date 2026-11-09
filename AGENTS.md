@@ -12,7 +12,7 @@ Before changing anything, read and follow:
   injected dispatchers and clock, string resources, testing strategy (fakes, never a real model in unit tests).
 - `PLATFORM_GUIDELINES.md` — UI behavior on Windows, macOS and Linux.
 - `LIBRARIES.md` — the approved libraries and why. Do not add a library that is not listed there without asking.
-- `qa/SELF_TEST.md` — how every smoke case is tested on the testers' machines (Notekea QA and its Self-Test) and what each
+- `qa/AUTO_TEST.md` — how every smoke case is tested on the testers' machines (Notekea QA and its Auto-Test) and what each
   feature must add to it.
 - `ROADMAP.md` — milestones, features (with branch names, status and the UI specification of each screen).
   In the feature's pull request to `main`, mark it ✅ with the PR link and update the milestone count.
@@ -110,7 +110,7 @@ them.
 - **One Gradle module with package-level features.** `composeApp` holds `core` and the features as packages, and
   Konsist guards their boundaries, including that features never depend on each other and that `core` depends on
   none. Gradle modules would pay in build time and wiring for a separation the app gets without them. The other
-  modules exist because they ship or run separately (`selftest`, `test-buddy`, `test-buddy-crash`, `ktlint-rules`).
+  modules exist because they ship or run separately (`auto-test`, `test-buddy`, `test-buddy-crash`, `ktlint-rules`).
 - **No `.composekit.conf`.** The kit's guards are not installed: the Konsist tests and `ktlint-rules/` enforce the
   rules that apply here, in `check`, where CI and the pre-commit hook already run them.
 - **`buildSrc`, not `build-logic`.** `notekea.jvm` is the one convention plugin, for the five modules. Because
@@ -135,25 +135,25 @@ left for the release run, not the feature's smoke list. Within the feature's ste
 1. **Data:** add what the smoke test needs to `smoke-data/` (inside the repository when Git can hold it, otherwise
    as a step of `smoke.sh` and `smoke.ps1`) and list it in `smoke-data/README.md`. The developer never invents data.
 2. **New cases:** add the feature's release cases to `MVP_SMOKE_TEST.md` (by hand until `qa/README.md` piece 5 makes
-   it generated from the Self-Test's cases), written so they can be reproduced on Windows, macOS and Linux (name
+   it generated from the Auto-Test's cases), written so they can be reproduced on Windows, macOS and Linux (name
    both `smoke.sh` and `smoke.ps1`, and the shortcut on each platform).
 3. **Outdated cases:** rewrite in place, keeping their IDs, the existing cases the change makes outdated, including
    those marked "Revised by <feature>"; mark the cases a later feature will change with a "Revised by" note.
-4. **Self-Test:** give every new or changed case its **Checked by** (`Self-Test`, or `Manual (<reason>)` for
+4. **Auto-Test:** give every new or changed case its **Checked by** (`Auto-Test`, or `Manual (<reason>)` for
    eyes, system, packaged or costly; there is no quota, but every milestone keeps as many useful automated cases as it
    can: a result shown as text, an order, a count or a file's content is automated, `Manual (eyes)` is only for
    colors, motion and drawings, and a costly case is split so its cheap part, such as starting and cancelling a
-   download, is automated) and write it in `:selftest` in the
+   download, is automated) and write it in `:auto-test` in the
    same step: an `AutomatedCase` named after its ID, or a `ManualCase` with its steps and expected result in plain
    English for a tester who is not a developer (no terminal, no paths to type). Keep the consistency test green
-   (`qa/SELF_TEST.md`).
+   (`qa/AUTO_TEST.md`).
 5. **Results:** the developer's results go in the description of the pull request to `main` (OS, version, what was
    checked); the OS columns of `MVP_SMOKE_TEST.md` are only filled in the release run with a packaged build.
 
 ## Testing levels (`GUIDELINES.md` §8)
 
 1. **Feature smoke test** — the section above: the developer runs it with your script before a feature reaches
-   `main`. Every automatable case you add also becomes an automated case of the Self-Test.
+   `main`. Every automatable case you add also becomes an automated case of the Auto-Test.
 2. **Milestone performance pass** — the last item of every milestone (1.18, 2.9, 3.7, 4.3, 5.4): run the automated
    smoke runs while sampling memory, profile where it goes and idle RAM, record it in `docs/performance.md`, cut
    what grew. Its smoke test also proves nothing broke.
@@ -165,7 +165,7 @@ left for the release run, not the feature's smoke list. Within the feature's ste
    when a run closes (M1 closed on macOS alone, `qa/runs/M1.md`). A milestone before it starts the next one as soon as
    its performance pass is merged.
 
-**The Self-Test is never left for later:** every feature keeps it current, so the release run only needs a tag.
+**The Auto-Test is never left for later:** every feature keeps it current, so the release run only needs a tag.
 
 ## The development machine
 

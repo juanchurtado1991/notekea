@@ -61,19 +61,19 @@ private fun TitleBar(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().background(
-            color = SelfTestColors.Page
+            color = AutoTestColors.Page
         ).padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier.size(
                 size = 22.dp
-            ).background(color = SelfTestColors.Running, shape = RoundedCornerShape(size = 6.dp)),
+            ).background(color = AutoTestColors.Running, shape = RoundedCornerShape(size = 6.dp)),
             contentAlignment = Alignment.Center
         ) { Text(text = "TB", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold) }
         Column(modifier = Modifier.padding(start = 8.dp)) {
             Text(text = title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            Text(text = subtitle, fontSize = 10.sp, color = SelfTestColors.Muted, maxLines = 1)
+            Text(text = subtitle, fontSize = 10.sp, color = AutoTestColors.Muted, maxLines = 1)
         }
     }
 }
@@ -85,7 +85,7 @@ private fun Tabs(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)
-            .background(color = SelfTestColors.Quiet, shape = RoundedCornerShape(size = 8.dp)).padding(all = 3.dp)
+            .background(color = AutoTestColors.Quiet, shape = RoundedCornerShape(size = 8.dp)).padding(all = 3.dp)
     ) {
         ManagerTab.entries.forEach { tab ->
             val isSelected = tab == selected

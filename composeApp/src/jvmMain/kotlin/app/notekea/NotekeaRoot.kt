@@ -39,7 +39,7 @@ private const val PREVIEW_TEXT = "Every window of the app"
 /**
  * What every window of the app reads, around them: the system's dark theme and reduced motion, the kept appearance
  * ([initialAppearance] until the store answers), the desktop's file drop and resize cursor, and the app's version. The
- * app and the Self-Test's cases both start here, so a case runs the same app.
+ * app and the Auto-Test's cases both start here, so a case runs the same app.
  */
 @Composable
 fun NotekeaAppLocals(
@@ -83,7 +83,7 @@ private fun AppLocals(
 }
 
 /**
- * The whole window's content, in the real window and in a Self-Test case, which differ only in their [host] and in what
+ * The whole window's content, in the real window and in a Auto-Test case, which differ only in their [host] and in what
  * closing the window does ([onClose]): the shortcuts and the close guard, the zoom, the welcome screen, then the open
  * vault's workspace, and the window's dialogs over them.
  */

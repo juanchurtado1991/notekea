@@ -24,7 +24,7 @@ import kotlin.time.Duration
  */
 internal class ManagerSession(
     private val suite: Suite,
-    private val folders: SelfTestFolders,
+    private val folders: AutoTestFolders,
     private val environment: () -> AppEnvironment = AppEnvironment::current,
     private val startRun: (onEvent: (RunnerEvent) -> Unit, onEnd: (Int) -> Unit) -> AutomaticRun = { onEvent, onEnd ->
         AutomaticRun(log = folders.report.resolve(RUN_LOG), onEvent = onEvent, onEnd = onEnd).also { it.start() }

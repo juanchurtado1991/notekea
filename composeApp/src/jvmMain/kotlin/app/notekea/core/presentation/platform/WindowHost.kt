@@ -7,7 +7,7 @@ import androidx.compose.runtime.setValue
 import app.notekea.core.platform.domain.PlatformConventions
 
 /**
- * What a host of Notekea's window holds for it: the real window or a Self-Test case. [conventions] are the system's,
+ * What a host of Notekea's window holds for it: the real window or a Auto-Test case. [conventions] are the system's,
  * and [title] follows the open vault and its active tab.
  */
 @Stable

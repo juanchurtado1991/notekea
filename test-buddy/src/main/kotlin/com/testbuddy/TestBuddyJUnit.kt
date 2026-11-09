@@ -6,7 +6,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 /**
- * Runs a suite's automated cases as JUnit 5 tests, one per case named after its ID, so CI runs the cases the Self-Test
+ * Runs a suite's automated cases as JUnit 5 tests, one per case named after its ID, so CI runs the cases the Auto-Test
  * app runs: `class NotekeaSuiteTest : TestBuddyJUnit(notekeaSuite)`.
  */
 public abstract class TestBuddyJUnit(private val suite: Suite) {

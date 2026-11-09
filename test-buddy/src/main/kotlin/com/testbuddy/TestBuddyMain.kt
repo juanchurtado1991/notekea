@@ -6,7 +6,7 @@ import com.testbuddy.app.AppProcess
 import com.testbuddy.app.ManagerSession
 import com.testbuddy.app.ManagerWindow
 import com.testbuddy.app.OutputCapture
-import com.testbuddy.app.SelfTestFolders
+import com.testbuddy.app.AutoTestFolders
 import com.testbuddy.app.runAutomatedCases
 import kotlin.system.exitProcess
 
@@ -21,7 +21,7 @@ import kotlin.system.exitProcess
 public fun testBuddyMain(
     args: Array<String>,
     suite: Suite,
-    folders: SelfTestFolders = SelfTestFolders.default(appName = suite.appName),
+    folders: AutoTestFolders = AutoTestFolders.default(appName = suite.appName),
     runApp: (manager: @Composable ApplicationScope.() -> Unit) -> Unit
 ) {
     if (AppProcess.RUNNER_FLAG in args) {
