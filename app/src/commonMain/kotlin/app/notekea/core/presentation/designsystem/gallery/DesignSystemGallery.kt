@@ -20,7 +20,7 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 
 /*
  * Developer-only gallery of the design system, rendered in the light and dark themes side by side.
- * Opened with `./gradlew :composeApp:run -Pgallery`; never reachable from a packaged build, so its sample texts are
+ * Opened with `./gradlew :app:run -Pgallery`; never reachable from a packaged build, so its sample texts are
  * constants instead of string resources (ARCHITECTURE.md §7).
  */
 

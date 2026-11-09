@@ -172,6 +172,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The Self-Test is now the Auto-Test: the module is `auto-test`, its guide `qa/AUTO_TEST.md` and its package
   `app.notekea.autotest`. Older entries and the QA runs keep the name they were written with.
+- The app's Gradle module is `app` instead of `composeApp`: it runs with `./gradlew :app:run`.
 - Packages: the editor and the tree split their presentation into `viewmodel`, `model`, `view` and one folder per
   section; `llm` and `models` are the `ai` feature, the design system is `core/presentation/designsystem`, and
   Settings and About are the `settings` feature (`ARCHITECTURE.md` §1).

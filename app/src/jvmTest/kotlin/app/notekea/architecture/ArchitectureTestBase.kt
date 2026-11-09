@@ -141,7 +141,7 @@ abstract class ArchitectureTestBase {
         const val ICONS_FILE = "NotekeaIcons"
         const val KTLINT_RULES_MODULE_NAME = "ktlint-rules"
         const val KOIN_COMPONENT_IMPORT = "org.koin.core.component.KoinComponent"
-        const val MODULE_NAME = "composeApp"
+        const val MODULE_NAME = "app"
         const val JAVA_REFERENCE_PATTERN = "\\bjavax?\\.[a-z]+\\."
         const val OS_NAME_PROPERTY = "\"os.name\""
         const val PRESENTATION_LAYER = "presentation"

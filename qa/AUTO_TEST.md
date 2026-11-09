@@ -30,9 +30,9 @@ A manual run takes a fraction of the 5 to 7 hours per system the old step-by-ste
 |---|---|---|---|
 | `:test-buddy` | **Test Buddy**, generic: the case types and verbs, the runner, the JUnit bridge, the report, `testBuddyMain` and the manager window. It knows nothing about Notekea, so it could test any Compose Desktop app ([README](../test-buddy/README.md)) | Compose, Compose UI Test, `:test-buddy-crash` | No |
 | `:test-buddy-crash` | **Test Buddy Crash**, generic: the crash notice, the crash report with the last steps (`Breadcrumbs`) and the machine (`AppEnvironment`), configured by the app: its name, texts, folder and issue form ([README](../test-buddy-crash/README.md)) | Compose | Yes |
-| `:auto-test` | **Notekea QA**: every automated and manual case, the smoke data bundled in, `QaMain` (Notekea with the manager), its data folder (`QaAppData`) and its installers; also the memory runs of the performance passes (`smokeRun`) | `:composeApp`, `:test-buddy` | No |
+| `:auto-test` | **Notekea QA**: every automated and manual case, the smoke data bundled in, `QaMain` (Notekea with the manager), its data folder (`QaAppData`) and its installers; also the memory runs of the performance passes (`smokeRun`) | `:app`, `:test-buddy` | No |
 
-Notekea's release ships no test code: `:composeApp` depends only on `:test-buddy-crash`.
+Notekea's release ships no test code: `:app` depends only on `:test-buddy-crash`.
 
 **Test Buddy is written to become a standalone SDK** if it proves useful beyond Notekea: its own package
 (`com.testbuddy`), no dependency on any Notekea module (checked by a Konsist test), a public API kept small and

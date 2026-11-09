@@ -17,7 +17,7 @@ dependencyResolutionManagement {
     }
 }
 
-include(":composeApp")
+include(":app")
 include(":ktlint-rules")
 include(":test-buddy-crash")
 include(":test-buddy")

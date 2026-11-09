@@ -141,7 +141,7 @@ tasks.matching { it.name.startsWith("compileKotlin") }.configureEach {
     dependsOn(":installGitHooks")
 }
 
-// `./gradlew :composeApp:run -Pgallery` opens the design system gallery instead of the app (development only).
+// `./gradlew :app:run -Pgallery` opens the design system gallery instead of the app (development only).
 tasks.withType<JavaExec>().matching { it.name == "run" }.configureEach {
     if (project.hasProperty(galleryGradleProperty)) {
         systemProperty(gallerySystemProperty, true)
@@ -192,7 +192,7 @@ compose.desktop {
 val downloadEmbeddingModel = EmbeddingModel.registerDownload(project)
 
 // The tests that load the real model (named *RealModelTest) stay out of check, which every pull request runs: they run in
-// `./gradlew :composeApp:modelTest`, in the nightly build (ARCHITECTURE.md, testing).
+// `./gradlew :app:modelTest`, in the nightly build (ARCHITECTURE.md, testing).
 val jvmTest = tasks.named<Test>("jvmTest") { filter { excludeTestsMatching(modelTestPattern) } }
 tasks.register<Test>("modelTest") {
     description = "Runs the tests that load the bundled embedding model"
