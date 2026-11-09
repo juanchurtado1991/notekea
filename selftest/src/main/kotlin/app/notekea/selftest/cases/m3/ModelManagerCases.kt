@@ -13,6 +13,7 @@ private const val OPEN_AI_MODEL =
 /** The cases of 3.1, the model manager (`MVP_SMOKE_TEST.md`): Settings → AI model. */
 fun SuiteBuilder.modelManagerCases() {
     recommendedSize()
+    startPauseAndCancel()
     downloadAndResume()
     cancelAndDelete()
     droppedConnection()
@@ -32,6 +33,23 @@ private fun SuiteBuilder.recommendedSize() {
     }
 }
 
+private fun SuiteBuilder.startPauseAndCancel() {
+    automated(id = "3.1-05", title = "A download shows its progress, pauses and is cancelled, leaving nothing behind") {
+        openVault(name = PLAYGROUND, shownText = WELCOME)
+        clickIcon(label = "Settings")
+        click(text = "AI model")
+        click(text = "Download")
+        expectText(text = "Pause")
+        expectText(text = " GB of ", substring = true)
+        click(text = "Pause")
+        expectText(text = "Paused · ", substring = true)
+        expectText(text = "Resume")
+        click(text = "Cancel")
+        expectText(text = "Download")
+        expectNoText(text = "Resume")
+    }
+}
+
 private fun SuiteBuilder.downloadAndResume() {
     manual(id = "3.1-02", reason = ManualReason.COSTLY) {
         prepare(PLAYGROUND)
@@ -42,10 +60,10 @@ private fun SuiteBuilder.downloadAndResume() {
                 "wait until the download ends (from a few minutes to half an hour, depending on the connection)."
         )
         expected(
-            text =
-            "The bar grows with the gigabytes done of the total and the speed (as in 1.9 GB of 3.2 GB · 24.5 MB/s). In step 4 it stays paused where it was, also " +
-                "after closing Settings. In step 5 it goes on from there, not from the start, shows Checking the " +
-                "file… for a moment, and then the card says In use, with Delete next to it."
+            text = "The bar grows with the gigabytes done of the total and the speed (as in 1.9 GB of 3.2 GB · " +
+                "24.5 MB/s). In step 4 it stays paused where it was, also after closing Settings. In step 5 it goes " +
+                "on from there, not from the start, shows Checking the file… for a moment, and then the card says " +
+                "In use, with Delete next to it."
         )
     }
 }
@@ -53,15 +71,13 @@ private fun SuiteBuilder.downloadAndResume() {
 private fun SuiteBuilder.cancelAndDelete() {
     manual(id = "3.1-03", reason = ManualReason.COSTLY) {
         prepare(PLAYGROUND)
-        title(text = "Cancelling a download and deleting a model free their space")
+        title(text = "Deleting a model asks first and frees it")
         steps(
-            text = "$OPEN_AI_MODEL\n3. Click OTHER SIZES, then Download on the Small model, and click Cancel after " +
-                "a few seconds.\n4. On the model in use, click Delete, then Cancel in the question; click Delete " +
-                "again and confirm with Delete."
+            text = "$OPEN_AI_MODEL\n3. On the model in use (download one first if none says In use), click Delete, " +
+                "then Cancel in the question.\n4. Click Delete again and confirm with Delete."
         )
         expected(
-            text = "Step 3 ends the download and Small shows Download again. In step 4 Cancel keeps the model; " +
-                "confirming deletes it: the card shows Download again and no size says In use."
+            text = "Step 3 keeps the model. Step 4 deletes it: the card shows Download again and no size says In use."
         )
     }
 }
