@@ -18,6 +18,6 @@ interface ModelInstaller {
     /** Stops the download and keeps its bytes for [start]. */
     fun pause()
 
-    /** Stops the download and deletes what it downloaded of the chat model. */
+    /** Stops the download and deletes what it downloaded: the chat model, and the reranker unless it finished. */
     fun cancel()
 }
