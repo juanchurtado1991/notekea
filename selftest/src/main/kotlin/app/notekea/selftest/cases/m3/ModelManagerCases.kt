@@ -42,7 +42,8 @@ private fun SuiteBuilder.downloadAndResume() {
                 "wait until the download ends (from a few minutes to half an hour, depending on the connection)."
         )
         expected(
-            text = "The bar grows with the gigabytes done of the total. In step 4 it stays paused where it was, also " +
+            text =
+            "The bar grows with the gigabytes done of the total and the speed (as in 1.9 GB of 3.2 GB · 24.5 MB/s). In step 4 it stays paused where it was, also " +
                 "after closing Settings. In step 5 it goes on from there, not from the start, shows Checking the " +
                 "file… for a moment, and then the card says In use, with Delete next to it."
         )

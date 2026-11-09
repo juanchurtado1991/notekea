@@ -25,6 +25,7 @@ import app.notekea.resources.models_pause
 import app.notekea.resources.models_paused
 import app.notekea.resources.models_progress
 import app.notekea.resources.models_progress_label
+import app.notekea.resources.models_progress_speed
 import app.notekea.resources.models_resume
 import app.notekea.resources.models_verifying
 import org.jetbrains.compose.resources.stringResource
@@ -94,8 +95,19 @@ private fun progressText(
         ?: return stringResource(resource = Res.string.models_verifying)
     val done = formatBytes(bytes = downloading.doneBytes)
     val total = formatBytes(bytes = downloading.totalBytes)
-    val text = if (isPaused) Res.string.models_paused else Res.string.models_progress
-    return stringResource(resource = text, done, total)
+    val speed = downloading.bytesPerSecond
+    return when {
+        isPaused -> stringResource(resource = Res.string.models_paused, done, total)
+
+        speed == null -> stringResource(resource = Res.string.models_progress, done, total)
+
+        else -> stringResource(
+            resource = Res.string.models_progress_speed,
+            done,
+            total,
+            formatSpeed(bytesPerSecond = speed)
+        )
+    }
 }
 
 @Preview

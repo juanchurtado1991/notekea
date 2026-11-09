@@ -40,7 +40,8 @@ val jvmModelsModule = module {
             catalogSource = get(),
             storage = get(),
             activeModelStore = get(),
-            dispatchers = get()
+            dispatchers = get(),
+            clock = get()
         )
     } onClose { it?.close() } bind ModelInstaller::class
 }

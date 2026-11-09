@@ -39,7 +39,11 @@ internal object ModelManagerSamples {
     val downloading = notInstalled.copy(
         session = InstallSession(
             size = ModelSize.MEDIUM,
-            progress = InstallProgress.Downloading(doneBytes = 1_940_000_000, totalBytes = 3_179_314_752)
+            progress = InstallProgress.Downloading(
+                doneBytes = 1_940_000_000,
+                totalBytes = 3_179_314_752,
+                bytesPerSecond = 24_500_000
+            )
         )
     )
     val inUse = notInstalled.copy(
