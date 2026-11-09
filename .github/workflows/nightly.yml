@@ -44,7 +44,7 @@ jobs:
       # check, and the tests that load the bundled embedding model, which pull requests skip (ARCHITECTURE.md).
       - name: Lint, test and coverage
         shell: bash
-        run: ./gradlew check koverVerify :composeApp:modelTest --continue --console=plain
+        run: ./gradlew check koverVerify :app:modelTest --continue --console=plain
 
       - name: Smoke runs with memory
         if: always()
@@ -98,7 +98,7 @@ jobs:
 
       - name: Package
         shell: bash
-        run: ./gradlew :composeApp:packageDistributionForCurrentOS --console=plain
+        run: ./gradlew :app:packageDistributionForCurrentOS --console=plain
 
       - name: Install on Linux
         if: runner.os == 'Linux'
@@ -106,12 +106,12 @@ jobs:
           # The package's menu entry needs this folder, which a machine with no desktop lacks.
           sudo mkdir -p /usr/share/desktop-directories
           sudo apt-get update
-          sudo apt-get install -y xvfb ./composeApp/build/compose/binaries/main/deb/*.deb
+          sudo apt-get install -y xvfb ./app/build/compose/binaries/main/deb/*.deb
 
       - name: Install on macOS
         if: runner.os == 'macOS'
         run: |
-          hdiutil attach composeApp/build/compose/binaries/main/dmg/*.dmg -nobrowse -mountpoint /Volumes/Notekea
+          hdiutil attach app/build/compose/binaries/main/dmg/*.dmg -nobrowse -mountpoint /Volumes/Notekea
           cp -R /Volumes/Notekea/Notekea.app /Applications/
           hdiutil detach /Volumes/Notekea
 
@@ -119,7 +119,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $installer = (Get-Item composeApp/build/compose/binaries/main/msi/*.msi).FullName
+          $installer = (Get-Item app/build/compose/binaries/main/msi/*.msi).FullName
           $install = Start-Process msiexec -ArgumentList "/i `"$installer`" /qn" -Wait -PassThru
           if ($install.ExitCode -ne 0) { throw "The installer ended with $($install.ExitCode)" }
 
@@ -139,6 +139,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $installer = (Get-Item composeApp/build/compose/binaries/main/msi/*.msi).FullName
+          $installer = (Get-Item app/build/compose/binaries/main/msi/*.msi).FullName
           $remove = Start-Process msiexec -ArgumentList "/x `"$installer`" /qn" -Wait -PassThru
           if ($remove.ExitCode -ne 0) { throw "The uninstaller ended with $($remove.ExitCode)" }

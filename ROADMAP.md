@@ -178,7 +178,7 @@ status bar item, empty state, error banner.
   available in debug builds.
 - Implemented in `core.presentation.theme` (internal `palette` + semantic `ColorThemeSchemes`, typography,
   dimensions) and `core.presentation.components`; a test gates WCAG AA contrast for every text pair. The gallery
-  opens with `./gradlew :composeApp:run -Pgallery`.
+  opens with `./gradlew :app:run -Pgallery`.
 
 ### ✅ 1.3 Open a vault — `feature/vault-open` — [notekea#19](https://github.com/juanchurtado1991/notekea/pull/19)
 

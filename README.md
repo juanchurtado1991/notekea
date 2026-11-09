@@ -25,7 +25,7 @@ Requirements: JDK 21 and Git.
 ```bash
 git clone https://github.com/juanchurtado1991/notekea.git
 cd notekea
-./gradlew :composeApp:run
+./gradlew :app:run
 ```
 
 Run lint, tests and coverage:

@@ -199,7 +199,7 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   fails when a case has no counterpart. Once the M1 cases are in (`qa/README.md` piece 5), the cases in code are the
   only source and `MVP_SMOKE_TEST.md` is generated from them, never edited by hand. Every step that adds or changes UI also brings its screen tests (§10).
 - **Manual smoke test before a `feature/` or `fix/` branch reaches `main`.** Automated tests do not prove the
-  app works as a whole, so the developer runs the app (`./gradlew :composeApp:run`) on **at least one OS** and checks:
+  app works as a whole, so the developer runs the app (`./gradlew :app:run`) on **at least one OS** and checks:
   1. The app starts and the main window renders without errors in the log.
   2. The new or fixed behavior works end to end, including its empty, loading and error states
      (use the "Done when" criteria of the feature in `ROADMAP.md` as the script).

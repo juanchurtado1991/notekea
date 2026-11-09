@@ -23,7 +23,7 @@ object EmbeddingModel {
     const val COMMON_RESOURCES = "common"
 
     /**
-     * Registers in [project] (composeApp) the task that downloads the model, once for the whole build, into
+     * Registers in [project] (app) the task that downloads the model, once for the whole build, into
      * `.gradle/models` at the root: it survives `clean`, and CI caches that folder.
      */
     fun registerDownload(project: Project): TaskProvider<DownloadVerifiedFileTask> =
@@ -47,6 +47,6 @@ object EmbeddingModel {
             into(project.layout.buildDirectory.dir("app-resources/$COMMON_RESOURCES/$RESOURCE_FOLDER"))
         }
 
-    private const val DOWNLOAD_TASK_PATH = ":composeApp:downloadEmbeddingModel"
+    private const val DOWNLOAD_TASK_PATH = ":app:downloadEmbeddingModel"
     private const val TASK = "downloadEmbeddingModel"
 }

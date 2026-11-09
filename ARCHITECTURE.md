@@ -181,7 +181,7 @@ abstract class BaseViewModel<S, I, E>(
 | Architecture | Layer boundaries and conventions in this document | Konsist tests in `jvmTest` |
 | AI quality | Retrieval recall and citation accuracy | Evaluation sets (`ROADMAP.md` 2.8, 3.4), run on demand |
 
-- **Architecture tests** (`composeApp/src/jvmTest/.../architecture/ArchitectureTest.kt`) enforce: domain imports
+- **Architecture tests** (`app/src/jvmTest/.../architecture/ArchitectureTest.kt`) enforce: domain imports
   no other layer and no framework (Compose, Koin, Okio, Ktor, JGit, Lucene, llama.cpp, `java.io`/`java.nio`);
   presentation does not import data; `<Feature>Error` types are sealed and live in domain; DTOs live in data;
   no `Impl` classes; interfaces have no default bodies and are not extended with extension functions or properties; use cases live in domain with a single `operator fun invoke`; ViewModels extend
@@ -194,7 +194,7 @@ abstract class BaseViewModel<S, I, E>(
   A new convention in this document comes with its Konsist rule in the same pull request.
 - **Unit tests never load a real model.** Fakes of the ports stand in for it: a fake `TextEmbedder` (2.3) returns
   deterministic vectors and `FakeLlmEngine` scripted generations. Tests that load a real model are named
-  `*RealModelTest` and stay out of `check`, which every pull request runs: `./gradlew :composeApp:modelTest` runs them,
+  `*RealModelTest` and stay out of `check`, which every pull request runs: `./gradlew :app:modelTest` runs them,
   and so does the nightly build on the three systems. Today they are the bundled embedding model's
   (`LlamaTextEmbedderRealModelTest`, `ChunkTokensRealModelTest`, `ROADMAP.md` 2.2), which also prove its native
   library loads everywhere, and `RetrievalEvalRealModelTest` (2.8), which holds hybrid search to its recall@5 baseline;
@@ -250,7 +250,7 @@ themselves.
   empty states, error banners, context menus (nestable, with checked choices, explained options and submenus) and menu
   buttons, a grid size picker, attachments (image, file chip, missing file, embedded note), confirmation dialogs and a
   resizable split pane (its panel at the start or the end, floating over the content when there is no room) already
-  exist (see the gallery: `./gradlew :composeApp:run -Pgallery`).
+  exist (see the gallery: `./gradlew :app:run -Pgallery`).
 - **Layout and look rules decided in 1.14:**
   - Text pages are as wide as `PAGE_SHARE` (70 %) of their pane, between 760 and 1100 dp; never a fixed width.
   - The UI zoom is a `LocalDensity` scale provided once by `UiZoom` around the window; screens read the zoom from

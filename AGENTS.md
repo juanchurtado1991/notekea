@@ -107,7 +107,7 @@ them.
   back through, so the kit's cold load on start has nothing to add.
 - **Streams keep their names:** `AppearanceStore.observe`, `FileWatcher.watch` and the `Observe*UseCase` classes,
   not `get…Stream`. A port with one stream names what it does, and a use case's name is a verb.
-- **One Gradle module with package-level features.** `composeApp` holds `core` and the features as packages, and
+- **One Gradle module with package-level features.** `app` holds `core` and the features as packages, and
   Konsist guards their boundaries, including that features never depend on each other and that `core` depends on
   none. Gradle modules would pay in build time and wiring for a separation the app gets without them. The other
   modules exist because they ship or run separately (`auto-test`, `test-buddy`, `test-buddy-crash`, `ktlint-rules`).

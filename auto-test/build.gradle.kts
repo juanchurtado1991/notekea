@@ -22,7 +22,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(projects.composeApp)
+    implementation(projects.app)
     implementation(projects.testBuddy)
     implementation(compose.desktop.currentOs)
     implementation(libs.koin.core)
@@ -75,7 +75,7 @@ tasks.register<Test>("smokeRun") {
     providers.gradleProperty("mallocArenaMax").orNull?.let { environment("MALLOC_ARENA_MAX", it) }
     // And the bundled embedding model instead of the stand-in, as the installed app has it: `-PrealModel`.
     providers.gradleProperty("realModel").orNull?.let {
-        val resources = rootProject.file("composeApp/build/app-resources/common")
+        val resources = rootProject.file("app/build/app-resources/common")
         systemProperty("compose.application.resources.dir", resources.path)
     }
     // A fresh JVM per test class, so a run is measured without what the runs before it left behind.
@@ -95,18 +95,18 @@ compose.desktop {
             description = "Notekea with its tests, for testers before a release"
             vendor = "Notekea"
             windows {
-                iconFile.set(rootProject.file("composeApp/packaging/icon.ico"))
+                iconFile.set(rootProject.file("app/packaging/icon.ico"))
                 menu = true
                 menuGroup = "Notekea"
                 // Never change it: a newer Notekea QA installer updates the installed one by this ID.
                 upgradeUuid = "3c2f0b7e-5a41-4d0e-9a8e-6f1d2b7c4e19"
             }
             macOS {
-                iconFile.set(rootProject.file("composeApp/packaging/icon.icns"))
+                iconFile.set(rootProject.file("app/packaging/icon.icns"))
                 bundleID = "app.notekea.autotest"
             }
             linux {
-                iconFile.set(rootProject.file("composeApp/packaging/icon.png"))
+                iconFile.set(rootProject.file("app/packaging/icon.png"))
                 shortcut = true
                 menuGroup = "Development"
             }
