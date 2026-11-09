@@ -38,7 +38,9 @@ jobs:
           if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
             changed=$(git diff --name-only "origin/$GITHUB_BASE_REF...HEAD")
             docs='^(README|ROADMAP|CHANGELOG|CLAUDE|GUIDELINES|ARCHITECTURE|PLATFORM_GUIDELINES|LIBRARIES|CONTRIBUTING|SECURITY)\.md$|^docs/|^qa/|^test-buddy/README\.md$'
-            if [ -n "$changed" ] && ! echo "$changed" | grep -qvE "$docs"; then code=false; fi
+            # The list goes in as a here-string: through a pipe, grep leaves at its first match and a long list then
+            # fails the pipe (pipefail), which read as "only documents" and skipped the build of a large pull request.
+            if [ -n "$changed" ] && ! grep -qvE "$docs" <<< "$changed"; then code=false; fi
           fi
           echo "code=$code" >> "$GITHUB_OUTPUT"
           echo "Code changed: $code"
