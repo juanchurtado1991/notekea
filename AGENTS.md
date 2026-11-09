@@ -140,7 +140,10 @@ left for the release run, not the feature's smoke list. Within the feature's ste
 3. **Outdated cases:** rewrite in place, keeping their IDs, the existing cases the change makes outdated, including
    those marked "Revised by <feature>"; mark the cases a later feature will change with a "Revised by" note.
 4. **Self-Test:** give every new or changed case its **Checked by** (`Self-Test`, or `Manual (<reason>)` for
-   eyes, system, packaged or costly; automate what is reasonable, with no quota) and write it in `:selftest` in the
+   eyes, system, packaged or costly; there is no quota, but every milestone keeps as many useful automated cases as it
+   can: a result shown as text, an order, a count or a file's content is automated, `Manual (eyes)` is only for
+   colors, motion and drawings, and a costly case is split so its cheap part, such as starting and cancelling a
+   download, is automated) and write it in `:selftest` in the
    same step: an `AutomatedCase` named after its ID, or a `ManualCase` with its steps and expected result in plain
    English for a tester who is not a developer (no terminal, no paths to type). Keep the consistency test green
    (`qa/SELF_TEST.md`).
