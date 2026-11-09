@@ -3,7 +3,6 @@ package app.notekea.editor.presentation.viewmodel
 import androidx.compose.runtime.snapshots.Snapshot
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.EditorViewModels
 import androidx.compose.ui.text.TextRange
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.notes.domain.NoteFixtures.file

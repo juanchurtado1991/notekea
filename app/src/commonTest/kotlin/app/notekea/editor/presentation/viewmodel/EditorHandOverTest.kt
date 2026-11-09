@@ -2,7 +2,6 @@ package app.notekea.editor.presentation.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.EditorViewModelTestBase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi

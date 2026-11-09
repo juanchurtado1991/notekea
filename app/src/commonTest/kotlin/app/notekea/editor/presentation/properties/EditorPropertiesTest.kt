@@ -2,7 +2,7 @@ package app.notekea.editor.presentation.properties
 
 import androidx.compose.runtime.snapshots.Snapshot
 import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.EditorViewModels
+import app.notekea.editor.presentation.viewmodel.EditorViewModels
 import app.notekea.editor.presentation.model.PropertyIntent
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.notes.domain.FrontmatterContent

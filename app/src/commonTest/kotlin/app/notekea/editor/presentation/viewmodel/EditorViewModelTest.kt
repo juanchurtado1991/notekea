@@ -3,7 +3,6 @@ package app.notekea.editor.presentation.viewmodel
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.EditorViewModelTestBase
 import app.notekea.editor.presentation.model.SaveStatus
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath

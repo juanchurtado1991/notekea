@@ -3,7 +3,6 @@ package app.notekea.editor.presentation.viewmodel
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.EditorViewModelTestBase
 import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent

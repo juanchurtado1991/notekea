@@ -23,7 +23,7 @@ import app.notekea.shell.domain.Workspace
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.viewmodel.EditorViewModel
-import app.notekea.editor.presentation.EditorViewModels
+import app.notekea.editor.presentation.viewmodel.EditorViewModels
 import app.notekea.search.presentation.switcher.QuickSwitcherEffect
 import app.notekea.shell.presentation.WorkspaceIntent
 import app.notekea.shell.presentation.WorkspaceTools
