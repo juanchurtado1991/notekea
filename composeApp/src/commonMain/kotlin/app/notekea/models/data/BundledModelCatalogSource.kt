@@ -14,9 +14,11 @@ import kotlinx.coroutines.withContext
 class BundledModelCatalogSource(
     private val dispatchers: AppDispatchers
 ) : ModelCatalogSource {
-    override suspend fun load(): ModelCatalog = withContext(context = dispatchers.io) {
+    private var catalog: ModelCatalog? = null
+
+    override suspend fun load(): ModelCatalog = catalog ?: withContext(context = dispatchers.io) {
         Ghost.deserialize<ModelCatalogDto>(Res.readBytes(path = CATALOG_PATH).decodeToString()).toDomain()
-    }
+    }.also { catalog = it }
 
     private companion object {
         const val CATALOG_PATH = "files/model-catalog.json"

@@ -140,7 +140,7 @@ class ModelManagerViewModelTest {
         advanceUntilIdle()
 
         assertEquals(expected = ModelSize.MEDIUM, actual = asked)
-        assertEquals(expected = listOf("medium.gguf"), actual = storage.deleted)
+        assertEquals(expected = listOf("medium.gguf", "reranker.gguf"), actual = storage.deleted)
         assertEquals(
             expected = null to null,
             actual =
@@ -167,5 +167,19 @@ class ModelManagerViewModelTest {
         assertEquals(expected = emptyList(), actual = storage.deleted)
         assertEquals(expected = ModelSize.SMALL, actual = activeModelStore.kept.value)
         assertEquals(expected = true, actual = viewModel.state.value.isOtherSizesShown)
+    }
+
+    @Test
+    fun `the reranker stays while another chat model is installed`() = runTest(context = testDispatcher) {
+        storage.installed +=
+            listOf(ModelCatalogs.small.file.fileName, ModelCatalogs.medium.file.fileName, "reranker.gguf")
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.onIntent(intent = ModelManagerIntent.OnDeleteAsk(size = ModelSize.MEDIUM))
+        viewModel.onIntent(intent = ModelManagerIntent.OnDeleteConfirm)
+        advanceUntilIdle()
+
+        assertEquals(expected = listOf("medium.gguf"), actual = storage.deleted)
     }
 }

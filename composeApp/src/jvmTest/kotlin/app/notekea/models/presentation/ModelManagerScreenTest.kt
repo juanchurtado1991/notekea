@@ -76,6 +76,12 @@ class ModelManagerScreenTest {
             scene.clickText(text = DOWNLOAD) { settle(scene = scene) }
             installer.current.value = InstallSession(
                 size = ModelSize.MEDIUM,
+                progress = InstallProgress.Downloading(doneBytes = 0, totalBytes = 0)
+            )
+            settle(scene = scene)
+            texts += scene.texts()
+            installer.current.value = InstallSession(
+                size = ModelSize.MEDIUM,
                 progress = InstallProgress.Downloading(
                     doneBytes = 1_200_000_000,
                     totalBytes = 3_000_000_000,
@@ -92,7 +98,8 @@ class ModelManagerScreenTest {
 
         assertTrue(actual = "Medium · Model medium" in texts[0] && "Recommended" in texts[0])
         assertTrue(actual = "Model large" !in texts[0].joinToString())
-        assertTrue(actual = "1.2 GB of 3.0 GB · 24.5 MB/s" in texts[1])
+        assertTrue(actual = texts[1].none { "0 MB" in it } && PAUSE !in texts[1])
+        assertTrue(actual = "1.2 GB of 3.0 GB · 24.5 MB/s" in texts[2])
         assertEquals(expected = listOf(ModelSize.MEDIUM, ModelSize.MEDIUM), actual = installer.started)
         assertEquals(expected = 1, actual = installer.pauses)
     }
@@ -121,7 +128,7 @@ class ModelManagerScreenTest {
         }
 
         assertTrue(actual = "Delete Medium?" in asked)
-        assertEquals(expected = listOf("medium.gguf"), actual = storage.deleted)
+        assertEquals(expected = listOf("medium.gguf", "reranker.gguf"), actual = storage.deleted)
         assertEquals(expected = null, actual = activeModelStore.kept.value)
     }
 
