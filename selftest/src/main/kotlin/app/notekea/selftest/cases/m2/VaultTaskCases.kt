@@ -1,10 +1,18 @@
 package app.notekea.selftest.cases.m2
 
+import app.notekea.selftest.clickLast
+import app.notekea.selftest.expectLineSelected
+import app.notekea.selftest.expectOrderOnScreen
 import app.notekea.selftest.openVault
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val SAMPLE = "Sample Vault"
+private const val HOME = "Home"
+private const val TASKS = "Tasks"
+private const val DEMO_TASK = "Record a demo video"
+private const val FLAT_TASK = "Find a flat near the river"
+private const val LAUNCH_FILE = "$SAMPLE/Projects/Notekea launch.md"
 private const val OPEN_TASKS =
     "1. In Notekea, open the Sample Vault (see TEST DATA above).\n2. Click Tasks in the rail on the left."
 
@@ -19,35 +27,44 @@ fun SuiteBuilder.vaultTaskCases() {
 
 private fun SuiteBuilder.tasksTab() {
     automated(id = "2.11-01", title = "The Tasks tab lists the vault's tasks by note") {
-        openVault(name = SAMPLE, shownText = "Home")
-        clickIcon(label = "Tasks")
+        openVault(name = SAMPLE, shownText = HOME)
+        clickIcon(label = TASKS)
         expectText(text = "By note")
         expectText(text = "Record a demo video")
     }
 }
 
 private fun SuiteBuilder.groupsAndLimits() {
-    manual(id = "2.11-02", reason = ManualReason.EYES) {
-        prepare(SAMPLE)
-        title(text = "Tasks group by date and are limited by folder and done")
-        steps(text = "$OPEN_TASKS\n3. Click By date.\n4. Click Show done.\n5. Click Folder and choose Projects.")
-        expected(
-            text = "Step 3 groups the tasks by date, with Write the announcement and Book the flights dated, and No " +
-                "date holding the rest. Step 4 adds a Done group at the end. Step 5 keeps only the tasks of " +
-                "Projects, and the foot counts them."
-        )
+    automated(id = "2.11-02", title = "Tasks group by date and are limited by folder and done") {
+        openVault(name = SAMPLE, shownText = HOME)
+        clickIcon(label = TASKS)
+        click(text = "By date")
+        // Write the announcement is dated 2026-10-30, so it stays overdue; Book the flights moves with today.
+        expectOrderOnScreen(texts = listOf("Overdue", "Write the announcement 2026-10-30", "No date"))
+        expectNoText(text = "A done task")
+        click(text = "Show done")
+        scrollTo(text = "A done task")
+        expectText(text = "Done")
+        click(text = "Folder")
+        clickLast(text = "Projects")
+        expectText(text = "4 open of 5 tasks")
+        expectText(text = "Finish the editor")
+        expectNoText(text = "An open task")
     }
 }
 
 private fun SuiteBuilder.checkingATask() {
-    manual(id = "2.11-03", reason = ManualReason.EYES) {
-        prepare(SAMPLE)
-        title(text = "A task checked in the tab or in its note shows in the other")
-        steps(
-            text = "$OPEN_TASKS\n3. Check Record a demo video.\n4. Open Projects/Notekea launch.\n5. Uncheck that " +
-                "task there, and go back to the Tasks tab."
-        )
-        expected(text = "It leaves the list at once and its note shows it checked. After step 5 it is listed again.")
+    automated(id = "2.11-03", title = "A task checked or unchecked in the tab is written to its note") {
+        openVault(name = SAMPLE, shownText = HOME)
+        clickIcon(label = TASKS)
+        clickIcon(label = "Task: $DEMO_TASK")
+        expectNoText(text = DEMO_TASK)
+        expectFile(path = LAUNCH_FILE, containing = "- [x] $DEMO_TASK")
+        click(text = "Show done")
+        clickIcon(label = "Task: $DEMO_TASK")
+        expectFile(path = LAUNCH_FILE, containing = "- [ ] $DEMO_TASK")
+        click(text = "Hide done")
+        expectText(text = DEMO_TASK)
     }
 }
 
@@ -61,10 +78,11 @@ private fun SuiteBuilder.changedOutside() {
 }
 
 private fun SuiteBuilder.openingATask() {
-    manual(id = "2.11-05", reason = ManualReason.EYES) {
-        prepare(SAMPLE)
-        title(text = "A task's text opens its note at the task")
-        steps(text = "$OPEN_TASKS\n3. Click the text of Find a flat near the river.")
-        expected(text = "Projects/Trip to Lisbon opens with that task selected.")
+    automated(id = "2.11-05", title = "A task's text opens its note at the task") {
+        openVault(name = SAMPLE, shownText = HOME)
+        clickIcon(label = TASKS)
+        scrollTo(text = FLAT_TASK)
+        click(text = FLAT_TASK)
+        expectLineSelected(line = FLAT_TASK)
     }
 }

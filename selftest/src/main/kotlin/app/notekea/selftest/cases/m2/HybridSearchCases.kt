@@ -1,9 +1,7 @@
 package app.notekea.selftest.cases.m2
 
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.isFocused
+import app.notekea.selftest.expectLineSelected
 import app.notekea.selftest.pressInWindow
 import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.ShortcutModifier.Shift
@@ -55,20 +53,6 @@ private fun SuiteBuilder.passageRows() {
 }
 
 private fun CaseScope.expectPassageSelected() = expectLineSelected(line = REST_LINE)
-
-/** The text field holds the keyboard with exactly [line] selected. */
-private fun CaseScope.expectLineSelected(
-    line: String
-) {
-    val field = isFocused() and hasSetTextAction()
-    ui.waitUntil(timeoutMillis = 10_000) {
-        ui.onAllNodes(matcher = field).fetchSemanticsNodes().any { node ->
-            val text = node.config[SemanticsProperties.EditableText].text
-            val selection = node.config[SemanticsProperties.TextSelectionRange]
-            text.substring(selection.min, selection.max) == line
-        }
-    }
-}
 
 private fun SuiteBuilder.byMeaning() {
     manual(id = "2.6-02", reason = ManualReason.EYES) {

@@ -132,17 +132,16 @@ private fun SuiteBuilder.linkFromTheGraph() {
 }
 
 private fun SuiteBuilder.noNote() {
-    manual(id = "2.7-08", reason = ManualReason.EYES) {
-        prepare(SAMPLE)
-        title(text = "With no note open the graph asks to find one")
-        steps(
-            text = "1. In Notekea, open the Sample Vault (see TEST DATA above) and close every tab.\n2. Press Ctrl+G " +
-                "(Cmd+G on macOS).\n3. Click Find a note, type arepas and press Enter."
-        )
-        expected(
-            text = "The tab says No note selected and offers Find a note; nothing else shows on the map. Enter " +
-                "brings the graph of Arepas, its notes coming out of the center."
-        )
+    automated(id = "2.7-08", title = "With no note open the graph asks to find one") {
+        openVault(name = SAMPLE, shownText = "Home")
+        pressInWindow(shortcut = Mod + Key.G)
+        expectText(text = "No note selected")
+        click(text = "Find a note")
+        type(text = "arepas")
+        expectText(text = "1 of 1")
+        press(key = Key.Enter)
+        expectNoText(text = "No note selected")
+        expectText(text = "Arepas")
     }
 }
 

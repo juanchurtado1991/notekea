@@ -1,10 +1,24 @@
 package app.notekea.selftest.cases.m2
 
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.hasText
+import app.notekea.selftest.clickLast
+import app.notekea.selftest.expectOrderOnScreen
+import app.notekea.selftest.openNote
 import app.notekea.selftest.openVault
+import app.notekea.selftest.pressInWindow
+import app.notekea.selftest.relaunch
+import app.notekea.selftest.typeAtEnd
+import com.testbuddy.CaseScope
+import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val SAMPLE = "Sample Vault"
+private const val HOME = "Home"
+private const val QUERY = "Query"
+private const val STATE_BLOCKS = "\n\n```query\nfilters:\n  - property: rating\n    condition: more than\n" +
+    "    value: 99\n```\n\n```query\nsorted: rating\n```\n\n```query\ncolumns: [mood]\n```\n"
 private const val OPEN_QUERY =
     "1. In Notekea, open the Sample Vault (see TEST DATA above).\n2. Click Query in the rail on the left."
 
@@ -29,40 +43,48 @@ private fun SuiteBuilder.queryTab() {
 }
 
 private fun SuiteBuilder.booksByRating() {
-    manual(id = "2.10-02", reason = ManualReason.EYES) {
-        prepare(SAMPLE)
-        title(text = "Books by rating list the right notes, in order, and the query stays")
-        steps(
-            text = "$OPEN_QUERY\n3. Click Add filter, keep Folder, and choose Books as its value.\n4. Click the + of " +
-                "that rule, choose rating, then more than, type 4 and press Enter.\n5. Click Columns and choose " +
-                "author and rating, then close the menu.\n6. In the rating rule, change 4 to 3 and press Enter." +
-                "\n7. Click the " +
-                "rating column's name twice." +
-                "\n8. Close and open the vault, and click Query."
-        )
-        expected(
-            text = "Two rules show the filters. Step 4 lists Deep Work, Dune and The Pragmatic Programmer, and step " +
-                "6 adds Atomic Habits and Sapiens. The first click sorts low first and the second high first, with " +
-                "an arrow on the column. After reopening, the same query and table are there."
-        )
+    automated(id = "2.10-02", title = "Books by rating list the right notes, in order, and the query stays") {
+        openVault(name = SAMPLE, shownText = HOME)
+        clickIcon(label = QUERY)
+        addFolderRule(folder = "Books")
+        addRule(property = "rating", condition = "more than", value = "4")
+        expectText(text = "Deep Work")
+        expectText(text = "Dune")
+        expectNoText(text = "Sapiens")
+        click(text = "4")
+        clearText()
+        type(text = "3")
+        press(key = Key.Enter)
+        expectText(text = "Sapiens")
+        sortBy(property = "rating")
+        expectOrderOnScreen(texts = listOf("Sapiens", "Dune"))
+        click(text = "Sort")
+        scrollTo(text = "High first")
+        clickLast(text = "High first")
+        expectOrderOnScreen(texts = listOf("Dune", "Sapiens"))
+        relaunch()
+        expectText(text = HOME)
+        clickIcon(label = QUERY)
+        expectOrderOnScreen(texts = listOf("Dune", "Sapiens"))
     }
 }
 
 private fun SuiteBuilder.projectsAndMeetings() {
-    manual(id = "2.10-03", reason = ManualReason.EYES) {
-        prepare(SAMPLE)
-        title(text = "Projects by status and meetings by date list the right notes")
-        steps(
-            text = "$OPEN_QUERY\n3. Add the rule Folder, Projects, and click Sort, status.\n4. Remove the rule with " +
-                "its -, add the rule Folder, Meetings, and the rule date, after, 2026-10-22, and click Sort, date." +
-                "\n5. Add the rule rating, more than, type high and press Enter."
-        )
-        expected(
-            text = "Step 3 starts with Notekea launch (active), Kitchen renovation (on hold) and Garden plan " +
-                "(planning), and the projects with no status come last. Step 4 lists Design review, Budget and " +
-                "Retro October, oldest first. In step 5 the field is outlined in red and " +
-                "the table does not change."
-        )
+    automated(id = "2.10-03", title = "Projects by status and meetings by date list the right notes") {
+        openVault(name = SAMPLE, shownText = HOME)
+        clickIcon(label = QUERY)
+        addFolderRule(folder = "Projects")
+        sortBy(property = "status")
+        expectOrderOnScreen(texts = listOf("Notekea launch", "Kitchen renovation", "Garden plan", "Trip to Lisbon"))
+        clickIcon(label = "Remove filter")
+        addFolderRule(folder = "Meetings")
+        addRule(property = "date", condition = "after", value = "2026-10-22")
+        sortBy(property = "date")
+        expectOrderOnScreen(texts = listOf("2026-10-23 Design review", "2026-10-24 Budget", "Retro October"))
+        expectNoText(text = "Vendor call")
+        addRule(property = "rating", condition = "more than", value = "high")
+        expectText(text = "Retro October")
+        expectNoText(text = "No notes match these filters")
     }
 }
 
@@ -83,40 +105,32 @@ private fun SuiteBuilder.cellsEditNotes() {
 }
 
 private fun SuiteBuilder.savedInANote() {
-    manual(id = "2.10-05", reason = ManualReason.EYES) {
-        prepare(SAMPLE)
-        title(text = "A query saved in a note is a live table in Preview and YAML in Edit")
-        steps(
-            text =
-            "1. In Notekea, open the Sample Vault (see TEST DATA above) and open Books/Reading list.\n2. Click " +
-                "Query in the rail, and add the filter Folder, Books, and the column rating.\n3. Click Save in " +
-                "Reading list.\n4. Go to the note's tab, in Preview.\n5. Change a rating in the table.\n6. Click " +
-                "Edit, then close and open the note."
-        )
-        expected(
-            text = "The tab says Saved in Reading list. In Preview the block is a table under the query's chips, " +
-                "with a border; its header does not sort. A second click on Save says the note already holds it. " +
-                "Step 5 changes that book. In Edit the block is the " +
-                "query's YAML between ```query and ```, at the end of the note."
-        )
+    automated(id = "2.10-05", title = "A query saved in a note is a table in Preview and YAML in the note") {
+        openVault(name = SAMPLE, shownText = HOME)
+        openNote(name = "Reading list", shownText = "Deep Work")
+        clickIcon(label = QUERY)
+        addFolderRule(folder = "Books")
+        click(text = "Save in Reading list")
+        expectText(text = "Saved in Reading list.")
+        click(text = "Save in Reading list")
+        expectText(text = "Reading list already holds this query.")
+        expectFile(path = "$SAMPLE/Books/Reading list.md", containing = "    value: Books\n```")
+        click(text = "Reading list")
+        pressInWindow(shortcut = Mod + Key.E)
+        expectText(text = "Folder is Books")
     }
 }
 
 private fun SuiteBuilder.queryStates() {
-    manual(id = "2.10-06", reason = ManualReason.EYES) {
-        prepare(SAMPLE)
-        title(text = "No match, an unknown property and a broken block each say so")
-        steps(
-            text = "1. In Notekea, open the Sample Vault (see TEST DATA above) and open Books/Reading list, in " +
-                "Edit.\n2. At its end, write a block with three backticks and query, the line sorted: rating, and " +
-                "three backticks.\n3. Click Preview.\n4. In Edit, replace that line with columns: [mood], then " +
-                "Preview.\n5. Click Query in the rail, and add a filter that no note passes, such as rating, more " +
-                "than, 99."
-        )
-        expected(
-            text = "Step 3 says This query can't be read, names the line and shows the YAML below. Step 4 lists " +
-                "every note and says No note has the property mood. Step 5 says No notes match these filters."
-        )
+    automated(id = "2.10-06", title = "A broken block, an unknown property and no match each say so") {
+        openVault(name = SAMPLE, shownText = "Home")
+        openNote(name = "Reading list", shownText = "Deep Work")
+        typeAtEnd(part = "Deep Work", text = STATE_BLOCKS)
+        pressInWindow(shortcut = Mod + Key.E)
+        expectText(text = "This query can't be read")
+        expectText(text = "Line 1: a query holds only filters, sort and columns.")
+        expectText(text = "0 notes")
+        expectText(text = "No note has the property mood.")
     }
 }
 
@@ -130,4 +144,35 @@ private fun SuiteBuilder.queryInObsidian() {
         )
         expected(text = "Obsidian shows the block as a code block, and the rest of the note as before.")
     }
+}
+
+/** Adds the rule Folder is [folder], from the Add filter button or the + after the last rule. */
+private fun CaseScope.addFolderRule(folder: String) {
+    val hasButton = ui.onAllNodes(matcher = hasText(text = "Add filter")).fetchSemanticsNodes().isNotEmpty()
+    if (hasButton) click(text = "Add filter") else clickIcon(label = "Add filter")
+    clickLast(text = "Choose…")
+    clickLast(text = folder)
+}
+
+/** Adds the rule [property] [condition] [value] after the last one, typing the value. */
+private fun CaseScope.addRule(
+    property: String,
+    condition: String,
+    value: String
+) {
+    clickIcon(label = "Add filter")
+    clickLast(text = "Folder")
+    clickLast(text = property)
+    clickLast(text = "is")
+    clickLast(text = condition)
+    clickLast(text = "Value")
+    type(text = value)
+    press(key = Key.Enter)
+}
+
+/** Sorts the table by [property], low first. */
+private fun CaseScope.sortBy(property: String) {
+    click(text = "Sort")
+    clickLast(text = property)
+    press(key = Key.Escape)
 }
