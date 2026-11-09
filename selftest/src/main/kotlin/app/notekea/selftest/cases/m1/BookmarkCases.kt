@@ -11,6 +11,7 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.rightClick
 import app.notekea.selftest.SmokeScenarios
 import app.notekea.selftest.clickInTree
+import app.notekea.selftest.clickLast
 import app.notekea.selftest.openVault
 import app.notekea.selftest.pressInWindow
 import app.notekea.selftest.relaunch
@@ -18,7 +19,6 @@ import app.notekea.selftest.titleField
 import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
-import com.testbuddy.HostSystem
 import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.ShortcutModifier.Shift
 import com.testbuddy.SuiteBuilder
@@ -120,9 +120,11 @@ private fun SuiteBuilder.bookmarksFollow() {
         }
         titleField(name = "Start here").performKeyInput { pressKey(key = Key.Enter) }
         expectBookmarkOrder(names = listOf("Start here", "Cooking", PLATE, "Ideas"))
-        lowest(name = "Ideas").clickWhenStill()
-        if (system == HostSystem.MACOS) press(shortcut = Mod + Key.Backspace) else press(key = Key.Delete)
-        click(text = "Delete folder")
+        // The tree's menu, not the Delete key: after renaming, the key could still reach the title on a slow runner.
+        lowest(name = "Ideas").performMouseInput { this.rightClick() }
+        clickLast(text = "Delete folder")
+        expectText(text = "Delete this folder?")
+        clickLast(text = "Delete folder")
         ui.waitUntil(timeoutMillis = 10_000) { shownCount(name = "Ideas") == 0 }
         expectBookmarkOrder(names = listOf("Start here", "Cooking", PLATE))
     }
