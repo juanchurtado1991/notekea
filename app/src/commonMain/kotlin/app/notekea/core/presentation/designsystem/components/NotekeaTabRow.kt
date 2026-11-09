@@ -32,9 +32,23 @@ fun NotekeaTabRow(
 private fun NotekeaTabRowPreview() {
     NotekeaPreviewThemes {
         NotekeaTabRow(selectedTabIndex = 1) {
-            NotekeaTab(text = PREVIEW_RELATED, selected = false, onClick = {})
-            NotekeaTab(text = PREVIEW_OUTLINE, selected = true, onClick = {})
-            NotekeaTab(text = PREVIEW_CHAT, selected = false, onClick = {})
+            NotekeaTab(
+                text = PREVIEW_RELATED,
+                selected = false,
+                onClick = {}
+            )
+
+            NotekeaTab(
+                text = PREVIEW_OUTLINE,
+                selected = true,
+                onClick = {}
+            )
+
+            NotekeaTab(
+                text = PREVIEW_CHAT,
+                selected = false,
+                onClick = {}
+            )
         }
     }
 }

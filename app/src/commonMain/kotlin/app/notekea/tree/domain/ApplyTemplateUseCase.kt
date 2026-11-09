@@ -9,7 +9,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TemplateInsertion
 
 /**
- * Fills the note at `note` on disk from `template` (`ROADMAP.md` 1.12), for a note made with "New note from template":
+ * Fills the note at `note` on disk from `template`, for a note made with "New note from template":
  * the template is filled in with the note's name as its title, then inserted ([TemplateInsertion]), so an empty note
  * becomes the template and a note with text gets it at its end.
  */
@@ -24,21 +24,48 @@ class ApplyTemplateUseCase(
         note: RelativePath,
         template: RelativePath
     ): Outcome<Unit, NotesError> {
-        val filled = when (val outcome = fillTemplate(vaultPath, template, title = note.nameWithoutExtension)) {
+        val filled = when (
+            val outcome = fillTemplate(
+                vaultPath,
+                template,
+                title = note.nameWithoutExtension
+            )
+        ) {
             is Outcome.Failure -> return outcome
             is Outcome.Success -> outcome.value
         }
-        val text = noteContentStore.read(vaultPath = vaultPath, path = note)
+
+        val text = noteContentStore.read(
+            vaultPath = vaultPath,
+            path = note
+        )
             ?: return Outcome.Failure(error = NotesError.EntryMissing(path = note.value))
+
         val document = NoteDocument.fromText(text = text)
         val end = document.body.length
-        val result = insertion.insert(note = document, selectionStart = end, selectionEnd = end, template = filled)
+
+        val result = insertion.insert(
+            note = document,
+            selectionStart = end,
+            selectionEnd = end,
+            template = filled
+        )
+
         val body = document.body.replaceRange(
             startIndex = result.edit.start,
             endIndex = result.edit.end,
             replacement = result.edit.replacement
         )
-        val content = document.copy(header = result.header, body = body).toText()
-        return noteContentStore.write(vaultPath = vaultPath, path = note, content = content)
+
+        val content = document.copy(
+            header = result.header,
+            body = body
+        ).toText()
+
+        return noteContentStore.write(
+            vaultPath = vaultPath,
+            path = note,
+            content = content
+        )
     }
 }

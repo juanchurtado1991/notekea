@@ -1,8 +1,8 @@
 package app.notekea.core.notes.domain
 
+import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
-import app.notekea.core.domain.StringPatterns
 
 /**
  * The `#tags` written in a note's text, as Obsidian reads them, each once in the order they first appear: a `#` not
@@ -10,14 +10,16 @@ import app.notekea.core.domain.StringPatterns
  * blocks and inline code), wiki links and link targets are not text, so `[[#Heading]]` and `(#anchor)` are not tags.
  */
 class TextTagFinder {
-    fun tags(
-        lines: Sequence<String>
-    ): List<String> {
+    fun tags(lines: Sequence<String>): List<String> {
         val tags = LinkedHashSet<String>()
         val fences = FenceTracker()
+
         lines.forEach { line ->
-            if (!fences.read(text = line)) tagsIn(line = line).forEach { tags += it.groupValues[1] }
+            if (!fences.read(text = line)) {
+                tagsIn(line = line).forEach { tags += it.groupValues[1] }
+            }
         }
+
         return tags.toList()
     }
 
@@ -25,18 +27,15 @@ class TextTagFinder {
      * The `#tags` of a [line] outside fenced code, each match at its place in the line, its name in group 1. Most lines
      * have no tag: the cheap character check skips the regexes.
      */
-    fun tagsIn(
-        line: String
-    ): Sequence<MatchResult> = if (TAG_MARK in line) {
+    fun tagsIn(line: String): Sequence<MatchResult> = if (TAG_MARK in line) {
         MarkdownSyntax.TAG.findAll(input = textOf(line = line))
     } else {
         emptySequence()
     }
 
     /** [line] with what is not text (code, wiki links, link targets) blanked, every other character where it was. */
-    fun textOf(
-        line: String
-    ): String = NOT_TEXT.replace(input = line) { StringPatterns.SPACE.repeat(n = it.value.length) }
+    fun textOf(line: String): String = NOT_TEXT
+        .replace(input = line) { StringPatterns.SPACE.repeat(n = it.value.length) }
 
     companion object {
         private const val TAG_MARK = '#'

@@ -8,7 +8,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** Linking two notes from the graph (`ROADMAP.md` 2.7). */
+/** Linking two notes from the graph. */
 class LinkNotesUseCaseTest {
     private val store = FakeNoteContentStore()
     private val linkNotes = LinkNotesUseCase(
@@ -22,7 +22,10 @@ class LinkNotesUseCaseTest {
 
         linkNotes(VAULT, SOURCE, TARGET, listOf(SOURCE, TARGET))
 
-        assertEquals(expected = "---\ntag: food\n---\nSome text.\n\n[[Salsa]]\n", actual = store.texts[SOURCE])
+        assertEquals(
+            expected = "---\ntag: food\n---\nSome text.\n\n[[Salsa]]\n",
+            actual = store.texts[SOURCE]
+        )
     }
 
     @Test
@@ -31,21 +34,35 @@ class LinkNotesUseCaseTest {
 
         linkNotes(VAULT, SOURCE, TARGET, listOf(SOURCE, TARGET))
 
-        assertEquals(expected = "[[Salsa]]\n", actual = store.texts[SOURCE])
+        assertEquals(
+            expected = "[[Salsa]]\n",
+            actual = store.texts[SOURCE]
+        )
     }
 
     @Test
     fun `two notes of the same name are told apart by the path`() = runTest {
         store.texts[SOURCE] = "Text"
 
-        linkNotes(VAULT, SOURCE, TARGET, listOf(SOURCE, TARGET, RelativePath(value = "Other/Salsa.md")))
+        linkNotes(
+            VAULT,
+            SOURCE,
+            TARGET,
+            listOf(SOURCE, TARGET, RelativePath(value = "Other/Salsa.md"))
+        )
 
-        assertEquals(expected = "Text\n\n[[Sauces/Salsa]]\n", actual = store.texts[SOURCE])
+        assertEquals(
+            expected = "Text\n\n[[Sauces/Salsa]]\n",
+            actual = store.texts[SOURCE]
+        )
     }
 
     @Test
     fun `a note that cannot be read changes nothing`() = runTest {
-        assertEquals(expected = null, actual = linkNotes(VAULT, SOURCE, TARGET, listOf(SOURCE, TARGET)))
+        assertEquals(
+            expected = null,
+            actual = linkNotes(VAULT, SOURCE, TARGET, listOf(SOURCE, TARGET))
+        )
     }
 
     private companion object {

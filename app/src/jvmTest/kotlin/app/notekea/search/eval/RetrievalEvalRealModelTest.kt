@@ -30,10 +30,9 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 
 /**
- * Recall@5 of hybrid search on the evaluation set (`ROADMAP.md` 2.8), on the bundled model and the real index, as
- * [SearchPassagesUseCase] answers a person: a question is answered when one of its notes is among the first five
- * results. The report, with the questions missed, is written to [REPORT]. Below the agreed baseline the test fails, so a
- * change to chunking, models or ranking is measured.
+ * Recall@5 of hybrid search on the evaluation set, on the bundled model and the real index, as [SearchPassagesUseCase]
+ * answers a person: a question is answered when one of its notes is among the first five results. The report, with the
+ * questions missed, is written to [REPORT]. Below the agreed baseline the test fails.
  */
 class RetrievalEvalRealModelTest {
     private val dispatchers = JvmAppDispatchers()
@@ -48,15 +47,32 @@ class RetrievalEvalRealModelTest {
     @Test
     fun `search answers the evaluation set at or above the baseline`() = runBlocking {
         val questions = RetrievalEvalSet.read().questions
-        val measured = questions.groupBy { it.vault }.map { (vault, asked) -> measure(vault = vault, asked = asked) }
+
+        val measured = questions.groupBy { it.vault }.map { (vault, asked) ->
+            measure(
+                vault = vault,
+                asked = asked
+            )
+        }
+
         File(REPORT).run {
             parentFile.mkdirs()
-            writeText(text = measured.joinToString(separator = "\n\n") { it.report() } + "\n")
+
+            writeText(
+                text = measured
+                    .joinToString(separator = "\n\n") { it.report() } + "\n"
+            )
         }
+
         println(File(REPORT).readText())
+
         measured.forEach { result ->
             val baseline = BASELINES.getValue(result.vault)
-            assertTrue(actual = result.recall >= baseline, message = "${result.vault}: ${result.recall} < $baseline")
+
+            assertTrue(
+                actual = result.recall >= baseline,
+                message = "${result.vault}: ${result.recall} < $baseline"
+            )
         }
     }
 
@@ -66,23 +82,47 @@ class RetrievalEvalRealModelTest {
     ): RetrievalMeasure {
         val folder = RetrievalEvalSet.folderOf(vault = vault)
         val store = FakeNoteContentStore()
-        val notes = folder.walkTopDown().filter { it.isFile && it.extension == MARKDOWN }.map { file ->
-            val path = RelativePath(value = file.relativeTo(base = folder).invariantSeparatorsPath)
-            store.texts[path] = file.readText()
-            NoteEntry(NoteFile(path, file.length(), modifiedAt = null), NoteMetadata.NONE)
-        }.toList()
-        val index = LuceneVectorIndex(Files.createTempDirectory("notekea-eval").toString(), dispatchers)
+
+        val notes = folder
+            .walkTopDown()
+            .filter {
+                it.isFile && it.extension == MARKDOWN
+            }
+            .map { file ->
+                val path =
+                    RelativePath(value = file.relativeTo(base = folder).invariantSeparatorsPath)
+
+                store.texts[path] = file.readText()
+                NoteEntry(NoteFile(path, file.length(), modifiedAt = null), NoteMetadata.NONE)
+            }
+            .toList()
+
+        val index =
+            LuceneVectorIndex(Files.createTempDirectory("notekea-eval").toString(), dispatchers)
+
         IndexVaultUseCase(
             planIndex = PlanIndexUseCase(),
-            chunkNote = ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder())),
+            chunkNote = ChunkNoteUseCase(
+                noteSections = NoteSections(outlineFinder = OutlineFinder())
+            ),
             noteContentStore = store,
             textEmbedder = embedder,
             vectorIndex = index,
             indexStateStore = FakeIndexStateStore()
-        )(vaultPath = folder.path, notes = notes.map { it.file }).last()
+        )(
+            vaultPath = folder.path,
+            notes = notes.map { it.file }
+        ).last()
+
         val textFolder = TextFolder()
-        val cache = NoteTextCache(contentStore = store, textFolder = textFolder)
+
+        val cache = NoteTextCache(
+            contentStore = store,
+            textFolder = textFolder
+        )
+
         val stripper = MarkdownLineStripper()
+
         val search = SearchPassagesUseCase(
             textEmbedder = embedder,
             vectorIndex = index,
@@ -97,11 +137,20 @@ class RetrievalEvalRealModelTest {
                 dispatchers = dispatchers
             )
         )
+
         val missed = asked.filterNot { question ->
             val found = (search(folder.path, notes, question.question) as Outcome.Success).value
-            found.take(n = RECALL_AT).any { it.note.file.path.value in question.notes }
+
+            found.take(n = RECALL_AT).any {
+                it.note.file.path.value in question.notes
+            }
         }
-        return RetrievalMeasure(vault = vault, asked = asked.size, missed = missed)
+
+        return RetrievalMeasure(
+            vault = vault,
+            asked = asked.size,
+            missed = missed
+        )
     }
 
     private companion object {
@@ -109,6 +158,9 @@ class RetrievalEvalRealModelTest {
         const val MODEL_PROPERTY = "notekea.embedding.model"
         const val RECALL_AT = 5
         const val REPORT = "build/reports/retrieval-eval.txt"
-        val BASELINES = mapOf(RetrievalEvalSet.SAMPLE_VAULT to 0.92, RetrievalEvalSet.GHOST_VAULT to 0.86)
+        val BASELINES = mapOf(
+            RetrievalEvalSet.SAMPLE_VAULT to 0.92,
+            RetrievalEvalSet.GHOST_VAULT to 0.86
+        )
     }
 }

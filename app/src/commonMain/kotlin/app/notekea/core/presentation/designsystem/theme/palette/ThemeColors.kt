@@ -3,10 +3,9 @@ package app.notekea.core.presentation.designsystem.theme.palette
 import androidx.compose.ui.graphics.Color
 
 /**
- * One mode of a theme (`ROADMAP.md` 2.12), the way Workspace Blue works: quiet grays with a touch of the theme's hue, so
- * the [page], the [surface] of the content and the [raised] parts stay calm, and one [lead] color for what can be clicked.
- * [selection] tints a chosen row and [accent] marks tags and warnings. All chosen by hand, as tones computed from a brand
- * color painted the whole window with it.
+ * One mode of a theme: quiet grays with a touch of the theme's hue for the [page], the [surface] of the content and the
+ * [raised] parts, and one [lead] color for what can be clicked. [selection] tints a chosen row and [accent] marks tags
+ * and warnings. All are chosen by hand: tones computed from a brand color paint the whole window with it.
  */
 internal data class ThemeColors(
     val page: Color,

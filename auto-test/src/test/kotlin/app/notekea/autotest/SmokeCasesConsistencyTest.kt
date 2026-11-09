@@ -11,22 +11,41 @@ import kotlin.test.assertTrue
  */
 class SmokeCasesConsistencyTest {
     private val cases = SmokeCaseList.read(file = File(SMOKE_TEST_FILE))
-    private val pending = File(PENDING_FILE).readLines().map(String::trim).filter {
-        it.isNotEmpty() &&
-            !it.startsWith("#")
-    }
+    private val pending = File(PENDING_FILE)
+        .readLines()
+        .map(String::trim)
+        .filter {
+            it.isNotEmpty() &&
+                !it.startsWith("#")
+        }
     private val suite = NotekeaSuite.suite
-    private val automated = suite.automated.map { it.id }.toSet()
-    private val manual = suite.manual.associate { it.id to "Manual (${it.reason.label})" }
+    private val automated = suite
+        .automated
+        .map { it.id }
+        .toSet()
+    private val manual = suite.manual.associate {
+        it.id to "Manual (${it.reason.label})"
+    }
 
     @Test
     fun `every case is written as its Checked by says, or still pending`() {
         val wrong = cases.filterNot { case ->
-            val isWritten = if (case.checkedBy == AUTO_TEST) case.id in automated else manual[case.id] == case.checkedBy
+            val isWritten = if (case.checkedBy == AUTO_TEST) {
+                case.id in automated
+            } else {
+                manual[case.id] == case.checkedBy
+            }
+
             isWritten || case.id in pending
         }
+
         assertEquals(emptyList(), wrong.map { "${it.id} (${it.checkedBy})" })
-        println("Auto-Test: ${cases.count { it.checkedBy == AUTO_TEST }} of ${cases.size} cases are automatic")
+
+        println(
+            "Auto-Test: ${cases.count {
+                it.checkedBy == AUTO_TEST
+            }} of ${cases.size} cases are automatic"
+        )
     }
 
     @Test

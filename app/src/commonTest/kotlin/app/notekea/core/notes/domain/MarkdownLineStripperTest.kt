@@ -9,7 +9,14 @@ class MarkdownLineStripperTest {
     @Test
     fun `block markers at the start of a line are removed`() {
         assertEquals(
-            expected = listOf("Tomato plan", "Add tomatoes", "Buy flour", "Done", "Quoted", "Second step"),
+            expected = listOf(
+                "Tomato plan",
+                "Add tomatoes",
+                "Buy flour",
+                "Done",
+                "Quoted",
+                "Second step"
+            ),
             actual = listOf(
                 "# Tomato plan",
                 "- Add tomatoes",
@@ -18,7 +25,12 @@ class MarkdownLineStripperTest {
                 "> Quoted",
                 "2. Second step"
             )
-                .map { stripper.strip(line = it, ranges = emptyList()).text }
+                .map {
+                    stripper.strip(
+                        line = it,
+                        ranges = emptyList()
+                    ).text
+                }
         )
     }
 
@@ -59,7 +71,8 @@ class MarkdownLineStripperTest {
         )
 
         assertEquals(
-            expected = "Planted tomato seedlings; notes in Tomato plan." to listOf("tomato", "Tomato"),
+            expected =
+            "Planted tomato seedlings; notes in Tomato plan." to listOf("tomato", "Tomato"),
             actual = plain.text to plain.ranges.map { plain.text.substring(range = it) }
         )
     }

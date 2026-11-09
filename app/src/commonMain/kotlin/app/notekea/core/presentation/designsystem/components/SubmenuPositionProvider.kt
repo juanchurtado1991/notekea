@@ -19,7 +19,15 @@ class SubmenuPositionProvider : PopupPositionProvider {
     ): IntOffset {
         val fitsRight = anchorBounds.right + popupContentSize.width <= windowSize.width
         val x = if (fitsRight) anchorBounds.right else anchorBounds.left - popupContentSize.width
-        val y = anchorBounds.top.coerceAtMost(maximumValue = windowSize.height - popupContentSize.height)
-        return IntOffset(x = x.coerceAtLeast(minimumValue = 0), y = y.coerceAtLeast(minimumValue = 0))
+
+        val y = anchorBounds.top.coerceAtMost(
+            maximumValue =
+            windowSize.height - popupContentSize.height
+        )
+
+        return IntOffset(
+            x = x.coerceAtLeast(minimumValue = 0),
+            y = y.coerceAtLeast(minimumValue = 0)
+        )
     }
 }

@@ -14,9 +14,17 @@ data class GraphEdge(
             other: RelativePath,
             isRelated: Boolean = false
         ): GraphEdge = if (one.value <= other.value) {
-            GraphEdge(first = one, second = other, isRelated = isRelated)
+            GraphEdge(
+                first = one,
+                second = other,
+                isRelated = isRelated
+            )
         } else {
-            GraphEdge(first = other, second = one, isRelated = isRelated)
+            GraphEdge(
+                first = other,
+                second = one,
+                isRelated = isRelated
+            )
         }
     }
 }

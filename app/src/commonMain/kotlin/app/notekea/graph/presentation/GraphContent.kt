@@ -33,10 +33,10 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.EmptyState
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaFindBar
-import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.resources.Res
 import app.notekea.resources.editor_find_count
 import app.notekea.resources.editor_find_none
@@ -53,11 +53,9 @@ private const val LEGEND_DOT_DP = 8
 private const val EXCLUDED_ALPHA = 0.45f
 
 /**
- * The graph tab (`ROADMAP.md` 2.7): a compact toolbar, the map, the legend of folders, which also leaves a folder out
- * when clicked; the inspector of the selected note is in the side panel. The keyboard walks the map: arrows move
- * between connected notes, `Enter` opens one, `Space` shows or hides the side panel, `Esc` goes back to the note and
- * `Mod+F` finds a note, with the keyboard back on the map when the search closes, in the pane the keyboard is in
- * ([isActive]). A focused control gets its keys first.
+ * The graph tab: a compact toolbar, the map and the legend of folders, which also leaves a folder out when clicked. The
+ * keyboard walks the map in the pane it is in ([isActive]): arrows move between connected notes, `Enter` opens one,
+ * `Space` toggles the side panel, `Esc` goes back to the note and `Mod+F` finds a note.
  */
 @Composable
 fun GraphContent(
@@ -68,10 +66,17 @@ fun GraphContent(
     isActive: Boolean = true
 ) {
     val focus = remember { FocusRequester() }
-    LaunchedEffect(focus, state.isSearching, state.selected) { if (!state.isSearching) focus.requestFocus() }
-    if (isActive) {
-        WindowShortcut(shortcut = platformConventions.findShortcut) { onIntent(GraphIntent.OnSearchOpen) }
+
+    LaunchedEffect(focus, state.isSearching, state.selected) {
+        if (!state.isSearching) focus.requestFocus()
     }
+
+    if (isActive) {
+        WindowShortcut(shortcut = platformConventions.findShortcut) {
+            onIntent(GraphIntent.OnSearchOpen)
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -82,9 +87,22 @@ fun GraphContent(
             }
             .focusable()
     ) {
-        GraphToolbar(state = state, platformConventions = platformConventions, onIntent = onIntent)
-        MapArea(state = state, onIntent = onIntent, modifier = Modifier.weight(weight = 1f).fillMaxWidth())
-        Footer(state = state, onIntent = onIntent)
+        GraphToolbar(
+            state = state,
+            platformConventions = platformConventions,
+            onIntent = onIntent
+        )
+
+        MapArea(
+            state = state,
+            onIntent = onIntent,
+            modifier = Modifier.weight(weight = 1f).fillMaxWidth()
+        )
+
+        Footer(
+            state = state,
+            onIntent = onIntent
+        )
     }
 }
 
@@ -96,8 +114,19 @@ private fun MapArea(
     modifier: Modifier
 ) {
     Box(modifier = modifier) {
-        GraphCanvas(state = state, onIntent = onIntent, modifier = Modifier.fillMaxSize())
-        if (state.needsNote) NoNote(onIntent = onIntent, modifier = Modifier.align(alignment = Alignment.Center))
+        GraphCanvas(
+            state = state,
+            onIntent = onIntent,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        if (state.needsNote) {
+            NoNote(
+                onIntent = onIntent,
+                modifier = Modifier.align(alignment = Alignment.Center)
+            )
+        }
+
         if (state.isEmpty) {
             EmptyState(
                 title = stringResource(resource = Res.string.graph_empty_title),
@@ -105,11 +134,14 @@ private fun MapArea(
                 modifier = Modifier.align(alignment = Alignment.Center)
             )
         }
+
         if (state.isSearching) {
             SearchBar(
                 state = state,
                 onIntent = onIntent,
-                modifier = Modifier.align(alignment = Alignment.TopEnd).padding(all = NotekeaDimensions.SpacingS)
+                modifier = Modifier.align(
+                    alignment = Alignment.TopEnd
+                ).padding(all = NotekeaDimensions.SpacingS)
             )
         }
     }
@@ -140,8 +172,10 @@ private fun onKey(
 ): Boolean {
     if (isSearching) {
         if (key == Key.Escape) onIntent(GraphIntent.OnSearchClose)
+
         return key == Key.Escape
     }
+
     val intent = when (key) {
         Key.DirectionLeft -> GraphIntent.OnMove(direction = GraphDirection.LEFT)
         Key.DirectionRight -> GraphIntent.OnMove(direction = GraphDirection.RIGHT)
@@ -152,7 +186,9 @@ private fun onKey(
         Key.Escape -> GraphIntent.OnBack
         else -> return false
     }
+
     onIntent(intent)
+
     return true
 }
 
@@ -165,9 +201,15 @@ private fun SearchBar(
 ) {
     val label = when {
         state.query.isBlank() -> ""
+
         state.matches.isEmpty() -> stringResource(resource = Res.string.editor_find_none)
-        else -> matchCount(index = maxOf(state.matchIndex, 0), count = state.matches.size)
+
+        else -> matchCount(
+            index = maxOf(state.matchIndex, 0),
+            count = state.matches.size
+        )
     }
+
     NotekeaFindBar(
         query = state.query,
         onQueryChange = { onIntent(GraphIntent.OnQueryChange(query = it)) },
@@ -197,6 +239,7 @@ private fun Footer(
         state.isWaitingForIndex -> Res.string.graph_index_not_ready
         else -> null
     }
+
     Row(
         modifier = Modifier.fillMaxWidth().padding(all = NotekeaDimensions.SpacingS),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),
@@ -210,6 +253,7 @@ private fun Footer(
                 onClick = { onIntent(GraphIntent.OnFolderToggle(folder = folder)) }
             )
         }
+
         message?.let {
             Text(
                 text = stringResource(resource = it),
@@ -228,6 +272,7 @@ private fun LegendItem(
     onClick: () -> Unit
 ) {
     val color = folderColor(folder, folders, MaterialTheme.colorScheme.onSurfaceVariant)
+
     Row(
         modifier = Modifier.clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
@@ -236,8 +281,12 @@ private fun LegendItem(
         Box(
             modifier = Modifier
                 .size(size = LEGEND_DOT_DP.dp)
-                .background(color = color.copy(alpha = if (isExcluded) EXCLUDED_ALPHA else 1f), shape = CircleShape)
+                .background(
+                    color = color.copy(alpha = if (isExcluded) EXCLUDED_ALPHA else 1f),
+                    shape = CircleShape
+                )
         )
+
         Text(
             text = folder,
             style = MaterialTheme.typography.bodySmall,
@@ -252,7 +301,10 @@ private fun LegendItem(
 private fun GraphContentPreview() {
     NotekeaPreviewThemes {
         GraphContent(
-            state = GraphPreviewData.state.copy(isSearching = true, query = "are"),
+            state = GraphPreviewData.state.copy(
+                isSearching = true,
+                query = "are"
+            ),
             platformConventions = PreviewPlatformConventions.linux,
             onIntent = {}
         )

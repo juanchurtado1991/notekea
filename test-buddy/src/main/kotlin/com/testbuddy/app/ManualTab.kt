@@ -21,10 +21,9 @@ import com.testbuddy.ManualReason
 import java.nio.file.Path
 
 /**
- * The manual cases, one at a time: which case of how many and why it is manual, its title, and its steps as a line
- * (✓ done, the current one in bold, the rest to come); Back and "Done, next step"; above them the case's test data and
- * how to open it ([TestDataCard]), and Restart the app when the case needs it. After its last step comes the result
- * ([ManualResult]). The case scrolls; its buttons and the way to the other cases stay under it.
+ * The manual cases, one at a time: which case of how many and why it is manual, its title, and its steps as a line;
+ * Back and "Done, next step"; above them the case's test data ([TestDataCard]), and Restart the app when the case needs
+ * it. After its last step comes the result ([ManualResult]). The case scrolls; its buttons stay under it.
  */
 @Composable
 internal fun ManualTab(
@@ -35,25 +34,59 @@ internal fun ManualTab(
     actions: ManagerActions
 ) {
     val case = cases.getOrNull(state.manualIndex)
+
     if (case == null) {
-        Text(text = "There are no manual cases.", fontSize = 13.sp)
+        Text(
+            text = "There are no manual cases.",
+            fontSize = 13.sp
+        )
+
         return
     }
-    val header: @Composable ColumnScope.() -> Unit = { CaseHeader(case = case, count = cases.size, state = state) }
-    val otherCases: @Composable ColumnScope.() -> Unit = { OtherCases(index = state.manualIndex, actions = actions) }
+
+    val header: @Composable ColumnScope.() -> Unit = {
+        CaseHeader(
+            case = case,
+            count = cases.size,
+            state = state
+        )
+    }
+
+    val otherCases: @Composable ColumnScope.() -> Unit = {
+        OtherCases(
+            index = state.manualIndex,
+            actions = actions
+        )
+    }
+
     if (state.manualStep >= case.stepList.size) {
-        ManualResult(case = case, actions = actions, header = header, otherCases = otherCases)
+        ManualResult(
+            case = case,
+            actions = actions,
+            header = header,
+            otherCases = otherCases
+        )
     } else {
         TabLayout(actions = {
-            StepButtons(case = case, step = state.manualStep, actions = actions)
+            StepButtons(
+                case = case,
+                step = state.manualStep,
+                actions = actions
+            )
+
             otherCases()
         }) {
             header()
+
             // In full on the first step, where the vault is opened; one line after it, so the steps keep their room.
             when {
                 case.data.isEmpty() -> Unit
 
-                state.manualStep == 0 -> TestDataCard(appName = appName, folders = case.data, dataFolder = dataFolder)
+                state.manualStep == 0 -> TestDataCard(
+                    appName = appName,
+                    folders = case.data,
+                    dataFolder = dataFolder
+                )
 
                 else -> Text(
                     text = "Test data: a fresh copy of ${case.data.joinToString()}",
@@ -61,7 +94,13 @@ internal fun ManualTab(
                     color = AutoTestColors.Muted
                 )
             }
-            Steps(appName = appName, case = case, step = state.manualStep, actions = actions)
+
+            Steps(
+                appName = appName,
+                case = case,
+                step = state.manualStep,
+                actions = actions
+            )
         }
     }
 }
@@ -72,13 +111,24 @@ private fun CaseHeader(
     count: Int,
     state: ManagerState
 ) {
-    val answered = state.answers[case.id]?.let { if (it is ManualAnswer.Passed) " · passed" else " · failed" }.orEmpty()
+    val answered = state
+        .answers[case.id]
+        ?.let {
+            if (it is ManualAnswer.Passed) " · passed" else " · failed"
+        }
+        .orEmpty()
+
     Text(
         text = "Case ${state.manualIndex + 1} of $count · ${case.reason.hint()}$answered",
         fontSize = 11.sp,
         color = AutoTestColors.Muted
     )
-    Text(text = "${case.id} · ${case.title}", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+
+    Text(
+        text = "${case.id} · ${case.title}",
+        fontSize = 15.sp,
+        fontWeight = FontWeight.SemiBold
+    )
 }
 
 @Composable
@@ -87,11 +137,24 @@ private fun OtherCases(
     actions: ManagerActions
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        TextButton(onClick = actions.onPreviousCase, enabled = index > 0) {
-            Text(text = "‹ Previous case", fontSize = 12.sp)
+        TextButton(
+            onClick = actions.onPreviousCase,
+            enabled = index > 0
+        ) {
+            Text(
+                text = "‹ Previous case",
+                fontSize = 12.sp
+            )
         }
+
         Spacer(modifier = Modifier.weight(weight = 1f))
-        TextButton(onClick = actions.onSkip) { Text(text = "Skip this case ›", fontSize = 12.sp) }
+
+        TextButton(onClick = actions.onSkip) {
+            Text(
+                text = "Skip this case ›",
+                fontSize = 12.sp
+            )
+        }
     }
 }
 
@@ -104,14 +167,21 @@ private fun Steps(
 ) {
     Card {
         SectionLabel(text = "STEP ${step + 1} OF ${case.stepList.size}")
+
         StepTimeline(
             done = case.stepList.take(n = step),
             current = case.stepList[step],
             pending = case.stepList.drop(n = step + 1)
         )
     }
+
     if (case.launchEnvironment.isNotEmpty()) {
-        OutlinedButton(onClick = actions.onRestart) { Text(text = "Restart $appName for this case", fontSize = 12.sp) }
+        OutlinedButton(onClick = actions.onRestart) {
+            Text(
+                text = "Restart $appName for this case",
+                fontSize = 12.sp
+            )
+        }
     }
 }
 
@@ -121,9 +191,17 @@ private fun StepButtons(
     step: Int,
     actions: ManagerActions
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp), modifier = Modifier.fillMaxWidth()) {
-        OutlinedButton(onClick = actions.onPreviousStep, enabled = step > 0) { Text(text = "‹ Back") }
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedButton(
+            onClick = actions.onPreviousStep,
+            enabled = step > 0
+        ) { Text(text = "‹ Back") }
+
         Spacer(modifier = Modifier.weight(weight = 1f))
+
         Button(onClick = actions.onNextStep) {
             Text(text = if (step == case.stepList.lastIndex) "Done ›" else "Done, next step ›")
         }

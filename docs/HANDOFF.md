@@ -69,7 +69,7 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
   `ThemeColorSets` (2026-11-05); `ColorTheme.fromId` keeps the ids of the themes that are gone. Keep the theme's generic name: no third-party brand
   names or marks in the app.
 - **Architecture:** Clean Architecture + MVI + Koin + ports with fakes stays (decided 2026-10-28). A use case only
-  when it decides something; files at most 350 lines, functions at most 40.
+  when it decides something; files at most 350 lines of code, functions at most 60, lines at most 100 characters.
 - **Test Buddy** (`:test-buddy`, `:test-buddy-crash`) is kept generic, ready to become a library of its own: nothing
   Notekea-specific in it. Notekea's cases live in `:auto-test`. The Auto-Test is in English only.
 - **Every feature keeps the Auto-Test current** (its cases, automatic or manual), so the release run only needs

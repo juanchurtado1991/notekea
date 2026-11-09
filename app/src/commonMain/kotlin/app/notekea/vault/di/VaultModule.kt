@@ -15,7 +15,13 @@ import org.koin.dsl.module
 
 /** Vault feature: recent vaults on the app settings, the vault use cases and the welcome flow. */
 val vaultModule = module {
-    single<RecentVaultsStore> { SettingsRecentVaultsStore(settings = get(), dispatchers = get()) }
+    single<RecentVaultsStore> {
+        SettingsRecentVaultsStore(
+            settings = get(),
+            dispatchers = get()
+        )
+    }
+
     factoryOf(::CreateVaultUseCase)
     factoryOf(::GetRecentVaultsUseCase)
     factoryOf(::LocateVaultUseCase)

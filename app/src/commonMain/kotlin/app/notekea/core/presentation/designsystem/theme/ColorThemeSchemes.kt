@@ -10,14 +10,22 @@ import app.notekea.core.presentation.designsystem.theme.palette.ThemeColors
 import app.notekea.core.presentation.designsystem.theme.palette.WorkspaceBluePalette
 
 /**
- * The light and dark color schemes of every [ColorTheme] (`ROADMAP.md` 2.12), with the same roles as
+ * The light and dark color schemes of every [ColorTheme], with the same roles as
  * [WorkspaceBlueSchemes], which [ColorTheme.WORKSPACE_BLUE] uses as it is; the others come from their [ThemeColors].
  */
 object ColorThemeSchemes {
     private val schemes: Map<Pair<ColorTheme, Boolean>, ColorScheme> by lazy {
-        ColorTheme.entries.flatMap { theme ->
-            listOf(true, false).map { dark -> (theme to dark) to build(theme = theme, darkTheme = dark) }
-        }.toMap()
+        ColorTheme
+            .entries
+            .flatMap { theme ->
+                listOf(true, false).map { dark ->
+                    (theme to dark) to build(
+                        theme = theme,
+                        darkTheme = dark
+                    )
+                }
+            }
+            .toMap()
     }
 
     fun of(

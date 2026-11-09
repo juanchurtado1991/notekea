@@ -10,7 +10,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 /**
- * The vault's notes as a graph (`ROADMAP.md` 2.7): each link that a click would follow to another note is one edge,
+ * The vault's notes as a graph: each link that a click would follow to another note is one edge,
  * however many times two notes link each other. Texts come from [NoteTextCache], so only changed notes are read again.
  */
 class BuildNoteGraphUseCase(
@@ -22,31 +22,56 @@ class BuildNoteGraphUseCase(
         vaultPath: String,
         notes: Collection<NoteEntry>
     ): NoteGraph {
-        val texts = noteTextCache.textsOf(vaultPath = vaultPath, notes = notes)
+        val texts = noteTextCache.textsOf(
+            vaultPath = vaultPath,
+            notes = notes
+        )
+
         return withContext(context = dispatchers.default) {
             val paths = notes.map { it.file.path }
             val resolver = LinkResolver(notePaths = paths)
             val edges = LinkedHashSet<GraphEdge>()
+
             texts.forEach { (source, text) ->
                 ensureActive()
+
                 linkFinder.find(markdown = text.body).forEach { link ->
-                    val target = resolver.closest(link = link, source = source)
-                    if (target != null && target != source) edges += GraphEdge.between(one = source, other = target)
+                    val target = resolver.closest(
+                        link = link,
+                        source = source
+                    )
+
+                    if (target != null && target != source) {
+                        edges += GraphEdge.between(
+                            one = source,
+                            other = target
+                        )
+                    }
                 }
             }
+
             val counts = countsOf(edges = edges)
-            NoteGraph(nodes = paths.map { GraphNode(path = it, links = counts[it] ?: 0) }, edges = edges.toList())
+
+            NoteGraph(
+                nodes = paths.map {
+                    GraphNode(
+                        path = it,
+                        links = counts[it] ?: 0
+                    )
+                },
+                edges = edges.toList()
+            )
         }
     }
 
-    private fun countsOf(
-        edges: Collection<GraphEdge>
-    ): Map<RelativePath, Int> {
+    private fun countsOf(edges: Collection<GraphEdge>): Map<RelativePath, Int> {
         val counts = HashMap<RelativePath, Int>()
+
         edges.forEach { edge ->
             counts[edge.first] = (counts[edge.first] ?: 0) + 1
             counts[edge.second] = (counts[edge.second] ?: 0) + 1
         }
+
         return counts
     }
 }

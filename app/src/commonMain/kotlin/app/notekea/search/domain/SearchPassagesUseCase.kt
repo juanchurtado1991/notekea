@@ -13,10 +13,9 @@ import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.VectorIndex
 
 /**
- * Hybrid search (`ROADMAP.md` 2.6): the query's words, embedded, reach the index by meaning and keywords together, and
- * each note counts once, with its best passage. The index answers with its closest chunks however far they are, so a
- * chunk stays only if it holds every searched word or is close enough in meaning ([MIN_CLOSENESS]). A `#tag` in the
- * query limits the search to the notes that have it. A query of tags alone finds nothing here: content search answers it.
+ * Hybrid search: the query reaches the index by meaning and keywords together, and each note counts once, with its best
+ * passage. A chunk stays only if it holds every searched word or is close enough in meaning ([MIN_CLOSENESS]). A tag in
+ * the query limits the search to the notes that have it; a query of tags alone finds nothing here.
  */
 class SearchPassagesUseCase(
     private val textEmbedder: TextEmbedder,
@@ -31,34 +30,73 @@ class SearchPassagesUseCase(
         notes: Collection<NoteEntry>,
         query: String
     ): Outcome<List<PassageResult>, IndexRunError> {
-        val (tags, words) = query.trim().split(WHITESPACE).filter { it.isNotEmpty() }
-            .partition { it.length > 1 && it.startsWith(prefix = TAG_MARK) }
+        val (tags, words) = query
+            .trim()
+            .split(WHITESPACE)
+            .filter { it.isNotEmpty() }
+            .partition {
+                it.length > 1 && it.startsWith(prefix = TAG_MARK)
+            }
+
         if (words.isEmpty()) return Outcome.Success(value = emptyList())
         val text = words.joinToString(separator = WORD_SEPARATOR)
+
         val vector = (textEmbedder.embed(texts = listOf(text)) as? Outcome.Success)?.value?.single()
             ?: return Outcome.Failure(error = IndexRunError.Model)
-        val allowed = allowedNotes(vaultPath = vaultPath, notes = notes, tags = tags)
+
+        val allowed = allowedNotes(
+            vaultPath = vaultPath,
+            notes = notes,
+            tags = tags
+        )
+
         val only = allowed.keys.takeIf { tags.isNotEmpty() }
-        val hits = (vectorIndex.search(vaultPath, text, vector, CANDIDATES, only) as? Outcome.Success)?.value
+
+        val hits = (
+            vectorIndex.search(
+                vaultPath,
+                text,
+                vector,
+                CANDIDATES,
+                only
+            ) as? Outcome.Success
+            )?.value
             ?: return Outcome.Failure(error = IndexRunError.Index)
-        val texts = noteTextCache.textsOf(vaultPath = vaultPath, notes = allowed.values)
+
+        val texts = noteTextCache.textsOf(
+            vaultPath = vaultPath,
+            notes = allowed.values
+        )
+
         val folded = words.map { textFolder.fold(text = it) }
-        val results = hits.asSequence()
-            .filter { it.hasWords || it.closeness >= MIN_CLOSENESS }
+
+        val results = hits
+            .asSequence()
+            .filter {
+                it.hasWords || it.closeness >= MIN_CLOSENESS
+            }
             .mapNotNull { hit ->
                 val note = allowed[hit.note]
-                val body = texts[hit.note]?.body?.takeIf { hit.range.last < it.length }
-                if (note == null ||
-                    body == null
-                ) {
+
+                val body = texts[hit.note]?.body?.takeIf {
+                    hit.range.last < it.length
+                }
+
+                if (note == null || body == null) {
                     null
                 } else {
-                    resultOf(note = note, hit = hit, body = body, words = folded)
+                    resultOf(
+                        note = note,
+                        hit = hit,
+                        body = body,
+                        words = folded
+                    )
                 }
             }
             .distinctBy { it.note.file.path }
             .take(n = SearchNoteContentUseCase.DEFAULT_LIMIT)
             .toList()
+
         return Outcome.Success(value = results)
     }
 
@@ -78,6 +116,7 @@ class SearchPassagesUseCase(
                 limit = notes.size
             ).map { it.note }
         }
+
         return tagged.associateBy { it.file.path }
     }
 
@@ -89,50 +128,103 @@ class SearchPassagesUseCase(
         words: List<String>
     ): PassageResult? {
         val passage = body.substring(range = hit.range)
-        val lines = LINE.findAll(input = passage).map { it.range }.toList().ifEmpty { return null }
+
+        val lines = LINE
+            .findAll(input = passage)
+            .map { it.range }
+            .toList()
+            .ifEmpty {
+                return null
+            }
+
         val best = lines.filterNot { isHeading(line = passage.substring(range = it)) }
-            .maxByOrNull { range -> sharedWords(line = passage.substring(range = range), words = words) }
+            .maxByOrNull { range ->
+                sharedWords(
+                    line = passage.substring(range = range),
+                    words = words
+                )
+            }
             ?: lines.first()
-        val heading = lines.takeWhile { it.first < best.first }
+
+        val heading = lines
+            .takeWhile {
+                it.first < best.first
+            }
             .map { passage.substring(range = it) }
             .lastOrNull { isHeading(line = it) }
-            ?.trimStart(HEADING_MARK)?.trim()
+            ?.trimStart(HEADING_MARK)
+            ?.trim()
             ?: hit.headingPath.lastOrNull()
+
         val offset = hit.range.first
-        val (snippet, ranges) = snippetOf(line = passage.substring(range = best), words = words)
+
+        val (snippet, ranges) = snippetOf(
+            line = passage.substring(range = best),
+            words = words
+        )
+
         return PassageResult(
             note = note,
             snippet = snippet,
             ranges = ranges,
             range = offset + best.first..offset + best.last,
-            heading = heading?.takeUnless { it == note.file.path.nameWithoutExtension }
+            heading = heading?.takeUnless {
+                it == note.file.path.nameWithoutExtension
+            }
         )
     }
 
-    private fun isHeading(
-        line: String
-    ): Boolean = HEADING.matches(input = line)
+    private fun isHeading(line: String): Boolean = HEADING.matches(input = line)
 
     private fun sharedWords(
         line: String,
         words: List<String>
-    ): Int = textFolder.fold(text = line).let { folded -> words.count { folded.contains(other = it) } }
+    ): Int = textFolder.fold(text = line).let { folded ->
+        words.count { folded.contains(other = it) }
+    }
 
     /** [line] as plain text, from its sentence with most of [words], as long as a row shows, with those words found. */
     private fun snippetOf(
         line: String,
         words: List<String>
     ): Pair<String, List<IntRange>> {
-        val plain = markdownLineStripper.strip(line = line, ranges = emptyList()).text
-        val found = PassageSnippet.of(passage = plain, words = words.toSet(), normalized = textFolder::fold)
-        val cut = found.text.drop(n = found.highlight.first).trimStart()
-        val snippet = if (cut.length > MAX_SNIPPET) cut.take(n = MAX_SNIPPET).trimEnd() + ELLIPSIS else cut
+        val plain = markdownLineStripper.strip(
+            line = line,
+            ranges = emptyList()
+        ).text
+
+        val found = PassageSnippet.of(
+            passage = plain,
+            words = words.toSet(),
+            normalized = textFolder::fold
+        )
+
+        val cut = found
+            .text
+            .drop(n = found.highlight.first)
+            .trimStart()
+
+        val snippet = if (cut.length > MAX_SNIPPET) {
+            cut.take(n = MAX_SNIPPET).trimEnd() + ELLIPSIS
+        } else {
+            cut
+        }
+
         val folded = textFolder.fold(text = snippet)
+
         val ranges = words.flatMap { word ->
             generateSequence(seed = folded.indexOf(string = word)) {
-                folded.indexOf(string = word, startIndex = it + word.length)
-            }.takeWhile { it >= 0 }.map { it until it + word.length }
+                folded.indexOf(
+                    string = word,
+                    startIndex = it + word.length
+                )
+            }.takeWhile {
+                it >= 0
+            }.map {
+                it until it + word.length
+            }
         }
+
         return snippet to ranges.sortedBy { it.first }
     }
 
@@ -140,7 +232,8 @@ class SearchPassagesUseCase(
         // Enough chunks for many to come from one note and still fill the list.
         const val CANDIDATES = 200
 
-        // Closeness runs from 0 to 1. Measured with the bundled model on the Sample Vault: related passages reach 0.83, unrelated ones stay at 0.80.
+        // Closeness runs from 0 to 1. Measured with the bundled model on the Sample Vault: related passages reach 0.83,
+        // unrelated ones stay at 0.80.
         const val MIN_CLOSENESS = 0.82f
         const val MAX_SNIPPET = 140
         const val ELLIPSIS = "…"

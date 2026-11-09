@@ -20,15 +20,14 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 
 private const val PREVIEW_CANCEL = "Cancel"
 private const val PREVIEW_DELETE = "Delete note"
-private const val PREVIEW_MESSAGE = "“Tomato plan” will be moved to the trash. You can restore it from there."
+private const val PREVIEW_MESSAGE =
+    "“Tomato plan” will be moved to the trash. You can restore it from there."
 private const val PREVIEW_TITLE = "Delete this note?"
 
 /**
  * A question that needs an answer before going on (deleting a note). The buttons follow the platform's order
- * ([buttonOrder]: Cancel first on macOS and Linux, last on Windows, `PLATFORM_GUIDELINES.md` §5) and the confirm
- * button says what it does ("Delete note", never "OK"). A destructive confirm button uses the error color and focus
- * starts on Cancel, so a quick Enter never destroys anything; otherwise focus starts on the confirm button. Esc and
- * clicking outside cancel.
+ * ([buttonOrder], `PLATFORM_GUIDELINES.md` §5). A destructive confirm uses the error color and focus starts on Cancel,
+ * so a quick Enter never destroys anything. Esc and clicking outside cancel.
  */
 @Composable
 fun NotekeaConfirmDialog(
@@ -43,6 +42,7 @@ fun NotekeaConfirmDialog(
     isDestructive: Boolean = false
 ) {
     val colors = MaterialTheme.colorScheme
+
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -56,11 +56,24 @@ fun NotekeaConfirmDialog(
             )
         },
         modifier = modifier.border(
-            border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = colors.outline),
+            border = BorderStroke(
+                width = NotekeaDimensions.BorderWidth,
+                color = colors.outline
+            ),
             shape = MaterialTheme.shapes.medium
         ),
-        title = { Text(text = title, style = MaterialTheme.typography.titleMedium) },
-        text = { Text(text = message, style = MaterialTheme.typography.bodyMedium) },
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium
+            )
+        },
+        text = {
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
         shape = MaterialTheme.shapes.medium,
         containerColor = colors.surface,
         titleContentColor = colors.onSurface,
@@ -78,23 +91,46 @@ private fun DialogButtons(
     isDestructive: Boolean
 ) {
     val initialFocus = remember { FocusRequester() }
+
     LaunchedEffect(key1 = initialFocus) { initialFocus.requestFocus() }
+
     val confirm: @Composable () -> Unit = {
+        val confirmModifier = if (isDestructive) {
+            Modifier
+        } else {
+            Modifier.focusRequester(
+                focusRequester = initialFocus
+            )
+        }
+
+        val style =
+            if (isDestructive) NotekeaButtonStyle.DESTRUCTIVE else NotekeaButtonStyle.PRIMARY
+
         NotekeaButton(
             text = confirmLabel,
             onClick = onConfirm,
-            modifier = if (isDestructive) Modifier else Modifier.focusRequester(focusRequester = initialFocus),
-            style = if (isDestructive) NotekeaButtonStyle.DESTRUCTIVE else NotekeaButtonStyle.PRIMARY
+            modifier = confirmModifier,
+            style = style
         )
     }
+
     val cancel: @Composable () -> Unit = {
+        val cancelModifier = if (isDestructive) {
+            Modifier.focusRequester(
+                focusRequester = initialFocus
+            )
+        } else {
+            Modifier
+        }
+
         NotekeaButton(
             text = cancelLabel,
             onClick = onDismiss,
-            modifier = if (isDestructive) Modifier.focusRequester(focusRequester = initialFocus) else Modifier,
+            modifier = cancelModifier,
             style = NotekeaButtonStyle.SECONDARY
         )
     }
+
     Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
         when (buttonOrder) {
             DialogButtonOrder.CANCEL_THEN_PRIMARY -> {

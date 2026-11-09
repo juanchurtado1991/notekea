@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 /**
- * [AppearanceStore] on Multiplatform Settings: `app.theme` and `app.theme_mode`, by their ids, and `app.reduce_motion`. It is read once, on the
- * first [observe], and then held, so every window sees each [save] at once.
+ * [AppearanceStore] on Multiplatform Settings: `app.theme` and `app.theme_mode`, by their ids, and `app.reduce_motion`.
+ * It is read once, on the first [observe], and then held, so every window sees each [save] at once.
  */
 class SettingsAppearanceStore(
     private val settings: Settings,
@@ -24,18 +24,34 @@ class SettingsAppearanceStore(
     private val current = MutableStateFlow<Appearance?>(value = null)
 
     override fun observe(): Flow<Appearance> = flow {
-        if (current.value == null) current.compareAndSet(expect = null, update = read())
+        if (current.value == null) {
+            current.compareAndSet(
+                expect = null,
+                update = read()
+            )
+        }
+
         emitAll(current.filterNotNull())
     }
 
-    override suspend fun save(
-        appearance: Appearance
-    ) {
+    override suspend fun save(appearance: Appearance) {
         withContext(context = dispatchers.io) {
-            settings.putString(key = THEME_KEY, value = appearance.theme.id)
-            settings.putString(key = MODE_KEY, value = appearance.mode.id)
-            settings.putBoolean(key = REDUCE_MOTION_KEY, value = appearance.reduceMotion)
+            settings.putString(
+                key = THEME_KEY,
+                value = appearance.theme.id
+            )
+
+            settings.putString(
+                key = MODE_KEY,
+                value = appearance.mode.id
+            )
+
+            settings.putBoolean(
+                key = REDUCE_MOTION_KEY,
+                value = appearance.reduceMotion
+            )
         }
+
         current.value = appearance
     }
 
@@ -43,7 +59,10 @@ class SettingsAppearanceStore(
         Appearance(
             theme = ColorTheme.fromId(id = settings.getStringOrNull(key = THEME_KEY)),
             mode = ThemeMode.fromId(id = settings.getStringOrNull(key = MODE_KEY)),
-            reduceMotion = settings.getBoolean(key = REDUCE_MOTION_KEY, defaultValue = false)
+            reduceMotion = settings.getBoolean(
+                key = REDUCE_MOTION_KEY,
+                defaultValue = false
+            )
         )
     }
 

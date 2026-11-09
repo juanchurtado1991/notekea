@@ -3,7 +3,7 @@ package app.notekea.core.notes.domain
 import app.notekea.core.domain.time.CalendarDate
 
 /**
- * A task of a note (`ROADMAP.md` 2.11), as the note cache keeps it: [stateIndex] is the character between its brackets
+ * A task of a note, as the note cache keeps it: [stateIndex] is the character between its brackets
  * and [endIndex] the end of its line, both in the note's body; its [text] as it reads, under its [heading], with the
  * [date] written in it, if any.
  */

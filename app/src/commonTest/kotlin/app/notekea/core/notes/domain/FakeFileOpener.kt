@@ -11,8 +11,12 @@ class FakeFileOpener : FileOpener {
         vaultPath: String,
         path: RelativePath
     ): Outcome<Unit, NotesError> {
-        failure?.let { return Outcome.Failure(error = it) }
+        failure?.let {
+            return Outcome.Failure(error = it)
+        }
+
         opened += path
+
         return Outcome.Success(value = Unit)
     }
 }

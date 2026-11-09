@@ -34,11 +34,29 @@ internal fun ManagerContent(
     actions: ManagerActions
 ) {
     Column(modifier = Modifier.fillMaxSize().background(color = Color.White)) {
-        TitleBar(title = "${suite.appName} QA", subtitle = "${suite.version} · $machine")
-        Tabs(selected = state.tab, onSelect = actions.onTab)
-        Box(modifier = Modifier.fillMaxSize().padding(start = 14.dp, end = 14.dp, bottom = 12.dp)) {
+        TitleBar(
+            title = "${suite.appName} QA",
+            subtitle = "${suite.version} · $machine"
+        )
+
+        Tabs(
+            selected = state.tab,
+            onSelect = actions.onTab
+        )
+
+        Box(
+            modifier = Modifier.fillMaxSize().padding(
+                start = 14.dp,
+                end = 14.dp,
+                bottom = 12.dp
+            )
+        ) {
             when (state.tab) {
-                ManagerTab.AUTOMATIC -> AutomaticTab(cases = suite.automated, state = state, actions = actions)
+                ManagerTab.AUTOMATIC -> AutomaticTab(
+                    cases = suite.automated,
+                    state = state,
+                    actions = actions
+                )
 
                 ManagerTab.MANUAL -> ManualTab(
                     appName = suite.appName,
@@ -48,7 +66,10 @@ internal fun ManagerContent(
                     actions = actions
                 )
 
-                ManagerTab.REPORT -> ReportTab(state = state, actions = actions)
+                ManagerTab.REPORT -> ReportTab(
+                    state = state,
+                    actions = actions
+                )
             }
         }
     }
@@ -60,20 +81,43 @@ private fun TitleBar(
     subtitle: String
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().background(
-            color = AutoTestColors.Page
-        ).padding(horizontal = 14.dp, vertical = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = AutoTestColors.Page)
+            .padding(
+                horizontal = 14.dp,
+                vertical = 10.dp
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier.size(
-                size = 22.dp
-            ).background(color = AutoTestColors.Running, shape = RoundedCornerShape(size = 6.dp)),
+            modifier = Modifier.size(size = 22.dp).background(
+                color = AutoTestColors.Running,
+                shape = RoundedCornerShape(size = 6.dp)
+            ),
             contentAlignment = Alignment.Center
-        ) { Text(text = "TB", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold) }
+        ) {
+            Text(
+                text = "TB",
+                color = Color.White,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
         Column(modifier = Modifier.padding(start = 8.dp)) {
-            Text(text = title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            Text(text = subtitle, fontSize = 10.sp, color = AutoTestColors.Muted, maxLines = 1)
+            Text(
+                text = title,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Text(
+                text = subtitle,
+                fontSize = 10.sp,
+                color = AutoTestColors.Muted,
+                maxLines = 1
+            )
         }
     }
 }
@@ -84,13 +128,24 @@ private fun Tabs(
     onSelect: (ManagerTab) -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)
-            .background(color = AutoTestColors.Quiet, shape = RoundedCornerShape(size = 8.dp)).padding(all = 3.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = 12.dp,
+                vertical = 8.dp
+            )
+            .background(
+                color = AutoTestColors.Quiet,
+                shape = RoundedCornerShape(size = 8.dp)
+            )
+            .padding(all = 3.dp)
     ) {
         ManagerTab.entries.forEach { tab ->
             val isSelected = tab == selected
+
             Box(
-                modifier = Modifier.weight(weight = 1f)
+                modifier = Modifier
+                    .weight(weight = 1f)
                     .background(
                         color = if (isSelected) Color.White else Color.Transparent,
                         shape = RoundedCornerShape(size = 6.dp)

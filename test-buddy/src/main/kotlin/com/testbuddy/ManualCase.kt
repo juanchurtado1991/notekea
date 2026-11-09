@@ -20,14 +20,18 @@ public class ManualCase internal constructor(
      * The [steps] one by one, as the manager shows them: each line that starts with its number (`2. Click About.`)
      * begins a step, without the number; other lines belong to the step before. Steps with no numbers are one step.
      */
-    public val stepList: List<String> = steps.lines().fold(initial = emptyList<String>()) { list, line ->
-        val numbered = STEP_NUMBER.find(line)
-        when {
-            numbered != null -> list + line.removeRange(numbered.range).trim()
-            list.isEmpty() -> listOf(line.trim())
-            else -> list.dropLast(n = 1) + (list.last() + " " + line.trim()).trim()
+    public val stepList: List<String> = steps
+        .lines()
+        .fold(initial = emptyList<String>()) { list, line ->
+            val numbered = STEP_NUMBER.find(line)
+
+            when {
+                numbered != null -> list + line.removeRange(numbered.range).trim()
+                list.isEmpty() -> listOf(line.trim())
+                else -> list.dropLast(n = 1) + (list.last() + " " + line.trim()).trim()
+            }
         }
-    }.filter { it.isNotBlank() }
+        .filter { it.isNotBlank() }
 
     private companion object {
         val STEP_NUMBER = Regex(pattern = "^\\s*\\d+\\.\\s+")

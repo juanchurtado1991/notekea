@@ -10,37 +10,38 @@ import java.nio.file.Path
 import java.sql.SQLException
 
 /**
- * The app's SQLite database, `notekea.db` in the app data directory (`PLATFORM_GUIDELINES.md`), created or migrated
- * to the current schema on open. It only holds what can be rebuilt from the vaults, so a file that cannot be opened
- * (corrupt, written by an unknown version) is deleted and created again; if even that fails (a file locked by another
- * process on Windows), the app runs on an in-memory database and simply reads its vaults from disk.
+ * The app's SQLite database, `notekea.db` in the app data directory (`PLATFORM_GUIDELINES.md`), created or migrated on
+ * open. It only holds what can be rebuilt from the vaults, so a file that cannot be opened is deleted and created
+ * again; if even that fails (a file locked by another process), the app runs on an in-memory database.
  */
 class SqliteDatabaseFactory(private val appDataDirectory: String) {
     private val logger = Logger.withTag(tag = LOG_TAG)
 
     fun create(): NotekeaDatabase = NotekeaDatabase(driver = openDriver())
 
-    private fun open(
-        url: String
-    ): SqlDriver = JdbcSqliteDriver(url = url, schema = NotekeaDatabase.Schema)
+    private fun open(url: String): SqlDriver = JdbcSqliteDriver(
+        url = url,
+        schema = NotekeaDatabase.Schema
+    )
 
     private fun openDriver(): SqlDriver {
         val file = Path.of(appDataDirectory, DATABASE_FILE_NAME)
+
         return try {
             Files.createDirectories(file.parent)
             openOrRecreate(file = file)
         } catch (exception: IOException) {
             logger.w(throwable = exception) { IN_MEMORY_MESSAGE }
+
             open(url = JdbcSqliteDriver.IN_MEMORY)
         } catch (exception: SQLException) {
             logger.w(throwable = exception) { IN_MEMORY_MESSAGE }
+
             open(url = JdbcSqliteDriver.IN_MEMORY)
         }
     }
 
-    private fun openOrRecreate(
-        file: Path
-    ): SqlDriver = try {
+    private fun openOrRecreate(file: Path): SqlDriver = try {
         open(url = URL_PREFIX + file)
     } catch (exception: SQLException) {
         logger.w(throwable = exception) { RECREATE_MESSAGE }

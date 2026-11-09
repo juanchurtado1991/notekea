@@ -1,7 +1,6 @@
 package app.notekea.editor.presentation.sidepanel
 
 import androidx.compose.foundation.focusable
-import app.notekea.editor.presentation.model.EditorPreviewData
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,8 +23,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import app.notekea.core.presentation.designsystem.theme.LocalReduceMotion
-import app.notekea.core.presentation.designsystem.theme.followItem
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -38,13 +35,16 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.notes.domain.OutlineHeading
 import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.designsystem.components.NotekeaLazyScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.NotekeaTreeItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.LocalReduceMotion
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.core.notes.domain.OutlineHeading
+import app.notekea.core.presentation.designsystem.theme.followItem
+import app.notekea.editor.presentation.model.EditorPreviewData
 import app.notekea.resources.Res
 import app.notekea.resources.outline_empty_message
 import app.notekea.resources.outline_empty_title
@@ -78,6 +78,7 @@ internal fun OutlineSection(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
+
             Text(
                 text = stringResource(resource = Res.string.outline_empty_message),
                 style = MaterialTheme.typography.bodySmall,
@@ -110,23 +111,51 @@ private fun OutlineList(
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
+
     var hasFocus by remember { mutableStateOf(value = false) }
+
     var focused by remember { mutableIntStateOf(value = 0) }
+
     val label = stringResource(resource = Res.string.outline_label)
     val goTo = stringResource(resource = Res.string.outline_go_to)
-    FollowCurrent(listState = listState, index = { if (hasFocus) focused else current() })
+
+    FollowCurrent(
+        listState = listState,
+        index = {
+            if (hasFocus) focused else current()
+        }
+    )
+
     val onFocusChange = { isFocused: Boolean ->
-        if (isFocused && !hasFocus) focused = current().coerceIn(minimumValue = 0, maximumValue = outline.lastIndex)
+        if (isFocused && !hasFocus) {
+            focused = current().coerceIn(
+                minimumValue = 0,
+                maximumValue = outline.lastIndex
+            )
+        }
+
         hasFocus = isFocused
     }
-    val contentHeight = NotekeaDimensions.TreeRowHeight * outline.size + NotekeaDimensions.SpacingXs * 2
-    NotekeaLazyScrollArea(state = listState, modifier = modifier, contentHeight = contentHeight) {
+
+    val contentHeight =
+        NotekeaDimensions.TreeRowHeight * outline.size + NotekeaDimensions.SpacingXs * 2
+
+    NotekeaLazyScrollArea(
+        state = listState,
+        modifier = modifier,
+        contentHeight = contentHeight
+    ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics { contentDescription = label }
-                .outlineInput(focusRequester = focusRequester, onFocusChange = onFocusChange) { event ->
-                    outlineKey(event, focused, outline.size, { focused = it }, { onHeadingClick(focused) }, onLeave)
+                .outlineInput(
+                    focusRequester = focusRequester,
+                    onFocusChange = onFocusChange
+                ) { event ->
+                    outlineKey(event, focused, outline.size, {
+                        focused = it
+                    }, { onHeadingClick(focused) }, onLeave)
                 },
             state = listState,
             contentPadding = LIST_PADDING
@@ -136,7 +165,12 @@ private fun OutlineList(
                 key = { _, heading -> heading.offset },
                 contentType = { _, _ -> HEADING_ROW }
             ) { index, heading ->
-                val isCurrent by remember(index, current) { derivedStateOf { index == current() } }
+                val isCurrent by remember(index, current) {
+                    derivedStateOf {
+                        index == current()
+                    }
+                }
+
                 OutlineRow(
                     heading = heading,
                     isCurrent = isCurrent,
@@ -158,7 +192,16 @@ private fun OutlineRow(
     goTo: String,
     onClick: () -> Unit
 ) {
-    NotekeaContextMenuArea(sections = listOf(listOf(NotekeaMenuItem(label = goTo, onClick = onClick)))) {
+    NotekeaContextMenuArea(
+        sections = listOf(
+            listOf(
+                NotekeaMenuItem(
+                    label = goTo,
+                    onClick = onClick
+                )
+            )
+        )
+    ) {
         NotekeaTreeItem(
             label = heading.text,
             icon = null,
@@ -188,10 +231,22 @@ private fun FollowCurrent(
 ) {
     val reduceMotion = LocalReduceMotion.current
     val currentIndex by rememberUpdatedState(newValue = index)
+
     LaunchedEffect(listState, reduceMotion) {
         snapshotFlow { currentIndex() }.collectLatest { row ->
-            val isVisible = listState.layoutInfo.visibleItemsInfo.any { it.index == row && it.offset >= 0 }
-            if (row >= 0 && !isVisible) listState.followItem(index = row, reduceMotion = reduceMotion)
+            val isVisible = listState
+                .layoutInfo
+                .visibleItemsInfo
+                .any {
+                    it.index == row && it.offset >= 0
+                }
+
+            if (row >= 0 && !isVisible) {
+                listState.followItem(
+                    index = row,
+                    reduceMotion = reduceMotion
+                )
+            }
         }
     }
 }
@@ -208,7 +263,9 @@ private fun outlineKey(
     onChoose: () -> Unit,
     onLeave: () -> Unit
 ): Boolean {
-    if (event.type != KeyEventType.KeyDown || count == 0) return false
+    val isIgnored = event.type != KeyEventType.KeyDown || count == 0
+    if (isIgnored) return false
+
     val move = when (event.key) {
         Key.DirectionUp -> focused - 1
         Key.DirectionDown -> focused + 1
@@ -216,13 +273,24 @@ private fun outlineKey(
         Key.MoveEnd -> count - 1
         else -> null
     }
+
     val action = when (event.key) {
         Key.Enter, Key.NumPadEnter -> onChoose
         Key.Escape -> onLeave
         else -> null
     }
-    move?.let { onMove(it.coerceIn(minimumValue = 0, maximumValue = count - 1)) }
+
+    move?.let {
+        onMove(
+            it.coerceIn(
+                minimumValue = 0,
+                maximumValue = count - 1
+            )
+        )
+    }
+
     action?.invoke()
+
     return move != null || action != null
 }
 

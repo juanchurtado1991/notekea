@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Code layout is enforced by lint (`GUIDELINES.md` §6 *Layout*): imports in IntelliJ's order, lines of code of at
+  most 100 characters, chains, lambdas, named arguments and parameters laid out one way, compound conditions and
+  long callbacks named, and KDoc of at most three lines whose links and file names exist. The repository is
+  reformatted to it.
+
 ### Added
 
 - Settings → AI model: the chat model for this computer (Small, Medium or Large, from its memory and GPU) downloads

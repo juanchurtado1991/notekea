@@ -25,9 +25,15 @@ fun NotekeaLogo(
     size: Dp = DEFAULT_SIZE_DP.dp
 ) {
     val colors = MaterialTheme.colorScheme
+
     val logo = remember(colors.primaryContainer, colors.primary, colors.tertiary) {
-        NotekeaBrand.logoOf(note = colors.primaryContainer, mark = colors.primary, fold = colors.tertiary)
+        NotekeaBrand.logoOf(
+            note = colors.primaryContainer,
+            mark = colors.primary,
+            fold = colors.tertiary
+        )
     }
+
     Image(
         imageVector = logo,
         contentDescription = null,

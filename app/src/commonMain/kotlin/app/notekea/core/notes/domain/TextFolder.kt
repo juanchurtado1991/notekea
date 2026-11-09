@@ -5,9 +5,7 @@ package app.notekea.core.notes.domain
  * found in the folded text is the same position in the original and highlights land on the right letters.
  */
 class TextFolder {
-    fun fold(
-        text: String
-    ): String = buildString(capacity = text.length) {
+    fun fold(text: String): String = buildString(capacity = text.length) {
         text.forEach { char ->
             val lower = char.lowercaseChar()
             append(UNACCENTED[lower] ?: lower)
@@ -26,6 +24,10 @@ class TextFolder {
             'y' to "ýÿŷ",
             's' to "śŝşš",
             'z' to "źżž"
-        ).flatMap { (plain, accented) -> accented.map { it to plain } }.toMap()
+        ).flatMap { (plain, accented) ->
+            accented.map {
+                it to plain
+            }
+        }.toMap()
     }
 }

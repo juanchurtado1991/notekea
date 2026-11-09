@@ -1,14 +1,6 @@
 package app.notekea.editor.presentation.view
 
 import androidx.compose.runtime.Composable
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.model.EditorPreviewData
-import app.notekea.editor.presentation.toolbar.FormatActions
-import app.notekea.editor.presentation.model.PropertyIntent
-import app.notekea.editor.presentation.properties.PropertyTypes
-import app.notekea.editor.presentation.toolbar.ToolbarFit
-import app.notekea.editor.presentation.toolbar.formatActions
-import app.notekea.editor.presentation.toolbar.shortcutLabel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -22,6 +14,14 @@ import app.notekea.core.presentation.designsystem.components.calloutIcon
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.editor.domain.FormatAction
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorPreviewData
+import app.notekea.editor.presentation.model.PropertyIntent
+import app.notekea.editor.presentation.properties.PropertyTypes
+import app.notekea.editor.presentation.toolbar.FormatActions
+import app.notekea.editor.presentation.toolbar.ToolbarFit
+import app.notekea.editor.presentation.toolbar.formatActions
+import app.notekea.editor.presentation.toolbar.shortcutLabel
 import app.notekea.resources.Res
 import app.notekea.resources.format_attach
 import app.notekea.resources.format_attach_hint
@@ -70,23 +70,39 @@ private fun overflowItems(
     onIntent: (EditorIntent) -> Unit
 ): List<List<NotekeaMenuItem>> {
     val format = { action: FormatAction -> onIntent(EditorIntent.OnFormat(action = action)) }
+
     val links = listOf(
         moreItem(
             icon = NotekeaIcons.NoteLink,
             label = Res.string.format_note_link,
-            shortcutHint = platformConventions.shortcutLabel(shortcut = platformConventions.noteLinkShortcut)
+            shortcutHint = platformConventions.shortcutLabel(
+                shortcut = platformConventions.noteLinkShortcut
+            )
         ) { onIntent(EditorIntent.OnNoteLinkRequest) },
-        moreItem(icon = NotekeaIcons.Tag, label = Res.string.format_tag) { onIntent(EditorIntent.OnTagRequest) }
+        moreItem(
+            icon = NotekeaIcons.Tag,
+            label = Res.string.format_tag
+        ) { onIntent(EditorIntent.OnTagRequest) }
     )
+
     val lists = listOf(
-        moreItem(icon = NotekeaIcons.Checklist, label = Res.string.format_checklist) { format(actions.checklist) },
-        moreItem(icon = NotekeaIcons.BulletList, label = Res.string.format_bullet_list) { format(actions.bulletList) },
+        moreItem(
+            icon = NotekeaIcons.Checklist,
+            label = Res.string.format_checklist
+        ) { format(actions.checklist) },
+        moreItem(
+            icon = NotekeaIcons.BulletList,
+            label = Res.string.format_bullet_list
+        ) { format(actions.bulletList) },
         moreItem(
             icon = NotekeaIcons.Template,
             label = Res.string.format_template,
-            shortcutHint = platformConventions.shortcutLabel(shortcut = platformConventions.templateShortcut)
+            shortcutHint = platformConventions.shortcutLabel(
+                shortcut = platformConventions.templateShortcut
+            )
         ) { onIntent(EditorIntent.OnTemplateRequest) }
     )
+
     return listOfNotNull(links.takeUnless { fit.showsLinks }, lists.takeUnless { fit.showsLists })
 }
 
@@ -102,25 +118,41 @@ internal fun MoreMenu(
     onIntent: (EditorIntent) -> Unit,
     fit: ToolbarFit
 ) {
-    val overflow =
-        overflowItems(fit = fit, actions = actions, platformConventions = platformConventions, onIntent = onIntent)
+    val overflow = overflowItems(
+        fit = fit,
+        actions = actions,
+        platformConventions = platformConventions,
+        onIntent = onIntent
+    )
+
     val shortcut = platformConventions.shortcutLabel(shortcut = platformConventions.webLinkShortcut)
+
     val format = { action: FormatAction -> onIntent(EditorIntent.OnFormat(action = action)) }
+
     NotekeaMenuButton(
         icon = NotekeaIcons.More,
         label = stringResource(resource = Res.string.format_more),
         sections = overflow + listOf(
             listOf(
-                moreItem(icon = NotekeaIcons.WebLink, label = Res.string.format_web_link, shortcutHint = shortcut) {
-                    format(actions.webLink)
-                },
-                moreItem(icon = NotekeaIcons.NumberedList, label = Res.string.format_numbered_list) {
-                    format(actions.numberedList)
-                }
+                moreItem(
+                    icon = NotekeaIcons.WebLink,
+                    label = Res.string.format_web_link,
+                    shortcutHint = shortcut
+                ) { format(actions.webLink) },
+                moreItem(
+                    icon = NotekeaIcons.NumberedList,
+                    label = Res.string.format_numbered_list
+                ) { format(actions.numberedList) }
             ),
             listOf(
-                calloutItem(actions = actions, format = format),
-                codeBlockItem(actions = actions, format = format),
+                calloutItem(
+                    actions = actions,
+                    format = format
+                ),
+                codeBlockItem(
+                    actions = actions,
+                    format = format
+                ),
                 NotekeaMenuItem(
                     label = stringResource(resource = Res.string.format_attach),
                     onClick = { onIntent(EditorIntent.OnAttachmentPick) },
@@ -130,22 +162,27 @@ internal fun MoreMenu(
             ),
             listOf(addPropertyItem(onIntent = onIntent)),
             listOf(
-                moreItem(icon = NotekeaIcons.Quote, label = Res.string.format_quote) { format(actions.quote) },
-                moreItem(icon = NotekeaIcons.Divider, label = Res.string.format_divider) {
-                    format(FormatAction.Divider)
-                },
-                tableItem(actions = actions, format = format)
+                moreItem(
+                    icon = NotekeaIcons.Quote,
+                    label = Res.string.format_quote
+                ) { format(actions.quote) },
+                moreItem(
+                    icon = NotekeaIcons.Divider,
+                    label = Res.string.format_divider
+                ) { format(FormatAction.Divider) },
+                tableItem(
+                    actions = actions,
+                    format = format
+                )
             )
         ),
         takesFocus = false
     )
 }
 
-/** Add property (`ROADMAP.md` 1.14): its types beside the menu, each adding a property of that type to the note. */
+/** Add property: its types beside the menu, each adding a property of that type to the note. */
 @Composable
-private fun addPropertyItem(
-    onIntent: (EditorIntent) -> Unit
-): NotekeaMenuItem = NotekeaMenuItem(
+private fun addPropertyItem(onIntent: (EditorIntent) -> Unit): NotekeaMenuItem = NotekeaMenuItem(
     label = stringResource(resource = Res.string.properties_add),
     onClick = {},
     icon = NotekeaIcons.AddRow,
@@ -168,13 +205,22 @@ private fun calloutItem(
 ): NotekeaMenuItem {
     // Read when an item is clicked, never captured: the open menu may still hold the items of an earlier composition.
     val isFolded = remember { mutableStateOf(value = false) }
+
     val callouts = CalloutKind.entries.map { kind ->
         NotekeaMenuItem(
             label = actions.calloutTitles.getValue(kind),
-            onClick = { format(actions.callout(kind = kind, isFolded = isFolded.value)) },
+            onClick = {
+                format(
+                    actions.callout(
+                        kind = kind,
+                        isFolded = isFolded.value
+                    )
+                )
+            },
             icon = calloutIcon(kind = kind)
         )
     }
+
     val folded = NotekeaMenuItem(
         label = stringResource(resource = Res.string.format_callout_folded),
         onClick = { isFolded.value = !isFolded.value },
@@ -182,6 +228,7 @@ private fun calloutItem(
         isChecked = isFolded.value,
         keepsMenuOpen = true
     )
+
     return NotekeaMenuItem(
         label = stringResource(resource = Res.string.format_callout),
         onClick = {},
@@ -201,9 +248,14 @@ private fun codeBlockItem(
         label = stringResource(resource = Res.string.format_code_plain),
         onClick = { format(actions.codeBlock(language = "")) }
     )
+
     val languages = CODE_LANGUAGES.map { (name, fence) ->
-        NotekeaMenuItem(label = name, onClick = { format(actions.codeBlock(language = fence)) })
+        NotekeaMenuItem(
+            label = name,
+            onClick = { format(actions.codeBlock(language = fence)) }
+        )
     }
+
     return NotekeaMenuItem(
         label = stringResource(resource = Res.string.format_code_block),
         onClick = {},
@@ -222,14 +274,27 @@ private fun tableItem(
     onClick = {},
     icon = NotekeaIcons.Table,
     submenu = { onChosen ->
+        fun pick(
+            columns: Int,
+            rows: Int
+        ) {
+            onChosen()
+
+            format(
+                actions.table(
+                    columns = columns,
+                    rows = rows
+                )
+            )
+        }
+
         NotekeaGridSizePicker(
             columns = FormatActions.TABLE_MAX_COLUMNS,
             rows = FormatActions.TABLE_MAX_ROWS,
-            label = { columns, rows -> stringResource(Res.string.format_table_size, columns, rows) },
-            onPick = { columns, rows ->
-                onChosen()
-                format(actions.table(columns = columns, rows = rows))
-            }
+            label = { columns, rows ->
+                stringResource(Res.string.format_table_size, columns, rows)
+            },
+            onPick = { columns, rows -> pick(columns, rows) }
         )
     }
 )

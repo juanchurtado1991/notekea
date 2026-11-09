@@ -29,6 +29,7 @@ class OkioVaultFileSystemTest {
             expected = listOf(FolderAccess.AVAILABLE, FolderAccess.MISSING, FolderAccess.MISSING),
             actual = listOf(NOTES, FILE, MISSING).map { vaultFileSystem().access(path = it) }
         )
+
         assertEquals(
             expected = FolderAccess.NOT_READABLE,
             actual = vaultFileSystem(fileSystem = unlistable()).access(path = NOTES)
@@ -39,48 +40,76 @@ class OkioVaultFileSystemTest {
     fun `a new folder is created, or reused when it exists and is empty`() = runVaultTest {
         fakeFileSystem.createDirectories(dir = DOCUMENTS.toPath())
 
-        val created = vaultFileSystem().createFolder(parentPath = DOCUMENTS, name = NAME)
-        val reused = vaultFileSystem().createFolder(parentPath = DOCUMENTS, name = NAME)
+        val created = vaultFileSystem().createFolder(
+            parentPath = DOCUMENTS,
+            name = NAME
+        )
+
+        val reused = vaultFileSystem().createFolder(
+            parentPath = DOCUMENTS,
+            name = NAME
+        )
 
         assertEquals(
-            expected = listOf(Outcome.Success(value = NEW_VAULT), Outcome.Success(value = NEW_VAULT)),
+            expected = listOf(
+                Outcome.Success(value = NEW_VAULT),
+                Outcome.Success(value = NEW_VAULT)
+            ),
             actual = listOf(created, reused)
         )
     }
 
     @Test
-    fun `creating fails for a folder with files, a missing parent or a disk error`() = runVaultTest {
-        writeFile(path = "$NEW_VAULT/a.md")
+    fun `creating fails for a folder with files, a missing parent or a disk error`() =
+        runVaultTest {
+            writeFile(path = "$NEW_VAULT/a.md")
 
-        assertEquals(
-            expected = Outcome.Failure(error = VaultError.FolderAlreadyExists(path = NEW_VAULT)),
-            actual = vaultFileSystem().createFolder(parentPath = DOCUMENTS, name = NAME)
-        )
-        assertEquals(
-            expected = Outcome.Failure(error = VaultError.FolderMissing(path = MISSING)),
-            actual = vaultFileSystem().createFolder(parentPath = MISSING, name = NAME)
-        )
-        assertEquals(
-            expected = Outcome.Failure(error = VaultError.CreationFailed(path = "$NOTES/$NAME")),
-            actual = vaultFileSystem(fileSystem = readOnly()).createFolder(parentPath = NOTES, name = NAME)
-        )
-    }
+            assertEquals(
+                expected = Outcome.Failure(
+                    error = VaultError.FolderAlreadyExists(path = NEW_VAULT)
+                ),
+                actual = vaultFileSystem().createFolder(
+                    parentPath = DOCUMENTS,
+                    name = NAME
+                )
+            )
+
+            assertEquals(
+                expected = Outcome.Failure(error = VaultError.FolderMissing(path = MISSING)),
+                actual = vaultFileSystem().createFolder(
+                    parentPath = MISSING,
+                    name = NAME
+                )
+            )
+
+            assertEquals(
+                expected = Outcome.Failure(
+                    error = VaultError.CreationFailed(path = "$NOTES/$NAME")
+                ),
+                actual = vaultFileSystem(fileSystem = readOnly()).createFolder(
+                    parentPath = NOTES,
+                    name = NAME
+                )
+            )
+        }
 
     @Test
-    fun `new vaults are suggested in Documents, or in the home folder without one`() = runVaultTest {
-        fakeFileSystem.createDirectories(dir = HOME.toPath())
+    fun `new vaults are suggested in Documents, or in the home folder without one`() =
+        runVaultTest {
+            fakeFileSystem.createDirectories(dir = HOME.toPath())
 
-        val withoutDocuments = vaultFileSystem().suggestedParentFolder()
-        fakeFileSystem.createDirectories(dir = DOCUMENTS.toPath())
+            val withoutDocuments = vaultFileSystem().suggestedParentFolder()
+            fakeFileSystem.createDirectories(dir = DOCUMENTS.toPath())
 
-        assertEquals(
-            expected = listOf(HOME, DOCUMENTS),
-            actual = listOf(withoutDocuments, vaultFileSystem().suggestedParentFolder())
-        )
-    }
+            assertEquals(
+                expected = listOf(HOME, DOCUMENTS),
+                actual = listOf(withoutDocuments, vaultFileSystem().suggestedParentFolder())
+            )
+        }
 
     private fun readOnly(): FileSystem {
         fakeFileSystem.createDirectories(dir = NOTES.toPath())
+
         return object : ForwardingFileSystem(delegate = fakeFileSystem) {
             override fun createDirectory(
                 dir: Path,
@@ -89,30 +118,26 @@ class OkioVaultFileSystemTest {
         }
     }
 
-    private fun runVaultTest(
-        block: suspend TestScope.() -> Unit
-    ) = runTest(context = testDispatcher) { block() }
+    private fun runVaultTest(block: suspend TestScope.() -> Unit) = runTest(
+        context = testDispatcher
+    ) { block() }
 
     private fun unlistable(): FileSystem {
         fakeFileSystem.createDirectories(dir = NOTES.toPath())
+
         return object : ForwardingFileSystem(delegate = fakeFileSystem) {
-            override fun list(
-                dir: Path
-            ): List<Path> = throw IOException(DENIED)
+            override fun list(dir: Path): List<Path> = throw IOException(DENIED)
         }
     }
 
-    private fun vaultFileSystem(
-        fileSystem: FileSystem = fakeFileSystem
-    ): OkioVaultFileSystem = OkioVaultFileSystem(
-        fileSystem = fileSystem,
-        dispatchers = FakeAppDispatchers(dispatcher = testDispatcher),
-        homeDirectory = HOME
-    )
+    private fun vaultFileSystem(fileSystem: FileSystem = fakeFileSystem): OkioVaultFileSystem =
+        OkioVaultFileSystem(
+            fileSystem = fileSystem,
+            dispatchers = FakeAppDispatchers(dispatcher = testDispatcher),
+            homeDirectory = HOME
+        )
 
-    private fun writeFile(
-        path: String
-    ) {
+    private fun writeFile(path: String) {
         fakeFileSystem.createDirectories(dir = path.toPath().parent!!)
         fakeFileSystem.write(file = path.toPath()) { writeUtf8(string = CONTENT) }
     }

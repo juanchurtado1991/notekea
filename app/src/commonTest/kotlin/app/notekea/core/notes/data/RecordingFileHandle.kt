@@ -12,23 +12,31 @@ class RecordingFileHandle(
         array: ByteArray,
         arrayOffset: Int,
         byteCount: Int
-    ): Int = delegate.read(fileOffset = fileOffset, array = array, arrayOffset = arrayOffset, byteCount = byteCount)
+    ): Int = delegate.read(
+        fileOffset = fileOffset,
+        array = array,
+        arrayOffset = arrayOffset,
+        byteCount = byteCount
+    )
 
     override fun protectedWrite(
         fileOffset: Long,
         array: ByteArray,
         arrayOffset: Int,
         byteCount: Int
-    ) = delegate.write(fileOffset = fileOffset, array = array, arrayOffset = arrayOffset, byteCount = byteCount)
+    ) = delegate.write(
+        fileOffset = fileOffset,
+        array = array,
+        arrayOffset = arrayOffset,
+        byteCount = byteCount
+    )
 
     override fun protectedFlush() {
         delegate.flush()
         onFlush()
     }
 
-    override fun protectedResize(
-        size: Long
-    ) = delegate.resize(size = size)
+    override fun protectedResize(size: Long) = delegate.resize(size = size)
 
     override fun protectedSize(): Long = delegate.size()
 

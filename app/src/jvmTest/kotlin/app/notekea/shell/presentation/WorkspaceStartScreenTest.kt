@@ -4,71 +4,106 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
-import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.clickText
-import app.notekea.core.presentation.descriptions
-import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
-import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.clickText
+import app.notekea.core.presentation.descriptions
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.shell.domain.Workspace
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The editor without tabs and the tab of an unsaved note (`ROADMAP.md` 1.14), rendered headless: each start action runs
+ * The editor without tabs and the tab of an unsaved note, rendered headless: each start action runs
  * its own action, and only the unsaved note's tab shows the dot that says so.
  */
 class WorkspaceStartScreenTest {
     private val notes = listOf("Welcome.md", "Ideas.md").map { RelativePath(value = it) }
-    private val tree = notes.fold(initial = VaultTree.EMPTY) { tree, path ->
-        tree.withNote(note = NoteEntry(file = file(path = path.value), metadata = NoteMetadata.NONE))
-    }
+    private val tree = notes
+        .fold(initial = VaultTree.EMPTY) { tree, path ->
+            tree.withNote(
+                note = NoteEntry(
+                    file = file(path = path.value),
+                    metadata = NoteMetadata.NONE
+                )
+            )
+        }
 
     @Test
     fun `an editor without tabs offers find a note, a new note, today's note and a search, each doing its own`() {
         val chosen = mutableListOf<String>()
+
         val actions = WorkspaceStartActions(
             onFindNote = { chosen += FIND },
             onNewNote = { chosen += NEW },
             onToday = { chosen += TODAY },
             onSearchNotes = { chosen += SEARCH }
         )
+
         UiThread.run {
-            scene(workspace = Workspace.EMPTY, actions = actions, unsaved = emptySet()).use { scene ->
+            scene(
+                workspace = Workspace.EMPTY,
+                actions = actions,
+                unsaved = emptySet()
+            ).use { scene ->
                 scene.render(nanoTime = 0L)
-                listOf(SEARCH, TODAY, NEW, FIND).forEach { scene.clickText(text = it) { scene.render(nanoTime = 0L) } }
+
+                listOf(SEARCH, TODAY, NEW, FIND).forEach {
+                    scene.clickText(text = it) { scene.render(nanoTime = 0L) }
+                }
             }
         }
 
-        assertEquals(expected = listOf(SEARCH, TODAY, NEW, FIND), actual = chosen)
+        assertEquals(
+            expected = listOf(SEARCH, TODAY, NEW, FIND),
+            actual = chosen
+        )
     }
 
     @Test
     fun `only the tab of a note with unsaved changes shows the unsaved dot`() {
         var descriptions = emptyList<String>()
         val workspace = notes.fold(initial = Workspace.EMPTY) { it, path -> it.open(path = path) }
+
         UiThread.run {
-            scene(workspace = workspace, actions = WorkspaceStartActions(), unsaved = setOf(notes[0])).use { scene ->
+            scene(
+                workspace = workspace,
+                actions = WorkspaceStartActions(),
+                unsaved = setOf(notes[0])
+            ).use { scene ->
                 scene.render(nanoTime = 0L)
                 descriptions = scene.descriptions()
             }
         }
 
-        assertEquals(expected = 1, actual = descriptions.count { it == UNSAVED })
+        assertEquals(
+            expected = 1,
+            actual = descriptions.count {
+                it == UNSAVED
+            }
+        )
     }
 
     private fun scene(
         workspace: Workspace,
         actions: WorkspaceStartActions,
         unsaved: Set<RelativePath>
-    ) = ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+    ) = ImageComposeScene(
+        width = WIDTH,
+        height = HEIGHT,
+        density = Density(density = 1f)
+    ) {
         NotekeaTheme(darkTheme = false) {
             WorkspaceContent(
-                state = WorkspaceState(workspace = workspace, tree = tree),
+                state = WorkspaceState(
+                    workspace = workspace,
+                    tree = tree
+                ),
                 platformConventions = PreviewPlatformConventions.linux,
                 onIntent = {},
                 startActions = actions,

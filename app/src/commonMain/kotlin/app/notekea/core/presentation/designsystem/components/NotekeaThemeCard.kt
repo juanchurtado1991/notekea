@@ -49,10 +49,9 @@ private const val TEXT_ALPHA = 0.55f
 private const val SKETCH_PADDING_DP = 6
 
 /**
- * A color theme to choose (Settings → Appearance, `ROADMAP.md` 2.12): a sketch of a note in its [light] and [dark]
- * schemes side by side (title, text, a tag and a button), and its [name] under them. The [isSelected] one is outlined in
- * the primary color and checked. A click or Enter goes to [onClick]; the card draws the focus ring when it has the
- * keyboard, and screen readers hear it as a selectable choice.
+ * A color theme to choose (Settings → Appearance): a sketch of a note in its [light] and [dark] schemes side by side,
+ * and its [name] under them. The [isSelected] one is outlined in the primary color and checked. A click or Enter goes
+ * to [onClick]; screen readers hear the card as a selectable choice.
  */
 @Composable
 fun NotekeaThemeCard(
@@ -65,24 +64,43 @@ fun NotekeaThemeCard(
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = MaterialTheme.shapes.medium
+    val dimensions = NotekeaDimensions
+
     Column(
         modifier = modifier
             .width(width = PREVIEW_WIDTH_DP.dp)
             .clip(shape = shape)
             .border(
-                width = if (isSelected) NotekeaDimensions.FocusRingWidth else NotekeaDimensions.BorderWidth,
+                width = if (isSelected) dimensions.FocusRingWidth else dimensions.BorderWidth,
                 color = if (isSelected) colors.primary else colors.outlineVariant,
                 shape = shape
             )
-            .focusBorder(color = colors.primary, shape = shape)
+            .focusBorder(
+                color = colors.primary,
+                shape = shape
+            )
             .semantics { selected = isSelected }
-            .clickable(role = Role.RadioButton, onClick = onClick)
+            .clickable(
+                role = Role.RadioButton,
+                onClick = onClick
+            )
     ) {
         Row(modifier = Modifier.fillMaxWidth().height(height = PREVIEW_HEIGHT_DP.dp)) {
-            NoteSketch(scheme = light, modifier = Modifier.weight(weight = 1f))
-            NoteSketch(scheme = dark, modifier = Modifier.weight(weight = 1f))
+            NoteSketch(
+                scheme = light,
+                modifier = Modifier.weight(weight = 1f)
+            )
+
+            NoteSketch(
+                scheme = dark,
+                modifier = Modifier.weight(weight = 1f)
+            )
         }
-        CardName(name = name, isSelected = isSelected)
+
+        CardName(
+            name = name,
+            isSelected = isSelected
+        )
     }
 }
 
@@ -93,11 +111,15 @@ private fun CardName(
     isSelected: Boolean
 ) {
     val colors = MaterialTheme.colorScheme
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = colors.surface)
-            .padding(horizontal = NotekeaDimensions.SpacingS, vertical = NotekeaDimensions.SpacingXs),
+            .padding(
+                horizontal = NotekeaDimensions.SpacingS,
+                vertical = NotekeaDimensions.SpacingXs
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -108,6 +130,7 @@ private fun CardName(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
         if (isSelected) {
             Icon(
                 imageVector = NotekeaIcons.Checked,
@@ -126,14 +149,37 @@ private fun NoteSketch(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.fillMaxHeight().background(color = scheme.background).padding(all = SKETCH_PADDING_DP.dp),
+        modifier = modifier
+            .fillMaxHeight()
+            .background(color = scheme.background)
+            .padding(all = SKETCH_PADDING_DP.dp),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
     ) {
-        Bar(width = TITLE_WIDTH_DP, height = SWATCH_HEIGHT_DP - 1, color = scheme.onBackground)
-        Bar(width = TEXT_WIDTH_DP, height = TEXT_HEIGHT_DP, color = scheme.onBackground.copy(alpha = TEXT_ALPHA))
-        Bar(width = TAG_WIDTH_DP, height = SWATCH_HEIGHT_DP, color = scheme.tertiary)
+        Bar(
+            width = TITLE_WIDTH_DP,
+            height = SWATCH_HEIGHT_DP - 1,
+            color = scheme.onBackground
+        )
+
+        Bar(
+            width = TEXT_WIDTH_DP,
+            height = TEXT_HEIGHT_DP,
+            color = scheme.onBackground.copy(alpha = TEXT_ALPHA)
+        )
+
+        Bar(
+            width = TAG_WIDTH_DP,
+            height = SWATCH_HEIGHT_DP,
+            color = scheme.tertiary
+        )
+
         Spacer(modifier = Modifier.weight(weight = 1f))
-        Bar(width = BUTTON_WIDTH_DP, height = BUTTON_HEIGHT_DP, color = scheme.primary)
+
+        Bar(
+            width = BUTTON_WIDTH_DP,
+            height = BUTTON_HEIGHT_DP,
+            color = scheme.primary
+        )
     }
 }
 
@@ -145,7 +191,10 @@ private fun Bar(
 ) {
     Box(
         modifier = Modifier
-            .size(width = width.dp, height = height.dp)
+            .size(
+                width = width.dp,
+                height = height.dp
+            )
             .clip(shape = RoundedCornerShape(size = (height / 2).dp))
             .background(color = color)
     )
@@ -159,8 +208,14 @@ private fun NotekeaThemeCardPreview() {
             listOf(ColorTheme.WORKSPACE_BLUE, ColorTheme.LAGOON).forEach { theme ->
                 NotekeaThemeCard(
                     name = theme.name,
-                    light = ColorThemeSchemes.of(theme = theme, darkTheme = false),
-                    dark = ColorThemeSchemes.of(theme = theme, darkTheme = true),
+                    light = ColorThemeSchemes.of(
+                        theme = theme,
+                        darkTheme = false
+                    ),
+                    dark = ColorThemeSchemes.of(
+                        theme = theme,
+                        darkTheme = true
+                    ),
                     isSelected = theme == ColorTheme.WORKSPACE_BLUE,
                     onClick = {}
                 )

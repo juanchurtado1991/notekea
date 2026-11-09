@@ -16,9 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,7 +29,8 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 
 private const val ACCENT_WIDTH_DP = 3
 private const val PREVIEW_HINT = "Open note"
-private const val PREVIEW_TEXT = "Soak the corn flour for ten minutes, then shape the dough into discs."
+private const val PREVIEW_TEXT =
+    "Soak the corn flour for ten minutes, then shape the dough into discs."
 private const val PREVIEW_TITLE = "Arepas › Dough"
 
 /**
@@ -46,25 +47,41 @@ fun NotekeaEmbeddedNote(
     content: @Composable () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.small,
         color = colors.surface,
-        border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = colors.outline)
+        border = BorderStroke(
+            width = NotekeaDimensions.BorderWidth,
+            color = colors.outline
+        )
     ) {
         // The bar is drawn, not laid out: a row sized to its content's intrinsic height cannot hold a picture or
         // another embed, which have no intrinsic size.
         val bar = colors.primary
+
         Box(
             modifier = Modifier.drawBehind {
-                drawRect(color = bar, size = Size(width = ACCENT_WIDTH_DP.dp.toPx(), height = size.height))
+                drawRect(
+                    color = bar,
+                    size = Size(
+                        width = ACCENT_WIDTH_DP.dp.toPx(),
+                        height = size.height
+                    )
+                )
             }
         ) {
             Column(
                 modifier = Modifier.padding(all = NotekeaDimensions.SpacingM),
                 verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
             ) {
-                Title(title = title, openHint = openHint, onOpen = onOpen)
+                Title(
+                    title = title,
+                    openHint = openHint,
+                    onOpen = onOpen
+                )
+
                 content()
             }
         }
@@ -78,11 +95,19 @@ private fun Title(
     onOpen: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
+
     Row(
         modifier = Modifier
-            .focusBorder(color = colors.primary, shape = MaterialTheme.shapes.small)
+            .focusBorder(
+                color = colors.primary,
+                shape = MaterialTheme.shapes.small
+            )
             .clip(shape = MaterialTheme.shapes.small)
-            .clickable(onClickLabel = openHint, role = Role.Button, onClick = onOpen),
+            .clickable(
+                onClickLabel = openHint,
+                role = Role.Button,
+                onClick = onOpen
+            ),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -92,6 +117,7 @@ private fun Title(
             modifier = Modifier.size(size = NotekeaDimensions.IconSize),
             tint = colors.primary
         )
+
         Text(
             text = title,
             style = MaterialTheme.typography.titleSmall,
@@ -99,6 +125,7 @@ private fun Title(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
         Text(
             text = openHint,
             style = MaterialTheme.typography.labelMedium,
@@ -112,8 +139,15 @@ private fun Title(
 @Composable
 private fun NotekeaEmbeddedNotePreview() {
     NotekeaPreviewThemes {
-        NotekeaEmbeddedNote(title = PREVIEW_TITLE, openHint = PREVIEW_HINT, onOpen = {}) {
-            Text(text = PREVIEW_TEXT, style = MaterialTheme.typography.bodyLarge)
+        NotekeaEmbeddedNote(
+            title = PREVIEW_TITLE,
+            openHint = PREVIEW_HINT,
+            onOpen = {}
+        ) {
+            Text(
+                text = PREVIEW_TEXT,
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
     }
 }

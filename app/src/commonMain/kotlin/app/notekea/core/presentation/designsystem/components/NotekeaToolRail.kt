@@ -28,13 +28,9 @@ private const val PREVIEW_HEIGHT_DP = 260
 private const val RAIL_WIDTH_DP = 40
 
 /**
- * A narrow strip of icon buttons along the window's edge that stays when the panel beside it is hidden, as in IDEs
- * (Android Studio, VS Code): the actions always at hand, each with a tooltip beside it, naming it and its shortcut. A
- * [NotekeaToolRailItem.isSelected] button (the panel it shows is open) sits on the selected color. [items] leave the
- * keyboard where it was, each with a shortcut of its own; [bottomItems] sit at the strip's bottom, apart from the daily
- * ones, as Obsidian keeps its vault and settings there, and Tab reaches them, which have none; [header] (the app's logo)
- * sits above them all. [label] names the
- * strip for screen readers.
+ * A narrow strip of icon buttons along the window's edge that stays when the panel beside it is hidden, each with a
+ * tooltip beside it. [items] leave the keyboard where it was; [bottomItems] sit at the bottom and Tab reaches them;
+ * [header] sits above them all; [label] names the strip for screen readers.
  */
 @Composable
 fun NotekeaToolRail(
@@ -45,6 +41,7 @@ fun NotekeaToolRail(
     header: (@Composable () -> Unit)? = null
 ) {
     val colors = MaterialTheme.colorScheme
+
     Row(modifier = modifier.fillMaxHeight()) {
         Column(
             modifier = Modifier
@@ -61,10 +58,24 @@ fun NotekeaToolRail(
                 it()
                 Spacer(modifier = Modifier.height(height = NotekeaDimensions.SpacingXs))
             }
-            items.forEach { RailButton(item = it, takesFocus = false) }
+
+            items.forEach {
+                RailButton(
+                    item = it,
+                    takesFocus = false
+                )
+            }
+
             Spacer(modifier = Modifier.weight(weight = 1f))
-            bottomItems.forEach { RailButton(item = it, takesFocus = true) }
+
+            bottomItems.forEach {
+                RailButton(
+                    item = it,
+                    takesFocus = true
+                )
+            }
         }
+
         Box(
             modifier = Modifier
                 .width(width = NotekeaDimensions.BorderWidth)
@@ -81,6 +92,7 @@ private fun RailButton(
     takesFocus: Boolean
 ) {
     val colors = MaterialTheme.colorScheme
+
     Box(
         modifier = Modifier
             .background(
@@ -106,9 +118,22 @@ private fun NotekeaToolRailPreview() {
     NotekeaPreviewThemes {
         NotekeaToolRail(
             items = listOf(
-                NotekeaToolRailItem(icon = NotekeaIcons.Files, label = "Files", onClick = {}, isSelected = true),
-                NotekeaToolRailItem(icon = NotekeaIcons.Find, label = "Search notes", onClick = {}),
-                NotekeaToolRailItem(icon = NotekeaIcons.NewNote, label = "New note", onClick = {})
+                NotekeaToolRailItem(
+                    icon = NotekeaIcons.Files,
+                    label = "Files",
+                    onClick = {},
+                    isSelected = true
+                ),
+                NotekeaToolRailItem(
+                    icon = NotekeaIcons.Find,
+                    label = "Search notes",
+                    onClick = {}
+                ),
+                NotekeaToolRailItem(
+                    icon = NotekeaIcons.NewNote,
+                    label = "New note",
+                    onClick = {}
+                )
             ),
             label = "Sidebar tools",
             modifier = Modifier.height(height = PREVIEW_HEIGHT_DP.dp)

@@ -36,7 +36,5 @@ fun NotekeaProgressIndicator(
 @Preview
 @Composable
 private fun NotekeaProgressIndicatorPreview() {
-    NotekeaPreviewThemes {
-        NotekeaProgressIndicator(label = PREVIEW_LABEL)
-    }
+    NotekeaPreviewThemes { NotekeaProgressIndicator(label = PREVIEW_LABEL) }
 }

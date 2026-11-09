@@ -13,7 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-/** `ROADMAP.md` 3.1: the memory read as the size people know their computer by, and the video memory of its GPU. */
+/** The memory read as the size people know their computer by, and the video memory of its GPU. */
 @OptIn(ExperimentalPathApi::class)
 class JvmHardwareProbeTest {
     private val drm = Files.createTempDirectory(TEMP_PREFIX)
@@ -39,26 +39,54 @@ class JvmHardwareProbeTest {
             JvmHardwareProbe.installedGb(visibleBytes = (it * GIBIBYTE).toLong())
         }
 
-        assertEquals(expected = listOf(8, 16, 16, 24, 32, 64, 201), actual = sizes)
+        assertEquals(
+            expected = listOf(8, 16, 16, 24, 32, 64, 201),
+            actual = sizes
+        )
     }
 
     @Test
     fun `an NVIDIA GPU reports its largest card in gigabytes`() = runBlocking {
-        val hardware = probe(operatingSystem = OperatingSystem.LINUX, nvidia = "16311\n8192\n").probe()
+        val hardware = probe(
+            operatingSystem = OperatingSystem.LINUX,
+            nvidia = "16311\n8192\n"
+        ).probe()
 
-        assertEquals(expected = 16, actual = hardware.videoMemoryGb)
+        assertEquals(
+            expected = 16,
+            actual = hardware.videoMemoryGb
+        )
+
         assertTrue(actual = hardware.memoryGb > 0)
     }
 
     @Test
     fun `without nvidia-smi an AMD card is read on Linux, and nothing on macOS`() = runBlocking {
-        drm.resolve("card0/device").createDirectories().resolve("mem_info_vram_total").writeText(text = "8573157376\n")
+        drm
+            .resolve("card0/device")
+            .createDirectories()
+            .resolve("mem_info_vram_total")
+            .writeText(text = "8573157376\n")
 
-        val linux = probe(operatingSystem = OperatingSystem.LINUX, nvidia = null).probe().videoMemoryGb
-        val windows = probe(operatingSystem = OperatingSystem.WINDOWS, nvidia = null).probe().videoMemoryGb
-        val macos = probe(operatingSystem = OperatingSystem.MACOS, nvidia = "8192").probe().videoMemoryGb
+        val linux = probe(
+            operatingSystem = OperatingSystem.LINUX,
+            nvidia = null
+        ).probe().videoMemoryGb
 
-        assertEquals(expected = listOf(8, null, null), actual = listOf(linux, windows, macos))
+        val windows = probe(
+            operatingSystem = OperatingSystem.WINDOWS,
+            nvidia = null
+        ).probe().videoMemoryGb
+
+        val macos = probe(
+            operatingSystem = OperatingSystem.MACOS,
+            nvidia = "8192"
+        ).probe().videoMemoryGb
+
+        assertEquals(
+            expected = listOf(8, null, null),
+            actual = listOf(linux, windows, macos)
+        )
     }
 
     private companion object {

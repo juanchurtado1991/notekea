@@ -4,10 +4,9 @@ import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.TemplateSettings
 
 /**
- * State of the template picker (`ROADMAP.md` 1.12): the templates matching [query] as [rows], and [selectedIndex] the
- * one `Enter` chooses, for [target]. [hasFolder] is false while the vault has no templates folder ([folder]), which the
- * picker offers to create ([isCreating] meanwhile, [error] when it failed); [hasTemplates] tells an empty folder from a
- * search that matches nothing.
+ * State of the template picker: the templates matching [query] as [rows], and [selectedIndex] the one `Enter` chooses,
+ * for [target]. [hasFolder] is false while the vault has no templates folder ([folder]), which the picker offers to
+ * create ([isCreating], [error]); [hasTemplates] tells an empty folder from a search that matches nothing.
  */
 data class TemplatePickerState(
     val isOpen: Boolean = false,

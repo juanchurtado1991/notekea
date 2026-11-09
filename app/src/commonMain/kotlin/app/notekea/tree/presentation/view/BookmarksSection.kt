@@ -1,10 +1,6 @@
 package app.notekea.tree.presentation.view
 
 import androidx.compose.foundation.gestures.detectDragGestures
-import app.notekea.tree.presentation.model.BookmarkIntent
-import app.notekea.tree.presentation.model.TreePreviewData
-import app.notekea.tree.presentation.model.VaultTreeIntent
-import app.notekea.tree.presentation.model.VaultTreeState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,7 +9,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import app.notekea.core.presentation.designsystem.components.NotekeaFold
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -30,8 +25,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
+import app.notekea.core.presentation.designsystem.components.NotekeaFold
+import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
 import app.notekea.core.presentation.designsystem.components.NotekeaTreeItem
@@ -39,23 +36,25 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.designsystem.theme.missingEntry
-import app.notekea.core.notes.domain.RelativePath
 import app.notekea.resources.Res
 import app.notekea.resources.tree_bookmark_missing_remove
 import app.notekea.resources.tree_bookmark_remove
 import app.notekea.resources.tree_bookmarks
-import org.jetbrains.compose.resources.stringResource
 import app.notekea.tree.presentation.filepreview.fileIconOf
 import app.notekea.tree.presentation.filepreview.fileTintOf
+import app.notekea.tree.presentation.model.BookmarkIntent
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.model.VaultTreeState
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 private const val PREVIEW_WIDTH_DP = 300
 
 /**
- * The vault's bookmarks above the tree (`ROADMAP.md` 1.13), under a BOOKMARKS header that folds them; nothing while
- * there are none. A bookmark opens its entry in a tab and selects it in the tree; dragged up or down, it moves among
- * the others; its menu removes it. One whose entry is no longer in the vault (moved or deleted outside Notekea) is
- * struck through, with a ✕ that removes it.
+ * The vault's bookmarks above the tree, under a header that folds them; nothing while there are none. A bookmark opens
+ * its entry in a tab and selects it in the tree; dragged up or down, it moves among the others; its menu removes it.
+ * One whose entry is no longer in the vault is struck through, with a ✕ that removes it.
  */
 @Composable
 internal fun BookmarksSection(
@@ -65,6 +64,7 @@ internal fun BookmarksSection(
 ) {
     val paths = state.bookmarks.paths
     if (paths.isEmpty()) return
+
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = NotekeaDimensions.SpacingXs)) {
         NotekeaSectionHeader(
             title = stringResource(resource = Res.string.tree_bookmarks),
@@ -72,9 +72,16 @@ internal fun BookmarksSection(
             onToggle = { onIntent(BookmarkIntent.OnSectionToggle) },
             count = paths.size
         )
+
         NotekeaFold(isOpen = state.isBookmarksExpanded) {
             paths.forEachIndexed { index, path ->
-                BookmarkRow(path = path, index = index, count = paths.size, state = state, onIntent = onIntent)
+                BookmarkRow(
+                    path = path,
+                    index = index,
+                    count = paths.size,
+                    state = state,
+                    onIntent = onIntent
+                )
             }
         }
     }
@@ -90,6 +97,7 @@ private fun BookmarkRow(
     onIntent: (VaultTreeIntent) -> Unit
 ) {
     val isMissing = !state.isLoading && path !in state.tree
+
     val menu = listOf(
         listOf(
             NotekeaMenuItem(
@@ -99,27 +107,47 @@ private fun BookmarkRow(
             )
         )
     )
+
     NotekeaContextMenuArea(
         sections = menu,
         modifier = Modifier.bookmarkDrag(
             index = index,
             count = count,
-            onMove = { from, to -> onIntent(BookmarkIntent.OnMove(from = from, to = to)) }
+            onMove = { from, to ->
+                onIntent(
+                    BookmarkIntent.OnMove(
+                        from = from,
+                        to = to
+                    )
+                )
+            }
         )
     ) {
+        val labelContent: (@Composable () -> Unit)? = if (isMissing) {
+            {
+                MissingLabel(
+                    path = path,
+                    onIntent = onIntent
+                )
+            }
+        } else {
+            null
+        }
+
         NotekeaTreeItem(
             label = labelOf(path = path),
             depth = 1,
             onClick = { onIntent(BookmarkIntent.OnClick(path = path)) },
-            icon = iconOf(path = path, state = state),
-            iconTint = fileTintOf(path = path).takeUnless { path in state.tree.folders },
+            icon = iconOf(
+                path = path,
+                state = state
+            ),
+            iconTint = fileTintOf(path = path).takeUnless {
+                path in state.tree.folders
+            },
             selected = path == state.selectedPath,
             takesFocus = true,
-            labelContent = if (isMissing) {
-                { MissingLabel(path = path, onIntent = onIntent) }
-            } else {
-                null
-            }
+            labelContent = labelContent
         )
     }
 }
@@ -135,19 +163,28 @@ private fun Modifier.bookmarkDrag(
     onMove: (from: Int, to: Int) -> Unit
 ): Modifier {
     var dragged by remember { mutableFloatStateOf(value = 0f) }
+
     val rowHeight = with(LocalDensity.current) { NotekeaDimensions.TreeRowHeight.toPx() }
+
     val currentIndex by rememberUpdatedState(newValue = index)
     val currentCount by rememberUpdatedState(newValue = count)
     val currentOnMove by rememberUpdatedState(newValue = onMove)
+
     return zIndex(zIndex = if (dragged == 0f) 0f else 1f)
         .graphicsLayer { translationY = dragged }
         .pointerInput(Unit) {
+            fun drop() {
+                val target = (currentIndex + (dragged / rowHeight).roundToInt()).coerceIn(
+                    0,
+                    currentCount - 1
+                )
+
+                dragged = 0f
+                if (target != currentIndex) currentOnMove(currentIndex, target)
+            }
+
             detectDragGestures(
-                onDragEnd = {
-                    val target = (currentIndex + (dragged / rowHeight).roundToInt()).coerceIn(0, currentCount - 1)
-                    dragged = 0f
-                    if (target != currentIndex) currentOnMove(currentIndex, target)
-                },
+                onDragEnd = { drop() },
                 onDragCancel = { dragged = 0f }
             ) { change, amount ->
                 change.consume()
@@ -156,7 +193,9 @@ private fun Modifier.bookmarkDrag(
         }
 }
 
-/** A bookmark whose entry is gone: its name muted and struck through, and a ✕ that removes it, its tooltip saying why. */
+/**
+ * A bookmark whose entry is gone: its name muted and struck through, and a ✕ that removes it, its tooltip saying why.
+ */
 @Composable
 private fun MissingLabel(
     path: RelativePath,
@@ -172,6 +211,7 @@ private fun MissingLabel(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
         NotekeaIconButton(
             icon = NotekeaIcons.Close,
             label = stringResource(resource = Res.string.tree_bookmark_missing_remove),
@@ -182,9 +222,8 @@ private fun MissingLabel(
 }
 
 /** A note by its name without `.md`, a folder or another file by its name. */
-private fun labelOf(
-    path: RelativePath
-): String = if (path.isMarkdown) path.nameWithoutExtension else path.name
+private fun labelOf(path: RelativePath): String =
+    if (path.isMarkdown) path.nameWithoutExtension else path.name
 
 /** The icon of what the bookmark points to: a folder, a note, or another file by its kind. */
 private fun iconOf(
@@ -203,7 +242,14 @@ private fun BookmarksSectionPreview() {
         BookmarksSection(
             state = TreePreviewData.state().let { state ->
                 state.copy(
-                    bookmarks = state.bookmarks.toggled(path = state.rows.first().path)
+                    bookmarks = state
+                        .bookmarks
+                        .toggled(
+                            path = state
+                                .rows
+                                .first()
+                                .path
+                        )
                         .toggled(path = RelativePath(value = PREVIEW_MISSING))
                 )
             },

@@ -17,9 +17,16 @@ import org.koin.dsl.module
  * The search index and the quick switcher.
  */
 val searchModule = module {
-    single<IndexStateStore> { SqlDelightIndexStateStore(database = get(), dispatchers = get()) }
+    single<IndexStateStore> {
+        SqlDelightIndexStateStore(
+            database = get(),
+            dispatchers = get()
+        )
+    }
+
     factoryOf(::PlanIndexUseCase)
     factoryOf(::IndexVaultUseCase)
+
     viewModel { parameters ->
         SearchIndexViewModel(
             vaultPath = parameters.get(),
@@ -30,9 +37,11 @@ val searchModule = module {
             clock = get()
         )
     }
+
     factoryOf(::SearchNoteContentUseCase)
     factoryOf(::SearchPassagesUseCase)
     factoryOf(::SearchNotesUseCase)
+
     viewModel { parameters ->
         QuickSwitcherViewModel(
             vaultPath = parameters.get(),

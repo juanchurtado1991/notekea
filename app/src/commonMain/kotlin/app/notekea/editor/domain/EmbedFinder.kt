@@ -7,10 +7,9 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.percentDecoded
 
 /**
- * The embedded files of a note's text (`ROADMAP.md` 1.8), as Obsidian reads them: `![[file]]` with an optional
- * `|300` width or `|caption`, and `![alt](path)` (a path in `<…>` or percent-encoded, an optional `|300` after the
- * alt; `\|` inside a table). Embeds of notes (`![[Other note]]`, a name without an extension or ending in `.md`) are
- * found only when asked for ([embeds] `includeNotes`), marked [Embed.isNote]; anything in code is left out.
+ * The embedded files of a note's text, as Obsidian reads them: a wiki embed with an optional `|300` width or
+ * `|caption`, and `![alt](path)` (a path in `<…>` or percent-encoded, an optional `|300` after the alt). Embeds of
+ * notes are found only when [embeds] is asked for them, marked [Embed.isNote]; anything in code is left out.
  */
 class EmbedFinder {
     fun embeds(
@@ -20,23 +19,55 @@ class EmbedFinder {
         val embeds = mutableListOf<Embed>()
         val fences = FenceTracker()
         var lineStart = 0
+
         text.split(StringPatterns.NEW_LINE_CHAR).forEach { line ->
-            if (!fences.read(text = line)) embeds += embedsOf(line = line, offset = lineStart)
+            if (!fences.read(text = line)) {
+                embeds += embedsOf(
+                    line = line,
+                    offset = lineStart
+                )
+            }
+
             lineStart += line.length + 1
         }
-        return embeds.filter { if (it.isNote) includeNotes else isFile(target = it.target) }
+
+        return embeds.filter {
+            if (it.isNote) includeNotes else isFile(target = it.target)
+        }
     }
 
     private fun embedsOf(
         line: String,
         offset: Int
     ): List<Embed> {
-        val code = INLINE_CODE.findAll(input = line).map { it.range }.toList()
-        val found = WIKI_EMBED.findAll(input = line).map { wikiEmbed(match = it, line = line, offset = offset) } +
-            MARKDOWN_EMBED.findAll(input = line).map { markdownEmbed(match = it, line = line, offset = offset) }
-        return found.filter { embed ->
-            code.none { it.first <= embed.range.first - offset && embed.range.last - offset <= it.last }
-        }.sortedBy { it.range.first }.toList()
+        val code = INLINE_CODE
+            .findAll(input = line)
+            .map { it.range }
+            .toList()
+
+        val found = WIKI_EMBED.findAll(input = line).map {
+            wikiEmbed(
+                match = it,
+                line = line,
+                offset = offset
+            )
+        } +
+            MARKDOWN_EMBED.findAll(input = line).map {
+                markdownEmbed(
+                    match = it,
+                    line = line,
+                    offset = offset
+                )
+            }
+
+        return found
+            .filter { embed ->
+                code.none {
+                    it.first <= embed.range.first - offset && embed.range.last - offset <= it.last
+                }
+            }
+            .sortedBy { it.range.first }
+            .toList()
     }
 
     private fun wikiEmbed(
@@ -44,16 +75,31 @@ class EmbedFinder {
         line: String,
         offset: Int
     ): Embed {
-        val option = match.groupValues[2].takeIf { match.groups[2] != null }
-        val target = match.groupValues[1].removeSuffix(suffix = TABLE_ESCAPE).trim()
+        val option = match.groupValues[2].takeIf {
+            match.groups[2] != null
+        }
+
+        val target = match
+            .groupValues[1]
+            .removeSuffix(suffix = TABLE_ESCAPE)
+            .trim()
+
         return Embed(
             range = match.range.first + offset..match.range.last + offset,
             // In a table the `|` before a width is escaped (`![[photo.png\|80]]`), so the target ends with the `\`.
             target = target,
             kind = EmbedKind.WIKI,
             isOwnLine = line.trim() == match.value,
-            label = option?.takeIf { WIDTH.matchEntire(input = it) == null },
-            width = option?.let { WIDTH.matchEntire(input = it)?.groupValues?.get(index = 1)?.toInt() },
+            label = option?.takeIf {
+                WIDTH.matchEntire(input = it) == null
+            },
+            width = option?.let {
+                WIDTH
+                    .matchEntire(input = it)
+                    ?.groupValues
+                    ?.get(index = 1)
+                    ?.toInt()
+            },
             isNote = !isFile(target = target)
         )
     }
@@ -66,27 +112,42 @@ class EmbedFinder {
         val alt = match.groupValues[1]
         val width = WIDTH_AFTER_ALT.find(input = alt)
         val written = match.groupValues[2].trim()
-        val target = if (written.startsWith(prefix = ANGLE_OPEN) && written.endsWith(suffix = ANGLE_CLOSE)) {
+
+        val isInAngles =
+            written.startsWith(prefix = ANGLE_OPEN) && written.endsWith(suffix = ANGLE_CLOSE)
+
+        val target = if (isInAngles) {
             written.removePrefix(prefix = ANGLE_OPEN).removeSuffix(suffix = ANGLE_CLOSE)
         } else {
             percentDecoded(target = written)
         }
+
+        val label = (
+            if (width != null) {
+                alt.removeRange(range = width.range)
+            } else {
+                alt
+            }
+            ).ifBlank { null }
+
         return Embed(
             range = match.range.first + offset..match.range.last + offset,
             target = target,
             kind = EmbedKind.MARKDOWN,
             isOwnLine = line.trim() == match.value,
-            label = (if (width != null) alt.removeRange(range = width.range) else alt).ifBlank { null },
-            width = width?.groupValues?.get(index = 1)?.toInt()
+            label = label,
+            width = width
+                ?.groupValues
+                ?.get(index = 1)
+                ?.toInt()
         )
     }
 
     /** A file, not a note: its name has an extension other than `.md`. */
-    private fun isFile(
-        target: String
-    ): Boolean {
+    private fun isFile(target: String): Boolean {
         val name = target.substringBefore(delimiter = MarkdownSyntax.HEADING_ANCHOR_CHAR)
             .substringAfterLast(delimiter = RelativePath.SEPARATOR)
+
         return EXTENSION.containsMatchIn(input = name) &&
             !name.endsWith(suffix = RelativePath.MARKDOWN_EXTENSION, ignoreCase = true)
     }

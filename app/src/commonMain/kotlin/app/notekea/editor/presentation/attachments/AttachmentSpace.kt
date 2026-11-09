@@ -7,7 +7,7 @@ import app.notekea.core.domain.StringPatterns
 import app.notekea.editor.domain.EmbedFinder
 
 /**
- * Room under a line that holds only an embedded file, in Edit mode (`ROADMAP.md` 1.8): the line from [lineStart] until
+ * Room under a line that holds only an embedded file, in Edit mode: the line from [lineStart] until
  * [lineEnd] is made [height] pixels taller, and [view] is drawn there. [key] names the embed by its place among the
  * note's embedded files, so its measured height survives typing above it.
  */
@@ -28,7 +28,9 @@ data class AttachmentSpace(
         density: Density
     ): ParagraphStyle? {
         if (height <= 0) return null
+
         val total = with(density) { (lineHeight + gap + height + gap).toSp() }
+
         return ParagraphStyle(
             lineHeight = total,
             lineHeightStyle = LineHeightStyle(
@@ -56,28 +58,47 @@ data class AttachmentSpace(
             // Without a file shown on its own line there is nothing to make room for, so the text is not scanned.
             if (shown.isEmpty()) return emptyList()
             var next = 0
-            return embedFinder.embeds(text = text, includeNotes = true).filter { it.isOwnLine }.mapIndexedNotNull {
-                    index,
-                    embed
-                ->
-                val view = shown.getOrNull(index = next)?.takeIf { it.embed.target == embed.target }
-                    ?: return@mapIndexedNotNull null
-                next++
-                val key = index.toString() + KEY_SEPARATOR + embed.target
-                val lineStart =
-                    text.lastIndexOf(char = StringPatterns.NEW_LINE_CHAR, startIndex = embed.range.first - 1) + 1
-                val lineEnd =
-                    text.indexOf(char = StringPatterns.NEW_LINE_CHAR, startIndex = embed.range.last).takeIf { it >= 0 }
-                        ?: text.length
-                AttachmentSpace(
-                    key = key,
-                    lineStart = lineStart,
-                    lineEnd = lineEnd,
-                    view = view.copy(embed = embed),
-                    height =
-                    heights[key] ?: 0
+
+            return embedFinder
+                .embeds(
+                    text = text,
+                    includeNotes = true
                 )
-            }
+                .filter { it.isOwnLine }
+                .mapIndexedNotNull {
+                        index,
+                        embed
+                    ->
+                    val view = shown.getOrNull(index = next)?.takeIf {
+                        it.embed.target == embed.target
+                    }
+                        ?: return@mapIndexedNotNull null
+
+                    next++
+                    val key = index.toString() + KEY_SEPARATOR + embed.target
+
+                    val lineStart = text.lastIndexOf(
+                        char = StringPatterns.NEW_LINE_CHAR,
+                        startIndex = embed.range.first - 1
+                    ) + 1
+
+                    val lineEnd = text.indexOf(
+                        char = StringPatterns.NEW_LINE_CHAR,
+                        startIndex = embed.range.last
+                    ).takeIf {
+                        it >= 0
+                    }
+                        ?: text.length
+
+                    AttachmentSpace(
+                        key = key,
+                        lineStart = lineStart,
+                        lineEnd = lineEnd,
+                        view = view.copy(embed = embed),
+                        height =
+                        heights[key] ?: 0
+                    )
+                }
         }
     }
 }

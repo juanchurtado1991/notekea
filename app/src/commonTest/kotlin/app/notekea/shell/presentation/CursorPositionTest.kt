@@ -10,7 +10,12 @@ class CursorPositionTest {
 
         assertEquals(
             expected = listOf(1 to 1, 1 to 8, 2 to 1, 3 to 6, 3 to 9, 3 to 9),
-            actual = listOf(0, 7, 8, 14, 17, 99).map { cursorOf(text = text, offset = it) }
+            actual = listOf(0, 7, 8, 14, 17, 99).map {
+                cursorOf(
+                    text = text,
+                    offset = it
+                )
+            }
         )
     }
 }

@@ -71,27 +71,45 @@ private fun RowScope.CountTab(
     count: Int?
 ) {
     val colors = MaterialTheme.colorScheme
+
     Row(
         modifier = Modifier
             .weight(weight = 1f)
             .fillMaxHeight()
-            .segmentThumb(isSelected = isSelected, colors = colors)
-            .focusBorder(color = colors.primary, shape = segmentShape)
-            .selectable(selected = isSelected, role = Role.Tab, onClick = onClick),
+            .segmentThumb(
+                isSelected = isSelected,
+                colors = colors
+            )
+            .focusBorder(
+                color = colors.primary,
+                shape = segmentShape
+            )
+            .selectable(
+                selected = isSelected,
+                role = Role.Tab,
+                onClick = onClick
+            ),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium
-            ),
+            style = MaterialTheme
+                .typography
+                .labelMedium
+                .copy(fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium),
             color = if (isSelected) colors.onSurface else colors.onSurfaceVariant,
             maxLines = 1
         )
+
         if (count != null) {
             Spacer(modifier = Modifier.width(width = COUNT_GAP_DP.dp))
-            Text(text = count.toString(), style = MaterialTheme.typography.labelSmall, color = colors.onSurfaceVariant)
+
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.onSurfaceVariant
+            )
         }
     }
 }

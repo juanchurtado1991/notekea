@@ -3,21 +3,21 @@ package app.notekea.editor.domain
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
-import app.notekea.core.notes.domain.NoteFixtures.VAULT
-import app.notekea.core.notes.domain.NoteFixtures.file
-import kotlinx.coroutines.test.runTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeNoteFileOperations
 import app.notekea.core.notes.domain.FakeNoteScanner
 import app.notekea.core.notes.domain.LinkUpdateResult
+import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.RenameEntryUseCase
 import app.notekea.core.notes.domain.UpdateLinksAfterRenameUseCase
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class RenameAndUpdateLinksUseCaseTest {
     private val scanner = FakeNoteScanner()
@@ -25,7 +25,10 @@ class RenameAndUpdateLinksUseCaseTest {
     private val store = FakeNoteContentStore()
     private val renameAndUpdateLinks = RenameAndUpdateLinksUseCase(
         noteScanner = scanner,
-        renameEntry = RenameEntryUseCase(noteFileOperations = operations, validateFileName = ValidateFileNameUseCase()),
+        renameEntry = RenameEntryUseCase(
+            noteFileOperations = operations,
+            validateFileName = ValidateFileNameUseCase()
+        ),
         updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
             planLinkUpdates = PlanLinkUpdatesUseCase(
                 noteContentStore = store,
@@ -37,21 +40,35 @@ class RenameAndUpdateLinksUseCaseTest {
 
     @Test
     fun `the note is renamed and the notes that link to it follow`() = runTest {
-        addNote(path = AREPAS, text = "# Arepas")
-        addNote(path = WELCOME, text = "Cook [[Arepas]].")
+        addNote(
+            path = AREPAS,
+            text = "# Arepas"
+        )
 
-        val outcome =
-            renameAndUpdateLinks(vaultPath = VAULT, path = RelativePath(value = AREPAS), newName = "Arepas reina")
+        addNote(
+            path = WELCOME,
+            text = "Cook [[Arepas]]."
+        )
+
+        val outcome = renameAndUpdateLinks(
+            vaultPath = VAULT,
+            path = RelativePath(value = AREPAS),
+            newName = "Arepas reina"
+        )
 
         assertEquals(
             expected = Outcome.Success(
                 value = RenamedEntry(
                     path = RelativePath(value = "Recipes/Arepas reina.md"),
-                    links = LinkUpdateResult(updated = listOf(RelativePath(value = WELCOME)), skipped = emptyList())
+                    links = LinkUpdateResult(
+                        updated = listOf(RelativePath(value = WELCOME)),
+                        skipped = emptyList()
+                    )
                 )
             ),
             actual = outcome
         )
+
         assertEquals(
             expected = "Cook [[Arepas reina]].",
             actual = store.texts.getValue(RelativePath(value = WELCOME))
@@ -60,22 +77,50 @@ class RenameAndUpdateLinksUseCaseTest {
 
     @Test
     fun `the same name changes nothing, and a refused or unlisted rename is reported`() = runTest {
-        addNote(path = AREPAS, text = "# Arepas")
-        addNote(path = WELCOME, text = "Cook [[Arepas]].")
+        addNote(
+            path = AREPAS,
+            text = "# Arepas"
+        )
 
-        val same = renameAndUpdateLinks(vaultPath = VAULT, path = RelativePath(value = AREPAS), newName = "Arepas")
-        val hidden = renameAndUpdateLinks(vaultPath = VAULT, path = RelativePath(value = AREPAS), newName = ".Arepas")
+        addNote(
+            path = WELCOME,
+            text = "Cook [[Arepas]]."
+        )
+
+        val same = renameAndUpdateLinks(
+            vaultPath = VAULT,
+            path = RelativePath(value = AREPAS),
+            newName = "Arepas"
+        )
+
+        val hidden = renameAndUpdateLinks(
+            vaultPath = VAULT,
+            path = RelativePath(value = AREPAS),
+            newName = ".Arepas"
+        )
+
         scanner.failure = NotesError.VaultMissing(path = VAULT)
-        val missing = renameAndUpdateLinks(vaultPath = VAULT, path = RelativePath(value = AREPAS), newName = "Other")
+
+        val missing = renameAndUpdateLinks(
+            vaultPath = VAULT,
+            path = RelativePath(value = AREPAS),
+            newName = "Other"
+        )
 
         assertEquals(
             expected = listOf(
-                Outcome.Success(value = RenamedEntry(path = RelativePath(value = AREPAS), links = null)),
+                Outcome.Success(
+                    value = RenamedEntry(
+                        path = RelativePath(value = AREPAS),
+                        links = null
+                    )
+                ),
                 Outcome.Failure(error = NotesError.HiddenName),
                 Outcome.Failure(error = NotesError.VaultMissing(path = VAULT))
             ),
             actual = listOf(same, hidden, missing)
         )
+
         assertEquals(
             expected = emptyList(),
             actual = operations.moves

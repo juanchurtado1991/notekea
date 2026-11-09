@@ -11,16 +11,25 @@ import androidx.compose.ui.semantics.getAllSemanticsNodes
 import androidx.compose.ui.semantics.getOrNull
 
 /** Every node of the scene, unmerged, as a screen reader would list them. */
-fun ImageComposeScene.nodes(): List<SemanticsNode> =
-    semanticsOwners.flatMap { it.getAllSemanticsNodes(mergingEnabled = false) }
+fun ImageComposeScene.nodes(): List<SemanticsNode> = semanticsOwners.flatMap {
+    it.getAllSemanticsNodes(mergingEnabled = false)
+}
 
 /** The texts the scene shows. */
-fun ImageComposeScene.texts(): List<String> =
-    nodes().mapNotNull { node -> node.config.getOrNull(SemanticsProperties.Text)?.joinToString { it.text } }
+fun ImageComposeScene.texts(): List<String> = nodes().mapNotNull { node ->
+    node
+        .config
+        .getOrNull(SemanticsProperties.Text)
+        ?.joinToString { it.text }
+}
 
 /** The content descriptions the scene names (icons, dots). */
-fun ImageComposeScene.descriptions(): List<String> =
-    nodes().flatMap { node -> node.config.getOrNull(SemanticsProperties.ContentDescription).orEmpty() }
+fun ImageComposeScene.descriptions(): List<String> = nodes().flatMap { node ->
+    node
+        .config
+        .getOrNull(SemanticsProperties.ContentDescription)
+        .orEmpty()
+}
 
 /**
  * Moves the pointer onto the middle of the node showing [text] (the [occurrence]-th one, from 0, when several show it),
@@ -30,8 +39,17 @@ fun ImageComposeScene.clickText(
     text: String,
     occurrence: Int = 0,
     frames: () -> Unit
-) = clickNode(occurrence = occurrence, frames = frames) { node ->
-    node.config.getOrNull(SemanticsProperties.Text).orEmpty().any { it.text == text }
+) = clickNode(
+    occurrence = occurrence,
+    frames = frames
+) { node ->
+    node
+        .config
+        .getOrNull(SemanticsProperties.Text)
+        .orEmpty()
+        .any {
+            it.text == text
+        }
 }
 
 /** Moves the pointer onto the node showing [text], presses and releases the right button, then renders [frames]. */
@@ -39,19 +57,41 @@ fun ImageComposeScene.rightClickText(
     text: String,
     frames: () -> Unit
 ) {
-    val center = nodes().first { node ->
-        node.config.getOrNull(SemanticsProperties.Text).orEmpty().any { it.text == text }
-    }.boundsInRoot.center
+    val center = nodes()
+        .first { node ->
+            node
+                .config
+                .getOrNull(SemanticsProperties.Text)
+                .orEmpty()
+                .any {
+                    it.text == text
+                }
+        }
+        .boundsInRoot
+        .center
+
     val pressed = PointerButtons(isSecondaryPressed = true)
-    sendPointerEvent(eventType = PointerEventType.Move, position = center)
+
+    sendPointerEvent(
+        eventType = PointerEventType.Move,
+        position = center
+    )
+
     sendPointerEvent(
         eventType = PointerEventType.Press,
         position = center,
         buttons = pressed,
         button = PointerButton.Secondary
     )
+
     frames()
-    sendPointerEvent(eventType = PointerEventType.Release, position = center, button = PointerButton.Secondary)
+
+    sendPointerEvent(
+        eventType = PointerEventType.Release,
+        position = center,
+        button = PointerButton.Secondary
+    )
+
     frames()
 }
 
@@ -59,8 +99,14 @@ fun ImageComposeScene.rightClickText(
 fun ImageComposeScene.clickDescription(
     description: String,
     frames: () -> Unit
-) = clickNode(occurrence = 0, frames = frames) { node ->
-    node.config.getOrNull(SemanticsProperties.ContentDescription)?.contains(element = description) == true
+) = clickNode(
+    occurrence = 0,
+    frames = frames
+) { node ->
+    node
+        .config
+        .getOrNull(SemanticsProperties.ContentDescription)
+        ?.contains(element = description) == true
 }
 
 private fun ImageComposeScene.clickNode(
@@ -68,9 +114,25 @@ private fun ImageComposeScene.clickNode(
     frames: () -> Unit,
     isTarget: (SemanticsNode) -> Boolean
 ) {
-    val center: Offset = nodes().filter(predicate = isTarget)[occurrence].boundsInRoot.center
-    sendPointerEvent(eventType = PointerEventType.Move, position = center)
-    sendPointerEvent(eventType = PointerEventType.Press, position = center)
-    sendPointerEvent(eventType = PointerEventType.Release, position = center)
+    val center: Offset = nodes()
+        .filter(predicate = isTarget)[occurrence]
+        .boundsInRoot
+        .center
+
+    sendPointerEvent(
+        eventType = PointerEventType.Move,
+        position = center
+    )
+
+    sendPointerEvent(
+        eventType = PointerEventType.Press,
+        position = center
+    )
+
+    sendPointerEvent(
+        eventType = PointerEventType.Release,
+        position = center
+    )
+
     frames()
 }

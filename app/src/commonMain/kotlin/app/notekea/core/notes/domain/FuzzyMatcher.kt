@@ -1,12 +1,9 @@
 package app.notekea.core.notes.domain
 
 /**
- * Fuzzy matching for the quick switcher (`ROADMAP.md` 1.6): the letters of the search must appear in the text in
- * order, not necessarily together (`pfag` matches "Pasta e fagioli"). Letter case and accents are ignored (`cafe`
- * matches "Café"), and spaces in the search are skipped. Among the ways the letters can match, the best is chosen:
- * letters at the start of the text or of a word and letters next to each other score higher, and every skipped
- * character scores a little lower (up to a point before the first letter), so for `are` "Arepas" ranks above
- * "Café con leche y arepas", which ranks above "Prepare dough".
+ * Fuzzy matching for the quick switcher: the letters of the search must appear in the text in order, not necessarily
+ * together (`pfag` matches "Pasta e fagioli"), ignoring letter case, accents and spaces. The best way to match wins:
+ * letters at the start of a word and letters together score higher, skipped characters lower.
  */
 class FuzzyMatcher(private val textFolder: TextFolder) {
     fun match(
@@ -14,10 +11,16 @@ class FuzzyMatcher(private val textFolder: TextFolder) {
         text: String
     ): FuzzyMatch? {
         val pattern = textFolder.fold(text = query).filterNot { it.isWhitespace() }
+
         if (pattern.isEmpty()) return FuzzyMatch.EVERYTHING
         val target = textFolder.fold(text = text)
         if (!isSubsequence(pattern = pattern, target = target)) return null
-        return bestMatch(pattern = pattern, target = target, text = text)
+
+        return bestMatch(
+            pattern = pattern,
+            target = target,
+            text = text
+        )
     }
 
     /**
@@ -29,23 +32,63 @@ class FuzzyMatcher(private val textFolder: TextFolder) {
         target: String,
         text: String
     ): FuzzyMatch {
-        val scores = Array(size = pattern.length) { IntArray(size = target.length) { NO_MATCH } }
-        val previous = Array(size = pattern.length) { IntArray(size = target.length) { -1 } }
-        target.indices.filter { target[it] == pattern[0] }.forEach { j ->
-            scores[0][j] = MATCH + bonusAt(text = text, index = j) - minOf(j, MAX_LEADING_GAP) * LEADING_GAP
+        val scores = Array(size = pattern.length) {
+            IntArray(size = target.length) { NO_MATCH }
         }
+
+        val previous = Array(size = pattern.length) {
+            IntArray(size = target.length) {
+                -1
+            }
+        }
+
+        target
+            .indices
+            .filter {
+                target[it] == pattern[0]
+            }
+            .forEach { j ->
+                scores[0][j] = MATCH + bonusAt(
+                    text = text,
+                    index = j
+                ) - minOf(j, MAX_LEADING_GAP) * LEADING_GAP
+            }
+
         for (i in 1 until pattern.length) {
-            fillRow(row = i, pattern = pattern, target = target, text = text, scores = scores, previous = previous)
+            fillRow(
+                row = i,
+                pattern = pattern,
+                target = target,
+                text = text,
+                scores = scores,
+                previous = previous
+            )
         }
+
         val last = scores.last()
-        val finalScores = last.indices.filter { last[it] != NO_MATCH }.associateWith { end ->
-            last[end] - (target.length - 1 - end) * TRAILING_GAP
-        }
+
+        val finalScores = last
+            .indices
+            .filter {
+                last[it] != NO_MATCH
+            }
+            .associateWith { end ->
+                last[end] - (target.length - 1 - end) * TRAILING_GAP
+            }
+
         val end = finalScores.maxBy { it.value }.key
+
         val matched = generateSequence(seed = pattern.lastIndex to end) { (i, j) ->
             if (i == 0) null else i - 1 to previous[i][j]
-        }.map { it.second }.toList().reversed()
-        return FuzzyMatch(score = finalScores.getValue(key = end), ranges = runsOf(indices = matched))
+        }
+            .map { it.second }
+            .toList()
+            .reversed()
+
+        return FuzzyMatch(
+            score = finalScores.getValue(key = end),
+            ranges = runsOf(indices = matched)
+        )
     }
 
     /** Letter [row] of the pattern after the letter before it: right next to it, or after a gap. */
@@ -61,22 +104,41 @@ class FuzzyMatcher(private val textFolder: TextFolder) {
         // The best earlier match two or more characters back, offset so the gap penalty is one subtraction.
         var bestGapped = NO_MATCH
         var bestGappedAt = -1
+
         for (j in row until target.length) {
             val gappedFrom = j - 2
-            if (gappedFrom >= 0 && before[gappedFrom] != NO_MATCH) {
+
+            val hasGapped = gappedFrom >= 0 && before[gappedFrom] != NO_MATCH
+
+            if (hasGapped) {
                 val offset = before[gappedFrom] + gappedFrom * GAP
+
                 if (offset > bestGapped) {
                     bestGapped = offset
                     bestGappedAt = gappedFrom
                 }
             }
+
             if (target[j] != pattern[row]) continue
-            val adjacent = before[j - 1].takeIf { it != NO_MATCH }?.plus(CONSECUTIVE)
-            val gapped = bestGapped.takeIf { it != NO_MATCH }?.minus((j - 1) * GAP)
+
+            val adjacent = before[j - 1].takeIf {
+                it != NO_MATCH
+            }?.plus(CONSECUTIVE)
+
+            val gapped = bestGapped.takeIf {
+                it != NO_MATCH
+            }?.minus((j - 1) * GAP)
+
             val best = maxOf(adjacent ?: NO_MATCH, gapped ?: NO_MATCH)
             if (best == NO_MATCH) continue
-            scores[row][j] = best + MATCH + bonusAt(text = text, index = j)
-            previous[row][j] = if (adjacent != null && adjacent >= (gapped ?: NO_MATCH)) j - 1 else bestGappedAt
+
+            scores[row][j] = best + MATCH + bonusAt(
+                text = text,
+                index = j
+            )
+
+            previous[row][j] =
+                if (adjacent != null && adjacent >= (gapped ?: NO_MATCH)) j - 1 else bestGappedAt
         }
     }
 
@@ -88,6 +150,7 @@ class FuzzyMatcher(private val textFolder: TextFolder) {
         if (index == 0) return START
         val before = text[index - 1]
         val current = text[index]
+
         return when {
             !before.isLetterOrDigit() -> WORD_START
             before.isLowerCase() && current.isUpperCase() -> CAMEL_HUMP
@@ -100,20 +163,27 @@ class FuzzyMatcher(private val textFolder: TextFolder) {
         target: String
     ): Boolean {
         var next = 0
+
         for (char in target) {
             if (char == pattern[next]) next++
             if (next == pattern.length) return true
         }
+
         return false
     }
 
-    private fun runsOf(
-        indices: List<Int>
-    ): List<IntRange> = indices.fold(initial = mutableListOf<IntRange>()) { runs, index ->
-        val last = runs.lastOrNull()
-        if (last != null && last.last + 1 == index) runs[runs.lastIndex] = last.first..index else runs += index..index
-        runs
-    }
+    private fun runsOf(indices: List<Int>): List<IntRange> = indices
+        .fold(initial = mutableListOf<IntRange>()) { runs, index ->
+            val last = runs.lastOrNull()
+
+            if (last != null && last.last + 1 == index) {
+                runs[runs.lastIndex] = last.first..index
+            } else {
+                runs += index..index
+            }
+
+            runs
+        }
 
     companion object {
         private const val MATCH = 16

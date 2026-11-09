@@ -25,6 +25,7 @@ class EmbedFinderTest {
             ),
             actual = finder.embeds(text = text).map { Triple(it.target, it.width, it.isOwnLine) }
         )
+
         assertEquals(
             expected = listOf(null, null, "The manual", "A plate", null),
             actual = finder.embeds(text = text).map { it.label }
@@ -36,15 +37,30 @@ class EmbedFinderTest {
         val text = "![[Arepas]]\n![[Recipes/Arepas.md#Dough]]\n![[plate.png]]"
 
         assertEquals(
-            expected = listOf("Arepas" to true, "Recipes/Arepas.md#Dough" to true, "plate.png" to false),
-            actual = finder.embeds(text = text, includeNotes = true).map { it.target to it.isNote }
+            expected = listOf(
+                "Arepas" to true,
+                "Recipes/Arepas.md#Dough" to true,
+                "plate.png" to false
+            ),
+            actual = finder.embeds(
+                text = text,
+                includeNotes = true
+            ).map {
+                it.target to it.isNote
+            }
         )
-        assertEquals(expected = listOf("plate.png"), actual = finder.embeds(text = text).map { it.target })
+
+        assertEquals(
+            expected = listOf("plate.png"),
+            actual = finder.embeds(text = text).map { it.target }
+        )
     }
 
     @Test
     fun `embeds of notes and anything in code are left out, and ranges point at the embed in the text`() {
-        val text = "![[Other note]] ![[Recipe.md]]\n`![[inline.png]]`\n```\n![[fenced.png]]\n```\nEnd ![[end.png]]"
+        val text =
+            "![[Other note]] ![[Recipe.md]]\n`![[inline.png]]`\n```\n![[fenced.png]]\n```\nEnd ![[end.png]]"
+
         val embeds = finder.embeds(text = text)
 
         assertEquals(
@@ -55,7 +71,9 @@ class EmbedFinderTest {
 
     @Test
     fun `an embed in a table cell, its pipe escaped, keeps its file and width`() {
-        val embeds = finder.embeds(text = "| Dish | Photo |\n| --- | --- |\n| Arepas | ![[Arepas plate.png\\|80]] |")
+        val embeds = finder.embeds(
+            text = "| Dish | Photo |\n| --- | --- |\n| Arepas | ![[Arepas plate.png\\|80]] |"
+        )
 
         assertEquals(
             expected = listOf(Triple("Arepas plate.png", 80 as Int?, false)),
@@ -67,6 +85,9 @@ class EmbedFinderTest {
     fun `a shorter fence inside a longer one does not end the code`() {
         val text = "````\n```\n![[inside.png]]\n````\n![[outside.png]]"
 
-        assertEquals(expected = listOf("outside.png"), actual = EmbedFinder().embeds(text = text).map { it.target })
+        assertEquals(
+            expected = listOf("outside.png"),
+            actual = EmbedFinder().embeds(text = text).map { it.target }
+        )
     }
 }

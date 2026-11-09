@@ -2,10 +2,10 @@ package app.notekea.core.notes.data
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
-import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.notes.domain.FileOpener
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.platform.domain.OperatingSystem
 import kotlinx.coroutines.withContext
 import kotlin.io.path.Path
 import kotlin.io.path.exists
@@ -25,12 +25,19 @@ class ProcessFileOpener(
         path: RelativePath
     ): Outcome<Unit, NotesError> = withContext(context = dispatchers.io) {
         val file = Path(vaultPath, path.value)
-        if (!file.exists()) return@withContext Outcome.Failure(error = NotesError.EntryMissing(path = path.value))
+
+        if (!file.exists()) {
+            return@withContext Outcome.Failure(
+                error = NotesError.EntryMissing(path = path.value)
+            )
+        }
+
         val command = when (operatingSystem) {
             OperatingSystem.LINUX -> listOf(XDG_OPEN, file.toString())
             OperatingSystem.MACOS -> listOf(OPEN, file.toString())
             OperatingSystem.WINDOWS -> listOf(CMD, CMD_RUN, START, START_TITLE, file.toString())
         }
+
         if (runCommand(command) == SUCCESS) {
             Outcome.Success(value = Unit)
         } else {

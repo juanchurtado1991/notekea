@@ -1,10 +1,8 @@
 package app.notekea.tree.presentation.view
 
 import androidx.compose.foundation.focusable
-import app.notekea.tree.presentation.model.TreePreviewData
-import app.notekea.tree.presentation.model.VaultTreeIntent
-import app.notekea.tree.presentation.model.VaultTreeState
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -13,9 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import app.notekea.core.presentation.designsystem.components.NotekeaLazyScrollArea
 import androidx.compose.runtime.Composable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -23,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -36,27 +33,30 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.TestTags
 import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
-import app.notekea.core.presentation.designsystem.components.isContextMenuKey
-import app.notekea.core.presentation.platform.matches
+import app.notekea.core.presentation.designsystem.components.NotekeaLazyScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
-import app.notekea.core.presentation.platform.label
+import app.notekea.core.presentation.designsystem.components.isContextMenuKey
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.LocalReduceMotion
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.designsystem.theme.followItem
+import app.notekea.core.presentation.platform.label
+import app.notekea.core.presentation.platform.matches
 import app.notekea.resources.Res
 import app.notekea.resources.tree_new_folder
-import app.notekea.resources.tree_new_note_from_template
 import app.notekea.resources.tree_new_note
+import app.notekea.resources.tree_new_note_from_template
 import app.notekea.resources.tree_untitled_folder
 import app.notekea.resources.tree_untitled_note
-import org.jetbrains.compose.resources.stringResource
-import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.core.notes.domain.RelativePath
 import app.notekea.tree.domain.TreeRow
-import androidx.compose.ui.Modifier
-import app.notekea.core.presentation.designsystem.theme.LocalReduceMotion
-import app.notekea.core.presentation.designsystem.theme.followItem
-import app.notekea.core.presentation.TestTags
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.model.VaultTreeState
+import org.jetbrains.compose.resources.stringResource
 
 private const val EMPTY_ROWS_BELOW = 2
 private const val PREVIEW_HEIGHT_DP = 320
@@ -71,12 +71,9 @@ private val TREE_PADDING = PaddingValues(
 )
 
 /**
- * The vault tree. It is one focus stop moved with the keyboard: arrows move and open folders, the platform's rename and
- * delete shortcuts act on the selected entry, Enter opens or closes a folder and Shift+F10 or the Menu key opens the
- * context menu. While a name is being edited, keys belong to the field. The list follows the selection when it moves
- * out of view, and focus comes back to the tree when renaming ends. A click on the empty part of the list (there is
- * always some below the last row) clears the selection and a right click there offers New note and New folder, so
- * entries can be created at the vault root.
+ * The vault tree, one focus stop moved with the keyboard: arrows move and open folders, the platform's rename and
+ * delete shortcuts act on the selected entry, and while a name is edited keys belong to the field. The list follows the
+ * selection. A click on the empty part below the rows clears the selection; a right click there creates at the root.
  */
 @Composable
 internal fun TreeList(
@@ -85,27 +82,64 @@ internal fun TreeList(
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
+
     val focusRequester = remember { FocusRequester() }
+
     var hasFocus by remember { mutableStateOf(value = false) }
+
     var menuRequest by remember { mutableStateOf<RelativePath?>(value = null) }
-    FollowSelection(listState = listState, state = state)
-    LaunchedEffect(key1 = state.renaming == null) { if (state.renaming == null) focusRequester.requestFocus() }
+
+    FollowSelection(
+        listState = listState,
+        state = state
+    )
+
+    LaunchedEffect(key1 = state.renaming == null) {
+        if (state.renaming == null) focusRequester.requestFocus()
+    }
+
     val currentState = rememberUpdatedState(newValue = state)
-    val stateNow = remember<() -> VaultTreeState> { { currentState.value } }
-    val createItems = rememberCreateItems(state = currentState, onIntent = onIntent)
+
+    val stateNow = remember<() -> VaultTreeState> {
+        { currentState.value }
+    }
+
+    val createItems = rememberCreateItems(
+        state = currentState,
+        onIntent = onIntent
+    )
+
     val input = Modifier
         .fillMaxSize()
-        .treeInput(focusRequester, state, onIntent, { menuRequest = state.selectedPath }) { hasFocus = it }
+        .treeInput(focusRequester, state, onIntent, { menuRequest = state.selectedPath }) {
+            hasFocus =
+                it
+        }
+
     NotekeaContextMenuArea(
         menu = { listOf(createItems()) },
         modifier = modifier,
         onOpenByPointer = { onIntent(VaultTreeIntent.OnSelectionClear) }
     ) {
-        NotekeaLazyScrollArea(state = listState, modifier = Modifier.fillMaxSize().testTag(tag = TestTags.TREE)) {
-            LazyColumn(modifier = input, state = listState, contentPadding = TREE_PADDING) {
-                items(items = state.rows, key = { it.path.value }, contentType = ::contentTypeOf) { row ->
+        NotekeaLazyScrollArea(
+            state = listState,
+            modifier = Modifier.fillMaxSize().testTag(tag = TestTags.TREE)
+        ) {
+            LazyColumn(
+                modifier = input,
+                state = listState,
+                contentPadding = TREE_PADDING
+            ) {
+                items(
+                    items = state.rows,
+                    key = { it.path.value },
+                    contentType = ::contentTypeOf
+                ) { row ->
                     // A folder's rows fade in as it opens, and the rows below slide down to make room.
-                    Box(modifier = if (LocalReduceMotion.current) Modifier else Modifier.animateItem()) {
+                    val itemModifier =
+                        if (LocalReduceMotion.current) Modifier else Modifier.animateItem()
+
+                    Box(modifier = itemModifier) {
                         ListedEntry(
                             row = row,
                             state = state,
@@ -130,7 +164,12 @@ private fun rememberCreateItems(
     state: State<VaultTreeState>,
     onIntent: (VaultTreeIntent) -> Unit
 ) = remember<@Composable () -> List<NotekeaMenuItem>>(onIntent) {
-    { createMenuItems(state = state.value, onIntent = onIntent) }
+    {
+        createMenuItems(
+            state = state.value,
+            onIntent = onIntent
+        )
+    }
 }
 
 /** One row of the list, given only what concerns it, so a change to another row leaves it alone. */
@@ -157,7 +196,9 @@ private fun ListedEntry(
         onMenuShown = onMenuShown,
         onIntent = onIntent,
         onFocusTree = onFocusTree,
-        draft = state.renaming?.takeIf { it.path == row.path }
+        draft = state.renaming?.takeIf {
+            it.path == row.path
+        }
     )
 }
 
@@ -175,7 +216,14 @@ private fun Modifier.treeInput(
 ): Modifier = focusRequester(focusRequester = focusRequester)
     .onFocusChanged { onFocusChange(it.hasFocus) }
     .focusable()
-    .onKeyEvent { handleTreeKey(event = it, state = state, onIntent = onIntent, onMenuRequest = onMenuRequest) }
+    .onKeyEvent {
+        handleTreeKey(
+            event = it,
+            state = state,
+            onIntent = onIntent,
+            onMenuRequest = onMenuRequest
+        )
+    }
     .pointerInput(onIntent, focusRequester) {
         detectTapGestures {
             onIntent(VaultTreeIntent.OnSelectionClear)
@@ -183,9 +231,8 @@ private fun Modifier.treeInput(
         }
     }
 
-private fun contentTypeOf(
-    row: TreeRow
-): String = if (row is TreeRow.Folder) FOLDER_ROW else NOTE_ROW
+private fun contentTypeOf(row: TreeRow): String =
+    if (row is TreeRow.Folder) FOLDER_ROW else NOTE_ROW
 
 @Composable
 private fun createMenuItems(
@@ -194,14 +241,16 @@ private fun createMenuItems(
 ): List<NotekeaMenuItem> {
     val untitledNote = stringResource(resource = Res.string.tree_untitled_note)
     val untitledFolder = stringResource(resource = Res.string.tree_untitled_folder)
+
     return listOf(
         NotekeaMenuItem(
             label = stringResource(resource = Res.string.tree_new_note),
             onClick = { onIntent(VaultTreeIntent.OnNewNoteClick(baseName = untitledNote)) },
             icon = NotekeaIcons.NewNote,
-            shortcutHint = state.platformConventions.newNoteShortcut.label(
-                operatingSystem = state.platformConventions.operatingSystem
-            )
+            shortcutHint = state
+                .platformConventions
+                .newNoteShortcut
+                .label(operatingSystem = state.platformConventions.operatingSystem)
         ),
         NotekeaMenuItem(
             label = stringResource(resource = Res.string.tree_new_note_from_template),
@@ -221,12 +270,25 @@ private fun FollowSelection(
     listState: LazyListState,
     state: VaultTreeState
 ) {
-    val index = state.rows.indexOfFirst { it.path == state.selectedPath }
+    val index = state.rows.indexOfFirst {
+        it.path == state.selectedPath
+    }
+
     val reduceMotion = LocalReduceMotion.current
+
     LaunchedEffect(key1 = index) {
         val visible = listState.layoutInfo.visibleItemsInfo
-        val isVisible = visible.any { it.index == index && it.offset >= 0 }
-        if (index >= 0 && !isVisible) listState.followItem(index = index, reduceMotion = reduceMotion)
+
+        val isVisible = visible.any {
+            it.index == index && it.offset >= 0
+        }
+
+        if (index >= 0 && !isVisible) {
+            listState.followItem(
+                index = index,
+                reduceMotion = reduceMotion
+            )
+        }
     }
 }
 
@@ -238,10 +300,16 @@ private fun handleTreeKey(
     onMenuRequest: () -> Unit
 ): Boolean {
     if (event.type != KeyEventType.KeyDown || state.renaming != null) return false
-    val intent = treeIntentFor(event = event, state = state)
+
+    val intent = treeIntentFor(
+        event = event,
+        state = state
+    )
+
     val isMenuKey = event.isContextMenuKey
     if (isMenuKey && state.selectedPath != null) onMenuRequest()
     intent?.let(onIntent)
+
     return intent != null || isMenuKey
 }
 
@@ -250,6 +318,7 @@ private fun treeIntentFor(
     state: VaultTreeState
 ): VaultTreeIntent? {
     val conventions = state.platformConventions
+
     return when {
         // Before the arrows: on macOS Cmd+Down opens, as in Finder, where Enter renames.
         conventions.openSelectedShortcut.matches(event = event) && state.selectedPath != null ->
@@ -266,7 +335,9 @@ private fun treeIntentFor(
         conventions.renameShortcut.matches(event = event) -> VaultTreeIntent.OnRenameRequest()
 
         conventions.deleteShortcut.matches(event = event) ||
-            conventions.alternateDeleteShortcut?.matches(event = event) == true -> VaultTreeIntent.OnDeleteRequest()
+            conventions.alternateDeleteShortcut?.matches(
+                event = event
+            ) == true -> VaultTreeIntent.OnDeleteRequest()
 
         else -> null
     }
@@ -280,9 +351,7 @@ private fun TreeListPreview() {
             state = TreePreviewData.state(),
             onIntent = {},
             modifier = Modifier
-                .width(
-                    width = PREVIEW_WIDTH_DP.dp
-                ).height(height = PREVIEW_HEIGHT_DP.dp)
+                .width(width = PREVIEW_WIDTH_DP.dp).height(height = PREVIEW_HEIGHT_DP.dp)
         )
     }
 }
@@ -294,7 +363,9 @@ private fun TreeListRenamingPreview() {
         TreeList(
             state = TreePreviewData.renamingState(),
             onIntent = {},
-            modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp).height(height = PREVIEW_HEIGHT_DP.dp)
+            modifier = Modifier.width(
+                width = PREVIEW_WIDTH_DP.dp
+            ).height(height = PREVIEW_HEIGHT_DP.dp)
         )
     }
 }

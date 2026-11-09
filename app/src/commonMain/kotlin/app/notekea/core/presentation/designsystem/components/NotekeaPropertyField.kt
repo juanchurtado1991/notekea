@@ -41,12 +41,9 @@ private const val PREVIEW_WIDTH_DP = 240
 private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
 
 /**
- * A value edited in place, as in a form of properties: plain text until hovered (a faint border) or focused (the
- * primary border). What is typed is kept here and handed to [onCommit] when Enter is pressed or the field is left;
- * Esc puts [value] back. Text [isValid] rejects is outlined in the error color and not committed. [placeholder] shows
- * while it is empty. [displayValue], when given, is shown instead of [value] while the field is not focused (a date
- * written for people), and [value] comes back to be edited. [textColor] replaces the ink color (a property's
- * muted name).
+ * A value edited in place, plain text until hovered or focused. What is typed goes to [onCommit] on Enter or when the
+ * field is left; Esc puts [value] back, and text [isValid] rejects is outlined in the error color and not committed.
+ * [displayValue] is shown instead of [value] while not focused; [textColor] replaces the ink color.
  */
 @Composable
 fun NotekeaPropertyField(
@@ -59,29 +56,52 @@ fun NotekeaPropertyField(
     isValid: (String) -> Boolean = { true }
 ) {
     var text by remember(value) { mutableStateOf(value = value) }
+
     val interactions = remember { MutableInteractionSource() }
+
     val isFocused by interactions.collectIsFocusedAsState()
     val focusManager = LocalFocusManager.current
     val isError = !isValid(text)
-    val commit = { if (text != value && isValid(text)) onCommit(text) }
-    val isShowingDisplay = !isFocused && displayValue != null && text == value
+
+    val commit = {
+        if (text != value && isValid(text)) onCommit(text)
+    }
+
+    val isShowingDisplay =
+        !isFocused &&
+            displayValue != null &&
+            text == value
+
     BasicTextField(
         value = if (isShowingDisplay) displayValue else text,
-        onValueChange = { if (!isShowingDisplay) text = it },
+        onValueChange = {
+            if (!isShowingDisplay) text = it
+        },
         modifier = modifier
             .fillMaxWidth()
-            .onFocusChanged { if (!it.isFocused) commit() }
+            .onFocusChanged {
+                if (!it.isFocused) commit()
+            }
             .onPreviewKeyEvent { event ->
-                keyAction(event = event, focusManager = focusManager, onCancel = { text = value })
+                keyAction(
+                    event = event,
+                    focusManager = focusManager,
+                    onCancel = { text = value }
+                )
             },
-        textStyle = MaterialTheme.typography.bodyMedium.copy(
-            color = textColor.takeOrElse { MaterialTheme.colorScheme.onSurface }
-        ),
+        textStyle = MaterialTheme
+            .typography
+            .bodyMedium
+            .copy(color = textColor.takeOrElse { MaterialTheme.colorScheme.onSurface }),
         singleLine = true,
         interactionSource = interactions,
         cursorBrush = SolidColor(value = MaterialTheme.colorScheme.primary),
         decorationBox = { field ->
-            FieldFrame(isFocused = isFocused, isError = isError, interactions = interactions) {
+            FieldFrame(
+                isFocused = isFocused,
+                isError = isError,
+                interactions = interactions
+            ) {
                 if (text.isEmpty() && placeholder != null) PlaceholderText(text = placeholder)
                 field()
             }
@@ -96,6 +116,7 @@ private fun keyAction(
     onCancel: () -> Unit
 ): Boolean {
     if (event.type != KeyEventType.KeyDown) return false
+
     return when (event.key) {
         in SUBMIT_KEYS -> {
             focusManager.clearFocus()
@@ -121,23 +142,30 @@ private fun FieldFrame(
 ) {
     val colors = MaterialTheme.colorScheme
     val isHovered by interactions.collectIsHoveredAsState()
+
     val border = when {
         isError -> colors.error
         isFocused -> colors.primary
         isHovered -> colors.outline
         else -> Color.Transparent
     }
+
     Box(
         modifier = Modifier
-            .border(width = NotekeaDimensions.BorderWidth, color = border, shape = MaterialTheme.shapes.extraSmall)
-            .padding(horizontal = NotekeaDimensions.SpacingXs, vertical = FIELD_VERTICAL_PADDING_DP.dp)
+            .border(
+                width = NotekeaDimensions.BorderWidth,
+                color = border,
+                shape = MaterialTheme.shapes.extraSmall
+            )
+            .padding(
+                horizontal = NotekeaDimensions.SpacingXs,
+                vertical = FIELD_VERTICAL_PADDING_DP.dp
+            )
     ) { content() }
 }
 
 @Composable
-private fun PlaceholderText(
-    text: String
-) {
+private fun PlaceholderText(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodyMedium,
@@ -150,7 +178,11 @@ private fun PlaceholderText(
 private fun NotekeaPropertyFieldPreview() {
     NotekeaPreviewThemes {
         Box(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
-            NotekeaPropertyField(value = PREVIEW_VALUE, onCommit = {}, placeholder = PREVIEW_PLACEHOLDER)
+            NotekeaPropertyField(
+                value = PREVIEW_VALUE,
+                onCommit = {},
+                placeholder = PREVIEW_PLACEHOLDER
+            )
         }
     }
 }
@@ -160,7 +192,11 @@ private fun NotekeaPropertyFieldPreview() {
 private fun NotekeaPropertyFieldEmptyPreview() {
     NotekeaPreviewThemes {
         Box(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
-            NotekeaPropertyField(value = "", onCommit = {}, placeholder = PREVIEW_PLACEHOLDER)
+            NotekeaPropertyField(
+                value = "",
+                onCommit = {},
+                placeholder = PREVIEW_PLACEHOLDER
+            )
         }
     }
 }

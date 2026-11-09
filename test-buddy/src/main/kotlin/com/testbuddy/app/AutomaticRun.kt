@@ -12,26 +12,40 @@ internal class AutomaticRun(
     private val log: Path,
     private val onEvent: (RunnerEvent) -> Unit,
     private val onEnd: (exitCode: Int) -> Unit,
-    private val startProcess: () -> Process = { AppProcess.start(arguments = listOf(AppProcess.RUNNER_FLAG)) }
+    private val startProcess: () -> Process = {
+        AppProcess.start(arguments = listOf(AppProcess.RUNNER_FLAG))
+    }
 ) {
     private var process: Process? = null
 
     fun start() {
         val started = startProcess()
         process = started
-        thread(isDaemon = true, name = "test-buddy-run") {
-            log.toFile().bufferedWriter().use { writer ->
-                started.inputStream.bufferedReader().forEachLine { line ->
-                    val event = RunnerEvent.parse(line = line)
-                    if (event == null) writer.appendLine(line) else onEvent(event)
+
+        thread(
+            isDaemon = true,
+            name = "test-buddy-run"
+        ) {
+            log
+                .toFile()
+                .bufferedWriter()
+                .use { writer ->
+                    started
+                        .inputStream
+                        .bufferedReader()
+                        .forEachLine { line ->
+                            val event = RunnerEvent.parse(line = line)
+                            if (event == null) writer.appendLine(line) else onEvent(event)
+                        }
                 }
-            }
+
             onEnd(started.waitFor())
         }
     }
 
     fun stop() {
         process?.descendants()?.forEach { it.destroy() }
+
         process?.destroy()
     }
 }

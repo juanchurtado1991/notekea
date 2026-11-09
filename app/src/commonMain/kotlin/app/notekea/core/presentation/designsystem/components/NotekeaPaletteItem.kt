@@ -30,17 +30,15 @@ private const val PREVIEW_ALIAS = "Morning coffee"
 private const val PREVIEW_AREPAS = "Arepas"
 private const val PREVIEW_CAFE = "Café con leche"
 private const val PREVIEW_FOLDER = "Recipes"
-private const val PREVIEW_LONG_LINE =
-    "Beans and corn, slowly cooked with rosemary " + "until the soup is thick enough to hold a spoon."
+private const val PREVIEW_LONG_LINE = "Beans and corn, slowly cooked with rosemary " +
+    "until the soup is thick enough to hold a spoon."
 private const val PREVIEW_PASTA = "Pasta e fagioli"
 private const val PREVIEW_WIDTH_DP = 560
 
 /**
- * One result of a [NotekeaPalette]: a [title] with its matched characters in bold primary ([titleHighlights]), a
- * muted [supportingText] at the end of the line (the note's folder), and an optional [detail] line under it with its
- * own highlights (the alias or path that matched, or the matching line of the content), cut with an ellipsis when
- * long. The [selected] item is the one `Enter` opens; the keyboard stays in the palette's field, so items are
- * clicked, not focused.
+ * One result of a [NotekeaPalette]: a [title] with its matched characters in bold primary ([titleHighlights]), a muted
+ * [supportingText] at the end of the line, and an optional [detail] line under it with its own highlights. The
+ * [selected] item is the one Enter opens; the keyboard stays in the palette's field, so items are clicked, not focused.
  */
 @Composable
 fun NotekeaPaletteItem(
@@ -54,6 +52,7 @@ fun NotekeaPaletteItem(
     detail: String? = null
 ) {
     val colors = MaterialTheme.colorScheme
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.small,
@@ -62,14 +61,29 @@ fun NotekeaPaletteItem(
     ) {
         Column(
             modifier = Modifier
-                .clickable(role = Role.Button, onClick = onClick)
-                .padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingS),
+                .clickable(
+                    role = Role.Button,
+                    onClick = onClick
+                )
+                .padding(
+                    horizontal = NotekeaDimensions.SpacingM,
+                    vertical = NotekeaDimensions.SpacingS
+                ),
             verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
         ) {
-            TitleLine(title = title, highlights = titleHighlights, supportingText = supportingText)
+            TitleLine(
+                title = title,
+                highlights = titleHighlights,
+                supportingText = supportingText
+            )
+
             detail?.let {
                 Text(
-                    text = highlighted(text = it, ranges = detailHighlights, color = colors.primary),
+                    text = highlighted(
+                        text = it,
+                        ranges = detailHighlights,
+                        color = colors.primary
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.onSurfaceVariant,
                     maxLines = 1,
@@ -88,14 +102,20 @@ private fun TitleLine(
     supportingText: String?
 ) {
     val colors = MaterialTheme.colorScheme
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = highlighted(text = title, ranges = highlights, color = colors.primary),
+            text = highlighted(
+                text = title,
+                ranges = highlights,
+                color = colors.primary
+            ),
             modifier = Modifier.weight(weight = 1f),
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
         supportingText?.let {
             Text(
                 text = it,
@@ -118,9 +138,17 @@ private fun highlighted(
 ): AnnotatedString = remember(text, ranges, color) {
     buildAnnotatedString {
         append(text = text)
-        ranges.filter { it.first >= 0 && it.last < text.length && !it.isEmpty() }.forEach { range ->
+
+        ranges.filter {
+            it.first >= 0 &&
+                it.last < text.length &&
+                !it.isEmpty()
+        }.forEach { range ->
             addStyle(
-                style = SpanStyle(color = color, fontWeight = FontWeight.Bold),
+                style = SpanStyle(
+                    color = color,
+                    fontWeight = FontWeight.Bold
+                ),
                 start = range.first,
                 end = range.last + 1
             )
@@ -140,6 +168,7 @@ private fun NotekeaPaletteItemPreview() {
                 selected = true,
                 supportingText = PREVIEW_FOLDER
             )
+
             NotekeaPaletteItem(
                 title = PREVIEW_CAFE,
                 onClick = {},
@@ -147,6 +176,7 @@ private fun NotekeaPaletteItemPreview() {
                 supportingText = PREVIEW_FOLDER,
                 detail = PREVIEW_ALIAS
             )
+
             NotekeaPaletteItem(
                 title = PREVIEW_PASTA,
                 onClick = {},

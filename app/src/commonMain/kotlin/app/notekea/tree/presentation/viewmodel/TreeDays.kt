@@ -1,13 +1,13 @@
 package app.notekea.tree.presentation.viewmodel
 
 import app.notekea.core.domain.Outcome
-import app.notekea.tree.presentation.model.VaultTreeIntent
-import app.notekea.tree.presentation.model.VaultTreeState
 import app.notekea.core.notes.domain.DailyNoteSettings
 import app.notekea.tree.domain.DailyNotes
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.model.VaultTreeState
 
 /**
- * Daily notes in the sidebar (`ROADMAP.md` 1.10): "Today" opens today's note, creating it first if needed, and a
+ * Daily notes in the sidebar: "Today" opens today's note, creating it first if needed, and a
  * selected daily note knows the daily notes before and after it, to step through them.
  */
 internal class TreeDays(
@@ -26,9 +26,7 @@ internal class TreeDays(
         settings = days.getDailyNoteSettings(vaultPath = vaultPath)
     }
 
-    fun onIntent(
-        intent: VaultTreeIntent
-    ) {
+    fun onIntent(intent: VaultTreeIntent) {
         if (intent is VaultTreeIntent.OnDayStep) step(step = intent.step) else openToday()
     }
 
@@ -36,14 +34,27 @@ internal class TreeDays(
     fun update() {
         val current = host.state.value
         val last = inputs
-        val isSame = last != null && last.first == current.selectedPath && last.second === current.tree.notes &&
-            last.third == settings
+
+        val isSame =
+            last != null &&
+                last.first == current.selectedPath &&
+                last.second === current.tree.notes &&
+                last.third == settings
+
         if (isSame) return
         inputs = Triple(current.selectedPath, current.tree.notes, settings)
+
         val neighbors = current.selectedPath?.let {
-            dailyNotes.neighborsOf(path = it, notes = current.tree.notes.keys, settings = settings)
+            dailyNotes.neighborsOf(
+                path = it,
+                notes = current.tree.notes.keys,
+                settings = settings
+            )
         }
-        if (neighbors != current.dayNeighbors) host.reduce { it.copy(dayNeighbors = neighbors) }
+
+        if (neighbors != current.dayNeighbors) {
+            host.reduce { it.copy(dayNeighbors = neighbors) }
+        }
     }
 
     /** Today's daily note, with the settings read again: Obsidian may have changed them since the vault opened. */
@@ -51,14 +62,19 @@ internal class TreeDays(
         host.launch {
             loadSettings()
             val outcome = days.openDailyNote(vaultPath = vaultPath)
-            host.updateTree { reduceFollowedLink(state = it, outcome = outcome) }
+
+            host.updateTree {
+                reduceFollowedLink(
+                    state = it,
+                    outcome = outcome
+                )
+            }
+
             host.open(path = (outcome as? Outcome.Success)?.value?.path)
         }
     }
 
-    private fun step(
-        step: Int
-    ) {
+    private fun step(step: Int) {
         val neighbors = host.state.value.dayNeighbors ?: return
         val target = (if (step < 0) neighbors.previous else neighbors.next) ?: return
         host.reveal(path = target)

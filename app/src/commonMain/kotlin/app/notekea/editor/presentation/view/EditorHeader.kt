@@ -1,11 +1,6 @@
 package app.notekea.editor.presentation.view
 
 import androidx.compose.foundation.clickable
-import app.notekea.editor.presentation.model.EditorHeaderData
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.model.EditorPreviewData
-import app.notekea.editor.presentation.model.EditorState
-import app.notekea.editor.presentation.properties.PropertiesView
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -30,18 +25,23 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.notes.domain.DayNeighbors
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.presentation.notesErrorMessage
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.NotekeaTitleField
 import app.notekea.core.presentation.designsystem.components.NotekeaTooltip
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaColors
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
-import app.notekea.core.notes.domain.DayNeighbors
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.presentation.notesErrorMessage
+import app.notekea.core.presentation.platform.label
+import app.notekea.editor.presentation.model.EditorHeaderData
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorPreviewData
+import app.notekea.editor.presentation.model.EditorState
+import app.notekea.editor.presentation.properties.PropertiesView
 import app.notekea.resources.Res
 import app.notekea.resources.editor_bookmark_add
 import app.notekea.resources.editor_bookmark_remove
@@ -53,15 +53,21 @@ import org.jetbrains.compose.resources.stringResource
 
 private const val PATH_SEPARATOR = " / "
 
-/** The note's [folder] above its title, muted, turning to the link color under the pointer: a click shows it in Files. */
+/**
+ * The note's [folder] above its title, muted, turning to the link color under the pointer: a click shows it in Files.
+ */
 @Composable
 private fun FolderPath(
     folder: RelativePath,
     onClick: () -> Unit
 ) {
     val interaction = remember { MutableInteractionSource() }
+
     val isHovered by interaction.collectIsHoveredAsState()
-    val color = if (isHovered) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+
+    val colors = MaterialTheme.colorScheme
+    val color = if (isHovered) colors.primary else colors.onSurfaceVariant
+
     NotekeaTooltip(label = stringResource(resource = Res.string.editor_reveal_folder)) {
         Row(
             modifier = Modifier
@@ -69,7 +75,12 @@ private fun FolderPath(
                 .hoverable(interactionSource = interaction)
                 .pointerHoverIcon(icon = PointerIcon.Hand)
                 .focusProperties { canFocus = false }
-                .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick),
+                .clickable(
+                    interactionSource = interaction,
+                    indication = null,
+                    role = Role.Button,
+                    onClick = onClick
+                ),
             horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -79,8 +90,12 @@ private fun FolderPath(
                 modifier = Modifier.size(size = NotekeaDimensions.BadgeIconSize),
                 tint = color
             )
+
             Text(
-                text = folder.value.split(RelativePath.SEPARATOR).joinToString(separator = PATH_SEPARATOR),
+                text = folder
+                    .value
+                    .split(RelativePath.SEPARATOR)
+                    .joinToString(separator = PATH_SEPARATOR),
                 style = MaterialTheme.typography.bodySmall,
                 color = color
             )
@@ -97,10 +112,19 @@ internal fun EditorHeader(
     onIntent: (EditorIntent) -> Unit
 ) {
     val path = state.notePath ?: return
-    path.parent?.takeUnless { it.isRoot }?.let { folder ->
-        FolderPath(folder = folder, onClick = { onIntent(EditorIntent.OnFolderReveal) })
-        Spacer(modifier = Modifier.height(height = NotekeaDimensions.SpacingXs))
-    }
+
+    path
+        .parent
+        ?.takeUnless { it.isRoot }
+        ?.let { folder ->
+            FolderPath(
+                folder = folder,
+                onClick = { onIntent(EditorIntent.OnFolderReveal) }
+            )
+
+            Spacer(modifier = Modifier.height(height = NotekeaDimensions.SpacingXs))
+        }
+
     Row(verticalAlignment = Alignment.CenterVertically) {
         NotekeaTitleField(
             value = path.nameWithoutExtension,
@@ -108,35 +132,57 @@ internal fun EditorHeader(
             label = stringResource(resource = Res.string.editor_title_label),
             modifier = Modifier.weight(weight = 1f),
             isError = state.titleError != null,
-            onEdit = { if (state.titleError != null) onIntent(EditorIntent.OnTitleErrorDismiss) }
+            onEdit = {
+                if (state.titleError != null) onIntent(EditorIntent.OnTitleErrorDismiss)
+            }
         )
-        BookmarkStar(isBookmarked = header.isBookmarked, platformConventions = platformConventions, onIntent = onIntent)
+
+        BookmarkStar(
+            isBookmarked = header.isBookmarked,
+            platformConventions = platformConventions,
+            onIntent = onIntent
+        )
+
         header.dayNeighbors?.let {
-            DayArrows(neighbors = it, platformConventions = platformConventions, onIntent = onIntent)
+            DayArrows(
+                neighbors = it,
+                platformConventions = platformConventions,
+                onIntent = onIntent
+            )
         }
     }
+
     state.titleError?.let { error ->
         Text(
-            text = notesErrorMessage(error = error, platformConventions = platformConventions),
+            text = notesErrorMessage(
+                error = error,
+                platformConventions = platformConventions
+            ),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error
         )
     }
-    PropertiesView(state = state, onIntent = onIntent, modifier = Modifier.padding(top = NotekeaDimensions.SpacingXs))
+
+    PropertiesView(
+        state = state,
+        onIntent = onIntent,
+        modifier = Modifier.padding(top = NotekeaDimensions.SpacingXs)
+    )
 }
 
-/** The star beside the title: filled in yellow while the note is bookmarked (`ROADMAP.md` 1.13). */
+/** The star beside the title: filled in yellow while the note is bookmarked. */
 @Composable
 private fun BookmarkStar(
     isBookmarked: Boolean,
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit
 ) {
+    val strings = Res.string
+    val label = if (isBookmarked) strings.editor_bookmark_remove else strings.editor_bookmark_add
+
     NotekeaIconButton(
         icon = if (isBookmarked) NotekeaIcons.Bookmarked else NotekeaIcons.Bookmark,
-        label = stringResource(
-            resource = if (isBookmarked) Res.string.editor_bookmark_remove else Res.string.editor_bookmark_add
-        ),
+        label = stringResource(resource = label),
         onClick = { onIntent(EditorIntent.OnBookmarkToggle) },
         shortcutHint = platformConventions.bookmarkShortcut.label(
             operatingSystem = platformConventions.operatingSystem
@@ -154,14 +200,18 @@ private fun DayArrows(
     onIntent: (EditorIntent) -> Unit
 ) {
     val operatingSystem = platformConventions.operatingSystem
+
     NotekeaIconButton(
         icon = NotekeaIcons.PreviousDay,
         label = stringResource(resource = Res.string.editor_previous_day),
         onClick = { onIntent(EditorIntent.OnDayStep(step = -1)) },
         enabled = neighbors.previous != null,
-        shortcutHint = platformConventions.previousDayShortcut.label(operatingSystem = operatingSystem),
+        shortcutHint = platformConventions.previousDayShortcut.label(
+            operatingSystem = operatingSystem
+        ),
         takesFocus = false
     )
+
     NotekeaIconButton(
         icon = NotekeaIcons.NextDay,
         label = stringResource(resource = Res.string.editor_next_day),
@@ -179,7 +229,10 @@ private fun EditorHeaderPreview() {
         Column {
             EditorHeader(
                 state = EditorPreviewData.state(),
-                header = EditorHeaderData(dayNeighbors = null, isBookmarked = true),
+                header = EditorHeaderData(
+                    dayNeighbors = null,
+                    isBookmarked = true
+                ),
                 platformConventions = EditorPreviewData.platformConventions,
                 onIntent = {}
             )

@@ -1,7 +1,6 @@
 package app.notekea.settings.presentation.appearance
 
 import androidx.compose.ui.ImageComposeScene
-import app.notekea.settings.presentation.SettingsDialog
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
@@ -19,13 +18,14 @@ import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.appearance.domain.ThemeMode
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickText
-import app.notekea.core.presentation.nodes
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
+import app.notekea.core.presentation.nodes
+import app.notekea.settings.presentation.SettingsDialog
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Settings → Appearance (`ROADMAP.md` 2.12), rendered headless: a theme is chosen with a click and another with the
+ * Settings → Appearance, rendered headless: a theme is chosen with a click and another with the
  * keyboard (its card focused, then Enter), and the mode with its segment; each choice is kept.
  */
 @OptIn(InternalComposeUiApi::class)
@@ -36,8 +36,13 @@ class AppearanceSettingsScreenTest {
     fun `a theme is chosen with the mouse or the keyboard, and the mode with its segment`() {
         val store = FakeAppearanceStore()
         val kept = mutableListOf<Appearance>()
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     SettingsDialog(
                         onDismiss = {},
@@ -49,9 +54,26 @@ class AppearanceSettingsScreenTest {
                 settle(scene = scene)
                 scene.clickText(text = "Sage") { settle(scene = scene) }
                 kept += store.kept
-                focusCard(scene = scene, name = "Honey")
-                scene.sendKeyEvent(event = KeyEvent(key = Key.Enter, type = KeyEventType.KeyDown))
-                scene.sendKeyEvent(event = KeyEvent(key = Key.Enter, type = KeyEventType.KeyUp))
+
+                focusCard(
+                    scene = scene,
+                    name = "Honey"
+                )
+
+                scene.sendKeyEvent(
+                    event = KeyEvent(
+                        key = Key.Enter,
+                        type = KeyEventType.KeyDown
+                    )
+                )
+
+                scene.sendKeyEvent(
+                    event = KeyEvent(
+                        key = Key.Enter,
+                        type = KeyEventType.KeyUp
+                    )
+                )
+
                 settle(scene = scene)
                 kept += store.kept
                 scene.clickText(text = "Dark") { settle(scene = scene) }
@@ -63,7 +85,10 @@ class AppearanceSettingsScreenTest {
             expected = listOf(
                 Appearance(theme = ColorTheme.SAGE),
                 Appearance(theme = ColorTheme.HONEY),
-                Appearance(theme = ColorTheme.HONEY, mode = ThemeMode.DARK)
+                Appearance(
+                    theme = ColorTheme.HONEY,
+                    mode = ThemeMode.DARK
+                )
             ),
             actual = kept
         )
@@ -75,21 +100,27 @@ class AppearanceSettingsScreenTest {
         name: String
     ) {
         val card = scene.nodes().first { node ->
-            node.config.getOrNull(SemanticsProperties.Role) == Role.RadioButton && name in textsUnder(node = node)
+            node.config.getOrNull(SemanticsProperties.Role) == Role.RadioButton &&
+                name in textsUnder(node = node)
         }
-        card.config[SemanticsActions.RequestFocus].action?.invoke()
+
+        card
+            .config[SemanticsActions.RequestFocus]
+            .action
+            ?.invoke()
+
         settle(scene = scene)
     }
 
-    private fun textsUnder(
-        node: SemanticsNode
-    ): List<String> = node.children.flatMap { child ->
-        child.config.getOrNull(SemanticsProperties.Text).orEmpty().map { it.text } + textsUnder(node = child)
+    private fun textsUnder(node: SemanticsNode): List<String> = node.children.flatMap { child ->
+        child
+            .config
+            .getOrNull(SemanticsProperties.Text)
+            .orEmpty()
+            .map { it.text } + textsUnder(node = child)
     }
 
-    private fun settle(
-        scene: ImageComposeScene
-    ) {
+    private fun settle(scene: ImageComposeScene) {
         repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
     }
 

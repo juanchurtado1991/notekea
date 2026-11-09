@@ -1,9 +1,5 @@
 package app.notekea.tree.presentation.viewmodel
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import app.notekea.tree.presentation.model.BookmarkIntent
-import app.notekea.tree.presentation.model.VaultTreeEffect
-import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.notes.domain.DailyNoteSettings
@@ -13,120 +9,169 @@ import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import app.notekea.tree.presentation.model.BookmarkIntent
+import app.notekea.tree.presentation.model.VaultTreeEffect
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /** Going to entries from elsewhere */
 @OptIn(ExperimentalCoroutinesApi::class)
 class VaultTreeNavigationTest : VaultTreeViewModelTestBase() {
     @Test
-    fun `a bookmark follows a rename in the tree or the editor, and goes with a deleted entry`() = runTreeTest {
-        val viewModel = startedViewModel()
-        listOf(WELCOME, ROADMAP).forEach { viewModel.onIntent(intent = BookmarkIntent.OnToggle(path = path(it))) }
+    fun `a bookmark follows a rename in the tree or the editor, and goes with a deleted entry`() =
+        runTreeTest {
+            val viewModel = startedViewModel()
 
-        rename(viewModel = viewModel, from = PROJECTS, to = "Plans")
-        viewModel.onIntent(
-            intent = VaultTreeIntent.OnEntryRenamed(from = path(WELCOME), to = path("Start here.md"), links = null)
-        )
-        val renamed = viewModel.state.value.bookmarks.paths
-        viewModel.onIntent(intent = VaultTreeIntent.OnDeleteRequest(path = path("Plans")))
-        viewModel.onIntent(intent = VaultTreeIntent.OnDeleteConfirm)
-        advanceUntilIdle()
+            listOf(WELCOME, ROADMAP).forEach {
+                viewModel.onIntent(intent = BookmarkIntent.OnToggle(path = path(it)))
+            }
 
-        assertEquals(
-            expected = listOf("Start here.md", "Plans/Roadmap.md").map(::path) to listOf(path("Start here.md")),
-            actual = renamed to bookmarkStore.saved.getValue(VAULT).paths
-        )
-    }
+            rename(
+                viewModel = viewModel,
+                from = PROJECTS,
+                to = "Plans"
+            )
+
+            viewModel.onIntent(
+                intent = VaultTreeIntent.OnEntryRenamed(
+                    from = path(WELCOME),
+                    to = path("Start here.md"),
+                    links = null
+                )
+            )
+
+            val renamed = viewModel.state.value.bookmarks.paths
+            viewModel.onIntent(intent = VaultTreeIntent.OnDeleteRequest(path = path("Plans")))
+            viewModel.onIntent(intent = VaultTreeIntent.OnDeleteConfirm)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected =
+                listOf("Start here.md", "Plans/Roadmap.md").map(::path) to
+                    listOf(path("Start here.md")),
+                actual = renamed to bookmarkStore
+                    .saved
+                    .getValue(VAULT)
+                    .paths
+            )
+        }
 
     @Test
-    fun `a clicked bookmark is selected in the tree with its folders open and opens in a tab`() = runTreeTest {
-        val viewModel = startedViewModel()
-        val effects = mutableListOf<VaultTreeEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+    fun `a clicked bookmark is selected in the tree with its folders open and opens in a tab`() =
+        runTreeTest {
+            val viewModel = startedViewModel()
+            val effects = mutableListOf<VaultTreeEffect>()
 
-        viewModel.onIntent(intent = BookmarkIntent.OnClick(path = path(ROADMAP)))
-        advanceUntilIdle()
-        runCurrent()
+            backgroundScope.launch {
+                viewModel.effects.collect { effects += it }
+            }
 
-        assertEquals(
-            expected = Triple(
-                path(ROADMAP),
-                true,
-                listOf<VaultTreeEffect>(VaultTreeEffect.OpenEntry(path = path(ROADMAP)))
-            ),
-            actual = Triple(
-                viewModel.state.value.selectedPath,
-                path(PROJECTS) in viewModel.state.value.expandedFolders,
-                effects.toList()
+            viewModel.onIntent(intent = BookmarkIntent.OnClick(path = path(ROADMAP)))
+            advanceUntilIdle()
+            runCurrent()
+
+            assertEquals(
+                expected = Triple(
+                    path(ROADMAP),
+                    true,
+                    listOf<VaultTreeEffect>(VaultTreeEffect.OpenEntry(path = path(ROADMAP)))
+                ),
+                actual = Triple(
+                    viewModel.state.value.selectedPath,
+                    path(PROJECTS) in viewModel.state.value.expandedFolders,
+                    effects.toList()
+                )
             )
-        )
-    }
+        }
 
     @Test
     fun `a clicked link selects its note and opens the folders above it`() = runTreeTest {
         val viewModel = startedViewModel()
 
         viewModel.onIntent(
-            intent = VaultTreeIntent.OnFollowLink(source = path(WELCOME), target = "roadmap", kind = LinkKind.WIKI)
-        )
-        advanceUntilIdle()
-
-        assertEquals(
-            expected = path(ROADMAP) to setOf(path(PROJECTS)),
-            actual = viewModel.state.value.selectedPath to viewModel.state.value.expandedFolders
-        )
-    }
-
-    @Test
-    fun `a note chosen in the quick switcher is selected with the folders above it open`() = runTreeTest {
-        val viewModel = startedViewModel()
-
-        viewModel.onIntent(intent = VaultTreeIntent.OnRevealNote(path = path(ROADMAP)))
-        advanceUntilIdle()
-
-        assertEquals(
-            expected = path(ROADMAP) to setOf(path(PROJECTS)),
-            actual = viewModel.state.value.selectedPath to viewModel.state.value.expandedFolders
-        )
-    }
-
-    @Test
-    fun `a folder clicked in the status bar shows in a hidden sidebar, without opening a tab`() = runTreeTest {
-        val viewModel = startedViewModel()
-        val effects = mutableListOf<VaultTreeEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
-        viewModel.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
-        runCurrent()
-
-        viewModel.onIntent(intent = VaultTreeIntent.OnRevealInTree(path = path(PROJECTS)))
-        advanceUntilIdle()
-
-        assertEquals(
-            expected = Triple<RelativePath?, Boolean, List<VaultTreeEffect>>(path(PROJECTS), false, emptyList()),
-            actual = Triple(
-                viewModel.state.value.selectedPath,
-                viewModel.state.value.isSidebarCollapsed,
-                effects.toList()
+            intent = VaultTreeIntent.OnFollowLink(
+                source = path(WELCOME),
+                target = "roadmap",
+                kind = LinkKind.WIKI
             )
         )
+
+        advanceUntilIdle()
+
+        assertEquals(
+            expected = path(ROADMAP) to setOf(path(PROJECTS)),
+            actual = viewModel.state.value.selectedPath to viewModel.state.value.expandedFolders
+        )
     }
+
+    @Test
+    fun `a note chosen in the quick switcher is selected with the folders above it open`() =
+        runTreeTest {
+            val viewModel = startedViewModel()
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnRevealNote(path = path(ROADMAP)))
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = path(ROADMAP) to setOf(path(PROJECTS)),
+                actual = viewModel.state.value.selectedPath to viewModel.state.value.expandedFolders
+            )
+        }
+
+    @Test
+    fun `a folder clicked in the status bar shows in a hidden sidebar, without opening a tab`() =
+        runTreeTest {
+            val viewModel = startedViewModel()
+            val effects = mutableListOf<VaultTreeEffect>()
+
+            backgroundScope.launch {
+                viewModel.effects.collect { effects += it }
+            }
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
+            runCurrent()
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnRevealInTree(path = path(PROJECTS)))
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = Triple<RelativePath?, Boolean, List<VaultTreeEffect>>(
+                    path(PROJECTS),
+                    false,
+                    emptyList()
+                ),
+                actual = Triple(
+                    viewModel.state.value.selectedPath,
+                    viewModel.state.value.isSidebarCollapsed,
+                    effects.toList()
+                )
+            )
+        }
 
     @Test
     fun `a wiki link to a missing note creates it at the root and selects it`() = runTreeTest {
         val viewModel = startedViewModel()
 
         viewModel.onIntent(
-            intent = VaultTreeIntent.OnFollowLink(source = path(WELCOME), target = "Ideas", kind = LinkKind.WIKI)
+            intent = VaultTreeIntent.OnFollowLink(
+                source = path(WELCOME),
+                target = "Ideas",
+                kind = LinkKind.WIKI
+            )
         )
+
         advanceUntilIdle()
 
         assertEquals(
             expected = path("Ideas.md") to true,
-            actual = viewModel.state.value.selectedPath to (path("Ideas.md") in viewModel.state.value.tree.notes)
+            actual =
+            viewModel.state.value.selectedPath to
+                (path("Ideas.md") in viewModel.state.value.tree.notes)
         )
     }
 
@@ -141,6 +186,7 @@ class VaultTreeNavigationTest : VaultTreeViewModelTestBase() {
                 kind = LinkKind.MARKDOWN_ENCODED
             )
         )
+
         advanceUntilIdle()
 
         assertEquals(
@@ -167,7 +213,9 @@ class VaultTreeNavigationTest : VaultTreeViewModelTestBase() {
                     first.selectedPath,
                     path("Journal") in first.expandedFolders,
                     viewModel.state.value.selectedPath,
-                    operations.existing.count { it == path(TODAY) }
+                    operations.existing.count {
+                        it == path(TODAY)
+                    }
                 )
             )
         }
@@ -178,8 +226,13 @@ class VaultTreeNavigationTest : VaultTreeViewModelTestBase() {
             listOf("Journal/2026-10-20.md", "Journal/2026-10-22.md", TODAY, WELCOME).forEach {
                 scanner.addNote(file = file(path = it))
             }
+
             val viewModel = startedViewModel()
-            viewModel.onIntent(intent = VaultTreeIntent.OnRowClick(path = path("Journal/2026-10-22.md")))
+
+            viewModel.onIntent(
+                intent = VaultTreeIntent.OnRowClick(path = path("Journal/2026-10-22.md"))
+            )
+
             val middle = viewModel.state.value.dayNeighbors
 
             viewModel.onIntent(intent = VaultTreeIntent.OnDayStep(step = 1))
@@ -191,7 +244,11 @@ class VaultTreeNavigationTest : VaultTreeViewModelTestBase() {
             assertEquals(
                 expected = listOf(
                     DayNeighbors(
-                        date = CalendarDate(year = 2026, month = 10, day = 22),
+                        date = CalendarDate(
+                            year = 2026,
+                            month = 10,
+                            day = 22
+                        ),
                         previous = path("Journal/2026-10-20.md"),
                         next = path(TODAY)
                     ),
@@ -199,24 +256,39 @@ class VaultTreeNavigationTest : VaultTreeViewModelTestBase() {
                     null,
                     path(WELCOME)
                 ),
-                actual = listOf(middle, last, viewModel.state.value.dayNeighbors, viewModel.state.value.selectedPath)
+                actual = listOf(
+                    middle,
+                    last,
+                    viewModel.state.value.dayNeighbors,
+                    viewModel.state.value.selectedPath
+                )
             )
         }
 
     @Test
-    fun `daily notes follow the folder and format of the vault's Obsidian settings`() = runTreeTest {
-        vaultSettings.dailyNotes = DailyNoteSettings(folder = "Diary", format = "DD.MM.YYYY", template = null)
-        listOf("Diary/25.10.2026.md", "Journal/2026-10-22.md").forEach { scanner.addNote(file = file(path = it)) }
-        val viewModel = startedViewModel()
+    fun `daily notes follow the folder and format of the vault's Obsidian settings`() =
+        runTreeTest {
+            vaultSettings.dailyNotes = DailyNoteSettings(
+                folder = "Diary",
+                format = "DD.MM.YYYY",
+                template = null
+            )
 
-        viewModel.onIntent(intent = VaultTreeIntent.OnTodayClick)
-        advanceUntilIdle()
+            listOf("Diary/25.10.2026.md", "Journal/2026-10-22.md").forEach {
+                scanner.addNote(file = file(path = it))
+            }
 
-        assertEquals(
-            expected = path("Diary/27.10.2026.md") to path("Diary/25.10.2026.md"),
-            actual = viewModel.state.value.selectedPath to viewModel.state.value.dayNeighbors?.previous
-        )
-    }
+            val viewModel = startedViewModel()
+
+            viewModel.onIntent(intent = VaultTreeIntent.OnTodayClick)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = path("Diary/27.10.2026.md") to path("Diary/25.10.2026.md"),
+                actual =
+                viewModel.state.value.selectedPath to viewModel.state.value.dayNeighbors?.previous
+            )
+        }
 
     @Test
     fun `a file manager that cannot open shows a dismissible error`() = runTreeTest {

@@ -1,10 +1,9 @@
 package app.notekea.core.notes.domain
 
 /**
- * Resolves links the way Obsidian does, among [notePaths], ignoring letter case. A wiki link is first read as a path
- * ([wikiPath]: `./`, `../` and a leading `/`). With a folder it must match a path (or the end of one); a bare name must match one note's name, and among several the one in the linking note's
- * folder wins; any other ambiguity resolves to nothing, so an unclear link is never rewritten. A Markdown link is read
- * from the linking note's folder, then from the vault root, and otherwise as a wiki link: by a name only one note has.
+ * Resolves links the way Obsidian does, among [notePaths], ignoring letter case. A wiki link with a folder must match a
+ * path or the end of one ([wikiPath]); a bare name must match one note's name, the linking note's folder winning, and
+ * any other ambiguity resolves to nothing. A Markdown link is read from the linking note's folder, then the vault root.
  */
 class LinkResolver(notePaths: Collection<RelativePath>) {
     private val notes = notePaths.toSet()
@@ -15,13 +14,25 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
         link: NoteLink,
         source: RelativePath
     ): ResolvedLink? = when (link.kind) {
-        LinkKind.WIKI -> resolveWiki(target = link.target, source = source)?.let {
-            ResolvedLink(target = it, isRelativeToSource = false)
+        LinkKind.WIKI -> resolveWiki(
+            target = link.target,
+            source = source
+        )?.let {
+            ResolvedLink(
+                target = it,
+                isRelativeToSource = false
+            )
         }
 
-        LinkKind.MARKDOWN_ANGLE -> resolveMarkdown(target = link.target, source = source)
+        LinkKind.MARKDOWN_ANGLE -> resolveMarkdown(
+            target = link.target,
+            source = source
+        )
 
-        LinkKind.MARKDOWN_ENCODED -> resolveMarkdown(target = percentDecoded(target = link.target), source = source)
+        LinkKind.MARKDOWN_ENCODED -> resolveMarkdown(
+            target = percentDecoded(target = link.target),
+            source = source
+        )
     }
 
     /**
@@ -31,8 +42,16 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
     fun closest(
         link: NoteLink,
         source: RelativePath
-    ): RelativePath? = resolve(link = link, source = source)?.target
-        ?: closestWiki(target = link.target, source = source).takeIf { link.kind == LinkKind.WIKI }
+    ): RelativePath? = resolve(
+        link = link,
+        source = source
+    )?.target
+        ?: closestWiki(
+            target = link.target,
+            source = source
+        ).takeIf {
+            link.kind == LinkKind.WIKI
+        }
 
     /**
      * The note a wiki link to [target] leads to when [resolve] finds no single one because several notes share its
@@ -43,48 +62,81 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
         target: String,
         source: RelativePath
     ): RelativePath? {
-        val name = wikiPath(target = target, source = source)?.value?.lowercase() ?: return null
+        val name = wikiPath(
+            target = target,
+            source = source
+        )?.value?.lowercase() ?: return null
+
         val candidates = if (RelativePath.SEPARATOR in name) {
             val withExtension = name + RelativePath.MARKDOWN_EXTENSION
+
             notes.filter {
                 val path = it.value.lowercase()
-                path == withExtension || path.endsWith(suffix = RelativePath.SEPARATOR + withExtension)
+
+                path == withExtension ||
+                    path.endsWith(suffix = RelativePath.SEPARATOR + withExtension)
             }
         } else {
             byLowerName[name].orEmpty()
         }
+
         return candidates.minWithOrNull(
             comparator = compareBy<RelativePath>(
-                { it.parent != source.parent },
-                { path -> path.value.count { it == RelativePath.SEPARATOR.single() } },
+                {
+                    it.parent != source.parent
+                },
+                { path ->
+                    path.value.count {
+                        it == RelativePath.SEPARATOR.single()
+                    }
+                },
                 { it.value.lowercase() }
             )
         )
     }
 
     /** How a new wiki link to [path] is written: its name when that is unique in the vault, else its path. */
-    fun wikiTarget(
-        path: RelativePath
-    ): String = if (isUniqueName(name = path.nameWithoutExtension)) {
-        path.nameWithoutExtension
-    } else {
-        withoutMarkdownExtension(target = path.value)
-    }
+    fun wikiTarget(path: RelativePath): String =
+        if (isUniqueName(name = path.nameWithoutExtension)) {
+            path.nameWithoutExtension
+        } else {
+            withoutMarkdownExtension(target = path.value)
+        }
 
     /** Whether a bare `[[name]]` would point to exactly one note. */
-    fun isUniqueName(
-        name: String
-    ): Boolean = byLowerName[name.lowercase()].orEmpty().size == 1
+    fun isUniqueName(name: String): Boolean = byLowerName[name.lowercase()].orEmpty().size == 1
 
     private fun resolveMarkdown(
         target: String,
         source: RelativePath
     ): ResolvedLink? {
-        val fromSource = noteAt(folder = source.parent ?: RelativePath.ROOT, target = target)
-        if (fromSource != null) return ResolvedLink(target = fromSource, isRelativeToSource = true)
-        val fromRoot = noteAt(folder = RelativePath.ROOT, target = target.removePrefix(prefix = RelativePath.SEPARATOR))
-        return (fromRoot ?: resolveWiki(target = target, source = source))?.let {
-            ResolvedLink(target = it, isRelativeToSource = false)
+        val fromSource = noteAt(
+            folder = source.parent ?: RelativePath.ROOT,
+            target = target
+        )
+
+        if (fromSource != null) {
+            return ResolvedLink(
+                target = fromSource,
+                isRelativeToSource = true
+            )
+        }
+
+        val fromRoot = noteAt(
+            folder = RelativePath.ROOT,
+            target = target.removePrefix(prefix = RelativePath.SEPARATOR)
+        )
+
+        return (
+            fromRoot ?: resolveWiki(
+                target = target,
+                source = source
+            )
+            )?.let {
+            ResolvedLink(
+                target = it,
+                isRelativeToSource = false
+            )
         }
     }
 
@@ -93,36 +145,55 @@ class LinkResolver(notePaths: Collection<RelativePath>) {
         folder: RelativePath,
         target: String
     ): RelativePath? {
-        val path = resolvedFrom(folder = folder, target = target) ?: return null
-        return path.takeIf { it in notes } ?: byLowerPath[path.value.lowercase()]
+        val path = resolvedFrom(
+            folder = folder,
+            target = target
+        ) ?: return null
+
+        return path.takeIf {
+            it in notes
+        } ?: byLowerPath[path.value.lowercase()]
     }
 
     private fun resolveWiki(
         target: String,
         source: RelativePath
     ): RelativePath? {
-        val name = wikiPath(target = target, source = source)?.value?.lowercase() ?: return null
+        val name = wikiPath(
+            target = target,
+            source = source
+        )?.value?.lowercase() ?: return null
+
         if (RelativePath.SEPARATOR in name) {
             val withExtension = name + RelativePath.MARKDOWN_EXTENSION
+
             return byLowerPath[withExtension]
                 ?: notes
                     .filter {
-                        it.value.lowercase().endsWith(
-                            suffix = RelativePath.SEPARATOR + withExtension
-                        )
+                        it
+                            .value
+                            .lowercase()
+                            .endsWith(suffix = RelativePath.SEPARATOR + withExtension)
                     }.singleOrNull()
         }
+
         val candidates = byLowerName[name].orEmpty()
-        return candidates.singleOrNull() ?: candidates.singleOrNull { it.parent == source.parent }
+
+        return candidates.singleOrNull() ?: candidates.singleOrNull {
+            it.parent == source.parent
+        }
     }
 
     companion object {
-        fun withoutMarkdownExtension(
-            target: String
-        ): String = if (target.endsWith(suffix = RelativePath.MARKDOWN_EXTENSION, ignoreCase = true)) {
-            target.dropLast(n = RelativePath.MARKDOWN_EXTENSION.length)
-        } else {
-            target
+        fun withoutMarkdownExtension(target: String): String {
+            val isMarkdown = target.endsWith(
+                suffix = RelativePath.MARKDOWN_EXTENSION,
+                ignoreCase = true
+            )
+
+            if (!isMarkdown) return target
+
+            return target.dropLast(n = RelativePath.MARKDOWN_EXTENSION.length)
         }
     }
 }

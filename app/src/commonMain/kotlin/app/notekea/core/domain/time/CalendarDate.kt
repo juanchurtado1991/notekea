@@ -2,7 +2,7 @@ package app.notekea.core.domain.time
 
 /**
  * A day of the proleptic Gregorian calendar, without a time or a time zone: what a daily note is named after
- * (`ROADMAP.md` 1.10). [month] runs from 1 to 12 and [day] from 1; [isValid] says whether the three make a real day.
+ *. [month] runs from 1 to 12 and [day] from 1; [isValid] says whether the three make a real day.
  * Days are counted from 1970-01-01 ([epochDay]), so moving by days, weeks or years never trips over month lengths.
  */
 data class CalendarDate(
@@ -17,10 +17,18 @@ data class CalendarDate(
     val epochDay: Long
         get() {
             val shiftedYear = (if (month <= 2) year - 1 else year).toLong()
-            val era = (if (shiftedYear >= 0) shiftedYear else shiftedYear - ERA_YEARS + 1) / ERA_YEARS
+
+            val era =
+                (if (shiftedYear >= 0) shiftedYear else shiftedYear - ERA_YEARS + 1) / ERA_YEARS
+
             val yearOfEra = shiftedYear - era * ERA_YEARS
-            val dayOfShiftedYear = (MONTH_LENGTH_SPAN * ((month + MARCH_SHIFT) % MONTHS) + 2) / MONTH_SPAN + day - 1
-            val dayOfEra = yearOfEra * DAYS_IN_YEAR + yearOfEra / LEAP_CYCLE - yearOfEra / CENTURY + dayOfShiftedYear
+
+            val dayOfShiftedYear =
+                (MONTH_LENGTH_SPAN * ((month + MARCH_SHIFT) % MONTHS) + 2) / MONTH_SPAN + day - 1
+
+            val dayOfEra = yearOfEra * DAYS_IN_YEAR + yearOfEra / LEAP_CYCLE - yearOfEra / CENTURY +
+                dayOfShiftedYear
+
             return era * DAYS_IN_ERA + dayOfEra - EPOCH_SHIFT
         }
 
@@ -30,12 +38,19 @@ data class CalendarDate(
 
     /** The day's place in its year, from 1 (January 1st). */
     val dayOfYear: Int
-        get() = (epochDay - CalendarDate(year = year, month = 1, day = 1).epochDay).toInt() + 1
+        get() = (
+            epochDay - CalendarDate(
+                year = year,
+                month = 1,
+                day = 1
+            ).epochDay
+            ).toInt() + 1
 
     /** The ISO week (1 to 53) and the year it belongs to, which differs from [year] around New Year. */
     val isoWeek: Pair<Int, Int>
         get() {
             val week = (dayOfYear - dayOfWeek + ISO_WEEK_SHIFT) / DAYS_IN_WEEK
+
             return when {
                 week < 1 -> year - 1 to weeksIn(year = year - 1)
                 week > weeksIn(year = year) -> year + 1 to 1
@@ -43,13 +58,9 @@ data class CalendarDate(
             }
         }
 
-    fun plusDays(
-        days: Long
-    ): CalendarDate = ofEpochDay(epochDay = epochDay + days)
+    fun plusDays(days: Long): CalendarDate = ofEpochDay(epochDay = epochDay + days)
 
-    override fun compareTo(
-        other: CalendarDate
-    ): Int = epochDay.compareTo(other = other.epochDay)
+    override fun compareTo(other: CalendarDate): Int = epochDay.compareTo(other = other.epochDay)
 
     companion object {
         const val MONTHS = 12
@@ -77,27 +88,40 @@ data class CalendarDate(
         private val SHORT_MONTHS = setOf(4, 6, 9, 11)
 
         /** The day [epochDay] days after 1970-01-01. */
-        fun ofEpochDay(
-            epochDay: Long
-        ): CalendarDate {
+        fun ofEpochDay(epochDay: Long): CalendarDate {
             val shifted = epochDay + EPOCH_SHIFT
             val era = (if (shifted >= 0) shifted else shifted - DAYS_IN_ERA + 1) / DAYS_IN_ERA
             val dayOfEra = shifted - era * DAYS_IN_ERA
+
             val yearOfEra = (
-                dayOfEra - dayOfEra / (DAYS_IN_YEAR * LEAP_CYCLE) + dayOfEra / (DAYS_IN_ERA / LEAP_CYCLE) -
+                dayOfEra - dayOfEra / (DAYS_IN_YEAR * LEAP_CYCLE) +
+                    dayOfEra / (DAYS_IN_ERA / LEAP_CYCLE) -
                     dayOfEra / (DAYS_IN_ERA - 1)
                 ) / DAYS_IN_YEAR
-            val dayOfShiftedYear = dayOfEra - (DAYS_IN_YEAR * yearOfEra + yearOfEra / LEAP_CYCLE - yearOfEra / CENTURY)
+
+            val dayOfShiftedYear =
+                dayOfEra - (DAYS_IN_YEAR * yearOfEra + yearOfEra / LEAP_CYCLE - yearOfEra / CENTURY)
+
             val shiftedMonth = (MONTH_SPAN * dayOfShiftedYear + 2) / MONTH_LENGTH_SPAN
             val day = dayOfShiftedYear - (MONTH_LENGTH_SPAN * shiftedMonth + 2) / MONTH_SPAN + 1
-            val month = if (shiftedMonth < MONTHS - 2) shiftedMonth + 3 else shiftedMonth - MARCH_SHIFT
+
+            val month = if (shiftedMonth < MONTHS - 2) {
+                shiftedMonth + 3
+            } else {
+                shiftedMonth - MARCH_SHIFT
+            }
+
             val year = yearOfEra + era * ERA_YEARS + if (month <= FEBRUARY) 1 else 0
-            return CalendarDate(year = year.toInt(), month = month.toInt(), day = day.toInt())
+
+            return CalendarDate(
+                year = year.toInt(),
+                month = month.toInt(),
+                day = day.toInt()
+            )
         }
 
-        fun isLeapYear(
-            year: Int
-        ): Boolean = year % LEAP_CYCLE == 0 && (year % CENTURY != 0 || year % ERA_YEARS.toInt() == 0)
+        fun isLeapYear(year: Int): Boolean =
+            year % LEAP_CYCLE == 0 && (year % CENTURY != 0 || year % ERA_YEARS.toInt() == 0)
 
         fun lengthOfMonth(
             year: Int,
@@ -109,11 +133,15 @@ data class CalendarDate(
         }
 
         /** How many ISO weeks [year] has: 53 when it starts on a Thursday, or on a Wednesday in a leap year. */
-        private fun weeksIn(
-            year: Int
-        ): Int {
-            val firstDay = CalendarDate(year = year, month = 1, day = 1).dayOfWeek
+        private fun weeksIn(year: Int): Int {
+            val firstDay = CalendarDate(
+                year = year,
+                month = 1,
+                day = 1
+            ).dayOfWeek
+
             val isLong = firstDay == THURSDAY || (firstDay == WEDNESDAY && isLeapYear(year = year))
+
             return if (isLong) WEEKS_IN_LONG_YEAR else WEEKS_IN_YEAR
         }
     }

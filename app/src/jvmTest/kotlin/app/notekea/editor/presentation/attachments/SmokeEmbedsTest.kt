@@ -5,10 +5,10 @@ import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.notes.data.ObsidianVaultSettingsReader
 import app.notekea.core.notes.data.OkioAttachmentStore
 import app.notekea.core.notes.data.OkioNoteFileOperations
-import app.notekea.editor.domain.AttachFileUseCase
 import app.notekea.core.notes.domain.AttachmentKind
-import app.notekea.editor.domain.EmbedProblem
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.domain.AttachFileUseCase
+import app.notekea.editor.domain.EmbedProblem
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
@@ -31,8 +31,14 @@ class SmokeEmbedsTest {
     private val testDispatcher = StandardTestDispatcher()
     private val dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     private val vault = Files.createTempDirectory(TEMP_PREFIX)
-    private val store = OkioAttachmentStore(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
-    private val settings = ObsidianVaultSettingsReader(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers)
+    private val store = OkioAttachmentStore(
+        fileSystem = FileSystem.SYSTEM,
+        dispatchers = dispatchers
+    )
+    private val settings = ObsidianVaultSettingsReader(
+        fileSystem = FileSystem.SYSTEM,
+        dispatchers = dispatchers
+    )
 
     @AfterTest
     fun deleteVault() {
@@ -55,7 +61,9 @@ class SmokeEmbedsTest {
                     "Blocks#^nothing" to EmbedProblem.MISSING_SECTION,
                     "Weekend menu" to EmbedProblem.MISSING_NOTE
                 ),
-                actual = practiceViews().filter { it.embed.isOwnLine }.map { it.embed.target to it.problem }
+                actual = practiceViews().filter { it.embed.isOwnLine }.map {
+                    it.embed.target to it.problem
+                }
             )
         }
 
@@ -75,7 +83,9 @@ class SmokeEmbedsTest {
                     listOf(AttachmentKind.NOTE to EmbedProblem.CIRCULAR)
                 ),
                 actual = listOf(pantry, shelf, bin, views[1].nested.single()).map { view ->
-                    view.nested.map { it.kind to it.problem }
+                    view.nested.map {
+                        it.kind to it.problem
+                    }
                 }
             )
         }
@@ -89,7 +99,12 @@ class SmokeEmbedsTest {
                     "- Buy fresh corn",
                     "| Item | Price |\n|---|---|\n| Flour | 3 |\n| Cheese | 5 |"
                 ),
-                actual = practiceViews().filter { it.embed.target.startsWith(prefix = "Blocks#^") }
+                actual = practiceViews().filter {
+                    it
+                        .embed
+                        .target
+                        .startsWith(prefix = "Blocks#^")
+                }
                     .mapNotNull { it.noteText }
             )
         }
@@ -100,7 +115,11 @@ class SmokeEmbedsTest {
         File(SHOPPING_NOTE).copyTo(target = vault.resolve("Editor/Shopping basics.md").toFile())
         File(SMOKE_ATTACHMENTS).copyRecursively(target = vault.resolve("attachments").toFile())
         val text = File(SMOKE_EMBEDS, PRACTICE.name).readText()
-        return attachments().viewsOf(note = PRACTICE, text = text)
+
+        return attachments().viewsOf(
+            note = PRACTICE,
+            text = text
+        )
     }
 
     private fun attachments() = EditorAttachments(
@@ -110,7 +129,10 @@ class SmokeEmbedsTest {
         attachFile = AttachFileUseCase(
             attachmentStore = store,
             vaultSettingsReader = settings,
-            noteFileOperations = OkioNoteFileOperations(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers),
+            noteFileOperations = OkioNoteFileOperations(
+                fileSystem = FileSystem.SYSTEM,
+                dispatchers = dispatchers
+            ),
             localTimeFormatter = JvmLocalTimeFormatter(),
             clock = Clock.System
         ),

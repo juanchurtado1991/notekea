@@ -21,14 +21,17 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** Hybrid search (`ROADMAP.md` 2.6), over the real content search and fakes of the index and the model. */
+/** Hybrid search, over the real content search and fakes of the index and the model. */
 class SearchPassagesUseCaseTest {
     private val testDispatcher = StandardTestDispatcher()
     private val store = FakeNoteContentStore()
     private val index = FakeVectorIndex()
     private val embedder = FakeTextEmbedder()
     private val folder = TextFolder()
-    private val cache = NoteTextCache(contentStore = store, textFolder = folder)
+    private val cache = NoteTextCache(
+        contentStore = store,
+        textFolder = folder
+    )
     private val search = SearchPassagesUseCase(
         textEmbedder = embedder,
         vectorIndex = index,
@@ -45,63 +48,161 @@ class SearchPassagesUseCaseTest {
     )
 
     @Test
-    fun `a note counts once, with its best line, the heading above it and the searched words marked`() = runTest(
+    fun `a note counts once, with its best line, the heading above it and the searched words marked`() =
+        runTest(
+            testDispatcher
+        ) {
+            val body = "## Dough\nKnead well.\nMix the **corn** flour.\n\n## Serving\nServe warm."
+
+            val notes = listOf(
+                note(
+                    path = AREPAS,
+                    body = body
+                )
+            )
+
+            indexed(
+                path = AREPAS,
+                body = body,
+                heading = "Recipes",
+                passage = "## Dough\nKnead well.\nMix the **corn** flour."
+            )
+
+            indexed(
+                path = AREPAS,
+                body = body,
+                heading = "Serving",
+                passage = "## Serving\nServe warm.",
+                index = 1
+            )
+
+            val result = found(
+                notes = notes,
+                query = "corn"
+            ).single()
+
+            assertEquals(
+                expected = listOf("Dough", "Mix the corn flour.", "corn"),
+                actual = listOf(
+                    result.heading,
+                    result.snippet,
+                    result.snippet.substring(range = result.ranges.single())
+                )
+            )
+
+            assertEquals(
+                expected = "Mix the **corn** flour.",
+                actual = body.substring(range = result.range)
+            )
+        }
+
+    @Test
+    fun `a heading that repeats the note's name says nothing, and a long line is cut`() = runTest(
         testDispatcher
     ) {
-        val body = "## Dough\nKnead well.\nMix the **corn** flour.\n\n## Serving\nServe warm."
-        val notes = listOf(note(path = AREPAS, body = body))
-        indexed(
-            path = AREPAS,
-            body = body,
-            heading = "Recipes",
-            passage = "## Dough\nKnead well.\nMix the **corn** flour."
-        )
-        indexed(path = AREPAS, body = body, heading = "Serving", passage = "## Serving\nServe warm.", index = 1)
+        val line = "Corn " + "flour ".repeat(n = 40)
 
-        val result = found(notes = notes, query = "corn").single()
-
-        assertEquals(
-            expected = listOf("Dough", "Mix the corn flour.", "corn"),
-            actual = listOf(
-                result.heading,
-                result.snippet,
-                result.snippet.substring(range = result.ranges.single())
+        val notes = listOf(
+            note(
+                path = AREPAS,
+                body = "# Arepas\n$line"
             )
         )
-        assertEquals(expected = "Mix the **corn** flour.", actual = body.substring(range = result.range))
+
+        indexed(
+            path = AREPAS,
+            body = "# Arepas\n$line",
+            passage = "# Arepas\n$line",
+            heading = "Arepas"
+        )
+
+        val result = found(
+            notes = notes,
+            query = "corn"
+        ).single()
+
+        assertEquals(
+            expected = null to true,
+            actual = result.heading to (result.snippet.length < line.length)
+        )
     }
 
     @Test
-    fun `a heading that repeats the note's name says nothing, and a long line is cut`() = runTest(testDispatcher) {
-        val line = "Corn " + "flour ".repeat(n = 40)
-        val notes = listOf(note(path = AREPAS, body = "# Arepas\n$line"))
-        indexed(path = AREPAS, body = "# Arepas\n$line", passage = "# Arepas\n$line", heading = "Arepas")
+    fun `a chunk with no searched word stays only if it is close in meaning`() = runTest(
+        testDispatcher
+    ) {
+        val notes = listOf(
+            note(
+                path = AREPAS,
+                body = "Corn flour."
+            ),
+            note(
+                path = SONG,
+                body = "A slow guitar."
+            )
+        )
 
-        val result = found(notes = notes, query = "corn").single()
+        indexed(
+            path = AREPAS,
+            body = "Corn flour.",
+            passage = "Corn flour."
+        )
 
-        assertEquals(expected = null to true, actual = result.heading to (result.snippet.length < line.length))
+        indexed(
+            path = SONG,
+            body = "A slow guitar.",
+            passage = "A slow guitar."
+        )
+
+        val result = found(
+            notes = notes,
+            query = "flour"
+        )
+
+        assertEquals(
+            expected = listOf(AREPAS),
+            actual = result.map { it.note.file.path }
+        )
     }
 
     @Test
-    fun `a chunk with no searched word stays only if it is close in meaning`() = runTest(testDispatcher) {
-        val notes = listOf(note(path = AREPAS, body = "Corn flour."), note(path = SONG, body = "A slow guitar."))
-        indexed(path = AREPAS, body = "Corn flour.", passage = "Corn flour.")
-        indexed(path = SONG, body = "A slow guitar.", passage = "A slow guitar.")
+    fun `a tag keeps the notes that have it, and alone it needs no index`() = runTest(
+        testDispatcher
+    ) {
+        val notes = listOf(
+            note(
+                path = AREPAS,
+                body = "Corn flour #recipe"
+            ),
+            note(
+                path = SONG,
+                body = "Corn fields"
+            )
+        )
 
-        val result = found(notes = notes, query = "flour")
+        indexed(
+            path = AREPAS,
+            body = "Corn flour #recipe",
+            passage = "Corn flour #recipe"
+        )
 
-        assertEquals(expected = listOf(AREPAS), actual = result.map { it.note.file.path })
-    }
+        indexed(
+            path = SONG,
+            body = "Corn fields",
+            passage = "Corn fields"
+        )
 
-    @Test
-    fun `a tag keeps the notes that have it, and alone it needs no index`() = runTest(testDispatcher) {
-        val notes = listOf(note(path = AREPAS, body = "Corn flour #recipe"), note(path = SONG, body = "Corn fields"))
-        indexed(path = AREPAS, body = "Corn flour #recipe", passage = "Corn flour #recipe")
-        indexed(path = SONG, body = "Corn fields", passage = "Corn fields")
+        val tagged = found(
+            notes = notes,
+            query = "corn #recipe"
+        )
 
-        val tagged = found(notes = notes, query = "corn #recipe")
         embedder.embedded.clear()
-        val tagAlone = found(notes = notes, query = "#recipe")
+
+        val tagAlone = found(
+            notes = notes,
+            query = "#recipe"
+        )
 
         assertEquals(
             expected = listOf(listOf(AREPAS), emptyList(), emptyList<Any>()),
@@ -110,55 +211,136 @@ class SearchPassagesUseCaseTest {
     }
 
     @Test
-    fun `a chunk beyond the note's text, which changed after indexing, is left out`() = runTest(testDispatcher) {
-        indexed(path = AREPAS, body = "Corn flour and more words.", passage = "Corn flour and more words.")
+    fun `a chunk beyond the note's text, which changed after indexing, is left out`() = runTest(
+        testDispatcher
+    ) {
+        indexed(
+            path = AREPAS,
+            body = "Corn flour and more words.",
+            passage = "Corn flour and more words."
+        )
+
         store.texts[AREPAS] = "Corn"
 
-        val result = found(notes = listOf(entry(path = AREPAS.value)), query = "corn")
+        val result = found(
+            notes = listOf(entry(path = AREPAS.value)),
+            query = "corn"
+        )
 
-        assertEquals(expected = emptyList(), actual = result)
+        assertEquals(
+            expected = emptyList(),
+            actual = result
+        )
     }
 
     @Test
-    fun `a common word alone keeps nothing that is not close in meaning`() = runTest(testDispatcher) {
-        val notes = listOf(note(path = SONG, body = "The slow guitar."))
-        indexed(path = SONG, body = "The slow guitar.", passage = "The slow guitar.")
+    fun `a common word alone keeps nothing that is not close in meaning`() = runTest(
+        testDispatcher
+    ) {
+        val notes = listOf(
+            note(
+                path = SONG,
+                body = "The slow guitar."
+            )
+        )
 
-        assertEquals(expected = emptyList(), actual = found(notes = notes, query = "the football park"))
+        indexed(
+            path = SONG,
+            body = "The slow guitar.",
+            passage = "The slow guitar."
+        )
+
+        assertEquals(
+            expected = emptyList(),
+            actual = found(
+                notes = notes,
+                query = "the football park"
+            )
+        )
     }
 
     @Test
-    fun `a chunk with no text left is skipped, and the others still answer`() = runTest(testDispatcher) {
+    fun `a chunk with no text left is skipped, and the others still answer`() = runTest(
+        testDispatcher
+    ) {
         val body = "\n\n\nCorn flour."
-        val notes = listOf(note(path = AREPAS, body = body), note(path = SONG, body = "Corn fields."))
+
+        val notes = listOf(
+            note(
+                path = AREPAS,
+                body = body
+            ),
+            note(
+                path = SONG,
+                body = "Corn fields."
+            )
+        )
+
         val blank = NoteChunk(AREPAS, 0, emptyList(), 0..1, "corn", tokens = 1)
         val vector = (embedder.embed(texts = listOf("corn")) as Outcome.Success).value.single()
         index.put(VAULT, AREPAS, listOf(blank), listOf(vector))
-        indexed(path = SONG, body = "Corn fields.", passage = "Corn fields.")
 
-        assertEquals(expected = listOf(SONG), actual = found(notes, "corn").map { it.note.file.path })
+        indexed(
+            path = SONG,
+            body = "Corn fields.",
+            passage = "Corn fields."
+        )
+
+        assertEquals(
+            expected = listOf(SONG),
+            actual = found(notes, "corn").map { it.note.file.path }
+        )
     }
 
     @Test
-    fun `the snippet starts at the sentence with the word, accents or not`() = runTest(testDispatcher) {
+    fun `the snippet starts at the sentence with the word, accents or not`() = runTest(
+        testDispatcher
+    ) {
         val body = "Empieza aquí. Una canción lenta. Y sigue."
-        val notes = listOf(note(path = AREPAS, body = body))
-        indexed(path = AREPAS, body = body, passage = body)
+
+        val notes = listOf(
+            note(
+                path = AREPAS,
+                body = body
+            )
+        )
+
+        indexed(
+            path = AREPAS,
+            body = body,
+            passage = body
+        )
 
         assertEquals(
             expected = "Una canción lenta. Y sigue.",
-            actual = found(notes = notes, query = "canción").single().snippet
+            actual = found(
+                notes = notes,
+                query = "canción"
+            ).single().snippet
         )
     }
 
     @Test
     fun `a model or an index that cannot answer says which`() = runTest(testDispatcher) {
-        val notes = listOf(note(path = AREPAS, body = "Corn"))
+        val notes = listOf(
+            note(
+                path = AREPAS,
+                body = "Corn"
+            )
+        )
+
         embedder.failure = EmbeddingError.EngineFailed
 
-        val outcome = search(vaultPath = VAULT, notes = notes, query = "corn")
+        val outcome = search(
+            vaultPath = VAULT,
+            notes = notes,
+            query = "corn"
+        )
 
-        assertEquals(expected = Outcome.Failure(error = IndexRunError.Model), actual = outcome)
+        assertEquals(
+            expected = Outcome.Failure(error = IndexRunError.Model),
+            actual = outcome
+        )
     }
 
     private suspend fun found(
@@ -180,10 +362,24 @@ class SearchPassagesUseCaseTest {
     ) {
         store.texts[path] = body
         val start = body.indexOf(string = passage)
-        val chunk =
-            NoteChunk(path, index, listOfNotNull(heading), start until start + passage.length, passage, tokens = 8)
+
+        val chunk = NoteChunk(
+            path,
+            index,
+            listOfNotNull(heading),
+            start until start + passage.length,
+            passage,
+            tokens = 8
+        )
+
         val vector = (embedder.embed(texts = listOf(passage)) as Outcome.Success).value
-        val held = this.index.notes[VAULT]?.get(path).orEmpty()
+
+        val held = this
+            .index
+            .notes[VAULT]
+            ?.get(path)
+            .orEmpty()
+
         val chunks = held + (chunk to vector.single())
         this.index.put(VAULT, path, chunks.map { it.first }, chunks.map { it.second })
     }

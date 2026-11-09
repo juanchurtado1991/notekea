@@ -11,7 +11,9 @@ data class NoteStats(
     val tasks: Int,
     val doneTasks: Int
 ) {
-    /** Minutes to read it at [WORDS_PER_MINUTE], rounded up: at least one minute for any text, none for an empty note. */
+    /**
+     * Minutes to read it at [WORDS_PER_MINUTE], rounded up: at least one minute for any text, none for an empty note.
+     */
     val readingMinutes: Int
         get() = (words + WORDS_PER_MINUTE - 1) / WORDS_PER_MINUTE
 

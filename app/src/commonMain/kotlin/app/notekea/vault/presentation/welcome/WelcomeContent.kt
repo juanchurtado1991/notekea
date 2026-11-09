@@ -28,9 +28,9 @@ import app.notekea.core.presentation.designsystem.components.NotekeaLogo
 import app.notekea.core.presentation.designsystem.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaWordmark
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.platform.label
 import app.notekea.resources.Res
 import app.notekea.resources.welcome_busy
 import app.notekea.resources.welcome_create_vault
@@ -49,10 +49,9 @@ private const val PREVIEW_HEIGHT_DP = 640
 private const val TWO_COLUMNS_MIN_WIDTH_DP = 820
 
 /**
- * Stateless welcome flow: nothing but the wordmark while the last vault is restored, the open vault once there is
- * one (drawn by [openedVaultContent], which the app provides so this feature does not depend on the notes one, with
- * the error over it when another vault fails to open from it), and
- * otherwise the welcome screen (`ROADMAP.md` 1.3, two columns since 1.14).
+ * Stateless welcome flow: nothing but the wordmark while the last vault is restored, the open vault once there is one
+ * (drawn by [openedVaultContent], which the app provides so this feature does not depend on the notes one, with the
+ * error over it when another vault fails to open from it), and otherwise the welcome screen.
  */
 @Composable
 fun WelcomeContent(
@@ -68,15 +67,22 @@ fun WelcomeContent(
     ) {
         Box {
             val openedVault = state.openedVault
+
             when {
-                state.isLoading -> NotekeaWordmark(modifier = Modifier.align(alignment = Alignment.Center))
+                state.isLoading -> NotekeaWordmark(
+                    modifier = Modifier.align(alignment = Alignment.Center)
+                )
 
-                openedVault != null -> openedVaultContent(
-                    openedVault
-                ) { onIntent(WelcomeIntent.OnSwitchVaultClick) }
+                openedVault != null -> openedVaultContent(openedVault) {
+                    onIntent(WelcomeIntent.OnSwitchVaultClick)
+                }
 
-                else -> WelcomeHome(state = state, onIntent = onIntent)
+                else -> WelcomeHome(
+                    state = state,
+                    onIntent = onIntent
+                )
             }
+
             // A vault that fails to open from the open one (Open folder… and its shortcut) says why over it.
             if (openedVault != null && (state.error != null || state.hasUnexpectedError)) {
                 WelcomeErrorBanner(
@@ -106,31 +112,60 @@ private fun WelcomeHome(
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val isWide = maxWidth >= TWO_COLUMNS_MIN_WIDTH_DP.dp
         val scrollState = rememberScrollState()
+
         val page = Modifier
             .fillMaxWidth()
             .heightIn(min = maxHeight)
             .verticalScroll(state = scrollState)
-            .padding(horizontal = NotekeaDimensions.SpacingXxl, vertical = NotekeaDimensions.SpacingXxl)
-        NotekeaScrollArea(state = scrollState, modifier = Modifier.fillMaxSize()) {
+            .padding(
+                horizontal = NotekeaDimensions.SpacingXxl,
+                vertical = NotekeaDimensions.SpacingXxl
+            )
+
+        NotekeaScrollArea(
+            state = scrollState,
+            modifier = Modifier.fillMaxSize()
+        ) {
             if (isWide) {
                 Row(
-                    modifier = page.wrapContentWidth().widthIn(max = (COLUMN_MAX_WIDTH_DP * 2 + COLUMN_GAP_DP).dp),
+                    modifier = page.wrapContentWidth().widthIn(
+                        max = (
+                            COLUMN_MAX_WIDTH_DP * 2 +
+                                COLUMN_GAP_DP
+                            ).dp
+                    ),
                     horizontalArrangement = Arrangement.spacedBy(
                         space = COLUMN_GAP_DP.dp,
                         alignment = Alignment.CenterHorizontally
                     ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    WelcomeStartColumn(state = state, onIntent = onIntent, modifier = Modifier.weight(weight = 1f))
-                    WelcomeEndColumn(state = state, onIntent = onIntent, modifier = Modifier.weight(weight = 1f))
+                    WelcomeStartColumn(
+                        state = state,
+                        onIntent = onIntent,
+                        modifier = Modifier.weight(weight = 1f)
+                    )
+
+                    WelcomeEndColumn(
+                        state = state,
+                        onIntent = onIntent,
+                        modifier = Modifier.weight(weight = 1f)
+                    )
                 }
             } else {
                 Column(
                     modifier = page,
                     verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXl)
                 ) {
-                    WelcomeStartColumn(state = state, onIntent = onIntent)
-                    WelcomeEndColumn(state = state, onIntent = onIntent)
+                    WelcomeStartColumn(
+                        state = state,
+                        onIntent = onIntent
+                    )
+
+                    WelcomeEndColumn(
+                        state = state,
+                        onIntent = onIntent
+                    )
                 }
             }
         }
@@ -149,7 +184,10 @@ private fun WelcomeStartColumn(
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingL)
     ) {
         WelcomeHeader()
-        val showBanner = state.hasUnexpectedError || (state.error != null && state.newVaultForm == null)
+
+        val showBanner =
+            state.hasUnexpectedError || (state.error != null && state.newVaultForm == null)
+
         if (showBanner) {
             WelcomeErrorBanner(
                 platformConventions = state.platformConventions,
@@ -159,7 +197,11 @@ private fun WelcomeStartColumn(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        WelcomeStart(state = state, onIntent = onIntent)
+
+        WelcomeStart(
+            state = state,
+            onIntent = onIntent
+        )
     }
 }
 
@@ -174,7 +216,10 @@ private fun WelcomeEndColumn(
         if (state.recentVaults.isEmpty()) {
             WelcomeFeatures(modifier = Modifier.fillMaxWidth())
         } else {
-            RecentVaultsSection(state = state, onIntent = onIntent)
+            RecentVaultsSection(
+                state = state,
+                onIntent = onIntent
+            )
         }
     }
 }
@@ -183,6 +228,7 @@ private fun WelcomeEndColumn(
 private fun WelcomeHeader() {
     NotekeaLogo()
     NotekeaWordmark()
+
     Text(
         text = stringResource(resource = Res.string.welcome_tagline),
         style = MaterialTheme.typography.bodyLarge,
@@ -196,6 +242,7 @@ private fun WelcomeStart(
     onIntent: (WelcomeIntent) -> Unit
 ) {
     val form = state.newVaultForm
+
     if (form != null) {
         NewVaultPanel(
             form = form,
@@ -207,9 +254,15 @@ private fun WelcomeStart(
             error = state.error,
             isBusy = state.isBusy
         )
+
         return
     }
-    StartActions(state = state, onIntent = onIntent)
+
+    StartActions(
+        state = state,
+        onIntent = onIntent
+    )
+
     StartHint(isBusy = state.isBusy)
 }
 
@@ -220,6 +273,7 @@ private fun StartActions(
 ) {
     val conventions = state.platformConventions
     val suggestedName = stringResource(resource = Res.string.welcome_new_vault_default_name)
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),
         verticalAlignment = Alignment.CenterVertically
@@ -228,8 +282,11 @@ private fun StartActions(
             text = stringResource(resource = Res.string.welcome_open_folder),
             onClick = { onIntent(WelcomeIntent.OnOpenFolderClick) },
             enabled = !state.isBusy,
-            shortcutHint = conventions.openFolderShortcut.label(operatingSystem = conventions.operatingSystem)
+            shortcutHint = conventions.openFolderShortcut.label(
+                operatingSystem = conventions.operatingSystem
+            )
         )
+
         NotekeaButton(
             text = stringResource(resource = Res.string.welcome_create_vault),
             onClick = { onIntent(WelcomeIntent.OnCreateVaultClick(suggestedName = suggestedName)) },
@@ -240,9 +297,7 @@ private fun StartActions(
 }
 
 @Composable
-private fun StartHint(
-    isBusy: Boolean
-) {
+private fun StartHint(isBusy: Boolean) {
     Row(
         modifier = Modifier.height(height = HINT_HEIGHT_DP.dp),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
@@ -250,8 +305,11 @@ private fun StartHint(
     ) {
         val busyText = stringResource(resource = Res.string.welcome_busy)
         if (isBusy) NotekeaProgressIndicator(label = busyText)
+
+        val hint = if (isBusy) busyText else stringResource(resource = Res.string.welcome_open_hint)
+
         Text(
-            text = if (isBusy) busyText else stringResource(resource = Res.string.welcome_open_hint),
+            text = hint,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -259,15 +317,16 @@ private fun StartHint(
 }
 
 @Composable
-private fun WelcomeContentPreviewFrame(
-    state: WelcomeState
-) {
+private fun WelcomeContentPreviewFrame(state: WelcomeState) {
     NotekeaPreviewThemes {
         WelcomeContent(
             state = state,
             onIntent = {},
             openedVaultContent = { vault, _ ->
-                Text(text = vault.name, modifier = Modifier.padding(all = NotekeaDimensions.SpacingXl))
+                Text(
+                    text = vault.name,
+                    modifier = Modifier.padding(all = NotekeaDimensions.SpacingXl)
+                )
             },
             modifier = Modifier.height(height = PREVIEW_HEIGHT_DP.dp)
         )
@@ -289,7 +348,9 @@ private fun WelcomeContentNoRecentsPreview() {
 @Preview
 @Composable
 private fun WelcomeContentRecentsPreview() {
-    WelcomeContentPreviewFrame(state = WelcomePreviewData.state().copy(recentVaults = WelcomePreviewData.recentVaults))
+    WelcomeContentPreviewFrame(
+        state = WelcomePreviewData.state().copy(recentVaults = WelcomePreviewData.recentVaults)
+    )
 }
 
 @Preview
@@ -317,13 +378,18 @@ private fun WelcomeContentPermissionErrorPreview() {
 @Preview
 @Composable
 private fun WelcomeContentVaultOpenedPreview() {
-    WelcomeContentPreviewFrame(state = WelcomePreviewData.state().copy(openedVault = WelcomePreviewData.openedVault))
+    WelcomeContentPreviewFrame(
+        state = WelcomePreviewData.state().copy(openedVault = WelcomePreviewData.openedVault)
+    )
 }
 
 @Preview
 @Composable
 private fun WelcomeContentBusyPreview() {
     WelcomeContentPreviewFrame(
-        state = WelcomePreviewData.state().copy(recentVaults = WelcomePreviewData.recentVaults, isBusy = true)
+        state = WelcomePreviewData.state().copy(
+            recentVaults = WelcomePreviewData.recentVaults,
+            isBusy = true
+        )
     )
 }

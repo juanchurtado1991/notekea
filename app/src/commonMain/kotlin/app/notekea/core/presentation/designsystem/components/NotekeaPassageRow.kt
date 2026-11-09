@@ -55,16 +55,14 @@ private const val ROW_VERTICAL_DP = 6
 private const val SUBTITLE_MAX_DP = 150
 private const val PREVIEW_TITLE = "Tomato soup"
 private const val PREVIEW_FOLDER = "Recipes"
-private const val PREVIEW_TEXT = "Ripe tomatoes roasted with garlic. Summer tomatoes from the beds make it sweeter."
+private const val PREVIEW_TEXT =
+    "Ripe tomatoes roasted with garlic. Summer tomatoes from the beds make it sweeter."
 private const val PREVIEW_HIGHLIGHT_START = 35
 
 /**
- * A row of a list that quotes a passage, as an inspector lists things (`ROADMAP.md` 2.4, 2.5, design A): its [icon],
- * [title] and, beside it in the muted color, [subtitle] (the folder); below, up to two lines of [text] with its
- * [highlights] underlined. No border: the row tints softly under the pointer, and its [actions] show at the
- * end of the title's row while the pointer is over it or the keyboard is on it or on one of them, so Tab reaches them,
- * or always when [showsActions] (the one thing a row is there for). Screen readers get them as [accessibilityActions].
- * A click or Enter on the row goes to [onClick].
+ * A row of a list that quotes a passage: [icon], [title], a muted [subtitle] and up to two lines of [text] with its
+ * [highlights] underlined. Its [actions] show while the pointer or the keyboard is on the row, or always when
+ * [showsActions]; screen readers get them as [accessibilityActions]. A click or Enter goes to [onClick].
  */
 @Composable
 fun NotekeaPassageRow(
@@ -81,37 +79,56 @@ fun NotekeaPassageRow(
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = MaterialTheme.shapes.small
+
     val interaction = remember { MutableInteractionSource() }
+
     val isHovered by interaction.collectIsHoveredAsState()
+
     var hasFocus by remember { mutableStateOf(value = false) }
+
+    val hoverColor = if (isHovered || hasFocus) {
+        colors.onSurface.copy(alpha = HOVER_ALPHA)
+    } else {
+        Color.Transparent
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = NotekeaDimensions.SpacingXs)
             .onFocusChanged { hasFocus = it.hasFocus }
             .clip(shape = shape)
-            .focusBorder(color = colors.primary, shape = shape)
-            .background(
-                color = if (isHovered ||
-                    hasFocus
-                ) {
-                    colors.onSurface.copy(alpha = HOVER_ALPHA)
-                } else {
-                    Color.Transparent
-                }
+            .focusBorder(
+                color = colors.primary,
+                shape = shape
             )
+            .background(color = hoverColor)
             .semantics { customActions = accessibilityActions }
-            .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick)
-            .padding(horizontal = NotekeaDimensions.SpacingS, vertical = ROW_VERTICAL_DP.dp)
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                role = Role.Button,
+                onClick = onClick
+            )
+            .padding(
+                horizontal = NotekeaDimensions.SpacingS,
+                vertical = ROW_VERTICAL_DP.dp
+            )
     ) {
         TitleRow(
             title = title,
             subtitle = subtitle,
             icon = icon,
-            showsActions = showsActions || isHovered || hasFocus,
+            showsActions = showsActions ||
+                isHovered ||
+                hasFocus,
             actions = actions
         )
-        Passage(text = text, highlights = highlights)
+
+        Passage(
+            text = text,
+            highlights = highlights
+        )
     }
 }
 
@@ -125,23 +142,39 @@ private fun TitleRow(
     actions: @Composable RowScope.() -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
-    Row(modifier = Modifier.height(height = TITLE_ROW_DP.dp), verticalAlignment = Alignment.CenterVertically) {
+
+    Row(
+        modifier = Modifier.height(height = TITLE_ROW_DP.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(size = ICON_DP.dp),
             tint = colors.onSurfaceVariant
         )
+
         Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
-        Row(modifier = Modifier.weight(weight = 1f), verticalAlignment = Alignment.CenterVertically) {
+
+        Row(
+            modifier = Modifier.weight(weight = 1f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text = title,
-                modifier = Modifier.weight(weight = 1f, fill = false),
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                modifier = Modifier.weight(
+                    weight = 1f,
+                    fill = false
+                ),
+                style = MaterialTheme
+                    .typography
+                    .bodyMedium
+                    .copy(fontWeight = FontWeight.SemiBold),
                 color = colors.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+
             if (subtitle.isNotEmpty()) {
                 Text(
                     text = subtitle,
@@ -155,6 +188,7 @@ private fun TitleRow(
                 )
             }
         }
+
         if (showsActions) actions()
     }
 }
@@ -165,8 +199,13 @@ private fun Passage(
     highlights: List<IntRange>
 ) {
     val colors = MaterialTheme.colorScheme
+
     Text(
-        text = marked(text = text, ranges = highlights, ink = colors.onSurface),
+        text = marked(
+            text = text,
+            ranges = highlights,
+            ink = colors.onSurface
+        ),
         color = colors.onSurfaceVariant,
         maxLines = TEXT_LINES,
         overflow = TextOverflow.Ellipsis
@@ -180,9 +219,15 @@ private fun marked(
     ink: Color
 ): AnnotatedString = buildAnnotatedString {
     append(text)
-    ranges.filter { it.first in text.indices && it.last in text.indices }.forEach { range ->
+
+    ranges.filter {
+        it.first in text.indices && it.last in text.indices
+    }.forEach { range ->
         addStyle(
-            style = SpanStyle(color = ink, textDecoration = TextDecoration.Underline),
+            style = SpanStyle(
+                color = ink,
+                textDecoration = TextDecoration.Underline
+            ),
             start = range.first,
             end = range.last + 1
         )

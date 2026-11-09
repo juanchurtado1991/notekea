@@ -30,7 +30,10 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 @Composable
 internal fun MarkdownSection() {
     NotekeaCard {
-        NotekeaMarkdown(content = MARKDOWN_SAMPLE, modifier = Modifier.padding(all = NotekeaDimensions.SpacingM))
+        NotekeaMarkdown(
+            content = MARKDOWN_SAMPLE,
+            modifier = Modifier.padding(all = NotekeaDimensions.SpacingM)
+        )
     }
 }
 
@@ -52,7 +55,11 @@ internal fun ContextMenuSection() {
                 icon = NotekeaIcons.Rename,
                 shortcutHint = MENU_RENAME_SHORTCUT
             ),
-            NotekeaMenuItem(label = MENU_REVEAL, onClick = {}, icon = NotekeaIcons.Reveal)
+            NotekeaMenuItem(
+                label = MENU_REVEAL,
+                onClick = {},
+                icon = NotekeaIcons.Reveal
+            )
         ),
         listOf(
             NotekeaMenuItem(
@@ -64,24 +71,38 @@ internal fun ContextMenuSection() {
             )
         )
     )
+
     NotekeaContextMenuArea(sections = sections) {
         NotekeaCard {
-            Text(text = MENU_AREA, modifier = Modifier.padding(all = NotekeaDimensions.SpacingM))
+            Text(
+                text = MENU_AREA,
+                modifier = Modifier.padding(all = NotekeaDimensions.SpacingM)
+            )
         }
     }
+
     MenuButtonSample()
 }
 
 @Composable
 private fun MenuButtonSample() {
     var isByName by remember { mutableStateOf(value = true) }
+
     NotekeaMenuButton(
         icon = if (isByName) NotekeaIcons.SortByName else NotekeaIcons.SortByModified,
         label = if (isByName) MENU_SORTED_BY_NAME else MENU_SORTED_BY_DATE,
         sections = listOf(
             listOf(
-                NotekeaMenuItem(label = MENU_SORT_NAME, onClick = { isByName = true }, isChecked = isByName),
-                NotekeaMenuItem(label = MENU_SORT_DATE, onClick = { isByName = false }, isChecked = !isByName)
+                NotekeaMenuItem(
+                    label = MENU_SORT_NAME,
+                    onClick = { isByName = true },
+                    isChecked = isByName
+                ),
+                NotekeaMenuItem(
+                    label = MENU_SORT_DATE,
+                    onClick = { isByName = false },
+                    isChecked = !isByName
+                )
             ),
             listOf(
                 NotekeaMenuItem(
@@ -105,7 +126,13 @@ private fun MenuButtonSample() {
 @Composable
 internal fun ConfirmDialogSection() {
     var isOpen by remember { mutableStateOf(value = false) }
-    NotekeaButton(text = DIALOG_OPEN, onClick = { isOpen = true }, style = NotekeaButtonStyle.SECONDARY)
+
+    NotekeaButton(
+        text = DIALOG_OPEN,
+        onClick = { isOpen = true },
+        style = NotekeaButtonStyle.SECONDARY
+    )
+
     if (isOpen) {
         NotekeaConfirmDialog(
             title = DIALOG_TITLE,
@@ -123,18 +150,33 @@ internal fun ConfirmDialogSection() {
 @Composable
 internal fun SplitPaneSection() {
     var isVisible by remember { mutableStateOf(value = true) }
+
     var width by remember { mutableStateOf(value = SPLIT_MIN_DP.dp) }
+
     var side by remember { mutableStateOf(value = PaneSide.START) }
+
     var isOverlay by remember { mutableStateOf(value = false) }
+
     Row {
-        NotekeaIconButton(icon = NotekeaIcons.HideSidebar, label = SPLIT_TOGGLE, onClick = { isVisible = !isVisible })
+        NotekeaIconButton(
+            icon = NotekeaIcons.HideSidebar,
+            label = SPLIT_TOGGLE,
+            onClick = { isVisible = !isVisible }
+        )
+
         NotekeaIconButton(
             icon = NotekeaIcons.SidePanel,
             label = SPLIT_SIDE,
             onClick = { side = if (side == PaneSide.START) PaneSide.END else PaneSide.START }
         )
-        NotekeaIconButton(icon = NotekeaIcons.Outline, label = SPLIT_OVERLAY, onClick = { isOverlay = !isOverlay })
+
+        NotekeaIconButton(
+            icon = NotekeaIcons.Outline,
+            label = SPLIT_OVERLAY,
+            onClick = { isOverlay = !isOverlay }
+        )
     }
+
     NotekeaCard {
         NotekeaSplitPane(
             panelWidth = width,
@@ -142,8 +184,18 @@ internal fun SplitPaneSection() {
             isPanelVisible = isVisible,
             minPanelWidth = SPLIT_MIN_DP.dp,
             maxPanelWidth = SPLIT_MAX_DP.dp,
-            panel = { Text(text = SPLIT_START, modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)) },
-            content = { Text(text = SPLIT_END, modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)) },
+            panel = {
+                Text(
+                    text = SPLIT_START,
+                    modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)
+                )
+            },
+            content = {
+                Text(
+                    text = SPLIT_END,
+                    modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)
+                )
+            },
             modifier = Modifier.height(height = SPLIT_HEIGHT_DP.dp),
             panelSide = side,
             isOverlay = isOverlay

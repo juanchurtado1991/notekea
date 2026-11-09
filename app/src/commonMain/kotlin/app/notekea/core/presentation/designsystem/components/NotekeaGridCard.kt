@@ -2,6 +2,7 @@ package app.notekea.core.presentation.designsystem.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.border
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,10 +44,9 @@ private const val SCRIM_ALPHA = 0.7f
 private const val SCRIM_START = 0.45f
 
 /**
- * A card of a grid of files (`ROADMAP.md` 1.11: a folder's notes): a rectangle with the [label] at its bottom. With an
- * [image] (the picture a note shows, or an image itself) the picture fills the card, cropped, under a dark shade that
- * keeps the label readable; without one the card shows [icon] on the surface. A click goes to [onClick]; the card draws
- * the focus ring when it has the keyboard.
+ * A card of a grid of files: a rectangle with the [label] at its bottom. With an [image] the picture fills the card,
+ * cropped, under a dark shade that keeps the label readable; without one the card shows [icon] on the surface. A click
+ * goes to [onClick]; the card draws the focus ring when it has the keyboard.
  */
 @Composable
 fun NotekeaGridCard(
@@ -59,14 +58,25 @@ fun NotekeaGridCard(
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = MaterialTheme.shapes.medium
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(ratio = ASPECT_RATIO)
             .clip(shape = shape)
-            .border(width = NotekeaDimensions.BorderWidth, color = colors.outlineVariant, shape = shape)
-            .focusBorder(color = colors.primary, shape = shape)
-            .clickable(role = Role.Button, onClick = onClick)
+            .border(
+                width = NotekeaDimensions.BorderWidth,
+                color = colors.outlineVariant,
+                shape = shape
+            )
+            .focusBorder(
+                color = colors.primary,
+                shape = shape
+            )
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
             .background(color = colors.surfaceVariant)
     ) {
         if (image != null) {
@@ -76,6 +86,7 @@ fun NotekeaGridCard(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
+
             Box(
                 modifier = Modifier.fillMaxSize().background(
                     brush = Brush.verticalGradient(
@@ -88,11 +99,18 @@ fun NotekeaGridCard(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.align(alignment = Alignment.Center).size(size = ICON_SIZE_DP.dp),
+                modifier = Modifier.align(
+                    alignment = Alignment.Center
+                ).size(size = ICON_SIZE_DP.dp),
                 tint = colors.onSurfaceVariant
             )
         }
-        CardLabel(label = label, icon = icon, isOnImage = image != null)
+
+        CardLabel(
+            label = label,
+            icon = icon,
+            isOnImage = image != null
+        )
     }
 }
 
@@ -103,6 +121,7 @@ private fun BoxScope.CardLabel(
     isOnImage: Boolean
 ) {
     val color = if (isOnImage) NotekeaColors.onImage else MaterialTheme.colorScheme.onSurface
+
     Row(
         modifier = Modifier
             .align(alignment = Alignment.BottomStart)
@@ -117,8 +136,10 @@ private fun BoxScope.CardLabel(
                 modifier = Modifier.size(size = NotekeaDimensions.IconSize),
                 tint = color
             )
+
             Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingXs))
         }
+
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
@@ -134,7 +155,11 @@ private fun BoxScope.CardLabel(
 private fun NotekeaGridCardPreview() {
     NotekeaPreviewThemes {
         Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
-            NotekeaGridCard(label = PREVIEW_NOTE, icon = NotekeaIcons.Note, onClick = {})
+            NotekeaGridCard(
+                label = PREVIEW_NOTE,
+                icon = NotekeaIcons.Note,
+                onClick = {}
+            )
         }
     }
 }

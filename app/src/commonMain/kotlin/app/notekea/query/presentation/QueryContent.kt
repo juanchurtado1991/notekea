@@ -36,9 +36,9 @@ import app.notekea.resources.query_write_failed
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The Query tab (`ROADMAP.md` 2.10): the query as rules over a table of the notes it finds, computed exactly from the
- * notes' properties, and how many at its foot. A property no note has says so, and no match says what to do. [saveTarget] is the note a query
- * can be saved in.
+ * The Query tab: the query as rules over a table of the notes it finds, computed exactly from the notes' properties,
+ * and how many at its foot. A property no note has says so, and no match says what to do. [saveTarget] is the note a
+ * query can be saved in.
  */
 @Composable
 fun QueryContent(
@@ -48,10 +48,21 @@ fun QueryContent(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        QueryBar(state = state, saveTarget = saveTarget, onIntent = onIntent)
+        QueryBar(
+            state = state,
+            saveTarget = saveTarget,
+            onIntent = onIntent
+        )
+
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        QueryNoticeLine(notice = state.notice, onIntent = onIntent)
+
+        QueryNoticeLine(
+            notice = state.notice,
+            onIntent = onIntent
+        )
+
         UnknownProperties(unknown = state.result.unknown)
+
         when {
             state.isLoading -> Unit
 
@@ -65,18 +76,22 @@ fun QueryContent(
                 )
             }
 
-            else -> ResultTable(state = state, onIntent = onIntent, modifier = Modifier.weight(weight = 1f))
+            else -> ResultTable(
+                state = state,
+                onIntent = onIntent,
+                modifier = Modifier.weight(weight = 1f)
+            )
         }
+
         if (!state.isLoading) StatusBar(result = state.result)
     }
 }
 
 /** How many notes the query found, at the window's foot as Finder says it. */
 @Composable
-private fun StatusBar(
-    result: QueryResult
-) {
+private fun StatusBar(result: QueryResult) {
     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
     Text(
         text = stringResource(resource = Res.string.query_count_of, result.rows.size, result.total),
         modifier = Modifier.fillMaxWidth().padding(vertical = NotekeaDimensions.SpacingXs),
@@ -94,16 +109,32 @@ private fun ResultTable(
 ) {
     val result: QueryResult = state.result
     val list = rememberLazyListState()
+
     Column(modifier = modifier) {
         QueryHeader(
             columns = result.columns,
             sort = state.query.sort,
             onSortChange = { onIntent(QueryIntent.OnSortChange(sort = it)) }
         )
-        NotekeaLazyScrollArea(state = list, modifier = Modifier.weight(weight = 1f)) {
-            LazyColumn(state = list, modifier = Modifier.fillMaxSize()) {
-                itemsIndexed(items = result.rows, key = { _, row -> row.path.value }) { index, row ->
-                    QueryTableRow(row = row, index = index, columns = result.columns, onIntent = onIntent)
+
+        NotekeaLazyScrollArea(
+            state = list,
+            modifier = Modifier.weight(weight = 1f)
+        ) {
+            LazyColumn(
+                state = list,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                itemsIndexed(
+                    items = result.rows,
+                    key = { _, row -> row.path.value }
+                ) { index, row ->
+                    QueryTableRow(
+                        row = row,
+                        index = index,
+                        columns = result.columns,
+                        onIntent = onIntent
+                    )
                 }
             }
         }
@@ -117,18 +148,27 @@ internal fun QueryNoticeLine(
     onIntent: (QueryIntent) -> Unit
 ) {
     val message = when (notice) {
-        is QueryNotice.Saved -> stringResource(resource = Res.string.query_saved, notice.path.nameWithoutExtension)
+        is QueryNotice.Saved -> stringResource(
+            resource = Res.string.query_saved,
+            notice.path.nameWithoutExtension
+        )
 
         is QueryNotice.AlreadySaved ->
-            stringResource(resource = Res.string.query_already_saved, notice.path.nameWithoutExtension)
+            stringResource(
+                resource = Res.string.query_already_saved,
+                notice.path.nameWithoutExtension
+            )
 
         QueryNotice.WriteFailed -> stringResource(resource = Res.string.query_write_failed)
 
         null -> return
     }
+
+    val hasFailed = notice == QueryNotice.WriteFailed
+
     NotekeaNotice(
         message = message,
-        icon = if (notice == QueryNotice.WriteFailed) NotekeaIcons.CalloutWarning else NotekeaIcons.Checked,
+        icon = if (hasFailed) NotekeaIcons.CalloutWarning else NotekeaIcons.Checked,
         dismissLabel = stringResource(resource = Res.string.query_notice_dismiss),
         onDismiss = { onIntent(QueryIntent.OnNoticeDismiss) },
         modifier = Modifier.fillMaxWidth().padding(all = NotekeaDimensions.SpacingS)
@@ -136,9 +176,7 @@ internal fun QueryNoticeLine(
 }
 
 @Composable
-internal fun UnknownProperties(
-    unknown: List<String>
-) {
+internal fun UnknownProperties(unknown: List<String>) {
     unknown.forEach { property ->
         Text(
             text = stringResource(resource = Res.string.query_unknown_property, property),
@@ -156,7 +194,10 @@ internal fun UnknownProperties(
 @Composable
 private fun QueryNoticeLinePreview() {
     NotekeaPreviewThemes {
-        QueryNoticeLine(notice = QueryNotice.WriteFailed, onIntent = {})
+        QueryNoticeLine(
+            notice = QueryNotice.WriteFailed,
+            onIntent = {}
+        )
     }
 }
 
@@ -172,6 +213,10 @@ private fun UnknownPropertiesPreview() {
 @Composable
 private fun QueryContentPreview() {
     NotekeaPreviewThemes {
-        QueryContent(state = QueryPreviewData.state, onIntent = {}, saveTarget = null)
+        QueryContent(
+            state = QueryPreviewData.state,
+            onIntent = {},
+            saveTarget = null
+        )
     }
 }

@@ -12,7 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The welcome screen's recent vaults (`ROADMAP.md` 1.14), rendered headless: five show, the sixth is not on screen
+ * The welcome screen's recent vaults, rendered headless: five show, the sixth is not on screen
  * until the list is scrolled inside its card, where it can be opened.
  */
 class WelcomeRecentsScreenTest {
@@ -21,13 +21,27 @@ class WelcomeRecentsScreenTest {
     @Test
     fun `five recent vaults show and the list scrolls inside its card to the others`() {
         val intents = mutableListOf<WelcomeIntent>()
+
         val vaults = (1..RECENTS).map { index ->
-            WelcomePreviewData.recentVaults.first().let {
-                it.copy(vault = Vault(path = PATH + index, name = NAME + index))
-            }
+            WelcomePreviewData
+                .recentVaults
+                .first()
+                .let {
+                    it.copy(
+                        vault = Vault(
+                            path = PATH + index,
+                            name = NAME + index
+                        )
+                    )
+                }
         }
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     WelcomeContent(
                         state = WelcomePreviewData.state().copy(recentVaults = vaults),
@@ -37,14 +51,29 @@ class WelcomeRecentsScreenTest {
                 }
             }.use { scene ->
                 settle(scene = scene)
-                listOf(FIFTH_ROW, BELOW_CARD).forEach { click(scene = scene, position = it) }
+
+                listOf(FIFTH_ROW, BELOW_CARD).forEach {
+                    click(
+                        scene = scene,
+                        position = it
+                    )
+                }
+
                 scene.sendPointerEvent(
                     eventType = PointerEventType.Scroll,
                     position = FIFTH_ROW,
-                    scrollDelta = Offset(x = 0f, y = SCROLL_TICKS)
+                    scrollDelta = Offset(
+                        x = 0f,
+                        y = SCROLL_TICKS
+                    )
                 )
+
                 settle(scene = scene)
-                click(scene = scene, position = FIFTH_ROW)
+
+                click(
+                    scene = scene,
+                    position = FIFTH_ROW
+                )
             }
         }
 
@@ -58,15 +87,25 @@ class WelcomeRecentsScreenTest {
         scene: ImageComposeScene,
         position: Offset
     ) {
-        scene.sendPointerEvent(eventType = PointerEventType.Move, position = position)
-        scene.sendPointerEvent(eventType = PointerEventType.Press, position = position)
-        scene.sendPointerEvent(eventType = PointerEventType.Release, position = position)
+        scene.sendPointerEvent(
+            eventType = PointerEventType.Move,
+            position = position
+        )
+
+        scene.sendPointerEvent(
+            eventType = PointerEventType.Press,
+            position = position
+        )
+
+        scene.sendPointerEvent(
+            eventType = PointerEventType.Release,
+            position = position
+        )
+
         settle(scene = scene)
     }
 
-    private fun settle(
-        scene: ImageComposeScene
-    ) {
+    private fun settle(scene: ImageComposeScene) {
         repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
     }
 
@@ -81,7 +120,13 @@ class WelcomeRecentsScreenTest {
         private const val SCROLL_TICKS = 100f
         private const val SETTLE_FRAMES = 4
         private const val WIDTH = 1300
-        private val BELOW_CARD = Offset(x = 900f, y = 560f)
-        private val FIFTH_ROW = Offset(x = 900f, y = 495f)
+        private val BELOW_CARD = Offset(
+            x = 900f,
+            y = 560f
+        )
+        private val FIFTH_ROW = Offset(
+            x = 900f,
+            y = 495f
+        )
     }
 }

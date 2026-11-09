@@ -1,12 +1,12 @@
 package app.notekea.connections.presentation
 
-import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.connections.data.JetBrainsMarkdownMentionFinder
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
-import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.connections.domain.FindMentionsUseCase
 import app.notekea.connections.domain.LinkMentionUseCase
+import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
+import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteTextCache
@@ -25,7 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Linked and Unlinked (`ROADMAP.md` 2.5): they follow the open note and the vault's notes, and Link turns an unlinked
+ * Linked and Unlinked: they follow the open note and the vault's notes, and Link turns an unlinked
  * mention into a link, which moves it to Linked.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -53,7 +53,10 @@ class NoteMentionsViewModelTest {
             noteContentStore = contents,
             applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = contents)
         ),
-        noteTextCache = NoteTextCache(contentStore = contents, textFolder = TextFolder()),
+        noteTextCache = NoteTextCache(
+            contentStore = contents,
+            textFolder = TextFolder()
+        ),
         dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     )
 
@@ -65,39 +68,74 @@ class NoteMentionsViewModelTest {
 
         assertEquals(
             expected = listOf(WELCOME) to listOf(LISBON),
-            actual = viewModel.state.value.mentions.let { found ->
-                found.linked.map { it.source } to found.unlinked.map { it.source }
-            }
+            actual = viewModel
+                .state
+                .value
+                .mentions
+                .let { found ->
+                    found.linked.map { it.source } to found.unlinked.map { it.source }
+                }
         )
     }
 
     @Test
-    fun `Link turns the mention into a link, and the vault changing moves the note to Linked`() = runTest(
+    fun `Link turns the mention into a link, and the vault changing moves the note to Linked`() =
+        runTest(
+            context = testDispatcher
+        ) {
+            val viewModel = started()
+
+            viewModel.onIntent(
+                intent = NoteMentionsIntent.OnLink(
+                    mention = viewModel
+                        .state
+                        .value
+                        .mentions
+                        .unlinked
+                        .single()
+                )
+            )
+
+            advanceUntilIdle()
+
+            viewModel.onIntent(
+                intent = NoteMentionsIntent.OnNotesChange(notes = notes(changed = LISBON))
+            )
+
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = Triple(
+                    "We ate [[Arepas|arepas]] by the river.",
+                    listOf(LISBON, WELCOME),
+                    null
+                ),
+                actual = Triple(
+                    contents.texts.getValue(LISBON),
+                    viewModel
+                        .state
+                        .value
+                        .mentions
+                        .linked
+                        .map { it.source },
+                    viewModel.state.value.linkFailed
+                )
+            )
+        }
+
+    @Test
+    fun `a mention whose note changed meanwhile is not linked, and says so`() = runTest(
         context = testDispatcher
     ) {
         val viewModel = started()
 
-        viewModel.onIntent(
-            intent = NoteMentionsIntent.OnLink(mention = viewModel.state.value.mentions.unlinked.single())
-        )
-        advanceUntilIdle()
-        viewModel.onIntent(intent = NoteMentionsIntent.OnNotesChange(notes = notes(changed = LISBON)))
-        advanceUntilIdle()
+        val mention = viewModel
+            .state
+            .value
+            .mentions
+            .unlinked
+            .single()
 
-        assertEquals(
-            expected = Triple("We ate [[Arepas|arepas]] by the river.", listOf(LISBON, WELCOME), null),
-            actual = Triple(
-                contents.texts.getValue(LISBON),
-                viewModel.state.value.mentions.linked.map { it.source },
-                viewModel.state.value.linkFailed
-            )
-        )
-    }
-
-    @Test
-    fun `a mention whose note changed meanwhile is not linked, and says so`() = runTest(context = testDispatcher) {
-        val viewModel = started()
-        val mention = viewModel.state.value.mentions.unlinked.single()
         contents.texts[LISBON] = "Another day, other plans."
 
         viewModel.onIntent(intent = NoteMentionsIntent.OnLink(mention = mention))
@@ -115,9 +153,13 @@ class NoteMentionsViewModelTest {
     ) {
         val viewModel = started()
         val found = viewModel.state.value.mentions
+
         contents.onRead = { error("The disk went away") }
 
-        viewModel.onIntent(intent = NoteMentionsIntent.OnNotesChange(notes = notes(changed = LISBON)))
+        viewModel.onIntent(
+            intent = NoteMentionsIntent.OnNotesChange(notes = notes(changed = LISBON))
+        )
+
         advanceUntilIdle()
         val failed = viewModel.state.value
         contents.onRead = {}
@@ -126,7 +168,11 @@ class NoteMentionsViewModelTest {
 
         assertEquals(
             expected = Triple(true, found, false),
-            actual = Triple(failed.searchFailed, failed.mentions, viewModel.state.value.searchFailed)
+            actual = Triple(
+                failed.searchFailed,
+                failed.mentions,
+                viewModel.state.value.searchFailed
+            )
         )
     }
 
@@ -138,14 +184,20 @@ class NoteMentionsViewModelTest {
         viewModel.onIntent(intent = NoteMentionsIntent.OnNotesChange(notes = notes()))
         viewModel.onIntent(intent = NoteMentionsIntent.OnNoteChange(note = AREPAS))
         advanceUntilIdle()
+
         return viewModel
     }
 
     /** The vault's notes; [changed] has a later date, as the tree has it after the file changed. */
-    private fun notes(
-        changed: RelativePath? = null
-    ): Map<RelativePath, NoteEntry> = listOf(AREPAS, WELCOME, LISBON).associateWith { path ->
-        entry(path = path.value, modifiedOffsetMillis = if (path == changed) CHANGE_MILLIS else 0L)
+    private fun notes(changed: RelativePath? = null): Map<RelativePath, NoteEntry> = listOf(
+        AREPAS,
+        WELCOME,
+        LISBON
+    ).associateWith { path ->
+        entry(
+            path = path.value,
+            modifiedOffsetMillis = if (path == changed) CHANGE_MILLIS else 0L
+        )
     }
 
     private companion object {

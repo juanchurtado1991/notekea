@@ -16,9 +16,21 @@ private const val CASES_PROPERTY = "notekea.autotest.cases"
  * opens it with only the cases of 1.6, for a feature's smoke test.
  */
 fun main(args: Array<String>) {
-    val prefixes = System.getProperty(CASES_PROPERTY).orEmpty().split(",").map(String::trim).filter(String::isNotEmpty)
-    testBuddyMain(args = args, suite = NotekeaSuite.suite.only(prefixes = prefixes)) { manager ->
-        runNotekea(modules = desktopModules + qaModule(), extraWindows = manager)
+    val prefixes = System
+        .getProperty(CASES_PROPERTY)
+        .orEmpty()
+        .split(",")
+        .map(String::trim)
+        .filter(String::isNotEmpty)
+
+    testBuddyMain(
+        args = args,
+        suite = NotekeaSuite.suite.only(prefixes = prefixes)
+    ) { manager ->
+        runNotekea(
+            modules = desktopModules + qaModule(),
+            extraWindows = manager
+        )
     }
 }
 

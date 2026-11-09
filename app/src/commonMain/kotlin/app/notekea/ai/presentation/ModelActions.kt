@@ -11,12 +11,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.ai.domain.ModelError
 import app.notekea.core.presentation.designsystem.components.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.ai.domain.ModelError
 import app.notekea.resources.Res
 import app.notekea.resources.models_delete
 import app.notekea.resources.models_download
@@ -93,21 +93,36 @@ private fun ActionRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
     ) {
+        val statusText = when (status) {
+            ModelStatus.InUse -> stringResource(resource = Res.string.models_in_use)
+
+            ModelStatus.Installed -> formatBytes(bytes = row.downloadBytes)
+
+            else -> downloadText(
+                downloadBytes = row.downloadBytes,
+                searchBytes = searchBytes
+            )
+        }
+
+        val statusColor = if (status == ModelStatus.InUse) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
+
         Text(
-            text = when (status) {
-                ModelStatus.InUse -> stringResource(resource = Res.string.models_in_use)
-                ModelStatus.Installed -> formatBytes(bytes = row.downloadBytes)
-                else -> downloadText(downloadBytes = row.downloadBytes, searchBytes = searchBytes)
-            },
+            text = statusText,
             modifier = Modifier.weight(weight = 1f),
             style = MaterialTheme.typography.bodySmall,
-            color = if (status == ModelStatus.InUse) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            }
+            color = statusColor
         )
-        ActionButtons(row = row, status = status, isFeatured = isFeatured, onIntent = onIntent)
+
+        ActionButtons(
+            row = row,
+            status = status,
+            isFeatured = isFeatured,
+            onIntent = onIntent
+        )
     }
 }
 
@@ -134,7 +149,10 @@ private fun ActionButtons(
 
         else -> Unit
     }
-    if (status == ModelStatus.Installed || status == ModelStatus.InUse) {
+
+    val isInstalled = status == ModelStatus.Installed || status == ModelStatus.InUse
+
+    if (isInstalled) {
         NotekeaButton(
             text = stringResource(resource = Res.string.models_delete),
             onClick = { onIntent(ModelManagerIntent.OnDeleteAsk(size = row.size)) },
@@ -158,9 +176,7 @@ private fun downloadText(
 }
 
 @Composable
-private fun errorMessage(
-    error: ModelError
-): String = when (error) {
+private fun errorMessage(error: ModelError): String = when (error) {
     ModelError.ChecksumMismatch -> stringResource(resource = Res.string.models_error_checksum)
 
     ModelError.Network -> stringResource(resource = Res.string.models_error_network)
@@ -182,7 +198,13 @@ private fun ModelActionsPreview() {
             verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
         ) {
             val row = ModelManagerSamples.medium
-            listOf(ModelStatus.NotInstalled, ModelStatus.Installed, ModelStatus.InUse, ModelStatus.Waiting).forEach {
+
+            listOf(
+                ModelStatus.NotInstalled,
+                ModelStatus.Installed,
+                ModelStatus.InUse,
+                ModelStatus.Waiting
+            ).forEach {
                 ModelActions(
                     row = row,
                     status = it,
@@ -191,6 +213,7 @@ private fun ModelActionsPreview() {
                     searchBytes = row.downloadBytes / PREVIEW_SEARCH_SHARE
                 )
             }
+
             ModelActions(
                 row = row,
                 status = ModelStatus.Failed(error = ModelError.Network),

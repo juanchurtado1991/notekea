@@ -18,5 +18,10 @@ class CreateNoteUseCase(private val noteFileOperations: NoteFileOperations) {
         folder = folder,
         baseName = baseName,
         extension = RelativePath.MARKDOWN_EXTENSION
-    ) { path -> noteFileOperations.createFile(vaultPath = vaultPath, path = path) }
+    ) { path ->
+        noteFileOperations.createFile(
+            vaultPath = vaultPath,
+            path = path
+        )
+    }
 }

@@ -31,9 +31,7 @@ private const val TAG_MARK = "#"
 
 /** How a person reads [condition]; a folder and a tag are just "is". */
 @Composable
-internal fun conditionLabel(
-    condition: QueryCondition
-): String = when (condition) {
+internal fun conditionLabel(condition: QueryCondition): String = when (condition) {
     QueryCondition.IS, QueryCondition.IN_FOLDER, QueryCondition.HAS_TAG ->
         stringResource(resource = Res.string.query_condition_is)
 
@@ -52,13 +50,17 @@ internal fun conditionLabel(
 
 /** What a chip says about [filter]. */
 @Composable
-internal fun filterLabel(
-    filter: QueryFilter
-): String = when (filter.condition) {
-    QueryCondition.IN_FOLDER -> stringResource(resource = Res.string.query_chip_folder, filter.value)
+internal fun filterLabel(filter: QueryFilter): String = when (filter.condition) {
+    QueryCondition.IN_FOLDER -> stringResource(
+        resource = Res.string.query_chip_folder,
+        filter.value
+    )
 
     QueryCondition.HAS_TAG ->
-        stringResource(resource = Res.string.query_chip_tag, filter.value.removePrefix(prefix = TAG_MARK))
+        stringResource(
+            resource = Res.string.query_chip_tag,
+            filter.value.removePrefix(prefix = TAG_MARK)
+        )
 
     else -> stringResource(
         resource = Res.string.query_chip_filter,
@@ -69,9 +71,7 @@ internal fun filterLabel(
 }
 
 @Composable
-internal fun noteCountLabel(
-    count: Int
-): String = if (count == 1) {
+internal fun noteCountLabel(count: Int): String = if (count == 1) {
     stringResource(resource = Res.string.query_count_one)
 } else {
     stringResource(resource = Res.string.query_count_many, count)
@@ -79,13 +79,26 @@ internal fun noteCountLabel(
 
 /** Which line of a query block cannot be read, and why. */
 @Composable
-internal fun invalidLabel(
-    invalid: QueryParse.Invalid
-): String = when (invalid.problem) {
-    QueryProblem.UNKNOWN_KEY -> stringResource(resource = Res.string.query_invalid_key, invalid.line)
-    QueryProblem.UNKNOWN_CONDITION -> stringResource(resource = Res.string.query_invalid_condition, invalid.line)
-    QueryProblem.UNKNOWN_ORDER -> stringResource(resource = Res.string.query_invalid_order, invalid.line)
-    QueryProblem.MISSING_PART -> stringResource(resource = Res.string.query_invalid_part, invalid.line)
+internal fun invalidLabel(invalid: QueryParse.Invalid): String = when (invalid.problem) {
+    QueryProblem.UNKNOWN_KEY -> stringResource(
+        resource = Res.string.query_invalid_key,
+        invalid.line
+    )
+
+    QueryProblem.UNKNOWN_CONDITION -> stringResource(
+        resource = Res.string.query_invalid_condition,
+        invalid.line
+    )
+
+    QueryProblem.UNKNOWN_ORDER -> stringResource(
+        resource = Res.string.query_invalid_order,
+        invalid.line
+    )
+
+    QueryProblem.MISSING_PART -> stringResource(
+        resource = Res.string.query_invalid_part,
+        invalid.line
+    )
 }
 
 @Preview
@@ -110,6 +123,13 @@ private fun noteCountLabelPreview() {
 @Composable
 private fun invalidLabelPreview() {
     NotekeaPreviewThemes {
-        Text(text = invalidLabel(invalid = QueryParse.Invalid(line = 2, problem = QueryProblem.MISSING_PART)))
+        Text(
+            text = invalidLabel(
+                invalid = QueryParse.Invalid(
+                    line = 2,
+                    problem = QueryProblem.MISSING_PART
+                )
+            )
+        )
     }
 }

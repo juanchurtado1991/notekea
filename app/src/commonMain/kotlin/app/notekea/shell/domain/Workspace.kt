@@ -3,11 +3,9 @@ package app.notekea.shell.domain
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * The editor's tabs (`ROADMAP.md` 1.11): one pane, or two side by side ([MAX_PANES]), and the [activePane], the one
- * the keyboard works in. A tab shows a note, another file, a folder (its notes as a grid) or a tool of the vault. A path is
- * open in one tab at most, in either pane, so two editors never write the same note:
- * opening it again goes to its tab. Every change returns a new workspace; the active tab always exists while its pane
- * has tabs, and a second pane left without tabs closes.
+ * The editor's tabs: one pane, or two side by side ([MAX_PANES]), and the [activePane], the one the keyboard works in.
+ * A path is open in one tab at most, in either pane, so two editors never write the same note. Every change returns a
+ * new workspace; the active tab always exists while its pane has tabs, and a second pane left without tabs closes.
  */
 data class Workspace(
     val panes: List<EditorPane> = listOf(EditorPane()),
@@ -21,31 +19,65 @@ data class Workspace(
         get() = panes.size == MAX_PANES
 
     /** Where [path] is open, as its pane and tab, or null when it is not. */
-    fun find(
-        path: RelativePath
-    ): Pair<Int, Int>? = panes.withIndex().firstNotNullOfOrNull { (pane, it) ->
-        it.tabs.indexOf(element = path).takeIf { tab -> tab >= 0 }?.let { tab -> pane to tab }
-    }
+    fun find(path: RelativePath): Pair<Int, Int>? =
+        panes.withIndex().firstNotNullOfOrNull { (pane, it) ->
+            it
+                .tabs
+                .indexOf(element = path)
+                .takeIf { tab ->
+                    tab >= 0
+                }
+                ?.let { tab ->
+                    pane to tab
+                }
+        }
 
     /** The pane that shows [path] once it is opened: the one holding its tab, or the active one, where it would go. */
-    fun paneOpening(
-        path: RelativePath
-    ): Int = find(path = path)?.first ?: activePane
+    fun paneOpening(path: RelativePath): Int = find(path = path)?.first ?: activePane
 
     /**
-     * Opens [path]: goes to its tab when it is open, otherwise adds a tab after the active one of the active pane. A tab
-     * opened [inBackground] (a link clicked with `Mod`, or the middle button) is added without leaving the current one.
+     * Opens [path]: goes to its tab when it is open, otherwise adds a tab after the active one of the active pane. A
+     * tab opened [inBackground] (a link clicked with `Mod`, or the middle button) is added without leaving the current
+     * one.
      */
     fun open(
         path: RelativePath,
         inBackground: Boolean = false
     ): Workspace {
-        find(path = path)?.let { (pane, tab) -> return if (inBackground) this else select(pane = pane, tab = tab) }
+        find(path = path)?.let { (pane, tab) ->
+            return if (inBackground) {
+                this
+            } else {
+                select(
+                    pane = pane,
+                    tab = tab
+                )
+            }
+        }
+
         val pane = panes[activePane]
         val index = pane.active + 1
-        val tabs = pane.tabs.toMutableList().apply { add(index = index, element = path) }
-        val active = if (inBackground && pane.active != EditorPane.NONE) pane.active else index
-        return withPane(index = activePane, pane = EditorPane(tabs = tabs, active = active))
+
+        val tabs = pane
+            .tabs
+            .toMutableList()
+            .apply {
+                add(
+                    index = index,
+                    element = path
+                )
+            }
+
+        val isActiveKept = inBackground && pane.active != EditorPane.NONE
+        val active = if (isActiveKept) pane.active else index
+
+        return withPane(
+            index = activePane,
+            pane = EditorPane(
+                tabs = tabs,
+                active = active
+            )
+        )
     }
 
     fun select(
@@ -54,25 +86,33 @@ data class Workspace(
     ): Workspace {
         val target = panes.getOrNull(index = pane) ?: return this
         if (tab !in target.tabs.indices) return this
-        return withPane(index = pane, pane = target.copy(active = tab)).copy(activePane = pane)
+
+        return withPane(
+            index = pane,
+            pane = target.copy(active = tab)
+        ).copy(activePane = pane)
     }
 
     /** The active pane's tab [step] places away, wrapping around at both ends (`Ctrl+Tab`, `Ctrl+Shift+Tab`). */
-    fun cycle(
-        step: Int
-    ): Workspace {
+    fun cycle(step: Int): Workspace {
         val pane = panes[activePane]
         if (pane.tabs.isEmpty()) return this
-        return select(pane = activePane, tab = (pane.active + step).mod(other = pane.tabs.size))
+
+        return select(
+            pane = activePane,
+            tab = (pane.active + step).mod(other = pane.tabs.size)
+        )
     }
 
     /** The active pane's [number]th tab (`Mod+1` to `Mod+8`); 9 is always the last one, as in browsers. */
-    fun jump(
-        number: Int
-    ): Workspace {
+    fun jump(number: Int): Workspace {
         val pane = panes[activePane]
         val tab = if (number >= LAST_TAB_NUMBER) pane.tabs.lastIndex else number - 1
-        return select(pane = activePane, tab = tab)
+
+        return select(
+            pane = activePane,
+            tab = tab
+        )
     }
 
     /** Closes a tab; the one to its right becomes active (or the one to its left, at the end), as in browsers. */
@@ -82,14 +122,25 @@ data class Workspace(
     ): Workspace {
         val target = panes.getOrNull(index = pane) ?: return this
         if (tab !in target.tabs.indices) return this
-        val tabs = target.tabs.filterIndexed { index, _ -> index != tab }
+
+        val tabs = target.tabs.filterIndexed { index, _ ->
+            index != tab
+        }
+
         val active = when {
             tabs.isEmpty() -> EditorPane.NONE
             tab < target.active -> target.active - 1
             tab == target.active -> tab.coerceAtMost(maximumValue = tabs.lastIndex)
             else -> target.active
         }
-        return withPane(index = pane, pane = EditorPane(tabs = tabs, active = active)).withoutEmptyPanes()
+
+        return withPane(
+            index = pane,
+            pane = EditorPane(
+                tabs = tabs,
+                active = active
+            )
+        ).withoutEmptyPanes()
     }
 
     /** Closes every tab of [pane] but [tab]. */
@@ -97,25 +148,55 @@ data class Workspace(
         pane: Int,
         tab: Int
     ): Workspace {
-        val path = panes.getOrNull(index = pane)?.tabs?.getOrNull(index = tab) ?: return this
-        return withPane(index = pane, pane = EditorPane(tabs = listOf(path), active = 0)).copy(activePane = pane)
+        val path = panes
+            .getOrNull(index = pane)
+            ?.tabs
+            ?.getOrNull(index = tab) ?: return this
+
+        return withPane(
+            index = pane,
+            pane = EditorPane(
+                tabs = listOf(path),
+                active = 0
+            )
+        ).copy(activePane = pane)
     }
 
     /**
-     * Opens [path] beside the active pane (a related note's Open to the side, `ROADMAP.md` 2.4): goes to its tab when it
+     * Opens [path] beside the active pane (a related note's Open to the side): goes to its tab when it
      * is open; otherwise adds it after the other pane's active tab, creating that pane when there is one, and makes
      * the other pane active.
      */
-    fun openBeside(
-        path: RelativePath
-    ): Workspace {
-        find(path = path)?.let { (pane, tab) -> return select(pane = pane, tab = tab) }
+    fun openBeside(path: RelativePath): Workspace {
+        find(path = path)?.let { (pane, tab) ->
+            return select(
+                pane = pane,
+                tab = tab
+            )
+        }
+
         val other = if (isSplit) MAX_PANES - 1 - activePane else 1
         val split = if (isSplit) this else copy(panes = panes + EditorPane())
         val target = split.panes[other]
         val index = target.active + 1
-        val tabs = target.tabs.toMutableList().apply { add(index = index, element = path) }
-        return split.withPane(index = other, pane = EditorPane(tabs = tabs, active = index)).copy(activePane = other)
+
+        val tabs = target
+            .tabs
+            .toMutableList()
+            .apply {
+                add(
+                    index = index,
+                    element = path
+                )
+            }
+
+        return split.withPane(
+            index = other,
+            pane = EditorPane(
+                tabs = tabs,
+                active = index
+            )
+        ).copy(activePane = other)
     }
 
     /**
@@ -125,7 +206,12 @@ data class Workspace(
     fun splitRight(): Workspace {
         val path = activePath ?: return this
         if (isSplit) return this
-        return move(path = path, toPane = 1, toIndex = 0)
+
+        return move(
+            path = path,
+            toPane = 1,
+            toIndex = 0
+        )
     }
 
     /**
@@ -139,28 +225,64 @@ data class Workspace(
     ): Workspace {
         val (fromPane, fromTab) = find(path = path) ?: return this
         if (toPane >= MAX_PANES) return this
+
         val withoutTab = withPane(
             index = fromPane,
             pane = panes[fromPane].let { pane ->
-                val tabs = pane.tabs.filterIndexed { index, _ -> index != fromTab }
+                val tabs = pane.tabs.filterIndexed { index, _ ->
+                    index != fromTab
+                }
+
                 val active = if (pane.active > fromTab) pane.active - 1 else pane.active
-                EditorPane(tabs = tabs, active = active.coerceAtMost(maximumValue = tabs.lastIndex))
+
+                EditorPane(
+                    tabs = tabs,
+                    active = active.coerceAtMost(maximumValue = tabs.lastIndex)
+                )
             }
         )
-        val panesBefore = if (toPane < withoutTab.panes.size) withoutTab.panes else withoutTab.panes + EditorPane()
+
+        val panesBefore = if (toPane < withoutTab.panes.size) {
+            withoutTab.panes
+        } else {
+            withoutTab.panes + EditorPane()
+        }
+
         val target = panesBefore[toPane]
-        val index = toIndex.coerceIn(minimumValue = 0, maximumValue = target.tabs.size)
-        val tabs = target.tabs.toMutableList().apply { add(index = index, element = path) }
-        val moved = Workspace(panes = panesBefore, activePane = activePane)
-            .withPane(index = toPane, pane = EditorPane(tabs = tabs, active = index))
+
+        val index = toIndex.coerceIn(
+            minimumValue = 0,
+            maximumValue = target.tabs.size
+        )
+
+        val tabs = target
+            .tabs
+            .toMutableList()
+            .apply {
+                add(
+                    index = index,
+                    element = path
+                )
+            }
+
+        val moved = Workspace(
+            panes = panesBefore,
+            activePane = activePane
+        )
+            .withPane(
+                index = toPane,
+                pane = EditorPane(
+                    tabs = tabs,
+                    active = index
+                )
+            )
             .copy(activePane = toPane)
+
         return moved.withoutEmptyPanes()
     }
 
     /** The pane the keyboard works in, after a click in it. */
-    fun focus(
-        pane: Int
-    ): Workspace = if (pane in panes.indices) copy(activePane = pane) else this
+    fun focus(pane: Int): Workspace = if (pane in panes.indices) copy(activePane = pane) else this
 
     /** Follows a rename or a move: the tabs of [from], or of anything inside it when it is a folder, now show [to]. */
     fun renamed(
@@ -168,53 +290,99 @@ data class Workspace(
         to: RelativePath
     ): Workspace = copy(
         panes = panes.map { pane ->
-            pane.copy(tabs = pane.tabs.map { if (it.isWithin(folder = from)) it.rebased(from = from, to = to) else it })
+            pane.copy(
+                tabs = pane.tabs.map {
+                    if (it.isWithin(folder = from)) {
+                        it.rebased(
+                            from = from,
+                            to = to
+                        )
+                    } else {
+                        it
+                    }
+                }
+            )
         }
     )
 
     /** Closes the tabs of [path], or of anything inside it when it is a folder (deleted). */
-    fun without(
-        path: RelativePath
-    ): Workspace = closeWhere { it.isWithin(folder = path) }
+    fun without(path: RelativePath): Workspace = closeWhere { it.isWithin(folder = path) }
 
     /** Closes the tabs whose file is not in [existing] (files deleted while the vault was closed). */
-    fun keepingOnly(
-        existing: Set<RelativePath>
-    ): Workspace = closeWhere { it !in existing && it !in TOOL_TABS }
+    fun keepingOnly(existing: Set<RelativePath>): Workspace = closeWhere {
+        it !in existing && it !in TOOL_TABS
+    }
 
-    private fun closeWhere(
-        predicate: (RelativePath) -> Boolean
-    ): Workspace {
+    private fun closeWhere(predicate: (RelativePath) -> Boolean): Workspace {
         var workspace = this
+
         while (true) {
-            val (pane, tab) = workspace.panes.withIndex().firstNotNullOfOrNull { (pane, it) ->
-                it.tabs.indexOfFirst(predicate).takeIf { tab -> tab >= 0 }?.let { tab -> pane to tab }
-            } ?: return workspace
-            workspace = workspace.close(pane = pane, tab = tab)
+            val (pane, tab) = workspace
+                .panes
+                .withIndex()
+                .firstNotNullOfOrNull { (pane, it) ->
+                    it
+                        .tabs
+                        .indexOfFirst(predicate)
+                        .takeIf { tab ->
+                            tab >= 0
+                        }
+                        ?.let { tab ->
+                            pane to tab
+                        }
+                } ?: return workspace
+
+            workspace = workspace.close(
+                pane = pane,
+                tab = tab
+            )
         }
     }
 
     private fun withPane(
         index: Int,
         pane: EditorPane
-    ): Workspace = copy(panes = panes.mapIndexed { i, it -> if (i == index) pane else it })
+    ): Workspace = copy(
+        panes = panes.mapIndexed { i, it ->
+            if (i == index) pane else it
+        }
+    )
 
     /** Drops panes without tabs while another pane remains, keeping the active pane on a pane that still exists. */
     private fun withoutEmptyPanes(): Workspace {
-        if (panes.size < MAX_PANES || panes.none { it.tabs.isEmpty() }) return this
-        val kept = panes.withIndex().filter { it.value.tabs.isNotEmpty() }.ifEmpty { listOf(panes.withIndex().first()) }
-        val active = kept.indexOfFirst { it.index == activePane }.takeIf { it >= 0 } ?: 0
-        return Workspace(panes = kept.map { it.value }, activePane = active)
+        val hasNoEmptyPane = panes.size < MAX_PANES || panes.none { it.tabs.isEmpty() }
+        if (hasNoEmptyPane) return this
+
+        val kept = panes
+            .withIndex()
+            .filter {
+                it
+                    .value
+                    .tabs
+                    .isNotEmpty()
+            }
+            .ifEmpty { listOf(panes.withIndex().first()) }
+
+        val active = kept.indexOfFirst {
+            it.index == activePane
+        }.takeIf {
+            it >= 0
+        } ?: 0
+
+        return Workspace(
+            panes = kept.map { it.value },
+            activePane = active
+        )
     }
 
     companion object {
-        /** The graph's tab (`ROADMAP.md` 2.7). It is no file of the vault, and the name of none: a dot starts it. */
+        /** The graph's tab. It is no file of the vault, and the name of none: a dot starts it. */
         val GRAPH = RelativePath(value = ".notekea-graph")
 
-        /** The Query tab (`ROADMAP.md` 2.10), no file of the vault either. */
+        /** The Query tab, no file of the vault either. */
         val QUERY = RelativePath(value = ".notekea-query")
 
-        /** The Tasks tab (`ROADMAP.md` 2.11), no file of the vault either. */
+        /** The Tasks tab, no file of the vault either. */
         val TASKS = RelativePath(value = ".notekea-tasks")
 
         /** The tabs that show a tool of the vault, not one of its files. */

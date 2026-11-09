@@ -19,9 +19,14 @@ class CommandSystemMotion(
 ) : SystemMotion {
     override suspend fun isReduced(): Boolean = withContext(context = dispatchers.io) {
         when (operatingSystem) {
-            OperatingSystem.LINUX -> run(LINUX_COMMAND)?.contains(other = LINUX_ANIMATIONS_OFF) == true
+            OperatingSystem.LINUX -> run(LINUX_COMMAND)?.contains(other = LINUX_ANIMATIONS_OFF) ==
+                true
+
             OperatingSystem.MACOS -> run(MACOS_COMMAND)?.trim() == MACOS_REDUCED
-            OperatingSystem.WINDOWS -> run(WINDOWS_COMMAND)?.trim()?.endsWith(suffix = WINDOWS_ANIMATIONS_OFF) == true
+
+            OperatingSystem.WINDOWS -> run(
+                WINDOWS_COMMAND
+            )?.trim()?.endsWith(suffix = WINDOWS_ANIMATIONS_OFF) == true
         }
     }
 
@@ -36,7 +41,8 @@ class CommandSystemMotion(
             "--object-path", "/org/freedesktop/portal/desktop",
             "--method", "org.freedesktop.portal.Settings.ReadOne", "org.gnome.desktop.interface", "enable-animations"
         )
-        private val MACOS_COMMAND = listOf("defaults", "read", "com.apple.universalaccess", "reduceMotion")
+        private val MACOS_COMMAND =
+            listOf("defaults", "read", "com.apple.universalaccess", "reduceMotion")
         private val WINDOWS_COMMAND = listOf(
             "reg",
             "query",
@@ -45,13 +51,18 @@ class CommandSystemMotion(
             "MinAnimate"
         )
 
-        private fun outputOf(
-            command: List<String>
-        ): String? = try {
+        private fun outputOf(command: List<String>): String? = try {
             val process = ProcessBuilder(command).redirectErrorStream(true).start()
-            process.inputStream.bufferedReader().use { it.readText() }
+
+            process
+                .inputStream
+                .bufferedReader()
+                .use { it.readText() }
         } catch (exception: IOException) {
-            Logger.withTag(tag = LOG_TAG).w(throwable = exception) { UNAVAILABLE_MESSAGE }
+            Logger
+                .withTag(tag = LOG_TAG)
+                .w(throwable = exception) { UNAVAILABLE_MESSAGE }
+
             null
         }
     }

@@ -45,7 +45,10 @@ fun NotekeaSkeletonRow(
             modifier = Modifier
                 .fillMaxWidth(fraction = widthFraction)
                 .height(height = BAR_HEIGHT_DP.dp)
-                .background(color = MaterialTheme.colorScheme.surfaceVariant, shape = MaterialTheme.shapes.extraSmall)
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = MaterialTheme.shapes.extraSmall
+                )
         )
     }
 }
@@ -55,7 +58,12 @@ fun NotekeaSkeletonRow(
 private fun NotekeaSkeletonRowPreview() {
     NotekeaPreviewThemes {
         Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
-            PREVIEW_ROWS.forEach { (depth, fraction) -> NotekeaSkeletonRow(widthFraction = fraction, depth = depth) }
+            PREVIEW_ROWS.forEach { (depth, fraction) ->
+                NotekeaSkeletonRow(
+                    widthFraction = fraction,
+                    depth = depth
+                )
+            }
         }
     }
 }

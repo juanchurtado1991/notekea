@@ -17,8 +17,17 @@ class CreateVaultUseCase(
         name: String
     ): Outcome<Vault, VaultError> {
         val folderName = name.trim()
-        if (!validateFileName(name = folderName)) return Outcome.Failure(error = VaultError.InvalidName)
-        return when (val created = vaultFileSystem.createFolder(parentPath = parentPath, name = folderName)) {
+
+        if (!validateFileName(name = folderName)) {
+            return Outcome.Failure(error = VaultError.InvalidName)
+        }
+
+        return when (
+            val created = vaultFileSystem.createFolder(
+                parentPath = parentPath,
+                name = folderName
+            )
+        ) {
             is Outcome.Failure -> created
             is Outcome.Success -> openVault(path = created.value)
         }

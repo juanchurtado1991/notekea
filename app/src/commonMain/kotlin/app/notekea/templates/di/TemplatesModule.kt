@@ -13,6 +13,7 @@ import org.koin.dsl.module
 val templatesModule = module {
     factoryOf(::GetTemplateSettingsUseCase)
     factoryOf(::CreateTemplatesFolderUseCase)
+
     viewModel { parameters ->
         TemplatePickerViewModel(
             vaultPath = parameters.get(),

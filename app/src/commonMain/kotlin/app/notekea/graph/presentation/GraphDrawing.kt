@@ -31,16 +31,28 @@ internal fun DrawScope.drawLines(
     lines.forEach { line ->
         val start = paint.places[line.first]
         val end = paint.places[line.second]
+
         if (start != null && end != null) {
             val isDimmed = paint.isDimmed(path = line.first) || paint.isDimmed(path = line.second)
+
+            val dash = if (line.isRelated) {
+                PathEffect.dashPathEffect(
+                    intervals = RELATED_DASH
+                )
+            } else {
+                null
+            }
+
+            val color = (if (line.isRelated) paint.accent else paint.lineColor).copy(
+                alpha = if (isDimmed) DIMMED else 1f
+            )
+
             drawLine(
-                color = (if (line.isRelated) paint.accent else paint.lineColor).copy(
-                    alpha = if (isDimmed) DIMMED else 1f
-                ),
+                color = color,
                 start = start,
                 end = end,
                 strokeWidth = if (line.isRelated) RELATED_WIDTH else LINK_WIDTH,
-                pathEffect = if (line.isRelated) PathEffect.dashPathEffect(intervals = RELATED_DASH) else null
+                pathEffect = dash
             )
         }
     }
@@ -55,15 +67,31 @@ internal fun DrawScope.drawDots(
     dots.forEach { dot ->
         val center = paint.places[dot.path] ?: return@forEach
         val radius = dot.radius * paint.scale
-        val alpha = fade * if (paint.isDimmed(path = dot.path)) DIMMED else 1f - dot.depth * DEPTH_FADE / 2
+
+        val alpha =
+            fade * if (paint.isDimmed(path = dot.path)) DIMMED else 1f - dot.depth * DEPTH_FADE / 2
+
         if (dot.path == paint.selected) {
-            drawCircle(color = paint.accent.copy(alpha = HALO_ALPHA), radius = radius + HALO_GROWTH, center = center)
+            drawCircle(
+                color = paint.accent.copy(alpha = HALO_ALPHA),
+                radius = radius + HALO_GROWTH,
+                center = center
+            )
         }
-        drawCircle(color = paint.colorOf(dot).copy(alpha = alpha), radius = radius, center = center)
+
+        drawCircle(
+            color = paint.colorOf(dot).copy(alpha = alpha),
+            radius = radius,
+            center = center
+        )
+
         val isNamed = fade == 1f && (
-            paint.showsAllLabels || dot.path == paint.selected || dot.path in paint.hovered ||
+            paint.showsAllLabels ||
+                dot.path == paint.selected ||
+                dot.path in paint.hovered ||
                 paint.isNamedMatch(path = dot.path)
             )
+
         if (isNamed) drawName(dot, center, radius, alpha, paint, measurer)
     }
 }
@@ -83,12 +111,31 @@ private fun DrawScope.drawName(
         maxLines = 1,
         constraints = Constraints(maxWidth = LABEL_WIDTH)
     )
-    val topLeft = Offset(x = center.x - text.size.width / 2f, y = center.y + radius + LABEL_GAP)
+
+    val topLeft = Offset(
+        x = center.x - text.size.width / 2f,
+        y = center.y + radius + LABEL_GAP
+    )
+
     drawRoundRect(
         color = paint.labelBackground.copy(alpha = paint.labelBackground.alpha * alpha),
-        topLeft = topLeft - Offset(x = LABEL_PADDING, y = LABEL_PADDING / 2),
-        size = Size(width = text.size.width + LABEL_PADDING * 2, height = text.size.height + LABEL_PADDING),
-        cornerRadius = CornerRadius(x = LABEL_PADDING, y = LABEL_PADDING)
+        topLeft = topLeft - Offset(
+            x = LABEL_PADDING,
+            y = LABEL_PADDING / 2
+        ),
+        size = Size(
+            width = text.size.width + LABEL_PADDING * 2,
+            height = text.size.height + LABEL_PADDING
+        ),
+        cornerRadius = CornerRadius(
+            x = LABEL_PADDING,
+            y = LABEL_PADDING
+        )
     )
-    drawText(textLayoutResult = text, topLeft = topLeft, alpha = alpha)
+
+    drawText(
+        textLayoutResult = text,
+        topLeft = topLeft,
+        alpha = alpha
+    )
 }

@@ -36,6 +36,7 @@ fun NotekeaAttachmentImage(
             maxWidth = maxWidth.value,
             requestedWidth = width?.value
         )
+
         Image(
             bitmap = bitmap,
             contentDescription = contentDescription,
@@ -53,7 +54,11 @@ fun NotekeaAttachmentImage(
 private fun NotekeaAttachmentImagePreview() {
     NotekeaPreviewThemes {
         NotekeaAttachmentImage(
-            bitmap = ImageBitmap(width = PREVIEW_WIDTH, height = PREVIEW_HEIGHT, config = ImageBitmapConfig.Argb8888),
+            bitmap = ImageBitmap(
+                width = PREVIEW_WIDTH,
+                height = PREVIEW_HEIGHT,
+                config = ImageBitmapConfig.Argb8888
+            ),
             contentDescription = null
         )
     }

@@ -10,9 +10,9 @@ import kotlin.time.toJavaInstant
 class JvmLocalTimeFormatter : LocalTimeFormatter {
     private val formatter = DateTimeFormatter.ofPattern(COMPACT_PATTERN)
 
-    override fun compact(
-        instant: Instant
-    ): String = formatter.format(instant.toJavaInstant().atZone(ZoneId.systemDefault()))
+    override fun compact(instant: Instant): String = formatter.format(
+        instant.toJavaInstant().atZone(ZoneId.systemDefault())
+    )
 
     companion object {
         private const val COMPACT_PATTERN = "yyyyMMddHHmmss"

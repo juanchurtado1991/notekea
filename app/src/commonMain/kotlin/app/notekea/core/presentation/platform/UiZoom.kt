@@ -21,9 +21,9 @@ import org.koin.compose.viewmodel.koinViewModel
 private const val PREVIEW_TEXT = "Zoomed text"
 
 /**
- * [content], the whole window, drawn at the app's zoom (`ROADMAP.md` 1.14): the platform's zoom shortcuts make it
- * larger, smaller or back to the system's size, one [UiScale] step at a time. [UiZoomViewModel] holds the zoom and keeps
- * it. [LocalUiZoom] tells the screens the zoom and how to reset it.
+ * [content], the whole window, drawn at the app's zoom: the platform's zoom shortcuts make it larger, smaller or back
+ * to the system's size, one [UiScale] step at a time. [UiZoomViewModel] holds the zoom and keeps it. [LocalUiZoom]
+ * tells the screens the zoom and how to reset it.
  */
 @Composable
 fun UiZoom(
@@ -32,6 +32,7 @@ fun UiZoom(
     content: @Composable () -> Unit
 ) {
     val scale by viewModel.state.collectAsState()
+
     ZoomedContent(
         scale = scale,
         platformConventions = platformConventions,
@@ -47,13 +48,29 @@ private fun ZoomedContent(
     onIntent: (UiZoomIntent) -> Unit,
     content: @Composable () -> Unit
 ) {
-    WindowShortcut(shortcut = platformConventions.zoomInShortcut) { onIntent(UiZoomIntent.OnLarger) }
-    WindowShortcut(shortcut = platformConventions.zoomOutShortcut) { onIntent(UiZoomIntent.OnSmaller) }
-    WindowShortcut(shortcut = platformConventions.zoomResetShortcut) { onIntent(UiZoomIntent.OnReset) }
+    WindowShortcut(shortcut = platformConventions.zoomInShortcut) {
+        onIntent(UiZoomIntent.OnLarger)
+    }
+
+    WindowShortcut(shortcut = platformConventions.zoomOutShortcut) {
+        onIntent(UiZoomIntent.OnSmaller)
+    }
+
+    WindowShortcut(shortcut = platformConventions.zoomResetShortcut) {
+        onIntent(UiZoomIntent.OnReset)
+    }
+
     val system = LocalDensity.current
-    val resetHint = platformConventions.zoomResetShortcut.label(operatingSystem = platformConventions.operatingSystem)
+
+    val resetHint = platformConventions.zoomResetShortcut.label(
+        operatingSystem = platformConventions.operatingSystem
+    )
+
     CompositionLocalProvider(
-        LocalDensity provides Density(density = system.density * scale, fontScale = system.fontScale),
+        LocalDensity provides Density(
+            density = system.density * scale,
+            fontScale = system.fontScale
+        ),
         LocalUiZoom provides UiZoomState(
             scale = scale,
             onReset = { onIntent(UiZoomIntent.OnReset) },

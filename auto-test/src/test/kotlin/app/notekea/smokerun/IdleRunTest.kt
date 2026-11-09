@@ -5,26 +5,59 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import kotlin.test.Test
 
 /**
- * The idle run of a performance pass (`ROADMAP.md`, "Closing a milestone"): the Sample Vault open, notes opened and
+ * The idle run of a performance pass: the Sample Vault open, notes opened and
  * closed, then the app left alone, its memory sampled after the work, after closing the notes and after one minute and
  * after the whole idle time the `smokeRun` task asks for. A plain test run does the work without waiting.
  */
 @OptIn(ExperimentalTestApi::class)
 class IdleRunTest {
     @Test
-    fun `memory comes back after notes close and stays put while the app is idle`() = smokeRun(name = RUN) { app ->
-        openVault(app = app, name = SAMPLE_VAULT, shownNote = HOME)
-        NOTES.forEach { (name, text) -> openNote(name = name, shownText = text) }
-        SmokeRunReport.sample(run = RUN, moment = "notes-open")
+    fun `memory comes back after notes close and stays put while the app is idle`() = smokeRun(
+        name = RUN
+    ) { app ->
+        openVault(
+            app = app,
+            name = SAMPLE_VAULT,
+            shownNote = HOME
+        )
+
+        NOTES.forEach { (name, text) ->
+            openNote(
+                name = name,
+                shownText = text
+            )
+        }
+
+        SmokeRunReport.sample(
+            run = RUN,
+            moment = "notes-open"
+        )
+
         repeat(times = NOTES.size) { pressShortcut(key = Key.W) }
+
         waitForIdle()
-        SmokeRunReport.sample(run = RUN, moment = "notes-closed")
+
+        SmokeRunReport.sample(
+            run = RUN,
+            moment = "notes-closed"
+        )
+
         val idle = SmokeRunReport.idleSeconds
+
         if (idle > 0) {
             Thread.sleep(minOf(idle, MINUTE) * MILLIS)
-            SmokeRunReport.sample(run = RUN, moment = "idle-1min")
+
+            SmokeRunReport.sample(
+                run = RUN,
+                moment = "idle-1min"
+            )
+
             Thread.sleep((idle - MINUTE).coerceAtLeast(minimumValue = 0) * MILLIS)
-            SmokeRunReport.sample(run = RUN, moment = "idle-${idle}s")
+
+            SmokeRunReport.sample(
+                run = RUN,
+                moment = "idle-${idle}s"
+            )
         }
     }
 

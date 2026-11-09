@@ -51,17 +51,22 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 @Composable
 internal fun TabsSection() {
     var selectedTab by remember { mutableIntStateOf(value = 0) }
+
     NotekeaTabRow(selectedTabIndex = selectedTab) {
         SAMPLE_TABS.forEachIndexed { index, label ->
             NotekeaTab(
                 text = label,
                 selected = selectedTab == index,
                 onClick = { selectedTab = index },
-                badgeCount = BADGE_SAMPLE_COUNT.takeIf { index == BADGE_TAB_INDEX }
+                badgeCount = BADGE_SAMPLE_COUNT.takeIf {
+                    index == BADGE_TAB_INDEX
+                }
             )
         }
     }
+
     var selectedCompactTab by remember { mutableIntStateOf(value = 0) }
+
     NotekeaCompactTabs(
         labels = SAMPLE_COMPACT_TABS,
         selectedIndex = selectedCompactTab,
@@ -71,42 +76,91 @@ internal fun TabsSection() {
 }
 
 /**
- * Document tabs above a pane, a tool rail, grid cards and a toolbar capsule: the workspace's pieces (`ROADMAP.md` 1.11,
- * 1.17).
+ * Document tabs above a pane, a tool rail, grid cards and a toolbar capsule: the workspace's pieces.
  */
 @Composable
 internal fun DocumentTabsSection() {
     var documents by remember { mutableStateOf(value = SAMPLE_DOCUMENTS) }
+
     var selectedDocument by remember { mutableIntStateOf(value = 0) }
+
+    fun reorder(
+        from: Int,
+        to: Int
+    ) {
+        documents = documents.toMutableList().apply {
+            add(
+                index = to,
+                element = removeAt(index = from)
+            )
+        }
+
+        selectedDocument = to
+    }
+
     NotekeaTabStrip(
-        tabs = documents.map { NotekeaTabStripItem(key = it, label = it, icon = NotekeaIcons.Note) },
+        tabs = documents.map {
+            NotekeaTabStripItem(
+                key = it,
+                label = it,
+                icon = NotekeaIcons.Note
+            )
+        },
         selectedIndex = selectedDocument.coerceAtMost(maximumValue = documents.lastIndex),
         isActive = true,
         closeLabel = DOCUMENT_CLOSE,
         onSelect = { selectedDocument = it },
-        onClose = { closed -> documents = documents.filterIndexed { index, _ -> index != closed } },
+        onClose = { closed ->
+            documents = documents.filterIndexed { index, _ ->
+                index != closed
+            }
+        },
         onDrop = { _, _ -> },
-        onReorder = { from, to ->
-            documents = documents.toMutableList().apply { add(index = to, element = removeAt(index = from)) }
-            selectedDocument = to
-        }
+        onReorder = { from, to -> reorder(from, to) }
     )
+
     Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)) {
         NotekeaToolRail(
-            items = SAMPLE_DOCUMENTS.map { NotekeaToolRailItem(icon = NotekeaIcons.Note, label = it, onClick = {}) },
+            items = SAMPLE_DOCUMENTS.map {
+                NotekeaToolRailItem(
+                    icon = NotekeaIcons.Note,
+                    label = it,
+                    onClick = {}
+                )
+            },
             label = RAIL_LABEL,
             modifier = Modifier.height(height = RAIL_HEIGHT_DP.dp)
         )
+
         SAMPLE_DOCUMENTS.take(n = 2).forEach { name ->
             Box(modifier = Modifier.width(width = GRID_CARD_WIDTH_DP.dp)) {
-                NotekeaGridCard(label = name, icon = NotekeaIcons.Note, onClick = {})
+                NotekeaGridCard(
+                    label = name,
+                    icon = NotekeaIcons.Note,
+                    onClick = {}
+                )
             }
         }
     }
+
     NotekeaToolbarPill(
         groups = listOf(
-            { SAMPLE_DOCUMENTS.forEach { NotekeaIconButton(icon = NotekeaIcons.Note, label = it, onClick = {}) } },
-            { NotekeaIconButton(icon = NotekeaIcons.More, label = DOCUMENT_CLOSE, onClick = {}) }
+            {
+                SAMPLE_DOCUMENTS.forEach {
+                    NotekeaIconButton(
+                        icon = NotekeaIcons.Note,
+                        label = it,
+                        onClick = {}
+                    )
+                }
+            },
+            {
+                NotekeaIconButton(
+                    icon = NotekeaIcons.More,
+                    label = DOCUMENT_CLOSE,
+                    onClick = {}
+                )
+            }
         )
     )
 }
@@ -115,7 +169,9 @@ internal fun DocumentTabsSection() {
 @Composable
 internal fun PaletteSection() {
     var query by remember { mutableStateOf(value = "") }
+
     var selected by remember { mutableIntStateOf(value = 0) }
+
     NotekeaCard {
         Box(modifier = Modifier.fillMaxWidth().height(height = PALETTE_HEIGHT_DP.dp)) {
             NotekeaPalette(
@@ -142,31 +198,63 @@ internal fun PaletteSection() {
 @Composable
 internal fun FeedbackSection() {
     Row {
-        StatusBarItem(label = STATUS_INDEXED, onClick = {}, indicator = StatusIndicator.ACTIVE)
-        StatusBarItem(label = STATUS_MODEL, onClick = {})
-        StatusBarItem(label = STATUS_SYNC, onClick = {}, indicator = StatusIndicator.ERROR)
+        StatusBarItem(
+            label = STATUS_INDEXED,
+            onClick = {},
+            indicator = StatusIndicator.ACTIVE
+        )
+
+        StatusBarItem(
+            label = STATUS_MODEL,
+            onClick = {}
+        )
+
+        StatusBarItem(
+            label = STATUS_SYNC,
+            onClick = {},
+            indicator = StatusIndicator.ERROR
+        )
     }
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
         verticalAlignment = Alignment.CenterVertically
     ) {
         NotekeaProgressIndicator(label = PROGRESS_LABEL)
-        Text(text = PROGRESS_LABEL, style = MaterialTheme.typography.bodySmall)
+
+        Text(
+            text = PROGRESS_LABEL,
+            style = MaterialTheme.typography.bodySmall
+        )
     }
+
     NotekeaProgressBar(
         fraction = PROGRESS_FRACTION,
         label = PROGRESS_LABEL,
         modifier = Modifier.width(width = PROGRESS_WIDTH_DP.dp)
     )
+
     ErrorBanner(
         message = SAMPLE_ERROR,
         onDismiss = {},
-        action = { NotekeaButton(text = BUTTON_LOAD_THEIRS, onClick = {}, style = NotekeaButtonStyle.SECONDARY) }
+        action = {
+            NotekeaButton(
+                text = BUTTON_LOAD_THEIRS,
+                onClick = {},
+                style = NotekeaButtonStyle.SECONDARY
+            )
+        }
     )
+
     EmptyState(
         title = EMPTY_TITLE,
         message = EMPTY_MESSAGE,
-        action = { NotekeaButton(text = BUTTON_NEW_NOTE, onClick = {}) }
+        action = {
+            NotekeaButton(
+                text = BUTTON_NEW_NOTE,
+                onClick = {}
+            )
+        }
     )
 }
 
@@ -174,20 +262,48 @@ internal fun FeedbackSection() {
 internal fun AttachmentsSection() {
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
         NotekeaAttachmentImage(
-            bitmap = ImageBitmap(width = SAMPLE_IMAGE_WIDTH, height = SAMPLE_IMAGE_HEIGHT),
+            bitmap = ImageBitmap(
+                width = SAMPLE_IMAGE_WIDTH,
+                height = SAMPLE_IMAGE_HEIGHT
+            ),
             contentDescription = null
         )
-        NotekeaFileChip(name = SAMPLE_FILE, hint = SAMPLE_FILE_HINT, onOpen = {})
-        NotekeaEmbeddedNote(title = SAMPLE_EMBEDDED_NOTE, openHint = SAMPLE_EMBEDDED_NOTE_HINT, onOpen = {}) {
-            Text(text = SAMPLE_EMBEDDED_NOTE_TEXT, style = MaterialTheme.typography.bodyLarge)
+
+        NotekeaFileChip(
+            name = SAMPLE_FILE,
+            hint = SAMPLE_FILE_HINT,
+            onOpen = {}
+        )
+
+        NotekeaEmbeddedNote(
+            title = SAMPLE_EMBEDDED_NOTE,
+            openHint = SAMPLE_EMBEDDED_NOTE_HINT,
+            onOpen = {}
+        ) {
+            Text(
+                text = SAMPLE_EMBEDDED_NOTE_TEXT,
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
+
         NotekeaEmbedNotice(
             title = SAMPLE_EMBED_MISSING_TITLE,
             message = SAMPLE_EMBED_MISSING,
             actionLabel = SAMPLE_EMBED_CREATE
         )
-        NotekeaEmbedNotice(title = SAMPLE_EMBEDDED_NOTE, message = SAMPLE_EMBED_CIRCULAR, isWarning = true)
-        NotekeaMissingFile(title = SAMPLE_MISSING, path = SAMPLE_MISSING_PATH, locateLabel = SAMPLE_LOCATE, onLocate = {
-        })
+
+        NotekeaEmbedNotice(
+            title = SAMPLE_EMBEDDED_NOTE,
+            message = SAMPLE_EMBED_CIRCULAR,
+            isWarning = true
+        )
+
+        NotekeaMissingFile(
+            title = SAMPLE_MISSING,
+            path = SAMPLE_MISSING_PATH,
+            locateLabel = SAMPLE_LOCATE,
+            onLocate = {
+            }
+        )
     }
 }

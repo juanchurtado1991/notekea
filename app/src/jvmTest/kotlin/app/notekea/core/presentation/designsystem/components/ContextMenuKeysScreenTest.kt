@@ -15,11 +15,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.keyDown
 import app.notekea.core.presentation.keyUp
 import app.notekea.core.presentation.nodes
 import app.notekea.core.presentation.texts
-import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -32,8 +32,15 @@ class ContextMenuKeysScreenTest {
 
     @Test
     fun `the Menu key and Shift+F10 open the menu of what has the keyboard`() {
-        val shown = listOf(keyDown(key = Key.Menu), keyDown(key = Key.F10, isShiftPressed = true)).map { key ->
+        val shown = listOf(
+            keyDown(key = Key.Menu),
+            keyDown(
+                key = Key.F10,
+                isShiftPressed = true
+            )
+        ).map { key ->
             var isShown = false
+
             UiThread.run {
                 menuScene().use { scene ->
                     settle(scene = scene)
@@ -44,21 +51,35 @@ class ContextMenuKeysScreenTest {
                     isShown = PARENT in scene.texts()
                 }
             }
+
             isShown
         }
 
-        assertEquals(expected = listOf(true, true), actual = shown)
+        assertEquals(
+            expected = listOf(true, true),
+            actual = shown
+        )
     }
 
     @Test
     fun `the Menu key opens the selected tab's menu, which takes the keyboard`() {
         var isShown = false
         var chosen = 0
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     NotekeaTabStrip(
-                        tabs = listOf(NotekeaTabStripItem(key = TAB, label = TAB)),
+                        tabs = listOf(
+                            NotekeaTabStripItem(
+                                key = TAB,
+                                label = TAB
+                            )
+                        ),
                         selectedIndex = 0,
                         isActive = true,
                         closeLabel = CHILD,
@@ -66,7 +87,18 @@ class ContextMenuKeysScreenTest {
                         onClose = {},
                         onDrop = { _, _ -> },
                         onReorder = { _, _ -> },
-                        menuOf = { listOf(listOf(NotekeaMenuItem(label = PARENT, onClick = { chosen++ }))) }
+                        menuOf = {
+                            listOf(
+                                listOf(
+                                    NotekeaMenuItem(
+                                        label = PARENT,
+                                        onClick = {
+                                            chosen++
+                                        }
+                                    )
+                                )
+                            )
+                        }
                     )
                 }
             }.use { scene ->
@@ -76,12 +108,23 @@ class ContextMenuKeysScreenTest {
                 scene.sendKeyEvent(event = keyDown(key = Key.Menu))
                 settle(scene = scene)
                 isShown = PARENT in scene.texts()
-                press(scene = scene, key = Key.DirectionDown)
-                press(scene = scene, key = Key.Enter)
+
+                press(
+                    scene = scene,
+                    key = Key.DirectionDown
+                )
+
+                press(
+                    scene = scene,
+                    key = Key.Enter
+                )
             }
         }
 
-        assertEquals(expected = true to 1, actual = isShown to chosen)
+        assertEquals(
+            expected = true to 1,
+            actual = isShown to chosen
+        )
     }
 
     @Test
@@ -89,69 +132,141 @@ class ContextMenuKeysScreenTest {
         var chosen = 0
         var inside = false
         var afterLeft = true
+
         UiThread.run {
-            menuScene(isOpen = true, onChild = { chosen++ }).use { scene ->
+            menuScene(
+                isOpen = true,
+                onChild = {
+                    chosen++
+                }
+            ).use { scene ->
                 settle(scene = scene)
-                press(scene = scene, key = Key.DirectionDown)
-                press(scene = scene, key = Key.DirectionRight)
+
+                press(
+                    scene = scene,
+                    key = Key.DirectionDown
+                )
+
+                press(
+                    scene = scene,
+                    key = Key.DirectionRight
+                )
+
                 inside = CHILD in scene.texts()
-                press(scene = scene, key = Key.DirectionLeft)
+
+                press(
+                    scene = scene,
+                    key = Key.DirectionLeft
+                )
+
                 afterLeft = CHILD in scene.texts()
-                press(scene = scene, key = Key.DirectionRight)
-                press(scene = scene, key = Key.Enter)
+
+                press(
+                    scene = scene,
+                    key = Key.DirectionRight
+                )
+
+                press(
+                    scene = scene,
+                    key = Key.Enter
+                )
             }
         }
 
-        assertEquals(expected = Triple(true, false, 1), actual = Triple(inside, afterLeft, chosen))
+        assertEquals(
+            expected = Triple(true, false, 1),
+            actual = Triple(inside, afterLeft, chosen)
+        )
     }
 
     @Test
     fun `a submenu opened with the pointer still closes when the pointer moves on`() {
         var opened = false
         var moved = true
+
         UiThread.run {
-            menuScene(isOpen = true, onChild = {}).use { scene ->
+            menuScene(
+                isOpen = true,
+                onChild = {}
+            ).use { scene ->
                 settle(scene = scene)
                 val rows = scene.textCenters()
+
                 scene.sendPointerEvent(
                     eventType = PointerEventType.Move,
                     position = rows.getValue(PARENT)
                 )
+
                 settle(scene = scene)
                 opened = CHILD in scene.texts()
+
                 scene.sendPointerEvent(
                     eventType = PointerEventType.Move,
                     position = rows.getValue(SIBLING)
                 )
+
                 settle(scene = scene)
                 moved = CHILD in scene.texts()
             }
         }
 
-        assertEquals(expected = true to false, actual = opened to moved)
+        assertEquals(
+            expected = true to false,
+            actual = opened to moved
+        )
     }
 
-    private fun ImageComposeScene.textCenters(): Map<String, Offset> = listOf(PARENT, SIBLING).associateWith { text ->
-        nodes().first { node ->
-            node.config.getOrNull(SemanticsProperties.Text)?.any { it.text == text } == true
-        }.boundsInRoot.center
+    private fun ImageComposeScene.textCenters(): Map<String, Offset> = listOf(
+        PARENT,
+        SIBLING
+    ).associateWith { text ->
+        nodes()
+            .first { node ->
+                node
+                    .config
+                    .getOrNull(SemanticsProperties.Text)
+                    ?.any {
+                        it.text == text
+                    } == true
+            }
+            .boundsInRoot
+            .center
     }
 
     private fun menuScene(
         isOpen: Boolean = false,
         onChild: () -> Unit = {}
-    ) = ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+    ) = ImageComposeScene(
+        width = WIDTH,
+        height = HEIGHT,
+        density = Density(density = 1f)
+    ) {
         NotekeaTheme(darkTheme = false) {
-            val state = remember { NotekeaContextMenuState().apply { if (isOpen) open(byKeyboard = true) } }
+            val state = remember {
+                NotekeaContextMenuState().apply {
+                    if (isOpen) open(byKeyboard = true)
+                }
+            }
+
             NotekeaContextMenuArea(
                 sections = listOf(
                     listOf(
                         NotekeaMenuItem(
                             label = PARENT,
                             onClick = {},
-                            items = listOf(listOf(NotekeaMenuItem(label = CHILD, onClick = onChild)))
+                            items = listOf(
+                                listOf(
+                                    NotekeaMenuItem(
+                                        label = CHILD,
+                                        onClick = onChild
+                                    )
+                                )
+                            )
                         ),
-                        NotekeaMenuItem(label = SIBLING, onClick = {})
+                        NotekeaMenuItem(
+                            label = SIBLING,
+                            onClick = {}
+                        )
                     )
                 ),
                 state = state
@@ -168,9 +283,7 @@ class ContextMenuKeysScreenTest {
         settle(scene = scene)
     }
 
-    private fun settle(
-        scene: ImageComposeScene
-    ) {
+    private fun settle(scene: ImageComposeScene) {
         repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
     }
 

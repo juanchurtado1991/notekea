@@ -3,7 +3,7 @@ package app.notekea.shell.domain
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * One pane of the editor (`ROADMAP.md` 1.11): its open [tabs], each a note or another file of the vault, in the order
+ * One pane of the editor: its open [tabs], each a note or another file of the vault, in the order
  * they are shown, and the index of the [active] one, or -1 when the pane has no tab.
  */
 data class EditorPane(

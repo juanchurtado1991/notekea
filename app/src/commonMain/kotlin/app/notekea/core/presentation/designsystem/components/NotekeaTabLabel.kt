@@ -44,30 +44,46 @@ internal fun NotekeaTabLabel(
     onClose: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
+
     Row(
-        modifier = Modifier.padding(start = NotekeaDimensions.SpacingM, end = NotekeaDimensions.SpacingXs),
+        modifier = Modifier.padding(
+            start = NotekeaDimensions.SpacingM,
+            end = NotekeaDimensions.SpacingXs
+        ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         tab.icon?.let {
+            val isLit = look.isSelected && look.isActive
+            val tint = if (isLit) colors.primary else tab.iconTint ?: colors.onSurfaceVariant
+
             Icon(
                 imageVector = it,
                 contentDescription = null,
                 modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-                tint = if (look.isSelected && look.isActive) colors.primary else tab.iconTint ?: colors.onSurfaceVariant
+                tint = tint
             )
+
             Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingXs))
         }
+
         Text(
             text = tab.label,
             modifier = Modifier.widthIn(max = LABEL_MAX_WIDTH_DP.dp),
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = if (look.isSelected) FontWeight.SemiBold else FontWeight.Normal
-            ),
+            style = MaterialTheme
+                .typography
+                .bodyMedium
+                .copy(fontWeight = if (look.isSelected) FontWeight.SemiBold else FontWeight.Normal),
             color = if (look.isSelected) colors.onSurface else colors.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        CloseOrDot(unsavedLabel = tab.unsavedLabel, look = look, closeLabel = closeLabel, onClose = onClose)
+
+        CloseOrDot(
+            unsavedLabel = tab.unsavedLabel,
+            look = look,
+            closeLabel = closeLabel,
+            onClose = onClose
+        )
     }
 }
 
@@ -84,18 +100,24 @@ private fun CloseOrDot(
 ) {
     Box(contentAlignment = Alignment.Center) {
         val isDotShown = unsavedLabel != null && !look.isHovered
+        val isCloseShown = !isDotShown && (look.isSelected || look.isHovered)
+
         NotekeaIconButton(
             icon = NotekeaIcons.Close,
             label = closeLabel,
             onClick = onClose,
-            modifier = Modifier.alpha(alpha = if (!isDotShown && (look.isSelected || look.isHovered)) 1f else 0f),
+            modifier = Modifier.alpha(alpha = if (isCloseShown) 1f else 0f),
             takesFocus = false
         )
+
         if (isDotShown) {
             Box(
                 modifier = Modifier
                     .size(size = UNSAVED_DOT_DP.dp)
-                    .background(color = MaterialTheme.colorScheme.onSurfaceVariant, shape = CircleShape)
+                    .background(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        shape = CircleShape
+                    )
                     .semantics { contentDescription = unsavedLabel }
             )
         }
@@ -107,8 +129,16 @@ private fun CloseOrDot(
 private fun NotekeaTabLabelPreview() {
     NotekeaPreviewThemes {
         NotekeaTabLabel(
-            tab = NotekeaTabStripItem(key = PREVIEW_KEY, label = PREVIEW_LABEL, icon = NotekeaIcons.Note),
-            look = TabLook(isSelected = true, isActive = true, isHovered = false),
+            tab = NotekeaTabStripItem(
+                key = PREVIEW_KEY,
+                label = PREVIEW_LABEL,
+                icon = NotekeaIcons.Note
+            ),
+            look = TabLook(
+                isSelected = true,
+                isActive = true,
+                isHovered = false
+            ),
             closeLabel = PREVIEW_CLOSE,
             onClose = {}
         )

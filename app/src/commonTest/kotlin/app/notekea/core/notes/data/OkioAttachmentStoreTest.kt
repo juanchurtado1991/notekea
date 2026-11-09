@@ -22,7 +22,12 @@ class OkioAttachmentStoreTest {
                 "/home/me/notes-old/pic.png",
                 "/home/me/notes",
                 "/home/me/notes/../pic.png"
-            ).map { store.pathInVault(vaultPath = "/home/me/notes", absolutePath = it) }
+            ).map {
+                store.pathInVault(
+                    vaultPath = "/home/me/notes",
+                    absolutePath = it
+                )
+            }
         )
     }
 }

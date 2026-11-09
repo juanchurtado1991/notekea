@@ -4,9 +4,7 @@ import app.notekea.core.domain.Outcome
 
 /** The folder operations the vault feature needs from the platform. */
 interface VaultFileSystem {
-    suspend fun access(
-        path: String
-    ): FolderAccess
+    suspend fun access(path: String): FolderAccess
 
     /** Creates `parentPath/name`, or reuses it when it exists and is empty, and returns its path. */
     suspend fun createFolder(

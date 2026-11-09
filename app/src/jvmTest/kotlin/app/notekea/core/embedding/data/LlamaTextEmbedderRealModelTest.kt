@@ -1,17 +1,17 @@
 package app.notekea.core.embedding.data
 
+import app.notekea.core.domain.Outcome
+import app.notekea.core.embedding.domain.EmbeddingError
 import co.touchlab.kermit.LogWriter
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import co.touchlab.kermit.platformLogWriter
-import app.notekea.core.domain.Outcome
-import app.notekea.core.embedding.domain.EmbeddingError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.delay
 import net.ladenthin.llama.LlamaModel
 import net.ladenthin.llama.args.LogFormat
 import net.ladenthin.llama.value.LogLevel
@@ -26,7 +26,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * The bundled multilingual model through java-llama.cpp (`ROADMAP.md` 2.2), the one integration test on the real model
+ * The bundled multilingual model through java-llama.cpp, the one integration test on the real model
  * (`ARCHITECTURE.md`: unit tests use fakes): unit vectors of its size, closeness in meaning across Spanish and English,
  * a text over its context refused, a missing file named, and the model let go when it is idle.
  */
@@ -37,6 +37,7 @@ class LlamaTextEmbedderRealModelTest {
     @Test
     fun `texts become unit vectors close in meaning across Spanish and English`() = runBlocking {
         val embedder = embedder()
+
         val texts = listOf(
             "¿Cuánta agua lleva la masa de las arepas?",
             "Arepas: two cups of pre-cooked corn flour and two and a half cups of warm water.",
@@ -45,8 +46,17 @@ class LlamaTextEmbedderRealModelTest {
 
         val (question, recipe, vendor) = (embedder.embed(texts = texts) as Outcome.Success).value
 
-        assertEquals(expected = listOf(384, 384, 384), actual = listOf(question.size, recipe.size, vendor.size))
-        assertTrue(actual = listOf(question, recipe, vendor).all { abs(dot(it, it) - 1f) < TOLERANCE })
+        assertEquals(
+            expected = listOf(384, 384, 384),
+            actual = listOf(question.size, recipe.size, vendor.size)
+        )
+
+        assertTrue(
+            actual = listOf(question, recipe, vendor).all {
+                abs(dot(it, it) - 1f) < TOLERANCE
+            }
+        )
+
         assertTrue(
             actual = dot(question, recipe) > dot(question, vendor) + MARGIN,
             message = "${dot(question, recipe)}"
@@ -54,39 +64,60 @@ class LlamaTextEmbedderRealModelTest {
     }
 
     @Test
-    fun `a text longer than the model reads is refused with its place and size, never cut`() = runBlocking {
-        val embedder = embedder()
+    fun `a text longer than the model reads is refused with its place and size, never cut`() =
+        runBlocking {
+            val embedder = embedder()
 
-        val outcome = embedder.embed(texts = listOf("short", List(size = 600) { "word" }.joinToString(separator = " ")))
+            val outcome = embedder.embed(
+                texts = listOf(
+                    "short",
+                    List(size = 600) { "word" }.joinToString(separator = " ")
+                )
+            )
 
-        val error = (outcome as Outcome.Failure).error
-        assertTrue(
-            actual = error is EmbeddingError.TextTooLong && error.index == 1 && error.tokens > embedder.maxTokens
-        )
-    }
+            val error = (outcome as Outcome.Failure).error
 
-    // Smoke 2.3 on Linux: quitting while indexing logged "The embedding model failed": the cancellation was caught as
-    // the model failing. A cancelled call now stops as cancelled and logs nothing.
+            assertTrue(
+                actual = error is EmbeddingError.TextTooLong &&
+                    error.index == 1 &&
+                    error.tokens > embedder.maxTokens
+            )
+        }
+
+    // Quitting while indexing cancels the call: it stops as cancelled and logs nothing, as the model has not failed.
     @Test
     fun `a cancelled call stops as cancelled, never logged as a failing model`() = runBlocking {
         val embedder = embedder()
         val errors = mutableListOf<String>()
+
         Logger.setLogWriters(
             object : LogWriter() {
-                override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
+                override fun log(
+                    severity: Severity,
+                    message: String,
+                    tag: String,
+                    throwable: Throwable?
+                ) {
                     if (severity >= Severity.Error) errors += message
                 }
             }
         )
+
         try {
-            val call = launch(context = Dispatchers.Default) { embedder.embed(texts = List(size = 300) { "Note $it" }) }
+            val call = launch(context = Dispatchers.Default) {
+                embedder.embed(texts = List(size = 300) { "Note $it" })
+            }
+
             delay(timeMillis = CANCEL_AFTER_MILLIS)
             call.cancelAndJoin()
         } finally {
             Logger.setLogWriters(platformLogWriter())
         }
 
-        assertEquals(expected = emptyList(), actual = errors)
+        assertEquals(
+            expected = emptyList(),
+            actual = errors
+        )
     }
 
     @Test
@@ -94,7 +125,9 @@ class LlamaTextEmbedderRealModelTest {
         val embedder = embedder(modelPath = "/no/model.gguf")
 
         assertEquals(
-            expected = Outcome.Failure(error = EmbeddingError.ModelMissing(path = "/no/model.gguf")),
+            expected = Outcome.Failure(
+                error = EmbeddingError.ModelMissing(path = "/no/model.gguf")
+            ),
             actual = embedder.embed(texts = listOf("anything"))
         )
     }
@@ -105,22 +138,41 @@ class LlamaTextEmbedderRealModelTest {
 
         embedder.embed(texts = listOf("Tomato soup"))
         val loadedAfterUse = embedder.isLoaded
-        withTimeout(timeMillis = WAIT_MILLIS) { while (embedder.isLoaded) delay(timeMillis = POLL_MILLIS) }
 
-        assertEquals(expected = listOf(true, false), actual = listOf(loadedAfterUse, embedder.isLoaded))
+        withTimeout(timeMillis = WAIT_MILLIS) {
+            while (embedder.isLoaded) delay(timeMillis = POLL_MILLIS)
+        }
+
+        assertEquals(
+            expected = listOf(true, false),
+            actual = listOf(loadedAfterUse, embedder.isLoaded)
+        )
     }
 
-    // Audit: the idle timer was started only by a call that returned, so a cancelled one kept the model loaded for good.
+    // Audit: the idle timer was started only by a call that returned, so a cancelled one kept the model loaded for
+    // good.
     @Test
     fun `the model is let go after a cancelled call too`() = runBlocking {
         val embedder = embedder(idleMillis = IDLE_MILLIS)
 
-        val call = launch(context = Dispatchers.Default) { embedder.embed(texts = List(size = 300) { "Note $it" }) }
-        withTimeout(timeMillis = WAIT_MILLIS) { while (!embedder.isLoaded) delay(timeMillis = POLL_MILLIS) }
-        call.cancelAndJoin()
-        withTimeout(timeMillis = WAIT_MILLIS) { while (embedder.isLoaded) delay(timeMillis = POLL_MILLIS) }
+        val call = launch(context = Dispatchers.Default) {
+            embedder.embed(texts = List(size = 300) { "Note $it" })
+        }
 
-        assertEquals(expected = false, actual = embedder.isLoaded)
+        withTimeout(timeMillis = WAIT_MILLIS) {
+            while (!embedder.isLoaded) delay(timeMillis = POLL_MILLIS)
+        }
+
+        call.cancelAndJoin()
+
+        withTimeout(timeMillis = WAIT_MILLIS) {
+            while (embedder.isLoaded) delay(timeMillis = POLL_MILLIS)
+        }
+
+        assertEquals(
+            expected = false,
+            actual = embedder.isLoaded
+        )
     }
 
     @Test
@@ -131,7 +183,10 @@ class LlamaTextEmbedderRealModelTest {
 
         embedder.close()
 
-        assertEquals(expected = listOf(true, false), actual = listOf(loadedAfterUse, embedder.isLoaded))
+        assertEquals(
+            expected = listOf(true, false),
+            actual = listOf(loadedAfterUse, embedder.isLoaded)
+        )
     }
 
     // 2.9: the model was never freed in java-llama.cpp 4.2.0: every load and let go kept about 275 MB for good.
@@ -139,35 +194,53 @@ class LlamaTextEmbedderRealModelTest {
     fun `loading the model again and again keeps no memory`() = runBlocking {
         assumeTrue(Files.exists(STATUS_FILE))
         val embedder = embedder(idleMillis = IDLE_MILLIS)
+
         val resident = List(size = CYCLES) {
             embedder.embed(texts = listOf("Tomato soup"))
-            withTimeout(timeMillis = WAIT_MILLIS) { while (embedder.isLoaded) delay(timeMillis = POLL_MILLIS) }
+
+            withTimeout(timeMillis = WAIT_MILLIS) {
+                while (embedder.isLoaded) delay(timeMillis = POLL_MILLIS)
+            }
+
             residentMegabytes()
         }
 
         val growth = resident.last() - resident.first()
-        assertTrue(actual = growth < MAX_GROWTH_MB, message = "$resident")
+
+        assertTrue(
+            actual = growth < MAX_GROWTH_MB,
+            message = "$resident"
+        )
     }
 
     // 2.9: llama.cpp's default log level writes every embedded text to stderr, and with it the words of the notes.
     @Test
     fun `the words of a note stay out of the engine's logs`() = runBlocking {
         val lines = CopyOnWriteArrayList<String>()
+
         val capture = object : BiConsumer<LogLevel, String> {
             override fun accept(level: LogLevel, message: String) {
                 lines += message
             }
         }
+
         LlamaModel.setLogger(LogFormat.TEXT, capture)
 
         embedder().embed(texts = listOf(PRIVATE_WORD))
 
-        assertEquals(expected = emptyList(), actual = lines.filter { PRIVATE_WORD in it })
+        assertEquals(
+            expected = emptyList(),
+            actual = lines.filter {
+                PRIVATE_WORD in it
+            }
+        )
     }
 
-    private fun residentMegabytes(): Long = Files.readAllLines(STATUS_FILE)
+    private fun residentMegabytes(): Long = Files
+        .readAllLines(STATUS_FILE)
         .first { it.startsWith(prefix = "VmRSS") }
-        .filter(Char::isDigit).toLong() / KILOBYTES
+        .filter(Char::isDigit)
+        .toLong() / KILOBYTES
 
     private fun embedder(
         modelPath: String = this.modelPath,
@@ -181,7 +254,10 @@ class LlamaTextEmbedderRealModelTest {
     private fun dot(
         first: FloatArray,
         second: FloatArray
-    ): Float = first.indices.sumOf { (first[it] * second[it]).toDouble() }.toFloat()
+    ): Float = first
+        .indices
+        .sumOf { (first[it] * second[it]).toDouble() }
+        .toFloat()
 
     private companion object {
         const val MODEL_PROPERTY = "notekea.embedding.model"

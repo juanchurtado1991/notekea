@@ -4,19 +4,19 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.MouseButton
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
-import androidx.compose.ui.test.click
 import androidx.compose.ui.test.rightClick
 import app.notekea.autotest.clickInTree
 import app.notekea.autotest.pressInWindow
-import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.HostSystem
 import com.testbuddy.ShortcutModifier.Mod
-import androidx.compose.ui.test.hasContentDescription
+import com.testbuddy.isShown
 
 private const val TAB_STRIP_BOTTOM = 40f
 private const val DRAG_STEPS = 12
@@ -24,10 +24,13 @@ private const val DRAG_STEPS = 12
 /** The tab showing [name]: of the elements showing it, the one in the tab strip at the window's top. */
 internal fun CaseScope.tab(name: String): SemanticsNodeInteraction {
     var found: SemanticsNodeInteraction? = null
-    ui.waitUntil(timeoutMillis = 10_000) {
-        found = tabsShowing(name = name).firstOrNull()
-        found != null
-    }
+
+    ui
+        .waitUntil(timeoutMillis = 10_000) {
+            found = tabsShowing(name = name).firstOrNull()
+            found != null
+        }
+
     return found ?: throw CaseFailure(message = "expected a tab \"$name\", there is none")
 }
 
@@ -35,15 +38,34 @@ internal fun CaseScope.tab(name: String): SemanticsNodeInteraction {
 internal fun CaseScope.tabsShowing(name: String): List<SemanticsNodeInteraction> {
     val nodes = ui.onAllNodes(matcher = hasText(text = name))
     val count = nodes.fetchSemanticsNodes().size
-    return (0 until count).map { nodes[it] }
-        .filter { it.isShown() && it.fetchSemanticsNode().boundsInRoot.bottom < TAB_STRIP_BOTTOM }
-        .sortedBy { it.fetchSemanticsNode().boundsInRoot.left }
+
+    return (0 until count)
+        .map {
+            nodes[it]
+        }
+        .filter {
+            it.isShown() && it.fetchSemanticsNode().boundsInRoot.bottom < TAB_STRIP_BOTTOM
+        }
+        .sortedBy {
+            it
+                .fetchSemanticsNode()
+                .boundsInRoot
+                .left
+        }
 }
 
 /** Fails unless the tabs [names] are in that order from left to right. */
 internal fun CaseScope.expectTabOrder(names: List<String>) {
-    val lefts = names.map { tab(name = it).fetchSemanticsNode().boundsInRoot.left }
-    if (lefts != lefts.sorted()) throw CaseFailure(message = "expected the tabs ${names.joinToString()} in that order")
+    val lefts = names.map {
+        tab(name = it)
+            .fetchSemanticsNode()
+            .boundsInRoot
+            .left
+    }
+
+    if (lefts != lefts.sorted()) {
+        throw CaseFailure(message = "expected the tabs ${names.joinToString()} in that order")
+    }
 }
 
 internal fun CaseScope.expectNoTab(name: String) {
@@ -65,22 +87,30 @@ internal fun CaseScope.rightClickTab(name: String) {
 /** Clicks [node] holding the system's main modifier (Cmd on macOS, Ctrl elsewhere), as Mod+click. */
 internal fun CaseScope.modClick(node: SemanticsNodeInteraction) {
     val mod = if (system == HostSystem.MACOS) Key.MetaLeft else Key.CtrlLeft
+
     node.performKeyInput { keyDown(key = mod) }
+
     node.performMouseInput { this.click() }
+
     node.performKeyInput { keyUp(key = mod) }
 }
 
 /** Hovers the tab [name], so its ✕ shows, and clicks the ✕. */
 internal fun CaseScope.closeTabWithX(name: String) {
     tab(name = name).performMouseInput { moveTo(position = center) }
+
     val closes = ui.onAllNodes(matcher = hasContentDescription(value = "Close tab"))
     ui.waitUntil(timeoutMillis = 10_000) { closes.fetchSemanticsNodes().isNotEmpty() }
     val tabBounds = tab(name = name).fetchSemanticsNode().boundsInRoot
     val count = closes.fetchSemanticsNodes().size
-    val close = (0 until count).map { closes[it] }.minBy {
+
+    val close = (0 until count).map {
+        closes[it]
+    }.minBy {
         val bounds = it.fetchSemanticsNode().boundsInRoot
         kotlin.math.abs(bounds.left - tabBounds.right)
     }
+
     close.performMouseInput { this.click() }
 }
 
@@ -92,15 +122,24 @@ internal fun CaseScope.dragTab(
     tab(name = name).performMouseInput {
         moveTo(position = center)
         press()
+
         repeat(times = DRAG_STEPS) { moveBy(delta = by / DRAG_STEPS.toFloat()) }
+
         release()
     }
 }
 
 /** The left edge of the tab [name], to drag another tab next to it. */
-internal fun CaseScope.tabLeft(name: String): Float = tab(name = name).fetchSemanticsNode().boundsInRoot.left
+internal fun CaseScope.tabLeft(name: String): Float = tab(name = name)
+    .fetchSemanticsNode()
+    .boundsInRoot
+    .left
 
-internal fun CaseScope.tabCenterX(name: String): Float = tab(name = name).fetchSemanticsNode().boundsInRoot.center.x
+internal fun CaseScope.tabCenterX(name: String): Float = tab(name = name)
+    .fetchSemanticsNode()
+    .boundsInRoot
+    .center
+    .x
 
 /**
  * Opens the folder [name] of the tree without keeping its tab: a click opens a folder in a tab too (1.11), which the

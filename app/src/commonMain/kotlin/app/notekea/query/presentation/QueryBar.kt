@@ -38,7 +38,7 @@ import app.notekea.resources.query_sort_name
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The query above its table (`ROADMAP.md` 2.10, design A): a toolbar with Sort, Columns and, with a note at hand,
+ * The query above its table: a toolbar with Sort, Columns and, with a note at hand,
  * saving it in [saveTarget], over its filters as [QueryRules]. With no filter, Add filter starts the first.
  */
 @Composable
@@ -48,7 +48,9 @@ internal fun QueryBar(
     onIntent: (QueryIntent) -> Unit
 ) {
     var isAdding by remember { mutableStateOf(value = false) }
+
     val hasRules = state.query.filters.isNotEmpty() || isAdding
+
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = NotekeaDimensions.SpacingXs)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(
@@ -58,12 +60,33 @@ internal fun QueryBar(
             horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            RulesTitle(hasRules = hasRules, onAdd = { isAdding = true })
+            RulesTitle(
+                hasRules = hasRules,
+                onAdd = { isAdding = true }
+            )
+
             Spacer(modifier = Modifier.weight(weight = 1f))
-            SortMenu(query = state.query, catalog = state.catalog, onIntent = onIntent)
-            ColumnsMenu(query = state.query, catalog = state.catalog, onIntent = onIntent)
-            saveTarget?.let { SaveButton(note = it, onIntent = onIntent) }
+
+            SortMenu(
+                query = state.query,
+                catalog = state.catalog,
+                onIntent = onIntent
+            )
+
+            ColumnsMenu(
+                query = state.query,
+                catalog = state.catalog,
+                onIntent = onIntent
+            )
+
+            saveTarget?.let {
+                SaveButton(
+                    note = it,
+                    onIntent = onIntent
+                )
+            }
         }
+
         QueryRules(
             filters = state.query.filters,
             catalog = state.catalog,
@@ -116,19 +139,30 @@ private fun SortMenu(
     onIntent: (QueryIntent) -> Unit
 ) {
     val sort = query.sort
+
     val choose = { chosen: QuerySort? -> onIntent(QueryIntent.OnSortChange(sort = chosen)) }
+
     val byName = NotekeaMenuItem(
         label = stringResource(resource = Res.string.query_sort_name),
         onClick = { choose(null) },
         isChecked = sort == null
     )
+
     val keys = catalog.keys.map { key ->
         NotekeaMenuItem(
             label = key.name,
-            onClick = { choose(QuerySort(property = key.name, isDescending = sort?.isDescending == true)) },
+            onClick = {
+                choose(
+                    QuerySort(
+                        property = key.name,
+                        isDescending = sort?.isDescending == true
+                    )
+                )
+            },
             isChecked = sort?.property == key.name
         )
     }
+
     val order = sort?.let { current ->
         listOf(
             NotekeaMenuItem(
@@ -143,6 +177,7 @@ private fun SortMenu(
             )
         )
     }
+
     NotekeaToolMenu(
         icon = NotekeaIcons.QuerySort,
         text = stringResource(resource = Res.string.query_sort),
@@ -157,6 +192,7 @@ private fun ColumnsMenu(
     onIntent: (QueryIntent) -> Unit
 ) {
     val shown = query.shownColumns
+
     NotekeaToolMenu(
         icon = NotekeaIcons.QueryColumns,
         text = stringResource(resource = Res.string.query_columns),

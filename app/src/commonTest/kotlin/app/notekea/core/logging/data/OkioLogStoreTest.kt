@@ -13,15 +13,30 @@ class OkioLogStoreTest {
     private val fileSystem = FakeFileSystem().apply { createDirectories(dir = LOGS) }
 
     @Test
-    fun `the recent lines come from the oldest file to the current one, the last ones kept`() = runTest(
-        testDispatcher
-    ) {
-        write(name = "notekea.2.log", text = "a1\na2\n")
-        write(name = "notekea.1.log", text = "b1\n\nb2\n")
-        write(name = "notekea.log", text = "c1\nc2\n")
+    fun `the recent lines come from the oldest file to the current one, the last ones kept`() =
+        runTest(
+            testDispatcher
+        ) {
+            write(
+                name = "notekea.2.log",
+                text = "a1\na2\n"
+            )
 
-        assertEquals(expected = listOf("a2", "b1", "b2", "c1", "c2"), actual = store().recentLines(count = 5))
-    }
+            write(
+                name = "notekea.1.log",
+                text = "b1\n\nb2\n"
+            )
+
+            write(
+                name = "notekea.log",
+                text = "c1\nc2\n"
+            )
+
+            assertEquals(
+                expected = listOf("a2", "b1", "b2", "c1", "c2"),
+                actual = store().recentLines(count = 5)
+            )
+        }
 
     @Test
     fun `no log folder reads as no lines`() = runTest(testDispatcher) {

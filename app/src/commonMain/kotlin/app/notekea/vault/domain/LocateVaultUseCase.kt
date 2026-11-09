@@ -12,7 +12,11 @@ class LocateVaultUseCase(
         newPath: String
     ): Outcome<Vault, VaultError> {
         val opened = openVault(path = newPath)
-        if (opened is Outcome.Success && newPath != missingPath) removeRecentVault(path = missingPath)
+
+        if (opened is Outcome.Success && newPath != missingPath) {
+            removeRecentVault(path = missingPath)
+        }
+
         return opened
     }
 }

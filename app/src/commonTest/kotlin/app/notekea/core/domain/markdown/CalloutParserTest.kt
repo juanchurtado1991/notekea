@@ -10,11 +10,25 @@ class CalloutParserTest {
     fun `a header gives the kind, the title and how it folds`() {
         assertEquals(
             expected = listOf(
-                CalloutHeader(kind = CalloutKind.TIP, title = "Soak the beans", fold = CalloutFold.NONE),
-                CalloutHeader(kind = CalloutKind.WARNING, title = "Hot oil", fold = CalloutFold.COLLAPSED),
-                CalloutHeader(kind = CalloutKind.NOTE, title = "Note", fold = CalloutFold.EXPANDED)
+                CalloutHeader(
+                    kind = CalloutKind.TIP,
+                    title = "Soak the beans",
+                    fold = CalloutFold.NONE
+                ),
+                CalloutHeader(
+                    kind = CalloutKind.WARNING,
+                    title = "Hot oil",
+                    fold = CalloutFold.COLLAPSED
+                ),
+                CalloutHeader(
+                    kind = CalloutKind.NOTE,
+                    title = "Note",
+                    fold = CalloutFold.EXPANDED
+                )
             ),
-            actual = listOf("[!tip] Soak the beans", "[!WARNING]- Hot oil", "[!note]+").map { parser.header(line = it) }
+            actual = listOf("[!tip] Soak the beans", "[!WARNING]- Hot oil", "[!note]+").map {
+                parser.header(line = it)
+            }
         )
     }
 
@@ -28,7 +42,9 @@ class CalloutParserTest {
                 CalloutKind.NOTE to "Recipe"
             ),
             actual = listOf("[!caution]", "[!tldr]", "[!error]", "[!recipe]").map { line ->
-                parser.header(line = line)!!.let { it.kind to it.title }
+                parser.header(line = line)!!.let {
+                    it.kind to it.title
+                }
             }
         )
     }

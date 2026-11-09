@@ -68,7 +68,9 @@ class WindowBoundsViewModelTest {
     }
 
     @Test
-    fun `a window that cannot be kept stays as it is, without an error`() = runTest(context = testDispatcher) {
+    fun `a window that cannot be kept stays as it is, without an error`() = runTest(
+        context = testDispatcher
+    ) {
         val viewModel = WindowBoundsViewModel(windowBoundsStore = FailingStore())
         advanceUntilIdle()
 
@@ -84,13 +86,17 @@ class WindowBoundsViewModelTest {
     private class FailingStore : WindowBoundsStore {
         override suspend fun bounds(): WindowBounds? = error(MESSAGE)
 
-        override suspend fun save(
-            bounds: WindowBounds
-        ) = error(MESSAGE)
+        override suspend fun save(bounds: WindowBounds) = error(MESSAGE)
     }
 
     private companion object {
         const val MESSAGE = "The settings file is read-only"
-        val BOUNDS = WindowBounds(widthDp = 900, heightDp = 700, xDp = null, yDp = null, isMaximized = false)
+        val BOUNDS = WindowBounds(
+            widthDp = 900,
+            heightDp = 700,
+            xDp = null,
+            yDp = null,
+            isMaximized = false
+        )
     }
 }

@@ -3,16 +3,20 @@ package app.notekea.editor.presentation.find
 import androidx.compose.ui.text.TextRange
 import app.notekea.editor.presentation.viewmodel.EditorHost
 
-/** Find in note (`ROADMAP.md` 1.5): the matches of the query in the text, the current one selected in it. */
-internal class EditorFind(
-    private val host: EditorHost
-) {
+/** Find in note: the matches of the query in the text, the current one selected in it. */
+internal class EditorFind(private val host: EditorHost) {
     private val noteSearch = NoteSearch()
 
-    fun search(
-        query: String
-    ) {
-        updateMatches(query = query, body = host.buffer.text.toString(), keepCurrent = false)
+    fun search(query: String) {
+        updateMatches(
+            query = query,
+            body = host
+                .buffer
+                .text
+                .toString(),
+            keepCurrent = false
+        )
+
         selectCurrentMatch()
     }
 
@@ -22,23 +26,34 @@ internal class EditorFind(
         body: String,
         keepCurrent: Boolean
     ) {
-        val matches = noteSearch.matches(text = body, query = query)
+        val matches = noteSearch.matches(
+            text = body,
+            query = query
+        )
+
         host.reduce { state ->
-            val previous = state.find?.current?.takeIf { keepCurrent }
+            val previous = state
+                .find
+                ?.current
+                ?.takeIf { keepCurrent }
+
             val current = if (matches.isEmpty()) {
                 null
             } else {
-                (previous ?: 0).coerceAtMost(
-                    maximumValue = matches.lastIndex
-                )
+                (previous ?: 0).coerceAtMost(maximumValue = matches.lastIndex)
             }
-            state.copy(find = FindState(query = query, matches = matches, current = current))
+
+            state.copy(
+                find = FindState(
+                    query = query,
+                    matches = matches,
+                    current = current
+                )
+            )
         }
     }
 
-    fun moveToMatch(
-        step: Int
-    ) {
+    fun moveToMatch(step: Int) {
         host.reduce { state ->
             val find = state.find ?: return@reduce state
             val count = find.matches.size
@@ -46,18 +61,27 @@ internal class EditorFind(
             val next = ((find.current ?: 0) + step + count) % count
             state.copy(find = find.copy(current = next))
         }
+
         selectCurrentMatch()
     }
 
     fun close() {
         selectCurrentMatch()
+
         host.reduce { it.copy(find = null) }
     }
 
     /** Selects the current match in the text, so closing the bar leaves the cursor on it. */
     private fun selectCurrentMatch() {
         val find = host.state.value.find ?: return
+
         val match = find.current?.let { find.matches.getOrNull(index = it) } ?: return
-        host.buffer.edit { selection = TextRange(start = match.first, end = match.last + 1) }
+
+        host.buffer.edit {
+            selection = TextRange(
+                start = match.first,
+                end = match.last + 1
+            )
+        }
     }
 }

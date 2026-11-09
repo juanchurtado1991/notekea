@@ -23,7 +23,11 @@ actual fun NotekeaScrollbar(
     state: ScrollState,
     modifier: Modifier
 ) {
-    VerticalScrollbar(adapter = rememberScrollbarAdapter(scrollState = state), modifier = modifier, style = style())
+    VerticalScrollbar(
+        adapter = rememberScrollbarAdapter(scrollState = state),
+        modifier = modifier,
+        style = style()
+    )
 }
 
 @Composable
@@ -31,13 +35,18 @@ actual fun NotekeaLazyScrollbar(
     state: LazyListState,
     modifier: Modifier
 ) {
-    VerticalScrollbar(adapter = rememberScrollbarAdapter(scrollState = state), modifier = modifier, style = style())
+    VerticalScrollbar(
+        adapter = rememberScrollbarAdapter(scrollState = state),
+        modifier = modifier,
+        style = style()
+    )
 }
 
 /** A rounded thumb in the muted color, faint until hovered. */
 @Composable
 private fun style(): ScrollbarStyle {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
+
     return ScrollbarStyle(
         minimalHeight = MIN_THUMB_DP.dp,
         thickness = THICKNESS_DP.dp,

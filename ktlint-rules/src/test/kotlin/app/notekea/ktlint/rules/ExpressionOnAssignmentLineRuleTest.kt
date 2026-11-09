@@ -116,6 +116,69 @@ class ExpressionOnAssignmentLineRuleTest {
             ).isFormattedAs(formattedCode)
     }
 
+    @Test
+    fun `expression that does not fit on the assignment line goes to the next one`() {
+        val code =
+            """
+            fun answer(): Int = 1234567890
+            """.trimIndent()
+        val formattedCode =
+            """
+            fun answer(): Int =
+                1234567890
+            """.trimIndent()
+
+        assertThatCode(code)
+            .withEditorConfigOverride(MAX_LINE_LENGTH_PROPERTY to SHORT_MAX_LINE_LENGTH)
+            .isFormattedAs(formattedCode)
+    }
+
+    @Test
+    fun `property with a getter keeps its initializer and joins the getter`() {
+        val code =
+            """
+            var size: Int = 1
+                get() =
+                    field + 1
+            """.trimIndent()
+        val formattedCode =
+            """
+            var size: Int = 1
+                get() = field + 1
+            """.trimIndent()
+
+        assertThatCode(code).isFormattedAs(formattedCode)
+    }
+
+    @Test
+    fun `three operands start on the line after the assignment`() {
+        val code =
+            """
+            fun isSame(): Boolean = first &&
+                second &&
+                third
+            val isOther =
+                first ||
+                    second ||
+                    third
+            val isShort = first && second
+            """.trimIndent()
+        val formattedCode =
+            """
+            fun isSame(): Boolean =
+                first &&
+                second &&
+                third
+            val isOther =
+                first ||
+                    second ||
+                    third
+            val isShort = first && second
+            """.trimIndent()
+
+        assertThatCode(code).isFormattedAs(formattedCode)
+    }
+
     companion object {
         private const val ERROR_MESSAGE = "Expression should start on the same line as '='"
         private const val SHORT_MAX_LINE_LENGTH = 20

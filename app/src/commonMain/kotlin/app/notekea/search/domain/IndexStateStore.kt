@@ -2,11 +2,9 @@ package app.notekea.search.domain
 
 import app.notekea.core.notes.domain.RelativePath
 
-/** Where the search index keeps what it holds of each note, per vault (`ROADMAP.md` 2.3), in the app's data. */
+/** Where the search index keeps what it holds of each note, per vault, in the app's data. */
 interface IndexStateStore {
-    suspend fun read(
-        vaultPath: String
-    ): List<IndexedNote>
+    suspend fun read(vaultPath: String): List<IndexedNote>
 
     suspend fun save(
         vaultPath: String,
@@ -19,7 +17,5 @@ interface IndexStateStore {
     )
 
     /** Forgets every note of the vault, so the next run indexes them all (Rebuild index); false when it could not. */
-    suspend fun clear(
-        vaultPath: String
-    ): Boolean
+    suspend fun clear(vaultPath: String): Boolean
 }

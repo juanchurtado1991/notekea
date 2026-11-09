@@ -51,7 +51,7 @@ import org.jetbrains.compose.resources.stringResource
 private const val THEMES_PER_ROW = 3
 
 /**
- * Settings → Appearance (`ROADMAP.md` 2.12, design A): the mode (System, Light or Dark), reduce motion and the color themes as a grid
+ * Settings → Appearance: the mode (System, Light or Dark), reduce motion and the color themes as a grid
  * of cards, three per row, each with its light and dark sketch; the chosen one is outlined and checked. It scrolls when
  * the dialog is too short for it.
  */
@@ -62,7 +62,11 @@ fun AppearanceSettings(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
-    NotekeaScrollArea(state = scrollState, modifier = modifier) {
+
+    NotekeaScrollArea(
+        state = scrollState,
+        modifier = modifier
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -75,6 +79,7 @@ fun AppearanceSettings(
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
+
             if (state.hasSaveFailed) {
                 Text(
                     text = stringResource(resource = Res.string.appearance_save_failed),
@@ -82,9 +87,21 @@ fun AppearanceSettings(
                     color = MaterialTheme.colorScheme.error
                 )
             }
-            ModeChoice(mode = state.appearance.mode, onIntent = onIntent)
-            ReduceMotionChoice(isOn = state.appearance.reduceMotion, onIntent = onIntent)
-            ThemeChoice(theme = state.appearance.theme, onIntent = onIntent)
+
+            ModeChoice(
+                mode = state.appearance.mode,
+                onIntent = onIntent
+            )
+
+            ReduceMotionChoice(
+                isOn = state.appearance.reduceMotion,
+                onIntent = onIntent
+            )
+
+            ThemeChoice(
+                theme = state.appearance.theme,
+                onIntent = onIntent
+            )
         }
     }
 }
@@ -96,6 +113,7 @@ private fun ModeChoice(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
         GroupLabel(text = stringResource(resource = Res.string.appearance_mode))
+
         NotekeaSegmentedControl(
             segments = listOf(
                 NotekeaSegment(
@@ -114,6 +132,7 @@ private fun ModeChoice(
             selectedIndex = MODES.indexOf(element = mode),
             onSelect = { onIntent(AppearanceIntent.OnModeChoose(mode = MODES[it])) }
         )
+
         Text(
             text = stringResource(resource = Res.string.appearance_mode_hint),
             style = MaterialTheme.typography.bodySmall,
@@ -128,6 +147,7 @@ private fun ReduceMotionChoice(
     onIntent: (AppearanceIntent) -> Unit
 ) {
     val label = stringResource(resource = Res.string.appearance_reduce_motion)
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
         verticalAlignment = Alignment.CenterVertically
@@ -137,8 +157,10 @@ private fun ReduceMotionChoice(
             onClick = { onIntent(AppearanceIntent.OnReduceMotionToggle) },
             label = label
         )
+
         Column {
             GroupLabel(text = label)
+
             Text(
                 text = stringResource(resource = Res.string.appearance_reduce_motion_hint),
                 style = MaterialTheme.typography.bodySmall,
@@ -155,37 +177,48 @@ private fun ThemeChoice(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
         GroupLabel(text = stringResource(resource = Res.string.appearance_theme))
-        ColorTheme.entries.chunked(size = THEMES_PER_ROW).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-                row.forEach { each ->
-                    NotekeaThemeCard(
-                        name = stringResource(resource = nameOf(theme = each)),
-                        light = ColorThemeSchemes.of(theme = each, darkTheme = false),
-                        dark = ColorThemeSchemes.of(theme = each, darkTheme = true),
-                        isSelected = each == theme,
-                        onClick = { onIntent(AppearanceIntent.OnThemeChoose(theme = each)) }
-                    )
+
+        ColorTheme
+            .entries
+            .chunked(size = THEMES_PER_ROW)
+            .forEach { row ->
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
+                ) {
+                    row.forEach { each ->
+                        NotekeaThemeCard(
+                            name = stringResource(resource = nameOf(theme = each)),
+                            light = ColorThemeSchemes.of(
+                                theme = each,
+                                darkTheme = false
+                            ),
+                            dark = ColorThemeSchemes.of(
+                                theme = each,
+                                darkTheme = true
+                            ),
+                            isSelected = each == theme,
+                            onClick = { onIntent(AppearanceIntent.OnThemeChoose(theme = each)) }
+                        )
+                    }
                 }
             }
-        }
     }
 }
 
 @Composable
-private fun GroupLabel(
-    text: String
-) {
+private fun GroupLabel(text: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+        style = MaterialTheme
+            .typography
+            .titleSmall
+            .copy(fontWeight = FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.onSurface
     )
 }
 
 /** The name a theme is shown with. */
-private fun nameOf(
-    theme: ColorTheme
-): StringResource = when (theme) {
+private fun nameOf(theme: ColorTheme): StringResource = when (theme) {
     ColorTheme.WORKSPACE_BLUE -> Res.string.theme_workspace_blue
     ColorTheme.GRAPHITE -> Res.string.theme_graphite
     ColorTheme.SAGE -> Res.string.theme_sage

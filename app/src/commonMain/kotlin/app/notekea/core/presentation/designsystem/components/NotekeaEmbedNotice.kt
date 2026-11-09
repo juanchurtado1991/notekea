@@ -15,8 +15,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,16 +27,16 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 
 private const val ACCENT_WIDTH_DP = 3
 private const val PREVIEW_ACTION = "Create note"
-private const val PREVIEW_CIRCULAR = "Circular embed: this note is already shown above, so it stops here."
+private const val PREVIEW_CIRCULAR =
+    "Circular embed: this note is already shown above, so it stops here."
 private const val PREVIEW_MISSING = "This note does not exist yet."
 private const val PREVIEW_PLAN = "Tasks › Plan"
 private const val PREVIEW_TITLE = "Weekend menu"
 
 /**
- * The place of a note another embeds but that cannot be shown (`ROADMAP.md` 1.15), drawn as an embedded note
- * ([NotekeaEmbeddedNote]) whose text is not there: its [title] and bar muted, the [message] saying why, and an action
- * when there is one ([actionLabel], [onAction]: create the note, open it). A [isWarning] notice (an embed that goes
- * around in a circle, or too deep) has a yellow bar.
+ * The place of a note another embeds but that cannot be shown, drawn as a [NotekeaEmbeddedNote] whose text is not
+ * there: its [title] and bar muted, the [message] saying why, and an action when there is one ([actionLabel],
+ * [onAction]). A [isWarning] notice (an embed that goes around in a circle, or too deep) has a yellow bar.
  */
 @Composable
 fun NotekeaEmbedNotice(
@@ -48,17 +48,28 @@ fun NotekeaEmbedNotice(
     onAction: () -> Unit = {}
 ) {
     val colors = MaterialTheme.colorScheme
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.small,
         color = colors.surface,
-        border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = colors.outline)
+        border = BorderStroke(
+            width = NotekeaDimensions.BorderWidth,
+            color = colors.outline
+        )
     ) {
         // The bar is drawn behind the content, as on an embedded note.
         val bar = if (isWarning) NotekeaColors.warning else colors.onSurfaceVariant
+
         Box(
             modifier = Modifier.drawBehind {
-                drawRect(color = bar, size = Size(width = ACCENT_WIDTH_DP.dp.toPx(), height = size.height))
+                drawRect(
+                    color = bar,
+                    size = Size(
+                        width = ACCENT_WIDTH_DP.dp.toPx(),
+                        height = size.height
+                    )
+                )
             }
         ) {
             Column(
@@ -66,9 +77,19 @@ fun NotekeaEmbedNotice(
                 verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
             ) {
                 NoticeTitle(title = title)
-                Text(text = message, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant
+                )
+
                 actionLabel?.let {
-                    NotekeaButton(text = it, onClick = onAction, style = NotekeaButtonStyle.SECONDARY)
+                    NotekeaButton(
+                        text = it,
+                        onClick = onAction,
+                        style = NotekeaButtonStyle.SECONDARY
+                    )
                 }
             }
         }
@@ -76,10 +97,9 @@ fun NotekeaEmbedNotice(
 }
 
 @Composable
-private fun NoticeTitle(
-    title: String
-) {
+private fun NoticeTitle(title: String) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
         verticalAlignment = Alignment.CenterVertically
@@ -90,6 +110,7 @@ private fun NoticeTitle(
             modifier = Modifier.size(size = NotekeaDimensions.IconSize),
             tint = muted
         )
+
         Text(
             text = title,
             style = MaterialTheme.typography.titleSmall,
@@ -105,8 +126,17 @@ private fun NoticeTitle(
 private fun NotekeaEmbedNoticePreview() {
     NotekeaPreviewThemes {
         Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)) {
-            NotekeaEmbedNotice(title = PREVIEW_TITLE, message = PREVIEW_MISSING, actionLabel = PREVIEW_ACTION)
-            NotekeaEmbedNotice(title = PREVIEW_PLAN, message = PREVIEW_CIRCULAR, isWarning = true)
+            NotekeaEmbedNotice(
+                title = PREVIEW_TITLE,
+                message = PREVIEW_MISSING,
+                actionLabel = PREVIEW_ACTION
+            )
+
+            NotekeaEmbedNotice(
+                title = PREVIEW_PLAN,
+                message = PREVIEW_CIRCULAR,
+                isWarning = true
+            )
         }
     }
 }

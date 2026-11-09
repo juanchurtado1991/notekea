@@ -7,9 +7,13 @@ public class Shortcut internal constructor(
     private val modifiers: List<ShortcutModifier>,
     internal val key: Key
 ) {
-    internal fun modifierKeysOn(system: HostSystem): List<Key> = modifiers.map { it.keyOn(system = system) }
+    internal fun modifierKeysOn(system: HostSystem): List<Key> = modifiers.map {
+        it.keyOn(system = system)
+    }
 
-    override fun toString(): String = (modifiers.map { it.toString() } + key.toString()).joinToString(separator = "+")
+    override fun toString(): String = (
+        modifiers.map { it.toString() } + key.toString()
+        ).joinToString(separator = "+")
 
     /** As a person reads it on [system]: `Ctrl+Shift+F`, `Cmd+P` on macOS. */
     internal fun describe(system: HostSystem): String {
@@ -19,6 +23,7 @@ public class Shortcut internal constructor(
                 else -> modifier.toString()
             }
         }
+
         return (names + keyName(key = key)).joinToString(separator = "+")
     }
 }

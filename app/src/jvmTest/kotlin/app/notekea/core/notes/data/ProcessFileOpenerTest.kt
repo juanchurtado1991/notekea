@@ -2,9 +2,9 @@ package app.notekea.core.notes.data
 
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
-import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.platform.domain.OperatingSystem
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
 import kotlin.io.path.createParentDirectories
@@ -18,7 +18,10 @@ import kotlin.test.assertEquals
 class ProcessFileOpenerTest {
     private val commands = mutableListOf<List<String>>()
     private val vault = Files.createTempDirectory(TEMP_PREFIX).also {
-        it.resolve(MENU.value).createParentDirectories().writeText(text = CONTENT)
+        it
+            .resolve(MENU.value)
+            .createParentDirectories()
+            .writeText(text = CONTENT)
     }
 
     @AfterTest
@@ -27,33 +30,39 @@ class ProcessFileOpenerTest {
     }
 
     @Test
-    fun `each system opens the file with its own command, and a failed one is reported`() = runBlocking {
-        val file = vault.resolve(MENU.value).toString()
-        val outcomes = listOf(
-            OperatingSystem.LINUX to 0,
-            OperatingSystem.MACOS to 0,
-            OperatingSystem.WINDOWS to 0,
-            OperatingSystem.LINUX to 4
-        ).map { (system, exitCode) ->
-            opener(operatingSystem = system, exitCode = exitCode).open(vault.toString(), MENU)
-        }
+    fun `each system opens the file with its own command, and a failed one is reported`() =
+        runBlocking {
+            val file = vault.resolve(MENU.value).toString()
 
-        assertEquals(
-            expected = listOf(
-                listOf("xdg-open", file),
-                listOf("open", file),
-                listOf("cmd", "/c", "start", "\"\"", file),
-                listOf("xdg-open", file)
-            ),
-            actual = commands
-        )
-        assertEquals(
-            expected =
-            List(size = 3) { Outcome.Success(value = Unit) } +
-                Outcome.Failure(error = NotesError.OpenFailed(path = MENU.value)),
-            actual = outcomes
-        )
-    }
+            val outcomes = listOf(
+                OperatingSystem.LINUX to 0,
+                OperatingSystem.MACOS to 0,
+                OperatingSystem.WINDOWS to 0,
+                OperatingSystem.LINUX to 4
+            ).map { (system, exitCode) ->
+                opener(
+                    operatingSystem = system,
+                    exitCode = exitCode
+                ).open(vault.toString(), MENU)
+            }
+
+            assertEquals(
+                expected = listOf(
+                    listOf("xdg-open", file),
+                    listOf("open", file),
+                    listOf("cmd", "/c", "start", "\"\"", file),
+                    listOf("xdg-open", file)
+                ),
+                actual = commands
+            )
+
+            assertEquals(
+                expected =
+                List(size = 3) { Outcome.Success(value = Unit) } +
+                    Outcome.Failure(error = NotesError.OpenFailed(path = MENU.value)),
+                actual = outcomes
+            )
+        }
 
     @Test
     fun `a file that is gone is reported without running anything`() = runBlocking {
@@ -62,8 +71,15 @@ class ProcessFileOpenerTest {
             exitCode = 0
         ).open(vault.toString(), RelativePath(value = "gone.pdf"))
 
-        assertEquals(expected = Outcome.Failure(error = NotesError.EntryMissing(path = "gone.pdf")), actual = outcome)
-        assertEquals(expected = emptyList(), actual = commands)
+        assertEquals(
+            expected = Outcome.Failure(error = NotesError.EntryMissing(path = "gone.pdf")),
+            actual = outcome
+        )
+
+        assertEquals(
+            expected = emptyList(),
+            actual = commands
+        )
     }
 
     private fun opener(

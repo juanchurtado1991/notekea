@@ -19,15 +19,31 @@ class WindowCloseShortcutsTest {
     fun `the quit shortcut and Close window ask to close, and Close tab does not`() {
         val dispatcher = ShortcutDispatcher()
         var closes = 0
+
         UiThread.run {
-            ImageComposeScene(width = SIZE, height = SIZE) {
+            ImageComposeScene(
+                width = SIZE,
+                height = SIZE
+            ) {
                 CompositionLocalProvider(LocalShortcutDispatcher provides dispatcher) {
-                    WindowCloseShortcuts(platformConventions = PreviewPlatformConventions.linux, onClose = { closes++ })
+                    WindowCloseShortcuts(
+                        platformConventions = PreviewPlatformConventions.linux,
+                        onClose = {
+                            closes++
+                        }
+                    )
                 }
             }.use { scene ->
                 scene.render()
                 dispatcher.dispatch(event = key(key = Key.Q))
-                dispatcher.dispatch(event = key(key = Key.W, isShiftPressed = true))
+
+                dispatcher.dispatch(
+                    event = key(
+                        key = Key.W,
+                        isShiftPressed = true
+                    )
+                )
+
                 dispatcher.dispatch(event = key(key = Key.W))
             }
         }

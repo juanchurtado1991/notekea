@@ -1,7 +1,5 @@
 package app.notekea.ai.data
 
-import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.core.domain.FakeClock
 import app.notekea.ai.domain.FakeActiveModelStore
 import app.notekea.ai.domain.FakeModelCatalogSource
 import app.notekea.ai.domain.FakeModelDownloader
@@ -12,6 +10,8 @@ import app.notekea.ai.domain.InstallSession
 import app.notekea.ai.domain.ModelCatalogs
 import app.notekea.ai.domain.ModelError
 import app.notekea.ai.domain.ModelSize
+import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.core.domain.FakeClock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -22,7 +22,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.time.Instant
 
-/** `ROADMAP.md` 3.1: one installation at a time, paused, resumed or cancelled, that outlives Settings. */
+/** One installation at a time, paused, resumed or cancelled, that outlives Settings. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class CoroutineModelInstallerTest {
     private val testDispatcher = StandardTestDispatcher()
@@ -30,7 +30,10 @@ class CoroutineModelInstallerTest {
     private val downloader = FakeModelDownloader(storage = storage)
     private val activeModelStore = FakeActiveModelStore()
     private val installer = CoroutineModelInstaller(
-        install = InstallModelUseCase(storage = storage, downloader = downloader),
+        install = InstallModelUseCase(
+            storage = storage,
+            downloader = downloader
+        ),
         catalogSource = FakeModelCatalogSource(),
         storage = storage,
         activeModelStore = activeModelStore,
@@ -44,16 +47,24 @@ class CoroutineModelInstallerTest {
     }
 
     @Test
-    fun `an installed model becomes the one in use, and the installation ends`() = runTest(context = testDispatcher) {
+    fun `an installed model becomes the one in use, and the installation ends`() = runTest(
+        context = testDispatcher
+    ) {
         installer.start(model = ModelCatalogs.medium)
         advanceUntilIdle()
 
-        assertEquals(expected = ModelSize.MEDIUM, actual = activeModelStore.kept.value)
+        assertEquals(
+            expected = ModelSize.MEDIUM,
+            actual = activeModelStore.kept.value
+        )
+
         assertNull(actual = installer.session.value)
     }
 
     @Test
-    fun `a paused installation keeps its bytes and resumes from them`() = runTest(context = testDispatcher) {
+    fun `a paused installation keeps its bytes and resumes from them`() = runTest(
+        context = testDispatcher
+    ) {
         storage.installed += ModelCatalogs.reranker.fileName
         downloader.held += ModelCatalogs.small.file.fileName
         installer.start(model = ModelCatalogs.small)
@@ -68,17 +79,30 @@ class CoroutineModelInstallerTest {
         assertEquals(
             expected = InstallSession(
                 size = ModelSize.SMALL,
-                progress = InstallProgress.Downloading(doneBytes = 50, totalBytes = 100),
+                progress = InstallProgress.Downloading(
+                    doneBytes = 50,
+                    totalBytes = 100
+                ),
                 isPaused = true
             ),
             actual = paused
         )
-        assertEquals(expected = listOf("small.gguf" to 0L, "small.gguf" to 50L), actual = downloader.calls)
-        assertEquals(expected = ModelSize.SMALL, actual = activeModelStore.kept.value)
+
+        assertEquals(
+            expected = listOf("small.gguf" to 0L, "small.gguf" to 50L),
+            actual = downloader.calls
+        )
+
+        assertEquals(
+            expected = ModelSize.SMALL,
+            actual = activeModelStore.kept.value
+        )
     }
 
     @Test
-    fun `cancelling deletes what the model downloaded and ends the installation`() = runTest(context = testDispatcher) {
+    fun `cancelling deletes what the model downloaded and ends the installation`() = runTest(
+        context = testDispatcher
+    ) {
         storage.installed += ModelCatalogs.reranker.fileName
         downloader.held += ModelCatalogs.small.file.fileName
         installer.start(model = ModelCatalogs.small)
@@ -87,7 +111,12 @@ class CoroutineModelInstallerTest {
         advanceUntilIdle()
 
         assertNull(actual = installer.session.value)
-        assertEquals(expected = listOf("small.gguf"), actual = storage.deleted)
+
+        assertEquals(
+            expected = listOf("small.gguf"),
+            actual = storage.deleted
+        )
+
         assertNull(actual = activeModelStore.kept.value)
     }
 
@@ -101,12 +130,18 @@ class CoroutineModelInstallerTest {
         installer.start(model = ModelCatalogs.small)
         advanceUntilIdle()
 
-        assertEquals(expected = InstallProgress.Failed(error = ModelError.Network), actual = failed)
+        assertEquals(
+            expected = InstallProgress.Failed(error = ModelError.Network),
+            actual = failed
+        )
+
         assertNull(actual = installer.session.value)
     }
 
     @Test
-    fun `a resumed installation keeps its total after the reranker finished`() = runTest(context = testDispatcher) {
+    fun `a resumed installation keeps its total after the reranker finished`() = runTest(
+        context = testDispatcher
+    ) {
         downloader.held += ModelCatalogs.small.file.fileName
         installer.start(model = ModelCatalogs.small)
         advanceUntilIdle()
@@ -116,9 +151,19 @@ class CoroutineModelInstallerTest {
         installer.start(model = ModelCatalogs.small)
         advanceUntilIdle()
 
-        assertEquals(expected = InstallProgress.Downloading(doneBytes = 90, totalBytes = 140), actual = paused)
         assertEquals(
-            expected = InstallProgress.Downloading(doneBytes = 115, totalBytes = 140),
+            expected = InstallProgress.Downloading(
+                doneBytes = 90,
+                totalBytes = 140
+            ),
+            actual = paused
+        )
+
+        assertEquals(
+            expected = InstallProgress.Downloading(
+                doneBytes = 115,
+                totalBytes = 140
+            ),
             actual = installer.session.value?.progress
         )
     }
@@ -140,8 +185,19 @@ class CoroutineModelInstallerTest {
             installer.cancel()
             advanceUntilIdle()
 
-            assertEquals(expected = listOf("reranker.gguf", "small.gguf"), actual = firstCancel)
-            assertEquals(expected = listOf("small.gguf"), actual = storage.deleted)
-            assertEquals(expected = setOf("reranker.gguf"), actual = storage.installed)
+            assertEquals(
+                expected = listOf("reranker.gguf", "small.gguf"),
+                actual = firstCancel
+            )
+
+            assertEquals(
+                expected = listOf("small.gguf"),
+                actual = storage.deleted
+            )
+
+            assertEquals(
+                expected = setOf("reranker.gguf"),
+                actual = storage.installed
+            )
         }
 }

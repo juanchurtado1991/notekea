@@ -17,7 +17,5 @@ sealed interface InstallProgress {
 
     data object Installed : InstallProgress
 
-    data class Failed(
-        val error: ModelError
-    ) : InstallProgress
+    data class Failed(val error: ModelError) : InstallProgress
 }

@@ -17,12 +17,22 @@ class MaxFileLengthRuleTest {
         assertThatCode(fileOf(lines = MAX_FILE_LINES + 1)).hasLintViolationWithoutAutoCorrect(
             line = 1,
             col = 1,
-            detail = "File has ${MAX_FILE_LINES + 1} lines, the maximum is $MAX_FILE_LINES. Split it by sub-feature"
+            detail = MaxFileLengthRule.errorMessage(lines = MAX_FILE_LINES + 1)
         )
     }
 
+    @Test
+    fun `blank lines and lines of brackets alone do not count`() {
+        val blocks = (1..MAX_FILE_LINES).joinToString(separator = "\n\n") { "fun f$it() {\n}" }
+
+        assertThatCode(blocks).hasNoLintViolations()
+    }
+
     /** A file of [lines] lines: a package line, then one constant per line. */
-    private fun fileOf(
-        lines: Int
-    ): String = (listOf("package sample") + (2..lines).map { "val v$it = $it" }).joinToString(separator = "\n")
+    private fun fileOf(lines: Int): String =
+        (
+            listOf("package sample") + (2..lines).map {
+                "val v$it = $it"
+            }
+            ).joinToString(separator = "\n")
 }

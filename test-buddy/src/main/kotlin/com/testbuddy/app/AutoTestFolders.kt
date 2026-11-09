@@ -22,6 +22,7 @@ public class AutoTestFolders(public val root: Path) {
             val home = Path.of(System.getProperty("user.home"))
             val documents = home.resolve("Documents")
             val parent = if (Files.isDirectory(documents)) documents else home
+
             return AutoTestFolders(root = parent.resolve("$appName QA"))
         }
     }

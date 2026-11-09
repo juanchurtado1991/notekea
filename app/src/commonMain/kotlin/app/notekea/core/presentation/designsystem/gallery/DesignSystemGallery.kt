@@ -27,8 +27,17 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 @Composable
 fun DesignSystemGallery() {
     Row(modifier = Modifier.fillMaxSize()) {
-        GalleryColumn(title = LIGHT_TITLE, darkTheme = false, modifier = Modifier.weight(weight = 1f))
-        GalleryColumn(title = DARK_TITLE, darkTheme = true, modifier = Modifier.weight(weight = 1f))
+        GalleryColumn(
+            title = LIGHT_TITLE,
+            darkTheme = false,
+            modifier = Modifier.weight(weight = 1f)
+        )
+
+        GalleryColumn(
+            title = DARK_TITLE,
+            darkTheme = true,
+            modifier = Modifier.weight(weight = 1f)
+        )
     }
 }
 
@@ -39,14 +48,21 @@ private fun GalleryColumn(
     modifier: Modifier
 ) {
     NotekeaTheme(darkTheme = darkTheme) {
-        Surface(modifier = modifier.fillMaxHeight(), color = MaterialTheme.colorScheme.background) {
+        Surface(
+            modifier = modifier.fillMaxHeight(),
+            color = MaterialTheme.colorScheme.background
+        ) {
             Column(
                 modifier = Modifier
                     .verticalScroll(state = rememberScrollState())
                     .padding(all = NotekeaDimensions.SpacingXl),
                 verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingL)
             ) {
-                Text(text = title, style = MaterialTheme.typography.headlineMedium)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+
                 NotekeaWordmark()
                 ButtonsSection()
                 InputsSection()
@@ -60,7 +76,11 @@ private fun GalleryColumn(
                 PaletteSection()
                 FeedbackSection()
                 AttachmentsSection()
-                Text(text = CODE_SAMPLE, style = LocalNotekeaCodeTextStyle.current)
+
+                Text(
+                    text = CODE_SAMPLE,
+                    style = LocalNotekeaCodeTextStyle.current
+                )
             }
         }
     }

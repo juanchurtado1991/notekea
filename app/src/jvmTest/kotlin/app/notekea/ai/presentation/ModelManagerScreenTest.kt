@@ -4,14 +4,6 @@ import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
-import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.clickText
-import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
-import app.notekea.settings.presentation.appearance.AppearanceViewModel
-import app.notekea.settings.presentation.SettingsDialog
-import app.notekea.core.appearance.domain.FakeAppearanceStore
-import app.notekea.core.presentation.texts
-import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.ai.domain.FakeActiveModelStore
 import app.notekea.ai.domain.FakeHardwareProbe
 import app.notekea.ai.domain.FakeModelCatalogSource
@@ -22,12 +14,20 @@ import app.notekea.ai.domain.InstallSession
 import app.notekea.ai.domain.ModelCatalogs
 import app.notekea.ai.domain.ModelSize
 import app.notekea.ai.domain.RecommendModelUseCase
+import app.notekea.core.appearance.domain.FakeAppearanceStore
+import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.clickText
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
+import app.notekea.core.presentation.texts
+import app.notekea.settings.presentation.SettingsDialog
+import app.notekea.settings.presentation.appearance.AppearanceViewModel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Settings → AI model (`ROADMAP.md` 3.1, design C), rendered headless inside Settings: its section opens from the
+ * Settings → AI model, rendered headless inside Settings: its section opens from the
  * list, the recommended size downloads, pauses and resumes, the other sizes unfold, and deleting asks first.
  */
 @OptIn(InternalComposeUiApi::class)
@@ -47,16 +47,24 @@ class ModelManagerScreenTest {
         platformConventions = PreviewPlatformConventions.linux
     )
 
-    private fun render(
-        check: (ImageComposeScene) -> Unit
-    ) {
+    private fun render(check: (ImageComposeScene) -> Unit) {
         val viewModel = viewModel()
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     SettingsDialog(
                         onDismiss = {},
-                        aiModelSection = { ModelManagerScreen(modifier = it, viewModel = viewModel) },
+                        aiModelSection = {
+                            ModelManagerScreen(
+                                modifier = it,
+                                viewModel = viewModel
+                            )
+                        },
                         viewModel = AppearanceViewModel(appearanceStore = FakeAppearanceStore())
                     )
                 }
@@ -71,15 +79,22 @@ class ModelManagerScreenTest {
     @Test
     fun `the AI model section shows the recommended size, which downloads, pauses and resumes`() {
         val texts = mutableListOf<List<String>>()
+
         render { scene ->
             texts += scene.texts()
             scene.clickText(text = DOWNLOAD) { settle(scene = scene) }
+
             installer.current.value = InstallSession(
                 size = ModelSize.MEDIUM,
-                progress = InstallProgress.Downloading(doneBytes = 0, totalBytes = 0)
+                progress = InstallProgress.Downloading(
+                    doneBytes = 0,
+                    totalBytes = 0
+                )
             )
+
             settle(scene = scene)
             texts += scene.texts()
+
             installer.current.value = InstallSession(
                 size = ModelSize.MEDIUM,
                 progress = InstallProgress.Downloading(
@@ -88,10 +103,16 @@ class ModelManagerScreenTest {
                     bytesPerSecond = 24_500_000
                 )
             )
+
             settle(scene = scene)
             texts += scene.texts()
             scene.clickText(text = PAUSE) { settle(scene = scene) }
-            installer.current.value = installer.current.value?.copy(isPaused = true)
+
+            installer.current.value = installer
+                .current
+                .value
+                ?.copy(isPaused = true)
+
             settle(scene = scene)
             scene.clickText(text = RESUME) { settle(scene = scene) }
         }
@@ -100,13 +121,22 @@ class ModelManagerScreenTest {
         assertTrue(actual = "Model large" !in texts[0].joinToString())
         assertTrue(actual = texts[1].none { "0 MB" in it } && PAUSE !in texts[1])
         assertTrue(actual = "1.2 GB of 3.0 GB · 24.5 MB/s" in texts[2])
-        assertEquals(expected = listOf(ModelSize.MEDIUM, ModelSize.MEDIUM), actual = installer.started)
-        assertEquals(expected = 1, actual = installer.pauses)
+
+        assertEquals(
+            expected = listOf(ModelSize.MEDIUM, ModelSize.MEDIUM),
+            actual = installer.started
+        )
+
+        assertEquals(
+            expected = 1,
+            actual = installer.pauses
+        )
     }
 
     @Test
     fun `the other sizes unfold with what this computer lacks for them`() {
         var texts = emptyList<String>()
+
         render { scene ->
             scene.clickText(text = OTHER_SIZES) { settle(scene = scene) }
             texts = scene.texts()
@@ -121,20 +151,32 @@ class ModelManagerScreenTest {
         storage.installed += ModelCatalogs.medium.file.fileName
         activeModelStore.kept.value = ModelSize.MEDIUM
         var asked = emptyList<String>()
+
         render { scene ->
             scene.clickText(text = DELETE) { settle(scene = scene) }
             asked = scene.texts()
-            scene.clickText(text = DELETE, occurrence = 1) { settle(scene = scene) }
+
+            scene
+                .clickText(
+                    text = DELETE,
+                    occurrence = 1
+                ) { settle(scene = scene) }
         }
 
         assertTrue(actual = "Delete Medium?" in asked)
-        assertEquals(expected = listOf("medium.gguf", "reranker.gguf"), actual = storage.deleted)
-        assertEquals(expected = null, actual = activeModelStore.kept.value)
+
+        assertEquals(
+            expected = listOf("medium.gguf", "reranker.gguf"),
+            actual = storage.deleted
+        )
+
+        assertEquals(
+            expected = null,
+            actual = activeModelStore.kept.value
+        )
     }
 
-    private fun settle(
-        scene: ImageComposeScene
-    ) {
+    private fun settle(scene: ImageComposeScene) {
         repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
     }
 

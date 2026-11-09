@@ -3,7 +3,7 @@ package app.notekea.search.domain
 import app.notekea.core.notes.domain.NoteEntry
 
 /**
- * A note found by meaning or keywords (`ROADMAP.md` 2.6): its best line of the body ([range]), the closest [heading]
+ * A note found by meaning or keywords: its best line of the body ([range]), the closest [heading]
  * above it, and the [snippet] that shows why it was found, as plain text, with the searched words at [ranges].
  */
 data class PassageResult(

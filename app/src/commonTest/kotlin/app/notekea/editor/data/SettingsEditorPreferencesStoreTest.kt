@@ -20,10 +20,13 @@ class SettingsEditorPreferencesStoreTest {
     )
 
     @Test
-    fun `notes open in edit mode until read mode is chosen, which is remembered`() = runTest(context = testDispatcher) {
+    fun `notes open in edit mode until read mode is chosen, which is remembered`() = runTest(
+        context = testDispatcher
+    ) {
         val firstRun = store.isReadMode()
 
         store.setReadMode(isReading = true)
+
         val nextStore = SettingsEditorPreferencesStore(
             settings = settings,
             dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
@@ -41,21 +44,34 @@ class SettingsEditorPreferencesStoreTest {
             val firstRun = store.sidePanel()
 
             store.setSidePanel(preferences = CHANGED)
+
             val nextStore = SettingsEditorPreferencesStore(
                 settings = settings,
                 dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
             )
 
             assertEquals(
-                expected = SidePanelPreferences(widthDp = 340, isVisible = true) to CHANGED,
+                expected = SidePanelPreferences(
+                    widthDp = 340,
+                    isVisible = true
+                ) to CHANGED,
                 actual = firstRun to nextStore.sidePanel()
             )
         }
 
     @Test
-    fun `a mode or folded section of another version is left out`() = runTest(context = testDispatcher) {
-        settings.putString(key = "editor.side_panel_folded", value = "BACKLINKS,NOTE_INFO")
-        settings.putString(key = "editor.side_panel_mode", value = "GRAPH")
+    fun `a mode or folded section of another version is left out`() = runTest(
+        context = testDispatcher
+    ) {
+        settings.putString(
+            key = "editor.side_panel_folded",
+            value = "BACKLINKS,NOTE_INFO"
+        )
+
+        settings.putString(
+            key = "editor.side_panel_mode",
+            value = "GRAPH"
+        )
 
         assertEquals(
             expected = SidePanelPreferences(foldedSections = setOf(SidePanelSection.NOTE_INFO)),

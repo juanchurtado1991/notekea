@@ -1,13 +1,13 @@
 package app.notekea.tree.presentation.viewmodel
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.tree.presentation.model.VaultTreeState
-import app.notekea.core.notes.domain.RelativePath
 
 /**
- * New notes from a template in the sidebar (`ROADMAP.md` 1.12): the template picker opens for the selected folder, the
+ * New notes from a template in the sidebar: the template picker opens for the selected folder, the
  * note is made with its name ready to type and opened, and the template fills it once its name is set ([apply]).
  */
 internal class TreeTemplates(
@@ -20,17 +20,32 @@ internal class TreeTemplates(
 
     /** The template picker opens for a new note in the selected folder. */
     fun choose() {
-        host.emit(effect = VaultTreeEffect.ChooseTemplate(folder = targetFolder(state = host.state.value)))
+        host.emit(
+            effect = VaultTreeEffect.ChooseTemplate(folder = targetFolder(state = host.state.value))
+        )
     }
 
     /** Makes a note in the intent's folder with its name ready to type, opens it, and keeps its template for later. */
-    fun create(
-        intent: VaultTreeIntent.OnNoteFromTemplate
-    ) {
-        if (host.state.value.isSidebarCollapsed) host.updateTree { it.copy(isSidebarCollapsed = false) }
+    fun create(intent: VaultTreeIntent.OnNoteFromTemplate) {
+        if (host.state.value.isSidebarCollapsed) {
+            host.updateTree { it.copy(isSidebarCollapsed = false) }
+        }
+
         host.launch {
-            val outcome = newNotes.createNote(vaultPath = vaultPath, folder = intent.folder, baseName = intent.baseName)
-            host.updateTree { reduceCreated(state = it, outcome = outcome, isFolder = false) }
+            val outcome = newNotes.createNote(
+                vaultPath = vaultPath,
+                folder = intent.folder,
+                baseName = intent.baseName
+            )
+
+            host.updateTree {
+                reduceCreated(
+                    state = it,
+                    outcome = outcome,
+                    isFolder = false
+                )
+            }
+
             val path = (outcome as? Outcome.Success)?.value ?: return@launch
             pending = path to intent.template
             host.open(path = path)
@@ -45,7 +60,15 @@ internal class TreeTemplates(
         val (path, template) = pending ?: return
         if (path != note) return
         pending = null
-        val outcome = newNotes.applyTemplate(vaultPath = vaultPath, note = named, template = template)
-        if (outcome is Outcome.Failure) host.reduce { it.copy(actionError = outcome.error) }
+
+        val outcome = newNotes.applyTemplate(
+            vaultPath = vaultPath,
+            note = named,
+            template = template
+        )
+
+        if (outcome is Outcome.Failure) {
+            host.reduce { it.copy(actionError = outcome.error) }
+        }
     }
 }

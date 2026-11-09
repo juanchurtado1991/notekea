@@ -10,7 +10,10 @@ import kotlin.test.assertNull
 class UpdateLinksAfterRenameUseCaseTest {
     private val store = FakeNoteContentStore()
     private val updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
-        planLinkUpdates = PlanLinkUpdatesUseCase(noteContentStore = store, linkFinder = JetBrainsMarkdownLinkFinder()),
+        planLinkUpdates = PlanLinkUpdatesUseCase(
+            noteContentStore = store,
+            linkFinder = JetBrainsMarkdownLinkFinder()
+        ),
         applyLinkUpdates = ApplyLinkUpdatesUseCase(noteContentStore = store)
     )
 
@@ -28,6 +31,7 @@ class UpdateLinksAfterRenameUseCaseTest {
             ),
             actual = result
         )
+
         assertEquals(
             expected = listOf("Cook [[Arepas reina]].", "Ate [[Arepas reina]] again."),
             actual = listOf(WELCOME, JOURNAL).map { store.texts.getValue(RelativePath(value = it)) }
@@ -40,6 +44,7 @@ class UpdateLinksAfterRenameUseCaseTest {
         store.texts[RelativePath(value = JOURNAL)] = "Nor here."
 
         assertNull(actual = rename())
+
         assertEquals(
             expected = "No links here.",
             actual = store.texts.getValue(RelativePath(value = WELCOME))

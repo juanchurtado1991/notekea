@@ -8,7 +8,7 @@ import org.intellij.markdown.parser.MarkdownParser
 
 /**
  * Where Markdown text has code (fenced and indented blocks, inline code), read by the JetBrains Markdown parser, for
- * the finders that must leave code alone ([JetBrainsMarkdownLinkFinder], [JetBrainsMarkdownMentionFinder]).
+ * the finders that must leave code alone: [JetBrainsMarkdownLinkFinder] and the one of unlinked mentions.
  */
 class MarkdownCodeRanges {
     private val parser = MarkdownParser(
@@ -17,20 +17,21 @@ class MarkdownCodeRanges {
         cancellationToken = CancellationToken.NonCancellable
     )
 
-    fun of(
-        markdown: String
-    ): List<IntRange> = codeRanges(node = parser.buildMarkdownTreeFromString(text = markdown as CharSequence))
+    fun of(markdown: String): List<IntRange> = codeRanges(
+        node = parser.buildMarkdownTreeFromString(text = markdown as CharSequence)
+    )
 
-    private fun codeRanges(
-        node: ASTNode
-    ): List<IntRange> = if (node.type in CODE_TYPES) {
+    private fun codeRanges(node: ASTNode): List<IntRange> = if (node.type in CODE_TYPES) {
         listOf(node.startOffset until node.endOffset)
     } else {
         node.children.flatMap { codeRanges(node = it) }
     }
 
     private companion object {
-        val CODE_TYPES =
-            setOf(MarkdownElementTypes.CODE_FENCE, MarkdownElementTypes.CODE_BLOCK, MarkdownElementTypes.CODE_SPAN)
+        val CODE_TYPES = setOf(
+            MarkdownElementTypes.CODE_FENCE,
+            MarkdownElementTypes.CODE_BLOCK,
+            MarkdownElementTypes.CODE_SPAN
+        )
     }
 }

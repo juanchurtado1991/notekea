@@ -3,23 +3,11 @@ package app.notekea.core.notes.domain
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.TextEmbedder
-import app.notekea.core.notes.domain.ChunkNoteUseCase
-import app.notekea.core.notes.domain.IndexRunError
-import app.notekea.core.notes.domain.LinkFinder
-import app.notekea.core.notes.domain.LinkResolver
-import app.notekea.core.notes.domain.NoteContentStore
-import app.notekea.core.notes.domain.NoteDocument
-import app.notekea.core.notes.domain.PassageSnippet
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.SearchHit
-import app.notekea.core.notes.domain.VectorIndex
-import app.notekea.core.notes.domain.embedChunks
 
 /**
- * The notes closest in meaning to the open note (`ROADMAP.md` 2.4), from its [text] as the editor has it: each of its
- * chunks is embedded as the index embeds them and its nearest chunks found ([VectorIndex.nearest]); a note scores its
- * closest chunk, the open note and those it already links are left out, and the [LIMIT] best are kept, each with the
- * passage that matched ([PassageSnippet]). The notes it links come apart, for "Already linked".
+ * The notes closest in meaning to the open note, from its [text] as the editor has it: each of its chunks is embedded
+ * and its nearest chunks found ([VectorIndex.nearest]); a note scores its closest chunk, and the [LIMIT] best are kept,
+ * each with the passage that matched ([PassageSnippet]). The notes it links already come apart.
  */
 class FindRelatedNotesUseCase(
     private val chunkNote: ChunkNoteUseCase,
@@ -34,19 +22,69 @@ class FindRelatedNotesUseCase(
         text: String,
         notes: Collection<RelativePath>
     ): Outcome<RelatedNotes, IndexRunError> {
-        val linked = linkedNotes(note = note, text = text, notes = notes)
-        val chunks = chunkNote(note = note, text = text)
-        if (chunks.isEmpty()) return Outcome.Success(value = RelatedNotes(related = emptyList(), linked = linked))
-        val title = note.nameWithoutExtension
-        val vectors = when (val embedded = embedChunks(textEmbedder, title = title, chunks = chunks)) {
-            is Outcome.Success -> embedded.value.map { (_, vector) -> vector }
-            is Outcome.Failure -> return refused(error = embedded.error, linked = linked)
+        val linked = linkedNotes(
+            note = note,
+            text = text,
+            notes = notes
+        )
+
+        val chunks = chunkNote(
+            note = note,
+            text = text
+        )
+
+        if (chunks.isEmpty()) {
+            return Outcome.Success(
+                value = RelatedNotes(
+                    related = emptyList(),
+                    linked = linked
+                )
+            )
         }
-        val best = closest(vaultPath = vaultPath, vectors = vectors, leftOut = linked + note)
+
+        val title = note.nameWithoutExtension
+
+        val vectors = when (
+            val embedded = embedChunks(
+                textEmbedder,
+                title = title,
+                chunks = chunks
+            )
+        ) {
+            is Outcome.Success -> embedded.value.map { (_, vector) -> vector }
+
+            is Outcome.Failure -> return refused(
+                error = embedded.error,
+                linked = linked
+            )
+        }
+
+        val best = closest(
+            vaultPath = vaultPath,
+            vectors = vectors,
+            leftOut = linked + note
+        )
             ?: return Outcome.Failure(error = IndexRunError.Index)
-        val words = WORD.findAll(input = text.lowercase()).map { it.value }.toSet()
-        val related = best.take(n = LIMIT).mapNotNull { relatedOf(vaultPath = vaultPath, hit = it, words = words) }
-        return Outcome.Success(value = RelatedNotes(related = related, linked = linked))
+
+        val words = WORD
+            .findAll(input = text.lowercase())
+            .map { it.value }
+            .toSet()
+
+        val related = best.take(n = LIMIT).mapNotNull {
+            relatedOf(
+                vaultPath = vaultPath,
+                hit = it,
+                words = words
+            )
+        }
+
+        return Outcome.Success(
+            value = RelatedNotes(
+                related = related,
+                linked = linked
+            )
+        )
     }
 
     /** What the model refusing the note means: a note too long to compare is no failing model. */
@@ -54,7 +92,13 @@ class FindRelatedNotesUseCase(
         error: EmbeddingError,
         linked: List<RelativePath>
     ): Outcome<RelatedNotes, IndexRunError> = if (error is EmbeddingError.TextTooLong) {
-        Outcome.Success(value = RelatedNotes(related = emptyList(), linked = linked, isTooLong = true))
+        Outcome.Success(
+            value = RelatedNotes(
+                related = emptyList(),
+                linked = linked,
+                isTooLong = true
+            )
+        )
     } else {
         Outcome.Failure(error = IndexRunError.Model)
     }
@@ -66,13 +110,25 @@ class FindRelatedNotesUseCase(
         leftOut: List<RelativePath>
     ): List<SearchHit>? {
         val best = HashMap<RelativePath, SearchHit>()
+
         vectors.forEach { vector ->
-            val found = vectorIndex.nearest(vaultPath = vaultPath, vector = vector, limit = CANDIDATES)
+            val found = vectorIndex.nearest(
+                vaultPath = vaultPath,
+                vector = vector,
+                limit = CANDIDATES
+            )
+
             val hits = (found as? Outcome.Success)?.value ?: return null
-            hits.filter { it.note !in leftOut }.forEach { hit ->
-                if ((best[hit.note]?.score ?: Float.NEGATIVE_INFINITY) < hit.score) best[hit.note] = hit
+
+            hits.filter {
+                it.note !in leftOut
+            }.forEach { hit ->
+                if ((best[hit.note]?.score ?: Float.NEGATIVE_INFINITY) < hit.score) {
+                    best[hit.note] = hit
+                }
             }
         }
+
         return best.values.sortedByDescending { it.score }
     }
 
@@ -83,8 +139,18 @@ class FindRelatedNotesUseCase(
         notes: Collection<RelativePath>
     ): List<RelativePath> {
         val resolver = LinkResolver(notePaths = notes)
-        return linkFinder.find(markdown = text).mapNotNull { resolver.closest(link = it, source = note) }
-            .filter { it != note }
+
+        return linkFinder
+            .find(markdown = text)
+            .mapNotNull {
+                resolver.closest(
+                    link = it,
+                    source = note
+                )
+            }
+            .filter {
+                it != note
+            }
             .distinct()
     }
 
@@ -94,11 +160,24 @@ class FindRelatedNotesUseCase(
         hit: SearchHit,
         words: Set<String>
     ): RelatedNote? {
-        val stored = noteContentStore.read(vaultPath = vaultPath, path = hit.note) ?: return null
+        val stored = noteContentStore.read(
+            vaultPath = vaultPath,
+            path = hit.note
+        ) ?: return null
+
         val body = NoteDocument.fromText(text = stored).body
         if (hit.range.last >= body.length) return null
-        val snippet = PassageSnippet.of(passage = body.substring(range = hit.range), words = words)
-        return RelatedNote(path = hit.note, score = hit.score, snippet = snippet)
+
+        val snippet = PassageSnippet.of(
+            passage = body.substring(range = hit.range),
+            words = words
+        )
+
+        return RelatedNote(
+            path = hit.note,
+            score = hit.score,
+            snippet = snippet
+        )
     }
 
     companion object {

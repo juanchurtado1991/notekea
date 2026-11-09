@@ -12,42 +12,88 @@ import java.time.LocalDate
 import kotlin.test.Test
 
 /**
- * Automated smoke runs of what notes hold and how they are found (`ROADMAP.md` 1.6, 1.8, 1.10, 1.12, 1.14, 1.15):
+ * Automated smoke runs of what notes hold and how they are found:
  * a search inside the notes, attachments, today's daily note, the template picker, properties and embeds, on a copy of
  * the Sample Vault.
  */
 @OptIn(ExperimentalTestApi::class)
 class NotesRunTest {
     @Test
-    fun `a search inside the notes finds the ones that mention a word`() = smokeRun(name = "search") { app ->
-        openVault(app = app, name = SAMPLE_VAULT, shownNote = HOME)
-        pressShortcut(key = Key.F, withShift = true)
+    fun `a search inside the notes finds the ones that mention a word`() = smokeRun(
+        name = "search"
+    ) { app ->
+        openVault(
+            app = app,
+            name = SAMPLE_VAULT,
+            shownNote = HOME
+        )
+
+        pressShortcut(
+            key = Key.F,
+            withShift = true
+        )
+
         waitForText(text = SEARCH_PLACEHOLDER)
-        onNode(matcher = hasSetTextAction() and hasText(text = SEARCH_PLACEHOLDER)).performTextInput(text = TOMATOES)
+
+        onNode(
+            matcher = hasSetTextAction() and hasText(text = SEARCH_PLACEHOLDER)
+        ).performTextInput(text = TOMATOES)
+
         waitForText(text = GARDEN_PLAN)
         waitForText(text = TOMATO_SOUP)
     }
 
     @Test
-    fun `pictures, files and a missing file show in the note`() = smokeRun(name = "attachments") { app ->
-        openVault(app = app, name = SAMPLE_VAULT, shownNote = HOME)
-        openNote(name = IMAGES_AND_FILES, shownText = MENU_PDF)
+    fun `pictures, files and a missing file show in the note`() = smokeRun(
+        name = "attachments"
+    ) { app ->
+        openVault(
+            app = app,
+            name = SAMPLE_VAULT,
+            shownNote = HOME
+        )
+
+        openNote(
+            name = IMAGES_AND_FILES,
+            shownText = MENU_PDF
+        )
+
         waitForText(text = MISSING_FILE)
     }
 
     @Test
-    fun `today makes today's daily note in the vault's daily notes folder`() = smokeRun(name = "daily-notes") { app ->
-        openVault(app = app, name = SAMPLE_VAULT, shownNote = HOME)
+    fun `today makes today's daily note in the vault's daily notes folder`() = smokeRun(
+        name = "daily-notes"
+    ) { app ->
+        openVault(
+            app = app,
+            name = SAMPLE_VAULT,
+            shownNote = HOME
+        )
+
         onNode(matcher = hasContentDescription(value = TODAY)).performClick()
+
         waitUntil(timeoutMillis = WAIT_MILLIS) {
-            File(app.vaultPath(name = SAMPLE_VAULT), DAILY_FOLDER + LocalDate.now() + MARKDOWN).exists()
+            File(
+                app.vaultPath(name = SAMPLE_VAULT),
+                DAILY_FOLDER + LocalDate.now() + MARKDOWN
+            ).exists()
         }
     }
 
     @Test
     fun `the template picker lists the vault's templates`() = smokeRun(name = "templates") { app ->
-        openVault(app = app, name = SAMPLE_VAULT, shownNote = HOME)
-        openNote(name = PANCAKES, shownText = PANCAKES_TEXT)
+        openVault(
+            app = app,
+            name = SAMPLE_VAULT,
+            shownNote = HOME
+        )
+
+        openNote(
+            name = PANCAKES,
+            shownText = PANCAKES_TEXT
+        )
+
         pressShortcut(key = Key.T)
         waitForText(text = TEMPLATE_PLACEHOLDER)
         waitForText(text = MEETING)
@@ -55,22 +101,41 @@ class NotesRunTest {
 
     @Test
     fun `properties of every type show under the title`() = smokeRun(name = "properties") { app ->
-        openVault(app = app, name = SAMPLE_VAULT, shownNote = HOME)
-        openNote(name = PROPERTIES, shownText = PROPERTIES_TEXT)
+        openVault(
+            app = app,
+            name = SAMPLE_VAULT,
+            shownNote = HOME
+        )
+
+        openNote(
+            name = PROPERTIES,
+            shownText = PROPERTIES_TEXT
+        )
+
         listOf(STATUS, COUNT, DUE).forEach { waitForText(text = it) }
     }
 
     @Test
     fun `embeds nest, stop where they come back around and say when a note is missing`() =
         smokeRun(name = "embeds") { app ->
-            openVault(app = app, name = SAMPLE_VAULT, shownNote = HOME)
-            openNote(name = EMBEDS, shownText = SECTION)
+            openVault(
+                app = app,
+                name = SAMPLE_VAULT,
+                shownNote = HOME
+            )
+
+            openNote(
+                name = EMBEDS,
+                shownText = SECTION
+            )
+
             waitForText(text = CIRCULAR)
             waitForText(text = MISSING_NOTE)
         }
 
     companion object {
-        private const val CIRCULAR = "Circular embed: this note is already shown above, so it stops here."
+        private const val CIRCULAR =
+            "Circular embed: this note is already shown above, so it stops here."
         private const val COUNT = "count"
         private const val DAILY_FOLDER = "Journal/Daily/"
         private const val DUE = "due"

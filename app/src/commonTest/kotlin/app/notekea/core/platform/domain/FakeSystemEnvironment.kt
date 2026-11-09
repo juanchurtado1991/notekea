@@ -9,7 +9,5 @@ class FakeSystemEnvironment(
     override val javaVersion: String = "21.0.11",
     override val appVersion: String = "1.0.0"
 ) : SystemEnvironment {
-    override fun environmentVariable(
-        name: String
-    ): String? = environmentVariables[name]
+    override fun environmentVariable(name: String): String? = environmentVariables[name]
 }

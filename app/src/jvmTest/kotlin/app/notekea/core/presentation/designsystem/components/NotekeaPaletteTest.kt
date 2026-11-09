@@ -16,15 +16,20 @@ import java.awt.event.KeyEvent as AwtKeyEvent
 
 /**
  * The palette's search field opened with text already typed (a `#tag` to search, the selected text to tag) puts the
- * cursor after it, so typing continues the text (1.17 smoke: the cursor started before it).
+ * cursor after it, so typing continues the text.
  */
 class NotekeaPaletteTest {
     @OptIn(InternalComposeUiApi::class)
     @Test
     fun `text given when the palette opens is continued by typing`() {
         val queries = mutableListOf<String>()
+
         UiThread.run {
-            ImageComposeScene(width = WINDOW_WIDTH, height = WINDOW_HEIGHT, density = Density(density = DENSITY)) {
+            ImageComposeScene(
+                width = WINDOW_WIDTH,
+                height = WINDOW_HEIGHT,
+                density = Density(density = DENSITY)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     NotekeaPalette(
                         query = GIVEN,
@@ -37,7 +42,16 @@ class NotekeaPaletteTest {
                 }
             }.use { scene ->
                 repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = it * FRAME_NANOS) }
-                val typed = AwtKeyEvent(JPanel(), AwtKeyEvent.KEY_TYPED, 0L, 0, AwtKeyEvent.VK_UNDEFINED, TYPED)
+
+                val typed = AwtKeyEvent(
+                    JPanel(),
+                    AwtKeyEvent.KEY_TYPED,
+                    0L,
+                    0,
+                    AwtKeyEvent.VK_UNDEFINED,
+                    TYPED
+                )
+
                 scene.sendKeyEvent(
                     event = KeyEvent(
                         key = Key.Unknown,
@@ -46,6 +60,7 @@ class NotekeaPaletteTest {
                         nativeEvent = typed
                     )
                 )
+
                 scene.render(nanoTime = SETTLE_FRAMES * FRAME_NANOS)
             }
         }

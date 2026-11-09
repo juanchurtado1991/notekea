@@ -28,19 +28,17 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.Shortcut
 import app.notekea.core.presentation.designsystem.components.EmptyState
 import app.notekea.core.presentation.designsystem.components.NotekeaActionRow
-import app.notekea.core.presentation.platform.keys
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
-import app.notekea.shell.domain.EditorPane
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.VaultTree
-import app.notekea.shell.domain.Workspace
+import app.notekea.core.presentation.platform.keys
 import app.notekea.resources.Res
 import app.notekea.resources.workspace_empty_message
 import app.notekea.resources.workspace_empty_title
@@ -48,6 +46,8 @@ import app.notekea.resources.workspace_start_find
 import app.notekea.resources.workspace_start_new
 import app.notekea.resources.workspace_start_search
 import app.notekea.resources.workspace_start_today
+import app.notekea.shell.domain.EditorPane
+import app.notekea.shell.domain.Workspace
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_HEIGHT_DP = 320
@@ -56,11 +56,9 @@ private const val SPLIT_DROP_ZONE = 0.75f
 private const val START_WIDTH_DP = 440
 
 /**
- * The editor's panes side by side (`ROADMAP.md` 1.11), each with its tabs above what its active tab shows
- * ([paneContent]: a note's editor, a file's preview, a folder's grid). A click in a pane makes it the one the keyboard
- * works in. A tab dropped among its pane's tabs takes that place; dropped on the other pane, it moves there; dropped on
- * the right quarter of a single pane, it splits it and moves to the new pane. The "+" after the tabs finds a note to
- * open in a new tab; a tab of [unsavedPaths] shows a dot until it is saved. Without any tab, the pane offers [startActions] with their shortcuts.
+ * The editor's panes side by side, each with its tabs above what its active tab shows ([paneContent]). A tab dropped
+ * among its pane's tabs takes that place, on the other pane moves there, and on the right quarter of a single pane
+ * splits it. A tab of [unsavedPaths] shows a dot; a pane without tabs offers [startActions].
  */
 @Composable
 fun WorkspaceContent(
@@ -73,7 +71,9 @@ fun WorkspaceContent(
     paneContent: @Composable (pane: Int, path: RelativePath, kind: TabKind) -> Unit
 ) {
     val workspace = state.workspace
+
     val paneBounds = remember { mutableStateMapOf<Int, Rect>() }
+
     val onDrop = { path: RelativePath, position: Offset ->
         dropTarget(
             workspace = workspace,
@@ -81,14 +81,26 @@ fun WorkspaceContent(
             paneBounds = paneBounds,
             position = position
         )?.let { (pane, index) ->
-            onIntent(WorkspaceIntent.OnTabMove(path = path, toPane = pane, toIndex = index))
+            onIntent(
+                WorkspaceIntent.OnTabMove(
+                    path = path,
+                    toPane = pane,
+                    toIndex = index
+                )
+            )
         }
+
         Unit
     }
-    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.surface
+    ) {
         Row {
             workspace.panes.forEachIndexed { index, pane ->
                 if (index > 0) PaneDivider()
+
                 PaneColumn(
                     pane = pane,
                     index = index,
@@ -117,13 +129,23 @@ private fun dropTarget(
     position: Offset
 ): Pair<Int, Int>? {
     val from = workspace.find(path = path)?.first ?: return null
-    val pane = paneBounds.entries.firstOrNull { (index, bounds) ->
-        index in workspace.panes.indices && bounds.contains(offset = position)
-    }?.key ?: return null
+
+    val pane = paneBounds
+        .entries
+        .firstOrNull { (index, bounds) ->
+            index in workspace.panes.indices && bounds.contains(offset = position)
+        }
+        ?.key ?: return null
+
     return when {
         workspace.isSplit && pane != from -> pane to workspace.panes[pane].tabs.size
+
         workspace.isSplit -> null
-        position.x > paneBounds.getValue(pane).let { it.left + it.width * SPLIT_DROP_ZONE } -> 1 to 0
+
+        position.x > paneBounds.getValue(pane).let { it.left + it.width * SPLIT_DROP_ZONE } ->
+            1 to
+                0
+
         else -> null
     }
 }
@@ -147,9 +169,7 @@ private fun RowScope.PaneColumn(
             .fillMaxHeight()
             .onGloballyPositioned { onBounds(it.boundsInWindow()) }
             .focusOnPress {
-                if (state.workspace.activePane !=
-                    index
-                ) {
+                if (state.workspace.activePane != index) {
                     onIntent(WorkspaceIntent.OnPaneFocus(pane = index))
                 }
             }
@@ -164,12 +184,15 @@ private fun RowScope.PaneColumn(
             unsavedPaths = unsavedPaths,
             onDrop = onDrop
         )
+
         Box(modifier = Modifier.weight(weight = 1f).fillMaxSize()) {
             val path = pane.activePath
-            if (path ==
-                null
-            ) {
-                NoTabs(platformConventions = platformConventions, actions = startActions)
+
+            if (path == null) {
+                NoTabs(
+                    platformConventions = platformConventions,
+                    actions = startActions
+                )
             } else {
                 paneContent(index, path, state.kindOf(path))
             }
@@ -183,7 +206,10 @@ private fun BoxScope.NoTabs(
     platformConventions: PlatformConventions,
     actions: WorkspaceStartActions
 ) {
-    val keys = { shortcut: Shortcut -> shortcut.keys(operatingSystem = platformConventions.operatingSystem) }
+    val keys = { shortcut: Shortcut ->
+        shortcut.keys(operatingSystem = platformConventions.operatingSystem)
+    }
+
     EmptyState(
         title = stringResource(resource = Res.string.workspace_empty_title),
         message = stringResource(resource = Res.string.workspace_empty_message),
@@ -195,18 +221,21 @@ private fun BoxScope.NoTabs(
             keys = keys(platformConventions.quickSwitcherShortcut),
             onClick = actions.onFindNote
         )
+
         NotekeaActionRow(
             icon = NotekeaIcons.NewNote,
             label = stringResource(resource = Res.string.workspace_start_new),
             keys = keys(platformConventions.newNoteShortcut),
             onClick = actions.onNewNote
         )
+
         NotekeaActionRow(
             icon = NotekeaIcons.Today,
             label = stringResource(resource = Res.string.workspace_start_today),
             keys = keys(platformConventions.todayShortcut),
             onClick = actions.onToday
         )
+
         NotekeaActionRow(
             icon = NotekeaIcons.SearchNotes,
             label = stringResource(resource = Res.string.workspace_start_search),
@@ -227,12 +256,12 @@ private fun PaneDivider() {
 }
 
 /** Calls [onPress] on every press inside the element, before anything inside handles it; nothing is consumed. */
-private fun Modifier.focusOnPress(
-    onPress: () -> Unit
-): Modifier = pointerInput(onPress) {
+private fun Modifier.focusOnPress(onPress: () -> Unit): Modifier = pointerInput(onPress) {
     awaitPointerEventScope {
         while (true) {
-            if (awaitPointerEvent(pass = PointerEventPass.Initial).type == PointerEventType.Press) onPress()
+            if (awaitPointerEvent(pass = PointerEventPass.Initial).type == PointerEventType.Press) {
+                onPress()
+            }
         }
     }
 }
@@ -241,11 +270,19 @@ private fun Modifier.focusOnPress(
 @Composable
 private fun WorkspaceContentPreview() {
     val notes = listOf("Recipes/Arepas.md", "Welcome.md").map { RelativePath(value = it) }
+
     NotekeaPreviewThemes {
-        Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
+        Box(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
             WorkspaceContent(
                 state = WorkspaceState(
-                    workspace = notes.fold(initial = Workspace.EMPTY) { it, path -> it.open(path = path) }.splitRight(),
+                    workspace = notes
+                        .fold(initial = Workspace.EMPTY) { it, path -> it.open(path = path) }
+                        .splitRight(),
                     tree = VaultTree.EMPTY.withFolder(path = RelativePath(value = "Recipes"))
                 ),
                 platformConventions = PreviewPlatformConventions.linux,
@@ -261,7 +298,12 @@ private fun WorkspaceContentPreview() {
 @Composable
 private fun WorkspaceContentEmptyPreview() {
     NotekeaPreviewThemes {
-        Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
+        Box(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
             WorkspaceContent(
                 state = WorkspaceState(),
                 platformConventions = PreviewPlatformConventions.linux,

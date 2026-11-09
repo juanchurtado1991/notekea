@@ -27,21 +27,24 @@ internal fun dotsOf(
         val depth = depths[node.path] ?: 0
         val isCenter = depths.isNotEmpty() && depth == 0
         val radius = radiusOf(node = node) * (1f - depth * DEPTH_SHRINK)
+
+        val shownRadius = if (isCenter) maxOf(radius, CENTER_RADIUS) else radius
+
         GraphDot(
             path = node.path,
             name = node.name,
             folder = node.folder,
             x = point.x,
             y = point.y,
-            radius = if (isCenter) maxOf(radius, CENTER_RADIUS) else radius,
+            radius = shownRadius,
             depth = depth
         )
     }
 }
 
-private fun radiusOf(
-    node: GraphNode
-): Float = (BASE_RADIUS + sqrt(node.links.toFloat()) * RADIUS_PER_LINK).coerceAtMost(maximumValue = MAX_RADIUS)
+private fun radiusOf(node: GraphNode): Float = (
+    BASE_RADIUS + sqrt(node.links.toFloat()) * RADIUS_PER_LINK
+    ).coerceAtMost(maximumValue = MAX_RADIUS)
 
 /** The notes of [paths] named like [query], best first; the same score goes by path, so the order holds. */
 internal fun matchesOf(
@@ -51,8 +54,15 @@ internal fun matchesOf(
 ): List<RelativePath> = if (query.isBlank()) {
     emptyList()
 } else {
-    paths.mapNotNull { path -> matcher.match(query, path.nameWithoutExtension)?.let { path to it.score } }
-        .sortedWith(compareByDescending<Pair<RelativePath, Int>> { it.second }.thenBy { it.first.value })
+    paths
+        .mapNotNull { path ->
+            matcher.match(query, path.nameWithoutExtension)?.let {
+                path to it.score
+            }
+        }
+        .sortedWith(
+            compareByDescending<Pair<RelativePath, Int>> { it.second }.thenBy { it.first.value }
+        )
         .map { it.first }
 }
 
@@ -63,7 +73,10 @@ internal fun noteTowards(
     dots: List<GraphDot>,
     lines: List<GraphLine>
 ): RelativePath? {
-    val from = dots.firstOrNull { it.path == selected } ?: return null
+    val from = dots.firstOrNull {
+        it.path == selected
+    } ?: return null
+
     val joined = lines.mapNotNull {
         when (selected) {
             it.first -> it.second
@@ -71,10 +84,24 @@ internal fun noteTowards(
             else -> null
         }
     }.toSet()
-    return dots.filter { it.path in joined }
-        .map { dot -> dot to scoreOf(direction = direction, dx = dot.x - from.x, dy = dot.y - from.y) }
-        .filter { (_, score) -> score != null }
-        .minByOrNull { (_, score) -> score ?: Float.MAX_VALUE }
+
+    return dots
+        .filter {
+            it.path in joined
+        }
+        .map { dot ->
+            dot to scoreOf(
+                direction = direction,
+                dx = dot.x - from.x,
+                dy = dot.y - from.y
+            )
+        }
+        .filter { (_, score) ->
+            score != null
+        }
+        .minByOrNull { (_, score) ->
+            score ?: Float.MAX_VALUE
+        }
         ?.first
         ?.path
 }
@@ -83,7 +110,9 @@ internal fun noteTowards(
 internal fun connectedTo(
     path: RelativePath,
     lines: List<GraphLine>
-): List<RelativePath> = lines.filter { !it.isRelated }.mapNotNull {
+): List<RelativePath> = lines.filter {
+    !it.isRelated
+}.mapNotNull {
     when (path) {
         it.first -> it.second
         it.second -> it.first
@@ -100,5 +129,6 @@ private fun scoreOf(
     val ahead = dx * direction.dx + dy * direction.dy
     if (ahead <= 0f) return null
     val side = abs(dx * direction.dy) + abs(dy * direction.dx)
+
     return ahead + side * SIDE_WEIGHT
 }

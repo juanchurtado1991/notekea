@@ -12,9 +12,9 @@ class OpenVaultUseCase(
     private val recentVaultsStore: RecentVaultsStore,
     private val clock: Clock
 ) {
-    suspend operator fun invoke(
-        path: String
-    ): Outcome<Vault, VaultError> = when (vaultFileSystem.access(path = path)) {
+    suspend operator fun invoke(path: String): Outcome<Vault, VaultError> = when (
+        vaultFileSystem.access(path = path)
+    ) {
         FolderAccess.AVAILABLE -> {
             rememberAsMostRecent(path = path)
             Outcome.Success(value = Vault.fromPath(path = path))
@@ -29,12 +29,19 @@ class OpenVaultUseCase(
         }
     }
 
-    private suspend fun rememberAsMostRecent(
-        path: String
-    ) {
-        val others = recentVaultsStore.read().filterNot { it.path == path }
-        val opened = RecentVault(path = path, lastOpenedAt = clock.now())
-        recentVaultsStore.write(recentVaults = (listOf(opened) + others).take(n = MAX_RECENT_VAULTS))
+    private suspend fun rememberAsMostRecent(path: String) {
+        val others = recentVaultsStore.read().filterNot {
+            it.path == path
+        }
+
+        val opened = RecentVault(
+            path = path,
+            lastOpenedAt = clock.now()
+        )
+
+        recentVaultsStore.write(
+            recentVaults = (listOf(opened) + others).take(n = MAX_RECENT_VAULTS)
+        )
     }
 
     companion object {

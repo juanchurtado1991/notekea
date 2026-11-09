@@ -45,7 +45,5 @@ object WorkspaceBlueSchemes {
         onError = WorkspaceBluePalette.OnColorLight
     )
 
-    fun forTheme(
-        darkTheme: Boolean
-    ): ColorScheme = if (darkTheme) dark else light
+    fun forTheme(darkTheme: Boolean): ColorScheme = if (darkTheme) dark else light
 }

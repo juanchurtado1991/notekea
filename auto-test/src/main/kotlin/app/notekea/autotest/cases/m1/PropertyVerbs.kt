@@ -10,16 +10,18 @@ import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
-import com.testbuddy.isShown
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
+import com.testbuddy.isShown
 import kotlin.math.abs
 
 private const val WAIT_MILLIS = 10_000L
 
 /** The first text field on screen showing exactly [text]: a property's name or value. */
-internal fun CaseScope.field(text: String): SemanticsNodeInteraction =
-    firstShownOf(matcher = hasSetTextAction() and hasText(text = text), what = "a field showing \"$text\"")
+internal fun CaseScope.field(text: String): SemanticsNodeInteraction = firstShownOf(
+    matcher = hasSetTextAction() and hasText(text = text),
+    what = "a field showing \"$text\""
+)
 
 /** Replaces the text of the field showing [current] with [text] and presses Enter, as a person editing it. */
 internal fun CaseScope.editField(
@@ -30,6 +32,7 @@ internal fun CaseScope.editField(
     // A field can show its value another way while it is edited (a date as 2026-11-02), so the focused one is used.
     val focused = ui.onNode(matcher = isFocused() and hasSetTextAction())
     focused.performTextReplacement(text = text)
+
     focused.performKeyInput { pressKey(key = Key.Enter) }
 }
 
@@ -42,14 +45,27 @@ internal fun CaseScope.onRowOf(
     matcher: SemanticsMatcher,
     anchor: SemanticsMatcher = hasText(text = rowText)
 ): SemanticsNodeInteraction {
-    val row = firstShownOf(matcher = anchor, what = "\"$rowText\"").fetchSemanticsNode().boundsInRoot
+    val row = firstShownOf(
+        matcher = anchor,
+        what = "\"$rowText\""
+    ).fetchSemanticsNode().boundsInRoot
+
     val nodes = ui.onAllNodes(matcher = matcher)
     val count = nodes.fetchSemanticsNodes().size
-    return (0 until count).map { nodes[it] }.filter { it.isShown() }.minByOrNull { node ->
-        val bounds = node.fetchSemanticsNode().boundsInRoot
-        val rowDistance = abs(bounds.center.y - row.center.y) * ROW_WEIGHT
-        rowDistance + if (bounds.left >= row.left) bounds.left - row.right else LEFT_PENALTY
-    } ?: throw CaseFailure(message = "expected something next to \"$rowText\", there is nothing")
+
+    return (0 until count)
+        .map {
+            nodes[it]
+        }
+        .filter { it.isShown() }
+        .minByOrNull { node ->
+            val bounds = node.fetchSemanticsNode().boundsInRoot
+            val rowDistance = abs(bounds.center.y - row.center.y) * ROW_WEIGHT
+            rowDistance + if (bounds.left >= row.left) bounds.left - row.right else LEFT_PENALTY
+        }
+        ?: throw CaseFailure(
+            message = "expected something next to \"$rowText\", there is nothing"
+        )
 }
 
 /** Clicks the button labeled [label] on the row of [rowText]. */
@@ -57,7 +73,10 @@ internal fun CaseScope.clickOnRowOf(
     rowText: String,
     label: String
 ) {
-    onRowOf(rowText = rowText, matcher = hasContentDescription(value = label)).clickWhenStill()
+    onRowOf(
+        rowText = rowText,
+        matcher = hasContentDescription(value = label)
+    ).clickWhenStill()
 }
 
 private fun CaseScope.firstShownOf(
@@ -65,14 +84,21 @@ private fun CaseScope.firstShownOf(
     what: String
 ): SemanticsNodeInteraction {
     var found: SemanticsNodeInteraction? = null
+
     runCatching {
-        ui.waitUntil(timeoutMillis = WAIT_MILLIS) {
-            val nodes = ui.onAllNodes(matcher = matcher)
-            val count = nodes.fetchSemanticsNodes().size
-            found = (0 until count).map { nodes[it] }.firstOrNull { it.isShown() }
-            found != null
-        }
+        ui
+            .waitUntil(timeoutMillis = WAIT_MILLIS) {
+                val nodes = ui.onAllNodes(matcher = matcher)
+                val count = nodes.fetchSemanticsNodes().size
+
+                found = (0 until count).map {
+                    nodes[it]
+                }.firstOrNull { it.isShown() }
+
+                found != null
+            }
     }
+
     return found ?: throw CaseFailure(message = "expected $what, it did not appear")
 }
 

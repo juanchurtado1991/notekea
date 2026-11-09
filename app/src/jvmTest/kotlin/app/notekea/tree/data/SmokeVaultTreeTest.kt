@@ -2,11 +2,13 @@ package app.notekea.tree.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.data.GhostFrontmatterParser
+import app.notekea.core.notes.data.OkioNoteScanner
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 import app.notekea.tree.domain.FakeFileWatcher
 import app.notekea.tree.domain.FakeNoteMetadataCache
 import app.notekea.tree.domain.ObserveVaultTreeUseCase
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.VaultTree
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -14,8 +16,6 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.core.notes.data.GhostFrontmatterParser
-import app.notekea.core.notes.data.OkioNoteScanner
 
 /**
  * Runs the production scanner and frontmatter reader on the `Personal Notes` smoke vault, so the tree the smoke test
@@ -25,13 +25,16 @@ class SmokeVaultTreeTest {
     private val testDispatcher = StandardTestDispatcher()
 
     @Test
-    fun `the personal notes vault lists its twelve notes with their frontmatter`() = runTest(context = testDispatcher) {
+    fun `the personal notes vault lists its twelve notes with their frontmatter`() = runTest(
+        context = testDispatcher
+    ) {
         val tree = loadTree()
 
         assertEquals(
             expected = 12,
             actual = tree.notes.size
         )
+
         assertEquals(
             expected = listOf(
                 listOf("recipe", "venezuelan"),
@@ -40,23 +43,33 @@ class SmokeVaultTreeTest {
                 emptyList()
             ),
             actual = listOf(AREPAS, LISBON, ROADMAP_THOUGHTS, CAFE).map {
-                tree.notes
+                tree
+                    .notes
                     .getValue(RelativePath(value = it))
-                    .metadata.tags
+                    .metadata
+                    .tags
             }
         )
+
         assertEquals(
             expected = emptyList(),
             actual = tree.folders.filter { folder ->
-                folder.value.split(RelativePath.SEPARATOR).any { it.startsWith(prefix = ".") }
+                folder
+                    .value
+                    .split(RelativePath.SEPARATOR)
+                    .any { it.startsWith(prefix = ".") }
             }
         )
     }
 
     private suspend fun loadTree(): VaultTree {
         val dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
+
         val observeVaultTree = ObserveVaultTreeUseCase(
-            noteScanner = OkioNoteScanner(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers),
+            noteScanner = OkioNoteScanner(
+                fileSystem = FileSystem.SYSTEM,
+                dispatchers = dispatchers
+            ),
             noteMetadataReader = OkioNoteMetadataReader(
                 fileSystem = FileSystem.SYSTEM,
                 dispatchers = dispatchers,
@@ -65,7 +78,11 @@ class SmokeVaultTreeTest {
             fileWatcher = FakeFileWatcher(),
             noteMetadataCache = FakeNoteMetadataCache()
         )
-        val outcome = observeVaultTree(vaultPath = (VAULTS_DIRECTORY.toPath() / PERSONAL).toString()).first()
+
+        val outcome = observeVaultTree(
+            vaultPath = (VAULTS_DIRECTORY.toPath() / PERSONAL).toString()
+        ).first()
+
         return (outcome as Outcome.Success).value
     }
 

@@ -37,13 +37,20 @@ fun NotekeaToolButton(
     tint: Color = MaterialTheme.colorScheme.onSurface
 ) {
     val shape = MaterialTheme.shapes.small
+
     Row(
         modifier = Modifier
             .heightIn(min = NotekeaDimensions.CompactControlSize)
-            .focusBorder(color = MaterialTheme.colorScheme.primary, shape = shape)
+            .focusBorder(
+                color = MaterialTheme.colorScheme.primary,
+                shape = shape
+            )
             .clip(shape = shape)
             .pointerHoverIcon(icon = PointerIcon.Hand)
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
             .padding(horizontal = NotekeaDimensions.SpacingXs),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
         verticalAlignment = Alignment.CenterVertically
@@ -54,7 +61,13 @@ fun NotekeaToolButton(
             modifier = Modifier.size(size = NotekeaDimensions.IconSize),
             tint = tint
         )
-        Text(text = text, style = MaterialTheme.typography.bodySmall, color = tint, maxLines = 1)
+
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = tint,
+            maxLines = 1
+        )
     }
 }
 
@@ -66,20 +79,46 @@ fun NotekeaToolMenu(
     sections: List<List<NotekeaMenuItem>>
 ) {
     val menu = remember { NotekeaContextMenuState() }
-    val below = with(LocalDensity.current) { Offset(x = 0f, y = NotekeaDimensions.CompactControlSize.toPx()) }
-    NotekeaContextMenuArea(sections = sections, state = menu) {
-        NotekeaToolButton(icon = icon, text = text, onClick = { menu.open(at = below) })
+
+    val below = with(LocalDensity.current) {
+        Offset(
+            x = 0f,
+            y = NotekeaDimensions.CompactControlSize.toPx()
+        )
+    }
+
+    NotekeaContextMenuArea(
+        sections = sections,
+        state = menu
+    ) {
+        NotekeaToolButton(
+            icon = icon,
+            text = text,
+            onClick = { menu.open(at = below) }
+        )
     }
 }
 
 @Preview
 @Composable
 private fun NotekeaToolButtonPreview() {
-    NotekeaPreviewThemes { NotekeaToolButton(icon = NotekeaIcons.QuerySort, text = PREVIEW_TEXT, onClick = {}) }
+    NotekeaPreviewThemes {
+        NotekeaToolButton(
+            icon = NotekeaIcons.QuerySort,
+            text = PREVIEW_TEXT,
+            onClick = {}
+        )
+    }
 }
 
 @Preview
 @Composable
 private fun NotekeaToolMenuPreview() {
-    NotekeaPreviewThemes { NotekeaToolMenu(icon = NotekeaIcons.QuerySort, text = PREVIEW_TEXT, sections = emptyList()) }
+    NotekeaPreviewThemes {
+        NotekeaToolMenu(
+            icon = NotekeaIcons.QuerySort,
+            text = PREVIEW_TEXT,
+            sections = emptyList()
+        )
+    }
 }

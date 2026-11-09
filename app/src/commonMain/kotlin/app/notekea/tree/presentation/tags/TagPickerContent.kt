@@ -2,14 +2,14 @@ package app.notekea.tree.presentation.tags
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,7 +33,7 @@ private const val ROWS_MAX_HEIGHT_DP = 320
 private const val TAG_MARK = "#"
 
 /**
- * The tag picker palette (`ROADMAP.md` 1.17) over the workspace, while [TagPickerState.isOpen]: "Find or create a
+ * The tag picker palette over the workspace, while [TagPickerState.isOpen]: "Find or create a
  * tag", the matching tags as `#tag`, and "New tag: #name" for a name the vault lacks. An empty vault explains that
  * typing a name creates one; text that matches nothing and is not a valid tag says so.
  */
@@ -44,11 +44,20 @@ fun TagPickerContent(
     modifier: Modifier = Modifier
 ) {
     if (!state.isOpen) return
+
     NotekeaPalette(
         query = state.query,
         onQueryChange = { onIntent(TagPickerIntent.OnQueryChange(query = it)) },
         placeholder = stringResource(resource = Res.string.tag_picker_placeholder),
-        onMove = { step -> onIntent(if (step > 0) TagPickerIntent.OnSelectNext else TagPickerIntent.OnSelectPrevious) },
+        onMove = { step ->
+            onIntent(
+                if (step > 0) {
+                    TagPickerIntent.OnSelectNext
+                } else {
+                    TagPickerIntent.OnSelectPrevious
+                }
+            )
+        },
         onConfirm = { onIntent(TagPickerIntent.OnConfirm) },
         onDismiss = { onIntent(TagPickerIntent.OnClose) },
         modifier = modifier
@@ -56,7 +65,11 @@ fun TagPickerContent(
         if (state.rows.isEmpty()) {
             NoTags(query = state.query)
         } else {
-            Rows(rows = state.rows, selectedIndex = state.selectedIndex, onIntent = onIntent)
+            Rows(
+                rows = state.rows,
+                selectedIndex = state.selectedIndex,
+                onIntent = onIntent
+            )
         }
     }
 }
@@ -69,22 +82,39 @@ private fun Rows(
     onIntent: (TagPickerIntent) -> Unit
 ) {
     val listState = rememberLazyListState()
+
     LaunchedEffect(selectedIndex, rows) {
-        val isVisible = listState.layoutInfo.visibleItemsInfo.any { item ->
-            item.index == selectedIndex && item.offset >= 0 &&
-                item.offset + item.size <= listState.layoutInfo.viewportEndOffset
-        }
+        val isVisible = listState
+            .layoutInfo
+            .visibleItemsInfo
+            .any { item ->
+                item.index == selectedIndex &&
+                    item.offset >= 0 &&
+                    item.offset + item.size <= listState.layoutInfo.viewportEndOffset
+            }
+
         if (!isVisible) listState.scrollToItem(index = selectedIndex)
     }
+
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxWidth().heightIn(max = ROWS_MAX_HEIGHT_DP.dp),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
     ) {
         // A new tag's name is never one of the found tags', so the name alone tells the rows apart.
-        itemsIndexed(items = rows, key = { _, row -> row.name }) { index, row ->
+        itemsIndexed(
+            items = rows,
+            key = { _, row -> row.name }
+        ) { index, row ->
+            val title = if (row.isNew) {
+                stringResource(Res.string.tag_picker_new, row.name)
+            } else {
+                TAG_MARK +
+                    row.name
+            }
+
             NotekeaPaletteItem(
-                title = if (row.isNew) stringResource(Res.string.tag_picker_new, row.name) else TAG_MARK + row.name,
+                title = title,
                 onClick = { onIntent(TagPickerIntent.OnRowClick(index = index)) },
                 selected = index == selectedIndex
             )
@@ -93,28 +123,35 @@ private fun Rows(
 }
 
 @Composable
-private fun NoTags(
-    query: String
-) {
-    val isSearching = query.isNotBlank()
+private fun NoTags(query: String) {
+    val strings = Res.string
+
+    val (title, message) = if (query.isNotBlank()) {
+        strings.tag_picker_no_match_title to strings.tag_picker_no_match_message
+    } else {
+        strings.tag_picker_empty_title to strings.tag_picker_empty_message
+    }
+
     EmptyState(
-        title = stringResource(
-            resource = if (isSearching) Res.string.tag_picker_no_match_title else Res.string.tag_picker_empty_title
-        ),
-        message = stringResource(
-            resource = if (isSearching) Res.string.tag_picker_no_match_message else Res.string.tag_picker_empty_message
-        ),
+        title = stringResource(resource = title),
+        message = stringResource(resource = message),
         modifier = Modifier.fillMaxWidth()
     )
 }
 
 @Composable
-private fun TagPickerPreviewFrame(
-    state: TagPickerState
-) {
+private fun TagPickerPreviewFrame(state: TagPickerState) {
     NotekeaPreviewThemes {
-        Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
-            TagPickerContent(state = state, onIntent = {})
+        Box(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
+            TagPickerContent(
+                state = state,
+                onIntent = {}
+            )
         }
     }
 }
@@ -129,7 +166,10 @@ private fun TagPickerContentPreview() {
             rows = listOf(
                 TagPickerRow(name = "recipe"),
                 TagPickerRow(name = "recipe/drinks"),
-                TagPickerRow(name = "rec", isNew = true)
+                TagPickerRow(
+                    name = "rec",
+                    isNew = true
+                )
             )
         )
     )

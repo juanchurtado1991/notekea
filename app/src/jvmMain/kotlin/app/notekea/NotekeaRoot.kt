@@ -1,6 +1,5 @@
 package app.notekea
 
-import app.notekea.ai.presentation.ModelManagerScreen
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -10,7 +9,11 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.ai.presentation.ModelManagerScreen
 import app.notekea.core.appearance.domain.Appearance
+import app.notekea.core.presentation.designsystem.theme.LocalAppearance
+import app.notekea.core.presentation.designsystem.theme.LocalSystemDarkTheme
+import app.notekea.core.presentation.designsystem.theme.LocalSystemReduceMotion
 import app.notekea.core.presentation.platform.AppEnvironment
 import app.notekea.core.presentation.platform.AppVersionDefaults
 import app.notekea.core.presentation.platform.LocalAppVersion
@@ -21,14 +24,11 @@ import app.notekea.core.presentation.platform.LocalWindowCloseGuard
 import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.core.presentation.platform.UiZoom
 import app.notekea.core.presentation.platform.WindowCloseShortcuts
-import app.notekea.shell.presentation.WindowDialogsHost
 import app.notekea.core.presentation.platform.WindowHost
 import app.notekea.core.presentation.platform.awtFileDrop
-import app.notekea.core.presentation.designsystem.theme.LocalAppearance
-import app.notekea.core.presentation.designsystem.theme.LocalSystemDarkTheme
-import app.notekea.core.presentation.designsystem.theme.LocalSystemReduceMotion
-import app.notekea.tree.presentation.view.VaultScope
 import app.notekea.shell.presentation.VaultTreeScreen
+import app.notekea.shell.presentation.WindowDialogsHost
+import app.notekea.tree.presentation.view.VaultScope
 import app.notekea.vault.presentation.welcome.WelcomeContent
 import app.notekea.vault.presentation.welcome.WelcomePreviewData
 import app.notekea.vault.presentation.welcome.WelcomeScreen
@@ -48,12 +48,16 @@ fun NotekeaAppLocals(
     content: @Composable () -> Unit
 ) {
     val darkTheme = remember(environment) { environment.systemAppearance.observeDarkTheme() }
+
     val appearances = remember(environment) { environment.appearanceStore.observe() }
+
     val isSystemDark by darkTheme.collectAsState(initial = null)
     val appearance by appearances.collectAsState(initial = initialAppearance)
+
     val isMotionReduced by produceState(initialValue = false, environment) {
         value = environment.systemMotion.isReduced()
     }
+
     AppLocals(
         isMotionReduced = isMotionReduced,
         appearance = appearance,
@@ -97,15 +101,17 @@ fun NotekeaRoot(
         LocalWindowCloseGuard provides host.closeGuard,
         LocalWindowDialogs provides host.dialogs
     ) {
-        WindowCloseShortcuts(platformConventions = host.conventions, onClose = onClose)
+        WindowCloseShortcuts(
+            platformConventions = host.conventions,
+            onClose = onClose
+        )
+
         UiZoom(platformConventions = host.conventions) { WindowContent(host = host) }
     }
 }
 
 @Composable
-private fun WindowContent(
-    host: WindowHost
-) {
+private fun WindowContent(host: WindowHost) {
     App {
         WelcomeScreen(
             onVaultNameChange = { host.vaultName = it },
@@ -120,6 +126,7 @@ private fun WindowContent(
                 }
             }
         )
+
         WindowDialogsHost(
             platformConventions = host.conventions,
             dialogs = host.dialogs,
@@ -144,6 +151,10 @@ private fun NotekeaAppLocalsPreview() {
 @Composable
 private fun NotekeaRootPreview() {
     App {
-        WelcomeContent(state = WelcomePreviewData.state(), onIntent = {}, openedVaultContent = { _, _ -> })
+        WelcomeContent(
+            state = WelcomePreviewData.state(),
+            onIntent = {},
+            openedVaultContent = { _, _ -> }
+        )
     }
 }

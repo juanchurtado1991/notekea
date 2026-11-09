@@ -1,12 +1,12 @@
 package app.notekea.editor.domain
 
+import app.notekea.core.notes.domain.AttachmentKind
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.relativeTo
 import org.jetbrains.compose.resources.decodeToImageBitmap
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.core.notes.domain.AttachmentKind
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.relativeTo
 
 /**
  * The images and attachments cases of `MVP_SMOKE_TEST.md` (1.8) on the smoke data itself: the note's embeds are found
@@ -16,17 +16,23 @@ import app.notekea.core.notes.domain.relativeTo
 class SmokeAttachmentsTest {
     private val note = RelativePath(value = "Editor/Images and files.md")
     private val embeds = EmbedFinder().embeds(text = File(SMOKE_NOTE).readText())
-    private val files = File(PERSONAL_NOTES).walkTopDown()
+    private val files = File(PERSONAL_NOTES)
+        .walkTopDown()
         .filter {
             it.isFile &&
-                it.relativeTo(base = File(PERSONAL_NOTES)).invariantSeparatorsPath.split("/").none { part ->
+                it.relativeTo(
+                    base = File(PERSONAL_NOTES)
+                ).invariantSeparatorsPath.split("/").none { part ->
                     part.startsWith(".")
                 }
         }
-        .map { RelativePath(value = it.relativeTo(base = File(PERSONAL_NOTES)).invariantSeparatorsPath) }
-        .toList() + File(SMOKE_ATTACHMENTS).listFiles().orEmpty().map {
-        RelativePath(value = "attachments/" + it.name)
-    } +
+        .map {
+            RelativePath(value = it.relativeTo(base = File(PERSONAL_NOTES)).invariantSeparatorsPath)
+        }
+        .toList() + File(SMOKE_ATTACHMENTS)
+        .listFiles()
+        .orEmpty()
+        .map { RelativePath(value = "attachments/" + it.name) } +
         note
 
     @Test
@@ -47,38 +53,66 @@ class SmokeAttachmentsTest {
                 Triple("attachments/Weekly menu.pdf", null, false),
                 Triple("attachments/Arepas plate.png", 80, false)
             ),
-            actual = embeds.map { Triple(resolver.resolve(embed = it, note = note)?.value, it.width, it.isOwnLine) }
+            actual = embeds.map {
+                Triple(
+                    resolver.resolve(
+                        embed = it,
+                        note = note
+                    )?.value,
+                    it.width,
+                    it.isOwnLine
+                )
+            }
         )
     }
 
     @Test
     fun `1_8-13 the note embeds Shopping basics whole and its Dairy section`() {
         val shopping = File(SHOPPING_NOTE).readText()
-        val notes = EmbedFinder().embeds(text = File(SMOKE_NOTE).readText(), includeNotes = true).filter { it.isNote }
+
+        val notes = EmbedFinder().embeds(
+            text = File(SMOKE_NOTE).readText(),
+            includeNotes = true
+        ).filter { it.isNote }
 
         assertEquals(
             expected = listOf("Shopping basics", "Shopping basics#Dairy"),
             actual = notes.map { it.target }
         )
+
         assertEquals(
             expected = "## Dairy\n\n- Fresh cheese\n- Butter",
-            actual = EmbeddedNoteText().of(text = shopping, target = notes.last().target)
+            actual = EmbeddedNoteText().of(
+                text = shopping,
+                target = notes.last().target
+            )
         )
+
         assertEquals(
             expected = false,
-            actual = EmbeddedNoteText().of(text = shopping, target = notes.first().target).orEmpty().contains("tags:")
+            actual = EmbeddedNoteText()
+                .of(
+                    text = shopping,
+                    target = notes.first().target
+                )
+                .orEmpty()
+                .contains("tags:")
         )
     }
 
     @Test
     fun `1_8-01 the plate is a picture of 480 x 240, the broken png cannot be drawn and shows as a file`() {
         val plate = File(SMOKE_ATTACHMENTS, "Arepas plate.png").readBytes().decodeToImageBitmap()
-        val broken = runCatching { File(SMOKE_ATTACHMENTS, "broken.png").readBytes().decodeToImageBitmap() }.getOrNull()
+
+        val broken = runCatching {
+            File(SMOKE_ATTACHMENTS, "broken.png").readBytes().decodeToImageBitmap()
+        }.getOrNull()
 
         assertEquals(
             expected = listOf(480, 240, null),
             actual = listOf(plate.width, plate.height, broken)
         )
+
         assertEquals(
             expected = listOf(AttachmentKind.IMAGE, AttachmentKind.OTHER),
             actual = listOf("broken.png", "Weekly menu.pdf").map { AttachmentKind.of(name = it) }

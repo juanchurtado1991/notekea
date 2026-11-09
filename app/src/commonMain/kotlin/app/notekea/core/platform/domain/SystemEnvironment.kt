@@ -15,7 +15,5 @@ interface SystemEnvironment {
     /** The version people see (About, crash reports), or "development" when the build did not set it, as in tests. */
     val appVersion: String
 
-    fun environmentVariable(
-        name: String
-    ): String?
+    fun environmentVariable(name: String): String?
 }

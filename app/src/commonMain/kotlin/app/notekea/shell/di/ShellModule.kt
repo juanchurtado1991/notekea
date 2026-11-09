@@ -16,11 +16,23 @@ import org.koin.dsl.module
  * The window around the features: its panes, tabs and side panel, kept per vault.
  */
 val shellModule = module {
-    single<WorkspaceStore> { SettingsWorkspaceStore(settings = get(), dispatchers = get()) }
+    single<WorkspaceStore> {
+        SettingsWorkspaceStore(
+            settings = get(),
+            dispatchers = get()
+        )
+    }
+
     factoryOf(::GetWorkspaceUseCase)
     factoryOf(::GetNoteCoverUseCase)
     factoryOf(::WorkspaceTools)
     factoryOf(::GetSidePanelUseCase)
     factoryOf(::SaveSidePanelUseCase)
-    viewModel { parameters -> WorkspaceViewModel(vaultPath = parameters.get(), tools = get()) }
+
+    viewModel { parameters ->
+        WorkspaceViewModel(
+            vaultPath = parameters.get(),
+            tools = get()
+        )
+    }
 }

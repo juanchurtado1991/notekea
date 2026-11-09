@@ -1,6 +1,6 @@
 package app.notekea.editor.presentation.markdown
 
-/** What a stretch of a note's Markdown is, for the editor's highlighting (`ROADMAP.md` 1.5). */
+/** What a stretch of a note's Markdown is, for the editor's highlighting. */
 enum class HighlightKind {
     BOLD,
     CODE_BLOCK,

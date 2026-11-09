@@ -41,9 +41,8 @@ private const val PREVIEW_WIDTH_DP = 480
 
 /**
  * A callout card (an Obsidian `> [!type]` block in Read mode): a background tinted with [color], a header with [icon]
- * and the [title] in that color, and the [content] under it. When [onToggle] is given the callout can be folded: the
- * header shows a chevron and a click on it shows or hides the content ([isExpanded]); its title is then not selectable,
- * so quick clicks fold and unfold it instead of selecting it.
+ * and the [title], and the [content] under it. With [onToggle] the callout folds: the header shows a chevron and a
+ * click on it shows or hides the content ([isExpanded]); its title is then not selectable, so quick clicks fold it.
  */
 @Composable
 fun NotekeaCallout(
@@ -56,6 +55,7 @@ fun NotekeaCallout(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val shape = MaterialTheme.shapes.small
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -65,13 +65,26 @@ fun NotekeaCallout(
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
     ) {
         if (onToggle == null) {
-            CalloutHeader(title = title, icon = icon, color = color, isExpanded = isExpanded, onToggle = null)
+            CalloutHeader(
+                title = title,
+                icon = icon,
+                color = color,
+                isExpanded = isExpanded,
+                onToggle = null
+            )
         } else {
             // Clicking a foldable title twice in a row folds and unfolds it, instead of selecting it as a word.
             DisableSelection {
-                CalloutHeader(title = title, icon = icon, color = color, isExpanded = isExpanded, onToggle = onToggle)
+                CalloutHeader(
+                    title = title,
+                    icon = icon,
+                    color = color,
+                    isExpanded = isExpanded,
+                    onToggle = onToggle
+                )
             }
         }
+
         if (isExpanded) content()
     }
 }
@@ -84,7 +97,13 @@ private fun CalloutHeader(
     isExpanded: Boolean,
     onToggle: (() -> Unit)?
 ) {
-    val toggle = onToggle?.let { foldToggle(title = title, onToggle = it) } ?: Modifier
+    val toggle = onToggle?.let {
+        foldToggle(
+            title = title,
+            onToggle = it
+        )
+    } ?: Modifier
+
     Row(
         modifier = Modifier.fillMaxWidth().then(other = toggle),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
@@ -96,12 +115,17 @@ private fun CalloutHeader(
             modifier = Modifier.size(size = NotekeaDimensions.IconSize),
             tint = color
         )
+
         Text(
             text = title,
             modifier = Modifier.weight(weight = 1f),
-            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+            style = MaterialTheme
+                .typography
+                .bodyLarge
+                .copy(fontWeight = FontWeight.SemiBold),
             color = color
         )
+
         if (onToggle != null) {
             Icon(
                 imageVector = if (isExpanded) NotekeaIcons.Collapse else NotekeaIcons.Expand,
@@ -120,6 +144,7 @@ private fun foldToggle(
     onToggle: () -> Unit
 ): Modifier {
     val interactionSource = remember { MutableInteractionSource() }
+
     return Modifier
         .focusProperties { canFocus = false }
         .pointerHoverIcon(icon = PointerIcon.Hand)
@@ -145,8 +170,12 @@ private fun NotekeaCalloutPreview() {
                 icon = NotekeaIcons.CalloutTip,
                 color = MaterialTheme.colorScheme.primary
             ) {
-                Text(text = PREVIEW_BODY, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = PREVIEW_BODY,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
+
             NotekeaCallout(
                 title = PREVIEW_WARNING,
                 icon = NotekeaIcons.CalloutWarning,
@@ -154,7 +183,10 @@ private fun NotekeaCalloutPreview() {
                 isExpanded = false,
                 onToggle = {}
             ) {
-                Text(text = PREVIEW_BODY, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = PREVIEW_BODY,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }

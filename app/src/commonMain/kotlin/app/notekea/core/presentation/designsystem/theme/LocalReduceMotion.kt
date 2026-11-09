@@ -9,7 +9,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 val LocalSystemReduceMotion = staticCompositionLocalOf { false }
 
 /**
- * Whether what moves on screen changes at once instead (`ROADMAP.md`, Motion): the setting in Settings → Appearance or
+ * Whether what moves on screen changes at once instead: the setting in Settings → Appearance or
  * the system's, set by [NotekeaTheme]. Animations take their specs from [motionTween].
  */
 val LocalReduceMotion = staticCompositionLocalOf { false }

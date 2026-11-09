@@ -14,25 +14,20 @@ class FakeNoteScanner : NoteScanner {
     var scanCount = 0
 
     /** Adds the note and, as a real folder would hold it, its parent folders. */
-    fun addNote(
-        file: NoteFile
-    ) {
+    fun addNote(file: NoteFile) {
         files[file.path] = file
         folders += generateSequence(seed = file.path.parent) { it.parent }.filterNot { it.isRoot }
     }
 
     /** Adds a file that is not a note (an image, a PDF…) and its parent folders. */
-    fun addAttachment(
-        file: NoteFile
-    ) {
+    fun addAttachment(file: NoteFile) {
         attachments[file.path] = file
         folders += generateSequence(seed = file.path.parent) { it.parent }.filterNot { it.isRoot }
     }
 
-    override suspend fun scan(
-        vaultPath: String
-    ): Outcome<VaultListing, NotesError> {
+    override suspend fun scan(vaultPath: String): Outcome<VaultListing, NotesError> {
         scanCount++
+
         val error = failure
             ?: return Outcome.Success(
                 value = VaultListing(
@@ -41,6 +36,7 @@ class FakeNoteScanner : NoteScanner {
                     attachments = attachments.values.toList()
                 )
             )
+
         return Outcome.Failure(error = error)
     }
 

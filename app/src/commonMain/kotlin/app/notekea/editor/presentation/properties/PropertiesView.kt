@@ -1,10 +1,6 @@
 package app.notekea.editor.presentation.properties
 
 import androidx.compose.foundation.background
-import app.notekea.editor.presentation.model.PropertyIntent
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.model.EditorPreviewData
-import app.notekea.editor.presentation.model.EditorState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +27,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.notes.domain.FrontmatterContent
+import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.core.presentation.designsystem.components.NotekeaChip
 import app.notekea.core.presentation.designsystem.components.NotekeaFold
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
@@ -38,8 +36,10 @@ import app.notekea.core.presentation.designsystem.components.focusBorder
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
-import app.notekea.core.notes.domain.FrontmatterContent
-import app.notekea.core.notes.domain.NoteProperty
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorPreviewData
+import app.notekea.editor.presentation.model.EditorState
+import app.notekea.editor.presentation.model.PropertyIntent
 import app.notekea.resources.Res
 import app.notekea.resources.properties_show_form
 import app.notekea.resources.properties_show_source
@@ -51,11 +51,9 @@ private const val PREVIEW_WIDTH_DP = 640
 private const val SOURCE_LINE = "status: draft"
 
 /**
- * The note's properties under its title (`ROADMAP.md` 1.14), on a soft card: a "Properties" header with their number,
- * which folds them, then one row per property (its type's icon, its muted name renamed in place, its value edited in
- * place, and a − that removes it), and "Add property", whose menu picks the type. "Show source" swaps the
- * form for the YAML as written, which can be edited too; frontmatter the form cannot read is shown that way with an
- * explanation, so nothing is lost. A note without properties shows nothing.
+ * The note's properties under its title: a header with their number, which folds them, one row per property (type icon,
+ * name renamed in place, value edited in place, and a − that removes it) and "Add property". "Show source" swaps the
+ * form for the YAML as written; frontmatter the form cannot read is shown that way, so nothing is lost.
  */
 @Composable
 internal fun PropertiesView(
@@ -64,22 +62,49 @@ internal fun PropertiesView(
     modifier: Modifier = Modifier
 ) {
     val content = state.properties
+
     // The source stays while it is being typed in, even once its YAML is valid, empty or saved: it never vanishes.
     var isEditingSource by remember(state.notePath) { mutableStateOf(value = false) }
-    if (content == FrontmatterContent.None && !state.isSourceShown && !isEditingSource) return
+
+    val isHidden =
+        content == FrontmatterContent.None &&
+            !state.isSourceShown &&
+            !isEditingSource
+
+    if (isHidden) return
+
     val properties = (content as? FrontmatterContent.Properties)?.properties.orEmpty()
     val shape = MaterialTheme.shapes.medium
+
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape = shape)
-            .background(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = CARD_ALPHA), shape = shape)
+            .background(
+                color = MaterialTheme
+                    .colorScheme
+                    .surfaceVariant
+                    .copy(alpha = CARD_ALPHA),
+                shape = shape
+            )
             .padding(all = NotekeaDimensions.SpacingXs)
     ) {
-        PropertiesHeader(state = state, count = properties.size, isEditingSource = isEditingSource, onIntent = onIntent)
+        PropertiesHeader(
+            state = state,
+            count = properties.size,
+            isEditingSource = isEditingSource,
+            onIntent = onIntent
+        )
+
         NotekeaFold(isOpen = state.isPropertiesExpanded) {
             val isInvalid = content is FrontmatterContent.Invalid
-            if (isInvalid || state.isSourceShown || isEditingSource) {
+
+            val isSourceVisible =
+                isInvalid ||
+                    state.isSourceShown ||
+                    isEditingSource
+
+            if (isSourceVisible) {
                 PropertiesSource(
                     state = state,
                     invalidLine = (content as? FrontmatterContent.Invalid)?.line,
@@ -88,7 +113,16 @@ internal fun PropertiesView(
                 )
             } else {
                 val keys = properties.map(NoteProperty::key)
-                properties.forEach { PropertyRow(property = it, keys = keys, today = state.today, onIntent = onIntent) }
+
+                properties.forEach {
+                    PropertyRow(
+                        property = it,
+                        keys = keys,
+                        today = state.today,
+                        onIntent = onIntent
+                    )
+                }
+
                 AddPropertyRow(onIntent = onIntent)
             }
         }
@@ -107,14 +141,29 @@ private fun PropertiesHeader(
     onIntent: (EditorIntent) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        FoldTitle(isExpanded = state.isPropertiesExpanded, count = count, onIntent = onIntent)
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FoldTitle(
+            isExpanded = state.isPropertiesExpanded,
+            count = count,
+            onIntent = onIntent
+        )
+
         Spacer(modifier = Modifier.weight(weight = 1f))
+
+        fun toggleSource() {
+            if (isEditingSource) focusManager.clearFocus()
+            if (state.isSourceShown || !isEditingSource) onIntent(PropertyIntent.OnSourceToggle)
+        }
+
         if (state.isPropertiesExpanded && state.properties !is FrontmatterContent.Invalid) {
-            SourceToggle(isSourceShown = state.isSourceShown || isEditingSource, onToggle = {
-                if (isEditingSource) focusManager.clearFocus()
-                if (state.isSourceShown || !isEditingSource) onIntent(PropertyIntent.OnSourceToggle)
-            })
+            SourceToggle(
+                isSourceShown = state.isSourceShown || isEditingSource,
+                onToggle = { toggleSource() }
+            )
         }
     }
 }
@@ -129,12 +178,19 @@ private fun FoldTitle(
     val colors = MaterialTheme.colorScheme
     val muted = colors.onSurfaceVariant
     val shape = MaterialTheme.shapes.small
+
     Row(
         modifier = Modifier
-            .focusBorder(color = colors.primary, shape = shape)
+            .focusBorder(
+                color = colors.primary,
+                shape = shape
+            )
             .clip(shape = shape)
             .clickable(role = Role.Button) { onIntent(PropertyIntent.OnFoldToggle) }
-            .padding(horizontal = NotekeaDimensions.SpacingXs, vertical = NotekeaDimensions.SpacingXs),
+            .padding(
+                horizontal = NotekeaDimensions.SpacingXs,
+                vertical = NotekeaDimensions.SpacingXs
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
     ) {
@@ -144,12 +200,22 @@ private fun FoldTitle(
             modifier = Modifier.size(size = NotekeaDimensions.IconSize),
             tint = muted
         )
+
         Text(
             text = stringResource(resource = Res.string.properties_title),
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+            style = MaterialTheme
+                .typography
+                .labelLarge
+                .copy(fontWeight = FontWeight.SemiBold),
             color = muted
         )
-        if (count > 0) NotekeaChip(label = count.toString(), containerColor = MaterialTheme.colorScheme.surface)
+
+        if (count > 0) {
+            NotekeaChip(
+                label = count.toString(),
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        }
     }
 }
 
@@ -158,11 +224,12 @@ private fun SourceToggle(
     isSourceShown: Boolean,
     onToggle: () -> Unit
 ) {
+    val strings = Res.string
+    val label = if (isSourceShown) strings.properties_show_form else strings.properties_show_source
+
     NotekeaIconButton(
         icon = if (isSourceShown) NotekeaIcons.Properties else NotekeaIcons.PropertySource,
-        label = stringResource(
-            resource = if (isSourceShown) Res.string.properties_show_form else Res.string.properties_show_source
-        ),
+        label = stringResource(resource = label),
         onClick = onToggle,
         takesFocus = false
     )
@@ -190,7 +257,10 @@ private fun PropertiesViewSourcePreview() {
     NotekeaPreviewThemes {
         Box(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
             PropertiesView(
-                state = EditorState(properties = FrontmatterContent.Invalid(line = 1), propertiesSource = SOURCE_LINE),
+                state = EditorState(
+                    properties = FrontmatterContent.Invalid(line = 1),
+                    propertiesSource = SOURCE_LINE
+                ),
                 onIntent = {}
             )
         }

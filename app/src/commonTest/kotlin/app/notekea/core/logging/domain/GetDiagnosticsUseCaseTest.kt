@@ -18,9 +18,13 @@ class GetDiagnosticsUseCaseTest {
     fun `the diagnostics hold the versions and the last lines of the log`() = runTest {
         val log = (1..150).map { "line $it" }
 
-        val text = GetDiagnosticsUseCase(systemEnvironment = environment, logStore = FakeLogStore(lines = log))()
+        val text = GetDiagnosticsUseCase(
+            systemEnvironment = environment,
+            logStore = FakeLogStore(lines = log)
+        )()
 
         val lines = text.lines()
+
         assertEquals(
             expected = listOf(
                 "Notekea diagnostics",
@@ -32,14 +36,31 @@ class GetDiagnosticsUseCaseTest {
             ),
             actual = lines.take(n = 6)
         )
-        assertEquals(expected = "line 150", actual = lines.dropLast(n = 1).last())
-        assertEquals(expected = GetDiagnosticsUseCase.LOG_LINES + 5, actual = lines.size - 1)
+
+        assertEquals(
+            expected = "line 150",
+            actual = lines.dropLast(n = 1).last()
+        )
+
+        assertEquals(
+            expected = GetDiagnosticsUseCase.LOG_LINES + 5,
+            actual = lines.size - 1
+        )
     }
 
     @Test
     fun `an empty log says so`() = runTest {
-        val text = GetDiagnosticsUseCase(systemEnvironment = environment, logStore = FakeLogStore())()
+        val text = GetDiagnosticsUseCase(
+            systemEnvironment = environment,
+            logStore = FakeLogStore()
+        )()
 
-        assertEquals(expected = "(nothing logged yet)", actual = text.trimEnd().lines().last())
+        assertEquals(
+            expected = "(nothing logged yet)",
+            actual = text
+                .trimEnd()
+                .lines()
+                .last()
+        )
     }
 }

@@ -44,17 +44,20 @@ class ParameterOrderRule :
 
     override fun beforeVisitChildNodes(
         node: ASTNode,
-        emit: (offset: Int, errorMessage: String, canBeAutoCorrected: Boolean) -> AutocorrectDecision
+        emit: (
+            offset: Int,
+            errorMessage: String,
+            canBeAutoCorrected: Boolean
+        ) -> AutocorrectDecision
     ) {
         val owner = node.treeParent
         val isCheckedParameterList = node.elementType == VALUE_PARAMETER_LIST &&
             owner?.elementType in checkedOwners &&
             !hasFixedSignature(owner = owner)
-        if (!isCheckedParameterList) {
-            return
-        }
+        if (!isCheckedParameterList) return
         val parameters = node.getChildren(null).filter { it.elementType == VALUE_PARAMETER }
-        val isTrailingLambda = parameters.lastOrNull()?.let { isFunctionTyped(parameter = it) } == true
+        val isTrailingLambda =
+            parameters.lastOrNull()?.let { isFunctionTyped(parameter = it) } == true
         val checkedParameters = if (isTrailingLambda) parameters.dropLast(n = 1) else parameters
         var highestKind = ParameterKind.MANDATORY
         checkedParameters.forEach { parameter ->
@@ -88,7 +91,8 @@ class ParameterOrderRule :
         parameter: ASTNode
     ): ParameterKind {
         val hasDefaultValue = parameter.findChildByType(EQ) != null
-        val isNullable = parameter.findChildByType(TYPE_REFERENCE)?.findChildByType(NULLABLE_TYPE) != null
+        val isNullable =
+            parameter.findChildByType(TYPE_REFERENCE)?.findChildByType(NULLABLE_TYPE) != null
         return when {
             hasDefaultValue -> ParameterKind.DEFAULT
             isNullable -> ParameterKind.NULLABLE

@@ -8,13 +8,9 @@ import kotlinx.coroutines.flow.receiveAsFlow
 class FakeFileWatcher : FileWatcher {
     private val changes = Channel<VaultChange>(capacity = Channel.UNLIMITED)
 
-    suspend fun emit(
-        change: VaultChange
-    ) {
+    suspend fun emit(change: VaultChange) {
         changes.send(element = change)
     }
 
-    override fun watch(
-        vaultPath: String
-    ): Flow<VaultChange> = changes.receiveAsFlow()
+    override fun watch(vaultPath: String): Flow<VaultChange> = changes.receiveAsFlow()
 }

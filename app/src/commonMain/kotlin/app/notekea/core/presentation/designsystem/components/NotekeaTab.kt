@@ -10,9 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 
 private const val PREVIEW_BACKLINKS = "Backlinks"
 private const val PREVIEW_BADGE_COUNT = 12
@@ -33,7 +33,10 @@ fun NotekeaTab(
     Tab(
         selected = selected,
         onClick = onClick,
-        modifier = modifier.focusBorder(color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.small),
+        modifier = modifier.focusBorder(
+            color = MaterialTheme.colorScheme.primary,
+            shape = MaterialTheme.shapes.small
+        ),
         selectedContentColor = MaterialTheme.colorScheme.primary,
         unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
     ) {
@@ -43,17 +46,27 @@ fun NotekeaTab(
         ) {
             Text(
                 text = text,
-                modifier = Modifier.weight(weight = 1f, fill = false),
+                modifier = Modifier.weight(
+                    weight = 1f,
+                    fill = false
+                ),
                 style = MaterialTheme.typography.labelLarge,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+
             badgeCount?.let {
                 Badge(
                     modifier = Modifier.padding(start = NotekeaDimensions.SpacingXs),
                     containerColor = MaterialTheme.colorScheme.tertiary,
                     contentColor = MaterialTheme.colorScheme.onTertiary
-                ) { Text(text = it.toString(), maxLines = 1, softWrap = false) }
+                ) {
+                    Text(
+                        text = it.toString(),
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                }
             }
         }
     }
@@ -64,8 +77,18 @@ fun NotekeaTab(
 private fun NotekeaTabPreview() {
     NotekeaPreviewThemes {
         NotekeaTabRow(selectedTabIndex = 0) {
-            NotekeaTab(text = PREVIEW_RELATED, selected = true, onClick = {})
-            NotekeaTab(text = PREVIEW_BACKLINKS, selected = false, onClick = {}, badgeCount = PREVIEW_BADGE_COUNT)
+            NotekeaTab(
+                text = PREVIEW_RELATED,
+                selected = true,
+                onClick = {}
+            )
+
+            NotekeaTab(
+                text = PREVIEW_BACKLINKS,
+                selected = false,
+                onClick = {},
+                badgeCount = PREVIEW_BADGE_COUNT
+            )
         }
     }
 }

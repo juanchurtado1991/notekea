@@ -43,6 +43,8 @@ data class PlatformConventions(
     val dialogButtonOrder: DialogButtonOrder,
     val appDataDirectory: String,
     val homeDirectory: String,
-    /** A second key that deletes in the list of notes, never shown: Backspace alone on macOS, whose Delete key it is. */
+    /**
+     * A second key that deletes in the list of notes, never shown: Backspace alone on macOS, whose Delete key it is.
+     */
     val alternateDeleteShortcut: Shortcut?
 )

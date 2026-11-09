@@ -16,7 +16,9 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 
 private const val PREVIEW_VALUE = "Frank Herbert"
 
-/** The outline of a value in a form's row (a query's rule, a note's property): one control high, its width all there. */
+/**
+ * The outline of a value in a form's row (a query's rule, a note's property): one control high, its width all there.
+ */
 @Composable
 fun NotekeaFieldFrame(
     modifier: Modifier = Modifier,
@@ -40,5 +42,7 @@ fun NotekeaFieldFrame(
 @Preview
 @Composable
 private fun NotekeaFieldFramePreview() {
-    NotekeaPreviewThemes { NotekeaFieldFrame { Text(text = PREVIEW_VALUE) } }
+    NotekeaPreviewThemes {
+        NotekeaFieldFrame { Text(text = PREVIEW_VALUE) }
+    }
 }

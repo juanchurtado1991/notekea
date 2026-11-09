@@ -44,25 +44,59 @@ import app.notekea.resources.about_shortcut_zoom_reset
 
 /** About's shortcuts in three groups, each ordered from the most used: notes, writing, and the workspace. */
 object AboutShortcuts {
-    fun groups(
-        conventions: PlatformConventions
-    ): List<AboutShortcutGroup> = with(conventions) {
+    fun groups(conventions: PlatformConventions): List<AboutShortcutGroup> = with(conventions) {
         listOf(
             AboutShortcutGroup(
                 title = Res.string.about_group_notes,
                 shortcuts = listOf(
-                    AboutShortcut(label = Res.string.about_shortcut_open_note, shortcut = quickSwitcherShortcut),
-                    AboutShortcut(label = Res.string.about_shortcut_new_note, shortcut = newNoteShortcut),
-                    AboutShortcut(label = Res.string.about_shortcut_search_notes, shortcut = searchNotesShortcut),
-                    AboutShortcut(label = Res.string.about_shortcut_today, shortcut = todayShortcut),
-                    AboutShortcut(label = Res.string.about_shortcut_previous_day, shortcut = previousDayShortcut),
-                    AboutShortcut(label = Res.string.about_shortcut_next_day, shortcut = nextDayShortcut),
-                    AboutShortcut(label = Res.string.about_shortcut_template, shortcut = templateShortcut),
-                    AboutShortcut(label = Res.string.about_shortcut_bookmark, shortcut = bookmarkShortcut),
-                    AboutShortcut(label = Res.string.about_shortcut_graph, shortcut = graphShortcut),
-                    AboutShortcut(label = Res.string.about_shortcut_open_selected, shortcut = openSelectedShortcut),
-                    AboutShortcut(label = Res.string.about_shortcut_rename, shortcut = renameShortcut),
-                    AboutShortcut(label = Res.string.about_shortcut_delete, shortcut = deleteShortcut)
+                    AboutShortcut(
+                        label = Res.string.about_shortcut_open_note,
+                        shortcut = quickSwitcherShortcut
+                    ),
+                    AboutShortcut(
+                        label = Res.string.about_shortcut_new_note,
+                        shortcut = newNoteShortcut
+                    ),
+                    AboutShortcut(
+                        label = Res.string.about_shortcut_search_notes,
+                        shortcut = searchNotesShortcut
+                    ),
+                    AboutShortcut(
+                        label = Res.string.about_shortcut_today,
+                        shortcut = todayShortcut
+                    ),
+                    AboutShortcut(
+                        label = Res.string.about_shortcut_previous_day,
+                        shortcut = previousDayShortcut
+                    ),
+                    AboutShortcut(
+                        label = Res.string.about_shortcut_next_day,
+                        shortcut = nextDayShortcut
+                    ),
+                    AboutShortcut(
+                        label = Res.string.about_shortcut_template,
+                        shortcut = templateShortcut
+                    ),
+                    AboutShortcut(
+                        label = Res.string.about_shortcut_bookmark,
+                        shortcut = bookmarkShortcut
+                    ),
+                    AboutShortcut(
+                        label = Res.string.about_shortcut_graph,
+                        shortcut = graphShortcut
+                    ),
+                    AboutShortcut(
+                        label = Res.string.about_shortcut_open_selected,
+                        shortcut = openSelectedShortcut
+                    ),
+                    AboutShortcut(
+                        label = Res.string.about_shortcut_rename,
+                        shortcut = renameShortcut
+                    ),
+                    AboutShortcut(
+                        label = Res.string.about_shortcut_delete,
+                        shortcut = deleteShortcut
+                    )
                 )
             ),
             writing(conventions = conventions),
@@ -70,42 +104,98 @@ object AboutShortcuts {
         )
     }
 
-    private fun writing(
-        conventions: PlatformConventions
-    ) = with(conventions) {
+    private fun writing(conventions: PlatformConventions) = with(conventions) {
         AboutShortcutGroup(
             title = Res.string.about_group_writing,
             shortcuts = listOf(
-                AboutShortcut(label = Res.string.about_shortcut_read_mode, shortcut = toggleReadModeShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_find, shortcut = findShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_bold, shortcut = boldShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_italic, shortcut = italicShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_note_link, shortcut = noteLinkShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_web_link, shortcut = webLinkShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_task, shortcut = toggleTaskShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_save, shortcut = saveShortcut)
+                AboutShortcut(
+                    label = Res.string.about_shortcut_read_mode,
+                    shortcut = toggleReadModeShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_find,
+                    shortcut = findShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_bold,
+                    shortcut = boldShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_italic,
+                    shortcut = italicShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_note_link,
+                    shortcut = noteLinkShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_web_link,
+                    shortcut = webLinkShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_task,
+                    shortcut = toggleTaskShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_save,
+                    shortcut = saveShortcut
+                )
             )
         )
     }
 
-    private fun workspace(
-        conventions: PlatformConventions
-    ) = with(conventions) {
+    private fun workspace(conventions: PlatformConventions) = with(conventions) {
         AboutShortcutGroup(
             title = Res.string.about_group_workspace,
             shortcuts = listOf(
-                AboutShortcut(label = Res.string.about_shortcut_sidebar, shortcut = toggleSidebarShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_side_panel, shortcut = toggleSidePanelShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_outline, shortcut = outlineShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_close_tab, shortcut = closeTabShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_close_window, shortcut = closeWindowShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_quit, shortcut = quitShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_next_tab, shortcut = nextTabShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_previous_tab, shortcut = previousTabShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_split, shortcut = splitRightShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_zoom_in, shortcut = zoomInShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_zoom_out, shortcut = zoomOutShortcut),
-                AboutShortcut(label = Res.string.about_shortcut_zoom_reset, shortcut = zoomResetShortcut)
+                AboutShortcut(
+                    label = Res.string.about_shortcut_sidebar,
+                    shortcut = toggleSidebarShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_side_panel,
+                    shortcut = toggleSidePanelShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_outline,
+                    shortcut = outlineShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_close_tab,
+                    shortcut = closeTabShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_close_window,
+                    shortcut = closeWindowShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_quit,
+                    shortcut = quitShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_next_tab,
+                    shortcut = nextTabShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_previous_tab,
+                    shortcut = previousTabShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_split,
+                    shortcut = splitRightShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_zoom_in,
+                    shortcut = zoomInShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_zoom_out,
+                    shortcut = zoomOutShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_zoom_reset,
+                    shortcut = zoomResetShortcut
+                )
             )
         )
     }

@@ -9,9 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 
 private const val PREVIEW_ACTION = "New note"
 private const val PREVIEW_MESSAGE = "Create your first note to get started."
@@ -30,13 +30,19 @@ fun EmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
     ) {
-        Text(text = title, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center
+        )
+
         Text(
             text = message,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
+
         action?.let {
             Column(modifier = Modifier.padding(top = NotekeaDimensions.SpacingS)) { it() }
         }
@@ -47,9 +53,16 @@ fun EmptyState(
 @Composable
 private fun EmptyStatePreview() {
     NotekeaPreviewThemes {
-        EmptyState(title = PREVIEW_TITLE, message = PREVIEW_MESSAGE, action = {
-            NotekeaButton(text = PREVIEW_ACTION, onClick = {})
-        })
+        EmptyState(
+            title = PREVIEW_TITLE,
+            message = PREVIEW_MESSAGE,
+            action = {
+                NotekeaButton(
+                    text = PREVIEW_ACTION,
+                    onClick = {}
+                )
+            }
+        )
     }
 }
 
@@ -57,6 +70,9 @@ private fun EmptyStatePreview() {
 @Composable
 private fun EmptyStateWithoutActionPreview() {
     NotekeaPreviewThemes {
-        EmptyState(title = PREVIEW_TITLE, message = PREVIEW_MESSAGE)
+        EmptyState(
+            title = PREVIEW_TITLE,
+            message = PREVIEW_MESSAGE
+        )
     }
 }

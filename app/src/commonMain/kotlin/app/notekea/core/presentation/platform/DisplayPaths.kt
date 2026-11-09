@@ -16,11 +16,19 @@ fun displayPath(
     platformConventions: PlatformConventions
 ): String {
     val home = platformConventions.homeDirectory.removeSuffix(suffix = UNIX_SEPARATOR)
-    val usesHomeSymbol = platformConventions.operatingSystem != OperatingSystem.WINDOWS && home.isNotEmpty()
+
+    val usesHomeSymbol =
+        platformConventions.operatingSystem != OperatingSystem.WINDOWS && home.isNotEmpty()
+
     return when {
         !usesHomeSymbol -> path
+
         path == home -> HOME_SYMBOL
-        path.startsWith(prefix = home + UNIX_SEPARATOR) -> HOME_SYMBOL + path.removePrefix(prefix = home)
+
+        path.startsWith(prefix = home + UNIX_SEPARATOR) ->
+            HOME_SYMBOL +
+                path.removePrefix(prefix = home)
+
         else -> path
     }
 }

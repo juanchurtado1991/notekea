@@ -3,19 +3,25 @@ package app.notekea.core.notes.domain
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** A template's properties merged into a note's, as Obsidian merges them (`ROADMAP.md` 1.12). */
+/** A template's properties merged into a note's, as Obsidian merges them. */
 class FrontmatterMergeTest {
     private val merge = FrontmatterMerge()
 
     @Test
     fun `missing properties are added, existing ones keep their value, and lists gain the items they lack`() {
         val note = "---\nstatus: draft\ntags: [work, idea]\naliases:\n  - Plan\n---\n"
-        val template = "---\nstatus: todo\ntype: meeting\ntags:\n  - meeting\n  - work\naliases: Plan\n---\n"
+
+        val template =
+            "---\nstatus: todo\ntype: meeting\ntags:\n  - meeting\n  - work\naliases: Plan\n---\n"
 
         assertEquals(
-            expected = "---\nstatus: draft\ntags:\n  - work\n  - idea\n  - meeting\naliases:\n  - Plan\n" +
+            expected =
+            "---\nstatus: draft\ntags:\n  - work\n  - idea\n  - meeting\naliases:\n  - Plan\n" +
                 "type: meeting\n---\n",
-            actual = merge.merge(noteHeader = note, templateHeader = template)
+            actual = merge.merge(
+                noteHeader = note,
+                templateHeader = template
+            )
         )
     }
 
@@ -26,9 +32,18 @@ class FrontmatterMergeTest {
         assertEquals(
             expected = listOf(properties, properties, ""),
             actual = listOf(
-                merge.merge(noteHeader = "", templateHeader = properties),
-                merge.merge(noteHeader = properties, templateHeader = ""),
-                merge.merge(noteHeader = "", templateHeader = "")
+                merge.merge(
+                    noteHeader = "",
+                    templateHeader = properties
+                ),
+                merge.merge(
+                    noteHeader = properties,
+                    templateHeader = ""
+                ),
+                merge.merge(
+                    noteHeader = "",
+                    templateHeader = ""
+                )
             )
         )
     }
@@ -40,7 +55,10 @@ class FrontmatterMergeTest {
 
         assertEquals(
             expected = "\uFEFF---\r\n# kept\r\nauthor:\r\n  name: Ana\r\nproject: Notekea\r\n---\r\n",
-            actual = merge.merge(noteHeader = note, templateHeader = template)
+            actual = merge.merge(
+                noteHeader = note,
+                templateHeader = template
+            )
         )
     }
 
@@ -51,7 +69,10 @@ class FrontmatterMergeTest {
 
         assertEquals(
             expected = "---\ntags:\n  - \"Foo: bar\"\n  - \"#a\"\n  - 'old'\n  - \"New: one\"\n  - \"#b\"\n---\n",
-            actual = merge.merge(noteHeader = note, templateHeader = template)
+            actual = merge.merge(
+                noteHeader = note,
+                templateHeader = template
+            )
         )
     }
 
@@ -67,8 +88,14 @@ class FrontmatterMergeTest {
                 "---\naliases: |\n  first\n  second\ntags:\n  - meeting\n---\n"
             ),
             actual = listOf(
-                merge.merge(noteHeader = nested, templateHeader = template),
-                merge.merge(noteHeader = text, templateHeader = template)
+                merge.merge(
+                    noteHeader = nested,
+                    templateHeader = template
+                ),
+                merge.merge(
+                    noteHeader = text,
+                    templateHeader = template
+                )
             )
         )
     }

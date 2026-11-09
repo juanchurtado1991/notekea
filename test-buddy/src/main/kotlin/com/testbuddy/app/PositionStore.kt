@@ -13,8 +13,16 @@ internal class PositionStore(private val file: Path) {
 
     fun load(): Position? {
         if (!Files.isRegularFile(file)) return null
-        val fields = Files.readString(file).trim().split("\t")
-        val tab = ManagerTab.entries.firstOrNull { it.name == fields.getOrNull(0) } ?: return null
+
+        val fields = Files
+            .readString(file)
+            .trim()
+            .split("\t")
+
+        val tab = ManagerTab.entries.firstOrNull {
+            it.name == fields.getOrNull(0)
+        } ?: return null
+
         return Position(
             tab = tab,
             index = fields.getOrNull(1)?.toIntOrNull() ?: 0,

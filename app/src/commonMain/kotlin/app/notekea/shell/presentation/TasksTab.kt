@@ -20,20 +20,47 @@ internal fun FollowTasks(
     state: VaultTreeState
 ) {
     val tasks = viewModels.tasks
-    val tabs by viewModels.workspace.state.collectAsState()
-    val isShown = tabs.workspace.panes.any { it.activePath == Workspace.TASKS }
+
+    val tabs by viewModels
+        .workspace
+        .state
+        .collectAsState()
+
+    val isShown = tabs
+        .workspace
+        .panes
+        .any {
+            it.activePath == Workspace.TASKS
+        }
+
     LaunchedEffect(tasks, state.tree.notes) {
         tasks.onIntent(intent = TasksIntent.OnNotesChange(notes = state.tree.notes.values))
     }
-    LaunchedEffect(tasks, isShown) { tasks.onIntent(intent = TasksIntent.OnShownChange(isShown = isShown)) }
+
+    LaunchedEffect(tasks, isShown) {
+        tasks.onIntent(intent = TasksIntent.OnShownChange(isShown = isShown))
+    }
+
     LaunchedEffect(tasks) {
         tasks.effects.collect { effect ->
             when (effect) {
                 is TasksEffect.OpenNote -> {
-                    viewModels.workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = effect.path))
-                    val pane = viewModels.workspace.state.value.workspace.paneOpening(path = effect.path)
+                    viewModels.workspace.onIntent(
+                        intent = WorkspaceIntent.OnOpen(path = effect.path)
+                    )
+
+                    val pane = viewModels
+                        .workspace
+                        .state
+                        .value
+                        .workspace
+                        .paneOpening(path = effect.path)
+
                     viewModels.editors[pane].onIntent(
-                        intent = EditorIntent.OnRevealRequest(path = effect.path, range = effect.range)
+                        intent = EditorIntent.OnRevealRequest(
+                            path = effect.path,
+                            range = effect.range
+                        )
                     )
                 }
 

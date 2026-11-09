@@ -13,7 +13,9 @@ object QaAppData {
 
     /** This machine's Notekea QA data folder. */
     fun current(): Path = of(
-        conventions = ResolvePlatformConventionsUseCase(systemEnvironment = JvmSystemEnvironment())()
+        conventions = ResolvePlatformConventionsUseCase(
+            systemEnvironment = JvmSystemEnvironment()
+        )()
     )
 
     private const val SUFFIX = " QA"

@@ -1,58 +1,44 @@
 package app.notekea.core.presentation.designsystem.theme
 
-import app.notekea.core.domain.StringPatterns
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.vector.addPathNodes
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
-import com.composables.icons.lucide.Type
-import com.composables.icons.lucide.Monitor
-import com.composables.icons.lucide.Moon
-import com.composables.icons.lucide.Sun
-import com.composables.icons.lucide.FileImage
-import com.composables.icons.lucide.FilePlay
-import com.composables.icons.lucide.TextSearch
-import com.composables.icons.lucide.ZoomIn
-import com.composables.icons.lucide.ShieldCheck
-import com.composables.icons.lucide.BookOpen
-import com.composables.icons.lucide.MessagesSquare
-import com.composables.icons.lucide.Sparkles
-import com.composables.icons.lucide.Clock
-import com.composables.icons.lucide.CalendarPlus
-import com.composables.icons.lucide.Code
-import com.composables.icons.lucide.Braces
-import com.composables.icons.lucide.Binary
-import com.composables.icons.lucide.SquareCheck
-import com.composables.icons.lucide.SlidersHorizontal
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.addPathNodes
+import androidx.compose.ui.unit.dp
+import app.notekea.core.domain.StringPatterns
 import com.composables.icons.lucide.ArrowDown
-import com.composables.icons.lucide.ChevronsDownUp
-import com.composables.icons.lucide.ChevronsUpDown
-import com.composables.icons.lucide.FolderTree
-import com.composables.icons.lucide.Network
-import com.composables.icons.lucide.Minus
-import com.composables.icons.lucide.Calendar
-import com.composables.icons.lucide.CalendarDays
-import com.composables.icons.lucide.ChevronLeft
-import com.composables.icons.lucide.ListTree
-import com.composables.icons.lucide.PanelRight
-import com.composables.icons.lucide.Settings
-import com.composables.icons.lucide.Library
 import com.composables.icons.lucide.ArrowDownAZ
 import com.composables.icons.lucide.ArrowUp
+import com.composables.icons.lucide.ArrowUpDown
+import com.composables.icons.lucide.Binary
 import com.composables.icons.lucide.Bold
+import com.composables.icons.lucide.BookOpen
+import com.composables.icons.lucide.Braces
 import com.composables.icons.lucide.Bug
+import com.composables.icons.lucide.Calendar
+import com.composables.icons.lucide.CalendarDays
+import com.composables.icons.lucide.CalendarPlus
 import com.composables.icons.lucide.Check
 import com.composables.icons.lucide.ChevronDown
+import com.composables.icons.lucide.ChevronLeft
 import com.composables.icons.lucide.ChevronRight
+import com.composables.icons.lucide.ChevronUp
+import com.composables.icons.lucide.ChevronsDownUp
+import com.composables.icons.lucide.ChevronsUpDown
 import com.composables.icons.lucide.CircleCheck
 import com.composables.icons.lucide.CircleQuestionMark
 import com.composables.icons.lucide.ClipboardList
+import com.composables.icons.lucide.Clock
 import com.composables.icons.lucide.ClockArrowDown
+import com.composables.icons.lucide.Code
+import com.composables.icons.lucide.Columns3
 import com.composables.icons.lucide.Ellipsis
-import com.composables.icons.lucide.FilePlus
+import com.composables.icons.lucide.Eye
 import com.composables.icons.lucide.File
+import com.composables.icons.lucide.FileImage
+import com.composables.icons.lucide.FilePlay
+import com.composables.icons.lucide.FilePlus
 import com.composables.icons.lucide.FileText
 import com.composables.icons.lucide.FileX
 import com.composables.icons.lucide.Flame
@@ -60,41 +46,55 @@ import com.composables.icons.lucide.Folder
 import com.composables.icons.lucide.FolderOpen
 import com.composables.icons.lucide.FolderPlus
 import com.composables.icons.lucide.FolderSearch
+import com.composables.icons.lucide.FolderTree
 import com.composables.icons.lucide.Globe
 import com.composables.icons.lucide.Hash
 import com.composables.icons.lucide.Heading
 import com.composables.icons.lucide.ImagePlus
 import com.composables.icons.lucide.Info
 import com.composables.icons.lucide.Italic
+import com.composables.icons.lucide.LayoutTemplate
+import com.composables.icons.lucide.Library
 import com.composables.icons.lucide.Link
 import com.composables.icons.lucide.List
+import com.composables.icons.lucide.ListChecks
 import com.composables.icons.lucide.ListOrdered
 import com.composables.icons.lucide.ListTodo
-import com.composables.icons.lucide.LayoutTemplate
+import com.composables.icons.lucide.ListTree
 import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Eye
-import com.composables.icons.lucide.ListChecks
-import com.composables.icons.lucide.ChevronUp
-import com.composables.icons.lucide.ArrowUpDown
-import com.composables.icons.lucide.Columns3
-import com.composables.icons.lucide.Star
 import com.composables.icons.lucide.MessageSquareQuote
+import com.composables.icons.lucide.MessagesSquare
+import com.composables.icons.lucide.Minus
+import com.composables.icons.lucide.Monitor
+import com.composables.icons.lucide.Moon
+import com.composables.icons.lucide.Network
 import com.composables.icons.lucide.PanelLeftClose
+import com.composables.icons.lucide.PanelRight
 import com.composables.icons.lucide.Paperclip
 import com.composables.icons.lucide.Pencil
 import com.composables.icons.lucide.Plus
 import com.composables.icons.lucide.Quote
 import com.composables.icons.lucide.Search
 import com.composables.icons.lucide.SeparatorHorizontal
+import com.composables.icons.lucide.Settings
+import com.composables.icons.lucide.ShieldCheck
+import com.composables.icons.lucide.SlidersHorizontal
+import com.composables.icons.lucide.Sparkles
 import com.composables.icons.lucide.SquareArrowOutUpRight
+import com.composables.icons.lucide.SquareCheck
 import com.composables.icons.lucide.SquareCode
+import com.composables.icons.lucide.Star
+import com.composables.icons.lucide.Sun
 import com.composables.icons.lucide.Table
 import com.composables.icons.lucide.TableProperties
 import com.composables.icons.lucide.TextQuote
+import com.composables.icons.lucide.TextSearch
 import com.composables.icons.lucide.Trash2
 import com.composables.icons.lucide.TriangleAlert
+import com.composables.icons.lucide.Type
 import com.composables.icons.lucide.X
 import com.composables.icons.lucide.Zap
+import com.composables.icons.lucide.ZoomIn
 
 /**
  * Every icon of the app, named by what it means rather than how it looks, so a screen asks for [NewNote] and the
@@ -119,19 +119,22 @@ object NotekeaIcons {
 
     /** The bookmark star filled, for what is bookmarked: Lucide's star drawn with a fill. */
     val Bookmarked: ImageVector by lazy {
-        ImageVector.Builder(
-            name = BOOKMARKED_NAME,
-            defaultWidth = ICON_SIZE_DP.dp,
-            defaultHeight = ICON_SIZE_DP.dp,
-            viewportWidth = ICON_VIEWPORT,
-            viewportHeight = ICON_VIEWPORT
-        ).addPath(
-            pathData = addPathNodes(pathStr = STAR_PATH),
-            fill = SolidColor(value = Color.Black),
-            stroke = SolidColor(value = Color.Black),
-            strokeLineWidth = STAR_STROKE,
-            strokeLineJoin = StrokeJoin.Round
-        ).build()
+        ImageVector
+            .Builder(
+                name = BOOKMARKED_NAME,
+                defaultWidth = ICON_SIZE_DP.dp,
+                defaultHeight = ICON_SIZE_DP.dp,
+                viewportWidth = ICON_VIEWPORT,
+                viewportHeight = ICON_VIEWPORT
+            )
+            .addPath(
+                pathData = addPathNodes(pathStr = STAR_PATH),
+                fill = SolidColor(value = Color.Black),
+                stroke = SolidColor(value = Color.Black),
+                strokeLineWidth = STAR_STROKE,
+                strokeLineJoin = StrokeJoin.Round
+            )
+            .build()
     }
     val Bold: ImageVector get() = Lucide.Bold
     val BulletList: ImageVector get() = Lucide.List

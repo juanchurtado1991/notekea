@@ -1,9 +1,6 @@
 package app.notekea.editor.presentation.view
 
 import androidx.compose.foundation.layout.Arrangement
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.model.EditorPreviewData
-import app.notekea.editor.presentation.model.EditorState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -11,14 +8,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.presentation.notesErrorMessage
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.core.notes.domain.NotesError
-import app.notekea.core.notes.presentation.notesErrorMessage
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorPreviewData
+import app.notekea.editor.presentation.model.EditorState
 import app.notekea.resources.Res
 import app.notekea.resources.editor_close
 import app.notekea.resources.editor_conflict_message
@@ -35,8 +35,8 @@ private const val PREVIEW_WIDTH_DP = 720
 
 /**
  * The editor's questions and problems, above the note: a note that could not be opened (Try again), an outside change
- * while there were unsaved edits (Keep mine / Load theirs), a note that disappeared (Restore / Close) and a save that
- * failed (the next edit or Save tries again), or a file could not be attached, opened or located (Close). Each one says what happened and what the buttons do.
+ * over unsaved edits (Keep mine / Load theirs), a note that disappeared (Restore / Close), a save that failed (the next
+ * edit or Save tries again), or a file that could not be attached, opened or located (Close).
  */
 @Composable
 internal fun EditorBanners(
@@ -45,7 +45,10 @@ internal fun EditorBanners(
     onIntent: (EditorIntent) -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingXs),
+        modifier = Modifier.padding(
+            horizontal = NotekeaDimensions.SpacingM,
+            vertical = NotekeaDimensions.SpacingXs
+        ),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
     ) {
         if (state.loadError != null) {
@@ -55,18 +58,29 @@ internal fun EditorBanners(
                 }
             }
         }
+
         if (state.hasConflict) ConflictBanner(onIntent = onIntent)
         if (state.isDeleted) DeletedBanner(onIntent = onIntent)
+
         state.saveError?.let { error ->
             ErrorBanner(
                 message = stringResource(
                     Res.string.editor_save_failed,
-                    notesErrorMessage(error = error, platformConventions = platformConventions)
+                    notesErrorMessage(
+                        error = error,
+                        platformConventions = platformConventions
+                    )
                 )
             )
         }
+
         state.actionError?.let { error ->
-            ErrorBanner(message = notesErrorMessage(error = error, platformConventions = platformConventions)) {
+            ErrorBanner(
+                message = notesErrorMessage(
+                    error = error,
+                    platformConventions = platformConventions
+                )
+            ) {
                 BannerAction(text = stringResource(resource = Res.string.editor_close)) {
                     onIntent(EditorIntent.OnActionErrorDismiss)
                 }
@@ -76,13 +90,12 @@ internal fun EditorBanners(
 }
 
 @Composable
-private fun ConflictBanner(
-    onIntent: (EditorIntent) -> Unit
-) {
+private fun ConflictBanner(onIntent: (EditorIntent) -> Unit) {
     ErrorBanner(message = stringResource(resource = Res.string.editor_conflict_message)) {
         BannerAction(text = stringResource(resource = Res.string.editor_load_theirs)) {
             onIntent(EditorIntent.OnLoadTheirs)
         }
+
         BannerAction(text = stringResource(resource = Res.string.editor_keep_mine)) {
             onIntent(EditorIntent.OnKeepMine)
         }
@@ -90,14 +103,15 @@ private fun ConflictBanner(
 }
 
 @Composable
-private fun DeletedBanner(
-    onIntent: (EditorIntent) -> Unit
-) {
+private fun DeletedBanner(onIntent: (EditorIntent) -> Unit) {
     ErrorBanner(message = stringResource(resource = Res.string.editor_deleted_message)) {
         BannerAction(text = stringResource(resource = Res.string.editor_close)) {
             onIntent(EditorIntent.OnCloseDeleted)
         }
-        BannerAction(text = stringResource(resource = Res.string.editor_restore)) { onIntent(EditorIntent.OnRestore) }
+
+        BannerAction(text = stringResource(resource = Res.string.editor_restore)) {
+            onIntent(EditorIntent.OnRestore)
+        }
     }
 }
 

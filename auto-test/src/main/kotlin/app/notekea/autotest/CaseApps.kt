@@ -10,6 +10,7 @@ object CaseApps {
 
     fun register(app: CaseApp): QuitRequest {
         apps[app.vaults] = app
+
         return QuitRequest().also { quits[app] = it }
     }
 
@@ -18,7 +19,9 @@ object CaseApps {
         quits.remove(app)
     }
 
-    fun of(vaults: Path): CaseApp = requireNotNull(apps[vaults]) { "No Notekea is running on $vaults" }
+    fun of(vaults: Path): CaseApp = requireNotNull(apps[vaults]) {
+        "No Notekea is running on $vaults"
+    }
 
     /** Asks the Notekea on [vaults] to quit, run [whileClosed] and start again, and returns the one that quits. */
     fun quit(
@@ -27,6 +30,7 @@ object CaseApps {
     ): CaseApp {
         val app = of(vaults = vaults)
         requireNotNull(quits[app]).request(whileClosed = whileClosed)
+
         return app
     }
 }

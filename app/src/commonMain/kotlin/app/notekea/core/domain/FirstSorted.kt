@@ -10,18 +10,27 @@ fun <T> Iterable<T>.firstSorted(
 ): List<T> {
     val first = ArrayList<T>(n.coerceAtLeast(minimumValue = 0))
     if (n <= 0) return first
+
     forEach { element ->
         val isFull = first.size == n
-        if (isFull && comparator.compare(element, first.last()) >= 0) return@forEach
+        val isBeyondFirst = isFull && comparator.compare(element, first.last()) >= 0
+        if (isBeyondFirst) return@forEach
         // After every element that is not greater, so equal elements keep their order, as a stable sort does.
         var low = 0
         var high = first.size
+
         while (low < high) {
             val middle = (low + high) / 2
             if (comparator.compare(first[middle], element) <= 0) low = middle + 1 else high = middle
         }
-        first.add(index = low, element = element)
+
+        first.add(
+            index = low,
+            element = element
+        )
+
         if (first.size > n) first.removeAt(index = first.lastIndex)
     }
+
     return first
 }

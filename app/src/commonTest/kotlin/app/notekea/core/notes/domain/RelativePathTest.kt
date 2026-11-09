@@ -24,12 +24,15 @@ class RelativePathTest {
 
     @Test
     fun `the markdown extension is recognized in any case and kept for other files`() {
-        val paths = listOf("Welcome.md", "README.MD", "shopping.txt", "md").map { RelativePath(value = it) }
+        val paths = listOf("Welcome.md", "README.MD", "shopping.txt", "md").map {
+            RelativePath(value = it)
+        }
 
         assertEquals(
             expected = listOf(true, true, false, false),
             actual = paths.map { it.isMarkdown }
         )
+
         assertEquals(
             expected = listOf("Welcome", "README", "shopping.txt", "md"),
             actual = paths.map { it.nameWithoutExtension }

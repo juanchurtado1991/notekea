@@ -13,8 +13,8 @@ import app.notekea.core.notes.domain.TextTagFinder
 
 /**
  * Collects the [tasks] of a note's body read line by line ([TaskFinder]), each with the heading above it and its date:
- * the Tasks plugin's `📅 2026-11-02`, or else a date written in its text, not in a link or code (`ROADMAP.md` 2.11). A note's text is read once
- * for all of what the cache keeps, so this sees its lines as they pass.
+ * the Tasks plugin's `📅 2026-11-02`, or else a date written in its text, not in a link or code. A note's text is read
+ * once for all of what the cache keeps, so this sees its lines as they pass.
  */
 internal class NoteTaskCollector {
     private val finder = TaskFinder()
@@ -29,17 +29,28 @@ internal class NoteTaskCollector {
     val tasks: List<NoteTask>
         field = mutableListOf<NoteTask>()
 
-    fun read(
-        line: String
-    ) {
+    fun read(line: String) {
         if (!fences.read(text = line)) {
             if (line.startsWith(prefix = HEADING_MARK)) {
-                outline.headings(text = line).firstOrNull()?.let { heading = it.text }
+                outline
+                    .headings(text = line)
+                    .firstOrNull()
+                    ?.let { heading = it.text }
             }
+
             if (TASK_MARK in line) {
-                finder.markerIn(line = line, lineStart = offset)?.let { tasks += taskOf(line = line, marker = it) }
+                finder.markerIn(
+                    line = line,
+                    lineStart = offset
+                )?.let {
+                    tasks += taskOf(
+                        line = line,
+                        marker = it
+                    )
+                }
             }
         }
+
         offset += line.length + 1
     }
 
@@ -47,24 +58,49 @@ internal class NoteTaskCollector {
         line: String,
         marker: TaskMarker
     ): NoteTask {
-        val plain = PLUGIN_DATE.replace(input = line, replacement = StringPatterns.EMPTY)
-            .replace(regex = BLOCK_ID, replacement = StringPatterns.EMPTY)
+        val plain = PLUGIN_DATE.replace(
+            input = line,
+            replacement = StringPatterns.EMPTY
+        )
+            .replace(
+                regex = BLOCK_ID,
+                replacement = StringPatterns.EMPTY
+            )
+
         return NoteTask(
             stateIndex = marker.stateIndex,
             endIndex = offset + line.length,
-            text = stripper.strip(line = plain, ranges = emptyList()).text.trim(),
+            text = stripper
+                .strip(
+                    line = plain,
+                    ranges = emptyList()
+                )
+                .text
+                .trim(),
             isDone = marker.isDone,
             heading = heading,
             date = dateOf(line = line)
         )
     }
 
-    private fun dateOf(
-        line: String
-    ): CalendarDate? {
-        val written = PLUGIN_DATE.find(input = line)?.groupValues?.get(index = 1)
-            ?: PLAIN_DATE.find(input = tagFinder.textOf(line = line).replace(regex = ADDRESS, replacement = ""))?.value
-        return written?.let { momentFormat.parseDate(text = it, pattern = MomentFormat.ISO_DATE) }
+    private fun dateOf(line: String): CalendarDate? {
+        val written = PLUGIN_DATE
+            .find(input = line)
+            ?.groupValues
+            ?.get(index = 1)
+            ?: PLAIN_DATE.find(
+                input = tagFinder.textOf(line = line).replace(
+                    regex = ADDRESS,
+                    replacement = ""
+                )
+            )?.value
+
+        return written?.let {
+            momentFormat.parseDate(
+                text = it,
+                pattern = MomentFormat.ISO_DATE
+            )
+        }
     }
 
     private companion object {

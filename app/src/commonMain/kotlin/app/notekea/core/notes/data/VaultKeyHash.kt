@@ -10,10 +10,11 @@ object VaultKeyHash {
     private const val FNV_PRIME = 0x100000001b3L
     private const val HEX_RADIX = 16
 
-    fun of(
-        vaultPath: String
-    ): String = vaultPath.encodeToByteArray()
-        .fold(initial = FNV_OFFSET_BASIS) { hash, byte -> (hash xor (byte.toLong() and BYTE_MASK)) * FNV_PRIME }
+    fun of(vaultPath: String): String = vaultPath
+        .encodeToByteArray()
+        .fold(initial = FNV_OFFSET_BASIS) { hash, byte ->
+            (hash xor (byte.toLong() and BYTE_MASK)) * FNV_PRIME
+        }
         .toULong()
         .toString(radix = HEX_RADIX)
 }

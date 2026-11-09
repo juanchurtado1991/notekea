@@ -18,23 +18,43 @@ internal class GraphPreviews(
         suggested: List<RelativePath>
     ): GraphPreview {
         val path = entry.file.path
-        val body = noteTextCache.textsOf(vaultPath = vaultPath, notes = listOf(entry))[path]?.body.orEmpty()
+
+        val body = noteTextCache
+            .textsOf(
+                vaultPath = vaultPath,
+                notes = listOf(entry)
+            )[path]
+            ?.body
+            .orEmpty()
+
         return GraphPreview(
             path = path,
             name = path.nameWithoutExtension,
-            folder = GraphNode(path = path, links = 0).folder,
+            folder = GraphNode(
+                path = path,
+                links = 0
+            ).folder,
             snippet = snippetOf(body = body),
-            connected = connectedTo(path = path, lines = lines),
+            connected = connectedTo(
+                path = path,
+                lines = lines
+            ),
             suggested = suggested
         )
     }
 
-    private fun snippetOf(
-        body: String
-    ): String = body.lineSequence()
-        .filter { it.isNotBlank() && !it.startsWith(prefix = HEADING_MARK) }
+    private fun snippetOf(body: String): String = body
+        .lineSequence()
+        .filter {
+            it.isNotBlank() && !it.startsWith(prefix = HEADING_MARK)
+        }
         .take(n = SNIPPET_LINES)
-        .joinToString(separator = " ") { markdownLineStripper.strip(line = it, ranges = emptyList()).text }
+        .joinToString(separator = " ") {
+            markdownLineStripper.strip(
+                line = it,
+                ranges = emptyList()
+            ).text
+        }
         .take(n = MAX_SNIPPET)
 
     private companion object {

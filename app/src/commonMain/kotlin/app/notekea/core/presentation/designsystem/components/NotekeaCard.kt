@@ -25,14 +25,21 @@ fun NotekeaCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
+
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         color = colors.surface,
         contentColor = colors.onSurface,
-        border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = colors.outline)
+        border = BorderStroke(
+            width = NotekeaDimensions.BorderWidth,
+            color = colors.outline
+        )
     ) {
-        Column(modifier = Modifier.padding(all = NotekeaDimensions.SpacingXs), content = content)
+        Column(
+            modifier = Modifier.padding(all = NotekeaDimensions.SpacingXs),
+            content = content
+        )
     }
 }
 

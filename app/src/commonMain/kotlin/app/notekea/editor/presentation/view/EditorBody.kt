@@ -1,18 +1,6 @@
 package app.notekea.editor.presentation.view
 
 import androidx.compose.foundation.ScrollState
-import app.notekea.editor.presentation.attachments.AttachmentRoom
-import app.notekea.editor.presentation.attachments.AttachmentView
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.model.EditorPreviewData
-import app.notekea.editor.presentation.find.FindState
-import app.notekea.editor.presentation.toolbar.FormatActions
-import app.notekea.editor.presentation.markdown.HeadingPositions
-import app.notekea.editor.presentation.markdown.MarkdownOutputTransformation
-import app.notekea.editor.presentation.markdown.MarkdownStyles
-import app.notekea.editor.presentation.markdown.OnlyNewLines
-import app.notekea.editor.presentation.sidepanel.OutlinePlacement
-import app.notekea.editor.presentation.toolbar.formatActions
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,7 +18,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import app.notekea.core.presentation.designsystem.theme.LocalReduceMotion
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -57,18 +44,31 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.platform.matches
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.LocalNotekeaCodeTextStyle
+import app.notekea.core.presentation.designsystem.theme.LocalReduceMotion
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.platform.matches
 import app.notekea.editor.domain.ListAction
 import app.notekea.editor.domain.ListEditing
+import app.notekea.editor.presentation.attachments.AttachmentRoom
+import app.notekea.editor.presentation.attachments.AttachmentView
+import app.notekea.editor.presentation.find.FindState
+import app.notekea.editor.presentation.markdown.HeadingPositions
+import app.notekea.editor.presentation.markdown.MarkdownOutputTransformation
+import app.notekea.editor.presentation.markdown.MarkdownStyles
+import app.notekea.editor.presentation.markdown.OnlyNewLines
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorPreviewData
+import app.notekea.editor.presentation.sidepanel.OutlinePlacement
+import app.notekea.editor.presentation.toolbar.FormatActions
+import app.notekea.editor.presentation.toolbar.formatActions
 import app.notekea.resources.Res
 import app.notekea.resources.editor_body_label
-import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 
 private const val BODY_MIN_HEIGHT_DP = 320
 private const val MATCH_SCROLL_MARGIN_DP = 96
@@ -83,6 +83,7 @@ private fun rememberHighlighting(
     val typography = MaterialTheme.typography
     val codeFontFamily = LocalNotekeaCodeTextStyle.current.fontFamily
     val currentFind = rememberUpdatedState(newValue = find)
+
     return remember(colors, typography, codeFontFamily) {
         MarkdownOutputTransformation(
             styles = MarkdownStyles.from(
@@ -95,6 +96,20 @@ private fun rememberHighlighting(
         )
     }
 }
+
+/** Where the text goes: the page's width, room to click below a short note, its [label] and who focuses it. */
+private fun Modifier.bodyPlace(
+    label: String,
+    focusRequester: FocusRequester?,
+    onPlaced: (LayoutCoordinates) -> Unit
+): Modifier = this
+    .fillMaxWidth()
+    .onGloballyPositioned(onGloballyPositioned = onPlaced)
+    // A short note still leaves room to click below its last line and keep typing.
+    .defaultMinSize(minHeight = BODY_MIN_HEIGHT_DP.dp)
+    .padding(top = NotekeaDimensions.SpacingL)
+    .semantics { contentDescription = label }
+    .then(other = focusRequester?.let { Modifier.focusRequester(focusRequester = it) } ?: Modifier)
 
 /** The note's text in Edit mode: its Markdown highlighted, find matches, tasks' checkboxes and the files it embeds. */
 @Composable
@@ -109,26 +124,57 @@ internal fun EditorBody(
     focusRequester: FocusRequester?
 ) {
     val room = AttachmentRoom.remember(attachments = attachments)
-    val highlighting = rememberHighlighting(find = find, paragraphs = room.paragraphs)
+
+    val highlighting = rememberHighlighting(
+        find = find,
+        paragraphs = room.paragraphs
+    )
+
     var hasFocus by remember { mutableStateOf(value = false) }
-    var layout by remember { mutableStateOf<() -> TextLayoutResult?>(value = { null }) }
+
+    var layout by remember {
+        mutableStateOf<() -> TextLayoutResult?>(value = { null })
+    }
+
     var textPlace by remember { mutableStateOf<LayoutCoordinates?>(value = null) }
+
     val label = stringResource(resource = Res.string.editor_body_label)
-    val onKey = rememberEditorKeys(buffer = buffer, platformConventions = platformConventions, onIntent = onIntent)
-    val top = { textPlace?.takeIf { it.isAttached }?.positionInParent()?.y ?: 0f }
-    ScrollToCurrentMatch(scrollState = scrollState, layout = { layout() }, top = top, find = find)
-    PlaceHeadings(outline = outline, layout = { layout() }, textPlace = { textPlace })
+
+    val onKey = rememberEditorKeys(
+        buffer = buffer,
+        platformConventions = platformConventions,
+        onIntent = onIntent
+    )
+
+    val top = {
+        textPlace
+            ?.takeIf { it.isAttached }
+            ?.positionInParent()
+            ?.y ?: 0f
+    }
+
+    ScrollToCurrentMatch(
+        scrollState = scrollState,
+        layout = { layout() },
+        top = top,
+        find = find
+    )
+
+    PlaceHeadings(
+        outline = outline,
+        layout = { layout() },
+        textPlace = { textPlace }
+    )
+
     BasicTextField(
         state = buffer,
         inputTransformation = OnlyNewLines,
         modifier = Modifier
-            .fillMaxWidth()
-            .onGloballyPositioned { textPlace = it }
-            // A short note still leaves room to click below its last line and keep typing.
-            .defaultMinSize(minHeight = BODY_MIN_HEIGHT_DP.dp)
-            .padding(top = NotekeaDimensions.SpacingL)
-            .semantics { contentDescription = label }
-            .then(other = focusRequester?.let { Modifier.focusRequester(focusRequester = it) } ?: Modifier)
+            .bodyPlace(
+                label = label,
+                focusRequester = focusRequester,
+                onPlaced = { textPlace = it }
+            )
             .onPreviewKeyEvent(onPreviewKeyEvent = onKey)
             .onFocusChanged {
                 if (hasFocus && !it.isFocused) onIntent(EditorIntent.OnFocusLost)
@@ -138,18 +184,30 @@ internal fun EditorBody(
         cursorBrush = SolidColor(value = MaterialTheme.colorScheme.primary),
         onTextLayout = { getResult -> layout = getResult },
         outputTransformation = highlighting,
-        decorator = decoratorOf(buffer = buffer, layout = { layout() }, onIntent = onIntent) {
-            room.Overlay(buffer = buffer, attachments = attachments, layout = { layout() }, onIntent = onIntent)
+        decorator = decoratorOf(
+            buffer = buffer,
+            layout = { layout() },
+            onIntent = onIntent
+        ) {
+            room.Overlay(
+                buffer = buffer,
+                attachments = attachments,
+                layout = { layout() },
+                onIntent = onIntent
+            )
         }
     )
 }
 
 /** Ligatures would turn what is typed into other glyphs (`->` into an arrow): the editor shows the characters. */
 @Composable
-private fun editorTextStyle(): TextStyle = MaterialTheme.typography.bodyLarge.copy(
-    color = MaterialTheme.colorScheme.onSurface,
-    fontFeatureSettings = NO_LIGATURES
-)
+private fun editorTextStyle(): TextStyle = MaterialTheme
+    .typography
+    .bodyLarge
+    .copy(
+        color = MaterialTheme.colorScheme.onSurface,
+        fontFeatureSettings = NO_LIGATURES
+    )
 
 /** The toolbar action of a formatting shortcut pressed in the text (bold, italic, links), or null for any other key. */
 private fun formatShortcut(
@@ -157,13 +215,19 @@ private fun formatShortcut(
     platformConventions: PlatformConventions,
     formats: FormatActions
 ): EditorIntent? = when {
-    platformConventions.boldShortcut.matches(event = event) -> EditorIntent.OnFormat(action = formats.bold)
+    platformConventions.boldShortcut.matches(event = event) -> EditorIntent.OnFormat(
+        action = formats.bold
+    )
 
-    platformConventions.italicShortcut.matches(event = event) -> EditorIntent.OnFormat(action = formats.italic)
+    platformConventions.italicShortcut.matches(event = event) -> EditorIntent.OnFormat(
+        action = formats.italic
+    )
 
     platformConventions.noteLinkShortcut.matches(event = event) -> EditorIntent.OnNoteLinkRequest
 
-    platformConventions.webLinkShortcut.matches(event = event) -> EditorIntent.OnFormat(action = formats.webLink)
+    platformConventions.webLinkShortcut.matches(event = event) -> EditorIntent.OnFormat(
+        action = formats.webLink
+    )
 
     // A copied image is attached; copied text is pasted by the editor too, so both behave the same.
     platformConventions.pasteShortcut.matches(event = event) -> EditorIntent.OnPaste
@@ -182,10 +246,21 @@ private fun rememberEditorKeys(
     onIntent: (EditorIntent) -> Unit
 ): (KeyEvent) -> Boolean {
     val formats = formatActions()
+
     val listEditing = remember { ListEditing() }
+
     return { event ->
-        val intent = formatShortcut(event = event, platformConventions = platformConventions, formats = formats)
-            ?: listKey(event = event, buffer = buffer, listEditing = listEditing)
+        val intent = formatShortcut(
+            event = event,
+            platformConventions = platformConventions,
+            formats = formats
+        )
+            ?: listKey(
+                event = event,
+                buffer = buffer,
+                listEditing = listEditing
+            )
+
         intent?.let { onIntent(it) } != null
     }
 }
@@ -199,22 +274,30 @@ private fun listKey(
     buffer: TextFieldState,
     listEditing: ListEditing
 ): EditorIntent? {
-    if (event.type != KeyEventType.KeyDown || event.isCtrlPressed || event.isMetaPressed || event.isAltPressed) {
-        return null
-    }
+    val isIgnored =
+        event.type != KeyEventType.KeyDown ||
+            event.isCtrlPressed ||
+            event.isMetaPressed ||
+            event.isAltPressed
+
+    if (isIgnored) return null
+
     val action = when (event.key) {
         Key.Enter, Key.NumPadEnter -> ListAction.NEW_ITEM.takeUnless { event.isShiftPressed }
         Key.Tab -> if (event.isShiftPressed) ListAction.OUTDENT else ListAction.INDENT
         Key.Backspace -> ListAction.REMOVE_MARKER.takeUnless { event.isShiftPressed }
         else -> null
     } ?: return null
+
     val selection = buffer.selection
+
     val edit = listEditing.edit(
         text = buffer.text.toString(),
         selectionStart = selection.start,
         selectionEnd = selection.end,
         action = action
     )
+
     return edit?.let { EditorIntent.OnListKey(action = action) }
 }
 
@@ -229,19 +312,31 @@ private fun PlaceHeadings(
     textPlace: () -> LayoutCoordinates?
 ) {
     val padding = with(LocalDensity.current) { NotekeaDimensions.SpacingL.toPx() }
+
     val headings by rememberUpdatedState(newValue = outline.headings)
+
     DisposableEffect(outline.positions) {
         outline.positions.inText = { index ->
             val result = layout()
             val offset = headings.getOrNull(index = index)?.offset
+
             val textTop = textPlace()?.let { outline.positions.pageTopOf(coordinates = it) }
-            if (result == null || offset == null || textTop == null || offset > result.layoutInput.text.length) {
+
+            if (result == null ||
+                offset == null ||
+                textTop == null ||
+                offset > result.layoutInput.text.length
+            ) {
                 null
             } else {
-                textTop + padding + result.getLineTop(lineIndex = result.getLineForOffset(offset = offset))
+                textTop + padding +
+                    result.getLineTop(lineIndex = result.getLineForOffset(offset = offset))
             }
         }
-        onDispose { outline.positions.inText = { null } }
+
+        onDispose {
+            outline.positions.inText = { null }
+        }
     }
 }
 
@@ -254,16 +349,28 @@ private fun ScrollToCurrentMatch(
     find: FindState?
 ) {
     val margin = with(LocalDensity.current) { MATCH_SCROLL_MARGIN_DP.dp.toPx() }
+
     val match = find?.current?.let { find.matches.getOrNull(index = it) }
+
     val reduceMotion = LocalReduceMotion.current
+
     LaunchedEffect(match) {
         if (match == null) return@LaunchedEffect
+
         // The text may not be laid out yet (Find opened with the note): wait for its first layout.
         val result = snapshotFlow { layout() }.filterNotNull().first()
+
         if (match.first >= result.layoutInput.text.length) return@LaunchedEffect
         val lineTop = result.getLineTop(lineIndex = result.getLineForOffset(offset = match.first))
         val target = (top() + lineTop - margin).roundToInt().coerceAtLeast(minimumValue = 0)
-        if (reduceMotion) scrollState.scrollTo(value = target) else scrollState.animateScrollTo(value = target)
+
+        if (reduceMotion) {
+            scrollState.scrollTo(
+                value = target
+            )
+        } else {
+            scrollState.animateScrollTo(value = target)
+        }
     }
 }
 
@@ -277,7 +384,10 @@ private fun EditorBodyPreview() {
             platformConventions = EditorPreviewData.platformConventions,
             onIntent = {},
             attachments = emptyList(),
-            outline = OutlinePlacement(headings = EditorPreviewData.outline, positions = HeadingPositions { null }),
+            outline = OutlinePlacement(
+                headings = EditorPreviewData.outline,
+                positions = HeadingPositions { null }
+            ),
             find = null,
             focusRequester = null
         )

@@ -40,11 +40,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import app.notekea.core.presentation.platform.onMiddleClick
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.core.presentation.designsystem.theme.motionTween
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.designsystem.theme.motionTween
+import app.notekea.core.presentation.platform.onMiddleClick
 import kotlin.math.roundToInt
 
 private const val HOVER_ALPHA = 0.5f
@@ -70,7 +70,12 @@ internal fun DraggableTab(
     onRelease: () -> Unit,
     drag: TabDrag?
 ) {
-    val offset = tabOffset(index = index, targets = targets, drag = drag)
+    val offset = tabOffset(
+        index = index,
+        targets = targets,
+        drag = drag
+    )
+
     NotekeaContextMenuArea(
         sections = sections,
         modifier = Modifier
@@ -106,15 +111,31 @@ private fun tabOffset(
     drag: TabDrag?
 ): () -> Offset {
     val isDragged = drag?.index == index
+
+    val shiftTarget = if (drag == null || isDragged) {
+        0f
+    } else {
+        targets.shiftOf(
+            index = index,
+            drag = drag
+        )
+    }
+
     val shift by animateFloatAsState(
-        targetValue = if (drag == null || isDragged) 0f else targets.shiftOf(index = index, drag = drag),
+        targetValue = shiftTarget,
         animationSpec = motionTween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
     )
+
     return {
         when {
             drag == null -> Offset.Zero
+
             isDragged -> targets.offsetOf(drag = drag)
-            else -> Offset(x = shift, y = 0f)
+
+            else -> Offset(
+                x = shift,
+                y = 0f
+            )
         }
     }
 }
@@ -140,41 +161,75 @@ private fun StripTab(
     onCancel: () -> Unit
 ) {
     var place by remember { mutableStateOf<LayoutCoordinates?>(value = null) }
+
     val hover = remember { MutableInteractionSource() }
+
     val isHovered by hover.collectIsHoveredAsState()
-    val shape = RoundedCornerShape(topStart = TAB_RADIUS_DP.dp, topEnd = TAB_RADIUS_DP.dp)
+
+    val shape = RoundedCornerShape(
+        topStart = TAB_RADIUS_DP.dp,
+        topEnd = TAB_RADIUS_DP.dp
+    )
+
+    fun startDrag(start: Offset) {
+        onSelect()
+        onDrag(start)
+    }
+
     Row(
         modifier = Modifier
             .height(height = TAB_HEIGHT_DP.dp)
             .widthIn(min = TAB_MIN_WIDTH_DP.dp)
-            .offset { offset().let { IntOffset(x = it.x.roundToInt(), y = it.y.roundToInt()) } }
+            .offset {
+                offset().let {
+                    IntOffset(
+                        x = it.x.roundToInt(),
+                        y = it.y.roundToInt()
+                    )
+                }
+            }
             .onGloballyPositioned { place = it }
-            .focusStop(isSelected = isSelected, shape = shape)
+            .focusStop(
+                isSelected = isSelected,
+                shape = shape
+            )
             .clip(shape = shape)
-            .background(color = tabColor(isSelected = isSelected, isHovered = isHovered))
+            .background(
+                color = tabColor(
+                    isSelected = isSelected,
+                    isHovered = isHovered
+                )
+            )
             .hoverable(interactionSource = hover)
             .semantics { selected = isSelected }
             .onMiddleClick(onClick = onClose)
             .tabDrag(
-                start = { pressed -> place?.localToWindow(relativeToLocal = pressed) ?: Offset.Zero },
-                onStart = { start ->
-                    onSelect()
-                    onDrag(start)
+                start = { pressed ->
+                    place?.localToWindow(relativeToLocal = pressed) ?: Offset.Zero
                 },
+                onStart = { startDrag(it) },
                 onMove = onMove,
                 onRelease = onRelease,
                 onCancel = onCancel
             )
             .focusProperties { canFocus = false }
-            .clickable(role = Role.Tab, onClick = onSelect),
+            .clickable(
+                role = Role.Tab,
+                onClick = onSelect
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         NotekeaTabLabel(
             tab = tab,
-            look = TabLook(isSelected = isSelected, isActive = isActive, isHovered = isHovered),
+            look = TabLook(
+                isSelected = isSelected,
+                isActive = isActive,
+                isHovered = isHovered
+            ),
             closeLabel = closeLabel,
             onClose = onClose
         )
+
         Separator(isShown = hasSeparator && !isHovered)
     }
 }
@@ -184,7 +239,10 @@ private fun StripTab(
 private fun Modifier.focusStop(
     isSelected: Boolean,
     shape: Shape
-): Modifier = focusBorder(color = MaterialTheme.colorScheme.primary, shape = shape)
+): Modifier = focusBorder(
+    color = MaterialTheme.colorScheme.primary,
+    shape = shape
+)
     .focusProperties { canFocus = isSelected }
     .focusable()
 
@@ -195,27 +253,33 @@ private fun tabColor(
     isHovered: Boolean
 ): Color = when {
     isSelected -> MaterialTheme.colorScheme.surface
-    isHovered -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = HOVER_ALPHA)
+
+    isHovered ->
+        MaterialTheme
+            .colorScheme
+            .surfaceVariant
+            .copy(alpha = HOVER_ALPHA)
+
     else -> Color.Transparent
 }
 
 /** The thin line between two quiet tabs. */
 @Composable
-private fun Separator(
-    isShown: Boolean
-) {
+private fun Separator(isShown: Boolean) {
     Box(
         modifier = Modifier
             .width(width = NotekeaDimensions.BorderWidth)
             .height(height = SEPARATOR_HEIGHT_DP.dp)
-            .background(color = if (isShown) MaterialTheme.colorScheme.outline else Color.Transparent)
+            .background(
+                color = if (isShown) MaterialTheme.colorScheme.outline else Color.Transparent
+            )
     )
 }
 
 /**
- * A tab dragged reports where the press was in the window ([start], measured from where the tab is laid out, because the
- * strip clips a tab dragged out of it, so its own bounds cannot say), how far it went ([onMove]) and when it is let go
- * ([onRelease]) or the drag is cancelled ([onCancel]). The drag outlives recompositions (the tab moves on every step), so it reads the latest callbacks.
+ * A tab dragged reports where the press was in the window ([start], measured from where the tab is laid out, because
+ * the strip clips a tab dragged out of it), how far it went ([onMove]) and when it is let go ([onRelease]) or the drag
+ * is cancelled ([onCancel]). The drag outlives recompositions, so it reads the latest callbacks.
  */
 @Composable
 private fun Modifier.tabDrag(
@@ -230,13 +294,17 @@ private fun Modifier.tabDrag(
     val currentOnMove by rememberUpdatedState(newValue = onMove)
     val currentOnRelease by rememberUpdatedState(newValue = onRelease)
     val currentOnCancel by rememberUpdatedState(newValue = onCancel)
+
     return pointerInput(Unit) {
         var moved = Offset.Zero
+
+        fun startDrag(pressed: Offset) {
+            moved = Offset.Zero
+            currentOnStart(currentStart(pressed))
+        }
+
         detectDragGestures(
-            onDragStart = { pressed ->
-                moved = Offset.Zero
-                currentOnStart(currentStart(pressed))
-            },
+            onDragStart = { startDrag(it) },
             onDragEnd = { currentOnRelease() },
             onDragCancel = { currentOnCancel() }
         ) { change, amount ->
@@ -252,7 +320,11 @@ private fun Modifier.tabDrag(
 private fun DraggableTabPreview() {
     NotekeaPreviewThemes {
         DraggableTab(
-            tab = NotekeaTabStripItem(key = PREVIEW_KEY, label = PREVIEW_LABEL, icon = NotekeaIcons.Note),
+            tab = NotekeaTabStripItem(
+                key = PREVIEW_KEY,
+                label = PREVIEW_LABEL,
+                icon = NotekeaIcons.Note
+            ),
             index = 0,
             isSelected = true,
             isActive = true,

@@ -10,10 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -41,14 +41,9 @@ private const val PREVIEW_ROW = "Right-click here"
 private const val PREVIEW_WIDTH_DP = 320
 
 /**
- * Wraps [content] with a context menu of [sections] (separated by dividers) that opens at the pointer on a right
- * click, or at its top start on Shift+F10 or the Menu key while the keyboard is inside it, as anywhere its [state] is
- * opened from the keyboard. Areas can nest: a right click or those keys open only the innermost menu. [onOpenByPointer] runs on that right click, so the clicked item can be selected first, as file managers do.
- * Choosing an action closes the menu first, unless it [NotekeaMenuItem.keepsMenuOpen]. With [takesFocus] false a menu
- * opened with the pointer does not take the keyboard, so a text field keeps its selection while it is open. In a menu
- * that has it, Right or Enter goes into a row's submenu and Left or Esc comes back. The menu is themed like the rest of
- * the app (surface, outline border, 6 dp corners) on every platform, with the 32 dp rows of desktop menus and shortcuts
- * aligned at the end.
+ * Wraps [content] with a context menu of [sections] that opens on a right click ([onOpenByPointer] runs first, to
+ * select the clicked item), Shift+F10 or the Menu key; nested areas open only the innermost. Choosing an action closes
+ * it unless it [NotekeaMenuItem.keepsMenuOpen]. With [takesFocus] false the keyboard stays where it was.
  */
 @Composable
 fun NotekeaContextMenuArea(
@@ -80,11 +75,14 @@ fun NotekeaContextMenuArea(
     content: @Composable () -> Unit
 ) {
     var areaHeight by remember { mutableIntStateOf(value = 0) }
+
     Box(
         modifier = modifier
             .onSizeChanged { areaHeight = it.height }
             .onKeyEvent { event ->
-                event.isContextMenuKey.also { if (it) state.open(byKeyboard = true) }
+                event.isContextMenuKey.also {
+                    if (it) state.open(byKeyboard = true)
+                }
             }
             .onSecondaryPress {
                 onOpenByPointer()
@@ -93,16 +91,26 @@ fun NotekeaContextMenuArea(
     ) {
         content()
         val position = state.position
+
         DropdownMenu(
             expanded = position != null,
             onDismissRequest = state::close,
-            offset = menuOffset(position = position ?: Offset.Zero, areaHeight = areaHeight),
+            offset = menuOffset(
+                position = position ?: Offset.Zero,
+                areaHeight = areaHeight
+            ),
             properties = PopupProperties(focusable = takesFocus || state.isByKeyboard),
             shape = MaterialTheme.shapes.small,
             containerColor = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = MaterialTheme.colorScheme.outline)
+            border = BorderStroke(
+                width = NotekeaDimensions.BorderWidth,
+                color = MaterialTheme.colorScheme.outline
+            )
         ) {
-            MenuRows(sections = menu(), onChosen = state::close)
+            MenuRows(
+                sections = menu(),
+                onChosen = state::close
+            )
         }
     }
 }
@@ -116,10 +124,21 @@ private fun MenuRows(
     // The label of the item whose submenu is open; hovering another item closes it, moving into the submenu does
     // not. A label, not the item: a choice in the submenu ("Start folded") rebuilds the items.
     var openSubmenu by remember { mutableStateOf<String?>(value = null) }
+
     var hasKeyboard by remember { mutableStateOf(value = false) }
+
     sections.forEachIndexed { index, items ->
         if (index > 0) NotekeaMenuDivider()
+
         items.forEach { item ->
+            fun showSubmenu(
+                withKeyboard: Boolean,
+                label: String?
+            ) {
+                openSubmenu = label
+                hasKeyboard = withKeyboard
+            }
+
             NotekeaMenuRow(
                 item = item,
                 onChosen = onChosen,
@@ -127,17 +146,10 @@ private fun MenuRows(
                     isOpen = openSubmenu == item.label,
                     hasKeyboard = hasKeyboard,
                     onHover = {
-                        openSubmenu = item.label.takeIf { item.opensSubmenu }
-                        hasKeyboard = false
+                        showSubmenu(false, item.label.takeIf { item.opensSubmenu })
                     },
-                    onEnter = {
-                        openSubmenu = item.label
-                        hasKeyboard = true
-                    },
-                    onLeave = {
-                        openSubmenu = null
-                        hasKeyboard = false
-                    }
+                    onEnter = { showSubmenu(true, item.label) },
+                    onLeave = { showSubmenu(false, null) }
                 )
             )
         }
@@ -149,18 +161,33 @@ private fun MenuRows(
 private fun menuOffset(
     position: Offset,
     areaHeight: Int
-): DpOffset = with(LocalDensity.current) { DpOffset(x = position.x.toDp(), y = (position.y - areaHeight).toDp()) }
+): DpOffset = with(LocalDensity.current) {
+    DpOffset(
+        x = position.x.toDp(),
+        y = (position.y - areaHeight).toDp()
+    )
+}
 
-private fun Modifier.onSecondaryPress(
-    onPress: (Offset) -> Unit
-): Modifier = pointerInput(onPress) {
+private fun Modifier.onSecondaryPress(onPress: (Offset) -> Unit): Modifier = pointerInput(onPress) {
     awaitEachGesture {
         val event = awaitPointerEvent()
         // A nested area (a row inside a list that has its own menu) handles the press first and consumes it.
         val isUnhandled = event.changes.none { it.isConsumed }
-        if (event.type == PointerEventType.Press && event.buttons.isSecondaryPressed && isUnhandled) {
+
+        val isSecondaryPress =
+            event.type == PointerEventType.Press &&
+                event.buttons.isSecondaryPressed &&
+                isUnhandled
+
+        if (isSecondaryPress) {
             event.changes.forEach { it.consume() }
-            onPress(event.changes.first().position)
+
+            onPress(
+                event
+                    .changes
+                    .first()
+                    .position
+            )
         }
     }
 }
@@ -168,9 +195,17 @@ private fun Modifier.onSecondaryPress(
 @Preview
 @Composable
 private fun NotekeaContextMenuAreaPreview() {
-    val state = remember { NotekeaContextMenuState().apply { open() } }
+    val state = remember {
+        NotekeaContextMenuState().apply { open() }
+    }
+
     NotekeaPreviewThemes {
-        Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
+        Box(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
             NotekeaContextMenuArea(
                 sections = listOf(
                     listOf(
@@ -188,7 +223,11 @@ private fun NotekeaContextMenuAreaPreview() {
                             icon = NotekeaIcons.Rename,
                             shortcutHint = PREVIEW_RENAME_SHORTCUT
                         ),
-                        NotekeaMenuItem(label = PREVIEW_REVEAL, onClick = {}, icon = NotekeaIcons.Reveal)
+                        NotekeaMenuItem(
+                            label = PREVIEW_REVEAL,
+                            onClick = {},
+                            icon = NotekeaIcons.Reveal
+                        )
                     ),
                     listOf(
                         NotekeaMenuItem(

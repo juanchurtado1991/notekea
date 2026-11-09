@@ -13,7 +13,10 @@ import java.net.URI
  */
 internal object CrashActions {
     fun copy(text: String) {
-        Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)
+        Toolkit
+            .getDefaultToolkit()
+            .systemClipboard
+            .setContents(StringSelection(text), null)
     }
 
     /** Copies [text] and opens [url], through the desktop API or `xdg-open` where it is missing (some Linux). */
@@ -22,9 +25,18 @@ internal object CrashActions {
         url: String
     ) {
         copy(text = text)
-        val canBrowse = Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)
+
+        val canBrowse =
+            Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)
+
         try {
-            if (canBrowse) Desktop.getDesktop().browse(URI(url)) else ProcessBuilder("xdg-open", url).start()
+            if (canBrowse) {
+                Desktop.getDesktop().browse(
+                    URI(url)
+                )
+            } else {
+                ProcessBuilder("xdg-open", url).start()
+            }
         } catch (_: IOException) {
             // No browser could be opened; the report is on the clipboard and Copy details is still there.
         }

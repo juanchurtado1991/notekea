@@ -9,9 +9,7 @@ plugins {
 kotlin {
     explicitApi()
 
-    compilerOptions {
-        optIn.add("androidx.compose.ui.test.ExperimentalTestApi")
-    }
+    compilerOptions { optIn.add("androidx.compose.ui.test.ExperimentalTestApi") }
 }
 
 // Test Buddy depends on no Notekea module (qa/AUTO_TEST.md), so it can become a standalone SDK.
@@ -32,6 +30,4 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
+tasks.test { useJUnitPlatform() }

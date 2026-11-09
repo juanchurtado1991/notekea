@@ -11,9 +11,13 @@ internal class CaseFiles(
     private val folders: CaseFolders,
     private val waitFor: (condition: () -> Boolean) -> Boolean
 ) {
-    fun resolve(path: String): Path = folders.data.resolve(path).normalize().also {
-        require(it.startsWith(folders.data)) { "\"$path\" is outside the case's data folder" }
-    }
+    fun resolve(path: String): Path = folders
+        .data
+        .resolve(path)
+        .normalize()
+        .also {
+            require(it.startsWith(folders.data)) { "\"$path\" is outside the case's data folder" }
+        }
 
     fun expectFile(
         path: String,
@@ -21,26 +25,45 @@ internal class CaseFiles(
         containing: String?
     ) {
         val file = resolve(path = path)
-        val holds = waitFor { Files.isRegularFile(file) && matches(text = read(file = file), content, containing) }
+
+        val holds = waitFor {
+            Files.isRegularFile(file) && matches(text = read(file = file), content, containing)
+        }
+
         if (holds) return
+
         val failure = when {
             !Files.isRegularFile(file) -> "expected the file \"$path\", it does not exist"
-            content != null -> "expected \"$path\" to read \"$content\", it reads \"${read(file = file)}\""
-            else -> "expected \"$path\" to contain \"$containing\", it reads \"${read(file = file)}\""
+
+            content != null -> "expected \"$path\" to read \"$content\", it reads \"${read(
+                file = file
+            )}\""
+
+            else -> "expected \"$path\" to contain \"$containing\", it reads \"${read(
+                file = file
+            )}\""
         }
+
         throw CaseFailure(message = failure)
     }
 
     fun expectNoFile(path: String) {
         val file = resolve(path = path)
-        if (!waitFor { Files.notExists(file) }) throw CaseFailure(message = "expected no file \"$path\", it is there")
+
+        if (!waitFor {
+                Files.notExists(file)
+            }
+        ) {
+            throw CaseFailure(message = "expected no file \"$path\", it is there")
+        }
     }
 
     private fun matches(
         text: String,
         content: String?,
         containing: String?
-    ): Boolean = (content == null || text == content) && (containing == null || text.contains(containing))
+    ): Boolean =
+        (content == null || text == content) && (containing == null || text.contains(containing))
 
     private fun read(file: Path): String = runCatching { Files.readString(file) }.getOrDefault("")
 }

@@ -19,43 +19,84 @@ class SmokeScenariosTest {
     fun `prepare builds what smoke sh prepare builds`() {
         if (isWindows) return
         val scratchName = "scratch-autotest"
-        val script = runScript(scratchName = scratchName, command = "prepare")
+
+        val script = runScript(
+            scratchName = scratchName,
+            command = "prepare"
+        )
+
         val kotlin = Files.createTempDirectory("scenarios").resolve("scratch")
-        SmokeScenarios(smokeData = smokeData, scratch = kotlin).prepare()
+
+        SmokeScenarios(
+            smokeData = smokeData,
+            scratch = kotlin
+        ).prepare()
+
         assertEquals(tree(root = script), tree(root = kotlin))
-        runScript(scratchName = scratchName, command = "clean")
+
+        runScript(
+            scratchName = scratchName,
+            command = "clean"
+        )
     }
 
     @Test
     fun `outside changes the Playground Vault as smoke sh outside does`() {
         if (isWindows) return
         val scratchName = "scratch-autotestout"
-        runScript(scratchName = scratchName, command = "prepare")
-        val script = runScript(scratchName = scratchName, command = "outside")
+
+        runScript(
+            scratchName = scratchName,
+            command = "prepare"
+        )
+
+        val script = runScript(
+            scratchName = scratchName,
+            command = "outside"
+        )
+
         val kotlin = Files.createTempDirectory("scenarios").resolve("scratch")
-        SmokeScenarios(smokeData = smokeData, scratch = kotlin).apply {
+
+        SmokeScenarios(
+            smokeData = smokeData,
+            scratch = kotlin
+        ).apply {
             prepare()
             outside()
         }
+
         assertEquals(tree(root = script), tree(root = kotlin))
-        runScript(scratchName = scratchName, command = "clean")
+
+        runScript(
+            scratchName = scratchName,
+            command = "clean"
+        )
     }
 
     @Test
     fun `move, edit and delete change the scratch as another app would`() {
         val scratch = Files.createTempDirectory("scenarios").resolve("scratch")
-        val scenarios = SmokeScenarios(smokeData = smokeData, scratch = scratch).apply { prepare() }
+
+        val scenarios = SmokeScenarios(
+            smokeData = smokeData,
+            scratch = scratch
+        ).apply { prepare() }
+
         scenarios.editNote(time = "10:00:00")
         val shared = scratch.resolve("Playground Vault/Editor/Shared note.md")
-        assertEquals(true, Files.readString(shared).endsWith("\nEdited outside Notekea at 10:00:00.\n"))
+
+        assertEquals(
+            true,
+            Files.readString(shared).endsWith("\nEdited outside Notekea at 10:00:00.\n")
+        )
+
         scenarios.deleteNote()
         assertEquals(false, Files.exists(shared))
         scenarios.move()
+
         assertEquals(
             listOf(false, true),
-            listOf("Movable Vault", "Moved Vault").map {
-                Files.isDirectory(scratch.resolve(it))
-            }
+            listOf("Movable Vault", "Moved Vault").map { Files.isDirectory(scratch.resolve(it)) }
         )
     }
 
@@ -67,20 +108,46 @@ class SmokeScenariosTest {
             .apply { environment()["SMOKE_SCRATCH"] = scratchName }
             .redirectErrorStream(true)
             .start()
+
         process.inputStream.readAllBytes()
         assertEquals(0, process.waitFor(), "smoke.sh $command failed")
+
         return smokeData.resolve(scratchName)
     }
 
     // Every file under [root] by its path, with its bytes and, for the dated recipes, its date to the second.
     private fun tree(root: Path): Map<String, String> = Files.walk(root).use { paths ->
-        paths.filter { Files.isRegularFile(it) || Files.isDirectory(it) }.toList().associate { path ->
-            val relative = root.relativize(path).toString().replace(File.separatorChar, '/')
-            val isDated = relative.startsWith("Playground Vault/Recipes/")
-            val content = if (Files.isDirectory(path)) "<folder>" else path.readBytes().contentHashCode().toString()
-            val date = if (isDated) " " + Files.getLastModifiedTime(path).toMillis() / MILLIS_PER_SECOND else ""
-            relative to content + date
-        }
+        paths
+            .filter {
+                Files.isRegularFile(it) || Files.isDirectory(it)
+            }
+            .toList()
+            .associate { path ->
+                val relative = root
+                    .relativize(path)
+                    .toString()
+                    .replace(File.separatorChar, '/')
+
+                val isDated = relative.startsWith("Playground Vault/Recipes/")
+
+                val content = if (Files.isDirectory(path)) {
+                    "<folder>"
+                } else {
+                    path
+                        .readBytes()
+                        .contentHashCode()
+                        .toString()
+                }
+
+                val date = if (isDated) {
+                    " " +
+                        Files.getLastModifiedTime(path).toMillis() / MILLIS_PER_SECOND
+                } else {
+                    ""
+                }
+
+                relative to content + date
+            }
     }
 
     private companion object {

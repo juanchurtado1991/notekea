@@ -21,6 +21,7 @@ val loggingModule = module {
             clock = get()
         )
     }
+
     single<LogStore> {
         OkioLogStore(
             fileSystem = FileSystem.SYSTEM,
@@ -28,6 +29,8 @@ val loggingModule = module {
             appDataDirectory = get<PlatformConventions>().appDataDirectory
         )
     }
+
     single<TextClipboard> { AwtTextClipboard() }
+
     factoryOf(::GetDiagnosticsUseCase)
 }

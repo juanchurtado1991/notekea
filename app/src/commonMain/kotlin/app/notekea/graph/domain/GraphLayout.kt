@@ -8,7 +8,7 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
- * Where the graph's notes sit (`ROADMAP.md` 2.7). Around a note they sit on [rings], one per link away. The whole vault
+ * Where the graph's notes sit. Around a note they sit on [rings], one per link away. The whole vault
  * is [spread] by forces: edges pull, near notes push apart, within a grid, so each round stays linear in the notes.
  */
 class GraphLayout {
@@ -18,14 +18,30 @@ class GraphLayout {
         depths: Map<RelativePath, Int>
     ): Map<RelativePath, GraphPoint> {
         val points = HashMap<RelativePath, GraphPoint>()
-        graph.nodes.groupBy { depths[it.path] ?: 0 }.forEach { (depth, nodes) ->
-            val ring = nodes.sortedWith(compareBy({ it.folder }, { it.name }))
-            ring.forEachIndexed { index, node ->
-                val angle = START_ANGLE + TURN * index / ring.size + depth * RING_TWIST
-                val radius = max(depth * RING_GAP, ring.size * MIN_ARC / TURN)
-                points[node.path] = if (depth == 0) ORIGIN else pointAt(angle = angle, radius = radius)
+
+        graph
+            .nodes
+            .groupBy {
+                depths[it.path] ?: 0
             }
-        }
+            .forEach { (depth, nodes) ->
+                val ring = nodes.sortedWith(compareBy({ it.folder }, { it.name }))
+
+                ring.forEachIndexed { index, node ->
+                    val angle = START_ANGLE + TURN * index / ring.size + depth * RING_TWIST
+                    val radius = max(depth * RING_GAP, ring.size * MIN_ARC / TURN)
+
+                    points[node.path] = if (depth == 0) {
+                        ORIGIN
+                    } else {
+                        pointAt(
+                            angle = angle,
+                            radius = radius
+                        )
+                    }
+                }
+            }
+
         return points
     }
 
@@ -35,27 +51,67 @@ class GraphLayout {
         rounds: Int = ROUNDS,
         onRound: suspend () -> Unit = {}
     ): Map<RelativePath, GraphPoint> {
-        val index = graph.nodes.withIndex().associate { (i, node) -> node.path to i }
+        val index = graph
+            .nodes
+            .withIndex()
+            .associate { (i, node) ->
+                node.path to i
+            }
+
         val x = FloatArray(size = graph.nodes.size) { spiral(index = it).x }
+
         val y = FloatArray(size = graph.nodes.size) { spiral(index = it).y }
+
         val pairs = graph.edges.mapNotNull { edge ->
             val first = index[edge.first]
             val second = index[edge.second]
             if (first == null || second == null) null else first to second
         }
+
         repeat(times = rounds) { round ->
             onRound()
             val pushX = FloatArray(size = x.size)
             val pushY = FloatArray(size = y.size)
-            repel(x = x, y = y, pushX = pushX, pushY = pushY)
-            attract(pairs = pairs, x = x, y = y, pushX = pushX, pushY = pushY)
+
+            repel(
+                x = x,
+                y = y,
+                pushX = pushX,
+                pushY = pushY
+            )
+
+            attract(
+                pairs = pairs,
+                x = x,
+                y = y,
+                pushX = pushX,
+                pushY = pushY
+            )
+
             val heat = 1f - round.toFloat() / rounds
+
             for (i in x.indices) {
-                x[i] += limited(value = pushX[i] - x[i] * GRAVITY, heat = heat)
-                y[i] += limited(value = pushY[i] - y[i] * GRAVITY, heat = heat)
+                x[i] += limited(
+                    value = pushX[i] - x[i] * GRAVITY,
+                    heat = heat
+                )
+
+                y[i] += limited(
+                    value = pushY[i] - y[i] * GRAVITY,
+                    heat = heat
+                )
             }
         }
-        return graph.nodes.indices.associate { graph.nodes[it].path to GraphPoint(x = x[it], y = y[it]) }
+
+        return graph
+            .nodes
+            .indices
+            .associate {
+                graph.nodes[it].path to GraphPoint(
+                    x = x[it],
+                    y = y[it]
+                )
+            }
     }
 
     private fun repel(
@@ -65,14 +121,39 @@ class GraphLayout {
         pushY: FloatArray
     ) {
         val cells = HashMap<Long, MutableList<Int>>()
-        for (i in x.indices) cells.getOrPut(key = cellOf(x = x[i], y = y[i])) { mutableListOf() } += i
+
+        for (i in x.indices) {
+            cells
+                .getOrPut(
+                    key = cellOf(
+                        x = x[i],
+                        y = y[i]
+                    )
+                ) { mutableListOf() } += i
+        }
+
         for (i in x.indices) {
             val column = (x[i] / CELL).toInt()
             val row = (y[i] / CELL).toInt()
+
             for (c in column - 1..column + 1) {
                 for (r in row - 1..row + 1) {
-                    cells[keyOf(column = c, row = r)]?.forEach { other ->
-                        if (other != i) push(i = i, other = other, x = x, y = y, pushX = pushX, pushY = pushY)
+                    cells[
+                        keyOf(
+                            column = c,
+                            row = r
+                        )
+                    ]?.forEach { other ->
+                        if (other != i) {
+                            push(
+                                i = i,
+                                other = other,
+                                x = x,
+                                y = y,
+                                pushX = pushX,
+                                pushY = pushY
+                            )
+                        }
                     }
                 }
             }
@@ -115,12 +196,18 @@ class GraphLayout {
     private fun limited(
         value: Float,
         heat: Float
-    ): Float = value.coerceIn(minimumValue = -MAX_STEP * heat, maximumValue = MAX_STEP * heat)
+    ): Float = value.coerceIn(
+        minimumValue = -MAX_STEP * heat,
+        maximumValue = MAX_STEP * heat
+    )
 
     private fun cellOf(
         x: Float,
         y: Float
-    ): Long = keyOf(column = (x / CELL).toInt(), row = (y / CELL).toInt())
+    ): Long = keyOf(
+        column = (x / CELL).toInt(),
+        row = (y / CELL).toInt()
+    )
 
     private fun keyOf(
         column: Int,
@@ -128,17 +215,24 @@ class GraphLayout {
     ): Long = (column.toLong() shl Int.SIZE_BITS) xor (row.toLong() and INT_MASK)
 
     // A sunflower spiral: an even start, and the same one every time.
-    private fun spiral(
-        index: Int
-    ): GraphPoint = pointAt(angle = index * GOLDEN_ANGLE, radius = SPIRAL_STEP * sqrt(index.toFloat()))
+    private fun spiral(index: Int): GraphPoint = pointAt(
+        angle = index * GOLDEN_ANGLE,
+        radius = SPIRAL_STEP * sqrt(index.toFloat())
+    )
 
     private fun pointAt(
         angle: Float,
         radius: Float
-    ): GraphPoint = GraphPoint(x = cos(angle) * radius, y = sin(angle) * radius)
+    ): GraphPoint = GraphPoint(
+        x = cos(angle) * radius,
+        y = sin(angle) * radius
+    )
 
     private companion object {
-        val ORIGIN = GraphPoint(x = 0f, y = 0f)
+        val ORIGIN = GraphPoint(
+            x = 0f,
+            y = 0f
+        )
         const val TURN = (2 * PI).toFloat()
         const val START_ANGLE = (-PI / 2).toFloat()
         const val RING_TWIST = 0.4f

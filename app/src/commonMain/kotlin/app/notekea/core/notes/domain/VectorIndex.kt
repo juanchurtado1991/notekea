@@ -3,7 +3,7 @@ package app.notekea.core.notes.domain
 import app.notekea.core.domain.Outcome
 
 /**
- * The search index of a vault's notes (`ROADMAP.md` 2.3): each note's chunks ([NoteChunk]) with their vectors, found by
+ * The search index of a vault's notes: each note's chunks ([NoteChunk]) with their vectors, found by
  * meaning (nearest vectors) and by keywords (BM25), the two rankings merged. It lives in the app's data, never inside
  * the vault; a change is on disk when the call returns, so an interrupted run resumes without losing it.
  */
@@ -22,9 +22,7 @@ interface VectorIndex {
     ): Outcome<Unit, IndexError>
 
     /** Forgets every note of the vault (Rebuild index). */
-    suspend fun clear(
-        vaultPath: String
-    ): Outcome<Unit, IndexError>
+    suspend fun clear(vaultPath: String): Outcome<Unit, IndexError>
 
     /** The [limit] chunks closest in meaning to [vector] alone, best first: the related notes of a passage (2.4). */
     suspend fun nearest(

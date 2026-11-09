@@ -1,17 +1,17 @@
 package app.notekea.editor.presentation.noteinfo
 
 import androidx.compose.runtime.snapshots.Snapshot
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.viewmodel.EditorViewModels
-import app.notekea.editor.presentation.model.PropertyIntent
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.notes.domain.NoteFixtures.file
-import app.notekea.editor.domain.NoteStats
-import app.notekea.editor.domain.NoteTimes
 import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.domain.NoteStats
+import app.notekea.editor.domain.NoteTimes
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.PropertyIntent
+import app.notekea.editor.presentation.viewmodel.EditorViewModels
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -41,6 +41,7 @@ class EditorNoteInfoTest {
         fixture.store.texts[NOTE] = TEXT
         fixture.scanner.addNote(file = file(path = NOTE.value))
         fixture.operations.existing += NOTE
+
         fixture.times.times[NOTE] = NoteTimes(
             createdAt = Instant.parse(input = "2026-10-12T09:30:00Z"),
             modifiedAt = Instant.parse(input = "2026-10-20T18:05:00Z")
@@ -57,6 +58,7 @@ class EditorNoteInfoTest {
         runInfoTest {
             send(intent = EditorIntent.OnOpen(path = NOTE))
             val opened = viewModel.state.value.info
+
             send(
                 intent = PropertyIntent.OnValueChange(
                     key = "tags",
@@ -66,13 +68,42 @@ class EditorNoteInfoTest {
 
             assertEquals(
                 expected = NoteInfo(
-                    stats = NoteStats(words = 6, links = 1, tags = 2, tasks = 2, doneTasks = 1),
-                    createdAt = moment(day = 12, hour = 9, minute = 30),
-                    modifiedAt = moment(day = 20, hour = 18, minute = 5)
+                    stats = NoteStats(
+                        words = 6,
+                        links = 1,
+                        tags = 2,
+                        tasks = 2,
+                        doneTasks = 1
+                    ),
+                    createdAt = moment(
+                        day = 12,
+                        hour = 9,
+                        minute = 30
+                    ),
+                    modifiedAt = moment(
+                        day = 20,
+                        hour = 18,
+                        minute = 5
+                    )
                 ) to NoteInfo(
-                    stats = NoteStats(words = 6, links = 1, tags = 3, tasks = 2, doneTasks = 1),
-                    createdAt = moment(day = 12, hour = 9, minute = 30),
-                    modifiedAt = moment(day = 26, hour = 14, minute = 30, second = 5)
+                    stats = NoteStats(
+                        words = 6,
+                        links = 1,
+                        tags = 3,
+                        tasks = 2,
+                        doneTasks = 1
+                    ),
+                    createdAt = moment(
+                        day = 12,
+                        hour = 9,
+                        minute = 30
+                    ),
+                    modifiedAt = moment(
+                        day = 26,
+                        hour = 14,
+                        minute = 30,
+                        second = 5
+                    )
                 ),
                 actual = opened to viewModel.state.value.info
             )
@@ -84,15 +115,17 @@ class EditorNoteInfoTest {
         minute: Int,
         second: Int = 0
     ) = LocalMoment(
-        date = CalendarDate(year = 2026, month = 10, day = day),
+        date = CalendarDate(
+            year = 2026,
+            month = 10,
+            day = day
+        ),
         hour = hour,
         minute = minute,
         second = second
     )
 
-    private fun TestScope.send(
-        intent: EditorIntent
-    ) {
+    private fun TestScope.send(intent: EditorIntent) {
         viewModel.onIntent(intent = intent)
         runCurrent()
         Snapshot.sendApplyNotifications()
@@ -100,9 +133,9 @@ class EditorNoteInfoTest {
         runCurrent()
     }
 
-    private fun runInfoTest(
-        body: suspend TestScope.() -> Unit
-    ) = runTest(context = testDispatcher) {
+    private fun runInfoTest(body: suspend TestScope.() -> Unit) = runTest(
+        context = testDispatcher
+    ) {
         try {
             body()
         } finally {

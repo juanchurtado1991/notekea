@@ -5,8 +5,8 @@ import app.notekea.core.embedding.data.LlamaTextEmbedder
 import app.notekea.core.embedding.domain.TextEmbedder
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.db.NotekeaDatabase
-import app.notekea.tree.domain.Trash
 import app.notekea.editor.presentation.viewmodel.EditorViewModel
+import app.notekea.tree.domain.Trash
 import app.notekea.tree.presentation.viewmodel.VaultTreeViewModel
 import app.notekea.vault.domain.RecentVaultsStore
 import app.notekea.vault.presentation.welcome.WelcomeViewModel
@@ -37,6 +37,7 @@ import kotlin.test.assertTrue
 class DesktopModulesTest {
     private val inMemorySettings = module {
         single<Settings> { MapSettings() }
+
         single<NotekeaDatabase> {
             val driver = JdbcSqliteDriver(url = JdbcSqliteDriver.IN_MEMORY)
             NotekeaDatabase.Schema.create(driver)
@@ -69,6 +70,7 @@ class DesktopModulesTest {
             expected = first,
             actual = second
         )
+
         assertTrue(actual = first.appDataDirectory.isNotBlank())
     }
 
@@ -77,7 +79,9 @@ class DesktopModulesTest {
         val koin = koinApplication.koin
 
         assertNotNull(actual = koin.get<VaultTreeViewModel> { parametersOf(VAULT_PATH) })
+
         assertNotNull(actual = koin.get<EditorViewModel> { parametersOf(VAULT_PATH) })
+
         assertSame(
             expected = koin.get<Trash>(),
             actual = koin.get<Trash>()
@@ -89,13 +93,15 @@ class DesktopModulesTest {
         val koin = koinApplication.koin
 
         assertNotNull(actual = koin.get<WelcomeViewModel>())
+
         assertSame(
             expected = koin.get<RecentVaultsStore>(),
             actual = koin.get<RecentVaultsStore>()
         )
     }
 
-    // Audit: nothing ended the embedder's timer or freed its model when Koin stopped, as it does after every Auto-Test case.
+    // Audit: nothing ended the embedder's timer or freed its model when Koin stopped, as it does after every Auto-Test
+    // case.
     @Test
     fun `closing Koin closes the embedder`() {
         val embedder = koinApplication.koin.get<TextEmbedder>() as LlamaTextEmbedder
@@ -103,7 +109,10 @@ class DesktopModulesTest {
 
         koinApplication.close()
 
-        assertEquals(expected = false to true, actual = closedWhileOpen to embedder.isClosed)
+        assertEquals(
+            expected = false to true,
+            actual = closedWhileOpen to embedder.isClosed
+        )
     }
 
     companion object {

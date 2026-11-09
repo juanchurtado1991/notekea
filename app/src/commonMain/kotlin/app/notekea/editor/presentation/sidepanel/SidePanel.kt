@@ -1,9 +1,6 @@
 package app.notekea.editor.presentation.sidepanel
 
 import androidx.compose.animation.Crossfade
-import app.notekea.editor.presentation.model.EditorPreviewData
-import app.notekea.editor.presentation.noteinfo.NoteInfo
-import app.notekea.editor.presentation.noteinfo.NoteInfoRows
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,21 +23,24 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.notes.domain.OutlineHeading
+import app.notekea.core.notes.domain.SidePanelMode
+import app.notekea.core.notes.domain.SidePanelPreferences
+import app.notekea.core.notes.domain.SidePanelSection
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaFold
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
 import app.notekea.core.presentation.designsystem.components.NotekeaSegment
 import app.notekea.core.presentation.designsystem.components.NotekeaSegmentedControl
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.core.presentation.designsystem.theme.motionTween
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
-import app.notekea.core.notes.domain.OutlineHeading
-import app.notekea.core.notes.domain.SidePanelMode
-import app.notekea.core.notes.domain.SidePanelPreferences
-import app.notekea.core.notes.domain.SidePanelSection
+import app.notekea.core.presentation.designsystem.theme.motionTween
+import app.notekea.core.presentation.platform.label
+import app.notekea.editor.presentation.model.EditorPreviewData
+import app.notekea.editor.presentation.noteinfo.NoteInfo
+import app.notekea.editor.presentation.noteinfo.NoteInfoRows
 import app.notekea.resources.Res
 import app.notekea.resources.note_info_title
 import app.notekea.resources.outline_title
@@ -53,14 +53,9 @@ private const val PREVIEW_HEIGHT_DP = 480
 private const val PREVIEW_WIDTH_DP = 300
 
 /**
- * The panel on the right of the editor (`ROADMAP.md` 1.9), in the mode [preferences] keep: Inspector | Chat chosen at
- * its top beside the button that minimizes it. The inspector's sections fold on their own ([preferences]'s folded
- * sections; a header's click goes to the actions). Outline lists the note's headings as an indented tree, highlights
- * [current], the one the editor's view is in, and goes to a heading when it is clicked; a note without headings says
- * how to add one. The list is one focus stop, taken with [outlineFocus] (`Mod+Shift+O`): the arrows move, Enter goes
- * to the heading and Esc gives the keyboard back to the note. Note info, shown while a note is open ([info]), says what
- * it holds and when it was created and modified. A tab that is no note fills the inspector with its own [inspector].
- * Chat says it is coming (`ROADMAP.md` 3.3).
+ * The panel on the right of the editor, in the mode [preferences] keep: Inspector | Chat. The inspector's sections fold
+ * on their own. Outline highlights [current] and is one focus stop, taken with [outlineFocus]: the arrows move, Enter
+ * goes to the heading and Esc gives the keyboard back. A tab that is no note shows its own [inspector].
  */
 @Composable
 fun SidePanel(
@@ -73,11 +68,22 @@ fun SidePanel(
     modifier: Modifier = Modifier,
     outlineFocus: FocusRequester = remember { FocusRequester() },
     inspector: (@Composable () -> Unit)? = null,
-    connections: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit = { _, _ -> }
+    connections: @Composable ColumnScope.(
+        isOpen: Boolean,
+        onToggle: () -> Unit
+    ) -> Unit = { _, _ -> }
 ) {
-    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
         Column(modifier = Modifier.padding(vertical = NotekeaDimensions.SpacingXs)) {
-            PanelHeader(mode = preferences.mode, platformConventions = platformConventions, actions = actions)
+            PanelHeader(
+                mode = preferences.mode,
+                platformConventions = platformConventions,
+                actions = actions
+            )
+
             // Inspector and Chat fade into each other, so the switch reads as one panel changing.
             Crossfade(
                 targetState = preferences.mode,
@@ -123,14 +129,25 @@ private fun PanelHeader(
     ) {
         NotekeaSegmentedControl(
             segments = listOf(
-                NotekeaSegment(icon = NotekeaIcons.Inspector, label = stringResource(Res.string.side_panel_inspector)),
-                NotekeaSegment(icon = NotekeaIcons.Chat, label = stringResource(Res.string.side_panel_chat))
+                NotekeaSegment(
+                    icon = NotekeaIcons.Inspector,
+                    label = stringResource(Res.string.side_panel_inspector)
+                ),
+                NotekeaSegment(
+                    icon = NotekeaIcons.Chat,
+                    label = stringResource(Res.string.side_panel_chat)
+                )
             ),
             selectedIndex = SidePanelMode.entries.indexOf(element = mode),
             onSelect = { actions.onModeSelect(SidePanelMode.entries[it]) }
         )
+
         Spacer(modifier = Modifier.weight(weight = 1f))
-        MinimizeButton(platformConventions = platformConventions, onMinimize = actions.onHide)
+
+        MinimizeButton(
+            platformConventions = platformConventions,
+            onMinimize = actions.onHide
+        )
     }
 }
 
@@ -157,12 +174,14 @@ private fun InspectorSections(
                 actions = actions,
                 outlineFocus = outlineFocus
             )
+
             if (info != null) {
                 Column {
                     connections(SidePanelSection.CONNECTIONS !in foldedSections) {
                         actions.onSectionToggle(SidePanelSection.CONNECTIONS)
                     }
                 }
+
                 Column {
                     NoteInfoSection(
                         info = info,
@@ -195,16 +214,28 @@ private fun OutlinePart(
                 operatingSystem = platformConventions.operatingSystem
             )
         )
-        NotekeaFold(isOpen = isOpen, modifier = Modifier.weight(weight = 1f, fill = false)) {
-            OutlineSection(outline = outline, current = current, focusRequester = outlineFocus, actions = actions)
+
+        NotekeaFold(
+            isOpen = isOpen,
+            modifier = Modifier.weight(
+                weight = 1f,
+                fill = false
+            )
+        ) {
+            OutlineSection(
+                outline = outline,
+                current = current,
+                focusRequester = outlineFocus,
+                actions = actions
+            )
         }
     }
 }
 
 /**
  * Outline, then Connections and Note info when a note is open, stacked. Note info takes what it needs; Connections take
- * up to half of the rest, or more when the outline needs less, which it says without being measured (Connections cannot:
- * their rows are lazy); Outline takes what is left. Each scrolls inside its share.
+ * up to half of the rest, or more when the outline needs less, which it says without being measured (Connections
+ * cannot: their rows are lazy); Outline takes what is left. Each scrolls inside its share.
  */
 private val InspectorMeasurePolicy = MeasurePolicy { measurables, constraints ->
     val loose = constraints.copy(minHeight = 0)
@@ -213,12 +244,36 @@ private val InspectorMeasurePolicy = MeasurePolicy { measurables, constraints ->
     val info = measurables.getOrNull(index = 2)?.measure(constraints = loose)
     val free = (constraints.maxHeight - (info?.height ?: 0)).coerceAtLeast(minimumValue = 0)
     val outlineNeed = outline.maxIntrinsicHeight(width = constraints.maxWidth)
-    val middle = connections?.measure(constraints = loose.copy(maxHeight = maxOf(free / 2, free - outlineNeed)))
+
+    val middle = connections?.measure(
+        constraints = loose.copy(
+            maxHeight = maxOf(
+                free / 2,
+                free - outlineNeed
+            )
+        )
+    )
+
     val top = outline.measure(constraints = loose.copy(maxHeight = free - (middle?.height ?: 0)))
-    layout(width = constraints.maxWidth, height = constraints.maxHeight) {
-        top.placeRelative(x = 0, y = 0)
-        middle?.placeRelative(x = 0, y = top.height)
-        info?.placeRelative(x = 0, y = top.height + (middle?.height ?: 0))
+
+    layout(
+        width = constraints.maxWidth,
+        height = constraints.maxHeight
+    ) {
+        top.placeRelative(
+            x = 0,
+            y = 0
+        )
+
+        middle?.placeRelative(
+            x = 0,
+            y = top.height
+        )
+
+        info?.placeRelative(
+            x = 0,
+            y = top.height + (middle?.height ?: 0)
+        )
     }
 }
 
@@ -248,15 +303,20 @@ private fun NoteInfoSection(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingS)
+            .padding(
+                horizontal = NotekeaDimensions.SpacingM,
+                vertical = NotekeaDimensions.SpacingS
+            )
             .height(height = NotekeaDimensions.BorderWidth)
             .background(color = MaterialTheme.colorScheme.outline)
     )
+
     NotekeaSectionHeader(
         title = stringResource(resource = Res.string.note_info_title),
         isOpen = isOpen,
         onToggle = { actions.onSectionToggle(SidePanelSection.NOTE_INFO) }
     )
+
     NotekeaFold(isOpen = isOpen) { NoteInfoRows(info = info) }
 }
 
@@ -268,11 +328,19 @@ private fun SidePanelPreviewFrame(
     mode: SidePanelMode = SidePanelMode.INSPECTOR
 ) {
     NotekeaPreviewThemes {
-        Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
+        Box(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
             SidePanel(
                 outline = outline,
                 current = current,
-                preferences = SidePanelPreferences(mode = mode, foldedSections = foldedSections),
+                preferences = SidePanelPreferences(
+                    mode = mode,
+                    foldedSections = foldedSections
+                ),
                 platformConventions = EditorPreviewData.platformConventions,
                 actions = SidePanelActions(
                     onHeadingClick = {},
@@ -290,19 +358,29 @@ private fun SidePanelPreviewFrame(
 @Preview
 @Composable
 private fun SidePanelPreview() {
-    SidePanelPreviewFrame(outline = EditorPreviewData.outline, current = { 1 })
+    SidePanelPreviewFrame(
+        outline = EditorPreviewData.outline,
+        current = { 1 }
+    )
 }
 
 @Preview
 @Composable
 private fun SidePanelEmptyPreview() {
-    SidePanelPreviewFrame(outline = emptyList(), current = { OutlineTracker.NONE })
+    SidePanelPreviewFrame(
+        outline = emptyList(),
+        current = { OutlineTracker.NONE }
+    )
 }
 
 @Preview
 @Composable
 private fun SidePanelChatModePreview() {
-    SidePanelPreviewFrame(outline = EditorPreviewData.outline, current = { 1 }, mode = SidePanelMode.CHAT)
+    SidePanelPreviewFrame(
+        outline = EditorPreviewData.outline,
+        current = { 1 },
+        mode = SidePanelMode.CHAT
+    )
 }
 
 @Preview

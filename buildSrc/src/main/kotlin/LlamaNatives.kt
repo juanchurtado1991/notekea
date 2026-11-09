@@ -22,6 +22,8 @@ object LlamaNatives {
         val name = System.getProperty("os.name")
         val arch = System.getProperty("os.arch")
         val system = classifiers.keys.firstOrNull { name.startsWith(it.first) && arch == it.second }
-        return checkNotNull(classifiers[system]) { "net.ladenthin:llama has no natives for $name on $arch" }
+        return checkNotNull(classifiers[system]) {
+            "net.ladenthin:llama has no natives for $name on $arch"
+        }
     }
 }

@@ -8,6 +8,8 @@ enum class ThemeMode(val id: String) {
 
     companion object {
         /** The mode kept as [id], or [SYSTEM] when there is none or it is unknown. */
-        fun fromId(id: String?): ThemeMode = entries.firstOrNull { it.id == id } ?: SYSTEM
+        fun fromId(id: String?): ThemeMode = entries.firstOrNull {
+            it.id == id
+        } ?: SYSTEM
     }
 }

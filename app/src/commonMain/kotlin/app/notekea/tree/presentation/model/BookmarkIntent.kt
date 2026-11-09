@@ -2,7 +2,7 @@ package app.notekea.tree.presentation.model
 
 import app.notekea.core.notes.domain.RelativePath
 
-/** What the user did with bookmarks (`ROADMAP.md` 1.13): in the sidebar, the note's header, a menu or `Mod+Shift+B`. */
+/** What the user did with bookmarks: in the sidebar, the note's header, a menu or `Mod+Shift+B`. */
 sealed interface BookmarkIntent : VaultTreeIntent {
     /** Bookmarks [path] (a note, a folder or another file), or removes its bookmark when it has one. */
     data class OnToggle(val path: RelativePath) : BookmarkIntent

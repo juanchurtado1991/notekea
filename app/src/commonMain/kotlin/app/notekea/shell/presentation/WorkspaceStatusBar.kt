@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.domain.StringPatterns
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.components.NotekeaStatusBar
 import app.notekea.core.presentation.designsystem.components.NotekeaStatusLabel
 import app.notekea.core.presentation.designsystem.components.NotekeaStatusProgress
@@ -15,10 +16,9 @@ import app.notekea.core.presentation.designsystem.components.NotekeaStatusSepara
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
-import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.platform.LocalUiZoom
 import app.notekea.editor.presentation.model.EditorState
 import app.notekea.editor.presentation.model.SaveStatus
-import app.notekea.shell.presentation.TabKind
 import app.notekea.resources.Res
 import app.notekea.resources.editor_saved
 import app.notekea.resources.editor_unsaved
@@ -30,28 +30,25 @@ import app.notekea.resources.status_encoding_tooltip
 import app.notekea.resources.status_lf
 import app.notekea.resources.status_line_endings_tooltip
 import app.notekea.resources.status_loading
-import app.notekea.resources.status_words
-import org.jetbrains.compose.resources.pluralStringResource
-import org.jetbrains.compose.resources.stringResource
-import kotlin.math.roundToInt
-import app.notekea.resources.status_zoom_tooltip
-import app.notekea.resources.status_zoom
 import app.notekea.resources.status_reveal
+import app.notekea.resources.status_words
+import app.notekea.resources.status_zoom
+import app.notekea.resources.status_zoom_tooltip
 import app.notekea.resources.tab_graph
 import app.notekea.resources.tab_query
 import app.notekea.resources.tab_tasks
-import app.notekea.core.presentation.platform.LocalUiZoom
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 
 private const val PERCENT = 100
 private const val PREVIEW_PATH = "Editor/Tasks and callouts.md"
 private const val PREVIEW_VAULT = "Playground Vault"
 
 /**
- * The workspace's status bar (`ROADMAP.md` 1.14), as Android Studio's: where the user is (the vault, the folders and
- * the open tab's file, [path] of [kind]) on the left; on the right the vault's first scan while it runs ([isLoading]),
- * then the search index ([searchIndex], `ROADMAP.md` 2.3), then, for a note in Edit mode ([editor] and its [buffer]), the cursor's line and column in the file, its line endings
- * and encoding, its words, and whether it is saved; last, the window's zoom while it is not 100 %, a click going back to
- * 100 %. A click on a folder or the file of the path shows it in Files ([onReveal]).
+ * The workspace's status bar: where the user is ([path] of [kind]) on the left, a click showing it in Files
+ * ([onReveal]); on the right the vault's first scan ([isLoading]), the search index ([searchIndex]), then, for a note
+ * in Edit mode ([editor], [buffer]), the cursor's place, line endings, words and saved state.
  */
 @Composable
 internal fun WorkspaceStatusBar(
@@ -67,13 +64,35 @@ internal fun WorkspaceStatusBar(
 ) {
     NotekeaStatusBar(
         start = {
-            NotekeaStatusLabel(text = vaultName, icon = NotekeaIcons.SwitchVault)
-            path?.let { Breadcrumbs(path = it, kind = kind, onReveal = onReveal) }
+            NotekeaStatusLabel(
+                text = vaultName,
+                icon = NotekeaIcons.SwitchVault
+            )
+
+            path?.let {
+                Breadcrumbs(
+                    path = it,
+                    kind = kind,
+                    onReveal = onReveal
+                )
+            }
         },
         end = {
-            if (isLoading) NotekeaStatusProgress(label = stringResource(resource = Res.string.status_loading))
+            if (isLoading) {
+                NotekeaStatusProgress(
+                    label = stringResource(resource = Res.string.status_loading)
+                )
+            }
+
             searchIndex()
-            editor?.let { NoteFacts(editor = it, buffer = buffer) }
+
+            editor?.let {
+                NoteFacts(
+                    editor = it,
+                    buffer = buffer
+                )
+            }
+
             ZoomFact()
         },
         modifier = modifier
@@ -88,29 +107,45 @@ private fun Breadcrumbs(
     onReveal: (RelativePath) -> Unit
 ) {
     val reveal = stringResource(resource = Res.string.status_reveal)
-    generateSequence(seed = path.parent) { it.parent }.filterNot { it.isRoot }.toList().asReversed().forEach {
-        Chevron()
-        NotekeaStatusLabel(text = it.name, tooltip = reveal, onClick = { onReveal(it) })
-    }
+
+    generateSequence(seed = path.parent) { it.parent }
+        .filterNot { it.isRoot }
+        .toList()
+        .asReversed()
+        .forEach {
+            Chevron()
+
+            NotekeaStatusLabel(
+                text = it.name,
+                tooltip = reveal,
+                onClick = { onReveal(it) }
+            )
+        }
+
     Chevron()
+
+    val icon = when (kind) {
+        TabKind.NOTE -> NotekeaIcons.Note
+        TabKind.FOLDER -> NotekeaIcons.Folder
+        TabKind.GRAPH -> NotekeaIcons.Graph
+        TabKind.QUERY -> NotekeaIcons.Query
+        TabKind.TASKS -> NotekeaIcons.Tasks
+        else -> NotekeaIcons.OtherFile
+    }
+
+    val text = when (kind) {
+        TabKind.NOTE -> path.nameWithoutExtension
+        TabKind.GRAPH -> stringResource(resource = Res.string.tab_graph)
+        TabKind.QUERY -> stringResource(resource = Res.string.tab_query)
+        TabKind.TASKS -> stringResource(resource = Res.string.tab_tasks)
+        else -> path.name
+    }
+
     NotekeaStatusLabel(
         tooltip = reveal,
         onClick = { onReveal(path) },
-        text = when (kind) {
-            TabKind.NOTE -> path.nameWithoutExtension
-            TabKind.GRAPH -> stringResource(resource = Res.string.tab_graph)
-            TabKind.QUERY -> stringResource(resource = Res.string.tab_query)
-            TabKind.TASKS -> stringResource(resource = Res.string.tab_tasks)
-            else -> path.name
-        },
-        icon = when (kind) {
-            TabKind.NOTE -> NotekeaIcons.Note
-            TabKind.FOLDER -> NotekeaIcons.Folder
-            TabKind.GRAPH -> NotekeaIcons.Graph
-            TabKind.QUERY -> NotekeaIcons.Query
-            TabKind.TASKS -> NotekeaIcons.Tasks
-            else -> NotekeaIcons.OtherFile
-        }
+        text = text,
+        icon = icon
     )
 }
 
@@ -131,31 +166,53 @@ private fun NoteFacts(
     buffer: TextFieldState?
 ) {
     if (!editor.isReading && buffer != null) {
-        val (line, column) = cursorOf(text = buffer.text, offset = buffer.selection.start)
+        val (line, column) = cursorOf(
+            text = buffer.text,
+            offset = buffer.selection.start
+        )
+
         val fileLine = line + editor.bodyStartLine
+
         NotekeaStatusLabel(
             text = stringResource(Res.string.status_cursor, fileLine, column),
             tooltip = stringResource(Res.string.status_cursor_tooltip, fileLine, column)
         )
+
         NotekeaStatusSeparator()
     }
+
     NotekeaStatusLabel(
-        text = stringResource(resource = if (editor.usesCrLf) Res.string.status_crlf else Res.string.status_lf),
+        text = stringResource(
+            resource = if (editor.usesCrLf) Res.string.status_crlf else Res.string.status_lf
+        ),
         tooltip = stringResource(resource = Res.string.status_line_endings_tooltip)
     )
+
     NotekeaStatusSeparator()
+
     NotekeaStatusLabel(
         text = stringResource(resource = Res.string.status_encoding),
         tooltip = stringResource(resource = Res.string.status_encoding_tooltip)
     )
-    editor.info.stats?.let { stats ->
-        NotekeaStatusSeparator()
-        NotekeaStatusLabel(text = pluralStringResource(Res.plurals.status_words, stats.words, stats.words))
-    }
+
+    editor
+        .info
+        .stats
+        ?.let { stats ->
+            NotekeaStatusSeparator()
+
+            NotekeaStatusLabel(
+                text = pluralStringResource(Res.plurals.status_words, stats.words, stats.words)
+            )
+        }
+
     NotekeaStatusSeparator()
     val isUnsaved = editor.saveStatus == SaveStatus.UNSAVED
+
     NotekeaStatusLabel(
-        text = stringResource(resource = if (isUnsaved) Res.string.editor_unsaved else Res.string.editor_saved),
+        text = stringResource(
+            resource = if (isUnsaved) Res.string.editor_unsaved else Res.string.editor_saved
+        ),
         icon = if (isUnsaved) NotekeaIcons.InfoModified else NotekeaIcons.Checked
     )
 }
@@ -166,6 +223,7 @@ private fun ZoomFact() {
     val zoom = LocalUiZoom.current
     if (!zoom.isZoomed) return
     NotekeaStatusSeparator()
+
     NotekeaStatusLabel(
         text = stringResource(Res.string.status_zoom, (zoom.scale * PERCENT).roundToInt()),
         icon = NotekeaIcons.Zoom,
@@ -180,15 +238,21 @@ internal fun cursorOf(
     offset: Int
 ): Pair<Int, Int> {
     // Counted in place: it runs on every keystroke and caret move, so the text before the cursor is never copied.
-    val end = offset.coerceIn(minimumValue = 0, maximumValue = text.length)
+    val end = offset.coerceIn(
+        minimumValue = 0,
+        maximumValue = text.length
+    )
+
     var lines = 1
     var lineStart = 0
+
     for (index in 0 until end) {
         if (text[index] == StringPatterns.NEW_LINE_CHAR) {
             lines++
             lineStart = index + 1
         }
     }
+
     return lines to end - lineStart + 1
 }
 

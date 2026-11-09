@@ -20,11 +20,12 @@ enum class CalloutKind(val aliases: List<String>) {
     QUOTE(aliases = listOf("cite"));
 
     companion object {
-        fun of(
-            type: String
-        ): CalloutKind {
+        fun of(type: String): CalloutKind {
             val written = type.lowercase()
-            return entries.firstOrNull { it.name.lowercase() == written || written in it.aliases } ?: NOTE
+
+            return entries.firstOrNull {
+                it.name.lowercase() == written || written in it.aliases
+            } ?: NOTE
         }
     }
 }

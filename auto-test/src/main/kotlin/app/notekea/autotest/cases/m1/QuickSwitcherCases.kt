@@ -17,20 +17,38 @@ fun SuiteBuilder.quickSwitcherCases() {
 }
 
 private fun SuiteBuilder.openByPartOfName() {
-    automated(id = "1.6-01", title = "The quick switcher opens a note by part of its name") {
-        openVault(name = PERSONAL_NOTES, shownText = WELCOME)
+    automated(
+        id = "1.6-01",
+        title = "The quick switcher opens a note by part of its name"
+    ) {
+        openVault(
+            name = PERSONAL_NOTES,
+            shownText = WELCOME
+        )
+
         press(shortcut = Mod + Key.P)
         expectText(text = "Find a note by name or alias")
         type(text = "are")
         waitForResult(name = "Arepas")
         press(key = Key.Enter)
-        expectText(text = "2 cups pre-cooked white corn flour", substring = true)
+
+        expectText(
+            text = "2 cups pre-cooked white corn flour",
+            substring = true
+        )
     }
 }
 
 private fun SuiteBuilder.aliasesAndAccents() {
-    automated(id = "1.6-02", title = "The quick switcher finds aliases and names with accents") {
-        openVault(name = PERSONAL_NOTES, shownText = WELCOME)
+    automated(
+        id = "1.6-02",
+        title = "The quick switcher finds aliases and names with accents"
+    ) {
+        openVault(
+            name = PERSONAL_NOTES,
+            shownText = WELCOME
+        )
+
         press(shortcut = Mod + Key.P)
         type(text = "corn cakes")
         waitForResult(name = "Arepas")
@@ -42,8 +60,15 @@ private fun SuiteBuilder.aliasesAndAccents() {
 }
 
 private fun SuiteBuilder.folderPath() {
-    automated(id = "1.6-03", title = "The quick switcher matches a folder path") {
-        openVault(name = PERSONAL_NOTES, shownText = WELCOME)
+    automated(
+        id = "1.6-03",
+        title = "The quick switcher matches a folder path"
+    ) {
+        openVault(
+            name = PERSONAL_NOTES,
+            shownText = WELCOME
+        )
+
         press(shortcut = Mod + Key.P)
         type(text = "gard/tom")
         waitForResult(name = "Tomato plan")

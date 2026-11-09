@@ -15,44 +15,75 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The Sample Vault of `ROADMAP.md` 1.16 holds what it promises: every wiki link leads to a note but the two missing
+ * The Sample Vault holds what it promises: every wiki link leads to a note but the two missing
  * on purpose, every callout type is shown, every note's properties can be read, and its Obsidian settings put
  * attachments, daily notes and templates where the guide says.
  */
 class SampleVaultTest {
     private val testDispatcher = StandardTestDispatcher()
     private val vault = File(SAMPLE_VAULT)
-    private val notes = vault.walkTopDown()
-        .filter { it.isFile && it.extension == MARKDOWN && !it.path.contains(SETTINGS_FOLDER) }
-        .associate { RelativePath(value = it.relativeTo(base = vault).invariantSeparatorsPath) to it.readText() }
+    private val notes = vault
+        .walkTopDown()
+        .filter {
+            it.isFile &&
+                it.extension == MARKDOWN &&
+                !it.path.contains(SETTINGS_FOLDER)
+        }
+        .associate {
+            RelativePath(value = it.relativeTo(base = vault).invariantSeparatorsPath) to
+                it.readText()
+        }
 
     @Test
     fun `every wiki link leads to a note, but the missing note and picture the guides show on purpose`() {
         val resolver = LinkResolver(notePaths = notes.keys)
         val finder = JetBrainsMarkdownLinkFinder()
+
         val unresolved = notes.flatMap { (path, text) ->
-            finder.find(markdown = text).filter { it.kind == LinkKind.WIKI }
+            finder
+                .find(markdown = text)
+                .filter {
+                    it.kind == LinkKind.WIKI
+                }
                 .map { it.target.substringBefore(delimiter = ANCHOR) }
-                .filter { it.isNotEmpty() && !it.contains(other = FILE_DOT) }
-                .filter { resolver.closestWiki(target = it, source = path) == null }
+                .filter {
+                    it.isNotEmpty() && !it.contains(other = FILE_DOT)
+                }
+                .filter {
+                    resolver.closestWiki(
+                        target = it,
+                        source = path
+                    ) == null
+                }
         }.toSet()
 
-        assertEquals(expected = setOf("Shopping list"), actual = unresolved)
+        assertEquals(
+            expected = setOf("Shopping list"),
+            actual = unresolved
+        )
     }
 
     @Test
     fun `the vault shows every callout type and reads every note's properties`() {
-        val callouts = Regex(pattern = "\\[!(\\w+)]").findAll(input = notes.values.joinToString()).map {
+        val callouts = Regex(
+            pattern = "\\[!(\\w+)]"
+        ).findAll(input = notes.values.joinToString()).map {
             it.groupValues[1]
         }
+
         val reader = FrontmatterReader()
+
         val invalid = notes.filter { (_, text) ->
-            reader.read(header = NoteDocument.fromText(text = text).header) is FrontmatterContent.Invalid
+            reader.read(
+                header = NoteDocument.fromText(text = text).header
+            ) is FrontmatterContent.Invalid
         }.keys
 
         assertEquals(
             expected = CALLOUT_TYPES to emptySet(),
-            actual = callouts.filter { it in CALLOUT_TYPES }.toSet() to invalid
+            actual = callouts.filter {
+                it in CALLOUT_TYPES
+            }.toSet() to invalid
         )
     }
 
@@ -63,6 +94,7 @@ class SampleVaultTest {
                 fileSystem = FileSystem.SYSTEM,
                 dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
             )
+
             val path = vault.path
 
             assertEquals(

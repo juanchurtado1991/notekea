@@ -1,7 +1,7 @@
 package app.notekea.editor.domain
 
 /**
- * What a formatting toolbar button asks for (`ROADMAP.md` 1.17). Each carries the placeholder text inserted when
+ * What a formatting toolbar button asks for. Each carries the placeholder text inserted when
  * nothing is selected, already in the person's language, so [MarkdownFormatter] stays free of words.
  */
 sealed interface FormatAction {
@@ -46,7 +46,9 @@ sealed interface FormatAction {
 
     data object Divider : FormatAction
 
-    /** An embedded file, [markdown] written as it is (`![[photo.png]]`) on a line of its own, in place of the selection. */
+    /**
+     * An embedded file, [markdown] written as it is (`![[photo.png]]`) on a line of its own, in place of the selection.
+     */
     data class Embed(val markdown: String) : FormatAction
 
     /** A wiki link to [target], the note's name (or path when its name is not unique). */

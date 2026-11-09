@@ -86,28 +86,37 @@ abstract class ArchitectureTestBase {
         "org.koin."
     )
 
-    protected fun topLevelTypeCount(
-        file: KoFileDeclaration
-    ): Int = file.classes(includeNested = false).size +
-        file.interfaces(includeNested = false).size +
-        file.objects(includeNested = false).size
+    protected fun topLevelTypeCount(file: KoFileDeclaration): Int =
+        file.classes(includeNested = false).size +
+            file.interfaces(includeNested = false).size +
+            file.objects(includeNested = false).size
 
     /** The feature a package belongs to (`vault`, `editor`…), or null for core, the app root and generated code. */
-    protected fun featureOf(
-        packageName: String?
-    ): String? {
-        val segments = packageName?.removePrefix(prefix = APP_PACKAGE_PREFIX)?.takeIf { it != packageName }?.split(".")
-        return segments?.takeIf { it.size > 1 }?.first()?.takeUnless { it in NON_FEATURE_PACKAGES }
+    protected fun featureOf(packageName: String?): String? {
+        val segments = packageName
+            ?.removePrefix(prefix = APP_PACKAGE_PREFIX)
+            ?.takeIf {
+                it != packageName
+            }
+            ?.split(".")
+
+        return segments
+            ?.takeIf {
+                it.size > 1
+            }
+            ?.first()
+            ?.takeUnless {
+                it in NON_FEATURE_PACKAGES
+            }
     }
 
-    protected fun filesInLayer(
-        layer: String
-    ): List<KoFileDeclaration> = productionScope.files.filter {
-        isInLayer(
-            file = it,
-            layer = layer
-        )
-    }
+    protected fun filesInLayer(layer: String): List<KoFileDeclaration> =
+        productionScope.files.filter {
+            isInLayer(
+                file = it,
+                layer = layer
+            )
+        }
 
     protected fun importsLayer(
         importName: String,
@@ -117,7 +126,8 @@ abstract class ArchitectureTestBase {
     protected fun isInLayer(
         file: KoFileDeclaration,
         layer: String
-    ): Boolean = file.packagee
+    ): Boolean = file
+        .packagee
         ?.name
         ?.split(".")
         ?.contains(element = layer) == true
@@ -157,7 +167,8 @@ abstract class ArchitectureTestBase {
         const val FOLLOWER_PREFIX = "Follow"
         const val THEME_PACKAGE = "app.notekea.core.presentation.designsystem.theme"
         val NON_FEATURE_PACKAGES = setOf("architecture", "core", "db", "di", "resources", "shell")
-        val DESIGN_SYSTEM_PACKAGES = listOf("app.notekea.core.presentation.designsystem.components", THEME_PACKAGE)
+        val DESIGN_SYSTEM_PACKAGES =
+            listOf("app.notekea.core.presentation.designsystem.components", THEME_PACKAGE)
 
         // Theme functions, the preview helper and the developer gallery are tooling, not UI elements.
         val PREVIEW_EXEMPT_PACKAGES = listOf(

@@ -5,7 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
 
-/** The Linked and Unlinked tabs follow the vault (`ROADMAP.md` 2.5): the active pane's [note] and the vault's [notes]. */
+/** The Linked and Unlinked tabs follow the vault: the active pane's [note] and the vault's [notes]. */
 @Composable
 fun FollowNoteMentions(
     notes: Map<RelativePath, NoteEntry>,
@@ -13,5 +13,6 @@ fun FollowNoteMentions(
     note: RelativePath?
 ) {
     LaunchedEffect(notes) { onIntent(NoteMentionsIntent.OnNotesChange(notes = notes)) }
+
     LaunchedEffect(note) { onIntent(NoteMentionsIntent.OnNoteChange(note = note)) }
 }

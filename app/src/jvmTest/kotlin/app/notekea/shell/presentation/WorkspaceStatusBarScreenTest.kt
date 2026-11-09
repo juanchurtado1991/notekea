@@ -8,18 +8,17 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.editor.domain.NoteStats
-import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.presentation.model.EditorState
 import app.notekea.editor.presentation.noteinfo.NoteInfo
-import app.notekea.shell.presentation.TabKind
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The workspace's status bar (`ROADMAP.md` 1.14), rendered headless: the vault and the note's folders, the scan while it
+ * The workspace's status bar, rendered headless: the vault and the note's folders, the scan while it
  * runs, then the cursor's place in the file (after the frontmatter's lines), the line endings, the encoding and the
  * words; Preview leaves the cursor out.
  */
@@ -42,22 +41,30 @@ class WorkspaceStatusBarScreenTest {
         )
     }
 
-    private fun texts(
-        isReading: Boolean
-    ): List<String> {
+    private fun texts(isReading: Boolean): List<String> {
         var texts = emptyList<String>()
+
         val editor = EditorState(
             isReading = isReading,
             usesCrLf = !isReading,
             bodyStartLine = 3,
             info = NoteInfo(
-                stats = NoteStats(words = 236, links = 0, tags = 2, tasks = 9, doneTasks = 4).takeUnless {
-                    isReading
-                }
+                stats = NoteStats(
+                    words = 236,
+                    links = 0,
+                    tags = 2,
+                    tasks = 9,
+                    doneTasks = 4
+                ).takeUnless { isReading }
             )
         )
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     WorkspaceStatusBar(
                         vaultName = VAULT,
@@ -66,15 +73,27 @@ class WorkspaceStatusBarScreenTest {
                         path = RelativePath(value = NOTE),
                         kind = TabKind.NOTE,
                         editor = editor,
-                        buffer = TextFieldState(initialText = BODY, initialSelection = TextRange(index = CURSOR))
+                        buffer = TextFieldState(
+                            initialText = BODY,
+                            initialSelection = TextRange(index = CURSOR)
+                        )
                     )
                 }
             }.use { scene ->
                 scene.render(nanoTime = 0L)
-                texts = scene.semanticsOwners.flatMap { it.getAllSemanticsNodes(mergingEnabled = false) }
-                    .mapNotNull { node -> node.config.getOrNull(SemanticsProperties.Text)?.joinToString { it.text } }
+
+                texts = scene
+                    .semanticsOwners
+                    .flatMap { it.getAllSemanticsNodes(mergingEnabled = false) }
+                    .mapNotNull { node ->
+                        node
+                            .config
+                            .getOrNull(SemanticsProperties.Text)
+                            ?.joinToString { it.text }
+                    }
             }
         }
+
         return texts
     }
 

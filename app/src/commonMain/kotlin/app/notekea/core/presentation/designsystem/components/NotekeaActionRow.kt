@@ -46,13 +46,20 @@ fun NotekeaActionRow(
     modifier: Modifier = Modifier
 ) {
     val shape = MaterialTheme.shapes.small
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = ROW_HEIGHT_DP.dp)
-            .focusBorder(color = MaterialTheme.colorScheme.primary, shape = shape)
+            .focusBorder(
+                color = MaterialTheme.colorScheme.primary,
+                shape = shape
+            )
             .clip(shape = shape)
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
             .padding(horizontal = NotekeaDimensions.SpacingS),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),
         verticalAlignment = Alignment.CenterVertically
@@ -63,7 +70,13 @@ fun NotekeaActionRow(
             modifier = Modifier.size(size = NotekeaDimensions.IconSize),
             tint = MaterialTheme.colorScheme.primary
         )
-        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+
         Spacer(modifier = Modifier.weight(weight = 1f))
         NotekeaKeycaps(keys = keys)
     }
@@ -80,6 +93,7 @@ private fun NotekeaActionRowPreview() {
                 keys = PREVIEW_FIND_KEYS.split(" "),
                 onClick = {}
             )
+
             NotekeaActionRow(
                 icon = NotekeaIcons.Today,
                 label = PREVIEW_TODAY,

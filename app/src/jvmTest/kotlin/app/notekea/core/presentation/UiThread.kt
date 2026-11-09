@@ -9,10 +9,9 @@ import javax.swing.SwingUtilities
  */
 object UiThread {
     /** Runs [block] on the AWT event thread and rethrows what it threw, so a failed assertion still fails the test. */
-    fun run(
-        block: () -> Unit
-    ) {
+    fun run(block: () -> Unit) {
         var failure: Throwable? = null
+
         SwingUtilities.invokeAndWait {
             try {
                 block()
@@ -20,6 +19,9 @@ object UiThread {
                 failure = throwable
             }
         }
-        failure?.let { throw it }
+
+        failure?.let {
+            throw it
+        }
     }
 }

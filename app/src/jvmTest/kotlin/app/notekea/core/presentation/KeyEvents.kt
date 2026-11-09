@@ -10,13 +10,18 @@ import androidx.compose.ui.input.key.KeyEventType
 fun keyDown(
     key: Key,
     isShiftPressed: Boolean = false
-): KeyEvent = KeyEvent(key = key, type = KeyEventType.KeyDown, isShiftPressed = isShiftPressed)
+): KeyEvent = KeyEvent(
+    key = key,
+    type = KeyEventType.KeyDown,
+    isShiftPressed = isShiftPressed
+)
 
 /** A key let go, as the window sends it. */
 @OptIn(InternalComposeUiApi::class)
-fun keyUp(
-    key: Key
-): KeyEvent = KeyEvent(key = key, type = KeyEventType.KeyUp)
+fun keyUp(key: Key): KeyEvent = KeyEvent(
+    key = key,
+    type = KeyEventType.KeyUp
+)
 
 /** A key pressed with Ctrl, and Shift when [isShiftPressed], as the window sends it. */
 @OptIn(InternalComposeUiApi::class)

@@ -15,8 +15,12 @@ class RecentVaultUseCasesTest {
     @Test
     fun `recent vaults are described and missing folders are flagged`() = runTest {
         fixture.addFolder(path = VaultFixture.NOTES)
+
         fixture.store.recentVaults = listOf(
-            RecentVault(path = VaultFixture.NOTES, lastOpenedAt = fixture.clock.currentTime - 2.days),
+            RecentVault(
+                path = VaultFixture.NOTES,
+                lastOpenedAt = fixture.clock.currentTime - 2.days
+            ),
             fixture.recent(path = VaultFixture.ARCHIVE)
         )
 
@@ -39,15 +43,19 @@ class RecentVaultUseCasesTest {
 
     @Test
     fun `removing a recent vault keeps the others in order`() = runTest {
-        fixture.store.recentVaults = listOf(VaultFixture.NOTES, VaultFixture.ARCHIVE, VaultFixture.WORK).map {
-            fixture.recent(path = it)
-        }
+        fixture.store.recentVaults =
+            listOf(VaultFixture.NOTES, VaultFixture.ARCHIVE, VaultFixture.WORK).map {
+                fixture.recent(path = it)
+            }
 
         fixture.removeRecentVault(path = VaultFixture.ARCHIVE)
 
         assertEquals(
             expected = listOf(VaultFixture.NOTES, VaultFixture.WORK),
-            actual = fixture.store.recentVaults.map { it.path }
+            actual = fixture
+                .store
+                .recentVaults
+                .map { it.path }
         )
     }
 
@@ -56,15 +64,22 @@ class RecentVaultUseCasesTest {
         fixture.addFolder(path = VaultFixture.WORK)
         fixture.store.recentVaults = listOf(fixture.recent(path = VaultFixture.ARCHIVE))
 
-        val outcome = fixture.locateVault(missingPath = VaultFixture.ARCHIVE, newPath = VaultFixture.WORK)
+        val outcome = fixture.locateVault(
+            missingPath = VaultFixture.ARCHIVE,
+            newPath = VaultFixture.WORK
+        )
 
         assertEquals(
             expected = true,
             actual = outcome is Outcome.Success
         )
+
         assertEquals(
             expected = listOf(VaultFixture.WORK),
-            actual = fixture.store.recentVaults.map { it.path }
+            actual = fixture
+                .store
+                .recentVaults
+                .map { it.path }
         )
     }
 
@@ -72,11 +87,17 @@ class RecentVaultUseCasesTest {
     fun `a failed locate keeps the old entry`() = runTest {
         fixture.store.recentVaults = listOf(fixture.recent(path = VaultFixture.ARCHIVE))
 
-        fixture.locateVault(missingPath = VaultFixture.ARCHIVE, newPath = VaultFixture.WORK)
+        fixture.locateVault(
+            missingPath = VaultFixture.ARCHIVE,
+            newPath = VaultFixture.WORK
+        )
 
         assertEquals(
             expected = listOf(VaultFixture.ARCHIVE),
-            actual = fixture.store.recentVaults.map { it.path }
+            actual = fixture
+                .store
+                .recentVaults
+                .map { it.path }
         )
     }
 
@@ -85,11 +106,17 @@ class RecentVaultUseCasesTest {
         fixture.addFolder(path = VaultFixture.NOTES)
         fixture.store.recentVaults = listOf(fixture.recent(path = VaultFixture.NOTES))
 
-        fixture.locateVault(missingPath = VaultFixture.NOTES, newPath = VaultFixture.NOTES)
+        fixture.locateVault(
+            missingPath = VaultFixture.NOTES,
+            newPath = VaultFixture.NOTES
+        )
 
         assertEquals(
             expected = listOf(VaultFixture.NOTES),
-            actual = fixture.store.recentVaults.map { it.path }
+            actual = fixture
+                .store
+                .recentVaults
+                .map { it.path }
         )
     }
 

@@ -40,14 +40,19 @@ internal fun RecentVaultsSection(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
         val scrollState = rememberScrollState()
+
         NotekeaCard(modifier = Modifier.fillMaxWidth()) {
             NotekeaScrollArea(
                 state = scrollState,
                 modifier = Modifier.heightIn(max = (VISIBLE_RECENTS * RECENT_ROW_HEIGHT_DP).dp)
             ) {
                 Column(modifier = Modifier.verticalScroll(state = scrollState)) {
-                    RecentRows(state = state, onIntent = onIntent)
+                    RecentRows(
+                        state = state,
+                        onIntent = onIntent
+                    )
                 }
             }
         }
@@ -62,6 +67,7 @@ private fun RecentRows(
 ) {
     state.recentVaults.forEach { recentVault ->
         val path = recentVault.vault.path
+
         key(path) {
             RecentVaultRow(
                 recentVault = recentVault,
@@ -79,6 +85,9 @@ private fun RecentRows(
 @Composable
 private fun RecentVaultsSectionPreview() {
     NotekeaPreviewThemes {
-        RecentVaultsSection(state = WelcomePreviewData.state().copy(recentVaults = WelcomePreviewData.recentVaults)) {}
+        RecentVaultsSection(
+            state = WelcomePreviewData.state().copy(recentVaults = WelcomePreviewData.recentVaults)
+        ) {
+        }
     }
 }

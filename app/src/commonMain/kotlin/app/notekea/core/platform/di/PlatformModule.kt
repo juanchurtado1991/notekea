@@ -8,5 +8,6 @@ import org.koin.dsl.module
 /** Resolves the [PlatformConventions] once per app run; the `SystemEnvironment` comes from the platform module. */
 val platformModule = module {
     factoryOf(::ResolvePlatformConventionsUseCase)
+
     single<PlatformConventions> { get<ResolvePlatformConventionsUseCase>().invoke() }
 }

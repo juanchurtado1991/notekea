@@ -14,7 +14,9 @@ internal suspend fun saveInOtherEditors(
     editor: EditorViewModel,
     editors: List<EditorViewModel>
 ) {
-    editors.filter { it !== editor && it.state.value.notePath == path }.forEach { other ->
+    editors.filter {
+        it !== editor && it.state.value.notePath == path
+    }.forEach { other ->
         val saved = CompletableDeferred<Unit>()
         other.onIntent(intent = EditorIntent.OnHandOver(done = saved))
         saved.await()

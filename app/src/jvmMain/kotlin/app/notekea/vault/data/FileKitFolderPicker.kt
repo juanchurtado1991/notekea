@@ -12,9 +12,7 @@ import io.github.vinceglb.filekit.path
 class FileKitFolderPicker : FolderPicker {
     private val logger = Logger.withTag(tag = LOG_TAG)
 
-    override suspend fun pickFolder(
-        initialPath: String?
-    ): String? = try {
+    override suspend fun pickFolder(initialPath: String?): String? = try {
         FileKit.openDirectoryPicker(directory = initialPath?.let { PlatformFile(path = it) })?.path
     } catch (exception: FileKitDialogException) {
         logger.w(throwable = exception) { DIALOG_FAILED_MESSAGE }

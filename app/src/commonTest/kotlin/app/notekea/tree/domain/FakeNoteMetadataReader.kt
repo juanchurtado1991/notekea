@@ -13,6 +13,7 @@ class FakeNoteMetadataReader : NoteMetadataReader {
         path: RelativePath
     ): NoteMetadata? {
         reads += path
+
         return if (path in metadata) metadata[path] else NoteMetadata.NONE
     }
 }

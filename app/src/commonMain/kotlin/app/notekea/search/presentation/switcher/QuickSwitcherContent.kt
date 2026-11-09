@@ -51,10 +51,9 @@ private const val RESULTS_MAX_HEIGHT_DP = 440
 private const val ROW_CONTENT_TYPE = "result"
 
 /**
- * The quick switcher palette (`ROADMAP.md` 1.6) over the vault workspace, while [QuickSwitcherState.isOpen]: tabs for
- * names and content (Tab switches), the search field, and the results, the selected one highlighted and kept in view.
- * While a content search runs the previous results stay, with a small indicator by the tabs. Nothing found says
- * "No notes match", an empty content search explains what can be typed, and an empty vault says there are no notes.
+ * The quick switcher palette over the vault workspace, while [QuickSwitcherState.isOpen]: tabs for names and content
+ * (Tab switches), the search field, and the results, the selected one kept in view. While a content search runs the
+ * previous results stay, with a small indicator by the tabs. Each empty case says what to do.
  */
 @Composable
 fun QuickSwitcherContent(
@@ -64,32 +63,55 @@ fun QuickSwitcherContent(
 ) {
     if (!state.isOpen) return
     val isLinking = state.purpose == QuickSwitcherPurpose.LINK
+
     val header: (@Composable () -> Unit)? = if (isLinking) {
         null
     } else {
-        { ModeTabs(mode = state.mode, isSearching = state.isSearching, onIntent = onIntent) }
+        {
+            ModeTabs(
+                mode = state.mode,
+                isSearching = state.isSearching,
+                onIntent = onIntent
+            )
+        }
     }
+
+    val onTab = if (isLinking) {
+        null
+    } else {
+        (
+            { onIntent(QuickSwitcherIntent.OnModeSwitch) }
+            )
+    }
+
     NotekeaPalette(
         query = state.query,
         onQueryChange = { onIntent(QuickSwitcherIntent.OnQueryChange(query = it)) },
         placeholder = stringResource(resource = placeholderOf(state = state)),
         onMove = { step ->
-            onIntent(if (step > 0) QuickSwitcherIntent.OnSelectNext else QuickSwitcherIntent.OnSelectPrevious)
+            onIntent(
+                if (step > 0) {
+                    QuickSwitcherIntent.OnSelectNext
+                } else {
+                    QuickSwitcherIntent.OnSelectPrevious
+                }
+            )
         },
         onConfirm = { onIntent(QuickSwitcherIntent.OnConfirm) },
         onDismiss = { onIntent(QuickSwitcherIntent.OnClose) },
         modifier = modifier,
-        onTab = if (isLinking) null else ({ onIntent(QuickSwitcherIntent.OnModeSwitch) }),
+        onTab = onTab,
         header = header
     ) {
-        SwitcherBody(state = state, onIntent = onIntent)
+        SwitcherBody(
+            state = state,
+            onIntent = onIntent
+        )
     }
 }
 
 /** What the search field invites to type: a note to link, a note name, or text inside notes. */
-private fun placeholderOf(
-    state: QuickSwitcherState
-): StringResource = when {
+private fun placeholderOf(state: QuickSwitcherState): StringResource = when {
     state.purpose == QuickSwitcherPurpose.LINK -> Res.string.switcher_placeholder_link
     state.mode == QuickSwitcherMode.NOTES -> Res.string.switcher_placeholder_notes
     else -> Res.string.switcher_placeholder_content
@@ -109,7 +131,12 @@ private fun SwitcherBody(
         )
 
         state.rows.isNotEmpty() -> Column {
-            Results(rows = state.rows, selectedIndex = state.selectedIndex, onIntent = onIntent)
+            Results(
+                rows = state.rows,
+                selectedIndex = state.selectedIndex,
+                onIntent = onIntent
+            )
+
             if (state.showsExactWords) ExactWordsNote()
         }
 
@@ -135,24 +162,34 @@ private fun ModeTabs(
     isSearching: Boolean,
     onIntent: (QuickSwitcherIntent) -> Unit
 ) {
-    val switchTo = { target: QuickSwitcherMode -> if (target != mode) onIntent(QuickSwitcherIntent.OnModeSwitch) }
+    val switchTo = { target: QuickSwitcherMode ->
+        if (target != mode) onIntent(QuickSwitcherIntent.OnModeSwitch)
+    }
+
     Box {
-        NotekeaTabRow(selectedTabIndex = mode.ordinal, modifier = Modifier.fillMaxWidth()) {
+        NotekeaTabRow(
+            selectedTabIndex = mode.ordinal,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             NotekeaTab(
                 text = stringResource(resource = Res.string.switcher_mode_notes),
                 selected = mode == QuickSwitcherMode.NOTES,
                 onClick = { switchTo(QuickSwitcherMode.NOTES) }
             )
+
             NotekeaTab(
                 text = stringResource(resource = Res.string.switcher_mode_content),
                 selected = mode == QuickSwitcherMode.CONTENT,
                 onClick = { switchTo(QuickSwitcherMode.CONTENT) }
             )
         }
+
         if (isSearching) {
             NotekeaProgressIndicator(
                 label = stringResource(resource = Res.string.switcher_searching),
-                modifier = Modifier.align(alignment = Alignment.CenterEnd).padding(end = NotekeaDimensions.SpacingM)
+                modifier = Modifier.align(
+                    alignment = Alignment.CenterEnd
+                ).padding(end = NotekeaDimensions.SpacingM)
             )
         }
     }
@@ -165,22 +202,29 @@ private fun Results(
     onIntent: (QuickSwitcherIntent) -> Unit
 ) {
     val listState = rememberLazyListState()
+
     LaunchedEffect(selectedIndex, rows) {
         val visible = listState.layoutInfo.visibleItemsInfo
+
         val isFullyVisible = visible.any { item ->
-            item.index == selectedIndex && item.offset >= 0 &&
+            item.index == selectedIndex &&
+                item.offset >= 0 &&
                 item.offset + item.size <= listState.layoutInfo.viewportEndOffset
         }
+
         if (!isFullyVisible) listState.scrollToItem(index = selectedIndex)
     }
+
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxWidth().heightIn(max = RESULTS_MAX_HEIGHT_DP.dp),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
     ) {
-        itemsIndexed(items = rows, key = { _, row ->
-            row.path.value
-        }, contentType = { _, _ -> ROW_CONTENT_TYPE }) { index, row ->
+        itemsIndexed(
+            items = rows,
+            key = { _, row -> row.path.value },
+            contentType = { _, _ -> ROW_CONTENT_TYPE }
+        ) { index, row ->
             NotekeaPaletteItem(
                 title = row.name,
                 onClick = { onIntent(QuickSwitcherIntent.OnRowClick(path = row.path)) },
@@ -195,19 +239,19 @@ private fun Results(
 }
 
 @Composable
-private fun NoResults(
-    state: QuickSwitcherState
-) {
+private fun NoResults(state: QuickSwitcherState) {
     val isNotes = state.mode == QuickSwitcherMode.NOTES
+    val strings = Res.string
+
+    val noMatch =
+        if (isNotes) strings.switcher_no_match_notes else strings.switcher_no_match_content
+
     val (title, message) = when {
-        state.query.isNotBlank() ->
-            Res.string.switcher_no_match_title to
-                if (isNotes) Res.string.switcher_no_match_notes else Res.string.switcher_no_match_content
-
+        state.query.isNotBlank() -> Res.string.switcher_no_match_title to noMatch
         isNotes -> Res.string.switcher_empty_vault_title to Res.string.switcher_empty_vault_message
-
         else -> Res.string.switcher_content_hint_title to Res.string.switcher_content_hint_message
     }
+
     EmptyState(
         title = stringResource(resource = title),
         message = stringResource(resource = message),
@@ -216,12 +260,18 @@ private fun NoResults(
 }
 
 @Composable
-private fun QuickSwitcherPreviewFrame(
-    state: QuickSwitcherState
-) {
+private fun QuickSwitcherPreviewFrame(state: QuickSwitcherState) {
     NotekeaPreviewThemes {
-        Box(modifier = Modifier.size(width = PREVIEW_WIDTH_DP.dp, height = PREVIEW_HEIGHT_DP.dp)) {
-            QuickSwitcherContent(state = state, onIntent = {})
+        Box(
+            modifier = Modifier.size(
+                width = PREVIEW_WIDTH_DP.dp,
+                height = PREVIEW_HEIGHT_DP.dp
+            )
+        ) {
+            QuickSwitcherContent(
+                state = state,
+                onIntent = {}
+            )
         }
     }
 }
@@ -247,13 +297,23 @@ private fun QuickSwitcherSearchingPreview() {
 @Preview
 @Composable
 private fun QuickSwitcherNoMatchPreview() {
-    QuickSwitcherPreviewFrame(state = QuickSwitcherState(isOpen = true, query = "zzz"))
+    QuickSwitcherPreviewFrame(
+        state = QuickSwitcherState(
+            isOpen = true,
+            query = "zzz"
+        )
+    )
 }
 
 @Preview
 @Composable
 private fun QuickSwitcherContentHintPreview() {
-    QuickSwitcherPreviewFrame(state = QuickSwitcherState(isOpen = true, mode = QuickSwitcherMode.CONTENT))
+    QuickSwitcherPreviewFrame(
+        state = QuickSwitcherState(
+            isOpen = true,
+            mode = QuickSwitcherMode.CONTENT
+        )
+    )
 }
 
 @Preview
@@ -265,5 +325,11 @@ private fun QuickSwitcherEmptyVaultPreview() {
 @Preview
 @Composable
 private fun QuickSwitcherErrorPreview() {
-    QuickSwitcherPreviewFrame(state = QuickSwitcherState(isOpen = true, query = "corn", hasUnexpectedError = true))
+    QuickSwitcherPreviewFrame(
+        state = QuickSwitcherState(
+            isOpen = true,
+            query = "corn",
+            hasUnexpectedError = true
+        )
+    )
 }

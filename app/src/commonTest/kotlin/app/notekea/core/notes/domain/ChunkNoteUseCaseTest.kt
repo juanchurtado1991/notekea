@@ -4,29 +4,47 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * A note split into chunks (`ROADMAP.md` 2.1): its body only, each chunk exactly its part of the body; short sections
+ * A note split into chunks: its body only, each chunk exactly its part of the body; short sections
  * join the next ones under the same parent heading, a section that fits is one chunk.
  */
 class ChunkNoteUseCaseTest {
-    private val chunkNote = ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder()))
+    private val chunkNote =
+        ChunkNoteUseCase(noteSections = NoteSections(outlineFinder = OutlineFinder()))
 
     @Test
     fun `the frontmatter is left out, and short sections join into one chunk with the headings they share`() {
         val text = "---\ntags: [food]\n---\n# Arepas\nCorn dough.\n\n## Dough\nKnead it.\n\n"
 
-        val chunks = chunkNote(note = NOTE, text = text)
+        val chunks = chunkNote(
+            note = NOTE,
+            text = text
+        )
 
         val body = "# Arepas\nCorn dough.\n\n## Dough\nKnead it.\n\n"
+
         assertEquals(
-            expected = listOf(Triple(listOf("Arepas"), "# Arepas\nCorn dough.\n\n## Dough\nKnead it.", 0..39)),
+            expected = listOf(
+                Triple(
+                    listOf("Arepas"),
+                    "# Arepas\nCorn dough.\n\n## Dough\nKnead it.",
+                    0..39
+                )
+            ),
             actual = chunks.map { Triple(it.headingPath, it.text, it.range) }
         )
-        assertEquals(expected = chunks.map { it.text }, actual = chunks.map { body.substring(range = it.range) })
+
+        assertEquals(
+            expected = chunks.map { it.text },
+            actual = chunks.map { body.substring(range = it.range) }
+        )
     }
 
     @Test
     fun `a note saved with Windows line breaks has the ranges of the body the editor shows`() {
-        val chunks = chunkNote(note = NOTE, text = "# One\r\nFirst.\r\n# Two\r\nSecond.\r\n")
+        val chunks = chunkNote(
+            note = NOTE,
+            text = "# One\r\nFirst.\r\n# Two\r\nSecond.\r\n"
+        )
 
         assertEquals(
             expected = listOf(emptyList<String>() to 0..25),
@@ -40,7 +58,12 @@ class ChunkNoteUseCaseTest {
     fun `an empty note or one with only frontmatter has no chunks`() {
         assertEquals(
             expected = listOf(emptyList(), emptyList()),
-            actual = listOf("", "---\ntitle: Empty\n---\n\n").map { chunkNote(note = NOTE, text = it) }
+            actual = listOf("", "---\ntitle: Empty\n---\n\n").map {
+                chunkNote(
+                    note = NOTE,
+                    text = it
+                )
+            }
         )
     }
 
@@ -50,7 +73,10 @@ class ChunkNoteUseCaseTest {
 
         assertEquals(
             expected = listOf(listOf("Food"), listOf("Food", "Arepas"), listOf("Travel")),
-            actual = chunkNote(note = NOTE, text = text).map { it.headingPath }
+            actual = chunkNote(
+                note = NOTE,
+                text = text
+            ).map { it.headingPath }
         )
     }
 
@@ -60,7 +86,12 @@ class ChunkNoteUseCaseTest {
 
         assertEquals(
             expected = listOf(0 to listOf("One"), 1 to listOf("Two")),
-            actual = chunkNote(note = NOTE, text = text).map { it.index to it.headingPath }
+            actual = chunkNote(
+                note = NOTE,
+                text = text
+            ).map {
+                it.index to it.headingPath
+            }
         )
     }
 
@@ -70,7 +101,10 @@ class ChunkNoteUseCaseTest {
 
         assertEquals(
             expected = listOf(listOf("One"), listOf("Two")),
-            actual = chunkNote(note = NOTE, text = text).map { it.headingPath }
+            actual = chunkNote(
+                note = NOTE,
+                text = text
+            ).map { it.headingPath }
         )
     }
 
@@ -78,6 +112,7 @@ class ChunkNoteUseCaseTest {
         val NOTE = RelativePath(value = "Recipes/Arepas.md")
 
         /** [count] words of prose, one sentence. */
-        fun words(count: Int): String = List(size = count) { "word" }.joinToString(separator = " ") + "."
+        fun words(count: Int): String =
+            List(size = count) { "word" }.joinToString(separator = " ") + "."
     }
 }

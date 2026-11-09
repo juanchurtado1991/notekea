@@ -10,11 +10,9 @@ import java.nio.file.StandardOpenOption
 import kotlin.time.Clock
 
 /**
- * Writes what the app logs (Info and above) to `logs/notekea.log` in the app data [directory], so a tester can send it
- * with Copy diagnostics (`qa/README.md`, piece 6). Once the file reaches [LogFiles.MAX_BYTES] it becomes
- * `notekea.1.log`, the older ones move up and only [LogFiles.KEPT] files stay. Log messages never hold note text
- * (`ARCHITECTURE.md` §9); an error's message could, so it is cut at [MAX_LINE_LENGTH] characters. A file that
- * cannot be written is skipped: logging never stops the app.
+ * Writes what the app logs (Info and above) to `notekea.log` in the `logs` folder of the app data [directory]. At
+ * [LogFiles.MAX_BYTES] the file rotates and only [LogFiles.KEPT] files stay. An error's message could hold note text,
+ * so it is cut at [MAX_LINE_LENGTH] characters. A file that cannot be written is skipped.
  */
 class FileLogWriter(
     private val directory: Path,
@@ -33,14 +31,31 @@ class FileLogWriter(
         tag: String,
         throwable: Throwable?
     ) {
-        val error = throwable?.let { " | ${it::class.simpleName}: ${it.message.orEmpty()}" }.orEmpty()
-        val line = "${clock.now()} ${severity.name.first()} $tag: $message$error".take(n = MAX_LINE_LENGTH) + "\n"
+        val error = throwable?.let {
+            " | ${it::class.simpleName}: ${it.message.orEmpty()}"
+        }.orEmpty()
+
+        val line = "${clock.now()} ${severity.name.first()} $tag: $message$error".take(
+            n = MAX_LINE_LENGTH
+        ) +
+            "\n"
+
         synchronized(lock) {
             try {
                 Files.createDirectories(directory)
                 val current = directory.resolve(LogFiles.name(index = 0))
-                if (Files.exists(current) && Files.size(current) + line.length > LogFiles.MAX_BYTES) rotate()
-                Files.writeString(current, line, StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+
+                val isFull =
+                    Files.exists(current) && Files.size(current) + line.length > LogFiles.MAX_BYTES
+
+                if (isFull) rotate()
+
+                Files.writeString(
+                    current,
+                    line,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND
+                )
             } catch (_: IOException) {
                 // The log is a help, never a reason to fail: a full disk or a locked file only loses this line.
             }
@@ -49,8 +64,10 @@ class FileLogWriter(
 
     private fun rotate() {
         Files.deleteIfExists(directory.resolve(LogFiles.name(index = LogFiles.KEPT - 1)))
+
         (LogFiles.KEPT - 2 downTo 0).forEach { index ->
             val file = directory.resolve(LogFiles.name(index = index))
+
             if (Files.exists(file)) {
                 Files.move(
                     file,

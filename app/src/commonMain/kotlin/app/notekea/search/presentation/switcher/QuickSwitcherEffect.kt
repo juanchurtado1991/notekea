@@ -4,7 +4,9 @@ import app.notekea.core.notes.domain.RelativePath
 
 /** One-shot events of the quick switcher. */
 sealed interface QuickSwitcherEffect {
-    /** A result was chosen: the workspace opens the note, at its [passage] if it has one, and selects it in the tree. */
+    /**
+     * A result was chosen: the workspace opens the note, at its [passage] if it has one, and selects it in the tree.
+     */
     data class OpenNote(
         val path: RelativePath,
         val passage: IntRange? = null

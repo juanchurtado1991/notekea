@@ -8,9 +8,7 @@ import app.notekea.core.domain.Outcome
  */
 interface AttachmentStore {
     /** Every file of the vault, notes included, outside hidden folders (`.obsidian`, `.trash`). */
-    suspend fun files(
-        vaultPath: String
-    ): Outcome<List<RelativePath>, NotesError>
+    suspend fun files(vaultPath: String): Outcome<List<RelativePath>, NotesError>
 
     suspend fun read(
         vaultPath: String,

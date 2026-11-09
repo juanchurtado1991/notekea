@@ -8,17 +8,19 @@ class FakeVaultFileSystem : VaultFileSystem {
     var createFailure: VaultError? = null
     var suggestedParent = DEFAULT_PARENT
 
-    override suspend fun access(
-        path: String
-    ): FolderAccess = folders[path] ?: FolderAccess.MISSING
+    override suspend fun access(path: String): FolderAccess = folders[path] ?: FolderAccess.MISSING
 
     override suspend fun createFolder(
         parentPath: String,
         name: String
     ): Outcome<String, VaultError> {
-        createFailure?.let { return Outcome.Failure(error = it) }
+        createFailure?.let {
+            return Outcome.Failure(error = it)
+        }
+
         val path = parentPath + SEPARATOR + name
         folders[path] = FolderAccess.AVAILABLE
+
         return Outcome.Success(value = path)
     }
 

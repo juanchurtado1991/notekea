@@ -27,16 +27,29 @@ val jvmTreeModule = module {
             dispatchers = get()
         )
     }
+
     single<FileWatcher> { DirectoryWatcherFileWatcher(dispatchers = get()) }
+
     single<NoteMetadataReader> {
-        OkioNoteMetadataReader(fileSystem = FileSystem.SYSTEM, dispatchers = get(), parser = get())
+        OkioNoteMetadataReader(
+            fileSystem = FileSystem.SYSTEM,
+            dispatchers = get(),
+            parser = get()
+        )
     }
+
     single<Trash> {
-        val systemTrash =
-            JvmSystemTrash(operatingSystem = get<PlatformConventions>().operatingSystem, runCommand = ::runCommand)
+        val systemTrash = JvmSystemTrash(
+            operatingSystem = get<PlatformConventions>().operatingSystem,
+            runCommand = ::runCommand
+        )
+
         SystemFirstTrash(
             moveToSystemTrash = systemTrash::moveToTrash,
-            vaultTrash = VaultFolderTrash(fileSystem = FileSystem.SYSTEM, dispatchers = get()),
+            vaultTrash = VaultFolderTrash(
+                fileSystem = FileSystem.SYSTEM,
+                dispatchers = get()
+            ),
             dispatchers = get()
         )
     }

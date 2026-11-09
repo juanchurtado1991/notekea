@@ -1,7 +1,7 @@
 package app.notekea.search.presentation.index
 
-import app.notekea.core.presentation.FeedIntent
 import app.notekea.core.notes.domain.NoteFile
+import app.notekea.core.presentation.FeedIntent
 
 /** What the user did with the search index's status, details and notice, or what the vault's tree reports. */
 sealed interface SearchIndexIntent {

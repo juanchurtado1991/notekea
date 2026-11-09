@@ -10,8 +10,13 @@ public fun Suite.shard(
     count: Int
 ): Suite {
     require(count > 0 && index in 0 until count) { "Part $index of $count does not exist" }
+
+    val shardManual = if (index == 0) manual else emptyList()
+
     return withCases(
-        automated = automated.filterIndexed { position, _ -> position % count == index },
-        manual = if (index == 0) manual else emptyList()
+        automated = automated.filterIndexed { position, _ ->
+            position % count == index
+        },
+        manual = shardManual
     )
 }

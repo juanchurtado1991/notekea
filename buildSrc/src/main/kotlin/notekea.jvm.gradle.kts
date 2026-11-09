@@ -12,13 +12,17 @@ private val ktlintRulesPath = ":ktlint-rules"
 
 listOf("org.jetbrains.kotlin.jvm", "org.jetbrains.kotlin.multiplatform").forEach { kotlinPlugin ->
     pluginManager.withPlugin(kotlinPlugin) {
-        extensions.getByType<KotlinTopLevelExtension>().jvmToolchain(NotekeaVersions.jdk(project = project))
+        extensions.getByType<KotlinTopLevelExtension>().jvmToolchain(
+            NotekeaVersions.jdk(project = project)
+        )
     }
 }
 
 pluginManager.withPlugin("org.jetbrains.kotlin.plugin.compose") {
     extensions.configure<ComposeCompilerGradlePluginExtension> {
-        stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose-stability.conf"))
+        stabilityConfigurationFiles.add(
+            rootProject.layout.projectDirectory.file("compose-stability.conf")
+        )
     }
 }
 

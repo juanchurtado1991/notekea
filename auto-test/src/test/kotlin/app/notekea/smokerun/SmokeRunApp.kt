@@ -9,7 +9,7 @@ import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.deleteRecursively
 
 /**
- * The real app for an automated smoke run (`ROADMAP.md` 1.16): a [CaseApp] on copies of the smoke vaults named
+ * The real app for an automated smoke run: a [CaseApp] on copies of the smoke vaults named
  * [vaults] (and what [prepare] writes into their folder), with its data in a temporary folder instead of the user's.
  */
 @OptIn(ExperimentalPathApi::class)
@@ -22,10 +22,20 @@ internal class SmokeRunApp(
 
     init {
         vaults.forEach { name ->
-            File(SMOKE_VAULTS, name).copyRecursively(target = root.resolve(VAULTS).resolve(name).toFile())
+            File(SMOKE_VAULTS, name).copyRecursively(
+                target = root
+                    .resolve(VAULTS)
+                    .resolve(name)
+                    .toFile()
+            )
         }
+
         prepare(root.resolve(VAULTS).toFile())
-        app = CaseApp(appData = root.resolve(APP_DATA), vaults = root.resolve(VAULTS))
+
+        app = CaseApp(
+            appData = root.resolve(APP_DATA),
+            vaults = root.resolve(VAULTS)
+        )
     }
 
     val folderPicker get() = app.folderPicker
@@ -43,6 +53,7 @@ internal class SmokeRunApp(
      */
     override fun close() {
         app.close()
+
         Runtime.getRuntime().addShutdownHook(Thread { root.deleteRecursively() })
     }
 

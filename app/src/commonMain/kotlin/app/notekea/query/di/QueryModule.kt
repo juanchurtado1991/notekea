@@ -15,13 +15,19 @@ import org.koin.dsl.module
 /** The vault's queries: their results from the note cache, their writes to notes and one view model per vault. */
 val queryModule = module {
     single<QueryPreferencesStore> {
-        SettingsQueryPreferencesStore(settings = get(), queryYaml = get(), dispatchers = get())
+        SettingsQueryPreferencesStore(
+            settings = get(),
+            queryYaml = get(),
+            dispatchers = get()
+        )
     }
+
     factoryOf(::BuildQueryCatalogUseCase)
     factoryOf(::QueryYaml)
     factoryOf(::RunQueryUseCase)
     factoryOf(::SaveQueryUseCase)
     factoryOf(::SetPropertyUseCase)
+
     viewModel { parameters ->
         QueryViewModel(
             vaultPath = parameters.get(),

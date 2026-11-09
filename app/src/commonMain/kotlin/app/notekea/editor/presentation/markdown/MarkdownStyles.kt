@@ -1,28 +1,25 @@
 package app.notekea.editor.presentation.markdown
 
 import androidx.compose.material3.ColorScheme
-import app.notekea.editor.presentation.view.NO_LIGATURES
 import androidx.compose.material3.Typography
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import app.notekea.editor.presentation.view.NO_LIGATURES
 
 /**
- * How the editor shows each [HighlightKind], from the theme: headings on the type scale (28 / 20 / 16 sp, semibold),
- * code in the bundled monospaced face on a subtle background (behind a code block's whole lines), links and wiki links in the primary color, tags in the
- * accent color, and Markdown syntax muted so the text reads first. Find in note marks every match with a light accent
- * background and the current one with a stronger one.
+ * How the editor shows each [HighlightKind], from the theme: headings on the type scale, code in the bundled monospaced
+ * face on a subtle background, links in the primary color, tags in the accent color, and Markdown syntax muted so the
+ * text reads first. Find in note marks every match, the current one more strongly.
  */
 class MarkdownStyles(
     private val byKind: Map<HighlightKind, SpanStyle>,
     val findMatch: SpanStyle,
     val currentFindMatch: SpanStyle
 ) {
-    fun of(
-        kind: HighlightKind
-    ): SpanStyle = byKind.getValue(key = kind)
+    fun of(kind: HighlightKind): SpanStyle = byKind.getValue(key = kind)
 
     companion object {
         private const val CURRENT_FIND_MATCH_ALPHA = 0.55f
@@ -39,6 +36,7 @@ class MarkdownStyles(
                 fontFeatureSettings = NO_LIGATURES,
                 background = colorScheme.surfaceVariant
             )
+
             val headings = listOf(
                 typography.headlineMedium,
                 typography.titleLarge,
@@ -46,7 +44,13 @@ class MarkdownStyles(
                 typography.titleMedium,
                 typography.titleMedium,
                 typography.titleMedium
-            ).map { SpanStyle(fontSize = it.fontSize, fontWeight = FontWeight.SemiBold) }
+            ).map {
+                SpanStyle(
+                    fontSize = it.fontSize,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
             return MarkdownStyles(
                 byKind = mapOf(
                     HighlightKind.BOLD to SpanStyle(fontWeight = FontWeight.Bold),
@@ -65,8 +69,12 @@ class MarkdownStyles(
                     HighlightKind.TAG to SpanStyle(color = colorScheme.tertiary),
                     HighlightKind.WIKI_LINK to SpanStyle(color = colorScheme.primary)
                 ),
-                findMatch = SpanStyle(background = colorScheme.tertiary.copy(alpha = FIND_MATCH_ALPHA)),
-                currentFindMatch = SpanStyle(background = colorScheme.tertiary.copy(alpha = CURRENT_FIND_MATCH_ALPHA))
+                findMatch = SpanStyle(
+                    background = colorScheme.tertiary.copy(alpha = FIND_MATCH_ALPHA)
+                ),
+                currentFindMatch = SpanStyle(
+                    background = colorScheme.tertiary.copy(alpha = CURRENT_FIND_MATCH_ALPHA)
+                )
             )
         }
     }

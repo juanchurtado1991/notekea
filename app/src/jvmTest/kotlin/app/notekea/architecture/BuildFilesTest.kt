@@ -9,27 +9,52 @@ class BuildFilesTest {
     @Test
     fun `module build files leave the shared setup to the convention plugin`() {
         val modules = moduleBuildFiles()
+
         val repeated = modules.flatMap { file ->
             val text = file.readText()
-            SHARED_SETUP.filter { it in text }.map { "${file.parentFile.name}: $it" }
+
+            SHARED_SETUP.filter {
+                it in text
+            }.map { "${file.parentFile.name}: $it" }
         }
-        assertEquals(expected = emptyList(), actual = repeated)
-        assertEquals(expected = MODULES, actual = modules.count { PLUGIN in it.readText() })
+
+        assertEquals(
+            expected = emptyList(),
+            actual = repeated
+        )
+
+        assertEquals(
+            expected = MODULES,
+            actual = modules.count {
+                PLUGIN in it.readText()
+            }
+        )
     }
 
     @Test
     fun `every api dependency says which type it leaks`() {
         val uncommented = moduleBuildFiles().flatMap { file ->
             val lines = file.readLines()
-            lines.indices.filter { lines[it].trim().startsWith(prefix = API_DEPENDENCY) }
+
+            lines
+                .indices
+                .filter { lines[it].trim().startsWith(prefix = API_DEPENDENCY) }
                 .filterNot { lines[it - 1].trim().startsWith(prefix = COMMENT) }
                 .map { "${file.parentFile.name}: ${lines[it].trim()}" }
         }
-        assertEquals(expected = emptyList(), actual = uncommented)
+
+        assertEquals(
+            expected = emptyList(),
+            actual = uncommented
+        )
     }
 
-    private fun moduleBuildFiles(): List<File> = File(ROOT).listFiles().orEmpty()
-        .filterNot { it.name == BUILD_SRC }
+    private fun moduleBuildFiles(): List<File> = File(ROOT)
+        .listFiles()
+        .orEmpty()
+        .filterNot {
+            it.name == BUILD_SRC
+        }
         .map { File(it, BUILD_FILE) }
         .filter { it.isFile }
 

@@ -4,9 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,19 +22,26 @@ import androidx.compose.ui.unit.sp
 
 /**
  * A tab's screen: its [body], which scrolls when the window is too short for it, and its [actions] under it, always
- * on screen (issue #101: at 200% on macOS and on Windows they were cut off at the bottom).
+ * on screen (at 200% on macOS and on Windows the window is shorter than a case).
  */
 @Composable
 internal fun TabLayout(
     actions: @Composable ColumnScope.() -> Unit,
     body: @Composable ColumnScope.() -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(space = 10.dp)) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(space = 10.dp)
+    ) {
         Column(
-            modifier = Modifier.weight(weight = 1f).fillMaxWidth().verticalScroll(state = rememberScrollState()),
+            modifier = Modifier
+                .weight(weight = 1f)
+                .fillMaxWidth()
+                .verticalScroll(state = rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(space = 10.dp),
             content = body
         )
+
         actions()
     }
 }
@@ -50,15 +57,26 @@ internal fun CountChip(
         fontSize = 11.sp,
         color = color,
         modifier = Modifier
-            .background(color = color.copy(alpha = 0.1f), shape = RoundedCornerShape(size = 10.dp))
-            .padding(horizontal = 8.dp, vertical = 3.dp)
+            .background(
+                color = color.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(size = 10.dp)
+            )
+            .padding(
+                horizontal = 8.dp,
+                vertical = 3.dp
+            )
     )
 }
 
 /** A section's small capital title: NOW, RECENT. */
 @Composable
 internal fun SectionLabel(text: String) {
-    Text(text = text, fontSize = 10.sp, color = AutoTestColors.Muted, fontWeight = FontWeight.SemiBold)
+    Text(
+        text = text,
+        fontSize = 10.sp,
+        color = AutoTestColors.Muted,
+        fontWeight = FontWeight.SemiBold
+    )
 }
 
 /**
@@ -71,9 +89,26 @@ internal fun StepTimeline(
     current: String?,
     pending: List<String> = emptyList()
 ) {
-    done.forEach { StepRow(text = it, status = CaseStatus.PASSED) }
-    current?.let { StepRow(text = it, status = CaseStatus.RUNNING) }
-    pending.forEach { StepRow(text = it, status = CaseStatus.WAITING) }
+    done.forEach {
+        StepRow(
+            text = it,
+            status = CaseStatus.PASSED
+        )
+    }
+
+    current?.let {
+        StepRow(
+            text = it,
+            status = CaseStatus.RUNNING
+        )
+    }
+
+    pending.forEach {
+        StepRow(
+            text = it,
+            status = CaseStatus.WAITING
+        )
+    }
 }
 
 @Composable
@@ -81,12 +116,18 @@ private fun StepRow(
     text: String,
     status: CaseStatus
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp), verticalAlignment = Alignment.Top) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+        verticalAlignment = Alignment.Top
+    ) {
         StatusBadge(status = status)
+
+        val isRunning = status == CaseStatus.RUNNING
+
         Text(
             text = text,
             fontSize = 12.sp,
-            fontWeight = if (status == CaseStatus.RUNNING) FontWeight.SemiBold else FontWeight.Normal,
+            fontWeight = if (isRunning) FontWeight.SemiBold else FontWeight.Normal,
             color = if (status == CaseStatus.WAITING) AutoTestColors.Muted else Color.Unspecified
         )
     }

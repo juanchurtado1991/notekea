@@ -7,10 +7,9 @@ class FakeBookmarkStore : BookmarkStore {
     val saved = mutableMapOf<String, Bookmarks>()
     val gate = Gate()
 
-    override suspend fun read(
-        vaultPath: String
-    ): Bookmarks {
+    override suspend fun read(vaultPath: String): Bookmarks {
         gate.pass()
+
         return saved[vaultPath] ?: Bookmarks()
     }
 

@@ -26,25 +26,33 @@ class PortalSystemAppearance(
 
     override fun observeDarkTheme(): Flow<Boolean?> {
         if (operatingSystem != OperatingSystem.LINUX) return flowOf(value = null)
+
         return callbackFlow {
             val monitor = start(command = MONITOR_COMMAND)
+
             trySend(element = start(command = READ_COMMAND)?.let { read(process = it) })
+
             launch {
-                monitor?.inputStream?.bufferedReader()?.useLines { lines ->
-                    lines.mapNotNull { parser.isDark(output = it) }.forEach { trySend(element = it) }
-                }
+                monitor
+                    ?.inputStream
+                    ?.bufferedReader()
+                    ?.useLines { lines ->
+                        lines.mapNotNull {
+                            parser.isDark(output = it)
+                        }.forEach { trySend(element = it) }
+                    }
             }
+
             awaitClose { monitor?.destroy() }
         }.flowOn(context = dispatchers.io)
     }
 
-    private fun read(
-        process: Process
-    ): Boolean? = process.inputStream.bufferedReader().use { parser.isDark(output = it.readText()) }
+    private fun read(process: Process): Boolean? = process
+        .inputStream
+        .bufferedReader()
+        .use { parser.isDark(output = it.readText()) }
 
-    private fun start(
-        command: List<String>
-    ): Process? = try {
+    private fun start(command: List<String>): Process? = try {
         ProcessBuilder(command).redirectErrorStream(true).start()
     } catch (exception: IOException) {
         logger.w(throwable = exception) { UNAVAILABLE_MESSAGE }
@@ -55,7 +63,8 @@ class PortalSystemAppearance(
         private const val DESTINATION = "org.freedesktop.portal.Desktop"
         private const val LOG_TAG = "SystemAppearance"
         private const val OBJECT_PATH = "/org/freedesktop/portal/desktop"
-        private const val UNAVAILABLE_MESSAGE = "The desktop portal cannot be asked for the color scheme"
+        private const val UNAVAILABLE_MESSAGE =
+            "The desktop portal cannot be asked for the color scheme"
         private val MONITOR_COMMAND = listOf(
             "gdbus",
             "monitor",

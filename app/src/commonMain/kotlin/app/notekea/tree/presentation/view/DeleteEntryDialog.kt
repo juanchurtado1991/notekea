@@ -1,13 +1,12 @@
 package app.notekea.tree.presentation.view
 
 import androidx.compose.runtime.Composable
-import app.notekea.tree.presentation.model.TreePreviewData
 import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.presentation.designsystem.components.NotekeaConfirmDialog
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.VaultTree
 import app.notekea.resources.Res
 import app.notekea.resources.tree_cancel
 import app.notekea.resources.tree_delete_file
@@ -18,13 +17,14 @@ import app.notekea.resources.tree_delete_folder_title
 import app.notekea.resources.tree_delete_message
 import app.notekea.resources.tree_delete_note
 import app.notekea.resources.tree_delete_note_title
+import app.notekea.tree.presentation.model.TreePreviewData
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Asks before moving [path] to the trash. A folder says how many files go with it (notes, images…), so nobody deletes
- * a folder full of them thinking it is empty; an empty folder reads like a single note, and a file that is not a note is named with
- * its extension.
+ * Asks before moving [path] to the trash. A folder says how many files go with it (notes, images…), so nobody deletes a
+ * folder full of them thinking it is empty; an empty folder reads like a single note, and a file that is not a note is
+ * named with its extension.
  */
 @Composable
 internal fun DeleteEntryDialog(
@@ -36,28 +36,37 @@ internal fun DeleteEntryDialog(
 ) {
     val isFolder = path in tree.folders
     val isFile = path in tree.attachments
-    val fileCount = if (isFolder) (tree.notes.keys + tree.attachments.keys).count { it.isWithin(folder = path) } else 0
+
+    val fileCount = if (isFolder) {
+        (tree.notes.keys + tree.attachments.keys).count { it.isWithin(folder = path) }
+    } else {
+        0
+    }
+
     val name = if (isFile) path.name else path.nameWithoutExtension
+
+    val confirmResource = when {
+        isFolder -> Res.string.tree_delete_folder
+        isFile -> Res.string.tree_delete_file
+        else -> Res.string.tree_delete_note
+    }
+
+    val message = if (fileCount > 0) {
+        pluralStringResource(Res.plurals.tree_delete_folder_message, fileCount, name, fileCount)
+    } else {
+        stringResource(Res.string.tree_delete_message, name)
+    }
+
+    val titleResource = when {
+        isFolder -> Res.string.tree_delete_folder_title
+        isFile -> Res.string.tree_delete_file_title
+        else -> Res.string.tree_delete_note_title
+    }
+
     NotekeaConfirmDialog(
-        title = stringResource(
-            resource = when {
-                isFolder -> Res.string.tree_delete_folder_title
-                isFile -> Res.string.tree_delete_file_title
-                else -> Res.string.tree_delete_note_title
-            }
-        ),
-        message = if (fileCount > 0) {
-            pluralStringResource(Res.plurals.tree_delete_folder_message, fileCount, name, fileCount)
-        } else {
-            stringResource(Res.string.tree_delete_message, name)
-        },
-        confirmLabel = stringResource(
-            resource = when {
-                isFolder -> Res.string.tree_delete_folder
-                isFile -> Res.string.tree_delete_file
-                else -> Res.string.tree_delete_note
-            }
-        ),
+        title = stringResource(resource = titleResource),
+        message = message,
+        confirmLabel = stringResource(resource = confirmResource),
         cancelLabel = stringResource(resource = Res.string.tree_cancel),
         buttonOrder = buttonOrder,
         onConfirm = onConfirm,

@@ -1,10 +1,10 @@
 package app.notekea.editor.presentation.viewmodel
 
 import androidx.compose.runtime.snapshots.Snapshot
-import app.notekea.editor.presentation.model.EditorIntent
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.presentation.model.EditorIntent
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,8 +33,17 @@ class EditorFilesNoteChangeTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher = testDispatcher)
-        putOnDisk(path = FIRST, text = "![[gone.png]]\n")
-        putOnDisk(path = SECOND, text = "![[gone.png]]\n")
+
+        putOnDisk(
+            path = FIRST,
+            text = "![[gone.png]]\n"
+        )
+
+        putOnDisk(
+            path = SECOND,
+            text = "![[gone.png]]\n"
+        )
+
         fixture.attachmentStore.outside[OUTSIDE] = BYTES
     }
 
@@ -52,7 +61,13 @@ class EditorFilesNoteChangeTest {
         open(path = SECOND)
         settle()
 
-        assertEquals(expected = "![[gone.png]]\n", actual = viewModel.buffer.text.toString())
+        assertEquals(
+            expected = "![[gone.png]]\n",
+            actual = viewModel
+                .buffer
+                .text
+                .toString()
+        )
     }
 
     @Test
@@ -64,7 +79,13 @@ class EditorFilesNoteChangeTest {
         open(path = SECOND)
         settle()
 
-        assertEquals(expected = "![[gone.png]]\n", actual = viewModel.buffer.text.toString())
+        assertEquals(
+            expected = "![[gone.png]]\n",
+            actual = viewModel
+                .buffer
+                .text
+                .toString()
+        )
     }
 
     @Test
@@ -80,8 +101,18 @@ class EditorFilesNoteChangeTest {
             copied.complete(value = Unit)
             settle()
 
-            assertEquals(expected = "![[gone.png]]\n", actual = viewModel.buffer.text.toString())
-            assertEquals(expected = 1, actual = fixture.attachmentStore.contents.size)
+            assertEquals(
+                expected = "![[gone.png]]\n",
+                actual = viewModel
+                    .buffer
+                    .text
+                    .toString()
+            )
+
+            assertEquals(
+                expected = 1,
+                actual = fixture.attachmentStore.contents.size
+            )
         }
 
     @Test
@@ -97,30 +128,47 @@ class EditorFilesNoteChangeTest {
         closes.complete(value = Unit)
         settle()
 
-        assertEquals(expected = "![[gone.png]]\n", actual = viewModel.buffer.text.toString())
+        assertEquals(
+            expected = "![[gone.png]]\n",
+            actual = viewModel
+                .buffer
+                .text
+                .toString()
+        )
     }
 
     @Test
-    fun `a file located while another note opens does not replace the same embed there`() = runFilesTest {
-        open(path = FIRST)
-        settle()
-        val closes = CompletableDeferred<Unit>()
-        fixture.picker.closes = closes
-        fixture.picker.picked = OUTSIDE
-        val embed = viewModel.state.value.attachments.single().embed
+    fun `a file located while another note opens does not replace the same embed there`() =
+        runFilesTest {
+            open(path = FIRST)
+            settle()
+            val closes = CompletableDeferred<Unit>()
+            fixture.picker.closes = closes
+            fixture.picker.picked = OUTSIDE
 
-        viewModel.onIntent(intent = EditorIntent.OnAttachmentLocate(embed = embed))
-        runCurrent()
-        open(path = SECOND)
-        closes.complete(value = Unit)
-        settle()
+            val embed = viewModel
+                .state
+                .value
+                .attachments
+                .single()
+                .embed
 
-        assertEquals(expected = "![[gone.png]]\n", actual = viewModel.buffer.text.toString())
-    }
+            viewModel.onIntent(intent = EditorIntent.OnAttachmentLocate(embed = embed))
+            runCurrent()
+            open(path = SECOND)
+            closes.complete(value = Unit)
+            settle()
 
-    private fun TestScope.open(
-        path: RelativePath
-    ) {
+            assertEquals(
+                expected = "![[gone.png]]\n",
+                actual = viewModel
+                    .buffer
+                    .text
+                    .toString()
+            )
+        }
+
+    private fun TestScope.open(path: RelativePath) {
         viewModel.onIntent(intent = EditorIntent.OnOpen(path = path))
         runCurrent()
     }
@@ -142,9 +190,9 @@ class EditorFilesNoteChangeTest {
         fixture.operations.existing += path
     }
 
-    private fun runFilesTest(
-        body: suspend TestScope.() -> Unit
-    ) = runTest(context = testDispatcher) {
+    private fun runFilesTest(body: suspend TestScope.() -> Unit) = runTest(
+        context = testDispatcher
+    ) {
         try {
             body()
         } finally {

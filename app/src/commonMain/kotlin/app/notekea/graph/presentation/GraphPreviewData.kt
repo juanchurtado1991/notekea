@@ -18,15 +18,59 @@ internal object GraphPreviewData {
         selected = MENU,
         folders = listOf("Guides", "Projects", "Recipes"),
         dots = listOf(
-            GraphDot(AREPAS, "Arepas", "Recipes", x = 0f, y = 0f, radius = 18f, depth = 0),
-            GraphDot(MENU, "Weekly menu", "Recipes", x = 140f, y = -90f, radius = RADIUS, depth = 1),
-            GraphDot(TASKS, "Tasks", "Guides", x = -130f, y = -80f, radius = RADIUS, depth = 1),
-            GraphDot(GARDEN, "Garden plan", "Projects", x = 40f, y = 210f, radius = RADIUS, depth = 2)
+            GraphDot(
+                AREPAS,
+                "Arepas",
+                "Recipes",
+                x = 0f,
+                y = 0f,
+                radius = 18f,
+                depth = 0
+            ),
+            GraphDot(
+                MENU,
+                "Weekly menu",
+                "Recipes",
+                x = 140f,
+                y = -90f,
+                radius = RADIUS,
+                depth = 1
+            ),
+            GraphDot(
+                TASKS,
+                "Tasks",
+                "Guides",
+                x = -130f,
+                y = -80f,
+                radius = RADIUS,
+                depth = 1
+            ),
+            GraphDot(
+                GARDEN,
+                "Garden plan",
+                "Projects",
+                x = 40f,
+                y = 210f,
+                radius = RADIUS,
+                depth = 2
+            )
         ),
         lines = listOf(
-            GraphLine(first = AREPAS, second = MENU, isRelated = false),
-            GraphLine(first = AREPAS, second = TASKS, isRelated = false),
-            GraphLine(first = AREPAS, second = GARDEN, isRelated = true)
+            GraphLine(
+                first = AREPAS,
+                second = MENU,
+                isRelated = false
+            ),
+            GraphLine(
+                first = AREPAS,
+                second = TASKS,
+                isRelated = false
+            ),
+            GraphLine(
+                first = AREPAS,
+                second = GARDEN,
+                isRelated = true
+            )
         ),
         preview = GraphPreview(
             path = MENU,

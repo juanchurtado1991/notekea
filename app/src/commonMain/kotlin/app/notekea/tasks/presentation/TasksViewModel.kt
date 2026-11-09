@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 
 /**
- * The Tasks tab (`ROADMAP.md` 2.11) for the vault at [vaultPath]: every change lists the tasks again off the UI thread,
+ * The Tasks tab for the vault at [vaultPath]: every change lists the tasks again off the UI thread,
  * and nothing runs while its tab is closed. A task checked here shows at once, before the vault's scan brings it.
  */
 class TasksViewModel(
@@ -33,9 +33,7 @@ class TasksViewModel(
     private var isShown = false
     private var refreshJob: Job? = null
 
-    override fun handleIntent(
-        intent: TasksIntent
-    ) {
+    override fun handleIntent(intent: TasksIntent) {
         when (intent) {
             is TasksIntent.OnNotesChange -> {
                 notes = intent.notes
@@ -63,17 +61,18 @@ class TasksViewModel(
         }
     }
 
-    private fun openEffectOf(
-        row: TaskRow
-    ): TasksEffect {
+    private fun openEffectOf(row: TaskRow): TasksEffect {
         val textStart = minOf(row.task.stateIndex + BOX_END, row.task.endIndex)
-        return TasksEffect.OpenNote(path = row.path, range = textStart until row.task.endIndex)
+
+        return TasksEffect.OpenNote(
+            path = row.path,
+            range = textStart until row.task.endIndex
+        )
     }
 
-    private fun change(
-        update: (TaskView) -> TaskView
-    ) {
+    private fun change(update: (TaskView) -> TaskView) {
         reduce { it.copy(view = update(it.view)) }
+
         refresh()
     }
 
@@ -83,23 +82,45 @@ class TasksViewModel(
         val shown = notes
         val today = localCalendar.momentOf(instant = clock.now()).date
         refreshJob?.cancel()
+
         refreshJob = launchGuarded(onError = ::logUnexpectedError) {
             val list = withContext(context = dispatchers.default) { listTasks(view, shown, today) }
-            reduce { it.copy(list = list, isLoading = false) }
+
+            reduce {
+                it.copy(
+                    list = list,
+                    isLoading = false
+                )
+            }
         }
     }
 
-    private fun toggle(
-        row: TaskRow
-    ) {
+    private fun toggle(row: TaskRow) {
         launchGuarded(onError = ::showFailure) {
             // In turn: a second click on the same note must read what the first one wrote.
-            val rewrite = writes.withLock { setTaskDone(vaultPath = vaultPath, row = row) }
+            val rewrite = writes.withLock {
+                setTaskDone(
+                    vaultPath = vaultPath,
+                    row = row
+                )
+            }
+
             if (rewrite == null) {
                 reduce { it.copy(isWriteFailed = true) }
             } else {
                 emit(effect = TasksEffect.NoteRewritten(path = row.path))
-                notes = notes.map { if (it.file.path == row.path) toggled(entry = it, row = row) else it }
+
+                notes = notes.map {
+                    if (it.file.path == row.path) {
+                        toggled(
+                            entry = it,
+                            row = row
+                        )
+                    } else {
+                        it
+                    }
+                }
+
                 refresh()
             }
         }
@@ -109,22 +130,27 @@ class TasksViewModel(
         entry: NoteEntry,
         row: TaskRow
     ): NoteEntry {
-        val tasks = entry.metadata.tasks.map { task ->
-            if (task.stateIndex == row.task.stateIndex) task.copy(isDone = !row.task.isDone) else task
-        }
+        val tasks = entry
+            .metadata
+            .tasks
+            .map { task ->
+                if (task.stateIndex == row.task.stateIndex) {
+                    task.copy(isDone = !row.task.isDone)
+                } else {
+                    task
+                }
+            }
+
         return entry.copy(metadata = entry.metadata.copy(tasks = tasks))
     }
 
-    private fun showFailure(
-        throwable: Throwable
-    ) {
+    private fun showFailure(throwable: Throwable) {
         logUnexpectedError(throwable = throwable)
+
         reduce { it.copy(isWriteFailed = true) }
     }
 
-    private fun logUnexpectedError(
-        throwable: Throwable
-    ) {
+    private fun logUnexpectedError(throwable: Throwable) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR }
     }
 

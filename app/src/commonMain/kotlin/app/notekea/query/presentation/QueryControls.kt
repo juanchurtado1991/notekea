@@ -40,14 +40,23 @@ internal fun QueryPopup(
     modifier: Modifier = Modifier
 ) {
     val menu = remember { NotekeaContextMenuState() }
+
     val below = belowControl()
     val shape = MaterialTheme.shapes.small
     val colors = MaterialTheme.colorScheme
-    NotekeaContextMenuArea(sections = sections, modifier = modifier, state = menu) {
+
+    NotekeaContextMenuArea(
+        sections = sections,
+        modifier = modifier,
+        state = menu
+    ) {
         Row(
             modifier = Modifier
                 .heightIn(min = NotekeaDimensions.CompactControlSize)
-                .focusBorder(color = colors.primary, shape = shape)
+                .focusBorder(
+                    color = colors.primary,
+                    shape = shape
+                )
                 .clip(shape = shape)
                 .background(color = colors.surfaceVariant)
                 .pointerHoverIcon(icon = PointerIcon.Hand)
@@ -63,6 +72,7 @@ internal fun QueryPopup(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+
             Icon(
                 imageVector = NotekeaIcons.Collapse,
                 contentDescription = null,
@@ -74,11 +84,20 @@ internal fun QueryPopup(
 }
 
 @Composable
-private fun belowControl(): Offset =
-    with(LocalDensity.current) { Offset(x = 0f, y = NotekeaDimensions.CompactControlSize.toPx()) }
+private fun belowControl(): Offset = with(LocalDensity.current) {
+    Offset(
+        x = 0f,
+        y = NotekeaDimensions.CompactControlSize.toPx()
+    )
+}
 
 @Preview
 @Composable
 private fun QueryPopupPreview() {
-    NotekeaPreviewThemes { QueryPopup(text = PREVIEW_TEXT, sections = emptyList()) }
+    NotekeaPreviewThemes {
+        QueryPopup(
+            text = PREVIEW_TEXT,
+            sections = emptyList()
+        )
+    }
 }

@@ -1,6 +1,6 @@
 package app.notekea.core.notes.domain
 
-/** What a note's frontmatter holds for the properties view (`ROADMAP.md` 1.14). */
+/** What a note's frontmatter holds for the properties view. */
 sealed interface FrontmatterContent {
     /** The note has no frontmatter. */
     data object None : FrontmatterContent

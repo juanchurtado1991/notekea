@@ -36,17 +36,31 @@ fun NotekeaFileChip(
     modifier: Modifier = Modifier
 ) {
     val colors = MaterialTheme.colorScheme
+
     Surface(
         modifier = modifier
-            .focusBorder(color = colors.primary, shape = MaterialTheme.shapes.small)
+            .focusBorder(
+                color = colors.primary,
+                shape = MaterialTheme.shapes.small
+            )
             .clip(shape = MaterialTheme.shapes.small)
-            .clickable(onClickLabel = hint, role = Role.Button, onClick = onOpen),
+            .clickable(
+                onClickLabel = hint,
+                role = Role.Button,
+                onClick = onOpen
+            ),
         shape = MaterialTheme.shapes.small,
         color = colors.surface,
-        border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = colors.outline)
+        border = BorderStroke(
+            width = NotekeaDimensions.BorderWidth,
+            color = colors.outline
+        )
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingM, vertical = NotekeaDimensions.SpacingS),
+            modifier = Modifier.padding(
+                horizontal = NotekeaDimensions.SpacingM,
+                vertical = NotekeaDimensions.SpacingS
+            ),
             horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -56,6 +70,7 @@ fun NotekeaFileChip(
                 modifier = Modifier.size(size = NotekeaDimensions.IconSize),
                 tint = colors.primary
             )
+
             Text(
                 text = name,
                 style = MaterialTheme.typography.bodyMedium,
@@ -63,6 +78,7 @@ fun NotekeaFileChip(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+
             Text(
                 text = hint,
                 style = MaterialTheme.typography.labelMedium,
@@ -77,6 +93,10 @@ fun NotekeaFileChip(
 @Composable
 private fun NotekeaFileChipPreview() {
     NotekeaPreviewThemes {
-        NotekeaFileChip(name = PREVIEW_NAME, hint = PREVIEW_HINT, onOpen = {})
+        NotekeaFileChip(
+            name = PREVIEW_NAME,
+            hint = PREVIEW_HINT,
+            onOpen = {}
+        )
     }
 }

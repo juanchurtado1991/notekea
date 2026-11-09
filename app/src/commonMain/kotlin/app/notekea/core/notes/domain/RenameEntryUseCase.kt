@@ -18,24 +18,33 @@ class RenameEntryUseCase(
         newName: String
     ): Outcome<RelativePath, NotesError> {
         val trimmed = newName.trim()
+
         val baseName = if (path.isMarkdown) {
-            trimmed.removeSuffixIgnoringCase(
-                suffix = RelativePath.MARKDOWN_EXTENSION
-            )
+            trimmed.removeSuffixIgnoringCase(suffix = RelativePath.MARKDOWN_EXTENSION)
         } else {
             trimmed
         }
-        val fileName = if (path.isMarkdown) baseName.trimEnd() + RelativePath.MARKDOWN_EXTENSION else baseName
+
+        val fileName =
+            if (path.isMarkdown) baseName.trimEnd() + RelativePath.MARKDOWN_EXTENSION else baseName
+
         val target = (path.parent ?: RelativePath.ROOT).child(name = fileName)
+
         return when {
             !validateFileName(name = baseName.trimEnd()) || !validateFileName(name = fileName) ->
                 Outcome.Failure(error = NotesError.InvalidName)
 
-            fileName.startsWith(prefix = HIDDEN_PREFIX) -> Outcome.Failure(error = NotesError.HiddenName)
+            fileName.startsWith(prefix = HIDDEN_PREFIX) -> Outcome.Failure(
+                error = NotesError.HiddenName
+            )
 
             target == path -> Outcome.Success(value = path)
 
-            else -> moveTo(vaultPath = vaultPath, path = path, target = target)
+            else -> moveTo(
+                vaultPath = vaultPath,
+                path = path,
+                target = target
+            )
         }
     }
 
@@ -54,9 +63,14 @@ class RenameEntryUseCase(
         is Outcome.Success -> Outcome.Success(value = target)
     }
 
-    private fun String.removeSuffixIgnoringCase(
-        suffix: String
-    ): String = if (endsWith(suffix = suffix, ignoreCase = true)) dropLast(n = suffix.length) else this
+    private fun String.removeSuffixIgnoringCase(suffix: String): String {
+        val hasSuffix = endsWith(
+            suffix = suffix,
+            ignoreCase = true
+        )
+
+        return if (hasSuffix) dropLast(n = suffix.length) else this
+    }
 
     companion object {
         private const val HIDDEN_PREFIX = "."

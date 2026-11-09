@@ -13,6 +13,7 @@ class JvmAppDispatchersTest {
             expected = Dispatchers.Default,
             actual = dispatchers.default
         )
+
         assertSame(
             expected = Dispatchers.IO,
             actual = dispatchers.io

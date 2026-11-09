@@ -10,15 +10,17 @@ class FakeIndexStateStore : IndexStateStore {
     val states = mutableMapOf<String, MutableMap<RelativePath, IndexedNote>>()
     var isClearRefused = false
 
-    override suspend fun read(
-        vaultPath: String
-    ): List<IndexedNote> = states[vaultPath].orEmpty().values.toList()
+    override suspend fun read(vaultPath: String): List<IndexedNote> = states[vaultPath]
+        .orEmpty()
+        .values
+        .toList()
 
     override suspend fun save(
         vaultPath: String,
         note: IndexedNote
     ) {
-        states.getOrPut(key = vaultPath) { mutableMapOf() }[note.file.path] = note
+        states
+            .getOrPut(key = vaultPath) { mutableMapOf() }[note.file.path] = note
     }
 
     override suspend fun delete(
@@ -28,11 +30,10 @@ class FakeIndexStateStore : IndexStateStore {
         states[vaultPath]?.remove(key = path)
     }
 
-    override suspend fun clear(
-        vaultPath: String
-    ): Boolean {
+    override suspend fun clear(vaultPath: String): Boolean {
         if (isClearRefused) return false
         states.remove(key = vaultPath)
+
         return true
     }
 }

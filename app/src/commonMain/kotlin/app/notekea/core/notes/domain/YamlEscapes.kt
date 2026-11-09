@@ -11,7 +11,8 @@ internal object YamlEscapes {
     private const val LAST_CODE_POINT = 0x10FFFF
     private const val LOW_SURROGATE_MASK = 0x3FF
     private const val ZERO = '0'
-    private val ESCAPE = Regex(pattern = "\\\\(?:x(\\p{XDigit}{2})|u(\\p{XDigit}{4})|U(\\p{XDigit}{8})|([\\s\\S]))")
+    private val ESCAPE =
+        Regex(pattern = "\\\\(?:x(\\p{XDigit}{2})|u(\\p{XDigit}{4})|U(\\p{XDigit}{8})|([\\s\\S]))")
     private val READ = mapOf(
         '0' to "\u0000",
         'a' to "\u0007",
@@ -40,34 +41,48 @@ internal object YamlEscapes {
     )
 
     /** Whether [text] holds a line break or another character only an escape can write. */
-    fun needsEscapes(
-        text: String
-    ): Boolean = text.any { it < FIRST_PRINTABLE }
-
-    /** [text], the inside of a double-quoted YAML text, with its escapes undone; an unknown one stays as written. */
-    fun decoded(
-        text: String
-    ): String = ESCAPE.replace(input = text) { match ->
-        val named = match.groupValues[4].firstOrNull()
-        if (named != null) {
-            READ[named] ?: match.value
-        } else {
-            val digits = match.groupValues.subList(fromIndex = 1, toIndex = 4).first { it.isNotEmpty() }
-            digits.toIntOrNull(radix = HEX_RADIX)?.let { textOf(codePoint = it) } ?: match.value
-        }
+    fun needsEscapes(text: String): Boolean = text.any {
+        it < FIRST_PRINTABLE
     }
 
+    /** [text], the inside of a double-quoted YAML text, with its escapes undone; an unknown one stays as written. */
+    fun decoded(text: String): String = ESCAPE
+        .replace(input = text) { match ->
+            val named = match.groupValues[4].firstOrNull()
+
+            if (named != null) {
+                READ[named] ?: match.value
+            } else {
+                val digits = match
+                    .groupValues
+                    .subList(
+                        fromIndex = 1,
+                        toIndex = 4
+                    )
+                    .first { it.isNotEmpty() }
+
+                digits.toIntOrNull(radix = HEX_RADIX)?.let { textOf(codePoint = it) } ?: match.value
+            }
+        }
+
     /** [text] as the inside of a double-quoted YAML text. */
-    fun encoded(
-        text: String
-    ): String = buildString {
+    fun encoded(text: String): String = buildString {
         text.forEach { char ->
             when {
                 char in WRITTEN -> append(WRITTEN[char])
 
                 char < FIRST_PRINTABLE -> {
                     append(HEX_ESCAPE)
-                    append(char.code.toString(radix = HEX_RADIX).padStart(length = HEX_ESCAPE_DIGITS, padChar = ZERO))
+
+                    append(
+                        char
+                            .code
+                            .toString(radix = HEX_RADIX)
+                            .padStart(
+                                length = HEX_ESCAPE_DIGITS,
+                                padChar = ZERO
+                            )
+                    )
                 }
 
                 else -> append(char)
@@ -76,9 +91,7 @@ internal object YamlEscapes {
     }
 
     /** The character of [codePoint], two for one outside the first plane; null past the last. */
-    private fun textOf(
-        codePoint: Int
-    ): String? = when {
+    private fun textOf(codePoint: Int): String? = when {
         codePoint !in 0..LAST_CODE_POINT -> null
 
         codePoint < FIRST_SUPPLEMENTARY -> Char(code = codePoint).toString()

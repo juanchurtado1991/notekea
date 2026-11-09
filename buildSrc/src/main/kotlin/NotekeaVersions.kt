@@ -13,7 +13,9 @@ object NotekeaVersions {
     fun ktlint(project: Project): String = catalog(project = project, name = "ktlint-cli")
 
     /** The plain version the installers need. */
-    fun packageVersion(project: Project): String = project.providers.gradleProperty("packageVersion")
+    fun packageVersion(
+        project: Project
+    ): String = project.providers.gradleProperty("packageVersion")
         .getOrElse(catalog(project = project, name = "notekea-package"))
 
     /** The version people see, in About and crash reports. */

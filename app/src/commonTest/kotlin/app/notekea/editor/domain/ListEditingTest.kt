@@ -26,7 +26,12 @@ class ListEditingTest {
                 "> [!tip] Tip|",
                 "> - Flour|",
                 "- Corn|flour"
-            ).map { apply(marked = it, action = ListAction.NEW_ITEM) }
+            ).map {
+                apply(
+                    marked = it,
+                    action = ListAction.NEW_ITEM
+                )
+            }
         )
     }
 
@@ -40,7 +45,12 @@ class ListEditingTest {
                 "Plain text|",
                 "|- Flour",
                 "```\n- inside code|\n```"
-            ).map { applyOrNull(marked = it, action = ListAction.NEW_ITEM) }
+            ).map {
+                applyOrNull(
+                    marked = it,
+                    action = ListAction.NEW_ITEM
+                )
+            }
         )
     }
 
@@ -55,11 +65,26 @@ class ListEditingTest {
                 "- Cook\n  - Arepas\n  - Soak|"
             ),
             actual = listOf(
-                apply(marked = "- Cook\n- Arepas|", action = ListAction.INDENT),
-                apply(marked = "1. Cook\n1. Arepas|", action = ListAction.INDENT),
-                apply(marked = "- [ ] Cook\n- [ ] Arepas|", action = ListAction.INDENT),
-                apply(marked = "- Cook\n  - Arepas|", action = ListAction.OUTDENT),
-                apply(marked = "- Cook\n  - Arepas\n    - Soak|", action = ListAction.OUTDENT)
+                apply(
+                    marked = "- Cook\n- Arepas|",
+                    action = ListAction.INDENT
+                ),
+                apply(
+                    marked = "1. Cook\n1. Arepas|",
+                    action = ListAction.INDENT
+                ),
+                apply(
+                    marked = "- [ ] Cook\n- [ ] Arepas|",
+                    action = ListAction.INDENT
+                ),
+                apply(
+                    marked = "- Cook\n  - Arepas|",
+                    action = ListAction.OUTDENT
+                ),
+                apply(
+                    marked = "- Cook\n  - Arepas\n    - Soak|",
+                    action = ListAction.OUTDENT
+                )
             )
         )
     }
@@ -69,9 +94,18 @@ class ListEditingTest {
         assertEquals(
             expected = listOf<String?>("- Cook\n  - [Arepas\n  - Pasta]", "- First|", null),
             actual = listOf(
-                applyOrNull(marked = "- Cook\n- [Arepas\n- Pasta]", action = ListAction.INDENT),
-                applyOrNull(marked = "- First|", action = ListAction.INDENT),
-                applyOrNull(marked = "Plain|", action = ListAction.INDENT)
+                applyOrNull(
+                    marked = "- Cook\n- [Arepas\n- Pasta]",
+                    action = ListAction.INDENT
+                ),
+                applyOrNull(
+                    marked = "- First|",
+                    action = ListAction.INDENT
+                ),
+                applyOrNull(
+                    marked = "Plain|",
+                    action = ListAction.INDENT
+                )
             )
         )
     }
@@ -81,11 +115,26 @@ class ListEditingTest {
         assertEquals(
             expected = listOf<String?>("|Flour", "  |", "> |", null, null),
             actual = listOf(
-                applyOrNull(marked = "- [ ] |Flour", action = ListAction.REMOVE_MARKER),
-                applyOrNull(marked = "  1. |", action = ListAction.REMOVE_MARKER),
-                applyOrNull(marked = "> - |", action = ListAction.REMOVE_MARKER),
-                applyOrNull(marked = "- Fl|our", action = ListAction.REMOVE_MARKER),
-                applyOrNull(marked = "> |quote", action = ListAction.REMOVE_MARKER)
+                applyOrNull(
+                    marked = "- [ ] |Flour",
+                    action = ListAction.REMOVE_MARKER
+                ),
+                applyOrNull(
+                    marked = "  1. |",
+                    action = ListAction.REMOVE_MARKER
+                ),
+                applyOrNull(
+                    marked = "> - |",
+                    action = ListAction.REMOVE_MARKER
+                ),
+                applyOrNull(
+                    marked = "- Fl|our",
+                    action = ListAction.REMOVE_MARKER
+                ),
+                applyOrNull(
+                    marked = "> |quote",
+                    action = ListAction.REMOVE_MARKER
+                )
             )
         )
     }
@@ -95,8 +144,14 @@ class ListEditingTest {
         assertEquals(
             expected = listOf(null, "````\n```\n````\n- a\n- |"),
             actual = listOf(
-                applyOrNull(marked = "````\n```\n- a|\n````", action = ListAction.NEW_ITEM),
-                applyOrNull(marked = "````\n```\n````\n- a|", action = ListAction.NEW_ITEM)
+                applyOrNull(
+                    marked = "````\n```\n- a|\n````",
+                    action = ListAction.NEW_ITEM
+                ),
+                applyOrNull(
+                    marked = "````\n```\n````\n- a|",
+                    action = ListAction.NEW_ITEM
+                )
             )
         )
     }
@@ -114,13 +169,34 @@ class ListEditingTest {
                 "> - a\n>   - b\n>   - c|"
             ),
             actual = listOf(
-                apply(marked = "> - a\n> - b|", action = ListAction.INDENT),
-                apply(marked = "> [!tip] Tip\n> - a\n> - b|", action = ListAction.INDENT),
-                apply(marked = "> > 1. a\n> > 1. b|", action = ListAction.INDENT),
-                apply(marked = ">- a\n>- b|", action = ListAction.INDENT),
-                apply(marked = "  > - a\n  > - b|", action = ListAction.INDENT),
-                apply(marked = "> - a\n>   - b|", action = ListAction.OUTDENT),
-                apply(marked = "> - a\n>   - b\n>     - c|", action = ListAction.OUTDENT)
+                apply(
+                    marked = "> - a\n> - b|",
+                    action = ListAction.INDENT
+                ),
+                apply(
+                    marked = "> [!tip] Tip\n> - a\n> - b|",
+                    action = ListAction.INDENT
+                ),
+                apply(
+                    marked = "> > 1. a\n> > 1. b|",
+                    action = ListAction.INDENT
+                ),
+                apply(
+                    marked = ">- a\n>- b|",
+                    action = ListAction.INDENT
+                ),
+                apply(
+                    marked = "  > - a\n  > - b|",
+                    action = ListAction.INDENT
+                ),
+                apply(
+                    marked = "> - a\n>   - b|",
+                    action = ListAction.OUTDENT
+                ),
+                apply(
+                    marked = "> - a\n>   - b\n>     - c|",
+                    action = ListAction.OUTDENT
+                )
             )
         )
     }
@@ -130,8 +206,14 @@ class ListEditingTest {
         assertEquals(
             expected = listOf("> - a\n>   - b\n>   - |", "> - a\n>   |"),
             actual = listOf(
-                apply(marked = "> - a\n>   - b|", action = ListAction.NEW_ITEM),
-                apply(marked = "> - a\n>   - |", action = ListAction.REMOVE_MARKER)
+                apply(
+                    marked = "> - a\n>   - b|",
+                    action = ListAction.NEW_ITEM
+                ),
+                apply(
+                    marked = "> - a\n>   - |",
+                    action = ListAction.REMOVE_MARKER
+                )
             )
         )
     }
@@ -139,7 +221,10 @@ class ListEditingTest {
     private fun apply(
         marked: String,
         action: ListAction
-    ): String = applyOrNull(marked = marked, action = action) ?: error("No edit for $marked")
+    ): String = applyOrNull(
+        marked = marked,
+        action = action
+    ) ?: error("No edit for $marked")
 
     /**
      * The text after [action] on [marked], where `|` is the cursor or `[` … `]` the selection, written back the same
@@ -150,26 +235,51 @@ class ListEditingTest {
         action: ListAction
     ): String? {
         val (text, start, end) = unmark(marked = marked)
-        val edit = editing.edit(text = text, selectionStart = start, selectionEnd = end, action = action) ?: return null
-        val result = text.replaceRange(startIndex = edit.start, endIndex = edit.end, replacement = edit.replacement)
+
+        val edit = editing.edit(
+            text = text,
+            selectionStart = start,
+            selectionEnd = end,
+            action = action
+        ) ?: return null
+
+        val result = text.replaceRange(
+            startIndex = edit.start,
+            endIndex = edit.end,
+            replacement = edit.replacement
+        )
+
         return if (edit.selectionStart == edit.selectionEnd) {
-            result.substring(startIndex = 0, endIndex = edit.selectionStart) + "|" +
+            result.substring(
+                startIndex = 0,
+                endIndex = edit.selectionStart
+            ) + "|" +
                 result.substring(startIndex = edit.selectionStart)
         } else {
-            result.substring(startIndex = 0, endIndex = edit.selectionStart) + "[" +
-                result.substring(startIndex = edit.selectionStart, endIndex = edit.selectionEnd) + "]" +
+            result.substring(
+                startIndex = 0,
+                endIndex = edit.selectionStart
+            ) + "[" +
+                result.substring(
+                    startIndex = edit.selectionStart,
+                    endIndex = edit.selectionEnd
+                ) + "]" +
                 result.substring(startIndex = edit.selectionEnd)
         }
     }
 
-    private fun unmark(
-        marked: String
-    ): Triple<String, Int, Int> {
+    private fun unmark(marked: String): Triple<String, Int, Int> {
         val cursor = marked.indexOf(char = '|')
         if (cursor >= 0) return Triple(marked.removeRange(range = cursor..cursor), cursor, cursor)
-        val start = marked.indexOf(char = '[', startIndex = marked.indexOf(char = '\n').coerceAtLeast(minimumValue = 0))
+
+        val start = marked.indexOf(
+            char = '[',
+            startIndex = marked.indexOf(char = '\n').coerceAtLeast(minimumValue = 0)
+        )
+
         val end = marked.lastIndexOf(char = ']')
         val text = marked.removeRange(range = end..end).removeRange(range = start..start)
+
         return Triple(text, start, end - 1)
     }
 }

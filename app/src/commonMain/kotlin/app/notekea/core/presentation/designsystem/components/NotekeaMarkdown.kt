@@ -9,8 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.SpanStyle
@@ -45,11 +45,9 @@ private const val PREVIEW_MARKDOWN =
 private const val PREVIEW_WIDTH_DP = 520
 
 /**
- * Markdown rendered with the Notekea theme (the note's Read mode, later chat answers): headings on the type scale,
- * links in the primary color, code in the bundled monospaced face, code blocks colored by language like GitHub's
- * preview, with the syntax theme following the app's light or dark theme, and Obsidian callouts as cards
- * ([MarkdownQuoteOrCallout]). Text can be selected and copied. Clicked
- * links open with the system (a web page in the browser) unless [onLinkClick] takes them all.
+ * Markdown rendered with the Notekea theme (the note's Read mode): headings on the type scale, code blocks colored by
+ * language, and Obsidian callouts as cards ([MarkdownQuoteOrCallout]). Text can be selected and copied. Clicked links
+ * open with the system unless [onLinkClick] takes them all.
  */
 @Composable
 fun NotekeaMarkdown(
@@ -61,21 +59,27 @@ fun NotekeaMarkdown(
     val colors = MaterialTheme.colorScheme
     val isDark = colors.background.luminance() < DARK_LUMINANCE
     val systemUriHandler = LocalUriHandler.current
+
     val uriHandler = remember(onLinkClick, systemUriHandler) {
         onLinkClick?.let { onClick ->
             // Every clicked link goes to onLinkClick, which decides what opens (a note, or the browser).
             object : UriHandler {
-                override fun openUri(
-                    uri: String
-                ) = onClick(uri)
+                override fun openUri(uri: String) = onClick(uri)
             }
         } ?: systemUriHandler
     }
+
     val readingMarkdown = remember { ReadingMarkdown() }
+
     val prepared = remember(content) { readingMarkdown.prepare(markdown = content) }
+
     CompositionLocalProvider(LocalUriHandler provides uriHandler) {
         SelectionContainer(modifier = modifier) {
-            ThemedMarkdown(content = prepared, isDark = isDark, imagePainter = imagePainter)
+            ThemedMarkdown(
+                content = prepared,
+                isDark = isDark,
+                imagePainter = imagePainter
+            )
         }
     }
 }
@@ -87,8 +91,11 @@ private fun ThemedMarkdown(
     imagePainter: (String) -> Painter?
 ) {
     val colors = MaterialTheme.colorScheme
+
     val readingMarkdown = remember { ReadingMarkdown() }
+
     val images = remember(imagePainter) { NotekeaImageTransformer(painterOf = imagePainter) }
+
     Markdown(
         imageTransformer = images,
         content = content,
@@ -100,7 +107,12 @@ private fun ThemedMarkdown(
         ),
         typography = notekeaMarkdownTypography(),
         modifier = Modifier.fillMaxWidth(),
-        components = remember(isDark) { componentsOf(readingMarkdown = readingMarkdown, isDark = isDark) }
+        components = remember(isDark) {
+            componentsOf(
+                readingMarkdown = readingMarkdown,
+                isDark = isDark
+            )
+        }
     )
 }
 
@@ -111,21 +123,51 @@ private fun componentsOf(
 ) = markdownComponents(
     codeBlock = {
         val depth = quoteDepth(node = it.node)
+
         MarkdownCodeBlock(it.content, it.node, it.typography.code) { code, language, style ->
-            val unquoted = readingMarkdown.unquoted(code = code, depth = depth)
-            HighlightedCode(code = unquoted, style = style, isDark = isDark, language = language)
+            val unquoted = readingMarkdown.unquoted(
+                code = code,
+                depth = depth
+            )
+
+            HighlightedCode(
+                code = unquoted,
+                style = style,
+                isDark = isDark,
+                language = language
+            )
         }
     },
     codeFence = {
         val depth = quoteDepth(node = it.node)
+
         MarkdownCodeFence(it.content, it.node, it.typography.code) { code, language, style ->
-            val unquoted = readingMarkdown.unquoted(code = code, depth = depth)
-            HighlightedCode(code = unquoted, style = style, isDark = isDark, language = language)
+            val unquoted = readingMarkdown.unquoted(
+                code = code,
+                depth = depth
+            )
+
+            HighlightedCode(
+                code = unquoted,
+                style = style,
+                isDark = isDark,
+                language = language
+            )
         }
     },
     checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) },
-    blockQuote = { MarkdownQuoteOrCallout(content = it.content, node = it.node) },
-    alert = { MarkdownQuoteOrCallout(content = it.content, node = it.node) }
+    blockQuote = {
+        MarkdownQuoteOrCallout(
+            content = it.content,
+            node = it.node
+        )
+    },
+    alert = {
+        MarkdownQuoteOrCallout(
+            content = it.content,
+            node = it.node
+        )
+    }
 )
 
 /**
@@ -140,14 +182,22 @@ private fun HighlightedCode(
     isDark: Boolean,
     language: String?
 ) {
-    val highlights = remember(code, isDark) { Highlights.Builder().theme(SyntaxThemes.default(darkMode = isDark)) }
-    MarkdownHighlightedCode(code = code, language = language, style = style, highlightsBuilder = highlights)
+    val highlights = remember(code, isDark) {
+        Highlights.Builder().theme(SyntaxThemes.default(darkMode = isDark))
+    }
+
+    MarkdownHighlightedCode(
+        code = code,
+        language = language,
+        style = style,
+        highlightsBuilder = highlights
+    )
 }
 
 /** How many quotes or callouts hold [node]: the renderer leaves that many `>` marks in a code block's lines. */
-private fun quoteDepth(
-    node: ASTNode
-): Int = generateSequence(seed = node.parent) { it.parent }.count {
+private fun quoteDepth(node: ASTNode): Int = generateSequence(seed = node.parent) {
+    it.parent
+}.count {
     it.type == MarkdownElementTypes.BLOCK_QUOTE || it.type == GFMElementTypes.ALERT
 }
 
@@ -159,6 +209,7 @@ private fun notekeaMarkdownTypography(): MarkdownTypography {
     val heading = typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
     // The theme's style, loaded once: building it again would look up its font files for every segment.
     val code = LocalNotekeaCodeTextStyle.current
+
     return markdownTypography(
         h1 = typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
         h2 = typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
@@ -169,7 +220,10 @@ private fun notekeaMarkdownTypography(): MarkdownTypography {
         text = typography.bodyLarge,
         code = code,
         inlineCode = typography.bodyLarge.copy(fontFamily = code.fontFamily),
-        quote = typography.bodyLarge.copy(fontStyle = FontStyle.Italic, color = colors.onSurfaceVariant),
+        quote = typography.bodyLarge.copy(
+            fontStyle = FontStyle.Italic,
+            color = colors.onSurfaceVariant
+        ),
         paragraph = typography.bodyLarge,
         ordered = typography.bodyLarge,
         bullet = typography.bodyLarge,

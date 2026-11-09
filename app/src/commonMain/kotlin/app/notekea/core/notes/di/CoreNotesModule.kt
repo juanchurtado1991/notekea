@@ -24,6 +24,7 @@ import org.koin.dsl.module
  */
 val coreNotesModule = module {
     single<LinkFinder> { JetBrainsMarkdownLinkFinder() }
+
     factoryOf(::OutlineFinder)
     factoryOf(::NoteSections)
     factoryOf(::ChunkNoteUseCase)

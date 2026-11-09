@@ -18,9 +18,17 @@ import com.testbuddy.CaseFolders
 @Composable
 fun NotekeaCase(folders: CaseFolders) {
     var launch by remember { mutableIntStateOf(0) }
+
     key(launch) {
-        val app = remember { CaseApp(appData = folders.appData, vaults = folders.data) }
+        val app = remember {
+            CaseApp(
+                appData = folders.appData,
+                vaults = folders.data
+            )
+        }
+
         val quit = remember { CaseApps.register(app = app) }
+
         LaunchedEffect(quit.isRequested) {
             if (!quit.isRequested) return@LaunchedEffect
             app.closeGuard.beforeClose()
@@ -28,12 +36,14 @@ fun NotekeaCase(folders: CaseFolders) {
             quit.whileClosed()
             launch++
         }
+
         DisposableEffect(app) {
             onDispose {
                 CaseApps.unregister(app = app)
                 app.close()
             }
         }
+
         app.Content()
     }
 }

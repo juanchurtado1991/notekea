@@ -13,12 +13,22 @@ import kotlin.test.assertEquals
 @OptIn(ExperimentalTestApi::class)
 class OnlyNewLinesTest {
     @Test
-    fun `Windows breaks that reach the field by themselves keep only their new line`() = runComposeUiTest {
-        val buffer = TextFieldState(initialText = "Start\n")
-        setContent { BasicTextField(state = buffer, inputTransformation = OnlyNewLines) }
+    fun `Windows breaks that reach the field by themselves keep only their new line`() =
+        runComposeUiTest {
+            val buffer = TextFieldState(initialText = "Start\n")
 
-        onNode(matcher = hasSetTextAction()).performTextInput(text = "one\r\ntwo\r\n")
+            setContent {
+                BasicTextField(
+                    state = buffer,
+                    inputTransformation = OnlyNewLines
+                )
+            }
 
-        assertEquals(expected = "Start\none\ntwo\n", actual = buffer.text.toString())
-    }
+            onNode(matcher = hasSetTextAction()).performTextInput(text = "one\r\ntwo\r\n")
+
+            assertEquals(
+                expected = "Start\none\ntwo\n",
+                actual = buffer.text.toString()
+            )
+        }
 }

@@ -140,7 +140,7 @@ Font files are added with feature 1.2 (`feature/design-system`, see `ROADMAP.md`
 |---|---|---|---|
 | ktlint Gradle plugin | `org.jlleitschuh.gradle.ktlint` | 14.2.0 | `ktlintCheck` / `ktlintFormat` tasks |
 | ktlint | `com.pinterest.ktlint` | 1.8.0 | Lint engine; rules configured in `.editorconfig` |
-| Custom rules | `:ktlint-rules` module | — | `notekea:expression-on-assignment-line`, `notekea:max-function-length` (40 lines), `notekea:parameter-order` |
+| Custom rules | `:ktlint-rules` module | — | the layout and size rules of `GUIDELINES.md` §6 (`notekea:code-line-length`, `notekea:max-function-length`, `notekea:chain-per-line`…) |
 | Kover | `org.jetbrains.kotlinx.kover` | 0.9.11 | `koverVerify` requires 80% line coverage in every module on its own (Composable UI excluded); the root also publishes a merged report. Rules live once in the root build script |
 | GitHub Actions | `.github/workflows/ci.yml` | — | `./gradlew check koverVerify` on Windows, macOS and Linux on every pull request and merge to `main` |
 | Dependabot | `.github/dependabot.yml` | — | Monthly grouped minor/patch PRs for the version catalog and GitHub Actions; majors and Kotlin/KSP/Compose/Ghost upgraded by hand (`GUIDELINES.md` §14) |

@@ -9,7 +9,11 @@ import kotlin.time.Duration.Companion.milliseconds
 internal class ResultStore(private val file: Path) {
     fun load(): Map<String, CaseResult> {
         if (!Files.isRegularFile(file)) return emptyMap()
-        return Files.readAllLines(file).mapNotNull(::parse).associateBy { it.id }
+
+        return Files
+            .readAllLines(file)
+            .mapNotNull(::parse)
+            .associateBy { it.id }
     }
 
     fun save(results: Collection<CaseResult>) {
@@ -18,25 +22,49 @@ internal class ResultStore(private val file: Path) {
     }
 
     private fun line(result: CaseResult): String = when (result) {
-        is CaseResult.Passed -> listOf(result.id, PASSED, result.duration.inWholeMilliseconds.toString())
+        is CaseResult.Passed -> listOf(
+            result.id,
+            PASSED,
+            result
+                .duration
+                .inWholeMilliseconds
+                .toString()
+        )
 
         is CaseResult.Skipped -> listOf(result.id, SKIPPED)
 
         is CaseResult.Failed -> listOf(
             result.id,
             FAILED,
-            result.duration.inWholeMilliseconds.toString(),
+            result
+                .duration
+                .inWholeMilliseconds
+                .toString(),
             result.message.replace(Regex(pattern = "\\s+"), " "),
-            result.screenshot?.toString().orEmpty()
+            result
+                .screenshot
+                ?.toString()
+                .orEmpty()
         ) + result.steps.map { it.replace(Regex(pattern = "\\s+"), " ") }
     }.joinToString(separator = SEPARATOR)
 
     private fun parse(line: String): CaseResult? {
         val fields = line.split(SEPARATOR)
+
         val id = fields.firstOrNull()?.takeIf { it.isNotBlank() } ?: return null
-        val duration = fields.getOrNull(2)?.toLongOrNull()?.milliseconds
+
+        val duration = fields
+            .getOrNull(2)
+            ?.toLongOrNull()
+            ?.milliseconds
+
         return when (fields.getOrNull(1)) {
-            PASSED -> duration?.let { CaseResult.Passed(id = id, duration = it) }
+            PASSED -> duration?.let {
+                CaseResult.Passed(
+                    id = id,
+                    duration = it
+                )
+            }
 
             SKIPPED -> CaseResult.Skipped(id = id)
 
@@ -45,7 +73,10 @@ internal class ResultStore(private val file: Path) {
                     id = id,
                     message = fields.getOrElse(3) { "" },
                     duration = it,
-                    screenshot = fields.getOrNull(4)?.takeIf(String::isNotBlank)?.let(Path::of),
+                    screenshot = fields
+                        .getOrNull(4)
+                        ?.takeIf(String::isNotBlank)
+                        ?.let(Path::of),
                     steps = fields.drop(n = 5)
                 )
             }

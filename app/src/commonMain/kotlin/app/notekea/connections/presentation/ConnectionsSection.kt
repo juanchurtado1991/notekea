@@ -9,17 +9,12 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.notes.domain.ConnectionsTab
 import app.notekea.core.presentation.designsystem.components.NotekeaCountTabs
 import app.notekea.core.presentation.designsystem.components.NotekeaFold
 import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.core.notes.domain.ConnectionsTab
-import app.notekea.connections.presentation.NoteMentionsIntent
-import app.notekea.connections.presentation.NoteMentionsState
-import app.notekea.connections.presentation.RelatedList
-import app.notekea.connections.presentation.RelatedNotesIntent
-import app.notekea.connections.presentation.RelatedNotesState
 import app.notekea.resources.Res
 import app.notekea.resources.connections_linked
 import app.notekea.resources.connections_related
@@ -30,7 +25,7 @@ import org.jetbrains.compose.resources.stringResource
 private const val PREVIEW_HEIGHT_DP = 240
 
 /**
- * The inspector's Connections (`ROADMAP.md` 2.4, 2.5, design A): its header ([isOpen], [onToggle]), then a picker of
+ * The inspector's Connections: its header ([isOpen], [onToggle]), then a picker of
  * what it shows, each with how many: Related (by meaning, [related]), Linked and Unlinked (the notes that name the open
  * one, [mentions]); the chosen one ([tab], [onTabSelect]) lists below and scrolls when it does not fit.
  */
@@ -46,8 +41,19 @@ fun ColumnScope.ConnectionsSection(
     onMentionsIntent: (NoteMentionsIntent) -> Unit,
     actions: ConnectionActions
 ) {
-    NotekeaSectionHeader(title = stringResource(Res.string.connections_title), isOpen = isOpen, onToggle = onToggle)
-    NotekeaFold(isOpen = isOpen, modifier = Modifier.weight(weight = 1f, fill = false)) {
+    NotekeaSectionHeader(
+        title = stringResource(Res.string.connections_title),
+        isOpen = isOpen,
+        onToggle = onToggle
+    )
+
+    NotekeaFold(
+        isOpen = isOpen,
+        modifier = Modifier.weight(
+            weight = 1f,
+            fill = false
+        )
+    ) {
         Column {
             NotekeaCountTabs(
                 labels = listOf(
@@ -55,7 +61,10 @@ fun ColumnScope.ConnectionsSection(
                     stringResource(Res.string.connections_linked),
                     stringResource(Res.string.connections_unlinked)
                 ),
-                counts = countsOf(related = related, mentions = mentions),
+                counts = countsOf(
+                    related = related,
+                    mentions = mentions
+                ),
                 selectedIndex = tab.ordinal,
                 onSelect = { onTabSelect(ConnectionsTab.entries[it]) },
                 modifier = Modifier.padding(
@@ -63,6 +72,7 @@ fun ColumnScope.ConnectionsSection(
                     vertical = NotekeaDimensions.SpacingXs
                 )
             )
+
             key(tab) {
                 when (tab) {
                     ConnectionsTab.RELATED -> RelatedList(
@@ -89,10 +99,24 @@ private fun countsOf(
     mentions: NoteMentionsState
 ): List<Int?> {
     val isFinding = mentions.isLoading || mentions.searchFailed
+
     return listOf(
-        related.related.size.takeIf { related.isIndexReady && !related.isLoading },
-        mentions.mentions.linked.size.takeUnless { isFinding },
-        mentions.mentions.unlinked.size.takeUnless { isFinding }
+        related
+            .related
+            .size
+            .takeIf {
+                related.isIndexReady && !related.isLoading
+            },
+        mentions
+            .mentions
+            .linked
+            .size
+            .takeUnless { isFinding },
+        mentions
+            .mentions
+            .unlinked
+            .size
+            .takeUnless { isFinding }
     )
 }
 
@@ -110,7 +134,12 @@ private fun ConnectionsSectionPreview() {
                 mentions = NoteMentionsState(),
                 onRelatedIntent = {},
                 onMentionsIntent = {},
-                actions = ConnectionActions(onOpen = {}, onReveal = { _, _ -> }, onOpenBeside = {}, onInsertLink = {})
+                actions = ConnectionActions(
+                    onOpen = {},
+                    onReveal = { _, _ -> },
+                    onOpenBeside = {},
+                    onInsertLink = {}
+                )
             )
         }
     }

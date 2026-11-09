@@ -48,7 +48,7 @@ private val NEW_RULE = QueryFilter(condition = QueryCondition.IN_FOLDER)
 private val TAG_RULE = QueryFilter(condition = QueryCondition.HAS_TAG)
 
 /**
- * The query's filters as rules, one a row, as a Finder smart folder writes them (`ROADMAP.md` 2.10, design A). A rule
+ * The query's filters as rules, one a row, as a Finder smart folder writes them. A rule
  * is edited in place and reaches the query only once it is whole, so the table never runs on half a rule; [isAdding]
  * shows a new one after the last. A value that does not fit its property is outlined in red and not taken.
  */
@@ -64,19 +64,31 @@ internal fun QueryRules(
         filters.forEachIndexed { index, filter ->
             QueryRule(
                 catalog = catalog,
-                onWhole = { onIntent(QueryIntent.OnFilterChange(index = index, filter = it)) },
+                onWhole = {
+                    onIntent(
+                        QueryIntent.OnFilterChange(
+                            index = index,
+                            filter = it
+                        )
+                    )
+                },
                 onRemove = { onIntent(QueryIntent.OnFilterRemove(index = index)) },
                 filter = filter,
-                onAdd = { onAddingChange(true) }.takeIf { index == filters.lastIndex && !isAdding }
+                onAdd = { onAddingChange(true) }.takeIf {
+                    index == filters.lastIndex && !isAdding
+                }
             )
         }
+
+        fun addFilter(filter: QueryFilter) {
+            onAddingChange(false)
+            onIntent(QueryIntent.OnFilterAdd(filter = filter))
+        }
+
         if (isAdding) {
             QueryRule(
                 catalog = catalog,
-                onWhole = {
-                    onAddingChange(false)
-                    onIntent(QueryIntent.OnFilterAdd(filter = it))
-                },
+                onWhole = { addFilter(it) },
                 onRemove = { onAddingChange(false) },
                 filter = null,
                 onAdd = null
@@ -95,12 +107,26 @@ private fun QueryRule(
     onAdd: (() -> Unit)?
 ) {
     var draft by remember(filter) { mutableStateOf(value = filter ?: newRule(catalog = catalog)) }
-    val kind = kindOf(filter = draft, catalog = catalog)
+
+    val kind = kindOf(
+        filter = draft,
+        catalog = catalog
+    )
+
     val change = { changed: QueryFilter ->
         draft = changed
-        val isReady = isWhole(filter = changed, kind = kindOf(filter = changed, catalog = catalog))
+
+        val isReady = isWhole(
+            filter = changed,
+            kind = kindOf(
+                filter = changed,
+                catalog = catalog
+            )
+        )
+
         if (changed != filter && isReady) onWhole(changed)
     }
+
     Row(
         modifier = Modifier.fillMaxWidth().padding(
             horizontal = NotekeaDimensions.SpacingM,
@@ -111,18 +137,39 @@ private fun QueryRule(
     ) {
         QueryPopup(
             text = fieldLabel(filter = draft),
-            sections = fieldSections(catalog = catalog, draft = draft, onChange = change),
+            sections = fieldSections(
+                catalog = catalog,
+                draft = draft,
+                onChange = change
+            ),
             modifier = Modifier.width(width = POPUP_WIDTH_DP.dp)
         )
+
         QueryPopup(
             text = conditionLabel(condition = draft.condition),
-            sections = listOf(conditionItems(draft = draft, kind = kind, onChange = change)),
+            sections = listOf(
+                conditionItems(
+                    draft = draft,
+                    kind = kind,
+                    onChange = change
+                )
+            ),
             modifier = Modifier.width(width = POPUP_WIDTH_DP.dp)
         )
+
         Box(modifier = Modifier.weight(weight = 1f)) {
-            RuleValue(draft = draft, kind = kind, catalog = catalog, onChange = change)
+            RuleValue(
+                draft = draft,
+                kind = kind,
+                catalog = catalog,
+                onChange = change
+            )
         }
-        RuleActions(onRemove = onRemove, onAdd = onAdd)
+
+        RuleActions(
+            onRemove = onRemove,
+            onAdd = onAdd
+        )
     }
 }
 
@@ -137,6 +184,7 @@ private fun RuleActions(
         label = stringResource(resource = Res.string.query_remove_filter),
         onClick = onRemove
     )
+
     if (onAdd == null) {
         Spacer(modifier = Modifier.size(size = NotekeaDimensions.CompactControlSize))
     } else {
@@ -149,9 +197,7 @@ private fun RuleActions(
 }
 
 @Composable
-private fun fieldLabel(
-    filter: QueryFilter
-): String = when (filter.condition) {
+private fun fieldLabel(filter: QueryFilter): String = when (filter.condition) {
     QueryCondition.IN_FOLDER -> stringResource(resource = Res.string.query_filter_folder)
     QueryCondition.HAS_TAG -> stringResource(resource = Res.string.query_filter_tag)
     else -> filter.property
@@ -165,9 +211,17 @@ private fun fieldSections(
     onChange: (QueryFilter) -> Unit
 ): List<List<NotekeaMenuItem>> {
     val isChosen = { field: QueryFilter ->
-        if (field.condition.needsProperty) field.property == draft.property else field.condition == draft.condition
+        if (field.condition.needsProperty) {
+            field.property == draft.property
+        } else {
+            field.condition == draft.condition
+        }
     }
-    val choose = { field: QueryFilter -> if (!isChosen(field)) onChange(field) }
+
+    val choose = { field: QueryFilter ->
+        if (!isChosen(field)) onChange(field)
+    }
+
     val noteItems = listOfNotNull(
         NotekeaMenuItem(
             label = stringResource(resource = Res.string.query_filter_folder),
@@ -180,13 +234,25 @@ private fun fieldSections(
             isChecked = draft.condition == QueryCondition.HAS_TAG
         ).takeIf { catalog.tags.isNotEmpty() }
     )
+
     val keyItems = catalog.keys.map { key ->
         NotekeaMenuItem(
             label = key.name,
-            onClick = { choose(QueryFilter(condition = key.kind.conditions.first(), property = key.name)) },
+            onClick = {
+                choose(
+                    QueryFilter(
+                        condition = key
+                            .kind
+                            .conditions
+                            .first(),
+                        property = key.name
+                    )
+                )
+            },
             isChecked = draft.property == key.name
         )
     }
+
     return listOf(noteItems, keyItems).filter { it.isNotEmpty() }
 }
 
@@ -198,13 +264,25 @@ private fun conditionItems(
     onChange: (QueryFilter) -> Unit
 ): List<NotekeaMenuItem> {
     val conditions = if (draft.condition.needsProperty) kind.conditions else listOf(draft.condition)
+
     return conditions.map { condition ->
+        fun choose() {
+            val value = draft
+                .value
+                .takeIf { condition.needsValue }
+                .orEmpty()
+
+            onChange(
+                draft.copy(
+                    condition = condition,
+                    value = value
+                )
+            )
+        }
+
         NotekeaMenuItem(
             label = conditionLabel(condition = condition),
-            onClick = {
-                val value = draft.value.takeIf { condition.needsValue }.orEmpty()
-                onChange(draft.copy(condition = condition, value = value))
-            },
+            onClick = { choose() },
             isChecked = condition == draft.condition
         )
     }
@@ -219,13 +297,36 @@ private fun RuleValue(
     onChange: (QueryFilter) -> Unit
 ) {
     val choose = { value: String -> onChange(draft.copy(value = value)) }
+
     val choice = draft.value.ifEmpty { stringResource(resource = Res.string.query_choose) }
+
     when {
         !draft.condition.needsValue -> Unit
-        draft.condition == QueryCondition.IN_FOLDER -> ChoiceValue(choice, catalog.folders, draft.value, choose)
-        draft.condition == QueryCondition.HAS_TAG -> ChoiceValue(choice, catalog.tags, draft.value, choose)
-        kind == QueryValueKind.CHECKBOX -> CheckboxValue(value = draft.value, onChoose = choose)
-        else -> TypedValue(value = draft.value, kind = kind, onCommit = choose)
+
+        draft.condition == QueryCondition.IN_FOLDER -> ChoiceValue(
+            choice,
+            catalog.folders,
+            draft.value,
+            choose
+        )
+
+        draft.condition == QueryCondition.HAS_TAG -> ChoiceValue(
+            choice,
+            catalog.tags,
+            draft.value,
+            choose
+        )
+
+        kind == QueryValueKind.CHECKBOX -> CheckboxValue(
+            value = draft.value,
+            onChoose = choose
+        )
+
+        else -> TypedValue(
+            value = draft.value,
+            kind = kind,
+            onCommit = choose
+        )
     }
 }
 
@@ -239,7 +340,13 @@ private fun ChoiceValue(
     QueryPopup(
         text = text,
         sections = listOf(
-            values.map { NotekeaMenuItem(label = it, onClick = { onChoose(it) }, isChecked = it == chosen) }
+            values.map {
+                NotekeaMenuItem(
+                    label = it,
+                    onClick = { onChoose(it) },
+                    isChecked = it == chosen
+                )
+            }
         ),
         modifier = Modifier.fillMaxWidth()
     )
@@ -252,17 +359,27 @@ private fun CheckboxValue(
 ) {
     val yes = stringResource(resource = Res.string.query_yes)
     val no = stringResource(resource = Res.string.query_no)
+
     val text = when (value) {
         TRUE -> yes
         FALSE -> no
         else -> stringResource(resource = Res.string.query_choose)
     }
+
     QueryPopup(
         text = text,
         sections = listOf(
             listOf(
-                NotekeaMenuItem(label = yes, onClick = { onChoose(TRUE) }, isChecked = value == TRUE),
-                NotekeaMenuItem(label = no, onClick = { onChoose(FALSE) }, isChecked = value == FALSE)
+                NotekeaMenuItem(
+                    label = yes,
+                    onClick = { onChoose(TRUE) },
+                    isChecked = value == TRUE
+                ),
+                NotekeaMenuItem(
+                    label = no,
+                    onClick = { onChoose(FALSE) },
+                    isChecked = value == FALSE
+                )
             )
         ),
         modifier = Modifier.fillMaxWidth()
@@ -280,20 +397,30 @@ private fun TypedValue(
             value = value,
             onCommit = { onCommit(it.trim()) },
             placeholder = stringResource(resource = Res.string.query_value),
-            isValid = { it.isBlank() || fits(text = it.trim(), kind = kind) }
+            isValid = {
+                it.isBlank() || fits(text = it.trim(), kind = kind)
+            }
         )
     }
 }
 
 /** Where a rule starts: on the first of Folder, Tag and the properties that the vault has any of. */
-private fun newRule(
-    catalog: QueryCatalog
-): QueryFilter {
+private fun newRule(catalog: QueryCatalog): QueryFilter {
     val key = catalog.keys.firstOrNull()
+
     return when {
         catalog.folders.isNotEmpty() -> NEW_RULE
+
         catalog.tags.isNotEmpty() -> TAG_RULE
-        key != null -> QueryFilter(condition = key.kind.conditions.first(), property = key.name)
+
+        key != null -> QueryFilter(
+            condition = key
+                .kind
+                .conditions
+                .first(),
+            property = key.name
+        )
+
         else -> NEW_RULE
     }
 }
@@ -301,20 +428,32 @@ private fun newRule(
 private fun kindOf(
     filter: QueryFilter,
     catalog: QueryCatalog
-): QueryValueKind = catalog.keys.firstOrNull { it.name == filter.property }?.kind ?: QueryValueKind.TEXT
+): QueryValueKind = catalog
+    .keys
+    .firstOrNull {
+        it.name == filter.property
+    }
+    ?.kind ?: QueryValueKind.TEXT
 
 private fun isWhole(
     filter: QueryFilter,
     kind: QueryValueKind
-): Boolean = !filter.condition.needsValue || (filter.value.isNotBlank() && fits(text = filter.value, kind = kind))
+): Boolean = !filter.condition.needsValue ||
+    (filter.value.isNotBlank() && fits(text = filter.value, kind = kind))
 
 private fun fits(
     text: String,
     kind: QueryValueKind
 ): Boolean = when (kind) {
     QueryValueKind.NUMBER -> text.toDoubleOrNull() != null
-    QueryValueKind.DATE -> MomentFormat().parseDate(text = text, pattern = MomentFormat.ISO_DATE) != null
+
+    QueryValueKind.DATE -> MomentFormat().parseDate(
+        text = text,
+        pattern = MomentFormat.ISO_DATE
+    ) != null
+
     QueryValueKind.CHECKBOX -> text == TRUE || text == FALSE
+
     QueryValueKind.TEXT -> true
 }
 
@@ -323,6 +462,7 @@ private fun fits(
 private fun QueryRulesPreview() {
     NotekeaPreviewThemes {
         val state = QueryPreviewData.state
+
         QueryRules(
             filters = state.query.filters,
             catalog = state.catalog,

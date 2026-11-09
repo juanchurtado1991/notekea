@@ -10,6 +10,7 @@ internal fun contrastOf(
 ): Float {
     val lighter = maxOf(first.luminance(), second.luminance())
     val darker = minOf(first.luminance(), second.luminance())
+
     return (lighter + LUMINANCE_FLARE) / (darker + LUMINANCE_FLARE)
 }
 

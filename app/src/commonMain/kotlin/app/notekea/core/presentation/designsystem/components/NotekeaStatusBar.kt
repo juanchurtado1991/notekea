@@ -1,11 +1,6 @@
 package app.notekea.core.presentation.designsystem.components
 
 import androidx.compose.foundation.background
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +20,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,13 +53,16 @@ fun NotekeaStatusBar(
     end: @Composable RowScope.() -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.background)) {
+    Column(
+        modifier = modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.background)
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(height = NotekeaDimensions.BorderWidth)
                 .background(color = MaterialTheme.colorScheme.outline)
         )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -72,15 +75,19 @@ fun NotekeaStatusBar(
                 verticalAlignment = Alignment.CenterVertically,
                 content = start
             )
-            Row(verticalAlignment = Alignment.CenterVertically, content = end)
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                content = end
+            )
         }
     }
 }
 
 /**
  * A short fact of the status bar, in the muted color, with its [icon] (or a [leading] element of its own, such as a
- * progress ring) if any and its [tooltip] on hover if any. One that does something on a click ([onClick]: a folder of the path shown in Files, the zoom reset) shows a hand and a
- * faint fill under the pointer.
+ * progress ring) if any and its [tooltip] on hover if any. One that does something on a click ([onClick]: a folder of
+ * the path shown in Files, the zoom reset) shows a hand and a faint fill under the pointer.
  */
 @Composable
 fun NotekeaStatusLabel(
@@ -96,11 +103,17 @@ fun NotekeaStatusLabel(
             .clip(shape = MaterialTheme.shapes.small)
             .pointerHoverIcon(icon = PointerIcon.Hand)
             .focusProperties { canFocus = false }
-            .clickable(role = Role.Button, onClick = it)
+            .clickable(
+                role = Role.Button,
+                onClick = it
+            )
     } ?: Modifier
+
     val label = @Composable {
         Row(
-            modifier = modifier.then(other = click).padding(horizontal = NotekeaDimensions.SpacingS),
+            modifier = modifier.then(
+                other = click
+            ).padding(horizontal = NotekeaDimensions.SpacingS),
             horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -112,7 +125,9 @@ fun NotekeaStatusLabel(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
             leading?.invoke()
+
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelMedium,
@@ -122,7 +137,12 @@ fun NotekeaStatusLabel(
             )
         }
     }
-    if (tooltip == null) label() else NotekeaTooltip(label = tooltip) { label() }
+
+    if (tooltip == null) {
+        label()
+    } else {
+        NotekeaTooltip(label = tooltip) { label() }
+    }
 }
 
 /** A thin upright line between two facts of the status bar. */
@@ -138,16 +158,18 @@ fun NotekeaStatusSeparator() {
 
 /** Work in progress: what it is ([label]) and a thin moving bar, as long as the work has no known end. */
 @Composable
-fun NotekeaStatusProgress(
-    label: String
-) {
+fun NotekeaStatusProgress(label: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         NotekeaStatusLabel(text = label)
+
         LinearProgressIndicator(
-            modifier = Modifier.width(width = PROGRESS_WIDTH_DP.dp).height(height = PROGRESS_HEIGHT_DP.dp),
+            modifier = Modifier.width(
+                width = PROGRESS_WIDTH_DP.dp
+            ).height(height = PROGRESS_HEIGHT_DP.dp),
             color = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
+
         Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
     }
 }
@@ -158,8 +180,15 @@ private fun NotekeaStatusBarPreview() {
     NotekeaPreviewThemes {
         NotekeaStatusBar(
             start = {
-                NotekeaStatusLabel(text = PREVIEW_VAULT, icon = NotekeaIcons.SwitchVault)
-                NotekeaStatusLabel(text = PREVIEW_NOTE, icon = NotekeaIcons.Note)
+                NotekeaStatusLabel(
+                    text = PREVIEW_VAULT,
+                    icon = NotekeaIcons.SwitchVault
+                )
+
+                NotekeaStatusLabel(
+                    text = PREVIEW_NOTE,
+                    icon = NotekeaIcons.Note
+                )
             },
             end = {
                 NotekeaStatusProgress(label = PREVIEW_LOADING)
@@ -174,7 +203,12 @@ private fun NotekeaStatusBarPreview() {
 @Preview
 @Composable
 private fun NotekeaStatusLabelPreview() {
-    NotekeaPreviewThemes { NotekeaStatusLabel(text = PREVIEW_NOTE, icon = NotekeaIcons.Note) }
+    NotekeaPreviewThemes {
+        NotekeaStatusLabel(
+            text = PREVIEW_NOTE,
+            icon = NotekeaIcons.Note
+        )
+    }
 }
 
 @Preview

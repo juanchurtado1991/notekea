@@ -14,8 +14,8 @@ import okio.Path.Companion.toPath
 
 /**
  * [NoteFileOperations] on Okio. Creation uses `mustCreate`, so a file that appears between the check and the write is
- * never truncated, moves are atomic renames, and a path that leaves the vault changes nothing. On case-insensitive disks (macOS, Windows) the target of a
- * case-only rename "exists" because it is the same file, so that case is not treated as a name in use.
+ * never truncated, moves are atomic renames, and a path that leaves the vault changes nothing. On case-insensitive
+ * disks the target of a case-only rename is the same file, so it is not a name in use.
  */
 class OkioNoteFileOperations(
     private val fileSystem: FileSystem,
@@ -25,14 +25,27 @@ class OkioNoteFileOperations(
         vaultPath: String,
         path: RelativePath
     ): Outcome<Unit, NotesError> = withContext(context = dispatchers.io) {
-        createIfFree(vaultPath = vaultPath, path = path) { fileSystem.write(file = it, mustCreate = true) {} }
+        createIfFree(
+            vaultPath = vaultPath,
+            path = path
+        ) {
+            fileSystem
+                .write(
+                    file = it,
+                    mustCreate = true
+                ) {}
+        }
     }
 
     override suspend fun deleteEmptyFile(
         vaultPath: String,
         path: RelativePath
     ) = withContext(context = dispatchers.io) {
-        val file = resolve(vaultPath = vaultPath, path = path)
+        val file = resolve(
+            vaultPath = vaultPath,
+            path = path
+        )
+
         try {
             if (fileSystem.metadataOrNull(path = file)?.size == 0L) fileSystem.delete(path = file)
         } catch (_: IOException) {
@@ -44,34 +57,71 @@ class OkioNoteFileOperations(
         vaultPath: String,
         path: RelativePath
     ): Outcome<Unit, NotesError> = withContext(context = dispatchers.io) {
-        createIfFree(vaultPath = vaultPath, path = path) { fileSystem.createDirectory(dir = it, mustCreate = true) }
+        createIfFree(
+            vaultPath = vaultPath,
+            path = path
+        ) {
+            fileSystem.createDirectory(
+                dir = it,
+                mustCreate = true
+            )
+        }
     }
 
     override suspend fun exists(
         vaultPath: String,
         path: RelativePath
-    ): Boolean = withContext(
-        context = dispatchers.io
-    ) { existsOnDisk(file = resolve(vaultPath = vaultPath, path = path)) }
+    ): Boolean = withContext(context = dispatchers.io) {
+        existsOnDisk(
+            file = resolve(
+                vaultPath = vaultPath,
+                path = path
+            )
+        )
+    }
 
     override suspend fun move(
         vaultPath: String,
         from: RelativePath,
         to: RelativePath
     ): Outcome<Unit, NotesError> = withContext(context = dispatchers.io) {
-        val source = resolve(vaultPath = vaultPath, path = from)
-        val target = resolve(vaultPath = vaultPath, path = to)
-        val isCaseOnlyRename = from.value.equals(other = to.value, ignoreCase = true)
-        when {
-            !isInVault(vaultPath = vaultPath, file = target) -> Outcome.Failure(error = NotesError.InvalidName)
+        val source = resolve(
+            vaultPath = vaultPath,
+            path = from
+        )
 
-            !existsOnDisk(file = source) -> Outcome.Failure(error = NotesError.EntryMissing(path = from.value))
+        val target = resolve(
+            vaultPath = vaultPath,
+            path = to
+        )
+
+        val isCaseOnlyRename = from.value.equals(
+            other = to.value,
+            ignoreCase = true
+        )
+
+        val isInVault = isInVault(
+            vaultPath = vaultPath,
+            file = target
+        )
+
+        when {
+            !isInVault -> Outcome.Failure(error = NotesError.InvalidName)
+
+            !existsOnDisk(file = source) -> Outcome.Failure(
+                error = NotesError.EntryMissing(path = from.value)
+            )
 
             existsOnDisk(file = target) && (!isCaseOnlyRename || isListed(file = target)) -> {
                 Outcome.Failure(error = NotesError.NameTaken(name = to.name))
             }
 
-            else -> attempt(path = from) { fileSystem.atomicMove(source = source, target = target) }
+            else -> attempt(path = from) {
+                fileSystem.atomicMove(
+                    source = source,
+                    target = target
+                )
+            }
         }
     }
 
@@ -90,8 +140,13 @@ class OkioNoteFileOperations(
         path: RelativePath,
         create: (Path) -> Unit
     ): Outcome<Unit, NotesError> {
-        val target = resolve(vaultPath = vaultPath, path = path)
+        val target = resolve(
+            vaultPath = vaultPath,
+            path = path
+        )
+
         val parent = path.parent ?: RelativePath.ROOT
+
         return when {
             !isInVault(vaultPath = vaultPath, file = target) -> {
                 Outcome.Failure(error = NotesError.InvalidName)
@@ -118,28 +173,28 @@ class OkioNoteFileOperations(
     ): Boolean {
         val vault = vaultPath.toPath(normalize = true)
         val normalized = file.normalized()
-        return normalized.root == vault.root && normalized.segments.take(n = vault.segments.size) == vault.segments
+
+        return normalized.root == vault.root &&
+            normalized.segments.take(n = vault.segments.size) == vault.segments
     }
 
     /**
      * Whether [file]'s folder lists it by that exact name. A disk that ignores letter case finds `Foo.md` when only
      * `foo.md` exists, the same file; on one that does not, a listed `Foo.md` is another note, never to be replaced.
      */
-    private fun isListed(
-        file: Path
-    ): Boolean = file.parent?.let { fileSystem.listOrNull(dir = it) }.orEmpty().any { it.name == file.name }
+    private fun isListed(file: Path): Boolean = file
+        .parent
+        ?.let { fileSystem.listOrNull(dir = it) }
+        .orEmpty()
+        .any {
+            it.name == file.name
+        }
 
-    private fun existsOnDisk(
-        file: Path
-    ): Boolean = metadataOrNull(file = file) != null
+    private fun existsOnDisk(file: Path): Boolean = metadataOrNull(file = file) != null
 
-    private fun isFolder(
-        file: Path
-    ): Boolean = metadataOrNull(file = file)?.isDirectory == true
+    private fun isFolder(file: Path): Boolean = metadataOrNull(file = file)?.isDirectory == true
 
-    private fun metadataOrNull(
-        file: Path
-    ): FileMetadata? = try {
+    private fun metadataOrNull(file: Path): FileMetadata? = try {
         fileSystem.metadataOrNull(path = file)
     } catch (_: IOException) {
         null

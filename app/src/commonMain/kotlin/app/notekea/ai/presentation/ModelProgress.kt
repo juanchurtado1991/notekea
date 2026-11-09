@@ -12,13 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.ai.domain.InstallProgress
+import app.notekea.ai.domain.ModelSize
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaProgressBar
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.ai.domain.InstallProgress
-import app.notekea.ai.domain.ModelSize
 import app.notekea.resources.Res
 import app.notekea.resources.models_cancel
 import app.notekea.resources.models_pause
@@ -46,24 +46,43 @@ internal fun ModelProgress(
     onIntent: (ModelManagerIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val downloading = (status.progress as? InstallProgress.Downloading)?.takeIf { it.totalBytes > 0 }
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+    val downloading = (status.progress as? InstallProgress.Downloading)?.takeIf {
+        it.totalBytes > 0
+    }
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
+    ) {
         NotekeaProgressBar(
-            fraction = downloading?.let { it.doneBytes.toFloat() / it.totalBytes.coerceAtLeast(minimumValue = 1) },
+            fraction = downloading?.let {
+                it.doneBytes.toFloat() / it.totalBytes.coerceAtLeast(minimumValue = 1)
+            },
             label = stringResource(resource = Res.string.models_progress_label),
             modifier = Modifier.fillMaxWidth()
         )
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
         ) {
             Text(
-                text = progressText(progress = status.progress, isPaused = status.isPaused).orEmpty(),
+                text = progressText(
+                    progress = status.progress,
+                    isPaused = status.isPaused
+                ).orEmpty(),
                 modifier = Modifier.weight(weight = 1f),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            if (downloading != null) ProgressButtons(size = size, isPaused = status.isPaused, onIntent = onIntent)
+
+            if (downloading != null) {
+                ProgressButtons(
+                    size = size,
+                    isPaused = status.isPaused,
+                    onIntent = onIntent
+                )
+            }
         }
     }
 }
@@ -76,10 +95,23 @@ private fun ProgressButtons(
     onIntent: (ModelManagerIntent) -> Unit
 ) {
     NotekeaButton(
-        text = stringResource(resource = if (isPaused) Res.string.models_resume else Res.string.models_pause),
-        onClick = { onIntent(if (isPaused) ModelManagerIntent.OnInstall(size = size) else ModelManagerIntent.OnPause) },
+        text = stringResource(
+            resource = if (isPaused) Res.string.models_resume else Res.string.models_pause
+        ),
+        onClick = {
+            onIntent(
+                if (isPaused) {
+                    ModelManagerIntent.OnInstall(
+                        size = size
+                    )
+                } else {
+                    ModelManagerIntent.OnPause
+                }
+            )
+        },
         style = NotekeaButtonStyle.SECONDARY
     )
+
     NotekeaButton(
         text = stringResource(resource = Res.string.models_cancel),
         onClick = { onIntent(ModelManagerIntent.OnCancel) },
@@ -94,10 +126,12 @@ private fun progressText(
 ): String? {
     val downloading = progress as? InstallProgress.Downloading
         ?: return stringResource(resource = Res.string.models_verifying)
+
     if (downloading.totalBytes == 0L) return null
     val done = formatBytes(bytes = downloading.doneBytes)
     val total = formatBytes(bytes = downloading.totalBytes)
     val speed = downloading.bytesPerSecond
+
     return when {
         isPaused -> stringResource(resource = Res.string.models_paused, done, total)
 
@@ -121,15 +155,22 @@ private fun ModelProgressPreview() {
                 ModelProgress(
                     size = ModelSize.MEDIUM,
                     status = ModelStatus.Installing(
-                        progress = InstallProgress.Downloading(doneBytes = PREVIEW_DONE, totalBytes = PREVIEW_TOTAL),
+                        progress = InstallProgress.Downloading(
+                            doneBytes = PREVIEW_DONE,
+                            totalBytes = PREVIEW_TOTAL
+                        ),
                         isPaused = isPaused
                     ),
                     onIntent = {}
                 )
             }
+
             ModelProgress(
                 size = ModelSize.MEDIUM,
-                status = ModelStatus.Installing(progress = InstallProgress.Verifying, isPaused = false),
+                status = ModelStatus.Installing(
+                    progress = InstallProgress.Verifying,
+                    isPaused = false
+                ),
                 onIntent = {}
             )
         }

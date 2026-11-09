@@ -34,24 +34,36 @@ class ModelStatusesTest {
             formatBytes(bytes = it)
         }
 
-        assertEquals(expected = listOf("2.7 GB", "0.4 GB", "5.7 GB", "42 MB", "0 MB"), actual = texts)
+        assertEquals(
+            expected = listOf("2.7 GB", "0.4 GB", "5.7 GB", "42 MB", "0 MB"),
+            actual = texts
+        )
     }
 
     @Test
     fun `speeds read in the largest unit above one, with one decimal`() {
-        val texts = listOf(24_500_000L, 1_250_000_000L, 850_400L, 999L).map { formatSpeed(bytesPerSecond = it) }
+        val texts = listOf(24_500_000L, 1_250_000_000L, 850_400L, 999L).map {
+            formatSpeed(bytesPerSecond = it)
+        }
 
-        assertEquals(expected = listOf("24.5 MB/s", "1.3 GB/s", "850 KB/s", "1 KB/s"), actual = texts)
+        assertEquals(
+            expected = listOf("24.5 MB/s", "1.3 GB/s", "850 KB/s", "1 KB/s"),
+            actual = texts
+        )
     }
 
     @Test
     fun `deleting the last model frees the reranker too, and another model keeps it`() {
         val medium = ModelManagerSamples.medium.copy(isInstalled = true)
+
         val last = ModelManagerSamples.notInstalled.copy(
             models = listOf(ModelManagerSamples.small, medium),
             isRerankerInstalled = true
         )
-        val notLast = last.copy(models = listOf(ModelManagerSamples.small.copy(isInstalled = true), medium))
+
+        val notLast = last.copy(
+            models = listOf(ModelManagerSamples.small.copy(isInstalled = true), medium)
+        )
 
         assertEquals(
             expected = listOf(medium.downloadBytes + last.rerankerBytes, medium.downloadBytes),

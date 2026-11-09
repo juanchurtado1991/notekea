@@ -17,10 +17,21 @@ suspend fun createMissingFolders(
         .filterNot { it.isRoot }
         .toList()
         .reversed()
-        .filterNot { noteFileOperations.exists(vaultPath = vaultPath, path = it) }
+        .filterNot {
+            noteFileOperations.exists(
+                vaultPath = vaultPath,
+                path = it
+            )
+        }
+
     missing.forEach { path ->
-        val created = noteFileOperations.createFolder(vaultPath = vaultPath, path = path)
+        val created = noteFileOperations.createFolder(
+            vaultPath = vaultPath,
+            path = path
+        )
+
         if (created is Outcome.Failure && created.error !is NotesError.NameTaken) return created
     }
+
     return null
 }

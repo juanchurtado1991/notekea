@@ -1,26 +1,27 @@
 package app.notekea.editor.presentation.sidepanel
 
-import androidx.compose.runtime.Stable
-import app.notekea.editor.presentation.model.EditorIntent
-import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.focus.FocusRequester
+import app.notekea.editor.presentation.model.EditorIntent
 
 /**
- * How the screen holds the side panel (`ROADMAP.md` 1.9), one for every pane, beyond what the user chose and the tabs
- * keep: the [outlineFocus] that `Mod+Shift+O` gives the keyboard to, and whether the window is too narrow for the panel
- * beside the notes ([isOverlay]), so it floats over them instead, open only while it is used ([isOverlayOpen]): a
- * heading chosen, Esc or the hide button close it. [connections] draws the inspector's Connections (`ROADMAP.md`
- * 2.4, 2.5), given whether it is open and how to fold it; the vault's screen provides it.
+ * How the screen holds the side panel, one for every pane: the [outlineFocus] that `Mod+Shift+O` gives the keyboard to,
+ * and whether the window is too narrow for the panel beside the notes ([isOverlay]), so it floats over them, open only
+ * while it is used ([isOverlayOpen]). [connections] draws the inspector's Connections.
  */
 @Stable
 class SidePanelHost(
     private val send: (EditorIntent) -> Unit,
-    val connections: @Composable ColumnScope.(isOpen: Boolean, onToggle: () -> Unit) -> Unit = { _, _ -> }
+    val connections: @Composable ColumnScope.(
+        isOpen: Boolean,
+        onToggle: () -> Unit
+    ) -> Unit = { _, _ -> }
 ) {
     val outlineFocus = FocusRequester()
     var isOverlay by mutableStateOf(value = false)
@@ -30,16 +31,16 @@ class SidePanelHost(
      * Sends a side panel request ([isRequest]) through [send], except showing or hiding the panel while it floats,
      * which only opens or closes it here: the panel the user keeps beside the notes is the tabs'.
      */
-    fun onIntent(
-        intent: EditorIntent
-    ) {
-        if (intent == EditorIntent.OnSidePanelToggle && isOverlay) isOverlayOpen = !isOverlayOpen else send(intent)
+    fun onIntent(intent: EditorIntent) {
+        val isOverlayToggle = intent == EditorIntent.OnSidePanelToggle && isOverlay
+        if (isOverlayToggle) isOverlayOpen = !isOverlayOpen else send(intent)
     }
 
     /** Opens the panel if it floats, then gives its outline the keyboard once it is laid out. */
     suspend fun focusOutline() {
         if (isOverlay) isOverlayOpen = true
         withFrameNanos { }
+
         try {
             outlineFocus.requestFocus()
         } catch (_: IllegalStateException) {
@@ -49,10 +50,11 @@ class SidePanelHost(
 
     companion object {
         /** Whether [intent] is about the side panel, which the tabs handle rather than the note's editor. */
-        fun isRequest(
-            intent: EditorIntent
-        ): Boolean = intent == EditorIntent.OnSidePanelToggle || intent == EditorIntent.OnOutlineFocusRequest ||
-            intent is EditorIntent.OnSidePanelResize || intent is EditorIntent.OnSidePanelSectionToggle ||
-            intent is EditorIntent.OnSidePanelModeSelect
+        fun isRequest(intent: EditorIntent): Boolean =
+            intent == EditorIntent.OnSidePanelToggle ||
+                intent == EditorIntent.OnOutlineFocusRequest ||
+                intent is EditorIntent.OnSidePanelResize ||
+                intent is EditorIntent.OnSidePanelSectionToggle ||
+                intent is EditorIntent.OnSidePanelModeSelect
     }
 }

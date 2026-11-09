@@ -51,26 +51,30 @@ private val MODIFIER_ORDER = listOf(
     ShortcutModifier.COMMAND
 )
 
-fun Shortcut.label(
-    operatingSystem: OperatingSystem
-): String = keys(operatingSystem = operatingSystem).joinToString(
+fun Shortcut.label(operatingSystem: OperatingSystem): String = keys(
+    operatingSystem = operatingSystem
+).joinToString(
     separator = if (operatingSystem == OperatingSystem.MACOS) "" else KEY_SEPARATOR
 )
 
 /** The shortcut's keys one by one, as keycaps show them: modifiers first, in the platform's order. */
-fun Shortcut.keys(
-    operatingSystem: OperatingSystem
-): List<String> {
-    val ordered = MODIFIER_ORDER.filter { it in modifiers }
+fun Shortcut.keys(operatingSystem: OperatingSystem): List<String> {
+    val ordered = MODIFIER_ORDER.filter {
+        it in modifiers
+    }
+
     return when (operatingSystem) {
         OperatingSystem.MACOS -> ordered.map { it.macSymbol() } + key.macLabel()
-        OperatingSystem.LINUX, OperatingSystem.WINDOWS -> ordered.map { it.displayName() } + key.displayName()
+
+        OperatingSystem.LINUX, OperatingSystem.WINDOWS -> ordered.map { it.displayName() } +
+            key.displayName()
     }
 }
 
-fun Shortcut.matches(
-    event: KeyEvent
-): Boolean = event.type == KeyEventType.KeyDown && matches(key = event.key, pressedModifiers = event.pressedModifiers())
+fun Shortcut.matches(event: KeyEvent): Boolean = event.type == KeyEventType.KeyDown && matches(
+    key = event.key,
+    pressedModifiers = event.pressedModifiers()
+)
 
 fun Shortcut.matches(
     key: Key,
@@ -146,7 +150,8 @@ private val MAC_KEY_SYMBOLS = mapOf(
     ShortcutKey.TAB to MAC_TAB_SYMBOL
 )
 
-private fun ShortcutKey.displayName(): String = KEY_NAMES[this] ?: name.removePrefix(prefix = DIGIT_PREFIX)
+private fun ShortcutKey.displayName(): String =
+    KEY_NAMES[this] ?: name.removePrefix(prefix = DIGIT_PREFIX)
 
 private fun ShortcutKey.macLabel(): String = MAC_KEY_SYMBOLS[this] ?: displayName()
 

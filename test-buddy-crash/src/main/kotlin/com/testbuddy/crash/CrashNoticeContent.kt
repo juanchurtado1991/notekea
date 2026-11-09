@@ -25,10 +25,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 
 /**
- * What the crash notice says: the app must close, its work is saved first, where the report is (selectable), and the
- * actions: Copy details (confirmed under the buttons), Report on GitHub when the app has a form, and Close, the primary
- * one, placed as the platform orders dialog buttons ([CrashConfig.isCloseLast]). It fills the window it is in: the
- * text scrolls when it does not fit, the buttons are always shown.
+ * What the crash notice says: the app must close, its work is saved first, where the report is, and the actions: Copy
+ * details, Report on GitHub when the app has a form, and Close, the primary one, placed as the platform orders dialog
+ * buttons ([CrashConfig.isCloseLast]). The text scrolls when it does not fit; the buttons are always shown.
  */
 @Composable
 internal fun CrashNoticeContent(
@@ -39,12 +38,22 @@ internal fun CrashNoticeContent(
     onClose: () -> Unit
 ) {
     var isCopied by remember(crash) { mutableStateOf(value = false) }
+
     val texts = config.texts
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
-        Column(modifier = Modifier.padding(all = 24.dp), verticalArrangement = Arrangement.spacedBy(space = 12.dp)) {
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        Column(
+            modifier = Modifier.padding(all = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(space = 12.dp)
+        ) {
             // The text scrolls and the buttons stay under it, so a large text size never pushes them out of the window.
             Column(
-                modifier = Modifier.weight(weight = 1f).verticalScroll(state = rememberScrollState()),
+                modifier = Modifier.weight(
+                    weight = 1f
+                ).verticalScroll(state = rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(space = 12.dp)
             ) {
                 Text(
@@ -52,19 +61,47 @@ internal fun CrashNoticeContent(
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.error
                 )
-                Text(text = texts.message, style = MaterialTheme.typography.bodyMedium)
-                ReportLocation(texts = texts, path = crash.path)
+
+                Text(
+                    text = texts.message,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                ReportLocation(
+                    texts = texts,
+                    path = crash.path
+                )
             }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
-                if (!config.isCloseLast) Button(onClick = onClose) { Text(text = texts.close) }
-                OutlinedButton(onClick = { onCopy().also { isCopied = true } }) { Text(text = texts.copy) }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(space = 8.dp)
+            ) {
+                if (!config.isCloseLast) {
+                    Button(onClick = onClose) { Text(text = texts.close) }
+                }
+
+                OutlinedButton(onClick = {
+                    onCopy().also { isCopied = true }
+                }) { Text(text = texts.copy) }
+
                 config.issueFormUrl?.let { url ->
                     OutlinedButton(onClick = { onReport(url) }) { Text(text = texts.report) }
                 }
+
                 Spacer(modifier = Modifier.weight(weight = 1f))
-                if (config.isCloseLast) Button(onClick = onClose) { Text(text = texts.close) }
+
+                if (config.isCloseLast) {
+                    Button(onClick = onClose) { Text(text = texts.close) }
+                }
             }
-            if (isCopied) Text(text = texts.copied, style = MaterialTheme.typography.labelSmall)
+
+            if (isCopied) {
+                Text(
+                    text = texts.copied,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
         }
     }
 }
@@ -76,16 +113,31 @@ private fun ReportLocation(
     path: String?
 ) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
+
     if (path == null) {
-        Text(text = texts.notSaved, style = MaterialTheme.typography.bodySmall, color = muted)
+        Text(
+            text = texts.notSaved,
+            style = MaterialTheme.typography.bodySmall,
+            color = muted
+        )
+
         return
     }
+
     Column(verticalArrangement = Arrangement.spacedBy(space = 4.dp)) {
-        Text(text = texts.saved, style = MaterialTheme.typography.bodySmall, color = muted)
+        Text(
+            text = texts.saved,
+            style = MaterialTheme.typography.bodySmall,
+            color = muted
+        )
+
         SelectionContainer {
             Text(
                 text = path,
-                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                style = MaterialTheme
+                    .typography
+                    .bodySmall
+                    .copy(fontFamily = FontFamily.Monospace),
                 color = muted
             )
         }

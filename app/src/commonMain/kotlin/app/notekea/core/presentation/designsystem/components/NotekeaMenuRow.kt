@@ -55,13 +55,25 @@ internal fun NotekeaMenuRow(
     onChosen: () -> Unit,
     submenu: SubmenuControl
 ) {
-    val color = if (item.isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+    val colors = MaterialTheme.colorScheme
+    val color = if (item.isDestructive) colors.error else colors.onSurface
+
     val interactionSource = remember { MutableInteractionSource() }
+
     val isHovered by interactionSource.collectIsHoveredAsState()
-    LaunchedEffect(isHovered) { if (isHovered) submenu.onHover() }
+
+    LaunchedEffect(isHovered) {
+        if (isHovered) submenu.onHover()
+    }
+
     Box {
         DropdownMenuItem(
-            text = { MenuRowText(item = item, color = color) },
+            text = {
+                MenuRowText(
+                    item = item,
+                    color = color
+                )
+            },
             onClick = {
                 if (item.opensSubmenu) {
                     submenu.onHover()
@@ -73,16 +85,28 @@ internal fun NotekeaMenuRow(
             modifier = menuRowHeight(item = item)
                 .hoverable(interactionSource = interactionSource)
                 .onPreviewKeyEvent { event ->
-                    (item.opensSubmenu && event.entersSubmenu).also { if (it) submenu.onEnter() }
+                    (item.opensSubmenu && event.entersSubmenu).also {
+                        if (it) submenu.onEnter()
+                    }
                 },
-            leadingIcon = leadingIconOf(item = item, color = color),
+            leadingIcon = leadingIconOf(
+                item = item,
+                color = color
+            ),
             trailingIcon = trailingOf(item = item),
             enabled = item.enabled,
             interactionSource = interactionSource
         )
+
         val panel = item.submenu ?: item.items?.let { sections -> submenuOf(sections = sections) }
+
         if (submenu.isOpen && panel != null) {
-            Submenu(hasKeyboard = submenu.hasKeyboard, onChosen = onChosen, onLeave = submenu.onLeave, content = panel)
+            Submenu(
+                hasKeyboard = submenu.hasKeyboard,
+                onChosen = onChosen,
+                onLeave = submenu.onLeave,
+                content = panel
+            )
         }
     }
 }
@@ -100,8 +124,13 @@ private fun submenuOf(
     Column(modifier = Modifier.width(intrinsicSize = IntrinsicSize.Max)) {
         sections.forEachIndexed { index, items ->
             if (index > 0) NotekeaMenuDivider()
+
             items.forEach { item ->
-                NotekeaMenuRow(item = item, onChosen = onChosen, submenu = SubmenuControl.NONE)
+                NotekeaMenuRow(
+                    item = item,
+                    onChosen = onChosen,
+                    submenu = SubmenuControl.NONE
+                )
             }
         }
     }
@@ -113,7 +142,12 @@ private fun MenuRowText(
     color: Color
 ) {
     Column {
-        Text(text = item.label, style = MaterialTheme.typography.bodyMedium, color = color)
+        Text(
+            text = item.label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = color
+        )
+
         item.supportingText?.let {
             Text(
                 text = it,
@@ -125,18 +159,16 @@ private fun MenuRowText(
 }
 
 /** Desktop menus have 32 dp rows; a row with a second line grows to hold it. */
-private fun menuRowHeight(
-    item: NotekeaMenuItem
-): Modifier = if (item.supportingText == null) {
+private fun menuRowHeight(item: NotekeaMenuItem): Modifier = if (item.supportingText == null) {
     Modifier.height(height = NotekeaDimensions.MenuItemHeight)
 } else {
-    Modifier.heightIn(min = NotekeaDimensions.MenuItemHeight).padding(vertical = NotekeaDimensions.SpacingXs)
+    Modifier.heightIn(
+        min = NotekeaDimensions.MenuItemHeight
+    ).padding(vertical = NotekeaDimensions.SpacingXs)
 }
 
 /** The shortcut at the end of the row, or a chevron for an item that opens a submenu. */
-private fun trailingOf(
-    item: NotekeaMenuItem
-): (@Composable () -> Unit)? = when {
+private fun trailingOf(item: NotekeaMenuItem): (@Composable () -> Unit)? = when {
     item.opensSubmenu -> {
         {
             Icon(
@@ -176,24 +208,34 @@ private fun Submenu(
     content: @Composable (onChosen: () -> Unit) -> Unit
 ) {
     val position = remember { SubmenuPositionProvider() }
+
     Popup(
         popupPositionProvider = position,
         onDismissRequest = onLeave.takeIf { hasKeyboard },
         properties = PopupProperties(focusable = hasKeyboard)
     ) {
         val focusManager = LocalFocusManager.current
+
         LaunchedEffect(hasKeyboard) {
             // One frame later: its rows are not laid out before.
             withFrameNanos { }
             if (hasKeyboard) focusManager.moveFocus(focusDirection = FocusDirection.Next)
         }
+
         Surface(
             modifier = Modifier.onPreviewKeyEvent { event ->
-                handleSubmenuKey(event = event, focusManager = focusManager, onLeave = onLeave)
+                handleSubmenuKey(
+                    event = event,
+                    focusManager = focusManager,
+                    onLeave = onLeave
+                )
             },
             shape = MaterialTheme.shapes.small,
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(width = NotekeaDimensions.BorderWidth, color = MaterialTheme.colorScheme.outline),
+            border = BorderStroke(
+                width = NotekeaDimensions.BorderWidth,
+                color = MaterialTheme.colorScheme.outline
+            ),
             shadowElevation = NotekeaDimensions.SpacingXs
         ) {
             Box(modifier = Modifier.padding(all = NotekeaDimensions.SpacingS)) { content(onChosen) }
@@ -208,12 +250,14 @@ private fun handleSubmenuKey(
     onLeave: () -> Unit
 ): Boolean {
     if (event.type != KeyEventType.KeyDown) return false
+
     when (event.key) {
         Key.DirectionDown -> focusManager.moveFocus(focusDirection = FocusDirection.Next)
         Key.DirectionUp -> focusManager.moveFocus(focusDirection = FocusDirection.Previous)
         Key.DirectionLeft, Key.Escape -> onLeave()
         else -> return false
     }
+
     return true
 }
 
@@ -222,12 +266,24 @@ private fun leadingIconOf(
     item: NotekeaMenuItem,
     color: Color
 ): (@Composable () -> Unit)? {
-    val icon = if (item.isChecked != null) NotekeaIcons.Checked.takeIf { item.isChecked } else item.icon
+    val icon = if (item.isChecked != null) {
+        NotekeaIcons.Checked.takeIf { item.isChecked }
+    } else {
+        item.icon
+    }
+
     if (icon == null && item.isChecked == null) return null
+
     return {
         val iconModifier = Modifier.size(size = NotekeaDimensions.IconSize)
+
         if (icon != null) {
-            Icon(imageVector = icon, contentDescription = null, modifier = iconModifier, tint = color)
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = iconModifier,
+                tint = color
+            )
         } else {
             Box(modifier = iconModifier)
         }
@@ -252,7 +308,10 @@ private fun NotekeaMenuRowPreview() {
     NotekeaPreviewThemes {
         Column(modifier = Modifier.width(intrinsicSize = IntrinsicSize.Max)) {
             NotekeaMenuRow(
-                item = NotekeaMenuItem(label = PREVIEW_ROW, onClick = {}),
+                item = NotekeaMenuItem(
+                    label = PREVIEW_ROW,
+                    onClick = {}
+                ),
                 onChosen = {},
                 submenu = SubmenuControl.NONE
             )

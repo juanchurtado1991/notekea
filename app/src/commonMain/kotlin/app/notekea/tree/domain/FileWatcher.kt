@@ -7,7 +7,5 @@ import kotlinx.coroutines.flow.Flow
  * relative to the vault. Platform implementations live outside `commonMain` (directory-watcher on desktop).
  */
 interface FileWatcher {
-    fun watch(
-        vaultPath: String
-    ): Flow<VaultChange>
+    fun watch(vaultPath: String): Flow<VaultChange>
 }

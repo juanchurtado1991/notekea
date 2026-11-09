@@ -1,7 +1,7 @@
 package app.notekea.editor.domain
 
 /**
- * Why an embedded note cannot show its text (`ROADMAP.md` 1.15): the note does not exist ([MISSING_NOTE]), it has no
+ * Why an embedded note cannot show its text: the note does not exist ([MISSING_NOTE]), it has no
  * such heading or block ([MISSING_SECTION]), it is already shown above it in the same chain of embeds, the note itself
  * included ([CIRCULAR]), or it is deeper than [MAX_EMBED_DEPTH] notes ([TOO_DEEP]).
  */

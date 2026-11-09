@@ -5,10 +5,8 @@ import kotlinx.coroutines.CompletableDeferred
 
 /**
  * A vault's files in memory, like the disk: a write or copy to a path in use fails with [NotesError.NameTaken], and
- * every file written is also seen by [fileOperations], as the real disk is. [outside] holds files on the computer
- * outside the vault, by absolute path, to copy from; a path under `VAULT` is inside it. While [listingFails], listing
- * the vault fails as a disk error would. A copy takes until [copied] completes, when a test sets it. Every call that
- * touches the disk goes through [gate].
+ * every file written is also seen by [fileOperations]. [outside] holds files outside the vault, by absolute path, to
+ * copy from. [listingFails] makes listing fail; a copy takes until [copied] completes; every call goes through [gate].
  */
 class FakeAttachmentStore(
     private val fileOperations: FakeNoteFileOperations = FakeNoteFileOperations()
@@ -22,10 +20,9 @@ class FakeAttachmentStore(
     /** Every file read, in order, so a test can tell a picture decoded again from one kept. */
     val reads = mutableListOf<RelativePath>()
 
-    override suspend fun files(
-        vaultPath: String
-    ): Outcome<List<RelativePath>, NotesError> {
+    override suspend fun files(vaultPath: String): Outcome<List<RelativePath>, NotesError> {
         gate.pass()
+
         return if (listingFails) {
             Outcome.Failure(error = NotesError.OperationFailed(path = vaultPath))
         } else {
@@ -39,6 +36,7 @@ class FakeAttachmentStore(
     ): Outcome<ByteArray, NotesError> {
         gate.pass()
         reads += path
+
         return contents[path]?.let { Outcome.Success(value = it) }
             ?: Outcome.Failure(error = NotesError.EntryMissing(path.value))
     }
@@ -49,11 +47,16 @@ class FakeAttachmentStore(
         bytes: ByteArray
     ): Outcome<Unit, NotesError> {
         gate.pass()
-        if (path in contents || path in fileOperations.existing) {
+
+        val isTaken = path in contents || path in fileOperations.existing
+
+        if (isTaken) {
             return Outcome.Failure(error = NotesError.NameTaken(name = path.name))
         }
+
         contents[path] = bytes
         fileOperations.existing += path
+
         return Outcome.Success(value = Unit)
     }
 
@@ -63,8 +66,15 @@ class FakeAttachmentStore(
         path: RelativePath
     ): Outcome<Unit, NotesError> {
         copied?.await()
-        val bytes = outside[absolutePath] ?: return Outcome.Failure(error = NotesError.EntryMissing(absolutePath))
-        return write(vaultPath = vaultPath, path = path, bytes = bytes)
+
+        val bytes = outside[absolutePath]
+            ?: return Outcome.Failure(error = NotesError.EntryMissing(absolutePath))
+
+        return write(
+            vaultPath = vaultPath,
+            path = path,
+            bytes = bytes
+        )
     }
 
     override fun pathInVault(

@@ -2,18 +2,19 @@ package app.notekea.core.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
-import app.notekea.tree.domain.FakeFileWatcher
-import app.notekea.tree.domain.FakeNoteMetadataCache
 import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.search.domain.NoteMatchField
 import app.notekea.core.notes.domain.NoteTextCache
-import app.notekea.tree.domain.ObserveVaultTreeUseCase
+import app.notekea.core.notes.domain.TextFolder
+import app.notekea.search.domain.NoteMatchField
 import app.notekea.search.domain.SearchNoteContentUseCase
 import app.notekea.search.domain.SearchNotesUseCase
-import app.notekea.core.notes.domain.TextFolder
+import app.notekea.tree.data.OkioNoteMetadataReader
+import app.notekea.tree.domain.FakeFileWatcher
+import app.notekea.tree.domain.FakeNoteMetadataCache
+import app.notekea.tree.domain.ObserveVaultTreeUseCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -21,7 +22,6 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.tree.data.OkioNoteMetadataReader
 
 /**
  * The quick switcher cases of `MVP_SMOKE_TEST.md` (1.6) that can run headless, on the `Personal Notes` smoke vault
@@ -53,8 +53,13 @@ class SmokeQuickSwitcherTest {
     )
 
     @Test
-    fun `1_6-01 typing are puts Arepas first, its first letters highlighted`() = runTest(context = testDispatcher) {
-        val first = searchNotes(notes = loadNotes(), query = "are").first()
+    fun `1_6-01 typing are puts Arepas first, its first letters highlighted`() = runTest(
+        context = testDispatcher
+    ) {
+        val first = searchNotes(
+            notes = loadNotes(),
+            query = "are"
+        ).first()
 
         assertEquals(
             expected = Triple(AREPAS, NoteMatchField.NAME, listOf(0..2)),
@@ -63,23 +68,41 @@ class SmokeQuickSwitcherTest {
     }
 
     @Test
-    fun `1_6-02 an alias finds its note and accents are ignored`() = runTest(context = testDispatcher) {
+    fun `1_6-02 an alias finds its note and accents are ignored`() = runTest(
+        context = testDispatcher
+    ) {
         val notes = loadNotes()
-        val alias = searchNotes(notes = notes, query = "corn cakes").first()
+
+        val alias = searchNotes(
+            notes = notes,
+            query = "corn cakes"
+        ).first()
 
         assertEquals(
             expected = Triple(AREPAS, "Corn cakes", NoteMatchField.ALIAS),
             actual = Triple(alias.note.file.path.value, alias.text, alias.field)
         )
+
         assertEquals(
             expected = CAFE,
-            actual = searchNotes(notes = notes, query = "cafe").first().note.file.path.value
+            actual = searchNotes(
+                notes = notes,
+                query = "cafe"
+            )
+                .first()
+                .note
+                .file
+                .path
+                .value
         )
     }
 
     @Test
     fun `1_6-03 a search with a slash matches the path`() = runTest(context = testDispatcher) {
-        val first = searchNotes(notes = loadNotes(), query = "gard/tom").first()
+        val first = searchNotes(
+            notes = loadNotes(),
+            query = "gard/tom"
+        ).first()
 
         assertEquals(
             expected = Triple(TOMATO_PLAN, NoteMatchField.PATH, "Projects/Garden/Tomato plan"),
@@ -88,51 +111,68 @@ class SmokeQuickSwitcherTest {
     }
 
     @Test
-    fun `1_6-04 content search finds the word inside longer words, most matches first, lines as plain text`() = runTest(
-        context = testDispatcher
-    ) {
-        val results = searchContent(VAULT, loadNotes(), "tomato")
+    fun `1_6-04 content search finds the word inside longer words, most matches first, lines as plain text`() =
+        runTest(
+            context = testDispatcher
+        ) {
+            val results = searchContent(VAULT, loadNotes(), "tomato")
 
-        assertEquals(
-            expected = listOf(
-                Triple(
-                    JOURNAL_20,
-                    2,
-                    "Planted the last tomato seedlings; notes in Tomato plan. Cooked " +
-                        "Arepas for dinner, the cheese ones were best."
+            assertEquals(
+                expected = listOf(
+                    Triple(
+                        JOURNAL_20,
+                        2,
+                        "Planted the last tomato seedlings; notes in Tomato plan. Cooked " +
+                            "Arepas for dinner, the cheese ones were best."
+                    ),
+                    Triple(
+                        PASTA,
+                        1,
+                        "Add tomatoes, cooked borlotti beans and stock; simmer 20 minutes."
+                    ),
+                    Triple(TOMATO_PLAN, 1, "Tomato plan")
                 ),
-                Triple(PASTA, 1, "Add tomatoes, cooked borlotti beans and stock; simmer 20 minutes."),
-                Triple(TOMATO_PLAN, 1, "Tomato plan")
-            ),
-            actual = results.map { Triple(it.note.file.path.value, it.matchCount, it.snippet) }
-        )
-    }
+                actual = results.map {
+                    Triple(it.note.file.path.value, it.matchCount, it.snippet)
+                }
+            )
+        }
 
     @Test
-    fun `1_6-05 a tag finds frontmatter tags and nested tags, not other tags`() = runTest(context = testDispatcher) {
+    fun `1_6-05 a tag finds frontmatter tags and nested tags, not other tags`() = runTest(
+        context = testDispatcher
+    ) {
         val results = searchContent(VAULT, loadNotes(), "#recipe")
 
         assertEquals(
             expected = listOf(AREPAS to null, CAFE to "#recipe/drinks", PASTA to "#recipe"),
-            actual = results.map { it.note.file.path.value to it.snippet }
+            actual = results.map {
+                it.note.file.path.value to it.snippet
+            }
         )
     }
 
     @Test
-    fun `1_6-07 the travel tag finds the note tagged in its frontmatter and the journal entry`() = runTest(
-        context = testDispatcher
-    ) {
-        val results = searchContent(VAULT, loadNotes(), "#travel")
+    fun `1_6-07 the travel tag finds the note tagged in its frontmatter and the journal entry`() =
+        runTest(
+            context = testDispatcher
+        ) {
+            val results = searchContent(VAULT, loadNotes(), "#travel")
 
-        assertEquals(
-            expected = listOf(JOURNAL_21 to "#journal #travel", LISBON to null),
-            actual = results.map { it.note.file.path.value to it.snippet }
-        )
-    }
+            assertEquals(
+                expected = listOf(JOURNAL_21 to "#journal #travel", LISBON to null),
+                actual = results.map {
+                    it.note.file.path.value to it.snippet
+                }
+            )
+        }
 
     private suspend fun loadNotes(): Collection<NoteEntry> {
         val observeVaultTree = ObserveVaultTreeUseCase(
-            noteScanner = OkioNoteScanner(fileSystem = FileSystem.SYSTEM, dispatchers = dispatchers),
+            noteScanner = OkioNoteScanner(
+                fileSystem = FileSystem.SYSTEM,
+                dispatchers = dispatchers
+            ),
             noteMetadataReader = OkioNoteMetadataReader(
                 fileSystem = FileSystem.SYSTEM,
                 dispatchers = dispatchers,
@@ -141,6 +181,7 @@ class SmokeQuickSwitcherTest {
             fileWatcher = FakeFileWatcher(),
             noteMetadataCache = FakeNoteMetadataCache()
         )
+
         return (observeVaultTree(vaultPath = VAULT).first() as Outcome.Success).value.notes.values
     }
 

@@ -27,14 +27,28 @@ fun NotekeaKeycaps(
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = MaterialTheme.shapes.extraSmall
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(space = CAP_SPACING_DP.dp)) {
+
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(space = CAP_SPACING_DP.dp)
+    ) {
         keys.forEach { key ->
             Text(
                 text = key,
                 modifier = Modifier
-                    .background(color = colors.surfaceVariant, shape = shape)
-                    .border(width = NotekeaDimensions.BorderWidth, color = colors.outline, shape = shape)
-                    .padding(horizontal = CAP_HORIZONTAL_PADDING_DP.dp, vertical = CAP_VERTICAL_PADDING_DP.dp),
+                    .background(
+                        color = colors.surfaceVariant,
+                        shape = shape
+                    )
+                    .border(
+                        width = NotekeaDimensions.BorderWidth,
+                        color = colors.outline,
+                        shape = shape
+                    )
+                    .padding(
+                        horizontal = CAP_HORIZONTAL_PADDING_DP.dp,
+                        vertical = CAP_VERTICAL_PADDING_DP.dp
+                    ),
                 style = MaterialTheme.typography.labelMedium,
                 color = colors.onSurfaceVariant
             )

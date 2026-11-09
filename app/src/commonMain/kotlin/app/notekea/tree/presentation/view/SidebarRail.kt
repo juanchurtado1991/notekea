@@ -1,9 +1,6 @@
 package app.notekea.tree.presentation.view
 
 import androidx.compose.runtime.Composable
-import app.notekea.tree.presentation.model.TreePreviewData
-import app.notekea.tree.presentation.model.VaultTreeIntent
-import app.notekea.tree.presentation.model.VaultTreeState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -12,30 +9,32 @@ import app.notekea.core.platform.domain.graphShortcut
 import app.notekea.core.presentation.designsystem.components.NotekeaLogo
 import app.notekea.core.presentation.designsystem.components.NotekeaToolRail
 import app.notekea.core.presentation.designsystem.components.NotekeaToolRailItem
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.platform.label
 import app.notekea.resources.Res
 import app.notekea.resources.rail_about
 import app.notekea.resources.rail_graph
-import app.notekea.resources.rail_query
-import app.notekea.resources.rail_tasks
 import app.notekea.resources.rail_label
+import app.notekea.resources.rail_query
 import app.notekea.resources.rail_settings
 import app.notekea.resources.rail_side_panel
+import app.notekea.resources.rail_tasks
 import app.notekea.resources.tree_files
 import app.notekea.resources.tree_search
 import app.notekea.resources.tree_switch_vault
 import app.notekea.resources.tree_today
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.model.VaultTreeState
 import org.jetbrains.compose.resources.stringResource
 
 private const val LOGO_SIZE_DP = 24
 
 /**
- * The vault's tool rail on the window's left edge (`ROADMAP.md` 1.11), there whether the sidebar is shown or not, as in
- * Android Studio: Search notes first, then the two panels, Files (the sidebar, selected while it is shown) and the
- * side panel (selected while [isSidePanelVisible]), and the tools; at the bottom, as in Obsidian, Open another vault,
- * About and Settings. Each has a tooltip naming it and its shortcut; Notekea's logo tops the rail.
+ * The vault's tool rail on the window's left edge, there whether the sidebar is shown or not: Search notes first, then
+ * the two panels, Files (selected while the sidebar is shown) and the side panel (selected while [isSidePanelVisible]),
+ * and the tools; at the bottom Open another vault, About and Settings. Notekea's logo tops the rail.
  */
 @Composable
 internal fun SidebarRail(
@@ -68,7 +67,9 @@ private fun topItems(
     isSidePanelVisible: Boolean
 ): List<NotekeaToolRailItem> {
     val conventions = state.platformConventions
+
     val shortcut = { it: Shortcut -> it.label(operatingSystem = conventions.operatingSystem) }
+
     return listOf(
         NotekeaToolRailItem(
             icon = NotekeaIcons.Find,
@@ -90,7 +91,11 @@ private fun topItems(
             shortcutHint = shortcut(conventions.toggleSidePanelShortcut),
             isSelected = isSidePanelVisible
         )
-    ) + toolItems(state = state, onIntent = onIntent, actions = actions)
+    ) + toolItems(
+        state = state,
+        onIntent = onIntent,
+        actions = actions
+    )
 }
 
 /** The graph, queries, tasks and Today, with their shortcuts. */
@@ -101,7 +106,9 @@ private fun toolItems(
     actions: SidebarRailActions
 ): List<NotekeaToolRailItem> {
     val conventions = state.platformConventions
+
     val shortcut = { it: Shortcut -> it.label(operatingSystem = conventions.operatingSystem) }
+
     return listOf(
         NotekeaToolRailItem(
             icon = NotekeaIcons.Graph,
@@ -130,9 +137,7 @@ private fun toolItems(
 
 /** Open another vault, About and Settings. */
 @Composable
-private fun bottomItems(
-    actions: SidebarRailActions
-): List<NotekeaToolRailItem> = listOf(
+private fun bottomItems(actions: SidebarRailActions): List<NotekeaToolRailItem> = listOf(
     NotekeaToolRailItem(
         icon = NotekeaIcons.SwitchVault,
         label = stringResource(resource = Res.string.tree_switch_vault),

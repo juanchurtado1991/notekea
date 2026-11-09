@@ -22,11 +22,13 @@ internal data class FocusBorderElement(
     val shape: Shape,
     val width: Dp
 ) : ModifierNodeElement<FocusBorderElement.Node>() {
-    override fun create(): Node = Node(color = color, shape = shape, width = width)
+    override fun create(): Node = Node(
+        color = color,
+        shape = shape,
+        width = width
+    )
 
-    override fun update(
-        node: Node
-    ) {
+    override fun update(node: Node) {
         node.color = color
         node.shape = shape
         node.width = width
@@ -47,9 +49,7 @@ internal data class FocusBorderElement(
         DrawModifierNode {
         private var isFocused = false
 
-        override fun onFocusEvent(
-            focusState: FocusState
-        ) {
+        override fun onFocusEvent(focusState: FocusState) {
             if (focusState.isFocused != isFocused) {
                 isFocused = focusState.isFocused
                 invalidateDraw()
@@ -60,10 +60,27 @@ internal data class FocusBorderElement(
             drawContent()
             if (!isFocused) return
             val stroke = width.toPx()
-            val inner = Size(width = size.width - stroke, height = size.height - stroke)
-            val outline = shape.createOutline(size = inner, layoutDirection = layoutDirection, density = this)
-            translate(left = stroke / 2, top = stroke / 2) {
-                drawOutline(outline = outline, color = color, style = Stroke(width = stroke))
+
+            val inner = Size(
+                width = size.width - stroke,
+                height = size.height - stroke
+            )
+
+            val outline = shape.createOutline(
+                size = inner,
+                layoutDirection = layoutDirection,
+                density = this
+            )
+
+            translate(
+                left = stroke / 2,
+                top = stroke / 2
+            ) {
+                drawOutline(
+                    outline = outline,
+                    color = color,
+                    style = Stroke(width = stroke)
+                )
             }
         }
     }

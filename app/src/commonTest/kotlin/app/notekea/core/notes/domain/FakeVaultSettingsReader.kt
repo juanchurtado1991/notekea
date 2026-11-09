@@ -6,15 +6,9 @@ class FakeVaultSettingsReader(
     var dailyNotes: DailyNoteSettings? = null,
     var templates: TemplateSettings? = null
 ) : VaultSettingsReader {
-    override suspend fun attachmentFolderPath(
-        vaultPath: String
-    ): String? = attachmentFolder
+    override suspend fun attachmentFolderPath(vaultPath: String): String? = attachmentFolder
 
-    override suspend fun dailyNotes(
-        vaultPath: String
-    ): DailyNoteSettings? = dailyNotes
+    override suspend fun dailyNotes(vaultPath: String): DailyNoteSettings? = dailyNotes
 
-    override suspend fun templates(
-        vaultPath: String
-    ): TemplateSettings? = templates
+    override suspend fun templates(vaultPath: String): TemplateSettings? = templates
 }

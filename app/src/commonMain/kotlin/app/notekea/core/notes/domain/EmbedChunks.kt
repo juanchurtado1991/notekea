@@ -21,15 +21,29 @@ suspend fun embedChunks(
     chunks: List<NoteChunk>
 ): Outcome<List<Pair<NoteChunk, FloatArray>>, EmbeddingError> {
     var kept = chunks
+
     while (true) {
-        val texts = kept.map { embeddingText(title = title, chunk = it, maxTokens = textEmbedder.maxTokens) }
+        val texts = kept.map {
+            embeddingText(
+                title = title,
+                chunk = it,
+                maxTokens = textEmbedder.maxTokens
+            )
+        }
+
         when (val embedded = textEmbedder.embed(texts = texts)) {
             is Outcome.Success -> return Outcome.Success(value = kept.zip(other = embedded.value))
 
             is Outcome.Failure -> {
                 val error = embedded.error
-                if (error !is EmbeddingError.TextTooLong || kept.size == 1) return Outcome.Failure(error = error)
-                kept = kept.filterIndexed { index, _ -> index != error.index }
+
+                if (error !is EmbeddingError.TextTooLong || kept.size == 1) {
+                    return Outcome.Failure(error = error)
+                }
+
+                kept = kept.filterIndexed { index, _ ->
+                    index != error.index
+                }
             }
         }
     }
@@ -43,6 +57,12 @@ private fun embeddingText(
 ): String {
     val heading = (listOf(title) + chunk.headingPath).joinToString(separator = HEADING_JOIN)
     val room = maxTokens - chunk.tokens - 1
-    val shown = if (TokenEstimate.of(text = heading) <= room) heading else heading.take(n = (room - 1).coerceAtLeast(0))
+
+    val shown = if (TokenEstimate.of(text = heading) <= room) {
+        heading
+    } else {
+        heading.take(n = (room - 1).coerceAtLeast(0))
+    }
+
     return shown + StringPatterns.NEW_LINE + chunk.text
 }

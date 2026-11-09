@@ -1,8 +1,8 @@
 package app.notekea.editor.data
 
 import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.editor.domain.NoteTimes
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.domain.NoteTimes
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
@@ -33,15 +33,30 @@ class NoteTimesOnDiskTest {
     }
 
     @Test
-    fun `a note's modified time is read from its file, and a missing note has no times`() = runTest(testDispatcher) {
-        val note = vault.resolve("Recipes").createDirectories().resolve("Café con leche.md")
+    fun `a note's modified time is read from its file, and a missing note has no times`() = runTest(
+        testDispatcher
+    ) {
+        val note = vault
+            .resolve("Recipes")
+            .createDirectories()
+            .resolve("Café con leche.md")
+
         note.writeText(text = "# Café\n")
         Files.setLastModifiedTime(note, FileTime.fromMillis(MODIFIED.toEpochMilliseconds()))
 
         assertEquals(
-            expected = MODIFIED to NoteTimes(createdAt = null, modifiedAt = null),
-            actual = reader.times(vaultPath = vault.toString(), path = RelativePath(value = NOTE)).modifiedAt to
-                reader.times(vaultPath = vault.toString(), path = RelativePath(value = "Gone.md"))
+            expected = MODIFIED to NoteTimes(
+                createdAt = null,
+                modifiedAt = null
+            ),
+            actual = reader.times(
+                vaultPath = vault.toString(),
+                path = RelativePath(value = NOTE)
+            ).modifiedAt to
+                reader.times(
+                    vaultPath = vault.toString(),
+                    path = RelativePath(value = "Gone.md")
+                )
         )
     }
 

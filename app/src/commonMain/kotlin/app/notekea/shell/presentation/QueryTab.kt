@@ -7,8 +7,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.view.LocalQueryBlock
 import app.notekea.editor.presentation.sidepanel.SidePanelHost
+import app.notekea.editor.presentation.view.LocalQueryBlock
 import app.notekea.query.presentation.QueryBlock
 import app.notekea.query.presentation.QueryEffect
 import app.notekea.query.presentation.QueryIntent
@@ -26,9 +26,22 @@ internal fun FollowTools(
     searchIndex: SearchIndexViewModel,
     sidePanel: SidePanelHost
 ) {
-    FollowQuery(viewModels = viewModels, state = state)
-    FollowTasks(viewModels = viewModels, state = state)
-    FollowGraph(viewModels = viewModels, state = state, searchIndex = searchIndex, sidePanel = sidePanel)
+    FollowQuery(
+        viewModels = viewModels,
+        state = state
+    )
+
+    FollowTasks(
+        viewModels = viewModels,
+        state = state
+    )
+
+    FollowGraph(
+        viewModels = viewModels,
+        state = state,
+        searchIndex = searchIndex,
+        sidePanel = sidePanel
+    )
 }
 
 /**
@@ -42,19 +55,45 @@ private fun FollowQuery(
     state: VaultTreeState
 ) {
     val query = viewModels.query
-    val tabs by viewModels.workspace.state.collectAsState()
-    val isShown = tabs.workspace.panes.any { it.activePath == Workspace.QUERY }
+
+    val tabs by viewModels
+        .workspace
+        .state
+        .collectAsState()
+
+    val isShown = tabs
+        .workspace
+        .panes
+        .any {
+            it.activePath == Workspace.QUERY
+        }
+
     LaunchedEffect(query, state.tree.notes) {
         query.onIntent(intent = QueryIntent.OnNotesChange(notes = state.tree.notes.values))
     }
-    LaunchedEffect(query, isShown) { query.onIntent(intent = QueryIntent.OnShownChange(isShown = isShown)) }
+
+    LaunchedEffect(query, isShown) {
+        query.onIntent(intent = QueryIntent.OnShownChange(isShown = isShown))
+    }
+
     LaunchedEffect(query) {
         query.effects.collect { effect ->
             when (effect) {
                 is QueryEffect.OpenNote -> {
-                    viewModels.workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = effect.path))
-                    val pane = viewModels.workspace.state.value.workspace.paneOpening(path = effect.path)
-                    viewModels.editors[pane].onIntent(intent = EditorIntent.OnFocusRequest(path = effect.path))
+                    viewModels.workspace.onIntent(
+                        intent = WorkspaceIntent.OnOpen(path = effect.path)
+                    )
+
+                    val pane = viewModels
+                        .workspace
+                        .state
+                        .value
+                        .workspace
+                        .paneOpening(path = effect.path)
+
+                    viewModels.editors[pane].onIntent(
+                        intent = EditorIntent.OnFocusRequest(path = effect.path)
+                    )
                 }
 
                 is QueryEffect.NoteRewritten -> viewModels.editors.forEach { editor ->
@@ -74,15 +113,19 @@ internal fun FollowQueryBlocks(
     val block: @Composable (String, String) -> Unit = remember(query) {
         { text, source ->
             val queryState by query.state.collectAsState()
+
             QueryBlock(
                 text = text,
                 source = source,
                 notesVersion = queryState.notesVersion,
                 run = query::resultOf,
                 onIntent = query::onIntent,
-                notice = queryState.notice.takeIf { it is QueryNotice.WriteFailed }
+                notice = queryState.notice.takeIf {
+                    it is QueryNotice.WriteFailed
+                }
             )
         }
     }
+
     CompositionLocalProvider(LocalQueryBlock provides block, content = content)
 }

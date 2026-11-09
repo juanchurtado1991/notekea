@@ -3,18 +3,18 @@ package app.notekea.tree.data
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.domain.time.MomentFormat
-import app.notekea.db.NotekeaDatabase
-import app.notekea.db.SelectTasks
+import app.notekea.core.notes.data.isDatabaseFailure
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.NoteMetadata
-import app.notekea.tree.domain.NoteMetadataCache
 import app.notekea.core.notes.domain.NoteTask
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.db.NotekeaDatabase
+import app.notekea.db.SelectTasks
+import app.notekea.tree.domain.NoteMetadataCache
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
 import kotlin.time.Instant
-import app.notekea.core.notes.data.isDatabaseFailure
 
 /**
  * [NoteMetadataCache] on SQLDelight, in the app's database (never inside the vault). Dates are stored as epoch
@@ -30,41 +30,72 @@ class SqlDelightNoteMetadataCache(
     private val codec = CachedPropertyCodec()
     private val momentFormat = MomentFormat()
 
-    override suspend fun read(
-        vaultPath: String
-    ): List<NoteEntry> = withContext(context = dispatchers.io) {
-        guarded(fallback = emptyList(), failureMessage = READ_FAILED) {
+    override suspend fun read(vaultPath: String): List<NoteEntry> = withContext(
+        context = dispatchers.io
+    ) {
+        guarded(
+            fallback = emptyList(),
+            failureMessage = READ_FAILED
+        ) {
             // One transaction: the six reads share a connection and see the same snapshot.
             queries.transactionWithResult { readNotes(vaultPath = vaultPath) }
         }
     }
 
-    private fun readNotes(
-        vaultPath: String
-    ): List<NoteEntry> {
-        val tags = queries.selectTags(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.tag })
-        val aliases = queries.selectAliases(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.alias })
-        val textTags = queries.selectTextTags(vault = vaultPath).executeAsList().groupBy({ it.path }, { it.tag })
-        val properties = queries.selectProperties(vault = vaultPath).executeAsList()
-            .groupBy({ it.path }, { codec.decode(key = it.property_, type = it.type, value = it.value_) })
-        val tasks = queries.selectTasks(vault = vaultPath).executeAsList().groupBy({ it.path }, ::taskOf)
-        return queries.selectNotes(vault = vaultPath).executeAsList().map { row ->
-            NoteEntry(
-                file = NoteFile(
-                    path = RelativePath(value = row.path),
-                    size = row.size,
-                    modifiedAt = row.modified_at?.let { Instant.fromEpochMilliseconds(epochMilliseconds = it) }
-                ),
-                metadata = NoteMetadata(
-                    tags = tags[row.path].orEmpty(),
-                    aliases = aliases[row.path].orEmpty(),
-                    title = row.title,
-                    textTags = textTags[row.path].orEmpty(),
-                    properties = properties[row.path].orEmpty(),
-                    tasks = tasks[row.path].orEmpty()
+    private fun readNotes(vaultPath: String): List<NoteEntry> {
+        val tags = queries
+            .selectTags(vault = vaultPath)
+            .executeAsList()
+            .groupBy({ it.path }, { it.tag })
+
+        val aliases = queries
+            .selectAliases(vault = vaultPath)
+            .executeAsList()
+            .groupBy({ it.path }, { it.alias })
+
+        val textTags = queries
+            .selectTextTags(vault = vaultPath)
+            .executeAsList()
+            .groupBy({ it.path }, { it.tag })
+
+        val properties = queries
+            .selectProperties(vault = vaultPath)
+            .executeAsList()
+            .groupBy({ it.path }, {
+                codec.decode(
+                    key = it.property_,
+                    type = it.type,
+                    value = it.value_
                 )
-            )
-        }
+            })
+
+        val tasks = queries
+            .selectTasks(vault = vaultPath)
+            .executeAsList()
+            .groupBy({ it.path }, ::taskOf)
+
+        return queries
+            .selectNotes(vault = vaultPath)
+            .executeAsList()
+            .map { row ->
+                NoteEntry(
+                    file = NoteFile(
+                        path = RelativePath(value = row.path),
+                        size = row.size,
+                        modifiedAt = row.modified_at?.let {
+                            Instant.fromEpochMilliseconds(epochMilliseconds = it)
+                        }
+                    ),
+                    metadata = NoteMetadata(
+                        tags = tags[row.path].orEmpty(),
+                        aliases = aliases[row.path].orEmpty(),
+                        title = row.title,
+                        textTags = textTags[row.path].orEmpty(),
+                        properties = properties[row.path].orEmpty(),
+                        tasks = tasks[row.path].orEmpty()
+                    )
+                )
+            }
     }
 
     override suspend fun update(
@@ -72,10 +103,24 @@ class SqlDelightNoteMetadataCache(
         upserted: List<NoteEntry>,
         removed: List<RelativePath>
     ) = withContext(context = dispatchers.io) {
-        guarded(fallback = Unit, failureMessage = UPDATE_FAILED) {
+        guarded(
+            fallback = Unit,
+            failureMessage = UPDATE_FAILED
+        ) {
             database.transaction {
-                removed.forEach { delete(vaultPath = vaultPath, path = it.value) }
-                upserted.forEach { upsert(vaultPath = vaultPath, entry = it) }
+                removed.forEach {
+                    delete(
+                        vaultPath = vaultPath,
+                        path = it.value
+                    )
+                }
+
+                upserted.forEach {
+                    upsert(
+                        vaultPath = vaultPath,
+                        entry = it
+                    )
+                }
             }
         }
     }
@@ -84,12 +129,35 @@ class SqlDelightNoteMetadataCache(
         vaultPath: String,
         path: String
     ) {
-        queries.deleteNote(vault = vaultPath, path = path)
-        queries.deleteTags(vault = vaultPath, path = path)
-        queries.deleteAliases(vault = vaultPath, path = path)
-        queries.deleteTextTags(vault = vaultPath, path = path)
-        queries.deleteProperties(vault = vaultPath, path = path)
-        queries.deleteTasks(vault = vaultPath, path = path)
+        queries.deleteNote(
+            vault = vaultPath,
+            path = path
+        )
+
+        queries.deleteTags(
+            vault = vaultPath,
+            path = path
+        )
+
+        queries.deleteAliases(
+            vault = vaultPath,
+            path = path
+        )
+
+        queries.deleteTextTags(
+            vault = vaultPath,
+            path = path
+        )
+
+        queries.deleteProperties(
+            vault = vaultPath,
+            path = path
+        )
+
+        queries.deleteTasks(
+            vault = vaultPath,
+            path = path
+        )
     }
 
     private fun <T> guarded(
@@ -109,28 +177,80 @@ class SqlDelightNoteMetadataCache(
         entry: NoteEntry
     ) {
         val path = entry.file.path.value
-        delete(vaultPath = vaultPath, path = path)
+
+        delete(
+            vaultPath = vaultPath,
+            path = path
+        )
+
         queries.upsertNote(
             vault = vaultPath,
             path = path,
             size = entry.file.size,
-            modified_at = entry.file.modifiedAt?.toEpochMilliseconds(),
+            modified_at = entry
+                .file
+                .modifiedAt
+                ?.toEpochMilliseconds(),
             title = entry.metadata.title
         )
-        entry.metadata.tags.forEachIndexed { index, tag ->
-            queries.insertTag(vault = vaultPath, path = path, position = index.toLong(), tag = tag)
-        }
-        entry.metadata.aliases.forEachIndexed { index, alias ->
-            queries.insertAlias(vault = vaultPath, path = path, position = index.toLong(), alias = alias)
-        }
-        entry.metadata.textTags.forEachIndexed { index, tag ->
-            queries.insertTextTag(vault = vaultPath, path = path, position = index.toLong(), tag = tag)
-        }
-        entry.metadata.properties.forEachIndexed { index, property ->
-            val (type, value) = codec.encode(value = property.value)
-            queries.insertProperty(vaultPath, path, index.toLong(), property.key, type, value)
-        }
-        entry.metadata.tasks.forEachIndexed { index, task ->
+
+        entry
+            .metadata
+            .tags
+            .forEachIndexed { index, tag ->
+                queries.insertTag(
+                    vault = vaultPath,
+                    path = path,
+                    position = index.toLong(),
+                    tag = tag
+                )
+            }
+
+        entry
+            .metadata
+            .aliases
+            .forEachIndexed { index, alias ->
+                queries.insertAlias(
+                    vault = vaultPath,
+                    path = path,
+                    position = index.toLong(),
+                    alias = alias
+                )
+            }
+
+        entry
+            .metadata
+            .textTags
+            .forEachIndexed { index, tag ->
+                queries.insertTextTag(
+                    vault = vaultPath,
+                    path = path,
+                    position = index.toLong(),
+                    tag = tag
+                )
+            }
+
+        entry
+            .metadata
+            .properties
+            .forEachIndexed { index, property ->
+                val (type, value) = codec.encode(value = property.value)
+                queries.insertProperty(vaultPath, path, index.toLong(), property.key, type, value)
+            }
+
+        insertTasks(
+            vaultPath = vaultPath,
+            path = path,
+            tasks = entry.metadata.tasks
+        )
+    }
+
+    private fun insertTasks(
+        vaultPath: String,
+        path: String,
+        tasks: List<NoteTask>
+    ) {
+        tasks.forEachIndexed { index, task ->
             queries.insertTask(
                 vault = vaultPath,
                 path = path,
@@ -140,25 +260,31 @@ class SqlDelightNoteMetadataCache(
                 text = task.text,
                 is_done = task.isDone,
                 heading = task.heading,
-                date = task.date?.let { momentFormat.format(LocalMoment(date = it), MomentFormat.ISO_DATE) }
+                date = task.date?.let {
+                    momentFormat.format(LocalMoment(date = it), MomentFormat.ISO_DATE)
+                }
             )
         }
     }
 
-    private fun taskOf(
-        row: SelectTasks
-    ) = NoteTask(
+    private fun taskOf(row: SelectTasks) = NoteTask(
         stateIndex = row.state_index.toInt(),
         endIndex = row.end_index.toInt(),
         text = row.text,
         isDone = row.is_done,
         heading = row.heading,
-        date = row.date?.let { momentFormat.parseDate(text = it, pattern = MomentFormat.ISO_DATE) }
+        date = row.date?.let {
+            momentFormat.parseDate(
+                text = it,
+                pattern = MomentFormat.ISO_DATE
+            )
+        }
     )
 
     companion object {
         private const val LOG_TAG = "NoteMetadataCache"
         private const val READ_FAILED = "Note cache unreadable; reading the notes from disk"
-        private const val UPDATE_FAILED = "Note cache update failed; it will be refreshed on the next scan"
+        private const val UPDATE_FAILED =
+            "Note cache update failed; it will be refreshed on the next scan"
     }
 }

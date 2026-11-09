@@ -46,10 +46,9 @@ private const val PREVIEW_QUERY = "arepas"
 private val SUBMIT_KEYS = setOf(Key.Enter, Key.NumPadEnter)
 
 /**
- * An inline bar that finds text in the current page (Find in note, `Mod+F`) or the notes on the graph: a field that
- * takes focus when the bar appears, how many matches there are ([matchLabel], "2 of 5"), previous and next buttons and
- * close. Enter goes to the next match, Shift+Enter to the previous one and Esc closes, as in browsers and editors on
- * every platform.
+ * An inline bar that finds text in the current page (Find in note) or the notes on the graph: a field that takes focus
+ * when the bar appears, how many matches there are ([matchLabel], "2 of 5"), previous and next buttons and close. Enter
+ * goes to the next match, Shift+Enter to the previous one and Esc closes.
  */
 @Composable
 fun NotekeaFindBar(
@@ -63,8 +62,14 @@ fun NotekeaFindBar(
     placeholder: String = stringResource(resource = Res.string.find_bar_placeholder)
 ) {
     val focusRequester = remember { FocusRequester() }
+
     LaunchedEffect(focusRequester) { focusRequester.requestFocus() }
-    Surface(modifier = modifier, color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.small) {
+
+    Surface(
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.small
+    ) {
         Row(
             modifier = Modifier.padding(all = NotekeaDimensions.SpacingXs),
             horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
@@ -74,17 +79,30 @@ fun NotekeaFindBar(
                 query = query,
                 placeholder = placeholder,
                 onQueryChange = onQueryChange,
-                modifier = Modifier.focusRequester(focusRequester = focusRequester).onPreviewKeyEvent { event ->
-                    handleFindKey(event = event, onNext = onNext, onPrevious = onPrevious, onClose = onClose)
+                modifier = Modifier.focusRequester(
+                    focusRequester = focusRequester
+                ).onPreviewKeyEvent { event ->
+                    handleFindKey(
+                        event = event,
+                        onNext = onNext,
+                        onPrevious = onPrevious,
+                        onClose = onClose
+                    )
                 }
             )
+
             Text(
                 text = matchLabel,
                 modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingS),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            FindButtons(onNext = onNext, onPrevious = onPrevious, onClose = onClose)
+
+            FindButtons(
+                onNext = onNext,
+                onPrevious = onPrevious,
+                onClose = onClose
+            )
         }
     }
 }
@@ -100,11 +118,13 @@ private fun FindButtons(
         label = stringResource(resource = Res.string.find_bar_previous),
         onClick = onPrevious
     )
+
     NotekeaIconButton(
         icon = NotekeaIcons.FindNext,
         label = stringResource(resource = Res.string.find_bar_next),
         onClick = onNext
     )
+
     NotekeaIconButton(
         icon = NotekeaIcons.Close,
         label = stringResource(resource = Res.string.find_bar_close),
@@ -120,11 +140,18 @@ private fun FindField(
     modifier: Modifier
 ) {
     val colors = MaterialTheme.colorScheme
+
     BasicTextField(
         value = query,
         onValueChange = onQueryChange,
-        modifier = modifier.width(width = FIELD_WIDTH_DP.dp).semantics { contentDescription = placeholder },
-        textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.onSurface),
+        modifier = modifier.width(width = FIELD_WIDTH_DP.dp).semantics {
+            contentDescription =
+                placeholder
+        },
+        textStyle = MaterialTheme
+            .typography
+            .bodyMedium
+            .copy(color = colors.onSurface),
         singleLine = true,
         cursorBrush = SolidColor(value = colors.primary),
         decorationBox = { field ->
@@ -146,6 +173,7 @@ private fun FindField(
                         color = colors.onSurfaceVariant
                     )
                 }
+
                 field()
             }
         }
@@ -159,12 +187,14 @@ private fun handleFindKey(
     onClose: () -> Unit
 ): Boolean {
     if (event.type != KeyEventType.KeyDown) return false
+
     when {
         event.key in SUBMIT_KEYS && event.isShiftPressed -> onPrevious()
         event.key in SUBMIT_KEYS -> onNext()
         event.key == Key.Escape -> onClose()
         else -> return false
     }
+
     return true
 }
 

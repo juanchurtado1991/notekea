@@ -6,8 +6,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
  * One tab of a [NotekeaTabStrip]: what it is called ([label]), its [icon], a [key] that stays the same while open, and,
- * while it has changes not saved yet, [unsavedLabel]: a dot in place of its close button says so, named by it. [iconTint] colors the
- * icon (a file's kind) except on the active pane's selected tab.
+ * while it has changes not saved yet, [unsavedLabel]: a dot in place of its close button says so, named by it.
+ * [iconTint] colors the icon (a file's kind) except on the active pane's selected tab.
  */
 @Immutable
 data class NotekeaTabStripItem(

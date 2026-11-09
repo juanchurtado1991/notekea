@@ -18,20 +18,26 @@ class StandInTextEmbedder : TextEmbedder {
 
     override val maxTokens: Int = MAX_WORDS
 
-    override suspend fun embed(
-        texts: List<String>
-    ): Outcome<List<FloatArray>, EmbeddingError> = Outcome.Success(value = texts.map { vectorOf(text = it) })
+    override suspend fun embed(texts: List<String>): Outcome<List<FloatArray>, EmbeddingError> =
+        Outcome.Success(
+            value = texts.map { vectorOf(text = it) }
+        )
 
-    private suspend fun vectorOf(
-        text: String
-    ): FloatArray {
+    private suspend fun vectorOf(text: String): FloatArray {
         yield()
         val vector = FloatArray(size = DIMENSIONS)
+
         WORD.findAll(input = text.lowercase()).forEach { word ->
             vector[(word.value.hashCode() and Int.MAX_VALUE) % DIMENSIONS] += 1f
         }
-        val length = sqrt(vector.sumOf { (it * it).toDouble() }).toFloat().takeIf { it > 0f } ?: 1f
-        return FloatArray(size = DIMENSIONS) { vector[it] / length }
+
+        val length = sqrt(vector.sumOf { (it * it).toDouble() }).toFloat().takeIf {
+            it > 0f
+        } ?: 1f
+
+        return FloatArray(size = DIMENSIONS) {
+            vector[it] / length
+        }
     }
 
     private companion object {

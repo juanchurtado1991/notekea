@@ -46,6 +46,7 @@ class WelcomeViewModelTest {
             expected = false,
             actual = state.isLoading
         )
+
         assertEquals(
             expected = Vault.fromPath(path = VaultFixture.NOTES),
             actual = state.openedVault
@@ -57,7 +58,10 @@ class WelcomeViewModelTest {
         val state = startedViewModel().state.value
 
         assertEquals(
-            expected = WelcomeState(platformConventions = WelcomePreviewData.platformConventions, isLoading = false),
+            expected = WelcomeState(
+                platformConventions = WelcomePreviewData.platformConventions,
+                isLoading = false
+            ),
             actual = state
         )
     }
@@ -70,7 +74,13 @@ class WelcomeViewModelTest {
 
         assertNull(actual = state.openedVault)
         assertNull(actual = state.error)
-        assertTrue(actual = state.recentVaults.single().isMissing)
+
+        assertTrue(
+            actual = state
+                .recentVaults
+                .single()
+                .isMissing
+        )
     }
 
     @Test
@@ -79,16 +89,23 @@ class WelcomeViewModelTest {
         fixture.folderPicker.nextPick = VaultFixture.WORK
         val viewModel = startedViewModel()
 
-        send(viewModel = viewModel, intent = WelcomeIntent.OnOpenFolderClick)
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnOpenFolderClick
+        )
 
         assertEquals(
             expected = VaultFixture.WORK,
             actual = viewModel.state.value.openedVault
                 ?.path
         )
+
         assertEquals(
             expected = listOf(VaultFixture.WORK),
-            actual = viewModel.state.value.recentVaults
+            actual = viewModel
+                .state
+                .value
+                .recentVaults
                 .map { it.vault.path }
         )
     }
@@ -98,7 +115,10 @@ class WelcomeViewModelTest {
         val viewModel = startedViewModel()
         val before = viewModel.state.value
 
-        send(viewModel = viewModel, intent = WelcomeIntent.OnOpenFolderClick)
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnOpenFolderClick
+        )
 
         assertEquals(
             expected = before,
@@ -108,24 +128,42 @@ class WelcomeViewModelTest {
 
     @Test
     fun `a permission error is shown until dismissed`() = runWelcomeTest {
-        fixture.addFolder(path = VaultFixture.NOTES, access = FolderAccess.NOT_READABLE)
+        fixture.addFolder(
+            path = VaultFixture.NOTES,
+            access = FolderAccess.NOT_READABLE
+        )
+
         fixture.store.recentVaults = listOf(fixture.recent(path = VaultFixture.WORK))
         fixture.addFolder(path = VaultFixture.WORK)
         val viewModel = startedViewModel()
-        send(viewModel = viewModel, intent = WelcomeIntent.OnSwitchVaultClick)
 
-        send(viewModel = viewModel, intent = WelcomeIntent.OnRecentVaultClick(path = VaultFixture.NOTES))
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnSwitchVaultClick
+        )
+
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnRecentVaultClick(path = VaultFixture.NOTES)
+        )
+
         val failed = viewModel.state.value
-        send(viewModel = viewModel, intent = WelcomeIntent.OnErrorDismiss)
+
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnErrorDismiss
+        )
 
         assertEquals(
             expected = VaultError.PermissionDenied(path = VaultFixture.NOTES),
             actual = failed.error
         )
+
         assertEquals(
             expected = false,
             actual = failed.isBusy
         )
+
         assertNull(actual = viewModel.state.value.error)
     }
 
@@ -133,20 +171,37 @@ class WelcomeViewModelTest {
     fun `creating a vault suggests a name and location, then opens it`() = runWelcomeTest {
         val viewModel = startedViewModel()
 
-        send(viewModel = viewModel, intent = WelcomeIntent.OnCreateVaultClick(suggestedName = SUGGESTED_NAME))
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnCreateVaultClick(suggestedName = SUGGESTED_NAME)
+        )
+
         val suggested = viewModel.state.value.newVaultForm
-        send(viewModel = viewModel, intent = WelcomeIntent.OnNewVaultNameChange(name = NAME))
-        send(viewModel = viewModel, intent = WelcomeIntent.OnNewVaultConfirm)
+
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnNewVaultNameChange(name = NAME)
+        )
+
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnNewVaultConfirm
+        )
 
         assertEquals(
-            expected = NewVaultForm(name = SUGGESTED_NAME, parentPath = FakeVaultFileSystem.DEFAULT_PARENT),
+            expected = NewVaultForm(
+                name = SUGGESTED_NAME,
+                parentPath = FakeVaultFileSystem.DEFAULT_PARENT
+            ),
             actual = suggested
         )
+
         assertEquals(
             expected = FakeVaultFileSystem.DEFAULT_PARENT + FakeVaultFileSystem.SEPARATOR + NAME,
             actual = viewModel.state.value.openedVault
                 ?.path
         )
+
         assertNull(actual = viewModel.state.value.newVaultForm)
     }
 
@@ -154,15 +209,23 @@ class WelcomeViewModelTest {
     fun `the new vault location can be changed with the picker`() = runWelcomeTest {
         fixture.folderPicker.nextPick = VaultFixture.WORK
         val viewModel = startedViewModel()
-        send(viewModel = viewModel, intent = WelcomeIntent.OnCreateVaultClick(suggestedName = SUGGESTED_NAME))
 
-        send(viewModel = viewModel, intent = WelcomeIntent.OnNewVaultLocationClick)
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnCreateVaultClick(suggestedName = SUGGESTED_NAME)
+        )
+
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnNewVaultLocationClick
+        )
 
         assertEquals(
             expected = VaultFixture.WORK,
             actual = viewModel.state.value.newVaultForm
                 ?.parentPath
         )
+
         assertEquals(
             expected = listOf<String?>(FakeVaultFileSystem.DEFAULT_PARENT),
             actual = fixture.folderPicker.initialPaths
@@ -170,32 +233,58 @@ class WelcomeViewModelTest {
     }
 
     @Test
-    fun `an invalid name keeps the form open with an error, and cancel closes it`() = runWelcomeTest {
-        val viewModel = startedViewModel()
-        send(viewModel = viewModel, intent = WelcomeIntent.OnCreateVaultClick(suggestedName = INVALID_NAME))
+    fun `an invalid name keeps the form open with an error, and cancel closes it`() =
+        runWelcomeTest {
+            val viewModel = startedViewModel()
 
-        send(viewModel = viewModel, intent = WelcomeIntent.OnNewVaultConfirm)
-        val failed = viewModel.state.value
-        send(viewModel = viewModel, intent = WelcomeIntent.OnNewVaultCancel)
+            send(
+                viewModel = viewModel,
+                intent = WelcomeIntent.OnCreateVaultClick(suggestedName = INVALID_NAME)
+            )
 
-        assertEquals(
-            expected = VaultError.InvalidName,
-            actual = failed.error
-        )
-        assertEquals(
-            expected = INVALID_NAME,
-            actual = failed.newVaultForm?.name
-        )
-        assertNull(actual = viewModel.state.value.newVaultForm)
-    }
+            send(
+                viewModel = viewModel,
+                intent = WelcomeIntent.OnNewVaultConfirm
+            )
+
+            val failed = viewModel.state.value
+
+            send(
+                viewModel = viewModel,
+                intent = WelcomeIntent.OnNewVaultCancel
+            )
+
+            assertEquals(
+                expected = VaultError.InvalidName,
+                actual = failed.error
+            )
+
+            assertEquals(
+                expected = INVALID_NAME,
+                actual = failed.newVaultForm?.name
+            )
+
+            assertNull(actual = viewModel.state.value.newVaultForm)
+        }
 
     @Test
     fun `editing the name clears its error`() = runWelcomeTest {
         val viewModel = startedViewModel()
-        send(viewModel = viewModel, intent = WelcomeIntent.OnCreateVaultClick(suggestedName = INVALID_NAME))
-        send(viewModel = viewModel, intent = WelcomeIntent.OnNewVaultConfirm)
 
-        send(viewModel = viewModel, intent = WelcomeIntent.OnNewVaultNameChange(name = NAME))
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnCreateVaultClick(suggestedName = INVALID_NAME)
+        )
+
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnNewVaultConfirm
+        )
+
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnNewVaultNameChange(name = NAME)
+        )
 
         assertNull(actual = viewModel.state.value.error)
     }
@@ -209,7 +298,12 @@ class WelcomeViewModelTest {
             WelcomeIntent.OnNewVaultConfirm,
             WelcomeIntent.OnNewVaultLocationClick,
             WelcomeIntent.OnNewVaultNameChange(name = NAME)
-        ).forEach { send(viewModel = viewModel, intent = it) }
+        ).forEach {
+            send(
+                viewModel = viewModel,
+                intent = it
+            )
+        }
 
         assertEquals(
             expected = before,
@@ -220,19 +314,34 @@ class WelcomeViewModelTest {
     @Test
     fun `a missing vault can be located or removed`() = runWelcomeTest {
         fixture.store.recentVaults =
-            listOf(fixture.recent(path = VaultFixture.ARCHIVE), fixture.recent(path = VaultFixture.NOTES))
+            listOf(
+                fixture.recent(path = VaultFixture.ARCHIVE),
+                fixture.recent(path = VaultFixture.NOTES)
+            )
+
         fixture.addFolder(path = VaultFixture.WORK)
         fixture.folderPicker.nextPick = VaultFixture.WORK
         val viewModel = startedViewModel()
 
-        send(viewModel = viewModel, intent = WelcomeIntent.OnRemoveRecentVaultClick(path = VaultFixture.NOTES))
-        send(viewModel = viewModel, intent = WelcomeIntent.OnLocateVaultClick(missingPath = VaultFixture.ARCHIVE))
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnRemoveRecentVaultClick(path = VaultFixture.NOTES)
+        )
+
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnLocateVaultClick(missingPath = VaultFixture.ARCHIVE)
+        )
 
         assertEquals(
             expected = listOf(VaultFixture.WORK),
-            actual = viewModel.state.value.recentVaults
+            actual = viewModel
+                .state
+                .value
+                .recentVaults
                 .map { it.vault.path }
         )
+
         assertEquals(
             expected = VaultFixture.WORK,
             actual = viewModel.state.value.openedVault
@@ -246,12 +355,19 @@ class WelcomeViewModelTest {
         fixture.store.recentVaults = listOf(fixture.recent(path = VaultFixture.NOTES))
         val viewModel = startedViewModel()
 
-        send(viewModel = viewModel, intent = WelcomeIntent.OnSwitchVaultClick)
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnSwitchVaultClick
+        )
 
         assertNull(actual = viewModel.state.value.openedVault)
+
         assertEquals(
             expected = listOf(VaultFixture.NOTES),
-            actual = viewModel.state.value.recentVaults
+            actual = viewModel
+                .state
+                .value
+                .recentVaults
                 .map { it.vault.path }
         )
     }
@@ -261,20 +377,29 @@ class WelcomeViewModelTest {
         fixture.folderPicker.failure = IllegalStateException(FAILURE)
         val viewModel = startedViewModel()
 
-        send(viewModel = viewModel, intent = WelcomeIntent.OnOpenFolderClick)
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnOpenFolderClick
+        )
+
         val failed = viewModel.state.value
-        send(viewModel = viewModel, intent = WelcomeIntent.OnErrorDismiss)
+
+        send(
+            viewModel = viewModel,
+            intent = WelcomeIntent.OnErrorDismiss
+        )
 
         assertTrue(actual = failed.hasUnexpectedError)
+
         assertEquals(
             expected = false,
             actual = viewModel.state.value.hasUnexpectedError
         )
     }
 
-    private fun runWelcomeTest(
-        block: suspend TestScope.() -> Unit
-    ) = runTest(context = testDispatcher) { block() }
+    private fun runWelcomeTest(block: suspend TestScope.() -> Unit) = runTest(
+        context = testDispatcher
+    ) { block() }
 
     private fun TestScope.send(
         viewModel: WelcomeViewModel,
@@ -296,7 +421,9 @@ class WelcomeViewModelTest {
             restoreLastVault = fixture.restoreLastVault,
             vaultFileSystem = fixture.fileSystem
         )
+
         advanceUntilIdle()
+
         return viewModel
     }
 

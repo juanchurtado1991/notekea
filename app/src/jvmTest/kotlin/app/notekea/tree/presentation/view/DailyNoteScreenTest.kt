@@ -1,8 +1,6 @@
 package app.notekea.tree.presentation.view
 
 import androidx.compose.foundation.text.input.TextFieldState
-import app.notekea.tree.presentation.model.TreePreviewData
-import app.notekea.tree.presentation.model.VaultTreeIntent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.geometry.Offset
@@ -10,19 +8,21 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.domain.time.CalendarDate
+import app.notekea.core.notes.domain.DayNeighbors
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
-import app.notekea.core.notes.domain.DayNeighbors
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.editor.presentation.view.EditorContent
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.EditorState
+import app.notekea.editor.presentation.view.EditorContent
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.model.VaultTreeIntent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Daily notes on screen (`ROADMAP.md` 1.10): "Today" in the sidebar asks for today's note, and a daily note's header
+ * Daily notes on screen: "Today" in the sidebar asks for today's note, and a daily note's header
  * arrows step to the days around it, the one without a note on its side doing nothing.
  */
 class DailyNoteScreenTest {
@@ -30,17 +30,38 @@ class DailyNoteScreenTest {
     fun `today in the sidebar and the header's arrows ask for today and the day before, a missing side does nothing`() {
         val treeIntents = mutableListOf<VaultTreeIntent>()
         val editorIntents = mutableListOf<EditorIntent>()
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
                 NotekeaTheme(darkTheme = false) {
-                    DailyNoteWorkspace(onTreeIntent = { treeIntents += it }, onEditorIntent = { editorIntents += it })
+                    DailyNoteWorkspace(
+                        onTreeIntent = { treeIntents += it },
+                        onEditorIntent = { editorIntents += it }
+                    )
                 }
             }.use { scene ->
                 scene.render(nanoTime = 0L)
+
                 listOf(TODAY_ROW, PREVIOUS_ARROW, NEXT_ARROW).forEachIndexed { index, position ->
-                    scene.sendPointerEvent(eventType = PointerEventType.Move, position = position)
-                    scene.sendPointerEvent(eventType = PointerEventType.Press, position = position)
-                    scene.sendPointerEvent(eventType = PointerEventType.Release, position = position)
+                    scene.sendPointerEvent(
+                        eventType = PointerEventType.Move,
+                        position = position
+                    )
+
+                    scene.sendPointerEvent(
+                        eventType = PointerEventType.Press,
+                        position = position
+                    )
+
+                    scene.sendPointerEvent(
+                        eventType = PointerEventType.Release,
+                        position = position
+                    )
+
                     scene.render(nanoTime = (index + 1) * FRAME_NANOS)
                 }
             }
@@ -49,7 +70,9 @@ class DailyNoteScreenTest {
         assertEquals(
             expected = listOf<VaultTreeIntent>(VaultTreeIntent.OnTodayClick) to
                 listOf<EditorIntent>(EditorIntent.OnDayStep(step = -1)),
-            actual = treeIntents.filter { it == VaultTreeIntent.OnTodayClick } to
+            actual = treeIntents.filter {
+                it == VaultTreeIntent.OnTodayClick
+            } to
                 editorIntents.filterIsInstance<EditorIntent.OnDayStep>()
         )
     }
@@ -72,7 +95,11 @@ class DailyNoteScreenTest {
                 platformConventions = PreviewPlatformConventions.linux,
                 onIntent = onEditorIntent,
                 dayNeighbors = DayNeighbors(
-                    date = CalendarDate(year = 2026, month = 10, day = 22),
+                    date = CalendarDate(
+                        year = 2026,
+                        month = 10,
+                        day = 22
+                    ),
                     previous = RelativePath(value = PREVIOUS),
                     next = null
                 )
@@ -88,8 +115,17 @@ class DailyNoteScreenTest {
         private const val PREVIOUS = "Journal/2026-10-21.md"
         private const val VAULT_NAME = "Personal Notes"
         private const val WIDTH = 1100
-        private val NEXT_ARROW = Offset(x = 1018f, y = 65f)
-        private val PREVIOUS_ARROW = Offset(x = 990f, y = 65f)
-        private val TODAY_ROW = Offset(x = 20f, y = 252f)
+        private val NEXT_ARROW = Offset(
+            x = 1018f,
+            y = 65f
+        )
+        private val PREVIOUS_ARROW = Offset(
+            x = 990f,
+            y = 65f
+        )
+        private val TODAY_ROW = Offset(
+            x = 20f,
+            y = 252f
+        )
     }
 }

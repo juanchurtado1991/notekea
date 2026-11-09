@@ -15,9 +15,7 @@ sealed interface ModelStatus {
         val isPaused: Boolean
     ) : ModelStatus
 
-    data class Failed(
-        val error: ModelError
-    ) : ModelStatus
+    data class Failed(val error: ModelError) : ModelStatus
 
     data object Installed : ModelStatus
 

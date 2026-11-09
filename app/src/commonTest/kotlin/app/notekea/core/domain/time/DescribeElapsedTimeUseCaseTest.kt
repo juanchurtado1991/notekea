@@ -12,7 +12,8 @@ import kotlin.time.Instant
 
 class DescribeElapsedTimeUseCaseTest {
     private val now = Instant.fromEpochMilliseconds(epochMilliseconds = NOW_MILLIS)
-    private val describeElapsedTime = DescribeElapsedTimeUseCase(clock = FakeClock(currentTime = now))
+    private val describeElapsedTime =
+        DescribeElapsedTimeUseCase(clock = FakeClock(currentTime = now))
 
     @Test
     fun `each range uses the largest whole unit`() {
@@ -48,9 +49,9 @@ class DescribeElapsedTimeUseCaseTest {
         )
     }
 
-    private fun describe(
-        elapsed: Duration
-    ): ElapsedTime = describeElapsedTime(since = now - elapsed)
+    private fun describe(elapsed: Duration): ElapsedTime = describeElapsedTime(
+        since = now - elapsed
+    )
 
     companion object {
         private const val NOW_MILLIS = 1_800_000_000_000L

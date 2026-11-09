@@ -6,13 +6,24 @@ import kotlin.test.assertEquals
 class YamlValuesTest {
     @Test
     fun `a text ending in a colon is quoted, since YAML reads it as a key`() {
-        assertEquals(expected = "\"Note:\"", actual = YamlValues.written(text = "Note:"))
+        assertEquals(
+            expected = "\"Note:\"",
+            actual = YamlValues.written(text = "Note:")
+        )
     }
 
     @Test
     fun `double quotes undo their escapes, in one pass`() {
         assertEquals(
-            expected = listOf("a\nb", "tab\there", "say \"hi\"", "C:\\new", "\u00E9", "\uD83D\uDE00", "\\q"),
+            expected = listOf(
+                "a\nb",
+                "tab\there",
+                "say \"hi\"",
+                "C:\\new",
+                "\u00E9",
+                "\uD83D\uDE00",
+                "\\q"
+            ),
             actual = listOf(
                 "\"a\\nb\"",
                 "\"tab\\there\"",
@@ -27,7 +38,10 @@ class YamlValuesTest {
 
     @Test
     fun `single quotes hold no escapes`() {
-        assertEquals(expected = "a\\nb's", actual = YamlValues.unquoted(text = "'a\\nb''s'"))
+        assertEquals(
+            expected = "a\\nb's",
+            actual = YamlValues.unquoted(text = "'a\\nb''s'")
+        )
     }
 
     @Test
@@ -36,7 +50,12 @@ class YamlValuesTest {
 
         assertEquals(
             expected = written,
-            actual = written.map { YamlValues.written(text = YamlValues.unquoted(text = it), quote = '"') }
+            actual = written.map {
+                YamlValues.written(
+                    text = YamlValues.unquoted(text = it),
+                    quote = '"'
+                )
+            }
         )
     }
 
@@ -44,7 +63,13 @@ class YamlValuesTest {
     fun `a line break needs double quotes, even in a property that had single ones`() {
         assertEquals(
             expected = listOf("\"a\\nb\"", "\"a\\nb\""),
-            actual = listOf(YamlValues.written(text = "a\nb"), YamlValues.written(text = "a\nb", quote = '\''))
+            actual = listOf(
+                YamlValues.written(text = "a\nb"),
+                YamlValues.written(
+                    text = "a\nb",
+                    quote = '\''
+                )
+            )
         )
     }
 
@@ -70,7 +95,10 @@ class YamlValuesTest {
 
     @Test
     fun `the items of an inline list are found as written, quotes included`() {
-        val block = FrontmatterBlocks.Block(lines = listOf("authors: [\"Smith, John\", JS]"), key = "authors")
+        val block = FrontmatterBlocks.Block(
+            lines = listOf("authors: [\"Smith, John\", JS]"),
+            key = "authors"
+        )
 
         assertEquals(
             expected = mapOf("Smith, John" to "\"Smith, John\"", "JS" to "JS"),

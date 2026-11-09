@@ -15,7 +15,12 @@ public data class AppEnvironment(
     val screen: String
 ) {
     /** One line per fact, as reports list them. */
-    public fun lines(): List<String> = listOf("OS: $system", "Java: $java", "Language: $language", "Screen: $screen")
+    public fun lines(): List<String> = listOf(
+        "OS: $system",
+        "Java: $java",
+        "Language: $language",
+        "Screen: $screen"
+    )
 
     public companion object {
         /** This process's machine; the screen says "no screen" when there is none (CI on Linux). */
@@ -31,8 +36,13 @@ public data class AppEnvironment(
         private fun screen(): String {
             if (GraphicsEnvironment.isHeadless()) return NO_SCREEN
             val size = Toolkit.getDefaultToolkit().screenSize
-            val transform = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
+
+            val transform = GraphicsEnvironment
+                .getLocalGraphicsEnvironment()
+                .defaultScreenDevice
+                .defaultConfiguration
                 .defaultTransform
+
             return "${size.width}×${size.height} at ${Math.round(transform.scaleX * PERCENT)}%"
         }
 

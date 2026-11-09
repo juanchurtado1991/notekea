@@ -4,32 +4,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.VaultTree
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.NotekeaTabStrip
 import app.notekea.core.presentation.designsystem.components.NotekeaTabStripItem
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
-import app.notekea.shell.domain.EditorPane
-import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.VaultTree
-import app.notekea.shell.domain.Workspace
-import app.notekea.tree.presentation.filepreview.fileIconOf
-import app.notekea.tree.presentation.filepreview.fileTintOf
+import app.notekea.core.presentation.platform.label
 import app.notekea.resources.Res
 import app.notekea.resources.tab_all
 import app.notekea.resources.tab_close
-import app.notekea.resources.tab_graph
-import app.notekea.resources.tab_query
-import app.notekea.resources.tab_tasks
 import app.notekea.resources.tab_close_others
+import app.notekea.resources.tab_graph
 import app.notekea.resources.tab_move_to_other_pane
 import app.notekea.resources.tab_new
+import app.notekea.resources.tab_query
 import app.notekea.resources.tab_split_right
+import app.notekea.resources.tab_tasks
 import app.notekea.resources.tab_unsaved
+import app.notekea.shell.domain.EditorPane
+import app.notekea.shell.domain.Workspace
+import app.notekea.tree.presentation.filepreview.fileIconOf
+import app.notekea.tree.presentation.filepreview.fileTintOf
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -44,27 +44,62 @@ internal fun PaneTabs(
     onDrop: (RelativePath, Offset) -> Unit
 ) {
     val operatingSystem = platformConventions.operatingSystem
-    val menu = tabMenu(state = state, pane = index, platformConventions = platformConventions, onIntent = onIntent)
+
+    val menu = tabMenu(
+        state = state,
+        pane = index,
+        platformConventions = platformConventions,
+        onIntent = onIntent
+    )
+
     val unsaved = stringResource(resource = Res.string.tab_unsaved)
+
     NotekeaTabStrip(
         tabs = pane.tabs.map { path ->
             NotekeaTabStripItem(
                 key = path.value,
-                label = labelOf(path = path, state = state),
+                label = labelOf(
+                    path = path,
+                    state = state
+                ),
                 icon = iconOf(path, state),
-                iconTint = fileTintOf(path = path).takeIf { state.kindOf(path = path) == TabKind.FILE },
-                unsavedLabel = unsaved.takeIf { path in unsavedPaths }
+                iconTint = fileTintOf(path = path).takeIf {
+                    state.kindOf(path = path) == TabKind.FILE
+                },
+                unsavedLabel = unsaved.takeIf {
+                    path in unsavedPaths
+                }
             )
         },
         selectedIndex = pane.active,
         isActive = state.workspace.activePane == index,
         closeLabel = stringResource(resource = Res.string.tab_close),
         allTabsLabel = stringResource(resource = Res.string.tab_all),
-        onSelect = { onIntent(WorkspaceIntent.OnTabSelect(pane = index, tab = it)) },
-        onClose = { onIntent(WorkspaceIntent.OnTabClose(pane = index, tab = it)) },
+        onSelect = {
+            onIntent(
+                WorkspaceIntent.OnTabSelect(
+                    pane = index,
+                    tab = it
+                )
+            )
+        },
+        onClose = {
+            onIntent(
+                WorkspaceIntent.OnTabClose(
+                    pane = index,
+                    tab = it
+                )
+            )
+        },
         onDrop = { tab, position -> onDrop(pane.tabs[tab], position) },
         onReorder = { from, to ->
-            onIntent(WorkspaceIntent.OnTabMove(path = pane.tabs[from], toPane = index, toIndex = to))
+            onIntent(
+                WorkspaceIntent.OnTabMove(
+                    path = pane.tabs[from],
+                    toPane = index,
+                    toIndex = to
+                )
+            )
         },
         menuOf = menu
     ) {
@@ -72,7 +107,9 @@ internal fun PaneTabs(
             icon = NotekeaIcons.NewTab,
             label = stringResource(resource = Res.string.tab_new),
             onClick = onNewTab,
-            shortcutHint = platformConventions.quickSwitcherShortcut.label(operatingSystem = operatingSystem),
+            shortcutHint = platformConventions.quickSwitcherShortcut.label(
+                operatingSystem = operatingSystem
+            ),
             takesFocus = false
         )
     }
@@ -92,32 +129,67 @@ private fun tabMenu(
     val split = stringResource(resource = Res.string.tab_split_right)
     val moveToOther = stringResource(resource = Res.string.tab_move_to_other_pane)
     val workspace = state.workspace
+
     return { tab ->
         val path = workspace.panes[pane].tabs[tab]
+
         val move = if (workspace.isSplit) {
             NotekeaMenuItem(
                 label = moveToOther,
                 onClick = {
-                    onIntent(WorkspaceIntent.OnTabMove(path = path, toPane = 1 - pane, toIndex = Int.MAX_VALUE))
+                    onIntent(
+                        WorkspaceIntent.OnTabMove(
+                            path = path,
+                            toPane = 1 - pane,
+                            toIndex = Int.MAX_VALUE
+                        )
+                    )
                 }
             )
         } else {
             NotekeaMenuItem(
                 label = split,
-                onClick = { onIntent(WorkspaceIntent.OnTabMove(path = path, toPane = 1, toIndex = 0)) },
-                shortcutHint = platformConventions.splitRightShortcut.label(operatingSystem = operatingSystem)
+                onClick = {
+                    onIntent(
+                        WorkspaceIntent.OnTabMove(
+                            path = path,
+                            toPane = 1,
+                            toIndex = 0
+                        )
+                    )
+                },
+                shortcutHint = platformConventions.splitRightShortcut.label(
+                    operatingSystem = operatingSystem
+                )
             )
         }
+
         listOf(
             listOf(
                 NotekeaMenuItem(
                     label = close,
-                    onClick = { onIntent(WorkspaceIntent.OnTabClose(pane = pane, tab = tab)) },
-                    shortcutHint = platformConventions.closeTabShortcut.label(operatingSystem = operatingSystem)
+                    onClick = {
+                        onIntent(
+                            WorkspaceIntent.OnTabClose(
+                                pane = pane,
+                                tab = tab
+                            )
+                        )
+                    },
+                    shortcutHint = platformConventions.closeTabShortcut.label(
+                        operatingSystem = operatingSystem
+                    )
                 ),
                 NotekeaMenuItem(
                     label = closeOthers,
-                    onClick = { onIntent(WorkspaceIntent.OnCloseOthers(pane = pane, tab = tab)) },
+                    onClick = {
+                        onIntent(
+                            WorkspaceIntent.OnCloseOthers(
+                                pane = pane,
+                                tab = tab
+                            )
+                        )
+                    },
                     enabled = workspace.panes[pane].tabs.size > 1
                 )
             ),
@@ -156,11 +228,15 @@ private fun iconOf(
 private fun PaneTabsPreview() {
     val notes = listOf("Recipes/Arepas.md", "Welcome.md").map { RelativePath(value = it) }
     val workspace = notes.fold(initial = Workspace.EMPTY) { it, path -> it.open(path = path) }
+
     NotekeaPreviewThemes {
         PaneTabs(
             pane = workspace.panes.first(),
             index = 0,
-            state = WorkspaceState(workspace = workspace, tree = VaultTree.EMPTY),
+            state = WorkspaceState(
+                workspace = workspace,
+                tree = VaultTree.EMPTY
+            ),
             platformConventions = PreviewPlatformConventions.linux,
             onIntent = {},
             onNewTab = {},

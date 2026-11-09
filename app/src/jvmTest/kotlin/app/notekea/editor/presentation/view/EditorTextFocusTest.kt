@@ -1,8 +1,6 @@
 package app.notekea.editor.presentation.view
 
 import androidx.compose.foundation.focusable
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.model.EditorState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
@@ -13,17 +11,19 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.use
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
-import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The focus requester given to the editor reaches its text (1.6 smoke: the keyboard did not come back to the note
- * after the quick switcher closed). The text takes focus, then hands it to another element, which it reports as a
- * focus loss: only a focused text can lose focus.
+ * The focus requester given to the editor reaches its text, so the keyboard comes back to the note after the quick
+ * switcher closes. The text takes focus, then hands it to another element, which it reports as a focus loss: only a
+ * focused text can lose focus.
  */
 class EditorTextFocusTest {
     @Test
@@ -31,11 +31,21 @@ class EditorTextFocusTest {
         val intents = mutableListOf<EditorIntent>()
         val text = FocusRequester()
         val elsewhere = FocusRequester()
+
         UiThread.run {
-            ImageComposeScene(width = WINDOW_WIDTH, height = WINDOW_HEIGHT) {
+            ImageComposeScene(
+                width = WINDOW_WIDTH,
+                height = WINDOW_HEIGHT
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     Column {
-                        Box(modifier = Modifier.size(size = OTHER_SIZE_DP.dp).focusRequester(elsewhere).focusable())
+                        Box(
+                            modifier = Modifier
+                                .size(size = OTHER_SIZE_DP.dp)
+                                .focusRequester(elsewhere)
+                                .focusable()
+                        )
+
                         EditorContent(
                             state = EditorState(notePath = RelativePath(value = NOTE)),
                             buffer = TextFieldState(initialText = BODY),

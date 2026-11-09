@@ -9,14 +9,21 @@ class FirstSortedTest {
     fun `the first elements are those a full sort gives, ties in their original order`() {
         val random = Random(seed = SEED)
         val byScore = compareBy<Pair<Int, Int>> { it.first }
+
         repeat(times = ROUNDS) {
             // Few scores for many elements, so ties are everywhere; the second value tells equal ones apart.
-            val elements = List(size = random.nextInt(until = MAX_SIZE)) { random.nextInt(until = SCORES) to it }
+            val elements = List(size = random.nextInt(until = MAX_SIZE)) {
+                random.nextInt(until = SCORES) to it
+            }
+
             val n = random.nextInt(until = MAX_SIZE)
 
             assertEquals(
                 expected = elements.sortedWith(byScore).take(n = n),
-                actual = elements.firstSorted(n = n, comparator = byScore)
+                actual = elements.firstSorted(
+                    n = n,
+                    comparator = byScore
+                )
             )
         }
     }

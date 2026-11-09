@@ -1,11 +1,9 @@
 package app.notekea.search.domain
 
-import app.notekea.core.domain.firstSorted
-import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.AppDispatchers
+import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.domain.firstSorted
 import app.notekea.core.domain.markdown.FenceTracker
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.withContext
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
@@ -13,15 +11,13 @@ import app.notekea.core.notes.domain.NoteText
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.TextTagFinder
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 
 /**
- * Content search (`ROADMAP.md` 1.6, `Mod+Shift+F`; plain text until hybrid search in 2.6). Every word of `query` must
- * appear in the note's body, ignoring letter case and accents; a `#tag` in the query must be a tag of the note, in its
- * frontmatter or in its text outside code blocks, and also finds nested tags (`#recipe` finds `#recipe/venezuelan`).
- * Notes where the search appears most come first, then by name. The matching line reads as plain text, without
- * Markdown syntax. Texts come from [NoteTextCache], so only changed notes
- * are read again; matching runs on the default dispatcher and stops as soon as the caller is cancelled (the next
- * keystroke). An empty query finds nothing.
+ * Content search: every word of `query` must appear in the note's body, ignoring letter case and accents; a tag in the
+ * query must be a tag of the note and also finds its nested tags. Notes where the search appears most come first, then
+ * by name. Texts come from [NoteTextCache]; matching stops as soon as the caller is cancelled.
  */
 class SearchNoteContentUseCase(
     private val noteTextCache: NoteTextCache,
@@ -39,11 +35,23 @@ class SearchNoteContentUseCase(
         limit: Int = DEFAULT_LIMIT
     ): List<ContentSearchResult> {
         val terms = termsOf(query = query) ?: return emptyList()
-        val texts = noteTextCache.textsOf(vaultPath = vaultPath, notes = notes)
+
+        val texts = noteTextCache.textsOf(
+            vaultPath = vaultPath,
+            notes = notes
+        )
+
         return withContext(context = dispatchers.default) {
             notes.mapNotNull { note ->
                 ensureActive()
-                texts[note.file.path]?.let { matchOf(note = note, text = it, terms = terms) }
+
+                texts[note.file.path]?.let {
+                    matchOf(
+                        note = note,
+                        text = it,
+                        terms = terms
+                    )
+                }
             }.firstSorted(
                 n = limit,
                 comparator = compareByDescending<ContentSearchResult> { it.matchCount }
@@ -53,12 +61,19 @@ class SearchNoteContentUseCase(
         }
     }
 
-    private fun termsOf(
-        query: String
-    ): Terms? {
-        val (tags, words) = query.trim().split(WHITESPACE).filter { it.isNotEmpty() }
-            .partition { it.length > 1 && it.startsWith(prefix = TAG_MARK) }
-        if (tags.isEmpty() && words.isEmpty()) return null
+    private fun termsOf(query: String): Terms? {
+        val (tags, words) = query
+            .trim()
+            .split(WHITESPACE)
+            .filter { it.isNotEmpty() }
+            .partition {
+                it.length > 1 && it.startsWith(prefix = TAG_MARK)
+            }
+
+        val hasNoTerms = tags.isEmpty() && words.isEmpty()
+
+        if (hasNoTerms) return null
+
         return Terms(
             words = words.map { textFolder.fold(text = it) },
             tags = tags.map { textFolder.fold(text = it.removePrefix(prefix = TAG_MARK)) }
@@ -70,19 +85,62 @@ class SearchNoteContentUseCase(
         text: NoteText,
         terms: Terms
     ): ContentSearchResult? {
-        val wordHits = terms.words.map { word -> occurrences(text = text.folded, word = word) }
+        val wordHits = terms.words.map { word ->
+            occurrences(
+                text = text.folded,
+                word = word
+            )
+        }
+
         if (wordHits.any { it.isEmpty() }) return null
         val inlineTags = if (terms.tags.isEmpty()) emptyList() else inlineTagsOf(body = text.body)
-        val frontmatterTags = note.metadata.tags.map { textFolder.fold(text = it) }
-        val tagHits = terms.tags.map { tag -> inlineTags.filter { isTag(name = it.name, tag = tag) }.map { it.range } }
-        val hasEveryTag = terms.tags.indices.all { i ->
-            tagHits[i].isNotEmpty() || frontmatterTags.any { isTag(name = it, tag = terms.tags[i]) }
+
+        val frontmatterTags = note
+            .metadata
+            .tags
+            .map { textFolder.fold(text = it) }
+
+        val tagHits = terms.tags.map { tag ->
+            inlineTags.filter {
+                isTag(
+                    name = it.name,
+                    tag = tag
+                )
+            }.map { it.range }
         }
+
+        val hasEveryTag = terms
+            .tags
+            .indices
+            .all { i ->
+                tagHits[i].isNotEmpty() || frontmatterTags.any {
+                    isTag(
+                        name = it,
+                        tag = terms.tags[i]
+                    )
+                }
+            }
+
         if (!hasEveryTag) return null
         val hits = (wordHits.flatten() + tagHits.flatten()).sortedBy { it.first }
-        val line = bestLine(body = text.body, hits = hits)
-        val first = hits.firstOrNull { line != null && it.first in line }
-        val snippet = first?.let { snippetAround(body = text.body, hits = hits, first = it.first) }
+
+        val line = bestLine(
+            body = text.body,
+            hits = hits
+        )
+
+        val first = hits.firstOrNull {
+            line != null && it.first in line
+        }
+
+        val snippet = first?.let {
+            snippetAround(
+                body = text.body,
+                hits = hits,
+                first = it.first
+            )
+        }
+
         return ContentSearchResult(
             note = note,
             ranges = snippet?.second.orEmpty(),
@@ -100,15 +158,24 @@ class SearchNoteContentUseCase(
         var best: IntRange? = null
         var bestCount = 0
         var next = 0
+
         while (next < hits.size) {
-            val line = lineAround(body = body, offset = hits[next].first)
+            val line = lineAround(
+                body = body,
+                offset = hits[next].first
+            )
+
             val start = next
-            while (next < hits.size && hits[next].first <= line.last) next++
+            fun isOnLine(hit: Int): Boolean = hit < hits.size && hits[hit].first <= line.last
+
+            while (isOnLine(hit = next)) next++
+
             if (next - start > bestCount) {
                 best = line
                 bestCount = next - start
             }
         }
+
         return best
     }
 
@@ -116,8 +183,18 @@ class SearchNoteContentUseCase(
         body: String,
         offset: Int
     ): IntRange {
-        val start = body.lastIndexOf(char = NEW_LINE_CHAR, startIndex = offset) + 1
-        val end = body.indexOf(char = NEW_LINE_CHAR, startIndex = offset).takeIf { it >= 0 } ?: body.length
+        val start = body.lastIndexOf(
+            char = NEW_LINE_CHAR,
+            startIndex = offset
+        ) + 1
+
+        val end = body.indexOf(
+            char = NEW_LINE_CHAR,
+            startIndex = offset
+        ).takeIf {
+            it >= 0
+        } ?: body.length
+
         return start until end
     }
 
@@ -125,25 +202,42 @@ class SearchNoteContentUseCase(
         text: String,
         word: String
     ): List<IntRange> = generateSequence(seed = text.indexOf(string = word)) { previous ->
-        text.indexOf(string = word, startIndex = previous + word.length).takeIf { it >= 0 }
-    }.takeWhile { it >= 0 }.map { it until it + word.length }.toList()
+        text.indexOf(
+            string = word,
+            startIndex = previous + word.length
+        ).takeIf {
+            it >= 0
+        }
+    }
+        .takeWhile {
+            it >= 0
+        }
+        .map {
+            it until it + word.length
+        }
+        .toList()
 
     /** `#tags` written in the body ([TextTagFinder]), with their folded names and places. */
-    private fun inlineTagsOf(
-        body: String
-    ): List<InlineTag> {
+    private fun inlineTagsOf(body: String): List<InlineTag> {
         val tags = mutableListOf<InlineTag>()
         val fences = FenceTracker()
         var lineStart = 0
+
         body.split(NEW_LINE_CHAR).forEach { line ->
             if (!fences.read(text = line)) {
                 textTagFinder.tagsIn(line = line).forEach { match ->
                     val range = match.range.first + lineStart..match.range.last + lineStart
-                    tags += InlineTag(name = textFolder.fold(text = match.groupValues[1]), range = range)
+
+                    tags += InlineTag(
+                        name = textFolder.fold(text = match.groupValues[1]),
+                        range = range
+                    )
                 }
             }
+
             lineStart += line.length + 1
         }
+
         return tags
     }
 
@@ -161,24 +255,54 @@ class SearchNoteContentUseCase(
         hits: List<IntRange>,
         first: Int
     ): Pair<String, List<IntRange>> {
-        val lineStart = body.lastIndexOf(char = NEW_LINE_CHAR, startIndex = first - 1) + 1
-        val lineEnd = body.indexOf(char = NEW_LINE_CHAR, startIndex = first).takeIf { it >= 0 } ?: body.length
+        val lineStart = body.lastIndexOf(
+            char = NEW_LINE_CHAR,
+            startIndex = first - 1
+        ) + 1
+
+        val lineEnd = body.indexOf(
+            char = NEW_LINE_CHAR,
+            startIndex = first
+        ).takeIf {
+            it >= 0
+        } ?: body.length
+
         val plain = markdownLineStripper.strip(
-            line = body.substring(startIndex = lineStart, endIndex = lineEnd),
+            line = body.substring(
+                startIndex = lineStart,
+                endIndex = lineEnd
+            ),
             ranges = hits.filter {
                 it.first >= lineStart && it.last < lineEnd
-            }.map { it.first - lineStart..it.last - lineStart }
+            }.map {
+                it.first - lineStart..it.last - lineStart
+            }
         )
-        val firstInLine = plain.ranges.firstOrNull()?.first ?: 0
+
+        val firstInLine = plain
+            .ranges
+            .firstOrNull()
+            ?.first ?: 0
+
         val start = maxOf(0, firstInLine - CONTEXT_BEFORE)
         val end = minOf(plain.text.length, start + MAX_SNIPPET_LENGTH)
         val prefix = if (start > 0) ELLIPSIS else ""
         val suffix = if (end < plain.text.length) ELLIPSIS else ""
         val shift = start - prefix.length
-        val ranges = plain.ranges.filter {
-            it.first >= start && it.last < end
-        }.map { it.first - shift..it.last - shift }
-        return prefix + plain.text.substring(startIndex = start, endIndex = end) + suffix to ranges
+
+        val ranges = plain
+            .ranges
+            .filter {
+                it.first >= start && it.last < end
+            }
+            .map {
+                it.first - shift..it.last - shift
+            }
+
+        return prefix + plain.text.substring(
+            startIndex = start,
+            endIndex = end
+        ) + suffix to ranges
     }
 
     /** The search split into plain [words] and [tags] (without `#`), both folded. */
@@ -193,7 +317,7 @@ class SearchNoteContentUseCase(
     )
 
     companion object {
-        /** The palette shows up to 10 results (`ROADMAP.md` 1.6). */
+        /** The palette shows up to 10 results. */
         const val DEFAULT_LIMIT = 10
         private const val CONTEXT_BEFORE = 40
         private const val ELLIPSIS = "…"

@@ -24,11 +24,17 @@ class SystemFirstTrash(
         path: RelativePath
     ): Outcome<TrashLocation, NotesError> {
         val absolutePath = (vaultPath.toPath() / path.value).toString()
-        val isInSystemTrash = withContext(context = dispatchers.io) { moveToSystemTrash(absolutePath) }
+
+        val isInSystemTrash =
+            withContext(context = dispatchers.io) { moveToSystemTrash(absolutePath) }
+
         return if (isInSystemTrash) {
             Outcome.Success(value = TrashLocation.SYSTEM_TRASH)
         } else {
-            vaultTrash.moveToTrash(vaultPath = vaultPath, path = path)
+            vaultTrash.moveToTrash(
+                vaultPath = vaultPath,
+                path = path
+            )
         }
     }
 }

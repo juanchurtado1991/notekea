@@ -1,11 +1,9 @@
 package app.notekea.core.notes.domain
 
 /**
- * One line of Markdown as a reader sees it, for search results: the block marker at the start (heading `#`, quote `>`,
- * list `-` or `1.`, task box), the brackets of wiki links (an alias replaces its target), the address of Markdown
- * links and images (their text stays), inline code backticks and emphasis marks (`**`, `__`, `~~`, `==`, `*`, `_`)
- * are removed; `#tags` and everything else stay. Inside inline code nothing but the backticks is touched. Highlight
- * ranges move with the text they cover; a range whose characters were all removed is dropped.
+ * One line of Markdown as a reader sees it, for search results: the block marker at its start, the brackets of wiki
+ * links, the address of Markdown links and images, inline code backticks and emphasis marks are removed; `#tags` stay.
+ * Highlight ranges move with the text they cover; one whose characters were all removed is dropped.
  */
 class MarkdownLineStripper {
     fun strip(
@@ -14,29 +12,75 @@ class MarkdownLineStripper {
     ): PlainLine {
         val removed = BooleanArray(size = line.length)
         val code = BooleanArray(size = line.length)
-        removeLeadingMarker(line = line, removed = removed)
+
+        removeLeadingMarker(
+            line = line,
+            removed = removed
+        )
+
         INLINE_CODE.findAll(input = line).forEach { match ->
             val ticks = match.groupValues[1].length
+
             match.range.forEach { code[it] = true }
-            remove(removed = removed, range = match.range.first until match.range.first + ticks)
-            remove(removed = removed, range = match.range.last - ticks + 1..match.range.last)
+
+            remove(
+                removed = removed,
+                range = match.range.first until match.range.first + ticks
+            )
+
+            remove(
+                removed = removed,
+                range = match.range.last - ticks + 1..match.range.last
+            )
         }
-        removeLinkSyntax(line = line, removed = removed, code = code)
+
+        removeLinkSyntax(
+            line = line,
+            removed = removed,
+            code = code
+        )
+
         listOf(PAIRED_EMPHASIS, SINGLE_EMPHASIS).forEach { pattern ->
-            pattern.findAll(input = line).filter { !code[it.range.first] }.forEach { match ->
-                val marks = match.groupValues[1].length
-                remove(removed = removed, range = match.range.first until match.range.first + marks)
-                remove(removed = removed, range = match.range.last - marks + 1..match.range.last)
-            }
+            pattern
+                .findAll(input = line)
+                .filter {
+                    !code[it.range.first]
+                }
+                .forEach { match ->
+                    val marks = match.groupValues[1].length
+
+                    remove(
+                        removed = removed,
+                        range = match.range.first until match.range.first + marks
+                    )
+
+                    remove(
+                        removed = removed,
+                        range = match.range.last - marks + 1..match.range.last
+                    )
+                }
         }
-        return plainLine(line = line, removed = removed, ranges = ranges)
+
+        return plainLine(
+            line = line,
+            removed = removed,
+            ranges = ranges
+        )
     }
 
     private fun removeLeadingMarker(
         line: String,
         removed: BooleanArray
     ) {
-        LEADING_MARKER.find(input = line)?.range?.let { remove(removed = removed, range = it) }
+        LEADING_MARKER
+            .find(input = line)
+            ?.range
+            ?.let {
+                remove(
+                    removed = removed,
+                    range = it
+                )
+            }
     }
 
     /** `[[target|alias]]` keeps the alias, `[[target]]` the target, `[text](address)` the text; embeds the same. */
@@ -45,24 +89,53 @@ class MarkdownLineStripper {
         removed: BooleanArray,
         code: BooleanArray
     ) {
-        WIKI_LINK.findAll(input = line).filter { !code[it.range.first] }.forEach { match ->
-            val alias = match.groups[ALIAS_GROUP]
-            val textStart = alias?.range?.first ?: match.groups[TARGET_GROUP]!!.range.first
-            remove(removed = removed, range = match.range.first until textStart)
-            remove(removed = removed, range = match.range.last - 1..match.range.last)
-        }
-        MARKDOWN_LINK.findAll(input = line).filter { !code[it.range.first] }.forEach { match ->
-            val text = match.groups[TEXT_GROUP]!!.range
-            remove(removed = removed, range = match.range.first until text.first)
-            remove(removed = removed, range = text.last + 1..match.range.last)
-        }
+        WIKI_LINK
+            .findAll(input = line)
+            .filter {
+                !code[it.range.first]
+            }
+            .forEach { match ->
+                val alias = match.groups[ALIAS_GROUP]
+                val textStart = alias?.range?.first ?: match.groups[TARGET_GROUP]!!.range.first
+
+                remove(
+                    removed = removed,
+                    range = match.range.first until textStart
+                )
+
+                remove(
+                    removed = removed,
+                    range = match.range.last - 1..match.range.last
+                )
+            }
+
+        MARKDOWN_LINK
+            .findAll(input = line)
+            .filter {
+                !code[it.range.first]
+            }
+            .forEach { match ->
+                val text = match.groups[TEXT_GROUP]!!.range
+
+                remove(
+                    removed = removed,
+                    range = match.range.first until text.first
+                )
+
+                remove(
+                    removed = removed,
+                    range = text.last + 1..match.range.last
+                )
+            }
     }
 
     private fun remove(
         removed: BooleanArray,
         range: IntRange
     ) {
-        range.forEach { if (it in removed.indices) removed[it] = true }
+        range.forEach {
+            if (it in removed.indices) removed[it] = true
+        }
     }
 
     /** The kept characters, and each range moved to them (from its first kept character to its last). */
@@ -72,17 +145,26 @@ class MarkdownLineStripper {
         ranges: List<IntRange>
     ): PlainLine {
         val newIndex = IntArray(size = line.length)
+
         val text = buildString {
             line.forEachIndexed { index, char ->
                 newIndex[index] = length
                 if (!removed[index]) append(char)
             }
         }
+
         val moved = ranges.mapNotNull { range ->
-            val kept = range.filter { it in line.indices && !removed[it] }
+            val kept = range.filter {
+                it in line.indices && !removed[it]
+            }
+
             if (kept.isEmpty()) null else newIndex[kept.first()]..newIndex[kept.last()]
         }
-        return PlainLine(text = text.trimEnd(), ranges = moved)
+
+        return PlainLine(
+            text = text.trimEnd(),
+            ranges = moved
+        )
     }
 
     companion object {

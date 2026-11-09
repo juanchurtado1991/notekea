@@ -5,39 +5,36 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
-import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.platform.WindowShortcut
-import app.notekea.editor.domain.FormatAction
 import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.tree.domain.TagRanking
+import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.presentation.platform.WindowShortcut
+import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.viewmodel.EditorViewModel
 import app.notekea.editor.presentation.sidepanel.SidePanelHost
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
+import app.notekea.resources.Res
+import app.notekea.resources.tree_untitled_note
 import app.notekea.search.presentation.switcher.QuickSwitcherEffect
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherMode
 import app.notekea.search.presentation.switcher.QuickSwitcherViewModel
-import app.notekea.tree.presentation.tags.TagPickerEffect
-import app.notekea.tree.presentation.tags.TagPickerIntent
-import app.notekea.tree.presentation.tags.TagPickerViewModel
+import app.notekea.shell.domain.Workspace
 import app.notekea.templates.presentation.TemplatePickerEffect
 import app.notekea.templates.presentation.TemplatePickerIntent
 import app.notekea.templates.presentation.TemplatePickerViewModel
 import app.notekea.templates.presentation.TemplateTarget
-import app.notekea.shell.presentation.WorkspaceEffect
-import app.notekea.shell.presentation.WorkspaceIntent
-import app.notekea.shell.presentation.WorkspaceShortcuts
-import app.notekea.resources.Res
-import app.notekea.resources.tree_untitled_note
-import org.jetbrains.compose.resources.stringResource
+import app.notekea.tree.domain.TagRanking
 import app.notekea.tree.presentation.model.BookmarkIntent
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.tree.presentation.model.VaultTreeState
+import app.notekea.tree.presentation.tags.TagPickerEffect
+import app.notekea.tree.presentation.tags.TagPickerIntent
+import app.notekea.tree.presentation.tags.TagPickerViewModel
 import app.notekea.tree.presentation.viewmodel.VaultTreeViewModel
-import app.notekea.shell.domain.Workspace
+import org.jetbrains.compose.resources.stringResource
 
 /** The window shortcuts of the workspace, and the view models following each other's effects. */
 @Composable
@@ -50,30 +47,59 @@ internal fun FollowWorkspace(
     val conventions = state.platformConventions
     val tree = viewModels.tree
     val workspace = viewModels.workspace
+
     WindowShortcut(shortcut = conventions.newNoteShortcut) {
         tree.onIntent(intent = VaultTreeIntent.OnNewNoteClick(baseName = untitledNote))
     }
+
     WindowShortcut(shortcut = conventions.toggleSidebarShortcut) {
         tree.onIntent(intent = VaultTreeIntent.OnSidebarToggle)
     }
-    DailyNoteShortcuts(platformConventions = conventions, onIntent = tree::onIntent)
+
+    DailyNoteShortcuts(
+        platformConventions = conventions,
+        onIntent = tree::onIntent
+    )
+
     WindowShortcut(shortcut = conventions.bookmarkShortcut) {
-        val active = workspace.state.value.workspace.activePath?.takeIf { it !in Workspace.TOOL_TABS }
+        val active = workspace
+            .state
+            .value
+            .workspace
+            .activePath
+            ?.takeIf {
+                it !in Workspace.TOOL_TABS
+            }
+
         val path = active ?: tree.state.value.selectedPath
+
         path?.let { tree.onIntent(intent = BookmarkIntent.OnToggle(path = it)) }
     }
-    QuickSwitcherShortcuts(platformConventions = conventions, onIntent = viewModels.onSwitcher)
+
+    QuickSwitcherShortcuts(
+        platformConventions = conventions,
+        onIntent = viewModels.onSwitcher
+    )
+
     WorkspaceShortcuts(
         platformConventions = conventions,
         onIntent = workspace::onIntent,
         onSidePanelToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) }
     )
-    FollowTree(state = state, viewModels = viewModels)
+
+    FollowTree(
+        state = state,
+        viewModels = viewModels
+    )
+
     LaunchedEffect(workspace) {
         workspace.effects.collect { effect ->
             when (effect) {
                 WorkspaceEffect.FocusOutline -> sidePanel.focusOutline()
-                WorkspaceEffect.UnexpectedError -> viewModels.tree.onIntent(intent = VaultTreeIntent.OnUnexpectedError)
+
+                WorkspaceEffect.UnexpectedError -> viewModels.tree.onIntent(
+                    intent = VaultTreeIntent.OnUnexpectedError
+                )
             }
         }
     }
@@ -93,9 +119,16 @@ private fun FollowTree(
     val workspaceViewModel = viewModels.workspace
     val editors = viewModels.editors
     val workspaceState by workspaceViewModel.state.collectAsState()
+
     LaunchedEffect(viewModel, workspaceViewModel) {
-        viewModel.effects.collect { effect -> followTreeEffect(effect = effect, viewModels = viewModels) }
+        viewModel.effects.collect { effect ->
+            followTreeEffect(
+                effect = effect,
+                viewModels = viewModels
+            )
+        }
     }
+
     LaunchedEffect(state.tree, state.isLoading) {
         workspaceViewModel.onIntent(
             intent = WorkspaceIntent.OnTreeChange(
@@ -105,16 +138,25 @@ private fun FollowTree(
             )
         )
     }
+
     val activePath = workspaceState.workspace.activePath
     val selected by rememberUpdatedState(newValue = state.selectedPath)
+
     LaunchedEffect(activePath) {
-        if (activePath != null && activePath != selected && activePath !in Workspace.TOOL_TABS) {
+        if (activePath != null &&
+            activePath != selected &&
+            activePath !in Workspace.TOOL_TABS
+        ) {
             viewModel.onIntent(intent = VaultTreeIntent.OnRowSelect(path = activePath))
         }
     }
+
     val isSplit = workspaceState.workspace.isSplit
+
     LaunchedEffect(isSplit) {
-        if (!isSplit) editors.drop(n = 1).forEach { it.onIntent(EditorIntent.OnOpen(path = null)) }
+        if (!isSplit) {
+            editors.drop(n = 1).forEach { it.onIntent(EditorIntent.OnOpen(path = null)) }
+        }
     }
 }
 
@@ -124,19 +166,41 @@ private fun followTreeEffect(
     viewModels: WorkspaceViewModels
 ) {
     val workspace = viewModels.workspace
+
     when (effect) {
         is VaultTreeEffect.OpenEntry -> {
-            workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = effect.path, inBackground = effect.inBackground))
+            workspace.onIntent(
+                intent = WorkspaceIntent.OnOpen(
+                    path = effect.path,
+                    inBackground = effect.inBackground
+                )
+            )
         }
 
-        is VaultTreeEffect.EntryDeleted -> workspace.onIntent(intent = WorkspaceIntent.OnDeleted(path = effect.path))
+        is VaultTreeEffect.EntryDeleted -> workspace.onIntent(
+            intent = WorkspaceIntent.OnDeleted(path = effect.path)
+        )
 
         is VaultTreeEffect.EntryRenamed -> {
-            workspace.onIntent(intent = WorkspaceIntent.OnRenamed(from = effect.from, to = effect.to))
+            workspace.onIntent(
+                intent = WorkspaceIntent.OnRenamed(
+                    from = effect.from,
+                    to = effect.to
+                )
+            )
+
             viewModels.editors.forEach { editor ->
                 val open = editor.state.value.notePath ?: return@forEach
+
                 if (open.isWithin(folder = effect.from)) {
-                    editor.onIntent(EditorIntent.OnNoteMoved(path = open.rebased(from = effect.from, to = effect.to)))
+                    editor.onIntent(
+                        EditorIntent.OnNoteMoved(
+                            path = open.rebased(
+                                from = effect.from,
+                                to = effect.to
+                            )
+                        )
+                    )
                 }
             }
         }
@@ -166,8 +230,10 @@ internal fun FollowQuickSwitcher(
     LaunchedEffect(switcher, notes) {
         switcher.onIntent(intent = QuickSwitcherIntent.OnNotesChange(notes = notes.values))
     }
+
     val currentNotes by rememberUpdatedState(newValue = notes)
     val currentEditors by rememberUpdatedState(newValue = editors)
+
     LaunchedEffect(switcher, tree) {
         switcher.effects.collect { effect ->
             followSwitcherEffect(
@@ -195,35 +261,52 @@ internal fun followSwitcherEffect(
             onReveal(effect.path)
             val editor = editors.of(path = effect.path)
             val passage = effect.passage
-            editor.onIntent(
-                intent = if (passage == null) {
-                    EditorIntent.OnFocusRequest(path = effect.path)
-                } else {
-                    EditorIntent.OnRevealRequest(path = effect.path, range = passage)
-                }
-            )
+
+            val intent = if (passage == null) {
+                EditorIntent.OnFocusRequest(path = effect.path)
+            } else {
+                EditorIntent.OnRevealRequest(
+                    path = effect.path,
+                    range = passage
+                )
+            }
+
+            editor.onIntent(intent = intent)
         }
 
         is QuickSwitcherEffect.LinkNote -> {
             val target = LinkResolver(notePaths = notes).wikiTarget(path = effect.path)
-            editors.active.onIntent(EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target)))
+
+            editors.active.onIntent(
+                EditorIntent.OnFormat(action = FormatAction.NoteLink(target = target))
+            )
         }
 
-        QuickSwitcherEffect.Dismissed -> editors.active.onIntent(intent = EditorIntent.OnFocusRequest())
+        QuickSwitcherEffect.Dismissed -> editors.active.onIntent(
+            intent = EditorIntent.OnFocusRequest()
+        )
     }
 }
 
-/** `Mod+D` opens today's daily note; `Mod+Alt+←` and `Mod+Alt+→` step to the daily note before or after the open one. */
+/**
+ * `Mod+D` opens today's daily note; `Mod+Alt+←` and `Mod+Alt+→` step to the daily note before or after the open one.
+ */
 @Composable
 private fun DailyNoteShortcuts(
     platformConventions: PlatformConventions,
     onIntent: (VaultTreeIntent) -> Unit
 ) {
-    WindowShortcut(shortcut = platformConventions.todayShortcut) { onIntent(VaultTreeIntent.OnTodayClick) }
+    WindowShortcut(shortcut = platformConventions.todayShortcut) {
+        onIntent(VaultTreeIntent.OnTodayClick)
+    }
+
     WindowShortcut(shortcut = platformConventions.previousDayShortcut) {
         onIntent(VaultTreeIntent.OnDayStep(step = -1))
     }
-    WindowShortcut(shortcut = platformConventions.nextDayShortcut) { onIntent(VaultTreeIntent.OnDayStep(step = 1)) }
+
+    WindowShortcut(shortcut = platformConventions.nextDayShortcut) {
+        onIntent(VaultTreeIntent.OnDayStep(step = 1))
+    }
 }
 
 /** `Mod+P` opens the palette on note names, `Mod+Shift+F` on note content, whatever has focus. */
@@ -235,6 +318,7 @@ private fun QuickSwitcherShortcuts(
     WindowShortcut(shortcut = platformConventions.quickSwitcherShortcut) {
         onIntent(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.NOTES))
     }
+
     WindowShortcut(shortcut = platformConventions.searchNotesShortcut) {
         onIntent(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.CONTENT))
     }
@@ -251,15 +335,23 @@ internal fun FollowTagPicker(
     notes: Collection<NoteEntry>
 ) {
     LaunchedEffect(tagPicker, notes) {
-        tagPicker.onIntent(intent = TagPickerIntent.OnTagsChange(tags = TagRanking().byUse(notes = notes)))
+        tagPicker.onIntent(
+            intent = TagPickerIntent.OnTagsChange(tags = TagRanking().byUse(notes = notes))
+        )
     }
+
     val currentEditor by rememberUpdatedState(newValue = editor)
+
     LaunchedEffect(tagPicker) {
         tagPicker.effects.collect { effect ->
             val intent = when (effect) {
-                is TagPickerEffect.TagChosen -> EditorIntent.OnFormat(action = FormatAction.Tag(name = effect.name))
+                is TagPickerEffect.TagChosen -> EditorIntent.OnFormat(
+                    action = FormatAction.Tag(name = effect.name)
+                )
+
                 TagPickerEffect.Dismissed -> EditorIntent.OnFocusRequest()
             }
+
             currentEditor.onIntent(intent = intent)
         }
     }
@@ -279,17 +371,22 @@ internal fun FollowTemplatePicker(
 ) {
     val vaultTree = state.tree
     val untitledNote = stringResource(resource = Res.string.tree_untitled_note)
+
     LaunchedEffect(templatePicker, vaultTree) {
         templatePicker.onIntent(intent = TemplatePickerIntent.OnTreeChange(tree = vaultTree))
     }
+
     val currentEditor by rememberUpdatedState(newValue = editor)
     val currentUntitled by rememberUpdatedState(newValue = untitledNote)
+
     LaunchedEffect(templatePicker, tree) {
         templatePicker.effects.collect { effect ->
             when (effect) {
                 is TemplatePickerEffect.TemplateChosen -> when (val target = effect.target) {
                     TemplateTarget.CurrentNote -> {
-                        currentEditor.onIntent(intent = EditorIntent.OnTemplateInsert(template = effect.template))
+                        currentEditor.onIntent(
+                            intent = EditorIntent.OnTemplateInsert(template = effect.template)
+                        )
                     }
 
                     is TemplateTarget.NewNote -> tree.onIntent(
@@ -301,7 +398,9 @@ internal fun FollowTemplatePicker(
                     )
                 }
 
-                TemplatePickerEffect.Dismissed -> currentEditor.onIntent(intent = EditorIntent.OnFocusRequest())
+                TemplatePickerEffect.Dismissed -> currentEditor.onIntent(
+                    intent = EditorIntent.OnFocusRequest()
+                )
             }
         }
     }

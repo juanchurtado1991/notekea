@@ -1,5 +1,6 @@
 package app.notekea.core.presentation.designsystem.components
 
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.foundation.background
@@ -31,10 +32,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import app.notekea.core.presentation.platform.LocalResizePointerIcon
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.motionTween
+import app.notekea.core.presentation.platform.LocalResizePointerIcon
 
 private const val HANDLE_WIDTH_DP = 8
 private const val OVERLAY_SHADOW_DP = 8
@@ -45,13 +46,9 @@ private const val PREVIEW_PANEL_WIDTH_DP = 140
 private const val PREVIEW_WIDTH_DP = 420
 
 /**
- * A [panel] beside the [content] with a draggable edge: the panel at [panelWidth] between [minPanelWidth] and
- * [maxPanelWidth] on [panelSide] (the sidebar at the start, the side panel at the end), and the content filling the
- * rest. The edge follows the pointer while dragging and reports the final width through [onPanelWidthChange] once,
- * when the drag ends. Hiding the panel ([isPanelVisible]) slides it closed in the panel motion time; its content keeps
- * its width meanwhile, so nothing reflows while it closes. With [isOverlay] (no room for both) the panel floats over
- * the content with a shadow instead, and cannot be resized. The content stays the same composition in every case, so
- * hiding the panel or resizing the window keeps its state (the editor's scroll, its focus).
+ * A [panel] beside the [content] with a draggable edge: its width stays between [minPanelWidth] and [maxPanelWidth] and
+ * is reported through [onPanelWidthChange] when the drag ends. Hiding it ([isPanelVisible]) slides it closed; with
+ * [isOverlay] it floats over the content, which stays the same composition and keeps its state.
  */
 @Composable
 fun NotekeaSplitPane(
@@ -67,25 +64,46 @@ fun NotekeaSplitPane(
     isOverlay: Boolean = false
 ) {
     var draggedWidth by remember(panelWidth) { mutableStateOf(value = panelWidth) }
+
     var isDragging by remember { mutableStateOf(value = false) }
+
+    val widthAnimation: AnimationSpec<Dp> = if (isDragging) {
+        snap()
+    } else {
+        motionTween(durationMillis = NotekeaDimensions.MOTION_PANEL_MILLIS)
+    }
+
     val shownWidth by animateDpAsState(
         targetValue = if (isPanelVisible) draggedWidth else 0.dp,
-        animationSpec = if (isDragging) snap() else motionTween(durationMillis = NotekeaDimensions.MOTION_PANEL_MILLIS)
+        animationSpec = widthAnimation
     )
+
     val isStart = panelSide == PaneSide.START
-    val dragState = rememberPanelDrag(isStart = isStart, width = { draggedWidth }) {
-        draggedWidth = it.coerceIn(minimumValue = minPanelWidth, maximumValue = maxPanelWidth)
+
+    val dragState = rememberPanelDrag(
+        isStart = isStart,
+        width = { draggedWidth }
+    ) {
+        draggedWidth = it.coerceIn(
+            minimumValue = minPanelWidth,
+            maximumValue = maxPanelWidth
+        )
     }
+
     val hasHandle = isPanelVisible && !isOverlay
+
+    fun stopDrag() {
+        isDragging = false
+        onPanelWidthChange(draggedWidth)
+    }
+
     val handle = Modifier.draggable(
         state = dragState,
         orientation = Orientation.Horizontal,
         onDragStarted = { isDragging = true },
-        onDragStopped = {
-            isDragging = false
-            onPanelWidthChange(draggedWidth)
-        }
+        onDragStopped = { stopDrag() }
     )
+
     SplitLayout(
         isStart = isStart,
         docked = if (isOverlay) 0.dp else shownWidth + if (hasHandle) HANDLE_WIDTH_DP.dp else 0.dp,
@@ -116,7 +134,10 @@ private fun rememberPanelDrag(
 ): DraggableState {
     val density = LocalDensity.current
     val direction = if (isStart) 1 else -1
-    return rememberDraggableState { delta -> onDrag(width() + with(density) { (delta * direction).toDp() }) }
+
+    return rememberDraggableState { delta ->
+        onDrag(width() + with(density) { (delta * direction).toDp() })
+    }
 }
 
 /**
@@ -139,14 +160,21 @@ private fun SplitLayout(
                 end = if (isStart) 0.dp else docked
             )
         ) { content() }
+
         Row(
             modifier = Modifier
                 .fillMaxHeight()
                 .align(alignment = if (isStart) Alignment.TopStart else Alignment.TopEnd)
         ) {
-            if (!isStart) handle?.let { ResizeHandle(modifier = it) }
+            if (!isStart) {
+                handle?.let { ResizeHandle(modifier = it) }
+            }
+
             panel()
-            if (isStart) handle?.let { ResizeHandle(modifier = it) }
+
+            if (isStart) {
+                handle?.let { ResizeHandle(modifier = it) }
+            }
         }
     }
 }
@@ -161,12 +189,19 @@ private fun PanelBox(
     panel: @Composable () -> Unit
 ) {
     val floating = if (isOverlay) {
-        Modifier.shadow(elevation = OVERLAY_SHADOW_DP.dp).background(color = MaterialTheme.colorScheme.surface)
+        Modifier.shadow(
+            elevation = OVERLAY_SHADOW_DP.dp
+        ).background(color = MaterialTheme.colorScheme.surface)
     } else {
         Modifier
     }
+
     Box(
-        modifier = Modifier.width(width = shownWidth).fillMaxHeight().then(other = floating).clipToBounds(),
+        modifier = Modifier
+            .width(width = shownWidth)
+            .fillMaxHeight()
+            .then(other = floating)
+            .clipToBounds(),
         contentAlignment = if (isStart) Alignment.TopEnd else Alignment.TopStart
     ) {
         Box(modifier = Modifier.requiredWidth(width = fullWidth).fillMaxHeight()) { panel() }
@@ -174,14 +209,13 @@ private fun PanelBox(
 }
 
 @Composable
-private fun ResizeHandle(
-    modifier: Modifier
-) {
+private fun ResizeHandle(modifier: Modifier) {
     Box(
         modifier = modifier
             .width(width = HANDLE_WIDTH_DP.dp)
             .fillMaxHeight()
-            // The panes' surface, so the handle reads as their hairline and not as a gap down to the window's background.
+            // The panes' surface, so the handle reads as their hairline and not as a gap down to the window's
+            // background.
             .background(color = MaterialTheme.colorScheme.surface)
             .pointerHoverIcon(icon = LocalResizePointerIcon.current),
         contentAlignment = Alignment.Center
@@ -210,7 +244,9 @@ private fun SplitPanePreviewFrame(
             maxPanelWidth = PREVIEW_WIDTH_DP.dp,
             panel = { Text(text = PREVIEW_PANEL) },
             content = { Text(text = PREVIEW_CONTENT) },
-            modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp).height(height = PREVIEW_HEIGHT_DP.dp),
+            modifier = Modifier.width(
+                width = PREVIEW_WIDTH_DP.dp
+            ).height(height = PREVIEW_HEIGHT_DP.dp),
             panelSide = panelSide,
             isOverlay = isOverlay
         )
@@ -238,5 +274,8 @@ private fun NotekeaSplitPaneEndPreview() {
 @Preview
 @Composable
 private fun NotekeaSplitPaneOverlayPreview() {
-    SplitPanePreviewFrame(panelSide = PaneSide.END, isOverlay = true)
+    SplitPanePreviewFrame(
+        panelSide = PaneSide.END,
+        isOverlay = true
+    )
 }

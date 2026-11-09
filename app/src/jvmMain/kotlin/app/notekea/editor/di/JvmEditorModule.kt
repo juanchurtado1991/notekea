@@ -11,9 +11,9 @@ import app.notekea.editor.data.WaylandClipboardReader
 import app.notekea.editor.domain.AttachmentPicker
 import app.notekea.editor.domain.ClipboardReader
 import app.notekea.editor.domain.NoteTimesReader
-import kotlin.time.Duration.Companion.seconds
 import okio.FileSystem
 import org.koin.dsl.module
+import kotlin.time.Duration.Companion.seconds
 
 // On Wayland the owner of a copied image never answers Java, so it gives up after a second instead of ten.
 private val WAYLAND_SELECTION_TIMEOUT = 1.seconds
@@ -23,9 +23,13 @@ private val WAYLAND_SELECTION_TIMEOUT = 1.seconds
  */
 val jvmEditorModule = module {
     single<AttachmentPicker> { FileKitAttachmentPicker() }
+
     single<ClipboardReader> {
         val isWayland = get<PlatformConventions>().operatingSystem == OperatingSystem.LINUX &&
-            get<SystemEnvironment>().environmentVariable(name = WaylandClipboardReader.WAYLAND_DISPLAY) != null
+            get<SystemEnvironment>().environmentVariable(
+                name = WaylandClipboardReader.WAYLAND_DISPLAY
+            ) != null
+
         if (isWayland) {
             WaylandClipboardReader(
                 primary = AwtClipboardReader(selectionTimeout = WAYLAND_SELECTION_TIMEOUT),
@@ -35,5 +39,11 @@ val jvmEditorModule = module {
             AwtClipboardReader()
         }
     }
-    single<NoteTimesReader> { OkioNoteTimesReader(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
+
+    single<NoteTimesReader> {
+        OkioNoteTimesReader(
+            fileSystem = FileSystem.SYSTEM,
+            dispatchers = get()
+        )
+    }
 }

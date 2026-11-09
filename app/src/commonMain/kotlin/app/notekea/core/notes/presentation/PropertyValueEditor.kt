@@ -19,15 +19,15 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.domain.time.MomentFormat
+import app.notekea.core.notes.domain.NoteProperty
+import app.notekea.core.notes.domain.PropertyKeys
+import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.NotekeaChip
 import app.notekea.core.presentation.designsystem.components.NotekeaDateField
 import app.notekea.core.presentation.designsystem.components.NotekeaPropertyField
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.core.notes.domain.NoteProperty
-import app.notekea.core.notes.domain.PropertyKeys
-import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.resources.Res
 import app.notekea.resources.properties_add_item
 import app.notekea.resources.properties_calendar
@@ -44,10 +44,9 @@ private const val TAG_MARK = "#"
 private val NUMBER = Regex(pattern = "-?\\d+(\\.\\d+)?")
 
 /**
- * A property's value edited in place, by its type (`ROADMAP.md` 1.14): text and numbers as fields, a checkbox, a date
- * typed or picked on a calendar that marks [today] (shown as people write it until it is edited), a list as chips with
- * a field of [itemFieldWidth] that adds one, and a value the form does not edit as it is written, with a note to edit
- * it in the source. Each change goes to [change] at once.
+ * A property's value edited in place, by its type: text and numbers as fields, a checkbox, a date typed or picked on a
+ * calendar that marks [today], a list as chips with a field of [itemFieldWidth] that adds one, and a value the form
+ * does not edit as it is written. Each change goes to [change] at once.
  */
 @Composable
 fun PropertyValueEditor(
@@ -76,7 +75,11 @@ fun PropertyValueEditor(
             modifier = Modifier.padding(start = NotekeaDimensions.SpacingXs)
         )
 
-        is PropertyValue.Date -> DateEditor(value = value, today = today, change = change)
+        is PropertyValue.Date -> DateEditor(
+            value = value,
+            today = today,
+            change = change
+        )
 
         is PropertyValue.Items -> ItemsEditor(property, value.items, itemFieldWidth, change)
 
@@ -91,19 +94,32 @@ private fun DateEditor(
     change: (PropertyValue) -> Unit
 ) {
     val format = remember { MomentFormat() }
+
     NotekeaDateField(
         date = value.date,
-        text = format.format(moment = LocalMoment(date = value.date), pattern = MomentFormat.ISO_DATE),
+        text = format.format(
+            moment = LocalMoment(date = value.date),
+            pattern = MomentFormat.ISO_DATE
+        ),
         onTextCommit = { text ->
-            format.parseDate(text = text, pattern = MomentFormat.ISO_DATE)?.let {
-                change(PropertyValue.Date(date = it))
-            }
+            format.parseDate(
+                text = text,
+                pattern = MomentFormat.ISO_DATE
+            )?.let { change(PropertyValue.Date(date = it)) }
         },
         onDatePick = { change(PropertyValue.Date(date = it)) },
         calendarLabel = stringResource(resource = Res.string.properties_calendar),
-        displayText = format.format(moment = LocalMoment(date = value.date), pattern = READABLE_DATE),
+        displayText = format.format(
+            moment = LocalMoment(date = value.date),
+            pattern = READABLE_DATE
+        ),
         today = today,
-        isValid = { format.parseDate(text = it, pattern = MomentFormat.ISO_DATE) != null }
+        isValid = {
+            format.parseDate(
+                text = it,
+                pattern = MomentFormat.ISO_DATE
+            ) != null
+        }
     )
 }
 
@@ -117,6 +133,7 @@ private fun ItemsEditor(
 ) {
     val isTags = PropertyKeys.isTags(key = property.key)
     val removeLabel = stringResource(resource = Res.string.properties_remove_item)
+
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
@@ -130,15 +147,21 @@ private fun ItemsEditor(
                 containerColor = MaterialTheme.colorScheme.surface
             )
         }
+
+        fun addItem(text: String) {
+            val item = (if (isTags) text.removePrefix(prefix = TAG_MARK) else text).trim()
+
+            if (item.isNotEmpty() && item !in items) {
+                change(PropertyValue.Items(items = items + item))
+            }
+        }
+
         // A new field after each change, so what was typed does not stay once it is added.
         key(items) {
             Box(modifier = Modifier.width(width = fieldWidth)) {
                 NotekeaPropertyField(
                     value = "",
-                    onCommit = { text ->
-                        val item = (if (isTags) text.removePrefix(prefix = TAG_MARK) else text).trim()
-                        if (item.isNotEmpty() && item !in items) change(PropertyValue.Items(items = items + item))
-                    },
+                    onCommit = { addItem(it) },
                     placeholder = stringResource(resource = Res.string.properties_add_item)
                 )
             }
@@ -148,11 +171,11 @@ private fun ItemsEditor(
 
 /** A nested or multi-line value, as written, with a note that it is edited in the source. */
 @Composable
-private fun OtherValue(
-    source: String
-) {
+private fun OtherValue(source: String) {
     Text(
-        text = source.substringAfter(delimiter = SOURCE_KEY_SEPARATOR).trim()
+        text = source
+            .substringAfter(delimiter = SOURCE_KEY_SEPARATOR)
+            .trim()
             .ifEmpty { stringResource(resource = Res.string.properties_other) },
         modifier = Modifier.padding(start = NotekeaDimensions.SpacingXs),
         style = MaterialTheme.typography.bodyMedium,
@@ -172,7 +195,10 @@ private fun PropertyValueEditorPreview() {
     NotekeaPreviewThemes {
         Box(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
             PropertyValueEditor(
-                property = NoteProperty(key = PREVIEW_KEY, value = PropertyValue.Items(items = PREVIEW_ITEMS)),
+                property = NoteProperty(
+                    key = PREVIEW_KEY,
+                    value = PropertyValue.Items(items = PREVIEW_ITEMS)
+                ),
                 change = {},
                 today = null
             )

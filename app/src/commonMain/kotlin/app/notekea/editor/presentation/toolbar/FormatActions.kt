@@ -24,9 +24,10 @@ data class FormatActions(
     val calloutTitles: Map<CalloutKind, String>
 ) {
     /** A code block in [language], the name written after the fence (empty for plain text). */
-    fun codeBlock(
-        language: String
-    ): FormatAction.CodeBlock = FormatAction.CodeBlock(placeholder = codePlaceholder, language = language)
+    fun codeBlock(language: String): FormatAction.CodeBlock = FormatAction.CodeBlock(
+        placeholder = codePlaceholder,
+        language = language
+    )
 
     /** A table of [columns] (up to [TABLE_MAX_COLUMNS]) and [rows] rows of sample text to type over. */
     fun table(

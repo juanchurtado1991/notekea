@@ -5,12 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import app.notekea.core.appearance.domain.Appearance
 import androidx.compose.runtime.remember
-import app.notekea.NotekeaAppLocals
-import app.notekea.NotekeaRoot
-import app.notekea.core.presentation.platform.AppEnvironment
-import app.notekea.core.presentation.platform.WindowHost
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -19,14 +14,21 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import app.notekea.NotekeaAppLocals
+import app.notekea.NotekeaRoot
+import app.notekea.core.appearance.domain.Appearance
+import app.notekea.core.embedding.data.LlamaTextEmbedder
+import app.notekea.core.embedding.domain.TextEmbedder
+import app.notekea.core.notes.domain.FileOpener
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
+import app.notekea.core.presentation.platform.AppEnvironment
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.WindowCloseGuard
+import app.notekea.core.presentation.platform.WindowHost
 import app.notekea.di.desktopModules
-import app.notekea.tree.data.VaultFolderTrash
 import app.notekea.editor.domain.AttachmentPicker
-import app.notekea.core.notes.domain.FileOpener
+import app.notekea.tree.data.VaultFolderTrash
 import app.notekea.tree.domain.FileRevealer
 import app.notekea.tree.domain.Trash
 import app.notekea.vault.domain.FolderPicker
@@ -34,19 +36,14 @@ import okio.FileSystem
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import app.notekea.core.embedding.data.LlamaTextEmbedder
-import app.notekea.core.embedding.domain.TextEmbedder
 import org.koin.dsl.module
 import java.nio.file.Files
 import java.nio.file.Path
 
 /**
- * The real Notekea for one automated case or smoke run: every Koin module of the desktop app, with its data
- * (settings, database, crash reports) in [appData] instead of the user's folder, its vaults in [vaults], a home folder
- * of its own for new vaults ([home]), and the system's dialogs and apps replaced: the pickers answer what the case
- * set, files "open" in [fileOpener] and [fileRevealer], web links in [uriHandler], and deleted entries go to the
- * vault's `.trash` folder, never the system trash. [Content] is the window's content, keyboard shortcuts included;
- * [closeGuard] is what the window runs before it closes (the editor saving the note being typed).
+ * The real Notekea for one automated case or smoke run: every Koin module of the desktop app, with its data in
+ * [appData], its vaults in [vaults], a home of its own ([home]), and the system's dialogs and apps replaced
+ * ([fileOpener], [fileRevealer], [uriHandler]). [closeGuard] runs before the window closes.
  */
 class CaseApp(
     private val appData: Path,
@@ -77,7 +74,9 @@ class CaseApp(
         // As the installed app finds it: its data folder exists before the database and the settings open there.
         Files.createDirectories(appData)
         Files.createDirectories(home.resolve(DOCUMENTS))
+
         koin = startKoin { modules(desktopModules + overrides()) }.koin
+
         host = WindowHost(conventions = koin.get())
     }
 
@@ -93,7 +92,11 @@ class CaseApp(
     @Composable
     fun Content() {
         val environment = remember { koin.get<AppEnvironment>() }
-        NotekeaAppLocals(environment = environment, initialAppearance = Appearance()) {
+
+        NotekeaAppLocals(
+            environment = environment,
+            initialAppearance = Appearance()
+        ) {
             CompositionLocalProvider(
                 LocalViewModelStoreOwner provides viewModels,
                 LocalUriHandler provides uriHandler
@@ -106,7 +109,15 @@ class CaseApp(
                         .focusable()
                 ) {
                     // Closing the window quits, as in the app: the case's Notekea quits and starts again (1.1-07).
-                    NotekeaRoot(host = host, onClose = { CaseApps.quit(vaults = vaults, whileClosed = {}) })
+                    NotekeaRoot(
+                        host = host,
+                        onClose = {
+                            CaseApps.quit(
+                                vaults = vaults,
+                                whileClosed = {}
+                            )
+                        }
+                    )
                 }
             }
         }
@@ -127,18 +138,31 @@ class CaseApp(
                 homeDirectory = home.toString()
             )
         }
+
         single<FolderPicker> { folderPicker }
         single<AttachmentPicker> { attachmentPicker }
         single<FileOpener> { fileOpener }
         single<FileRevealer> { fileRevealer }
-        single<Trash> { VaultFolderTrash(fileSystem = FileSystem.SYSTEM, dispatchers = get()) }
+
+        single<Trash> {
+            VaultFolderTrash(
+                fileSystem = FileSystem.SYSTEM,
+                dispatchers = get()
+            )
+        }
+
         // The index's embedder (2.3): the bundled model in Notekea QA, a stand-in where it is not there (CI).
-        if (!hasBundledModel()) single<TextEmbedder> { StandInTextEmbedder() }
+        if (!hasBundledModel()) {
+            single<TextEmbedder> { StandInTextEmbedder() }
+        }
     }
 
     private fun hasBundledModel(): Boolean {
         val resources = System.getProperty(RESOURCES_PROPERTY) ?: return false
-        return Files.isRegularFile(Path.of(resources, LlamaTextEmbedder.MODEL_FOLDER, LlamaTextEmbedder.MODEL_FILE))
+
+        return Files.isRegularFile(
+            Path.of(resources, LlamaTextEmbedder.MODEL_FOLDER, LlamaTextEmbedder.MODEL_FILE)
+        )
     }
 
     private companion object {

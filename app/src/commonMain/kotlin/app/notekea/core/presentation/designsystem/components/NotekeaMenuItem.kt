@@ -4,15 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
- * One action of a [NotekeaContextMenuArea]. [shortcutHint] shows the keyboard shortcut at the end of the row, so the
- * menu teaches it; [isDestructive] colors the action in the error color, and its label must be a verb ("Delete note").
- * [isChecked] makes it one choice of a set (the tree's sort): true shows a check mark in the icon's place, false
- * keeps that space empty so the labels align; null is a plain action. [keepsMenuOpen] leaves the menu open after a
- * click, for an option of the other items (the callout menu's "Start folded"), so it can be set before choosing one.
- * [supportingText] explains in a second, smaller line what an option does when its label alone is not enough.
- * [submenu] makes the item open a panel beside the menu (on hover or click) instead of acting: the table size picker;
- * it calls the given `onChosen` once a choice is made, which closes the whole menu. [items] does the same with menu
- * rows of their own, in sections (the toolbar's More › Callout): the item opens them beside the menu.
+ * One action of a [NotekeaContextMenuArea]. [isChecked] makes it one choice of a set (null is a plain action);
+ * [keepsMenuOpen] leaves the menu open after a click; [submenu] opens a panel beside the menu instead of acting, which
+ * calls its `onChosen` once a choice is made, and [items] does the same with menu rows.
  */
 data class NotekeaMenuItem(
     val label: String,

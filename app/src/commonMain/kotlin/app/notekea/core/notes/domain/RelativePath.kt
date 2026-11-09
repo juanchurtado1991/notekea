@@ -9,7 +9,10 @@ import kotlin.jvm.JvmInline
 @JvmInline
 value class RelativePath(val value: String) {
     val isMarkdown: Boolean
-        get() = value.endsWith(suffix = MARKDOWN_EXTENSION, ignoreCase = true)
+        get() = value.endsWith(
+            suffix = MARKDOWN_EXTENSION,
+            ignoreCase = true
+        )
 
     val isRoot: Boolean
         get() = value.isEmpty()
@@ -26,23 +29,30 @@ value class RelativePath(val value: String) {
     val parent: RelativePath?
         get() = when {
             isRoot -> null
-            SEPARATOR in value -> RelativePath(value = value.substringBeforeLast(delimiter = SEPARATOR))
+
+            SEPARATOR in value -> RelativePath(
+                value = value.substringBeforeLast(delimiter = SEPARATOR)
+            )
+
             else -> ROOT
         }
 
-    fun child(
-        name: String
-    ): RelativePath = if (isRoot) RelativePath(value = name) else RelativePath(value = value + SEPARATOR + name)
+    fun child(name: String): RelativePath = if (isRoot) {
+        RelativePath(value = name)
+    } else {
+        RelativePath(value = value + SEPARATOR + name)
+    }
 
     /** True when this path is [folder] itself or anything inside it; every path is inside [ROOT]. */
-    fun isWithin(
-        folder: RelativePath
-    ): Boolean = folder.isRoot || value == folder.value ||
-        // Compared in place, without building the folder's prefix: this runs for every entry of a vault.
-        (
-            value.length > folder.value.length && value.startsWith(prefix = folder.value) &&
-                value[folder.value.length] == SEPARATOR_CHAR
-            )
+    fun isWithin(folder: RelativePath): Boolean =
+        folder.isRoot ||
+            value == folder.value ||
+            // Compared in place, without building the folder's prefix: this runs for every entry of a vault.
+            (
+                value.length > folder.value.length &&
+                    value.startsWith(prefix = folder.value) &&
+                    value[folder.value.length] == SEPARATOR_CHAR
+                )
 
     /** This path after [from] was renamed or moved to [to]; paths outside [from] stay as they are. */
     fun rebased(

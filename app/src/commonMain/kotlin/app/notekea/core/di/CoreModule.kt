@@ -1,7 +1,5 @@
 package app.notekea.core.di
 
-import app.notekea.core.domain.files.ValidateFileNameUseCase
-import app.notekea.core.domain.time.DescribeElapsedTimeUseCase
 import app.notekea.core.appearance.data.SettingsAppearanceStore
 import app.notekea.core.appearance.data.SettingsUiScaleStore
 import app.notekea.core.appearance.data.SettingsWindowBoundsStore
@@ -10,6 +8,8 @@ import app.notekea.core.appearance.domain.GetUiScaleUseCase
 import app.notekea.core.appearance.domain.SaveUiScaleUseCase
 import app.notekea.core.appearance.domain.UiScaleStore
 import app.notekea.core.appearance.domain.WindowBoundsStore
+import app.notekea.core.domain.files.ValidateFileNameUseCase
+import app.notekea.core.domain.time.DescribeElapsedTimeUseCase
 import app.notekea.core.presentation.platform.UiZoomViewModel
 import app.notekea.core.presentation.platform.WindowBoundsViewModel
 import org.koin.core.module.dsl.factoryOf
@@ -25,9 +25,28 @@ val coreModule = module {
     single<Clock> { Clock.System }
     factoryOf(::DescribeElapsedTimeUseCase)
     factoryOf(::ValidateFileNameUseCase)
-    single<UiScaleStore> { SettingsUiScaleStore(settings = get(), dispatchers = get()) }
-    single<AppearanceStore> { SettingsAppearanceStore(settings = get(), dispatchers = get()) }
-    single<WindowBoundsStore> { SettingsWindowBoundsStore(settings = get(), dispatchers = get()) }
+
+    single<UiScaleStore> {
+        SettingsUiScaleStore(
+            settings = get(),
+            dispatchers = get()
+        )
+    }
+
+    single<AppearanceStore> {
+        SettingsAppearanceStore(
+            settings = get(),
+            dispatchers = get()
+        )
+    }
+
+    single<WindowBoundsStore> {
+        SettingsWindowBoundsStore(
+            settings = get(),
+            dispatchers = get()
+        )
+    }
+
     factoryOf(::GetUiScaleUseCase)
     factoryOf(::SaveUiScaleUseCase)
     viewModelOf(::WindowBoundsViewModel)

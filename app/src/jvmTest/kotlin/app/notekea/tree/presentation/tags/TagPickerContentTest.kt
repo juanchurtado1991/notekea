@@ -15,23 +15,45 @@ class TagPickerContentTest {
     @Test
     fun `clicking a tag or the new tag row chooses it`() {
         val intents = mutableListOf<TagPickerIntent>()
+
         UiThread.run {
-            ImageComposeScene(width = WINDOW_WIDTH, height = WINDOW_HEIGHT, density = Density(density = DENSITY)) {
+            ImageComposeScene(
+                width = WINDOW_WIDTH,
+                height = WINDOW_HEIGHT,
+                density = Density(density = DENSITY)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     TagPickerContent(
                         state = TagPickerState(
                             isOpen = true,
                             query = "rec",
-                            rows = listOf(TagPickerRow(name = "recipe"), TagPickerRow(name = "rec", isNew = true))
+                            rows = listOf(
+                                TagPickerRow(name = "recipe"),
+                                TagPickerRow(
+                                    name = "rec",
+                                    isNew = true
+                                )
+                            )
                         ),
-                        onIntent = { if (it is TagPickerIntent.OnRowClick) intents += it }
+                        onIntent = {
+                            if (it is TagPickerIntent.OnRowClick) intents += it
+                        }
                     )
                 }
             }.use { scene ->
                 repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = it * FRAME_NANOS) }
+
                 listOf(FIRST_ROW, SECOND_ROW).forEach { position ->
-                    scene.sendPointerEvent(eventType = PointerEventType.Press, position = position)
-                    scene.sendPointerEvent(eventType = PointerEventType.Release, position = position)
+                    scene.sendPointerEvent(
+                        eventType = PointerEventType.Press,
+                        position = position
+                    )
+
+                    scene.sendPointerEvent(
+                        eventType = PointerEventType.Release,
+                        position = position
+                    )
+
                     scene.render(nanoTime = SETTLE_FRAMES * FRAME_NANOS)
                 }
             }
@@ -52,7 +74,13 @@ class TagPickerContentTest {
         private const val SETTLE_FRAMES = 3
         private const val WINDOW_HEIGHT = 640
         private const val WINDOW_WIDTH = 1200
-        private val FIRST_ROW = Offset(x = 600f, y = 200f)
-        private val SECOND_ROW = Offset(x = 600f, y = 260f)
+        private val FIRST_ROW = Offset(
+            x = 600f,
+            y = 200f
+        )
+        private val SECOND_ROW = Offset(
+            x = 600f,
+            y = 260f
+        )
     }
 }

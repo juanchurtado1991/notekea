@@ -4,16 +4,15 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.resolvedFrom
 
 /**
- * Where new attachments of a note are saved, as Obsidian's `attachmentFolderPath` setting says (`ROADMAP.md` 1.8):
+ * Where new attachments of a note are saved, as Obsidian's `attachmentFolderPath` setting says:
  * `/` the vault root, `./` the note's own folder, `./images` a folder inside the note's folder, any other path a fixed
  * folder of the vault. Without the setting, Notekea uses `attachments/` at the vault root.
  */
 class AttachmentFolder(private val setting: String?) {
-    fun folderFor(
-        note: RelativePath
-    ): RelativePath {
+    fun folderFor(note: RelativePath): RelativePath {
         val written = setting?.trim()
         val noteFolder = note.parent ?: RelativePath.ROOT
+
         return when {
             written.isNullOrEmpty() -> RelativePath(value = DEFAULT_FOLDER)
 
@@ -21,10 +20,16 @@ class AttachmentFolder(private val setting: String?) {
 
             written == NOTE_FOLDER || written == NOTE_FOLDER_SHORT -> noteFolder
 
-            written.startsWith(prefix = NOTE_FOLDER) -> resolvedFrom(folder = noteFolder, target = written)
+            written.startsWith(prefix = NOTE_FOLDER) -> resolvedFrom(
+                folder = noteFolder,
+                target = written
+            )
                 ?: noteFolder
 
-            else -> resolvedFrom(folder = RelativePath.ROOT, target = written) ?: RelativePath.ROOT
+            else -> resolvedFrom(
+                folder = RelativePath.ROOT,
+                target = written
+            ) ?: RelativePath.ROOT
         }
     }
 

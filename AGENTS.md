@@ -54,8 +54,8 @@ The rest of the pattern: port in domain, adapter in data, logic in a use case te
 
 ## Code size rules (`GUIDELINES.md` §6, `ARCHITECTURE.md` §10)
 
-- No file over 350 lines (aim for 300), tests included; split by sub-feature, never into one long helper.
-- No function body over 40 lines.
+- No file over 350 lines of code (aim for 300), tests included; split by sub-feature, never into one long helper.
+- No function body over 60 lines of code, no line of code over 100 characters (comments 120).
 - A use case only when it decides something; a ViewModel that needs one port's operation as it is calls the port.
 
 The custom ktlint rules (`ktlint-rules/`) and the Konsist tests enforce these and more; the pre-commit hook runs

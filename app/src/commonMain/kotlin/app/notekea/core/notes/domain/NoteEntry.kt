@@ -17,11 +17,12 @@ data class NoteEntry(
         get() = metadata.tags + metadata.textTags
 
     /** Whether it has [tag] or a tag nested under it, whatever their case, with or without the `#`. */
-    fun hasTag(
-        tag: String
-    ): Boolean {
+    fun hasTag(tag: String): Boolean {
         val wanted = tag.trim().removePrefix(prefix = TAG_MARK)
-        return allTags.any { it.equals(other = wanted, ignoreCase = true) || it.startsWith(wanted + NESTED, true) }
+
+        return allTags.any {
+            it.equals(other = wanted, ignoreCase = true) || it.startsWith(wanted + NESTED, true)
+        }
     }
 
     private companion object {

@@ -16,7 +16,10 @@ class VaultTest {
 
         names.forEach { (path, name) ->
             assertEquals(
-                expected = Vault(path = path, name = name),
+                expected = Vault(
+                    path = path,
+                    name = name
+                ),
                 actual = Vault.fromPath(path = path)
             )
         }

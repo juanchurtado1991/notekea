@@ -20,8 +20,13 @@ internal fun TestDataCard(
 ) {
     Card {
         SectionLabel(text = "TEST DATA")
+
         folders.forEach { name ->
-            Text(text = "This case uses a fresh copy of $name:", fontSize = 12.sp)
+            Text(
+                text = "This case uses a fresh copy of $name:",
+                fontSize = 12.sp
+            )
+
             SelectionContainer {
                 Text(
                     text = dataFolder.resolve(name).toString(),
@@ -31,8 +36,10 @@ internal fun TestDataCard(
                 )
             }
         }
+
         Text(
-            text = "To open it in $appName: click Open another vault at the bottom left (when a vault is " +
+            text =
+            "To open it in $appName: click Open another vault at the bottom left (when a vault is " +
                 "open), then Open folder…, go to that folder and choose it. Each case starts from a new copy, so " +
                 "what you changed in an earlier case is gone.",
             fontSize = 11.sp,

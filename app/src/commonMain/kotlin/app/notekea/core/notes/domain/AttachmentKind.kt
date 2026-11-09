@@ -18,13 +18,12 @@ enum class AttachmentKind {
         private const val EXTENSION_MARK = "."
         private val IMAGE_EXTENSIONS = setOf("png", "jpg", "jpeg", "gif", "webp", "bmp")
 
-        fun of(
-            name: String
-        ): AttachmentKind {
+        fun of(name: String): AttachmentKind {
             val extension = name.substringAfterLast(
                 delimiter = EXTENSION_MARK,
                 missingDelimiterValue = StringPatterns.EMPTY
             )
+
             return if (extension.lowercase() in IMAGE_EXTENSIONS) IMAGE else OTHER
         }
     }

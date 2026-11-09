@@ -6,7 +6,9 @@ import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.unit.Dp
 
 /** [ScrollAreaMeasurePolicy] whose content's height is known ([height]), so its lazy list is never asked for it. */
-internal class KnownHeightMeasurePolicy(private val height: Dp) : MeasurePolicy by ScrollAreaMeasurePolicy {
+internal class KnownHeightMeasurePolicy(
+    private val height: Dp
+) : MeasurePolicy by ScrollAreaMeasurePolicy {
     override fun IntrinsicMeasureScope.minIntrinsicHeight(
         measurables: List<IntrinsicMeasurable>,
         width: Int

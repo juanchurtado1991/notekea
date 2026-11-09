@@ -13,8 +13,17 @@ class GetNoteStatsUseCaseTest {
             "- [x] Knead\n- [ ] Rest #weekend\n\n```\n[[Not a link]]\n```\n"
 
         assertEquals(
-            expected = NoteStats(words = 14, links = 2, tags = 3, tasks = 2, doneTasks = 1),
-            actual = getNoteStats(body = body, propertyTags = listOf("breakfast", "weekend"))
+            expected = NoteStats(
+                words = 14,
+                links = 2,
+                tags = 3,
+                tasks = 2,
+                doneTasks = 1
+            ),
+            actual = getNoteStats(
+                body = body,
+                propertyTags = listOf("breakfast", "weekend")
+            )
         )
     }
 
@@ -23,7 +32,13 @@ class GetNoteStatsUseCaseTest {
         assertEquals(
             expected = listOf(0, 1, 1, 2),
             actual = listOf(0, 1, 200, 201).map {
-                NoteStats(words = it, links = 0, tags = 0, tasks = 0, doneTasks = 0).readingMinutes
+                NoteStats(
+                    words = it,
+                    links = 0,
+                    tags = 0,
+                    tasks = 0,
+                    doneTasks = 0
+                ).readingMinutes
             }
         )
     }

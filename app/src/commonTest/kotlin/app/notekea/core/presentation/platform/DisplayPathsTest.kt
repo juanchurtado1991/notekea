@@ -10,29 +10,56 @@ class DisplayPathsTest {
 
     @Test
     fun `the home folder is written as a tilde on macOS and Linux`() {
-        val macos = linux.copy(operatingSystem = OperatingSystem.MACOS, homeDirectory = "/home/ana/")
+        val macos = linux.copy(
+            operatingSystem = OperatingSystem.MACOS,
+            homeDirectory = "/home/ana/"
+        )
 
         assertEquals(
             expected = listOf("~/Notes", "~", "/home/anabel/Notes", "/srv/Notes", "~/Work"),
             actual = listOf(
-                displayPath(path = "/home/ana/Notes", platformConventions = linux),
-                displayPath(path = "/home/ana", platformConventions = linux),
-                displayPath(path = "/home/anabel/Notes", platformConventions = linux),
-                displayPath(path = "/srv/Notes", platformConventions = linux),
-                displayPath(path = "/home/ana/Work", platformConventions = macos)
+                displayPath(
+                    path = "/home/ana/Notes",
+                    platformConventions = linux
+                ),
+                displayPath(
+                    path = "/home/ana",
+                    platformConventions = linux
+                ),
+                displayPath(
+                    path = "/home/anabel/Notes",
+                    platformConventions = linux
+                ),
+                displayPath(
+                    path = "/srv/Notes",
+                    platformConventions = linux
+                ),
+                displayPath(
+                    path = "/home/ana/Work",
+                    platformConventions = macos
+                )
             )
         )
     }
 
     @Test
     fun `windows paths and an unknown home stay as they are`() {
-        val windows = linux.copy(operatingSystem = OperatingSystem.WINDOWS, homeDirectory = "C:\\Users\\ana")
+        val windows = linux.copy(
+            operatingSystem = OperatingSystem.WINDOWS,
+            homeDirectory = "C:\\Users\\ana"
+        )
 
         assertEquals(
             expected = listOf("C:\\Users\\ana\\Notes", "/home/ana/Notes"),
             actual = listOf(
-                displayPath(path = "C:\\Users\\ana\\Notes", platformConventions = windows),
-                displayPath(path = "/home/ana/Notes", platformConventions = linux.copy(homeDirectory = ""))
+                displayPath(
+                    path = "C:\\Users\\ana\\Notes",
+                    platformConventions = windows
+                ),
+                displayPath(
+                    path = "/home/ana/Notes",
+                    platformConventions = linux.copy(homeDirectory = "")
+                )
             )
         )
     }

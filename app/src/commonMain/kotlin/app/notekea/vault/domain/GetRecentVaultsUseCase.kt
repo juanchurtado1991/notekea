@@ -8,11 +8,12 @@ class GetRecentVaultsUseCase(
     private val vaultFileSystem: VaultFileSystem,
     private val describeElapsedTime: DescribeElapsedTimeUseCase
 ) {
-    suspend operator fun invoke(): List<RecentVaultStatus> = recentVaultsStore.read().map { recent ->
-        RecentVaultStatus(
-            vault = Vault.fromPath(path = recent.path),
-            lastOpened = describeElapsedTime(since = recent.lastOpenedAt),
-            isMissing = vaultFileSystem.access(path = recent.path) == FolderAccess.MISSING
-        )
-    }
+    suspend operator fun invoke(): List<RecentVaultStatus> =
+        recentVaultsStore.read().map { recent ->
+            RecentVaultStatus(
+                vault = Vault.fromPath(path = recent.path),
+                lastOpened = describeElapsedTime(since = recent.lastOpenedAt),
+                isMissing = vaultFileSystem.access(path = recent.path) == FolderAccess.MISSING
+            )
+        }
 }

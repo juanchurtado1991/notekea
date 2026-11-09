@@ -1,14 +1,6 @@
 package app.notekea.editor.presentation.view
 
 import androidx.compose.foundation.ScrollState
-import app.notekea.editor.presentation.model.EditorHeaderData
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.model.EditorPreviewData
-import app.notekea.editor.presentation.model.EditorState
-import app.notekea.editor.presentation.toolbar.EditorToolbar
-import app.notekea.editor.presentation.markdown.HeadingPositions
-import app.notekea.editor.presentation.sidepanel.OutlinePlacement
-import app.notekea.editor.presentation.reading.ReadingView
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +29,14 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.editor.presentation.markdown.HeadingPositions
+import app.notekea.editor.presentation.model.EditorHeaderData
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorPreviewData
+import app.notekea.editor.presentation.model.EditorState
+import app.notekea.editor.presentation.reading.ReadingView
+import app.notekea.editor.presentation.sidepanel.OutlinePlacement
+import app.notekea.editor.presentation.toolbar.EditorToolbar
 import kotlin.math.roundToInt
 
 private const val PAGE_MAX_WIDTH_DP = 1100
@@ -45,15 +45,34 @@ private const val PAGE_SHARE = 0.7f
 private val SKELETON_WIDTHS = listOf(0.9f, 0.75f, 0.85f, 0.6f, 0.8f, 0.4f)
 
 /**
- * The page's width as the pane allows (`ROADMAP.md` 1.14): [PAGE_SHARE] of it, never narrower than [PAGE_MIN_WIDTH_DP]
+ * The page's width as the pane allows: [PAGE_SHARE] of it, never narrower than [PAGE_MIN_WIDTH_DP]
  * nor wider than [PAGE_MAX_WIDTH_DP] (lines stay readable on a wide screen), and never wider than the pane.
  */
 private fun Modifier.readableWidth(): Modifier = layout { measurable, constraints ->
-    val width = (constraints.maxWidth * PAGE_SHARE).roundToInt()
-        .coerceIn(minimumValue = PAGE_MIN_WIDTH_DP.dp.roundToPx(), maximumValue = PAGE_MAX_WIDTH_DP.dp.roundToPx())
+    val width = (constraints.maxWidth * PAGE_SHARE)
+        .roundToInt()
+        .coerceIn(
+            minimumValue = PAGE_MIN_WIDTH_DP.dp.roundToPx(),
+            maximumValue = PAGE_MAX_WIDTH_DP.dp.roundToPx()
+        )
         .coerceAtMost(maximumValue = constraints.maxWidth)
-    val placeable = measurable.measure(constraints = constraints.copy(minWidth = width, maxWidth = width))
-    layout(width = placeable.width, height = placeable.height) { placeable.place(x = 0, y = 0) }
+
+    val placeable = measurable.measure(
+        constraints = constraints.copy(
+            minWidth = width,
+            maxWidth = width
+        )
+    )
+
+    layout(
+        width = placeable.width,
+        height = placeable.height
+    ) {
+        placeable.place(
+            x = 0,
+            y = 0
+        )
+    }
 }
 
 /** The note's page, centred at a readable width: its header, the toolbar (kept in view) and its text or rendering. */
@@ -71,10 +90,14 @@ internal fun EditorPage(
     onToolbarHeight: (Int) -> Unit
 ) {
     var toolbarTop by remember { mutableIntStateOf(value = 0) }
+
     Column(
         modifier = Modifier
             .readableWidth()
-            .padding(horizontal = NotekeaDimensions.SpacingXxl, vertical = NotekeaDimensions.SpacingXl)
+            .padding(
+                horizontal = NotekeaDimensions.SpacingXxl,
+                vertical = NotekeaDimensions.SpacingXl
+            )
     ) {
         EditorHeader(
             state = state,
@@ -82,19 +105,24 @@ internal fun EditorPage(
             platformConventions = platformConventions,
             onIntent = onIntent
         )
+
         if (state.notePath != null) {
             Spacer(modifier = Modifier.height(height = NotekeaDimensions.SpacingM))
+
             EditorToolbar(
                 isReading = state.isReading,
                 platformConventions = platformConventions,
                 onIntent = onIntent,
                 modifier = Modifier
                     .onSizeChanged { onToolbarHeight(it.height) }
-                    .stickyAtTop(scrollState = scrollState, viewport = viewport, top = {
-                        toolbarTop
-                    }) { toolbarTop = it }
+                    .stickyAtTop(
+                        scrollState = scrollState,
+                        viewport = viewport,
+                        top = { toolbarTop }
+                    ) { toolbarTop = it }
             )
         }
+
         NoteText(
             state = state,
             buffer = buffer,
@@ -122,7 +150,10 @@ private fun NoteText(
         EditorSkeleton()
     } else if (state.isReading) {
         // The headings' places belong to this note in Read mode: leaving it lets go of their laid-out nodes.
-        DisposableEffect(state.notePath) { onDispose { positions.inReading.clear() } }
+        DisposableEffect(state.notePath) {
+            onDispose { positions.inReading.clear() }
+        }
+
         ReadingView(
             text = buffer.text.toString(),
             attachments = state.attachments,
@@ -136,7 +167,10 @@ private fun NoteText(
             platformConventions = platformConventions,
             onIntent = onIntent,
             attachments = state.attachments,
-            outline = OutlinePlacement(headings = state.outline, positions = positions),
+            outline = OutlinePlacement(
+                headings = state.outline,
+                positions = positions
+            ),
             find = state.find,
             focusRequester = textFocusRequester
         )
@@ -154,10 +188,22 @@ private fun Modifier.stickyAtTop(
     top: () -> Int,
     onTop: (Int) -> Unit
 ): Modifier = onPlaced { coordinates ->
-    viewport()?.let { onTop((it.localPositionOf(sourceCoordinates = coordinates).y + scrollState.value).roundToInt()) }
+    viewport()?.let {
+        onTop(
+            (
+                it.localPositionOf(sourceCoordinates = coordinates).y +
+                    scrollState.value
+                ).roundToInt()
+        )
+    }
 }
     .zIndex(zIndex = 1f)
-    .offset { IntOffset(x = 0, y = (scrollState.value - top()).coerceAtLeast(minimumValue = 0)) }
+    .offset {
+        IntOffset(
+            x = 0,
+            y = (scrollState.value - top()).coerceAtLeast(minimumValue = 0)
+        )
+    }
 
 @Composable
 private fun EditorSkeleton() {

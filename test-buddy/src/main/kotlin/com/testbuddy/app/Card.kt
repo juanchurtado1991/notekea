@@ -20,11 +20,19 @@ internal fun Card(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val shape = RoundedCornerShape(size = 10.dp)
+
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(color = Color.White, shape = shape)
-            .border(width = 1.dp, color = AutoTestColors.Border, shape = shape)
+            .background(
+                color = Color.White,
+                shape = shape
+            )
+            .border(
+                width = 1.dp,
+                color = AutoTestColors.Border,
+                shape = shape
+            )
             .padding(all = 12.dp),
         verticalArrangement = Arrangement.spacedBy(space = 6.dp),
         content = content

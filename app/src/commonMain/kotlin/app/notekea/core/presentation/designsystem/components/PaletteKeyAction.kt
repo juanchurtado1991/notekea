@@ -20,10 +20,17 @@ enum class PaletteKeyAction {
             canSwitch: Boolean
         ): PaletteKeyAction? = when {
             key == Key.DirectionDown -> MOVE_DOWN
+
             key == Key.DirectionUp -> MOVE_UP
+
             key in SUBMIT_KEYS -> CONFIRM
+
             key == Key.Escape -> DISMISS
-            key == Key.Tab && !isShiftPressed && canSwitch -> SWITCH
+
+            key == Key.Tab &&
+                !isShiftPressed &&
+                canSwitch -> SWITCH
+
             else -> null
         }
     }

@@ -1,10 +1,6 @@
 package app.notekea.editor.presentation.viewmodel
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import app.notekea.editor.presentation.noteinfo.EditorNoteInfo
-import app.notekea.editor.presentation.model.EditorState
-import app.notekea.editor.presentation.properties.PropertyEditing
-import app.notekea.editor.presentation.model.SaveStatus
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.notes.domain.FrontmatterReader
@@ -12,15 +8,18 @@ import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.domain.SaveNoteUseCase
+import app.notekea.editor.presentation.model.EditorState
+import app.notekea.editor.presentation.model.SaveStatus
+import app.notekea.editor.presentation.noteinfo.EditorNoteInfo
+import app.notekea.editor.presentation.properties.PropertyEditing
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * The open note as it is on disk, and the one way to write it (`ROADMAP.md` 1.5): [opened] is the note as last read or
- * written (its header kept apart), [onDisk] what its file holds, so a save never replaces an outside change; saves,
- * loads and answers to a conflict run one at a time ([runSave]). A note shown or saved updates what the state says
- * about its file: its properties, line endings and where its text starts.
+ * The open note as it is on disk, and the one way to write it: [opened] is the note as last read or written (its header
+ * kept apart), [onDisk] what its file holds, so a save never replaces an outside change; saves, loads and answers to a
+ * conflict run one at a time ([runSave]). Each updates what the state says about the file.
  */
 internal class EditorSaving(
     private val host: EditorHost,
@@ -37,17 +36,18 @@ internal class EditorSaving(
     private val logger = Logger.withTag(tag = LOG_TAG)
 
     /** Runs [action] alone: saves, loads and answers to a conflict never interleave. */
-    fun runSave(
-        action: suspend () -> Unit
-    ) = host.launch { lock.withLock { action() } }
+    fun runSave(action: suspend () -> Unit) = host.launch {
+        lock.withLock { action() }
+    }
 
     /** Runs [action] alone from a coroutine already started (an autosave, a change on disk). */
-    suspend fun alone(
-        action: suspend () -> Unit
-    ) = lock.withLock { action() }
+    suspend fun alone(action: suspend () -> Unit) = lock.withLock { action() }
 
     /** Whether the text holds edits the file does not. */
-    fun hasEdits(): Boolean = host.buffer.text.toString() != opened?.body
+    fun hasEdits(): Boolean = host
+        .buffer
+        .text
+        .toString() != opened?.body
 
     suspend fun write(
         path: RelativePath,
@@ -59,13 +59,25 @@ internal class EditorSaving(
                 // Note info counts the properties' tags: a save that changed them counts again; the text's own
                 // changes are counted as they are typed.
                 val isHeaderChanged = opened?.header != document.header
+
                 // The header as the file holds it: a body typed after a closing `---` gave that line its line break.
-                val saved = document.copy(header = NoteDocument.fromText(text = outcome.value).header)
+                val saved = document.copy(
+                    header = NoteDocument.fromText(text = outcome.value).header
+                )
+
                 opened = saved
                 onDisk = outcome.value
-                val isCurrent = host.buffer.text.toString() == document.body
+
+                val isCurrent = host
+                    .buffer
+                    .text
+                    .toString() == document.body
+
                 host.reduce {
-                    describeFile(state = it, document = saved).copy(
+                    describeFile(
+                        state = it,
+                        document = saved
+                    ).copy(
                         info = it.info.copy(modifiedAt = noteInfo.now()),
                         saveStatus = if (isCurrent) SaveStatus.SAVED else SaveStatus.UNSAVED,
                         saveError = null,
@@ -73,7 +85,15 @@ internal class EditorSaving(
                         isDeleted = false
                     )
                 }
-                if (isHeaderChanged) noteInfo.updateStats(body = host.buffer.text.toString())
+
+                if (isHeaderChanged) {
+                    noteInfo.updateStats(
+                        body = host
+                            .buffer
+                            .text
+                            .toString()
+                    )
+                }
             }
 
             is Outcome.Failure -> reduceFailure(error = outcome.error)
@@ -81,12 +101,16 @@ internal class EditorSaving(
     }
 
     /** Takes [document] as what the file holds now, the text in the editor staying as it is. */
-    fun rebase(
-        document: NoteDocument
-    ) {
+    fun rebase(document: NoteDocument) {
         opened = document
         onDisk = document.toText()
-        host.reduce { describeFile(state = it, document = document) }
+
+        host.reduce {
+            describeFile(
+                state = it,
+                document = document
+            )
+        }
     }
 
     /** Shows [document] as the saved state of the note; a new note starts at the top with a fresh undo history. */
@@ -96,7 +120,11 @@ internal class EditorSaving(
     ) {
         rebase(document = document)
         noteInfo.readTimes()
-        replaceBuffer(body = document.body, isNewNote = isNewNote)
+
+        replaceBuffer(
+            body = document.body,
+            isNewNote = isNewNote
+        )
     }
 
     /** Forgets the open note's file before another opens. */
@@ -112,11 +140,28 @@ internal class EditorSaving(
         isNewNote: Boolean
     ) {
         val buffer = host.buffer
-        val cursor = buffer.selection.start.coerceAtMost(maximumValue = body.length)
+
+        val cursor = buffer
+            .selection
+            .start
+            .coerceAtMost(maximumValue = body.length)
+
         buffer.edit {
-            replace(start = 0, end = length, text = body)
-            if (isNewNote) placeCursorBeforeCharAt(index = 0) else placeCursorBeforeCharAt(index = cursor)
+            replace(
+                start = 0,
+                end = length,
+                text = body
+            )
+
+            if (isNewNote) {
+                placeCursorBeforeCharAt(
+                    index = 0
+                )
+            } else {
+                placeCursorBeforeCharAt(index = cursor)
+            }
         }
+
         if (isNewNote) buffer.undoState.clearHistory()
     }
 
@@ -128,14 +173,17 @@ internal class EditorSaving(
         properties = frontmatterReader.read(header = document.header),
         propertiesSource = propertyEditing.sourceOf(header = document.header),
         usesCrLf = document.usesCrLf,
-        bodyStartLine = document.header.count { it == NEW_LINE_CHAR },
+        bodyStartLine = document.header.count {
+            it == NEW_LINE_CHAR
+        },
         today = noteInfo.today()
     )
 
-    private fun reduceFailure(
-        error: NotesError
-    ) {
-        logger.w { SAVE_FAILED_MESSAGE + error::class.simpleName }
+    private fun reduceFailure(error: NotesError) {
+        logger.w {
+            SAVE_FAILED_MESSAGE + error::class.simpleName
+        }
+
         host.reduce {
             when (error) {
                 is NotesError.ChangedOnDisk -> it.copy(hasConflict = true)

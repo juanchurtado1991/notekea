@@ -8,8 +8,9 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * The text being edited only has `\n` breaks, as [app.notekea.core.notes.domain.NoteDocument] says: Windows breaks in text
- * that reaches the field by itself (its own Paste menu, Shift+Insert) lose their `\r`, or a save would write `\r\r\n`.
+ * The text being edited only has `\n` breaks, as [app.notekea.core.notes.domain.NoteDocument] says: Windows breaks in
+ * text that reaches the field by itself (its own Paste menu, Shift+Insert) lose their `\r`, or a save would write
+ * `\r\r\n`.
  */
 @OptIn(ExperimentalFoundationApi::class)
 internal object OnlyNewLines : InputTransformation {
@@ -18,14 +19,31 @@ internal object OnlyNewLines : InputTransformation {
     override fun TextFieldBuffer.transformInput() {
         var start = length
         var end = 0
+
         for (change in 0 until changes.changeCount) {
             val range = changes.getRange(changeIndex = change)
-            start = min(a = start, b = range.min)
-            end = max(a = end, b = range.max)
+
+            start = min(
+                a = start,
+                b = range.min
+            )
+
+            end = max(
+                a = end,
+                b = range.max
+            )
         }
+
         for (index in minOf(end, length - 1) - 1 downTo start) {
-            if (charAt(index = index) == CARRIAGE_RETURN && charAt(index = index + 1) == NEW_LINE_CHAR) {
-                replace(start = index, end = index + 1, text = "")
+            val isCrLf = charAt(index = index) == CARRIAGE_RETURN &&
+                charAt(index = index + 1) == NEW_LINE_CHAR
+
+            if (isCrLf) {
+                replace(
+                    start = index,
+                    end = index + 1,
+                    text = ""
+                )
             }
         }
     }

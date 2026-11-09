@@ -24,6 +24,7 @@ fun WindowShortcut(
 ) {
     val dispatcher = LocalShortcutDispatcher.current
     val currentOnTrigger by rememberUpdatedState(newValue = onTrigger)
+
     DisposableEffect(dispatcher, shortcut) {
         val unregister = dispatcher.register(shortcut = shortcut) { currentOnTrigger() }
         onDispose { unregister() }
@@ -35,9 +36,13 @@ fun WindowShortcut(
 private fun WindowShortcutPreview() {
     NotekeaPreviewThemes {
         WindowShortcut(
-            shortcut = Shortcut(key = ShortcutKey.O, modifiers = setOf(ShortcutModifier.CONTROL)),
+            shortcut = Shortcut(
+                key = ShortcutKey.O,
+                modifiers = setOf(ShortcutModifier.CONTROL)
+            ),
             onTrigger = {}
         )
+
         Text(text = PREVIEW_TEXT)
     }
 }

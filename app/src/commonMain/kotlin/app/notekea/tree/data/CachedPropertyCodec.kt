@@ -12,14 +12,19 @@ import app.notekea.core.notes.domain.PropertyValue
 internal class CachedPropertyCodec {
     private val momentFormat = MomentFormat()
 
-    fun encode(
-        value: PropertyValue
-    ): Pair<String, String> = when (value) {
+    fun encode(value: PropertyValue): Pair<String, String> = when (value) {
         is PropertyValue.Text -> TEXT to value.text
+
         is PropertyValue.Number -> NUMBER to value.text
+
         is PropertyValue.Checkbox -> CHECKBOX to value.isChecked.toString()
-        is PropertyValue.Date -> DATE to momentFormat.format(LocalMoment(date = value.date), MomentFormat.ISO_DATE)
+
+        is PropertyValue.Date ->
+            DATE to
+                momentFormat.format(LocalMoment(date = value.date), MomentFormat.ISO_DATE)
+
         is PropertyValue.Items -> ITEMS to value.items.joinToString(separator = ITEM_SEPARATOR)
+
         is PropertyValue.Other -> OTHER to value.source
     }
 
@@ -27,7 +32,13 @@ internal class CachedPropertyCodec {
         key: String,
         type: String,
         value: String
-    ): NoteProperty = NoteProperty(key = key, value = valueOf(type = type, value = value))
+    ): NoteProperty = NoteProperty(
+        key = key,
+        value = valueOf(
+            type = type,
+            value = value
+        )
+    )
 
     private fun valueOf(
         type: String,
@@ -37,14 +48,25 @@ internal class CachedPropertyCodec {
 
         CHECKBOX -> PropertyValue.Checkbox(isChecked = value.toBoolean())
 
-        DATE -> momentFormat.parseDate(text = value, pattern = MomentFormat.ISO_DATE)
+        DATE -> momentFormat.parseDate(
+            text = value,
+            pattern = MomentFormat.ISO_DATE
+        )
             ?.let { PropertyValue.Date(date = it) } ?: PropertyValue.Text(text = value)
 
-        ITEMS -> PropertyValue.Items(items = if (value.isEmpty()) emptyList() else value.split(ITEM_SEPARATOR))
+        ITEMS -> PropertyValue.Items(items = itemsOf(value = value))
 
         OTHER -> PropertyValue.Other(source = value)
 
         else -> PropertyValue.Text(text = value)
+    }
+
+    private fun itemsOf(value: String): List<String> = if (value.isEmpty()) {
+        emptyList()
+    } else {
+        value.split(
+            ITEM_SEPARATOR
+        )
     }
 
     private companion object {

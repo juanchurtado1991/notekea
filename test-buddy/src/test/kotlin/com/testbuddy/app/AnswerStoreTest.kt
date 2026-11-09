@@ -13,10 +13,18 @@ class AnswerStoreTest {
     fun `answers survive with tabs, line breaks and backslashes in a note`() {
         val answers = listOf(
             ManualAnswer.Passed(id = "1"),
-            ManualAnswer.Failed(id = "2", note = "a\ttab, a\nbreak and C:\\path", screenshot = "2.png"),
-            ManualAnswer.Failed(id = "3", note = "no picture"),
+            ManualAnswer.Failed(
+                id = "2",
+                note = "a\ttab, a\nbreak and C:\\path",
+                screenshot = "2.png"
+            ),
+            ManualAnswer.Failed(
+                id = "3",
+                note = "no picture"
+            ),
             ManualAnswer.NotRun(id = "4")
         )
+
         AnswerStore(file = file).save(answers = answers)
         assertEquals(answers.associateBy { it.id }, AnswerStore(file = file).load())
     }

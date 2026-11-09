@@ -1,47 +1,62 @@
 package app.notekea.editor.data
 
 import app.notekea.core.domain.Outcome
-import app.notekea.editor.domain.ClipboardReader
 import app.notekea.core.notes.domain.NotesError
+import app.notekea.editor.domain.ClipboardReader
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 
 /**
- * [ClipboardReader] on a Wayland desktop. Java reads the clipboard through XWayland, which does not pass images on:
- * without focus it offers none, with focus it offers one and Java waits seconds for it until the owner times out. So a
- * copied screenshot is read with `wl-paste` (wl-clipboard) first, PNG first, other image types turned into PNG, and
- * [primary] is asked only when `wl-paste` finds no image or is not installed; when [primary] offers an image it cannot
- * give and `wl-paste` is missing, the user is told to install wl-clipboard. [readCommand] runs a command and returns
- * its output, or null when it could not run (see `ProcessCommands.kt`). Text comes from [primary].
+ * [ClipboardReader] on a Wayland desktop, where Java reads the clipboard through XWayland, which does not pass images
+ * on. A copied image is read with `wl-paste` first, turned into PNG, and [primary] is asked only when that finds none
+ * or is not installed; an image neither can give tells the user to install wl-clipboard. Text comes from [primary].
  */
 class WaylandClipboardReader(
     private val primary: ClipboardReader,
     private val readCommand: (List<String>) -> ByteArray?
 ) : ClipboardReader {
     override fun image(): Outcome<ByteArray?, NotesError> {
-        waylandImage()?.let { return Outcome.Success(value = it) }
+        waylandImage()?.let {
+            return Outcome.Success(value = it)
+        }
+
         val image = primary.image()
         val isMissing = image is Outcome.Failure && readCommand(VERSION) == null
-        return if (isMissing) Outcome.Failure(error = NotesError.ClipboardToolMissing(tool = TOOL)) else image
+
+        return if (isMissing) {
+            Outcome.Failure(
+                error = NotesError.ClipboardToolMissing(tool = TOOL)
+            )
+        } else {
+            image
+        }
     }
 
     override fun text(): String? = primary.text()
 
     private fun waylandImage(): ByteArray? {
-        val types = readCommand(LIST_TYPES)?.decodeToString()?.lines()?.map { it.trim() }.orEmpty()
-        val type = types.firstOrNull { it == PNG_TYPE }
+        val types = readCommand(LIST_TYPES)
+            ?.decodeToString()
+            ?.lines()
+            ?.map { it.trim() }
+            .orEmpty()
+
+        val type = types.firstOrNull {
+            it == PNG_TYPE
+        }
             ?: types.firstOrNull { it.startsWith(prefix = IMAGE_TYPE_PREFIX) }
             ?: return null
+
         val bytes = readCommand(PASTE + type)?.takeIf { it.isNotEmpty() } ?: return null
+
         return if (type == PNG_TYPE) bytes else png(bytes = bytes)
     }
 
     /** The image in [bytes] encoded as PNG, or null when Java cannot read its format. */
-    private fun png(
-        bytes: ByteArray
-    ): ByteArray? {
+    private fun png(bytes: ByteArray): ByteArray? {
         val image = ImageIO.read(ByteArrayInputStream(bytes)) ?: return null
+
         return ByteArrayOutputStream().use { output ->
             ImageIO.write(image, PNG_FORMAT, output)
             output.toByteArray()

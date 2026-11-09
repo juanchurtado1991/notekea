@@ -20,7 +20,13 @@ internal fun copyKeepingTimes(): CopyActionContext.(
     if (source.isDirectory()) {
         Files.createDirectories(target)
     } else {
-        Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES)
+        Files.copy(
+            source,
+            target,
+            StandardCopyOption.REPLACE_EXISTING,
+            StandardCopyOption.COPY_ATTRIBUTES
+        )
     }
+
     CopyActionResult.CONTINUE
 }

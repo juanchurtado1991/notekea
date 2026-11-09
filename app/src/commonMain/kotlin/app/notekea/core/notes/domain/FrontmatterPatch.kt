@@ -5,7 +5,7 @@ import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.domain.time.MomentFormat
 
 /**
- * Edits one property of a note's frontmatter (`ROADMAP.md` 1.14) by rewriting only that property's lines: the other
+ * Edits one property of a note's frontmatter by rewriting only that property's lines: the other
  * properties, comments, key order, quoting and line breaks stay byte for byte. A value is written in the style the
  * property already had (a block or inline list, single or double quotes), and quoted only when YAML needs it.
  */
@@ -20,9 +20,26 @@ class FrontmatterPatch {
     ): String {
         val frontmatter = FrontmatterBlocks.of(header = header) ?: return header
         val old = frontmatter.blockOf(key = key) ?: return header
-        val keyText = old.lines.first().substringBefore(delimiter = FrontmatterBlocks.KEY_SEPARATOR)
-        val block = FrontmatterBlocks.Block(lines = linesOf(keyText = keyText, value = value, old = old), key = key)
-        return frontmatter.copy(blocks = frontmatter.blocks.map { if (it === old) block else it }).toHeader()
+
+        val keyText = old
+            .lines
+            .first()
+            .substringBefore(delimiter = FrontmatterBlocks.KEY_SEPARATOR)
+
+        val block = FrontmatterBlocks.Block(
+            lines = linesOf(
+                keyText = keyText,
+                value = value,
+                old = old
+            ),
+            key = key
+        )
+
+        return frontmatter.copy(
+            blocks = frontmatter.blocks.map {
+                if (it === old) block else it
+            }
+        ).toHeader()
     }
 
     /** [header] with a new property [key] at the end, a frontmatter made with [lineBreak] when the note has none. */
@@ -32,9 +49,20 @@ class FrontmatterPatch {
         value: PropertyValue,
         lineBreak: String = StringPatterns.NEW_LINE
     ): String {
-        val frontmatter =
-            FrontmatterBlocks.of(header = header) ?: FrontmatterBlocks(blocks = emptyList(), lineBreak = lineBreak)
-        val block = FrontmatterBlocks.Block(lines = linesOf(keyText = key, value = value, old = null), key = key)
+        val frontmatter = FrontmatterBlocks.of(header = header) ?: FrontmatterBlocks(
+            blocks = emptyList(),
+            lineBreak = lineBreak
+        )
+
+        val block = FrontmatterBlocks.Block(
+            lines = linesOf(
+                keyText = key,
+                value = value,
+                old = null
+            ),
+            key = key
+        )
+
         return frontmatter.copy(blocks = frontmatter.blocks + block).toHeader()
     }
 
@@ -44,8 +72,15 @@ class FrontmatterPatch {
         key: String
     ): String {
         val frontmatter = FrontmatterBlocks.of(header = header) ?: return header
-        val blocks = frontmatter.blocks.filterNot { it.key == key }
-        val isEmpty = blocks.all { block -> block.key == null && block.lines.all { it.isBlank() } }
+
+        val blocks = frontmatter.blocks.filterNot {
+            it.key == key
+        }
+
+        val isEmpty = blocks.all { block ->
+            block.key == null && block.lines.all { it.isBlank() }
+        }
+
         return if (isEmpty) frontmatter.prefix else frontmatter.copy(blocks = blocks).toHeader()
     }
 
@@ -58,10 +93,20 @@ class FrontmatterPatch {
         val frontmatter = FrontmatterBlocks.of(header = header) ?: return header
         val old = frontmatter.blockOf(key = from) ?: return header
         val first = old.lines.first()
-        val renamed =
-            to + FrontmatterBlocks.KEY_SEPARATOR + first.substringAfter(delimiter = FrontmatterBlocks.KEY_SEPARATOR)
-        val block = old.copy(lines = listOf(renamed) + old.continuation, key = to)
-        return frontmatter.copy(blocks = frontmatter.blocks.map { if (it === old) block else it }).toHeader()
+
+        val renamed = to + FrontmatterBlocks.KEY_SEPARATOR +
+            first.substringAfter(delimiter = FrontmatterBlocks.KEY_SEPARATOR)
+
+        val block = old.copy(
+            lines = listOf(renamed) + old.continuation,
+            key = to
+        )
+
+        return frontmatter.copy(
+            blocks = frontmatter.blocks.map {
+                if (it === old) block else it
+            }
+        ).toHeader()
     }
 
     private fun linesOf(
@@ -70,12 +115,29 @@ class FrontmatterPatch {
         old: FrontmatterBlocks.Block?
     ): List<String> {
         val inline = old?.inlineValue.orEmpty()
+
         val quote = inline.firstOrNull()?.takeIf { YamlValues.isQuoted(text = inline) }
+
         if (value is PropertyValue.Items) {
-            return itemLines(keyText = keyText, items = value.items, quote = quote, old = old)
+            return itemLines(
+                keyText = keyText,
+                items = value.items,
+                quote = quote,
+                old = old
+            )
         }
+
         if (value is PropertyValue.Other) return value.source.split(StringPatterns.NEW_LINE)
-        return listOf(keyLine(keyText = keyText, value = scalarText(value = value, quote = quote)))
+
+        return listOf(
+            keyLine(
+                keyText = keyText,
+                value = scalarText(
+                    value = value,
+                    quote = quote
+                )
+            )
+        )
     }
 
     /** A text, number, checkbox or date value as YAML writes it. */
@@ -83,10 +145,20 @@ class FrontmatterPatch {
         value: PropertyValue,
         quote: Char?
     ): String = when (value) {
-        is PropertyValue.Text -> YamlValues.written(text = value.text, quote = quote)
+        is PropertyValue.Text -> YamlValues.written(
+            text = value.text,
+            quote = quote
+        )
+
         is PropertyValue.Number -> value.text
+
         is PropertyValue.Checkbox -> if (value.isChecked) YamlValues.TRUE else YamlValues.FALSE
-        is PropertyValue.Date -> momentFormat.format(moment = LocalMoment(date = value.date), pattern = ISO_DATE)
+
+        is PropertyValue.Date -> momentFormat.format(
+            moment = LocalMoment(date = value.date),
+            pattern = ISO_DATE
+        )
+
         is PropertyValue.Items, is PropertyValue.Other -> StringPatterns.EMPTY
     }
 
@@ -99,33 +171,65 @@ class FrontmatterPatch {
     ): List<String> {
         // Items left as they were keep their quotes; only new ones are written, quoted when YAML needs it.
         val kept = old?.let { YamlValues.writtenItems(block = it) }.orEmpty()
+
         val inline = old?.inlineValue.orEmpty()
+
         val written = items.map { item ->
             kept[item] ?: if (inline.isEmpty()) {
-                YamlValues.written(text = item, quote = quote)
+                YamlValues.written(
+                    text = item,
+                    quote = quote
+                )
             } else {
-                YamlValues.writtenInline(text = item, quote = quote)
+                YamlValues.writtenInline(
+                    text = item,
+                    quote = quote
+                )
             }
         }
+
         val joined = written.joinToString(separator = ITEM_SEPARATOR)
+
         return when {
-            items.isEmpty() -> listOf(keyLine(keyText = keyText, value = StringPatterns.EMPTY))
+            items.isEmpty() -> listOf(
+                keyLine(
+                    keyText = keyText,
+                    value = StringPatterns.EMPTY
+                )
+            )
 
             inline.startsWith(prefix = YamlValues.INLINE_OPEN) -> {
-                listOf(keyLine(keyText = keyText, value = YamlValues.INLINE_OPEN + joined + YamlValues.INLINE_CLOSE))
+                listOf(
+                    keyLine(
+                        keyText = keyText,
+                        value = YamlValues.INLINE_OPEN + joined + YamlValues.INLINE_CLOSE
+                    )
+                )
             }
 
-            inline.isNotEmpty() -> listOf(keyLine(keyText = keyText, value = joined))
+            inline.isNotEmpty() -> listOf(
+                keyLine(
+                    keyText = keyText,
+                    value = joined
+                )
+            )
 
-            else -> listOf(keyLine(keyText = keyText, value = StringPatterns.EMPTY)) +
-                written.map { indentOf(old = old) + YamlValues.ITEM_MARK + StringPatterns.SPACE + it }
+            else -> listOf(
+                keyLine(
+                    keyText = keyText,
+                    value = StringPatterns.EMPTY
+                )
+            ) +
+                written.map {
+                    indentOf(old = old) + YamlValues.ITEM_MARK + StringPatterns.SPACE + it
+                }
         }
     }
 
     /** How the property's list items were indented (`  ` by default, as Obsidian writes them). */
-    private fun indentOf(
-        old: FrontmatterBlocks.Block?
-    ): String = old?.continuation?.firstOrNull { it.trimStart().startsWith(prefix = YamlValues.ITEM_MARK) }
+    private fun indentOf(old: FrontmatterBlocks.Block?): String = old
+        ?.continuation
+        ?.firstOrNull { it.trimStart().startsWith(prefix = YamlValues.ITEM_MARK) }
         ?.takeWhile { it.isWhitespace() } ?: DEFAULT_INDENT
 
     private fun keyLine(

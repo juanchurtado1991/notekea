@@ -11,10 +11,26 @@ class EditorBringIntoViewSpecTest {
         assertEquals(
             expected = listOf(0f, -30f, 50f, 0f),
             actual = listOf(
-                spec.calculateScrollDistance(offset = 200f, size = 20f, containerSize = 500f),
-                spec.calculateScrollDistance(offset = 30f, size = 20f, containerSize = 500f),
-                spec.calculateScrollDistance(offset = 530f, size = 20f, containerSize = 500f),
-                spec.calculateScrollDistance(offset = -300f, size = 1_200f, containerSize = 500f)
+                spec.calculateScrollDistance(
+                    offset = 200f,
+                    size = 20f,
+                    containerSize = 500f
+                ),
+                spec.calculateScrollDistance(
+                    offset = 30f,
+                    size = 20f,
+                    containerSize = 500f
+                ),
+                spec.calculateScrollDistance(
+                    offset = 530f,
+                    size = 20f,
+                    containerSize = 500f
+                ),
+                spec.calculateScrollDistance(
+                    offset = -300f,
+                    size = 1_200f,
+                    containerSize = 500f
+                )
             )
         )
     }

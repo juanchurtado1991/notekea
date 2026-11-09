@@ -15,7 +15,7 @@ import java.security.MessageDigest
  * Downloads [url] to [file] once and checks it is the file it must be: its SHA-256 is [sha256]. A file already there
  * with that hash is kept (it is never downloaded again), one with another hash is replaced, and a download that does
  * not match or breaks halfway fails the build and leaves nothing behind. A server that stops answering fails it after
- * [timeoutMillis], never hangs it. Used for the embedding model the app bundles (`ROADMAP.md` 2.2).
+ * [timeoutMillis], never hangs it. Used for the embedding model the app bundles.
  */
 abstract class DownloadVerifiedFileTask : DefaultTask() {
     @get:Input
@@ -44,7 +44,9 @@ abstract class DownloadVerifiedFileTask : DefaultTask() {
         try {
             fetch(partial = partial)
             val actual = sha256Of(file = partial)
-            if (actual != sha256.get()) error("${url.get()} has SHA-256 $actual, not ${sha256.get()}")
+            if (actual != sha256.get()) {
+                error("${url.get()} has SHA-256 $actual, not ${sha256.get()}")
+            }
             Files.move(partial.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
         } finally {
             partial.delete()

@@ -21,13 +21,20 @@ class BreadcrumbsTest {
         val steps = Breadcrumbs.recent()
         assertEquals(Breadcrumbs.MAX_STEPS, steps.size)
         assertTrue(steps.first().endsWith(" step 5"))
-        assertTrue(Regex("\\d\\d:\\d\\d:\\d\\d step ${Breadcrumbs.MAX_STEPS + 4}").matches(steps.last()))
+
+        assertTrue(
+            Regex("\\d\\d:\\d\\d:\\d\\d step ${Breadcrumbs.MAX_STEPS + 4}").matches(steps.last())
+        )
     }
 
     @Test
     fun `a step is kept with the time of the clock it is given`() {
         val clock = Clock.fixed(Instant.parse("2026-10-26T10:15:02Z"), ZoneOffset.UTC)
-        Breadcrumbs.record(step = "Editor: OnOpen", clock = clock)
+
+        Breadcrumbs.record(
+            step = "Editor: OnOpen",
+            clock = clock
+        )
 
         assertEquals(listOf("10:15:02 Editor: OnOpen"), Breadcrumbs.recent())
     }
@@ -35,13 +42,12 @@ class BreadcrumbsTest {
     @Test
     fun `the same step again is counted on its line`() {
         Breadcrumbs.record(step = "Editor: OnOpen")
+
         repeat(times = 3) { Breadcrumbs.record(step = "Editor: OnTextChange") }
 
         assertEquals(
             listOf("Editor: OnOpen", "Editor: OnTextChange (×3)"),
-            Breadcrumbs.recent().map {
-                it.substringAfter(' ')
-            }
+            Breadcrumbs.recent().map { it.substringAfter(' ') }
         )
     }
 }

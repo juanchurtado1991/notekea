@@ -10,13 +10,15 @@ import org.jetbrains.compose.desktop.application.tasks.AbstractSuggestModulesTas
 
 /**
  * What Notekea and Notekea QA share as desktop apps: the toolchain's JDK in the installers, the same runtime, the same
- * versions, the embedding model bundled in (`ROADMAP.md` 2.2) and the check that the runtime holds what the app needs.
+ * versions, the embedding model bundled in and the check that the runtime holds what the app needs.
  */
 fun JvmApplication.notekeaDesktopApp(project: Project) {
     // Package the toolchain's JDK, not the one that runs Gradle, so the installers ship the JDK the app is built and
     // tested on.
     javaHome = project.extensions.getByType<JavaToolchainService>()
-        .launcherFor { languageVersion.set(JavaLanguageVersion.of(NotekeaVersions.jdk(project = project))) }
+        .launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(NotekeaVersions.jdk(project = project)))
+        }
         .get().metadata.installationPath.asFile.absolutePath
     // Skiko and java-llama.cpp load native libraries; without this the JVM warns on every launch.
     jvmArgs += "--enable-native-access=ALL-UNNAMED"
@@ -28,10 +30,16 @@ fun JvmApplication.notekeaDesktopApp(project: Project) {
         targetFormats(TargetFormat.Deb, TargetFormat.Dmg, TargetFormat.Msi)
         packageVersion = NotekeaVersions.packageVersion(project = project)
         // The JDK modules the installers keep (gradle.properties).
-        modules(*project.providers.gradleProperty("notekea.runtimeModules").get().split(",").toTypedArray())
+        modules(
+            *project.providers.gradleProperty(
+                "notekea.runtimeModules"
+            ).get().split(",").toTypedArray()
+        )
     }
     val modelResources = EmbeddingModel.appResources(project)
-    project.tasks.matching { it.name == "prepareAppResources" }.configureEach { dependsOn(modelResources) }
+    project.tasks.matching {
+        it.name == "prepareAppResources"
+    }.configureEach { dependsOn(modelResources) }
     registerRuntimeCheck(project = project)
 }
 
@@ -47,7 +55,9 @@ private fun memoryJvmArgs(): List<String> {
 
 /** Registers `checkRuntimeModules` in `check`, reading what Compose's `suggestRuntimeModules` knows of the app. */
 private fun registerRuntimeCheck(project: Project) {
-    val checkRuntimeModules = project.tasks.register<CheckRuntimeModulesTask>("checkRuntimeModules") {
+    val checkRuntimeModules = project.tasks.register<CheckRuntimeModulesTask>(
+        "checkRuntimeModules"
+    ) {
         description = "Fails when the packaged runtime lacks a JDK module the app needs"
         group = "verification"
         val suggest = project.tasks.named<AbstractSuggestModulesTask>("suggestRuntimeModules")

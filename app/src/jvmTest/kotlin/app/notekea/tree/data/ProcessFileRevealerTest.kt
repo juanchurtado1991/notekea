@@ -2,9 +2,10 @@ package app.notekea.tree.data
 
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
-import app.notekea.core.platform.domain.OperatingSystem
+import app.notekea.core.notes.data.runCommand
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.platform.domain.OperatingSystem
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
 import java.nio.file.Path
@@ -14,14 +15,16 @@ import kotlin.io.path.writeText
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.core.notes.data.runCommand
 
 @OptIn(kotlin.io.path.ExperimentalPathApi::class)
 class ProcessFileRevealerTest {
     private val commands = mutableListOf<List<String>>()
     private val vault: Path = Files.createTempDirectory(TEMP_PREFIX).also { root ->
         listOf(NOTE.value, LOOSE_NOTE).forEach { note ->
-            root.resolve(note).createParentDirectories().writeText(text = CONTENT)
+            root
+                .resolve(note)
+                .createParentDirectories()
+                .writeText(text = CONTENT)
         }
     }
 
@@ -31,32 +34,54 @@ class ProcessFileRevealerTest {
     }
 
     @Test
-    fun `an entry that is gone is reported without opening anything, and so is a vault that moved`() = runBlocking {
-        val linux = revealer(operatingSystem = OperatingSystem.LINUX, exitCodes = emptyList())
-        val missingNote = linux.reveal(vaultPath = vault.toString(), path = RelativePath(value = "Gone.md"))
-        val movedVault = linux.reveal(vaultPath = vault.resolve("Moved").toString(), path = NOTE)
+    fun `an entry that is gone is reported without opening anything, and so is a vault that moved`() =
+        runBlocking {
+            val linux = revealer(
+                operatingSystem = OperatingSystem.LINUX,
+                exitCodes = emptyList()
+            )
 
-        assertEquals(
-            expected = listOf(
-                Outcome.Failure(error = NotesError.EntryMissing(path = "Gone.md")),
-                Outcome.Failure(error = NotesError.VaultMissing(path = vault.resolve("Moved").toString()))
-            ),
-            actual = listOf(missingNote, movedVault)
-        )
-        assertEquals(expected = emptyList(), actual = commands)
-    }
+            val missingNote = linux.reveal(
+                vaultPath = vault.toString(),
+                path = RelativePath(value = "Gone.md")
+            )
+
+            val movedVault = linux.reveal(
+                vaultPath = vault.resolve("Moved").toString(),
+                path = NOTE
+            )
+
+            assertEquals(
+                expected = listOf(
+                    Outcome.Failure(error = NotesError.EntryMissing(path = "Gone.md")),
+                    Outcome.Failure(
+                        error = NotesError.VaultMissing(path = vault.resolve("Moved").toString())
+                    )
+                ),
+                actual = listOf(missingNote, movedVault)
+            )
+
+            assertEquals(
+                expected = emptyList(),
+                actual = commands
+            )
+        }
 
     @Test
     fun `macOS selects the entry in Finder`() = runBlocking {
         val outcome = revealer(
             operatingSystem = OperatingSystem.MACOS,
             exitCodes = listOf(0)
-        ).reveal(vaultPath = vault.toString(), path = NOTE)
+        ).reveal(
+            vaultPath = vault.toString(),
+            path = NOTE
+        )
 
         assertEquals(
             expected = Outcome.Success(value = Unit),
             actual = outcome
         )
+
         assertEquals(
             expected = listOf(listOf("open", "-R", entry())),
             actual = commands
@@ -69,7 +94,10 @@ class ProcessFileRevealerTest {
             revealer(
                 operatingSystem = OperatingSystem.WINDOWS,
                 exitCodes = listOf(exitCode)
-            ).reveal(vaultPath = vault.toString(), path = NOTE)
+            ).reveal(
+                vaultPath = vault.toString(),
+                path = NOTE
+            )
         }
 
         assertEquals(
@@ -79,6 +107,7 @@ class ProcessFileRevealerTest {
             ),
             actual = outcomes
         )
+
         assertEquals(
             expected = listOf("explorer.exe", "/select,${entry()}"),
             actual = commands.first()
@@ -92,7 +121,10 @@ class ProcessFileRevealerTest {
         revealer(
             operatingSystem = OperatingSystem.LINUX,
             exitCodes = listOf(0)
-        ).reveal(vaultPath = vault.toString(), path = note)
+        ).reveal(
+            vaultPath = vault.toString(),
+            path = note
+        )
 
         assertEquals(
             expected = "array:string:" + vault
@@ -102,6 +134,7 @@ class ProcessFileRevealerTest {
                 .replace(",", "%2C"),
             actual = commands.single()[6]
         )
+
         assertEquals(
             expected = listOf("dbus-send", "--session", "--dest=org.freedesktop.FileManager1"),
             actual = commands.single().take(n = 3)
@@ -109,28 +142,37 @@ class ProcessFileRevealerTest {
     }
 
     @Test
-    fun `linux opens the folder when the file manager cannot select, and fails when nothing works`() = runBlocking {
-        val opened = revealer(
-            operatingSystem = OperatingSystem.LINUX,
-            exitCodes = listOf(1, 0)
-        ).reveal(vaultPath = vault.toString(), path = NOTE)
-        val failed = revealer(
-            operatingSystem = OperatingSystem.LINUX,
-            exitCodes = listOf(null, 4)
-        ).reveal(vaultPath = vault.toString(), path = NOTE)
+    fun `linux opens the folder when the file manager cannot select, and fails when nothing works`() =
+        runBlocking {
+            val opened = revealer(
+                operatingSystem = OperatingSystem.LINUX,
+                exitCodes = listOf(1, 0)
+            ).reveal(
+                vaultPath = vault.toString(),
+                path = NOTE
+            )
 
-        assertEquals(
-            expected = listOf(
-                Outcome.Success(value = Unit),
-                Outcome.Failure(error = NotesError.RevealFailed(path = NOTE.value))
-            ),
-            actual = listOf(opened, failed)
-        )
-        assertEquals(
-            expected = listOf("xdg-open", vault.resolve("Recipes").toString()),
-            actual = commands[1]
-        )
-    }
+            val failed = revealer(
+                operatingSystem = OperatingSystem.LINUX,
+                exitCodes = listOf(null, 4)
+            ).reveal(
+                vaultPath = vault.toString(),
+                path = NOTE
+            )
+
+            assertEquals(
+                expected = listOf(
+                    Outcome.Success(value = Unit),
+                    Outcome.Failure(error = NotesError.RevealFailed(path = NOTE.value))
+                ),
+                actual = listOf(opened, failed)
+            )
+
+            assertEquals(
+                expected = listOf("xdg-open", vault.resolve("Recipes").toString()),
+                actual = commands[1]
+            )
+        }
 
     private fun entry(): String = vault.resolve(NOTE.value).toString()
 
@@ -139,6 +181,7 @@ class ProcessFileRevealerTest {
         exitCodes: List<Int?>
     ): ProcessFileRevealer {
         val remaining = exitCodes.toMutableList()
+
         return ProcessFileRevealer(
             operatingSystem = operatingSystem,
             runCommand = { command ->

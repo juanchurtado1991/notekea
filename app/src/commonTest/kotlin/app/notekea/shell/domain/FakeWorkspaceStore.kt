@@ -1,7 +1,7 @@
 package app.notekea.shell.domain
 
-import kotlinx.coroutines.delay
 import app.notekea.core.notes.domain.Gate
+import kotlinx.coroutines.delay
 
 /**
  * Each vault's tabs in memory; every call goes through [gate], as the disk takes its time, and a write takes as long
@@ -15,10 +15,9 @@ class FakeWorkspaceStore : WorkspaceStore {
     /** Thrown by every write, as a bug in the store would. */
     var failure: Throwable? = null
 
-    override suspend fun read(
-        vaultPath: String
-    ): Workspace? {
+    override suspend fun read(vaultPath: String): Workspace? {
         gate.pass()
+
         return workspaces[vaultPath]
     }
 
@@ -27,8 +26,13 @@ class FakeWorkspaceStore : WorkspaceStore {
         workspace: Workspace
     ) {
         gate.pass()
-        failure?.let { throw it }
+
+        failure?.let {
+            throw it
+        }
+
         writeMillis.removeFirstOrNull()?.let { delay(timeMillis = it) }
+
         workspaces[vaultPath] = workspace
     }
 }

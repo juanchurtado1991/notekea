@@ -12,7 +12,7 @@ import app.notekea.resources.search_index_notice
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The first large run's notice (`ROADMAP.md` 2.3): Notekea is reading the notes, related notes and chat come soon,
+ * The first large run's notice: Notekea is reading the notes, related notes and chat come soon,
  * and writing goes on meanwhile; Dismiss hides it for this run.
  */
 @Composable
@@ -32,5 +32,7 @@ fun SearchIndexNotice(
 @Preview
 @Composable
 private fun SearchIndexNoticePreview() {
-    NotekeaPreviewThemes { SearchIndexNotice(onIntent = {}) }
+    NotekeaPreviewThemes {
+        SearchIndexNotice(onIntent = {})
+    }
 }

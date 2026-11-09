@@ -17,11 +17,17 @@ class GetDiagnosticsUseCase(
         val header = listOf(
             TITLE,
             VERSION_LABEL + systemEnvironment.appVersion,
-            OS_LABEL + systemEnvironment.operatingSystemName + SPACE + systemEnvironment.operatingSystemVersion,
+            OS_LABEL + systemEnvironment.operatingSystemName + SPACE +
+                systemEnvironment.operatingSystemVersion,
             JAVA_LABEL + systemEnvironment.javaVersion
         )
+
         val log = logStore.recentLines(count = LOG_LINES).ifEmpty { listOf(NO_LOG) }
-        return (header + LOG_TITLE + log).joinToString(separator = NEW_LINE, postfix = NEW_LINE)
+
+        return (header + LOG_TITLE + log).joinToString(
+            separator = NEW_LINE,
+            postfix = NEW_LINE
+        )
     }
 
     companion object {

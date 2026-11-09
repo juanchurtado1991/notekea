@@ -7,11 +7,9 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.thread
 
 /**
- * What a performance pass reads from the automated smoke runs (`ROADMAP.md`, "Closing a milestone"): a line per
- * sample in `memory.csv` (the run, the moment, the Java heap in use and the heap the JVM holds for it, the process's
- * resident memory, its highest since the sample before and Skia's font and resource caches, in megabytes, and the
- * seconds since the sample before), in the folder the `smokeRun` Gradle task names; a plain test run (no folder) records
- * nothing.
+ * What a performance pass reads from the automated smoke runs: a line per sample in `memory.csv` (the run, the moment,
+ * the Java heap in use and held, the process's resident memory and its peak, Skia's caches, and the seconds since the
+ * sample before), in the folder the `smokeRun` Gradle task names; a plain test run records nothing.
  */
 internal object SmokeRunReport {
     private const val REPORT_DIR = "notekea.smokeRun.reportDir"
@@ -32,7 +30,10 @@ internal object SmokeRunReport {
         if (folder != null) {
             thread(isDaemon = true) {
                 while (true) {
-                    ProcessMemory.residentMegabytes()?.let { resident -> peak.accumulateAndGet(resident, ::maxOf) }
+                    ProcessMemory.residentMegabytes()?.let { resident ->
+                        peak.accumulateAndGet(resident, ::maxOf)
+                    }
+
                     Thread.sleep(PEAK_MILLIS)
                 }
             }
@@ -53,6 +54,7 @@ internal object SmokeRunReport {
         val file = File(folder, FILE_NAME)
         if (!file.exists()) file.writeText(text = HEADER)
         val resident = ProcessMemory.residentMegabytes()
+
         val line = listOf(
             run,
             moment,
@@ -64,6 +66,7 @@ internal object SmokeRunReport {
             (Graphics.resourceCacheTotalUsed / BYTES_PER_MEGABYTE).toString(),
             "%.1f".format(Locale.ROOT, seconds)
         )
+
         file.appendText(text = line.joinToString(separator = SEPARATOR) + "\n")
         lastSample = System.nanoTime()
     }

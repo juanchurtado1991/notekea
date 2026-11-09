@@ -1,12 +1,12 @@
 package app.notekea.shell.presentation
 
-import app.notekea.core.presentation.FeedIntent
-import app.notekea.core.notes.domain.RelativePath
 import androidx.compose.ui.unit.IntSize
 import app.notekea.core.notes.domain.ConnectionsTab
+import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.SidePanelMode
 import app.notekea.core.notes.domain.SidePanelSection
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.presentation.FeedIntent
 
 /** What the user did with the tabs and panes, or what the panes around them report. */
 sealed interface WorkspaceIntent {
@@ -17,7 +17,9 @@ sealed interface WorkspaceIntent {
     ) : WorkspaceIntent,
         FeedIntent
 
-    /** [path] was opened (a click, a link, the quick switcher…): its tab is shown, or added behind when [inBackground]. */
+    /**
+     * [path] was opened (a click, a link, the quick switcher…): its tab is shown, or added behind when [inBackground].
+     */
     data class OnOpen(
         val path: RelativePath,
         val inBackground: Boolean = false
@@ -47,7 +49,7 @@ sealed interface WorkspaceIntent {
     /** `Mod+1` to `Mod+9`. */
     data class OnJump(val number: Int) : WorkspaceIntent
 
-    /** A related note's Open to the side (`ROADMAP.md` 2.4): [path] opens in the other pane, created if needed. */
+    /** A related note's Open to the side: [path] opens in the other pane, created if needed. */
     data class OnOpenBeside(val path: RelativePath) : WorkspaceIntent
 
     /** `Mod+Shift+D` or the tab menu's Split right: the active tab moves to a new pane on the right. */
@@ -89,7 +91,7 @@ sealed interface WorkspaceIntent {
 
     data class OnSidePanelSectionToggle(val section: SidePanelSection) : WorkspaceIntent
 
-    /** Connections shows [tab]: Related, Linked or Unlinked (`ROADMAP.md` 2.5). */
+    /** Connections shows [tab]: Related, Linked or Unlinked. */
     data class OnConnectionsTabSelect(val tab: ConnectionsTab) : WorkspaceIntent
 
     /** `Mod+Shift+O`: the outline takes the keyboard, the panel shown on the inspector and the outline opened first. */

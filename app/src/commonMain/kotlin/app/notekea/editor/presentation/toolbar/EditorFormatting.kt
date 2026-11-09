@@ -1,9 +1,6 @@
 package app.notekea.editor.presentation.toolbar
 
 import androidx.compose.foundation.layout.RowScope
-import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.model.EditorPreviewData
-import app.notekea.editor.presentation.view.MoreMenu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -14,10 +11,13 @@ import app.notekea.core.platform.domain.Shortcut
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuButton
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.NotekeaToolbarPill
-import app.notekea.core.presentation.platform.label
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.platform.label
 import app.notekea.editor.domain.FormatAction
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorPreviewData
+import app.notekea.editor.presentation.view.MoreMenu
 import app.notekea.resources.Res
 import app.notekea.resources.editor_toolbar_label
 import app.notekea.resources.format_bold
@@ -45,18 +45,48 @@ internal fun FormattingGroups(
     onIntent: (EditorIntent) -> Unit
 ) {
     val format = { action: FormatAction -> onIntent(EditorIntent.OnFormat(action = action)) }
+
     val actions = formatActions()
     val label = stringResource(resource = Res.string.editor_toolbar_label)
-    val text: @Composable RowScope.() -> Unit =
-        { TextGroup(actions = actions, platformConventions = platformConventions, format = format) }
-    val links: @Composable RowScope.() -> Unit =
-        { LinkGroup(platformConventions = platformConventions, onIntent = onIntent) }
-    val lists: @Composable RowScope.() -> Unit = { ListGroup(actions = actions, format = format) }
-    val template: @Composable RowScope.() -> Unit =
-        { TemplateButton(platformConventions = platformConventions, onIntent = onIntent) }
-    val more: @Composable RowScope.() -> Unit = {
-        MoreMenu(actions = actions, platformConventions = platformConventions, onIntent = onIntent, fit = fit)
+
+    val text: @Composable RowScope.() -> Unit = {
+        TextGroup(
+            actions = actions,
+            platformConventions = platformConventions,
+            format = format
+        )
     }
+
+    val links: @Composable RowScope.() -> Unit = {
+        LinkGroup(
+            platformConventions = platformConventions,
+            onIntent = onIntent
+        )
+    }
+
+    val lists: @Composable RowScope.() -> Unit = {
+        ListGroup(
+            actions = actions,
+            format = format
+        )
+    }
+
+    val template: @Composable RowScope.() -> Unit = {
+        TemplateButton(
+            platformConventions = platformConventions,
+            onIntent = onIntent
+        )
+    }
+
+    val more: @Composable RowScope.() -> Unit = {
+        MoreMenu(
+            actions = actions,
+            platformConventions = platformConventions,
+            onIntent = onIntent,
+            fit = fit
+        )
+    }
+
     NotekeaToolbarPill(
         modifier = Modifier.semantics { contentDescription = label },
         groups = listOfNotNull(
@@ -79,11 +109,16 @@ private fun LinkGroup(
         icon = NotekeaIcons.NoteLink,
         label = Res.string.format_note_link,
         onClick = { onIntent(EditorIntent.OnNoteLinkRequest) },
-        shortcutHint = platformConventions.shortcutLabel(shortcut = platformConventions.noteLinkShortcut)
+        shortcutHint = platformConventions.shortcutLabel(
+            shortcut = platformConventions.noteLinkShortcut
+        )
     )
-    ToolbarButton(icon = NotekeaIcons.Tag, label = Res.string.format_tag, onClick = {
-        onIntent(EditorIntent.OnTagRequest)
-    })
+
+    ToolbarButton(
+        icon = NotekeaIcons.Tag,
+        label = Res.string.format_tag,
+        onClick = { onIntent(EditorIntent.OnTagRequest) }
+    )
 }
 
 /** Checklist and Bulleted list, the lists used most. */
@@ -92,15 +127,20 @@ private fun ListGroup(
     actions: FormatActions,
     format: (FormatAction) -> Unit
 ) {
-    ToolbarButton(icon = NotekeaIcons.Checklist, label = Res.string.format_checklist, onClick = {
-        format(actions.checklist)
-    })
-    ToolbarButton(icon = NotekeaIcons.BulletList, label = Res.string.format_bullet_list, onClick = {
-        format(actions.bulletList)
-    })
+    ToolbarButton(
+        icon = NotekeaIcons.Checklist,
+        label = Res.string.format_checklist,
+        onClick = { format(actions.checklist) }
+    )
+
+    ToolbarButton(
+        icon = NotekeaIcons.BulletList,
+        label = Res.string.format_bullet_list,
+        onClick = { format(actions.bulletList) }
+    )
 }
 
-/** Insert template, which opens the template picker (`ROADMAP.md` 1.12). */
+/** Insert template, which opens the template picker. */
 @Composable
 private fun TemplateButton(
     platformConventions: PlatformConventions,
@@ -110,14 +150,16 @@ private fun TemplateButton(
         icon = NotekeaIcons.Template,
         label = Res.string.format_template,
         onClick = { onIntent(EditorIntent.OnTemplateRequest) },
-        shortcutHint = platformConventions.shortcutLabel(shortcut = platformConventions.templateShortcut)
+        shortcutHint = platformConventions.shortcutLabel(
+            shortcut = platformConventions.templateShortcut
+        )
     )
 }
 
 /** [shortcut] written the way this system writes it. */
-internal fun PlatformConventions.shortcutLabel(
-    shortcut: Shortcut
-): String = shortcut.label(operatingSystem = operatingSystem)
+internal fun PlatformConventions.shortcutLabel(shortcut: Shortcut): String = shortcut.label(
+    operatingSystem = operatingSystem
+)
 
 /** Heading (a menu of three sizes), Bold and Italic. */
 @Composable
@@ -126,29 +168,45 @@ private fun TextGroup(
     platformConventions: PlatformConventions,
     format: (FormatAction) -> Unit
 ) {
-    val sizes =
-        listOf(Res.string.format_heading_large, Res.string.format_heading_medium, Res.string.format_heading_small)
+    val sizes = listOf(
+        Res.string.format_heading_large,
+        Res.string.format_heading_medium,
+        Res.string.format_heading_small
+    )
+
     NotekeaMenuButton(
         takesFocus = false,
         icon = NotekeaIcons.Heading,
         label = stringResource(resource = Res.string.format_heading),
         sections = listOf(
-            actions.headings.zip(sizes).map { (heading, size) ->
-                NotekeaMenuItem(label = stringResource(resource = size), onClick = { format(heading) })
-            }
+            actions
+                .headings
+                .zip(sizes)
+                .map { (heading, size) ->
+                    NotekeaMenuItem(
+                        label = stringResource(resource = size),
+                        onClick = { format(heading) }
+                    )
+                }
         )
     )
+
     ToolbarButton(
         icon = NotekeaIcons.Bold,
         label = Res.string.format_bold,
         onClick = { format(actions.bold) },
-        shortcutHint = platformConventions.shortcutLabel(shortcut = platformConventions.boldShortcut)
+        shortcutHint = platformConventions.shortcutLabel(
+            shortcut = platformConventions.boldShortcut
+        )
     )
+
     ToolbarButton(
         icon = NotekeaIcons.Italic,
         label = Res.string.format_italic,
         onClick = { format(actions.italic) },
-        shortcutHint = platformConventions.shortcutLabel(shortcut = platformConventions.italicShortcut)
+        shortcutHint = platformConventions.shortcutLabel(
+            shortcut = platformConventions.italicShortcut
+        )
     )
 }
 
@@ -156,7 +214,11 @@ private fun TextGroup(
 @Composable
 private fun FormattingGroupsPreview() {
     NotekeaPreviewThemes {
-        FormattingGroups(fit = ToolbarFit.ALL, platformConventions = EditorPreviewData.platformConventions, onIntent = {
-        })
+        FormattingGroups(
+            fit = ToolbarFit.ALL,
+            platformConventions = EditorPreviewData.platformConventions,
+            onIntent = {
+            }
+        )
     }
 }

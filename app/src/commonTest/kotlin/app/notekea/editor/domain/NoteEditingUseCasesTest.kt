@@ -1,15 +1,14 @@
 package app.notekea.editor.domain
 
 import app.notekea.core.domain.Outcome
-
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.RelativePath
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import app.notekea.core.notes.domain.FakeNoteContentStore
-import app.notekea.core.notes.domain.NoteDocument
-import app.notekea.core.notes.domain.NotesError
-import app.notekea.core.notes.domain.RelativePath
 
 class NoteEditingUseCasesTest {
     private val store = FakeNoteContentStore()
@@ -22,9 +21,16 @@ class NoteEditingUseCasesTest {
 
         assertEquals(
             expected = Outcome.Success(
-                value = NoteDocument(header = "---\ntags: [recipe]\n---\n", body = "# Arepas\n", usesCrLf = false)
+                value = NoteDocument(
+                    header = "---\ntags: [recipe]\n---\n",
+                    body = "# Arepas\n",
+                    usesCrLf = false
+                )
             ),
-            actual = openNote(vaultPath = VAULT, path = NOTE)
+            actual = openNote(
+                vaultPath = VAULT,
+                path = NOTE
+            )
         )
     }
 
@@ -32,7 +38,10 @@ class NoteEditingUseCasesTest {
     fun `a note that cannot be read does not open`() = runTest {
         assertEquals(
             expected = Outcome.Failure(error = NotesError.EntryMissing(path = NOTE.value)),
-            actual = openNote(vaultPath = VAULT, path = NOTE)
+            actual = openNote(
+                vaultPath = VAULT,
+                path = NOTE
+            )
         )
     }
 
@@ -41,12 +50,18 @@ class NoteEditingUseCasesTest {
         store.texts[NOTE] = ORIGINAL
         val document = NoteDocument.fromText(text = ORIGINAL).copy(body = "# Arepas reina\n")
 
-        val saved = saveNote(vaultPath = VAULT, path = NOTE, document = document, expectedOnDisk = ORIGINAL)
+        val saved = saveNote(
+            vaultPath = VAULT,
+            path = NOTE,
+            document = document,
+            expectedOnDisk = ORIGINAL
+        )
 
         assertEquals(
             expected = Outcome.Success(value = "---\ntags: [recipe]\n---\n# Arepas reina\n"),
             actual = saved
         )
+
         assertEquals(
             expected = "---\ntags: [recipe]\n---\n# Arepas reina\n",
             actual = store.texts.getValue(NOTE)
@@ -58,7 +73,13 @@ class NoteEditingUseCasesTest {
         store.texts[NOTE] = "Edited in another app"
         val document = NoteDocument.fromText(text = ORIGINAL).copy(body = "Mine")
 
-        val refused = saveNote(vaultPath = VAULT, path = NOTE, document = document, expectedOnDisk = ORIGINAL)
+        val refused = saveNote(
+            vaultPath = VAULT,
+            path = NOTE,
+            document = document,
+            expectedOnDisk = ORIGINAL
+        )
+
         val kept = saveNote(
             vaultPath = VAULT,
             path = NOTE,
@@ -79,12 +100,18 @@ class NoteEditingUseCasesTest {
     fun `a save never brings back a note that was moved or deleted meanwhile`() = runTest {
         val document = NoteDocument.fromText(text = ORIGINAL)
 
-        val saved = saveNote(vaultPath = VAULT, path = NOTE, document = document, expectedOnDisk = ORIGINAL)
+        val saved = saveNote(
+            vaultPath = VAULT,
+            path = NOTE,
+            document = document,
+            expectedOnDisk = ORIGINAL
+        )
 
         assertEquals(
             expected = Outcome.Failure(error = NotesError.EntryMissing(path = NOTE.value)),
             actual = saved
         )
+
         assertEquals(
             expected = null,
             actual = store.texts[NOTE]
@@ -95,9 +122,21 @@ class NoteEditingUseCasesTest {
     fun `a deleted note can be written again, and a refused write is reported`() = runTest {
         val document = NoteDocument.fromText(text = ORIGINAL)
 
-        val restored = saveNote(vaultPath = VAULT, path = NOTE, document = document, expectedOnDisk = null)
+        val restored = saveNote(
+            vaultPath = VAULT,
+            path = NOTE,
+            document = document,
+            expectedOnDisk = null
+        )
+
         store.refused += NOTE
-        val refused = saveNote(vaultPath = VAULT, path = NOTE, document = document, expectedOnDisk = ORIGINAL)
+
+        val refused = saveNote(
+            vaultPath = VAULT,
+            path = NOTE,
+            document = document,
+            expectedOnDisk = ORIGINAL
+        )
 
         assertEquals(
             expected = listOf(
@@ -115,11 +154,24 @@ class NoteEditingUseCasesTest {
         val failure = Outcome.Failure(error = NotesError.Unreadable(path = NOTE.value))
 
         val document = NoteDocument.fromText(text = "Edited")
-        val saved = saveNote(vaultPath = VAULT, path = NOTE, document = document, expectedOnDisk = ORIGINAL)
+
+        val saved = saveNote(
+            vaultPath = VAULT,
+            path = NOTE,
+            document = document,
+            expectedOnDisk = ORIGINAL
+        )
 
         assertEquals(
             expected = Triple<Any, Any, Any>(failure, failure, ORIGINAL),
-            actual = Triple(openNote(vaultPath = VAULT, path = NOTE), saved, store.texts.getValue(NOTE))
+            actual = Triple(
+                openNote(
+                    vaultPath = VAULT,
+                    path = NOTE
+                ),
+                saved,
+                store.texts.getValue(NOTE)
+            )
         )
     }
 

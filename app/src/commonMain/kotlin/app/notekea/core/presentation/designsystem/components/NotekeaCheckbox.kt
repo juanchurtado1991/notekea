@@ -48,11 +48,18 @@ fun NotekeaCheckbox(
 ) {
     val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(size = CORNER_DP.dp)
-    val state = stringResource(resource = if (checked) Res.string.checkbox_checked else Res.string.checkbox_unchecked)
+
+    val state = stringResource(
+        resource = if (checked) Res.string.checkbox_checked else Res.string.checkbox_unchecked
+    )
+
     Box(
         modifier = modifier
             .size(size = size.dp)
-            .focusBorder(color = colors.primary, shape = shape)
+            .focusBorder(
+                color = colors.primary,
+                shape = shape
+            )
             .clip(shape = shape)
             .background(color = if (checked) colors.primary else colors.surface)
             .border(
@@ -60,7 +67,10 @@ fun NotekeaCheckbox(
                 color = if (checked) colors.primary else colors.outline,
                 shape = shape
             )
-            .clickable(role = Role.Checkbox, onClick = onClick)
+            .clickable(
+                role = Role.Checkbox,
+                onClick = onClick
+            )
             .semantics {
                 contentDescription = label
                 stateDescription = state
@@ -86,9 +96,24 @@ private fun NotekeaCheckboxPreview() {
             horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            NotekeaCheckbox(checked = false, onClick = {}, label = PREVIEW_LABEL)
-            NotekeaCheckbox(checked = true, onClick = {}, label = PREVIEW_LABEL)
-            NotekeaCheckbox(checked = true, onClick = {}, label = PREVIEW_LABEL, size = 20)
+            NotekeaCheckbox(
+                checked = false,
+                onClick = {},
+                label = PREVIEW_LABEL
+            )
+
+            NotekeaCheckbox(
+                checked = true,
+                onClick = {},
+                label = PREVIEW_LABEL
+            )
+
+            NotekeaCheckbox(
+                checked = true,
+                onClick = {},
+                label = PREVIEW_LABEL,
+                size = 20
+            )
         }
     }
 }

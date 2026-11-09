@@ -1,13 +1,13 @@
 package app.notekea.editor.presentation.viewmodel
 
 import androidx.compose.runtime.snapshots.Snapshot
-import app.notekea.editor.presentation.model.EditorEffect
-import app.notekea.editor.presentation.model.EditorIntent
 import androidx.compose.ui.text.TextRange
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.presentation.model.EditorEffect
+import app.notekea.editor.presentation.model.EditorIntent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -24,7 +24,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** A template inserted in the open note (`ROADMAP.md` 1.12), over real use cases and fakes. */
+/** A template inserted in the open note, over real use cases and fakes. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditorTemplatesTest {
     private val testDispatcher = StandardTestDispatcher()
@@ -34,9 +34,21 @@ class EditorTemplatesTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher = testDispatcher)
-        putOnDisk(path = AREPAS, text = AREPAS_TEXT)
-        putOnDisk(path = EMPTY, text = "")
-        putOnDisk(path = TEMPLATE, text = "---\ntags: [meal]\nsource: Grandma\n---\n## Notes for {{title}}, {{date}}\n")
+
+        putOnDisk(
+            path = AREPAS,
+            text = AREPAS_TEXT
+        )
+
+        putOnDisk(
+            path = EMPTY,
+            text = ""
+        )
+
+        putOnDisk(
+            path = TEMPLATE,
+            text = "---\ntags: [meal]\nsource: Grandma\n---\n## Notes for {{title}}, {{date}}\n"
+        )
     }
 
     @AfterTest
@@ -50,14 +62,19 @@ class EditorTemplatesTest {
             open(path = AREPAS)
             send(intent = EditorIntent.OnReadModeToggle)
             val effects = collectEffects()
+
             viewModel.buffer.edit { selection = TextRange(index = AREPAS_BODY.length) }
 
             send(intent = EditorIntent.OnTemplateRequest)
-            // The picker takes the keyboard, which moves the text field's selection: the template still goes where it was.
+
+            // The picker takes the keyboard, which moves the text field's selection: the template still goes where it
+            // was.
             viewModel.buffer.edit { selection = TextRange(index = 0) }
+
             send(intent = EditorIntent.OnTemplateInsert(template = TEMPLATE))
 
             val body = "# Arepas\n\nMix.\n## Notes for Arepas, 2026-10-26\n"
+
             assertEquals(
                 expected = listOf(
                     false,
@@ -68,7 +85,10 @@ class EditorTemplatesTest {
                 ),
                 actual = listOf(
                     viewModel.state.value.isReading,
-                    viewModel.buffer.text.toString(),
+                    viewModel
+                        .buffer
+                        .text
+                        .toString(),
                     viewModel.buffer.selection,
                     fixture.store.texts[AREPAS],
                     effects.toList()
@@ -86,7 +106,10 @@ class EditorTemplatesTest {
         assertEquals(
             expected = "## Notes for Meeting, 2026-10-26\n" to
                 "---\ntags: [meal]\nsource: Grandma\n---\n## Notes for Meeting, 2026-10-26\n",
-            actual = viewModel.buffer.text.toString() to fixture.store.texts[EMPTY]
+            actual = viewModel
+                .buffer
+                .text
+                .toString() to fixture.store.texts[EMPTY]
         )
     }
 
@@ -100,20 +123,19 @@ class EditorTemplatesTest {
 
         assertEquals(
             expected = NotesError.EntryMissing(path = missing.value) to AREPAS_BODY,
-            actual = viewModel.state.value.actionError to viewModel.buffer.text.toString()
+            actual = viewModel.state.value.actionError to viewModel
+                .buffer
+                .text
+                .toString()
         )
     }
 
-    private fun TestScope.open(
-        path: RelativePath
-    ) {
+    private fun TestScope.open(path: RelativePath) {
         send(intent = EditorIntent.OnOpen(path = path))
     }
 
     /** Sends [intent], then lets the edits reach the ViewModel and its saves reach the disk. */
-    private fun TestScope.send(
-        intent: EditorIntent
-    ) {
+    private fun TestScope.send(intent: EditorIntent) {
         viewModel.onIntent(intent = intent)
         runCurrent()
         Snapshot.sendApplyNotifications()
@@ -123,8 +145,13 @@ class EditorTemplatesTest {
 
     private fun TestScope.collectEffects(): List<EditorEffect> {
         val effects = mutableListOf<EditorEffect>()
-        backgroundScope.launch { viewModel.effects.collect { effects += it } }
+
+        backgroundScope.launch {
+            viewModel.effects.collect { effects += it }
+        }
+
         runCurrent()
+
         return effects
     }
 
@@ -137,9 +164,9 @@ class EditorTemplatesTest {
         fixture.operations.existing += path
     }
 
-    private fun runTemplateTest(
-        body: suspend TestScope.() -> Unit
-    ) = runTest(context = testDispatcher) {
+    private fun runTemplateTest(body: suspend TestScope.() -> Unit) = runTest(
+        context = testDispatcher
+    ) {
         try {
             body()
         } finally {

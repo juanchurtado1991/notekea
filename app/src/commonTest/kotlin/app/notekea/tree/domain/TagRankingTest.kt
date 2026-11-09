@@ -9,9 +9,18 @@ class TagRankingTest {
     @Test
     fun `the most used tags come first, ties in alphabetical order ignoring case`() {
         val notes = listOf(
-            entry(path = "Arepas.md", metadata = tags("recipe", "venezuelan")),
-            entry(path = "Pasta.md", metadata = tags("recipe", "Italian")),
-            entry(path = "Lisbon.md", metadata = tags("travel")),
+            entry(
+                path = "Arepas.md",
+                metadata = tags("recipe", "venezuelan")
+            ),
+            entry(
+                path = "Pasta.md",
+                metadata = tags("recipe", "Italian")
+            ),
+            entry(
+                path = "Lisbon.md",
+                metadata = tags("travel")
+            ),
             entry(path = "Welcome.md")
         )
 

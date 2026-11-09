@@ -9,16 +9,24 @@ import org.koin.dsl.onClose
 import java.nio.file.Path
 
 /**
- * The embedding model (`ROADMAP.md` 2.2): the bundled one, in the resources Compose gives the app
+ * The embedding model: the bundled one, in the resources Compose gives the app
  * (`compose.application.resources.dir`), with java-llama.cpp's native library in the app data's `natives` folder,
  * closed with Koin so its timer and memory do not outlive it (the Auto-Test starts Koin once per case).
  */
 val embeddingModule = module {
     single {
         val resources = System.getProperty(RESOURCES_PROPERTY).orEmpty()
+
         LlamaTextEmbedder(
-            modelPath = Path.of(resources, LlamaTextEmbedder.MODEL_FOLDER, LlamaTextEmbedder.MODEL_FILE).toString(),
-            nativeFolder = Path.of(get<PlatformConventions>().appDataDirectory, NATIVE_FOLDER).toString()
+            modelPath = Path.of(
+                resources,
+                LlamaTextEmbedder.MODEL_FOLDER,
+                LlamaTextEmbedder.MODEL_FILE
+            ).toString(),
+            nativeFolder = Path.of(
+                get<PlatformConventions>().appDataDirectory,
+                NATIVE_FOLDER
+            ).toString()
         )
     } onClose { it?.close() } bind TextEmbedder::class
 }

@@ -10,16 +10,31 @@ import kotlin.time.Duration.Companion.seconds
 
 class FormatReportTest {
     private val suite = sampleSuite {
-        automated(id = "1.6-03", title = "Opening a note from the quick switcher") {}
-        automated(id = "1.6-04", title = "Searching content") {}
-        manual(id = "1.17-02", reason = ManualReason.EYES) {
+        automated(
+            id = "1.6-03",
+            title = "Opening a note from the quick switcher"
+        ) {}
+
+        automated(
+            id = "1.6-04",
+            title = "Searching content"
+        ) {}
+
+        manual(
+            id = "1.17-02",
+            reason = ManualReason.EYES
+        ) {
             title(text = "Dark mode follows the system")
             steps(text = "Switch")
             expected(text = "Dark")
         }
     }
-    private val environment =
-        AppEnvironment(system = "Windows 11 10.0", java = "21.0.5", language = "es-CO", screen = "1920×1080 at 125%")
+    private val environment = AppEnvironment(
+        system = "Windows 11 10.0",
+        java = "21.0.5",
+        language = "es-CO",
+        screen = "1920×1080 at 125%"
+    )
 
     @Test
     fun `a report lists the machine, the counts and every failure in English`() {
@@ -34,7 +49,10 @@ class FormatReportTest {
                     screenshot = Path.of("shots", "1.6-03.png"),
                     steps = listOf("Press Mod+P", "Type “lisbon”")
                 ),
-                CaseResult.Passed(id = "1.6-04", duration = 15.minutes),
+                CaseResult.Passed(
+                    id = "1.6-04",
+                    duration = 15.minutes
+                ),
                 CaseResult.Skipped(id = "1.6-05")
             ),
             manual = listOf(
@@ -49,6 +67,7 @@ class FormatReportTest {
             ),
             diagnostics = "last log line\n"
         )
+
         assertEquals(EXPECTED_REPORT, report)
     }
 
@@ -57,9 +76,15 @@ class FormatReportTest {
         val report = formatReport(
             suite = suite,
             environment = environment,
-            automatic = listOf(CaseResult.Passed(id = "1.6-04", duration = 42.seconds)),
+            automatic = listOf(
+                CaseResult.Passed(
+                    id = "1.6-04",
+                    duration = 42.seconds
+                )
+            ),
             manual = emptyList()
         )
+
         assertTrue(report.contains("Automatic: 1 passed, 0 failed, 0 skipped (42 s)"))
         assertTrue(!report.contains("Diagnostics"))
     }
@@ -67,7 +92,12 @@ class FormatReportTest {
     @Test
     fun `the current machine is described`() {
         val current = AppEnvironment.current()
-        assertTrue(current.system.isNotBlank() && current.language.isNotBlank() && current.screen.isNotBlank())
+
+        assertTrue(
+            current.system.isNotBlank() &&
+                current.language.isNotBlank() &&
+                current.screen.isNotBlank()
+        )
     }
 
     private companion object {

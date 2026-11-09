@@ -10,9 +10,9 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.nodes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
+import app.notekea.core.presentation.nodes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -21,14 +21,25 @@ class CompactControlsScreenTest {
     @Test
     fun `every button style and a one line text field are one control tall`() {
         var heights = emptyMap<String, Float>()
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     Column {
                         NotekeaButtonStyle.entries.forEach {
-                            NotekeaButton(text = it.name, onClick = {
-                            }, modifier = Modifier.testTag(tag = it.name), style = it)
+                            NotekeaButton(
+                                text = it.name,
+                                onClick = {
+                                },
+                                modifier = Modifier.testTag(tag = it.name),
+                                style = it
+                            )
                         }
+
                         NotekeaTextField(
                             value = "",
                             onValueChange = {},
@@ -39,15 +50,27 @@ class CompactControlsScreenTest {
                 }
             }.use { scene ->
                 repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = it * FRAME_NANOS) }
-                heights = scene.nodes().mapNotNull { node ->
-                    node.config.getOrNull(SemanticsProperties.TestTag)?.let { it to node.boundsInRoot.height }
-                }.toMap()
+
+                heights = scene
+                    .nodes()
+                    .mapNotNull { node ->
+                        node
+                            .config
+                            .getOrNull(SemanticsProperties.TestTag)
+                            ?.let {
+                                it to node.boundsInRoot.height
+                            }
+                    }
+                    .toMap()
             }
         }
 
         val control = NotekeaDimensions.ControlHeight.value
+
         assertEquals(
-            expected = (NotekeaButtonStyle.entries.map { it.name } + FIELD).associateWith { control },
+            expected = (
+                NotekeaButtonStyle.entries.map { it.name } + FIELD
+                ).associateWith { control },
             actual = heights
         )
     }

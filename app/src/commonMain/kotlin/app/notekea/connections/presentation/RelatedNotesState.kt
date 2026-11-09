@@ -5,10 +5,9 @@ import app.notekea.core.notes.domain.RelatedNote
 import app.notekea.core.notes.domain.RelativePath
 
 /**
- * The open note's Related section (`ROADMAP.md` 2.4): its [related] notes and those it [linked] already (folded unless
- * [isLinkedOpen]), while [isLoading] the first time for a note; [isIndexReady] once the index has run, so an empty list
- * before says the notes appear after indexing; the [error] that stopped the search; [isTooLong] when the model could
- * read none of the note.
+ * The open note's Related section: its [related] notes and those it [linked] already (folded unless [isLinkedOpen]),
+ * while [isLoading] the first time; [isIndexReady] once the index has run; the [error] that stopped the search;
+ * [isTooLong] when the model could read none of the note.
  */
 data class RelatedNotesState(
     val note: RelativePath? = null,

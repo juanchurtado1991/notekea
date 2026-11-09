@@ -27,12 +27,20 @@ fun SuiteBuilder.editorViewCases() {
 }
 
 private fun SuiteBuilder.editLook() {
-    manual(id = "1.5-08", reason = ManualReason.EYES) {
+    manual(
+        id = "1.5-08",
+        reason = ManualReason.EYES
+    ) {
         prepare(PLAYGROUND)
         title(text = "How a note looks while you edit it")
-        steps(text = "$OPEN_READ_MODE\n3. Stay in Edit (the Edit tab under the title) and look at the text.")
+
+        steps(
+            text = "$OPEN_READ_MODE\n3. Stay in Edit (the Edit tab under the title) and look at the text."
+        )
+
         expected(
-            text = "Headings are larger, bold and italic show as such, code uses a monospaced font on a shaded " +
+            text =
+            "Headings are larger, bold and italic show as such, code uses a monospaced font on a shaded " +
                 "background, links are blue, tags are orange, the Markdown signs (#, **, [[) are muted, and the two " +
                 "tasks show a checkbox."
         )
@@ -40,8 +48,15 @@ private fun SuiteBuilder.editLook() {
 }
 
 private fun SuiteBuilder.findInNote() {
-    automated(id = "1.5-09", title = "Finding in a note") {
-        openPlaygroundNote(name = READ_MODE, shownText = RAW_BOLD)
+    automated(
+        id = "1.5-09",
+        title = "Finding in a note"
+    ) {
+        openPlaygroundNote(
+            name = READ_MODE,
+            shownText = RAW_BOLD
+        )
+
         press(shortcut = Mod + Key.F)
         type(text = "arepas")
         expectText(text = "1 of 2")
@@ -57,45 +72,133 @@ private fun SuiteBuilder.findInNote() {
 }
 
 private fun SuiteBuilder.previewRemembered() {
-    automated(id = "1.5-10", title = "Preview, and the mode is remembered") {
-        openPlaygroundNote(name = READ_MODE, shownText = RAW_BOLD)
+    automated(
+        id = "1.5-10",
+        title = "Preview, and the mode is remembered"
+    ) {
+        openPlaygroundNote(
+            name = READ_MODE,
+            shownText = RAW_BOLD
+        )
+
         press(shortcut = Mod + Key.E)
-        expectNoText(text = RAW_BOLD, substring = true)
-        expectText(text = "A finished task", substring = true)
-        openNote(name = "Arepas", shownText = "2 cups pre-cooked white corn flour")
-        expectNoText(text = "## Ingredients", substring = true)
+
+        expectNoText(
+            text = RAW_BOLD,
+            substring = true
+        )
+
+        expectText(
+            text = "A finished task",
+            substring = true
+        )
+
+        openNote(
+            name = "Arepas",
+            shownText = "2 cups pre-cooked white corn flour"
+        )
+
+        expectNoText(
+            text = "## Ingredients",
+            substring = true
+        )
+
         relaunch()
-        expectText(text = "2 cups pre-cooked white corn flour", substring = true)
-        expectNoText(text = "## Ingredients", substring = true)
+
+        expectText(
+            text = "2 cups pre-cooked white corn flour",
+            substring = true
+        )
+
+        expectNoText(
+            text = "## Ingredients",
+            substring = true
+        )
+
         pressInWindow(shortcut = Mod + Key.E)
-        expectText(text = "## Ingredients", substring = true)
+
+        expectText(
+            text = "## Ingredients",
+            substring = true
+        )
     }
 }
 
 private fun SuiteBuilder.previewLinks() {
-    automated(id = "1.5-11", title = "Links in Preview open notes, make missing ones and open the web") {
-        openPlaygroundNote(name = READ_MODE, shownText = RAW_BOLD)
+    automated(
+        id = "1.5-11",
+        title = "Links in Preview open notes, make missing ones and open the web"
+    ) {
+        openPlaygroundNote(
+            name = READ_MODE,
+            shownText = RAW_BOLD
+        )
+
         press(shortcut = Mod + Key.E)
+
         // Wait for Preview before clicking a link: until it shows, the words are the editor's text, not links.
-        expectNoText(text = RAW_BOLD, substring = true)
+        expectNoText(
+            text = RAW_BOLD,
+            substring = true
+        )
+
         clickWords(words = "Arepas")
-        expectText(text = "2 cups pre-cooked white corn flour", substring = true)
-        openNote(name = READ_MODE, shownText = "A finished task")
+
+        expectText(
+            text = "2 cups pre-cooked white corn flour",
+            substring = true
+        )
+
+        openNote(
+            name = READ_MODE,
+            shownText = "A finished task"
+        )
+
         clickWords(words = "the coffee")
-        expectText(text = "Half strong coffee", substring = true)
-        openNote(name = READ_MODE, shownText = "A finished task")
+
+        expectText(
+            text = "Half strong coffee",
+            substring = true
+        )
+
+        openNote(
+            name = READ_MODE,
+            shownText = "A finished task"
+        )
+
         clickWords(words = "A note that does not exist yet")
         expectFile(path = "$PLAYGROUND/A note that does not exist yet.md")
-        openNote(name = READ_MODE, shownText = "A finished task")
+
+        openNote(
+            name = READ_MODE,
+            shownText = "A finished task"
+        )
+
         clickWords(words = "in a new folder")
         expectFile(path = "$PLAYGROUND/Drafts/A note in a folder.md")
-        openNote(name = READ_MODE, shownText = "A finished task")
+
+        openNote(
+            name = READ_MODE,
+            shownText = "A finished task"
+        )
+
         clickWords(words = "Pasta e fagioli")
         expectText(text = "Pasta e fagioli")
-        openNote(name = READ_MODE, shownText = "A finished task")
+
+        openNote(
+            name = READ_MODE,
+            shownText = "A finished task"
+        )
+
         clickWords(words = "the web")
-        ui.waitUntil(timeoutMillis = 10_000) { "https://example.com" in notekea().uriHandler.opened }
+
+        ui
+            .waitUntil(timeoutMillis = 10_000) {
+                "https://example.com" in notekea().uriHandler.opened
+            }
+
         val codeLink = "not a link inside code"
+
         if (notekea().uriHandler.opened.any {
                 codeLink in it
             }
@@ -106,27 +209,38 @@ private fun SuiteBuilder.previewLinks() {
 }
 
 private fun SuiteBuilder.previewLook() {
-    manual(id = "1.5-12", reason = ManualReason.EYES) {
+    manual(
+        id = "1.5-12",
+        reason = ManualReason.EYES
+    ) {
         prepare(PLAYGROUND)
         title(text = "How a note looks in Preview")
         steps(text = "$OPEN_READ_MODE\n3. Click Preview under the title and look at the note.")
+
         expected(
-            text = "Headings, lists, checkboxes and the quote are drawn as such, and both code blocks are colored by " +
+            text =
+            "Headings, lists, checkboxes and the quote are drawn as such, and both code blocks are colored by " +
                 "their language (Kotlin and Python)."
         )
     }
 }
 
 private fun SuiteBuilder.createdKept() {
-    manual(id = "1.5-13", reason = ManualReason.SYSTEM) {
+    manual(
+        id = "1.5-13",
+        reason = ManualReason.SYSTEM
+    ) {
         prepare(PLAYGROUND)
         title(text = "Saving a note keeps the date it was created")
+
         steps(
             text = "$OPEN_READ_MODE\n3. Look at Created under Note info in the side panel.\n" +
                 "4. Type a word in the note, wait until it says Saved, then open another note and come back."
         )
+
         expected(
-            text = "On Windows and macOS, Created shows the same date and time as before. Linux cannot keep it, so " +
+            text =
+            "On Windows and macOS, Created shows the same date and time as before. Linux cannot keep it, so " +
                 "this case does not apply there."
         )
     }

@@ -23,16 +23,27 @@ import kotlin.test.assertEquals
 class ReduceMotionScreenTest {
     @Test
     fun `motion is reduced by the setting or by the system, and otherwise not`() {
-        val reduced = listOf(false to false, true to false, false to true).map { (setting, system) ->
+        val reduced = listOf(
+            false to false,
+            true to false,
+            false to true
+        ).map { (setting, system) ->
             var isReduced = false
+
             UiThread.run {
-                ImageComposeScene(width = SIZE, height = SIZE) {
+                ImageComposeScene(
+                    width = SIZE,
+                    height = SIZE
+                ) {
                     CompositionLocalProvider(
                         LocalAppearance provides Appearance(reduceMotion = setting),
                         LocalSystemReduceMotion provides system
-                    ) { NotekeaTheme { isReduced = LocalReduceMotion.current } }
+                    ) {
+                        NotekeaTheme { isReduced = LocalReduceMotion.current }
+                    }
                 }.use { it.render() }
             }
+
             isReduced
         }
 
@@ -46,19 +57,24 @@ class ReduceMotionScreenTest {
     fun `a panel slides closed, and closes at once with motion reduced`() {
         assertEquals(
             expected = listOf(true, false),
-            actual = listOf(false, true).map { reduceMotion -> isSlidingAfterClose(reduceMotion = reduceMotion) }
+            actual = listOf(false, true).map { reduceMotion ->
+                isSlidingAfterClose(reduceMotion = reduceMotion)
+            }
         )
     }
 
     /** Whether the content, one frame after the panel is told to close, has not reached the pane's whole width yet. */
-    private fun isSlidingAfterClose(
-        reduceMotion: Boolean
-    ): Boolean {
+    private fun isSlidingAfterClose(reduceMotion: Boolean): Boolean {
         var isVisible by mutableStateOf(value = true)
         var contentWidth = 0
         var frame = 0L
+
         UiThread.run {
-            ImageComposeScene(width = SIZE, height = SIZE, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = SIZE,
+                height = SIZE,
+                density = Density(density = 1f)
+            ) {
                 CompositionLocalProvider(LocalReduceMotion provides reduceMotion) {
                     NotekeaSplitPane(
                         panelWidth = PANEL_WIDTH.dp,
@@ -67,15 +83,24 @@ class ReduceMotionScreenTest {
                         minPanelWidth = PANEL_WIDTH.dp,
                         maxPanelWidth = PANEL_WIDTH.dp,
                         panel = { Text(text = PANEL) },
-                        content = { Box(modifier = Modifier.fillMaxSize().onSizeChanged { contentWidth = it.width }) }
+                        content = {
+                            Box(
+                                modifier = Modifier.fillMaxSize().onSizeChanged {
+                                    contentWidth =
+                                        it.width
+                                }
+                            )
+                        }
                     )
                 }
             }.use { scene ->
                 scene.render(nanoTime = frame++ * FRAME_NANOS)
                 isVisible = false
+
                 repeat(times = FRAMES) { scene.render(nanoTime = frame++ * FRAME_NANOS) }
             }
         }
+
         return contentWidth < SIZE
     }
 

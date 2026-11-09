@@ -11,9 +11,7 @@ interface ModelInstaller {
     val session: StateFlow<InstallSession?>
 
     /** Starts installing [model], or resumes it from the bytes already downloaded. */
-    fun start(
-        model: ChatModel
-    )
+    fun start(model: ChatModel)
 
     /** Stops the download and keeps its bytes for [start]. */
     fun pause()

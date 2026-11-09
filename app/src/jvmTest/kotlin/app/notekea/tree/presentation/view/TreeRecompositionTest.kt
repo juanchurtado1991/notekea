@@ -1,7 +1,6 @@
 package app.notekea.tree.presentation.view
 
 import androidx.compose.foundation.layout.Box
-import app.notekea.tree.presentation.model.TreePreviewData
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composer
 import androidx.compose.runtime.CompositionTracer
@@ -14,13 +13,14 @@ import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
+import app.notekea.core.notes.domain.OutlineFinder
+import app.notekea.core.notes.domain.SidePanelPreferences
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
-import app.notekea.core.notes.domain.OutlineFinder
-import app.notekea.core.notes.domain.SidePanelPreferences
 import app.notekea.editor.presentation.sidepanel.SidePanel
 import app.notekea.editor.presentation.sidepanel.SidePanelActions
+import app.notekea.tree.presentation.model.TreePreviewData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -36,13 +36,28 @@ class TreeRecompositionTest {
     @Test
     fun `moving the selection recomposes only the two rows it leaves and reaches`() {
         val rows = TreePreviewData.state().rows
-        var state by mutableStateOf(value = TreePreviewData.state().copy(selectedPath = rows.first().path))
+
+        var state by mutableStateOf(
+            value = TreePreviewData.state().copy(selectedPath = rows.first().path)
+        )
+
         val traced = mutableListOf<String>()
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
-                NotekeaTheme(darkTheme = false) { TreeList(state = state, onIntent = {}) }
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
+                NotekeaTheme(darkTheme = false) {
+                    TreeList(
+                        state = state,
+                        onIntent = {}
+                    )
+                }
             }.use { scene ->
                 settle(scene = scene)
+
                 tracing(into = traced) {
                     state = state.copy(selectedPath = rows.last().path)
                     settle(scene = scene)
@@ -50,16 +65,28 @@ class TreeRecompositionTest {
             }
         }
 
-        assertTrue(actual = rows.size > 2, message = "the preview tree has ${rows.size} rows")
-        assertEquals(expected = 2, actual = traced.count { it.contains(other = ".TreeEntryRow (") })
+        assertTrue(
+            actual = rows.size > 2,
+            message = "the preview tree has ${rows.size} rows"
+        )
+
+        assertEquals(
+            expected = 2,
+            actual = traced.count { it.contains(other = ".TreeEntryRow (") }
+        )
     }
 
     @Test
     fun `the view scrolling to another heading never recomposes the side panel`() {
         var current by mutableIntStateOf(value = 0)
         val traced = mutableListOf<String>()
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         SidePanel(
@@ -80,6 +107,7 @@ class TreeRecompositionTest {
                 }
             }.use { scene ->
                 settle(scene = scene)
+
                 tracing(into = traced) {
                     current = 1
                     settle(scene = scene)
@@ -89,7 +117,9 @@ class TreeRecompositionTest {
 
         assertEquals(
             expected = emptyList(),
-            actual = traced.filter { it.contains(other = ".SidePanel (") || it.contains(other = ".OutlineList (") }
+            actual = traced.filter {
+                it.contains(other = ".SidePanel (") || it.contains(other = ".OutlineList (")
+            }
         )
     }
 
@@ -113,6 +143,7 @@ class TreeRecompositionTest {
                 }
             }
         )
+
         try {
             block()
         } finally {
@@ -133,9 +164,7 @@ class TreeRecompositionTest {
         }
     }
 
-    private fun settle(
-        scene: ImageComposeScene
-    ) {
+    private fun settle(scene: ImageComposeScene) {
         repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = (frame++) * FRAME_NANOS) }
     }
 

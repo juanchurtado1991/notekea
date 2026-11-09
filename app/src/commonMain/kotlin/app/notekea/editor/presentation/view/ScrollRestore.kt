@@ -14,20 +14,27 @@ internal val SCROLL_RESTORE_LIMIT: Duration = 3.seconds
 private val SETTLED_TIME: Duration = 500.milliseconds
 
 /**
- * Scrolls to [target] once the page is laid out far enough to get there (`ROADMAP.md` 1.11), waiting frame by frame for
- * up to [limit] of real time, however many frames that is, and keeps it there while the page settles: Preview can lay
- * a long note out again, shorter for a moment, which pulls the view up to its end, so the view goes back to [target]
- * once the page is long enough again. It stops as soon as the person scrolls. A note now shorter than [target] scrolls
- * to its end once the time is up. Before, the note stayed at the top on a slow computer (1.11-09 on CI).
+ * Scrolls to [target] once the page is laid out far enough, waiting frame by frame for up to [limit] of real time,
+ * and keeps it there while the page settles (Preview can lay a long note out again, shorter for a moment). It stops
+ * as soon as the person scrolls; a note shorter than [target] scrolls to its end once the time is up.
  */
 internal suspend fun ScrollState.scrollWhenLaidOut(
     target: Int,
     limit: Duration = SCROLL_RESTORE_LIMIT
 ) {
     val start = TimeSource.Monotonic.markNow()
-    while (!hasRoom(target = target) && start.elapsedNow() < limit) withFrameNanos { }
+
+    fun isWaitingForRoom(): Boolean = !hasRoom(target = target) && start.elapsedNow() < limit
+
+    while (isWaitingForRoom()) withFrameNanos { }
     scrollTo(value = target)
-    keepWhileSettling(target = target, isTimeLeft = { start.elapsedNow() < limit })
+
+    keepWhileSettling(
+        target = target,
+        isTimeLeft = {
+            start.elapsedNow() < limit
+        }
+    )
 }
 
 private suspend fun ScrollState.keepWhileSettling(
@@ -37,18 +44,27 @@ private suspend fun ScrollState.keepWhileSettling(
     var steadySince = TimeSource.Monotonic.markNow()
     var height = maxValue
     var isPulledUp = false
-    while (steadySince.elapsedNow() < SETTLED_TIME && isTimeLeft() && !isScrollInProgress) {
+
+    fun isSettling(): Boolean =
+        steadySince.elapsedNow() < SETTLED_TIME &&
+            isTimeLeft() &&
+            !isScrollInProgress
+
+    while (isSettling()) {
         withFrameNanos { }
         // Only a view the page pulled up to its end goes back: one the person moved stays where they put it.
         if (value < target && value == maxValue) isPulledUp = true
+
         if (isPulledUp && hasRoom(target = target)) {
             scrollTo(value = target)
             isPulledUp = false
         }
+
         if (maxValue != height || value != target) steadySince = TimeSource.Monotonic.markNow()
         height = maxValue
     }
 }
 
 // Until the page is first laid out its height is unknown and maxValue is Int.MAX_VALUE: room for anything.
-private fun ScrollState.hasRoom(target: Int): Boolean = maxValue != Int.MAX_VALUE && maxValue >= target
+private fun ScrollState.hasRoom(target: Int): Boolean =
+    maxValue != Int.MAX_VALUE && maxValue >= target

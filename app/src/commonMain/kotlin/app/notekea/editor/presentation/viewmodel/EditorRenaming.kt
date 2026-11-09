@@ -19,16 +19,40 @@ internal class EditorRenaming(
         val from = host.state.value.notePath ?: return
         if (name.trim() == from.nameWithoutExtension) return
         saveNow()
-        when (val outcome = renameAndUpdateLinks(vaultPath = vaultPath, path = from, newName = name)) {
+
+        when (
+            val outcome = renameAndUpdateLinks(
+                vaultPath = vaultPath,
+                path = from,
+                newName = name
+            )
+        ) {
             is Outcome.Failure -> host.reduce { it.copy(titleError = outcome.error) }
 
             is Outcome.Success -> {
                 val renamed = outcome.value
                 disk.stop()
-                host.reduce { it.copy(notePath = renamed.path, titleError = null) }
-                if (renamed.path in renamed.links?.updated.orEmpty()) disk.followRewrite(path = renamed.path)
+
+                host.reduce {
+                    it.copy(
+                        notePath = renamed.path,
+                        titleError = null
+                    )
+                }
+
+                if (renamed.path in renamed.links?.updated.orEmpty()) {
+                    disk.followRewrite(path = renamed.path)
+                }
+
                 disk.watch(path = renamed.path)
-                host.emit(effect = EditorEffect.Renamed(from = from, to = renamed.path, links = renamed.links))
+
+                host.emit(
+                    effect = EditorEffect.Renamed(
+                        from = from,
+                        to = renamed.path,
+                        links = renamed.links
+                    )
+                )
             }
         }
     }

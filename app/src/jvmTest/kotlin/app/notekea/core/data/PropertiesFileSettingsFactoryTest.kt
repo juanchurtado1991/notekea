@@ -1,9 +1,9 @@
 package app.notekea.core.data
 
 import java.nio.file.Files
+import java.nio.file.Path
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
-import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
 import kotlin.io.path.exists
@@ -25,20 +25,25 @@ class PropertiesFileSettingsFactoryTest {
 
     @Test
     fun `settings are saved in the app data directory and survive a restart`() {
-        PropertiesFileSettingsFactory(
-            appDataDirectory = appData.toString()
-        ).create().putString(key = KEY, value = VALUE)
+        PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create().putString(
+            key = KEY,
+            value = VALUE
+        )
 
         val reloaded = PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create()
 
         assertTrue(actual = appData.resolve(SETTINGS_FILE).exists())
+
         assertEquals(
             expected = VALUE,
             actual = reloaded.getStringOrNull(key = KEY)
         )
+
         assertEquals(
             expected = listOf(SETTINGS_FILE),
-            actual = Files.list(appData).use { files -> files.map { it.fileName.toString() }.toList() }
+            actual = Files.list(appData).use { files ->
+                files.map { it.fileName.toString() }.toList()
+            }
         )
     }
 
@@ -57,26 +62,33 @@ class PropertiesFileSettingsFactoryTest {
 
     @Test
     fun `settings changed from several threads at once are all saved, none failing`() {
-        // 1.11 smoke: opening a folder saved the tree's open folders and the tabs at the same time, and one save moved
-        // the temporary file away while the other was still writing it ("Something went wrong").
+        // Opening a folder saves the tree's open folders and the tabs at the same time: one save must not move the
+        // temporary file away while the other is still writing it.
         val settings = PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create()
         val pool = Executors.newFixedThreadPool(THREADS)
         val failures = ConcurrentLinkedQueue<Throwable>()
+
         val writes = (0 until THREADS).map { thread ->
             pool.submit {
                 repeat(times = WRITES) { write ->
                     try {
-                        settings.putString(key = "key.$thread.$write", value = VALUE)
+                        settings.putString(
+                            key = "key.$thread.$write",
+                            value = VALUE
+                        )
                     } catch (exception: Exception) {
                         failures += exception
                     }
                 }
             }
         }
+
         writes.forEach { it.get() }
+
         pool.shutdown()
 
         val reloaded = PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create()
+
         assertEquals(
             expected = emptyList<Throwable>() to THREADS * WRITES,
             actual = failures.toList() to reloaded.keys.size
@@ -85,29 +97,40 @@ class PropertiesFileSettingsFactoryTest {
 
     @Test
     fun `two apps saving in one folder at once never fail, and leave no temporary file`() {
-        // 1.3-03 on CI: the Auto-Test's quitting Notekea and the next one saved at once, each with its own lock, and one
-        // moved the shared temporary file away from the other (NoSuchFileException: settings.properties.tmp).
-        val apps = List(size = 2) { PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create() }
+        // 1.3-03 on CI: the Auto-Test's quitting Notekea and the next one saved at once, each with its own lock, and
+        // one moved the shared temporary file away from the other (NoSuchFileException: settings.properties.tmp).
+        val apps = List(size = 2) {
+            PropertiesFileSettingsFactory(appDataDirectory = appData.toString()).create()
+        }
+
         val pool = Executors.newFixedThreadPool(THREADS)
         val failures = ConcurrentLinkedQueue<Throwable>()
+
         val writes = (0 until THREADS).map { thread ->
             pool.submit {
                 repeat(times = WRITES) { write ->
                     try {
-                        apps[thread % apps.size].putString(key = "key.$thread.$write", value = VALUE)
+                        apps[thread % apps.size].putString(
+                            key = "key.$thread.$write",
+                            value = VALUE
+                        )
                     } catch (exception: Exception) {
                         failures += exception
                     }
                 }
             }
         }
+
         writes.forEach { it.get() }
+
         pool.shutdown()
 
         assertEquals(
             expected = emptyList<Throwable>() to listOf(SETTINGS_FILE),
             actual =
-            failures.toList() to Files.list(appData).use { files -> files.map { it.fileName.toString() }.toList() }
+            failures.toList() to Files.list(appData).use { files ->
+                files.map { it.fileName.toString() }.toList()
+            }
         )
     }
 

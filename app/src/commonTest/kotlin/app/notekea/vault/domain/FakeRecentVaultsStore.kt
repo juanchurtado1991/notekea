@@ -6,9 +6,7 @@ class FakeRecentVaultsStore : RecentVaultsStore {
 
     override suspend fun read(): List<RecentVault> = recentVaults
 
-    override suspend fun write(
-        recentVaults: List<RecentVault>
-    ) {
+    override suspend fun write(recentVaults: List<RecentVault>) {
         this.recentVaults = recentVaults
     }
 }

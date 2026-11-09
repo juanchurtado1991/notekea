@@ -1,7 +1,6 @@
 package app.notekea.editor.presentation.toolbar
 
 import androidx.compose.foundation.layout.Box
-import app.notekea.editor.presentation.model.EditorIntent
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.Modifier
@@ -14,12 +13,13 @@ import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.descriptions
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
+import app.notekea.editor.presentation.model.EditorIntent
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The editor toolbar in a narrow editor (`ROADMAP.md` 1.14), rendered headless: it stays one line, and the buttons that
- * do not fit open from More, where they still work (1.14 smoke: the buttons took a line of their own).
+ * The editor toolbar in a narrow editor, rendered headless: it stays one line, and the buttons that
+ * do not fit open from More, where they still work.
  */
 class EditorToolbarFitScreenTest {
     private var frame = 0L
@@ -28,8 +28,13 @@ class EditorToolbarFitScreenTest {
     fun `a narrow toolbar moves the links, lists and template into More, where they still work`() {
         val intents = mutableListOf<EditorIntent>()
         var buttons = emptyList<String>()
+
         UiThread.run {
-            ImageComposeScene(width = WIDTH, height = HEIGHT, density = Density(density = 1f)) {
+            ImageComposeScene(
+                width = WIDTH,
+                height = HEIGHT,
+                density = Density(density = 1f)
+            ) {
                 NotekeaTheme(darkTheme = false) {
                     Box(modifier = Modifier.width(width = TOOLBAR_WIDTH_DP.dp)) {
                         EditorToolbar(
@@ -53,9 +58,7 @@ class EditorToolbarFitScreenTest {
         )
     }
 
-    private fun settle(
-        scene: ImageComposeScene
-    ) {
+    private fun settle(scene: ImageComposeScene) {
         repeat(times = SETTLE_FRAMES) {
             frame += FRAME_NANOS
             scene.render(nanoTime = frame)

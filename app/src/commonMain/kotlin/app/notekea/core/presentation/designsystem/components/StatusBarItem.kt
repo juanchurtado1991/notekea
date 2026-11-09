@@ -15,9 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
-import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 
 private const val PREVIEW_INDEXED = "Indexed 1,204 notes"
 private const val PREVIEW_MODEL = "Model: ready"
@@ -37,16 +37,26 @@ fun StatusBarItem(
     Row(
         modifier = modifier
             .height(NotekeaDimensions.StatusBarHeight)
-            .focusBorder(color = MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.small)
-            .clickable(role = Role.Button, onClick = onClick)
+            .focusBorder(
+                color = MaterialTheme.colorScheme.primary,
+                shape = MaterialTheme.shapes.small
+            )
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
             .padding(horizontal = NotekeaDimensions.SpacingS),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .size(NotekeaDimensions.SpacingS)
-                .background(color = indicator.color(colorScheme = MaterialTheme.colorScheme), shape = CircleShape)
+                .background(
+                    color = indicator.color(colorScheme = MaterialTheme.colorScheme),
+                    shape = CircleShape
+                )
         )
+
         Text(
             text = label,
             modifier = Modifier.padding(start = NotekeaDimensions.SpacingXs),
@@ -63,9 +73,22 @@ fun StatusBarItem(
 private fun StatusBarItemPreview() {
     NotekeaPreviewThemes {
         Row {
-            StatusBarItem(label = PREVIEW_INDEXED, onClick = {}, indicator = StatusIndicator.ACTIVE)
-            StatusBarItem(label = PREVIEW_MODEL, onClick = {})
-            StatusBarItem(label = PREVIEW_SYNC, onClick = {}, indicator = StatusIndicator.ERROR)
+            StatusBarItem(
+                label = PREVIEW_INDEXED,
+                onClick = {},
+                indicator = StatusIndicator.ACTIVE
+            )
+
+            StatusBarItem(
+                label = PREVIEW_MODEL,
+                onClick = {}
+            )
+
+            StatusBarItem(
+                label = PREVIEW_SYNC,
+                onClick = {},
+                indicator = StatusIndicator.ERROR
+            )
         }
     }
 }

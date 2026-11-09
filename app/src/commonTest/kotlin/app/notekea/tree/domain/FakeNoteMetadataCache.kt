@@ -8,9 +8,7 @@ class FakeNoteMetadataCache : NoteMetadataCache {
     val entries = mutableMapOf<RelativePath, NoteEntry>()
     val updates = mutableListOf<Pair<List<RelativePath>, List<RelativePath>>>()
 
-    override suspend fun read(
-        vaultPath: String
-    ): List<NoteEntry> = entries.values.toList()
+    override suspend fun read(vaultPath: String): List<NoteEntry> = entries.values.toList()
 
     override suspend fun update(
         vaultPath: String,
@@ -18,7 +16,9 @@ class FakeNoteMetadataCache : NoteMetadataCache {
         removed: List<RelativePath>
     ) {
         updates += upserted.map { it.file.path } to removed
+
         removed.forEach { entries.remove(it) }
+
         upserted.forEach { entries[it.file.path] = it }
     }
 }

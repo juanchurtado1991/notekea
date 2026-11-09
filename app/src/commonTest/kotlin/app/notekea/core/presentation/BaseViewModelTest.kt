@@ -43,7 +43,9 @@ class BaseViewModelTest {
     }
 
     @Test
-    fun `effects are delivered once even when emitted before collection`() = runTest(context = testDispatcher) {
+    fun `effects are delivered once even when emitted before collection`() = runTest(
+        context = testDispatcher
+    ) {
         val viewModel = CounterViewModel()
 
         viewModel.onIntent(intent = CounterIntent.Notify)
@@ -53,6 +55,7 @@ class BaseViewModelTest {
                 expected = CounterEffect.Notified,
                 actual = awaitItem()
             )
+
             expectNoEvents()
         }
     }
@@ -81,7 +84,9 @@ class BaseViewModelTest {
     }
 
     @Test
-    fun `unexpected exceptions in guarded work are routed to onError`() = runTest(context = testDispatcher) {
+    fun `unexpected exceptions in guarded work are routed to onError`() = runTest(
+        context = testDispatcher
+    ) {
         val viewModel = CounterViewModel()
 
         viewModel.onIntent(intent = CounterIntent.Fail)
@@ -115,9 +120,7 @@ class BaseViewModelTest {
     private class CounterViewModel : BaseViewModel<CounterState, CounterIntent, CounterEffect>(
         initialState = CounterState()
     ) {
-        override fun handleIntent(
-            intent: CounterIntent
-        ) {
+        override fun handleIntent(intent: CounterIntent) {
             when (intent) {
                 CounterIntent.Cancel -> launchGuarded(onError = ::showError) {
                     throw CancellationException(FAILURE_MESSAGE)
@@ -133,9 +136,7 @@ class BaseViewModelTest {
             }
         }
 
-        private fun showError(
-            throwable: Throwable
-        ) {
+        private fun showError(throwable: Throwable) {
             reduce { it.copy(error = throwable.message) }
         }
     }

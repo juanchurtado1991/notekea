@@ -15,20 +15,25 @@ private const val SPACE = " "
 private val PERCENT_RUN = Regex(pattern = "(?:%[0-9A-Fa-f]{2})+")
 
 /** Decodes each run of `%XX` sequences as UTF-8 and leaves everything else, malformed sequences included, as it is. */
-fun percentDecoded(
-    target: String
-): String = PERCENT_RUN.replace(input = target) { run ->
-    run.value
-        .chunked(size = ENCODED_BYTE_LENGTH)
-        .map {
-            it.drop(n = 1).toInt(radix = HEX_RADIX).toByte()
-        }.toByteArray()
-        .decodeToString()
-}
+fun percentDecoded(target: String): String = PERCENT_RUN
+    .replace(input = target) { run ->
+        run
+            .value
+            .chunked(size = ENCODED_BYTE_LENGTH)
+            .map {
+                it
+                    .drop(n = 1)
+                    .toInt(radix = HEX_RADIX)
+                    .toByte()
+            }
+            .toByteArray()
+            .decodeToString()
+    }
 
-fun spacesEncoded(
-    target: String
-): String = target.replace(oldValue = SPACE, newValue = ENCODED_SPACE)
+fun spacesEncoded(target: String): String = target.replace(
+    oldValue = SPACE,
+    newValue = ENCODED_SPACE
+)
 
 /** [target] read from [folder], or null when it climbs above the vault. */
 fun resolvedFrom(
@@ -37,6 +42,7 @@ fun resolvedFrom(
 ): RelativePath? {
     val segments = mutableListOf<String>()
     val parts = folder.value.split(RelativePath.SEPARATOR) + target.split(RelativePath.SEPARATOR)
+
     parts.filter { it.isNotEmpty() }.forEach { segment ->
         when (segment) {
             CURRENT -> Unit
@@ -44,6 +50,7 @@ fun resolvedFrom(
             else -> segments += segment
         }
     }
+
     return RelativePath(value = segments.joinToString(separator = RelativePath.SEPARATOR))
 }
 
@@ -58,6 +65,7 @@ fun wikiPath(
     val written = LinkResolver.withoutMarkdownExtension(target = target.trim())
     val first = written.substringBefore(delimiter = RelativePath.SEPARATOR)
     val isRelative = first == CURRENT || first == PARENT
+
     return resolvedFrom(
         folder = if (isRelative) source.parent ?: RelativePath.ROOT else RelativePath.ROOT,
         target = written
@@ -69,9 +77,21 @@ fun relativeTo(
     folder: RelativePath,
     target: RelativePath
 ): String {
-    val from = folder.value.split(RelativePath.SEPARATOR).filter { it.isNotEmpty() }
+    val from = folder
+        .value
+        .split(RelativePath.SEPARATOR)
+        .filter { it.isNotEmpty() }
+
     val to = target.value.split(RelativePath.SEPARATOR)
-    val shared = from.zip(to).takeWhile { (a, b) -> a == b }.size
+
+    val shared = from
+        .zip(to)
+        .takeWhile { (a, b) ->
+            a == b
+        }
+        .size
+
     val climbs = List(size = from.size - shared) { PARENT }
+
     return (climbs + to.drop(n = shared)).joinToString(separator = RelativePath.SEPARATOR)
 }
