@@ -5,7 +5,6 @@ import app.notekea.tree.presentation.model.BookmarkIntent
 import app.notekea.tree.presentation.model.RenameDraft
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeIntent
-import app.notekea.tree.presentation.VaultTreeViewModelTestBase
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError

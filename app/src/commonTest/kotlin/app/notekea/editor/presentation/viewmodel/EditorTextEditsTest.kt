@@ -3,7 +3,6 @@ package app.notekea.editor.presentation.viewmodel
 import androidx.compose.runtime.snapshots.Snapshot
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
-import app.notekea.editor.presentation.EditorViewModelTestBase
 import app.notekea.editor.presentation.find.FindState
 import app.notekea.editor.presentation.reading.ReadLink
 import androidx.compose.ui.text.TextRange
