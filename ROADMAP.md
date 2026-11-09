@@ -49,7 +49,7 @@ a person can judge (looks, feel, the operating system's own dialogs).
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
 | M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 13 / 13 |
-| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 1 / 10 |
+| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 2 / 10 |
 | M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
 | M4b — Sources, study cards and agent | Web clips, documents, study cards, agent mode | 10 weeks | 0 / 5 |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
@@ -956,7 +956,7 @@ Vulkan (needs only the driver) and Metal; no mmap on the CPU (24–31 % less mem
 on a GPU; context 4k a slot; a whole answer in 4 s on GPU and 12 s on CPU (median). Actions in one step, plans from
 Medium up. On an approximated 8 GB laptop chatting with the Small model goes over 2.5 GB; 3.2 and 3.7 fit it.
 
-### ⬜ 3.1 Model manager — `feature/model-manager`
+### ✅ 3.1 Model manager — `feature/model-manager` — [notekea#132](https://github.com/juanchurtado1991/notekea/pull/132)
 
 Catalog of tested chat models (JSON parsed with Ghost): **Small (~2B)**, **Medium (~4B)** and **Large (~8B)** GGUF,
 plus the reranker model (3.0), which is downloaded with whichever chat model is chosen. Download with Ktor
