@@ -116,8 +116,15 @@ class ModelManagerViewModel(
         launchGuarded(onError = ::onLoadError) {
             modelOf(size = size)?.let { storage.delete(file = it.file) }
             if (state.value.active == size) activeModelStore.save(size = null)
+            deleteRerankerIfAlone()
             refreshInstalled()
         }
+    }
+
+    /** The reranker only serves the chat models, so it goes with the last of them. */
+    private suspend fun deleteRerankerIfAlone() {
+        val catalog = loadedCatalog ?: return
+        if (catalog.models.none { storage.isInstalled(file = it.file) }) storage.delete(file = catalog.reranker)
     }
 
     private fun modelOf(

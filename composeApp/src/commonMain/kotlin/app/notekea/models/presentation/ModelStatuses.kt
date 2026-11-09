@@ -25,6 +25,14 @@ internal fun ModelManagerState.statusOf(
     }
 }
 
+/** The disk space deleting [row] frees: its file, and the reranker's when no other chat model is installed. */
+internal fun ModelManagerState.freedBy(
+    row: ModelRow
+): Long {
+    val isLast = models.none { it.isInstalled && it.size != row.size }
+    return row.downloadBytes + if (isLast && isRerankerInstalled) rerankerBytes else 0L
+}
+
 /** [bytes] in gigabytes of 10⁹ with one decimal ("2.7 GB"), or megabytes under a tenth of a gigabyte. */
 internal fun formatBytes(
     bytes: Long

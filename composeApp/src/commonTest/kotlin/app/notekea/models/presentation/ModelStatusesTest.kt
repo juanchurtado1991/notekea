@@ -43,4 +43,19 @@ class ModelStatusesTest {
 
         assertEquals(expected = listOf("24.5 MB/s", "1.3 GB/s", "850 KB/s", "1 KB/s"), actual = texts)
     }
+
+    @Test
+    fun `deleting the last model frees the reranker too, and another model keeps it`() {
+        val medium = ModelManagerSamples.medium.copy(isInstalled = true)
+        val last = ModelManagerSamples.notInstalled.copy(
+            models = listOf(ModelManagerSamples.small, medium),
+            isRerankerInstalled = true
+        )
+        val notLast = last.copy(models = listOf(ModelManagerSamples.small.copy(isInstalled = true), medium))
+
+        assertEquals(
+            expected = listOf(medium.downloadBytes + last.rerankerBytes, medium.downloadBytes),
+            actual = listOf(last.freedBy(row = medium), notLast.freedBy(row = medium))
+        )
+    }
 }

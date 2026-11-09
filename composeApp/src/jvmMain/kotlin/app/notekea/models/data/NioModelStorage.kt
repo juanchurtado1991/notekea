@@ -6,6 +6,8 @@ import app.notekea.models.domain.ModelError
 import app.notekea.models.domain.ModelFile
 import app.notekea.models.domain.ModelStorage
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.nio.file.Files
@@ -73,7 +75,7 @@ class NioModelStorage(
         }
     }
 
-    private fun sha256Of(
+    private suspend fun sha256Of(
         file: ModelFile
     ): String {
         val digest = MessageDigest.getInstance(SHA_256)
@@ -82,6 +84,7 @@ class NioModelStorage(
             while (true) {
                 val read = input.read(buffer)
                 if (read < 0) break
+                currentCoroutineContext().ensureActive()
                 digest.update(buffer, 0, read)
             }
         }

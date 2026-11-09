@@ -36,7 +36,8 @@ private const val PREVIEW_WIDTH_DP = 420
 
 /**
  * An installation under way: the bar, the gigabytes done of the total (or "Checking the file…" while its SHA-256 is
- * checked, when it cannot be paused), and Pause or Resume next to Cancel.
+ * checked, when it cannot be paused), and Pause or Resume next to Cancel. Until the files to download are known (a
+ * total of 0) the bar only moves.
  */
 @Composable
 internal fun ModelProgress(
@@ -45,7 +46,7 @@ internal fun ModelProgress(
     onIntent: (ModelManagerIntent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val downloading = status.progress as? InstallProgress.Downloading
+    val downloading = (status.progress as? InstallProgress.Downloading)?.takeIf { it.totalBytes > 0 }
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
         NotekeaProgressBar(
             fraction = downloading?.let { it.doneBytes.toFloat() / it.totalBytes.coerceAtLeast(minimumValue = 1) },
@@ -57,7 +58,7 @@ internal fun ModelProgress(
             horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
         ) {
             Text(
-                text = progressText(progress = status.progress, isPaused = status.isPaused),
+                text = progressText(progress = status.progress, isPaused = status.isPaused).orEmpty(),
                 modifier = Modifier.weight(weight = 1f),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -90,9 +91,10 @@ private fun ProgressButtons(
 private fun progressText(
     progress: InstallProgress,
     isPaused: Boolean
-): String {
+): String? {
     val downloading = progress as? InstallProgress.Downloading
         ?: return stringResource(resource = Res.string.models_verifying)
+    if (downloading.totalBytes == 0L) return null
     val done = formatBytes(bytes = downloading.doneBytes)
     val total = formatBytes(bytes = downloading.totalBytes)
     val speed = downloading.bytesPerSecond

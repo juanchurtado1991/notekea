@@ -42,6 +42,9 @@ class KtorModelDownloader(
             client.prepareGet(urlString = file.url) {
                 if (fromByte > 0) header(key = HttpHeaders.Range, value = "bytes=$fromByte-")
             }.execute { response -> save(response = response, file = file, fromByte = fromByte) }
+        } catch (exception: DiskWriteFailure) {
+            logger.w(throwable = exception.cause) { "Download of ${file.fileName} could not be written" }
+            Outcome.Failure(error = ModelError.Storage)
         } catch (exception: IOException) {
             logger.w(throwable = exception) { "Download of ${file.fileName} stopped" }
             Outcome.Failure(error = ModelError.Network)
@@ -60,17 +63,17 @@ class KtorModelDownloader(
             logger.w { "Download of ${file.fileName} answered ${response.status.value}" }
             return Outcome.Failure(error = ModelError.Network)
         }
-        Files.createDirectories(folder.root)
         val options = if (resumes) APPEND_OPTIONS else REPLACE_OPTIONS
         var onDisk = if (resumes) fromByte else 0L
         var reported = onDisk
         val channel = response.bodyAsChannel()
         val buffer = ByteArray(BUFFER_BYTES)
-        Files.newOutputStream(folder.partial(file = file), *options).use { output ->
+        writing(block = { Files.createDirectories(folder.root) })
+        writing(block = { Files.newOutputStream(folder.partial(file = file), *options) }).use { output ->
             while (true) {
                 val read = channel.readAvailable(buffer, 0, buffer.size)
                 if (read < 0) break
-                output.write(buffer, 0, read)
+                writing(block = { output.write(buffer, 0, read) })
                 onDisk += read
                 if (onDisk - reported >= REPORT_EVERY_BYTES) {
                     reported = onDisk
@@ -83,6 +86,20 @@ class KtorModelDownloader(
         logger.w { "Download of ${file.fileName} ended at $onDisk of ${file.sizeBytes} bytes" }
         return Outcome.Failure(error = ModelError.Network)
     }
+
+    /** Runs [block], a write to the disk, telling its failures apart from the network's. */
+    private inline fun <T> writing(
+        block: () -> T
+    ): T = try {
+        block()
+    } catch (exception: IOException) {
+        throw DiskWriteFailure(cause = exception)
+    }
+
+    /** A write to the models folder failed (a full disk, a folder gone), not the connection. */
+    private class DiskWriteFailure(
+        cause: IOException
+    ) : IOException(cause)
 
     private companion object {
         val APPEND_OPTIONS = arrayOf(StandardOpenOption.CREATE, StandardOpenOption.APPEND)

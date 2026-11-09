@@ -163,7 +163,10 @@ private fun DeleteDialog(
             resource = Res.string.models_delete_title,
             stringResource(resource = nameOf(size = size))
         ),
-        message = stringResource(resource = Res.string.models_delete_message, formatBytes(bytes = row.downloadBytes)),
+        message = stringResource(
+            resource = Res.string.models_delete_message,
+            formatBytes(bytes = state.freedBy(row = row))
+        ),
         confirmLabel = stringResource(resource = Res.string.models_delete),
         cancelLabel = stringResource(resource = Res.string.models_cancel),
         buttonOrder = state.buttonOrder,
