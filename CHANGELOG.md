@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   long callbacks named, and KDoc of at most three lines whose links and file names exist. The repository is
   reformatted to it.
 
+### Fixed
+
+- Files and folders whose names have digits of another script (`٣`, `३`) no longer break the order of the tree:
+  only `0`–`9` count as numbers, so three such names can no longer order in a cycle.
+
 ### Added
 
 - Settings → AI model: the chat model for this computer (Small, Medium or Large, from its memory and GPU) downloads

@@ -70,7 +70,8 @@ class NaturalNameComparator : Comparator<String> {
         startB: Int,
         endB: Int
     ): Int {
-        val areNumbers = a[startA].isDigit() && b[startB].isDigit()
+        // The same digits [chunkEnd] cuts runs by: a digit of another script is text, or the order has cycles.
+        val areNumbers = isAsciiDigit(char = a[startA]) && isAsciiDigit(char = b[startB])
 
         if (!areNumbers) {
             return compareText(
