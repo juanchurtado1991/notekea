@@ -4,8 +4,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 
 private const val PREVIEW_TEXT = "Close window and Quit are handled while this is shown"
 

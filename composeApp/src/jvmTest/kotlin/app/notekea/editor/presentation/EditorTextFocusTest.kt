@@ -1,6 +1,9 @@
 package app.notekea.editor.presentation
 
 import androidx.compose.foundation.focusable
+import app.notekea.editor.presentation.view.EditorContent
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.EditorState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
@@ -12,8 +15,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.preview.PreviewPlatformConventions
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.notes.domain.RelativePath
 import kotlin.test.Test
 import kotlin.test.assertEquals

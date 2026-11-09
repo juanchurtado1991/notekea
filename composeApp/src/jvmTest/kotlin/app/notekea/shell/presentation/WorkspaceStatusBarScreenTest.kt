@@ -9,11 +9,11 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.editor.domain.NoteStats
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.editor.presentation.EditorState
-import app.notekea.editor.presentation.NoteInfo
+import app.notekea.editor.presentation.model.EditorState
+import app.notekea.editor.presentation.noteinfo.NoteInfo
 import app.notekea.shell.presentation.TabKind
 import kotlin.test.Test
 import kotlin.test.assertEquals

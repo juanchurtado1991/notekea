@@ -5,11 +5,12 @@ import app.notekea.core.platform.di.platformModule
 import app.notekea.core.notes.di.coreNotesModule
 import app.notekea.editor.di.editorModule
 import app.notekea.graph.di.graphModule
-import app.notekea.models.di.modelsModule
+import app.notekea.ai.di.modelsModule
 import app.notekea.query.di.queryModule
 import app.notekea.tasks.di.tasksModule
 import app.notekea.tree.di.treeModule
 import app.notekea.search.di.searchModule
+import app.notekea.settings.di.settingsModule
 import app.notekea.connections.di.connectionsModule
 import app.notekea.templates.di.templatesModule
 import app.notekea.shell.di.shellModule
@@ -25,6 +26,7 @@ val appModule = module {
         editorModule,
         treeModule,
         searchModule,
+        settingsModule,
         connectionsModule,
         graphModule,
         modelsModule,

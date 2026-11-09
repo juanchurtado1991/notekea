@@ -1,6 +1,6 @@
 package app.notekea
 
-import app.notekea.models.presentation.ModelManagerScreen
+import app.notekea.ai.presentation.ModelManagerScreen
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -21,13 +21,13 @@ import app.notekea.core.presentation.platform.LocalWindowCloseGuard
 import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.core.presentation.platform.UiZoom
 import app.notekea.core.presentation.platform.WindowCloseShortcuts
-import app.notekea.core.presentation.platform.WindowDialogsHost
+import app.notekea.shell.presentation.WindowDialogsHost
 import app.notekea.core.presentation.platform.WindowHost
 import app.notekea.core.presentation.platform.awtFileDrop
-import app.notekea.core.presentation.theme.LocalAppearance
-import app.notekea.core.presentation.theme.LocalSystemDarkTheme
-import app.notekea.core.presentation.theme.LocalSystemReduceMotion
-import app.notekea.tree.presentation.VaultScope
+import app.notekea.core.presentation.designsystem.theme.LocalAppearance
+import app.notekea.core.presentation.designsystem.theme.LocalSystemDarkTheme
+import app.notekea.core.presentation.designsystem.theme.LocalSystemReduceMotion
+import app.notekea.tree.presentation.view.VaultScope
 import app.notekea.shell.presentation.VaultTreeScreen
 import app.notekea.vault.presentation.welcome.WelcomeContent
 import app.notekea.vault.presentation.welcome.WelcomePreviewData

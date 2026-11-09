@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.platform.WindowShortcut
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 
 /**
  * The tabs' shortcuts, whatever has focus (`ROADMAP.md` 1.11): `Mod+W` closes the active tab, `Ctrl+Tab` and

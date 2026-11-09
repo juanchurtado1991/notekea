@@ -6,7 +6,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.vault.domain.Vault
 import kotlin.test.Test
 import kotlin.test.assertEquals

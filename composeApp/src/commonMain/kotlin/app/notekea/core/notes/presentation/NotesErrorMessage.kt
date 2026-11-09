@@ -8,9 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.platform.displayPath
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.preview.PreviewPlatformConventions
-import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.resources.Res
 import app.notekea.resources.error_notes_changed_on_disk

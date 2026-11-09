@@ -11,12 +11,12 @@ import app.notekea.core.logging.domain.FakeLogStore
 import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.logging.domain.GetDiagnosticsUseCase
 import app.notekea.core.platform.domain.FakeSystemEnvironment
-import app.notekea.core.presentation.about.AboutDialog
-import app.notekea.core.presentation.about.AboutViewModel
-import app.notekea.core.presentation.preview.PreviewPlatformConventions
-import app.notekea.core.presentation.settings.AppearanceViewModel
-import app.notekea.core.presentation.settings.SettingsDialog
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.settings.presentation.about.AboutDialog
+import app.notekea.settings.presentation.about.AboutViewModel
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
+import app.notekea.settings.presentation.appearance.AppearanceViewModel
+import app.notekea.settings.presentation.SettingsDialog
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

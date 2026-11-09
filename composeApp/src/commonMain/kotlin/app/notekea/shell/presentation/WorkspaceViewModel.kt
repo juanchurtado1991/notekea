@@ -2,10 +2,10 @@ package app.notekea.shell.presentation
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.IntSize
-import app.notekea.core.presentation.images.scaledToCover
+import app.notekea.core.presentation.designsystem.images.scaledToCover
 import app.notekea.core.domain.Outcome
 import app.notekea.core.presentation.BaseViewModel
-import app.notekea.core.presentation.images.decodedImage
+import app.notekea.core.presentation.designsystem.images.decodedImage
 import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.RelativePath
@@ -13,7 +13,7 @@ import app.notekea.core.notes.domain.SidePanelMode
 import app.notekea.core.notes.domain.SidePanelPreferences
 import app.notekea.core.notes.domain.SidePanelSection
 import app.notekea.shell.domain.Workspace
-import app.notekea.tree.presentation.TreeFilePreviews
+import app.notekea.tree.presentation.viewmodel.TreeFilePreviews
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

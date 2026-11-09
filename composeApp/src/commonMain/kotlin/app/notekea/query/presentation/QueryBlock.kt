@@ -16,10 +16,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.presentation.components.NotekeaChip
-import app.notekea.core.presentation.components.NotekeaMarkdown
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.components.NotekeaChip
+import app.notekea.core.presentation.designsystem.components.NotekeaMarkdown
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.query.domain.QueryParse
 import app.notekea.query.domain.QueryResult
 import app.notekea.query.domain.QueryYaml

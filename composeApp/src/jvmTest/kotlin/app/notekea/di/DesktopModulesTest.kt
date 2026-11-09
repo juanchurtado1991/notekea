@@ -6,8 +6,8 @@ import app.notekea.core.embedding.domain.TextEmbedder
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.db.NotekeaDatabase
 import app.notekea.tree.domain.Trash
-import app.notekea.editor.presentation.EditorViewModel
-import app.notekea.tree.presentation.VaultTreeViewModel
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
+import app.notekea.tree.presentation.viewmodel.VaultTreeViewModel
 import app.notekea.vault.domain.RecentVaultsStore
 import app.notekea.vault.presentation.welcome.WelcomeViewModel
 import com.russhwolf.settings.MapSettings

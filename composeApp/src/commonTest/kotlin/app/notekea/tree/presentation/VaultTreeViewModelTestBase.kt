@@ -1,9 +1,13 @@
 package app.notekea.tree.presentation
 
 import app.notekea.core.domain.FakeClock
+import app.notekea.tree.presentation.viewmodel.DailyNoteTools
+import app.notekea.tree.presentation.viewmodel.NewNoteTools
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.viewmodel.VaultTreeViewModel
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.domain.time.FakeLocalCalendar
-import app.notekea.core.presentation.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.tree.domain.ApplyTemplateUseCase

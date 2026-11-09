@@ -1,6 +1,10 @@
 package app.notekea.editor.presentation
 
 import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.editor.presentation.attachments.AttachmentTools
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
+import app.notekea.editor.presentation.noteinfo.NoteInfoTools
+import app.notekea.editor.presentation.properties.PropertyTools
 import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.FakeLocalTimeFormatter
 import app.notekea.core.domain.files.ValidateFileNameUseCase

@@ -1,6 +1,10 @@
 package app.notekea.tree.presentation
 
 import androidx.compose.foundation.layout.Box
+import app.notekea.tree.presentation.view.EntryMenuArea
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.model.VaultTreeIntent
+import app.notekea.tree.presentation.view.asTreeRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -12,15 +16,15 @@ import androidx.compose.ui.use
 import app.notekea.core.domain.time.ElapsedTime
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickText
-import app.notekea.core.presentation.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.rightClickText
 import app.notekea.core.presentation.texts
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.tree.domain.FolderCard
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.editor.presentation.OutlineSection
-import app.notekea.editor.presentation.SidePanelActions
+import app.notekea.editor.presentation.sidepanel.OutlineSection
+import app.notekea.editor.presentation.sidepanel.SidePanelActions
 import app.notekea.shell.presentation.FolderGrid
 import app.notekea.vault.domain.RecentVaultStatus
 import app.notekea.vault.domain.Vault

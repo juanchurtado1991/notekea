@@ -1,7 +1,7 @@
 package app.notekea.vault.presentation.welcome
 
 import app.notekea.core.domain.time.ElapsedTime
-import app.notekea.core.presentation.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.vault.domain.RecentVaultStatus
 import app.notekea.vault.domain.Vault
 

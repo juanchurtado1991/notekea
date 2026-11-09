@@ -1,6 +1,9 @@
 package app.notekea.tree.presentation
 
 import androidx.compose.ui.ImageComposeScene
+import app.notekea.tree.presentation.view.TreeList
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.model.VaultTreeIntent
 import androidx.compose.ui.InternalComposeUiApi
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
@@ -12,8 +15,8 @@ import app.notekea.core.platform.domain.Shortcut
 import app.notekea.core.platform.domain.ShortcutKey
 import app.notekea.core.platform.domain.ShortcutModifier
 import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.preview.PreviewPlatformConventions
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

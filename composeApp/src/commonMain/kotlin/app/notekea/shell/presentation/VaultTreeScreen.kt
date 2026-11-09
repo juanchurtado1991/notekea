@@ -1,9 +1,10 @@
 package app.notekea.shell.presentation
 
 import androidx.compose.foundation.layout.Box
+import app.notekea.tree.presentation.model.VaultTreeIntent
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
-import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.padding
@@ -18,13 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.platform.WindowShortcut
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.shell.domain.Workspace
-import app.notekea.editor.presentation.EditorIntent
-import app.notekea.editor.presentation.EditorPaneTools
-import app.notekea.editor.presentation.EditorViewModel
-import app.notekea.editor.presentation.SidePanelHost
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.view.EditorPaneTools
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
+import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import app.notekea.search.presentation.switcher.QuickSwitcherContent
 import app.notekea.graph.presentation.GraphViewModel
 import app.notekea.query.presentation.QueryViewModel
@@ -51,12 +52,12 @@ import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.editor.domain.FormatAction
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import app.notekea.tree.presentation.PreviewNoteContent
-import app.notekea.tree.presentation.SidebarRailActions
-import app.notekea.tree.presentation.TreePreviewData
-import app.notekea.tree.presentation.VaultTreeContent
-import app.notekea.tree.presentation.VaultTreeState
-import app.notekea.tree.presentation.VaultTreeViewModel
+import app.notekea.tree.presentation.filepreview.PreviewNoteContent
+import app.notekea.tree.presentation.view.SidebarRailActions
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.view.VaultTreeContent
+import app.notekea.tree.presentation.model.VaultTreeState
+import app.notekea.tree.presentation.viewmodel.VaultTreeViewModel
 
 private const val TEMPLATE_PICKER_KEY_PREFIX = "templates:"
 private const val EDITOR_KEY_PREFIX = "editor:"

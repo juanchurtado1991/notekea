@@ -20,9 +20,9 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.shell.domain.SaveSidePanelUseCase
 import app.notekea.core.notes.domain.VaultTree
 import app.notekea.shell.domain.Workspace
-import app.notekea.editor.presentation.EditorEffect
-import app.notekea.editor.presentation.EditorIntent
-import app.notekea.editor.presentation.EditorViewModel
+import app.notekea.editor.presentation.model.EditorEffect
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
 import app.notekea.editor.presentation.EditorViewModels
 import app.notekea.search.presentation.switcher.QuickSwitcherEffect
 import app.notekea.shell.presentation.WorkspaceIntent

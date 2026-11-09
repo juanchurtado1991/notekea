@@ -1,6 +1,14 @@
 package app.notekea.editor.presentation
 
 import androidx.compose.foundation.layout.Box
+import app.notekea.editor.presentation.viewmodel.EditorCallbacks
+import app.notekea.editor.presentation.view.EditorContent
+import app.notekea.editor.presentation.model.EditorEffect
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.view.EditorPaneTools
+import app.notekea.editor.presentation.model.EditorPreviewData
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
+import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -17,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.platform.BeforeWindowClose
 import app.notekea.core.presentation.platform.WindowShortcut
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.notes.domain.DayNeighbors
 import app.notekea.core.notes.domain.OutlineHeading
 import app.notekea.core.notes.domain.RelativePath

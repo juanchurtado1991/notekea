@@ -1,6 +1,10 @@
 package app.notekea.tree.presentation
 
 import androidx.compose.ui.ImageComposeScene
+import app.notekea.tree.presentation.view.SidebarRailActions
+import app.notekea.tree.presentation.model.TreePreviewData
+import app.notekea.tree.presentation.view.VaultTreeContent
+import app.notekea.tree.presentation.model.VaultTreeIntent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerButtons
@@ -8,7 +12,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

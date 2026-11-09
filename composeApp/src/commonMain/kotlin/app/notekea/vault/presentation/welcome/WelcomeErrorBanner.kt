@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.components.ErrorBanner
-import app.notekea.core.presentation.components.NotekeaButton
-import app.notekea.core.presentation.components.NotekeaButtonStyle
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.components.ErrorBanner
+import app.notekea.core.presentation.designsystem.components.NotekeaButton
+import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.resources.Res
 import app.notekea.resources.error_unexpected
 import app.notekea.resources.welcome_recent_locate

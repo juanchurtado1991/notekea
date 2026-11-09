@@ -16,9 +16,9 @@ import app.notekea.core.presentation.platform.AppEnvironment
 import app.notekea.core.presentation.platform.LocalAppVersion
 import app.notekea.core.presentation.platform.LocalFileDrop
 import app.notekea.core.presentation.platform.LocalResizePointerIcon
-import app.notekea.core.presentation.theme.LocalAppearance
-import app.notekea.core.presentation.theme.LocalSystemDarkTheme
-import app.notekea.core.presentation.theme.LocalSystemReduceMotion
+import app.notekea.core.presentation.designsystem.theme.LocalAppearance
+import app.notekea.core.presentation.designsystem.theme.LocalSystemDarkTheme
+import app.notekea.core.presentation.designsystem.theme.LocalSystemReduceMotion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlin.test.Test

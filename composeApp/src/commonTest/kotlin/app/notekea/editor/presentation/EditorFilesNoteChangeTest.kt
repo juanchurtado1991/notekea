@@ -1,6 +1,7 @@
 package app.notekea.editor.presentation
 
 import androidx.compose.runtime.snapshots.Snapshot
+import app.notekea.editor.presentation.model.EditorIntent
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.RelativePath

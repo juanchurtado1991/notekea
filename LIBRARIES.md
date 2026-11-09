@@ -39,7 +39,7 @@ Decisions:
 - The MVP editor is a `BasicTextField` with custom highlighting (no library); Read mode renders with the Markdown
   renderer through the design system's `NotekeaMarkdown`.
 - No Navigation library: with 3–4 screens it is not worth it.
-- Icons come from Lucide through `core.presentation.theme.NotekeaIcons`, never from the library directly, so the set
+- Icons come from Lucide through `core.presentation.designsystem.theme.NotekeaIcons`, never from the library directly, so the set
   can change in one file. `material-icons-extended` is not used: JetBrains stopped publishing it after 1.7.3.
 - Compose dependencies use direct coordinates; the `compose.*` accessors of the Gradle plugin are deprecated.
 - **MVI** (see `GUIDELINES.md`) is implemented with ViewModel + `StateFlow` + `sealed interface` intents/effects.
@@ -153,7 +153,7 @@ Packages follow Clean Architecture by feature (`app.notekea.<feature>.{domain,da
 ```
 commonMain → Ghost, Okio, JetBrains Markdown, SQLDelight, Koin, Settings, Kermit,
              Koog (agents-core, agents-tools; from M3–M4), Compose UI, ViewModel
-             + domain interfaces: llm.domain.LlmEngine, index.domain.VectorIndex,
+             + domain interfaces: ai.domain.LlmEngine, index.domain.VectorIndex,
                sync.domain.GitSync, tree.domain.FileWatcher
 
 jvmMain    → java-llama.cpp, Lucene, directory-watcher, SQLDelight SQLite driver,

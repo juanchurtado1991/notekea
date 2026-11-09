@@ -1,6 +1,7 @@
 package app.notekea.editor.presentation
 
 import app.notekea.core.data.JvmLocalTimeFormatter
+import app.notekea.editor.presentation.attachments.EditorAttachments
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.notes.data.ObsidianVaultSettingsReader
 import app.notekea.core.notes.data.OkioAttachmentStore

@@ -21,11 +21,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.presentation.components.NotekeaButton
-import app.notekea.core.presentation.components.NotekeaButtonStyle
-import app.notekea.core.presentation.components.NotekeaSectionHeader
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.components.NotekeaButton
+import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
+import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
 import app.notekea.resources.graph_connected_to
 import app.notekea.resources.graph_inspector_empty

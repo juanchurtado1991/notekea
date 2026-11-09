@@ -6,9 +6,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import app.notekea.editor.presentation.EditorIntent
-import app.notekea.editor.presentation.LocalQueryBlock
-import app.notekea.editor.presentation.SidePanelHost
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.view.LocalQueryBlock
+import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import app.notekea.query.presentation.QueryBlock
 import app.notekea.query.presentation.QueryEffect
 import app.notekea.query.presentation.QueryIntent
@@ -16,7 +16,7 @@ import app.notekea.query.presentation.QueryNotice
 import app.notekea.query.presentation.QueryViewModel
 import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.shell.domain.Workspace
-import app.notekea.tree.presentation.VaultTreeState
+import app.notekea.tree.presentation.model.VaultTreeState
 
 /** What the vault's tools follow: the graph, queries and tasks. */
 @Composable

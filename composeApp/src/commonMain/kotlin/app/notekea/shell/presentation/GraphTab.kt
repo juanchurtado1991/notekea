@@ -6,13 +6,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import app.notekea.core.platform.domain.graphShortcut
 import app.notekea.core.presentation.platform.WindowShortcut
-import app.notekea.editor.presentation.EditorIntent
-import app.notekea.editor.presentation.SidePanelHost
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import app.notekea.graph.presentation.GraphEffect
 import app.notekea.graph.presentation.GraphIntent
 import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.shell.domain.Workspace
-import app.notekea.tree.presentation.VaultTreeState
+import app.notekea.tree.presentation.model.VaultTreeState
 
 /**
  * What the graph follows while the vault is open: its notes, its index and whether its tab shows, as it works only

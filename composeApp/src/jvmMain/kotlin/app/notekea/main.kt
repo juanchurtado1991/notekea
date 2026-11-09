@@ -20,7 +20,7 @@ import app.notekea.core.presentation.platform.FollowWindowBounds
 import app.notekea.core.presentation.platform.WindowHost
 import app.notekea.core.presentation.platform.WindowOpening
 import app.notekea.core.presentation.platform.WindowSizes
-import app.notekea.core.presentation.theme.NotekeaBrand
+import app.notekea.core.presentation.designsystem.theme.NotekeaBrand
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import app.notekea.core.logging.data.FileLogWriter
 import co.touchlab.kermit.Logger
@@ -28,13 +28,13 @@ import co.touchlab.kermit.platformLogWriter
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.appearance.domain.WindowBoundsStore
 import app.notekea.core.platform.domain.SystemEnvironment
-import app.notekea.core.presentation.gallery.DesignSystemGallery
+import app.notekea.core.presentation.designsystem.gallery.DesignSystemGallery
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.SystemAppMenu
 import app.notekea.core.presentation.platform.SystemQuit
 import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.core.presentation.platform.WindowQuit
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.di.desktopModules
 import app.notekea.core.presentation.IntentTrail
 import com.testbuddy.crash.Breadcrumbs

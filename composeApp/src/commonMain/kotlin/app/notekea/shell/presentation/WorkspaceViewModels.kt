@@ -1,6 +1,6 @@
 package app.notekea.shell.presentation
 
-import app.notekea.editor.presentation.EditorViewModel
+import app.notekea.editor.presentation.viewmodel.EditorViewModel
 import app.notekea.graph.presentation.GraphViewModel
 import app.notekea.query.presentation.QueryViewModel
 import app.notekea.tasks.presentation.TasksViewModel
@@ -8,7 +8,7 @@ import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.tree.presentation.tags.TagPickerIntent
 import app.notekea.templates.presentation.TemplatePickerIntent
 import app.notekea.shell.presentation.WorkspaceViewModel
-import app.notekea.tree.presentation.VaultTreeViewModel
+import app.notekea.tree.presentation.viewmodel.VaultTreeViewModel
 
 /**
  * The view models the vault workspace is drawn from, given together: the [graph], the [tree], the [workspace] of tabs,

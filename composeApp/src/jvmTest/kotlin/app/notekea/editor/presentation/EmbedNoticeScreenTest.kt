@@ -1,6 +1,10 @@
 package app.notekea.editor.presentation
 
 import androidx.compose.foundation.layout.Column
+import app.notekea.editor.presentation.attachments.AttachmentBlock
+import app.notekea.editor.presentation.attachments.AttachmentView
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.reading.ReadLink
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.Density
@@ -8,7 +12,7 @@ import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.texts
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.editor.domain.Embed
 import app.notekea.editor.domain.EmbedKind

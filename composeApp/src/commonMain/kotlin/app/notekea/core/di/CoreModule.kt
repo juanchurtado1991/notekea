@@ -12,7 +12,6 @@ import app.notekea.core.appearance.domain.UiScaleStore
 import app.notekea.core.appearance.domain.WindowBoundsStore
 import app.notekea.core.presentation.platform.UiZoomViewModel
 import app.notekea.core.presentation.platform.WindowBoundsViewModel
-import app.notekea.core.presentation.settings.AppearanceViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -20,7 +19,7 @@ import kotlin.time.Clock
 
 /**
  * Cross-feature services: the system clock, read only here (`ARCHITECTURE.md` §5), time descriptions, file name rules
- * and the app's zoom, appearance and window bounds, with Settings → Appearance.
+ * and the app's zoom, appearance and window bounds.
  */
 val coreModule = module {
     single<Clock> { Clock.System }
@@ -31,7 +30,6 @@ val coreModule = module {
     single<WindowBoundsStore> { SettingsWindowBoundsStore(settings = get(), dispatchers = get()) }
     factoryOf(::GetUiScaleUseCase)
     factoryOf(::SaveUiScaleUseCase)
-    viewModelOf(::AppearanceViewModel)
     viewModelOf(::WindowBoundsViewModel)
     viewModelOf(::UiZoomViewModel)
 }

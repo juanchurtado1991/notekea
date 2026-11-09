@@ -1,6 +1,7 @@
 package app.notekea.editor.presentation
 
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.presentation.model.EditorIntent
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

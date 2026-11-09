@@ -1,6 +1,8 @@
 package app.notekea.editor.presentation
 
 import androidx.compose.foundation.layout.Box
+import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.toolbar.EditorToolbar
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.Modifier
@@ -11,8 +13,8 @@ import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickDescription
 import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.descriptions
-import app.notekea.core.presentation.preview.PreviewPlatformConventions
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

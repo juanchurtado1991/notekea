@@ -9,7 +9,7 @@ import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.platform.LocalUiZoom
 import app.notekea.core.presentation.platform.UiZoomState
 import app.notekea.core.presentation.texts
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.shell.presentation.TabKind
 import kotlin.test.Test

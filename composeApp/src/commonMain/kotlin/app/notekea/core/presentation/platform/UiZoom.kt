@@ -14,8 +14,8 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.zoomInShortcut
 import app.notekea.core.platform.domain.zoomOutShortcut
 import app.notekea.core.platform.domain.zoomResetShortcut
-import app.notekea.core.presentation.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.preview.PreviewPlatformConventions
+import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import org.koin.compose.viewmodel.koinViewModel
 
 private const val PREVIEW_TEXT = "Zoomed text"

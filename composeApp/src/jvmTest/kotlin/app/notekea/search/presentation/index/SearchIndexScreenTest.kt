@@ -11,7 +11,7 @@ import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.texts
-import app.notekea.core.presentation.theme.NotekeaTheme
+import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.search.domain.IndexProgress
 import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.core.notes.domain.RelativePath
