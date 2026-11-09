@@ -93,8 +93,9 @@ private fun LateText() {
     var shows by remember { mutableStateOf(false) }
     LaunchedEffect(clicked) {
         if (clicked) {
-            // On the real clock, not the test's, which skips a delay as soon as the app is idle.
-            withContext(Dispatchers.Default) { delay(timeMillis = 300) }
+            // On the real clock, not the test's, which skips a delay as soon as the app is idle. Long enough that a
+            // slow runner's click (Windows CI took over 300 ms) ends before it shows, well under the 2 s watch.
+            withContext(Dispatchers.Default) { delay(timeMillis = 1_000) }
             shows = true
         }
     }
