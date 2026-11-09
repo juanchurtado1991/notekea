@@ -277,6 +277,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- CI: a pull request that changes many files was read as "only documents" and skipped lint and tests while its
+  checks reported green; the changed-files filter no longer goes through a pipe.
 - Memory: the embedding model is now really freed when idle, so searching no longer adds about 275 MB each time it
   loads again; on Linux, indexing and searching stay under 700 MB. Notes are indexed once more after the update.
 - Related's Insert link did nothing in Preview: the link now goes at the end of the note.
