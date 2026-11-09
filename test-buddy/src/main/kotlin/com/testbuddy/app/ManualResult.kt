@@ -76,12 +76,12 @@ private fun Answers(
     Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
         Button(
             onClick = actions.onPass,
-            colors = ButtonDefaults.buttonColors(containerColor = SelfTestColors.Passed),
+            colors = ButtonDefaults.buttonColors(containerColor = AutoTestColors.Passed),
             modifier = Modifier.weight(weight = 1f)
         ) { Text(text = case.passLabel) }
         Button(
             onClick = onFail,
-            colors = ButtonDefaults.buttonColors(containerColor = SelfTestColors.Failed),
+            colors = ButtonDefaults.buttonColors(containerColor = AutoTestColors.Failed),
             modifier = Modifier.weight(weight = 1f)
         ) { Text(text = case.failLabel) }
     }
@@ -105,6 +105,6 @@ private fun WhatYouSaw(
         OutlinedButton(onClick = onPickScreenshot) {
             Text(text = if (hasScreenshot) "Screenshot added" else "Add a screenshot", fontSize = 12.sp)
         }
-        Text(text = "Your last steps in the app are added for you.", fontSize = 10.sp, color = SelfTestColors.Muted)
+        Text(text = "Your last steps in the app are added for you.", fontSize = 10.sp, color = AutoTestColors.Muted)
     }
 }

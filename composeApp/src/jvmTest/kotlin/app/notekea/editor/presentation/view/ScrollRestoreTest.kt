@@ -22,7 +22,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * A note's tab shown again goes back to where it was (`ROADMAP.md` 1.11) even when its page is laid out late, as
- * Preview lays out a long note on a slow computer: 1.11-09 of the Self-Test failed on CI, the scroll coming before the
+ * Preview lays out a long note on a slow computer: 1.11-09 of the Auto-Test failed on CI, the scroll coming before the
  * page's first layout (when `maxValue` is still `Int.MAX_VALUE`) or after 30 frames of waiting.
  */
 @OptIn(ExperimentalTestApi::class)

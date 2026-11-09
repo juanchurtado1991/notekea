@@ -54,7 +54,7 @@ private fun Idle(
         text = "$total cases check the app on their own, on copies of the test data, out of sight. It takes a while " +
             "and you can keep using the computer.",
         fontSize = 12.sp,
-        color = SelfTestColors.Muted
+        color = AutoTestColors.Muted
     )
     Button(onClick = onStart, modifier = Modifier.fillMaxWidth()) { Text(text = "Start the automatic tests") }
 }
@@ -69,7 +69,7 @@ private fun Running(
         Text(
             text = "You can keep using the computer.",
             fontSize = 11.sp,
-            color = SelfTestColors.Muted,
+            color = AutoTestColors.Muted,
             modifier = Modifier.weight(weight = 1f)
         )
         OutlinedButton(onClick = onStop) { Text(text = "Stop") }
@@ -85,7 +85,7 @@ private fun Running(
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(start = 8.dp).weight(weight = 1f)
         )
-        Text(text = clock(millis = elapsed), fontSize = 12.sp, color = SelfTestColors.Muted)
+        Text(text = clock(millis = elapsed), fontSize = 12.sp, color = AutoTestColors.Muted)
     }
     LinearProgressIndicator(progress = {
         done / cases.size.coerceAtLeast(minimumValue = 1).toFloat()
@@ -93,7 +93,7 @@ private fun Running(
     Text(
         text = "$done of ${cases.size}" + timeLeft(done, cases.size, elapsed),
         fontSize = 11.sp,
-        color = SelfTestColors.Muted
+        color = AutoTestColors.Muted
     )
     Counts(results = state.results.values, waiting = cases.size - done)
     NowCard(steps = state.runningSteps, case = cases.firstOrNull { it.id == state.runningId })
@@ -153,7 +153,7 @@ private fun Finished(
         Text(
             text = "The failures go in the report: there is nothing to do about them now.",
             fontSize = 12.sp,
-            color = SelfTestColors.Muted
+            color = AutoTestColors.Muted
         )
         failed.take(n = SHOWN_FAILURES).forEach { result ->
             ResultRow(title = cases.firstOrNull { it.id == result.id }?.title.orEmpty(), result = result)
@@ -167,9 +167,9 @@ private fun Counts(
     waiting: Int
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
-        CountChip(text = "✓ ${results.count { it is CaseResult.Passed }} passed", color = SelfTestColors.Passed)
-        CountChip(text = "✕ ${results.count { it is CaseResult.Failed }} failed", color = SelfTestColors.Failed)
-        if (waiting > 0) CountChip(text = "$waiting to go", color = SelfTestColors.Muted)
+        CountChip(text = "✓ ${results.count { it is CaseResult.Passed }} passed", color = AutoTestColors.Passed)
+        CountChip(text = "✕ ${results.count { it is CaseResult.Failed }} failed", color = AutoTestColors.Failed)
+        if (waiting > 0) CountChip(text = "$waiting to go", color = AutoTestColors.Muted)
     }
 }
 

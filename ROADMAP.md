@@ -24,7 +24,7 @@ branch name is given next to it. Estimates assume one developer and are meant fo
 **One QA run before the release (decided with the developer, 2026-11-04):** after M1's, the only QA run is the release
 run, between 5.4 and 5.5, on Windows, macOS and Linux (`qa/README.md`). It covers every case of `MVP_SMOKE_TEST.md`, so
 it needs one or two weeks for the run, its fixes and a new build. Until then each feature keeps its local smoke test
-and its Self-Test cases, which CI runs on the three systems, and two checks cover what those cannot see: a packaged
+and its Auto-Test cases, which CI runs on the three systems, and two checks cover what those cannot see: a packaged
 app that installs and starts on each system every night (2.13), and the developer installing the app on Windows and
 macOS for half an hour at the end of M3, to see the chat answer there (no QA run, no release candidate).
 
@@ -537,7 +537,7 @@ with the developer on 2026-10-28. The smoke test of 1.18 then also proves the tr
   deliberately related notes without links. It also covers every feature above: tasks, all callout types, images and
   attachments, daily notes, templates, bookmarks, properties of every type, embeds (nested, by block, circular) and a
   `.obsidian/` folder with non-default settings. Used by tests, manual QA, the automated smoke runs and demos.
-- **Automated smoke runs** (`selftest/src/test/.../smokerun` since the Self-Test, Compose UI Test): the real app (every Koin
+- **Automated smoke runs** (`auto-test/src/test/.../smokerun` since the Auto-Test, Compose UI Test): the real app (every Koin
   module, its view models, data layer and file system, drawn headless) with its data in a temporary folder, never the
   user's, and the system's dialogs and apps replaced (folder and file pickers, opening a file, the trash), driven
   through its UI on copies of the smoke vaults like a person would: find by text, click, type, press shortcuts. One
@@ -545,7 +545,7 @@ with the developer on 2026-10-28. The smoke test of 1.18 then also proves the tr
   its tree, Recent, tabs, bookmarks, typing saved, tasks, the outline, toolbar formats, search, attachments, daily
   notes, templates, properties, embeds), plus an idle run. Each run samples the Java heap and the process's resident
   memory when it starts and ends. They run in every `jvmTest` (so in `check` and in CI on the three systems), and
-  `./gradlew :selftest:smokeRun -PidleSeconds=600` runs them alone and writes
+  `./gradlew :auto-test:smokeRun -PidleSeconds=600` runs them alone and writes
   `build/reports/smoke-runs/memory.csv`, the workload of 1.18 and every later performance pass. The cases they cover
   say so in the **Automated** column of `MVP_SMOKE_TEST.md` ("smoke run"); every later feature adds its own runs.
 - **Code trim** (`ARCHITECTURE.md` §4 and §10, `GUIDELINES.md` §6), so the code stays small as M2 starts:
@@ -682,7 +682,7 @@ character range of every chunk (needed for citations). Pure `commonMain` logic, 
   the next ones under the same parent heading up to 400; one that fits 400 is a chunk; a longer one is split between
   its paragraphs, lists, tables and whole code blocks, packed to 300, each chunk starting with the previous one's last
   sentence or line (at most 60). 2.2 checks the estimate against the embedding model's tokenizer.
-- Checked on all 431 notes of `smoke-data` (`ChunkSmokeDataTest`); no Self-Test case, since nothing shows yet: the
+- Checked on all 431 notes of `smoke-data` (`ChunkSmokeDataTest`); no Auto-Test case, since nothing shows yet: the
   cases of 2.3, 2.4 and 2.6 exercise it.
 
 ### ✅ 2.2 Embedding engine — `feature/embeddings` — [notekea#109](https://github.com/juanchurtado1991/notekea/pull/109)

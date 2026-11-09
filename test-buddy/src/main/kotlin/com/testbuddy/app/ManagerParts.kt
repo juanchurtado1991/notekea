@@ -58,7 +58,7 @@ internal fun CountChip(
 /** A section's small capital title: NOW, RECENT. */
 @Composable
 internal fun SectionLabel(text: String) {
-    Text(text = text, fontSize = 10.sp, color = SelfTestColors.Muted, fontWeight = FontWeight.SemiBold)
+    Text(text = text, fontSize = 10.sp, color = AutoTestColors.Muted, fontWeight = FontWeight.SemiBold)
 }
 
 /**
@@ -87,7 +87,7 @@ private fun StepRow(
             text = text,
             fontSize = 12.sp,
             fontWeight = if (status == CaseStatus.RUNNING) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (status == CaseStatus.WAITING) SelfTestColors.Muted else Color.Unspecified
+            color = if (status == CaseStatus.WAITING) AutoTestColors.Muted else Color.Unspecified
         )
     }
 }

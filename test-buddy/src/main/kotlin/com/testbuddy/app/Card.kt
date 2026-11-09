@@ -24,7 +24,7 @@ internal fun Card(
         modifier = modifier
             .fillMaxWidth()
             .background(color = Color.White, shape = shape)
-            .border(width = 1.dp, color = SelfTestColors.Border, shape = shape)
+            .border(width = 1.dp, color = AutoTestColors.Border, shape = shape)
             .padding(all = 12.dp),
         verticalArrangement = Arrangement.spacedBy(space = 6.dp),
         content = content

@@ -95,7 +95,7 @@ class DesktopModulesTest {
         )
     }
 
-    // Audit: nothing ended the embedder's timer or freed its model when Koin stopped, as it does after every Self-Test case.
+    // Audit: nothing ended the embedder's timer or freed its model when Koin stopped, as it does after every Auto-Test case.
     @Test
     fun `closing Koin closes the embedder`() {
         val embedder = koinApplication.koin.get<TextEmbedder>() as LlamaTextEmbedder

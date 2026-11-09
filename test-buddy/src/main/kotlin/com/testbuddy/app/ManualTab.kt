@@ -58,7 +58,7 @@ internal fun ManualTab(
                 else -> Text(
                     text = "Test data: a fresh copy of ${case.data.joinToString()}",
                     fontSize = 11.sp,
-                    color = SelfTestColors.Muted
+                    color = AutoTestColors.Muted
                 )
             }
             Steps(appName = appName, case = case, step = state.manualStep, actions = actions)
@@ -76,7 +76,7 @@ private fun CaseHeader(
     Text(
         text = "Case ${state.manualIndex + 1} of $count · ${case.reason.hint()}$answered",
         fontSize = 11.sp,
-        color = SelfTestColors.Muted
+        color = AutoTestColors.Muted
     )
     Text(text = "${case.id} · ${case.title}", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
 }

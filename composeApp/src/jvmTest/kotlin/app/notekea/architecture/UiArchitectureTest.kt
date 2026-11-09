@@ -46,9 +46,9 @@ class UiArchitectureTest : ArchitectureTestBase() {
     }
 
     @Test
-    fun `the window's locals are provided in one root, shared with the Self-Test's cases`() {
+    fun `the window's locals are provided in one root, shared with the Auto-Test's cases`() {
         val rootLocals = listOf("LocalShortcutDispatcher", "LocalFileDrop", "LocalAppVersion", "LocalResizePointerIcon")
-        (productionScope + Konsist.scopeFromProduction(moduleName = SELF_TEST_MODULE_NAME)).files
+        (productionScope + Konsist.scopeFromProduction(moduleName = AUTO_TEST_MODULE_NAME)).files
             .filterNot { it.name == ROOT_FILE }
             .assertFalse(additionalMessage = "audit 64: provide them in NotekeaRoot") { file ->
                 rootLocals.any { local -> file.text.contains(other = "$local provides") }

@@ -36,7 +36,7 @@ internal fun TestDataCard(
                 "open), then Open folder…, go to that folder and choose it. Each case starts from a new copy, so " +
                 "what you changed in an earlier case is gone.",
             fontSize = 11.sp,
-            color = SelfTestColors.Muted
+            color = AutoTestColors.Muted
         )
     }
 }

@@ -22,7 +22,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class ManagerSessionTest {
     private val root = Files.createTempDirectory("manager-session")
-    private val folders = SelfTestFolders(root = root.resolve("Sample QA"))
+    private val folders = AutoTestFolders(root = root.resolve("Sample QA"))
     private val suite = sampleSuite {
         automated(id = "1.1-01", title = "Shows the button") {}
         automated(id = "1.1-02", title = "Shows a ghost") {}
@@ -198,7 +198,7 @@ class ManagerSessionTest {
 
     @Test
     fun `the default folder is named after the app's QA build`() {
-        assertEquals("Sample QA", SelfTestFolders.default(appName = "Sample").root.fileName.toString())
+        assertEquals("Sample QA", AutoTestFolders.default(appName = "Sample").root.fileName.toString())
     }
 
     private var onEnd: (Int) -> Unit = {}

@@ -50,7 +50,7 @@ class FileStructureTest : ArchitectureTestBase() {
     @Test
     fun `test buddy depends on no Notekea code`() {
         Konsist.scopeFromModule(moduleName = TEST_BUDDY_MODULE_NAME).files
-            .assertFalse(additionalMessage = "qa/SELF_TEST.md: Test Buddy stays ready to be a standalone SDK") { file ->
+            .assertFalse(additionalMessage = "qa/AUTO_TEST.md: Test Buddy stays ready to be a standalone SDK") { file ->
                 val isNotekeaPackage = file.packagee?.name?.startsWith(prefix = APP_PACKAGE_PREFIX) == true
                 isNotekeaPackage || file.imports.any { it.name.startsWith(prefix = APP_PACKAGE_PREFIX) }
             }

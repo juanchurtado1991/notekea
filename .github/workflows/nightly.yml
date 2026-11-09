@@ -49,7 +49,7 @@ jobs:
       - name: Smoke runs with memory
         if: always()
         shell: bash
-        run: ./gradlew :selftest:smokeRun --console=plain
+        run: ./gradlew :auto-test:smokeRun --console=plain
 
       - name: Upload reports
         if: always()
@@ -58,7 +58,7 @@ jobs:
           name: nightly-${{ matrix.os }}
           path: |
             **/build/reports/tests/
-            selftest/build/reports/smoke-runs/
+            auto-test/build/reports/smoke-runs/
           retention-days: 14
 
   packaged:

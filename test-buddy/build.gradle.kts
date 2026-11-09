@@ -14,7 +14,7 @@ kotlin {
     }
 }
 
-// Test Buddy depends on no Notekea module (qa/SELF_TEST.md), so it can become a standalone SDK.
+// Test Buddy depends on no Notekea module (qa/AUTO_TEST.md), so it can become a standalone SDK.
 dependencies {
     // CaseScope hands a case Compose UI Test itself (ComposeUiTest), for what the verbs do not cover.
     api(libs.compose.ui.test)

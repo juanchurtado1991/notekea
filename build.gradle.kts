@@ -24,7 +24,7 @@ fun KoverProjectExtension.applyNotekeaCoverageRules() {
                     "*ComposableSingletons*",
                     "app.notekea.MainKt",
                     "app.notekea.CrashReportsKt",
-                    "app.notekea.selftest.QaMainKt",
+                    "app.notekea.autotest.QaMainKt",
                     // What talks to the desktop or starts processes: the clipboard, the browser, Swing dialogs, the
                     // app started again; checked in the QA run (qa/README.md), not by unit tests.
                     "com.testbuddy.crash.CrashActions",
@@ -60,7 +60,7 @@ dependencies {
     kover(projects.ktlintRules)
     kover(projects.testBuddy)
     kover(projects.testBuddyCrash)
-    kover(projects.selftest)
+    kover(projects.autoTest)
 }
 
 kover {

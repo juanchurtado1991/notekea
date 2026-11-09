@@ -184,18 +184,18 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
      and typing latency; records the numbers in `docs/performance.md` next to the previous milestone's; and cuts what
      grew or leaks against the budgets of `ROADMAP.md` 5.4. Its smoke test also checks that nothing broke.
   3. **Release run** (`qa/README.md`), the only QA run after M1's: when 5.4 is on `main`, before 5.5, testers install
-     **Notekea QA** (Notekea with its Self-Test and the Test Buddy manager) from a GitHub pre-release on **Windows,
+     **Notekea QA** (Notekea with its Auto-Test and the Test Buddy manager) from a GitHub pre-release on **Windows,
      macOS and Linux**; the manager runs the automatic cases of `MVP_SMOKE_TEST.md` accumulated so far and walks them
-     through the manual ones, step by step (`qa/SELF_TEST.md`), with the release builds, which are not signed
+     through the manual ones, step by step (`qa/AUTO_TEST.md`), with the release builds, which are not signed
      (`ROADMAP.md` 5.3, 5.5). The release waits until the three OSes pass. M1's run was the first and covered everything
      since M0.
-- **Notekea's Self-Test (the cases of Notekea QA) is kept up to date by every feature, never at the end of a
+- **Notekea's Auto-Test (the cases of Notekea QA) is kept up to date by every feature, never at the end of a
   milestone**
-  (`qa/SELF_TEST.md`). Every case of `MVP_SMOKE_TEST.md` is checked by the Self-Test, automatically (as many as is
+  (`qa/AUTO_TEST.md`). Every case of `MVP_SMOKE_TEST.md` is checked by the Auto-Test, automatically (as many as is
   reasonable, with no quota) or as a manual case it walks the tester through. In the step that adds the behavior, every
   `feature/` and `fix/` pull request writes each new or changed case as an `AutomatedCase` (named after its ID, run in
   CI on the three systems through the JUnit bridge) or a `ManualCase` (steps and expected result in plain
-  English, no terminal), in `:selftest`, and adds its data to `smoke-data/`. The consistency test
+  English, no terminal), in `:auto-test`, and adds its data to `smoke-data/`. The consistency test
   fails when a case has no counterpart. Once the M1 cases are in (`qa/README.md` piece 5), the cases in code are the
   only source and `MVP_SMOKE_TEST.md` is generated from them, never edited by hand. Every step that adds or changes UI also brings its screen tests (§10).
 - **Manual smoke test before a `feature/` or `fix/` branch reaches `main`.** Automated tests do not prove the
@@ -223,16 +223,16 @@ Composables are stateless: they receive `state` and `onIntent` and never talk to
   run in `check` and CI, so the cases accumulate feature after feature, and a feature that changes a case updates
   its test. The agent also runs the `smoke.sh` commands with `SMOKE_SCRATCH=scratch-agent` (never the developer's
   `smoke-data/scratch`) and checks every expected value the guide states (names, counts, file contents) against
-  the data in `smoke-data/`. The cases of 1.1 to 1.5, written before this rule, become Self-Test cases with the rest
+  the data in `smoke-data/`. The cases of 1.1 to 1.5, written before this rule, become Auto-Test cases with the rest
   of M1 before the M1 run (`qa/README.md`, piece 5). Screens rendered while
   developing are shown to the developer in the conversation, never committed or attached to pull requests: design
   decisions are made in the smoke test, using the app.
-- **Automated cases and smoke runs live in `:selftest`** (`ROADMAP.md` 1.16, `qa/SELF_TEST.md`): they start the real
+- **Automated cases and smoke runs live in `:auto-test`** (`ROADMAP.md` 1.16, `qa/AUTO_TEST.md`): they start the real
   app (its real code and files, with a temporary app data folder, never the user's) on copies of the smoke data, drive
   the UI as a person does (find by text, click, type, shortcuts) and check what the case expects, down to the files
-  on disk. They run in every `check` and so in CI (§8), the Self-Test in parts at the same time, each in its own JVM, and
-  `./gradlew :selftest:smokeRun -PidleSeconds=600` runs the smoke runs alone and records the memory of each in
-  `selftest/build/reports/smoke-runs/memory.csv`, the workload every performance pass measures.
+  on disk. They run in every `check` and so in CI (§8), the Auto-Test in parts at the same time, each in its own JVM, and
+  `./gradlew :auto-test:smokeRun -PidleSeconds=600` runs the smoke runs alone and records the memory of each in
+  `auto-test/build/reports/smoke-runs/memory.csv`, the workload every performance pass measures.
 - **Every `feature/` and `fix/` branch adds its cases to `MVP_SMOKE_TEST.md`** (in a step): what a person must check on
   each OS, including cases that only become testable with later features. The release run executes the whole file on
   Windows, macOS and Linux; it is the main source of bugs before release.

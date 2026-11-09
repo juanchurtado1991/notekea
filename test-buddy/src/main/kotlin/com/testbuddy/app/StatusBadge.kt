@@ -25,10 +25,10 @@ internal fun StatusBadge(status: CaseStatus) {
 }
 
 private fun CaseStatus.color() = when (this) {
-    CaseStatus.PASSED -> SelfTestColors.Passed
-    CaseStatus.FAILED -> SelfTestColors.Failed
-    CaseStatus.RUNNING -> SelfTestColors.Running
-    CaseStatus.WAITING, CaseStatus.SKIPPED -> SelfTestColors.Waiting
+    CaseStatus.PASSED -> AutoTestColors.Passed
+    CaseStatus.FAILED -> AutoTestColors.Failed
+    CaseStatus.RUNNING -> AutoTestColors.Running
+    CaseStatus.WAITING, CaseStatus.SKIPPED -> AutoTestColors.Waiting
 }
 
 private fun CaseStatus.symbol() = when (this) {

@@ -62,14 +62,14 @@ jobs:
       - name: Package Notekea and Notekea QA
         shell: bash
         run: >
-          ./gradlew :composeApp:packageDistributionForCurrentOS :selftest:packageQa --console=plain
+          ./gradlew :composeApp:packageDistributionForCurrentOS :auto-test:packageQa --console=plain
           -PpackageVersion=${{ steps.version.outputs.package }} -PreleaseName=${{ steps.version.outputs.name }}
 
       - name: Collect the installers
         shell: bash
         run: |
           mkdir -p installers
-          for app in composeApp selftest; do
+          for app in composeApp auto-test; do
             find "$app/build/compose/binaries/main" -type f \( -name "*.msi" -o -name "*.dmg" -o -name "*.deb" \) \
               -exec cp {} installers/ \;
           done

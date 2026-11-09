@@ -48,7 +48,7 @@ private fun ColumnScope.Report(report: String) {
     Text(
         text = "Copy it into a message to whoever asked you to test, with the pictures of the Report folder.",
         fontSize = 12.sp,
-        color = SelfTestColors.Muted
+        color = AutoTestColors.Muted
     )
     Card {
         Text(text = report, fontSize = 10.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.fillMaxWidth())

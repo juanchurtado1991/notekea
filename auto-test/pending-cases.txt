@@ -1,0 +1,2 @@
+# The cases of MVP_SMOKE_TEST.md not written in the Auto-Test yet (qa/README.md, piece 5), one ID per line.
+# Writing a case removes its line; the consistency test fails while a written case is still here.
