@@ -76,12 +76,16 @@ class CoroutineModelInstaller(
 
     override fun cancel() {
         val size = current.value?.size ?: return
+        val started = counted.value?.takeIf { it.size == size }?.files.orEmpty()
         val previous = job.value
         current.value = null
         counted.value = null
         job.value = scope.launch {
             previous?.cancelAndJoin()
-            catalogSource.load().models.firstOrNull { it.size == size }?.let { storage.delete(file = it.file) }
+            val model = catalogSource.load().models.firstOrNull { it.size == size }?.file
+            (started + listOfNotNull(model)).distinct()
+                .filterNot { it != model && storage.isInstalled(file = it) }
+                .forEach { storage.delete(file = it) }
         }
     }
 

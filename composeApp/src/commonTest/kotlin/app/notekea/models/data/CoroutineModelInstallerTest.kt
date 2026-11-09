@@ -122,4 +122,26 @@ class CoroutineModelInstallerTest {
             actual = installer.session.value?.progress
         )
     }
+
+    @Test
+    fun `cancelling while the reranker downloads deletes its bytes too, but never a finished reranker`() =
+        runTest(context = testDispatcher) {
+            downloader.held += ModelCatalogs.reranker.fileName
+            installer.start(model = ModelCatalogs.small)
+            advanceUntilIdle()
+            installer.cancel()
+            advanceUntilIdle()
+            val firstCancel = storage.deleted.toList()
+            storage.deleted.clear()
+            downloader.held.clear()
+            downloader.held += ModelCatalogs.small.file.fileName
+            installer.start(model = ModelCatalogs.small)
+            advanceUntilIdle()
+            installer.cancel()
+            advanceUntilIdle()
+
+            assertEquals(expected = listOf("reranker.gguf", "small.gguf"), actual = firstCancel)
+            assertEquals(expected = listOf("small.gguf"), actual = storage.deleted)
+            assertEquals(expected = setOf("reranker.gguf"), actual = storage.installed)
+        }
 }
