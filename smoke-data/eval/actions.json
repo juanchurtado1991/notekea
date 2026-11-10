@@ -1,0 +1,1250 @@
+[
+ {
+  "request": "How much water does the arepa dough take?",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "What did we decide in the kickoff meeting?",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "Who wrote Dune?",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "¿Qué libros hay en mi lista de lectura?",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "What is the budget for the kitchen renovation?",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "¿Cuándo es el viaje a Lisboa?",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "Summarize what my notes say about habits",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "¿De qué trata Deep Work?",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "What did Ana and I talk about in our 1-1?",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "Which vegetables are in the garden plan?",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "books I rated 4 or more",
+  "open": null,
+  "steps": [
+   {
+    "action": "find_notes",
+    "fields": {
+     "request": ""
+    }
+   }
+  ]
+ },
+ {
+  "request": "notes with status draft",
+  "open": null,
+  "steps": [
+   {
+    "action": "find_notes",
+    "fields": {
+     "request": ""
+    }
+   }
+  ]
+ },
+ {
+  "request": "libros que terminé",
+  "open": null,
+  "steps": [
+   {
+    "action": "find_notes",
+    "fields": {
+     "request": ""
+    }
+   }
+  ]
+ },
+ {
+  "request": "meetings tagged budget",
+  "open": null,
+  "steps": [
+   {
+    "action": "find_notes",
+    "fields": {
+     "request": ""
+    }
+   }
+  ]
+ },
+ {
+  "request": "projects with a due date before December",
+  "open": null,
+  "steps": [
+   {
+    "action": "find_notes",
+    "fields": {
+     "request": ""
+    }
+   }
+  ]
+ },
+ {
+  "request": "notas de recetas sin etiquetas de tipo dinner",
+  "open": null,
+  "steps": [
+   {
+    "action": "find_notes",
+    "fields": {
+     "request": ""
+    }
+   }
+  ]
+ },
+ {
+  "request": "what is due this week in Garden?",
+  "open": null,
+  "steps": [
+   {
+    "action": "show_tasks",
+    "fields": {
+     "period": "this week"
+    }
+   }
+  ]
+ },
+ {
+  "request": "show my overdue tasks",
+  "open": null,
+  "steps": [
+   {
+    "action": "show_tasks",
+    "fields": {
+     "period": "overdue"
+    }
+   }
+  ]
+ },
+ {
+  "request": "muéstrame las tareas de hoy",
+  "open": null,
+  "steps": [
+   {
+    "action": "show_tasks",
+    "fields": {
+     "period": "today"
+    }
+   }
+  ]
+ },
+ {
+  "request": "tasks in Projects",
+  "open": null,
+  "steps": [
+   {
+    "action": "show_tasks",
+    "fields": {
+     "folder": "Projects"
+    }
+   }
+  ]
+ },
+ {
+  "request": "which tasks did I finish?",
+  "open": null,
+  "steps": [
+   {
+    "action": "show_tasks",
+    "fields": {
+     "period": "done"
+    }
+   }
+  ]
+ },
+ {
+  "request": "list notes without tags",
+  "open": null,
+  "steps": [
+   {
+    "action": "list_untagged",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "¿hay enlaces rotos en el vault?",
+  "open": null,
+  "steps": [
+   {
+    "action": "list_broken_links",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "open Arepas",
+  "open": null,
+  "steps": [
+   {
+    "action": "open_note",
+    "fields": {
+     "note": "Arepas"
+    }
+   }
+  ]
+ },
+ {
+  "request": "abre la nota de Dune",
+  "open": null,
+  "steps": [
+   {
+    "action": "open_note",
+    "fields": {
+     "note": "Dune"
+    }
+   }
+  ]
+ },
+ {
+  "request": "go to the Steps section of Pancakes",
+  "open": null,
+  "steps": [
+   {
+    "action": "open_note",
+    "fields": {
+     "note": "Pancakes",
+     "text": "Steps"
+    }
+   }
+  ]
+ },
+ {
+  "request": "open today's note",
+  "open": null,
+  "steps": [
+   {
+    "action": "open_today",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "abre la nota de hoy",
+  "open": null,
+  "steps": [
+   {
+    "action": "open_today",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "search for lisbon",
+  "open": null,
+  "steps": [
+   {
+    "action": "search",
+    "fields": {
+     "text": "lisbon"
+    }
+   }
+  ]
+ },
+ {
+  "request": "busca 'tomate' en mis notas",
+  "open": null,
+  "steps": [
+   {
+    "action": "search",
+    "fields": {
+     "text": "tomat"
+    }
+   }
+  ]
+ },
+ {
+  "request": "show the graph",
+  "open": null,
+  "steps": [
+   {
+    "action": "show_panel",
+    "fields": {
+     "panel": "graph"
+    }
+   }
+  ]
+ },
+ {
+  "request": "open the backlinks of this note",
+  "open": "Arepas",
+  "steps": [
+   {
+    "action": "show_panel",
+    "fields": {
+     "panel": "backlinks"
+    }
+   }
+  ]
+ },
+ {
+  "request": "muestra las notas relacionadas",
+  "open": "Dune",
+  "steps": [
+   {
+    "action": "show_panel",
+    "fields": {
+     "panel": "related"
+    }
+   }
+  ]
+ },
+ {
+  "request": "show my bookmarks",
+  "open": null,
+  "steps": [
+   {
+    "action": "show_panel",
+    "fields": {
+     "panel": "bookmarks"
+    }
+   }
+  ]
+ },
+ {
+  "request": "split the pane",
+  "open": null,
+  "steps": [
+   {
+    "action": "split_pane",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "close the other tabs",
+  "open": null,
+  "steps": [
+   {
+    "action": "close_other_tabs",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "show this note as written in markdown",
+  "open": "Arepas",
+  "steps": [
+   {
+    "action": "toggle_source",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "switch to the sage theme",
+  "open": null,
+  "steps": [
+   {
+    "action": "set_theme",
+    "fields": {
+     "theme": "sage"
+    }
+   }
+  ]
+ },
+ {
+  "request": "cambia el tema a Honey",
+  "open": null,
+  "steps": [
+   {
+    "action": "set_theme",
+    "fields": {
+     "theme": "honey"
+    }
+   }
+  ]
+ },
+ {
+  "request": "open Dune and split the pane",
+  "open": null,
+  "steps": [
+   {
+    "action": "open_note",
+    "fields": {
+     "note": "Dune"
+    }
+   },
+   {
+    "action": "split_pane",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "create a note called Groceries",
+  "open": null,
+  "steps": [
+   {
+    "action": "create_note",
+    "fields": {
+     "title": "Groceries"
+    }
+   }
+  ]
+ },
+ {
+  "request": "crea una nota 'Ideas de regalo' en Ideas",
+  "open": null,
+  "steps": [
+   {
+    "action": "create_note",
+    "fields": {
+     "title": "Ideas de regalo",
+     "folder": "Ideas"
+    }
+   }
+  ]
+ },
+ {
+  "request": "create a note \"Meeting with Ana\" in Meetings from the Meeting template",
+  "open": null,
+  "steps": [
+   {
+    "action": "create_note",
+    "fields": {
+     "title": "Meeting with Ana",
+     "folder": "Meetings",
+     "template": "Meeting"
+    }
+   }
+  ]
+ },
+ {
+  "request": "create a note \"Meeting with Ana\" in Meetings from the Meeting template, status draft",
+  "open": null,
+  "steps": [
+   {
+    "action": "create_note",
+    "fields": {
+     "title": "Meeting with Ana",
+     "template": "Meeting"
+    }
+   },
+   {
+    "action": "set_property",
+    "fields": {
+     "property": "status",
+     "value": "draft"
+    }
+   }
+  ]
+ },
+ {
+  "request": "make a note in Recipes called Guacamole with a simple recipe",
+  "open": null,
+  "steps": [
+   {
+    "action": "create_note",
+    "fields": {
+     "title": "Guacamole",
+     "folder": "Recipes"
+    }
+   }
+  ]
+ },
+ {
+  "request": "write a summary of my book notes in a new note called Books summary",
+  "open": null,
+  "steps": [
+   {
+    "action": "write_from_notes",
+    "fields": {
+     "title": "Books summary",
+     "folder": "Books"
+    }
+   }
+  ]
+ },
+ {
+  "request": "resume todas las reuniones en una nota llamada Resumen de reuniones",
+  "open": null,
+  "steps": [
+   {
+    "action": "write_from_notes",
+    "fields": {
+     "title": "Resumen de reuniones",
+     "folder": "Meetings"
+    }
+   }
+  ]
+ },
+ {
+  "request": "make a new note with the tasks of this note",
+  "open": "Kitchen renovation",
+  "steps": [
+   {
+    "action": "write_from_notes",
+    "fields": {
+     "note": "Kitchen renovation"
+    }
+   }
+  ]
+ },
+ {
+  "request": "create a note summarizing this note",
+  "open": "Trip to Lisbon",
+  "steps": [
+   {
+    "action": "write_from_notes",
+    "fields": {
+     "note": "Trip to Lisbon"
+    }
+   }
+  ]
+ },
+ {
+  "request": "write a shopping list from the weekly menu into a note Shopping list",
+  "open": null,
+  "steps": [
+   {
+    "action": "write_from_notes",
+    "fields": {
+     "title": "Shopping list",
+     "note": "Weekly menu"
+    }
+   }
+  ]
+ },
+ {
+  "request": "crea una nota con un plan de lectura basado en Reading list y Reading challenge",
+  "open": null,
+  "steps": [
+   {
+    "action": "write_from_notes",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "make a note comparing Deep Work and Atomic Habits",
+  "open": null,
+  "steps": [
+   {
+    "action": "write_from_notes",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "Turn this into notes:\n## Chapter 1\nThe history of bread starts in the fertile crescent. Wheat was ground by hand and baked on hot stones. Later, ovens spread to Egypt and Rome, where bakers formed guilds.\n## Chapter 2\nThe history of bread starts in the fertile crescent. Wheat was ground by hand and baked on hot stones. Later, ovens spread to Egypt and Rome, where bakers formed guilds.\n## Chapter 3\nThe history of bread starts in the fertile crescent. Wheat was ground by hand and baked on hot stones. Later, ovens spread to Egypt and Rome, where bakers formed guilds.\n## Chapter 4\nThe history of bread starts in the fertile crescent. Wheat was ground by hand and baked on hot stones. Later, ovens spread to Egypt and Rome, where bakers formed guilds.\n## Chapter 5\nThe history of bread starts in the fertile crescent. Wheat was ground by hand and baked on hot stones. Later, ovens spread to Egypt and Rome, where bakers formed guilds.",
+  "open": null,
+  "steps": [
+   {
+    "action": "notes_from_text",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "Créame notas a partir de este texto:\nLa huerta necesita sol seis horas al día. Los tomates se siembran en primavera. Las lechugas crecen mejor a la sombra parcial. El riego por goteo ahorra agua. El compost mejora el suelo cada otoño.",
+  "open": null,
+  "steps": [
+   {
+    "action": "notes_from_text",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "add 'call the plumber' to today's note",
+  "open": null,
+  "steps": [
+   {
+    "action": "append_text",
+    "fields": {
+     "text": "plumber"
+    }
+   }
+  ]
+ },
+ {
+  "request": "añade a la nota Garden plan: comprar semillas de albahaca",
+  "open": null,
+  "steps": [
+   {
+    "action": "append_text",
+    "fields": {
+     "note": "Garden plan",
+     "text": "albahaca"
+    }
+   }
+  ]
+ },
+ {
+  "request": "append a line to this note saying the dough must rest 5 minutes",
+  "open": "Arepas",
+  "steps": [
+   {
+    "action": "append_text",
+    "fields": {
+     "note": "Arepas",
+     "text": "5"
+    }
+   }
+  ]
+ },
+ {
+  "request": "set the rating of Sapiens to 4",
+  "open": null,
+  "steps": [
+   {
+    "action": "set_property",
+    "fields": {
+     "note": "Sapiens",
+     "property": "rating",
+     "value": "4"
+    }
+   }
+  ]
+ },
+ {
+  "request": "marca Dune como terminado",
+  "open": null,
+  "steps": [
+   {
+    "action": "set_property",
+    "fields": {
+     "note": "Dune",
+     "property": "finished",
+     "value": "true"
+    }
+   }
+  ]
+ },
+ {
+  "request": "set status to done on this note",
+  "open": "Notekea launch",
+  "steps": [
+   {
+    "action": "set_property",
+    "fields": {
+     "property": "status",
+     "value": "done"
+    }
+   }
+  ]
+ },
+ {
+  "request": "tag every note in Recipes with food",
+  "open": null,
+  "steps": [
+   {
+    "action": "add_tag",
+    "fields": {
+     "folder": "Recipes",
+     "tag": "food"
+    }
+   }
+  ]
+ },
+ {
+  "request": "añade la etiqueta viaje a Trip to Lisbon",
+  "open": null,
+  "steps": [
+   {
+    "action": "add_tag",
+    "fields": {
+     "note": "Trip to Lisbon",
+     "tag": "viaje"
+    }
+   }
+  ]
+ },
+ {
+  "request": "tag this note as important",
+  "open": "Budget 2026",
+  "steps": [
+   {
+    "action": "add_tag",
+    "fields": {
+     "tag": "important"
+    }
+   }
+  ]
+ },
+ {
+  "request": "tag Dune and Sapiens as favorite",
+  "open": null,
+  "steps": [
+   {
+    "action": "add_tag",
+    "fields": {
+     "tag": "favorite"
+    }
+   }
+  ]
+ },
+ {
+  "request": "add a task to buy tomato seeds in Garden plan",
+  "open": null,
+  "steps": [
+   {
+    "action": "add_task",
+    "fields": {
+     "note": "Garden plan",
+     "text": "tomato"
+    }
+   }
+  ]
+ },
+ {
+  "request": "add a task for today: send the invoice",
+  "open": null,
+  "steps": [
+   {
+    "action": "add_task",
+    "fields": {
+     "text": "invoice"
+    }
+   }
+  ]
+ },
+ {
+  "request": "agrega la tarea 'pintar la cocina' a Kitchen renovation para el 2026-11-20",
+  "open": null,
+  "steps": [
+   {
+    "action": "add_task",
+    "fields": {
+     "note": "Kitchen renovation",
+     "text": "pintar",
+     "due": "2026-11-20"
+    }
+   }
+  ]
+ },
+ {
+  "request": "mark the task 'book flights' in Trip to Lisbon as done",
+  "open": null,
+  "steps": [
+   {
+    "action": "complete_task",
+    "fields": {
+     "note": "Trip to Lisbon",
+     "text": "flights"
+    }
+   }
+  ]
+ },
+ {
+  "request": "completa la tarea de comprar harina en Arepas",
+  "open": null,
+  "steps": [
+   {
+    "action": "complete_task",
+    "fields": {
+     "note": "Arepas",
+     "text": "harina"
+    }
+   }
+  ]
+ },
+ {
+  "request": "link Arepas to Weekly menu",
+  "open": null,
+  "steps": [
+   {
+    "action": "link_notes",
+    "fields": {
+     "note": "Arepas",
+     "target": "Weekly menu"
+    }
+   }
+  ]
+ },
+ {
+  "request": "enlaza esta nota con Budget 2026",
+  "open": "Kitchen renovation",
+  "steps": [
+   {
+    "action": "link_notes",
+    "fields": {
+     "target": "Budget 2026"
+    }
+   }
+  ]
+ },
+ {
+  "request": "bookmark Home",
+  "open": null,
+  "steps": [
+   {
+    "action": "bookmark",
+    "fields": {
+     "note": "Home"
+    }
+   }
+  ]
+ },
+ {
+  "request": "añade a marcadores la carpeta Projects",
+  "open": null,
+  "steps": [
+   {
+    "action": "bookmark",
+    "fields": {
+     "folder": "Projects"
+    }
+   }
+  ]
+ },
+ {
+  "request": "bookmark this note",
+  "open": "Dune",
+  "steps": [
+   {
+    "action": "bookmark",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "create a folder Archive",
+  "open": null,
+  "steps": [
+   {
+    "action": "create_folder",
+    "fields": {
+     "folder": "Archive"
+    }
+   }
+  ]
+ },
+ {
+  "request": "crea la carpeta Recetas/Postres",
+  "open": null,
+  "steps": [
+   {
+    "action": "create_folder",
+    "fields": {
+     "folder": "Postres"
+    }
+   }
+  ]
+ },
+ {
+  "request": "rename Pancakes to Banana pancakes",
+  "open": null,
+  "steps": [
+   {
+    "action": "rename",
+    "fields": {
+     "note": "Pancakes",
+     "title": "Banana pancakes"
+    }
+   }
+  ]
+ },
+ {
+  "request": "cambia el nombre de la carpeta Ideas a Ideas sueltas",
+  "open": null,
+  "steps": [
+   {
+    "action": "rename",
+    "fields": {
+     "folder": "Ideas",
+     "title": "Ideas sueltas"
+    }
+   }
+  ]
+ },
+ {
+  "request": "move Vendor call to Projects",
+  "open": null,
+  "steps": [
+   {
+    "action": "move",
+    "fields": {
+     "note": "Vendor call",
+     "target": "Projects"
+    }
+   }
+  ]
+ },
+ {
+  "request": "mueve todas las notas de Guides a Archive",
+  "open": null,
+  "steps": [
+   {
+    "action": "move",
+    "fields": {
+     "folder": "Guides",
+     "target": "Archive"
+    }
+   }
+  ]
+ },
+ {
+  "request": "move Dune and Sapiens to Archive",
+  "open": null,
+  "steps": [
+   {
+    "action": "move",
+    "fields": {
+     "target": "Archive"
+    }
+   }
+  ]
+ },
+ {
+  "request": "send Retro October to the trash",
+  "open": null,
+  "steps": [
+   {
+    "action": "trash",
+    "fields": {
+     "note": "Retro October"
+    }
+   }
+  ]
+ },
+ {
+  "request": "borra la nota Vendor call",
+  "open": null,
+  "steps": [
+   {
+    "action": "trash",
+    "fields": {
+     "note": "Vendor call"
+    }
+   }
+  ]
+ },
+ {
+  "request": "create a folder Archive and move Retro October into it",
+  "open": null,
+  "steps": [
+   {
+    "action": "create_folder",
+    "fields": {
+     "folder": "Archive"
+    }
+   },
+   {
+    "action": "move",
+    "fields": {
+     "note": "Retro October",
+     "target": "Archive"
+    }
+   }
+  ]
+ },
+ {
+  "request": "rename this note to Kickoff notes and bookmark it",
+  "open": "2026-10-21 Kickoff",
+  "steps": [
+   {
+    "action": "rename",
+    "fields": {
+     "title": "Kickoff notes"
+    }
+   },
+   {
+    "action": "bookmark",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "delete all my notes permanently",
+  "open": null,
+  "steps": [
+   {
+    "action": "refuse",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "borra para siempre la papelera",
+  "open": null,
+  "steps": [
+   {
+    "action": "refuse",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "change my sync password",
+  "open": null,
+  "steps": [
+   {
+    "action": "refuse",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "write a python script that renames my files",
+  "open": null,
+  "steps": [
+   {
+    "action": "refuse",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "open /etc/passwd",
+  "open": null,
+  "steps": [
+   {
+    "action": "refuse",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "download the large model",
+  "open": null,
+  "steps": [
+   {
+    "action": "refuse",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "tell me what the arepas recipe needs",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "explain the reading challenge",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "dime qué pasó en la retro de octubre",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "list the ingredients of tomato soup",
+  "open": null,
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "what tasks are left in the kitchen renovation?",
+  "open": null,
+  "steps": [
+   {
+    "action": "show_tasks",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "show me notes about Lisbon",
+  "open": null,
+  "steps": [
+   {
+    "action": "search",
+    "fields": {
+     "text": "lisbon"
+    }
+   }
+  ]
+ },
+ {
+  "request": "find my notes on habits",
+  "open": null,
+  "steps": [
+   {
+    "action": "search",
+    "fields": {
+     "text": "habit"
+    }
+   }
+  ]
+ },
+ {
+  "request": "which books did I finish?",
+  "open": null,
+  "steps": [
+   {
+    "action": "find_notes",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "¿qué notas tienen rating 5?",
+  "open": null,
+  "steps": [
+   {
+    "action": "find_notes",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "open the Daily template",
+  "open": null,
+  "steps": [
+   {
+    "action": "open_note",
+    "fields": {
+     "note": "Daily"
+    }
+   }
+  ]
+ },
+ {
+  "request": "create today's note and add 'gym at 7'",
+  "open": null,
+  "steps": [
+   {
+    "action": "append_text",
+    "fields": {
+     "text": "gym"
+    }
+   }
+  ]
+ },
+ {
+  "request": "summarize this note",
+  "open": "Trip to Lisbon",
+  "steps": [
+   {
+    "action": "answer",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "make a note from this text: Meeting notes 2026-11-10. Attendees: Ana, Luis. Decisions: ship the beta on Friday, freeze features. Actions: Ana writes the release notes, Luis fixes the crash.",
+  "open": null,
+  "steps": [
+   {
+    "action": "notes_from_text",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "create notes for each book in my reading list",
+  "open": null,
+  "steps": [
+   {
+    "action": "write_from_notes",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "add a property priority high to Notekea launch",
+  "open": null,
+  "steps": [
+   {
+    "action": "set_property",
+    "fields": {
+     "note": "Notekea launch",
+     "property": "priority",
+     "value": "high"
+    }
+   }
+  ]
+ }
+]

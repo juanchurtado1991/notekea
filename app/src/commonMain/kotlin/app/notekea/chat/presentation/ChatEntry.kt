@@ -8,7 +8,7 @@ import app.notekea.chat.domain.TurnOutcome
 /**
  * A question of the chat and its answer, as the panel draws it: [id] keys it in the list. While it is answered,
  * [step] says where it stands and [sources] are the passages read, which its `[n]` cite; once [outcome] is set they
- * are the passages it cites, numbered again.
+ * are the passages it cites, numbered again. A request that is not a question holds its [action] instead.
  */
 data class ChatEntry(
     val id: Long,
@@ -20,7 +20,8 @@ data class ChatEntry(
     val readNotes: Int,
     val scopeName: String?,
     val outcome: TurnOutcome?,
-    val error: ChatError?
+    val error: ChatError?,
+    val action: ChatAction? = null
 ) {
     val isAnswering: Boolean get() = outcome == null
 }

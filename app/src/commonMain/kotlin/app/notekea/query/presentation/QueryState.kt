@@ -14,5 +14,6 @@ data class QueryState(
     val catalog: QueryCatalog = QueryCatalog(),
     val isLoading: Boolean = true,
     val notesVersion: Int = 0,
-    val notice: QueryNotice? = null
+    val notice: QueryNotice? = null,
+    val isDescribing: Boolean = false
 )

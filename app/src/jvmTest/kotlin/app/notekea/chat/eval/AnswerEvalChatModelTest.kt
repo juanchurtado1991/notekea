@@ -33,6 +33,7 @@ class AnswerEvalChatModelTest {
     private val folder = Path.of(System.getProperty(MODELS_PROPERTY).orEmpty())
     private val size = ModelSize.fromId(id = System.getProperty(SIZE_PROPERTY)) ?: ModelSize.SMALL
     private val onGpu = System.getProperty(GPU_PROPERTY) != "false"
+    private val drafts = System.getProperty(DRAFTS_PROPERTY)?.toIntOrNull() ?: 1
     private val dispatchers = JvmAppDispatchers()
     private val natives = Files.createTempDirectory("notekea-natives").toString()
     private val embedder = LlamaTextEmbedder(
@@ -77,19 +78,21 @@ class AnswerEvalChatModelTest {
                 )
             }
 
-        val label = "${size.id} on the ${if (onGpu) "GPU" else "CPU"}"
+        val label = "${size.id} on the ${if (onGpu) "GPU" else "CPU"}, $drafts draft(s)"
 
         val report = AnswerEvalReport(
             label = label,
             answered = answered
         )
 
-        File(REPORTS, "answer-eval-${size.id}.txt").run {
+        val name = "answer-eval-${size.id}" + if (drafts > 1) "-drafts$drafts" else ""
+
+        File(REPORTS, "$name.txt").run {
             parentFile.mkdirs()
             writeText(text = report.text() + "\n")
         }
 
-        File(REPORTS, "answer-eval-${size.id}.tsv").writeText(
+        File(REPORTS, "$name.tsv").writeText(
             text = answered
                 .joinToString(separator = "\n") {
                     val answer = it.answer ?: NOT_FOUND
@@ -155,9 +158,14 @@ class AnswerEvalChatModelTest {
         answer(
             vaultPath = indexed.path,
             notes = indexed.notes,
-            question = question.question
+            question = question.question,
+            drafts = drafts
         ).collect { step ->
-            if (step is AnswerStep.Writing && first == null) first = millisSince(start = start)
+            // With drafts nothing shows before the chosen one is done.
+            val isFirstShown =
+                (step is AnswerStep.Writing || step is AnswerStep.Done) && first == null
+
+            if (isFirstShown) first = millisSince(start = start)
             last = step
         }
 
@@ -180,6 +188,7 @@ class AnswerEvalChatModelTest {
         const val MODELS_PROPERTY = "notekea.chat.models"
         const val SIZE_PROPERTY = "notekea.chat.size"
         const val GPU_PROPERTY = "notekea.chat.gpu"
+        const val DRAFTS_PROPERTY = "notekea.chat.drafts"
         const val EMBEDDING_PROPERTY = "notekea.embedding.model"
         const val RERANKER_FILE = "bge-reranker-v2-m3-Q4_K_M.gguf"
         const val REPORTS = "build/reports"

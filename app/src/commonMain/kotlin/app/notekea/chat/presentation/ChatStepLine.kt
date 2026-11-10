@@ -28,6 +28,9 @@ import app.notekea.core.presentation.designsystem.theme.LocalReduceMotion
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.motionTween
 import app.notekea.resources.Res
+import app.notekea.resources.chat_step_composing
+import app.notekea.resources.chat_step_drafting
+import app.notekea.resources.chat_step_planning
 import app.notekea.resources.chat_step_reading
 import app.notekea.resources.chat_step_reading_one
 import app.notekea.resources.chat_step_searching
@@ -84,10 +87,16 @@ private fun stepText(
 ): String = when {
     step == ChatStep.SEARCHING -> stringResource(resource = Res.string.chat_step_searching)
 
+    step == ChatStep.PLANNING -> stringResource(resource = Res.string.chat_step_planning)
+
+    step == ChatStep.COMPOSING -> stringResource(resource = Res.string.chat_step_composing)
+
     step == ChatStep.READING && notes == 1 ->
         stringResource(resource = Res.string.chat_step_reading_one)
 
     step == ChatStep.READING -> stringResource(Res.string.chat_step_reading, notes)
+
+    step == ChatStep.DRAFTING -> stringResource(resource = Res.string.chat_step_drafting)
 
     else -> stringResource(resource = Res.string.chat_step_writing)
 }

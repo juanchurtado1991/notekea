@@ -1,0 +1,208 @@
+package app.notekea.shell.data
+
+import app.notekea.chat.domain.ActionKind
+import app.notekea.chat.domain.ActionStep
+import app.notekea.chat.domain.DonePlan
+import app.notekea.chat.domain.NoteDraft
+import app.notekea.core.appearance.domain.ColorTheme
+import app.notekea.core.appearance.domain.FakeAppearanceStore
+import app.notekea.core.domain.FakeClock
+import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.files.ValidateFileNameUseCase
+import app.notekea.core.domain.time.FakeLocalCalendar
+import app.notekea.core.llm.domain.FakeLlmEngine
+import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
+import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.FakeNoteContentStore
+import app.notekea.core.notes.domain.FakeNoteFileOperations
+import app.notekea.core.notes.domain.FakeNoteScanner
+import app.notekea.core.notes.domain.FakeVaultSettingsReader
+import app.notekea.core.notes.domain.FillTemplateUseCase
+import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.PlanLinkUpdatesUseCase
+import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.RenameEntryUseCase
+import app.notekea.core.notes.domain.UpdateLinksAfterRenameUseCase
+import app.notekea.query.data.GhostQueryJsonReader
+import app.notekea.query.domain.BuildQueryCatalogUseCase
+import app.notekea.query.domain.QueryYaml
+import app.notekea.query.domain.RunQueryUseCase
+import app.notekea.query.domain.SetPropertyUseCase
+import app.notekea.query.domain.TranslateQueryUseCase
+import app.notekea.tasks.domain.ListTasksUseCase
+import app.notekea.tasks.domain.SetTaskDoneUseCase
+import app.notekea.tree.domain.ApplyTemplateUseCase
+import app.notekea.tree.domain.FakeBookmarkStore
+import app.notekea.tree.domain.FakeTrash
+import app.notekea.tree.domain.OpenDailyNoteUseCase
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.time.Instant
+
+/** The chat's actions carried out on fakes of the vault: each change written as planned and taken back by Undo. */
+class VaultActionRunnerTest {
+    private val store = FakeNoteContentStore()
+    private val operations = FakeNoteFileOperations()
+    private val trash = FakeTrash()
+    private val bookmarks = FakeBookmarkStore()
+    private val appearance = FakeAppearanceStore()
+    private val settings = FakeVaultSettingsReader()
+    private val calendar = FakeLocalCalendar()
+    private val clock = FakeClock(currentTime = Instant.parse(input = "2026-11-10T09:00:00Z"))
+    private val apply = ApplyLinkUpdatesUseCase(noteContentStore = store)
+    private val notes = listOf(entry(path = DUNE.value), entry(path = HOME.value))
+
+    private val runner = VaultActionRunner(
+        noteContentStore = store,
+        noteFileOperations = operations,
+        noteScanner = FakeNoteScanner(),
+        renameEntry = RenameEntryUseCase(
+            noteFileOperations = operations,
+            validateFileName = ValidateFileNameUseCase()
+        ),
+        updateLinksAfterRename = UpdateLinksAfterRenameUseCase(
+            planLinkUpdates = PlanLinkUpdatesUseCase(
+                noteContentStore = store,
+                linkFinder = JetBrainsMarkdownLinkFinder()
+            ),
+            applyLinkUpdates = apply
+        ),
+        applyLinkUpdates = apply,
+        applyTemplate = ApplyTemplateUseCase(
+            fillTemplate = FillTemplateUseCase(settings, store, calendar, clock),
+            noteContentStore = store
+        ),
+        openDailyNote = OpenDailyNoteUseCase(settings, operations, store, calendar, clock),
+        bookmarkStore = bookmarks,
+        trash = trash,
+        finder = VaultActionFinder(
+            translateQuery = TranslateQueryUseCase(
+                llmEngine = FakeLlmEngine(),
+                reader = GhostQueryJsonReader()
+            ),
+            buildCatalog = BuildQueryCatalogUseCase(),
+            runQuery = RunQueryUseCase(),
+            queryYaml = QueryYaml(),
+            listTasks = ListTasksUseCase(),
+            setTaskDone = SetTaskDoneUseCase(
+                noteContentStore = store,
+                applyLinkUpdates = apply
+            ),
+            setPropertyUseCase = SetPropertyUseCase(
+                noteContentStore = store,
+                applyLinkUpdates = apply
+            ),
+            noteContentStore = store,
+            linkFinder = JetBrainsMarkdownLinkFinder(),
+            localCalendar = calendar,
+            clock = clock
+        ),
+        appearanceStore = appearance
+    )
+
+    private suspend fun run(vararg steps: ActionStep): DonePlan = (
+        runner.run(
+            vaultPath = VAULT,
+            steps = steps.toList(),
+            notes = notes
+        ) as Outcome.Success
+        ).value
+
+    @Test
+    fun `a written note, an added line and a property are done, then Undo takes them all back`() =
+        runTest {
+            store.texts[DUNE] = "# Dune\n\nDesert politics.\n"
+            store.texts[HOME] = "# Home\n"
+
+            val done = run(
+                ActionStep(
+                    kind = ActionKind.WRITE_FROM_NOTES,
+                    content = listOf(
+                        NoteDraft(
+                            path = SUMMARY,
+                            text = "# Summary\n\n- Desert [[Dune]]\n"
+                        )
+                    )
+                ),
+                ActionStep(
+                    kind = ActionKind.APPEND_TEXT,
+                    notes = listOf(HOME),
+                    text = "Read [[Summary]]"
+                ),
+                ActionStep(
+                    kind = ActionKind.SET_PROPERTY,
+                    notes = listOf(DUNE),
+                    property = "rating",
+                    value = "5"
+                )
+            )
+
+            val written = listOf(store.texts[SUMMARY], store.texts[HOME], store.texts[DUNE])
+
+            runner.undo(
+                vaultPath = VAULT,
+                done = done
+            )
+
+            assertEquals(
+                expected = listOf(
+                    listOf("# Summary\n\n- Desert [[Dune]]\n", "# Home\n\nRead [[Summary]]\n", "---\nrating: 5\n---\n# Dune\n\nDesert politics.\n"),
+                    listOf(SUMMARY),
+                    listOf("# Home\n", "# Dune\n\nDesert politics.\n"),
+                    done.created to done.changed
+                ),
+                actual = listOf(
+                    written,
+                    trash.trashed.toList(),
+                    listOf(store.texts[HOME], store.texts[DUNE]),
+                    listOf(SUMMARY) to listOf(HOME, DUNE)
+                )
+            )
+        }
+
+    @Test
+    fun `a note in the way is never overwritten, and the theme changes by its name`() = runTest {
+        store.texts[SUMMARY] = "Mine"
+        operations.existing += SUMMARY
+
+        val failed = runner.run(
+            vaultPath = VAULT,
+            steps = listOf(
+                ActionStep(
+                    kind = ActionKind.CREATE_NOTE,
+                    title = "Summary",
+                    content = listOf(
+                        NoteDraft(
+                            path = SUMMARY,
+                            text = "Theirs"
+                        )
+                    )
+                )
+            ),
+            notes = notes
+        )
+
+        val isKnown = runner.setTheme(theme = "Sage")
+
+        assertEquals(
+            expected = Triple(true, "Mine", ColorTheme.SAGE),
+            actual = Triple(
+                failed is Outcome.Failure && isKnown,
+                store.texts[SUMMARY],
+                appearance
+                    .observe()
+                    .first()
+                    .theme
+            )
+        )
+    }
+
+    private companion object {
+        const val VAULT = "/vault"
+        val DUNE = RelativePath(value = "Books/Dune.md")
+        val HOME = RelativePath(value = "Home.md")
+        val SUMMARY = RelativePath(value = "Books/Summary.md")
+    }
+}

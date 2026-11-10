@@ -25,6 +25,8 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
@@ -93,11 +95,22 @@ fun NotekeaCitationChip(
                 .padding(horizontal = NotekeaDimensions.SpacingXs),
             contentAlignment = Alignment.Center
         ) {
+            // The line's room above and below the digits is trimmed, so they sit in the middle of the circle.
             Text(
                 text = number.toString(),
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme
+                    .typography
+                    .labelSmall
+                    .copy(
+                        lineHeight = MaterialTheme.typography.labelSmall.fontSize,
+                        lineHeightStyle = LineHeightStyle(
+                            alignment = LineHeightStyle.Alignment.Center,
+                            trim = LineHeightStyle.Trim.Both
+                        )
+                    ),
                 fontWeight = FontWeight.SemiBold,
-                color = colors.primary
+                color = colors.primary,
+                textAlign = TextAlign.Center
             )
         }
     }

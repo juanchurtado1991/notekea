@@ -2,6 +2,8 @@ package app.notekea.query.presentation
 
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.domain.FakeAppDispatchers
+import app.notekea.core.domain.time.FakeLocalCalendar
+import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
@@ -10,6 +12,7 @@ import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.query.data.GhostQueryJsonReader
 import app.notekea.query.domain.BuildQueryCatalogUseCase
 import app.notekea.query.domain.QueryCondition
 import app.notekea.query.domain.QueryFilter
@@ -21,6 +24,7 @@ import app.notekea.query.domain.QueryYaml
 import app.notekea.query.domain.RunQueryUseCase
 import app.notekea.query.domain.SaveQueryUseCase
 import app.notekea.query.domain.SetPropertyUseCase
+import app.notekea.query.domain.TranslateQueryUseCase
 import app.notekea.query.domain.VaultQuery
 import app.notekea.query.presentation.QueryTestData.DUNE
 import app.notekea.query.presentation.QueryTestData.NOTES
@@ -42,6 +46,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class QueryViewModelTest {
@@ -61,6 +66,9 @@ class QueryViewModelTest {
             ),
             saveQuery = SaveQueryUseCase(store, apply, QueryYaml()),
             preferencesStore = preferences,
+            translateQuery = TranslateQueryUseCase(FakeLlmEngine(), GhostQueryJsonReader()),
+            localCalendar = FakeLocalCalendar(),
+            clock = Clock.System,
             dispatchers = FakeAppDispatchers(dispatcher = dispatcher)
         )
     }

@@ -50,3 +50,52 @@ What it says:
 - All three stay inside the latency budget of 3.0 (GPU 4 / 6 s); Large's p90 (5.3 s) is closest to it.
 - **Baselines** (the test fails under them): 77 / 86 / 82 %, three points under this run, as batching on the GPU
   moves an answer now and then.
+
+## 3.5 — steps measured against the one call
+
+Each step of 3.5 is measured alone on the 3.4 set; one that does not beat the one call is not built (no dead code).
+
+- **Rewriting the question into 2–3 queries:** not measured as a step. Retrieval already finds an expected note for
+  94 % (Sample Vault) and 90 % (Ghost Serializer) of the questions (`RetrievalEvalRealModelTest`), and Medium declines
+  an answerable question only 2 % of the time, so a rewrite could win at most two points while adding a model call
+  (0.3–0.6 s on the GPU, seconds on the CPU) before every answer.
+- **Extracting evidence, and removing unsupported sentences:** measured in the spike of 2026-11-08 on every size; both
+  lose against the one call (extraction drops answers in tables and lists: Small 39 against 43 right, Medium 52
+  against 59) and are four to eight times slower. Not built.
+- **The note and the headings of each excerpt** (`(Arepas › Ingredients) Mix the flour…`), meant for answers that name
+  what a passage only describes (a class of Ghost Serializer, a date in a daily note's name): Medium 389 right
+  against 388, the same within noise (Ghost Serializer 91 against 90 %, Spanish 81 against 83 %). Not built.
+
+So 3.2's single call stays the answer pipeline: none of 3.5's steps beats it.
+
+## 3.6 — Deep answer
+
+Three drafts written at once (temperature 0.7, seeds 1–3) over the same five passages; the draft whose words the
+other two share most wins (`DraftVote`), and the notes do not answer when most drafts say so. Same set, same GPU.
+
+| Size | One answer | Three drafts and a vote | Traps declined | Whole answer (median, GPU busy) |
+|---|---|---|---|---|
+| Small (2B) | 80 % (348) | 79 % (346) | 81 → 82 % | 1.6 → 3.3 s |
+| Medium (4B) | 89 % (388) | **91 % (397)** | 91 → 94 % | 2.6 → 7.0 s |
+| Large (9B) | 85 % (372) | 85 % (373) | 96 → 94 % | 3.7 → 9.9 s |
+
+The times are with the 4 slots busy answering other questions; alone, the three drafts share the slots and take
+about one answer's time more. Deep answer is offered only for Medium, the one size where it wins (`LlamaLlmEngine.DEEP_ANSWER_SIZES`), as the
+spike of 2026-11-08 found: Small's drafts disagree without a majority being right, and Large is as good alone.
+
+## 3.9 — the plans of actions
+
+`smoke-data/eval/actions.json`: 106 requests over the Sample Vault (questions that must stay questions, notes by
+their properties, tasks, the window, writing, organizing, refusals; English and Spanish), graded by
+`ActionEvalChatModelTest`: right when the plan has the expected actions, in order, with the expected fields (a
+folder's notes listed one by one count as the folder, and one action repeated per note as one).
+
+| Size | Right | Median time |
+|---|---|---|
+| Small (2B) | 75 % | 0.9 s |
+| Medium (4B) | 92 % | 1.9 s |
+| Large (9B) | 91 % | 2.5 s |
+
+Medium, the recommendation from 16 GB, passes the 90 % of 3.9. Small's misses are mostly fields under the wrong name
+(the period of tasks inside the request) and questions turned into searches; every change still waits for the card,
+which shows exactly what will be written, so a wrong plan is seen before anything is done.

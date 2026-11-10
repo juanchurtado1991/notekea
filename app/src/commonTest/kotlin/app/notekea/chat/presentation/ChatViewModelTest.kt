@@ -1,11 +1,18 @@
 package app.notekea.chat.presentation
 
+import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.domain.ActOnRequestUseCase
 import app.notekea.chat.domain.AnswerFromNotesUseCase
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
+import app.notekea.chat.domain.CheckPlanUseCase
+import app.notekea.chat.domain.ComposeNotesUseCase
+import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.FakeChatHistoryStore
+import app.notekea.chat.domain.PlanRequestUseCase
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.llm.domain.LlmError
@@ -34,6 +41,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 
 /** The chat panel over the real answer, with fakes of the index, the models and the history. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -43,6 +51,7 @@ class ChatViewModelTest {
     private val index = FakeVectorIndex()
     private val embedder = FakeTextEmbedder()
     private val engine = FakeLlmEngine()
+    private val runner = FakeActionRunner()
     private val history = FakeChatHistoryStore()
     private val notes = mutableListOf<NoteEntry>()
 
@@ -259,6 +268,77 @@ class ChatViewModelTest {
             assertTrue(actual = viewModel.state.value.entries.isEmpty() && VAULT !in history.turns)
         }
 
+    @Test
+    fun `a request to write is proposed on a card, done with Do it and taken back with Undo`() =
+        runTest(
+            testDispatcher
+        ) {
+            engine.reply = { messages ->
+                val isPlan = messages
+                    .first()
+                    .text
+                    .startsWith(prefix = "You turn a request")
+
+                if (isPlan) PLAN else "A short list of groceries."
+            }
+
+            val viewModel = started()
+
+            viewModel.onIntent(intent = ChatIntent.OnQuestionChange(text = "create a note Groceries with a list"))
+            viewModel.onIntent(intent = ChatIntent.OnSend)
+            advanceUntilIdle()
+
+            val proposed = viewModel
+                .state
+                .value
+                .entries
+                .last()
+
+            val draft = proposed
+                .action
+                ?.steps
+                ?.single()
+                ?.content
+                ?.single()
+
+            viewModel.onIntent(intent = ChatIntent.OnActionConfirm(id = proposed.id))
+            advanceUntilIdle()
+
+            val done = viewModel
+                .state
+                .value
+                .entries
+                .last()
+                .action
+                ?.status
+
+            viewModel.onIntent(intent = ChatIntent.OnActionUndo(id = proposed.id))
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = listOf<Any?>(
+                    ActionStatus.PROPOSED,
+                    "Groceries.md",
+                    ActionStatus.DONE,
+                    ActionStatus.UNDONE,
+                    1
+                ),
+                actual = listOf(
+                    proposed.action?.status,
+                    draft?.path?.value,
+                    done,
+                    viewModel
+                        .state
+                        .value
+                        .entries
+                        .last()
+                        .action
+                        ?.status,
+                    runner.undone.size
+                )
+            )
+        }
+
     private fun TestScope.started(): ChatViewModel {
         val viewModel = ChatViewModel(
             vaultPath = VAULT,
@@ -271,6 +351,25 @@ class ChatViewModelTest {
                 ),
                 llmEngine = engine
             ),
+            actOnRequest = ActOnRequestUseCase(
+                planRequest = PlanRequestUseCase(
+                    llmEngine = engine,
+                    planReader = GhostActionPlanReader()
+                ),
+                checkPlan = CheckPlanUseCase(),
+                composeNotes = ComposeNotesUseCase(
+                    llmEngine = engine,
+                    noteTextCache = NoteTextCache(
+                        contentStore = store,
+                        textFolder = TextFolder()
+                    ),
+                    planReader = GhostActionPlanReader()
+                ),
+                actionRunner = runner
+            ),
+            actionRunner = runner,
+            localCalendar = FakeLocalCalendar(),
+            clock = Clock.System,
             historyStore = history,
             llmEngine = engine
         )
@@ -294,6 +393,8 @@ class ChatViewModelTest {
     }
 
     private companion object {
+        const val PLAN =
+            "{\"steps\":[{\"action\":\"create_note\",\"title\":\"Groceries\",\"text\":\"a list\"}]}"
         val AREPAS = RelativePath(value = "Recipes/Arepas.md")
         val BEANS = RelativePath(value = "Recipes/Black beans.md")
         const val AREPAS_BODY = "Mix corn flour with warm water and salt."

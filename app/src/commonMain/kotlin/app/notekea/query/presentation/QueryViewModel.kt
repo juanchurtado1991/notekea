@@ -1,6 +1,7 @@
 package app.notekea.query.presentation
 
 import app.notekea.core.domain.AppDispatchers
+import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.core.notes.domain.NoteRewrite
@@ -10,15 +11,18 @@ import app.notekea.query.domain.BuildQueryCatalogUseCase
 import app.notekea.query.domain.QueryPreferencesStore
 import app.notekea.query.domain.QueryResult
 import app.notekea.query.domain.QuerySave
+import app.notekea.query.domain.QueryTranslation
 import app.notekea.query.domain.RunQueryUseCase
 import app.notekea.query.domain.SaveQueryUseCase
 import app.notekea.query.domain.SetPropertyUseCase
+import app.notekea.query.domain.TranslateQueryUseCase
 import app.notekea.query.domain.VaultQuery
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlin.time.Clock
 
 /**
  * The Query tab for the vault at [vaultPath], and the writes of the query blocks in its notes. The query survives
@@ -32,6 +36,9 @@ class QueryViewModel(
     private val setProperty: SetPropertyUseCase,
     private val saveQuery: SaveQueryUseCase,
     private val preferencesStore: QueryPreferencesStore,
+    private val translateQuery: TranslateQueryUseCase,
+    private val localCalendar: LocalCalendar,
+    private val clock: Clock,
     private val dispatchers: AppDispatchers
 ) : BaseViewModel<QueryState, QueryIntent, QueryEffect>(initialState = QueryState()) {
     private val logger = Logger.withTag(tag = LOG_TAG)
@@ -73,6 +80,8 @@ class QueryViewModel(
 
             QueryIntent.OnNoticeDismiss -> reduce { it.copy(notice = null) }
 
+            is QueryIntent.OnDescribe -> describe(request = intent.request)
+
             else -> onQueryChange(intent = intent)
         }
     }
@@ -112,6 +121,50 @@ class QueryViewModel(
             }
 
             else -> Unit
+        }
+    }
+
+    /** Turns [request] into the query's controls; nothing changes when it cannot, and the notice says why. */
+    private fun describe(request: String) {
+        val isIgnored = request.isBlank() || state.value.isDescribing
+        if (isIgnored) return
+
+        reduce {
+            it.copy(
+                isDescribing = true,
+                notice = null
+            )
+        }
+
+        launchGuarded(onError = ::logUnexpectedError) {
+            val today = localCalendar.momentOf(instant = clock.now()).date
+
+            val iso = listOf(today.year, today.month, today.day)
+                .joinToString(separator = "-") {
+                    it.toString().padStart(
+                        length = 2,
+                        padChar = '0'
+                    )
+                }
+
+            val catalog = withContext(context = dispatchers.default) { buildCatalog(notes) }
+
+            when (
+                val translated = translateQuery(request = request, catalog = catalog, today = iso)
+            ) {
+                is QueryTranslation.Query -> change { translated.query.copy(columns = it.columns) }
+
+                is QueryTranslation.UnknownProperty -> reduce {
+                    val notice =
+                        QueryNotice.UnknownProperty(translated.property, translated.suggestions)
+
+                    it.copy(notice = notice)
+                }
+
+                QueryTranslation.Failed -> reduce { it.copy(notice = QueryNotice.NotUnderstood) }
+            }
+
+            reduce { it.copy(isDescribing = false) }
         }
     }
 

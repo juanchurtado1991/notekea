@@ -29,4 +29,7 @@ sealed interface QueryIntent {
     data class OnSave(val path: RelativePath) : QueryIntent
 
     data object OnNoticeDismiss : QueryIntent
+
+    /** "Describe what you want" (3.8): the request in plain words becomes the query's controls, to check. */
+    data class OnDescribe(val request: String) : QueryIntent
 }
