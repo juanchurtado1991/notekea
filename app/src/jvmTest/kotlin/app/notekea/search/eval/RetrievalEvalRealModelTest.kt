@@ -80,44 +80,16 @@ class RetrievalEvalRealModelTest {
         vault: String,
         asked: List<RetrievalQuestion>
     ): RetrievalMeasure {
-        val folder = RetrievalEvalSet.folderOf(vault = vault)
-        val store = FakeNoteContentStore()
-
-        val notes = folder
-            .walkTopDown()
-            .filter {
-                it.isFile && it.extension == MARKDOWN
-            }
-            .map { file ->
-                val path =
-                    RelativePath(value = file.relativeTo(base = folder).invariantSeparatorsPath)
-
-                store.texts[path] = file.readText()
-                NoteEntry(NoteFile(path, file.length(), modifiedAt = null), NoteMetadata.NONE)
-            }
-            .toList()
-
-        val index =
-            LuceneVectorIndex(Files.createTempDirectory("notekea-eval").toString(), dispatchers)
-
-        IndexVaultUseCase(
-            planIndex = PlanIndexUseCase(),
-            chunkNote = ChunkNoteUseCase(
-                noteSections = NoteSections(outlineFinder = OutlineFinder())
-            ),
-            noteContentStore = store,
-            textEmbedder = embedder,
-            vectorIndex = index,
-            indexStateStore = FakeIndexStateStore()
-        )(
-            vaultPath = folder.path,
-            notes = notes.map { it.file }
-        ).last()
+        val indexed = EvalVault.of(
+            vault = vault,
+            embedder = embedder,
+            dispatchers = dispatchers
+        )
 
         val textFolder = TextFolder()
 
         val cache = NoteTextCache(
-            contentStore = store,
+            contentStore = indexed.store,
             textFolder = textFolder
         )
 
@@ -125,7 +97,7 @@ class RetrievalEvalRealModelTest {
 
         val search = SearchPassagesUseCase(
             textEmbedder = embedder,
-            vectorIndex = index,
+            vectorIndex = indexed.index,
             noteTextCache = cache,
             textFolder = textFolder,
             markdownLineStripper = stripper,
@@ -139,7 +111,8 @@ class RetrievalEvalRealModelTest {
         )
 
         val missed = asked.filterNot { question ->
-            val found = (search(folder.path, notes, question.question) as Outcome.Success).value
+            val found =
+                (search(indexed.path, indexed.notes, question.question) as Outcome.Success).value
 
             found.take(n = RECALL_AT).any {
                 it.note.file.path.value in question.notes
@@ -154,7 +127,6 @@ class RetrievalEvalRealModelTest {
     }
 
     private companion object {
-        const val MARKDOWN = "md"
         const val MODEL_PROPERTY = "notekea.embedding.model"
         const val RECALL_AT = 5
         const val REPORT = "build/reports/retrieval-eval.txt"
