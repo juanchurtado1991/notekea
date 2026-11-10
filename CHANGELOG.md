@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The formatting toolbar starts at the left, its groups have a color each (links blue, lists green, the template
   purple), and a button is marked while the cursor is in its format: bold, italic, a heading, a link to a note, a
   tag, a checklist or a bulleted list.
+- In the tree, mentions and related notes, the Home note at the vault's root has a house and the vault's templates
+  have the template icon in their folder's color.
 - Tables are edited by cells: the table stays drawn while the cursor is in a cell, Tab and Enter move between cells
   (Tab on the last one adds a row), and a bar over the table, also on the right click, inserts and deletes rows and
   columns and aligns a column. Tables draw their columns left, centered or right as their delimiter row says.

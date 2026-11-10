@@ -140,12 +140,16 @@ private fun EntryItem(
     }
 
     val looks = LocalNoteLooks.current
-    val isDaily = row is TreeRow.Note && looks.isDaily(path = row.path.value)
-    val icon = if (isDaily) NotekeaIcons.Calendar else iconOf(row = row)
+    val path = row.path.value
+    val icon = if (row is TreeRow.Note) looks.iconOf(path = path) else iconOf(row = row)
+
+    // A daily note and a template have their folder's color, as the folder itself.
+    val isOfItsFolder = row is TreeRow.Folder ||
+        (row is TreeRow.Note && (looks.isDaily(path = path) || looks.isTemplate(path = path)))
 
     val iconTint = when {
         row is TreeRow.File -> fileTintOf(path = row.path)
-        row is TreeRow.Folder || isDaily -> looks.colorOf(path = row.path.value)
+        isOfItsFolder -> looks.colorOf(path = path)
         else -> null
     }
 

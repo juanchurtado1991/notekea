@@ -85,7 +85,8 @@ abstract class VaultTreeViewModelTestBase {
                 clock = FakeClock(currentTime = Instant.parse(input = NOW))
             ),
             noteContentStore = contents
-        )
+        ),
+        vaultSettings = vaultSettings
     )
 
     protected fun dailyNoteTools(): DailyNoteTools = DailyNoteTools(

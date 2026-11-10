@@ -2,6 +2,7 @@ package app.notekea.tree.presentation.viewmodel
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TemplateSettings
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.tree.presentation.model.VaultTreeState
@@ -17,6 +18,14 @@ internal class TreeTemplates(
 ) {
     // A note made from a template, and the template it is filled from once its name is set.
     private var pending: Pair<RelativePath, RelativePath>? = null
+
+    /** Reads where the vault keeps its templates, whose notes the tree draws as templates. */
+    suspend fun loadSettings() {
+        val settings =
+            newNotes.vaultSettings.templates(vaultPath = vaultPath) ?: TemplateSettings.DEFAULT
+
+        host.reduce { it.copy(templatesFolder = settings.folder) }
+    }
 
     /** The template picker opens for a new note in the selected folder. */
     fun choose() {

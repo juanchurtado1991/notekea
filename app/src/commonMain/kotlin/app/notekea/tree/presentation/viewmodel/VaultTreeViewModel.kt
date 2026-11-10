@@ -108,6 +108,7 @@ class VaultTreeViewModel(
             }
 
             dailyNotes.loadSettings()
+            templates.loadSettings()
             bookmarks.load()
             observe()
         }

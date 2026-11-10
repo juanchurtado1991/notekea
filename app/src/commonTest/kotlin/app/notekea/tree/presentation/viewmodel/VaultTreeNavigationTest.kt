@@ -9,6 +9,7 @@ import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.TemplateSettings
 import app.notekea.tree.presentation.model.BookmarkIntent
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeIntent
@@ -292,6 +293,25 @@ class VaultTreeNavigationTest : VaultTreeViewModelTestBase() {
                     "Diary"
                 ),
                 actual = listOf(state.selectedPath, state.dayNeighbors?.previous, state.dailyFolder)
+            )
+        }
+
+    @Test
+    fun `templates are in the folder of the vault's Obsidian settings, or in Templates without them`() =
+        runTreeTest {
+            val byDefault = startedViewModel()
+                .state
+                .value
+                .templatesFolder
+
+            vaultSettings.templates = TemplateSettings.DEFAULT.copy(folder = "Work/Blueprints")
+
+            assertEquals(
+                expected = "Templates" to "Work/Blueprints",
+                actual = byDefault to startedViewModel()
+                    .state
+                    .value
+                    .templatesFolder
             )
         }
 
