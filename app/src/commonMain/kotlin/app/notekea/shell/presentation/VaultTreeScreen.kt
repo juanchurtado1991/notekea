@@ -127,7 +127,7 @@ fun VaultTreeScreen(
         onActiveTabChange
     )
 
-    FollowChat(chatViewModel, state, workspaceViewModel, editors, searchIndexViewModel)
+    FollowChat(chatViewModel, state, viewModels, editors, searchIndexViewModel)
 
     val looks = rememberNoteLooks(state = state)
 

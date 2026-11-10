@@ -61,6 +61,14 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
     streaming in, the step line, the citation chips, the action card), within the design system and reduced motion.
     The actions must work perfectly: they are exercised for hours if needed, on the vaults of `smoke-data`, before
     the pull request, and every bug found gets its test. A code review closes the work.
+    Added by the developer on 2026-11-10: a long pasted text can become a structure of notes (`notes_from_text`): a
+    folder, up to about 15 notes that rewrite its parts (never pasted, nothing invented), an index note linking them,
+    tags or properties where the text suggests them, all on the confirm card and undone at once; a text longer than
+    the context is read in sections, and one too long says so instead of being cut.
+    Also from the developer (2026-11-10): notes the chat writes use everything the formatting toolbar offers
+    (headings, bold, italic, lists, numbered lists, tasks, quotes, callouts, tables, links, tags) where the content
+    calls for it (`WritePrompt.FORMATTING`). The WhatsApp-like chat (question bubble right in the theme's color,
+    answer bubble left in its accent, numbers centred in the chips) was approved.
   - **Progress:** 3.2 is done: `LlmEngine` (`core.llm`, so the chat, the queries and the actions share it) on
     java-llama.cpp (`LlamaLlmEngine`, `ai.data`), the Vulkan natives next to the CPU ones on Windows and Linux (the
     embedding model stays on the CPU, so the index keeps its vectors), and `AnswerFromNotesUseCase` (`chat.domain`):
@@ -78,6 +86,16 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
     retry, the history per vault (`FileChatHistoryStore`, JSON in the app data's `chat` folder, last 100 turns) with
     Clear history, the notices without a model or memory ("Choose a model" opens Settings at AI model, the new
     `WindowDialog.AI_MODEL`), and the model's download in the status bar (`ModelDownloadStatus`).
+    3.5 is measured and nothing is built: none of its steps beats 3.2's single call (`docs/answer-quality.md`, 3.5).
+    3.6 Deep answer: three drafts at temperature 0.7 and a vote (`DraftVote`, the draft the others agree with; not
+    found when most say so); Medium 91 % against 89 %, traps 94 against 91 %, so it is offered for Medium
+    (`LlamaLlmEngine.DEEP_ANSWER_SIZES`); Small and Large are measured next. The panel shows the toggle only then.
+    3.8 and 3.9 share one planner (`PlanRequestUseCase`, JSON grammar, `ActionPrompt`): a request becomes up to five
+    steps of `ActionKind`; `CheckPlanUseCase` resolves names against the vault, `ComposeNotesUseCase` writes the text
+    first (`WritePrompt`, length 120 + 20 words per note, at most 600; `TextNotesPrompt` for a pasted text), the card
+    confirms, and the shell's `VaultActionRunner` (`shell.data`, composing the features' use cases) does it with a
+    journal for Undo. Notes by their properties go through the query feature's `TranslateQueryUseCase`, also behind
+    the Query tab's "Describe what you want". Evaluated by `ActionEvalChatModelTest` over `smoke-data/eval/actions.json`.
 
 ## Open work, in order
 

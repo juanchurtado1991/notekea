@@ -1,5 +1,7 @@
 package app.notekea.chat.presentation
 
+import app.notekea.chat.domain.ActOnRequestUseCase
+import app.notekea.chat.domain.ActionRunner
 import app.notekea.chat.domain.AnswerCitations
 import app.notekea.chat.domain.AnswerFromNotesUseCase
 import app.notekea.chat.domain.AnswerStep
@@ -7,8 +9,10 @@ import app.notekea.chat.domain.ChatError
 import app.notekea.chat.domain.ChatHistoryStore
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
+import app.notekea.chat.domain.FoundRow
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmError
 import app.notekea.core.notes.domain.NoteEntry
@@ -16,6 +20,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.BaseViewModel
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
+import kotlin.time.Clock
 
 /**
  * The chat of the vault at [vaultPath]: questions answered from its notes ([answerFromNotes]) one at a time, the
@@ -25,10 +30,30 @@ import kotlinx.coroutines.Job
 class ChatViewModel(
     private val vaultPath: String,
     private val answerFromNotes: AnswerFromNotesUseCase,
+    actOnRequest: ActOnRequestUseCase,
+    actionRunner: ActionRunner,
+    localCalendar: LocalCalendar,
+    clock: Clock,
     private val historyStore: ChatHistoryStore,
     private val llmEngine: LlmEngine
 ) : BaseViewModel<ChatState, ChatIntent, ChatEffect>(initialState = ChatState()) {
     private val logger = Logger.withTag(tag = LOG_TAG)
+
+    private val actions = ChatActions(
+        vaultPath = vaultPath,
+        actOnRequest = actOnRequest,
+        actionRunner = actionRunner,
+        localCalendar = localCalendar,
+        clock = clock,
+        update = { id, change ->
+            update(
+                id = id,
+                change = change
+            )
+        },
+        emit = { emit(effect = it) }
+    )
+
     private var notes: Collection<NoteEntry> = emptyList()
     private var activeNote: RelativePath? = null
     private var answering: Job? = null
@@ -66,6 +91,8 @@ class ChatViewModel(
 
             ChatIntent.OnClearHistory -> clear()
 
+            ChatIntent.OnDeepToggle -> reduce { it.copy(isDeep = !it.isDeep) }
+
             ChatIntent.OnModelSettingsOpen -> emit(effect = ChatEffect.OpenModelSettings)
 
             ChatIntent.OnShown -> checkModel()
@@ -75,8 +102,42 @@ class ChatViewModel(
             is ChatIntent.OnIndexChange -> reduce { it.copy(isIndexReady = intent.isReady) }
 
             is ChatIntent.OnActiveNoteChange -> changeActiveNote(path = intent.path)
+
+            is ChatIntent.OnActionConfirm -> entryOf(id = intent.id)?.let {
+                launchGuarded(onError = ::logError) {
+                    actions.confirm(
+                        entry = it,
+                        notes = notes
+                    )
+                }
+            }
+
+            is ChatIntent.OnActionCancel -> entryOf(id = intent.id)?.let {
+                actions.cancel(entry = it)
+            }
+
+            is ChatIntent.OnActionUndo -> entryOf(id = intent.id)?.let {
+                launchGuarded(onError = ::logError) { actions.undo(entry = it) }
+            }
+
+            is ChatIntent.OnFoundClick -> emit(effect = foundEffectOf(row = intent.row))
         }
     }
+
+    private fun entryOf(id: Long): ChatEntry? = state
+        .value
+        .entries
+        .firstOrNull {
+            it.id == id
+        }
+
+    /** A task opens at its line; a note opens. */
+    private fun foundEffectOf(row: FoundRow): ChatEffect = row.line?.let {
+        ChatEffect.Reveal(
+            note = row.note,
+            range = it..it
+        )
+    } ?: ChatEffect.Open(note = row.note)
 
     override fun onCleared() {
         answering?.cancel()
@@ -137,7 +198,7 @@ class ChatViewModel(
             id = id,
             question = question,
             scope = scope,
-            step = ChatStep.SEARCHING,
+            step = ChatStep.PLANNING,
             answer = "",
             sources = emptyList(),
             readNotes = 0,
@@ -154,11 +215,21 @@ class ChatViewModel(
                 throwable = it
             )
         }) {
+            // A request in the whole vault may be an action; a question asked of a note or a folder is answered.
+            val isQuestion = scope != ChatScope.VAULT ||
+                actions.act(id = id, request = question, notes = notes, openNote = activeNote)
+
+            if (!isQuestion) return@launchGuarded save()
+
+            update(id = id) { it.copy(step = ChatStep.SEARCHING) }
+            val isDeep = state.value.isDeep && state.value.isDeepOffered
+
             answerFromNotes(
                 vaultPath = vaultPath,
                 notes = notes,
                 question = question,
-                only = onlyFor(scope = scope)
+                only = onlyFor(scope = scope),
+                drafts = if (isDeep) DEEP_DRAFTS else 1
             ).collect { step ->
                 follow(
                     id = id,
@@ -186,6 +257,8 @@ class ChatViewModel(
                     answer = step.text,
                     sources = step.read
                 )
+
+                is AnswerStep.Drafting -> entry.copy(step = ChatStep.DRAFTING)
 
                 is AnswerStep.Done -> entry.copy(
                     step = ChatStep.DONE,
@@ -257,7 +330,15 @@ class ChatViewModel(
         launchGuarded(onError = ::logError) {
             val status = when (val ready = llmEngine.readiness()) {
                 is Outcome.Success -> {
-                    reduce { it.copy(isSmall = ready.value.isSmall) }
+                    val info = ready.value
+
+                    reduce {
+                        it.copy(
+                            isSmall = info.isSmall,
+                            isDeepOffered = info.hasDeepAnswer
+                        )
+                    }
+
                     ModelStatus.READY
                 }
 
@@ -394,6 +475,9 @@ class ChatViewModel(
         const val FOLDER_SEPARATOR = "/"
         const val LOG_TAG = "ChatViewModel"
         const val MAX_TURNS = 100
+
+        // Three drafts and a vote (3.6, docs/answer-quality.md).
+        const val DEEP_DRAFTS = 3
         const val UNEXPECTED_ERROR_MESSAGE = "The chat failed unexpectedly"
 
         fun statusOf(error: LlmError): ModelStatus = when (error) {

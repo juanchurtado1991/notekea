@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.chat.domain.ChatScope
+import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuState
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuButton
@@ -38,6 +39,8 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res
 import app.notekea.resources.chat_clear
+import app.notekea.resources.chat_deep
+import app.notekea.resources.chat_deep_hint
 import app.notekea.resources.chat_index_wait
 import app.notekea.resources.chat_more
 import app.notekea.resources.chat_placeholder
@@ -245,8 +248,51 @@ private fun ChatInput(
             canSend = state.canSend,
             onSend = { onIntent(ChatIntent.OnSend) },
             onStop = { onIntent(ChatIntent.OnStop) },
-            modifier = Modifier.focusRequester(focusRequester = inputFocus)
+            modifier = Modifier.focusRequester(focusRequester = inputFocus),
+            bottom = {
+                if (state.isDeepOffered) {
+                    DeepAnswerToggle(
+                        isDeep = state.isDeep,
+                        onToggle = { onIntent(ChatIntent.OnDeepToggle) }
+                    )
+                }
+            }
         )
+    }
+}
+
+/** Deep answer (3.6), off by default, with what it costs and gives. */
+@Composable
+private fun DeepAnswerToggle(
+    isDeep: Boolean,
+    onToggle: () -> Unit
+) {
+    val label = stringResource(resource = Res.string.chat_deep)
+
+    Row(
+        modifier = Modifier.padding(top = NotekeaDimensions.SpacingXs),
+        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        NotekeaCheckbox(
+            checked = isDeep,
+            onClick = onToggle,
+            label = label
+        )
+
+        Column {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                text = stringResource(resource = Res.string.chat_deep_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 

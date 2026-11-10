@@ -12,6 +12,8 @@ data class ChatState(
     val scope: ChatScope = ChatScope.VAULT,
     val model: ModelStatus = ModelStatus.CHECKING,
     val isSmall: Boolean = false,
+    val isDeepOffered: Boolean = false,
+    val isDeep: Boolean = false,
     val isIndexReady: Boolean = false,
     val noteName: String? = null,
     val folderName: String? = null

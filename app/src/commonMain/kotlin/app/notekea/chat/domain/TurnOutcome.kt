@@ -9,5 +9,8 @@ enum class TurnOutcome {
 
     /** Stopped by the person before the answer was whole: what was written is kept. */
     STOPPED,
-    FAILED
+    FAILED,
+
+    /** A request the chat acted on (3.9): what it did is in the chat while it is open, not in the history. */
+    ACTED
 }

@@ -14,6 +14,9 @@ sealed interface AnswerStep {
         val read: List<AnswerSource>
     ) : AnswerStep
 
+    /** Deep answer (3.6): [drafts] answers are written at once, to vote on. */
+    data class Drafting(val drafts: Int) : AnswerStep
+
     data class Done(val answer: Answer) : AnswerStep
 
     /** The notes do not answer it: nothing close enough was found, or the model said so. */

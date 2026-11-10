@@ -62,10 +62,13 @@ internal fun VaultChatPanel(
 internal fun FollowChat(
     chat: ChatViewModel,
     tree: VaultTreeState,
-    workspace: WorkspaceViewModel,
+    viewModels: WorkspaceViewModels,
     editors: PaneEditors,
     searchIndex: SearchIndexViewModel
 ) {
+    // The window's view models are built again on each change of the tabs: the effects read the latest ones.
+    val currentViewModels by rememberUpdatedState(newValue = viewModels)
+    val workspace = viewModels.workspace
     val tabs by workspace.state.collectAsState()
     val indexState by searchIndex.state.collectAsState()
     val activeEditor = remember(editors, tabs.workspace.activePane) { editors.active }
@@ -86,7 +89,7 @@ internal fun FollowChat(
         chat.onIntent(intent = ChatIntent.OnActiveNoteChange(path = editorState.notePath))
     }
 
-    LaunchedEffect(chat, workspace, editors) {
+    LaunchedEffect(chat, editors) {
         val actions = connectionActions(
             workspace = workspace,
             editors = editors,
@@ -96,7 +99,18 @@ internal fun FollowChat(
         chat.effects.collect { effect ->
             when (effect) {
                 is ChatEffect.Reveal -> actions.onReveal(effect.note, effect.range)
+
                 ChatEffect.OpenModelSettings -> dialogs.shown = WindowDialog.AI_MODEL
+
+                is ChatEffect.Open -> currentViewModels.workspace.onIntent(
+                    intent = WorkspaceIntent.OnOpen(path = effect.note)
+                )
+
+                is ChatEffect.Show -> showStep(
+                    step = effect.step,
+                    viewModels = currentViewModels,
+                    editors = editors
+                )
             }
         }
     }

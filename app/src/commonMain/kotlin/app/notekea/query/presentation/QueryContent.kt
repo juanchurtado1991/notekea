@@ -27,6 +27,8 @@ import app.notekea.query.domain.QueryResult
 import app.notekea.resources.Res
 import app.notekea.resources.query_already_saved
 import app.notekea.resources.query_count_of
+import app.notekea.resources.query_describe_failed
+import app.notekea.resources.query_describe_unknown
 import app.notekea.resources.query_no_matches
 import app.notekea.resources.query_no_matches_message
 import app.notekea.resources.query_notice_dismiss
@@ -48,6 +50,12 @@ fun QueryContent(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
+        QueryDescribeField(
+            isDescribing = state.isDescribing,
+            onDescribe = { onIntent(QueryIntent.OnDescribe(request = it)) },
+            modifier = Modifier.fillMaxWidth().padding(all = NotekeaDimensions.SpacingS)
+        )
+
         QueryBar(
             state = state,
             saveTarget = saveTarget,
@@ -161,10 +169,18 @@ internal fun QueryNoticeLine(
 
         QueryNotice.WriteFailed -> stringResource(resource = Res.string.query_write_failed)
 
+        is QueryNotice.UnknownProperty -> stringResource(
+            Res.string.query_describe_unknown,
+            notice.property,
+            notice.suggestions.joinToString()
+        )
+
+        QueryNotice.NotUnderstood -> stringResource(resource = Res.string.query_describe_failed)
+
         null -> return
     }
 
-    val hasFailed = notice == QueryNotice.WriteFailed
+    val hasFailed = notice !is QueryNotice.Saved && notice !is QueryNotice.AlreadySaved
 
     NotekeaNotice(
         message = message,

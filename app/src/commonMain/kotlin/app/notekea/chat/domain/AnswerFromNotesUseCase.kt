@@ -10,7 +10,11 @@ import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.SearchHit
 import app.notekea.core.notes.domain.VectorIndex
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 
 /**
@@ -24,12 +28,16 @@ class AnswerFromNotesUseCase(
     private val noteTextCache: NoteTextCache,
     private val llmEngine: LlmEngine
 ) {
-    /** The answer to [question] from [notes] of the vault at [vaultPath], only from the notes [only] names if given. */
+    /**
+     * The answer to [question] from [notes] of the vault at [vaultPath], only from the notes [only] names if given;
+     * with more than one of [drafts] (Deep answer, 3.6), several are written and voted on ([DraftVote]).
+     */
     operator fun invoke(
         vaultPath: String,
         notes: Collection<NoteEntry>,
         question: String,
-        only: Set<RelativePath>? = null
+        only: Set<RelativePath>? = null,
+        drafts: Int = 1
     ): Flow<AnswerStep> = flow {
         emit(value = AnswerStep.Searching)
 
@@ -55,6 +63,27 @@ class AnswerFromNotesUseCase(
 
         if (read.isEmpty()) return@flow emit(value = AnswerStep.NotFound)
 
+        val answer = if (drafts > 1) {
+            voted(
+                question = question,
+                read = read,
+                drafts = drafts
+            )
+        } else {
+            written(
+                question = question,
+                read = read
+            )
+        }
+
+        emitAll(flow = answer)
+    }
+
+    /** The answer written once, shown as it is written. */
+    private fun written(
+        question: String,
+        read: List<AnswerSource>
+    ): Flow<AnswerStep> = flow {
         val written = StringBuilder()
 
         try {
@@ -95,6 +124,69 @@ class AnswerFromNotesUseCase(
                 )
             )
         )
+    }
+
+    /** [drafts] answers written at once with different seeds, the one [DraftVote] chooses shown when all are done. */
+    private fun voted(
+        question: String,
+        read: List<AnswerSource>,
+        drafts: Int
+    ): Flow<AnswerStep> = flow {
+        emit(value = AnswerStep.Drafting(drafts = drafts))
+
+        val texts = try {
+            coroutineScope {
+                (1..drafts)
+                    .map { seed ->
+                        async {
+                            draftOf(
+                                question = question,
+                                read = read,
+                                seed = seed
+                            )
+                        }
+                    }
+                    .awaitAll()
+            }
+        } catch (exception: LlmException) {
+            return@flow emit(value = failed(error = ChatError.Model(error = exception.error)))
+        }
+
+        val winner =
+            DraftVote.winner(drafts = texts) ?: return@flow emit(value = AnswerStep.NotFound)
+
+        emit(
+            value = AnswerStep.Done(
+                answer = AnswerCitations.of(
+                    text = winner.trim(),
+                    read = read
+                )
+            )
+        )
+    }
+
+    private suspend fun draftOf(
+        question: String,
+        read: List<AnswerSource>,
+        seed: Int
+    ): String {
+        val draft = StringBuilder()
+
+        llmEngine
+            .generate(
+                messages = AnswerPrompt.messages(
+                    question = question,
+                    excerpts = read.map { it.text }
+                ),
+                options = GenerationOptions(
+                    maxTokens = MAX_TOKENS,
+                    temperature = DRAFT_TEMPERATURE,
+                    seed = seed
+                )
+            )
+            .collect { draft.append(it) }
+
+        return draft.toString()
     }
 
     /** The index's [CANDIDATES] closest passages to [question], with their text. */
@@ -191,5 +283,8 @@ class AnswerFromNotesUseCase(
         private const val CANDIDATES = 20
         private const val EXCERPTS = 5
         private const val MAX_TOKENS = 200
+
+        // Drafts must differ to be worth a vote (docs/spikes/2026-11-08-answer-quality.md, "Vote").
+        private const val DRAFT_TEMPERATURE = 0.7f
     }
 }

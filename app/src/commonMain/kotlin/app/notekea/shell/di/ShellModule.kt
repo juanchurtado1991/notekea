@@ -1,6 +1,9 @@
 package app.notekea.shell.di
 
+import app.notekea.chat.domain.ActionRunner
 import app.notekea.shell.data.SettingsWorkspaceStore
+import app.notekea.shell.data.VaultActionFinder
+import app.notekea.shell.data.VaultActionRunner
 import app.notekea.shell.domain.GetNoteCoverUseCase
 import app.notekea.shell.domain.GetSidePanelUseCase
 import app.notekea.shell.domain.GetWorkspaceUseCase
@@ -28,6 +31,14 @@ val shellModule = module {
     factoryOf(::WorkspaceTools)
     factoryOf(::GetSidePanelUseCase)
     factoryOf(::SaveSidePanelUseCase)
+    factoryOf(::VaultActionFinder)
+
+    single<ActionRunner> {
+        VaultActionRunner(
+            get(), get(), get(), get(), get(), get(),
+            get(), get(), get(), get(), get(), get()
+        )
+    }
 
     viewModel { parameters ->
         WorkspaceViewModel(

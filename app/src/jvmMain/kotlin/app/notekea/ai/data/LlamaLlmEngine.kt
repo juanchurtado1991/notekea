@@ -92,8 +92,14 @@ class LlamaLlmEngine(
         when (val found = setupSource.current()) {
             is Outcome.Success -> {
                 val isSmall = found.value.size == ModelSize.SMALL
+                val hasDeepAnswer = found.value.size in DEEP_ANSWER_SIZES
 
-                Outcome.Success(value = LlmModelInfo(isSmall = isSmall))
+                Outcome.Success(
+                    value = LlmModelInfo(
+                        isSmall = isSmall,
+                        hasDeepAnswer = hasDeepAnswer
+                    )
+                )
             }
 
             is Outcome.Failure -> found
@@ -231,6 +237,9 @@ class LlamaLlmEngine(
     companion object {
         /** Five minutes without a reply, then the model leaves memory (3.2). */
         const val IDLE_MILLIS = 5 * 60_000L
+
+        // The sizes whose answers three drafts and a vote make better on the 3.4 set (docs/answer-quality.md, 3.6).
+        val DEEP_ANSWER_SIZES = setOf(ModelSize.MEDIUM)
 
         private const val ALL_LAYERS = -1
         private const val RERANKER_CONTEXT = 4_096

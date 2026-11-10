@@ -12,4 +12,13 @@ sealed interface QueryNotice {
 
     /** The note could not be written, as one that changed meanwhile: nothing was. */
     data object WriteFailed : QueryNotice
+
+    /** The description named [property], which no note has; [suggestions] are the closest the vault has. */
+    data class UnknownProperty(
+        val property: String,
+        val suggestions: List<String>
+    ) : QueryNotice
+
+    /** The description could not be turned into a query (no model, or none written). */
+    data object NotUnderstood : QueryNotice
 }

@@ -42,6 +42,7 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.designsystem.theme.motionTween
 import app.notekea.resources.Res
+import app.notekea.resources.chat_acted
 import app.notekea.resources.chat_failed
 import app.notekea.resources.chat_failed_search
 import app.notekea.resources.chat_not_found
@@ -50,7 +51,8 @@ import app.notekea.resources.chat_small_hint
 import app.notekea.resources.chat_stopped
 import org.jetbrains.compose.resources.stringResource
 
-private const val BUBBLE_ALPHA = 0.12f
+private const val ANSWER_ALPHA = 0.14f
+private const val ANSWER_INSET_DP = 24
 private const val BUBBLE_RADIUS_DP = 12
 private const val BUBBLE_TAIL_DP = 4
 private const val BUBBLE_INSET_DP = 40
@@ -149,10 +151,11 @@ private fun ChatEntryView(
 
 @Composable
 private fun QuestionBubble(text: String) {
+    // As in a messaging app: your own messages on the right, filled in the theme's color, the corner of the tail sharp.
     val shape = RoundedCornerShape(
         topStart = BUBBLE_RADIUS_DP.dp,
-        topEnd = BUBBLE_RADIUS_DP.dp,
-        bottomEnd = BUBBLE_TAIL_DP.dp,
+        topEnd = BUBBLE_TAIL_DP.dp,
+        bottomEnd = BUBBLE_RADIUS_DP.dp,
         bottomStart = BUBBLE_RADIUS_DP.dp
     )
 
@@ -171,10 +174,7 @@ private fun QuestionBubble(text: String) {
                     fill = false
                 )
                 .background(
-                    color = MaterialTheme
-                        .colorScheme
-                        .primary
-                        .copy(alpha = BUBBLE_ALPHA),
+                    color = MaterialTheme.colorScheme.primary,
                     shape = shape
                 )
                 .padding(
@@ -182,8 +182,43 @@ private fun QuestionBubble(text: String) {
                     vertical = NotekeaDimensions.SpacingS
                 ),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onPrimary
         )
+    }
+}
+
+/** The answer's bubble, on the left in the theme's accent, tail at the top: the step line, the answer, the sources. */
+@Composable
+private fun AnswerBubble(content: @Composable () -> Unit) {
+    val shape = RoundedCornerShape(
+        topStart = BUBBLE_TAIL_DP.dp,
+        topEnd = BUBBLE_RADIUS_DP.dp,
+        bottomEnd = BUBBLE_RADIUS_DP.dp,
+        bottomStart = BUBBLE_RADIUS_DP.dp
+    )
+
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .weight(
+                    weight = 1f,
+                    fill = false
+                )
+                .background(
+                    color = MaterialTheme
+                        .colorScheme
+                        .tertiary
+                        .copy(alpha = ANSWER_ALPHA),
+                    shape = shape
+                )
+                .padding(
+                    horizontal = NotekeaDimensions.SpacingM,
+                    vertical = NotekeaDimensions.SpacingS
+                )
+        ) { content() }
+
+        // Room on the right, so the answer reads as the other side of the conversation.
+        Box(modifier = Modifier.width(width = ANSWER_INSET_DP.dp))
     }
 }
 
@@ -199,7 +234,37 @@ private fun Answer(
 
     val isWriting = entry.step == ChatStep.WRITING && entry.isAnswering
 
+    AnswerBubble {
+        AnswerContent(
+            entry = entry,
+            isWriting = isWriting,
+            isSmall = isSmall,
+            onIntent = onIntent,
+            onSourceClick = onSourceClick
+        )
+    }
+}
+
+@Composable
+private fun AnswerContent(
+    entry: ChatEntry,
+    isWriting: Boolean,
+    isSmall: Boolean,
+    onIntent: (ChatIntent) -> Unit,
+    onSourceClick: (AnswerSource) -> Unit
+) {
+    val action = entry.action
+
     when {
+        action != null && !entry.isAnswering -> ChatActionView(
+            entryId = entry.id,
+            action = action,
+            onIntent = onIntent
+        )
+
+        entry.outcome == TurnOutcome.ACTED ->
+            Quiet(text = stringResource(resource = Res.string.chat_acted))
+
         entry.isAnswering && !isWriting -> ChatStepLine(
             step = entry.step,
             readNotes = entry.readNotes
