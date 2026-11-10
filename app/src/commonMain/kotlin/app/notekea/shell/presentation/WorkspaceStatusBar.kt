@@ -14,6 +14,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaStatusLabel
 import app.notekea.core.presentation.designsystem.components.NotekeaStatusProgress
 import app.notekea.core.presentation.designsystem.components.NotekeaStatusSeparator
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaColors
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.platform.LocalUiZoom
@@ -213,7 +214,8 @@ private fun NoteFacts(
         text = stringResource(
             resource = if (isUnsaved) Res.string.editor_unsaved else Res.string.editor_saved
         ),
-        icon = if (isUnsaved) NotekeaIcons.InfoModified else NotekeaIcons.Checked
+        icon = if (isUnsaved) NotekeaIcons.InfoModified else NotekeaIcons.Checked,
+        iconTint = if (isUnsaved) NotekeaColors.warning else NotekeaColors.success
     )
 }
 

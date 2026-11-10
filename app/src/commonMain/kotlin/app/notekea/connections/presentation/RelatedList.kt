@@ -27,6 +27,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaPassageRow
 import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
 import app.notekea.core.presentation.designsystem.components.focusBorder
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.LocalNoteLooks
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res
@@ -108,6 +109,7 @@ private fun RelatedRow(
     actions: ConnectionActions
 ) {
     val path = note.path
+    val looks = LocalNoteLooks.current
     val beside = stringResource(Res.string.related_open_beside)
     val insertLink = stringResource(Res.string.related_insert_link)
 
@@ -120,8 +122,9 @@ private fun RelatedRow(
             subtitle = folderOf(path = path),
             text = note.snippet.text,
             highlights = note.snippet.keywords,
-            icon = NotekeaIcons.Note,
+            icon = looks.iconOf(path = path.value),
             onClick = { actions.onOpen(path) },
+            accent = looks.colorOf(path = path.value),
             accessibilityActions = listOf(
                 connectionAction(label = beside) { actions.onOpenBeside(path) },
                 connectionAction(label = insertLink) { actions.onInsertLink(path) }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,12 +31,15 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 
 private const val HEIGHT_DP = 26
 private const val COUNT_GAP_DP = 5
+private const val EMPTY_ALPHA = 0.5f
+private const val PILL_ALPHA = 0.18f
+private const val PILL_PADDING_DP = 6
 private const val PREVIEW_WIDTH_DP = 300
 
 /**
  * A compact segmented picker whose segments say how many each holds, as macOS inspectors switch views: [labels] with
- * their [counts] (none shown when null) on a muted track, the [selectedIndex] one raised on the surface. Each segment
- * is a tab a click, Tab and Enter (or Space) choose ([onSelect]).
+ * their [counts] (none shown when null) on a muted track, the [selectedIndex] one raised on the surface with its count
+ * in the theme's color. Each segment is a tab a click, Tab and Enter (or Space) choose ([onSelect]).
  */
 @Composable
 fun NotekeaCountTabs(
@@ -105,13 +109,46 @@ private fun RowScope.CountTab(
         if (count != null) {
             Spacer(modifier = Modifier.width(width = COUNT_GAP_DP.dp))
 
-            Text(
-                text = count.toString(),
-                style = MaterialTheme.typography.labelSmall,
-                color = colors.onSurfaceVariant
+            TabCount(
+                count = count,
+                isSelected = isSelected
             )
         }
     }
+}
+
+/** How many a tab holds: a pill in the theme's color on the selected tab, fainter when it holds none. */
+@Composable
+private fun TabCount(
+    count: Int,
+    isSelected: Boolean
+) {
+    val colors = MaterialTheme.colorScheme
+    val isPill = isSelected && count > 0
+
+    val color = when {
+        isPill -> colors.primary
+        count == 0 -> colors.onSurfaceVariant.copy(alpha = EMPTY_ALPHA)
+        else -> colors.onSurfaceVariant
+    }
+
+    val pill = if (isPill) {
+        Modifier
+            .background(
+                color = colors.primary.copy(alpha = PILL_ALPHA),
+                shape = CircleShape
+            )
+            .padding(horizontal = PILL_PADDING_DP.dp)
+    } else {
+        Modifier
+    }
+
+    Text(
+        text = count.toString(),
+        modifier = pill,
+        style = MaterialTheme.typography.labelSmall,
+        color = color
+    )
 }
 
 @Preview

@@ -15,7 +15,10 @@ class MarkdownLineStripperTest {
                 "Buy flour",
                 "Done",
                 "Quoted",
-                "Second step"
+                "Second step",
+                "Ripe by July",
+                "Folded",
+                "Water the beds"
             ),
             actual = listOf(
                 "# Tomato plan",
@@ -23,7 +26,10 @@ class MarkdownLineStripperTest {
                 "  * [ ] Buy flour",
                 "- [x] Done",
                 "> Quoted",
-                "2. Second step"
+                "2. Second step",
+                "> [!summary] Ripe by July",
+                "> [!tip]- Folded",
+                "> - [ ] Water the beds"
             )
                 .map {
                     stripper.strip(

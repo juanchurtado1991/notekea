@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -22,6 +23,8 @@ import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.LocalNoteLooks
+import app.notekea.core.presentation.designsystem.theme.NoteLooks
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.editor.domain.FormatAction
@@ -118,17 +121,30 @@ fun VaultTreeScreen(
         onActiveTabChange
     )
 
-    Box(modifier = modifier) {
-        VaultWorkspace(
-            state = state,
-            workspaceState = workspaceState,
-            vaultName = vaultName,
-            viewModels = viewModels,
-            panes = panes,
-            sidePanel = sidePanel,
-            onSwitchVault = onSwitchVault,
-            searchIndex = { SearchIndexStatusOf(viewModel = searchIndexViewModel) }
+    val looks = remember(state.tree.notes, state.dailyFolder) {
+        NoteLooks.of(
+            notePaths = state
+                .tree
+                .notes
+                .keys
+                .map { it.value },
+            dailyFolder = state.dailyFolder
         )
+    }
+
+    Box(modifier = modifier) {
+        CompositionLocalProvider(LocalNoteLooks provides looks) {
+            VaultWorkspace(
+                state = state,
+                workspaceState = workspaceState,
+                vaultName = vaultName,
+                viewModels = viewModels,
+                panes = panes,
+                sidePanel = sidePanel,
+                onSwitchVault = onSwitchVault,
+                searchIndex = { SearchIndexStatusOf(viewModel = searchIndexViewModel) }
+            )
+        }
 
         IndexFollower(
             state,

@@ -33,6 +33,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaLazyScrollAr
 import app.notekea.core.presentation.designsystem.components.NotekeaPassageRow
 import app.notekea.core.presentation.designsystem.components.focusBorder
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.LocalNoteLooks
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res
@@ -159,6 +160,7 @@ private fun MentionRow(
     actions: ConnectionActions
 ) {
     val source = mention.source
+    val looks = LocalNoteLooks.current
 
     val onReveal = { actions.onReveal(source, mention.range) }
 
@@ -189,9 +191,10 @@ private fun MentionRow(
             subtitle = subtitleOf(mention = mention),
             text = mention.passage,
             highlights = listOf(mention.highlight),
-            icon = NotekeaIcons.Note,
+            icon = looks.iconOf(path = source.value),
             onClick = onReveal,
             showsActions = !isLinked,
+            accent = looks.colorOf(path = source.value),
             accessibilityActions = listOf(rowAction)
         ) {
             if (isLinked) {

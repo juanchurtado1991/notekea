@@ -12,17 +12,20 @@ data class PassageSnippet(
 ) {
     companion object {
         /**
-         * [passage] without its heading lines, and its sentence sharing most of [words], which are [normalized], lower
-         * case unless told otherwise, as the highlight; the first sentence when none shares any.
+         * [passage] without its heading lines, each other line made [plain], and its sentence sharing most of [words],
+         * which are [normalized], lower case unless told otherwise, as the highlight; the first when none shares any.
          */
         fun of(
             passage: String,
             words: Set<String>,
-            normalized: (String) -> String = String::lowercase
+            normalized: (String) -> String = String::lowercase,
+            plain: (String) -> String = { it }
         ): PassageSnippet {
             val text = passage
                 .lines()
                 .filterNot { HEADING.matches(input = it) }
+                .map(transform = plain)
+                .filter { it.isNotBlank() }
                 .joinToString(separator = " ")
                 .trim()
 

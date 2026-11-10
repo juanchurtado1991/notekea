@@ -42,7 +42,29 @@ class PassageSnippetTest {
         )
     }
 
-    // A passage shares many words with its note: underlining them all would underline whole lines in Related.
+    // Design review: Related quoted the raw Markdown of a callout and of a task ("> [!summary]", "- [ ]", "[[").
+    @Test
+    fun `lines are quoted as given plain, and one left with nothing is skipped`() {
+        val stripper = MarkdownLineStripper()
+
+        val snippet = PassageSnippet.of(
+            passage = "## Beds\n> [!summary]\n> Tomatoes ripen in [[July]].\n- [ ] Water the **beds**",
+            words = setOf("tomatoes"),
+            plain = {
+                stripper.strip(
+                    line = it,
+                    ranges = emptyList()
+                ).text
+            }
+        )
+
+        assertEquals(
+            expected = "Tomatoes ripen in July. Water the beds",
+            actual = snippet.text
+        )
+    }
+
+    // A passage shares many words with its note: marking them all would mark whole lines in Related.
     @Test
     fun `the keywords are the few longest shared words, wherever they repeat`() {
         val snippet = PassageSnippet.of(

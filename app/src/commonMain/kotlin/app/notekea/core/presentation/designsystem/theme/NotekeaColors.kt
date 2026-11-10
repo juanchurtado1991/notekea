@@ -39,6 +39,13 @@ object NotekeaColors {
     /** Text and icons on a picture, over its dark shade: white whatever the theme, as the shade is. */
     val onImage: Color = NotekeaPalette.OnImage
 
+    /** What went well and needs nothing done (a note that is saved): a calm green. */
+    val success: Color
+        @Composable get() = themed(
+            dark = NotekeaPalette.SuccessDark,
+            light = NotekeaPalette.SuccessLight
+        )
+
     /** A warning that is not an error (an embed that goes around in a circle or too deep): a warm yellow. */
     val warning: Color
         @Composable get() = themed(

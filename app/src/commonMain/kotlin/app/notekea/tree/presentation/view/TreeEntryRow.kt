@@ -22,6 +22,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaInlineTextFi
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.NotekeaTreeItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.LocalNoteLooks
 import app.notekea.core.presentation.designsystem.theme.NotekeaColors
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
@@ -138,7 +139,15 @@ private fun EntryItem(
         is TreeRow.File -> Res.string.tree_select_file
     }
 
-    val iconTint = if (row is TreeRow.File) fileTintOf(path = row.path) else null
+    val looks = LocalNoteLooks.current
+    val isDaily = row is TreeRow.Note && looks.isDaily(path = row.path.value)
+    val icon = if (isDaily) NotekeaIcons.Calendar else iconOf(row = row)
+
+    val iconTint = when {
+        row is TreeRow.File -> fileTintOf(path = row.path)
+        row is TreeRow.Folder || isDaily -> looks.colorOf(path = row.path.value)
+        else -> null
+    }
 
     fun click() {
         onIntent(
@@ -153,7 +162,7 @@ private fun EntryItem(
 
     NotekeaTreeItem(
         label = if (row is TreeRow.Note) row.path.nameWithoutExtension else row.path.name,
-        icon = iconOf(row = row),
+        icon = icon,
         iconTint = iconTint,
         depth = row.depth,
         onClick = { click() },

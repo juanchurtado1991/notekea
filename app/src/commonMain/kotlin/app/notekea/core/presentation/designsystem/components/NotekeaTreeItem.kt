@@ -46,8 +46,8 @@ private const val PREVIEW_WIDTH_DP = 260
 
 /**
  * One row of a tree: indentation by [depth], a chevron for folders ([isExpanded] is null for leaves), an [icon], the
- * [label], a [badge] and optional [trailingText]. The [selected] row is filled in the selection color while the tree is
- * [focused], in grey otherwise. [labelContent] replaces the label, for renaming in place.
+ * [label], a [badge] and optional [trailingText]. The [selected] row has a bar in the theme's color at its start and is
+ * filled in the selection color while the tree is [focused], in grey otherwise. [labelContent] replaces the label.
  */
 @Composable
 fun NotekeaTreeItem(
@@ -102,6 +102,11 @@ fun NotekeaTreeItem(
                     onClickLabel = onClickLabel,
                     takesFocus = takesFocus
                 )
+                .treeRowMarks(
+                    depth = depth,
+                    guide = colors.outlineVariant,
+                    bar = colors.primary.takeIf { selected }
+                )
                 .padding(
                     start = NotekeaDimensions.SpacingXs + NotekeaDimensions.TreeIndent * depth,
                     end = NotekeaDimensions.SpacingS
@@ -127,7 +132,7 @@ fun NotekeaTreeItem(
 
             badge?.invoke()
 
-            trailingText?.let { TrailingText(text = it) }
+            trailingText?.let { TreeCountPill(text = it) }
         }
     }
 }
@@ -223,17 +228,6 @@ private fun TreeLabel(label: String) {
         color = LocalContentColor.current,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis
-    )
-}
-
-@Composable
-private fun TrailingText(text: String) {
-    Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
-
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 

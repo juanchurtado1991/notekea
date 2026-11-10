@@ -16,6 +16,8 @@ class FindRelatedNotesUseCase(
     private val noteContentStore: NoteContentStore,
     private val linkFinder: LinkFinder
 ) {
+    private val stripper = MarkdownLineStripper()
+
     suspend operator fun invoke(
         vaultPath: String,
         note: RelativePath,
@@ -170,7 +172,8 @@ class FindRelatedNotesUseCase(
 
         val snippet = PassageSnippet.of(
             passage = body.substring(range = hit.range),
-            words = words
+            words = words,
+            plain = ::plainLine
         )
 
         return RelatedNote(
@@ -179,6 +182,12 @@ class FindRelatedNotesUseCase(
             snippet = snippet
         )
     }
+
+    /** [line] as a reader sees it, without its Markdown marks. */
+    private fun plainLine(line: String): String = stripper.strip(
+        line = line,
+        ranges = emptyList()
+    ).text
 
     companion object {
         /** How many related notes the panel shows. */

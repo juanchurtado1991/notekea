@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -85,15 +86,16 @@ fun NotekeaStatusBar(
 }
 
 /**
- * A short fact of the status bar, in the muted color, with its [icon] (or a [leading] element of its own, such as a
- * progress ring) if any and its [tooltip] on hover if any. One that does something on a click ([onClick]: a folder of
- * the path shown in Files, the zoom reset) shows a hand and a faint fill under the pointer.
+ * A short fact of the status bar, in the muted color, with its [icon] in [iconTint] (or a [leading] element of its own,
+ * such as a progress ring) if any and its [tooltip] on hover if any. One that does something on a click ([onClick]: a
+ * folder of the path shown in Files, the zoom reset) shows a hand and a faint fill under the pointer.
  */
 @Composable
 fun NotekeaStatusLabel(
     text: String,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
+    iconTint: Color? = null,
     tooltip: String? = null,
     onClick: (() -> Unit)? = null,
     leading: (@Composable () -> Unit)? = null
@@ -122,7 +124,7 @@ fun NotekeaStatusLabel(
                     imageVector = it,
                     contentDescription = null,
                     modifier = Modifier.size(size = ICON_DP.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = iconTint ?: MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
