@@ -37,4 +37,9 @@ ktlint {
     version.set(libs.versions.ktlint.cli.get())
     verbose.set(true)
     ignoreFailures.set(false)
+
+    // The accessors Gradle generates for the convention plugins are not ours to lay out.
+    filter {
+        exclude { it.file.path.contains("generated-sources") }
+    }
 }
