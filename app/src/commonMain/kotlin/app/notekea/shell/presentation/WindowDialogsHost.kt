@@ -10,6 +10,7 @@ import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConvent
 import app.notekea.core.presentation.platform.WindowDialog
 import app.notekea.core.presentation.platform.WindowDialogs
 import app.notekea.settings.presentation.SettingsDialog
+import app.notekea.settings.presentation.SettingsSection
 import app.notekea.settings.presentation.about.AboutDialog
 
 private const val PREVIEW_TEXT = "About or Settings open over this"
@@ -35,6 +36,12 @@ fun WindowDialogsHost(
         WindowDialog.SETTINGS -> SettingsDialog(
             onDismiss = onDismiss,
             aiModelSection = aiModelSection
+        )
+
+        WindowDialog.AI_MODEL -> SettingsDialog(
+            onDismiss = onDismiss,
+            aiModelSection = aiModelSection,
+            initialSection = SettingsSection.AI_MODEL
         )
 
         null -> Unit

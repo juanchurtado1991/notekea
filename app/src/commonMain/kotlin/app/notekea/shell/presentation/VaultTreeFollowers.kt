@@ -97,6 +97,8 @@ internal fun FollowWorkspace(
             when (effect) {
                 WorkspaceEffect.FocusOutline -> sidePanel.focusOutline()
 
+                WorkspaceEffect.FocusChat -> sidePanel.focusChat()
+
                 WorkspaceEffect.UnexpectedError -> viewModels.tree.onIntent(
                     intent = VaultTreeIntent.OnUnexpectedError
                 )

@@ -43,6 +43,10 @@ fun WorkspaceShortcuts(
     WindowShortcut(shortcut = platformConventions.outlineShortcut) {
         onIntent(WorkspaceIntent.OnOutlineFocusRequest)
     }
+
+    WindowShortcut(shortcut = platformConventions.chatShortcut) {
+        onIntent(WorkspaceIntent.OnChatFocusRequest)
+    }
 }
 
 @Preview

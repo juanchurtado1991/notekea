@@ -6,6 +6,7 @@ import app.notekea.ai.domain.ActiveModelStore
 import app.notekea.ai.domain.InstallModelUseCase
 import app.notekea.ai.domain.ModelCatalogSource
 import app.notekea.ai.domain.RecommendModelUseCase
+import app.notekea.ai.presentation.ModelDownloadViewModel
 import app.notekea.ai.presentation.ModelManagerViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
@@ -25,4 +26,5 @@ val modelsModule = module {
     factoryOf(::InstallModelUseCase)
     factoryOf(::RecommendModelUseCase)
     viewModelOf(::ModelManagerViewModel)
+    viewModelOf(::ModelDownloadViewModel)
 }

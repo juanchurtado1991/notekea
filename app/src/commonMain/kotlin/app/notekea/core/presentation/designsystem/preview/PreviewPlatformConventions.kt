@@ -95,6 +95,10 @@ object PreviewPlatformConventions {
             key = ShortcutKey.O,
             modifiers = setOf(ShortcutModifier.CONTROL, ShortcutModifier.SHIFT)
         ),
+        chatShortcut = Shortcut(
+            key = ShortcutKey.L,
+            modifiers = setOf(ShortcutModifier.CONTROL)
+        ),
         todayShortcut = Shortcut(
             key = ShortcutKey.D,
             modifiers = setOf(ShortcutModifier.CONTROL)

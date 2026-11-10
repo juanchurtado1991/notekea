@@ -114,6 +114,7 @@ internal fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.F4 -> Key.F4
     ShortcutKey.I -> Key.I
     ShortcutKey.K -> Key.K
+    ShortcutKey.L -> Key.L
     ShortcutKey.LEFT -> Key.DirectionLeft
     ShortcutKey.MINUS -> Key.Minus
     ShortcutKey.N -> Key.N

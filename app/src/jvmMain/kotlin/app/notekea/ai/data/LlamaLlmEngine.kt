@@ -2,6 +2,7 @@ package app.notekea.ai.data
 
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSetupSource
+import app.notekea.ai.domain.ModelSize
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.ChatMessage
@@ -9,6 +10,7 @@ import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmError
 import app.notekea.core.llm.domain.LlmException
+import app.notekea.core.llm.domain.LlmModelInfo
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -85,6 +87,17 @@ class LlamaLlmEngine(
             }
         }
     }
+
+    override suspend fun readiness(): Outcome<LlmModelInfo, LlmError> =
+        when (val found = setupSource.current()) {
+            is Outcome.Success -> {
+                val isSmall = found.value.size == ModelSize.SMALL
+
+                Outcome.Success(value = LlmModelInfo(isSmall = isSmall))
+            }
+
+            is Outcome.Failure -> found
+        }
 
     override suspend fun rerank(
         query: String,

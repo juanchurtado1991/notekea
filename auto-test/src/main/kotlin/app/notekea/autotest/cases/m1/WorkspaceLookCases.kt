@@ -21,6 +21,8 @@ import com.testbuddy.SuiteBuilder
 private const val TASKS = "Tasks and callouts"
 private const val TASKS_TEXT = "Buy corn flour"
 private const val OUTLINE_LIST = "Headings of this note"
+private const val NOTE_INFO = "NOTE INFO"
+private const val WELCOME_TEXT = "This is a sample vault"
 
 /** The cases of 1.14 about the side panel, the status bar and the zoom (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.workspaceLookCases() {
@@ -54,10 +56,10 @@ private fun SuiteBuilder.noteInfo() {
         )
 
         click(text = "OUTLINE")
-        click(text = "NOTE INFO")
+        click(text = NOTE_INFO)
         expectNoText(text = "Reading time")
         relaunch()
-        expectText(text = "NOTE INFO")
+        expectText(text = NOTE_INFO)
         expectNoText(text = "Reading time")
         pressInWindow(shortcut = Mod + Shift + Key.O)
         expectLabel(label = OUTLINE_LIST)
@@ -67,24 +69,28 @@ private fun SuiteBuilder.noteInfo() {
 private fun SuiteBuilder.chatPanel() {
     automated(
         id = "1.14-09",
-        title = "Chat shows what is coming, and the panel remembers it"
+        title = "Chat takes the panel's place, and the panel remembers it"
     ) {
         openPlaygroundNote(
             name = WELCOME,
-            shownText = "This is a sample vault"
+            shownText = WELCOME_TEXT
         )
 
+        expectText(text = NOTE_INFO)
         click(text = "Chat")
-
-        listOf("Chat with your notes", "COMING SOON", "Your questions will go here").forEach {
-            expectText(text = it)
-        }
-
+        expectNoText(text = NOTE_INFO)
         relaunch()
-        expectText(text = "Chat with your notes")
+
+        // The note shows once the window is back, and the panel with it.
+        expectText(
+            text = WELCOME_TEXT,
+            substring = true
+        )
+
+        expectNoText(text = NOTE_INFO)
         pressInWindow(shortcut = Mod + Shift + Key.O)
         expectLabel(label = OUTLINE_LIST)
-        expectNoText(text = "Chat with your notes")
+        expectText(text = NOTE_INFO)
     }
 }
 

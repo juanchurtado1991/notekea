@@ -96,4 +96,7 @@ sealed interface WorkspaceIntent {
 
     /** `Mod+Shift+O`: the outline takes the keyboard, the panel shown on the inspector and the outline opened first. */
     data object OnOutlineFocusRequest : WorkspaceIntent
+
+    /** `Mod+L`: the chat's question field takes the keyboard, the panel shown on the chat. */
+    data object OnChatFocusRequest : WorkspaceIntent
 }

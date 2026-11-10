@@ -25,13 +25,16 @@ import com.composables.icons.lucide.ChevronRight
 import com.composables.icons.lucide.ChevronUp
 import com.composables.icons.lucide.ChevronsDownUp
 import com.composables.icons.lucide.ChevronsUpDown
+import com.composables.icons.lucide.CircleAlert
 import com.composables.icons.lucide.CircleCheck
 import com.composables.icons.lucide.CircleQuestionMark
 import com.composables.icons.lucide.ClipboardList
 import com.composables.icons.lucide.ClockArrowDown
 import com.composables.icons.lucide.Code
 import com.composables.icons.lucide.Columns3
+import com.composables.icons.lucide.Cpu
 import com.composables.icons.lucide.Ellipsis
+import com.composables.icons.lucide.Eraser
 import com.composables.icons.lucide.Eye
 import com.composables.icons.lucide.File
 import com.composables.icons.lucide.FileImage
@@ -77,11 +80,13 @@ import com.composables.icons.lucide.Pencil
 import com.composables.icons.lucide.Plus
 import com.composables.icons.lucide.Quote
 import com.composables.icons.lucide.Search
+import com.composables.icons.lucide.SearchX
 import com.composables.icons.lucide.SeparatorHorizontal
 import com.composables.icons.lucide.Settings
 import com.composables.icons.lucide.ShieldCheck
 import com.composables.icons.lucide.SlidersHorizontal
 import com.composables.icons.lucide.Sparkles
+import com.composables.icons.lucide.Square
 import com.composables.icons.lucide.SquareArrowOutUpRight
 import com.composables.icons.lucide.SquareCheck
 import com.composables.icons.lucide.SquareCode
@@ -165,6 +170,7 @@ object NotekeaIcons {
     val Close: ImageVector get() = Lucide.X
     val CodeBlock: ImageVector get() = Lucide.SquareCode
     val Collapse: ImageVector get() = Lucide.ChevronDown
+    val Dropdown: ImageVector get() = Lucide.ChevronDown
     val CollapseAll: ImageVector get() = Lucide.ChevronsDownUp
     val Delete: ImageVector get() = Lucide.Trash2
     val Divider: ImageVector get() = Lucide.SeparatorHorizontal
@@ -188,7 +194,13 @@ object NotekeaIcons {
     val FolderOpen: ImageVector get() = Lucide.FolderOpen
     val Heading: ImageVector get() = Lucide.Heading
     val Chat: ImageVector get() = Lucide.MessagesSquare
-    val ChatSoon: ImageVector get() = Lucide.Sparkles
+    val ChatAnswer: ImageVector get() = Lucide.Sparkles
+    val ChatNotFound: ImageVector get() = Lucide.SearchX
+    val ChatClear: ImageVector get() = Lucide.Eraser
+    val ChatError: ImageVector get() = Lucide.CircleAlert
+    val ChatModel: ImageVector get() = Lucide.Cpu
+    val Send: ImageVector get() = Lucide.ArrowUp
+    val Stop: ImageVector get() = Lucide.Square
     val Inspector: ImageVector get() = Lucide.Info
     val InfoModified: ImageVector get() = Lucide.Pencil
     val HideSidebar: ImageVector get() = Lucide.PanelLeftClose

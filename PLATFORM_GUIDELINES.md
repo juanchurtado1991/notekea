@@ -54,6 +54,7 @@ primary modifier and resolved per platform.
 | Show or hide the side panel | `Cmd+Shift+\` | `Ctrl+Shift+\` |
 | Source (the note as written) | `Cmd+E` | `Ctrl+E` |
 | Go to the outline | `Cmd+Shift+O` | `Ctrl+Shift+O` |
+| Ask your notes (the chat) | `Cmd+L` | `Ctrl+L` |
 | Today's daily note | `Cmd+D` | `Ctrl+D` |
 | Previous / next daily note | `Cmd+Option+←` / `Cmd+Option+→` | `Ctrl+Alt+←` / `Ctrl+Alt+→` |
 | Insert template | `Cmd+T` | `Ctrl+T` |

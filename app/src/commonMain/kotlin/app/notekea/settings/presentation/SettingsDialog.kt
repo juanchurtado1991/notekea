@@ -69,17 +69,18 @@ private val SECTIONS_TO_COME = listOf(
 /**
  * Settings: the sections on the left, Appearance and AI model (3.1) to choose from, the chosen one
  * on the right, and the sections to come dimmed under "Coming soon" (5.2). AI model belongs to a feature, so the app
- * gives it as [aiModelSection]. Esc, a click outside or ✕ closes it ([onDismiss]).
+ * gives it as [aiModelSection]. It opens at [initialSection]. Esc, a click outside or ✕ closes it ([onDismiss]).
  */
 @Composable
 fun SettingsDialog(
     onDismiss: () -> Unit,
     aiModelSection: @Composable (Modifier) -> Unit,
+    initialSection: SettingsSection = SettingsSection.APPEARANCE,
     viewModel: AppearanceViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
 
-    var section by remember { mutableStateOf(value = SettingsSection.APPEARANCE) }
+    var section by remember { mutableStateOf(value = initialSection) }
 
     NotekeaDialog(
         onDismiss = onDismiss,

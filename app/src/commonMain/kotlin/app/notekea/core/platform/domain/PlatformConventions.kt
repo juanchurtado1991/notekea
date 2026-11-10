@@ -27,6 +27,7 @@ data class PlatformConventions(
     val pasteShortcut: Shortcut,
     val toggleSidePanelShortcut: Shortcut,
     val outlineShortcut: Shortcut,
+    val chatShortcut: Shortcut,
     val todayShortcut: Shortcut,
     val previousDayShortcut: Shortcut,
     val nextDayShortcut: Shortcut,

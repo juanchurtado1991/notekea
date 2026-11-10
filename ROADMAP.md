@@ -1030,6 +1030,11 @@ citations that do not match a retrieved chunk.
   ready, generating, error with retry. While a model downloads, the status bar shows its progress and opens Settings
   → AI model (moved here from 3.1, whose Settings section runs the download).
 - Chat history per vault, stored as JSON (Ghost) in the app data directory, with "Clear history".
+- **Decided while building it (2026-11-10):** design A · Conversation (the question in a bubble on the right, the
+  answer on the left with its chips in the text). The step line has no "Checking sources…": citations are checked
+  in code, at once. The card without a model says "Choose a model", since Settings → AI model may also offer a
+  model already downloaded. The history keeps the last 100 questions of each vault, and each question is answered
+  alone (a follow-up does not see the earlier ones yet).
 
 ### ⬜ 3.4 Answer evaluation — `chore/answer-eval`
 

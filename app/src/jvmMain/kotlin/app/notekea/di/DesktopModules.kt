@@ -1,6 +1,7 @@
 package app.notekea.di
 
 import app.notekea.ai.di.jvmModelsModule
+import app.notekea.chat.di.jvmChatModule
 import app.notekea.core.embedding.di.embeddingModule
 import app.notekea.core.logging.di.loggingModule
 import app.notekea.core.notes.di.jvmCoreNotesModule
@@ -20,5 +21,6 @@ val desktopModules: List<Module> = listOf(
     jvmTreeModule,
     jvmEditorModule,
     jvmModelsModule,
+    jvmChatModule,
     jvmVaultModule
 )
