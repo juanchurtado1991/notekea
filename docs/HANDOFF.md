@@ -141,8 +141,12 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
      at the note's start instead (`cursorToNoteStart`), since the cursor's block shows as written; a text of the
      note is always in the field's semantics, so a case cannot wait for Markdown to "go away": it looks for what
      is drawn. Cases 1.5-08, 1.5-10, 1.5-12 and 1.9-04 were rewritten, 1.5-14 and 1.5-15 (tables) are new.
-     Known limits: a link, a tag or a callout's title in the cursor's own block is text, not a click target; the
-     toolbar's formatting groups stay at the end of the bar, where they were beside the tabs.
+     Known limit: a link, a tag or a callout's title in the cursor's own block is text, not a click target.
+  7. The toolbar (done; the developer chose option B of three on 2026-11-10): the capsule starts at the left,
+     Source and Find stay at the right end, each group has a color of its own, the same in every theme
+     (`GraphPalette`: links blue, lists green, the template purple), and a button is marked while the cursor is in
+     its format (`ActiveFormats`, read from the cursor's line alone, so a line of a code block is read as text;
+     `EditorPageState.activeFormats`; `NotekeaIconButton.isMarked`). `ToolbarFit`'s widths no longer count the tabs.
   Also decided on 2026-11-10: "Source" is a button at the end of the formatting toolbar, marked while it is on
   (Notekea has no palette of commands, only the note switcher, so the button and the shortcut are its two ways
   in); the editor's colours are the "accents" option (only links, tags and code take

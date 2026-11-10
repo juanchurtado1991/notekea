@@ -1,6 +1,7 @@
 package app.notekea.editor.presentation.toolbar
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -12,6 +13,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaMenuButton
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.NotekeaToolbarPill
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.GraphPalette
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.platform.label
 import app.notekea.editor.domain.FormatAction
@@ -33,6 +35,11 @@ import app.notekea.resources.format_tag
 import app.notekea.resources.format_template
 import org.jetbrains.compose.resources.stringResource
 
+// Each group has a color of its own, the same in every theme: the graph's, mid tones that read on light and dark.
+private val LINKS_COLOR get() = GraphPalette.colorAt(index = 2)
+private val LISTS_COLOR get() = GraphPalette.colorAt(index = 0)
+private val TEMPLATE_COLOR get() = GraphPalette.colorAt(index = 3)
+
 /**
  * The formatting buttons in one capsule, in groups: Heading, Bold, Italic · Link to a note, Tag · Checklist, Bulleted
  * list · Insert template · More, which holds the rest (Web link, Numbered list, Callout, Code block, Image or file,
@@ -41,6 +48,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun FormattingGroups(
     fit: ToolbarFit,
+    active: Set<ToolbarFormat>,
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit
 ) {
@@ -52,6 +60,7 @@ internal fun FormattingGroups(
     val text: @Composable RowScope.() -> Unit = {
         TextGroup(
             actions = actions,
+            active = active,
             platformConventions = platformConventions,
             format = format
         )
@@ -59,6 +68,7 @@ internal fun FormattingGroups(
 
     val links: @Composable RowScope.() -> Unit = {
         LinkGroup(
+            active = active,
             platformConventions = platformConventions,
             onIntent = onIntent
         )
@@ -67,6 +77,7 @@ internal fun FormattingGroups(
     val lists: @Composable RowScope.() -> Unit = {
         ListGroup(
             actions = actions,
+            active = active,
             format = format
         )
     }
@@ -102,6 +113,7 @@ internal fun FormattingGroups(
 /** Link to a note (chosen in the quick switcher) and Tag (chosen in the tag picker). */
 @Composable
 private fun LinkGroup(
+    active: Set<ToolbarFormat>,
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit
 ) {
@@ -111,13 +123,17 @@ private fun LinkGroup(
         onClick = { onIntent(EditorIntent.OnNoteLinkRequest) },
         shortcutHint = platformConventions.shortcutLabel(
             shortcut = platformConventions.noteLinkShortcut
-        )
+        ),
+        tint = LINKS_COLOR,
+        isMarked = ToolbarFormat.NOTE_LINK in active
     )
 
     ToolbarButton(
         icon = NotekeaIcons.Tag,
         label = Res.string.format_tag,
-        onClick = { onIntent(EditorIntent.OnTagRequest) }
+        onClick = { onIntent(EditorIntent.OnTagRequest) },
+        tint = LINKS_COLOR,
+        isMarked = ToolbarFormat.TAG in active
     )
 }
 
@@ -125,18 +141,23 @@ private fun LinkGroup(
 @Composable
 private fun ListGroup(
     actions: FormatActions,
+    active: Set<ToolbarFormat>,
     format: (FormatAction) -> Unit
 ) {
     ToolbarButton(
         icon = NotekeaIcons.Checklist,
         label = Res.string.format_checklist,
-        onClick = { format(actions.checklist) }
+        onClick = { format(actions.checklist) },
+        tint = LISTS_COLOR,
+        isMarked = ToolbarFormat.CHECKLIST in active
     )
 
     ToolbarButton(
         icon = NotekeaIcons.BulletList,
         label = Res.string.format_bullet_list,
-        onClick = { format(actions.bulletList) }
+        onClick = { format(actions.bulletList) },
+        tint = LISTS_COLOR,
+        isMarked = ToolbarFormat.BULLET_LIST in active
     )
 }
 
@@ -152,7 +173,8 @@ private fun TemplateButton(
         onClick = { onIntent(EditorIntent.OnTemplateRequest) },
         shortcutHint = platformConventions.shortcutLabel(
             shortcut = platformConventions.templateShortcut
-        )
+        ),
+        tint = TEMPLATE_COLOR
     )
 }
 
@@ -165,9 +187,12 @@ internal fun PlatformConventions.shortcutLabel(shortcut: Shortcut): String = sho
 @Composable
 private fun TextGroup(
     actions: FormatActions,
+    active: Set<ToolbarFormat>,
     platformConventions: PlatformConventions,
     format: (FormatAction) -> Unit
 ) {
+    val ink = MaterialTheme.colorScheme.onSurface
+
     val sizes = listOf(
         Res.string.format_heading_large,
         Res.string.format_heading_medium,
@@ -176,6 +201,8 @@ private fun TextGroup(
 
     NotekeaMenuButton(
         takesFocus = false,
+        tint = ink,
+        isMarked = ToolbarFormat.HEADING in active,
         icon = NotekeaIcons.Heading,
         label = stringResource(resource = Res.string.format_heading),
         sections = listOf(
@@ -197,7 +224,9 @@ private fun TextGroup(
         onClick = { format(actions.bold) },
         shortcutHint = platformConventions.shortcutLabel(
             shortcut = platformConventions.boldShortcut
-        )
+        ),
+        tint = ink,
+        isMarked = ToolbarFormat.BOLD in active
     )
 
     ToolbarButton(
@@ -206,7 +235,9 @@ private fun TextGroup(
         onClick = { format(actions.italic) },
         shortcutHint = platformConventions.shortcutLabel(
             shortcut = platformConventions.italicShortcut
-        )
+        ),
+        tint = ink,
+        isMarked = ToolbarFormat.ITALIC in active
     )
 }
 
@@ -216,6 +247,7 @@ private fun FormattingGroupsPreview() {
     NotekeaPreviewThemes {
         FormattingGroups(
             fit = ToolbarFit.ALL,
+            active = setOf(ToolbarFormat.BOLD),
             platformConventions = EditorPreviewData.platformConventions,
             onIntent = {
             }

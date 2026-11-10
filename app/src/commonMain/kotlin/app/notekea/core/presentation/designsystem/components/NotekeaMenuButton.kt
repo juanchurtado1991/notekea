@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,7 +32,9 @@ fun NotekeaMenuButton(
     label: String,
     sections: List<List<NotekeaMenuItem>>,
     modifier: Modifier = Modifier,
-    takesFocus: Boolean = true
+    takesFocus: Boolean = true,
+    tint: Color? = null,
+    isMarked: Boolean = false
 ) {
     val menuState = remember { NotekeaContextMenuState() }
 
@@ -52,7 +55,9 @@ fun NotekeaMenuButton(
             icon = icon,
             label = label,
             onClick = { menuState.open(at = belowButton) },
-            takesFocus = takesFocus
+            takesFocus = takesFocus,
+            tint = tint,
+            isMarked = isMarked
         )
     }
 }

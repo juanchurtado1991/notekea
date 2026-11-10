@@ -1,5 +1,6 @@
 package app.notekea.core.presentation.designsystem.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,21 +16,24 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 
 private const val DISABLED_ALPHA = 0.38f
+private const val MARKED_ALPHA = 0.14f
 private const val PREVIEW_NEW_FOLDER = "New folder"
 private const val PREVIEW_NEW_NOTE = "New note"
 private const val PREVIEW_SHORTCUT = "Ctrl+N"
 private const val PREVIEW_SORT = "Sort by name"
 
 /**
- * Compact icon-only button for dense desktop toolbars. [label] is what screen readers announce and the tooltip shows,
- * followed by [shortcutHint], so an icon is never the only way to learn what a button does. With [takesFocus] false a
- * click leaves the keyboard where it was; with [isTooltipBeside] the tooltip shows to its side, for a vertical strip.
+ * Compact icon-only button for dense toolbars. The tooltip and screen readers say [label], then [shortcutHint]. With
+ * [takesFocus] false a click leaves the keyboard where it was; [isTooltipBeside] puts the tooltip to its side, for a
+ * vertical strip; [isMarked] says what the button turns on is on now: it takes the theme's color, on a wash of it.
  */
 @Composable
 fun NotekeaIconButton(
@@ -41,8 +45,12 @@ fun NotekeaIconButton(
     shortcutHint: String? = null,
     takesFocus: Boolean = true,
     isTooltipBeside: Boolean = false,
-    tint: Color? = null
+    tint: Color? = null,
+    isMarked: Boolean = false
 ) {
+    val colors = MaterialTheme.colorScheme
+    val wash = if (isMarked) colors.primary.copy(alpha = MARKED_ALPHA) else Color.Transparent
+
     NotekeaTooltip(
         label = label,
         shortcutHint = shortcutHint,
@@ -57,6 +65,8 @@ fun NotekeaIconButton(
                     shape = MaterialTheme.shapes.small
                 )
                 .clip(shape = MaterialTheme.shapes.small)
+                .background(color = wash)
+                .semantics { selected = isMarked }
                 .clickable(
                     enabled = enabled,
                     onClickLabel = label,
@@ -65,7 +75,7 @@ fun NotekeaIconButton(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            val color = tint ?: MaterialTheme.colorScheme.onSurfaceVariant
+            val color = if (isMarked) colors.primary else tint ?: colors.onSurfaceVariant
 
             val iconTint = if (enabled) color else color.copy(alpha = DISABLED_ALPHA)
 
@@ -94,7 +104,8 @@ private fun NotekeaIconButtonPreview() {
             NotekeaIconButton(
                 icon = NotekeaIcons.NewFolder,
                 label = PREVIEW_NEW_FOLDER,
-                onClick = {}
+                onClick = {},
+                isMarked = true
             )
 
             NotekeaIconButton(

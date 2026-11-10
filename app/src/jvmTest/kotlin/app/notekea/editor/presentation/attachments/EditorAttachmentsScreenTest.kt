@@ -216,11 +216,11 @@ class EditorAttachmentsScreenTest {
         private const val WINDOW_HEIGHT = 900
         private const val WINDOW_WIDTH = 1200
         private val ATTACH_ITEM = Offset(
-            x = 794f,
+            x = 735f,
             y = 513f
         )
         private val MORE_BUTTON = Offset(
-            x = 987f,
+            x = 545f,
             y = 186f
         )
         private val EDIT_CHIP = Offset(

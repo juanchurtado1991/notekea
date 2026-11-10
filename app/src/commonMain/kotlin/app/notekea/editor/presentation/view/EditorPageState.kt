@@ -17,6 +17,8 @@ import app.notekea.editor.domain.TableCell
 import app.notekea.editor.domain.TableText
 import app.notekea.editor.presentation.markdown.ShownText
 import app.notekea.editor.presentation.markdown.ShownTextBuilder
+import app.notekea.editor.presentation.toolbar.ActiveFormats
+import app.notekea.editor.presentation.toolbar.ToolbarFormat
 
 /**
  * What the pieces of the editor's page share: the note's text ([buffer]) cut into the list's [items], the list, and
@@ -31,6 +33,7 @@ internal class EditorPageState(
     private val isSource: () -> Boolean
 ) {
     private val shownTexts = ShownTextBuilder()
+    private val formats = ActiveFormats()
 
     private val blocks by derivedStateOf { NoteBlocks.of(text = buffer.text) }
 
@@ -117,6 +120,18 @@ internal class EditorPageState(
 
     /** Whether the text field has the keyboard: only then does the cursor's line show its marks. */
     var hasFocus: Boolean by mutableStateOf(value = false)
+
+    /** The toolbar's formats the cursor is in, which mark their buttons; none while the text has no keyboard. */
+    val activeFormats: Set<ToolbarFormat> by derivedStateOf {
+        if (hasFocus) {
+            formats.at(
+                text = buffer.text,
+                cursor = buffer.selection.start
+            )
+        } else {
+            emptySet()
+        }
+    }
 
     /** What the text field shows of the note: its window, with the marks hidden away from the cursor's lines. */
     val shown: ShownText by derivedStateOf {

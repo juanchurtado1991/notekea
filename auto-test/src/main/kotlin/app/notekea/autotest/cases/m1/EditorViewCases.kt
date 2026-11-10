@@ -43,8 +43,9 @@ private fun SuiteBuilder.editLook() {
 
         expected(
             text =
-            "The clicked line shows its Markdown signs (**, *, `, #) muted, with bold and italic as such; every " +
-                "other line stays as it reads. Source shows the whole note as written, with the signs muted, links " +
+            "The clicked line shows its Markdown signs (**, *, `, #) muted, with bold and italic as such, and the " +
+                "toolbar marks Bold (B) in blue while the cursor is in the bold word; every other line stays as " +
+                "it reads. Source shows the whole note as written, with the signs muted, links " +
                 "and tags blue and code on a shaded background; the second click draws the note again."
         )
     }
