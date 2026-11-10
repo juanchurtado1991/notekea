@@ -42,11 +42,15 @@ class MarkdownBlocks {
         else -> null
     }
 
-    /** A block on lines of its own, holding the selection if any; [build] gives its text and what to select in it. */
+    /**
+     * A block on lines of its own, holding the selection if any; [build] gives its text and what to select in it. With
+     * [isCursorUnder], for a block with nothing to type in, the cursor goes under it, past a blank line.
+     */
     fun edit(
         text: String,
         start: Int,
         end: Int,
+        isCursorUnder: Boolean,
         build: (String?) -> Pair<String, IntRange>
     ): TextEdit {
         val selected = text.substring(
@@ -65,12 +69,16 @@ class MarkdownBlocks {
 
         val after = when {
             rest.startsWith(prefix = BLANK_LINE) -> StringPatterns.EMPTY
+            rest.isEmpty() && isCursorUnder -> BLANK_LINE
             rest.startsWith(prefix = NEW_LINE) || rest.isEmpty() -> NEW_LINE
             else -> BLANK_LINE
         }
 
         val (content, selection) = build(selected)
         val offset = start + before.length
+        val under = offset + content.length + BLANK_LINE.length
+
+        if (isCursorUnder) return TextEdit(start, end, before + content + after, under, under)
 
         return TextEdit(
             start,

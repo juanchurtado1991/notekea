@@ -4,6 +4,7 @@ import androidx.compose.ui.input.key.Key
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
+private const val DRAWN_TASK = "Knead the dough"
 private const val LISBON = "Lisbon trip"
 private const val LISBON_TEXT = "Before leaving"
 private const val LAST_ROW = "| 3 | Day trip to Sintra and Pena a\\|b |"
@@ -12,6 +13,7 @@ private const val LAST_ROW = "| 3 | Day trip to Sintra and Pena a\\|b |"
 fun SuiteBuilder.editorTableCases() {
     cellsEdited()
     tableBarLook()
+    drawnAgainUnder()
 }
 
 private fun SuiteBuilder.cellsEdited() {
@@ -95,5 +97,21 @@ private fun SuiteBuilder.tableBarLook() {
                 "bar's actions. Down on the last row leaves the table and the bar goes. Source shows the table " +
                 "as written, its second row saying the alignment (--:)."
         )
+    }
+}
+
+private fun SuiteBuilder.drawnAgainUnder() {
+    automated(
+        id = "1.5-16",
+        title = "A list is drawn again once the cursor is two lines under it"
+    ) {
+        openFormatting()
+        cursorAtEnd()
+        type(text = "\n\n- [ ] Knead the dough\n\n")
+
+        // Drawn, the task is a text of its own; as written it is only part of the note's.
+        expectText(text = DRAWN_TASK)
+        type(text = "After the list")
+        expectInNote(text = "- [ ] Knead the dough\n\nAfter the list")
     }
 }

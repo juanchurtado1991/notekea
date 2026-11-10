@@ -44,6 +44,19 @@ class ShownTextBuilderTest {
     }
 
     @Test
+    fun `an embedded file's line stays as written away from the cursor, not only its width or its label`() {
+        val note = "See [[Arepas|the recipe]]\n![[plate.png|400]]\n![a plate](plate.png)"
+
+        assertEquals(
+            expected = "See the recipe\n![[plate.png|400]]\n![a plate](plate.png)",
+            actual = shown(
+                note = note,
+                cursor = null
+            ).text
+        )
+    }
+
+    @Test
     fun `the cursor's line shows its marks, and only that line`() {
         val shown = shown(
             note = NOTE,

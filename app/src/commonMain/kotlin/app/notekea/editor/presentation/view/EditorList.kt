@@ -232,7 +232,8 @@ private fun LazyListScope.blocks(
                     isSource = state.isSourceMode,
                     platformConventions = platformConventions,
                     onIntent = onIntent,
-                    find = state.find
+                    find = state.find,
+                    marks = marks
                 )
             } else {
                 EditorBlock(

@@ -17,6 +17,8 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.IntOffset
@@ -93,6 +95,7 @@ private fun TaskCheckboxes(
                         )
                     },
                     label = label,
+                    modifier = Modifier.pointerHoverIcon(icon = PointerIcon.Hand),
                     size = minOf(
                         TASK_CHECKBOX_DP,
                         (height.value * TASK_CHECKBOX_RATIO).roundToInt()

@@ -12,6 +12,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
+import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.editor.domain.NoteBlocks
 import app.notekea.editor.domain.TableCell
 import app.notekea.editor.domain.TableText
@@ -72,36 +73,58 @@ internal class EditorPageState(
         )
     }
 
-    /** Whether the cursor is on the lines under the table of its block, where text is written as anywhere. */
-    private val isUnderTable: Boolean by derivedStateOf {
-        val after = blockTable?.afterStart
+    /**
+     * Where the field starts while the cursor is under its block's text, past the blank line that ends it: the block
+     * is then drawn as it reads, and what is typed goes under it. Null in a window of several blocks and in Source.
+     */
+    val underStart: Int? by derivedStateOf {
+        val window = items.window
+        val shown = items.shown
+        val text = buffer.text
+        val blanks = (shown.min until shown.max).reversed().takeWhile { text[it].isWhitespace() }
+        val textEnd = shown.max - blanks.size
+        val under = textEnd + UNDER_GAP
 
-        after != null && buffer.selection.min >= after
+        val isUnder =
+            !isSource() &&
+                window.first == window.last &&
+                textEnd > shown.min &&
+                under <= shown.max &&
+                text[textEnd] == NEW_LINE_CHAR &&
+                text[textEnd + 1] == NEW_LINE_CHAR &&
+                buffer.selection.min >= under
+
+        under.takeIf { isUnder }
     }
+
+    /** Whether the cursor's block is drawn, with the field over one of its cells or under it. */
+    val isBlockDrawn: Boolean get() = cell != null || underStart != null
 
     /** The table's cell the text field is over: the cursor's, while the selection stays inside one cell. */
     val cell: TableCell? by derivedStateOf {
         val selection = buffer.selection
 
         blockTable
-            ?.takeUnless { isUnderTable }
+            ?.takeIf {
+                underStart == null
+            }
             ?.cellAt(offset = selection.start)
             ?.takeIf {
                 selection.collapsed || (selection.min >= it.start && selection.max <= it.end)
             }
     }
 
-    /** The table drawn in the cursor's block; null where the field shows the block's text as written. */
+    /** The table whose [cell] the field is over; null where the cursor is not in a cell. */
     val table: TableText? by derivedStateOf {
         blockTable?.takeIf {
-            cell != null || isUnderTable
+            cell != null
         }
     }
 
-    /** The part of the note the text field shows: the cursor's blocks or, of a drawn [table], its cell only. */
+    /** The part of the note the text field shows: the cursor's blocks, or its [cell], or what is under its block. */
     val fieldRange: TextRange by derivedStateOf {
         val cell = cell
-        val after = table?.afterStart
+        val after = underStart
 
         when {
             cell != null -> TextRange(
@@ -138,7 +161,7 @@ internal class EditorPageState(
         val window = fieldRange
 
         val revealed = when {
-            isSource() || table != null -> window
+            isSource() || isBlockDrawn -> window
             hasFocus -> buffer.selection
             else -> null
         }
@@ -289,7 +312,7 @@ internal class EditorPageState(
         offset: Int
     ): Float {
         val layout = currentLayout()?.takeIf {
-            table == null && items.isWindow(item = item)
+            !isBlockDrawn && items.isWindow(item = item)
         } ?: return 0f
 
         return layout.getLineTop(
@@ -349,6 +372,9 @@ internal class EditorPageState(
     companion object {
         /** The items the list has before the first block's: the header and the toolbar. */
         const val LEADING_ITEMS = 2
+
+        /** The line break that ends a block's text and the blank line after it. */
+        private const val UNDER_GAP = 2
         const val WINDOW_KEY = "window"
     }
 }

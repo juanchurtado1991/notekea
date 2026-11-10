@@ -70,7 +70,7 @@ class EditorNewAttachmentsTest : EditorAttachmentsTestBase() {
             send(intent = EditorIntent.OnPaste)
 
             assertEquals(
-                expected = "Intro\n\n![[Pasted image 20261026143005.png|1]]\nMore",
+                expected = "Intro\n\n![[Pasted image 20261026143005.png|1]]\n\nMore",
                 actual = viewModel
                     .buffer
                     .text
@@ -93,7 +93,7 @@ class EditorNewAttachmentsTest : EditorAttachmentsTestBase() {
             send(intent = EditorIntent.OnPaste)
 
             assertEquals(
-                expected = "![[Pasted image 20261026143005.png|400]]\n",
+                expected = "![[Pasted image 20261026143005.png|400]]\n\n",
                 actual = viewModel
                     .buffer
                     .text
@@ -139,7 +139,7 @@ class EditorNewAttachmentsTest : EditorAttachmentsTestBase() {
             send(intent = EditorIntent.OnAttachmentPick)
 
             assertEquals(
-                expected = "![[recipe.pdf]]\n![[plate.png|1]]\n\n![[recipe 1.pdf]]\n",
+                expected = "![[recipe.pdf]]\n![[plate.png|1]]\n\n![[recipe 1.pdf]]\n\n",
                 actual = viewModel
                     .buffer
                     .text
