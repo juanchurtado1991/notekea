@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.input.TextFieldDecorator
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
@@ -34,32 +33,28 @@ private const val TASK_CHECKBOX_DP = 16
 private const val TASK_CHECKBOX_RATIO = 0.8f
 
 /**
- * A clickable checkbox over the `[ ]` / `[x]` of every task of the text, placed with the text's
- * layout, so tasks can be checked in Edit mode as in Read mode; a click toggles the character in the file. The box
- * covers the brackets with the editor's background. It recomposes on every keystroke, which only moves these boxes.
+ * A clickable checkbox over the `[ ]` / `[x]` of every task of the text the field shows, placed with that text's
+ * layout and covering the brackets; a click toggles the character in the file, [windowStart] further in the note.
+ * It recomposes on every keystroke, which only moves these boxes.
  */
 @Composable
 private fun TaskCheckboxes(
-    buffer: TextFieldState,
     layout: () -> TextLayoutResult?,
+    windowStart: () -> Int,
     onIntent: (EditorIntent) -> Unit
 ) {
     val taskFinder = remember { TaskFinder() }
 
-    val text = buffer.text
-    // Keyed by the content alone: the text's own equality counts the selection, and a caret move changes no task.
-    val content = text.toString()
+    val result = layout() ?: return
+    val content = result.layoutInput.text.text
 
     val tasks = remember(content) { taskFinder.tasks(text = content) }
 
-    val result = layout() ?: return
     val density = LocalDensity.current
     val label = stringResource(resource = Res.string.editor_task)
     val background = MaterialTheme.colorScheme.surface
 
-    tasks.filter {
-        it.stateIndex + 1 < result.layoutInput.text.length
-    }.forEach { task ->
+    tasks.forEach { task ->
         val open = result.getBoundingBox(offset = task.stateIndex - 1)
         val close = result.getBoundingBox(offset = task.stateIndex + 1)
 
@@ -85,7 +80,11 @@ private fun TaskCheckboxes(
             ) {
                 NotekeaCheckbox(
                     checked = task.isDone,
-                    onClick = { onIntent(EditorIntent.OnTaskToggle(stateIndex = task.stateIndex)) },
+                    onClick = {
+                        onIntent(
+                            EditorIntent.OnTaskToggle(stateIndex = windowStart() + task.stateIndex)
+                        )
+                    },
                     label = label,
                     size = minOf(
                         TASK_CHECKBOX_DP,
@@ -99,26 +98,19 @@ private fun TaskCheckboxes(
 
 /** The code blocks' backgrounds behind the text, and the tasks' checkboxes over it. */
 internal fun decoratorOf(
-    buffer: TextFieldState,
     layout: () -> TextLayoutResult?,
-    onIntent: (EditorIntent) -> Unit,
-    overlay: @Composable () -> Unit
+    windowStart: () -> Int,
+    onIntent: (EditorIntent) -> Unit
 ): TextFieldDecorator = TextFieldDecorator { innerTextField ->
     Box {
-        CodeBlockBackgrounds(
-            buffer = buffer,
-            layout = layout
-        )
-
+        CodeBlockBackgrounds(layout = layout)
         innerTextField()
 
         TaskCheckboxes(
-            buffer = buffer,
             layout = layout,
+            windowStart = windowStart,
             onIntent = onIntent
         )
-
-        overlay()
     }
 }
 
@@ -127,14 +119,11 @@ internal fun decoratorOf(
  * the text on each side, as a block: shading only the characters left a ragged edge and hid the spaces ending a line.
  */
 @Composable
-private fun BoxScope.CodeBlockBackgrounds(
-    buffer: TextFieldState,
-    layout: () -> TextLayoutResult?
-) {
+private fun BoxScope.CodeBlockBackgrounds(layout: () -> TextLayoutResult?) {
     val highlighter = remember { MarkdownHighlighter() }
 
-    val text = buffer.text
-    val content = text.toString()
+    val result = layout() ?: return
+    val content = result.layoutInput.text.text
 
     val blocks = remember(content) { highlighter.codeBlocks(text = content) }
 
@@ -145,12 +134,9 @@ private fun BoxScope.CodeBlockBackgrounds(
     val radius = with(LocalDensity.current) { NotekeaDimensions.ControlRadius.toPx() }
 
     Canvas(modifier = Modifier.matchParentSize()) {
-        val result = layout() ?: return@Canvas
-        val length = result.layoutInput.text.length
+        val length = content.length
 
-        blocks.filter {
-            it.first <= length
-        }.forEach { block ->
+        blocks.forEach { block ->
             val top = result.getLineTop(lineIndex = result.getLineForOffset(offset = block.first))
 
             val bottom = result.getLineBottom(

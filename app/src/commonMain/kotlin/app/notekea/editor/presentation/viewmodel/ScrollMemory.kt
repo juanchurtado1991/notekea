@@ -7,14 +7,20 @@ import app.notekea.core.notes.domain.RelativePath
  * part of it. In memory only: a note opened in a new run starts at the top.
  */
 class ScrollMemory {
-    private val offsets = mutableMapOf<RelativePath, Int>()
+    private val places = mutableMapOf<RelativePath, Place>()
 
-    fun of(path: RelativePath): Int = offsets[path] ?: 0
+    fun of(path: RelativePath): Place = places[path] ?: Place()
 
     fun keep(
         path: RelativePath,
-        offset: Int
+        place: Place
     ) {
-        offsets[path] = offset
+        places[path] = place
     }
+
+    /** A place of the editor's list: its first [item] in view, scrolled [offset] pixels out of it. */
+    data class Place(
+        val item: Int = 0,
+        val offset: Int = 0
+    )
 }

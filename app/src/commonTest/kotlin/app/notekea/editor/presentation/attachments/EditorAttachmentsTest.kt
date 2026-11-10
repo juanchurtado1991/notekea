@@ -10,6 +10,7 @@ import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.domain.EmbedProblem
 import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.reading.ReadingSegment
 import app.notekea.editor.presentation.viewmodel.EditorViewModels
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -146,14 +147,16 @@ class EditorAttachmentsTest : EditorAttachmentsTestBase() {
                     "Shopping#Fish",
                     "plate.png"
                 ),
-                actual = AttachmentSpace.of(
-                    text = viewModel
-                        .buffer
-                        .text
-                        .toString(),
-                    views = viewModel.state.value.attachments,
-                    heights = emptyMap()
-                ).map { it.view.embed.target }
+                actual = ReadingSegment
+                    .of(
+                        text = viewModel
+                            .buffer
+                            .text
+                            .toString(),
+                        attachments = viewModel.state.value.attachments
+                    )
+                    .filterIsInstance<ReadingSegment.Attachment>()
+                    .map { it.view.embed.target }
             )
         }
 

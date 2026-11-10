@@ -105,14 +105,14 @@ private fun SuiteBuilder.narrowToolbar() {
             throw CaseFailure(message = "expected Checklist inside More")
         }
 
+        select(words = PLAIN_LINES)
         clickIcon(label = "More")
 
         listOf("Checklist", "Bulleted list", "Insert template", "Web link").forEach {
             expectText(text = it)
         }
 
-        select(words = PLAIN_LINES)
-        openFromMore(item = "Checklist")
+        click(text = "Checklist")
         expectInNote(text = "- [ ] Buy corn flour")
     }
 }

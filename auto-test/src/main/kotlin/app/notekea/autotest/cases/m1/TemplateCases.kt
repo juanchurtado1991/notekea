@@ -8,7 +8,9 @@ import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.performTextInputSelection
 import androidx.compose.ui.text.TextRange
 import app.notekea.autotest.clickInTree
+import app.notekea.autotest.expectInOutline
 import app.notekea.autotest.expectNoResult
+import app.notekea.autotest.inOutline
 import app.notekea.autotest.noteText
 import app.notekea.autotest.openNote
 import app.notekea.autotest.openVault
@@ -347,7 +349,7 @@ private fun CaseScope.waitForNameField(name: String) {
 
 // Both panels open 340 dp wide on a first launch: a row of the tree and a row of the outline span their panel.
 private fun CaseScope.expectSameWidths() {
-    expectText(text = "Ingredients")
+    expectInOutline(heading = "Ingredients")
 
     val tree = treeRow(text = WELCOME)
         .fetchSemanticsNode()
@@ -362,7 +364,7 @@ private fun CaseScope.expectSameWidths() {
 }
 
 private fun CaseScope.treeRowOf(text: String): Float {
-    val nodes = ui.onAllNodes(matcher = hasText(text = text))
+    val nodes = ui.onAllNodes(matcher = inOutline(heading = text))
     val count = nodes.fetchSemanticsNodes().size
 
     return (0 until count).maxOf {

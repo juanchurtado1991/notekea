@@ -79,7 +79,7 @@ class ReadModeTagClickTest {
         private const val WINDOW_WIDTH = 900
         private val TAG_POSITION = Offset(
             x = 225f,
-            y = 305f
+            y = 353f
         )
     }
 }

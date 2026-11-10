@@ -126,11 +126,17 @@ private fun SuiteBuilder.embeddedNotes() {
 
         pressInWindow(shortcut = Mod + Key.E)
 
+        scrollTo(
+            text = "What the kitchen always needs.",
+            substring = true
+        )
+
         expectText(
             text = "What the kitchen always needs.",
             substring = true
         )
 
+        scrollTo(text = "Shopping basics › Dairy")
         expectText(text = "Shopping basics › Dairy")
 
         expectNoText(

@@ -2,6 +2,7 @@ package com.testbuddy
 
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeTimeoutException
@@ -96,7 +97,7 @@ public class CaseScope internal constructor(
 
     /**
      * Clicks the words [words] inside a longer text, where they are drawn: a link in a paragraph, a word in a note.
-     * The first text that contains them is used.
+     * The first shown text that draws them is used: a text field can say more text than it draws.
      */
     public fun clickWords(words: String) {
         step(description = "Click “$words”")
@@ -109,44 +110,83 @@ public class CaseScope internal constructor(
         // A text's links can follow it by a frame: a click before they settle lands on plain words.
         ui.waitForIdle()
 
-        val node = firstShown(
-            matcher = hasText(
-                text = words,
-                substring = true
-            )
+        val drawn = drawing(
+            text = words,
+            substring = true
         )
+
+        // A lazy list has not made a row far below the window: a person scrolls until they see the words.
+        val isOutOfSight = ui
+            .onAllNodes(matcher = drawn)
+            .fetchSemanticsNodes()
+            .isEmpty()
+
+        if (isOutOfSight) scrollLists(target = drawn)
+
+        val nodes = ui.onAllNodes(matcher = drawn)
+
+        val node = List(size = nodes.fetchSemanticsNodes().size) {
+            nodes[it]
+        }.sortedByDescending { it.isShown() }.firstOrNull {
+            layoutOf(node = it.fetchSemanticsNode()) != null
+        } ?: throw CaseFailure(message = "\"$words\" is not in a text that can be clicked")
 
         // A person scrolls to what they click; a text in a scrolling view may be below the window.
         runCatching { node.performScrollTo() }
 
-        val semantics = node.fetchSemanticsNode()
+        val layout = layoutOf(node = node.fetchSemanticsNode())
+            ?: throw CaseFailure(message = "\"$words\" is not in a text that can be clicked")
 
-        val shown = (
-            semantics
-                .config
-                .getOrNull(SemanticsProperties.Text)
-                .orEmpty() +
-                listOfNotNull(semantics.config.getOrNull(SemanticsProperties.EditableText))
-            ).map { it.text }
+        // The middle of the first word: words that wrap onto two lines have a line's end between them, not the link.
+        val firstWord = words.substringBefore(delimiter = ' ')
 
-        val text = shown.first { it.contains(words) }
+        val start = layout
+            .layoutInput
+            .text
+            .indexOf(string = words)
 
+        val box = layout.getBoundingBox(offset = start + firstWord.length / 2)
+
+        node.performMouseInput { click(position = box.center) }
+    }
+
+    /**
+     * A node that draws [text] (or a text containing it, with [substring]): a text field can say more text than it
+     * draws, and what it does not draw cannot be seen nor clicked.
+     */
+    private fun drawing(
+        text: String,
+        substring: Boolean
+    ): SemanticsMatcher = hasText(
+        text = text,
+        substring = substring
+    ) and SemanticsMatcher(description = "draws \"$text\"") { node ->
+        layoutOf(node = node)
+            ?.layoutInput
+            ?.text
+            ?.contains(other = text) ?: true
+    }
+
+    private fun layoutOf(node: SemanticsNode): TextLayoutResult? {
         val layouts = mutableListOf<TextLayoutResult>()
 
-        semantics
+        node
             .config
             .getOrNull(SemanticsActions.GetTextLayoutResult)
             ?.action
             ?.invoke(layouts)
 
-        val layout = layouts.firstOrNull()
-            ?: throw CaseFailure(message = "\"$words\" is not in a text that can be clicked")
+        return layouts.firstOrNull()
+    }
 
-        // The middle of the first word: words that wrap onto two lines have a line's end between them, not the link.
-        val firstWord = words.substringBefore(delimiter = ' ')
-        val box = layout.getBoundingBox(offset = text.indexOf(words) + firstWord.length / 2)
+    /** Scrolls the first lazy list that can reach a row matching [target] until that row is made. */
+    private fun scrollLists(target: SemanticsMatcher): Boolean {
+        val lists = ui.onAllNodes(matcher = hasScrollToNodeAction())
+        val count = lists.fetchSemanticsNodes().size
 
-        node.performMouseInput { click(position = box.center) }
+        return (0 until count).any { index ->
+            runCatching { lists[index].performScrollToNode(matcher = target) }.isSuccess
+        }
     }
 
     /** Clicks the first icon button labeled [label] for screen readers (its content description), once it shows. */
@@ -206,10 +246,20 @@ public class CaseScope internal constructor(
         keyboardTarget().performKeyInput { pressKey(key = key) }
     }
 
-    /** Scrolls the list that holds [text] until it is in view, also when a lazy list has not made its row yet. */
-    public fun scrollTo(text: String) {
+    /**
+     * Scrolls the list that holds [text] (or a text containing it, with [substring]) until it is in view, also when a
+     * lazy list has not made its row yet.
+     */
+    public fun scrollTo(
+        text: String,
+        substring: Boolean = false
+    ) {
         step(description = "Scroll to “$text”")
-        val target = hasText(text = text)
+
+        val target = drawing(
+            text = text,
+            substring = substring
+        )
 
         val isMade = ui
             .onAllNodes(matcher = target)
@@ -225,20 +275,13 @@ public class CaseScope internal constructor(
             return
         }
 
-        val lists = ui.onAllNodes(matcher = hasScrollToNodeAction())
-        val count = lists.fetchSemanticsNodes().size
-
-        val list = (0 until count).firstOrNull { index ->
-            runCatching { lists[index].performScrollToNode(matcher = target) }.isSuccess
-        }
-
-        if (list == null) {
+        if (!scrollLists(target = target)) {
             throw CaseFailure(message = "expected a list holding \"$text\", none had it")
         }
 
         awaitText(
             text = text,
-            substring = false
+            substring = substring
         )
     }
 

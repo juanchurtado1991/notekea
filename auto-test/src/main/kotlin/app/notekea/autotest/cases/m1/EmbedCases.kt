@@ -48,21 +48,21 @@ private fun SuiteBuilder.embedsInOrder() {
             )
         )
 
-        expectCount(
-            text = CIRCULAR,
-            atLeast = 2
-        )
+        // The frame of the note itself, under its line; the one inside Loop A is above the page's top by then.
+        scrollNoteTo(text = "A note that embeds itself:")
+        expectText(text = CIRCULAR)
 
         listOf(
             "Fresh cheese",
             "Butter",
             "Shopping basics has no heading “Dessert”.",
-            "Blocks has no block “^nothing”."
+            "Blocks has no block “^nothing”.",
+            "This note does not exist yet.",
+            "Create note"
         )
-            .forEach { expectText(text = it) }
+            .forEach { scrollNoteTo(text = it) }
 
-        expectText(text = "This note does not exist yet.")
-        expectText(text = "Create note")
+        scrollNoteTo(text = "Weekend menu")
 
         expectText(
             text = "see Pantry",
@@ -85,6 +85,7 @@ private fun SuiteBuilder.nestedEmbeds() {
         expectText(text = "Too deep to show: embeds go 3 notes deep at most.")
         expectOrderInNote(texts = listOf("Pantry", "Shelf", "Bin", "Deep corner"))
         expectOrderInNote(texts = listOf("Loop A", "Loop B", CIRCULAR))
+        scrollNoteTo(text = "Pantry")
 
         ui
             .waitUntil(timeoutMillis = 10_000) {
@@ -107,8 +108,9 @@ private fun SuiteBuilder.blockEmbeds() {
         title = "A block embed shows only that block, without its marker"
     ) {
         openEmbeds(isPreview = true)
-        expectText(text = "Soak the corn flour for ten minutes, then shape the dough into discs.")
-        expectText(text = "Buy fresh corn")
+        scrollNoteTo(text = "Soak the corn flour for ten minutes, then shape the dough into discs.")
+        scrollNoteTo(text = "Buy fresh corn")
+        scrollNoteTo(text = "Blocks › ^prices")
 
         listOf("Item", "Price", "Flour", "Cheese").forEach {
             expectText(
@@ -168,21 +170,11 @@ private fun SuiteBuilder.embedNotices() {
 private fun SuiteBuilder.embedsInEdit() {
     automated(
         id = "1.15-05",
-        title = "In Edit every embed keeps its line, its frame right under it"
+        title = "In Edit every embed shows its frame, which follows its line when text is typed above"
     ) {
         openEmbeds(isPreview = false)
-
-        expectText(
-            text = "![[Pantry]]",
-            substring = true
-        )
-
-        expectText(
-            text = "![[Blocks#^corn]]",
-            substring = true
-        )
-
-        expectText(text = "Shopping basics › Dairy")
+        expectText(text = "Corn flour, rice and beans.")
+        scrollNoteTo(text = "Shopping basics › Dairy")
         val field = noteText(part = EMBEDS_TEXT)
 
         val text = field
@@ -199,6 +191,8 @@ private fun SuiteBuilder.embedsInEdit() {
             containing = "Shopping\n\n![[Pantry]]"
         )
 
+        // The cursor leaves the embed's block, which shows its line as written while the cursor is in it.
+        field.performTextInputSelection(selection = TextRange(index = text.indexOf("![[Pantry]]")))
         expectText(text = "Corn flour, rice and beans.")
     }
 }
@@ -240,23 +234,6 @@ private fun CaseScope.clickTextOnRowOf(
         .clickWhenStill()
 }
 
-private fun CaseScope.expectCount(
-    text: String,
-    atLeast: Int
-) {
-    val holds = runCatching {
-        ui
-            .waitUntil(timeoutMillis = 10_000) {
-                ui
-                    .onAllNodes(matcher = hasText(text = text))
-                    .fetchSemanticsNodes()
-                    .size >= atLeast
-            }
-    }.isSuccess
-
-    if (!holds) throw CaseFailure(message = "expected \"$text\" at least $atLeast times")
-}
-
 /** Fails unless [texts] first show in that order down the note, each found from the note's top. */
 private fun CaseScope.expectOrderInNote(texts: List<String>) {
     val places = texts.map { placeInNote(text = it) }
@@ -283,7 +260,10 @@ private fun CaseScope.noteColumn() = ui.onAllNodes(
     hasScrollAction() and hasVerticalScroll and inNote
 )[0]
 
-/** Scrolls the open note, a screen at a time from its top, until [text] is drawn on screen in it. */
+/**
+ * Scrolls the open note, a screen at a time from its top, until [text] is drawn on screen in it: the note draws only
+ * the blocks on screen.
+ */
 private fun CaseScope.scrollNoteTo(text: String) {
     val column = noteColumn()
     column.performSemanticsAction(key = SemanticsActions.ScrollBy) { it(0f, -SCROLL_TOP) }

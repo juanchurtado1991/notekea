@@ -3,6 +3,7 @@ package app.notekea.autotest.cases.m1
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.hasContentDescription
 import app.notekea.autotest.pressInWindow
 import com.testbuddy.CaseFailure
@@ -40,18 +41,15 @@ private fun SuiteBuilder.tasksShowAsCheckboxes() {
             shownText = SHOWN
         )
 
-        ui
-            .waitUntil(timeoutMillis = 10_000) {
-                taskBoxes().size == 9
-            }
+        // The note is a lazy list: the callout's two tasks are made once the page is scrolled to them.
+        expectTasks(states = listOf(false, true, false, false, true, false, true))
 
-        val checked = taskBoxes().count {
-            it.config.getOrNull(SemanticsProperties.StateDescription) == "checked"
-        }
+        scrollTo(
+            text = "A finished task inside a callout",
+            substring = true
+        )
 
-        if (checked != 4) {
-            throw CaseFailure(message = "expected 4 of the 9 tasks checked, $checked are")
-        }
+        expectLastTasks(states = listOf(false, true))
 
         pressInWindow(shortcut = Mod + Key.E)
 
@@ -119,7 +117,7 @@ private fun SuiteBuilder.toggleWithShortcut() {
         )
 
         val before = Files.readString(file(path = TASKS_FILE))
-        clickWords(words = "## Tasks")
+        clickWords(words = "A summary of the week.")
         press(shortcut = Mod + Key.Enter)
 
         expectFileStays(
@@ -166,6 +164,11 @@ private fun SuiteBuilder.calloutFolding() {
             substring = true
         )
 
+        scrollTo(
+            text = "A folded question",
+            substring = true
+        )
+
         expectNoText(text = "This text is hidden until the title is clicked.")
         clickWords(words = "A folded question")
         expectText(text = "This text is hidden until the title is clicked.")
@@ -192,6 +195,38 @@ private fun SuiteBuilder.nestedCallouts() {
                 "Example callout shows val servings = 6 as colored code, with no > signs. The last quote is a plain " +
                 "quote with a bar on its left."
         )
+    }
+}
+
+/** Waits until the tasks drawn are checked or not as [states] say, in the note's order. */
+private fun CaseScope.expectTasks(states: List<Boolean>) {
+    step(description = "Expect ${states.size} tasks, ${states.count { it }} of them checked")
+    awaitTasks(expected = states) { it }
+}
+
+/** Waits until the last tasks drawn are checked or not as [states] say, in the note's order. */
+private fun CaseScope.expectLastTasks(states: List<Boolean>) {
+    step(description = "Expect the last ${states.size} tasks, ${states.count { it }} of them checked")
+    awaitTasks(expected = states) { it.takeLast(n = states.size) }
+}
+
+private fun CaseScope.awaitTasks(
+    expected: List<Boolean>,
+    pick: (List<Boolean>) -> List<Boolean>
+) {
+    fun drawn(): List<Boolean> = taskBoxes().map {
+        it.config.getOrNull(SemanticsProperties.StateDescription) == "checked"
+    }
+
+    try {
+        ui
+            .waitUntil(timeoutMillis = 10_000) {
+                pick(drawn()) == expected
+            }
+    } catch (exception: ComposeTimeoutException) {
+        throw CaseFailure(
+            message = "expected the tasks checked as $expected, they are ${pick(drawn())}"
+        ).apply { initCause(exception) }
     }
 }
 

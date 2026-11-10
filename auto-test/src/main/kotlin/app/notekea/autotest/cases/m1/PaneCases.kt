@@ -8,6 +8,8 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import app.notekea.autotest.SmokeScenarios
 import app.notekea.autotest.clickInTree
+import app.notekea.autotest.expectNotInOutline
+import app.notekea.autotest.inOutline
 import app.notekea.autotest.noteText
 import app.notekea.autotest.openNote
 import app.notekea.autotest.openVault
@@ -68,7 +70,7 @@ private fun SuiteBuilder.splitRight() {
         expectNoText(text = "Split right")
         press(key = Key.Escape)
         noteText(part = WELCOME_TEXT).clickWhenStill()
-        expectNoText(text = "Ingredients")
+        expectNotInOutline(heading = "Ingredients")
     }
 }
 
@@ -384,9 +386,7 @@ private fun CaseScope.expectOnScreen(text: String) {
 }
 
 private fun CaseScope.clickInOutline(heading: String) {
-    val row = hasText(text = heading) and hasAnyAncestor(
-        matcher = hasContentDescription(value = "Headings of this note")
-    )
+    val row = inOutline(heading = heading)
 
     ui
         .waitUntil(timeoutMillis = 10_000) {

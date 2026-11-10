@@ -5,6 +5,7 @@ package app.notekea.smokerun
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
@@ -12,6 +13,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -40,6 +42,25 @@ internal fun ComposeUiTest.waitForText(
     ),
     timeoutMillis = timeoutMillis
 )
+
+/**
+ * Scrolls the list that holds [text] until it draws it: a note draws only the blocks on screen. What a block loads
+ * after it is drawn (an embedded note) is looked for again until it is there.
+ */
+internal fun ComposeUiTest.scrollToText(text: String) {
+    val lists = onAllNodes(matcher = hasScrollToNodeAction())
+
+    waitUntil(
+        conditionDescription = "a list holds \"$text\"",
+        timeoutMillis = WAIT_MILLIS
+    ) {
+        (0 until lists.fetchSemanticsNodes().size).any { index ->
+            runCatching {
+                lists[index].performScrollToNode(matcher = hasText(text = text))
+            }.isSuccess
+        }
+    }
+}
 
 /** Opens the copy of the vault [name] from the welcome screen, as Open folder… with the picker answering it. */
 internal fun ComposeUiTest.openVault(
