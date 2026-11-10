@@ -38,7 +38,11 @@ class ListTasksUseCase {
                 .map {
                     TaskRow(
                         path = note.file.path,
-                        task = it
+                        task = it,
+                        due = whenOf(
+                            task = it,
+                            today = today
+                        )
                     )
                 }
         }
@@ -48,12 +52,12 @@ class ListTasksUseCase {
         }
 
         val groups = if (view.grouping == TaskGrouping.NOTE) {
-            byNote(shown)
-        } else {
-            byDate(
+            byNote(
                 rows = shown,
-                today = today
+                all = all
             )
+        } else {
+            byDate(rows = shown)
         }
 
         return TaskList(
@@ -77,25 +81,27 @@ class ListTasksUseCase {
     ): Boolean = (view.folder == null || view.folder in note.folders) &&
         (view.tag?.let(note::hasTag) ?: true)
 
-    private fun byNote(rows: List<TaskRow>): List<TaskGroup> = rows.groupBy {
-        it.path
-    }.map { (path, found) ->
-        TaskGroup.OfNote(
-            path = path,
-            rows = found
-        )
-    }
-
-    private fun byDate(
+    /** The [rows] shown under their notes, each with how many of [all] its tasks are done. */
+    private fun byNote(
         rows: List<TaskRow>,
-        today: CalendarDate
+        all: List<TaskRow>
     ): List<TaskGroup> {
-        val groups = rows.groupBy {
-            whenOf(
-                task = it.task,
-                today = today
+        val ofNote = all.groupBy { it.path }
+
+        return rows.groupBy { it.path }.map { (path, found) ->
+            val tasks = ofNote.getValue(key = path)
+
+            TaskGroup.OfNote(
+                path = path,
+                rows = found,
+                done = tasks.count { it.task.isDone },
+                total = tasks.size
             )
         }
+    }
+
+    private fun byDate(rows: List<TaskRow>): List<TaskGroup> {
+        val groups = rows.groupBy { it.due }
 
         return TaskWhen.entries.mapNotNull { date ->
             groups[date]?.let { found ->

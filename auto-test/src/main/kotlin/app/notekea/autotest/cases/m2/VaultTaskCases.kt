@@ -23,6 +23,7 @@ fun SuiteBuilder.vaultTaskCases() {
     checkingATask()
     changedOutside()
     openingATask()
+    cardsLook()
 }
 
 private fun SuiteBuilder.tasksTab() {
@@ -37,6 +38,8 @@ private fun SuiteBuilder.tasksTab() {
 
         clickIcon(label = TASKS)
         expectText(text = "By note")
+        // The notes are cards in a lazy list: the one further down is made once the list is scrolled to it.
+        scrollTo(text = "Record a demo video")
         expectText(text = "Record a demo video")
     }
 }
@@ -82,6 +85,9 @@ private fun SuiteBuilder.checkingATask() {
         )
 
         clickIcon(label = TASKS)
+        // Only its folder, so its card is on screen whatever the vault holds above it.
+        click(text = "Folder")
+        clickLast(text = "Projects")
         clickIcon(label = "Task: $DEMO_TASK")
         expectNoText(text = DEMO_TASK)
 
@@ -129,5 +135,29 @@ private fun SuiteBuilder.openingATask() {
         scrollTo(text = FLAT_TASK)
         click(text = FLAT_TASK)
         expectLineSelected(line = FLAT_TASK)
+    }
+}
+
+private fun SuiteBuilder.cardsLook() {
+    manual(
+        id = "2.11-06",
+        reason = ManualReason.EYES
+    ) {
+        prepare(SAMPLE)
+        title(text = "The Tasks tab shows notes and dates as cards")
+
+        steps(
+            text =
+            "1. In Notekea, open the Sample Vault (see TEST DATA above).\n2. Click Tasks in the rail on the left " +
+                "and look at the tab.\n3. Click Show done, then By date."
+        )
+
+        expected(
+            text =
+            "Each note is a card on a soft background: its icon in its folder's color, its name, its folder " +
+                "and, at the card's end, a bar with \"N of M done\"; under it its tasks, a late date in red. By " +
+                "date each group is a card with its count: Overdue in red, Today in blue, and each task names " +
+                "its note."
+        )
     }
 }

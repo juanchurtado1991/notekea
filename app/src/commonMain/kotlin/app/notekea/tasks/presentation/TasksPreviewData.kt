@@ -6,6 +6,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.tasks.domain.TaskGroup
 import app.notekea.tasks.domain.TaskList
 import app.notekea.tasks.domain.TaskRow
+import app.notekea.tasks.domain.TaskWhen
 
 /** A few tasks for the Tasks tab's previews. */
 internal object TasksPreviewData {
@@ -24,7 +25,8 @@ internal object TasksPreviewData {
                 month = 10,
                 day = 30
             )
-        )
+        ),
+        due = TaskWhen.OVERDUE
     )
 
     val state = TasksState(
@@ -32,7 +34,9 @@ internal object TasksPreviewData {
             groups = listOf(
                 TaskGroup.OfNote(
                     path = LAUNCH,
-                    rows = listOf(row)
+                    rows = listOf(row),
+                    done = 1,
+                    total = 2
                 )
             ),
             open = 1,

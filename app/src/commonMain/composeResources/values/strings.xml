@@ -590,6 +590,7 @@
     <string name="tasks_filter_tag">Tag</string>
     <string name="tasks_hide_done">Hide done</string>
     <string name="tasks_notice_dismiss">Dismiss</string>
+    <string name="tasks_progress">%1$d of %2$d done</string>
     <string name="tasks_show_done">Show done</string>
     <string name="tasks_when_done">Done</string>
     <string name="tasks_when_later">Later</string>
