@@ -77,3 +77,17 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
   a tag. There is no quota of automatic cases: automate what is reasonable.
 - **Post-MVP repositories** (`ROADMAP.md`, post-MVP): clone the repository as it is, index it with a parser, answer
   with file and line; Notekea never writes notes about the code nor writes code.
+- **One editing mode** (`ROADMAP.md`, post-MVP item 4): the plan and the design were agreed on 2026-11-09; no code
+  yet. Design: the cursor's line shows all its Markdown marks, muted, and every other line looks finished (the two
+  designs not chosen revealed only the element under the cursor, or the whole block). The raw Markdown is a "Source"
+  action that takes over today's Edit/Preview shortcut. One PR from `main`, one commit per step:
+  1. A spike with no UI: hide the marks from `MarkdownOutputTransformation` and measure the longest Ghost Serializer
+     note against the memory targets of 1.18; if it does not hold, decide another way before going on.
+  2. Marks hidden except on the cursor's line (bold, italic, code, links, wiki links, heading `#`, bullets, tasks,
+     quotes) and the "Source" action; the Edit/Preview control stays.
+  3. Blocks in place: callouts, code blocks, rules, and task boxes that a click checks.
+  4. Images, embeds and query blocks shown and edited in place.
+  5. Tables shown and edited in place.
+  6. Parity with Preview on long notes and in memory; then the Edit/Preview control, `EditorState.isReading` and its
+     preference go (`ReadingView` stays for embedded notes), with the Auto-Test cases, the strings in every locale
+     and the changelog.
