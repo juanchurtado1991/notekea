@@ -9,24 +9,21 @@ import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorState
 
 /**
- * Insert template: the template picker opens for the open note, Read mode turning to Edit first
- * ([onEditMode]) so the template is seen going in, and the chosen template is filled in and inserted where the
- * selection was, its properties merged into the note's frontmatter.
+ * Insert template: the template picker opens for the open note, and the chosen template is filled in and inserted
+ * where the selection was, its properties merged into the note's frontmatter.
  */
 internal class EditorTemplates(
     private val host: EditorHost,
     private val vaultPath: String,
     private val fillTemplate: FillTemplateUseCase,
     private val saving: EditorSaving,
-    private val textEdits: EditorTextEdits,
-    private val onEditMode: () -> Unit
+    private val textEdits: EditorTextEdits
 ) {
     private val templateInsertion = TemplateInsertion()
 
     fun request() {
         val current = host.state.value
         if (current.notePath == null || current.isLoading) return
-        if (current.isReading) onEditMode()
         textEdits.requestPicker(effect = EditorEffect.RequestTemplate)
     }
 

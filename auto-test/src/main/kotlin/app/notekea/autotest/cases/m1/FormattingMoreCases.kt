@@ -2,6 +2,7 @@ package app.notekea.autotest.cases.m1
 
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.performTextReplacement
+import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.pressInWindow
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
@@ -52,7 +53,7 @@ private fun SuiteBuilder.callouts() {
         expectSelected(words = "Write here")
         type(text = "Use a cast-iron pan")
         expectInNote(text = "> [!tip] Tip\n> Use a cast-iron pan")
-        pressInWindow(shortcut = Mod + Key.E)
+        cursorToNoteStart()
         expectNoText(text = PAN_LINE)
         click(text = "Warning")
         expectText(text = PAN_LINE)
@@ -80,13 +81,8 @@ private fun SuiteBuilder.tableCodeDividerQuote() {
         cursorAtEnd()
         openFromMore(item = "Quote")
         expectInNote(text = "\n> Quote")
-        pressInWindow(shortcut = Mod + Key.E)
+        cursorToNoteStart()
         expectText(text = "Quote")
-
-        expectNoText(
-            text = "```kotlin",
-            substring = true
-        )
     }
 }
 
@@ -137,7 +133,7 @@ private fun SuiteBuilder.undoAndObsidian() {
         expected(
             text =
             "Ctrl+Z takes the bold away in one step and Ctrl+Shift+Z puts it back. Obsidian shows the same " +
-                "heading, bold, checklist, link, tag, callout, table, code block and quote as Notekea's Preview."
+                "heading, bold, checklist, link, tag, callout, table, code block and quote as Notekea draws them."
         )
     }
 }

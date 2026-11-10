@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextInputSelection
 import androidx.compose.ui.text.TextRange
+import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.noteText
 import app.notekea.autotest.pressInWindow
 import com.testbuddy.CaseFailure
@@ -39,7 +40,7 @@ private fun SuiteBuilder.embedsInOrder() {
         id = "1.15-01",
         title = "Every embed shows as a frame, or a notice that says why it cannot"
     ) {
-        openEmbeds(isPreview = true)
+        openEmbeds()
 
         expectOrderInNote(
             texts = listOf(
@@ -76,7 +77,7 @@ private fun SuiteBuilder.nestedEmbeds() {
         id = "1.15-02",
         title = "Embeds inside embeds stop three notes deep and where they loop"
     ) {
-        openEmbeds(isPreview = true)
+        openEmbeds()
 
         listOf("Corn flour, rice and beans.", "Shelf", "Bin", "Deep corner", "Loop B").forEach {
             expectText(text = it)
@@ -107,7 +108,7 @@ private fun SuiteBuilder.blockEmbeds() {
         id = "1.15-03",
         title = "A block embed shows only that block, without its marker"
     ) {
-        openEmbeds(isPreview = true)
+        openEmbeds()
         scrollNoteTo(text = "Soak the corn flour for ten minutes, then shape the dough into discs.")
         scrollNoteTo(text = "Buy fresh corn")
         scrollNoteTo(text = "Blocks › ^prices")
@@ -136,7 +137,7 @@ private fun SuiteBuilder.embedNotices() {
         id = "1.15-04",
         title = "A notice opens the note, or creates the one that does not exist"
     ) {
-        openEmbeds(isPreview = true)
+        openEmbeds()
 
         clickTextOnRowOf(
             rowText = "Shopping basics › Dessert",
@@ -170,9 +171,9 @@ private fun SuiteBuilder.embedNotices() {
 private fun SuiteBuilder.embedsInEdit() {
     automated(
         id = "1.15-05",
-        title = "In Edit every embed shows its frame, which follows its line when text is typed above"
+        title = "An embed's frame follows its line when text is typed above"
     ) {
-        openEmbeds(isPreview = false)
+        openEmbeds()
         expectText(text = "Corn flour, rice and beans.")
         scrollNoteTo(text = "Shopping basics › Dairy")
         val field = noteText(part = EMBEDS_TEXT)
@@ -204,20 +205,14 @@ private fun CaseScope.backToEmbeds() {
     ui.waitForIdle()
 }
 
-private fun CaseScope.openEmbeds(isPreview: Boolean) {
+/** Opens Embeds practice with the cursor in its title, so every embed shows its frame. */
+private fun CaseScope.openEmbeds() {
     openPlaygroundNote(
         name = EMBEDS,
         shownText = EMBEDS_TEXT
     )
 
-    if (isPreview) {
-        pressInWindow(shortcut = Mod + Key.E)
-
-        expectNoText(
-            text = "![[Pantry]]",
-            substring = true
-        )
-    }
+    cursorToNoteStart()
 }
 
 private fun CaseScope.clickTextOnRowOf(

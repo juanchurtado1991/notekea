@@ -205,7 +205,7 @@ class ResolvePlatformConventionsUseCaseTest {
         toggleSidebarShortcut = primary.with(ShortcutKey.BACKSLASH),
         saveShortcut = primary.with(ShortcutKey.S),
         findShortcut = primary.with(ShortcutKey.F),
-        toggleReadModeShortcut = primary.with(ShortcutKey.E),
+        toggleSourceShortcut = primary.with(ShortcutKey.E),
         quickSwitcherShortcut = primary.with(ShortcutKey.P),
         searchNotesShortcut = primary.withShift(ShortcutKey.F),
         toggleTaskShortcut = primary.with(ShortcutKey.ENTER),

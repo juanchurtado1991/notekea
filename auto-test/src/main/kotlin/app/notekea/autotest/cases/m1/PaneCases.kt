@@ -112,7 +112,6 @@ private fun SuiteBuilder.placeKept() {
             shownText = "Arepas guide"
         )
 
-        pressInWindow(shortcut = Mod + Key.E)
         clickInOutline(heading = "Serving")
         expectOnScreen(text = OUTLINE_MIDDLE)
         clickInTree(text = WELCOME)

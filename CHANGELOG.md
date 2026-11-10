@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- One editing mode: a note looks finished and is edited right there, so the Edit and Preview tabs are gone. The line
+  the cursor is on shows its Markdown marks, muted; every other line reads as Preview drew it, and links, tags, task
+  boxes, callouts, files and query tables work without leaving the text. `Mod+E` and the new Source button at the
+  end of the toolbar show the whole note as written. Only the part of the note on screen is drawn, so a long note
+  types as fast as a short one.
+- Tables are edited by cells: the table stays drawn while the cursor is in a cell, Tab and Enter move between cells
+  (Tab on the last one adds a row), and a bar over the table, also on the right click, inserts and deletes rows and
+  columns and aligns a column. Tables draw their columns left, centered or right as their delimiter row says.
 - Code layout is enforced by lint (`GUIDELINES.md` §6 *Layout*): imports in IntelliJ's order, lines of code of at
   most 100 characters, chains, lambdas, named arguments and parameters laid out one way, compound conditions and
   long callbacks named, and KDoc of at most three lines whose links and file names exist. The repository is

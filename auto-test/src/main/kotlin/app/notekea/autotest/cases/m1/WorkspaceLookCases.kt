@@ -117,8 +117,6 @@ private fun SuiteBuilder.statusBar() {
 
         expectText(text = "CRLF")
         expectCursorShown(isShown = true)
-        pressInWindow(shortcut = Mod + Key.E)
-        expectCursorShown(isShown = false)
         clickInTree(text = "Recipes")
         expectText(text = "Arepas")
         expectNoText(text = "CRLF")

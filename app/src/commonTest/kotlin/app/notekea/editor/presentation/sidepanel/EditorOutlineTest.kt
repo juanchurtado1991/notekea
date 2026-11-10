@@ -108,22 +108,17 @@ class EditorOutlineTest {
         }
 
     @Test
-    fun `choosing a heading in read mode only scrolls to it, and a heading that is gone does nothing`() =
-        runOutlineTest {
-            open(path = AREPAS)
-            send(intent = EditorIntent.OnReadModeToggle)
-            val effects = collectEffects()
+    fun `choosing a heading that is gone does nothing`() = runOutlineTest {
+        open(path = AREPAS)
+        val effects = collectEffects()
 
-            send(intent = EditorIntent.OnHeadingClick(index = 0))
-            send(intent = EditorIntent.OnHeadingClick(index = 5))
+        send(intent = EditorIntent.OnHeadingClick(index = 5))
 
-            assertEquals(
-                expected = TextRange(index = 0) to listOf<EditorEffect>(
-                    EditorEffect.RevealHeading(heading = viewModel.state.value.outline[0])
-                ),
-                actual = viewModel.buffer.selection to effects.toList()
-            )
-        }
+        assertEquals(
+            expected = TextRange(index = 0) to emptyList<EditorEffect>(),
+            actual = viewModel.buffer.selection to effects.toList()
+        )
+    }
 
     @Test
     fun `a mention chosen in Connections is selected once its note opens, or at once in the open note`() =
@@ -161,40 +156,6 @@ class EditorOutlineTest {
                     )
                 ),
                 actual = Triple(waiting, opened, viewModel.buffer.selection)
-            )
-        }
-
-    @Test
-    fun `a passage chosen in Preview shows in Edit for that note, and the mode remembered stays`() =
-        runOutlineTest {
-            open(path = AREPAS)
-            send(intent = EditorIntent.OnReadModeToggle)
-
-            send(
-                intent = EditorIntent.OnRevealRequest(
-                    path = AREPAS,
-                    range = 2..7
-                )
-            )
-
-            val shown = Triple(
-                viewModel.state.value.isReading,
-                viewModel.state.value.isRevealing,
-                viewModel.buffer.selection
-            )
-
-            open(path = PLAIN)
-
-            assertEquals(
-                expected = Triple(
-                    false,
-                    true,
-                    TextRange(
-                        start = 2,
-                        end = 8
-                    )
-                ) to true,
-                actual = shown to viewModel.state.value.isReading
             )
         }
 

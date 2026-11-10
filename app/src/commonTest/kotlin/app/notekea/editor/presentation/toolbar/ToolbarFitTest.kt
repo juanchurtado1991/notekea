@@ -14,7 +14,7 @@ class ToolbarFitTest {
                 ToolbarFit.WITHOUT_LISTS,
                 ToolbarFit.TEXT_ONLY
             ),
-            actual = listOf(800.dp, 552.dp, 551.dp, 451.dp).map { ToolbarFit.of(width = it) }
+            actual = listOf(800.dp, 426.dp, 425.dp, 325.dp).map { ToolbarFit.of(width = it) }
         )
     }
 }

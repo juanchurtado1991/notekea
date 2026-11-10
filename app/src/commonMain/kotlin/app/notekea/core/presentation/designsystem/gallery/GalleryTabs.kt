@@ -25,7 +25,6 @@ import app.notekea.core.presentation.designsystem.components.NotekeaAttachmentIm
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaCard
-import app.notekea.core.presentation.designsystem.components.NotekeaCompactTabs
 import app.notekea.core.presentation.designsystem.components.NotekeaEmbedNotice
 import app.notekea.core.presentation.designsystem.components.NotekeaEmbeddedNote
 import app.notekea.core.presentation.designsystem.components.NotekeaFileChip
@@ -64,15 +63,6 @@ internal fun TabsSection() {
             )
         }
     }
-
-    var selectedCompactTab by remember { mutableIntStateOf(value = 0) }
-
-    NotekeaCompactTabs(
-        labels = SAMPLE_COMPACT_TABS,
-        selectedIndex = selectedCompactTab,
-        onSelect = { selectedCompactTab = it },
-        shortcutHint = TABS_SHORTCUT
-    )
 }
 
 /**

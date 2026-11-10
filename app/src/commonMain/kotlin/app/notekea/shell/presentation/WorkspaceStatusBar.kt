@@ -49,7 +49,7 @@ private const val PREVIEW_VAULT = "Playground Vault"
 /**
  * The workspace's status bar: where the user is ([path] of [kind]) on the left, a click showing it in Files
  * ([onReveal]); on the right the vault's first scan ([isLoading]), the search index ([searchIndex]), then, for a note
- * in Edit mode ([editor], [buffer]), the cursor's place, line endings, words and saved state.
+ * ([editor], [buffer]) the cursor's place, line endings, words and saved state.
  */
 @Composable
 internal fun WorkspaceStatusBar(
@@ -160,13 +160,13 @@ private fun Chevron() {
     )
 }
 
-/** The cursor's line and column (in Edit mode), the line endings, the encoding, the words and the save state. */
+/** The cursor's line and column, the line endings, the encoding, the words and the save state. */
 @Composable
 private fun NoteFacts(
     editor: EditorState,
     buffer: TextFieldState?
 ) {
-    if (!editor.isReading && buffer != null) {
+    if (buffer != null) {
         val (line, column) = cursorOf(
             text = buffer.text,
             offset = buffer.selection.start

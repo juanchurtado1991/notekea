@@ -309,7 +309,6 @@ private fun rememberPreviewPage(): EditorPageState {
             buffer = buffer,
             listState = listState,
             focusRequester = FocusRequester(),
-            isReading = { false },
             isSource = { false }
         )
     }

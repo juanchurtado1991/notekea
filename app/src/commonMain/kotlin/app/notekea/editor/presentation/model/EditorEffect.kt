@@ -24,7 +24,7 @@ sealed interface EditorEffect {
         val inBackground: Boolean = false
     ) : EditorEffect
 
-    /** The text of the open note should take the keyboard (in Edit mode; Read mode has no cursor). */
+    /** The text of the open note should take the keyboard. */
     data object FocusText : EditorEffect
 
     /** A daily note's arrow was clicked: the window opens the daily note before ([step] -1) or after ([step] 1). */
@@ -48,7 +48,7 @@ sealed interface EditorEffect {
     /** Insert template was asked for: the window opens the template picker, then sends the template to insert. */
     data object RequestTemplate : EditorEffect
 
-    /** A `#tag` was clicked in Read mode: the window searches it in all notes. */
+    /** A `#tag` was clicked: the window searches it in all notes. */
     data class SearchTag(val tag: String) : EditorEffect
 
     /** What could not be saved of [note] is kept in [copy], or by this pane when even that failed (null). */

@@ -7,7 +7,7 @@ import app.notekea.core.notes.domain.OutlineHeading
 import app.notekea.editor.presentation.attachments.AttachmentView
 
 /**
- * A piece of a note as Read mode shows it: Markdown for the renderer, a file embedded on a line of its own, which
+ * A piece of a note as it is drawn: Markdown for the renderer, a file embedded on a line of its own, which
  * Notekea draws itself, or a query block drawn as its table. Files embedded inside a paragraph stay in the Markdown, as
  * links.
  */

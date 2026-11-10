@@ -9,7 +9,7 @@ import app.notekea.editor.presentation.model.EditorState
 /**
  * Where the keyboard and the cursor go in the editor: a focus request gives the keyboard to the text once its note is
  * open, each note left in this pane gets its cursor back when it opens again, an outline heading chosen is scrolled to,
- * and a mention or passage chosen elsewhere is selected once its note opens, in Edit mode, where a selection shows.
+ * and a mention or passage chosen elsewhere is selected once its note opens.
  */
 internal class EditorFocus(
     private val host: EditorHost,
@@ -89,12 +89,7 @@ internal class EditorFocus(
     private fun select(range: IntRange) {
         revealed = null
 
-        host.reduce {
-            it.copy(
-                isReading = false,
-                isRevealing = true
-            )
-        }
+        host.reduce { it.copy(isRevealing = true) }
 
         val length = host.buffer.text.length
 
@@ -124,7 +119,7 @@ internal class EditorFocus(
     }
 
     /**
-     * An outline heading was chosen: the editor scrolls to it and, in Edit mode, puts the cursor at the end of its line
+     * An outline heading was chosen: the editor scrolls to it and puts the cursor at the end of its line
      * and takes the keyboard, so typing goes on there.
      */
     fun revealHeading(index: Int) {

@@ -25,13 +25,13 @@
     <string name="about_shortcut_outline">Go to the outline</string>
     <string name="about_shortcut_previous_day">Previous day</string>
     <string name="about_shortcut_previous_tab">Previous tab</string>
-    <string name="about_shortcut_read_mode">Edit or preview</string>
     <string name="about_shortcut_rename">Rename the selected file</string>
     <string name="about_shortcut_open_selected">Open the selected file</string>
     <string name="about_shortcut_save">Save</string>
     <string name="about_shortcut_search_notes">Search in all notes</string>
     <string name="about_shortcut_side_panel">Show or hide the side panel</string>
     <string name="about_shortcut_sidebar">Show or hide the sidebar</string>
+    <string name="about_shortcut_source">Show the note as written</string>
     <string name="about_shortcut_split">Open beside</string>
     <string name="about_shortcut_task">Check a task</string>
     <string name="about_shortcut_template">Insert a template</string>
@@ -69,7 +69,6 @@
     <string name="editor_close">Close</string>
     <string name="editor_conflict_message">This note changed outside Notekea while you were editing it.</string>
     <string name="editor_deleted_message">This note was moved or deleted outside Notekea.</string>
-    <string name="editor_edit_mode">Edit</string>
     <string name="editor_find">Find in note</string>
     <string name="editor_source">Source: the note as written</string>
     <string name="editor_find_count">%1$d of %2$d</string>
@@ -78,7 +77,6 @@
     <string name="editor_load_failed">This note couldn’t be opened.</string>
     <string name="editor_load_theirs">Load theirs</string>
     <string name="editor_next_day">Next daily note</string>
-    <string name="editor_preview_mode">Preview</string>
     <string name="editor_previous_day">Previous daily note</string>
     <string name="editor_restore">Restore</string>
     <string name="editor_retry">Try again</string>

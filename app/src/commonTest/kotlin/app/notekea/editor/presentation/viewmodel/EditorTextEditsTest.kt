@@ -96,40 +96,6 @@ class EditorTextEditsTest : EditorViewModelTestBase() {
     }
 
     @Test
-    fun `the chosen mode closes find, is kept for the next note and is remembered for the next run`() =
-        runEditorTest {
-            open(path = AREPAS)
-            viewModel.onIntent(intent = EditorIntent.OnFindOpen)
-
-            viewModel.onIntent(intent = EditorIntent.OnReadModeToggle)
-            runCurrent()
-            val reading = viewModel.state.value
-            open(path = WELCOME)
-
-            assertEquals(
-                expected = listOf(true, null, true, true),
-                actual = listOf(
-                    reading.isReading,
-                    reading.find,
-                    viewModel.state.value.isReading,
-                    preferences.isReading
-                )
-            )
-        }
-
-    @Test
-    fun `notes open in the mode remembered from an earlier run`() = runEditorTest {
-        preferences.isReading = true
-
-        open(path = AREPAS)
-
-        assertEquals(
-            expected = true,
-            actual = viewModel.state.value.isReading
-        )
-    }
-
-    @Test
     fun `clicking a task checks it in the text, which is saved like any edit`() = runEditorTest {
         putOnDisk(
             path = TASKS,
@@ -155,7 +121,7 @@ class EditorTextEditsTest : EditorViewModelTestBase() {
     }
 
     @Test
-    fun `mod+enter toggles the task on the cursor line in edit mode only`() = runEditorTest {
+    fun `mod+enter toggles the task on the cursor line`() = runEditorTest {
         putOnDisk(
             path = TASKS,
             text = TASKS_TEXT
@@ -167,27 +133,12 @@ class EditorTextEditsTest : EditorViewModelTestBase() {
 
         viewModel.onIntent(intent = EditorIntent.OnTaskToggleShortcut)
 
-        val inEditMode = viewModel
-            .buffer
-            .text
-            .toString()
-
-        viewModel.onIntent(intent = EditorIntent.OnReadModeToggle)
-        runCurrent()
-        viewModel.onIntent(intent = EditorIntent.OnTaskToggleShortcut)
-
         assertEquals(
-            expected = listOf(
-                "- [ ] Buy flour\n- [ ] Soak beans\n",
-                "- [ ] Buy flour\n- [ ] Soak beans\n"
-            ),
-            actual = listOf(
-                inEditMode,
-                viewModel
-                    .buffer
-                    .text
-                    .toString()
-            )
+            expected = "- [ ] Buy flour\n- [ ] Soak beans\n",
+            actual = viewModel
+                .buffer
+                .text
+                .toString()
         )
     }
 
@@ -254,55 +205,6 @@ class EditorTextEditsTest : EditorViewModelTestBase() {
                     listOf<EditorEffect>(EditorEffect.FocusText)
                 ),
                 actual = Triple(store.texts.getValue(TASKS), selected, effects.toList())
-            )
-        }
-
-    @Test
-    fun `formatting and asking for a note to link work in edit mode only`() = runEditorTest {
-        val effects = collectEffects()
-
-        putOnDisk(
-            path = TASKS,
-            text = TASKS_TEXT
-        )
-
-        open(path = TASKS)
-
-        viewModel.onIntent(intent = EditorIntent.OnNoteLinkRequest)
-        runCurrent()
-        viewModel.onIntent(intent = EditorIntent.OnReadModeToggle)
-        runCurrent()
-        viewModel.onIntent(intent = EditorIntent.OnNoteLinkRequest)
-        viewModel.onIntent(intent = EditorIntent.OnFormat(action = FormatAction.Divider))
-        runCurrent()
-
-        assertEquals(
-            expected = TASKS_TEXT to listOf<EditorEffect>(EditorEffect.RequestNoteLink),
-            actual = viewModel
-                .buffer
-                .text
-                .toString() to effects.toList()
-        )
-    }
-
-    @Test
-    fun `a note linked in read mode goes at the end of the note, which stays rendered and is saved`() =
-        runEditorTest {
-            open(path = AREPAS)
-            type(text = "Corn flour.\n")
-            viewModel.onIntent(intent = EditorIntent.OnReadModeToggle)
-
-            viewModel.onIntent(
-                intent = EditorIntent.OnFormat(action = FormatAction.NoteLink(target = "Pancakes"))
-            )
-
-            Snapshot.sendApplyNotifications()
-            advanceTimeBy(delayTimeMillis = TWO_SECONDS_MILLIS)
-            runCurrent()
-
-            assertEquals(
-                expected = true to "---\ntags: [recipe]\n---\nCorn flour.\n\n[[Pancakes]]\n",
-                actual = viewModel.state.value.isReading to store.texts.getValue(AREPAS)
             )
         }
 
@@ -459,24 +361,6 @@ class EditorTextEditsTest : EditorViewModelTestBase() {
                 )
             ),
             actual = effects
-        )
-    }
-
-    @Test
-    fun `find switches back to edit mode, which is then remembered`() = runEditorTest {
-        open(path = AREPAS)
-        viewModel.onIntent(intent = EditorIntent.OnReadModeToggle)
-
-        viewModel.onIntent(intent = EditorIntent.OnFindOpen)
-        runCurrent()
-
-        assertEquals(
-            expected = Triple(false, FindState(), false),
-            actual = Triple(
-                viewModel.state.value.isReading,
-                viewModel.state.value.find,
-                preferences.isReading
-            )
         )
     }
 }

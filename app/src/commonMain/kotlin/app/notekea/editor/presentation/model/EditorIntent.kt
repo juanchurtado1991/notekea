@@ -24,7 +24,7 @@ sealed interface EditorIntent {
         EditorIntent,
         FeedIntent
 
-    /** A link to a note was clicked in Read mode; with `Mod` held its tab opens [inBackground]. */
+    /** A link to a note was clicked; with `Mod` held its tab opens [inBackground]. */
     data class OnLinkClick(
         val link: ReadLink.Note,
         val inBackground: Boolean = false
@@ -36,19 +36,19 @@ sealed interface EditorIntent {
      */
     data class OnFocusRequest(val path: RelativePath? = null) : EditorIntent
 
-    /** A task's checkbox was clicked in Edit mode: the task at [stateIndex] of the text is checked or unchecked. */
+    /** A task's checkbox was clicked: the task at [stateIndex] of the text is checked or unchecked. */
     data class OnTaskToggle(val stateIndex: Int) : EditorIntent
 
-    /** `Mod+Enter`: the task on the cursor's line, if any, is checked or unchecked (Edit mode only). */
+    /** `Mod+Enter`: the task on the cursor's line, if any, is checked or unchecked. */
     data object OnTaskToggleShortcut : EditorIntent
 
-    /** A formatting toolbar button or shortcut: [action] is applied to the selection (Edit mode only). */
+    /** A formatting toolbar button or shortcut: [action] is applied to the selection. */
     data class OnFormat(val action: FormatAction) : EditorIntent
 
     /** The toolbar's Link to a note (`Mod+K`): the window lets the person pick the note to link. */
     data object OnNoteLinkRequest : EditorIntent
 
-    /** A `#tag` clicked in Read mode: it is searched in all notes. */
+    /** A `#tag` clicked: it is searched in all notes. */
     data class OnTagClick(val tag: String) : EditorIntent
 
     /** Esc in the find bar: close it, leaving the current match selected in the text. */
@@ -122,11 +122,8 @@ sealed interface EditorIntent {
 
     data object OnActionErrorDismiss : EditorIntent
 
-    /** The toolbar's Source button: show the whole note as written, or as it looks again. */
+    /** The toolbar's Source button or Mod+E: show the whole note as written, or as it looks again. */
     data object OnSourceModeToggle : EditorIntent
-
-    /** Mod+E or the header button: switch between Edit and Read mode. */
-    data object OnReadModeToggle : EditorIntent
 
     /** Write the deleted note back with the editor's text. */
     data object OnRestore : EditorIntent

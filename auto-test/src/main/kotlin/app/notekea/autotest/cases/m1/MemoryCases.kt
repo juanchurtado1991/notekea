@@ -3,6 +3,7 @@ package app.notekea.autotest.cases.m1
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasContentDescription
 import app.notekea.autotest.clickInTree
+import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.expectOrderOnScreen
 import app.notekea.autotest.openNote
 import app.notekea.autotest.pressInWindow
@@ -90,7 +91,7 @@ private fun SuiteBuilder.picturesComeBack() {
             shownText = "A picture at its own size"
         )
 
-        pressInWindow(shortcut = Mod + Key.E)
+        cursorToNoteStart()
         expectPictures(atLeast = 2)
 
         openNote(

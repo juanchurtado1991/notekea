@@ -20,7 +20,7 @@ import kotlin.test.assertEquals
 /**
  * The workspace's status bar, rendered headless: the vault and the note's folders, the scan while it
  * runs, then the cursor's place in the file (after the frontmatter's lines), the line endings, the encoding and the
- * words; Preview leaves the cursor out.
+ * words; a note with Unix line endings and no count says less.
  */
 class WorkspaceStatusBarScreenTest {
     @Test
@@ -36,17 +36,16 @@ class WorkspaceStatusBarScreenTest {
                 "UTF-8",
                 "236 words",
                 "Saved"
-            ) to listOf("Playground Vault", "Editor", "Tasks and callouts", "LF", "UTF-8", "Saved"),
-            actual = texts(isReading = false) to texts(isReading = true)
+            ) to listOf("Playground Vault", "Editor", "Tasks and callouts", "6:6", "LF", "UTF-8", "Saved"),
+            actual = texts(isPlain = false) to texts(isPlain = true)
         )
     }
 
-    private fun texts(isReading: Boolean): List<String> {
+    private fun texts(isPlain: Boolean): List<String> {
         var texts = emptyList<String>()
 
         val editor = EditorState(
-            isReading = isReading,
-            usesCrLf = !isReading,
+            usesCrLf = !isPlain,
             bodyStartLine = 3,
             info = NoteInfo(
                 stats = NoteStats(
@@ -55,7 +54,7 @@ class WorkspaceStatusBarScreenTest {
                     tags = 2,
                     tasks = 9,
                     doneTasks = 4
-                ).takeUnless { isReading }
+                ).takeUnless { isPlain }
             )
         )
 
@@ -68,7 +67,7 @@ class WorkspaceStatusBarScreenTest {
                 NotekeaTheme(darkTheme = false) {
                     WorkspaceStatusBar(
                         vaultName = VAULT,
-                        isLoading = !isReading,
+                        isLoading = !isPlain,
                         onReveal = {},
                         path = RelativePath(value = NOTE),
                         kind = TabKind.NOTE,

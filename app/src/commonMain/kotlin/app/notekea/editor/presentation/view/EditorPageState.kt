@@ -28,7 +28,6 @@ internal class EditorPageState(
     val buffer: TextFieldState,
     val listState: LazyListState,
     val focusRequester: FocusRequester,
-    private val isReading: () -> Boolean,
     private val isSource: () -> Boolean
 ) {
     private val shownTexts = ShownTextBuilder()
@@ -39,8 +38,6 @@ internal class EditorPageState(
         val selection = buffer.selection
 
         val window = when {
-            isReading() -> null
-
             // Source shows the whole note as written, in the text field.
             isSource() -> 0 until blocks.size
 
@@ -58,13 +55,10 @@ internal class EditorPageState(
 
     /** The cursor's block if it is one table and nothing else, to edit by cells; never in Source. */
     private val blockTable: TableText? by derivedStateOf {
-        val block = items
-            .window
-            ?.takeIf {
-                !isSource() && it.first == it.last
-            }
-            ?.first
-            ?: return@derivedStateOf null
+        val window = items.window
+        val block = window.first
+
+        if (isSource() || block != window.last) return@derivedStateOf null
 
         TableText.of(
             text = items.textOf(

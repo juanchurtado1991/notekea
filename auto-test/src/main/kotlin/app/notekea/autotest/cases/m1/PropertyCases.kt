@@ -30,7 +30,7 @@ fun SuiteBuilder.propertyCases() {
     firstProperty()
     propertiesSource()
     brokenProperties()
-    propertiesInPreview()
+    propertiesOfEachNote()
 }
 
 private fun SuiteBuilder.propertiesShown() {
@@ -334,13 +334,12 @@ private fun SuiteBuilder.brokenProperties() {
     }
 }
 
-private fun SuiteBuilder.propertiesInPreview() {
+private fun SuiteBuilder.propertiesOfEachNote() {
     automated(
         id = "1.14-07",
-        title = "Properties are edited in Preview too, and every note shows its own"
+        title = "A property edited is saved, and every note shows its own"
     ) {
         openPractice()
-        pressInWindow(shortcut = Mod + Key.E)
 
         editField(
             current = "draft",

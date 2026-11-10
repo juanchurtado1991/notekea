@@ -90,8 +90,7 @@ class EditorViewModel(
     private val disk =
         EditorDisk(host, vaultPath, openNote, observeNoteOnDisk, saving) { autosaveJob?.cancel() }
     private val renaming = EditorRenaming(host, vaultPath, renameAndUpdateLinks, disk, ::saveNow)
-    private val templates =
-        EditorTemplates(host, vaultPath, fillTemplate, saving, textEdits) { chooseMode(false) }
+    private val templates = EditorTemplates(host, vaultPath, fillTemplate, saving, textEdits)
     private val focus = EditorFocus(
         host = host,
         textEdits = textEdits
@@ -99,24 +98,11 @@ class EditorViewModel(
 
     private var autosaveJob: Job? = null
 
-    // The mode every note opens in: the one the user last chose, here and in earlier runs.
-    private var isReadingChosen = false
-
     init {
         launchGuarded(onError = ::showUnexpectedError) {
-            isReadingChosen = editorPreferences.isReadMode()
             properties.loadFold()
 
-            reduce {
-                val opened = it
-                    .copy(isPropertiesExpanded = properties.isExpandedChosen)
-
-                if (it.find == null) {
-                    opened.copy(isReading = isReadingChosen)
-                } else {
-                    opened
-                }
-            }
+            reduce { it.copy(isPropertiesExpanded = properties.isExpandedChosen) }
         }
 
         launchGuarded(onError = ::showUnexpectedError) {
@@ -158,7 +144,12 @@ class EditorViewModel(
 
             EditorIntent.OnFindNext -> find.moveToMatch(step = 1)
 
-            EditorIntent.OnFindOpen -> openFind()
+            EditorIntent.OnFindOpen -> reduce {
+                it.copy(
+                    isRevealing = false,
+                    find = it.find ?: FindState()
+                )
+            }
 
             EditorIntent.OnFindPrevious -> find.moveToMatch(step = -1)
 
@@ -210,8 +201,6 @@ class EditorViewModel(
 
             EditorIntent.OnTitleErrorDismiss -> reduce { it.copy(titleError = null) }
 
-            EditorIntent.OnReadModeToggle -> chooseMode(isReading = !state.value.isReading)
-
             EditorIntent.OnSourceModeToggle -> reduce { it.copy(isSourceMode = !it.isSourceMode) }
 
             else -> onNavigationIntent(intent = intent)
@@ -251,32 +240,7 @@ class EditorViewModel(
         }
     }
 
-    /** Find works on the Markdown, so it switches to Edit mode, which is then the mode remembered. */
-    private fun openFind() {
-        reduce { it.copy(find = it.find ?: FindState()) }
-
-        chooseMode(isReading = false)
-    }
-
-    /** Shows [isReading]'s mode and remembers it for the next notes and runs. */
-    private fun chooseMode(isReading: Boolean) {
-        reduce {
-            it.copy(
-                isReading = isReading,
-                isRevealing = false,
-                find = if (isReading) null else it.find
-            )
-        }
-
-        if (isReading == isReadingChosen) return
-        isReadingChosen = isReading
-
-        launchGuarded(onError = ::showUnexpectedError) {
-            editorPreferences.setReadMode(isReading = isReading)
-        }
-    }
-
-    /** Asks the panes around the editor to open the note a Read mode link leads to, from the open note. */
+    /** Asks the panes around the editor to open the note a link leads to, from the open note. */
     private fun openLink(link: ReadLink.Note, inBackground: Boolean) {
         val source = state.value.notePath ?: return
 
@@ -356,7 +320,6 @@ class EditorViewModel(
             EditorState(
                 notePath = path,
                 isLoading = path != null,
-                isReading = isReadingChosen,
                 isPropertiesExpanded = properties.isExpandedChosen
             )
         }

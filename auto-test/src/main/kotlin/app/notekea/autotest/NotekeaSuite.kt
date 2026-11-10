@@ -6,6 +6,7 @@ import app.notekea.autotest.cases.m1.attachmentCases
 import app.notekea.autotest.cases.m1.bookmarkCases
 import app.notekea.autotest.cases.m1.dailyCases
 import app.notekea.autotest.cases.m1.editorCases
+import app.notekea.autotest.cases.m1.editorTableCases
 import app.notekea.autotest.cases.m1.editorViewCases
 import app.notekea.autotest.cases.m1.embedCases
 import app.notekea.autotest.cases.m1.formattingCases
@@ -70,6 +71,7 @@ object NotekeaSuite {
             treeChangeCases()
             editorCases()
             editorViewCases()
+            editorTableCases()
             quickSwitcherCases()
             searchCases()
             taskCases()

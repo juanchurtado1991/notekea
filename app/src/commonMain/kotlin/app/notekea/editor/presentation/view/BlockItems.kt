@@ -5,34 +5,30 @@ import app.notekea.editor.domain.NoteBlocks
 
 /**
  * The note's [blocks] as the items of the editor's list: one item per block, except the blocks of the [window] (the
- * ones the selection touches), which share one item, the text field. No window (Read mode) is every block drawn.
+ * ones the selection touches), which share one item, the text field.
  */
 internal data class BlockItems(
     val blocks: NoteBlocks,
-    val window: IntRange?
+    val window: IntRange
 ) {
-    private val span: Int get() = window?.let {
-        it.last - it.first
-    } ?: 0
+    private val span: Int get() = window.last - window.first
 
     val count: Int get() = blocks.size - span
 
     /** The part of the note's text the text field shows. */
     val shown: TextRange
-        get() = window?.let {
-            TextRange(
-                start = blocks.start(index = it.first),
-                end = blocks.textEnd(window = it)
-            )
-        } ?: TextRange.Zero
+        get() = TextRange(
+            start = blocks.start(index = window.first),
+            end = blocks.textEnd(window = window)
+        )
 
-    fun isWindow(item: Int): Boolean = item == window?.first
+    fun isWindow(item: Int): Boolean = item == window.first
 
     /** The block the [item] draws; the window's first block for the text field. */
-    fun blockOf(item: Int): Int = if (window == null || item <= window.first) item else item + span
+    fun blockOf(item: Int): Int = if (item <= window.first) item else item + span
 
     fun itemOf(block: Int): Int = when {
-        window == null || block < window.first -> block
+        block < window.first -> block
         block <= window.last -> window.first
         else -> block - span
     }

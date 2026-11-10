@@ -38,7 +38,6 @@ class EditorToolbarFitScreenTest {
                 NotekeaTheme(darkTheme = false) {
                     Box(modifier = Modifier.width(width = TOOLBAR_WIDTH_DP.dp)) {
                         EditorToolbar(
-                            isReading = false,
                             isSource = false,
                             platformConventions = PreviewPlatformConventions.linux,
                             onIntent = { intents += it }
@@ -73,7 +72,7 @@ class EditorToolbarFitScreenTest {
         private const val MORE = "More"
         private const val SETTLE_FRAMES = 4
         private const val TEMPLATE = "Insert template"
-        private const val TOOLBAR_WIDTH_DP = 400
+        private const val TOOLBAR_WIDTH_DP = 300
         private const val WIDTH = 700
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.hasContentDescription
+import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.pressInWindow
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
@@ -18,8 +19,7 @@ private const val TASKS_NOTE = "Tasks and callouts"
 private const val TASKS_FILE = "$PLAYGROUND/Editor/Tasks and callouts.md"
 private const val SHOWN = "Buy corn flour"
 private const val OPEN_TASKS =
-    "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Open the note Editor › Tasks and callouts " +
-        "and click Preview under its title."
+    "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Open the note Editor › Tasks and callouts."
 
 /** The cases of 1.7, tasks and callouts (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.taskCases() {
@@ -50,18 +50,6 @@ private fun SuiteBuilder.tasksShowAsCheckboxes() {
         )
 
         expectLastTasks(states = listOf(false, true))
-
-        pressInWindow(shortcut = Mod + Key.E)
-
-        expectNoText(
-            text = "- [x] Soak the beans",
-            substring = true
-        )
-
-        expectText(
-            text = "Soak the beans",
-            substring = true
-        )
     }
 }
 
@@ -156,13 +144,8 @@ private fun SuiteBuilder.calloutFolding() {
             shownText = SHOWN
         )
 
-        pressInWindow(shortcut = Mod + Key.E)
-
-        // Wait for Preview before clicking a title: until it shows, the words are the editor's text, not a callout.
-        expectNoText(
-            text = "[!faq]",
-            substring = true
-        )
+        // In the cursor's block the words are the editor's text, not a callout.
+        cursorToNoteStart()
 
         scrollTo(
             text = "A folded question",

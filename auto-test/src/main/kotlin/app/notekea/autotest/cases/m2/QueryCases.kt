@@ -3,6 +3,7 @@ package app.notekea.autotest.cases.m2
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasText
 import app.notekea.autotest.clickLast
+import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.expectOrderOnScreen
 import app.notekea.autotest.openNote
 import app.notekea.autotest.openVault
@@ -162,7 +163,7 @@ private fun SuiteBuilder.cellsEditNotes() {
 private fun SuiteBuilder.savedInANote() {
     automated(
         id = "2.10-05",
-        title = "A query saved in a note is a table in Preview and YAML in the note"
+        title = "A query saved in a note is a table in the note and YAML in its file"
     ) {
         openVault(
             name = SAMPLE,
@@ -187,7 +188,7 @@ private fun SuiteBuilder.savedInANote() {
         )
 
         click(text = "Reading list")
-        pressInWindow(shortcut = Mod + Key.E)
+        cursorToNoteStart()
         expectText(text = "Folder is Books")
     }
 }
@@ -212,10 +213,12 @@ private fun SuiteBuilder.queryStates() {
             text = STATE_BLOCKS
         )
 
-        pressInWindow(shortcut = Mod + Key.E)
+        cursorToNoteStart()
         expectText(text = "This query can't be read")
         expectText(text = "Line 1: a query holds only filters, sort and columns.")
         expectText(text = "0 notes")
+        // The note is a lazy list: the last block is made once the page is scrolled to it.
+        scrollTo(text = "No note has the property mood.")
         expectText(text = "No note has the property mood.")
     }
 }

@@ -20,25 +20,6 @@ class SettingsEditorPreferencesStoreTest {
     )
 
     @Test
-    fun `notes open in edit mode until read mode is chosen, which is remembered`() = runTest(
-        context = testDispatcher
-    ) {
-        val firstRun = store.isReadMode()
-
-        store.setReadMode(isReading = true)
-
-        val nextStore = SettingsEditorPreferencesStore(
-            settings = settings,
-            dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
-        )
-
-        assertEquals(
-            expected = false to true,
-            actual = firstRun to nextStore.isReadMode()
-        )
-    }
-
-    @Test
     fun `the side panel is shown at its default width, open, until it is changed, which is remembered`() =
         runTest(context = testDispatcher) {
             val firstRun = store.sidePanel()

@@ -40,7 +40,7 @@ internal fun FollowScroll(
     val path = state.notePath
     val margin = with(LocalDensity.current) { CURSOR_MARGIN_DP.dp.toPx() }
 
-    LaunchedEffect(page, path, state.isLoading, state.isReading) {
+    LaunchedEffect(page, path, state.isLoading) {
         if (path == null || state.isLoading) return@LaunchedEffect
         val list = page.listState
 
@@ -61,7 +61,7 @@ internal fun FollowScroll(
         }
 
         launch {
-            snapshotFlow { page.items.window?.first }.drop(count = 1).collect {
+            snapshotFlow { page.items.window.first }.drop(count = 1).collect {
                 page.showCursor(margin = margin)
             }
         }
@@ -218,7 +218,7 @@ private suspend fun EditorPageState.showCursor(margin: Float) {
     // What calls this follows state the list writes while it measures, and a list cannot be scrolled then.
     withFrameNanos {}
 
-    val window = items.window ?: return
+    val window = items.window
     val index = LEADING_ITEMS + window.first
     val seen = seen(top = toolbarHeight)
 

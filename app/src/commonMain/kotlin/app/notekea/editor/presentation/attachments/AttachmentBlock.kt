@@ -29,7 +29,7 @@ import app.notekea.resources.embedded_note_open
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * One embedded file as the note shows it, in Read and Edit mode alike: a picture at its width, a file chip that opens
+ * One embedded file as the note shows it: a picture at its width, a file chip that opens
  * the file with its app, its path and Locate… for a file that cannot be found, or an embedded note's text in a frame
  * whose title opens the note; a note that cannot be shown says why ([EmbedNoticeBlock]).
  */

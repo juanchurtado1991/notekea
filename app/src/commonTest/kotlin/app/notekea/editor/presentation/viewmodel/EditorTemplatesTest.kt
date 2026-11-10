@@ -57,44 +57,40 @@ class EditorTemplatesTest {
     }
 
     @Test
-    fun `in read mode the request turns to edit, and the template goes in at the cursor with its properties saved`() =
-        runTemplateTest {
-            open(path = AREPAS)
-            send(intent = EditorIntent.OnReadModeToggle)
-            val effects = collectEffects()
+    fun `the template goes in at the cursor with its properties saved`() = runTemplateTest {
+        open(path = AREPAS)
+        val effects = collectEffects()
 
-            viewModel.buffer.edit { selection = TextRange(index = AREPAS_BODY.length) }
+        viewModel.buffer.edit { selection = TextRange(index = AREPAS_BODY.length) }
 
-            send(intent = EditorIntent.OnTemplateRequest)
+        send(intent = EditorIntent.OnTemplateRequest)
 
-            // The picker takes the keyboard, which moves the text field's selection: the template still goes where it
-            // was.
-            viewModel.buffer.edit { selection = TextRange(index = 0) }
+        // The picker takes the keyboard, which moves the text field's selection: the template still goes where it
+        // was.
+        viewModel.buffer.edit { selection = TextRange(index = 0) }
 
-            send(intent = EditorIntent.OnTemplateInsert(template = TEMPLATE))
+        send(intent = EditorIntent.OnTemplateInsert(template = TEMPLATE))
 
-            val body = "# Arepas\n\nMix.\n## Notes for Arepas, 2026-10-26\n"
+        val body = "# Arepas\n\nMix.\n## Notes for Arepas, 2026-10-26\n"
 
-            assertEquals(
-                expected = listOf(
-                    false,
-                    body,
-                    TextRange(index = body.length),
-                    "---\ntags:\n  - recipe\n  - meal\nsource: Grandma\n---\n$body",
-                    listOf(EditorEffect.RequestTemplate, EditorEffect.FocusText)
-                ),
-                actual = listOf(
-                    viewModel.state.value.isReading,
-                    viewModel
-                        .buffer
-                        .text
-                        .toString(),
-                    viewModel.buffer.selection,
-                    fixture.store.texts[AREPAS],
-                    effects.toList()
-                )
+        assertEquals(
+            expected = listOf(
+                body,
+                TextRange(index = body.length),
+                "---\ntags:\n  - recipe\n  - meal\nsource: Grandma\n---\n$body",
+                listOf(EditorEffect.RequestTemplate, EditorEffect.FocusText)
+            ),
+            actual = listOf(
+                viewModel
+                    .buffer
+                    .text
+                    .toString(),
+                viewModel.buffer.selection,
+                fixture.store.texts[AREPAS],
+                effects.toList()
             )
-        }
+        )
+    }
 
     @Test
     fun `an empty note becomes the template whole, its properties included`() = runTemplateTest {

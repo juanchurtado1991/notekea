@@ -19,7 +19,8 @@ long the idle steps wait (0, no waiting, in a plain test run); `-PsmokeJvmArgs` 
 The memory runs (`ROADMAP.md` 1.18) are the workload of a pass:
 
 - **Personal Notes** (`smoke-data/vaults/Personal Notes`, plus a generated 2,000-line `Long note`): opened, 12 notes
-  opened in tabs and closed, a text search, the long note scrolled to its end in Edit and then in Preview, idle one
+  opened in tabs and closed, a text search, the long note scrolled to its end as it reads and then in Source (in
+  Edit and then in Preview until One editing mode), idle one
   minute and the whole idle time, the vault left for the welcome screen, and opened again.
 - **Ghost Serializer** (`smoke-data/vaults/Ghost Serializer`: a code repository as 371 notes of 250–550 words, one per
   Kotlin file, with their links): opened, 20 of its larger notes opened in tabs and closed, a text search over every
@@ -283,3 +284,28 @@ The idle collection and the trim wake the app: idle, it uses 0.26% of one core w
 Not measured: Windows and macOS. Not cut: the growth of the test runs against 1.18, which the packaged app does not show,
 and the cost of a long note open while indexing.
 
+## Post-MVP — One editing mode
+
+Linux, test JVM, the stand-in embedder, `-PidleSeconds=0`, one run of the Personal Notes memory run
+(`./gradlew :auto-test:smokeRun --tests "*PersonalNotesMemoryRunTest*"`). Edit and Preview are gone: the note is a
+lazy list of blocks drawn as they read, with one text field over the cursor's blocks, and Source is the whole note in
+one text field. In megabytes; the 2.9 column is the median of three of that pass.
+
+| Moment | Heap | Committed heap | Resident | Resident in 2.9 |
+|---|---|---|---|---|
+| opened | 56 | 113 | 538 | 522 |
+| 12 notes open | 77 | 140 | 657 | 723 |
+| notes closed | 76 | 140 | 666 | |
+| long note scrolled as it reads | 81 | 144 | 703 | 890 (Edit) |
+| long note scrolled in Source | 92 | 170 | 855 | 1057 (Preview) |
+| vault closed | 76 | 170 | 855 | 1061 |
+
+What it says:
+
+- **The long note stopped being the cost.** Scrolling its 2,000 lines adds 37 MB to the process; it added about 170 MB
+  in Edit and 170 MB more in Preview. Only the blocks on screen are composed, and they leave when they scroll away.
+- Source is the old editor: the whole note laid out in one text field, which adds about 150 MB and types as slowly
+  as Edit did on a long note (`docs/spikes/2026-11-09-one-editing-mode.md`: 1,380 ms per key against 6 ms).
+- As before, nothing comes back when the note or the vault closes.
+
+Not measured: Windows and macOS, the packaged app, and a median of several runs.

@@ -32,7 +32,7 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             toggleSidebarShortcut = primary(ShortcutKey.BACKSLASH, null),
             saveShortcut = primary(ShortcutKey.S, null),
             findShortcut = primary(ShortcutKey.F, null),
-            toggleReadModeShortcut = primary(ShortcutKey.E, null),
+            toggleSourceShortcut = primary(ShortcutKey.E, null),
             quickSwitcherShortcut = primary(ShortcutKey.P, null),
             searchNotesShortcut = primary(ShortcutKey.F, ShortcutModifier.SHIFT),
             toggleTaskShortcut = primary(ShortcutKey.ENTER, null),

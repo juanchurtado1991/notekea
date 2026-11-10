@@ -11,7 +11,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.percentDecoded
 
 /**
- * Links in Read mode. [prepare] rewrites what the renderer does not know as Markdown links: a wiki link to
+ * Links in a drawn note. [prepare] rewrites what the renderer does not know as Markdown links: a wiki link to
  * `notekea:<target>`, a tag to `notekea-tag:<tag>`, an embedded note as a plain link and a file embedded in a paragraph
  * or table cell as an image or link. [classify] turns a clicked link back into a note, a tag, a file or an address.
  */
@@ -139,7 +139,7 @@ class ReadModeLinks {
 
     /**
      * A file embedded in a paragraph or a table cell: an image becomes a Markdown image (`photo.png|80` →
-     * `![photo.png](notekea-file:photo.png?width=80)`), drawn by Read mode at that width; any other file a link that
+     * `![photo.png](notekea-file:photo.png?width=80)`), drawn at that width; any other file a link that
      * opens it (`menu.pdf|The menu` → `[The menu](notekea-file:menu.pdf)`).
      */
     private fun fileEmbed(inner: String): String {

@@ -2,6 +2,7 @@ package app.notekea.autotest.cases.m1
 
 import androidx.compose.ui.input.key.Key
 import app.notekea.autotest.SmokeScenarios
+import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.expectNotInNoteText
 import app.notekea.autotest.noteText
 import app.notekea.autotest.openNote
@@ -111,7 +112,7 @@ private fun SuiteBuilder.paletteKeyboard() {
 private fun SuiteBuilder.tagLink() {
     automated(
         id = "1.6-07",
-        title = "A tag in Preview opens the search for it"
+        title = "A tag in a note opens the search for it"
     ) {
         openVault(
             name = PERSONAL_NOTES,
@@ -123,10 +124,8 @@ private fun SuiteBuilder.tagLink() {
             shownText = "#travel"
         )
 
-        pressInWindow(shortcut = Mod + Key.E)
-        // Wait for Preview before clicking the tag: until it shows, the words are the editor's text, not a link.
-        // Connections can quote the same line, so only the note's own text field counts.
-        expectNotInNoteText(part = "[[Lisbon trip]]")
+        // In the cursor's block the words are the editor's text, not a link.
+        cursorToNoteStart()
 
         expectText(
             text = "#travel",

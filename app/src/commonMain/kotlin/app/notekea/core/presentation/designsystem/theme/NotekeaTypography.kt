@@ -73,7 +73,7 @@ fun notekeaTypography(): Typography {
         ),
         titleLarge = base.titleLarge.withInter(inter, FontWeight.SemiBold, TITLE_SIZE_SP),
         titleMedium = base.titleMedium.withInter(inter, FontWeight.Medium, LARGE_SIZE_SP),
-        // The notes' text, in Edit and Preview: lines as far apart as long reading wants (Bear, iA Writer).
+        // The notes' text, typed and drawn: lines as far apart as long reading wants (Bear, iA Writer).
         bodyLarge = base
             .bodyLarge
             .withInter(inter, FontWeight.Normal, LARGE_SIZE_SP)

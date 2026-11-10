@@ -78,8 +78,8 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
 - **Post-MVP repositories** (`ROADMAP.md`, post-MVP): clone the repository as it is, index it with a parser, answer
   with file and line; Notekea never writes notes about the code nor writes code.
 - **One editing mode** (`ROADMAP.md`, post-MVP item 4): the plan and the design were agreed on 2026-11-09, and
-  both spikes are done (`docs/spikes/2026-11-09-one-editing-mode.md`). Steps 2 to 5 of the plan below are written on
-  `feature/one-editing-mode`; the next is step 6. Design: the cursor's line shows
+  both spikes are done (`docs/spikes/2026-11-09-one-editing-mode.md`). Steps 2 to 6 of the plan below are written on
+  `feature/one-editing-mode`; what is left is under the steps. Design: the cursor's line shows
   all its Markdown marks, muted, and every other line looks finished (the two designs not chosen revealed only the
   element under the cursor, or the whole block). The raw Markdown is a "Source" action that takes over today's
   Edit/Preview shortcut.
@@ -133,9 +133,16 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
      - The room for the bar stays above every table in Edit, so nothing moves when the cursor comes in. A note
        that starts with a table gets text above it only in Source.
      - The table is parsed again on every key typed in a cell.
-  6. Long notes and memory against Preview with the `:auto-test` memory runs; then the Edit/Preview control,
-     `EditorState.isReading` and its preference go (`ReadingView` stays for embedded notes), with the Auto-Test
-     cases, the QA documents, the strings in every locale and the changelog.
+  6. Edit and Preview are gone (done): `EditorState.isReading`, its preference, the tabs and `OnReadModeToggle`
+     went; `Mod+E` (`toggleSourceShortcut`) and the toolbar's button turn Source on and off, which a note forgets
+     when it closes. `ReadingView` stays: it draws the blocks and the embedded notes. The memory run scrolls the
+     long note as it reads and in Source (`docs/performance.md`, "Post-MVP — One editing mode": 37 MB for the long
+     note, against 170 in Edit and 170 more in Preview). The Auto-Test cases that went to Preview put the cursor
+     at the note's start instead (`cursorToNoteStart`), since the cursor's block shows as written; a text of the
+     note is always in the field's semantics, so a case cannot wait for Markdown to "go away": it looks for what
+     is drawn. Cases 1.5-08, 1.5-10, 1.5-12 and 1.9-04 were rewritten, 1.5-14 and 1.5-15 (tables) are new.
+     Known limits: a link, a tag or a callout's title in the cursor's own block is text, not a click target; the
+     toolbar's formatting groups stay at the end of the bar, where they were beside the tabs.
   Also decided on 2026-11-10: "Source" is a button at the end of the formatting toolbar, marked while it is on
   (Notekea has no palette of commands, only the note switcher, so the button and the shortcut are its two ways
   in); the editor's colours are the "accents" option (only links, tags and code take

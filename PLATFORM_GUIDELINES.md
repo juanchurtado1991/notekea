@@ -52,7 +52,7 @@ primary modifier and resolved per platform.
 | Web link | `Cmd+Shift+K` | `Ctrl+Shift+K` |
 | Show or hide Files (the sidebar) | `Cmd+\` | `Ctrl+\` |
 | Show or hide the side panel | `Cmd+Shift+\` | `Ctrl+Shift+\` |
-| Edit / Preview | `Cmd+E` | `Ctrl+E` |
+| Source (the note as written) | `Cmd+E` | `Ctrl+E` |
 | Go to the outline | `Cmd+Shift+O` | `Ctrl+Shift+O` |
 | Today's daily note | `Cmd+D` | `Ctrl+D` |
 | Previous / next daily note | `Cmd+Option+←` / `Cmd+Option+→` | `Ctrl+Alt+←` / `Ctrl+Alt+→` |

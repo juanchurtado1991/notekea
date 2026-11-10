@@ -11,7 +11,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.wikiPath
 
 /**
- * Where a link clicked in Read mode leads, resolved among `notes` from the note `source` ([LinkResolver]). A wiki link
+ * Where a link clicked in a note leads, resolved among `notes` from the note `source` ([LinkResolver]). A wiki link
  * to a name several notes share opens the closest one; one to a missing note creates it where the link says
  * ([wikiPath]), unless it leaves the vault or cannot be a file. A Markdown link to a missing file is reported instead.
  */

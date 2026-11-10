@@ -94,7 +94,7 @@ private fun Modifier.readableWidth(): Modifier = layout { measurable, constraint
 }
 
 /**
- * Find's matches for the blocks drawn as Read mode draws them, or null while Find is closed. The query is read when a
+ * Find's matches for the blocks drawn as they read, or null while Find is closed. The query is read when a
  * block is painted, so typing it paints the blocks again without laying them out.
  */
 @Composable
@@ -119,7 +119,7 @@ private fun rememberFindMarks(find: FindState?): TextMarks? {
 
 /**
  * The note's page as a list, so only what is in view is composed: its header, the sticky toolbar, then the note's
- * blocks, drawn as Read mode draws them except the ones the cursor is in, which are the text field ([EditorWindow]).
+ * blocks, drawn as they read except the ones the cursor is in, which are the text field ([EditorWindow]).
  * A block has no identity of its own, so its place in the note is its key.
  */
 @OptIn(ExperimentalFoundationApi::class)
@@ -167,7 +167,6 @@ internal fun EditorList(
                 PageItem(bringIntoView = defaultBringIntoView) {
                     if (state.notePath != null) {
                         EditorToolbar(
-                            isReading = state.isReading,
                             isSource = state.isSourceMode,
                             platformConventions = platformConventions,
                             onIntent = onIntent,
@@ -242,7 +241,6 @@ private fun LazyListScope.blocks(
                     ),
                     textStart = items.blocks.start(index = block),
                     attachments = state.attachments,
-                    isReading = state.isReading,
                     onIntent = onIntent,
                     onClick = { position, drawnHeight, isExtending ->
                         page.click(
@@ -331,7 +329,6 @@ private fun EditorListPreview() {
             buffer = buffer,
             listState = listState,
             focusRequester = FocusRequester(),
-            isReading = { false },
             isSource = { false }
         )
     }

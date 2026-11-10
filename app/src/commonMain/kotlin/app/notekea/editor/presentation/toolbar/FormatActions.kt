@@ -5,7 +5,7 @@ import app.notekea.editor.domain.FormatAction
 
 /**
  * The toolbar's [FormatAction]s with their placeholders in the app's language, so the toolbar and the shortcuts insert
- * the same text. A callout is titled with its type in plain words ([calloutTitles]), as Read mode shows it; a table's
+ * the same text. A callout is titled with its type in plain words ([calloutTitles]), as a note shows it; a table's
  * cells hold sample text ([tableCellText]) under numbered column names.
  */
 data class FormatActions(

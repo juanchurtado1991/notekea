@@ -1,6 +1,7 @@
 package app.notekea.autotest.cases.m1
 
 import androidx.compose.ui.input.key.Key
+import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.notekea
 import app.notekea.autotest.openNote
 import app.notekea.autotest.pressInWindow
@@ -13,16 +14,17 @@ import com.testbuddy.SuiteBuilder
 
 private const val READ_MODE = "Read mode"
 private const val RAW_BOLD = "Some **bold**"
+private const val DRAWN_TASK = "A task to do"
 private const val OPEN_READ_MODE =
     "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Open the note Editor › Read mode."
 
-/** The cases of 1.5 that show a note: how it looks, finding in it, Preview and its links (`MVP_SMOKE_TEST.md`). */
+/** The cases of 1.5 that show a note: how it looks, finding in it, Source and its links (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.editorViewCases() {
     editLook()
     findInNote()
-    previewRemembered()
-    previewLinks()
-    previewLook()
+    sourceAndBack()
+    noteLinks()
+    readingLook()
     createdKept()
 }
 
@@ -32,17 +34,18 @@ private fun SuiteBuilder.editLook() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "How a note looks while you edit it")
+        title(text = "The line the cursor is on shows its Markdown signs")
 
         steps(
-            text = "$OPEN_READ_MODE\n3. Stay in Edit (the Edit tab under the title) and look at the text."
+            text = "$OPEN_READ_MODE\n3. Click the words Some bold in the note and look at that line and at the " +
+                "others.\n4. Click Source (</>) at the end of the toolbar, look, and click it again."
         )
 
         expected(
             text =
-            "Headings are larger, bold and italic show as such, code uses a monospaced font on a shaded " +
-                "background, links are blue, tags are orange, the Markdown signs (#, **, [[) are muted, and the two " +
-                "tasks show a checkbox."
+            "The clicked line shows its Markdown signs (**, *, `, #) muted, with bold and italic as such; every " +
+                "other line stays as it reads. Source shows the whole note as written, with the signs muted, links " +
+                "and tags blue and code on a shaded background; the second click draws the note again."
         )
     }
 }
@@ -71,76 +74,37 @@ private fun SuiteBuilder.findInNote() {
     }
 }
 
-private fun SuiteBuilder.previewRemembered() {
+private fun SuiteBuilder.sourceAndBack() {
     automated(
         id = "1.5-10",
-        title = "Preview, and the mode is remembered"
+        title = "Source shows the note as written, and its button draws it again"
     ) {
         openPlaygroundNote(
             name = READ_MODE,
             shownText = RAW_BOLD
         )
 
-        press(shortcut = Mod + Key.E)
-
-        expectNoText(
-            text = RAW_BOLD,
-            substring = true
-        )
-
-        expectText(
-            text = "A finished task",
-            substring = true
-        )
-
-        openNote(
-            name = "Arepas",
-            shownText = "2 cups pre-cooked white corn flour"
-        )
-
-        expectNoText(
-            text = "## Ingredients",
-            substring = true
-        )
-
-        relaunch()
-
-        expectText(
-            text = "2 cups pre-cooked white corn flour",
-            substring = true
-        )
-
-        expectNoText(
-            text = "## Ingredients",
-            substring = true
-        )
-
+        // A task drawn in a block the cursor is not in is a text of its own; as written it is part of the note's.
+        expectText(text = DRAWN_TASK)
         pressInWindow(shortcut = Mod + Key.E)
-
-        expectText(
-            text = "## Ingredients",
-            substring = true
-        )
+        expectNoText(text = DRAWN_TASK)
+        clickIcon(label = "Source: the note as written")
+        expectText(text = DRAWN_TASK)
     }
 }
 
-private fun SuiteBuilder.previewLinks() {
+private fun SuiteBuilder.noteLinks() {
     automated(
         id = "1.5-11",
-        title = "Links in Preview open notes, make missing ones and open the web"
+        title = "Links open notes, make missing ones and open the web"
     ) {
         openPlaygroundNote(
             name = READ_MODE,
             shownText = RAW_BOLD
         )
 
-        press(shortcut = Mod + Key.E)
-
-        // Wait for Preview before clicking a link: until it shows, the words are the editor's text, not links.
-        expectNoText(
-            text = RAW_BOLD,
-            substring = true
-        )
+        // In the cursor's block the words are the editor's text, not links.
+        cursorToNoteStart()
 
         clickWords(words = "Arepas")
 
@@ -208,14 +172,14 @@ private fun SuiteBuilder.previewLinks() {
     }
 }
 
-private fun SuiteBuilder.previewLook() {
+private fun SuiteBuilder.readingLook() {
     manual(
         id = "1.5-12",
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "How a note looks in Preview")
-        steps(text = "$OPEN_READ_MODE\n3. Click Preview under the title and look at the note.")
+        title(text = "How a note reads")
+        steps(text = "$OPEN_READ_MODE\n3. Look at the note without clicking in its text.")
 
         expected(
             text =

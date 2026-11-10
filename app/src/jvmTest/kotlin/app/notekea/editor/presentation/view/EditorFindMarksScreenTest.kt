@@ -62,7 +62,6 @@ class EditorFindMarksScreenTest {
             ),
             listState = LazyListState(),
             focusRequester = FocusRequester(),
-            isReading = { false },
             isSource = { false }
         )
 

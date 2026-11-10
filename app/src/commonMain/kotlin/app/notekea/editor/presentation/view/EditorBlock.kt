@@ -31,16 +31,15 @@ import app.notekea.editor.presentation.reading.ReadingView
 private const val PREVIEW_TEXT = "Mix the **corn flour** with warm water.\n"
 
 /**
- * One block of the note the cursor is not in, drawn as Read mode draws it, with Find's [marks]; [text] starts
- * [textStart] into the note, and its last blank lines keep their height. In Edit mode [onClick] (where, how tall the
- * text is drawn, whether Shift was held) puts the cursor in it, or [onCellClick] in a cell of a block that is a table.
+ * One block of the note the cursor is not in, drawn as it reads, with Find's [marks]; [text] starts [textStart] into
+ * the note, and its last blank lines keep their height. [onClick] (where, how tall the text is drawn, whether Shift
+ * was held) puts the cursor in it, or [onCellClick] in a cell of a block that is a table; links take their clicks.
  */
 @Composable
 internal fun EditorBlock(
     text: String,
     textStart: Int,
     attachments: List<AttachmentView>,
-    isReading: Boolean,
     onIntent: (EditorIntent) -> Unit,
     onClick: (position: Offset, drawnHeight: Float, isExtending: Boolean) -> Unit,
     onCellClick: (row: Int, column: Int, x: Float) -> Unit,
@@ -68,7 +67,7 @@ internal fun EditorBlock(
     val currentOnCellClick by rememberUpdatedState(newValue = onCellClick)
 
     val isTable = remember(content) {
-        !isReading && TableText.of(text = content) != null
+        TableText.of(text = content) != null
     }
 
     val cells = remember {
@@ -77,25 +76,21 @@ internal fun EditorBlock(
         }
     }
 
-    val clicks = if (isReading) {
-        Modifier
-    } else {
-        Modifier
-            .pointerHoverIcon(icon = PointerIcon.Text)
-            .pointerInput(Unit) {
-                awaitEachGesture {
-                    awaitFirstDown()
+    val clicks = Modifier
+        .pointerHoverIcon(icon = PointerIcon.Text)
+        .pointerInput(Unit) {
+            awaitEachGesture {
+                awaitFirstDown()
 
-                    waitForUpOrCancellation()?.let {
-                        currentOnClick(
-                            it.position,
-                            size.height - blankHeight.toPx(),
-                            currentEvent.keyboardModifiers.isShiftPressed
-                        )
-                    }
+                waitForUpOrCancellation()?.let {
+                    currentOnClick(
+                        it.position,
+                        size.height - blankHeight.toPx(),
+                        currentEvent.keyboardModifiers.isShiftPressed
+                    )
                 }
             }
-    }
+        }
 
     Column(modifier = modifier.fillMaxWidth().then(other = clicks)) {
         if (isTable) {
@@ -112,7 +107,7 @@ internal fun EditorBlock(
                 attachments = attachments,
                 onIntent = onIntent,
                 marks = marks,
-                isSelectable = isReading,
+                isSelectable = false,
                 textStart = textStart
             )
         }
@@ -129,7 +124,6 @@ private fun EditorBlockPreview() {
             text = PREVIEW_TEXT,
             textStart = 0,
             attachments = emptyList(),
-            isReading = false,
             onIntent = {},
             onClick = { _, _, _ -> },
             onCellClick = { _, _, _ -> },

@@ -35,7 +35,7 @@ import kotlin.test.assertEquals
 class EditorAttachmentsScreenTest {
     @Test
     fun `in edit mode the chip of a file away from the cursor opens it, mod+v pastes and more picks a file`() {
-        val intents = render(isReading = false) { scene ->
+        val intents = render { scene ->
             click(
                 scene = scene,
                 position = EDIT_CHIP
@@ -73,7 +73,7 @@ class EditorAttachmentsScreenTest {
 
     @Test
     fun `in preview the chip opens the file and a missing one offers locate`() {
-        val intents = render(isReading = true) { scene ->
+        val intents = render { scene ->
             click(
                 scene = scene,
                 position = READ_CHIP
@@ -94,10 +94,7 @@ class EditorAttachmentsScreenTest {
         )
     }
 
-    private fun render(
-        isReading: Boolean,
-        actions: (ImageComposeScene) -> Unit
-    ): List<EditorIntent> {
+    private fun render(actions: (ImageComposeScene) -> Unit): List<EditorIntent> {
         val intents = mutableListOf<EditorIntent>()
 
         UiThread.run {
@@ -110,7 +107,6 @@ class EditorAttachmentsScreenTest {
                     EditorContent(
                         state = EditorState(
                             notePath = NOTE,
-                            isReading = isReading,
                             attachments = views()
                         ),
                         buffer = TextFieldState(
