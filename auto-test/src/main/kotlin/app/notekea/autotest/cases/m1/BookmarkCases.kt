@@ -69,7 +69,7 @@ private fun SuiteBuilder.menuBookmarks() {
         bookmarkFour()
         expectBookmarkOrder(names = listOf(WELCOME, "Recipes", PLATE, "Ideas"))
 
-        lowest(name = "Recipes").performMouseInput { this.rightClick() }
+        rightClickLowest(name = "Recipes")
 
         expectText(text = "Remove bookmark")
         press(key = Key.Escape)
@@ -167,7 +167,7 @@ private fun SuiteBuilder.bookmarksFollow() {
     ) {
         bookmarkFour()
 
-        lowest(name = "Recipes").performMouseInput { this.rightClick() }
+        rightClickLowest(name = "Recipes")
 
         click(text = "Rename")
         type(text = "Cooking")
@@ -185,7 +185,7 @@ private fun SuiteBuilder.bookmarksFollow() {
         expectBookmarkOrder(names = listOf("Start here", "Cooking", PLATE, "Ideas"))
 
         // The tree's menu, not the Delete key: after renaming, the key could still reach the title on a slow runner.
-        lowest(name = "Ideas").performMouseInput { this.rightClick() }
+        rightClickLowest(name = "Ideas")
 
         clickLast(text = "Delete folder")
         expectText(text = "Delete this folder?")
@@ -266,7 +266,7 @@ private fun CaseScope.bookmarkFour() {
 }
 
 private fun CaseScope.bookmarkFromMenu(name: String) {
-    lowest(name = name).performMouseInput { this.rightClick() }
+    rightClickLowest(name = name)
 
     click(text = "Bookmark")
 }
@@ -274,6 +274,20 @@ private fun CaseScope.bookmarkFromMenu(name: String) {
 /** The bookmarks list sits above the tree, so a bookmark is the highest row showing its name, the tree's the lowest. */
 private fun CaseScope.highest(name: String): SemanticsNodeInteraction = shown(name = name).minBy {
     it.top()
+}
+
+/**
+ * Right-clicks the lowest row that shows [name]. The tree is drawn anew after a rename, and a row found just before
+ * is then gone (macOS's runner failed 1.13-05 that way): the row is found again and clicked once more.
+ */
+private fun CaseScope.rightClickLowest(name: String) {
+    val isClicked = runCatching {
+        lowest(name = name).performMouseInput { this.rightClick() }
+    }.isSuccess
+
+    if (isClicked) return
+    ui.waitForIdle()
+    lowest(name = name).performMouseInput { this.rightClick() }
 }
 
 private fun CaseScope.lowest(name: String): SemanticsNodeInteraction = shown(name = name).maxBy {

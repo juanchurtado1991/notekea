@@ -12,9 +12,12 @@ import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.noteText
 import app.notekea.autotest.openVault
 import app.notekea.autotest.renameInTree
+import com.testbuddy.CaseScope
 import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
 
+private const val EMBED_TRIES = 10
+private const val EMBED_WAIT_MILLIS = 1_000L
 private const val IMAGES_NOTE = "Images and files"
 private const val IMAGES_FILE = "$PLAYGROUND/Editor/Images and files.md"
 private const val IMAGES_SHOWN = "A picture at its own size"
@@ -124,10 +127,7 @@ private fun SuiteBuilder.embeddedNotes() {
 
         cursorToNoteStart()
 
-        scrollTo(
-            text = "What the kitchen always needs.",
-            substring = true
-        )
+        scrollToEmbedded(text = "What the kitchen always needs.")
 
         expectText(
             text = "What the kitchen always needs.",
@@ -149,4 +149,27 @@ private fun SuiteBuilder.embeddedNotes() {
             timeoutMillis = 10_000
         )
     }
+}
+
+/**
+ * Scrolls to [text] of a note embedded in the open one. The embedded note is read after the note that holds it, and
+ * until then no list holds its text (macOS's runner failed 1.8-13 that way): the scroll is tried again for a while.
+ */
+private fun CaseScope.scrollToEmbedded(text: String) {
+    repeat(times = EMBED_TRIES - 1) {
+        val isFound = runCatching {
+            scrollTo(
+                text = text,
+                substring = true
+            )
+        }.isSuccess
+
+        if (isFound) return
+        settle(millis = EMBED_WAIT_MILLIS)
+    }
+
+    scrollTo(
+        text = text,
+        substring = true
+    )
 }
