@@ -5,9 +5,9 @@ import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 
 /**
- * Finds what to highlight in a note's body, line by line, fast enough to run on every keystroke: fenced code, headings,
- * quote and list markers, inline code, links, bold, italic and tags. The Markdown syntax itself is a
- * [HighlightKind.SYNTAX] span, shown muted. Code and link targets are never searched for emphasis or tags.
+ * Finds what to highlight in a note's body, line by line, fast enough to run on every keystroke. Quote and list markers
+ * are [HighlightKind.MARKER], the rest of the syntax [HighlightKind.SYNTAX], a wiki link's target before its alias
+ * too. Code and link targets are never searched for emphasis, strikethrough, highlights or tags.
  */
 class MarkdownHighlighter {
     fun highlight(text: CharSequence): List<HighlightSpan> {
@@ -111,7 +111,8 @@ class MarkdownHighlighter {
             textStart
         } else {
             BLOCK_MARKER.find(input = line)?.let { marker ->
-                spans += syntax(
+                spans += HighlightSpan(
+                    kind = HighlightKind.MARKER,
                     start = offset,
                     end = offset + marker.range.last + 1
                 )
@@ -185,6 +186,26 @@ class MarkdownHighlighter {
                 wrapped(
                     match = match,
                     kind = HighlightKind.ITALIC
+                )
+            }
+
+            matches(
+                regex = STRIKETHROUGH,
+                from = from
+            ).forEach { match ->
+                wrapped(
+                    match = match,
+                    kind = HighlightKind.STRIKETHROUGH
+                )
+            }
+
+            matches(
+                regex = HIGHLIGHT,
+                from = from
+            ).forEach { match ->
+                wrapped(
+                    match = match,
+                    kind = HighlightKind.HIGHLIGHT
                 )
             }
 
@@ -285,13 +306,15 @@ class MarkdownHighlighter {
             HighlightKind.HEADING_5,
             HighlightKind.HEADING_6
         )
-        private const val INLINE_TRIGGERS = "`[*_#"
+        private val HIGHLIGHT = Regex(pattern = "(==)(?=\\S)(.+?)(?<=\\S)(==)")
+        private const val INLINE_TRIGGERS = "`[*_#~="
         private val INLINE_CODE = Regex(pattern = "(`+)(.+?)(\\1)")
         private val ITALIC = Regex(
             pattern = "((?<![*\\w])\\*(?![*\\s])|(?<![_\\w])_(?![_\\s]))(.+?)((?<=\\S)\\1(?![*\\w]))"
         )
         private val MARKDOWN_LINK = Regex(pattern = "(!?\\[)([^\\]\\n]*)]\\([^)\\n]*\\)")
-        private val WIKI_LINK = Regex(pattern = "(!?\\[\\[)([^\\]\\n]+)(]])")
+        private val STRIKETHROUGH = Regex(pattern = "(~~)(?=\\S)(.+?)(?<=\\S)(~~)")
+        private val WIKI_LINK = Regex(pattern = "(!?\\[\\[(?:[^\\]|\\n]*\\|)?)([^\\]\\n]+)(]])")
 
         private fun syntax(
             start: Int,

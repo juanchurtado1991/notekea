@@ -13,6 +13,8 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import app.notekea.editor.domain.NoteBlocks
+import app.notekea.editor.presentation.markdown.ShownText
+import app.notekea.editor.presentation.markdown.ShownTextBuilder
 
 /**
  * What the pieces of the editor's page share: the note's text ([buffer]) cut into the list's [items], the list, and
@@ -24,21 +26,51 @@ internal class EditorPageState(
     val buffer: TextFieldState,
     val listState: LazyListState,
     val focusRequester: FocusRequester,
-    private val isReading: () -> Boolean
+    private val isReading: () -> Boolean,
+    private val isSource: () -> Boolean
 ) {
+    private val shownTexts = ShownTextBuilder()
+
     private val blocks by derivedStateOf { NoteBlocks.of(text = buffer.text) }
 
     val items: BlockItems by derivedStateOf {
         val selection = buffer.selection
 
-        val window = blocks.takeUnless { isReading() }?.window(
-            selectionMin = selection.min,
-            selectionMax = selection.max
-        )
+        val window = when {
+            isReading() -> null
+
+            // Source shows the whole note as written, in the text field.
+            isSource() -> 0 until blocks.size
+
+            else -> blocks.window(
+                selectionMin = selection.min,
+                selectionMax = selection.max
+            )
+        }
 
         BlockItems(
             blocks = blocks,
             window = window
+        )
+    }
+
+    /** Whether the text field has the keyboard: only then does the cursor's line show its marks. */
+    var hasFocus: Boolean by mutableStateOf(value = false)
+
+    /** What the text field shows of the note: its window, with the marks hidden away from the cursor's lines. */
+    val shown: ShownText by derivedStateOf {
+        val window = items.shown
+
+        val revealed = when {
+            isSource() -> window
+            hasFocus -> buffer.selection
+            else -> null
+        }
+
+        shownTexts.of(
+            note = buffer.text,
+            window = window,
+            revealed = revealed
         )
     }
 
@@ -57,19 +89,13 @@ internal class EditorPageState(
 
     /** The field's layout if it is the one of the text shown now: right after the window moves it is the old one. */
     fun currentLayout(): TextLayoutResult? {
-        val shown = items.shown
-
-        val text = buffer.text.subSequence(
-            startIndex = shown.min,
-            endIndex = shown.max
-        )
+        val text = shown.text
 
         return layout()?.takeIf {
             it
                 .layoutInput
                 .text
-                .text
-                .contentEquals(other = text)
+                .text == text
         }
     }
 
@@ -136,14 +162,10 @@ internal class EditorPageState(
         offset: Int
     ): Float {
         val layout = currentLayout()?.takeIf { items.isWindow(item = item) } ?: return 0f
-        val shown = items.shown
 
-        val inField = (offset - shown.min).coerceIn(
-            minimumValue = 0,
-            maximumValue = shown.length
+        return layout.getLineTop(
+            lineIndex = layout.getLineForOffset(offset = shown.toShown(offset = offset))
         )
-
-        return layout.getLineTop(lineIndex = layout.getLineForOffset(offset = inField))
     }
 
     /** Ends the [placement] waiting, with the field's [layout] of the clicked block: the cursor goes where it was. */
@@ -151,22 +173,17 @@ internal class EditorPageState(
         waiting: Placement,
         layout: TextLayoutResult
     ) {
-        val shown = items.shown
+        val shown = shown
+        val reference = shown.toShown(offset = waiting.reference)
 
-        val reference = (waiting.reference - shown.min).coerceIn(
-            minimumValue = 0,
-            maximumValue = shown.length
-        )
-
-        val last = (reference + waiting.textLength - 1).coerceIn(
-            minimumValue = reference,
-            maximumValue = shown.length
-        )
+        val last = shown
+            .toShown(offset = waiting.reference + waiting.textLength - 1)
+            .coerceAtLeast(minimumValue = reference)
 
         val top = layout.getLineTop(lineIndex = layout.getLineForOffset(offset = reference))
         val bottom = layout.getLineBottom(lineIndex = layout.getLineForOffset(offset = last))
         val position = waiting.position.copy(y = top + waiting.yIn(fieldHeight = bottom - top))
-        val offset = shown.min + layout.getOffsetForPosition(position = position)
+        val offset = shown.toNote(offset = layout.getOffsetForPosition(position = position))
 
         buffer.edit {
             selection = TextRange(

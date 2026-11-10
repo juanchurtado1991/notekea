@@ -13,6 +13,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -23,6 +24,7 @@ import app.notekea.core.notes.domain.TaskFinder
 import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.editor.presentation.markdown.MarkdownHighlighter
+import app.notekea.editor.presentation.markdown.ShownText
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.resources.Res
 import app.notekea.resources.editor_task
@@ -33,30 +35,32 @@ private const val TASK_CHECKBOX_DP = 16
 private const val TASK_CHECKBOX_RATIO = 0.8f
 
 /**
- * A clickable checkbox over the `[ ]` / `[x]` of every task of the text the field shows, placed with that text's
- * layout and covering the brackets; a click toggles the character in the file, [windowStart] further in the note.
- * It recomposes on every keystroke, which only moves these boxes.
+ * A clickable checkbox over the `[ ]` / `[x]` of every task of the text the field shows ([shown]), placed with that
+ * text's [layout] and covering the brackets; a click toggles the character in the note and leaves the focus in the
+ * text. It recomposes on every keystroke, which only moves these boxes.
  */
 @Composable
 private fun TaskCheckboxes(
     layout: () -> TextLayoutResult?,
-    windowStart: () -> Int,
+    shown: () -> ShownText,
     onIntent: (EditorIntent) -> Unit
 ) {
     val taskFinder = remember { TaskFinder() }
 
     val result = layout() ?: return
-    val content = result.layoutInput.text.text
+    val text = shown()
+    val windowStart = text.window.min
 
-    val tasks = remember(content) { taskFinder.tasks(text = content) }
+    val tasks = remember(text) { taskFinder.tasks(text = text.source) }
 
     val density = LocalDensity.current
     val label = stringResource(resource = Res.string.editor_task)
     val background = MaterialTheme.colorScheme.surface
 
     tasks.forEach { task ->
-        val open = result.getBoundingBox(offset = task.stateIndex - 1)
-        val close = result.getBoundingBox(offset = task.stateIndex + 1)
+        val state = text.toShown(offset = windowStart + task.stateIndex)
+        val open = result.getBoundingBox(offset = state - 1)
+        val close = result.getBoundingBox(offset = state + 1)
 
         val width = with(density) { (close.right - open.left).toDp() }
 
@@ -75,14 +79,17 @@ private fun TaskCheckboxes(
                         width = width,
                         height = height
                     )
-                    .background(color = background),
+                    .background(color = background)
+                    // The focus stays in the text: losing it hides the line's marks, which moves this box
+                    // from under the pointer before the click ends.
+                    .focusProperties { canFocus = false },
                 contentAlignment = Alignment.Center
             ) {
                 NotekeaCheckbox(
                     checked = task.isDone,
                     onClick = {
                         onIntent(
-                            EditorIntent.OnTaskToggle(stateIndex = windowStart() + task.stateIndex)
+                            EditorIntent.OnTaskToggle(stateIndex = windowStart + task.stateIndex)
                         )
                     },
                     label = label,
@@ -99,7 +106,7 @@ private fun TaskCheckboxes(
 /** The code blocks' backgrounds behind the text, and the tasks' checkboxes over it. */
 internal fun decoratorOf(
     layout: () -> TextLayoutResult?,
-    windowStart: () -> Int,
+    shown: () -> ShownText,
     onIntent: (EditorIntent) -> Unit
 ): TextFieldDecorator = TextFieldDecorator { innerTextField ->
     Box {
@@ -108,7 +115,7 @@ internal fun decoratorOf(
 
         TaskCheckboxes(
             layout = layout,
-            windowStart = windowStart,
+            shown = shown,
             onIntent = onIntent
         )
     }

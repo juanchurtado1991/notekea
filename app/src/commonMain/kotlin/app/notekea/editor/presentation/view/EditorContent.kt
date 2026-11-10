@@ -70,7 +70,8 @@ fun EditorContent(
             buffer = buffer,
             listState = listState,
             focusRequester = focusRequester,
-            isReading = { currentState.value.isReading }
+            isReading = { currentState.value.isReading },
+            isSource = { currentState.value.isSourceMode }
         )
     }
 

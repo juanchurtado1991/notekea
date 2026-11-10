@@ -7,12 +7,13 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import app.notekea.editor.presentation.view.NO_LIGATURES
 
 /**
  * How the editor shows each [HighlightKind], from the theme: headings on the type scale, code in the bundled monospaced
- * face on a subtle background, links in the primary color, tags in the accent color, and Markdown syntax muted so the
- * text reads first. Find in note marks every match, the current one more strongly.
+ * face on a subtle background, links and tags in the primary color, as the drawn blocks show them, and Markdown syntax
+ * muted so the text reads first. Find in note marks every match, the current one more strongly.
  */
 class MarkdownStyles(
     private val byKind: Map<HighlightKind, SpanStyle>,
@@ -67,10 +68,19 @@ class MarkdownStyles(
                     HighlightKind.HEADING_4 to headings[3],
                     HighlightKind.HEADING_5 to headings[4],
                     HighlightKind.HEADING_6 to headings[5],
+                    // The colors the Markdown renderer gives a highlight, so it looks the same in a drawn block.
+                    HighlightKind.HIGHLIGHT to SpanStyle(
+                        color = colorScheme.onSecondaryContainer,
+                        background = colorScheme.secondaryContainer
+                    ),
                     HighlightKind.ITALIC to SpanStyle(fontStyle = FontStyle.Italic),
                     HighlightKind.LINK to SpanStyle(color = colorScheme.primary),
+                    HighlightKind.MARKER to SpanStyle(color = colorScheme.onSurfaceVariant),
+                    HighlightKind.STRIKETHROUGH to SpanStyle(
+                        textDecoration = TextDecoration.LineThrough
+                    ),
                     HighlightKind.SYNTAX to SpanStyle(color = colorScheme.onSurfaceVariant),
-                    HighlightKind.TAG to SpanStyle(color = colorScheme.tertiary),
+                    HighlightKind.TAG to SpanStyle(color = colorScheme.primary),
                     HighlightKind.WIKI_LINK to SpanStyle(color = colorScheme.primary)
                 ),
                 findMatch = SpanStyle(background = findMatchColor(colorScheme = colorScheme)),

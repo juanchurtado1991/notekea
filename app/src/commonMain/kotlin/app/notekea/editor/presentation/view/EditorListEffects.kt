@@ -251,7 +251,6 @@ private fun EditorPageState.headingAt(
 ): Int {
     val padding = listState.layoutInfo.beforeContentPadding
     val seen = seen()
-    val shown = items.shown
 
     val above = seen.lastOrNull {
         it.offset + padding <= line
@@ -267,7 +266,7 @@ private fun EditorPageState.headingAt(
                 it.getLineEnd(lineIndex = lineIndex)
             }
 
-            shown.min + (inField ?: 0)
+            inField?.let { shown.toNote(offset = it) } ?: shown.window.min
         } else {
             items.blocks.end(index = items.blockOf(item = item)) - 1
         }

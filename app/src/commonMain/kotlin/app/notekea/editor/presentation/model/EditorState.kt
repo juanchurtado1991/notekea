@@ -25,6 +25,7 @@ data class EditorState(
     val titleError: NotesError? = null,
     val find: FindState? = null,
     val isReading: Boolean = false,
+    val isSourceMode: Boolean = false,
     val isRevealing: Boolean = false,
     val attachments: List<AttachmentView> = emptyList(),
     val actionError: NotesError? = null,

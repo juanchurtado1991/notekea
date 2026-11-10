@@ -78,8 +78,8 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
 - **Post-MVP repositories** (`ROADMAP.md`, post-MVP): clone the repository as it is, index it with a parser, answer
   with file and line; Notekea never writes notes about the code nor writes code.
 - **One editing mode** (`ROADMAP.md`, post-MVP item 4): the plan and the design were agreed on 2026-11-09, and
-  both spikes are done (`docs/spikes/2026-11-09-one-editing-mode.md`). Steps 2 and 3 of the plan below are written on
-  `feature/one-editing-mode`; the next is step 4. Design: the cursor's line shows
+  both spikes are done (`docs/spikes/2026-11-09-one-editing-mode.md`). Steps 2 to 4 of the plan below are written on
+  `feature/one-editing-mode`; the next is step 5. Design: the cursor's line shows
   all its Markdown marks, muted, and every other line looks finished (the two designs not chosen revealed only the
   element under the cursor, or the whole block). The raw Markdown is a "Source" action that takes over today's
   Edit/Preview shortcut.
@@ -106,7 +106,12 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
   3. Find and embeds outside the text field (done): Find marks its matches in the drawn blocks (`TextMarks`,
      painted behind the renderer's texts; `rememberFindMarks`), and the embedded files and query blocks of the
      cursor's block are drawn under the field (`WindowEmbeds`).
-  4. Marks hidden except on the cursor's line inside the cursor's block, and the "Source" action.
+  4. Marks hidden except on the cursor's line (done): the window's output transformation also hides the marks
+     of the lines the cursor is not on (`ShownText`, built by `ShownTextBuilder` from the highlighter's spans; it
+     maps offsets both ways for the keys, the drag and the decorations), a list's `-` shows as a bullet, and no
+     line shows its marks while the field has no focus. Struck and highlighted text (`~~`, `==`) got their kinds.
+     "Source" (`EditorState.isSourceMode`, the toolbar's last button but Find) is the window over the whole note
+     with every mark shown: one text field again, so a long note is as slow there as the editor was before.
   5. The table editor by cells: a table's block stays a table while the cursor is in it, each cell a text field
      over the cell's range of the note's text; Tab and Enter move between cells, and rows and columns are added
      and removed from the table. Design chosen by the developer on 2026-11-10: a small bar above the table while
@@ -115,8 +120,9 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
   6. Long notes and memory against Preview with the `:auto-test` memory runs; then the Edit/Preview control,
      `EditorState.isReading` and its preference go (`ReadingView` stays for embedded notes), with the Auto-Test
      cases, the QA documents, the strings in every locale and the changelog.
-  Also decided on 2026-11-10: "Source" is a button at the end of the formatting toolbar, marked while it is on,
-  and a command of the palette; the editor's colours are the "accents" option (only links, tags and code take
+  Also decided on 2026-11-10: "Source" is a button at the end of the formatting toolbar, marked while it is on
+  (Notekea has no palette of commands, only the note switcher, so the button and the shortcut are its two ways
+  in); the editor's colours are the "accents" option (only links, tags and code take
   colour, headings keep the text's colour); Home and Templates get their icons in the tree, in a commit of their
   own in this PR. `isBasicTextFieldStyledTextEnabled` stays on: the window keeps the styled text small.
   What steps 2 and 3 leave, to settle in the later steps or to keep as known limits:

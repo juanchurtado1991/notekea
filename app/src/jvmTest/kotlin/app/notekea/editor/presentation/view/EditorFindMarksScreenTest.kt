@@ -62,7 +62,8 @@ class EditorFindMarksScreenTest {
             ),
             listState = LazyListState(),
             focusRequester = FocusRequester(),
-            isReading = { false }
+            isReading = { false },
+            isSource = { false }
         )
 
         val pixels = IntArray(size = WINDOW_WIDTH * WINDOW_HEIGHT)

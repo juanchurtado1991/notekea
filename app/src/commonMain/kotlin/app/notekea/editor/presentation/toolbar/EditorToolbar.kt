@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,7 @@ import app.notekea.resources.Res
 import app.notekea.resources.editor_edit_mode
 import app.notekea.resources.editor_find
 import app.notekea.resources.editor_preview_mode
+import app.notekea.resources.editor_source
 import app.notekea.resources.format_bold
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -38,12 +40,13 @@ private const val PREVIEW_WIDTH_DP = 760
 
 /**
  * The editor toolbar, under the title, always one line: Edit | Preview tabs, the formatting buttons in groups, each
- * with a tooltip and its shortcut, and Find in note at the end. Preview keeps only the tabs and Find. Groups that do
- * not fit move into More (⋯), the lists and the template first, then the links ([ToolbarFit]).
+ * with a tooltip and its shortcut, then Source and Find in note at the end. Preview keeps only the tabs and Find.
+ * Groups that do not fit move into More (⋯), the lists and the template first, then the links ([ToolbarFit]).
  */
 @Composable
 fun EditorToolbar(
     isReading: Boolean,
+    isSource: Boolean,
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier = Modifier
@@ -83,7 +86,8 @@ fun EditorToolbar(
 
                     EndButtons(
                         platformConventions = platformConventions,
-                        onIntent = onIntent
+                        onIntent = onIntent,
+                        isSource = isSource.takeUnless { isReading }
                     )
                 }
             }
@@ -98,13 +102,29 @@ fun EditorToolbar(
     }
 }
 
-/** Find in note, at the end in both modes; the side panel is shown or hidden from the tool rail. */
+/**
+ * Source, marked while the note is shown as written ([isSource]; null in Preview, which has no such button), and Find
+ * in note, at the end in both modes; the side panel is shown or hidden from the tool rail.
+ */
 @Composable
 private fun EndButtons(
     platformConventions: PlatformConventions,
-    onIntent: (EditorIntent) -> Unit
+    onIntent: (EditorIntent) -> Unit,
+    isSource: Boolean?
 ) {
     val operatingSystem = platformConventions.operatingSystem
+
+    if (isSource != null) {
+        ToolbarButton(
+            icon = NotekeaIcons.Source,
+            label = Res.string.editor_source,
+            onClick = { onIntent(EditorIntent.OnSourceModeToggle) },
+            tint = MaterialTheme
+                .colorScheme
+                .primary
+                .takeIf { isSource }
+        )
+    }
 
     ToolbarButton(
         icon = NotekeaIcons.Find,
@@ -142,14 +162,16 @@ internal fun ToolbarButton(
     icon: ImageVector,
     label: StringResource,
     onClick: () -> Unit,
-    shortcutHint: String? = null
+    shortcutHint: String? = null,
+    tint: Color? = null
 ) {
     NotekeaIconButton(
         icon = icon,
         label = stringResource(resource = label),
         onClick = onClick,
         shortcutHint = shortcutHint,
-        takesFocus = false
+        takesFocus = false,
+        tint = tint
     )
 }
 
@@ -160,12 +182,14 @@ private fun EditorToolbarPreview() {
         Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
             EditorToolbar(
                 isReading = false,
+                isSource = true,
                 platformConventions = EditorPreviewData.platformConventions,
                 onIntent = {}
             )
 
             EditorToolbar(
                 isReading = true,
+                isSource = false,
                 platformConventions = EditorPreviewData.platformConventions,
                 onIntent = {}
             )

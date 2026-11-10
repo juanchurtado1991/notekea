@@ -54,6 +54,21 @@ class MarkdownHighlighterTest {
     }
 
     @Test
+    fun `struck and highlighted text are found, their marks are syntax`() {
+        assertEquals(
+            expected = listOf(
+                "~~" to HighlightKind.SYNTAX,
+                "old" to HighlightKind.STRIKETHROUGH,
+                "~~" to HighlightKind.SYNTAX,
+                "==" to HighlightKind.SYNTAX,
+                "new idea" to HighlightKind.HIGHLIGHT,
+                "==" to HighlightKind.SYNTAX
+            ),
+            actual = shown(text = "~~old~~ ==new idea== a == b ~ c")
+        )
+    }
+
+    @Test
     fun `nothing is highlighted inside code or a link target`() {
         assertEquals(
             expected = listOf(
@@ -105,14 +120,27 @@ class MarkdownHighlighterTest {
     }
 
     @Test
-    fun `quote, list and task markers are muted`() {
+    fun `quote, list and task markers are a line's markers`() {
         assertEquals(
             expected = listOf(
-                "> " to HighlightKind.SYNTAX,
-                "- " to HighlightKind.SYNTAX,
-                "- [ ] " to HighlightKind.SYNTAX
+                "> " to HighlightKind.MARKER,
+                "- " to HighlightKind.MARKER,
+                "- [ ] " to HighlightKind.MARKER,
+                "2. " to HighlightKind.MARKER
             ),
-            actual = shown(text = "> Quote\n- Item\n- [ ] Task")
+            actual = shown(text = "> Quote\n- Item\n- [ ] Task\n2. Step")
+        )
+    }
+
+    @Test
+    fun `a wiki link with an alias shows the alias as the link`() {
+        assertEquals(
+            expected = listOf(
+                "[[Recipes/Arepas|" to HighlightKind.SYNTAX,
+                "corn cakes" to HighlightKind.WIKI_LINK,
+                "]]" to HighlightKind.SYNTAX
+            ),
+            actual = shown(text = "See [[Recipes/Arepas|corn cakes]]")
         )
     }
 

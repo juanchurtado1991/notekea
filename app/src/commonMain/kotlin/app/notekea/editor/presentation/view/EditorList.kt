@@ -167,6 +167,7 @@ internal fun EditorList(
                     if (state.notePath != null) {
                         EditorToolbar(
                             isReading = state.isReading,
+                            isSource = state.isSourceMode,
                             platformConventions = platformConventions,
                             onIntent = onIntent,
                             modifier = Modifier.onSizeChanged {
@@ -231,11 +232,14 @@ private fun LazyListScope.blocks(
                     onIntent = onIntent
                 )
 
-                WindowEmbeds(
-                    page = page,
-                    attachments = state.attachments,
-                    onIntent = onIntent
-                )
+                // Source is the note as written: no pictures nor query tables under it.
+                if (!state.isSourceMode) {
+                    WindowEmbeds(
+                        page = page,
+                        attachments = state.attachments,
+                        onIntent = onIntent
+                    )
+                }
             } else {
                 EditorBlock(
                     text = items.textOf(
@@ -321,7 +325,8 @@ private fun EditorListPreview() {
             buffer = buffer,
             listState = listState,
             focusRequester = FocusRequester(),
-            isReading = { false }
+            isReading = { false },
+            isSource = { false }
         )
     }
 

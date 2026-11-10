@@ -228,7 +228,7 @@ private fun SourceToggle(
     val label = if (isSourceShown) strings.properties_show_form else strings.properties_show_source
 
     NotekeaIconButton(
-        icon = if (isSourceShown) NotekeaIcons.Properties else NotekeaIcons.PropertySource,
+        icon = if (isSourceShown) NotekeaIcons.Properties else NotekeaIcons.Source,
         label = stringResource(resource = label),
         onClick = onToggle,
         takesFocus = false
