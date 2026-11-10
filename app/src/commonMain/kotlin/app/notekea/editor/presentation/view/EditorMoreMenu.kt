@@ -61,7 +61,7 @@ private val CODE_LANGUAGES = listOf(
     "Shell" to "shell"
 )
 
-/** The buttons [fit] leaves out of the capsule, as items for the top of More: the links, the lists and the template. */
+/** The buttons [fit] leaves out of the bar, as items for the top of More: the links, the lists and the template. */
 @Composable
 private fun overflowItems(
     fit: ToolbarFit,

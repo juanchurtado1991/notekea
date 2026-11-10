@@ -54,7 +54,7 @@ fun EditorToolbar(
         ) {
             val fit = ToolbarFit.of(width = maxWidth)
 
-            // The capsule and the end buttons float a little above the line under the bar.
+            // The buttons float a little above the line under the bar.
             Row(
                 modifier = Modifier.fillMaxWidth().padding(bottom = NotekeaDimensions.SpacingXs),
                 verticalAlignment = Alignment.CenterVertically
@@ -121,7 +121,6 @@ internal fun ToolbarButton(
     label: StringResource,
     onClick: () -> Unit,
     shortcutHint: String? = null,
-    tint: Color? = null,
     isMarked: Boolean = false
 ) {
     NotekeaIconButton(
@@ -130,8 +129,8 @@ internal fun ToolbarButton(
         onClick = onClick,
         shortcutHint = shortcutHint,
         takesFocus = false,
-        tint = tint,
-        isMarked = isMarked
+        isMarked = isMarked,
+        isColoredOnHover = true
     )
 }
 

@@ -5,15 +5,15 @@ import androidx.compose.ui.geometry.Offset
 /** Where the toolbar's buttons and menu rows are in a 1200 × 900 px window at 1.5 density. */
 internal object ToolbarSpots {
     val BOLD = Offset(
-        x = 153f,
+        x = 147f,
         y = 186f
     )
     val CALLOUT = Offset(
-        x = 735f,
+        x = 729f,
         y = 356f
     )
     val CHECKLIST = Offset(
-        x = 373f,
+        x = 367f,
         y = 186f
     )
     val FIND = Offset(
@@ -25,19 +25,19 @@ internal object ToolbarSpots {
         y = 196f
     )
     val HEADING = Offset(
-        x = 105f,
+        x = 99f,
         y = 186f
     )
     val MEDIUM_HEADING = Offset(
-        x = 186f,
+        x = 180f,
         y = 273f
     )
     val NOTE_LINK = Offset(
-        x = 263f,
+        x = 257f,
         y = 186f
     )
     val TEMPLATE = Offset(
-        x = 483f,
+        x = 477f,
         y = 186f
     )
     val SOURCE = Offset(
@@ -45,27 +45,27 @@ internal object ToolbarSpots {
         y = 186f
     )
     val TAG = Offset(
-        x = 311f,
+        x = 305f,
         y = 186f
     )
     val CODE_BLOCK = Offset(
-        x = 735f,
+        x = 729f,
         y = 443f
     )
     val FOUR_BY_THREE = Offset(
-        x = 366f,
+        x = 360f,
         y = 739f
     )
     val KOTLIN = Offset(
-        x = 1040f,
+        x = 1034f,
         y = 624f
     )
     val MORE = Offset(
-        x = 545f,
+        x = 539f,
         y = 186f
     )
     val TABLE_ROW = Offset(
-        x = 735f,
+        x = 729f,
         y = 735f
     )
     val TOOLBAR_GAP = Offset(

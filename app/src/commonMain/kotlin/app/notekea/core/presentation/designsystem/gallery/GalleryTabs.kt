@@ -41,7 +41,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaTabStrip
 import app.notekea.core.presentation.designsystem.components.NotekeaTabStripItem
 import app.notekea.core.presentation.designsystem.components.NotekeaToolRail
 import app.notekea.core.presentation.designsystem.components.NotekeaToolRailItem
-import app.notekea.core.presentation.designsystem.components.NotekeaToolbarPill
+import app.notekea.core.presentation.designsystem.components.NotekeaToolbarGroups
 import app.notekea.core.presentation.designsystem.components.StatusBarItem
 import app.notekea.core.presentation.designsystem.components.StatusIndicator
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
@@ -66,7 +66,7 @@ internal fun TabsSection() {
 }
 
 /**
- * Document tabs above a pane, a tool rail, grid cards and a toolbar capsule: the workspace's pieces.
+ * Document tabs above a pane, a tool rail, grid cards and a toolbar: the workspace's pieces.
  */
 @Composable
 internal fun DocumentTabsSection() {
@@ -133,7 +133,7 @@ internal fun DocumentTabsSection() {
         }
     }
 
-    NotekeaToolbarPill(
+    NotekeaToolbarGroups(
         groups = listOf(
             {
                 SAMPLE_DOCUMENTS.forEach {
