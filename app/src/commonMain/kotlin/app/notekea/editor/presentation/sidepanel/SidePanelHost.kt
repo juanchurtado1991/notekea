@@ -11,9 +11,9 @@ import androidx.compose.ui.focus.FocusRequester
 import app.notekea.editor.presentation.model.EditorIntent
 
 /**
- * How the screen holds the side panel, one for every pane: the [outlineFocus] that `Mod+Shift+O` gives the keyboard to,
- * and whether the window is too narrow for the panel beside the notes ([isOverlay]), so it floats over them, open only
- * while it is used ([isOverlayOpen]). [connections] draws the inspector's Connections.
+ * How the screen holds the side panel: the [outlineFocus] and [chatFocus] that `Mod+Shift+O` and `Mod+L` give the
+ * keyboard to, and whether a narrow window floats it over the notes ([isOverlay]), open only while used
+ * ([isOverlayOpen]). [connections] draws the inspector's Connections and [chat] the chat.
  */
 @Stable
 class SidePanelHost(
@@ -21,9 +21,11 @@ class SidePanelHost(
     val connections: @Composable ColumnScope.(
         isOpen: Boolean,
         onToggle: () -> Unit
-    ) -> Unit = { _, _ -> }
+    ) -> Unit = { _, _ -> },
+    val chat: @Composable (inputFocus: FocusRequester) -> Unit = {}
 ) {
     val outlineFocus = FocusRequester()
+    val chatFocus = FocusRequester()
     var isOverlay by mutableStateOf(value = false)
     var isOverlayOpen by mutableStateOf(value = false)
 
@@ -48,7 +50,29 @@ class SidePanelHost(
         }
     }
 
+    /**
+     * Opens the panel if it floats, then gives the chat's question field the keyboard once it is laid out, which may
+     * take a few frames when the panel was on the inspector.
+     */
+    suspend fun focusChat() {
+        if (isOverlay) isOverlayOpen = true
+
+        repeat(times = FOCUS_FRAMES) {
+            withFrameNanos { }
+
+            try {
+                chatFocus.requestFocus()
+
+                return
+            } catch (_: IllegalStateException) {
+                // Not laid out yet, or no model: the chat shows its notice, with no question field.
+            }
+        }
+    }
+
     companion object {
+        private const val FOCUS_FRAMES = 4
+
         /** Whether [intent] is about the side panel, which the tabs handle rather than the note's editor. */
         fun isRequest(intent: EditorIntent): Boolean =
             intent == EditorIntent.OnSidePanelToggle ||

@@ -15,6 +15,8 @@ class FakeLlmEngine : LlmEngine {
     var scoreOf: (query: String, text: String) -> Float = { _, _ -> 0f }
     var pieces = 4
     var failure: LlmError? = null
+    var readiness: Outcome<LlmModelInfo, LlmError> =
+        Outcome.Success(value = LlmModelInfo(isSmall = false))
 
     override fun generate(
         messages: List<ChatMessage>,
@@ -32,6 +34,8 @@ class FakeLlmEngine : LlmEngine {
 
         text.chunked(size = size).forEach { emit(value = it) }
     }
+
+    override suspend fun readiness(): Outcome<LlmModelInfo, LlmError> = readiness
 
     override suspend fun rerank(
         query: String,

@@ -216,6 +216,7 @@ class ResolvePlatformConventionsUseCaseTest {
         pasteShortcut = primary.with(ShortcutKey.V),
         toggleSidePanelShortcut = primary.withShift(ShortcutKey.BACKSLASH),
         outlineShortcut = primary.withShift(ShortcutKey.O),
+        chatShortcut = primary.with(ShortcutKey.L),
         todayShortcut = primary.with(ShortcutKey.D),
         previousDayShortcut = Shortcut(
             key = ShortcutKey.LEFT,

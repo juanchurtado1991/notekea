@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import app.notekea.ai.presentation.ModelDownloadViewModel
+import app.notekea.chat.presentation.ChatViewModel
 import app.notekea.connections.presentation.NoteMentionsViewModel
 import app.notekea.connections.presentation.RelatedNotesViewModel
 import app.notekea.core.notes.domain.RelativePath
@@ -34,7 +36,6 @@ import app.notekea.graph.presentation.GraphViewModel
 import app.notekea.query.presentation.QueryViewModel
 import app.notekea.search.presentation.index.SearchIndexIntent
 import app.notekea.search.presentation.index.SearchIndexNotice
-import app.notekea.search.presentation.index.SearchIndexStatus
 import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.search.presentation.switcher.QuickSwitcherContent
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
@@ -83,6 +84,8 @@ fun VaultTreeScreen(
     searchIndexViewModel: SearchIndexViewModel = vaultViewModel(vaultPath),
     relatedViewModel: RelatedNotesViewModel = vaultViewModel(vaultPath),
     mentionsViewModel: NoteMentionsViewModel = vaultViewModel(vaultPath),
+    chatViewModel: ChatViewModel = vaultViewModel(vaultPath),
+    modelDownloadViewModel: ModelDownloadViewModel = vaultViewModel(vaultPath),
     panes: List<EditorPaneTools> = remember(vaultPath) {
         List(size = Workspace.MAX_PANES) { EditorPaneTools() }
     }
@@ -94,8 +97,14 @@ fun VaultTreeScreen(
         PaneEditors(workspaceViewModel, editorViewModels)
     }
 
-    val sidePanel =
-        rememberSidePanel(workspaceViewModel, relatedViewModel, mentionsViewModel, editors, state)
+    val sidePanel = rememberSidePanel(
+        workspaceViewModel,
+        relatedViewModel,
+        mentionsViewModel,
+        chatViewModel,
+        editors,
+        state
+    )
 
     val viewModels = WorkspaceViewModels(
         graph = graphViewModel,
@@ -118,17 +127,9 @@ fun VaultTreeScreen(
         onActiveTabChange
     )
 
-    val looks = remember(state.tree.notes, state.dailyFolder, state.templatesFolder) {
-        NoteLooks.of(
-            notePaths = state
-                .tree
-                .notes
-                .keys
-                .map { it.value },
-            dailyFolder = state.dailyFolder,
-            templatesFolder = state.templatesFolder
-        )
-    }
+    FollowChat(chatViewModel, state, workspaceViewModel, editors, searchIndexViewModel)
+
+    val looks = rememberNoteLooks(state = state)
 
     Box(modifier = modifier) {
         CompositionLocalProvider(LocalNoteLooks provides looks) {
@@ -140,7 +141,7 @@ fun VaultTreeScreen(
                 panes = panes,
                 sidePanel = sidePanel,
                 onSwitchVault = onSwitchVault,
-                searchIndex = { SearchIndexStatusOf(viewModel = searchIndexViewModel) }
+                searchIndex = { AiStatusOf(searchIndexViewModel, modelDownloadViewModel) }
             )
         }
 
@@ -172,6 +173,21 @@ private inline fun <reified T : ViewModel> vaultViewModel(
     pane: Int = 0
 ): T = koinViewModel(key = "${T::class.simpleName}:$pane:$vaultPath") { parametersOf(vaultPath) }
 
+/** How the notes of the vault in [state] look: their folders' colors, and which are daily notes or templates. */
+@Composable
+private fun rememberNoteLooks(state: VaultTreeState): NoteLooks =
+    remember(state.tree.notes, state.dailyFolder, state.templatesFolder) {
+        NoteLooks.of(
+            notePaths = state
+                .tree
+                .notes
+                .keys
+                .map { it.value },
+            dailyFolder = state.dailyFolder,
+            templatesFolder = state.templatesFolder
+        )
+    }
+
 /** [onChange] hears the name the active tab shows, for the window's title, and null once the vault closes. */
 @Composable
 private fun FollowActiveTab(
@@ -187,31 +203,21 @@ private fun FollowActiveTab(
     }
 }
 
-/** The side panel with the inspector's Connections ([connectionsSidePanel]), on the [editors] and the [tree]. */
+/** The side panel with Connections and the [chat] ([connectionsSidePanel]), on the [editors] and the [tree]. */
 @Composable
 private fun rememberSidePanel(
     workspace: WorkspaceViewModel,
     related: RelatedNotesViewModel,
     mentions: NoteMentionsViewModel,
+    chat: ChatViewModel,
     editors: PaneEditors,
     tree: VaultTreeState
 ): SidePanelHost {
     val currentNotes by rememberUpdatedState(newValue = tree.tree.notes.keys)
 
-    return remember(workspace, related, mentions, editors) {
-        connectionsSidePanel(workspace, related, mentions, editors) { currentNotes }
+    return remember(workspace, related, mentions, chat, editors) {
+        connectionsSidePanel(workspace, related, mentions, chat, editors) { currentNotes }
     }
-}
-
-/** The search index's status in the status bar. */
-@Composable
-private fun SearchIndexStatusOf(viewModel: SearchIndexViewModel) {
-    val state by viewModel.state.collectAsState()
-
-    SearchIndexStatus(
-        state = state,
-        onIntent = viewModel::onIntent
-    )
 }
 
 /**

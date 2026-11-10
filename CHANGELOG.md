@@ -44,6 +44,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Chat with your notes in the side panel's Chat (`Mod+L`): a question is answered from the vault's notes by the
+  model of Settings → AI model, on this computer. The answer appears as it is written, after one line saying what is
+  going on (searching, reading 5 notes), and cites its passages as numbered chips: pointing at one shows the
+  passage, clicking it opens the note with the passage selected; the cited notes are listed under the answer. A
+  question can be asked of the whole vault, the open note or its folder; `Esc` stops an answer; a question the notes
+  do not answer is declined instead of guessed. Each vault keeps its chat, with Clear history. Without a model the
+  chat says so and opens Settings → AI model, and a model's download shows in the status bar.
 - Settings → AI model: the chat model for this computer (Small, Medium or Large, from its memory and GPU) downloads
   with its reranker, with progress, pause and resume, checked by SHA-256 before use; the other sizes can be
   downloaded, used or deleted.

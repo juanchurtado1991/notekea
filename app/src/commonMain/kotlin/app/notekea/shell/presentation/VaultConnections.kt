@@ -3,6 +3,7 @@ package app.notekea.shell.presentation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import app.notekea.chat.presentation.ChatViewModel
 import app.notekea.connections.presentation.ConnectionActions
 import app.notekea.connections.presentation.ConnectionsSection
 import app.notekea.connections.presentation.FollowNoteMentions
@@ -18,14 +19,15 @@ import app.notekea.editor.presentation.viewmodel.EditorViewModel
 import app.notekea.tree.presentation.model.VaultTreeState
 
 /**
- * The side panel's host, with the inspector's Connections: a row opens its note (a mention at
- * the place it names the open one, in the pane that shows it), opens it beside, or inserts a link to it at the active
- * editor's cursor, resolved among the vault's [notes]; the tab shown is the tabs' side panel preference.
+ * The side panel's host, with the vault's [chat] and the inspector's Connections: a row opens its note (a mention
+ * where it names the open one), opens it beside, or links to it at the active editor's cursor, among the vault's
+ * [notes]; the tab shown is the tabs' side panel preference.
  */
 internal fun connectionsSidePanel(
     workspace: WorkspaceViewModel,
     related: RelatedNotesViewModel,
     mentions: NoteMentionsViewModel,
+    chat: ChatViewModel,
     editors: PaneEditors,
     notes: () -> Set<RelativePath>
 ): SidePanelHost {
@@ -35,27 +37,34 @@ internal fun connectionsSidePanel(
         notes = notes
     )
 
-    return SidePanelHost(send = {
-        workspace.onIntent(intent = workspaceIntentOf(intent = it))
-    }) { isOpen, onToggle ->
-        val workspaceState by workspace.state.collectAsState()
-        val relatedState by related.state.collectAsState()
-        val mentionsState by mentions.state.collectAsState()
+    return SidePanelHost(
+        send = { workspace.onIntent(intent = workspaceIntentOf(intent = it)) },
+        connections = { isOpen, onToggle ->
+            val workspaceState by workspace.state.collectAsState()
+            val relatedState by related.state.collectAsState()
+            val mentionsState by mentions.state.collectAsState()
 
-        ConnectionsSection(
-            tab = workspaceState.sidePanel.connections,
-            onTabSelect = {
-                workspace.onIntent(intent = WorkspaceIntent.OnConnectionsTabSelect(tab = it))
-            },
-            isOpen = isOpen,
-            onToggle = onToggle,
-            related = relatedState,
-            mentions = mentionsState,
-            onRelatedIntent = related::onIntent,
-            onMentionsIntent = mentions::onIntent,
-            actions = actions
-        )
-    }
+            ConnectionsSection(
+                tab = workspaceState.sidePanel.connections,
+                onTabSelect = {
+                    workspace.onIntent(intent = WorkspaceIntent.OnConnectionsTabSelect(tab = it))
+                },
+                isOpen = isOpen,
+                onToggle = onToggle,
+                related = relatedState,
+                mentions = mentionsState,
+                onRelatedIntent = related::onIntent,
+                onMentionsIntent = mentions::onIntent,
+                actions = actions
+            )
+        },
+        chat = { inputFocus ->
+            VaultChatPanel(
+                chat = chat,
+                inputFocus = inputFocus
+            )
+        }
+    )
 }
 
 /** What Connections' rows do on the tabs and the [editors]. */

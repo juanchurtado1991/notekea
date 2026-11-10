@@ -27,6 +27,7 @@ enum class ShortcutKey {
     F4,
     I,
     K,
+    L,
     LEFT,
     MINUS,
     N,

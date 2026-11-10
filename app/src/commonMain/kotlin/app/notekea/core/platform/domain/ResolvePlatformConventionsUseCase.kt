@@ -43,6 +43,7 @@ class ResolvePlatformConventionsUseCase(private val systemEnvironment: SystemEnv
             pasteShortcut = primary(ShortcutKey.V, null),
             toggleSidePanelShortcut = primary(ShortcutKey.BACKSLASH, ShortcutModifier.SHIFT),
             outlineShortcut = primary(ShortcutKey.O, ShortcutModifier.SHIFT),
+            chatShortcut = primary(ShortcutKey.L, null),
             todayShortcut = primary(ShortcutKey.D, null),
             previousDayShortcut = primary(ShortcutKey.LEFT, ShortcutModifier.ALT),
             nextDayShortcut = primary(ShortcutKey.RIGHT, ShortcutModifier.ALT),

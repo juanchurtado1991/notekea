@@ -71,7 +71,8 @@ fun SidePanel(
     connections: @Composable ColumnScope.(
         isOpen: Boolean,
         onToggle: () -> Unit
-    ) -> Unit = { _, _ -> }
+    ) -> Unit = { _, _ -> },
+    chat: @Composable () -> Unit = {}
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -90,7 +91,7 @@ fun SidePanel(
                 animationSpec = motionTween(durationMillis = NotekeaDimensions.MOTION_SHORT_MILLIS)
             ) { mode ->
                 when {
-                    mode == SidePanelMode.CHAT -> SidePanelChat()
+                    mode == SidePanelMode.CHAT -> chat()
 
                     inspector != null -> inspector()
 

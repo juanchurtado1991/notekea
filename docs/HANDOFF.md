@@ -71,6 +71,13 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
     `AnswerEvalChatModelTest`, run by hand per size, which grades the app's own answers strictly
     (`docs/answer-quality.md`): Small 80 %, Medium 89 %, Large 85 % right; the sample vaults are read as committed
     (`EvalVault`), so local edits to `smoke-data` change no number.
+    3.3 is done: the chat panel (`chat.presentation`, design A · Conversation) in the side panel's Chat mode, one
+    `ChatViewModel` per vault: the question on the right, the step line, the answer streamed with a caret and inline
+    citation chips (`NotekeaCitationChip`, tooltip with the passage, click reveals it), Sources under it (above it
+    for Small, with a line to check them), the scopes (Whole vault, This note, This folder), `Mod+L`, Stop (`Esc`),
+    retry, the history per vault (`FileChatHistoryStore`, JSON in the app data's `chat` folder, last 100 turns) with
+    Clear history, the notices without a model or memory ("Choose a model" opens Settings at AI model, the new
+    `WindowDialog.AI_MODEL`), and the model's download in the status bar (`ModelDownloadStatus`).
 
 ## Open work, in order
 

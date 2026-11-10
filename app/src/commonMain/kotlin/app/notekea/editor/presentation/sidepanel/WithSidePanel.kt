@@ -85,7 +85,8 @@ fun WithSidePanel(
                     info = info,
                     outlineFocus = sidePanel.outlineFocus,
                     inspector = inspector,
-                    connections = sidePanel.connections
+                    connections = sidePanel.connections,
+                    chat = { sidePanel.chat(sidePanel.chatFocus) }
                 )
             },
             content = content,

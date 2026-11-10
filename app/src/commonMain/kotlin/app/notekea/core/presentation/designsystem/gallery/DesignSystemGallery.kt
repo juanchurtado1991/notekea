@@ -76,6 +76,7 @@ private fun GalleryColumn(
                 PaletteSection()
                 FeedbackSection()
                 AttachmentsSection()
+                ChatSection()
 
                 Text(
                     text = CODE_SAMPLE,

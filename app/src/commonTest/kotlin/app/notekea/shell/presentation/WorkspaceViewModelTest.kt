@@ -336,6 +336,32 @@ class WorkspaceViewModelTest : WorkspaceViewModelTestBase() {
         }
 
     @Test
+    fun `the chat shortcut shows the hidden panel on the chat and gives its field the keyboard`() =
+        runWorkspaceTest {
+            val viewModel = started()
+            val effects = mutableListOf<WorkspaceEffect>()
+
+            backgroundScope.launch {
+                viewModel.effects.collect { effects += it }
+            }
+
+            runCurrent()
+            viewModel.onIntent(intent = WorkspaceIntent.OnSidePanelToggle)
+            advanceUntilIdle()
+            viewModel.onIntent(intent = WorkspaceIntent.OnChatFocusRequest)
+            advanceUntilIdle()
+            runCurrent()
+
+            assertEquals(
+                expected = SidePanelPreferences(
+                    isVisible = true,
+                    mode = SidePanelMode.CHAT
+                ) to listOf<WorkspaceEffect>(WorkspaceEffect.FocusChat),
+                actual = preferences.sidePanel to effects.toList()
+            )
+        }
+
+    @Test
     fun `a slow save of the panel never lands after a newer one`() = runWorkspaceTest {
         val viewModel = started()
         preferences.sidePanelSaveMillis += listOf(SLOW_SAVE_MILLIS, 0L)

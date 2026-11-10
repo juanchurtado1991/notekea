@@ -18,6 +18,9 @@ interface LlmEngine {
         options: GenerationOptions = GenerationOptions()
     ): Flow<String>
 
+    /** The model in use, or why there is none that can answer now; nothing is loaded to tell. */
+    suspend fun readiness(): Outcome<LlmModelInfo, LlmError>
+
     /** How well each of [texts] answers [query], in order: the reranker's scores, higher is better. */
     suspend fun rerank(
         query: String,

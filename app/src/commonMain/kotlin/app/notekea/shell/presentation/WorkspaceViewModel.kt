@@ -157,6 +157,18 @@ class WorkspaceViewModel(
                 emit(effect = WorkspaceEffect.FocusOutline)
             }
 
+            WorkspaceIntent.OnChatFocusRequest -> {
+                val panel = state.value.sidePanel
+
+                val shown = panel.copy(
+                    isVisible = true,
+                    mode = SidePanelMode.CHAT
+                )
+
+                if (shown != panel) updateSidePanel { shown }
+                emit(effect = WorkspaceEffect.FocusChat)
+            }
+
             is WorkspaceIntent.OnSidePanelModeSelect -> updateSidePanel {
                 it.copy(mode = intent.mode)
             }

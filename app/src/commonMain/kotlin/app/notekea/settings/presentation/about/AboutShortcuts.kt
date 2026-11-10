@@ -11,6 +11,7 @@ import app.notekea.resources.about_group_workspace
 import app.notekea.resources.about_group_writing
 import app.notekea.resources.about_shortcut_bold
 import app.notekea.resources.about_shortcut_bookmark
+import app.notekea.resources.about_shortcut_chat
 import app.notekea.resources.about_shortcut_close_tab
 import app.notekea.resources.about_shortcut_close_window
 import app.notekea.resources.about_shortcut_delete
@@ -159,6 +160,10 @@ object AboutShortcuts {
                 AboutShortcut(
                     label = Res.string.about_shortcut_outline,
                     shortcut = outlineShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_chat,
+                    shortcut = chatShortcut
                 ),
                 AboutShortcut(
                     label = Res.string.about_shortcut_close_tab,

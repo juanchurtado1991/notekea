@@ -69,7 +69,15 @@ class AnswerFromNotesUseCase(
                 .collect { piece ->
                     written.append(piece)
                     val isShown = !AnswerPrompt.NOT_FOUND.startsWith(prefix = written.trim())
-                    if (isShown) emit(value = AnswerStep.Writing(text = written.toString().trim()))
+
+                    if (isShown) {
+                        emit(
+                            value = AnswerStep.Writing(
+                                text = written.toString().trim(),
+                                read = read
+                            )
+                        )
+                    }
                 }
         } catch (exception: LlmException) {
             return@flow emit(value = failed(error = ChatError.Model(error = exception.error)))

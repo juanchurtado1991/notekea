@@ -8,8 +8,11 @@ sealed interface AnswerStep {
     /** The [notes] passages found are read to answer it. */
     data class Reading(val notes: Int) : AnswerStep
 
-    /** The answer so far, as the model writes it; its citations are only checked at the end. */
-    data class Writing(val text: String) : AnswerStep
+    /** The answer so far, as the model writes it from the passages [read]: `[n]` cites `read[n - 1]`. */
+    data class Writing(
+        val text: String,
+        val read: List<AnswerSource>
+    ) : AnswerStep
 
     data class Done(val answer: Answer) : AnswerStep
 

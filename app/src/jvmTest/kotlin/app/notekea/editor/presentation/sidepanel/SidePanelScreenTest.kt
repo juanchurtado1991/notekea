@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.Modifier
@@ -11,7 +12,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getAllSemanticsNodes
 import androidx.compose.ui.semantics.getOrNull
@@ -76,10 +76,9 @@ class SidePanelScreenTest {
         )
     }
 
-    // A disabled text field in Chat leaves stale pixels on Linux once the panel goes back to the inspector.
     @Test
-    fun `Chat says it is coming soon and holds no text field`() {
-        var editable = emptyList<SemanticsNode>()
+    fun `Chat fills the panel with the chat, without the inspector's sections`() {
+        var texts = emptyList<String>()
 
         UiThread.run {
             scene(
@@ -87,19 +86,13 @@ class SidePanelScreenTest {
                 mode = SidePanelMode.CHAT
             ).use { scene ->
                 settle(scene = scene)
-
-                editable = scene
-                    .semanticsOwners
-                    .flatMap { it.getAllSemanticsNodes(mergingEnabled = false) }
-                    .filter {
-                        SemanticsProperties.EditableText in it.config
-                    }
+                texts = scene.texts()
             }
         }
 
         assertEquals(
-            expected = emptyList(),
-            actual = editable
+            expected = listOf(true, false),
+            actual = listOf(CHAT_TEXT in texts, "Note info" in texts)
         )
     }
 
@@ -295,7 +288,8 @@ class SidePanelScreenTest {
                     onLeave = {}
                 ),
                 info = EditorPreviewData.info,
-                connections = connections
+                connections = connections,
+                chat = { Text(text = CHAT_TEXT) }
             )
         }
     }
@@ -327,6 +321,7 @@ class SidePanelScreenTest {
     }
 
     companion object {
+        private const val CHAT_TEXT = "The chat"
         private const val BODY =
             "# Arepas guide\n\n## Ingredients\n\n### For the filling\n\n## Steps\n\n### Cooking\n\n## Serving\n"
         private const val FRAME_NANOS = 16_000_000L
