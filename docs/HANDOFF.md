@@ -77,8 +77,10 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
   a tag. There is no quota of automatic cases: automate what is reasonable.
 - **Post-MVP repositories** (`ROADMAP.md`, post-MVP): clone the repository as it is, index it with a parser, answer
   with file and line; Notekea never writes notes about the code nor writes code.
-- **One editing mode** (`ROADMAP.md`, post-MVP item 4): the plan and the design were agreed on 2026-11-09; no code
-  yet. Design: the cursor's line shows all its Markdown marks, muted, and every other line looks finished (the two
+- **One editing mode** (`ROADMAP.md`, post-MVP item 4): the plan and the design were agreed on 2026-11-09. Step 1
+  is done (`docs/spikes/2026-11-09-one-editing-mode.md`): hiding the marks works and holds for real notes, not for a
+  2,000-line one, where the one text field lays out the whole note on every change; how to lay out only what is on
+  screen is to be decided with the developer before step 2. No code yet. Design: the cursor's line shows all its Markdown marks, muted, and every other line looks finished (the two
   designs not chosen revealed only the element under the cursor, or the whole block). The raw Markdown is a "Source"
   action that takes over today's Edit/Preview shortcut. One PR from `main`, one commit per step:
   1. A spike with no UI: hide the marks from `MarkdownOutputTransformation` and measure the longest Ghost Serializer
