@@ -17,9 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -33,8 +35,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaSkeletonRow
+import app.notekea.core.presentation.designsystem.components.TextMarks
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.editor.presentation.find.FindState
+import app.notekea.editor.presentation.find.NoteSearch
+import app.notekea.editor.presentation.markdown.MarkdownStyles
 import app.notekea.editor.presentation.model.EditorHeaderData
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.EditorPreviewData
@@ -87,6 +93,30 @@ private fun Modifier.readableWidth(): Modifier = layout { measurable, constraint
 }
 
 /**
+ * Find's matches for the blocks drawn as Read mode draws them, or null while Find is closed. The query is read when a
+ * block is painted, so typing it paints the blocks again without laying them out.
+ */
+@Composable
+private fun rememberFindMarks(find: FindState?): TextMarks? {
+    val color = MarkdownStyles.findMatchColor(colorScheme = MaterialTheme.colorScheme)
+    val query = rememberUpdatedState(newValue = find?.query.orEmpty())
+    val search = remember { NoteSearch() }
+
+    val marks = remember(color) {
+        TextMarks(color = color) {
+            search.matches(
+                text = it,
+                query = query.value
+            )
+        }
+    }
+
+    return marks.takeIf {
+        find != null
+    }
+}
+
+/**
  * The note's page as a list, so only what is in view is composed: its header, the sticky toolbar, then the note's
  * blocks, drawn as Read mode draws them except the ones the cursor is in, which are the text field ([EditorWindow]).
  * A block has no identity of its own, so its place in the note is its key.
@@ -102,6 +132,7 @@ internal fun EditorList(
     modifier: Modifier = Modifier
 ) {
     val defaultBringIntoView = LocalBringIntoViewSpec.current
+    val marks = rememberFindMarks(find = state.find)
 
     CompositionLocalProvider(LocalBringIntoViewSpec provides EditorBringIntoViewSpec) {
         LazyColumn(
@@ -159,7 +190,8 @@ internal fun EditorList(
                     page = page,
                     bringIntoView = defaultBringIntoView,
                     platformConventions = platformConventions,
-                    onIntent = onIntent
+                    onIntent = onIntent,
+                    marks = marks
                 )
             }
         }
@@ -172,7 +204,8 @@ private fun LazyListScope.blocks(
     page: EditorPageState,
     bringIntoView: BringIntoViewSpec,
     platformConventions: PlatformConventions,
-    onIntent: (EditorIntent) -> Unit
+    onIntent: (EditorIntent) -> Unit,
+    marks: TextMarks?
 ) {
     val items = page.items
 
@@ -197,6 +230,12 @@ private fun LazyListScope.blocks(
                     platformConventions = platformConventions,
                     onIntent = onIntent
                 )
+
+                WindowEmbeds(
+                    page = page,
+                    attachments = state.attachments,
+                    onIntent = onIntent
+                )
             } else {
                 EditorBlock(
                     text = items.textOf(
@@ -214,7 +253,8 @@ private fun LazyListScope.blocks(
                             drawnHeight = drawnHeight,
                             isExtending = isExtending
                         )
-                    }
+                    },
+                    marks = marks
                 )
             }
         }

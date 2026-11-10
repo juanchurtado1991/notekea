@@ -25,6 +25,10 @@ class MarkdownStyles(
         private const val CURRENT_FIND_MATCH_ALPHA = 0.55f
         private const val FIND_MATCH_ALPHA = 0.22f
 
+        /** What is painted behind each of Find's matches, in the text field and in the drawn blocks. */
+        fun findMatchColor(colorScheme: ColorScheme): Color =
+            colorScheme.tertiary.copy(alpha = FIND_MATCH_ALPHA)
+
         fun from(
             colorScheme: ColorScheme,
             typography: Typography,
@@ -69,9 +73,7 @@ class MarkdownStyles(
                     HighlightKind.TAG to SpanStyle(color = colorScheme.tertiary),
                     HighlightKind.WIKI_LINK to SpanStyle(color = colorScheme.primary)
                 ),
-                findMatch = SpanStyle(
-                    background = colorScheme.tertiary.copy(alpha = FIND_MATCH_ALPHA)
-                ),
+                findMatch = SpanStyle(background = findMatchColor(colorScheme = colorScheme)),
                 currentFindMatch = SpanStyle(
                     background = colorScheme.tertiary.copy(alpha = CURRENT_FIND_MATCH_ALPHA)
                 )

@@ -20,6 +20,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
+import app.notekea.core.presentation.designsystem.components.TextMarks
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.editor.presentation.attachments.AttachmentView
 import app.notekea.editor.presentation.model.EditorIntent
@@ -28,9 +29,9 @@ import app.notekea.editor.presentation.reading.ReadingView
 private const val PREVIEW_TEXT = "Mix the **corn flour** with warm water.\n"
 
 /**
- * One block of the note the cursor is not in, drawn as Read mode draws it; [text] starts [textStart] into the note,
- * and the blank lines that end it keep their height, as in the text field. In Edit mode [onClick] (where the click
- * was, how tall the text is drawn, whether Shift was held) puts the cursor in it; links and files take their clicks.
+ * One block of the note the cursor is not in, drawn as Read mode draws it, with Find's [marks]; [text] starts
+ * [textStart] into the note, and the blank lines that end it keep their height. In Edit mode [onClick] (where, how
+ * tall the text is drawn, whether Shift was held) puts the cursor in it; links and files take their clicks.
  */
 @Composable
 internal fun EditorBlock(
@@ -40,6 +41,7 @@ internal fun EditorBlock(
     isReading: Boolean,
     onIntent: (EditorIntent) -> Unit,
     onClick: (position: Offset, drawnHeight: Float, isExtending: Boolean) -> Unit,
+    marks: TextMarks?,
     modifier: Modifier = Modifier
 ) {
     val content = text.trimEnd()
@@ -86,6 +88,7 @@ internal fun EditorBlock(
             text = content,
             attachments = attachments,
             onIntent = onIntent,
+            marks = marks,
             isSelectable = isReading,
             textStart = textStart
         )
@@ -104,7 +107,8 @@ private fun EditorBlockPreview() {
             attachments = emptyList(),
             isReading = false,
             onIntent = {},
-            onClick = { _, _, _ -> }
+            onClick = { _, _, _ -> },
+            marks = null
         )
     }
 }

@@ -38,6 +38,7 @@ import com.mikepenz.markdown.m3.elements.MarkdownCheckBox
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.MarkdownTypography
+import com.mikepenz.markdown.model.markdownExtendedSpans
 import com.mikepenz.markdown.model.rememberMarkdownState
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
@@ -56,15 +57,16 @@ private const val PREVIEW_MARKDOWN =
 private const val PREVIEW_WIDTH_DP = 520
 
 /**
- * Markdown rendered with the Notekea theme: callouts as cards ([MarkdownQuoteOrCallout]), text that can be selected
- * unless [isSelectable] is off, links opened by the system unless [onLinkClick] takes them, and with [onTaskClick]
- * task boxes that say which one of how many was clicked. Parsed at once: a lazy list needs its height on frame one.
+ * Markdown rendered with the Notekea theme: callouts as cards ([MarkdownQuoteOrCallout]), selectable text unless
+ * [isSelectable] is off, links opened by the system unless [onLinkClick] takes them, [onTaskClick] task boxes (which
+ * one of how many), [marks] behind its texts but tables and code. Parsed at once: a lazy list needs its height first.
  */
 @Composable
 fun NotekeaMarkdown(
     content: String,
     modifier: Modifier = Modifier,
     onLinkClick: ((String) -> Unit)? = null,
+    marks: TextMarks? = null,
     isSelectable: Boolean = true,
     imagePainter: (String) -> Painter? = { null },
     onTaskClick: ((index: Int, count: Int) -> Unit)? = null
@@ -93,7 +95,8 @@ fun NotekeaMarkdown(
                     content = prepared,
                     isDark = isDark,
                     imagePainter = imagePainter,
-                    onTaskClick = onTaskClick
+                    onTaskClick = onTaskClick,
+                    marks = marks
                 )
             }
         } else {
@@ -102,7 +105,8 @@ fun NotekeaMarkdown(
                     content = prepared,
                     isDark = isDark,
                     imagePainter = imagePainter,
-                    onTaskClick = onTaskClick
+                    onTaskClick = onTaskClick,
+                    marks = marks
                 )
             }
         }
@@ -114,7 +118,8 @@ private fun ThemedMarkdown(
     content: String,
     isDark: Boolean,
     imagePainter: (String) -> Painter?,
-    onTaskClick: ((index: Int, count: Int) -> Unit)?
+    onTaskClick: ((index: Int, count: Int) -> Unit)?,
+    marks: TextMarks?
 ) {
     val colors = MaterialTheme.colorScheme
     val currentOnTaskClick by rememberUpdatedState(newValue = onTaskClick)
@@ -138,6 +143,9 @@ private fun ThemedMarkdown(
         ),
         typography = notekeaMarkdownTypography(),
         modifier = Modifier.fillMaxWidth(),
+        extendedSpans = markdownExtendedSpans(
+            extendedSpans = remember(marks) { marks?.spans() }
+        ),
         components = remember(isDark, hasTaskClicks) {
             val taskClicks = { index: Int, count: Int ->
                 currentOnTaskClick?.invoke(index, count) ?: Unit

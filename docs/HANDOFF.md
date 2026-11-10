@@ -78,8 +78,8 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
 - **Post-MVP repositories** (`ROADMAP.md`, post-MVP): clone the repository as it is, index it with a parser, answer
   with file and line; Notekea never writes notes about the code nor writes code.
 - **One editing mode** (`ROADMAP.md`, post-MVP item 4): the plan and the design were agreed on 2026-11-09, and
-  both spikes are done (`docs/spikes/2026-11-09-one-editing-mode.md`). Step 2 of the plan below is written on
-  `feature/one-editing-mode`; the next is step 3. Design: the cursor's line shows
+  both spikes are done (`docs/spikes/2026-11-09-one-editing-mode.md`). Steps 2 and 3 of the plan below are written on
+  `feature/one-editing-mode`; the next is step 4. Design: the cursor's line shows
   all its Markdown marks, muted, and every other line looks finished (the two designs not chosen revealed only the
   element under the cursor, or the whole block). The raw Markdown is a "Source" action that takes over today's
   Edit/Preview shortcut.
@@ -103,8 +103,9 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
      (`EditorPageState.click`); arrows, Backspace and Delete (`EditorKeys`), drag (`EditorDrag`) and Shift+click
      cross blocks; the outline, each tab's scroll position and Find's scroll read the list (`EditorListEffects`);
      a click on a task's box in a drawn block checks it. The Edit/Preview control stays.
-  3. What still reads only the text field's layout reads the list: Find's highlight in the drawn blocks, embedded
-     files and query blocks in the cursor's block.
+  3. Find and embeds outside the text field (done): Find marks its matches in the drawn blocks (`TextMarks`,
+     painted behind the renderer's texts; `rememberFindMarks`), and the embedded files and query blocks of the
+     cursor's block are drawn under the field (`WindowEmbeds`).
   4. Marks hidden except on the cursor's line inside the cursor's block, and the "Source" action.
   5. The table editor by cells: a table's block stays a table while the cursor is in it, each cell a text field
      over the cell's range of the note's text; Tab and Enter move between cells, and rows and columns are added
@@ -118,7 +119,7 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
   and a command of the palette; the editor's colours are the "accents" option (only links, tags and code take
   colour, headings keep the text's colour); Home and Templates get their icons in the tree, in a commit of their
   own in this PR. `isBasicTextFieldStyledTextEnabled` stays on: the window keeps the styled text small.
-  What step 2 leaves, to settle in the later steps or to keep as known limits:
+  What steps 2 and 3 leave, to settle in the later steps or to keep as known limits:
   - The window's text field holds the note's whole text in its semantics (`EditorWindow`), so a screen reader and
     the Auto-Test's verbs read and select the note as one text.
   - The lazy list already keeps what is brought into view below its sticky toolbar: `EditorBringIntoViewSpec`
@@ -134,7 +135,12 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
     (`showCursor` in `EditorListEffects`).
   - A drawn block keeps the height of the blank lines that end it, so the page does not move when the window does;
     Preview is a little looser than it was.
-  - While the cursor is in a block, its embedded files show as Markdown; their chips show in the drawn blocks.
+  - While the cursor is in a block, its embedded files and query tables show under the whole block, not under
+    their own lines, and their lines show as written.
+  - Find's marks in a drawn block are searched in the drawn text, which has no Markdown marks, and are painted when
+    the block is drawn: tables, code blocks and callout titles take no mark (the renderer draws them without the
+    hook), and a match the marks of the note's text split shows marked though Find does not count it. The match
+    Find is on is always exact: its block is the text field.
   - A reference-style link whose definition is in another block does not resolve in a drawn block.
   - A note with no blank line and no heading is one block: it is laid out whole, as before.
   - `Mod+A` makes the window the whole note. Page Up and Page Down stay inside the window, an arrow that crosses to
