@@ -12,7 +12,8 @@ class NoteLooksTest {
             "Books/Reading list.md",
             "Recipes/Arepas.md"
         ),
-        dailyFolder = "Journal/Daily"
+        dailyFolder = "Journal/Daily",
+        templatesFolder = "Templates"
     )
 
     // The graph colors the same folders in the same order, so a folder has one color across the app.
@@ -53,6 +54,26 @@ class NoteLooksTest {
                     .copy(dailyFolder = "")
                     .isDaily(path = "Home.md")
             )
+        )
+    }
+
+    @Test
+    fun `a daily note has a calendar, a template its icon, Home at the root a house and any other note a page`() {
+        assertEquals(
+            expected = listOf(
+                NotekeaIcons.Calendar,
+                NotekeaIcons.Template,
+                NotekeaIcons.Home,
+                NotekeaIcons.Note,
+                NotekeaIcons.Note
+            ),
+            actual = listOf(
+                "Journal/Daily/2026-11-09.md",
+                "Templates/Meeting.md",
+                "Home.md",
+                "Recipes/Home.md",
+                "Recipes/Arepas.md"
+            ).map { looks.iconOf(path = it) }
         )
     }
 }

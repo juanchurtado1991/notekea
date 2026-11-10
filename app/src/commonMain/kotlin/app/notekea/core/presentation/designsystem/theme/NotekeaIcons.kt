@@ -54,6 +54,7 @@ import com.composables.icons.lucide.FolderTree
 import com.composables.icons.lucide.Globe
 import com.composables.icons.lucide.Hash
 import com.composables.icons.lucide.Heading
+import com.composables.icons.lucide.House
 import com.composables.icons.lucide.ImagePlus
 import com.composables.icons.lucide.Info
 import com.composables.icons.lucide.Italic
@@ -186,6 +187,7 @@ object NotekeaIcons {
     val MediaFile: ImageVector get() = Lucide.FilePlay
     val Minimize: ImageVector get() = Lucide.Minus
     val Folder: ImageVector get() = Lucide.Folder
+    val Home: ImageVector get() = Lucide.House
     val FolderOpen: ImageVector get() = Lucide.FolderOpen
     val Heading: ImageVector get() = Lucide.Heading
     val Chat: ImageVector get() = Lucide.MessagesSquare

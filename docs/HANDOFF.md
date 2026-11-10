@@ -147,6 +147,9 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
      (`GraphPalette`: links blue, lists green, the template purple), and a button is marked while the cursor is in
      its format (`ActiveFormats`, read from the cursor's line alone, so a line of a code block is read as text;
      `EditorPageState.activeFormats`; `NotekeaIconButton.isMarked`). `ToolbarFit`'s widths no longer count the tabs.
+  8. The tree's icons (done): the note `Home.md` at the vault's root has a house and the notes of the templates'
+     folder (the vault's Obsidian setting, `Templates` without it) the template icon in their folder's color
+     (`NoteLooks.iconOf`, `VaultTreeState.templatesFolder`); mentions and related notes use the same icons.
   Also decided on 2026-11-10: "Source" is a button at the end of the formatting toolbar, marked while it is on
   (Notekea has no palette of commands, only the note switcher, so the button and the shortcut are its two ways
   in); the editor's colours are the "accents" option (only links, tags and code take

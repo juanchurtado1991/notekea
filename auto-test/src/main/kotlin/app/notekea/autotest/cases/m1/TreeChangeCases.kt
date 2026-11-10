@@ -13,6 +13,7 @@ import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
 
 private const val DELETE_NOTE = "Delete note"
+private const val SAMPLE_VAULT = "Sample Vault"
 
 /** The cases of 1.4 that change the tree: deleting, other apps, a large vault, the sidebar (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.treeChangeCases() {
@@ -23,6 +24,7 @@ fun SuiteBuilder.treeChangeCases() {
     sidebarHides()
     vaultMovedWhileOpen()
     restoreFromTrash()
+    noteIcons()
 }
 
 private fun SuiteBuilder.deleteNoteAndFolder() {
@@ -186,6 +188,29 @@ private fun SuiteBuilder.restoreFromTrash() {
 
         expected(
             text = "Packing checklist is back under Travel in Notekea within a second, without clicking anything."
+        )
+    }
+}
+
+private fun SuiteBuilder.noteIcons() {
+    manual(
+        id = "1.4-14",
+        reason = ManualReason.EYES
+    ) {
+        prepare(SAMPLE_VAULT)
+        title(text = "Home, templates and daily notes have icons of their own")
+
+        steps(
+            text =
+            "1. In Notekea, open the Sample Vault (see TEST DATA above).\n2. In the list on the left, look at " +
+                "the icon of Home, open the Templates folder, then Journal › Daily, and look at their notes."
+        )
+
+        expected(
+            text =
+            "Home has a house. Daily and Meeting, in Templates, have the template icon in the color of their " +
+                "folder. The notes of Journal › Daily have a calendar in the color of Journal. Every other note " +
+                "has a page."
         )
     }
 }

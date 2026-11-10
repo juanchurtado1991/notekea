@@ -121,14 +121,15 @@ fun VaultTreeScreen(
         onActiveTabChange
     )
 
-    val looks = remember(state.tree.notes, state.dailyFolder) {
+    val looks = remember(state.tree.notes, state.dailyFolder, state.templatesFolder) {
         NoteLooks.of(
             notePaths = state
                 .tree
                 .notes
                 .keys
                 .map { it.value },
-            dailyFolder = state.dailyFolder
+            dailyFolder = state.dailyFolder,
+            templatesFolder = state.templatesFolder
         )
     }
 
