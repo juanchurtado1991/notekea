@@ -11,6 +11,9 @@ plugins {
 }
 
 private val modelTestPattern = "*RealModelTest"
+private val chatModelTestPattern = "*ChatModelTest"
+private val chatModelsGradleProperty = "chatModels"
+private val chatModelsSystemProperty = "notekea.chat.models"
 private val appPackageName = "Notekea"
 private val androidCompileSdk = 36
 private val androidMinSdk = 26
@@ -81,7 +84,7 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.llama)
-            implementation(LlamaNatives.dependency(library = libs.llama.get()))
+            LlamaNatives.dependencies(library = libs.llama.get()).forEach { implementation(it) }
             implementation(libs.lucene.core)
             implementation(libs.lucene.analysis.common)
             implementation(libs.sqldelight.sqlite.driver)
@@ -193,7 +196,12 @@ val downloadEmbeddingModel = EmbeddingModel.registerDownload(project)
 
 // The tests that load the real model (named *RealModelTest) stay out of check, which every pull request runs: they run in
 // `./gradlew :app:modelTest`, in the nightly build (ARCHITECTURE.md, testing).
-val jvmTest = tasks.named<Test>("jvmTest") { filter { excludeTestsMatching(modelTestPattern) } }
+val jvmTest = tasks.named<Test>("jvmTest") {
+    filter {
+        excludeTestsMatching(modelTestPattern)
+        excludeTestsMatching(chatModelTestPattern)
+    }
+}
 tasks.register<Test>("modelTest") {
     description = "Runs the tests that load the bundled embedding model"
     group = "verification"
@@ -203,4 +211,18 @@ tasks.register<Test>("modelTest") {
     filter { includeTestsMatching(modelTestPattern) }
     dependsOn(downloadEmbeddingModel)
     systemProperty(EmbeddingModel.TEST_PROPERTY, EmbeddingModel.file(project).asFile.absolutePath)
+}
+
+// The tests that load a chat model and its reranker (named *ChatModelTest) need files of gigabytes the build does not
+// download: they run by hand, `./gradlew :app:chatModelTest -PchatModels=<folder>`, the folder holding the catalog's
+// files (docs/HANDOFF.md, M3). Never in check nor in the nightly build.
+tasks.register<Test>("chatModelTest") {
+    description = "Runs the tests that load a chat model, from the folder given as -PchatModels"
+    group = "verification"
+    testClassesDirs = jvmTest.get().testClassesDirs
+    classpath = jvmTest.get().classpath
+    useJUnit()
+    filter { includeTestsMatching(chatModelTestPattern) }
+    systemProperty(chatModelsSystemProperty, providers.gradleProperty(chatModelsGradleProperty).getOrElse(""))
+    outputs.upToDateWhen { false }
 }
