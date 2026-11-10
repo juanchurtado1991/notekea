@@ -62,8 +62,15 @@ class ShownTextBuilder(private val highlighter: MarkdownHighlighter = MarkdownHi
         val bullets = mutableListOf<Int>()
         val styled = mutableListOf<HighlightSpan>()
 
+        // An embedded file's line stays as written: without its marks only its width or its label would show.
+        val embeds = EMBED
+            .findAll(input = source)
+            .map { it.range }
+            .toList()
+
         lastSpans.forEach { span ->
-            val isRevealed = lines != null && span.start in lines
+            val isRevealed = (lines != null && span.start in lines) ||
+                embeds.any { span.start in it }
 
             when {
                 isRevealed -> styled += span
@@ -177,6 +184,7 @@ class ShownTextBuilder(private val highlighter: MarkdownHighlighter = MarkdownHi
     }
 
     private companion object {
+        val EMBED = Regex(pattern = """!\[\[[^\]\n]*]]|!\[[^\]\n]*]\([^)\n]*\)""")
         const val LIST_MARKS = "-*+"
         const val QUOTE_MARK = '>'
         const val TASK_BOX_START = '['

@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.presentation.designsystem.components.TextMarks
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.editor.domain.TableCell
@@ -39,8 +40,8 @@ import kotlin.math.roundToInt
 
 /**
  * The list's item of the cursor's blocks: the text field ([EditorWindow]) with their pictures and query tables under
- * it. A block that is one table is drawn instead, with its bar, and the field is laid over the cell being edited,
- * or under the table while the cursor is on the lines after it.
+ * it. With the cursor under its block's text, past a blank line, the block is drawn (with Find's [marks]) and the
+ * field is under it; a block that is one table is drawn with its bar, the field over the cell being edited.
  */
 @Composable
 internal fun EditorWindowItem(
@@ -50,10 +51,12 @@ internal fun EditorWindowItem(
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
     find: FindState?,
+    marks: TextMarks?,
     modifier: Modifier = Modifier
 ) {
     val table = page.table
     val cell = page.cell
+    val underStart = page.underStart
     val place = remember(page) { CellPlace() }
 
     val frame = if (cell == null) {
@@ -82,12 +85,21 @@ internal fun EditorWindowItem(
 
             Column {
                 when {
-                    table != null -> WindowTable(
+                    table != null && cell != null -> WindowTable(
                         page = page,
                         table = table,
+                        cell = cell,
                         place = place,
                         attachments = attachments,
                         onIntent = onIntent
+                    )
+
+                    underStart != null -> WindowBlock(
+                        page = page,
+                        underStart = underStart,
+                        attachments = attachments,
+                        onIntent = onIntent,
+                        marks = marks
                     )
 
                     // Source is the note as written: no pictures nor query tables under it.
@@ -104,7 +116,7 @@ internal fun EditorWindowItem(
             .clipToBounds()
             .onPlaced { place.container = it },
         measurePolicy = windowPolicy(
-            isTableDrawn = table != null,
+            isBlockDrawn = page.isBlockDrawn,
             place = place,
             cell = cell
         )
@@ -113,10 +125,10 @@ internal fun EditorWindowItem(
 
 /**
  * Where the text field (the first child) and what is drawn with it (the second) go: the field over the [cell] being
- * edited, where [place] says it is, or under the drawn table, or over its pictures when no table is drawn.
+ * edited, where [place] says it is, or under the drawn block, or over its pictures when the block is not drawn.
  */
 private fun windowPolicy(
-    isTableDrawn: Boolean,
+    isBlockDrawn: Boolean,
     place: CellPlace,
     cell: TableCell?
 ) = MeasurePolicy { measurables, constraints ->
@@ -140,7 +152,7 @@ private fun windowPolicy(
 
     val fieldTop = when {
         cell != null -> rect?.top?.roundToInt() ?: 0
-        isTableDrawn -> rest.height
+        isBlockDrawn -> rest.height
         else -> 0
     }
 
@@ -162,7 +174,7 @@ private fun windowPolicy(
     ) {
         rest.place(
             x = 0,
-            y = if (isTableDrawn) 0 else field.height
+            y = if (isBlockDrawn) 0 else field.height
         )
 
         field.placeWithLayer(
@@ -173,16 +185,66 @@ private fun windowPolicy(
     }
 }
 
-/** The cursor's table, drawn: its cells take the cursor, the one being edited tells where it is ([place]). */
+/**
+ * The cursor's block drawn as it reads, with the blank line that ends it, while the cursor is under it: what
+ * follows [underStart] is the field's. A click on it puts the cursor back in its text.
+ */
+@Composable
+private fun WindowBlock(
+    page: EditorPageState,
+    underStart: Int,
+    attachments: List<AttachmentView>,
+    onIntent: (EditorIntent) -> Unit,
+    marks: TextMarks?
+) {
+    val block = page.items.window.first
+
+    val start = page
+        .items
+        .blocks
+        .start(index = block)
+
+    EditorBlock(
+        text = page
+            .buffer
+            .text
+            .substring(
+                startIndex = start,
+                endIndex = underStart - 1
+            ),
+        textStart = start,
+        attachments = attachments,
+        onIntent = onIntent,
+        onClick = { position, drawnHeight, isExtending ->
+            page.click(
+                block = block,
+                position = position,
+                drawnHeight = drawnHeight,
+                isExtending = isExtending
+            )
+        },
+        onCellClick = { row, column, x ->
+            page.clickCell(
+                block = block,
+                row = row,
+                column = column,
+                x = x
+            )
+        },
+        marks = marks
+    )
+}
+
+/** The table whose [cell] is being edited, drawn: its cells take the cursor, the edited one tells its [place]. */
 @Composable
 private fun WindowTable(
     page: EditorPageState,
     table: TableText,
+    cell: TableCell,
     place: CellPlace,
     attachments: List<AttachmentView>,
     onIntent: (EditorIntent) -> Unit
 ) {
-    val cell = page.cell
     val block = page.items.window.first
 
     val text = page.items.textOf(
@@ -190,16 +252,11 @@ private fun WindowTable(
         block = block
     )
 
-    // Under the cell's field every blank line that ends the block keeps its height; the lines after the table are
-    // the field's but the first, which ends the table.
-    val blankLines = if (cell == null) {
-        1
-    } else {
-        text.count {
-            it == NEW_LINE_CHAR
-        } - text.trimEnd().count {
-            it == NEW_LINE_CHAR
-        }
+    // Under the cell's field every blank line that ends the block keeps its height.
+    val blankLines = text.count {
+        it == NEW_LINE_CHAR
+    } - text.trimEnd().count {
+        it == NEW_LINE_CHAR
     }
 
     val lineHeight = with(LocalDensity.current) {
@@ -217,7 +274,7 @@ private fun WindowTable(
             attachments = attachments,
             onIntent = onIntent,
             cells = { row, column ->
-                val isEdited = cell?.row == row && cell.column == column
+                val isEdited = cell.row == row && cell.column == column
 
                 val press = Modifier
                     .cellPress(isMenuKept = true) { x ->
@@ -240,9 +297,7 @@ private fun WindowTable(
                     press
                 }
             },
-            bar = {
-                if (cell != null) TableBar(onIntent = onIntent)
-            }
+            bar = { TableBar(onIntent = onIntent) }
         )
     }
 
@@ -286,7 +341,8 @@ private fun EditorWindowItemPreview() {
             isSource = false,
             platformConventions = EditorPreviewData.platformConventions,
             onIntent = {},
-            find = null
+            find = null,
+            marks = null
         )
     }
 }

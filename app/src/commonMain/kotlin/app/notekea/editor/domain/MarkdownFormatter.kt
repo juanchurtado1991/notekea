@@ -46,24 +46,14 @@ class MarkdownFormatter {
         }
 
         blocks.of(action = action)?.let { build ->
-            val edit = blocks.edit(
+            // After an embedded file or a divider, typing goes on under it.
+            return blocks.edit(
                 text = text,
                 start = start,
                 end = end,
+                isCursorUnder = action is FormatAction.Embed || action == FormatAction.Divider,
                 build = build
             )
-
-            // After an embedded file, typing goes on below it.
-            val after = edit.start + edit.replacement.length
-
-            return if (action is FormatAction.Embed) {
-                edit.copy(
-                    selectionStart = after,
-                    selectionEnd = after
-                )
-            } else {
-                edit
-            }
         }
 
         return inline(

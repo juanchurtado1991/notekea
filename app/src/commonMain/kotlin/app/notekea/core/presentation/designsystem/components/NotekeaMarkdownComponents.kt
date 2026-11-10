@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.TextStyle
 import app.notekea.core.domain.markdown.ReadingMarkdown
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
@@ -120,7 +122,9 @@ private fun TaskBox(
         checked = isDone,
         onClick = { onClick(boxes.indexOf(element = node), boxes.size) },
         label = stringResource(resource = Res.string.editor_task),
-        modifier = Modifier.padding(end = NotekeaDimensions.SpacingXs)
+        modifier = Modifier
+            .padding(end = NotekeaDimensions.SpacingXs)
+            .pointerHoverIcon(icon = PointerIcon.Hand)
     )
 }
 

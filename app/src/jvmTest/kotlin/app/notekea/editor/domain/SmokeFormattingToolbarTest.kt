@@ -289,7 +289,7 @@ class SmokeFormattingToolbarTest {
         assertEquals(
             expected = Triple(
                 "| Column 1 | Column 2 | Column 3 |\n| --- | --- | --- |\n" +
-                    "| Text | Text | Text |\n| Text | Text | Text |\n\n```kotlin\ncode\n```\n\n---\n> Quote",
+                    "| Text | Text | Text |\n| Text | Text | Text |\n\n```kotlin\ncode\n```\n\n---\n\n> Quote",
                 "Column 1",
                 "code"
             ),

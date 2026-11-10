@@ -247,7 +247,7 @@ class EditorOnDiskTest {
         val copied = "attachments/" + outside.fileName
 
         assertEquals(
-            expected = Triple("Intro\n\n![[${outside.fileName}]]\n", copied, "%PDF"),
+            expected = Triple("Intro\n\n![[${outside.fileName}]]\n\n", copied, "%PDF"),
             actual = Triple(
                 viewModel
                     .buffer

@@ -142,6 +142,12 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
      note is always in the field's semantics, so a case cannot wait for Markdown to "go away": it looks for what
      is drawn. Cases 1.5-08, 1.5-10, 1.5-12 and 1.9-04 were rewritten, 1.5-14 and 1.5-15 (tables) are new.
      Known limit: a link, a tag or a callout's title in the cursor's own block is text, not a click target.
+     From the developer's smoke (2026-11-10): with the cursor under its block's text, past a blank line, the block
+     is drawn again and the field holds only the lines under it (`EditorPageState.underStart`, `WindowBlock`),
+     which is also how the lines under a table are written; an embedded file or a divider put in by the toolbar
+     leaves the cursor there (`MarkdownBlocks.edit`, `isCursorUnder`), so the picture shows at once; an embed's
+     line never hides its marks (`ShownTextBuilder`); a task's box shows a hand; and the table bar's inserts have
+     icons that say the side (`PanelTop` and the like).
   7. The toolbar (done; of three options the developer chose B on 2026-11-10, then C, without the capsule): the
      groups start at the left, on the page (`NotekeaToolbarGroups`), Source and Find stay at the right end, a
      button takes the theme's color under the pointer and is marked while the cursor is in its format (`ActiveFormats`, read from the cursor's line alone, so a line of a code block is read as text;

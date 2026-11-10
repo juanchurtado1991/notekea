@@ -242,7 +242,7 @@ class MarkdownFormatterTest {
                     "A",
                 "```\ncode\n```\n" to "code",
                 "```kotlin\ncode\n```\n" to "code",
-                "Intro\n\n---\n" to ""
+                "Intro\n\n---\n\n" to ""
             ),
             actual = listOf(
                 apply(
@@ -344,7 +344,7 @@ class MarkdownFormatterTest {
 
         assertEquals(
             expected = listOf(
-                "Intro\n\n![[a.png]]\n" to "Intro\n\n![[a.png]]\n".length,
+                "Intro\n\n![[a.png]]\n\n" to "Intro\n\n![[a.png]]\n\n".length,
                 "| Dish | Photo |\n| --- | --- |\n| Arepas | ![[a.png\\|80]] |" to cell + 14
             ),
             actual = listOf(
