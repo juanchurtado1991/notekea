@@ -54,6 +54,13 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
   - **Models and measures:** the files already downloaded for the tournament (`~/.cache/notekea-spike/models`:
     Qwen3.5 2B, 4B and 9B Q4_K_M and bge-reranker-v2-m3), on this Linux machine (RTX 5060 Ti 16 GB, and CPU only);
     no new downloads. Windows and macOS are measured in the release run. Evaluation runs by hand, never in CI.
+  - **Asked by the developer the same day:** the actions must be useful, not only correct: the chat can make a note
+    from other notes (a summary of a folder, of a tag, of the notes it found), and what it writes follows what was
+    asked for: summing up 30 notes gives a longer summary than summing up 3, but never an enormous one (a length
+    that grows with the sources, with a ceiling). The chat panel must feel alive, with motion and colour (the answer
+    streaming in, the step line, the citation chips, the action card), within the design system and reduced motion.
+    The actions must work perfectly: they are exercised for hours if needed, on the vaults of `smoke-data`, before
+    the pull request, and every bug found gets its test. A code review closes the work.
 
 ## Open work, in order
 
