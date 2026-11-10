@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   boxes, callouts, files and query tables work without leaving the text. `Mod+E` and the new Source button at the
   end of the toolbar show the whole note as written. Only the part of the note on screen is drawn, so a long note
   types as fast as a short one.
+- The formatting toolbar starts at the left, its groups have a color each (links blue, lists green, the template
+  purple), and a button is marked while the cursor is in its format: bold, italic, a heading, a link to a note, a
+  tag, a checklist or a bulleted list.
 - Tables are edited by cells: the table stays drawn while the cursor is in a cell, Tab and Enter move between cells
   (Tab on the last one adds a row), and a bar over the table, also on the right click, inserts and deletes rows and
   columns and aligns a column. Tables draw their columns left, centered or right as their delimiter row says.

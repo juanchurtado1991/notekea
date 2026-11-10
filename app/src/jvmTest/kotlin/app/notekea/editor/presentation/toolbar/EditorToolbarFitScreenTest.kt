@@ -39,6 +39,7 @@ class EditorToolbarFitScreenTest {
                     Box(modifier = Modifier.width(width = TOOLBAR_WIDTH_DP.dp)) {
                         EditorToolbar(
                             isSource = false,
+                            active = emptySet(),
                             platformConventions = PreviewPlatformConventions.linux,
                             onIntent = { intents += it }
                         )

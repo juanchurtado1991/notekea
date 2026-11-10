@@ -37,12 +37,13 @@ private const val PREVIEW_WIDTH_DP = 760
 
 /**
  * The editor toolbar, under the title, always one line: the formatting buttons in groups, each with a tooltip and its
- * shortcut, then Source (marked while [isSource]) and Find in note at the end. Groups that do not fit move into More
- * (⋯), the lists and the template first, then the links ([ToolbarFit]).
+ * shortcut and marked while the cursor is in its format ([active]), then Source (marked while [isSource]) and Find in
+ * note at the end. Groups that do not fit move into More: the lists and the template, then the links ([ToolbarFit]).
  */
 @Composable
 fun EditorToolbar(
     isSource: Boolean,
+    active: Set<ToolbarFormat>,
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier = Modifier
@@ -58,16 +59,14 @@ fun EditorToolbar(
                 modifier = Modifier.fillMaxWidth().padding(bottom = NotekeaDimensions.SpacingXs),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // The buttons stay at the end, where they were beside the Edit and Preview tabs.
-                Spacer(modifier = Modifier.weight(weight = 1f))
-
                 FormattingGroups(
                     fit = fit,
+                    active = active,
                     platformConventions = platformConventions,
                     onIntent = onIntent
                 )
 
-                Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingM))
+                Spacer(modifier = Modifier.weight(weight = 1f))
 
                 EndButtons(
                     isSource = isSource,
@@ -105,10 +104,7 @@ private fun EndButtons(
         shortcutHint = platformConventions
             .toggleSourceShortcut
             .label(operatingSystem = operatingSystem),
-        tint = MaterialTheme
-            .colorScheme
-            .primary
-            .takeIf { isSource }
+        isMarked = isSource
     )
 
     ToolbarButton(
@@ -125,7 +121,8 @@ internal fun ToolbarButton(
     label: StringResource,
     onClick: () -> Unit,
     shortcutHint: String? = null,
-    tint: Color? = null
+    tint: Color? = null,
+    isMarked: Boolean = false
 ) {
     NotekeaIconButton(
         icon = icon,
@@ -133,7 +130,8 @@ internal fun ToolbarButton(
         onClick = onClick,
         shortcutHint = shortcutHint,
         takesFocus = false,
-        tint = tint
+        tint = tint,
+        isMarked = isMarked
     )
 }
 
@@ -144,12 +142,14 @@ private fun EditorToolbarPreview() {
         Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
             EditorToolbar(
                 isSource = true,
+                active = setOf(ToolbarFormat.BOLD, ToolbarFormat.CHECKLIST),
                 platformConventions = EditorPreviewData.platformConventions,
                 onIntent = {}
             )
 
             EditorToolbar(
                 isSource = false,
+                active = emptySet(),
                 platformConventions = EditorPreviewData.platformConventions,
                 onIntent = {}
             )

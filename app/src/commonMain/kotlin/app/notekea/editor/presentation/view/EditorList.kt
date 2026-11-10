@@ -168,6 +168,7 @@ internal fun EditorList(
                     if (state.notePath != null) {
                         EditorToolbar(
                             isSource = state.isSourceMode,
+                            active = page.activeFormats,
                             platformConventions = platformConventions,
                             onIntent = onIntent,
                             modifier = Modifier.onSizeChanged {
