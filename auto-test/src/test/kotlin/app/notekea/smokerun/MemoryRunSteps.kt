@@ -26,7 +26,11 @@ private const val MAX_TABS = 100
 private const val MILLIS = 1_000L
 private const val MINUTE = 60L
 private const val RECENT = "Recent"
-private const val SCROLL_STEPS = 240
+
+// More turns of the wheel than the long note needs anywhere: a turn scrolls far less on macOS than on Linux, and
+// the scroll stops as soon as the note's end is drawn.
+private const val SCROLL_STEPS = 2_000
+private const val SOURCE_SCROLL_STEPS = 240
 private const val SEARCH_MILLIS = 60_000L
 private const val SEARCH_PLACEHOLDER = "Search the text of your notes"
 private const val SCROLL_TICKS = 25f
@@ -170,8 +174,8 @@ private fun ComposeUiTest.scrollLongNote(
 
     pressShortcut(key = Key.E)
     waitForIdle()
-    // Source draws no block: the note is one text field, scrolled as far as the drawn note was.
-    repeat(times = SCROLL_STEPS) { scrollDown() }
+    // Source draws no block to say where its end is: the one text field is scrolled a fixed way down.
+    repeat(times = SOURCE_SCROLL_STEPS) { scrollDown() }
 
     SmokeRunReport.sample(
         run = run,

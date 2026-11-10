@@ -253,14 +253,40 @@ private fun CaseScope.noteColumn() = ui.onAllNodes(
 )[0]
 
 /**
- * Scrolls the open note, a screen at a time from its top, until [text] is drawn on screen in it: the note draws only
- * the blocks on screen.
+ * Scrolls the open note, a step at a time from its top, until [text] is drawn on screen in it: the note draws only
+ * the blocks on screen. An embedded note is read once its frame is on screen, and a slow machine scrolls past the
+ * frame before its text shows (macOS's runner did, in 1.15-03 and 1.15-04): a second pass waits at every step.
  */
 private fun CaseScope.scrollNoteTo(text: String) {
+    val isFound = scrollPassTo(
+        text = text,
+        stepMillis = 0L
+    ) || scrollPassTo(
+        text = text,
+        stepMillis = SLOW_STEP_MILLIS
+    )
+
+    if (!isFound) throw CaseFailure(message = "expected \"$text\" in the note")
+}
+
+/** One pass down the note from its top; at each step [text] has [stepMillis] to show. False if it never does. */
+private fun CaseScope.scrollPassTo(
+    text: String,
+    stepMillis: Long
+): Boolean {
     val column = noteColumn()
     column.performSemanticsAction(key = SemanticsActions.ScrollBy) { it(0f, -SCROLL_TOP) }
 
     repeat(times = MAX_SCREENS) {
+        if (stepMillis > 0) {
+            runCatching {
+                ui
+                    .waitUntil(timeoutMillis = stepMillis) {
+                        firstShownTop(text = text) != null
+                    }
+            }
+        }
+
         val top = firstShownTop(text = text)
 
         if (top != null) {
@@ -280,14 +306,14 @@ private fun CaseScope.scrollNoteTo(text: String) {
 
             ui.waitForIdle()
 
-            return
+            return true
         }
 
         column.performSemanticsAction(key = SemanticsActions.ScrollBy) { it(0f, SCROLL_STEP) }
         ui.waitForIdle()
     }
 
-    throw CaseFailure(message = "expected \"$text\" in the note")
+    return false
 }
 
 private fun CaseScope.firstShownTop(text: String): Float? {
@@ -314,6 +340,7 @@ private const val SCROLL_TOP = 100_000f
 private const val SCROLL_STEP = 300f
 private const val TOP_MARGIN = 40f
 private const val MAX_SCREENS = 40
+private const val SLOW_STEP_MILLIS = 1_000L
 
 // What the note's column holds, between the sidebar and the side panel, not the tree's rows of the same names.
 private val inNote = SemanticsMatcher(description = "in the note") { node ->
