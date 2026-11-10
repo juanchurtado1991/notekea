@@ -77,19 +77,31 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
   a tag. There is no quota of automatic cases: automate what is reasonable.
 - **Post-MVP repositories** (`ROADMAP.md`, post-MVP): clone the repository as it is, index it with a parser, answer
   with file and line; Notekea never writes notes about the code nor writes code.
-- **One editing mode** (`ROADMAP.md`, post-MVP item 4): the plan and the design were agreed on 2026-11-09. Step 1
-  is done (`docs/spikes/2026-11-09-one-editing-mode.md`): hiding the marks works and holds for real notes, not for a
-  2,000-line one, where the one text field lays out the whole note on every change; how to lay out only what is on
-  screen is to be decided with the developer before step 2. No code yet. Design: the cursor's line shows all its Markdown marks, muted, and every other line looks finished (the two
-  designs not chosen revealed only the element under the cursor, or the whole block). The raw Markdown is a "Source"
-  action that takes over today's Edit/Preview shortcut. One PR from `main`, one commit per step:
-  1. A spike with no UI: hide the marks from `MarkdownOutputTransformation` and measure the longest Ghost Serializer
-     note against the memory targets of 1.18; if it does not hold, decide another way before going on.
-  2. Marks hidden except on the cursor's line (bold, italic, code, links, wiki links, heading `#`, bullets, tasks,
-     quotes) and the "Source" action; the Edit/Preview control stays.
-  3. Blocks in place: callouts, code blocks, rules, and task boxes that a click checks.
-  4. Images, embeds and query blocks shown and edited in place.
-  5. Tables shown and edited in place.
-  6. Parity with Preview on long notes and in memory; then the Edit/Preview control, `EditorState.isReading` and its
-     preference go (`ReadingView` stays for embedded notes), with the Auto-Test cases, the strings in every locale
-     and the changelog.
+- **One editing mode** (`ROADMAP.md`, post-MVP item 4): the plan and the design were agreed on 2026-11-09, and
+  both spikes are done (`docs/spikes/2026-11-09-one-editing-mode.md`). No code yet. Design: the cursor's line shows
+  all its Markdown marks, muted, and every other line looks finished (the two designs not chosen revealed only the
+  element under the cursor, or the whole block). The raw Markdown is a "Source" action that takes over today's
+  Edit/Preview shortcut.
+  **Architecture, decided by the developer: visible blocks.** One text field for the whole note lays out the whole
+  note on every change and does not hold for a 2,000-line note. So the note is cut into blocks at its blank lines
+  and shown in a `LazyColumn`; Preview's renderer draws every block but the cursor's, which is a `BasicTextField`
+  over the note's one `TextFieldState` whose output transformation removes the text outside the block (the window).
+  One text, one selection, one undo; the window is the blocks the selection touches; the field's item keeps one key.
+  Measured: 6 ms per key on the long note instead of 1,380, 51 MB of heap. Rules the spike gave:
+  - A block's renderer must have its height on its first frame (`rememberMarkdownState(immediate = true)`): the
+    renderer's default parses later and is empty meanwhile, so the list composes every block of the note.
+  - Tables, callouts, code blocks, images, embeds and query blocks are drawn by the renderer and show their Markdown
+    while the cursor is in them: no editor of their own.
+  - "Source" is the window over the whole note, which is today's editor.
+  One PR from `main`, one commit per step:
+  1. The spikes (done).
+  2. The blocks: the pure cut of a note into blocks and the window, with tests; the lazy list in place of the
+     scrolled text field in Edit mode, with the header, the properties and the toolbar (sticky) as its first
+     items; a click on a block puts the cursor there; arrows, drag and Shift+click cross blocks. The Edit/Preview
+     control stays.
+  3. What read the text field's layout reads the list: Find in note, the outline (scroll to a heading, the current
+     heading), each tab's scroll position, embedded files and query blocks, task boxes that a click checks.
+  4. Marks hidden except on the cursor's line inside the cursor's block, and the "Source" action.
+  5. Long notes and memory against Preview with the `:auto-test` memory runs; then the Edit/Preview control,
+     `EditorState.isReading` and its preference go (`ReadingView` stays for embedded notes), with the Auto-Test
+     cases, the QA documents, the strings in every locale and the changelog.
