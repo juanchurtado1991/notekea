@@ -24,27 +24,16 @@ private const val PREVIEW_LINK = "Link to a note"
 private const val PREVIEW_MORE = "More"
 
 /**
- * A row of toolbar buttons in one capsule (the editor's formatting bar): the theme's soft surface with the 6 dp
- * corners of the other controls, and
- * [groups] of related buttons separated by thin lines, so a long row reads as a few groups.
+ * A row of toolbar buttons on the page itself (the editor's formatting bar): [groups] of related buttons separated
+ * by thin lines, so a long row reads as a few groups.
  */
 @Composable
-fun NotekeaToolbarPill(
+fun NotekeaToolbarGroups(
     groups: List<@Composable RowScope.() -> Unit>,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(size = NotekeaDimensions.ControlRadius)
-
     Row(
-        modifier = modifier
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = shape
-            )
-            .padding(
-                horizontal = NotekeaDimensions.SpacingXs,
-                vertical = NotekeaDimensions.SpacingXs / 2
-            ),
+        modifier = modifier.padding(vertical = NotekeaDimensions.SpacingXs / 2),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -69,9 +58,9 @@ private fun GroupDivider() {
 
 @Preview
 @Composable
-private fun NotekeaToolbarPillPreview() {
+private fun NotekeaToolbarGroupsPreview() {
     NotekeaPreviewThemes {
-        NotekeaToolbarPill(
+        NotekeaToolbarGroups(
             groups = listOf(
                 {
                     NotekeaIconButton(

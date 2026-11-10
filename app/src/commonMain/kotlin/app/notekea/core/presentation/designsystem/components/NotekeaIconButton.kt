@@ -1,7 +1,10 @@
 package app.notekea.core.presentation.designsystem.components
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -9,6 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,8 +37,8 @@ private const val PREVIEW_SORT = "Sort by name"
 
 /**
  * Compact icon-only button for dense toolbars. The tooltip and screen readers say [label], then [shortcutHint]. With
- * [takesFocus] false a click leaves the keyboard where it was; [isTooltipBeside] puts the tooltip to its side, for a
- * vertical strip; [isMarked] says what the button turns on is on now: it takes the theme's color, on a wash of it.
+ * [takesFocus] false a click leaves the keyboard where it was. [isMarked] says what the button turns on is on now:
+ * the theme's color on a wash of it, a color the icon also takes under the pointer with [isColoredOnHover].
  */
 @Composable
 fun NotekeaIconButton(
@@ -46,9 +51,19 @@ fun NotekeaIconButton(
     takesFocus: Boolean = true,
     isTooltipBeside: Boolean = false,
     tint: Color? = null,
-    isMarked: Boolean = false
+    isMarked: Boolean = false,
+    isColoredOnHover: Boolean = false
 ) {
     val colors = MaterialTheme.colorScheme
+    val interactions = remember { MutableInteractionSource() }
+    val isHovered by interactions.collectIsHoveredAsState()
+
+    val isColored = isMarked || (
+        isColoredOnHover &&
+            isHovered &&
+            enabled
+        )
+
     val wash = if (isMarked) colors.primary.copy(alpha = MARKED_ALPHA) else Color.Transparent
 
     NotekeaTooltip(
@@ -68,6 +83,8 @@ fun NotekeaIconButton(
                 .background(color = wash)
                 .semantics { selected = isMarked }
                 .clickable(
+                    interactionSource = interactions,
+                    indication = LocalIndication.current,
                     enabled = enabled,
                     onClickLabel = label,
                     role = Role.Button,
@@ -75,7 +92,7 @@ fun NotekeaIconButton(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            val color = if (isMarked) colors.primary else tint ?: colors.onSurfaceVariant
+            val color = if (isColored) colors.primary else tint ?: colors.onSurfaceVariant
 
             val iconTint = if (enabled) color else color.copy(alpha = DISABLED_ALPHA)
 

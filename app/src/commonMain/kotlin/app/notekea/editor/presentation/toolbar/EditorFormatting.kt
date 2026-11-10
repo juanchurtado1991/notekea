@@ -1,7 +1,6 @@
 package app.notekea.editor.presentation.toolbar
 
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -11,9 +10,8 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.Shortcut
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuButton
 import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
-import app.notekea.core.presentation.designsystem.components.NotekeaToolbarPill
+import app.notekea.core.presentation.designsystem.components.NotekeaToolbarGroups
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.designsystem.theme.GraphPalette
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.platform.label
 import app.notekea.editor.domain.FormatAction
@@ -35,13 +33,8 @@ import app.notekea.resources.format_tag
 import app.notekea.resources.format_template
 import org.jetbrains.compose.resources.stringResource
 
-// Each group has a color of its own, the same in every theme: the graph's, mid tones that read on light and dark.
-private val LINKS_COLOR get() = GraphPalette.colorAt(index = 2)
-private val LISTS_COLOR get() = GraphPalette.colorAt(index = 0)
-private val TEMPLATE_COLOR get() = GraphPalette.colorAt(index = 3)
-
 /**
- * The formatting buttons in one capsule, in groups: Heading, Bold, Italic · Link to a note, Tag · Checklist, Bulleted
+ * The formatting buttons, in groups: Heading, Bold, Italic · Link to a note, Tag · Checklist, Bulleted
  * list · Insert template · More, which holds the rest (Web link, Numbered list, Callout, Code block, Image or file,
  * Quote, Divider, Table), so the bar stays short and calm. The groups [fit] leaves out open from the top of More.
  */
@@ -98,7 +91,7 @@ internal fun FormattingGroups(
         )
     }
 
-    NotekeaToolbarPill(
+    NotekeaToolbarGroups(
         modifier = Modifier.semantics { contentDescription = label },
         groups = listOfNotNull(
             text,
@@ -124,7 +117,6 @@ private fun LinkGroup(
         shortcutHint = platformConventions.shortcutLabel(
             shortcut = platformConventions.noteLinkShortcut
         ),
-        tint = LINKS_COLOR,
         isMarked = ToolbarFormat.NOTE_LINK in active
     )
 
@@ -132,7 +124,6 @@ private fun LinkGroup(
         icon = NotekeaIcons.Tag,
         label = Res.string.format_tag,
         onClick = { onIntent(EditorIntent.OnTagRequest) },
-        tint = LINKS_COLOR,
         isMarked = ToolbarFormat.TAG in active
     )
 }
@@ -148,7 +139,6 @@ private fun ListGroup(
         icon = NotekeaIcons.Checklist,
         label = Res.string.format_checklist,
         onClick = { format(actions.checklist) },
-        tint = LISTS_COLOR,
         isMarked = ToolbarFormat.CHECKLIST in active
     )
 
@@ -156,7 +146,6 @@ private fun ListGroup(
         icon = NotekeaIcons.BulletList,
         label = Res.string.format_bullet_list,
         onClick = { format(actions.bulletList) },
-        tint = LISTS_COLOR,
         isMarked = ToolbarFormat.BULLET_LIST in active
     )
 }
@@ -173,8 +162,7 @@ private fun TemplateButton(
         onClick = { onIntent(EditorIntent.OnTemplateRequest) },
         shortcutHint = platformConventions.shortcutLabel(
             shortcut = platformConventions.templateShortcut
-        ),
-        tint = TEMPLATE_COLOR
+        )
     )
 }
 
@@ -191,8 +179,6 @@ private fun TextGroup(
     platformConventions: PlatformConventions,
     format: (FormatAction) -> Unit
 ) {
-    val ink = MaterialTheme.colorScheme.onSurface
-
     val sizes = listOf(
         Res.string.format_heading_large,
         Res.string.format_heading_medium,
@@ -201,8 +187,8 @@ private fun TextGroup(
 
     NotekeaMenuButton(
         takesFocus = false,
-        tint = ink,
         isMarked = ToolbarFormat.HEADING in active,
+        isColoredOnHover = true,
         icon = NotekeaIcons.Heading,
         label = stringResource(resource = Res.string.format_heading),
         sections = listOf(
@@ -225,7 +211,6 @@ private fun TextGroup(
         shortcutHint = platformConventions.shortcutLabel(
             shortcut = platformConventions.boldShortcut
         ),
-        tint = ink,
         isMarked = ToolbarFormat.BOLD in active
     )
 
@@ -236,7 +221,6 @@ private fun TextGroup(
         shortcutHint = platformConventions.shortcutLabel(
             shortcut = platformConventions.italicShortcut
         ),
-        tint = ink,
         isMarked = ToolbarFormat.ITALIC in active
     )
 }

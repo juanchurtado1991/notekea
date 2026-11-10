@@ -142,10 +142,9 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
      note is always in the field's semantics, so a case cannot wait for Markdown to "go away": it looks for what
      is drawn. Cases 1.5-08, 1.5-10, 1.5-12 and 1.9-04 were rewritten, 1.5-14 and 1.5-15 (tables) are new.
      Known limit: a link, a tag or a callout's title in the cursor's own block is text, not a click target.
-  7. The toolbar (done; the developer chose option B of three on 2026-11-10): the capsule starts at the left,
-     Source and Find stay at the right end, each group has a color of its own, the same in every theme
-     (`GraphPalette`: links blue, lists green, the template purple), and a button is marked while the cursor is in
-     its format (`ActiveFormats`, read from the cursor's line alone, so a line of a code block is read as text;
+  7. The toolbar (done; of three options the developer chose B on 2026-11-10, then C, without the capsule): the
+     groups start at the left, on the page (`NotekeaToolbarGroups`), Source and Find stay at the right end, a
+     button takes the theme's color under the pointer and is marked while the cursor is in its format (`ActiveFormats`, read from the cursor's line alone, so a line of a code block is read as text;
      `EditorPageState.activeFormats`; `NotekeaIconButton.isMarked`). `ToolbarFit`'s widths no longer count the tabs.
   8. The tree's icons (done): the note `Home.md` at the vault's root has a house and the notes of the templates'
      folder (the vault's Obsidian setting, `Templates` without it) the template icon in their folder's color
