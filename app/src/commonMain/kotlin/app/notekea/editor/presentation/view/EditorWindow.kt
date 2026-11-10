@@ -73,7 +73,7 @@ private fun rememberHighlighting(
                 typography = typography,
                 codeFontFamily = codeFontFamily
             ),
-            window = { page.items.shown },
+            shown = { page.shown },
             findState = { currentFind.value }
         )
     }
@@ -92,7 +92,6 @@ internal fun EditorWindow(
     find: FindState?,
     modifier: Modifier = Modifier
 ) {
-    var hasFocus by remember { mutableStateOf(value = false) }
     val label = stringResource(resource = Res.string.editor_body_label)
     val formats = formatActions()
 
@@ -121,8 +120,8 @@ internal fun EditorWindow(
             .focusRequester(focusRequester = page.focusRequester)
             .onPreviewKeyEvent(onPreviewKeyEvent = keys::onKey)
             .onFocusChanged {
-                if (hasFocus && !it.isFocused) onIntent(EditorIntent.OnFocusLost)
-                hasFocus = it.isFocused
+                if (page.hasFocus && !it.isFocused) onIntent(EditorIntent.OnFocusLost)
+                page.hasFocus = it.isFocused
             },
         // Ligatures would turn what is typed into other glyphs (`->` into an arrow): the editor shows the characters.
         textStyle = MaterialTheme
@@ -140,8 +139,8 @@ internal fun EditorWindow(
         ),
         decorator = remember(page, onIntent) {
             decoratorOf(
-                layout = { page.layout() },
-                windowStart = { page.items.shown.min },
+                layout = page::currentLayout,
+                shown = { page.shown },
                 onIntent = onIntent
             )
         }
@@ -301,7 +300,8 @@ private fun rememberPreviewPage(): EditorPageState {
             buffer = buffer,
             listState = listState,
             focusRequester = FocusRequester(),
-            isReading = { false }
+            isReading = { false },
+            isSource = { false }
         )
     }
 }

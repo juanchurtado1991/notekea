@@ -26,8 +26,8 @@ enum class ToolbarFit(
     );
 
     companion object {
-        private const val ALL_MIN_WIDTH_DP = 520
-        private const val LINKS_MIN_WIDTH_DP = 420
+        private const val ALL_MIN_WIDTH_DP = 552
+        private const val LINKS_MIN_WIDTH_DP = 452
 
         /** The fit of a toolbar [width] wide. */
         fun of(width: Dp): ToolbarFit = when {

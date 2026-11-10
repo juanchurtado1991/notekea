@@ -191,7 +191,7 @@ internal class EditorKeys(
         val layout = page.currentLayout() ?: return false
 
         val line =
-            layout.getLineForOffset(offset = page.buffer.selection.end - page.items.shown.min)
+            layout.getLineForOffset(offset = page.shown.toShown(offset = page.buffer.selection.end))
 
         return line == if (isLast) layout.lineCount - 1 else 0
     }

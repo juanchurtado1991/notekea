@@ -100,12 +100,12 @@ private fun EditorPageState.isOnToolbar(y: Float): Boolean {
  */
 private fun EditorPageState.dragTarget(position: Offset): Int? {
     val window = items.window ?: return null
-    val shown = items.shown
+    val range = items.shown
     val inField = fieldPosition(position = position) ?: return null
 
     if (isInField(y = inField.y)) {
         return currentLayout()?.let {
-            shown.min + it.getOffsetForPosition(position = inField)
+            shown.toNote(offset = it.getOffsetForPosition(position = inField))
         }
     }
 
@@ -125,7 +125,7 @@ private fun EditorPageState.dragTarget(position: Offset): Int? {
                 block < window.first && y < item.offset + item.size
             }
             ?.let { (_, block) -> items.blocks.start(index = block) }
-            ?: shown.min
+            ?: range.min
     } else {
         drawn
             .map {
@@ -135,6 +135,6 @@ private fun EditorPageState.dragTarget(position: Offset): Int? {
                 block > window.last && y >= item.offset
             }
             ?.let { (_, block) -> items.blocks.textEnd(window = block..block) }
-            ?: shown.max
+            ?: range.max
     }
 }

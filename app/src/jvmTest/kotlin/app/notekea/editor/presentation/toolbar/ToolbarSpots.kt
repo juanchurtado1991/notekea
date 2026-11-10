@@ -2,18 +2,18 @@ package app.notekea.editor.presentation.toolbar
 
 import androidx.compose.ui.geometry.Offset
 
-/** Where the toolbar's buttons and menu rows are in a 1200 × 640 px window at 1.5 density. */
+/** Where the toolbar's buttons and menu rows are in a 1200 × 900 px window at 1.5 density. */
 internal object ToolbarSpots {
     val BOLD = Offset(
-        x = 643f,
+        x = 595f,
         y = 186f
     )
     val CALLOUT = Offset(
-        x = 842f,
+        x = 794f,
         y = 356f
     )
     val CHECKLIST = Offset(
-        x = 863f,
+        x = 815f,
         y = 186f
     )
     val EDIT_TAB = Offset(
@@ -29,15 +29,15 @@ internal object ToolbarSpots {
         y = 196f
     )
     val HEADING = Offset(
-        x = 595f,
+        x = 547f,
         y = 186f
     )
     val MEDIUM_HEADING = Offset(
-        x = 676f,
+        x = 628f,
         y = 273f
     )
     val NOTE_LINK = Offset(
-        x = 753f,
+        x = 705f,
         y = 186f
     )
     val PREVIEW_TAB = Offset(
@@ -45,31 +45,35 @@ internal object ToolbarSpots {
         y = 186f
     )
     val TEMPLATE = Offset(
-        x = 973f,
+        x = 925f,
+        y = 186f
+    )
+    val SOURCE = Offset(
+        x = 1053f,
         y = 186f
     )
     val TAG = Offset(
-        x = 801f,
+        x = 753f,
         y = 186f
     )
     val CODE_BLOCK = Offset(
-        x = 842f,
-        y = 425f
+        x = 794f,
+        y = 443f
     )
     val FOUR_BY_THREE = Offset(
-        x = 478f,
+        x = 430f,
         y = 744f
     )
     val KOTLIN = Offset(
         x = 460f,
-        y = 630f
+        y = 624f
     )
     val MORE = Offset(
-        x = 1035f,
+        x = 987f,
         y = 186f
     )
     val TABLE_ROW = Offset(
-        x = 842f,
+        x = 794f,
         y = 735f
     )
     val TOOLBAR_GAP = Offset(

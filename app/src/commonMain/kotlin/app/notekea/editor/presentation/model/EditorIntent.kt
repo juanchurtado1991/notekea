@@ -118,6 +118,9 @@ sealed interface EditorIntent {
 
     data object OnActionErrorDismiss : EditorIntent
 
+    /** The toolbar's Source button: show the whole note as written, or as it looks again. */
+    data object OnSourceModeToggle : EditorIntent
+
     /** Mod+E or the header button: switch between Edit and Read mode. */
     data object OnReadModeToggle : EditorIntent
 

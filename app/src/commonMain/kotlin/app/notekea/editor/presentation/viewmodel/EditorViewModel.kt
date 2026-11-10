@@ -210,6 +210,8 @@ class EditorViewModel(
 
             EditorIntent.OnReadModeToggle -> chooseMode(isReading = !state.value.isReading)
 
+            EditorIntent.OnSourceModeToggle -> reduce { it.copy(isSourceMode = !it.isSourceMode) }
+
             else -> onNavigationIntent(intent = intent)
         }
     }

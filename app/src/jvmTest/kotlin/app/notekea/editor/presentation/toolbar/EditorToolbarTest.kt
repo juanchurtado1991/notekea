@@ -31,6 +31,7 @@ import app.notekea.editor.presentation.toolbar.ToolbarSpots.MEDIUM_HEADING
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.MORE
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.NOTE_LINK
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.PREVIEW_TAB
+import app.notekea.editor.presentation.toolbar.ToolbarSpots.SOURCE
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.TABLE_ROW
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.TAG
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.TEMPLATE
@@ -49,10 +50,19 @@ import kotlin.test.assertEquals
  */
 class EditorToolbarTest {
     @Test
-    fun `buttons format, link to a note and insert template ask to choose one, and the tabs switch modes`() {
+    fun `buttons format, link to a note and insert template ask to choose one, Source and the tabs switch modes`() {
         val intents = clickAll(
             isReading = false,
-            positions = listOf(BOLD, NOTE_LINK, CHECKLIST, TEMPLATE, EDIT_TAB, PREVIEW_TAB, FIND)
+            positions = listOf(
+                BOLD,
+                NOTE_LINK,
+                CHECKLIST,
+                TEMPLATE,
+                SOURCE,
+                EDIT_TAB,
+                PREVIEW_TAB,
+                FIND
+            )
         )
 
         assertEquals(
@@ -61,6 +71,7 @@ class EditorToolbarTest {
                 EditorIntent.OnNoteLinkRequest,
                 EditorIntent.OnFormat(action = FormatAction.Checklist(placeholder = "To do")),
                 EditorIntent.OnTemplateRequest,
+                EditorIntent.OnSourceModeToggle,
                 EditorIntent.OnReadModeToggle,
                 EditorIntent.OnFindOpen
             ),

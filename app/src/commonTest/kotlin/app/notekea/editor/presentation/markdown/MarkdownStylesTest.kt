@@ -24,7 +24,7 @@ class MarkdownStylesTest {
             expected = listOf(
                 colors.primary,
                 colors.primary,
-                colors.tertiary,
+                colors.primary,
                 colors.onSurfaceVariant
             ),
             actual = listOf(

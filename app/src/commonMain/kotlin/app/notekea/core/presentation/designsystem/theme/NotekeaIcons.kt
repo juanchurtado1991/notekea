@@ -209,7 +209,7 @@ object NotekeaIcons {
     val PropertyList: ImageVector get() = Lucide.List
     val PropertyNumber: ImageVector get() = Lucide.Binary
     val PropertyOther: ImageVector get() = Lucide.Braces
-    val PropertySource: ImageVector get() = Lucide.Code
+    val Source: ImageVector get() = Lucide.Code
     val PropertyText: ImageVector get() = Lucide.Type
     val Quote: ImageVector get() = Lucide.TextQuote
     val Rename: ImageVector get() = Lucide.Pencil

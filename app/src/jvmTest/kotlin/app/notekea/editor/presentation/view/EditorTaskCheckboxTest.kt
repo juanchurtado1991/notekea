@@ -7,8 +7,11 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.Density
@@ -66,6 +69,42 @@ class EditorTaskCheckboxTest {
             actual = toggles
         )
     }
+
+    @Test
+    fun `a checkbox of the lines the cursor is in toggles its task and leaves the cursor in the text`() =
+        runComposeUiTest {
+            val toggles = mutableListOf<Int>()
+
+            setContent {
+                NotekeaTheme(darkTheme = false) {
+                    EditorContent(
+                        state = EditorState(notePath = RelativePath(value = NOTE)),
+                        buffer = TextFieldState(
+                            initialText = BODY,
+                            initialSelection = TextRange(index = BODY.indexOf(string = "Buy"))
+                        ),
+                        platformConventions = PreviewPlatformConventions.linux,
+                        onIntent = {
+                            if (it is EditorIntent.OnTaskToggle) toggles += it.stateIndex
+                        }
+                    )
+                }
+            }
+
+            // With the text focused the cursor's line shows its marks: moving the focus to the box would hide
+            // them again and take the box from under the pointer before the click ends.
+            onAllNodes(matcher = hasSetTextAction())[1].requestFocus()
+            onAllNodes(matcher = hasSetTextAction())[1].assertIsFocused()
+
+            onAllNodes(matcher = hasContentDescription(value = "Task"))[0].performClick()
+
+            assertEquals(
+                expected = listOf(BODY.indexOf(string = "[ ] Buy flour") + 1),
+                actual = toggles
+            )
+
+            onAllNodes(matcher = hasSetTextAction())[1].assertIsFocused()
+        }
 
     @Test
     fun `clicking a task's checkbox in edit mode toggles that task, clicking its text does not`() {
@@ -132,8 +171,8 @@ class EditorTaskCheckboxTest {
         private const val WINDOW_HEIGHT = 520
         private const val WINDOW_WIDTH = 900
         private val FLOUR_CHECKBOX = Offset(
-            x = 80f,
-            y = 344f
+            x = 62f,
+            y = 356f
         )
         private val FLOUR_TEXT = Offset(
             x = 160f,
