@@ -9,13 +9,10 @@ import app.notekea.editor.presentation.attachments.AttachmentView
 /**
  * A piece of a note as Read mode shows it: Markdown for the renderer, a file embedded on a line of its own, which
  * Notekea draws itself, or a query block drawn as its table. Files embedded inside a paragraph stay in the Markdown, as
- * links. A piece that starts with a heading of the outline knows its index ([Markdown.heading]).
+ * links.
  */
 sealed interface ReadingSegment {
-    data class Markdown(
-        val text: String,
-        val heading: Int? = null
-    ) : ReadingSegment
+    data class Markdown(val text: String) : ReadingSegment
 
     data class Attachment(val view: AttachmentView) : ReadingSegment
 
@@ -27,16 +24,17 @@ sealed interface ReadingSegment {
     companion object {
         /**
          * [text] cut at the lines that hold only an embedded file of [attachments], around its query blocks, and
-         * before every line of [headings]; blank pieces are left out.
+         * before every line of [headings]; blank pieces are left out. [text] is the note's from [offset] on (a block
+         * of the editor), and the embedded files are placed in the whole note: the ones outside [text] are left out.
          */
         fun of(
             text: String,
             attachments: List<AttachmentView>,
-            headings: List<OutlineHeading> = emptyList()
+            headings: List<OutlineHeading> = emptyList(),
+            offset: Int = 0
         ): List<ReadingSegment> {
             val segments = mutableListOf<ReadingSegment>()
             var start = 0
-            var heading: Int? = null
 
             val addMarkdown = { end: Int ->
                 text
@@ -45,20 +43,14 @@ sealed interface ReadingSegment {
                         endIndex = end
                     )
                     .takeIf { it.isNotBlank() }
-                    ?.let {
-                        segments += Markdown(
-                            text = it,
-                            heading = heading
-                        )
-                    }
-
-                heading = null
+                    ?.let { segments += Markdown(text = it) }
             }
 
             cutsOf(
                 text = text,
                 attachments = attachments,
-                headings = headings
+                headings = headings,
+                offset = offset
             ).forEach { cut ->
                 if (cut.lineStart < start) return@forEach
                 addMarkdown(cut.lineStart)
@@ -66,9 +58,7 @@ sealed interface ReadingSegment {
 
                 val piece = cut.view?.let { Attachment(view = it) } ?: cut.query
 
-                if (piece == null) {
-                    heading = cut.heading
-                } else {
+                if (piece != null) {
                     segments += piece
                     start = minOf(cut.lineEnd + 1, text.length)
                 }
@@ -83,19 +73,22 @@ sealed interface ReadingSegment {
         private fun cutsOf(
             text: String,
             attachments: List<AttachmentView>,
-            headings: List<OutlineHeading>
+            headings: List<OutlineHeading>,
+            offset: Int
         ): List<Cut> {
             val files = attachments.filter {
-                it.embed.isOwnLine && it.embed.range.last < text.length
+                it.embed.isOwnLine &&
+                    it.embed.range.first >= offset &&
+                    it.embed.range.last < offset + text.length
             }.map { view ->
                 val lineStart = text.lastIndexOf(
                     char = StringPatterns.NEW_LINE_CHAR,
-                    startIndex = view.embed.range.first - 1
+                    startIndex = view.embed.range.first - offset - 1
                 ) + 1
 
                 val lineEnd = text.indexOf(
                     char = StringPatterns.NEW_LINE_CHAR,
-                    startIndex = view.embed.range.last
+                    startIndex = view.embed.range.last - offset
                 )
                     .takeIf {
                         it >= 0
@@ -109,15 +102,13 @@ sealed interface ReadingSegment {
             }
 
             val titles = headings
-                .withIndex()
                 .filter {
-                    it.value.offset < text.length
+                    it.offset < text.length
                 }
-                .map { (index, heading) ->
+                .map { heading ->
                     Cut(
                         lineStart = heading.offset,
-                        lineEnd = heading.offset,
-                        heading = index
+                        lineEnd = heading.offset
                     )
                 }
 
@@ -213,13 +204,12 @@ sealed interface ReadingSegment {
             )
         }
 
-        /** One place [of] cuts the text: an embedded file's line ([view]), a query block or a heading's ([heading]). */
+        /** One place [of] cuts the text: an embedded file's line ([view]), a query block, or a heading's line. */
         private data class Cut(
             val lineStart: Int,
             val lineEnd: Int,
             val view: AttachmentView? = null,
-            val query: Query? = null,
-            val heading: Int? = null
+            val query: Query? = null
         )
     }
 }

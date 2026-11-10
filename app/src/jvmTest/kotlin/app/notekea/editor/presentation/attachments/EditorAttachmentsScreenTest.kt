@@ -12,6 +12,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.notes.domain.AttachmentKind
@@ -27,13 +28,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * A note's attachments on screen, rendered headless on the AWT event thread: in Edit mode each
- * file shows under its line and its chip opens it; in Preview a missing file offers Locate…; Mod+V and the toolbar's
- * More › Image or file ask the editor to attach. Positions are those of a 1200 × 900 px window at 1.5 density.
+ * A note's attachments on screen, rendered headless on the AWT event thread, in a 1200 × 900 px window at 1.5
+ * density: in Edit mode each file shows in place of its line while the cursor is in another block, and its chip
+ * opens it; in Preview a missing file offers Locate…; Mod+V and More › Image or file ask the editor to attach.
  */
 class EditorAttachmentsScreenTest {
     @Test
-    fun `in edit mode the file chip under its line opens the file, mod+v pastes and more picks a file`() {
+    fun `in edit mode the chip of a file away from the cursor opens it, mod+v pastes and more picks a file`() {
         val intents = render(isReading = false) { scene ->
             click(
                 scene = scene,
@@ -112,7 +113,10 @@ class EditorAttachmentsScreenTest {
                             isReading = isReading,
                             attachments = views()
                         ),
-                        buffer = TextFieldState(initialText = TEXT),
+                        buffer = TextFieldState(
+                            initialText = TEXT,
+                            initialSelection = TextRange(index = 0)
+                        ),
                         platformConventions = PreviewPlatformConventions.linux,
                         onIntent = { intents += it }
                     )
@@ -225,21 +229,21 @@ class EditorAttachmentsScreenTest {
         )
         private val EDIT_CHIP = Offset(
             x = 255f,
-            y = 877f
+            y = 731f
         )
         private val MENU = RelativePath(value = "Recipes/menu.pdf")
         private val NOTE = RelativePath(value = "Recipes/Arepas.md")
         private val READ_CHIP = Offset(
             x = 255f,
-            y = 668f
+            y = 725f
         )
         private val READ_LOCATE = Offset(
-            x = 1023f,
-            y = 767f
+            x = 1040f,
+            y = 817f
         )
         private val TEXT_LINE = Offset(
             x = 300f,
-            y = 344f
+            y = 360f
         )
     }
 }

@@ -11,7 +11,7 @@ import kotlin.test.assertEquals
 
 class ReadingSegmentTest {
     @Test
-    fun `read mode cuts at files on their own line and before each heading, which its piece knows`() {
+    fun `read mode cuts at files on their own line and before each heading`() {
         val text = "Intro\n# One\nBody\n![[a.png]]\n## Two\nEnd\n"
         val start = text.indexOf(string = "![[")
 
@@ -29,15 +29,9 @@ class ReadingSegmentTest {
         assertEquals(
             expected = listOf(
                 ReadingSegment.Markdown(text = "Intro\n"),
-                ReadingSegment.Markdown(
-                    text = "# One\nBody\n",
-                    heading = 0
-                ),
+                ReadingSegment.Markdown(text = "# One\nBody\n"),
                 ReadingSegment.Attachment(view = view),
-                ReadingSegment.Markdown(
-                    text = "## Two\nEnd\n",
-                    heading = 1
-                )
+                ReadingSegment.Markdown(text = "## Two\nEnd\n")
             ),
             actual = ReadingSegment.of(
                 text = text,

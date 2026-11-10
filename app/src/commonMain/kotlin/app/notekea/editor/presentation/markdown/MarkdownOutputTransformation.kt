@@ -2,25 +2,48 @@ package app.notekea.editor.presentation.markdown
 
 import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldBuffer
-import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.TextRange
 import app.notekea.editor.presentation.find.FindState
 
 /**
- * Highlights the Markdown of the text field it is given to: it only adds styles, so the cursor, selection and undo are
- * those of the plain text. The last text's spans are reused when the field redraws without an edit. [findState] adds
- * Find in note's matches on top; [paragraphs] make the lines of embedded files taller.
+ * Shows only the [window] of the note in its text field (the blocks the cursor is in), with its Markdown highlighted
+ * and [findState]'s matches on top: the field lays out that text alone, while the cursor, selection and undo stay the
+ * whole note's. The last text's spans are reused when the field redraws without an edit.
  */
 class MarkdownOutputTransformation(
     private val styles: MarkdownStyles,
+    private val window: () -> TextRange,
     private val highlighter: MarkdownHighlighter = MarkdownHighlighter(),
-    private val findState: () -> FindState? = { null },
-    private val paragraphs: (String) -> List<Pair<IntRange, ParagraphStyle>> = { emptyList() }
+    private val findState: () -> FindState? = { null }
 ) : OutputTransformation {
     private var lastText: String? = null
     private var lastSpans: List<HighlightSpan> = emptyList()
 
     override fun TextFieldBuffer.transformOutput() {
-        val text = originalText.toString()
+        val shown = window()
+        val start = shown.min.coerceAtMost(maximumValue = length)
+
+        val end = shown.max.coerceIn(
+            minimumValue = start,
+            maximumValue = length
+        )
+
+        val text = originalText.substring(
+            startIndex = start,
+            endIndex = end
+        )
+
+        replace(
+            start = end,
+            end = length,
+            text = ""
+        )
+
+        replace(
+            start = 0,
+            end = start,
+            text = ""
+        )
 
         spansOf(text = text).forEach { span ->
             addStyle(
@@ -30,26 +53,16 @@ class MarkdownOutputTransformation(
             )
         }
 
-        paragraphs(text).filter {
-            it.first.last < length
-        }.forEach { (range, style) ->
-            addStyle(
-                paragraphStyle = style,
-                start = range.first,
-                end = range.last + 1
-            )
-        }
-
         val find = findState() ?: return
 
         find.matches.forEachIndexed { index, match ->
-            if (match.last >= length) return@forEachIndexed
+            if (match.first < start || match.last >= end) return@forEachIndexed
             val style = if (index == find.current) styles.currentFindMatch else styles.findMatch
 
             addStyle(
                 spanStyle = style,
-                start = match.first,
-                end = match.last + 1
+                start = match.first - start,
+                end = match.last + 1 - start
             )
         }
     }

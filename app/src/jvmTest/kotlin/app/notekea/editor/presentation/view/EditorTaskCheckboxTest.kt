@@ -4,6 +4,13 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.notes.domain.RelativePath
@@ -15,8 +22,51 @@ import app.notekea.editor.presentation.model.EditorState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** Tasks in Edit mode: a checkbox over each `[ ]` toggles that task; clicking the text does not. */
+/**
+ * Tasks in Edit mode: a checkbox over each `[ ]` toggles that task; clicking the text does not. The tasks of the
+ * blocks the cursor is not in are drawn by the renderer, and their checkboxes toggle them the same way.
+ */
+@OptIn(ExperimentalTestApi::class)
 class EditorTaskCheckboxTest {
+    @Test
+    fun `a task's checkbox in a block the cursor is not in toggles that task`() = runComposeUiTest {
+        val toggles = mutableListOf<Int>()
+
+        setContent {
+            NotekeaTheme(darkTheme = false) {
+                EditorContent(
+                    state = EditorState(notePath = RelativePath(value = NOTE)),
+                    buffer = TextFieldState(
+                        initialText = DRAWN_BODY,
+                        initialSelection = TextRange(index = 0)
+                    ),
+                    platformConventions = PreviewPlatformConventions.linux,
+                    onIntent = {
+                        if (it is EditorIntent.OnTaskToggle) toggles += it.stateIndex
+                    }
+                )
+            }
+        }
+
+        val boxes = onAllNodes(matcher = hasContentDescription(value = "Task"))
+
+        assertEquals(
+            expected = listOf("not checked", "checked", "not checked", "checked"),
+            actual = boxes.fetchSemanticsNodes().map {
+                it.config.getOrNull(key = SemanticsProperties.StateDescription)
+            }
+        )
+
+        repeat(times = DRAWN_TASKS.size) { boxes[it].performClick() }
+
+        assertEquals(
+            expected = DRAWN_TASKS.map {
+                DRAWN_BODY.indexOf(string = it) + 1
+            },
+            actual = toggles
+        )
+    }
+
     @Test
     fun `clicking a task's checkbox in edit mode toggles that task, clicking its text does not`() {
         val toggles = mutableListOf<EditorIntent.OnTaskToggle>()
@@ -69,6 +119,11 @@ class EditorTaskCheckboxTest {
     }
 
     companion object {
+        private val DRAWN_TASKS =
+            listOf("[ ] Buy flour", "[X] Soak the beans", "[ ] Call the baker", "[x] Pay")
+        private const val DRAWN_BODY =
+            "# Groceries\n\n- [ ] Buy flour\n- [X] Soak the beans\n\n## Later\n\nSoon.\n\n" +
+                "> [!todo] To do\n> - [ ] Call the baker\n\n1. [x] Pay\n"
         private const val BODY = "# Groceries\n\n- [ ] Buy flour\n- [x] Soak the beans\n"
         private const val DENSITY = 1.5f
         private const val FRAME_NANOS = 16_000_000L

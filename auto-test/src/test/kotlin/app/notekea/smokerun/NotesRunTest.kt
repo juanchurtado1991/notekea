@@ -58,7 +58,7 @@ class NotesRunTest {
             shownText = MENU_PDF
         )
 
-        waitForText(text = MISSING_FILE)
+        scrollToText(text = MISSING_FILE)
     }
 
     @Test
@@ -129,8 +129,8 @@ class NotesRunTest {
                 shownText = SECTION
             )
 
-            waitForText(text = CIRCULAR)
-            waitForText(text = MISSING_NOTE)
+            scrollToText(text = CIRCULAR)
+            scrollToText(text = MISSING_NOTE)
         }
 
     companion object {

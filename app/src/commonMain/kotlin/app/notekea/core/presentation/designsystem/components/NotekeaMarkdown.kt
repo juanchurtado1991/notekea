@@ -2,12 +2,15 @@ package app.notekea.core.presentation.designsystem.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.Painter
@@ -23,6 +26,9 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.markdown.ReadingMarkdown
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalNotekeaCodeTextStyle
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.resources.Res
+import app.notekea.resources.editor_task
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.compose.elements.MarkdownCodeBlock
 import com.mikepenz.markdown.compose.elements.MarkdownCodeFence
@@ -32,29 +38,36 @@ import com.mikepenz.markdown.m3.elements.MarkdownCheckBox
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.MarkdownTypography
+import com.mikepenz.markdown.model.rememberMarkdownState
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
+import org.intellij.markdown.ast.getTextInNode
 import org.intellij.markdown.flavours.gfm.GFMElementTypes
+import org.intellij.markdown.flavours.gfm.GFMTokenTypes
+import org.jetbrains.compose.resources.stringResource
 
 private const val DARK_LUMINANCE = 0.5f
+private const val DONE_STATE = 'x'
 private const val PREVIEW_MARKDOWN =
     "# Arepas\n\nMade with **corn flour**, see [the recipe](https://example.com).\n\n" +
         "> Rest the dough for `5 minutes`.\n\n- [x] Buy flour\n- [ ] Buy cheese\n\n```kotlin\nval servings = 6\n```\n"
 private const val PREVIEW_WIDTH_DP = 520
 
 /**
- * Markdown rendered with the Notekea theme (the note's Read mode): headings on the type scale, code blocks colored by
- * language, and Obsidian callouts as cards ([MarkdownQuoteOrCallout]). Text can be selected and copied. Clicked links
- * open with the system unless [onLinkClick] takes them all.
+ * Markdown rendered with the Notekea theme: callouts as cards ([MarkdownQuoteOrCallout]), text that can be selected
+ * unless [isSelectable] is off, links opened by the system unless [onLinkClick] takes them, and with [onTaskClick]
+ * task boxes that say which one of how many was clicked. Parsed at once: a lazy list needs its height on frame one.
  */
 @Composable
 fun NotekeaMarkdown(
     content: String,
     modifier: Modifier = Modifier,
     onLinkClick: ((String) -> Unit)? = null,
-    imagePainter: (String) -> Painter? = { null }
+    isSelectable: Boolean = true,
+    imagePainter: (String) -> Painter? = { null },
+    onTaskClick: ((index: Int, count: Int) -> Unit)? = null
 ) {
     val colors = MaterialTheme.colorScheme
     val isDark = colors.background.luminance() < DARK_LUMINANCE
@@ -74,12 +87,24 @@ fun NotekeaMarkdown(
     val prepared = remember(content) { readingMarkdown.prepare(markdown = content) }
 
     CompositionLocalProvider(LocalUriHandler provides uriHandler) {
-        SelectionContainer(modifier = modifier) {
-            ThemedMarkdown(
-                content = prepared,
-                isDark = isDark,
-                imagePainter = imagePainter
-            )
+        if (isSelectable) {
+            SelectionContainer(modifier = modifier) {
+                ThemedMarkdown(
+                    content = prepared,
+                    isDark = isDark,
+                    imagePainter = imagePainter,
+                    onTaskClick = onTaskClick
+                )
+            }
+        } else {
+            Box(modifier = modifier) {
+                ThemedMarkdown(
+                    content = prepared,
+                    isDark = isDark,
+                    imagePainter = imagePainter,
+                    onTaskClick = onTaskClick
+                )
+            }
         }
     }
 }
@@ -88,9 +113,12 @@ fun NotekeaMarkdown(
 private fun ThemedMarkdown(
     content: String,
     isDark: Boolean,
-    imagePainter: (String) -> Painter?
+    imagePainter: (String) -> Painter?,
+    onTaskClick: ((index: Int, count: Int) -> Unit)?
 ) {
     val colors = MaterialTheme.colorScheme
+    val currentOnTaskClick by rememberUpdatedState(newValue = onTaskClick)
+    val hasTaskClicks = onTaskClick != null
 
     val readingMarkdown = remember { ReadingMarkdown() }
 
@@ -98,7 +126,10 @@ private fun ThemedMarkdown(
 
     Markdown(
         imageTransformer = images,
-        content = content,
+        markdownState = rememberMarkdownState(
+            content = content,
+            immediate = true
+        ),
         colors = markdownColor(
             text = colors.onSurface,
             codeBackground = colors.surfaceVariant,
@@ -107,10 +138,15 @@ private fun ThemedMarkdown(
         ),
         typography = notekeaMarkdownTypography(),
         modifier = Modifier.fillMaxWidth(),
-        components = remember(isDark) {
+        components = remember(isDark, hasTaskClicks) {
+            val taskClicks = { index: Int, count: Int ->
+                currentOnTaskClick?.invoke(index, count) ?: Unit
+            }
+
             componentsOf(
                 readingMarkdown = readingMarkdown,
-                isDark = isDark
+                isDark = isDark,
+                onTaskClick = taskClicks.takeIf { hasTaskClicks }
             )
         }
     )
@@ -119,7 +155,8 @@ private fun ThemedMarkdown(
 /** Code colored by language without the `>` marks of the quotes around it, checkboxes and callouts as cards. */
 private fun componentsOf(
     readingMarkdown: ReadingMarkdown,
-    isDark: Boolean
+    isDark: Boolean,
+    onTaskClick: ((index: Int, count: Int) -> Unit)?
 ) = markdownComponents(
     codeBlock = {
         val depth = quoteDepth(node = it.node)
@@ -155,7 +192,17 @@ private fun componentsOf(
             )
         }
     },
-    checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) },
+    checkbox = {
+        if (onTaskClick == null) {
+            MarkdownCheckBox(it.content, it.node, it.typography.text)
+        } else {
+            TaskBox(
+                content = it.content,
+                node = it.node,
+                onClick = onTaskClick
+            )
+        }
+    },
     blockQuote = {
         MarkdownQuoteOrCallout(
             content = it.content,
@@ -169,6 +216,50 @@ private fun componentsOf(
         )
     }
 )
+
+/** A task's checkbox that takes clicks: [onClick] gets which checkbox of the content it is, and how many there are. */
+@Composable
+private fun TaskBox(
+    content: String,
+    node: ASTNode,
+    onClick: (index: Int, count: Int) -> Unit
+) {
+    val boxes = remember(node) { checkBoxesOf(node = node) }
+
+    val isDone = node
+        .getTextInNode(allFileText = content)
+        .contains(
+            char = DONE_STATE,
+            ignoreCase = true
+        )
+
+    NotekeaCheckbox(
+        checked = isDone,
+        onClick = { onClick(boxes.indexOf(element = node), boxes.size) },
+        label = stringResource(resource = Res.string.editor_task),
+        modifier = Modifier.padding(end = NotekeaDimensions.SpacingXs)
+    )
+}
+
+/** Every checkbox of the document [node] is in, in the text's order. */
+private fun checkBoxesOf(node: ASTNode): List<ASTNode> {
+    val root = generateSequence(seed = node) { it.parent }.last()
+    val boxes = mutableListOf<ASTNode>()
+    val pending = ArrayDeque(elements = listOf(root))
+
+    while (pending.isNotEmpty()) {
+        val next = pending.removeFirst()
+
+        if (next.type == GFMTokenTypes.CHECK_BOX) boxes += next
+
+        pending.addAll(
+            index = 0,
+            elements = next.children
+        )
+    }
+
+    return boxes
+}
 
 /**
  * One code block colored by language. The renderer colors every block in the background at the same time, and a

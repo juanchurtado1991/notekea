@@ -1,34 +1,21 @@
 package app.notekea.editor.presentation.view
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.DayNeighbors
@@ -40,7 +27,6 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.platform.LocalFileDrop
 import app.notekea.core.presentation.platform.PressedModifiers
 import app.notekea.editor.presentation.find.FindState
-import app.notekea.editor.presentation.markdown.HeadingPositions
 import app.notekea.editor.presentation.model.EditorHeaderData
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.EditorPreviewData
@@ -52,9 +38,7 @@ import app.notekea.resources.Res
 import app.notekea.resources.editor_find_count
 import app.notekea.resources.editor_find_none
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.roundToInt
 
-private const val HEADING_MARGIN_DP = 8
 internal const val NO_LIGATURES = "liga 0, calt 0"
 private const val PREVIEW_HEIGHT_DP = 520
 private const val PREVIEW_WIDTH_DP = 760
@@ -64,7 +48,6 @@ private const val PREVIEW_WIDTH_DP = 760
  * note's folder, its title, which renames it, and the body, centred at a readable width; the header scrolls with it.
  * Leaving the text saves at once. Files dropped anywhere on the editor are attached at the cursor, in Edit mode.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EditorContent(
     state: EditorState,
@@ -78,45 +61,40 @@ fun EditorContent(
     isBookmarked: Boolean = false,
     scrollMemory: ScrollMemory? = null
 ) {
-    val scrollState = rememberScrollState()
+    val currentState = rememberUpdatedState(newValue = state)
+    val listState = rememberLazyListState()
+    val focusRequester = textFocusRequester ?: remember { FocusRequester() }
 
-    scrollMemory?.let {
-        RememberScroll(
-            state = state,
-            scrollState = scrollState,
-            memory = it
+    val page = remember(buffer, listState, focusRequester) {
+        EditorPageState(
+            buffer = buffer,
+            listState = listState,
+            focusRequester = focusRequester,
+            isReading = { currentState.value.isReading }
         )
     }
 
     val pressed = remember { PressedModifiers() }
 
-    // Read only when the toolbar is placed, never in composition, so updating it recomposes nothing.
-    val viewport = remember { mutableStateOf<LayoutCoordinates?>(value = null) }
-
-    val positions = rememberHeadingPositions(
-        viewport = viewport,
-        scrollState = scrollState
-    )
-
-    val keepInView = remember { EditorBringIntoViewSpec() }
-
     val fileDrop = LocalFileDrop.current { paths ->
         onIntent(EditorIntent.OnFilesDrop(paths = paths))
     }
 
-    val tracker = outlineTracker ?: remember { OutlineTracker() }
+    FollowScroll(
+        state = state,
+        page = page,
+        memory = scrollMemory
+    )
 
     FollowOutline(
         state = state,
-        tracker = tracker,
-        positions = positions,
-        scrollState = scrollState,
-        toolbarHeight = { keepInView.topInset }
+        page = page,
+        tracker = outlineTracker ?: remember { OutlineTracker() }
     )
 
-    val header = EditorHeaderData(
-        dayNeighbors = dayNeighbors,
-        isBookmarked = isBookmarked
+    FollowMatch(
+        page = page,
+        find = state.find
     )
 
     val surface = modifier
@@ -135,27 +113,19 @@ fun EditorContent(
                 onIntent = onIntent
             )
 
-            ScrollingPage(
-                scrollState = scrollState,
-                viewport = viewport,
-                keepInView = keepInView
-            ) {
-                EditorPage(
-                    state = state,
-                    buffer = buffer,
-                    scrollState = scrollState,
-                    viewport = { viewport.value },
-                    platformConventions = platformConventions,
-                    onIntent = withModClicks(
-                        pressed = pressed,
-                        onIntent = onIntent
-                    ),
-                    positions = positions,
-                    header = header,
-                    textFocusRequester = textFocusRequester,
-                    onToolbarHeight = { keepInView.topInset = it.toFloat() }
+            EditorList(
+                state = state,
+                page = page,
+                header = EditorHeaderData(
+                    dayNeighbors = dayNeighbors,
+                    isBookmarked = isBookmarked
+                ),
+                platformConventions = platformConventions,
+                onIntent = withModClicks(
+                    pressed = pressed,
+                    onIntent = onIntent
                 )
-            }
+            )
         }
     }
 }
@@ -200,77 +170,6 @@ private fun withModClicks(
     )
 }
 
-/**
- * Keeps where [state]'s note is scrolled to in [memory] while it is shown, and scrolls back there when it is shown
- * again, once its text is laid out far enough to get there.
- */
-@Composable
-private fun RememberScroll(
-    state: EditorState,
-    scrollState: ScrollState,
-    memory: ScrollMemory
-) {
-    val path = state.notePath
-
-    LaunchedEffect(path, state.isLoading, state.isReading) {
-        if (path == null || state.isLoading) return@LaunchedEffect
-        // A place just selected scrolls the text there, and the place remembered must not pull it back.
-        if (!state.isRevealing) scrollState.scrollWhenLaidOut(target = memory.of(path = path))
-
-        snapshotFlow { scrollState.value }.collect {
-            memory.keep(
-                path = path,
-                offset = it
-            )
-        }
-    }
-}
-
-/** Where the outline's headings are, measured from the [viewport], in which the page scrolls by [scrollState]. */
-@Composable
-private fun rememberHeadingPositions(
-    viewport: State<LayoutCoordinates?>,
-    scrollState: ScrollState
-): HeadingPositions = remember(viewport, scrollState) {
-    HeadingPositions { coordinates ->
-        viewport
-            .value
-            ?.takeIf { it.isAttached }
-            ?.let {
-                it.localPositionOf(sourceCoordinates = coordinates).y + scrollState.value
-            }
-    }
-}
-
-/**
- * The [page] scrolled in the editor's viewport (reported to [viewport]). Only the editor's scroll keeps things below
- * the toolbar ([keepInView]); the fields inside scroll as usual.
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun ScrollingPage(
-    scrollState: ScrollState,
-    viewport: MutableState<LayoutCoordinates?>,
-    keepInView: EditorBringIntoViewSpec,
-    page: @Composable () -> Unit
-) {
-    val defaultBringIntoView = LocalBringIntoViewSpec.current
-
-    CompositionLocalProvider(LocalBringIntoViewSpec provides keepInView) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .onPlaced { viewport.value = it }
-                .verticalScroll(state = scrollState),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            CompositionLocalProvider(LocalBringIntoViewSpec provides defaultBringIntoView) {
-                page()
-            }
-        }
-    }
-}
-
 @Composable
 private fun EditorFindBar(
     find: FindState,
@@ -294,88 +193,6 @@ private fun EditorFindBar(
             onClose = { onIntent(EditorIntent.OnFindClose) },
             modifier = Modifier.align(alignment = Alignment.CenterEnd)
         )
-    }
-}
-
-/**
- * Follows the view for the outline: the [tracker]'s current heading is the last one at or above the top of the view
- * (below the toolbar), or the first one while it is in view below it. A heading the outline asks for is scrolled to the
- * top at once and stays the current one while the view stays there, even when the note ends too soon.
- */
-@Composable
-private fun FollowOutline(
-    state: EditorState,
-    tracker: OutlineTracker,
-    positions: HeadingPositions,
-    scrollState: ScrollState,
-    toolbarHeight: () -> Float
-) {
-    val margin = with(LocalDensity.current) { HEADING_MARGIN_DP.dp.toPx() }
-
-    val currentState = rememberUpdatedState(newValue = state)
-
-    val revealed = remember { mutableStateOf<Pair<Int, Int>?>(value = null) }
-
-    LaunchedEffect(tracker) {
-        tracker.onReveal { heading ->
-            val index = currentState
-                .value
-                .outline
-                .indexOf(element = heading)
-
-            val top = positions.top(
-                index = index,
-                isReading = currentState.value.isReading
-            ) ?: return@onReveal
-
-            scrollState.scrollTo(
-                value = (top - toolbarHeight() - margin).roundToInt().coerceAtLeast(
-                    minimumValue = 0
-                )
-            )
-
-            revealed.value = index to scrollState.value
-        }
-    }
-
-    LaunchedEffect(tracker) {
-        snapshotFlow {
-            val shown = currentState.value
-            val line = scrollState.value + toolbarHeight() + margin + 1
-
-            val top = { index: Int ->
-                positions.top(
-                    index = index,
-                    isReading = shown.isReading
-                )
-            }
-
-            revealed
-                .value
-                ?.takeIf {
-                    it.second == scrollState.value && it.first in shown.outline.indices
-                }
-                ?.first
-                ?: shown
-                    .outline
-                    .indices
-                    .lastOrNull { index ->
-                        top(index)?.let {
-                            it <= line
-                        } == true
-                    }
-                // Above the first heading, it is the current one once it can be seen.
-                ?: shown
-                    .outline
-                    .indices
-                    .firstOrNull()
-                    ?.takeIf { index ->
-                        top(index)?.let {
-                            it < scrollState.value + scrollState.viewportSize
-                        } == true
-                    }
-                ?: OutlineTracker.NONE
-        }.collect { tracker.current = it }
     }
 }
 

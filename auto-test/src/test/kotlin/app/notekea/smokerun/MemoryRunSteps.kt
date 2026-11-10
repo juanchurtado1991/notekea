@@ -4,8 +4,11 @@ package app.notekea.smokerun
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -15,13 +18,15 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.waitUntilAtLeastOneExists
 
 private const val CLOSE_TAB = "Close tab"
+private const val END_MILLIS = 10_000L
 private const val MAX_TABS = 100
 private const val MILLIS = 1_000L
 private const val MINUTE = 60L
 private const val RECENT = "Recent"
-private const val SCROLL_STEPS = 40
+private const val SCROLL_STEPS = 240
 private const val SEARCH_MILLIS = 60_000L
 private const val SEARCH_PLACEHOLDER = "Search the text of your notes"
 private const val SCROLL_TICKS = 25f
@@ -156,7 +161,7 @@ private fun ComposeUiTest.scrollLongNote(
         shownText = name
     )
 
-    scrollDown()
+    scrollDownTo(end = end)
 
     SmokeRunReport.sample(
         run = run,
@@ -165,12 +170,7 @@ private fun ComposeUiTest.scrollLongNote(
 
     pressShortcut(key = Key.E)
     waitForIdle()
-    scrollDown()
-
-    waitForText(
-        text = end,
-        substring = true
-    )
+    scrollDownTo(end = end)
 
     SmokeRunReport.sample(
         run = run,
@@ -178,9 +178,21 @@ private fun ComposeUiTest.scrollLongNote(
     )
 }
 
-/** Turns the mouse wheel over the middle of the window, where the note is, down to its end. */
-private fun ComposeUiTest.scrollDown() {
+/**
+ * Turns the mouse wheel over the middle of the window, where the note is, until the note draws [end], its last line:
+ * the text field always holds the whole note, so only a drawn text says the end is on screen.
+ */
+private fun ComposeUiTest.scrollDownTo(end: String) {
+    val drawn = SemanticsMatcher(description = "draws \"$end\"") { node ->
+        node
+            .config
+            .getOrNull(key = SemanticsProperties.Text)
+            ?.any { it.text.contains(other = end) } == true
+    }
+
     repeat(times = SCROLL_STEPS) {
+        if (onAllNodes(matcher = drawn).fetchSemanticsNodes().isNotEmpty()) return
+
         window().performMouseInput {
             moveTo(
                 position = Offset(
@@ -194,6 +206,11 @@ private fun ComposeUiTest.scrollDown() {
 
         waitForIdle()
     }
+
+    waitUntilAtLeastOneExists(
+        matcher = drawn,
+        timeoutMillis = END_MILLIS
+    )
 }
 
 /** Closes every tab with its close button, then gives the focus back to the window; fails if a tab stays open. */

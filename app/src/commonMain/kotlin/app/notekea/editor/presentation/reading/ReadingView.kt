@@ -2,20 +2,17 @@ package app.notekea.editor.presentation.reading
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
 import app.notekea.core.notes.domain.OutlineFinder
+import app.notekea.core.notes.domain.TaskFinder
 import app.notekea.core.notes.domain.percentDecoded
 import app.notekea.core.presentation.designsystem.components.NotekeaMarkdown
 import app.notekea.core.presentation.designsystem.components.ScaledBitmapPainter
@@ -28,9 +25,9 @@ import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.view.LocalQueryBlock
 
 /**
- * The note rendered (Read mode): its Markdown, with wiki links and tags as links, and its embedded files in their place
- * ([AttachmentBlock]). Each heading of the outline starts a piece of its own, whose place is told to [onHeadingPlaced]
- * with its index. An embedded note is drawn the same way inside its frame, with no [topPadding].
+ * The note rendered: its Markdown, with wiki links and tags as links and its embedded files in their place
+ * ([AttachmentBlock]); each heading of the outline starts a piece. Embedded notes and the editor's blocks are drawn
+ * the same way: a block's [text] starts [textStart] into the note, and with [isSelectable] off a click is the editor's.
  */
 @Composable
 fun ReadingView(
@@ -38,16 +35,17 @@ fun ReadingView(
     attachments: List<AttachmentView>,
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier = Modifier,
-    topPadding: Dp = NotekeaDimensions.SpacingL,
-    onHeadingPlaced: (Int, LayoutCoordinates) -> Unit = { _, _ -> }
+    isSelectable: Boolean = true,
+    textStart: Int = 0
 ) {
     val readLinks = remember { ReadModeLinks() }
 
-    val segments = remember(text, attachments) {
+    val segments = remember(text, attachments, textStart) {
         ReadingSegment.of(
             text = text,
             attachments = attachments,
-            headings = OutlineFinder().headings(text = text)
+            headings = OutlineFinder().headings(text = text),
+            offset = textStart
         )
     }
 
@@ -80,7 +78,7 @@ fun ReadingView(
     }
 
     Column(
-        modifier = modifier.padding(top = topPadding),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM)
     ) {
         segments.forEach { segment ->
@@ -88,11 +86,14 @@ fun ReadingView(
                 is ReadingSegment.Markdown -> NotekeaMarkdown(
                     content = remember(segment.text) { readLinks.prepare(body = segment.text) },
                     onLinkClick = onLinkClick,
+                    isSelectable = isSelectable,
                     imagePainter = imagePainter,
-                    modifier = headingPlace(
-                        heading = segment.heading,
-                        onHeadingPlaced = onHeadingPlaced
-                    )
+                    onTaskClick = taskClicks(
+                        segment = segment,
+                        text = text,
+                        textStart = textStart,
+                        onIntent = onIntent
+                    ).takeUnless { isSelectable }
                 )
 
                 is ReadingSegment.Attachment -> AttachmentBlock(
@@ -103,6 +104,27 @@ fun ReadingView(
                 is ReadingSegment.Query -> QuerySegment(segment = segment)
             }
         }
+    }
+}
+
+/**
+ * What a click on a task's checkbox of [segment] does: the task is toggled where it is in the note, [text] starting
+ * [textStart] characters into it. The renderer counts the checkboxes it draws; when the text holds another number of
+ * tasks (a task in indented code), which one was clicked is not known and nothing is toggled.
+ */
+private fun taskClicks(
+    segment: ReadingSegment.Markdown,
+    text: String,
+    textStart: Int,
+    onIntent: (EditorIntent) -> Unit
+): (Int, Int) -> Unit = { index, count ->
+    val tasks = TaskFinder().tasks(text = segment.text)
+    val segmentStart = text.indexOf(string = segment.text)
+
+    if (tasks.size == count && segmentStart >= 0) {
+        val stateIndex = textStart + segmentStart + tasks[index].stateIndex
+
+        onIntent(EditorIntent.OnTaskToggle(stateIndex = stateIndex))
     }
 }
 
@@ -154,14 +176,6 @@ private fun inlineImage(
         )
     )
 }
-
-/** For a piece that starts with the outline's [heading], tells [onHeadingPlaced] where it is laid out. */
-private fun headingPlace(
-    heading: Int?,
-    onHeadingPlaced: (Int, LayoutCoordinates) -> Unit
-): Modifier = heading?.let {
-    Modifier.onGloballyPositioned { onHeadingPlaced(heading, it) }
-} ?: Modifier
 
 /** A note or a file opens, and a tag is searched. */
 private fun openLink(

@@ -78,7 +78,8 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
 - **Post-MVP repositories** (`ROADMAP.md`, post-MVP): clone the repository as it is, index it with a parser, answer
   with file and line; Notekea never writes notes about the code nor writes code.
 - **One editing mode** (`ROADMAP.md`, post-MVP item 4): the plan and the design were agreed on 2026-11-09, and
-  both spikes are done (`docs/spikes/2026-11-09-one-editing-mode.md`). No code yet. Design: the cursor's line shows
+  both spikes are done (`docs/spikes/2026-11-09-one-editing-mode.md`). Step 2 of the plan below is written on
+  `feature/one-editing-mode`; the next is step 3. Design: the cursor's line shows
   all its Markdown marks, muted, and every other line looks finished (the two designs not chosen revealed only the
   element under the cursor, or the whole block). The raw Markdown is a "Source" action that takes over today's
   Edit/Preview shortcut.
@@ -90,18 +91,53 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
   Measured: 6 ms per key on the long note instead of 1,380, 51 MB of heap. Rules the spike gave:
   - A block's renderer must have its height on its first frame (`rememberMarkdownState(immediate = true)`): the
     renderer's default parses later and is empty meanwhile, so the list composes every block of the note.
-  - Tables, callouts, code blocks, images, embeds and query blocks are drawn by the renderer and show their Markdown
-    while the cursor is in them: no editor of their own.
+  - Callouts, code blocks, images, embeds and query blocks are drawn by the renderer and show their Markdown while
+    the cursor is in them: no editor of their own. Tables get an editor by cells (step 5, asked for by the developer
+    on 2026-11-09); until that step they show their Markdown like the rest.
   - "Source" is the window over the whole note, which is today's editor.
   One PR from `main`, one commit per step:
   1. The spikes (done).
-  2. The blocks: the pure cut of a note into blocks and the window, with tests; the lazy list in place of the
-     scrolled text field in Edit mode, with the header, the properties and the toolbar (sticky) as its first
-     items; a click on a block puts the cursor there; arrows, drag and Shift+click cross blocks. The Edit/Preview
-     control stays.
-  3. What read the text field's layout reads the list: Find in note, the outline (scroll to a heading, the current
-     heading), each tab's scroll position, embedded files and query blocks, task boxes that a click checks.
+  2. The blocks (done): the pure cut of a note into blocks and the window (`NoteBlocks`, `BlockItems`), with
+     tests; the lazy list in place of the scrolled text field in Edit mode and in Preview (`EditorList`), with the
+     header, the properties and the toolbar (sticky) as its first items; a click on a block puts the cursor there
+     (`EditorPageState.click`); arrows, Backspace and Delete (`EditorKeys`), drag (`EditorDrag`) and Shift+click
+     cross blocks; the outline, each tab's scroll position and Find's scroll read the list (`EditorListEffects`);
+     a click on a task's box in a drawn block checks it. The Edit/Preview control stays.
+  3. What still reads only the text field's layout reads the list: Find's highlight in the drawn blocks, embedded
+     files and query blocks in the cursor's block.
   4. Marks hidden except on the cursor's line inside the cursor's block, and the "Source" action.
-  5. Long notes and memory against Preview with the `:auto-test` memory runs; then the Edit/Preview control,
+  5. The table editor by cells: a table's block stays a table while the cursor is in it, each cell a text field
+     over the cell's range of the note's text; Tab and Enter move between cells, and rows and columns are added
+     and removed from the table. Design chosen by the developer on 2026-11-10: a small bar above the table while
+     the cursor is in it (insert a row above or below, a column left or right, align, delete the row or the
+     column), with the same actions on the right click.
+  6. Long notes and memory against Preview with the `:auto-test` memory runs; then the Edit/Preview control,
      `EditorState.isReading` and its preference go (`ReadingView` stays for embedded notes), with the Auto-Test
      cases, the QA documents, the strings in every locale and the changelog.
+  Also decided on 2026-11-10: "Source" is a button at the end of the formatting toolbar, marked while it is on,
+  and a command of the palette; the editor's colours are the "accents" option (only links, tags and code take
+  colour, headings keep the text's colour); Home and Templates get their icons in the tree, in a commit of their
+  own in this PR. `isBasicTextFieldStyledTextEnabled` stays on: the window keeps the styled text small.
+  What step 2 leaves, to settle in the later steps or to keep as known limits:
+  - The window's text field holds the note's whole text in its semantics (`EditorWindow`), so a screen reader and
+    the Auto-Test's verbs read and select the note as one text.
+  - The lazy list already keeps what is brought into view below its sticky toolbar: `EditorBringIntoViewSpec`
+    must not add the toolbar's height again (it did, and the outline marked the heading before the chosen one;
+    `EditorOutlineRevealTest`).
+  - A click on a drawn block lands at the same share of the block's height in its text, since a drawn block is
+    taller than its lines in the field.
+  - Test Buddy's `scrollTo` and `clickWords` look for the node that draws a text, and scroll lazy lists to it: the
+    window's field says the whole note but draws only its blocks.
+  - Auto-Test case 1.15-05 was rewritten: in Edit an embed shows its frame, and its line as written only while the
+    cursor is in its block.
+  - A list cannot be scrolled while it measures: what follows state the list writes waits a frame first
+    (`showCursor` in `EditorListEffects`).
+  - A drawn block keeps the height of the blank lines that end it, so the page does not move when the window does;
+    Preview is a little looser than it was.
+  - While the cursor is in a block, its embedded files show as Markdown; their chips show in the drawn blocks.
+  - A reference-style link whose definition is in another block does not resolve in a drawn block.
+  - A note with no blank line and no heading is one block: it is laid out whole, as before.
+  - `Mod+A` makes the window the whole note. Page Up and Page Down stay inside the window, an arrow that crosses to
+    another block loses its column, a selection dragged past the page's edge does not scroll it, and a click on a
+    drawn block puts the cursor near the click, not always on the exact character (the drawn text has no marks).
+  - Preview selects text one block at a time.

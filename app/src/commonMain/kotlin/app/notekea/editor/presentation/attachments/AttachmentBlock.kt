@@ -113,8 +113,7 @@ private fun EmbeddedNote(
         ReadingView(
             text = text,
             attachments = nested,
-            onIntent = onIntent,
-            topPadding = 0.dp
+            onIntent = onIntent
         )
     }
 }

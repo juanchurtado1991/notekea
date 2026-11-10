@@ -9,6 +9,9 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performTextInput
+import app.notekea.autotest.expectInOutline
+import app.notekea.autotest.expectNotInOutline
+import app.notekea.autotest.inOutline
 import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.relaunch
@@ -23,7 +26,6 @@ import com.testbuddy.WindowSize
 private const val OUTLINE_NOTE = "Outline practice"
 private const val OUTLINE_FILE = "$PLAYGROUND/Editor/Outline practice.md"
 private const val OUTLINE_SHOWN = "Arepas guide"
-private const val OUTLINE_LABEL = "Headings of this note"
 private const val NARROW_WIDTH = 900
 private const val NARROW_HEIGHT = 800
 
@@ -56,9 +58,9 @@ private fun SuiteBuilder.outlineLists() {
             "Tip: resting the dough",
             "Cooking"
         )
-            .forEach { expectText(text = it) }
+            .forEach { expectInOutline(heading = it) }
 
-        listOf("Not headings", "Serving", "Last section").forEach { expectText(text = it) }
+        listOf("Not headings", "Serving", "Last section").forEach { expectInOutline(heading = it) }
 
         expectNoText(text = "#recipe")
         expectNoText(text = "a comment inside a code block")
@@ -165,15 +167,22 @@ private fun SuiteBuilder.sidePanelHides() {
         )
 
         clickIcon(label = "Minimize side panel")
-        expectNoText(text = "Ingredients")
+        expectNotInOutline(heading = "Ingredients")
         clickIcon(label = "Side panel")
-        expectText(text = "Ingredients")
+        expectInOutline(heading = "Ingredients")
         press(shortcut = Mod + Shift + Key.Backslash)
-        expectNoText(text = "Ingredients")
+        expectNotInOutline(heading = "Ingredients")
         relaunch()
-        expectNoText(text = "Ingredients")
+
+        // The note is back before the outline is looked for: while the vault opens there is no outline at all.
+        expectText(
+            text = OUTLINE_SHOWN,
+            substring = true
+        )
+
+        expectNotInOutline(heading = "Ingredients")
         pressInWindow(shortcut = Mod + Shift + Key.O)
-        expectText(text = "Ingredients")
+        expectInOutline(heading = "Ingredients")
     }
 }
 
@@ -191,14 +200,14 @@ private fun SuiteBuilder.narrowSidePanel() {
             shownText = OUTLINE_SHOWN
         )
 
-        expectNoText(text = "Ingredients")
+        expectNotInOutline(heading = "Ingredients")
         clickIcon(label = "Side panel")
         clickOutline(heading = "Cooking")
-        expectNoText(text = "Ingredients")
+        expectNotInOutline(heading = "Ingredients")
         pressInWindow(shortcut = Mod + Shift + Key.O)
-        expectText(text = "Ingredients")
+        expectInOutline(heading = "Ingredients")
         press(key = Key.Escape)
-        expectNoText(text = "Ingredients")
+        expectNotInOutline(heading = "Ingredients")
     }
 }
 
@@ -240,21 +249,17 @@ private fun CaseScope.typeInNoteBody(text: String) {
         }
 }
 
-// A heading's row in the outline: the note itself shows the same words in Preview.
-private fun inOutline(heading: String) = hasText(text = heading) and
-    hasAnyAncestor(matcher = hasContentDescription(value = OUTLINE_LABEL))
-
 private fun CaseScope.clickOutline(heading: String) {
     ui
         .waitUntil(timeoutMillis = 10_000) {
             ui
-                .onAllNodes(matcher = inOutline(heading))
+                .onAllNodes(matcher = inOutline(heading = heading))
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
 
     ui
-        .onAllNodes(matcher = inOutline(heading))
+        .onAllNodes(matcher = inOutline(heading = heading))
         .onFirst()
         .clickWhenStill()
 }
@@ -275,7 +280,7 @@ private fun CaseScope.expectSelected(heading: String) {
 // The label itself, not its row: rows are as wide as the outline, labels start further right the deeper they are.
 private fun CaseScope.left(text: String): Float = ui
     .onAllNodes(
-        matcher = hasText(text = text),
+        matcher = inOutline(heading = text),
         useUnmergedTree = true
     )
     .onFirst()
