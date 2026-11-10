@@ -116,7 +116,7 @@ private fun SuiteBuilder.statusBar() {
         )
 
         expectText(text = "CRLF")
-        expectCursorShown(isShown = true)
+        expectCursorShown()
         clickInTree(text = "Recipes")
         expectText(text = "Arepas")
         expectNoText(text = "CRLF")
@@ -180,8 +180,8 @@ private fun CaseScope.firstTask(state: String) = ui.onAllNodes(
     matcher = hasContentDescription(value = "Task") and hasStateDescription(value = state)
 )[0]
 
-/** Fails unless the status bar shows the cursor's line:column, or no longer does, as [isShown] says. */
-private fun CaseScope.expectCursorShown(isShown: Boolean) {
+/** Fails unless the status bar shows the cursor's line:column. */
+private fun CaseScope.expectCursorShown() {
     val cursor = SemanticsMatcher(description = "a line:column") { node ->
         node
             .config
@@ -195,15 +195,11 @@ private fun CaseScope.expectCursorShown(isShown: Boolean) {
                 ui
                     .onAllNodes(matcher = cursor)
                     .fetchSemanticsNodes()
-                    .isNotEmpty() == isShown
+                    .isNotEmpty()
             }
     }.isSuccess
 
-    if (!holds) {
-        throw CaseFailure(
-            message = "expected the status bar ${if (isShown) "to show" else "not to show"} the cursor"
-        )
-    }
+    if (!holds) throw CaseFailure(message = "expected the status bar to show the cursor")
 }
 
 private val CURSOR = Regex(pattern = "\\d+:\\d+")

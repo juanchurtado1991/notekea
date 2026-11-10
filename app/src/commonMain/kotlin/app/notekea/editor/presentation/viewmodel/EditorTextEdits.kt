@@ -1,7 +1,6 @@
 package app.notekea.editor.presentation.viewmodel
 
 import androidx.compose.ui.text.TextRange
-import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.TaskFinder

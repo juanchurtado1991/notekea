@@ -189,6 +189,34 @@ class EditorTableCellsTest {
             )
         }
 
+    @Test
+    fun `a click on another cell still lands in it after a paragraph is written above the table`() =
+        runComposeUiTest {
+            show()
+            clickCell(text = "Salt")
+
+            val added = "A new paragraph.\n\n"
+            val cursor = buffer.selection.start
+
+            buffer.edit {
+                replace(
+                    start = 0,
+                    end = 0,
+                    text = added
+                )
+
+                selection = TextRange(index = cursor + added.length)
+            }
+
+            waitForIdle()
+            clickCell(text = "Corn flour")
+
+            assertEquals(
+                expected = "Corn flour",
+                actual = cursorCell()
+            )
+        }
+
     private fun ComposeUiTest.show() {
         val editing = TableEditing()
 

@@ -3,8 +3,6 @@ package app.notekea.autotest.cases.m1
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.hasAnyAncestor
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import app.notekea.autotest.SmokeScenarios
 import app.notekea.autotest.clickInTree

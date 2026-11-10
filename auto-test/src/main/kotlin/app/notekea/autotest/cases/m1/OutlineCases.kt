@@ -1,7 +1,6 @@
 package app.notekea.autotest.cases.m1
 
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction

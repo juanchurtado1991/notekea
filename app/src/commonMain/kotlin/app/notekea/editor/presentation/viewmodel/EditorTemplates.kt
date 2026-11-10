@@ -6,7 +6,6 @@ import app.notekea.core.notes.domain.FillTemplateUseCase
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TemplateInsertion
 import app.notekea.editor.presentation.model.EditorEffect
-import app.notekea.editor.presentation.model.EditorState
 
 /**
  * Insert template: the template picker opens for the open note, and the chosen template is filled in and inserted

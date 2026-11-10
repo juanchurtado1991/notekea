@@ -1,10 +1,8 @@
 package app.notekea.editor.presentation.view
 
-import androidx.compose.ui.text.TextRange
 import app.notekea.editor.domain.NoteBlocks
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class BlockItemsTest {

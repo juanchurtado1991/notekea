@@ -167,21 +167,6 @@ fun CaseScope.expectNotInTree(text: String) {
     )
 }
 
-/** Waits until the note's text field no longer holds [part]; the same words elsewhere in the window do not count. */
-fun CaseScope.expectNotInNoteText(part: String) {
-    step(description = "Expect no “$part” in the note's text")
-
-    val inField = hasText(
-        text = part,
-        substring = true
-    ) and hasSetTextAction()
-
-    awaitNone(
-        matcher = inField,
-        failure = "expected the note's text to stop showing \"$part\""
-    )
-}
-
 private fun paletteResult(name: String): SemanticsMatcher =
     hasText(text = name) and !hasSetTextAction() and
         hasAnyAncestor(matcher = hasTestTag(testTag = TestTags.PALETTE_RESULTS))

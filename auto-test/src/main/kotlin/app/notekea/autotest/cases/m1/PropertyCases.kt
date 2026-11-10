@@ -7,10 +7,8 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performTextReplacement
 import app.notekea.autotest.noteText
 import app.notekea.autotest.openNote
-import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.relaunch
 import com.testbuddy.CaseScope
-import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
 

@@ -3,11 +3,9 @@ package app.notekea.autotest.cases.m1
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.performTextReplacement
 import app.notekea.autotest.cursorToNoteStart
-import app.notekea.autotest.pressInWindow
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
-import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.ShortcutModifier.Shift
 import com.testbuddy.SuiteBuilder
 import com.testbuddy.WindowSize

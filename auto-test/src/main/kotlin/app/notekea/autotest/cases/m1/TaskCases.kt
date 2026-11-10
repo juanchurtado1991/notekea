@@ -6,7 +6,6 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.hasContentDescription
 import app.notekea.autotest.cursorToNoteStart
-import app.notekea.autotest.pressInWindow
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
