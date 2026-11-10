@@ -38,6 +38,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.designsystem.components.TextMarks
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.editor.domain.TableAction
 import app.notekea.editor.presentation.find.FindState
 import app.notekea.editor.presentation.find.NoteSearch
 import app.notekea.editor.presentation.markdown.MarkdownStyles
@@ -225,21 +226,14 @@ private fun LazyListScope.blocks(
             modifier = Modifier.padding(top = top)
         ) {
             if (items.isWindow(item = item)) {
-                EditorWindow(
+                EditorWindowItem(
                     page = page,
-                    find = state.find,
+                    attachments = state.attachments,
+                    isSource = state.isSourceMode,
                     platformConventions = platformConventions,
-                    onIntent = onIntent
+                    onIntent = onIntent,
+                    find = state.find
                 )
-
-                // Source is the note as written: no pictures nor query tables under it.
-                if (!state.isSourceMode) {
-                    WindowEmbeds(
-                        page = page,
-                        attachments = state.attachments,
-                        onIntent = onIntent
-                    )
-                }
             } else {
                 EditorBlock(
                     text = items.textOf(
@@ -258,6 +252,14 @@ private fun LazyListScope.blocks(
                             isExtending = isExtending
                         )
                     },
+                    onCellClick = { row, column, x ->
+                        page.clickCell(
+                            block = block,
+                            row = row,
+                            column = column,
+                            x = x
+                        )
+                    },
                     marks = marks
                 )
             }
@@ -274,8 +276,12 @@ private fun LazyListScope.blocks(
                     .fillMaxWidth()
                     .height(height = END_ROOM_DP.dp)
                     .pointerHoverIcon(icon = PointerIcon.Text)
-                    .pointerInput(page) {
-                        detectTapGestures { page.clickAfterEnd() }
+                    .pointerInput(page, onIntent) {
+                        detectTapGestures {
+                            page.clickAfterEnd()
+                            // A table that ends the note gets a line under it to write on.
+                            onIntent(EditorIntent.OnTableEdit(action = TableAction.AFTER))
+                        }
                     }
             )
         }

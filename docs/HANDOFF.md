@@ -78,8 +78,8 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
 - **Post-MVP repositories** (`ROADMAP.md`, post-MVP): clone the repository as it is, index it with a parser, answer
   with file and line; Notekea never writes notes about the code nor writes code.
 - **One editing mode** (`ROADMAP.md`, post-MVP item 4): the plan and the design were agreed on 2026-11-09, and
-  both spikes are done (`docs/spikes/2026-11-09-one-editing-mode.md`). Steps 2 to 4 of the plan below are written on
-  `feature/one-editing-mode`; the next is step 5. Design: the cursor's line shows
+  both spikes are done (`docs/spikes/2026-11-09-one-editing-mode.md`). Steps 2 to 5 of the plan below are written on
+  `feature/one-editing-mode`; the next is step 6. Design: the cursor's line shows
   all its Markdown marks, muted, and every other line looks finished (the two designs not chosen revealed only the
   element under the cursor, or the whole block). The raw Markdown is a "Source" action that takes over today's
   Edit/Preview shortcut.
@@ -112,11 +112,27 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
      line shows its marks while the field has no focus. Struck and highlighted text (`~~`, `==`) got their kinds.
      "Source" (`EditorState.isSourceMode`, the toolbar's last button but Find) is the window over the whole note
      with every mark shown: one text field again, so a long note is as slow there as the editor was before.
-  5. The table editor by cells: a table's block stays a table while the cursor is in it, each cell a text field
-     over the cell's range of the note's text; Tab and Enter move between cells, and rows and columns are added
-     and removed from the table. Design chosen by the developer on 2026-11-10: a small bar above the table while
-     the cursor is in it (insert a row above or below, a column left or right, align, delete the row or the
-     column), with the same actions on the right click.
+  5. The table editor by cells (done; design chosen by the developer on 2026-11-10): a block that is one table
+     (`TableText`: every line a row between pipes with the header's number of cells) stays drawn while the cursor
+     is in it, and the note's text field is laid over the cursor's cell, showing that cell's range of the text
+     only (`EditorPageState.cell` and `fieldRange`, `EditorWindowItem`, `CellPlace`). Tab, Enter and the arrows
+     move between cells and out of the table (`CellKeys`), a pipe or a line break typed in a cell cannot break the
+     row (`CellInput`), and a bar above the table (`TableBar`), also on the right click, inserts a row above or
+     below and a column left or right, aligns the column and deletes the row or the column (`TableEditing`,
+     `EditorIntent.OnTableEdit`). Drawn tables line their columns up as the delimiter row says
+     (`NotekeaMarkdownTable`). Known limits:
+     - A table that is not strict (rows of different lengths, no outer pipes, indented, a wiki-link alias with a
+       bare pipe, an embed in a cell) shows as written while the cursor is in it, as before.
+     - An action on the structure writes the whole table again with one space around each cell.
+     - A line format (heading, list) or a paste of several lines with the cursor in a cell can break the table;
+       undo brings it back. Find's marks are not drawn in tables.
+     - The cell's field shows the cell as written, left-aligned; a click lands on the exact character only in a
+       left-aligned cell. A selection that leaves the cell (Shift+arrows, a drag) shows the table as written.
+     - A right click on the cell being edited opens the text's menu, not the table's; on a table the cursor is not
+       in, it only puts the cursor in the cell.
+     - The room for the bar stays above every table in Edit, so nothing moves when the cursor comes in. A note
+       that starts with a table gets text above it only in Source.
+     - The table is parsed again on every key typed in a cell.
   6. Long notes and memory against Preview with the `:auto-test` memory runs; then the Edit/Preview control,
      `EditorState.isReading` and its preference go (`ReadingView` stays for embedded notes), with the Auto-Test
      cases, the QA documents, the strings in every locale and the changelog.

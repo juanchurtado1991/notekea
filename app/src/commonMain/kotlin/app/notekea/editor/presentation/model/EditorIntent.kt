@@ -7,6 +7,7 @@ import app.notekea.core.presentation.FeedIntent
 import app.notekea.editor.domain.Embed
 import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.domain.ListAction
+import app.notekea.editor.domain.TableAction
 import app.notekea.editor.presentation.reading.ReadLink
 import kotlinx.coroutines.CompletableDeferred
 
@@ -85,6 +86,9 @@ sealed interface EditorIntent {
 
     /** Enter, Tab, Shift+Tab or Backspace in a list item or a quote, which edit the list (`ListEditing`). */
     data class OnListKey(val action: ListAction) : EditorIntent
+
+    /** A table changed from the cursor's cell: its bar, its menu, or a key that needs a new row (`TableEditing`). */
+    data class OnTableEdit(val action: TableAction) : EditorIntent
 
     /** The toolbar's Tag button: choose a tag in the tag picker. */
     data object OnTagRequest : EditorIntent

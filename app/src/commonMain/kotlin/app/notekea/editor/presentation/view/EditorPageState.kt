@@ -13,13 +13,15 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import app.notekea.editor.domain.NoteBlocks
+import app.notekea.editor.domain.TableCell
+import app.notekea.editor.domain.TableText
 import app.notekea.editor.presentation.markdown.ShownText
 import app.notekea.editor.presentation.markdown.ShownTextBuilder
 
 /**
  * What the pieces of the editor's page share: the note's text ([buffer]) cut into the list's [items], the list, and
  * the text field over the cursor's blocks, with its layout and its place, which clicks, keys and drags need to move
- * the cursor from one block to another.
+ * the cursor from one block to another. In a block that is one table the field is over one [cell] only.
  */
 @Stable
 internal class EditorPageState(
@@ -54,15 +56,80 @@ internal class EditorPageState(
         )
     }
 
+    /** The cursor's block if it is one table and nothing else, to edit by cells; never in Source. */
+    private val blockTable: TableText? by derivedStateOf {
+        val block = items
+            .window
+            ?.takeIf {
+                !isSource() && it.first == it.last
+            }
+            ?.first
+            ?: return@derivedStateOf null
+
+        TableText.of(
+            text = items.textOf(
+                text = buffer.text,
+                block = block
+            ),
+            offset = items.blocks.start(index = block)
+        )
+    }
+
+    /** Whether the cursor is on the lines under the table of its block, where text is written as anywhere. */
+    private val isUnderTable: Boolean by derivedStateOf {
+        val after = blockTable?.afterStart
+
+        after != null && buffer.selection.min >= after
+    }
+
+    /** The table's cell the text field is over: the cursor's, while the selection stays inside one cell. */
+    val cell: TableCell? by derivedStateOf {
+        val selection = buffer.selection
+
+        blockTable
+            ?.takeUnless { isUnderTable }
+            ?.cellAt(offset = selection.start)
+            ?.takeIf {
+                selection.collapsed || (selection.min >= it.start && selection.max <= it.end)
+            }
+    }
+
+    /** The table drawn in the cursor's block; null where the field shows the block's text as written. */
+    val table: TableText? by derivedStateOf {
+        blockTable?.takeIf {
+            cell != null || isUnderTable
+        }
+    }
+
+    /** The part of the note the text field shows: the cursor's blocks or, of a drawn [table], its cell only. */
+    val fieldRange: TextRange by derivedStateOf {
+        val cell = cell
+        val after = table?.afterStart
+
+        when {
+            cell != null -> TextRange(
+                start = cell.start,
+                end = cell.end
+            )
+
+            after != null -> TextRange(
+                start = after,
+                end = items.shown.max
+            )
+
+            else -> items.shown
+        }
+    }
+
     /** Whether the text field has the keyboard: only then does the cursor's line show its marks. */
     var hasFocus: Boolean by mutableStateOf(value = false)
 
     /** What the text field shows of the note: its window, with the marks hidden away from the cursor's lines. */
     val shown: ShownText by derivedStateOf {
-        val window = items.shown
+        val window = fieldRange
 
         val revealed = when {
-            isSource() -> window
+            isSource() || table != null -> window
             hasFocus -> buffer.selection
             else -> null
         }
@@ -131,6 +198,57 @@ internal class EditorPageState(
         )
     }
 
+    /** Puts the cursor in the cell at [row] and [column] of the table that [block] is, [x] into the cell's text. */
+    fun clickCell(
+        block: Int,
+        row: Int,
+        column: Int,
+        x: Float
+    ) {
+        val table = TableText.of(
+            text = items.textOf(
+                text = buffer.text,
+                block = block
+            ),
+            offset = items.blocks.start(index = block)
+        )
+
+        val cell = table?.cell(
+            row = row,
+            column = column
+        ) ?: return
+
+        wait(
+            placement = Placement(
+                reference = cell.start,
+                position = Offset(
+                    x = x,
+                    y = 0f
+                ),
+                anchor = null
+            )
+        )
+    }
+
+    /**
+     * Where the cursor goes when it is alone in a [cell]'s row but outside its text (in the pipes or the spaces
+     * around it, where an arrow, an undo or a click on the table's edge left it); null when it is in place.
+     */
+    fun strayCursor(): Int? {
+        val cell = cell ?: return null
+        val selection = buffer.selection
+
+        return selection
+            .start
+            .coerceIn(
+                minimumValue = cell.start,
+                maximumValue = cell.end
+            )
+            .takeIf {
+                selection.collapsed && it != selection.start
+            }
+    }
+
     /** A click in the room below the note's last line puts the cursor at the note's end. */
     fun clickAfterEnd() = wait(
         placement = Placement(
@@ -161,7 +279,9 @@ internal class EditorPageState(
         item: Int,
         offset: Int
     ): Float {
-        val layout = currentLayout()?.takeIf { items.isWindow(item = item) } ?: return 0f
+        val layout = currentLayout()?.takeIf {
+            table == null && items.isWindow(item = item)
+        } ?: return 0f
 
         return layout.getLineTop(
             lineIndex = layout.getLineForOffset(offset = shown.toShown(offset = offset))

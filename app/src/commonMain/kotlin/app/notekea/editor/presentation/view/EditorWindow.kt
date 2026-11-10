@@ -41,6 +41,7 @@ import app.notekea.core.presentation.designsystem.theme.LocalNotekeaCodeTextStyl
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.editor.presentation.attachments.AttachmentView
 import app.notekea.editor.presentation.find.FindState
+import app.notekea.editor.presentation.markdown.CellInput
 import app.notekea.editor.presentation.markdown.KeepInWindow
 import app.notekea.editor.presentation.markdown.MarkdownOutputTransformation
 import app.notekea.editor.presentation.markdown.MarkdownStyles
@@ -109,7 +110,15 @@ internal fun EditorWindow(
 
     BasicTextField(
         state = page.buffer,
-        inputTransformation = OnlyNewLines.then(next = KeepInWindow { page.items.shown }),
+        inputTransformation = remember(page) {
+            OnlyNewLines
+                .then(next = KeepInWindow { page.fieldRange })
+                .then(
+                    next = CellInput {
+                        page.cell != null
+                    }
+                )
+        },
         modifier = modifier
             .fillMaxWidth()
             .onPlaced { page.fieldPlace = it }
