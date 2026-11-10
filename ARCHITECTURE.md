@@ -16,11 +16,13 @@ app.notekea
 │   │                   previews, the gallery)
 │   ├── appearance      App-wide look the user sets: the UI zoom (UiScale, its store and use cases)
 │   ├── embedding       The embedding model's port, used by the index and search
+│   ├── llm             The chat model's port (LlmEngine), used by the chat, the queries and the actions
 │   ├── notes           What features share about notes: paths, documents, files, links, frontmatter
 │   └── platform        Platform abstraction (PLATFORM_GUIDELINES.md)
 ├── di                  App-level Koin module that includes every feature module
 ├── shell               Assembles the window: panes, tabs, side panel, dialogs (About, Settings), what follows what
-└── <feature>           editor, tree, search, connections, graph, query, tasks, templates, vault, settings, ai
+└── <feature>           editor, tree, search, connections, graph, query, tasks, templates, vault, settings, ai,
+                        chat
     ├── domain          Entities, <Feature>Error, repository interfaces, use cases
     ├── data            Implementations of the domain interfaces, DTOs and mappers
     ├── presentation    <Screen>State, <Screen>Intent, <Screen>Effect, <Screen>ViewModel, <Screen>Screen

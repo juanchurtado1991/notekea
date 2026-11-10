@@ -61,6 +61,12 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
     streaming in, the step line, the citation chips, the action card), within the design system and reduced motion.
     The actions must work perfectly: they are exercised for hours if needed, on the vaults of `smoke-data`, before
     the pull request, and every bug found gets its test. A code review closes the work.
+  - **Progress:** 3.2 is done: `LlmEngine` (`core.llm`, so the chat, the queries and the actions share it) on
+    java-llama.cpp (`LlamaLlmEngine`, `ai.data`), the Vulkan natives next to the CPU ones on Windows and Linux (the
+    embedding model stays on the CPU, so the index keeps its vectors), and `AnswerFromNotesUseCase` (`chat.domain`):
+    20 passages from the index, reranked, the gate at −8, one call over the best 5, citations checked and numbered
+    again. Tests on the real model run by hand: `./gradlew :app:chatModelTest -PchatModels=<folder>` (5 tests, about
+    10 s on the GPU). Not yet: the history of a conversation (each question is answered alone).
 
 ## Open work, in order
 

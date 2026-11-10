@@ -1,6 +1,7 @@
 package app.notekea.di
 
 import app.notekea.ai.di.modelsModule
+import app.notekea.chat.di.chatModule
 import app.notekea.connections.di.connectionsModule
 import app.notekea.core.di.coreModule
 import app.notekea.core.notes.di.coreNotesModule
@@ -30,6 +31,7 @@ val appModule = module {
         connectionsModule,
         graphModule,
         modelsModule,
+        chatModule,
         queryModule,
         tasksModule,
         templatesModule,

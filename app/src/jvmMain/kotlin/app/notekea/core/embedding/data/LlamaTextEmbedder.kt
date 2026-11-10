@@ -146,6 +146,8 @@ class LlamaTextEmbedder(
         val parameters = ModelParameters()
             .setModel(modelPath)
             .enableEmbedding()
+            // On the CPU always: the vectors stay the ones indexed, and the GPU is left to the chat model.
+            .setGpuLayers(0)
             .setCtxSize(CONTEXT_TOKENS)
             .setBatchSize(CONTEXT_TOKENS)
             .setUbatchSize(CONTEXT_TOKENS)
