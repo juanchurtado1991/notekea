@@ -2,6 +2,7 @@ package app.notekea.autotest.cases.m1
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performKeyInput
@@ -308,37 +309,39 @@ private fun CaseScope.shown(name: String): List<SemanticsNodeInteraction> {
     return rows
 }
 
+/**
+ * What shows [name] in the sidebar. Only the sidebar's nodes are matched, so each one keeps its place among them
+ * while the rest of the window changes: the same name in a tab or in Connections, which loads again after a rename,
+ * moved the places and a row was looked for where none was left (1.13-05 failed that way on Linux and macOS).
+ */
+private fun inSidebar(name: String): SemanticsMatcher =
+    hasText(text = name) and SemanticsMatcher(description = "in the sidebar") {
+        it.boundsInRoot.left < SIDEBAR_RIGHT
+    }
+
 // No waiting inside: it runs within the waits of expectBookmarkOrder, which cannot hold other waits.
 private fun CaseScope.shownNow(name: String): List<SemanticsNodeInteraction> {
-    val nodes = ui.onAllNodes(matcher = hasText(text = name))
+    val nodes = ui.onAllNodes(matcher = inSidebar(name = name))
     val count = nodes.fetchSemanticsNodes().size
 
     return (0 until count).map {
         nodes[it]
-    }.filter {
-        it.isShown() &&
-            it.fetchSemanticsNode().boundsInRoot.left < SIDEBAR_RIGHT
-    }
+    }.filter { it.isShown() }
 }
 
-private fun CaseScope.shownCount(name: String): Int {
-    val nodes = ui.onAllNodes(matcher = hasText(text = name))
-    val count = nodes.fetchSemanticsNodes().size
-
-    return (0 until count).count {
-        nodes[it].isShown() &&
-            nodes[it].fetchSemanticsNode().boundsInRoot.left < SIDEBAR_RIGHT
-    }
-}
+private fun CaseScope.shownCount(name: String): Int = shownNow(name = name).size
 
 private fun CaseScope.expectBookmarkOrder(names: List<String>) {
     ui
         .waitUntil(timeoutMillis = 10_000) {
-            val tops = names.map { name ->
-                shownNow(name = name).minOfOrNull { it.top() } ?: Float.MAX_VALUE
-            }
+            // A row can leave between being found and being measured, while the sidebar is drawn anew: not yet.
+            runCatching {
+                val tops = names.map { name ->
+                    shownNow(name = name).minOfOrNull { it.top() } ?: Float.MAX_VALUE
+                }
 
-            tops.none { it == Float.MAX_VALUE } && tops == tops.sorted()
+                tops.none { it == Float.MAX_VALUE } && tops == tops.sorted()
+            }.getOrDefault(defaultValue = false)
         }
 }
 
