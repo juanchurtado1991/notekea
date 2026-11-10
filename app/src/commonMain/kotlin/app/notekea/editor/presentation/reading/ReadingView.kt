@@ -16,6 +16,7 @@ import app.notekea.core.notes.domain.TaskFinder
 import app.notekea.core.notes.domain.percentDecoded
 import app.notekea.core.presentation.designsystem.components.NotekeaMarkdown
 import app.notekea.core.presentation.designsystem.components.ScaledBitmapPainter
+import app.notekea.core.presentation.designsystem.components.TextMarks
 import app.notekea.core.presentation.designsystem.components.attachmentImageSize
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
@@ -26,8 +27,8 @@ import app.notekea.editor.presentation.view.LocalQueryBlock
 
 /**
  * The note rendered: its Markdown, with wiki links and tags as links and its embedded files in their place
- * ([AttachmentBlock]); each heading of the outline starts a piece. Embedded notes and the editor's blocks are drawn
- * the same way: a block's [text] starts [textStart] into the note, and with [isSelectable] off a click is the editor's.
+ * ([AttachmentBlock]); each heading starts a piece. A block of the editor starts [textStart] into the note; with
+ * [isSelectable] off a click is the editor's, and with [isTextShown] off only files and query blocks are drawn.
  */
 @Composable
 fun ReadingView(
@@ -35,19 +36,25 @@ fun ReadingView(
     attachments: List<AttachmentView>,
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier = Modifier,
+    marks: TextMarks? = null,
     isSelectable: Boolean = true,
+    isTextShown: Boolean = true,
     textStart: Int = 0
 ) {
     val readLinks = remember { ReadModeLinks() }
 
-    val segments = remember(text, attachments, textStart) {
+    val segments = remember(text, attachments, textStart, isTextShown) {
         ReadingSegment.of(
             text = text,
             attachments = attachments,
             headings = OutlineFinder().headings(text = text),
             offset = textStart
-        )
+        ).filter {
+            isTextShown || it !is ReadingSegment.Markdown
+        }
     }
+
+    if (segments.isEmpty()) return
 
     val systemUriHandler = LocalUriHandler.current
     val density = LocalDensity.current
@@ -86,6 +93,7 @@ fun ReadingView(
                 is ReadingSegment.Markdown -> NotekeaMarkdown(
                     content = remember(segment.text) { readLinks.prepare(body = segment.text) },
                     onLinkClick = onLinkClick,
+                    marks = marks,
                     isSelectable = isSelectable,
                     imagePainter = imagePainter,
                     onTaskClick = taskClicks(

@@ -1,6 +1,7 @@
 package app.notekea.editor.presentation.view
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
@@ -37,6 +38,8 @@ import app.notekea.core.domain.StringPatterns.WINDOWS_NEW_LINE
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalNotekeaCodeTextStyle
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.editor.presentation.attachments.AttachmentView
 import app.notekea.editor.presentation.find.FindState
 import app.notekea.editor.presentation.markdown.KeepInWindow
 import app.notekea.editor.presentation.markdown.MarkdownOutputTransformation
@@ -44,6 +47,7 @@ import app.notekea.editor.presentation.markdown.MarkdownStyles
 import app.notekea.editor.presentation.markdown.OnlyNewLines
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.EditorPreviewData
+import app.notekea.editor.presentation.reading.ReadingView
 import app.notekea.editor.presentation.toolbar.formatActions
 import app.notekea.resources.Res
 import app.notekea.resources.editor_body_label
@@ -145,6 +149,35 @@ internal fun EditorWindow(
 }
 
 /**
+ * The embedded files and the query blocks of the window's text, drawn under the field, which shows them as written:
+ * the cursor's block keeps its pictures and its query's table. They are read here, so typing recomposes only this.
+ */
+@Composable
+internal fun WindowEmbeds(
+    page: EditorPageState,
+    attachments: List<AttachmentView>,
+    onIntent: (EditorIntent) -> Unit
+) {
+    val shown = page.items.shown
+
+    ReadingView(
+        text = page
+            .buffer
+            .text
+            .substring(
+                startIndex = shown.min,
+                endIndex = shown.max
+            ),
+        attachments = attachments,
+        onIntent = onIntent,
+        modifier = Modifier.padding(top = NotekeaDimensions.SpacingM),
+        isSelectable = false,
+        isTextShown = false,
+        textStart = shown.min
+    )
+}
+
+/**
  * What the field tells a screen reader and the Auto-Test: the note's whole text and the selection's place in it, not
  * only the window the field shows, whose text and offsets change as the cursor moves between blocks. A text set
  * through it replaces the whole note.
@@ -232,17 +265,7 @@ private fun PlaceClick(page: EditorPageState) {
 @Preview
 @Composable
 private fun EditorWindowPreview() {
-    val buffer = remember { EditorPreviewData.buffer() }
-    val listState = rememberLazyListState()
-
-    val page = remember(buffer, listState) {
-        EditorPageState(
-            buffer = buffer,
-            listState = listState,
-            focusRequester = FocusRequester(),
-            isReading = { false }
-        )
-    }
+    val page = rememberPreviewPage()
 
     NotekeaPreviewThemes {
         EditorWindow(
@@ -250,6 +273,35 @@ private fun EditorWindowPreview() {
             find = null,
             platformConventions = EditorPreviewData.platformConventions,
             onIntent = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun WindowEmbedsPreview() {
+    val page = rememberPreviewPage()
+
+    NotekeaPreviewThemes {
+        WindowEmbeds(
+            page = page,
+            attachments = emptyList(),
+            onIntent = {}
+        )
+    }
+}
+
+@Composable
+private fun rememberPreviewPage(): EditorPageState {
+    val buffer = remember { EditorPreviewData.buffer() }
+    val listState = rememberLazyListState()
+
+    return remember(buffer, listState) {
+        EditorPageState(
+            buffer = buffer,
+            listState = listState,
+            focusRequester = FocusRequester(),
+            isReading = { false }
         )
     }
 }
