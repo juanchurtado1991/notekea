@@ -10,6 +10,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -67,6 +68,38 @@ class EditorTaskCheckboxTest {
                 DRAWN_BODY.indexOf(string = it) + 1
             },
             actual = toggles
+        )
+    }
+
+    // Found in the smoke of One editing mode: the drawn boxes sat above their texts' line.
+    @Test
+    fun `a drawn task's checkbox is at the middle of its text's line`() = runComposeUiTest {
+        setContent {
+            NotekeaTheme(darkTheme = false) {
+                EditorContent(
+                    state = EditorState(notePath = RelativePath(value = NOTE)),
+                    buffer = TextFieldState(
+                        initialText = "# Tasks\n\n- [ ] Buy flour\n",
+                        initialSelection = TextRange(index = 0)
+                    ),
+                    platformConventions = PreviewPlatformConventions.linux,
+                    onIntent = {}
+                )
+            }
+        }
+
+        val box = onAllNodes(matcher = hasContentDescription(value = "Task"))[0]
+            .fetchSemanticsNode()
+            .boundsInRoot
+
+        val text = onNode(matcher = hasText(text = "Buy flour") and !hasSetTextAction())
+            .fetchSemanticsNode()
+            .boundsInRoot
+
+        assertEquals(
+            expected = text.center.y,
+            actual = box.center.y,
+            absoluteTolerance = 1.5f
         )
     }
 

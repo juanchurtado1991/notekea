@@ -1,12 +1,17 @@
 package app.notekea.core.presentation.designsystem.components
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.TextUnit
 import app.notekea.core.domain.markdown.ReadingMarkdown
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
@@ -77,6 +82,7 @@ internal fun notekeaMarkdownComponents(
             TaskBox(
                 content = it.content,
                 node = it.node,
+                lineHeight = it.typography.text.lineHeight,
                 onClick = onTaskClick
             )
         }
@@ -102,11 +108,15 @@ internal fun notekeaMarkdownComponents(
     }
 )
 
-/** A task's checkbox that takes clicks: [onClick] gets which checkbox of the content it is, and how many there are. */
+/**
+ * A task's checkbox that takes clicks, at the middle of its text's first line, [lineHeight] tall: [onClick] gets
+ * which checkbox of the content it is, and how many there are.
+ */
 @Composable
 private fun TaskBox(
     content: String,
     node: ASTNode,
+    lineHeight: TextUnit,
     onClick: (index: Int, count: Int) -> Unit
 ) {
     val boxes = remember(node) { checkBoxesOf(node = node) }
@@ -118,14 +128,21 @@ private fun TaskBox(
             ignoreCase = true
         )
 
-    NotekeaCheckbox(
-        checked = isDone,
-        onClick = { onClick(boxes.indexOf(element = node), boxes.size) },
-        label = stringResource(resource = Res.string.editor_task),
+    val line = with(LocalDensity.current) { lineHeight.toDp() }
+
+    Box(
         modifier = Modifier
-            .padding(end = NotekeaDimensions.SpacingXs)
-            .pointerHoverIcon(icon = PointerIcon.Hand)
-    )
+            .height(height = line)
+            .padding(end = NotekeaDimensions.SpacingXs),
+        contentAlignment = Alignment.Center
+    ) {
+        NotekeaCheckbox(
+            checked = isDone,
+            onClick = { onClick(boxes.indexOf(element = node), boxes.size) },
+            label = stringResource(resource = Res.string.editor_task),
+            modifier = Modifier.pointerHoverIcon(icon = PointerIcon.Hand)
+        )
+    }
 }
 
 /** Every checkbox of the document [node] is in, in the text's order. */
