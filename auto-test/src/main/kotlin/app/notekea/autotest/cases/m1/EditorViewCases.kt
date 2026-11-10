@@ -5,7 +5,6 @@ import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.notekea
 import app.notekea.autotest.openNote
 import app.notekea.autotest.pressInWindow
-import app.notekea.autotest.relaunch
 import com.testbuddy.CaseFailure
 import com.testbuddy.ManualReason
 import com.testbuddy.ShortcutModifier.Mod

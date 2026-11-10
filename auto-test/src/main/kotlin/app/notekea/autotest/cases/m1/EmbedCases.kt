@@ -1,6 +1,5 @@
 package app.notekea.autotest.cases.m1
 
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
@@ -13,10 +12,8 @@ import androidx.compose.ui.test.performTextInputSelection
 import androidx.compose.ui.text.TextRange
 import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.noteText
-import app.notekea.autotest.pressInWindow
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
-import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.SuiteBuilder
 import com.testbuddy.isShown
 

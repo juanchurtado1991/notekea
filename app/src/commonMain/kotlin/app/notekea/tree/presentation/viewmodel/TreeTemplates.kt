@@ -5,7 +5,6 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TemplateSettings
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeIntent
-import app.notekea.tree.presentation.model.VaultTreeState
 
 /**
  * New notes from a template in the sidebar: the template picker opens for the selected folder, the

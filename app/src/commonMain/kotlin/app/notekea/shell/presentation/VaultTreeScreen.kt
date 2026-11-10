@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import app.notekea.connections.presentation.NoteMentionsViewModel
 import app.notekea.connections.presentation.RelatedNotesViewModel
-import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
@@ -27,7 +26,6 @@ import app.notekea.core.presentation.designsystem.theme.LocalNoteLooks
 import app.notekea.core.presentation.designsystem.theme.NoteLooks
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.platform.WindowShortcut
-import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import app.notekea.editor.presentation.view.EditorPaneTools
@@ -49,7 +47,6 @@ import app.notekea.templates.presentation.TemplatePickerViewModel
 import app.notekea.templates.presentation.TemplateTarget
 import app.notekea.tree.presentation.filepreview.PreviewNoteContent
 import app.notekea.tree.presentation.model.TreePreviewData
-import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.tree.presentation.model.VaultTreeState
 import app.notekea.tree.presentation.tags.TagPickerContent
 import app.notekea.tree.presentation.tags.TagPickerViewModel

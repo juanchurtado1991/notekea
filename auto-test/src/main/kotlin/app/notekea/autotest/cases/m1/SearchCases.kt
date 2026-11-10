@@ -3,7 +3,6 @@ package app.notekea.autotest.cases.m1
 import androidx.compose.ui.input.key.Key
 import app.notekea.autotest.SmokeScenarios
 import app.notekea.autotest.cursorToNoteStart
-import app.notekea.autotest.expectNotInNoteText
 import app.notekea.autotest.noteText
 import app.notekea.autotest.openNote
 import app.notekea.autotest.openVault

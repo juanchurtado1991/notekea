@@ -7,12 +7,10 @@ import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.expectOrderOnScreen
 import app.notekea.autotest.openNote
 import app.notekea.autotest.openVault
-import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.relaunch
 import app.notekea.autotest.typeAtEnd
 import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
-import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.SuiteBuilder
 
 private const val SAMPLE = "Sample Vault"

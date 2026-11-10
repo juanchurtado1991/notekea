@@ -30,38 +30,37 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /** What the table's bar and its menu offer, in groups: each action with its icon and its name. */
-private val TABLE_ACTIONS: List<List<Triple<TableAction, ImageVector, StringResource>>>
-    get() = listOf(
-        listOf(
-            Triple(TableAction.ROW_ABOVE, NotekeaIcons.RowAbove, Res.string.table_row_above),
-            Triple(TableAction.ROW_BELOW, NotekeaIcons.RowBelow, Res.string.table_row_below)
+private val TABLE_ACTIONS: List<List<Triple<TableAction, ImageVector, StringResource>>> = listOf(
+    listOf(
+        Triple(TableAction.ROW_ABOVE, NotekeaIcons.RowAbove, Res.string.table_row_above),
+        Triple(TableAction.ROW_BELOW, NotekeaIcons.RowBelow, Res.string.table_row_below)
+    ),
+    listOf(
+        Triple(TableAction.COLUMN_LEFT, NotekeaIcons.ColumnLeft, Res.string.table_column_left),
+        Triple(
+            TableAction.COLUMN_RIGHT,
+            NotekeaIcons.ColumnRight,
+            Res.string.table_column_right
+        )
+    ),
+    listOf(
+        Triple(TableAction.ALIGN_LEFT, NotekeaIcons.AlignLeft, Res.string.table_align_left),
+        Triple(
+            TableAction.ALIGN_CENTER,
+            NotekeaIcons.AlignCenter,
+            Res.string.table_align_center
         ),
-        listOf(
-            Triple(TableAction.COLUMN_LEFT, NotekeaIcons.ColumnLeft, Res.string.table_column_left),
-            Triple(
-                TableAction.COLUMN_RIGHT,
-                NotekeaIcons.ColumnRight,
-                Res.string.table_column_right
-            )
-        ),
-        listOf(
-            Triple(TableAction.ALIGN_LEFT, NotekeaIcons.AlignLeft, Res.string.table_align_left),
-            Triple(
-                TableAction.ALIGN_CENTER,
-                NotekeaIcons.AlignCenter,
-                Res.string.table_align_center
-            ),
-            Triple(TableAction.ALIGN_RIGHT, NotekeaIcons.AlignRight, Res.string.table_align_right)
-        ),
-        listOf(
-            Triple(TableAction.DELETE_ROW, NotekeaIcons.DeleteRow, Res.string.table_delete_row),
-            Triple(
-                TableAction.DELETE_COLUMN,
-                NotekeaIcons.DeleteColumn,
-                Res.string.table_delete_column
-            )
+        Triple(TableAction.ALIGN_RIGHT, NotekeaIcons.AlignRight, Res.string.table_align_right)
+    ),
+    listOf(
+        Triple(TableAction.DELETE_ROW, NotekeaIcons.DeleteRow, Res.string.table_delete_row),
+        Triple(
+            TableAction.DELETE_COLUMN,
+            NotekeaIcons.DeleteColumn,
+            Res.string.table_delete_column
         )
     )
+)
 
 /** The bar over the table the cursor is in: rows and columns added from its cell or deleted, its column aligned. */
 @Composable

@@ -6,7 +6,6 @@ import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.hasText
 import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.expectOrderOnScreen
-import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.waitForResult
 import com.testbuddy.CaseScope
 import com.testbuddy.ShortcutModifier.Mod
