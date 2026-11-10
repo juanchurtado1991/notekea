@@ -67,6 +67,10 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
     20 passages from the index, reranked, the gate at −8, one call over the best 5, citations checked and numbered
     again. Tests on the real model run by hand: `./gradlew :app:chatModelTest -PchatModels=<folder>` (5 tests, about
     10 s on the GPU). Not yet: the history of a conversation (each question is answered alone).
+    3.4 is done: `smoke-data/eval/answers.json` (the 504 questions of the tournament) and
+    `AnswerEvalChatModelTest`, run by hand per size, which grades the app's own answers strictly
+    (`docs/answer-quality.md`): Small 80 %, Medium 89 %, Large 85 % right; the sample vaults are read as committed
+    (`EvalVault`), so local edits to `smoke-data` change no number.
 
 ## Open work, in order
 
