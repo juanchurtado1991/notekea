@@ -24,6 +24,7 @@ internal class TreeDays(
 
     suspend fun loadSettings() {
         settings = days.getDailyNoteSettings(vaultPath = vaultPath)
+        host.reduce { it.copy(dailyFolder = settings.folder) }
     }
 
     fun onIntent(intent: VaultTreeIntent) {

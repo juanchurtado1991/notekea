@@ -13,8 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   most 100 characters, chains, lambdas, named arguments and parameters laid out one way, compound conditions and
   long callbacks named, and KDoc of at most three lines whose links and file names exist. The repository is
   reformatted to it.
+- More color in the tree and the inspector. Each top-level folder has the color it has in the graph: on its icon and
+  its subfolders' in the tree, and as the folder's chip of a mention or a related note. Daily notes show a calendar.
+  The selected row has a bar in the theme's color, folder counts are pills and nested rows have indent guides.
+- Matched words in mentions and related notes are marked in the theme's color instead of underlined, the open
+  tab's count is a pill, and the status bar's *Saved* check is green.
+- Note info mutes the counts that are zero and draws the done tasks as a bar.
 
 ### Fixed
+
+- Related notes quote a passage as plain text: `> [!summary]`, `- [ ]`, `[[`, `**` and the like no longer show.
 
 - Files and folders whose names have digits of another script (`٣`, `३`) no longer break the order of the tree:
   only `0`–`9` count as numbers, so three such names can no longer order in a cycle.

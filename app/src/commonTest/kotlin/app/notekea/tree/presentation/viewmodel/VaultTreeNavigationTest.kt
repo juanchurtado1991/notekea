@@ -283,10 +283,15 @@ class VaultTreeNavigationTest : VaultTreeViewModelTestBase() {
             viewModel.onIntent(intent = VaultTreeIntent.OnTodayClick)
             advanceUntilIdle()
 
+            val state = viewModel.state.value
+
             assertEquals(
-                expected = path("Diary/27.10.2026.md") to path("Diary/25.10.2026.md"),
-                actual =
-                viewModel.state.value.selectedPath to viewModel.state.value.dayNeighbors?.previous
+                expected = listOf(
+                    path("Diary/27.10.2026.md"),
+                    path("Diary/25.10.2026.md"),
+                    "Diary"
+                ),
+                actual = listOf(state.selectedPath, state.dayNeighbors?.previous, state.dailyFolder)
             )
         }
 

@@ -1,8 +1,8 @@
 package app.notekea.core.notes.domain
 
 /**
- * One line of Markdown as a reader sees it, for search results: the block marker at its start, the brackets of wiki
- * links, the address of Markdown links and images, inline code backticks and emphasis marks are removed; `#tags` stay.
+ * One line of Markdown as a reader sees it, without the block marker at its start, a callout's kind (`[!note]`), wiki
+ * link brackets, the address of Markdown links and images, code backticks and emphasis marks; `#tags` stay.
  * Highlight ranges move with the text they cover; one whose characters were all removed is dropped.
  */
 class MarkdownLineStripper {
@@ -172,7 +172,7 @@ class MarkdownLineStripper {
         private const val TARGET_GROUP = 1
         private const val TEXT_GROUP = 1
         private val LEADING_MARKER = Regex(
-            pattern = "^\\s*(?:>\\s*)*(?:#{1,6}\\s+|(?:[-*+]|\\d+[.)])\\s+(?:\\[[ xX]]\\s+)?)?"
+            pattern = "^\\s*(?:(?:>\\s*)+(?:\\[![^\\]]+][-+]?\\s*)?)?(?:#{1,6}\\s+|(?:[-*+]|\\d+[.)])\\s+(?:\\[[ xX]]\\s+)?)?"
         )
         private val INLINE_CODE = Regex(pattern = "(`+)(.+?)\\1")
         private val WIKI_LINK = Regex(pattern = "!?\\[\\[([^\\]|\\n]+)(?:\\|([^\\]\\n]*))?]]")

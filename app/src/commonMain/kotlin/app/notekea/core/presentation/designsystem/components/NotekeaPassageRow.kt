@@ -36,7 +36,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,6 +45,8 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 
 private const val TEXT_LINES = 2
+private const val CHIP_ALPHA = 0.16f
+private const val MARKER_ALPHA = 0.2f
 private const val HOVER_ALPHA = 0.05f
 private const val ICON_DP = 14
 private const val TITLE_ROW_DP = 22
@@ -60,9 +61,9 @@ private const val PREVIEW_TEXT =
 private const val PREVIEW_HIGHLIGHT_START = 35
 
 /**
- * A row of a list that quotes a passage: [icon], [title], a muted [subtitle] and up to two lines of [text] with its
- * [highlights] underlined. Its [actions] show while the pointer or the keyboard is on the row, or always when
- * [showsActions]; screen readers get them as [accessibilityActions]. A click or Enter goes to [onClick].
+ * A row that quotes a passage: [icon], [title], a muted [subtitle] and two lines of [text] with its [highlights]
+ * marked; [accent], the color of the note's folder, tints the icon and the subtitle. Its [actions] show under the
+ * pointer or the keyboard, or always when [showsActions]; screen readers get them as [accessibilityActions].
  */
 @Composable
 fun NotekeaPassageRow(
@@ -74,6 +75,7 @@ fun NotekeaPassageRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     showsActions: Boolean = false,
+    accent: Color? = null,
     accessibilityActions: List<CustomAccessibilityAction> = emptyList(),
     actions: @Composable RowScope.() -> Unit = {}
 ) {
@@ -122,7 +124,8 @@ fun NotekeaPassageRow(
             showsActions = showsActions ||
                 isHovered ||
                 hasFocus,
-            actions = actions
+            actions = actions,
+            accent = accent
         )
 
         Passage(
@@ -139,7 +142,8 @@ private fun TitleRow(
     subtitle: String,
     icon: ImageVector,
     showsActions: Boolean,
-    actions: @Composable RowScope.() -> Unit
+    actions: @Composable RowScope.() -> Unit,
+    accent: Color?
 ) {
     val colors = MaterialTheme.colorScheme
 
@@ -151,7 +155,7 @@ private fun TitleRow(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(size = ICON_DP.dp),
-            tint = colors.onSurfaceVariant
+            tint = accent ?: colors.onSurfaceVariant
         )
 
         Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
@@ -176,21 +180,45 @@ private fun TitleRow(
             )
 
             if (subtitle.isNotEmpty()) {
-                Text(
+                Subtitle(
                     text = subtitle,
-                    modifier = Modifier
-                        .padding(start = NotekeaDimensions.SpacingS)
-                        .widthIn(max = SUBTITLE_MAX_DP.dp),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colors.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    accent = accent
                 )
             }
         }
 
         if (showsActions) actions()
     }
+}
+
+/** The muted [text] after the title; with an [accent], a chip in that color. */
+@Composable
+private fun Subtitle(
+    text: String,
+    accent: Color?
+) {
+    val chip = if (accent == null) {
+        Modifier
+    } else {
+        Modifier
+            .background(
+                color = accent.copy(alpha = CHIP_ALPHA),
+                shape = MaterialTheme.shapes.extraSmall
+            )
+            .padding(horizontal = NotekeaDimensions.SpacingXs)
+    }
+
+    Text(
+        text = text,
+        modifier = Modifier
+            .padding(start = NotekeaDimensions.SpacingS)
+            .widthIn(max = SUBTITLE_MAX_DP.dp)
+            .then(other = chip),
+        style = MaterialTheme.typography.labelSmall,
+        color = accent ?: MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
 }
 
 @Composable
@@ -204,7 +232,7 @@ private fun Passage(
         text = marked(
             text = text,
             ranges = highlights,
-            ink = colors.onSurface
+            ink = colors.primary
         ),
         color = colors.onSurfaceVariant,
         maxLines = TEXT_LINES,
@@ -212,7 +240,7 @@ private fun Passage(
     )
 }
 
-/** [text] with [ranges] underlined in [ink]; a range outside the text, or crossing one before it, is left out. */
+/** [text] with [ranges] marked in [ink]; a range outside the text, or crossing one before it, is left out. */
 private fun marked(
     text: String,
     ranges: List<IntRange>,
@@ -226,7 +254,7 @@ private fun marked(
         addStyle(
             style = SpanStyle(
                 color = ink,
-                textDecoration = TextDecoration.Underline
+                background = ink.copy(alpha = MARKER_ALPHA)
             ),
             start = range.first,
             end = range.last + 1

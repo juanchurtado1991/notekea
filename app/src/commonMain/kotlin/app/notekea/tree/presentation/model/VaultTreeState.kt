@@ -12,8 +12,8 @@ import app.notekea.tree.domain.TreeSort
 
 /**
  * State of the vault sidebar. [isLoading] covers the first scan only; later changes keep the rows on screen. [rows] are
- * [tree] flattened with [expandedFolders] and [sort]. A refused rename stays in [renaming], next to the field.
- * [sidebarWidthDp] changes when a resize ends. [dayNeighbors] holds a selected daily note's date and neighbors.
+ * [tree] flattened with [expandedFolders] and [sort]. A refused rename stays in [renaming]; [sidebarWidthDp] changes
+ * when a resize ends; [dayNeighbors] is a selected daily note's date and neighbors, [dailyFolder] where they are kept.
  */
 data class VaultTreeState(
     val vaultPath: String,
@@ -27,6 +27,7 @@ data class VaultTreeState(
     val isSidebarCollapsed: Boolean = false,
     val selectedPath: RelativePath? = null,
     val dayNeighbors: DayNeighbors? = null,
+    val dailyFolder: String = "",
     val bookmarks: Bookmarks = Bookmarks(),
     val isBookmarksExpanded: Boolean = true,
     val renaming: RenameDraft? = null,

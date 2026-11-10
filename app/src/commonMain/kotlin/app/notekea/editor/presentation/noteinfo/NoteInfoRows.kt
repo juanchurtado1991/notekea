@@ -3,8 +3,10 @@ package app.notekea.editor.presentation.noteinfo
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +34,9 @@ import org.jetbrains.compose.resources.stringResource
 
 private const val INFO_LABEL_WIDTH_DP = 88
 private const val INFO_ROW_PADDING_DP = 3
+private const val MUTED_ALPHA = 0.5f
+private const val PROGRESS_HEIGHT_DP = 3
+private const val PROGRESS_WIDTH_DP = 56
 private const val CREATED_PATTERN = "MMM D, YYYY"
 private const val MODIFIED_PATTERN = "MMM D, YYYY, HH:mm"
 private const val PREVIEW_WIDTH_DP = 300
@@ -84,28 +89,44 @@ private fun StatsRows(stats: NoteStats) {
 
     InfoRow(
         label = stringResource(resource = Res.string.note_info_links),
-        value = stats.links.toString()
+        value = stats.links.toString(),
+        isMuted = stats.links == 0
     )
 
     InfoRow(
         label = stringResource(resource = Res.string.note_info_tags),
-        value = stats.tags.toString()
+        value = stats.tags.toString(),
+        isMuted = stats.tags == 0
     )
 
     if (stats.tasks > 0) {
         InfoRow(
             label = stringResource(resource = Res.string.note_info_tasks),
-            value = stringResource(Res.string.note_info_tasks_value, stats.doneTasks, stats.tasks)
+            value = stringResource(Res.string.note_info_tasks_value, stats.doneTasks, stats.tasks),
+            progress = stats.doneTasks.toFloat() / stats.tasks
         )
     }
 }
 
-/** One row, as an inspector's table: [label] in the muted color in a column of its own, [value] in ink beside it. */
+/**
+ * One row, as an inspector's table: [label] in the muted color in a column of its own, [value] in ink beside it, or
+ * muted too when it says nothing ([isMuted]: no links, no tags), and a thin bar of how much is done ([progress]).
+ */
 @Composable
 private fun InfoRow(
     label: String,
-    value: String
+    value: String,
+    isMuted: Boolean = false,
+    progress: Float? = null
 ) {
+    val colors = MaterialTheme.colorScheme
+
+    val valueColor = if (isMuted) {
+        colors.onSurfaceVariant.copy(alpha = MUTED_ALPHA)
+    } else {
+        colors.onSurface
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -126,8 +147,21 @@ private fun InfoRow(
         Text(
             text = value,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
+            color = valueColor
         )
+
+        if (progress != null) {
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .padding(start = NotekeaDimensions.SpacingS)
+                    .width(width = PROGRESS_WIDTH_DP.dp)
+                    .height(height = PROGRESS_HEIGHT_DP.dp),
+                color = colors.primary,
+                trackColor = colors.surfaceVariant,
+                drawStopIndicator = {}
+            )
+        }
     }
 }
 
