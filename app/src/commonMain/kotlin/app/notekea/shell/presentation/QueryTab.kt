@@ -104,7 +104,7 @@ private fun FollowQuery(
     }
 }
 
-/** What Read mode's query blocks follow, for [content]: each runs against the notes [query] knows. */
+/** What the notes' query blocks follow, for [content]: each runs against the notes [query] knows. */
 @Composable
 internal fun FollowQueryBlocks(
     query: QueryViewModel,

@@ -4,6 +4,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.notes.domain.RelativePath
@@ -16,13 +17,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * A `#tag` in Read mode, rendered headless and clicked: it asks to search the tag. The renderer parses in the
+ * A `#tag` of a drawn block, rendered headless and clicked: it asks to search the tag. The renderer parses in the
  * background, so the scene renders a few frames with short pauses first; it runs on the AWT event thread, as in the
  * app (`ARCHITECTURE.md` §8).
  */
-class ReadModeTagClickTest {
+class EditorTagClickTest {
     @Test
-    fun `clicking a tag in read mode asks to search it`() {
+    fun `clicking a tag of a block the cursor is not in asks to search it`() {
         val intents = mutableListOf<EditorIntent>()
 
         UiThread.run {
@@ -33,11 +34,11 @@ class ReadModeTagClickTest {
             ) {
                 NotekeaTheme(darkTheme = false) {
                     EditorContent(
-                        state = EditorState(
-                            notePath = RelativePath(value = NOTE),
-                            isReading = true
+                        state = EditorState(notePath = RelativePath(value = NOTE)),
+                        buffer = TextFieldState(
+                            initialText = BODY,
+                            initialSelection = TextRange(index = 0)
                         ),
-                        buffer = TextFieldState(initialText = BODY),
                         platformConventions = PreviewPlatformConventions.linux,
                         onIntent = { intents += it }
                     )

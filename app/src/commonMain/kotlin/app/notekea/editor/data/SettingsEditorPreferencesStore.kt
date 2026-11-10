@@ -11,28 +11,14 @@ import com.russhwolf.settings.Settings
 import kotlinx.coroutines.withContext
 
 /**
- * [EditorPreferencesStore] on Multiplatform Settings, the same keys for all vaults, all under `editor.`: the read mode,
- * the side panel's width, whether it is visible, its mode (the inspector when the name is unknown) and its folded
+ * [EditorPreferencesStore] on Multiplatform Settings, the same keys for all vaults, all under `editor.`: the side
+ * panel's width, whether it is visible, its mode (the inspector when the name is unknown) and its folded
  * sections (names of other versions left out), and whether the properties are expanded.
  */
 class SettingsEditorPreferencesStore(
     private val settings: Settings,
     private val dispatchers: AppDispatchers
 ) : EditorPreferencesStore {
-    override suspend fun isReadMode(): Boolean = withContext(context = dispatchers.io) {
-        settings.getBoolean(
-            key = READ_MODE_KEY,
-            defaultValue = false
-        )
-    }
-
-    override suspend fun setReadMode(isReading: Boolean) = withContext(context = dispatchers.io) {
-        settings.putBoolean(
-            key = READ_MODE_KEY,
-            value = isReading
-        )
-    }
-
     override suspend fun sidePanel(): SidePanelPreferences = withContext(context = dispatchers.io) {
         SidePanelPreferences(
             widthDp = settings.getInt(
@@ -119,7 +105,6 @@ class SettingsEditorPreferencesStore(
 
     companion object {
         private const val PROPERTIES_EXPANDED_KEY = "editor.properties_expanded"
-        private const val READ_MODE_KEY = "editor.read_mode"
         private const val SECTION_SEPARATOR = ","
         private const val SIDE_PANEL_CONNECTIONS_KEY = "editor.side_panel_connections"
         private const val SIDE_PANEL_FOLDED_KEY = "editor.side_panel_folded"

@@ -254,7 +254,6 @@ private fun SuiteBuilder.templateReplacesSelection() {
             shownText = KICKOFF_TEXT
         )
 
-        pressInWindow(shortcut = Mod + Key.E)
         pressInWindow(shortcut = Mod + Key.T)
         expectText(text = "Find a template to insert")
         press(key = Key.Escape)

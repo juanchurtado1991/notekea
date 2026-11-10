@@ -24,7 +24,6 @@ data class EditorState(
     val isDeleted: Boolean = false,
     val titleError: NotesError? = null,
     val find: FindState? = null,
-    val isReading: Boolean = false,
     val isSourceMode: Boolean = false,
     val isRevealing: Boolean = false,
     val attachments: List<AttachmentView> = emptyList(),
@@ -39,9 +38,6 @@ data class EditorState(
     val usesCrLf: Boolean = false,
     val bodyStartLine: Int = 0
 ) {
-    /** Whether the text can be changed now: a note is open and loaded, in Edit mode. */
-    val isEditable: Boolean get() =
-        notePath != null &&
-            !isLoading &&
-            !isReading
+    /** Whether the text can be changed now: a note is open and loaded. */
+    val isEditable: Boolean get() = notePath != null && !isLoading
 }

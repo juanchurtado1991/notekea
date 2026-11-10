@@ -40,7 +40,7 @@ private const val PREVIEW_WARNING = "Hot oil"
 private const val PREVIEW_WIDTH_DP = 480
 
 /**
- * A callout card (an Obsidian `> [!type]` block in Read mode): a background tinted with [color], a header with [icon]
+ * A callout card (an Obsidian `> [!type]` block, drawn): a background tinted with [color], a header with [icon]
  * and the [title], and the [content] under it. With [onToggle] the callout folds: the header shows a chevron and a
  * click on it shows or hides the content ([isExpanded]); its title is then not selectable, so quick clicks fold it.
  */

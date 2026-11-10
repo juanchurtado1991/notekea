@@ -27,12 +27,12 @@ import app.notekea.resources.about_shortcut_outline
 import app.notekea.resources.about_shortcut_previous_day
 import app.notekea.resources.about_shortcut_previous_tab
 import app.notekea.resources.about_shortcut_quit
-import app.notekea.resources.about_shortcut_read_mode
 import app.notekea.resources.about_shortcut_rename
 import app.notekea.resources.about_shortcut_save
 import app.notekea.resources.about_shortcut_search_notes
 import app.notekea.resources.about_shortcut_side_panel
 import app.notekea.resources.about_shortcut_sidebar
+import app.notekea.resources.about_shortcut_source
 import app.notekea.resources.about_shortcut_split
 import app.notekea.resources.about_shortcut_task
 import app.notekea.resources.about_shortcut_template
@@ -109,8 +109,8 @@ object AboutShortcuts {
             title = Res.string.about_group_writing,
             shortcuts = listOf(
                 AboutShortcut(
-                    label = Res.string.about_shortcut_read_mode,
-                    shortcut = toggleReadModeShortcut
+                    label = Res.string.about_shortcut_source,
+                    shortcut = toggleSourceShortcut
                 ),
                 AboutShortcut(
                     label = Res.string.about_shortcut_find,

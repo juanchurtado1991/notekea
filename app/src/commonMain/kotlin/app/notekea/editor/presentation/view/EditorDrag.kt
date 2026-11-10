@@ -99,7 +99,7 @@ private fun EditorPageState.isOnToolbar(y: Float): Boolean {
  * field's layout is not the one of its text.
  */
 private fun EditorPageState.dragTarget(position: Offset): Int? {
-    val window = items.window ?: return null
+    val window = items.window
     val range = items.shown
     val inField = fieldPosition(position = position) ?: return null
 

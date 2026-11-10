@@ -16,7 +16,7 @@ data class PlatformConventions(
     val toggleSidebarShortcut: Shortcut,
     val saveShortcut: Shortcut,
     val findShortcut: Shortcut,
-    val toggleReadModeShortcut: Shortcut,
+    val toggleSourceShortcut: Shortcut,
     val quickSwitcherShortcut: Shortcut,
     val searchNotesShortcut: Shortcut,
     val toggleTaskShortcut: Shortcut,

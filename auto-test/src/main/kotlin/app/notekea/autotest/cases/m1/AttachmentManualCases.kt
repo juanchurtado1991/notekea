@@ -28,7 +28,7 @@ private fun SuiteBuilder.pictureSizes() {
     ) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
         title(text = "Pictures at the right size, files as chips")
-        steps(text = "$OPEN_IMAGES\n3. Click Preview and scroll through the note.")
+        steps(text = "$OPEN_IMAGES\n3. Scroll through the note without clicking in its text.")
 
         expected(
             text =
@@ -50,8 +50,8 @@ private fun SuiteBuilder.pdfOpens() {
 
         steps(
             text =
-            "$OPEN_IMAGES\n3. Click the Weekly menu.pdf chip.\n4. Close the PDF viewer, click Preview and " +
-                "click \"the menu\" in the last paragraph."
+            "$OPEN_IMAGES\n3. Click the Weekly menu.pdf chip.\n4. Close the PDF viewer and click \"the menu\" " +
+                "in the last paragraph."
         )
 
         expected(
@@ -205,7 +205,7 @@ private fun SuiteBuilder.pictureInTable() {
 
         steps(
             text =
-            "$OPEN_IMAGES\n3. Click Preview and scroll to the table at the end.\n4. Click Edit, add a row | " +
+            "$OPEN_IMAGES\n3. Scroll to the table at the end.\n4. Click Source (</>) in the toolbar, add a row | " +
                 "Cachapa |  | under the table, put the cursor in its empty Photo cell and choose More (⋯) › Image or " +
                 "file, picking Found plate.png from the Outside files folder."
         )
@@ -213,8 +213,8 @@ private fun SuiteBuilder.pictureInTable() {
         expected(
             text =
             "The plate shows 80 wide inside its cell, not the text \"80\". The new picture is written inside " +
-                "the cell with its width and the pipe escaped, the row keeps its two columns, and Preview shows the " +
-                "green plate in it."
+                "the cell with its width and the pipe escaped, the row keeps its two columns, and a second click on " +
+                "Source shows the green plate in it."
         )
     }
 }

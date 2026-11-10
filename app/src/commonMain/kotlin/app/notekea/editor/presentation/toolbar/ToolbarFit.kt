@@ -4,9 +4,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Which formatting groups the editor toolbar has room for beside its tabs: all of them, or without the lists and the
- * template ([showsLists]), or the text group only, without the links either ([showsLinks]). What is left out opens
- * from More, so the toolbar always stays one line.
+ * Which formatting groups the editor toolbar has room for beside Source and Find: all of them, or without the lists
+ * and the template ([showsLists]), or the text group only, without the links either ([showsLinks]). What is left out
+ * opens from More, so the toolbar always stays one line.
  */
 enum class ToolbarFit(
     val showsLinks: Boolean,
@@ -26,8 +26,8 @@ enum class ToolbarFit(
     );
 
     companion object {
-        private const val ALL_MIN_WIDTH_DP = 552
-        private const val LINKS_MIN_WIDTH_DP = 452
+        private const val ALL_MIN_WIDTH_DP = 426
+        private const val LINKS_MIN_WIDTH_DP = 326
 
         /** The fit of a toolbar [width] wide. */
         fun of(width: Dp): ToolbarFit = when {

@@ -157,34 +157,18 @@ private fun EditorEffects(
         viewModel.effects.collect { effect ->
             when (effect) {
                 EditorEffect.Closed -> current.onClosed()
-
                 EditorEffect.Flushed -> flushed.trySend(element = Unit)
-
                 is EditorEffect.OpenLink -> current.onOpenLink(effect)
-
                 is EditorEffect.Renamed -> current.onRenamed(effect)
-
                 is EditorEffect.SearchTag -> current.onSearchTag(effect.tag)
-
                 EditorEffect.RequestNoteLink -> current.onRequestNoteLink()
-
                 is EditorEffect.RequestTag -> current.onRequestTag(effect.query)
-
                 EditorEffect.RequestTemplate -> current.onRequestTemplate()
-
                 is EditorEffect.ToggleBookmark -> current.onBookmarkToggle(effect.path)
-
                 is EditorEffect.RevealFolder -> current.onRevealFolder(effect.path)
-
                 is EditorEffect.UnsavedKept -> current.onUnsavedKept(effect)
-
-                EditorEffect.FocusText -> focusText(
-                    requester = textFocusRequester,
-                    isReading = viewModel.state.value.isReading
-                )
-
+                EditorEffect.FocusText -> focusText(requester = textFocusRequester)
                 is EditorEffect.RevealHeading -> currentOnRevealHeading(effect.heading)
-
                 is EditorEffect.DayStep -> current.onDayStep(effect.step)
             }
         }
@@ -192,15 +176,10 @@ private fun EditorEffects(
 }
 
 /**
- * Gives the keyboard to the note's text once the text field that replaced the loading skeleton or Preview is there,
- * which takes more than one frame after leaving Preview. Read mode has no cursor, so nothing takes focus there.
+ * Gives the keyboard to the note's text once the text field that replaced the loading skeleton is there, which takes
+ * more than one frame.
  */
-private suspend fun focusText(
-    requester: FocusRequester,
-    isReading: Boolean
-) {
-    if (isReading) return
-
+private suspend fun focusText(requester: FocusRequester) {
     repeat(times = FOCUS_FRAMES) {
         withFrameNanos { }
 
@@ -214,7 +193,7 @@ private suspend fun focusText(
 
 private const val FOCUS_FRAMES = 5
 
-/** Save, Find in note, Edit / Read and toggling a task work whatever has focus while the editor's pane is active. */
+/** Save, Find in note, Source and toggling a task work whatever has focus while the editor's pane is active. */
 @Composable
 private fun EditorShortcuts(
     platformConventions: PlatformConventions,
@@ -228,8 +207,8 @@ private fun EditorShortcuts(
         onIntent(EditorIntent.OnFindOpen)
     }
 
-    WindowShortcut(shortcut = platformConventions.toggleReadModeShortcut) {
-        onIntent(EditorIntent.OnReadModeToggle)
+    WindowShortcut(shortcut = platformConventions.toggleSourceShortcut) {
+        onIntent(EditorIntent.OnSourceModeToggle)
     }
 
     WindowShortcut(shortcut = platformConventions.toggleTaskShortcut) {

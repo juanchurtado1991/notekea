@@ -21,7 +21,6 @@ import app.notekea.editor.presentation.toolbar.ToolbarSpots.BOLD
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.CALLOUT
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.CHECKLIST
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.CODE_BLOCK
-import app.notekea.editor.presentation.toolbar.ToolbarSpots.EDIT_TAB
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.FIND
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.FOLDED
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.FOUR_BY_THREE
@@ -30,7 +29,6 @@ import app.notekea.editor.presentation.toolbar.ToolbarSpots.KOTLIN
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.MEDIUM_HEADING
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.MORE
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.NOTE_LINK
-import app.notekea.editor.presentation.toolbar.ToolbarSpots.PREVIEW_TAB
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.SOURCE
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.TABLE_ROW
 import app.notekea.editor.presentation.toolbar.ToolbarSpots.TAG
@@ -52,15 +50,12 @@ class EditorToolbarTest {
     @Test
     fun `buttons format, link to a note and insert template ask to choose one, Source and the tabs switch modes`() {
         val intents = clickAll(
-            isReading = false,
             positions = listOf(
                 BOLD,
                 NOTE_LINK,
                 CHECKLIST,
                 TEMPLATE,
                 SOURCE,
-                EDIT_TAB,
-                PREVIEW_TAB,
                 FIND
             )
         )
@@ -72,7 +67,6 @@ class EditorToolbarTest {
                 EditorIntent.OnFormat(action = FormatAction.Checklist(placeholder = "To do")),
                 EditorIntent.OnTemplateRequest,
                 EditorIntent.OnSourceModeToggle,
-                EditorIntent.OnReadModeToggle,
                 EditorIntent.OnFindOpen
             ),
             actual = intents
@@ -82,7 +76,6 @@ class EditorToolbarTest {
     @Test
     fun `code block writes the chosen language, and the table picked on the grid has that size`() {
         val intents = clickAll(
-            isReading = false,
             positions = listOf(MORE, CODE_BLOCK, KOTLIN, MORE, TABLE_ROW, FOUR_BY_THREE)
         )
 
@@ -107,22 +100,8 @@ class EditorToolbarTest {
     }
 
     @Test
-    fun `preview keeps only the tabs and find, and the side panel is left to the tool rail`() {
-        val intents = clickAll(
-            isReading = true,
-            positions = listOf(BOLD, MORE, EDIT_TAB, FIND)
-        )
-
-        assertEquals(
-            expected = listOf(EditorIntent.OnReadModeToggle, EditorIntent.OnFindOpen),
-            actual = intents
-        )
-    }
-
-    @Test
     fun `menus write a heading and a folded callout of the chosen type, and tag asks for the tag picker`() {
         val intents = clickAll(
-            isReading = false,
             positions = listOf(
                 HEADING,
                 MEDIUM_HEADING,
@@ -161,7 +140,6 @@ class EditorToolbarTest {
         val intents = mutableListOf<EditorIntent>()
 
         scene(
-            isReading = false,
             intents = intents
         ) { scene ->
             click(
@@ -199,7 +177,6 @@ class EditorToolbarTest {
         val intents = mutableListOf<EditorIntent>()
 
         scene(
-            isReading = false,
             intents = intents
         ) { scene ->
             scene.sendPointerEvent(
@@ -228,13 +205,12 @@ class EditorToolbarTest {
     }
 
     @Test
-    fun `mouse-selected lines stay selected for a button, a menu and the tabs, which leave the keyboard in the text`() {
+    fun `mouse-selected lines stay selected for a button, a menu and Source, which leave the keyboard in the text`() {
         val intents = mutableListOf<EditorIntent>()
         val buffer = TextFieldState(initialText = BODY)
         val selections = mutableListOf<String>()
 
         scene(
-            isReading = false,
             intents = intents,
             buffer = buffer
         ) { scene ->
@@ -265,7 +241,7 @@ class EditorToolbarTest {
 
             click(
                 scene = scene,
-                position = PREVIEW_TAB
+                position = SOURCE
             )
         }
 
@@ -280,7 +256,7 @@ class EditorToolbarTest {
         assertEquals(
             expected = listOf<EditorIntent>(
                 EditorIntent.OnFormat(action = FormatAction.Checklist(placeholder = "To do")),
-                EditorIntent.OnReadModeToggle
+                EditorIntent.OnSourceModeToggle
             ),
             actual = intents
         )
@@ -291,7 +267,6 @@ class EditorToolbarTest {
         val intents = mutableListOf<EditorIntent>()
 
         scene(
-            isReading = false,
             intents = intents
         ) { scene ->
             click(
@@ -318,7 +293,6 @@ class EditorToolbarTest {
         val intents = mutableListOf<EditorIntent>()
 
         scene(
-            isReading = false,
             intents = intents,
             buffer = TextFieldState(initialText = "# Arepas\n\n- Flour\n- Salt")
         ) { scene ->
@@ -381,14 +355,10 @@ class EditorToolbarTest {
         settle(scene = scene)
     }
 
-    private fun clickAll(
-        isReading: Boolean,
-        positions: List<Offset>
-    ): List<EditorIntent> {
+    private fun clickAll(positions: List<Offset>): List<EditorIntent> {
         val intents = mutableListOf<EditorIntent>()
 
         scene(
-            isReading = isReading,
             intents = intents
         ) { scene ->
             positions.forEach {
@@ -403,7 +373,6 @@ class EditorToolbarTest {
     }
 
     private fun scene(
-        isReading: Boolean,
         intents: MutableList<EditorIntent>,
         buffer: TextFieldState = TextFieldState(initialText = BODY),
         actions: (ImageComposeScene) -> Unit
@@ -416,10 +385,7 @@ class EditorToolbarTest {
             ) {
                 NotekeaTheme(darkTheme = false) {
                     EditorContent(
-                        state = EditorState(
-                            notePath = RelativePath(value = NOTE),
-                            isReading = isReading
-                        ),
+                        state = EditorState(notePath = RelativePath(value = NOTE)),
                         buffer = buffer,
                         platformConventions = PreviewPlatformConventions.linux,
                         onIntent = { intents += it }

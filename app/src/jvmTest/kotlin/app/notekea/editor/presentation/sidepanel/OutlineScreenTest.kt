@@ -57,34 +57,30 @@ class OutlineScreenTest {
     }
 
     @Test
-    fun `a heading asked for is scrolled to the top of the view, in edit and read mode, and becomes the current one`() {
-        val currents = listOf(false, true).map { isReading ->
-            var current = 0
+    fun `a heading asked for is scrolled to the top of the view and becomes the current one`() {
+        var current = 0
 
-            scene(isReading = isReading) { scene, _, tools ->
-                tools.tracker.reveal(heading = outline[3])
-                settle(scene = scene)
+        scene { scene, _, tools ->
+            tools.tracker.reveal(heading = outline[3])
+            settle(scene = scene)
 
-                // A little further down: still in Steps only if Steps was brought to the top.
-                scene.sendPointerEvent(
-                    eventType = PointerEventType.Scroll,
-                    position = TEXT,
-                    scrollDelta = Offset(
-                        x = 0f,
-                        y = 1f
-                    )
+            // A little further down: still in Steps only if Steps was brought to the top.
+            scene.sendPointerEvent(
+                eventType = PointerEventType.Scroll,
+                position = TEXT,
+                scrollDelta = Offset(
+                    x = 0f,
+                    y = 1f
                 )
+            )
 
-                settle(scene = scene)
-                current = tools.tracker.current
-            }
-
-            current
+            settle(scene = scene)
+            current = tools.tracker.current
         }
 
         assertEquals(
-            expected = listOf(3, 3),
-            actual = currents
+            expected = 3,
+            actual = current
         )
     }
 
@@ -128,7 +124,6 @@ class OutlineScreenTest {
     }
 
     private fun scene(
-        isReading: Boolean = false,
         width: Int = WIDE,
         intents: MutableList<EditorIntent> = mutableListOf(),
         actions: (ImageComposeScene, SidePanelHost, EditorPaneTools) -> Unit
@@ -139,7 +134,6 @@ class OutlineScreenTest {
 
         val state = EditorState(
             notePath = RelativePath(value = NOTE),
-            isReading = isReading,
             outline = outline
         )
 

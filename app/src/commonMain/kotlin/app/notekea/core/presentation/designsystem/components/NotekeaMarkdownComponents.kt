@@ -147,7 +147,7 @@ private fun checkBoxesOf(node: ASTNode): List<ASTNode> {
 /**
  * One code block colored by language. The renderer colors every block in the background at the same time, and a
  * highlights builder is mutable: shared by two blocks (or kept while a block's text changes), it mixes their texts and
- * returns color ranges past the end of the code, which crashed Read mode. So each block and text gets its own.
+ * returns color ranges past the end of the code, which crashed the app. So each block and text gets its own.
  */
 @Composable
 private fun HighlightedCode(

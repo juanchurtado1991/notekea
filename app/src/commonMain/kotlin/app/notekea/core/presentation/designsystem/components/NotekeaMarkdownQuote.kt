@@ -170,7 +170,7 @@ private fun calloutColor(kind: CalloutKind): Color {
     }
 }
 
-/** The icon of a callout [kind], in Read mode and in the editor toolbar's Callout menu. */
+/** The icon of a callout [kind], in a drawn note and in the editor toolbar's Callout menu. */
 fun calloutIcon(kind: CalloutKind): ImageVector = when (kind) {
     CalloutKind.NOTE -> NotekeaIcons.CalloutNote
     CalloutKind.ABSTRACT -> NotekeaIcons.CalloutAbstract

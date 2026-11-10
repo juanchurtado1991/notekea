@@ -19,7 +19,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.designsystem.components.NotekeaCompactTabs
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
@@ -28,9 +27,7 @@ import app.notekea.core.presentation.platform.label
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.EditorPreviewData
 import app.notekea.resources.Res
-import app.notekea.resources.editor_edit_mode
 import app.notekea.resources.editor_find
-import app.notekea.resources.editor_preview_mode
 import app.notekea.resources.editor_source
 import app.notekea.resources.format_bold
 import org.jetbrains.compose.resources.StringResource
@@ -39,13 +36,12 @@ import org.jetbrains.compose.resources.stringResource
 private const val PREVIEW_WIDTH_DP = 760
 
 /**
- * The editor toolbar, under the title, always one line: Edit | Preview tabs, the formatting buttons in groups, each
- * with a tooltip and its shortcut, then Source and Find in note at the end. Preview keeps only the tabs and Find.
- * Groups that do not fit move into More (⋯), the lists and the template first, then the links ([ToolbarFit]).
+ * The editor toolbar, under the title, always one line: the formatting buttons in groups, each with a tooltip and its
+ * shortcut, then Source (marked while [isSource]) and Find in note at the end. Groups that do not fit move into More
+ * (⋯), the lists and the template first, then the links ([ToolbarFit]).
  */
 @Composable
 fun EditorToolbar(
-    isReading: Boolean,
     isSource: Boolean,
     platformConventions: PlatformConventions,
     onIntent: (EditorIntent) -> Unit,
@@ -57,39 +53,27 @@ fun EditorToolbar(
         ) {
             val fit = ToolbarFit.of(width = maxWidth)
 
+            // The capsule and the end buttons float a little above the line under the bar.
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Bottom
+                modifier = Modifier.fillMaxWidth().padding(bottom = NotekeaDimensions.SpacingXs),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                ModeTabs(
-                    isReading = isReading,
+                // The buttons stay at the end, where they were beside the Edit and Preview tabs.
+                Spacer(modifier = Modifier.weight(weight = 1f))
+
+                FormattingGroups(
+                    fit = fit,
                     platformConventions = platformConventions,
                     onIntent = onIntent
                 )
 
-                Spacer(modifier = Modifier.weight(weight = 1f))
+                Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingM))
 
-                // The capsule and the end buttons float a little above the line under the bar.
-                Row(
-                    modifier = Modifier.padding(bottom = NotekeaDimensions.SpacingXs),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (!isReading) {
-                        FormattingGroups(
-                            fit = fit,
-                            platformConventions = platformConventions,
-                            onIntent = onIntent
-                        )
-
-                        Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingM))
-                    }
-
-                    EndButtons(
-                        platformConventions = platformConventions,
-                        onIntent = onIntent,
-                        isSource = isSource.takeUnless { isReading }
-                    )
-                }
+                EndButtons(
+                    isSource = isSource,
+                    platformConventions = platformConventions,
+                    onIntent = onIntent
+                )
             }
         }
 
@@ -103,57 +87,35 @@ fun EditorToolbar(
 }
 
 /**
- * Source, marked while the note is shown as written ([isSource]; null in Preview, which has no such button), and Find
- * in note, at the end in both modes; the side panel is shown or hidden from the tool rail.
+ * Source, marked while the note is shown as written ([isSource]), and Find in note, at the end; the side panel is
+ * shown or hidden from the tool rail.
  */
 @Composable
 private fun EndButtons(
+    isSource: Boolean,
     platformConventions: PlatformConventions,
-    onIntent: (EditorIntent) -> Unit,
-    isSource: Boolean?
+    onIntent: (EditorIntent) -> Unit
 ) {
     val operatingSystem = platformConventions.operatingSystem
 
-    if (isSource != null) {
-        ToolbarButton(
-            icon = NotekeaIcons.Source,
-            label = Res.string.editor_source,
-            onClick = { onIntent(EditorIntent.OnSourceModeToggle) },
-            tint = MaterialTheme
-                .colorScheme
-                .primary
-                .takeIf { isSource }
-        )
-    }
+    ToolbarButton(
+        icon = NotekeaIcons.Source,
+        label = Res.string.editor_source,
+        onClick = { onIntent(EditorIntent.OnSourceModeToggle) },
+        shortcutHint = platformConventions
+            .toggleSourceShortcut
+            .label(operatingSystem = operatingSystem),
+        tint = MaterialTheme
+            .colorScheme
+            .primary
+            .takeIf { isSource }
+    )
 
     ToolbarButton(
         icon = NotekeaIcons.Find,
         label = Res.string.editor_find,
         onClick = { onIntent(EditorIntent.OnFindOpen) },
         shortcutHint = platformConventions.findShortcut.label(operatingSystem = operatingSystem)
-    )
-}
-
-/** Edit | Preview, like GitHub's; the tooltip teaches the shortcut that switches them. */
-@Composable
-private fun ModeTabs(
-    isReading: Boolean,
-    platformConventions: PlatformConventions,
-    onIntent: (EditorIntent) -> Unit
-) {
-    NotekeaCompactTabs(
-        labels = listOf(
-            stringResource(resource = Res.string.editor_edit_mode),
-            stringResource(resource = Res.string.editor_preview_mode)
-        ),
-        selectedIndex = if (isReading) 1 else 0,
-        onSelect = { index ->
-            if ((index == 1) != isReading) onIntent(EditorIntent.OnReadModeToggle)
-        },
-        shortcutHint = platformConventions.toggleReadModeShortcut.label(
-            operatingSystem = platformConventions.operatingSystem
-        ),
-        takesFocus = false
     )
 }
 
@@ -181,14 +143,12 @@ private fun EditorToolbarPreview() {
     NotekeaPreviewThemes {
         Column(modifier = Modifier.width(width = PREVIEW_WIDTH_DP.dp)) {
             EditorToolbar(
-                isReading = false,
                 isSource = true,
                 platformConventions = EditorPreviewData.platformConventions,
                 onIntent = {}
             )
 
             EditorToolbar(
-                isReading = true,
                 isSource = false,
                 platformConventions = EditorPreviewData.platformConventions,
                 onIntent = {}

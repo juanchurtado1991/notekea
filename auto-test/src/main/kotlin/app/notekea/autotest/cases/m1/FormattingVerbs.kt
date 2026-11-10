@@ -19,7 +19,7 @@ internal val WIDE_WINDOW = WindowSize(
     height = 900
 )
 
-/** Opens Formatting practice of the Playground Vault in Edit. */
+/** Opens Formatting practice of the Playground Vault. */
 internal fun CaseScope.openFormatting() {
     openPlaygroundNote(
         name = FORMATTING,

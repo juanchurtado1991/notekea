@@ -3,7 +3,7 @@ package app.notekea.editor.presentation.reading
 import app.notekea.core.notes.domain.LinkKind
 
 /**
- * A link clicked in Read mode: to a note of the vault, a `#tag` (searched in all notes), a file embedded in a
+ * A link clicked in a note: to a note of the vault, a `#tag` (searched in all notes), a file embedded in a
  * paragraph, or anything else (a web page, an email address).
  */
 sealed interface ReadLink {

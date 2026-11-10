@@ -16,10 +16,6 @@ internal object ToolbarSpots {
         x = 815f,
         y = 186f
     )
-    val EDIT_TAB = Offset(
-        x = 115f,
-        y = 186f
-    )
     val FIND = Offset(
         x = 1101f,
         y = 186f
@@ -38,10 +34,6 @@ internal object ToolbarSpots {
     )
     val NOTE_LINK = Offset(
         x = 705f,
-        y = 186f
-    )
-    val PREVIEW_TAB = Offset(
-        x = 195f,
         y = 186f
     )
     val TEMPLATE = Offset(

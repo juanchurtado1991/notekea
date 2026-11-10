@@ -6,6 +6,7 @@ import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -26,6 +27,7 @@ import com.testbuddy.isShown
 import java.nio.file.Files
 
 private const val INDEX_READY = "ready to search"
+private const val NOTE_TEXT = "Note text"
 private const val OPEN_FOLDER = "Open folder…"
 private const val FIND_NOTE = "Find a note by name or alias"
 private const val WAIT_MILLIS = 10_000L
@@ -269,6 +271,20 @@ fun CaseScope.noteText(part: String): SemanticsNodeInteraction {
     )
 }
 
+/**
+ * Puts the cursor at the start of the open note, so every block after the first shows as it reads: the block the
+ * cursor is in shows its lines as written.
+ */
+fun CaseScope.cursorToNoteStart() {
+    step(description = "Put the cursor at the note's start")
+
+    ui
+        .onNode(matcher = hasSetTextAction() and hasContentDescription(value = NOTE_TEXT))
+        .performTextInputSelection(selection = TextRange(index = 0))
+
+    ui.waitForIdle()
+}
+
 /** Types [text] at the end of the open note whose text holds [part]. */
 fun CaseScope.typeAtEnd(
     part: String,
@@ -296,7 +312,7 @@ fun CaseScope.titleField(name: String): SemanticsNodeInteraction {
 
 /**
  * Presses [shortcut] as the window gets it: in the app every key reaches the window, in a case only a focused element
- * does, so when nothing has the keyboard (a note in Preview) the window takes it first.
+ * does, so when nothing has the keyboard the window takes it first.
  */
 fun CaseScope.pressInWindow(shortcut: Shortcut) {
     val hasFocus = ui

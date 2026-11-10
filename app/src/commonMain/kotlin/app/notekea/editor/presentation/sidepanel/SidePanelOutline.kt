@@ -98,8 +98,8 @@ internal fun OutlineSection(
 }
 
 /**
- * The headings, indented by their depth. A row a click chose leaves the keyboard where it was (the editor takes it in
- * Edit mode); the keyboard's own row starts at the current heading each time the list takes focus.
+ * The headings, indented by their depth. A row a click chose leaves the keyboard where it was (the editor takes it);
+ * the keyboard's own row starts at the current heading each time the list takes focus.
  */
 @Composable
 private fun OutlineList(

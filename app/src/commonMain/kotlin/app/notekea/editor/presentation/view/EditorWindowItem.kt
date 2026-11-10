@@ -183,7 +183,7 @@ private fun WindowTable(
     onIntent: (EditorIntent) -> Unit
 ) {
     val cell = page.cell
-    val block = page.items.window?.first ?: return
+    val block = page.items.window.first
 
     val text = page.items.textOf(
         text = page.buffer.text,
@@ -275,7 +275,6 @@ private fun EditorWindowItemPreview() {
             buffer = buffer,
             listState = listState,
             focusRequester = FocusRequester(),
-            isReading = { false },
             isSource = { false }
         )
     }

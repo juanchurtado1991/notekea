@@ -12,38 +12,6 @@ class BlockItemsTest {
     private val blocks = NoteBlocks.of(text = text)
 
     @Test
-    fun `without a window every block is an item`() {
-        val items = BlockItems(
-            blocks = blocks,
-            window = null
-        )
-
-        assertEquals(
-            expected = 5,
-            actual = items.count
-        )
-
-        assertEquals(
-            expected = TextRange.Zero,
-            actual = items.shown
-        )
-
-        assertFalse(actual = items.isWindow(item = 0))
-
-        (0 until 5).forEach {
-            assertEquals(
-                expected = it,
-                actual = items.blockOf(item = it)
-            )
-
-            assertEquals(
-                expected = it,
-                actual = items.itemOf(block = it)
-            )
-        }
-    }
-
-    @Test
     fun `the blocks of the window share one item`() {
         val items = BlockItems(
             blocks = blocks,
@@ -88,7 +56,7 @@ class BlockItemsTest {
     fun `a block's text leaves out the line break ending its blank line, but the last block has none`() {
         val items = BlockItems(
             blocks = blocks,
-            window = null
+            window = 0..0
         )
 
         assertEquals(

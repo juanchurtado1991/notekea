@@ -51,7 +51,7 @@ object PreviewPlatformConventions {
             key = ShortcutKey.F,
             modifiers = setOf(ShortcutModifier.CONTROL)
         ),
-        toggleReadModeShortcut = Shortcut(
+        toggleSourceShortcut = Shortcut(
             key = ShortcutKey.E,
             modifiers = setOf(ShortcutModifier.CONTROL)
         ),

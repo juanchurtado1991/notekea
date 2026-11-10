@@ -88,7 +88,6 @@ internal const val SPLIT_TOGGLE = "Hide or show the sidebar"
 internal const val STATUS_INDEXED = "Indexed 1,204 notes"
 internal const val STATUS_MODEL = "Model: ready"
 internal const val STATUS_SYNC = "Sync: conflict"
-internal const val TABS_SHORTCUT = "Ctrl+E"
 internal const val TREE_COUNT_PROJECTS = "12"
 internal const val TREE_FOLDER_GARDEN = "Garden"
 internal const val TREE_FOLDER_PROJECTS = "Projects"
@@ -100,6 +99,5 @@ internal val PALETTE_RESULTS = listOf(
     NOTE_MEETING to NOTE_FOLDER_JOURNAL,
     NOTE_ARCHIVE to null
 )
-internal val SAMPLE_COMPACT_TABS = listOf("Edit", "Preview")
 internal val SAMPLE_DOCUMENTS = listOf("Pricing ideas", "2026-10-23", "Tomato plan")
 internal val SAMPLE_TABS = listOf("Related", "Backlinks", "Outline", "Chat")

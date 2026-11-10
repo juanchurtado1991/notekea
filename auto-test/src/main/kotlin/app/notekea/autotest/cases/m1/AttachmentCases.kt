@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performTextInputSelection
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.compose.ui.text.TextRange
 import app.notekea.autotest.clickInTree
+import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.noteText
 import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
@@ -21,7 +22,7 @@ private const val IMAGES_NOTE = "Images and files"
 private const val IMAGES_FILE = "$PLAYGROUND/Editor/Images and files.md"
 private const val IMAGES_SHOWN = "A picture at its own size"
 
-/** The cases of 1.8 the program checks: embeds in Edit, the attachments folder and notes shown in a note. */
+/** The cases of 1.8 the program checks: embeds as text, the attachments folder and notes shown in a note. */
 fun SuiteBuilder.attachmentCases() {
     embedsInEdit()
     attachmentFiles()
@@ -32,7 +33,7 @@ fun SuiteBuilder.attachmentCases() {
 private fun SuiteBuilder.embedsInEdit() {
     automated(
         id = "1.8-02",
-        title = "Embed lines keep their text in Edit and move with it"
+        title = "Embed lines keep their text and move with it"
     ) {
         openPlaygroundNote(
             name = IMAGES_NOTE,
@@ -124,7 +125,7 @@ private fun SuiteBuilder.embeddedNotes() {
             shownText = IMAGES_SHOWN
         )
 
-        pressInWindow(shortcut = Mod + Key.E)
+        cursorToNoteStart()
 
         scrollTo(
             text = "What the kitchen always needs.",
@@ -144,16 +145,6 @@ private fun SuiteBuilder.embeddedNotes() {
             substring = true
         )
 
-        pressInWindow(shortcut = Mod + Key.E)
-
-        expectText(
-            text = "![[Shopping basics#Dairy]]",
-            substring = true
-        )
-
-        expectText(text = "Shopping basics › Dairy")
-        // Clicked in Preview, which scrolls to the frame as a person would.
-        pressInWindow(shortcut = Mod + Key.E)
         click(text = "Shopping basics › Dairy")
 
         ui.waitUntilAtLeastOneExists(

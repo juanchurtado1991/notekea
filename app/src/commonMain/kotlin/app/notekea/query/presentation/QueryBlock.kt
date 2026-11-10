@@ -34,7 +34,7 @@ private const val PREVIEW_BLOCK = "columns: [author, rating]"
 private const val PREVIEW_SOURCE = "```query\ncolumns: [author, rating]\n```"
 
 /**
- * A `query` block as Preview shows it: the live table of what its [text] finds ([run]), again whenever [notesVersion]
+ * A `query` block as a note shows it: the live table of what its [text] finds ([run]), again whenever [notesVersion]
  * changes, under the query's chips, which are edited as the block's YAML. A block that is not a query says which line
  * cannot be read, above its [source]. Past [MAX_ROWS], the table says how many it leaves out.
  */

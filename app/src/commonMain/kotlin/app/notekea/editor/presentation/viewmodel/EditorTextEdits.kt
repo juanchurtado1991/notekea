@@ -52,7 +52,7 @@ internal class EditorTextEdits(private val host: EditorHost) {
     }
 
     fun toggleTaskAtCursor() {
-        if (host.state.value.isReading || host.state.value.notePath == null) return
+        if (host.state.value.notePath == null) return
 
         val text = host
             .buffer
@@ -67,14 +67,9 @@ internal class EditorTextEdits(private val host: EditorHost) {
 
     /**
      * Applies a toolbar [action] to the selection as one edit (undone in one step, saved like typing), selects what it
-     * says, and gives the keyboard back to the text, which the toolbar button took. Read mode has no formats, but a
-     * link asked for from Related still goes in ([appendLink]).
+     * says, and gives the keyboard back to the text, which the toolbar button took.
      */
     fun format(action: FormatAction) {
-        if (action is FormatAction.NoteLink && host.state.value.isReading) {
-            return appendLink(link = action)
-        }
-
         if (!host.state.value.isEditable) return
         val selection = takePickerSelection()
 
@@ -102,38 +97,6 @@ internal class EditorTextEdits(private val host: EditorHost) {
         }
 
         host.emit(effect = EditorEffect.FocusText)
-    }
-
-    /**
-     * Read mode shows no cursor to insert at, so [link] goes at the end of the note, in a paragraph of its own as the
-     * graph's Link writes it, and the note stays rendered. It is saved like any edit.
-     */
-    private fun appendLink(link: FormatAction.NoteLink) {
-        if (host.state.value.notePath == null || host.state.value.isLoading) return
-
-        val text = host
-            .buffer
-            .text
-            .toString()
-
-        val written = text.trimEnd().length
-
-        val edit = markdownFormatter.format(
-            text = "",
-            selectionStart = 0,
-            selectionEnd = 0,
-            action = link
-        )
-
-        val gap = if (written == 0) "" else StringPatterns.BLANK_LINE
-
-        host.buffer.edit {
-            replace(
-                start = written,
-                end = text.length,
-                text = gap + edit.replacement + NEW_LINE_CHAR
-            )
-        }
     }
 
     /** A key in a list item, as in other editors: the edit replaces what the key would have typed. */

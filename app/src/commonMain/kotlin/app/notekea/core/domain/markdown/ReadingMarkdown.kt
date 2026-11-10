@@ -5,7 +5,7 @@ import app.notekea.core.domain.StringPatterns.NEW_LINE
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 
 /**
- * A note's Markdown prepared for Read mode's renderer: every callout's first line gets an empty quoted line after it,
+ * A note's Markdown prepared for the renderer: every callout's first line gets an empty quoted line after it,
  * so the header is a paragraph of its own ([CalloutParser]), and a task checked with a capital X gets a small one, the
  * only form the renderer checks. Fenced code is left as it is; [unquoted] cleans a block inside quotes.
  */

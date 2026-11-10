@@ -46,7 +46,7 @@ private const val PREVIEW_WIDTH_DP = 760
 /**
  * The note editor: the questions that need an answer on top (outside change, deleted note, failed save), then the
  * note's folder, its title, which renames it, and the body, centred at a readable width; the header scrolls with it.
- * Leaving the text saves at once. Files dropped anywhere on the editor are attached at the cursor, in Edit mode.
+ * Leaving the text saves at once. Files dropped anywhere on the editor are attached at the cursor.
  */
 @Composable
 fun EditorContent(
@@ -70,7 +70,6 @@ fun EditorContent(
             buffer = buffer,
             listState = listState,
             focusRequester = focusRequester,
-            isReading = { currentState.value.isReading },
             isSource = { currentState.value.isSourceMode }
         )
     }
@@ -240,12 +239,6 @@ private fun EditorContentFindPreview() {
             )
         )
     )
-}
-
-@Preview
-@Composable
-private fun EditorContentReadingPreview() {
-    EditorPreviewFrame(state = EditorPreviewData.state().copy(isReading = true))
 }
 
 @Preview

@@ -34,7 +34,7 @@ fun SuiteBuilder.outlineCases() {
     outlineLists()
     outlineClick()
     outlineHighlight()
-    outlineInPreview()
+    outlineInSource()
     outlineKeyboard()
     sidePanelHides()
     narrowSidePanel()
@@ -113,10 +113,10 @@ private fun SuiteBuilder.outlineHighlight() {
     }
 }
 
-private fun SuiteBuilder.outlineInPreview() {
+private fun SuiteBuilder.outlineInSource() {
     automated(
         id = "1.9-04",
-        title = "The outline works in Preview too"
+        title = "The outline works in Source too"
     ) {
         openPlaygroundNote(
             name = OUTLINE_NOTE,

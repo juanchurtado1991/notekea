@@ -35,7 +35,7 @@ private const val SWITCH_VAULT = "Open another vault"
 /**
  * The steps of a memory run, each followed by a sample of [run]'s memory named after it: open the
  * [notes] (name to a text it shows) in tabs and close them, search the notes' text for [search] (a word to a result it
- * shows), scroll [longNote] to its end in Edit and Preview, stay idle, then leave the vault and open it again.
+ * shows), scroll [longNote] to its end as it reads and in Source, stay idle, then leave the vault and open it again.
  */
 internal fun ComposeUiTest.measureVault(
     app: SmokeRunApp,
@@ -150,7 +150,7 @@ internal fun ComposeUiTest.searchText(
     focusWindow(app = app)
 }
 
-/** Opens [name], scrolls it to [end] in Edit, then in Preview (`Mod+E`), with a sample after each. */
+/** Opens [name], scrolls it to [end] as it reads, then as written in Source (`Mod+E`), with a sample after each. */
 private fun ComposeUiTest.scrollLongNote(
     run: String,
     name: String,
@@ -165,22 +165,23 @@ private fun ComposeUiTest.scrollLongNote(
 
     SmokeRunReport.sample(
         run = run,
-        moment = "long-note-edit"
+        moment = "long-note"
     )
 
     pressShortcut(key = Key.E)
     waitForIdle()
-    scrollDownTo(end = end)
+    // Source draws no block: the note is one text field, scrolled as far as the drawn note was.
+    repeat(times = SCROLL_STEPS) { scrollDown() }
 
     SmokeRunReport.sample(
         run = run,
-        moment = "long-note-preview"
+        moment = "long-note-source"
     )
 }
 
 /**
- * Turns the mouse wheel over the middle of the window, where the note is, until the note draws [end], its last line:
- * the text field always holds the whole note, so only a drawn text says the end is on screen.
+ * Turns the mouse wheel until the note draws [end], its last line: the text field always holds the whole note, so
+ * only a drawn text says the end is on screen.
  */
 private fun ComposeUiTest.scrollDownTo(end: String) {
     val drawn = SemanticsMatcher(description = "draws \"$end\"") { node ->
@@ -193,24 +194,29 @@ private fun ComposeUiTest.scrollDownTo(end: String) {
     repeat(times = SCROLL_STEPS) {
         if (onAllNodes(matcher = drawn).fetchSemanticsNodes().isNotEmpty()) return
 
-        window().performMouseInput {
-            moveTo(
-                position = Offset(
-                    x = width * 0.6f,
-                    y = height * 0.5f
-                )
-            )
-
-            scroll(delta = SCROLL_TICKS)
-        }
-
-        waitForIdle()
+        scrollDown()
     }
 
     waitUntilAtLeastOneExists(
         matcher = drawn,
         timeoutMillis = END_MILLIS
     )
+}
+
+/** One turn of the mouse wheel over the middle of the window, where the note is. */
+private fun ComposeUiTest.scrollDown() {
+    window().performMouseInput {
+        moveTo(
+            position = Offset(
+                x = width * 0.6f,
+                y = height * 0.5f
+            )
+        )
+
+        scroll(delta = SCROLL_TICKS)
+    }
+
+    waitForIdle()
 }
 
 /** Closes every tab with its close button, then gives the focus back to the window; fails if a tab stays open. */

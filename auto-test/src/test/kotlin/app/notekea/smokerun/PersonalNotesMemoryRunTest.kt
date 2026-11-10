@@ -5,8 +5,8 @@ import java.io.File
 import kotlin.test.Test
 
 /**
- * The memory run of Personal Notes: every note opened in tabs and closed, a long note scrolled in
- * Edit and Preview, the app idle, and the vault left and opened again. Run in a JVM of its own by `smokeRun`.
+ * The memory run of Personal Notes: every note opened in tabs and closed, a long note scrolled as it reads
+ * and in Source, the app idle, and the vault left and opened again. Run in a JVM of its own by `smokeRun`.
  */
 @OptIn(ExperimentalTestApi::class)
 class PersonalNotesMemoryRunTest {

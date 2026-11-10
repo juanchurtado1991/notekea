@@ -4,6 +4,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.hasText
+import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.expectOrderOnScreen
 import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.waitForResult
@@ -44,6 +45,7 @@ private fun SuiteBuilder.toolbarButtons() {
         )
             .forEach { expectLabel(label = it) }
 
+        expectLabel(label = "Source: the note as written")
         expectLabel(label = "Find in note")
         clickIcon(label = "More")
 
@@ -53,21 +55,6 @@ private fun SuiteBuilder.toolbarButtons() {
         ).forEach { expectText(text = it) }
 
         press(key = Key.Escape)
-        click(text = "Preview")
-
-        expectNoText(
-            text = "Weekend arepas\n",
-            substring = true
-        )
-
-        ui
-            .waitUntil(timeoutMillis = 10_000) {
-                !hasLabel(label = "Bold")
-            }
-
-        expectLabel(label = "Find in note")
-        pressInWindow(shortcut = Mod + Key.E)
-        expectLabel(label = "Bold")
     }
 }
 
@@ -166,14 +153,8 @@ private fun SuiteBuilder.noteLink() {
         expectNoText(text = "Choose a note to link")
         type(text = " hot")
         expectInNote(text = "[[Café con leche|coffee]] hot")
-        pressInWindow(shortcut = Mod + Key.E)
-
-        // Wait for Preview before clicking the link: until it shows, the words are the editor's text, not a link.
-        expectNoText(
-            text = "[[Café con leche|coffee]]",
-            substring = true
-        )
-
+        // In the cursor's block the words are the editor's text, not a link.
+        cursorToNoteStart()
         clickWords(words = "coffee")
         tab(name = "Café con leche")
     }
