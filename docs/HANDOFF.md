@@ -33,9 +33,27 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
   (`docs/spikes/2026-11-08-model-tournament.md`) kept Qwen3.5 2B, 4B and 9B against five other open models. On 8 GB,
   Small answers with its sources first and a line asking to check them (decided 2026-11-08, in 3.3). **3.1 Model
   manager** (#132) is done: Settings → AI model downloads the recommended size and the reranker from pinned Hugging
-  Face commits, checked by SHA-256, into the app data's `models` folder (`app.notekea.ai`). Next: 3.2 Chat engine,
-  which reads the model in use from `ActiveModelStore` and must fit chatting with the Small model under 2.5 GB (the
-  spike's estimate is 2.7–3.0 GB).
+  Face commits, checked by SHA-256, into the app data's `models` folder (`app.notekea.ai`).
+  **3.2 to 3.9 in one pull request** (decided with the developer on 2026-11-10), on `feature/m3-chat` from `main`,
+  one commit or more per item, in this order: 3.2 Chat engine, 3.4 Answer evaluation, 3.3 Chat panel, 3.5 Answer
+  pipeline, 3.6 Deep answer, 3.8 Questions in plain words, 3.9 Actions from chat, 3.7 M3 performance pass. The
+  developer took every decision up front so the work runs without stopping; a smoke list and the pull request come at
+  the end, after `./gradlew check koverVerify` and a code review. Decisions:
+  - **Chat panel: design A, conversation:** the question on the right, the answer on the left with citation chips
+    `[1]`, its sources listed under it; the scope above the messages, Deep answer beside the send button. With the
+    Small model the sources come first, as decided on 2026-11-08.
+  - **3.9: every action of the roadmap but clipping a web page**, which waits for 4.4: read and find, the app's
+    actions (Edit and Preview are gone: the chat turns Source on and off), writing, organizing (rename, move, trash,
+    up to 50 notes), one confirmation card for the plan and one undo.
+  - **A step that does not beat the baseline is dropped:** each step of 3.5 and Deep answer (3.6) is measured with
+    the 3.4 set against the single call of 3.2; what does not help is not shipped (no dead code), the numbers go
+    into the spike's document and the roadmap item says why. Deep answer is offered only for the sizes it helps, and
+    not at all if it helps none.
+  - **Memory:** if chatting with the Small model cannot get under 2.5 GB, 3.7 records how close it got in
+    `docs/performance.md` and the gap goes to 5.4; the pull request is not held for it.
+  - **Models and measures:** the files already downloaded for the tournament (`~/.cache/notekea-spike/models`:
+    Qwen3.5 2B, 4B and 9B Q4_K_M and bge-reranker-v2-m3), on this Linux machine (RTX 5060 Ti 16 GB, and CPU only);
+    no new downloads. Windows and macOS are measured in the release run. Evaluation runs by hand, never in CI.
 
 ## Open work, in order
 
