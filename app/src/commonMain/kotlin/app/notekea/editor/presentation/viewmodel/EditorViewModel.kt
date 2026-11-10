@@ -135,6 +135,8 @@ class EditorViewModel(
 
             is EditorIntent.OnListKey -> textEdits.editList(action = intent.action)
 
+            is EditorIntent.OnTableEdit -> textEdits.editTable(action = intent.action)
+
             EditorIntent.OnNoteLinkRequest -> textEdits.requestPicker(
                 effect = EditorEffect.RequestNoteLink
             )

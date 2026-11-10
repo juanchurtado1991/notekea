@@ -31,10 +31,18 @@ internal class EditorKeys(
     private val onIntent: (EditorIntent) -> Unit
 ) {
     private val listEditing = ListEditing()
+
+    private val cellKeys = CellKeys(
+        page = page,
+        onIntent = onIntent
+    )
+
     private val isMac = platformConventions.primaryModifier == ShortcutModifier.COMMAND
 
     /** False for the text field to handle the key. */
     fun onKey(event: KeyEvent): Boolean {
+        if (cellKeys.onKey(event = event)) return true
+
         val intent = formatShortcut(event = event) ?: listKey(event = event)
 
         if (intent != null) {
@@ -141,7 +149,7 @@ internal class EditorKeys(
     ): Int? {
         val selection = page.buffer.selection
         val length = page.buffer.text.length
-        val shown = page.items.shown
+        val shown = page.fieldRange
 
         val before = (shown.min - 1).takeIf {
             it >= 0
@@ -199,7 +207,7 @@ internal class EditorKeys(
     /** Backspace at the start of the shown blocks and Delete at their end remove the line break across the edge. */
     private fun deleteAcross(event: KeyEvent): Boolean {
         val selection = page.buffer.selection
-        val shown = page.items.shown
+        val shown = page.fieldRange
 
         val isPlain =
             !event.isCtrlPressed &&

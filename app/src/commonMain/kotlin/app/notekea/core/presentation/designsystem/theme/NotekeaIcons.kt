@@ -11,6 +11,10 @@ import com.composables.icons.lucide.ArrowDown
 import com.composables.icons.lucide.ArrowDownAZ
 import com.composables.icons.lucide.ArrowUp
 import com.composables.icons.lucide.ArrowUpDown
+import com.composables.icons.lucide.BetweenHorizontalEnd
+import com.composables.icons.lucide.BetweenHorizontalStart
+import com.composables.icons.lucide.BetweenVerticalEnd
+import com.composables.icons.lucide.BetweenVerticalStart
 import com.composables.icons.lucide.Binary
 import com.composables.icons.lucide.Bold
 import com.composables.icons.lucide.BookOpen
@@ -86,7 +90,12 @@ import com.composables.icons.lucide.SquareCode
 import com.composables.icons.lucide.Star
 import com.composables.icons.lucide.Sun
 import com.composables.icons.lucide.Table
+import com.composables.icons.lucide.TableColumnsSplit
 import com.composables.icons.lucide.TableProperties
+import com.composables.icons.lucide.TableRowsSplit
+import com.composables.icons.lucide.TextAlignCenter
+import com.composables.icons.lucide.TextAlignEnd
+import com.composables.icons.lucide.TextAlignStart
 import com.composables.icons.lucide.TextQuote
 import com.composables.icons.lucide.TextSearch
 import com.composables.icons.lucide.Trash2
@@ -222,6 +231,15 @@ object NotekeaIcons {
     val SortByModified: ImageVector get() = Lucide.ClockArrowDown
     val SortByName: ImageVector get() = Lucide.ArrowDownAZ
     val Table: ImageVector get() = Lucide.Table
+    val AlignCenter: ImageVector get() = Lucide.TextAlignCenter
+    val AlignLeft: ImageVector get() = Lucide.TextAlignStart
+    val AlignRight: ImageVector get() = Lucide.TextAlignEnd
+    val ColumnLeft: ImageVector get() = Lucide.BetweenVerticalStart
+    val ColumnRight: ImageVector get() = Lucide.BetweenVerticalEnd
+    val DeleteColumn: ImageVector get() = Lucide.TableColumnsSplit
+    val DeleteRow: ImageVector get() = Lucide.TableRowsSplit
+    val RowAbove: ImageVector get() = Lucide.BetweenHorizontalStart
+    val RowBelow: ImageVector get() = Lucide.BetweenHorizontalEnd
     val QueryColumns: ImageVector get() = Lucide.Columns3
     val QuerySave: ImageVector get() = Lucide.FilePlus
     val QuerySort: ImageVector get() = Lucide.ArrowUpDown

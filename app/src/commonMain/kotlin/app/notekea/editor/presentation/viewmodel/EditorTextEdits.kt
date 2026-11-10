@@ -5,21 +5,25 @@ import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.TaskFinder
+import app.notekea.core.notes.domain.TextEdit
 import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.domain.ListAction
 import app.notekea.editor.domain.ListEditing
 import app.notekea.editor.domain.MarkdownFormatter
+import app.notekea.editor.domain.TableAction
+import app.notekea.editor.domain.TableEditing
 import app.notekea.editor.presentation.model.EditorEffect
 
 /**
  * The edits the editor makes to the text itself, each one edit undone in one step and saved like typing: a task
- * checked or unchecked, a toolbar format, a key in a list, and the selection kept
+ * checked or unchecked, a toolbar format, a key in a list, a table's change, and the selection kept
  * while a picker (a note to link, a tag, a template, a file) has the keyboard, so what it chooses goes there.
  */
 internal class EditorTextEdits(private val host: EditorHost) {
     private val taskFinder = TaskFinder()
     private val markdownFormatter = MarkdownFormatter()
     private val listEditing = ListEditing()
+    private val tableEditing = TableEditing()
 
     // The selection when a picker took the keyboard, which clears it in the text field: what is chosen formats it,
     // and closing the picker puts it back.
@@ -147,6 +151,26 @@ internal class EditorTextEdits(private val host: EditorHost) {
             action = action
         ) ?: return
 
+        write(edit = edit)
+    }
+
+    /** A table changed from the cursor's cell: a row or a column added or deleted, a column aligned. */
+    fun editTable(action: TableAction) {
+        if (!host.state.value.isEditable) return
+
+        val edit = tableEditing.edit(
+            text = host
+                .buffer
+                .text
+                .toString(),
+            cursor = host.buffer.selection.end,
+            action = action
+        ) ?: return
+
+        write(edit = edit)
+    }
+
+    private fun write(edit: TextEdit) {
         host.buffer.edit {
             replace(
                 start = edit.start,
@@ -154,7 +178,7 @@ internal class EditorTextEdits(private val host: EditorHost) {
                 text = edit.replacement
             )
 
-            this.selection = TextRange(
+            selection = TextRange(
                 start = edit.selectionStart,
                 end = edit.selectionEnd
             )

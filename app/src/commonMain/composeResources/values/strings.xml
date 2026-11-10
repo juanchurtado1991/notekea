@@ -601,6 +601,15 @@
     <string name="tasks_when_today">Today</string>
     <string name="tasks_write_failed">That note changed, so the task was left as it was.</string>
     <string name="tab_query">Query</string>
+    <string name="table_align_center">Align column center</string>
+    <string name="table_align_left">Align column left</string>
+    <string name="table_align_right">Align column right</string>
+    <string name="table_column_left">Insert column left</string>
+    <string name="table_column_right">Insert column right</string>
+    <string name="table_delete_column">Delete column</string>
+    <string name="table_delete_row">Delete row</string>
+    <string name="table_row_above">Insert row above</string>
+    <string name="table_row_below">Insert row below</string>
     <string name="models_cancel">Cancel</string>
     <string name="models_checking">Checking this computer…</string>
     <string name="models_delete">Delete</string>
