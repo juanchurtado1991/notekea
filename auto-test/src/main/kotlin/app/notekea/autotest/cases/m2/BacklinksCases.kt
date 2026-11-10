@@ -1,11 +1,18 @@
 package app.notekea.autotest.cases.m2
 
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelected
+import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import app.notekea.autotest.openNote
 import app.notekea.autotest.openVault
+import com.testbuddy.CaseFailure
+import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val SAMPLE = "Sample Vault"
+private const val TAB_CLICKS = 3
+private const val TAB_MILLIS = 2_000L
 private const val AREPAS = "Arepas"
 private const val AREPAS_TEXT = "pre-cooked corn flour"
 private const val TASKS_LINE = "Buy flour for the arepas"
@@ -37,7 +44,7 @@ private fun SuiteBuilder.linkedMentions() {
             shownText = AREPAS_TEXT
         )
 
-        click(text = "Linked")
+        openConnections(tab = "Linked")
         // Weekly menu links to Arepas and embeds its ^dough block; Embeds embeds its Ingredients heading.
         expectText(text = "Recipes · 2 mentions")
 
@@ -68,7 +75,7 @@ private fun SuiteBuilder.linkUnlinked() {
             shownText = AREPAS_TEXT
         )
 
-        click(text = "Unlinked")
+        openConnections(tab = "Unlinked")
 
         expectText(
             text = TASKS_LINE,
@@ -82,13 +89,37 @@ private fun SuiteBuilder.linkUnlinked() {
             containing = "Buy flour for the [[Arepas|arepas]]"
         )
 
-        click(text = "Linked")
+        openConnections(tab = "Linked")
 
         expectText(
             text = "Buy flour for the arepas",
             substring = true
         )
     }
+}
+
+/**
+ * Clicks a [tab] of Connections until it is the selected one. The panel's sections still move while the note's
+ * outline and counts come in, and a press that lands while they move takes the focus but selects nothing: macOS's
+ * runner failed 2.5-01 and 2.5-02 that way, on Related with the focus on the tab clicked.
+ */
+private fun CaseScope.openConnections(tab: String) {
+    val selected = hasText(text = tab) and isSelected()
+
+    repeat(times = TAB_CLICKS) {
+        click(text = tab)
+
+        val isOpen = runCatching {
+            ui.waitUntilAtLeastOneExists(
+                matcher = selected,
+                timeoutMillis = TAB_MILLIS
+            )
+        }.isSuccess
+
+        if (isOpen) return
+    }
+
+    throw CaseFailure(message = "expected the $tab tab of Connections to open, it stayed closed")
 }
 
 private fun SuiteBuilder.rightClickMenus() {
