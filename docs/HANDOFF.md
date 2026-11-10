@@ -15,7 +15,10 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
   chunking (#108), 2.2 Embedding engine (#109), 2.3 Hybrid index (#110), 2.4 Related notes panel (#111) and **2.5
   Backlinks** (#112) are done; Workspace Blue is the default theme (#113). `notes` was split into features (#118), and
   **2.6 Hybrid search** (#120), the eight hand-tuned themes (#123) and **2.7 Graph view** (#122) are done. **2.10
-  Vault queries** (#124) are done. **2.11 Vault tasks** (#125, a grouped list, as Reminders) is done. **2.8 Retrieval
+  Vault queries** (#124) are done. **2.11 Vault tasks** (#125, a grouped list, as Reminders) is done; on
+  branch `feature/tasks-view-cards` (from `feature/one-editing-mode`, to open as its own pull request after that
+  one) its groups are cards, the design the developer chose on 2026-11-10 (`TaskCards.kt`: each piece of a card is
+  one item of the lazy list). **2.8 Retrieval
   evaluation set** (#126) is done: recall@5 measures 0.94 and 0.90 against baselines of 0.92 and 0.86. **2.13 Packaged
   check** (#127) is done: the nightly installs and starts the app on the three systems. **2.9 M2 performance pass**
   (#128) is done: the app moved to `net.ladenthin:llama`, because java-llama.cpp 4.2.0 leaked each model it loaded;

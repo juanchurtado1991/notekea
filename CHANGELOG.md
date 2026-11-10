@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   note, a tag, a checklist or a bulleted list.
 - In the tree, mentions and related notes, the Home note at the vault's root has a house and the vault's templates
   have the template icon in their folder's color.
+- The Tasks tab shows each note, or each date, as a card: a note's card has its icon, its folder and a bar of how many
+  of its tasks are done, and a late date is red.
 - Tables are edited by cells: the table stays drawn while the cursor is in a cell, Tab and Enter move between cells
   (Tab on the last one adds a row), and a bar over the table, also on the right click, inserts and deletes rows and
   columns and aligns a column. Tables draw their columns left, centered or right as their delimiter row says.

@@ -489,9 +489,10 @@ The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly: `
 |---|---|---|---|---|---|---|---|---|
 | 2.11-01 | In Sample Vault, click Tasks in the rail | The Tasks tab opens, grouped by note, and its foot counts every task of the vault | 2.11 | Auto-Test | 2.11-01 | | | |
 | 2.11-02 | Click By date; click Show done; click Folder and choose Projects | Overdue, This week or Later and No date in order, with Write the announcement and Book the flights dated; a Done group last; only the tasks of Projects, and the foot counts them | 2.11 | Auto-Test | 2.11-02 | | | |
-| 2.11-03 | Check Record a demo video in the tab; click Show done and uncheck it | It leaves the list at once and its note holds `- [x] Record a demo video`; unchecked, its note holds `- [ ]` again and Hide done lists it | 2.11 | Auto-Test | 2.11-03 | | | |
+| 2.11-03 | Click Folder and choose Projects; check Record a demo video in the tab; click Show done and uncheck it | It leaves the list at once and its note holds `- [x] Record a demo video`; unchecked, its note holds `- [ ]` again and Hide done lists it | 2.11 | Auto-Test | 2.11-03 | | | |
 | 2.11-04 | Change a task's text in another editor and save | The tab shows the new text within a second | 2.11 | Manual (system) | `NoteTaskCollectorTest` | | | |
 | 2.11-05 | Click the text of Find a flat near the river | Projects/Trip to Lisbon opens with that task selected | 2.11 | Auto-Test | 2.11-05 | | | |
+| 2.11-06 | In Sample Vault, click Tasks in the rail and look at the tab; click Show done; click By date | Each note is a card on a soft background: its icon in its folder's color, its name, its folder, and a bar with "N of M done" at the card's end, which counts the done tasks even while they are hidden; under it its tasks, a late date in red and today's in the theme's color. By date each group (Overdue in red, Today in the theme's color) is a card with its count, and each task names its note | 2.11 | Manual (eyes) | `ListTasksUseCaseTest` | | | |
 
 ## M3 — Chat with citations
 

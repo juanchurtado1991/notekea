@@ -1,16 +1,18 @@
 package app.notekea.tasks.presentation
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.domain.time.MomentFormat
 import app.notekea.core.presentation.designsystem.components.EmptyState
@@ -70,10 +73,12 @@ import app.notekea.tasks.domain.TaskView
 import app.notekea.tasks.domain.TaskWhen
 import org.jetbrains.compose.resources.stringResource
 
-private const val SHORT_DATE = "MMM D"
+private const val CARD_MAX_WIDTH_DP = 760
+private const val HEAD = "head"
+private const val ROW = "row"
 
 /**
- * The Tasks tab: the vault's open tasks in groups, by note or by date, with what limits
+ * The Tasks tab: the vault's open tasks in cards, one per note or per date ([TaskCardHead]), with what limits
  * them above and how many at the foot. A box checks its task in its note, and a task's text opens it there.
  */
 @Composable
@@ -248,21 +253,36 @@ private fun TaskGroups(
     ) {
         LazyColumn(
             state = scroll,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.surfaceVariant),
+            contentPadding = PaddingValues(all = NotekeaDimensions.SpacingM),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             list.groups.forEach { group ->
-                item(key = keyOf(group = group)) { GroupHeader(group = group) }
-
-                items(
-                    items = group.rows,
-                    key = {
-                        it.path.value + it.task.stateIndex
-                    }
-                ) { row ->
-                    TaskLine(
-                        row = row,
+                item(
+                    key = keyOf(group = group),
+                    contentType = HEAD
+                ) {
+                    TaskCardHead(
                         group = group,
-                        onIntent = onIntent
+                        modifier = Modifier.widthIn(max = CARD_MAX_WIDTH_DP.dp)
+                    )
+                }
+
+                itemsIndexed(
+                    items = group.rows,
+                    key = { _, row ->
+                        row.path.value + row.task.stateIndex
+                    },
+                    contentType = { _, _ -> ROW }
+                ) { index, row ->
+                    TaskCardRow(
+                        row = row,
+                        isInNote = group is TaskGroup.OfNote,
+                        isLast = index == group.rows.lastIndex,
+                        onIntent = onIntent,
+                        modifier = Modifier.widthIn(max = CARD_MAX_WIDTH_DP.dp)
                     )
                 }
             }
@@ -273,131 +293,6 @@ private fun TaskGroups(
 private fun keyOf(group: TaskGroup): String = when (group) {
     is TaskGroup.OfNote -> group.path.value
     is TaskGroup.OfDate -> group.date.name
-}
-
-@Composable
-private fun GroupHeader(group: TaskGroup) {
-    val isOverdue = (group as? TaskGroup.OfDate)?.date == TaskWhen.OVERDUE
-    val colors = MaterialTheme.colorScheme
-
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(
-            start = NotekeaDimensions.SpacingM,
-            end = NotekeaDimensions.SpacingM,
-            top = NotekeaDimensions.SpacingS,
-            bottom = NotekeaDimensions.SpacingXs
-        ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = groupTitle(group = group),
-            modifier = Modifier.weight(weight = 1f),
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = if (isOverdue) colors.error else colors.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Text(
-            text = group
-                .rows
-                .size
-                .toString(),
-            style = MaterialTheme.typography.labelSmall,
-            color = colors.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun groupTitle(group: TaskGroup): String = when (group) {
-    is TaskGroup.OfNote -> group.path.nameWithoutExtension
-
-    is TaskGroup.OfDate -> {
-        val titleResource = when (group.date) {
-            TaskWhen.OVERDUE -> Res.string.tasks_when_overdue
-            TaskWhen.TODAY -> Res.string.tasks_when_today
-            TaskWhen.THIS_WEEK -> Res.string.tasks_when_this_week
-            TaskWhen.LATER -> Res.string.tasks_when_later
-            TaskWhen.NO_DATE -> Res.string.tasks_when_no_date
-            TaskWhen.DONE -> Res.string.tasks_when_done
-        }
-
-        stringResource(resource = titleResource)
-    }
-}
-
-/** A task: its box, its text, which opens it, its date, and where it is: its heading, or its note in a date's group. */
-@Composable
-private fun TaskLine(
-    row: TaskRow,
-    group: TaskGroup,
-    onIntent: (TasksIntent) -> Unit
-) {
-    val task = row.task
-    val colors = MaterialTheme.colorScheme
-    val isOverdue = (group as? TaskGroup.OfDate)?.date == TaskWhen.OVERDUE
-    val place = if (group is TaskGroup.OfDate) row.path.nameWithoutExtension else task.heading
-
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(
-            horizontal = NotekeaDimensions.SpacingM,
-            vertical = NotekeaDimensions.SpacingXs
-        ),
-        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        NotekeaCheckbox(
-            checked = task.isDone,
-            onClick = { onIntent(TasksIntent.OnTaskToggle(row = row)) },
-            label = stringResource(resource = Res.string.tasks_done_label, task.text)
-        )
-
-        Text(
-            text = task.text,
-            modifier = Modifier
-                .weight(weight = 1f)
-                .pointerHoverIcon(icon = PointerIcon.Hand)
-                .clickable(role = Role.Button) { onIntent(TasksIntent.OnTaskOpen(row = row)) },
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (task.isDone) colors.onSurfaceVariant else colors.onSurface,
-            textDecoration = if (task.isDone) TextDecoration.LineThrough else null,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        task.date?.let { date ->
-            TaskDetail(
-                text = MomentFormat().format(
-                    moment = LocalMoment(date = date),
-                    pattern = SHORT_DATE
-                ),
-                color = if (isOverdue) colors.error else colors.onSurfaceVariant
-            )
-        }
-
-        place?.let {
-            TaskDetail(
-                text = it,
-                color = colors.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun TaskDetail(
-    text: String,
-    color: Color
-) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        color = color,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
-    )
 }
 
 @Composable

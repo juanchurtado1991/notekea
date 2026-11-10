@@ -40,6 +40,26 @@ class ListTasksUseCaseTest {
     }
 
     @Test
+    fun `a note's card counts its done tasks though they are hidden, and each task knows when it is due`() {
+        val launch = list(TaskView(), NOTES, TODAY).groups.first() as TaskGroup.OfNote
+
+        assertEquals(
+            expected = Triple(
+                1,
+                6,
+                listOf(
+                    TaskWhen.OVERDUE,
+                    TaskWhen.TODAY,
+                    TaskWhen.THIS_WEEK,
+                    TaskWhen.LATER,
+                    TaskWhen.NO_DATE
+                )
+            ),
+            actual = Triple(launch.done, launch.total, launch.rows.map { it.due })
+        )
+    }
+
+    @Test
     fun `by date splits overdue, today, this week, later and no date, with the done ones last`() {
         val result = list(
             TaskView(

@@ -6,7 +6,13 @@ import app.notekea.core.notes.domain.RelativePath
 sealed interface TaskGroup {
     val rows: List<TaskRow>
 
-    data class OfNote(val path: RelativePath, override val rows: List<TaskRow>) : TaskGroup
+    /** A note's tasks in view: [done] of its [total] are checked, whether or not the done ones are among [rows]. */
+    data class OfNote(
+        val path: RelativePath,
+        override val rows: List<TaskRow>,
+        val done: Int,
+        val total: Int
+    ) : TaskGroup
 
     data class OfDate(val date: TaskWhen, override val rows: List<TaskRow>) : TaskGroup
 }
