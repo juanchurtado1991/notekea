@@ -3,6 +3,7 @@ package app.notekea.chat.presentation
 import app.notekea.chat.domain.AnswerSource
 import app.notekea.chat.domain.ChatError
 import app.notekea.chat.domain.ChatScope
+import app.notekea.chat.domain.ReplyLanguage
 import app.notekea.chat.domain.TurnOutcome
 
 /**
@@ -23,5 +24,8 @@ data class ChatEntry(
     val error: ChatError?,
     val action: ChatAction? = null
 ) {
+    /** The language the chat replies to it in: the question's. */
+    val language: ReplyLanguage get() = ReplyLanguage.of(text = question)
+
     val isAnswering: Boolean get() = outcome == null
 }

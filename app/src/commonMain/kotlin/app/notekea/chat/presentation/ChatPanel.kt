@@ -280,19 +280,25 @@ private fun DeepAnswerToggle(
             label = label
         )
 
-        Column {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+        // One line whatever the panel's width: the hint gives way first.
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1
+        )
 
-            Text(
-                text = stringResource(resource = Res.string.chat_deep_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        Text(
+            text = stringResource(resource = Res.string.chat_deep_hint),
+            modifier = Modifier.weight(
+                weight = 1f,
+                fill = false
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 

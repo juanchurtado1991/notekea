@@ -26,7 +26,7 @@ private fun SuiteBuilder.deepAnswer() {
         prepare(PLAYGROUND)
         title(text = "Deep answer writes drafts and shows one answer, only with Medium")
         steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with Medium in use (Settings → AI model).\n2. Press Ctrl+L (Cmd+L on macOS), tick Deep answer under the question field and ask How much water does the arepa dough take?\n3. Ask another question with Deep answer on and press Esc while it is prepared.\n4. Switch to Small in Settings → AI model and look under the question field.")
-        expected(text = "Step 2 shows Writing drafts and comparing them…, then the whole answer at once with its citations. Step 3 stops it, marked Stopped. In step 4 the Deep answer box is gone.")
+        expected(text = "Deep answer and its hint fit on one line. Step 2 shows Writing drafts and comparing them…, then the whole answer at once with its citation. Step 3 stops it, marked Stopped. In step 4 the Deep answer box is gone.")
     }
 }
 
@@ -36,9 +36,9 @@ private fun SuiteBuilder.describeQuery() {
         reason = ManualReason.COSTLY
     ) {
         prepare(PLAYGROUND)
-        title(text = "The Query tab fills its rules from plain words")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use.\n2. Open the Query tab (the table icon on the narrow bar on the left).\n3. Type books I rated 4 or more in Describe what you want and press Enter.\n4. Type books by stars and press Enter.")
-        expected(text = "Step 3 sets the rule rating more than 3 and the table lists the books rated 4 and 5; the rule can be changed by hand. Step 4 says that no note has a property stars and names the closest ones; the rules stay as they were.")
+        title(text = "The Query tab fills its rules from plain words, in English or Spanish")
+        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use.\n2. Open the Query tab (the table icon on the narrow bar on the left).\n3. Type notes with a rating of 4 or more in Describe what you want and press Enter.\n4. Type notas con calificación de más de 3 and press Enter.\n5. Type notes by stars and press Enter.")
+        expected(text = "Steps 3 and 4 set the rule rating more than 3 and the table lists Properties practice; the rule can be changed by hand. Step 5 says that no note has a property stars and names the closest ones; the rules stay as they were.")
     }
 }
 
@@ -48,9 +48,9 @@ private fun SuiteBuilder.chatLists() {
         reason = ManualReason.COSTLY
     ) {
         prepare(PLAYGROUND)
-        title(text = "The chat lists notes by their properties and tasks by date")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask books I rated 4 or more.\n3. Ask what is due this week? and click one of its rows.")
-        expected(text = "Step 2 answers with a list of books and their rating, counted. Step 3 lists tasks with their notes; the click opens the note at the task.")
+        title(text = "The chat lists open tasks, and says when none match")
+        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask what tasks are open? and click one of its rows.\n3. Ask ¿qué tareas hay esta semana?")
+        expected(text = "Step 2 answers with the open tasks and their notes (Packing checklist, Reading list…), counted; the click opens the note at the task. Step 3 says, in Spanish, that no open task matches: the vault has no dated task this week.")
     }
 }
 
@@ -60,9 +60,9 @@ private fun SuiteBuilder.noteFromTemplate() {
         reason = ManualReason.COSTLY
     ) {
         prepare(PLAYGROUND)
-        title(text = "A note from a template is proposed, cancelled, done and undone")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask create a note Call with Ana in Projects from the Meeting template, status draft, and click Cancel on the card.\n3. Ask it again and click Do it.\n4. Click Undo on the card.")
-        expected(text = "Step 2's card says Notekea will: Create note Projects/Call with Ana from the template Meeting, and Set property status: draft; Cancel changes nothing. Step 3 makes the note from the template, with status draft, and opens it. Step 4 removes it.")
+        title(text = "A note is proposed, cancelled, done and undone")
+        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask create a note Call with Ana in Projects, status draft, and click Cancel on the card.\n3. Ask it again and click Do it.\n4. Click Undo on the card.")
+        expected(text = "Step 2's card says Notekea will: Create note Projects/Call with Ana, and Set property status: draft; Cancel changes nothing. Step 3 makes the note with status draft and opens it. Step 4 removes it.")
     }
 }
 
@@ -73,8 +73,8 @@ private fun SuiteBuilder.summaryOfNotes() {
     ) {
         prepare(PLAYGROUND)
         title(text = "A summary of several notes is useful and sized to them")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask write a summary of my book notes in a new note called Books summary, read the card and click Do it.\n3. Read the new note, then click Undo.")
-        expected(text = "The card names the book notes it read and shows the start of the summary. The note has headings, lists and links to the books, a few hundred words, says nothing the books do not say, and reads well. Undo removes it.")
+        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask write a summary of my Travel notes in a new note called Travel summary, read the card and click Do it.\n3. Read the new note, then click Undo.")
+        expected(text = "The card names Lisbon trip and Packing checklist and shows the start of the summary. The note has headings, lists and links to both, says nothing they do not say, and reads well. Undo removes it.")
     }
 }
 
@@ -98,7 +98,7 @@ private fun SuiteBuilder.tagFolder() {
         prepare(PLAYGROUND)
         title(text = "Tagging a folder tags every note in it, and Undo takes it back")
         steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask tag every note in Recipes with food and click Do it.\n3. Open Arepas and look at its properties, then click Undo on the card.")
-        expected(text = "The card lists every note of Recipes. After Do it each has the tag food; after Undo none has it.")
+        expected(text = "The card lists Arepas, Café con leche and Pasta e fagioli. After Do it each has the tag food; after Undo none has it.")
     }
 }
 
@@ -109,8 +109,8 @@ private fun SuiteBuilder.moveKeepsLinks() {
     ) {
         prepare(PLAYGROUND)
         title(text = "Moving a note keeps its links, and Undo moves it back")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask create a folder Archive and move Retro October into it, and click Do it.\n3. Follow a link to Retro October from another note, then click Undo on the card.")
-        expected(text = "Archive holds Retro October and the link opens it there. Undo moves it back to Meetings.")
+        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask create a folder Archive and move Packing checklist into it, and click Do it.\n3. In Lisbon trip click the link to Packing checklist, then click Undo on the card.")
+        expected(text = "Archive holds Packing checklist and the link in Lisbon trip opens it there. Undo moves it back to Travel.")
     }
 }
 
@@ -121,7 +121,7 @@ private fun SuiteBuilder.shownAtOnce() {
     ) {
         prepare(PLAYGROUND)
         title(text = "What only shows something is done at once")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask open Dune and split the pane.\n3. Ask switch to the sage theme.\n4. Ask show the backlinks.")
+        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask open Arepas and split the pane.\n3. Ask switch to the sage theme.\n4. Ask show the backlinks.")
         expected(text = "Each is done at once, with no card, and a line in the chat says what was done.")
     }
 }
@@ -132,8 +132,8 @@ private fun SuiteBuilder.refusedAndTrash() {
         reason = ManualReason.COSTLY
     ) {
         prepare(PLAYGROUND)
-        title(text = "Deleting for good is refused, and the trash is confirmed")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask delete all my notes permanently.\n3. Ask send Vendor call to the trash and click Do it.")
-        expected(text = "Step 2 is refused, saying what the chat can do instead, and nothing changes. Step 3's card lists Vendor call and says the trash gives notes back, not Undo; after Do it the note is in the trash.")
+        title(text = "Deleting for good is refused in the request's language, and the trash is confirmed")
+        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask borra todas mis notas para siempre.\n3. Ask send Café con leche to the trash and click Do it.")
+        expected(text = "Step 2 is refused in Spanish, saying what the chat can do instead, and nothing changes. Step 3's card lists Café con leche and says the trash gives notes back, not Undo; after Do it the note is in the trash.")
     }
 }

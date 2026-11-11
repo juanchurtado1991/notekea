@@ -26,7 +26,10 @@ Conditions: is, contains, more than, less than (numbers), before, after (dates Y
 in folder (value: a folder), has tag (value: a tag without #). "more than" and "less than" are strict: "4 or more" is
 "more than 3", "in 2026" is after 2025-12-31 and before 2027-01-01. A checkbox is "true" or "false".
 "sort" names a property to order by ("" for none), "descending" true for the highest first. Use only the properties,
-folders and tags listed."""
+folders and tags listed. The request may be in another language than the vault: match its words to them by meaning
+("libros" is a folder Books or a tag book, "calificación", "nota" or "estrellas" is rating, "terminado" is finished).
+Example: "libros con más de 3" -> {"filters":[{"property":"","condition":"in folder","value":"Books"},
+{"property":"rating","condition":"more than","value":"3"}]}"""
 
     fun messages(
         request: String,

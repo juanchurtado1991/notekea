@@ -24,6 +24,7 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
 import app.notekea.resources.chat_found_count
+import app.notekea.resources.chat_found_no_tasks
 import app.notekea.resources.chat_found_none
 import app.notekea.resources.chat_found_tasks
 import app.notekea.resources.chat_problem_exists
@@ -94,17 +95,17 @@ private fun FoundTable(
     found: FoundNotes,
     onRowClick: (FoundRow) -> Unit
 ) {
-    val isTasks = found.rows.any {
-        it.line != null
-    }
+    val isTasks = found.isTasks
 
     val count = if (isTasks) Res.string.chat_found_tasks else Res.string.chat_found_count
 
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)) {
+        val none = if (isTasks) Res.string.chat_found_no_tasks else Res.string.chat_found_none
+
         val heading = if (found.rows.isEmpty()) {
-            stringResource(resource = Res.string.chat_found_none)
+            replyString(resource = none)
         } else {
-            stringResource(count, found.rows.size)
+            replyString(count, found.rows.size)
         }
 
         Text(
@@ -167,7 +168,7 @@ private fun FoundRowLine(
 @Composable
 private fun ShownLine(step: ActionStep) {
     val text = when (step.kind) {
-        ActionKind.OPEN_NOTE -> stringResource(
+        ActionKind.OPEN_NOTE -> replyString(
             Res.string.chat_shown_open_note,
             step
                 .notes
@@ -176,19 +177,19 @@ private fun ShownLine(step: ActionStep) {
                 .orEmpty()
         )
 
-        ActionKind.OPEN_TODAY -> stringResource(resource = Res.string.chat_shown_open_today)
+        ActionKind.OPEN_TODAY -> replyString(resource = Res.string.chat_shown_open_today)
 
-        ActionKind.SEARCH -> stringResource(Res.string.chat_shown_search, step.text.orEmpty())
+        ActionKind.SEARCH -> replyString(Res.string.chat_shown_search, step.text.orEmpty())
 
-        ActionKind.SHOW_PANEL -> stringResource(Res.string.chat_shown_panel, step.panel.orEmpty())
+        ActionKind.SHOW_PANEL -> replyString(Res.string.chat_shown_panel, step.panel.orEmpty())
 
-        ActionKind.SPLIT_PANE -> stringResource(resource = Res.string.chat_shown_split)
+        ActionKind.SPLIT_PANE -> replyString(resource = Res.string.chat_shown_split)
 
-        ActionKind.CLOSE_OTHER_TABS -> stringResource(resource = Res.string.chat_shown_close_tabs)
+        ActionKind.CLOSE_OTHER_TABS -> replyString(resource = Res.string.chat_shown_close_tabs)
 
-        ActionKind.TOGGLE_SOURCE -> stringResource(resource = Res.string.chat_shown_source)
+        ActionKind.TOGGLE_SOURCE -> replyString(resource = Res.string.chat_shown_source)
 
-        else -> stringResource(Res.string.chat_shown_theme, step.theme.orEmpty())
+        else -> replyString(Res.string.chat_shown_theme, step.theme.orEmpty())
     }
 
     Text(
@@ -200,30 +201,30 @@ private fun ShownLine(step: ActionStep) {
 
 @Composable
 private fun problemText(problem: ActionProblem): String = when (problem) {
-    is ActionProblem.UnknownNote -> stringResource(Res.string.chat_problem_note, problem.name)
+    is ActionProblem.UnknownNote -> replyString(Res.string.chat_problem_note, problem.name)
 
-    is ActionProblem.UnknownFolder -> stringResource(Res.string.chat_problem_folder, problem.name)
+    is ActionProblem.UnknownFolder -> replyString(Res.string.chat_problem_folder, problem.name)
 
     is ActionProblem.Missing ->
-        stringResource(Res.string.chat_problem_missing, problem.field.written)
+        replyString(Res.string.chat_problem_missing, problem.field.written)
 
-    is ActionProblem.TooManyNotes -> stringResource(Res.string.chat_problem_many, problem.count)
+    is ActionProblem.TooManyNotes -> replyString(Res.string.chat_problem_many, problem.count)
 
     is ActionProblem.Exists ->
-        stringResource(Res.string.chat_problem_exists, problem.path.nameWithoutExtension)
+        replyString(Res.string.chat_problem_exists, problem.path.nameWithoutExtension)
 
-    is ActionProblem.UnknownTask -> stringResource(Res.string.chat_problem_task, problem.text)
+    is ActionProblem.UnknownTask -> replyString(Res.string.chat_problem_task, problem.text)
 
     is ActionProblem.UnknownQuery -> problem.property?.let {
-        stringResource(Res.string.chat_problem_query, it)
+        replyString(Res.string.chat_problem_query, it)
     }
-        ?: stringResource(resource = Res.string.chat_problem_query_failed)
+        ?: replyString(resource = Res.string.chat_problem_query_failed)
 
-    is ActionProblem.TextTooLong -> stringResource(Res.string.chat_problem_long, problem.words)
+    is ActionProblem.TextTooLong -> replyString(Res.string.chat_problem_long, problem.words)
 
-    is ActionProblem.Failed -> stringResource(resource = Res.string.chat_problem_failed)
+    is ActionProblem.Failed -> replyString(resource = Res.string.chat_problem_failed)
 
-    is ActionProblem.Refused -> stringResource(resource = Res.string.chat_problem_refused)
+    is ActionProblem.Refused -> replyString(resource = Res.string.chat_problem_refused)
 }
 
 @Preview

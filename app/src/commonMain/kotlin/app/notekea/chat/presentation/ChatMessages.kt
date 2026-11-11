@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,11 +19,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -51,9 +54,10 @@ import app.notekea.resources.chat_small_hint
 import app.notekea.resources.chat_stopped
 import org.jetbrains.compose.resources.stringResource
 
-private const val ANSWER_ALPHA = 0.14f
-private const val ANSWER_INSET_DP = 24
 private const val BUBBLE_RADIUS_DP = 12
+private const val AVATAR_DP = 22
+private const val AVATAR_ICON_DP = 13
+private const val AVATAR_ALPHA = 0.14f
 private const val BUBBLE_TAIL_DP = 4
 private const val BUBBLE_INSET_DP = 40
 private const val RISE_DP = 12f
@@ -141,21 +145,23 @@ private fun ChatEntryView(
     ) {
         QuestionBubble(text = entry.question)
 
-        Answer(
-            entry = entry,
-            isSmall = isSmall,
-            onIntent = onIntent
-        )
+        CompositionLocalProvider(LocalReplyLanguage provides entry.language) {
+            Answer(
+                entry = entry,
+                isSmall = isSmall,
+                onIntent = onIntent
+            )
+        }
     }
 }
 
 @Composable
 private fun QuestionBubble(text: String) {
-    // As in a messaging app: your own messages on the right, filled in the theme's color, the corner of the tail sharp.
+    // As in a messaging app: your own messages on the right in a quiet bubble, the corner of the tail sharp.
     val shape = RoundedCornerShape(
         topStart = BUBBLE_RADIUS_DP.dp,
-        topEnd = BUBBLE_TAIL_DP.dp,
-        bottomEnd = BUBBLE_RADIUS_DP.dp,
+        topEnd = BUBBLE_RADIUS_DP.dp,
+        bottomEnd = BUBBLE_TAIL_DP.dp,
         bottomStart = BUBBLE_RADIUS_DP.dp
     )
 
@@ -174,7 +180,12 @@ private fun QuestionBubble(text: String) {
                     fill = false
                 )
                 .background(
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = shape
+                )
+                .border(
+                    width = NotekeaDimensions.BorderWidth,
+                    color = MaterialTheme.colorScheme.outlineVariant,
                     shape = shape
                 )
                 .padding(
@@ -182,43 +193,39 @@ private fun QuestionBubble(text: String) {
                     vertical = NotekeaDimensions.SpacingS
                 ),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onPrimary
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
 
-/** The answer's bubble, on the left in the theme's accent, tail at the top: the step line, the answer, the sources. */
+/** The answer on the page itself, beside the assistant's small mark: the step line, the answer, its sources. */
 @Composable
 private fun AnswerBubble(content: @Composable () -> Unit) {
-    val shape = RoundedCornerShape(
-        topStart = BUBBLE_TAIL_DP.dp,
-        topEnd = BUBBLE_RADIUS_DP.dp,
-        bottomEnd = BUBBLE_RADIUS_DP.dp,
-        bottomStart = BUBBLE_RADIUS_DP.dp
-    )
-
-    Row(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
+    ) {
         Box(
             modifier = Modifier
-                .weight(
-                    weight = 1f,
-                    fill = false
-                )
+                .size(size = AVATAR_DP.dp)
                 .background(
                     color = MaterialTheme
                         .colorScheme
-                        .tertiary
-                        .copy(alpha = ANSWER_ALPHA),
-                    shape = shape
-                )
-                .padding(
-                    horizontal = NotekeaDimensions.SpacingM,
-                    vertical = NotekeaDimensions.SpacingS
-                )
-        ) { content() }
+                        .primary
+                        .copy(alpha = AVATAR_ALPHA),
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = NotekeaIcons.ChatAnswer,
+                contentDescription = null,
+                modifier = Modifier.size(size = AVATAR_ICON_DP.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
 
-        // Room on the right, so the answer reads as the other side of the conversation.
-        Box(modifier = Modifier.width(width = ANSWER_INSET_DP.dp))
+        Box(modifier = Modifier.weight(weight = 1f)) { content() }
     }
 }
 
@@ -263,7 +270,7 @@ private fun AnswerContent(
         )
 
         entry.outcome == TurnOutcome.ACTED ->
-            Quiet(text = stringResource(resource = Res.string.chat_acted))
+            Quiet(text = replyString(resource = Res.string.chat_acted))
 
         entry.isAnswering && !isWriting -> ChatStepLine(
             step = entry.step,
@@ -271,7 +278,7 @@ private fun AnswerContent(
         )
 
         entry.outcome == TurnOutcome.NOT_FOUND -> Quiet(
-            text = stringResource(resource = Res.string.chat_not_found)
+            text = replyString(resource = Res.string.chat_not_found)
         )
 
         entry.outcome == TurnOutcome.FAILED -> Failed(
@@ -304,7 +311,7 @@ private fun Written(
                 onSourceClick = onSourceClick
             )
 
-            Quiet(text = stringResource(resource = Res.string.chat_small_hint))
+            Quiet(text = replyString(resource = Res.string.chat_small_hint))
         }
 
         ChatAnswerText(
@@ -315,7 +322,7 @@ private fun Written(
         )
 
         if (entry.outcome == TurnOutcome.STOPPED) {
-            Quiet(text = stringResource(resource = Res.string.chat_stopped))
+            Quiet(text = replyString(resource = Res.string.chat_stopped))
         }
 
         AnimatedVisibility(
@@ -351,14 +358,14 @@ private fun Failed(
             val failed = if (isSearch) Res.string.chat_failed_search else Res.string.chat_failed
 
             Text(
-                text = stringResource(resource = failed),
+                text = replyString(resource = failed),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error
             )
         }
 
         NotekeaButton(
-            text = stringResource(resource = Res.string.chat_retry),
+            text = replyString(resource = Res.string.chat_retry),
             onClick = onRetry,
             style = NotekeaButtonStyle.TEXT
         )
