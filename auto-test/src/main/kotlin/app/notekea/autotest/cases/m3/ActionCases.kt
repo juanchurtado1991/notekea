@@ -94,12 +94,12 @@ private fun SuiteBuilder.describeQuery() {
 
         clickIcon(label = DESCRIBE)
         clearText()
-        type(text = "notes by stars")
+        type(text = "notes by price")
         press(key = Key.Enter)
         awaitReply(running = "Filling the rules…")
 
         expectText(
-            text = "No note has a property “stars”",
+            text = "No note has a property “price”",
             substring = true
         )
     }

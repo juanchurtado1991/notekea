@@ -29,8 +29,10 @@ in folder (value: a folder), has tag (value: a tag without #). "more than" and "
 folders and tags listed, never others (there is no property "title" or "name" unless listed); a word that names a
 note or a topic is not a filter. The request may be in another language than the vault: match its words to them by meaning
 ("libros" is a folder Books or a tag book, "calificación", "nota" or "estrellas" is rating, "terminado" is finished).
-Example: "libros con más de 3" -> {"filters":[{"property":"","condition":"in folder","value":"Books"},
-{"property":"rating","condition":"more than","value":"3"}]}"""
+When no listed property means what the request names, write the request's word as the property, never another one.
+Examples: "libros con más de 3" -> {"filters":[{"property":"","condition":"in folder","value":"Books"},
+{"property":"rating","condition":"more than","value":"3"}]}
+"notes by price", with no property for a price -> {"filters":[],"sort":"price"}"""
 
     fun messages(
         request: String,

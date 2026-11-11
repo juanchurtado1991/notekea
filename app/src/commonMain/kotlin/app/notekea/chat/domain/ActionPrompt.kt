@@ -75,6 +75,7 @@ Examples:
 "what books are in my reading list?" -> [answer request="what books are in my reading list?"]
 "books I rated 4 or more" -> [find_notes request="books I rated 4 or more"]
 "what is due this week?" -> [show_tasks period="this week"]
+"what tasks are open?" -> [show_tasks]
 "open Dune" -> [open_note note="Dune"]
 "open today's note" -> [open_today]
 "show the backlinks" -> [show_panel panel="backlinks"]
@@ -85,6 +86,8 @@ Examples:
   folder="Meetings" template="Meeting"]
 "make a note in Recipes called Flan with a simple recipe" -> [create_note title="Flan" folder="Recipes"
   text="a simple recipe"]
+"create a note Budget in Work, status todo" -> [create_note title="Budget" folder="Work"], [set_property
+  note="Budget" property="status" value="todo"]
 "write a note Plan from this note" -> [write_from_notes title="Plan" text="a plan" note="this note"]
 "summarize my meetings in a note Meetings summary" -> [write_from_notes title="Meetings summary" text="a summary"
   folder="Meetings"]

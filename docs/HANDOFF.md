@@ -96,7 +96,7 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
     confirms, and the shell's `VaultActionRunner` (`shell.data`, composing the features' use cases) does it with a
     journal for Undo. Notes by their properties go through the query feature's `TranslateQueryUseCase`, also behind
     the Query tab's "Describe what you want". Evaluated by `ActionEvalChatModelTest` over `smoke-data/eval/actions.json`.
-    Plans: Small 75 %, Medium 92 %, Large 91 % of 106 requests. `ActionRunChatModelTest` runs 13 requests end to end
+    Plans: Small 73 %, Medium 94 %, Large 91 % of 106 requests. `ActionRunChatModelTest` runs 13 requests end to end
     on a copy of the Sample Vault with the real model (files checked, Undo leaves it as it was): all pass on Medium.
     3.7: the CPU setup names no GPU device (it kept Vulkan and 1.9 GB with no layer on it); Small on the CPU peaks at
     3.3 GB, over 5.4's 2.5 GB, recorded in `docs/performance.md` as decided. The code review's nine findings are fixed.

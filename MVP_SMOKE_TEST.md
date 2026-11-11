@@ -542,7 +542,7 @@ Same vault and model as 3.3; Deep answer is offered with Medium only (`docs/answ
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
-| 3.8-01 | In the Playground Vault open the Query tab, type notes with a rating of 4 or more in Describe what you want and press Enter; then notas con calificación de más de 3; then notes by stars | The first two set the rule rating more than 3 and the table lists Properties practice; notes by stars says no note has a property stars and names the closest | 3.8 | Auto-Test | 3.8-01, `QueryDescribeTest`, `TranslateQueryUseCase` | | | |
+| 3.8-01 | In the Playground Vault open the Query tab, type notes with a rating of 4 or more in Describe what you want and press Enter; then notas con calificación de más de 3; then notes by price | The first two set the rule rating more than 3 and the table lists Properties practice; notes by price says no note has a property price and names the closest | 3.8 | Auto-Test | 3.8-01, `QueryDescribeTest`, `TranslateQueryUseCase` | | | |
 | 3.8-02 | In the Playground Vault ask the chat what tasks are open?; click a row; then ask ¿qué tareas hay esta semana? | The first answers with the open tasks and their notes (Packing checklist, Reading list…), counted; a row opens its note at the task; the second says, in Spanish, that no open task matches (the vault has no dated task this week) | 3.8 | Auto-Test | 3.8-02, `ActionEvalChatModelTest` (by hand), `ChatViewModelTest` | | | |
 
 ### 3.9 Actions from chat

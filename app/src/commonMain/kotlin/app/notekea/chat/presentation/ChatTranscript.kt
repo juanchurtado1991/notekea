@@ -93,6 +93,7 @@ internal object ChatTranscript {
         step.title?.let { "title=$it" },
         step.property?.let { "$it=${step.value}" },
         step.tag?.let { "#$it" },
+        step.period?.let { "period=$it" },
         step.text?.let { "text=${it.take(n = SNIPPET_CHARS)}" },
         step
             .content

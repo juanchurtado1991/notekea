@@ -219,15 +219,7 @@ internal class ChatActions(
         return ActionContext(
             today = "${today.year}-${twoDigits(today.month)}-${twoDigits(today.day)}",
             openNote = openNote?.value?.removeSuffix(suffix = MARKDOWN),
-            folders = paths
-                .mapNotNull {
-                    it
-                        .parent
-                        ?.takeUnless { folder -> folder.isRoot }
-                        ?.value
-                }
-                .distinct()
-                .sorted(),
+            folders = ActionContext.foldersOf(paths = paths),
             notes = names,
             properties = notes
                 .flatMap { note ->
