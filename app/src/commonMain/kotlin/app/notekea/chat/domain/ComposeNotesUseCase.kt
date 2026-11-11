@@ -127,7 +127,12 @@ class ComposeNotesUseCase(
         val url = step.url.orEmpty()
 
         if (ClipWords.isSection(request)) {
-            return when (val clips = clipping.clipSection(url = url)) {
+            return when (
+                val clips = clipping.clipSection(
+                    url = url,
+                    isEvery = ClipWords.isEvery(request)
+                )
+            ) {
                 is Outcome.Success -> Outcome.Success(value = step.copy(content = clips.value))
                 is Outcome.Failure -> problem(ActionProblem.PageFailed(reason = clips.error))
             }

@@ -154,6 +154,8 @@ import app.notekea.resources.chat_retry
 import app.notekea.resources.chat_retry_es
 import app.notekea.resources.chat_section_all
 import app.notekea.resources.chat_section_all_es
+import app.notekea.resources.chat_section_every
+import app.notekea.resources.chat_section_every_es
 import app.notekea.resources.chat_section_more
 import app.notekea.resources.chat_section_more_es
 import app.notekea.resources.chat_section_only
@@ -254,6 +256,7 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_section_more to Res.string.chat_section_more_es,
     Res.string.chat_section_only to Res.string.chat_section_only_es,
     Res.string.chat_section_all to Res.string.chat_section_all_es,
+    Res.string.chat_section_every to Res.string.chat_section_every_es,
     Res.string.chat_page_address to Res.string.chat_page_address_es,
     Res.string.chat_page_local to Res.string.chat_page_local_es,
     Res.string.chat_page_offline to Res.string.chat_page_offline_es,

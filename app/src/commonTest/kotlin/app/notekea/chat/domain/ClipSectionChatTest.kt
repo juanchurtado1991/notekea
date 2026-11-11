@@ -31,7 +31,10 @@ class ClipSectionChatTest {
             )
         )
 
-        override suspend fun clipSection(url: String) = Outcome.Success(
+        override suspend fun clipSection(
+            url: String,
+            isEvery: Boolean
+        ) = Outcome.Success(
             value = listOf(draft(name = "Overview"), draft(name = "Overview/Axiom"), draft(name = "Overview/Datadog"))
         )
     }
@@ -86,6 +89,19 @@ class ClipSectionChatTest {
                 )
             )
         }
+
+    @Test
+    fun `all of them is asked in English or Spanish, the closest thirty otherwise`() {
+        assertEquals(
+            expected = listOf(true, true, false, false),
+            actual = listOf(
+                ClipWords.isEvery(request = "clip $URL with all its linked pages"),
+                ClipWords.isEvery(request = "recorta $URL con todas sus páginas enlazadas"),
+                ClipWords.isEvery(request = "clip $URL with its linked pages"),
+                ClipWords.isEvery(request = "clip all of $URL")
+            )
+        )
+    }
 
     private fun draft(name: String) = NoteDraft(
         path = RelativePath(value = "Web sources/$name.md"),

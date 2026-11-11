@@ -61,6 +61,12 @@ class ClipViewModel(
                     .section
                     ?.let { clipWhole(links = it) }
 
+            ClipIntent.OnClipAll ->
+                state
+                    .value
+                    .section
+                    ?.let { clipWhole(links = it.everyPage()) }
+
             ClipIntent.OnDismiss -> {
                 clipping?.cancel()
                 reduce { ClipState() }

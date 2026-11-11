@@ -2,6 +2,7 @@ package app.notekea.clips.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -43,6 +44,7 @@ import app.notekea.resources.clip_section_progress
 import app.notekea.resources.clip_section_question
 import app.notekea.resources.clip_title
 import app.notekea.resources.clip_url_hint
+import app.notekea.resources.clip_with_all
 import app.notekea.resources.clip_with_section
 import app.notekea.resources.clip_writing
 import org.jetbrains.compose.resources.stringResource
@@ -161,7 +163,7 @@ private fun SectionQuestion(
             )
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
             NotekeaButton(
                 text = stringResource(resource = Res.string.clip_only_page),
                 onClick = { onIntent(ClipIntent.OnClipPage) },
@@ -172,6 +174,14 @@ private fun SectionQuestion(
                 text = stringResource(resource = Res.string.clip_with_section, links.urls.size),
                 onClick = { onIntent(ClipIntent.OnClipSection) }
             )
+
+            if (links.more > 0) {
+                NotekeaButton(
+                    text = stringResource(Res.string.clip_with_all, links.urls.size + links.more),
+                    onClick = { onIntent(ClipIntent.OnClipAll) },
+                    style = NotekeaButtonStyle.TEXT
+                )
+            }
         }
     }
 }

@@ -295,11 +295,12 @@ private fun AnswerContent(
 
         entry.sectionAsked != null -> ChatSectionQuestion(
             section = entry.sectionAsked,
-            onChoose = { isWhole ->
+            onChoose = { isWhole, isEvery ->
                 onIntent(
                     ChatIntent.OnSectionChoose(
                         id = entry.id,
-                        isWhole = isWhole
+                        isWhole = isWhole,
+                        isEvery = isEvery
                     )
                 )
             }

@@ -14,6 +14,9 @@ sealed interface ClipIntent {
     /** Asked about the page's section: the page and the pages it links under its path are clipped. */
     data object OnClipSection : ClipIntent
 
+    /** Asked about a section of more pages than are clipped by default: every one of them. */
+    data object OnClipAll : ClipIntent
+
     /** Cancel or Esc: a clip under way stops, and nothing is written. */
     data object OnDismiss : ClipIntent
 }

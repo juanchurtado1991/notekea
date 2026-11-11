@@ -152,6 +152,24 @@ class SectionSourcesTest {
             )
         }
 
+    @Test
+    fun `the closest thirty are the default, and all of them stay at hand for whoever asks`() {
+        val urls = (1..34).map { "https://x.com/docs/p$it" }
+
+        val capped = SectionLinks(
+            prefix = "https://x.com/docs/",
+            urls = urls,
+            more = 0
+        ).capped(chosen = urls.reversed())
+
+        val every = capped.everyPage()
+
+        assertEquals(
+            expected = listOf(30, 4, 34, 0),
+            actual = listOf(capped.urls.size, capped.rest.size, every.urls.size, every.more)
+        )
+    }
+
     private companion object {
         const val ANDROID = "https://x.com/docs/android-overview"
     }
