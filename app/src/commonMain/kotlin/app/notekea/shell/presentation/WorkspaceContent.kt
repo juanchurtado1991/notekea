@@ -42,6 +42,7 @@ import app.notekea.core.presentation.platform.keys
 import app.notekea.resources.Res
 import app.notekea.resources.workspace_empty_message
 import app.notekea.resources.workspace_empty_title
+import app.notekea.resources.workspace_start_clip
 import app.notekea.resources.workspace_start_find
 import app.notekea.resources.workspace_start_new
 import app.notekea.resources.workspace_start_search
@@ -241,6 +242,13 @@ private fun BoxScope.NoTabs(
             label = stringResource(resource = Res.string.workspace_start_search),
             keys = keys(platformConventions.searchNotesShortcut),
             onClick = actions.onSearchNotes
+        )
+
+        NotekeaActionRow(
+            icon = NotekeaIcons.Clip,
+            label = stringResource(resource = Res.string.workspace_start_clip),
+            keys = emptyList(),
+            onClick = actions.onClipPage
         )
     }
 }

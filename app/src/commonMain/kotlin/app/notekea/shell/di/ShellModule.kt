@@ -1,6 +1,10 @@
 package app.notekea.shell.di
 
 import app.notekea.chat.domain.ActionRunner
+import app.notekea.chat.domain.CardMaker
+import app.notekea.chat.domain.WebPageClipper
+import app.notekea.shell.data.CardsForChat
+import app.notekea.shell.data.ClipsForChat
 import app.notekea.shell.data.SettingsWorkspaceStore
 import app.notekea.shell.data.VaultActionFinder
 import app.notekea.shell.data.VaultActionRunner
@@ -43,6 +47,16 @@ val shellModule = module {
         VaultEdits { vaultPath ->
             watcher.watch(vaultPath = vaultPath).map { }
         }
+    }
+
+    single<CardMaker> { CardsForChat(makeCards = get()) }
+
+    single<WebPageClipper> {
+        ClipsForChat(
+            clipWebPage = get(),
+            localCalendar = get(),
+            clock = get()
+        )
     }
 
     single<ActionRunner> {

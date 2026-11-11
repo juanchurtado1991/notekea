@@ -2,10 +2,12 @@ package app.notekea.di
 
 import app.notekea.ai.di.jvmModelsModule
 import app.notekea.chat.di.jvmChatModule
+import app.notekea.clips.di.jvmClipsModule
 import app.notekea.core.embedding.di.embeddingModule
 import app.notekea.core.logging.di.loggingModule
 import app.notekea.core.notes.di.jvmCoreNotesModule
 import app.notekea.core.platform.di.jvmPlatformModule
+import app.notekea.documents.di.jvmDocumentsModule
 import app.notekea.editor.di.jvmEditorModule
 import app.notekea.sync.di.jvmSyncModule
 import app.notekea.tree.di.jvmTreeModule
@@ -24,5 +26,7 @@ val desktopModules: List<Module> = listOf(
     jvmModelsModule,
     jvmChatModule,
     jvmSyncModule,
+    jvmDocumentsModule,
+    jvmClipsModule,
     jvmVaultModule
 )

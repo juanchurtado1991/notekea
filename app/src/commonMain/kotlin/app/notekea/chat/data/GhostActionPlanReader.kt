@@ -66,7 +66,8 @@ class GhostActionPlanReader : ActionPlanReader {
             ActionField.PERIOD to dto.period,
             ActionField.PANEL to dto.panel,
             ActionField.THEME to dto.theme,
-            ActionField.REQUEST to dto.request
+            ActionField.REQUEST to dto.request,
+            ActionField.URL to dto.url
         )
 
         return PlannedStep(

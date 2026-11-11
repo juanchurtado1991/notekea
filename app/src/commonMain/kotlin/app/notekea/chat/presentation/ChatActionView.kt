@@ -20,6 +20,7 @@ import app.notekea.chat.domain.ActionProblem
 import app.notekea.chat.domain.ActionStep
 import app.notekea.chat.domain.FoundNotes
 import app.notekea.chat.domain.FoundRow
+import app.notekea.chat.domain.PageProblem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
@@ -27,12 +28,20 @@ import app.notekea.resources.chat_found_count
 import app.notekea.resources.chat_found_no_tasks
 import app.notekea.resources.chat_found_none
 import app.notekea.resources.chat_found_tasks
+import app.notekea.resources.chat_page_address
+import app.notekea.resources.chat_page_large
+import app.notekea.resources.chat_page_local
+import app.notekea.resources.chat_page_not_article
+import app.notekea.resources.chat_page_offline
+import app.notekea.resources.chat_page_refused
+import app.notekea.resources.chat_page_slow
 import app.notekea.resources.chat_problem_exists
 import app.notekea.resources.chat_problem_failed
 import app.notekea.resources.chat_problem_folder
 import app.notekea.resources.chat_problem_long
 import app.notekea.resources.chat_problem_many
 import app.notekea.resources.chat_problem_missing
+import app.notekea.resources.chat_problem_no_cards
 import app.notekea.resources.chat_problem_note
 import app.notekea.resources.chat_problem_query
 import app.notekea.resources.chat_problem_query_failed
@@ -225,7 +234,21 @@ private fun problemText(problem: ActionProblem): String = when (problem) {
     is ActionProblem.Failed -> replyString(resource = Res.string.chat_problem_failed)
 
     is ActionProblem.Refused -> replyString(resource = Res.string.chat_problem_refused)
+
+    ActionProblem.NoCards -> replyString(resource = Res.string.chat_problem_no_cards)
+
+    is ActionProblem.PageFailed -> replyString(resource = PAGE_PROBLEMS.getValue(problem.reason))
 }
+
+private val PAGE_PROBLEMS = mapOf(
+    PageProblem.BAD_ADDRESS to Res.string.chat_page_address,
+    PageProblem.LOCAL_ADDRESS to Res.string.chat_page_local,
+    PageProblem.OFFLINE to Res.string.chat_page_offline,
+    PageProblem.TOO_SLOW to Res.string.chat_page_slow,
+    PageProblem.TOO_LARGE to Res.string.chat_page_large,
+    PageProblem.REFUSED to Res.string.chat_page_refused,
+    PageProblem.NOT_ARTICLE to Res.string.chat_page_not_article
+)
 
 @Preview
 @Composable

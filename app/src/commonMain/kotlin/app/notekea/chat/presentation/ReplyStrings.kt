@@ -22,6 +22,10 @@ import app.notekea.resources.chat_action_cancel
 import app.notekea.resources.chat_action_cancel_es
 import app.notekea.resources.chat_action_cancelled
 import app.notekea.resources.chat_action_cancelled_es
+import app.notekea.resources.chat_action_cards_count
+import app.notekea.resources.chat_action_cards_count_es
+import app.notekea.resources.chat_action_clip_url
+import app.notekea.resources.chat_action_clip_url_es
 import app.notekea.resources.chat_action_close_tabs
 import app.notekea.resources.chat_action_close_tabs_es
 import app.notekea.resources.chat_action_complete_task
@@ -38,6 +42,8 @@ import app.notekea.resources.chat_action_from
 import app.notekea.resources.chat_action_from_es
 import app.notekea.resources.chat_action_link_notes
 import app.notekea.resources.chat_action_link_notes_es
+import app.notekea.resources.chat_action_make_cards
+import app.notekea.resources.chat_action_make_cards_es
 import app.notekea.resources.chat_action_more
 import app.notekea.resources.chat_action_more_es
 import app.notekea.resources.chat_action_move
@@ -94,6 +100,20 @@ import app.notekea.resources.chat_found_tasks
 import app.notekea.resources.chat_found_tasks_es
 import app.notekea.resources.chat_not_found
 import app.notekea.resources.chat_not_found_es
+import app.notekea.resources.chat_page_address
+import app.notekea.resources.chat_page_address_es
+import app.notekea.resources.chat_page_large
+import app.notekea.resources.chat_page_large_es
+import app.notekea.resources.chat_page_local
+import app.notekea.resources.chat_page_local_es
+import app.notekea.resources.chat_page_not_article
+import app.notekea.resources.chat_page_not_article_es
+import app.notekea.resources.chat_page_offline
+import app.notekea.resources.chat_page_offline_es
+import app.notekea.resources.chat_page_refused
+import app.notekea.resources.chat_page_refused_es
+import app.notekea.resources.chat_page_slow
+import app.notekea.resources.chat_page_slow_es
 import app.notekea.resources.chat_problem_exists
 import app.notekea.resources.chat_problem_exists_es
 import app.notekea.resources.chat_problem_failed
@@ -106,6 +126,8 @@ import app.notekea.resources.chat_problem_many
 import app.notekea.resources.chat_problem_many_es
 import app.notekea.resources.chat_problem_missing
 import app.notekea.resources.chat_problem_missing_es
+import app.notekea.resources.chat_problem_no_cards
+import app.notekea.resources.chat_problem_no_cards_es
 import app.notekea.resources.chat_problem_note
 import app.notekea.resources.chat_problem_note_es
 import app.notekea.resources.chat_problem_query
@@ -195,6 +217,17 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_stopped to Res.string.chat_stopped_es,
     Res.string.chat_acted to Res.string.chat_acted_es,
     Res.string.chat_do_it_for_me to Res.string.chat_do_it_for_me_es,
+    Res.string.chat_action_make_cards to Res.string.chat_action_make_cards_es,
+    Res.string.chat_action_cards_count to Res.string.chat_action_cards_count_es,
+    Res.string.chat_problem_no_cards to Res.string.chat_problem_no_cards_es,
+    Res.string.chat_action_clip_url to Res.string.chat_action_clip_url_es,
+    Res.string.chat_page_address to Res.string.chat_page_address_es,
+    Res.string.chat_page_local to Res.string.chat_page_local_es,
+    Res.string.chat_page_offline to Res.string.chat_page_offline_es,
+    Res.string.chat_page_slow to Res.string.chat_page_slow_es,
+    Res.string.chat_page_large to Res.string.chat_page_large_es,
+    Res.string.chat_page_refused to Res.string.chat_page_refused_es,
+    Res.string.chat_page_not_article to Res.string.chat_page_not_article_es,
     Res.string.chat_failed to Res.string.chat_failed_es,
     Res.string.chat_failed_search to Res.string.chat_failed_search_es,
     Res.string.chat_retry to Res.string.chat_retry_es,

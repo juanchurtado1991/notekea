@@ -23,5 +23,6 @@ data class ActionStep(
     val panel: String? = null,
     val theme: String? = null,
     val request: String? = null,
+    val url: String? = null,
     val content: List<NoteDraft> = emptyList()
 )

@@ -18,7 +18,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import app.notekea.ai.presentation.ModelDownloadViewModel
+import app.notekea.cards.presentation.StudyViewModel
 import app.notekea.chat.presentation.ChatViewModel
+import app.notekea.clips.presentation.ClipIntent
+import app.notekea.clips.presentation.ClipViewModel
 import app.notekea.connections.presentation.NoteMentionsViewModel
 import app.notekea.connections.presentation.RelatedNotesViewModel
 import app.notekea.core.notes.domain.RelativePath
@@ -82,12 +85,14 @@ fun VaultTreeScreen(
     graphViewModel: GraphViewModel = vaultViewModel(vaultPath),
     queryViewModel: QueryViewModel = vaultViewModel(vaultPath),
     tasksViewModel: TasksViewModel = vaultViewModel(vaultPath),
+    studyViewModel: StudyViewModel = vaultViewModel(vaultPath),
     searchIndexViewModel: SearchIndexViewModel = vaultViewModel(vaultPath),
     relatedViewModel: RelatedNotesViewModel = vaultViewModel(vaultPath),
     mentionsViewModel: NoteMentionsViewModel = vaultViewModel(vaultPath),
     chatViewModel: ChatViewModel = vaultViewModel(vaultPath),
     modelDownloadViewModel: ModelDownloadViewModel = vaultViewModel(vaultPath),
     syncViewModel: SyncStatusViewModel = vaultViewModel(vaultPath),
+    clipViewModel: ClipViewModel = vaultViewModel(vaultPath),
     panes: List<EditorPaneTools> = remember(vaultPath) {
         List(size = Workspace.MAX_PANES) { EditorPaneTools() }
     }
@@ -112,12 +117,15 @@ fun VaultTreeScreen(
         graph = graphViewModel,
         query = queryViewModel,
         tasks = tasksViewModel,
+        study = studyViewModel,
         tree = viewModel,
         workspace = workspaceViewModel,
         editors = editorViewModels,
         onSwitcher = switcherViewModel::onIntent,
         onTagPicker = tagPickerViewModel::onIntent,
-        onTemplatePicker = templatePickerViewModel::onIntent
+        onTemplatePicker = templatePickerViewModel::onIntent,
+        documentFocus = editors.documents,
+        onClipRequest = { clipViewModel.onIntent(intent = ClipIntent.OnOpen) }
     )
 
     FollowVault(
@@ -129,12 +137,10 @@ fun VaultTreeScreen(
         onActiveTabChange
     )
 
-    FollowChat(chatViewModel, state, viewModels, editors, searchIndexViewModel)
-
-    val looks = rememberNoteLooks(state = state)
+    FollowAssistants(chatViewModel, clipViewModel, state, viewModels, editors, searchIndexViewModel)
 
     Box(modifier = modifier) {
-        CompositionLocalProvider(LocalNoteLooks provides looks) {
+        CompositionLocalProvider(LocalNoteLooks provides rememberNoteLooks(state = state)) {
             VaultWorkspace(
                 state = state,
                 workspaceState = workspaceState,
@@ -144,8 +150,7 @@ fun VaultTreeScreen(
                 sidePanel = sidePanel,
                 onSwitchVault = onSwitchVault,
                 searchIndex = {
-                    SyncStatusOf(sync = syncViewModel)
-                    AiStatusOf(searchIndexViewModel, modelDownloadViewModel)
+                    VaultStatusOf(syncViewModel, searchIndexViewModel, modelDownloadViewModel)
                 },
                 banner = { SyncConflictsOf(sync = syncViewModel) }
             )
@@ -262,10 +267,10 @@ private fun BoxScope.IndexFollower(
     )
 
     LaunchedEffect(tree.tree, tree.isLoading) {
+        // Notes and documents (4.5): both are searched, related and answered from.
         val notes = tree
             .tree
-            .notes
-            .values
+            .readable
             .map { it.file }
 
         val isLoaded = !tree.isLoading && tree.loadError == null

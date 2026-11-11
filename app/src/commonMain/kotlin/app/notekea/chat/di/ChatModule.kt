@@ -23,7 +23,17 @@ val chatModule = module {
     factoryOf(::AnswerFromNotesUseCase)
     factoryOf(::PlanRequestUseCase)
     factoryOf(::CheckPlanUseCase)
-    factoryOf(::ComposeNotesUseCase)
+
+    factory {
+        ComposeNotesUseCase(
+            llmEngine = get(),
+            noteTextCache = get(),
+            planReader = get(),
+            clipper = get(),
+            cardMaker = get()
+        )
+    }
+
     factoryOf(::ActOnRequestUseCase)
     factoryOf(::ConverseUseCase)
     factoryOf(::AgentAnswerUseCase)

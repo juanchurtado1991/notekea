@@ -74,7 +74,8 @@ class CheckPlanUseCase {
                 period = step[ActionField.PERIOD],
                 panel = step[ActionField.PANEL],
                 theme = step[ActionField.THEME],
-                request = step[ActionField.REQUEST]
+                request = step[ActionField.REQUEST],
+                url = step[ActionField.URL]
             )
         )
     }

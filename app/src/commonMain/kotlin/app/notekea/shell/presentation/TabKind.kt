@@ -8,5 +8,6 @@ enum class TabKind {
     GRAPH,
     QUERY,
     TASKS,
+    STUDY,
     MISSING
 }

@@ -384,9 +384,10 @@ data class Workspace(
 
         /** The Tasks tab, no file of the vault either. */
         val TASKS = RelativePath(value = ".notekea-tasks")
+        val STUDY = RelativePath(value = ".notekea-study")
 
         /** The tabs that show a tool of the vault, not one of its files. */
-        val TOOL_TABS = setOf(GRAPH, QUERY, TASKS)
+        val TOOL_TABS = setOf(GRAPH, QUERY, TASKS, STUDY)
         const val MAX_PANES = 2
         private const val LAST_TAB_NUMBER = 9
         val EMPTY = Workspace()

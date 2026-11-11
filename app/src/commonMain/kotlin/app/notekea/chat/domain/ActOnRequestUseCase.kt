@@ -170,7 +170,12 @@ class ActOnRequestUseCase(
             ActionKind.LIST_BROKEN_LINKS
         )
 
-        val COMPOSED =
-            setOf(ActionKind.CREATE_NOTE, ActionKind.WRITE_FROM_NOTES, ActionKind.NOTES_FROM_TEXT)
+        val COMPOSED = setOf(
+            ActionKind.CREATE_NOTE,
+            ActionKind.WRITE_FROM_NOTES,
+            ActionKind.NOTES_FROM_TEXT,
+            ActionKind.CLIP_URL,
+            ActionKind.MAKE_CARDS
+        )
     }
 }

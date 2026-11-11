@@ -64,6 +64,19 @@ enum class ActionKind(
         isWriting = true
     ),
 
+    // Study cards made from a note and added to it (4.6); the open note when none is named.
+    MAKE_CARDS(
+        written = "make_cards",
+        isWriting = true
+    ),
+
+    // A web page the request names, clipped into Web sources with notes about it (4.4).
+    CLIP_URL(
+        written = "clip_url",
+        needs = setOf(ActionField.URL),
+        isWriting = true
+    ),
+
     // A long text pasted with the request becomes a folder of linked notes, with an index note (decided 2026-11-10).
     NOTES_FROM_TEXT(
         written = "notes_from_text",

@@ -20,5 +20,6 @@ data class PlannedStepDto(
     val period: String? = null,
     val panel: String? = null,
     val theme: String? = null,
-    val request: String? = null
+    val request: String? = null,
+    val url: String? = null
 )

@@ -20,9 +20,32 @@ import kotlinx.coroutines.coroutineScope
 class ComposeNotesUseCase(
     private val llmEngine: LlmEngine,
     private val noteTextCache: NoteTextCache,
-    private val planReader: ActionPlanReader
+    private val planReader: ActionPlanReader,
+    private val clipper: WebPageClipper? = null,
+    private val cardMaker: CardMaker? = null
 ) {
     suspend operator fun invoke(
+        step: ActionStep,
+        request: String,
+        vaultPath: String,
+        notes: Collection<NoteEntry>
+    ): Outcome<ActionStep, ActionProblem> = when (step.kind) {
+        ActionKind.CLIP_URL -> clipped(step = step)
+
+        ActionKind.MAKE_CARDS -> withCards(
+            step = step,
+            vaultPath = vaultPath
+        )
+
+        else -> composed(
+            step = step,
+            request = request,
+            vaultPath = vaultPath,
+            notes = notes
+        )
+    }
+
+    private suspend fun composed(
         step: ActionStep,
         request: String,
         vaultPath: String,
@@ -68,6 +91,36 @@ class ComposeNotesUseCase(
         Outcome.Failure(error = ActionProblem.Failed(ChatError.Model(exception.error)))
     } catch (problem: ComposeProblem) {
         Outcome.Failure(error = problem.problem)
+    }
+
+    private fun problem(problem: ActionProblem): Outcome<ActionStep, ActionProblem> =
+        Outcome.Failure(error = problem)
+
+    /** The study cards of the step's note, to add at its end (4.6). */
+    private suspend fun withCards(
+        step: ActionStep,
+        vaultPath: String
+    ): Outcome<ActionStep, ActionProblem> {
+        val note =
+            step.notes.firstOrNull() ?: return problem(problem = ActionProblem.UnknownNote(name = ""))
+
+        val maker = cardMaker ?: return Outcome.Failure(error = ActionProblem.NoCards)
+
+        return when (val made = maker.cardsFor(vaultPath = vaultPath, note = note)) {
+            is Outcome.Success -> Outcome.Success(value = step.copy(text = made.value))
+            is Outcome.Failure -> made
+        }
+    }
+
+    /** A web page clipped as it is written (4.4): its note is the page's, never cleaned like the model's notes. */
+    private suspend fun clipped(step: ActionStep): Outcome<ActionStep, ActionProblem> {
+        val clipping =
+            clipper ?: return problem(ActionProblem.PageFailed(reason = PageProblem.REFUSED))
+
+        return when (val clip = clipping.clip(url = step.url.orEmpty())) {
+            is Outcome.Success -> Outcome.Success(value = step.copy(content = listOf(clip.value)))
+            is Outcome.Failure -> problem(problem = ActionProblem.PageFailed(reason = clip.error))
+        }
     }
 
     private suspend fun newNote(

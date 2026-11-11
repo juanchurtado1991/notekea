@@ -1,5 +1,8 @@
 package app.notekea.core.notes.di
 
+import app.notekea.core.documents.data.DocumentAwareContentStore
+import app.notekea.core.documents.data.TikaDocumentReader
+import app.notekea.core.documents.domain.DocumentReader
 import app.notekea.core.notes.data.LuceneVectorIndex
 import app.notekea.core.notes.data.NioNoteFileAttributes
 import app.notekea.core.notes.data.ObsidianVaultSettingsReader
@@ -47,11 +50,17 @@ val jvmCoreNotesModule = module {
         )
     }
 
+    single<DocumentReader> { TikaDocumentReader(dispatchers = get()) }
+
+    // Notes as stored, documents (4.5) as the text read out of them: whoever reads the vault reads both.
     single<NoteContentStore> {
-        OkioNoteContentStore(
-            fileSystem = FileSystem.SYSTEM,
-            dispatchers = get(),
-            attributes = NioNoteFileAttributes()
+        DocumentAwareContentStore(
+            notes = OkioNoteContentStore(
+                fileSystem = FileSystem.SYSTEM,
+                dispatchers = get(),
+                attributes = NioNoteFileAttributes()
+            ),
+            documents = get()
         )
     }
 
