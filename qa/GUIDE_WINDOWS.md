@@ -1,60 +1,62 @@
-# Notekea QA guide — Windows
+# Guía de Notekea QA — Windows
 
-Thank you for testing Notekea. You do not need to know anything about programming. You install one app,
-**Notekea QA**: Notekea itself, with a small window at the bottom left, the **manager**, which tests it and tells you
-what to do. It keeps its own notes and settings, so it never touches a Notekea you use every day. The automatic part
-runs by itself in about 20 minutes; the manual cases take one to two hours, and you can stop and go on later. If
-something here is unclear, that is a problem with the guide, not with you: say so when you send the report.
+Gracias por probar Notekea. No necesitas saber nada de programación. Instalas una sola app, **Notekea QA**: Notekea
+con una ventanita abajo a la izquierda, el **gestor**, que lo prueba y te dice qué hacer. Notekea QA tiene sus propias
+notas y ajustes, así que nunca toca un Notekea que uses a diario, y empieza en español (puedes cambiarlo en Ajustes ›
+General). La parte automática corre sola en unos 20 minutos; los casos manuales toman de una a dos horas, y puedes
+parar y seguir después. Si algo de esta guía no se entiende, es un problema de la guía, no tuyo: dilo al enviar el
+reporte.
 
-## 1. Download
+## 1. Descarga
 
-You receive a link to a **release** on GitHub, named like `Notekea m1-rc1`. On that page, under **Assets**, download
-`Notekea.QA-<version>.msi`.
+Recibes un enlace a una **release** en GitHub, con un nombre como `Notekea m1-rc1`. En esa página, en **Assets**,
+descarga `Notekea.QA-<versión>.msi`.
 
-## 2. Install
+## 2. Instala
 
-Double-click `Notekea.QA-<version>.msi`. Windows may show **"Windows protected your PC"**: it appears because the
-builds are not signed yet. Click **More info**, then **Run anyway**, and follow the installer. Notekea QA is now in
-the Start menu.
+Haz doble clic en `Notekea.QA-<versión>.msi`. Windows puede mostrar **"Windows protegió tu PC"**: aparece porque las
+versiones todavía no están firmadas. Haz clic en **Más información**, luego en **Ejecutar de todas formas**, y sigue el
+instalador. Notekea QA queda en el menú Inicio.
 
-## 3. The automatic part
+## 3. La parte automática
 
-1. Open **Notekea QA** from the Start menu. Notekea opens, and the manager opens at the bottom left of the screen. You can move it, and minimize it
-   when it is in your way; closing it only minimizes it.
-2. In the manager, click **Start the automatic tests**. It says **Running tests** and shows, at every moment, the time,
-   how many cases are done and how long is left, how many passed and failed, the case it runs **now** with each step
-   as it happens, and the last ones done. They run out of sight, on copies of the test notes: you can keep using the
-   computer.
-3. When it is done, failed cases are red: there is nothing to do about them now, they go in the report. Click
-   **Next: manual cases**.
+1. Abre **Notekea QA** desde el menú Inicio. Se abre Notekea, y el gestor aparece abajo a la izquierda de la pantalla. Puedes
+   moverlo, y minimizarlo cuando estorbe; cerrarlo solo lo minimiza.
+2. En el gestor, haz clic en **Empezar las pruebas automáticas**. Dice **Corriendo pruebas** y muestra en todo momento
+   el tiempo, cuántos casos van y cuánto falta, cuántos pasaron y fallaron, el caso que corre **ahora** con cada paso a
+   medida que ocurre, y los últimos terminados. Corren sin que se vean, sobre copias de las notas de prueba: puedes
+   seguir usando la computadora.
+3. Al terminar, los casos que fallaron salen en rojo: no tienes que hacer nada con ellos ahora, van al reporte. Haz
+   clic en **Siguiente: casos manuales**.
 
-## 4. The manual cases
+## 4. Los casos manuales
 
-The manager shows one case at a time, and its steps as a line: ✓ done, the current one in bold, the rest to come.
+El gestor muestra un caso a la vez, y sus pasos como una línea: ✓ los hechos, el actual en negrita, los que faltan.
 
-1. Do the step **in Notekea**, then click **Done, next step**. **Back** goes to the step before.
-2. When a step needs the case's sample notes, **Open the test data** shows the **Test data** folder: in Notekea, open
-   the vault the step names with **Open folder…**.
-3. A few cases ask you to **Restart Notekea for this case**: click it, and Notekea and the manager come back on that
-   case.
-4. After the last step, the manager shows what you should have seen. Click the green answer if you saw it, or the red
-   one if not: write **What did you see?**, click **Add a screenshot** if you took one, and **Save and go to the next
-   case**. Your last steps in Notekea are added to the report for you. **Skip this case** leaves it for later.
+1. Haz el paso **en Notekea** y luego haz clic en **Listo, siguiente paso**. **Atrás** vuelve al paso anterior.
+2. Cuando un paso necesita las notas de prueba del caso, la tarjeta **DATOS DE PRUEBA** dice en qué carpeta están: en
+   Notekea, ábrela con **Abrir otra bóveda** (abajo a la izquierda) y luego **Abrir carpeta…**.
+3. Algunos casos piden **Reiniciar Notekea para este caso**: haz clic, y Notekea y el gestor vuelven en ese caso.
+4. Después del último paso, el gestor muestra lo que deberías haber visto. Haz clic en la respuesta verde si lo
+   viste, o en la roja si no: escribe **¿Qué viste?**, haz clic en **Agregar una captura** si tomaste una, y en
+   **Guardar e ir al siguiente caso**. Tus últimos pasos en Notekea se agregan solos al reporte. **Saltar este caso**
+   lo deja para después.
 
-**Screenshots:** press **Windows key + Print Screen**. The screen flashes and the picture is saved in **Pictures ›
-Screenshots**; choose it with **Add a screenshot**.
+**Capturas:** pulsa **tecla Windows + Impr Pant**. La pantalla parpadea y la imagen se guarda en **Imágenes › Capturas
+de pantalla**; elígela con **Agregar una captura**.
 
-Your answers are saved: you can close Notekea QA and open it again later, it goes on where you left. The last case is
-15 minutes of free use: use Notekea as you really would, and say whether you found anything odd.
+Tus respuestas se guardan: puedes cerrar Notekea QA y abrirlo después, y sigue donde lo dejaste. El último caso son
+15 minutos de uso libre: usa Notekea como lo usarías de verdad y di si encontraste algo raro.
 
-## 5. Send the report
+## 5. Envía el reporte
 
-1. In the manager, click **Report**, then **Copy report**, and paste it into a message (email, WhatsApp…) to whoever
-   asked you to test.
-2. Click **Open the Report folder** and attach the pictures in it, and the file `output.txt`, to the same message.
+1. En el gestor, haz clic en **Reporte**, luego en **Copiar el reporte**, y pégalo en un mensaje (correo,
+   WhatsApp…) para quien te pidió probar.
+2. Haz clic en **Abrir la carpeta Report** y adjunta al mismo mensaje las imágenes que hay ahí y el archivo
+   `output.txt`.
 
-## 6. Finish
+## 6. Termina
 
-When you have sent the report, you can uninstall Notekea QA: **Settings › Apps › Installed apps**, its **⋯** button,
-**Uninstall**. Its notes and settings were its own: your everyday Notekea, if you have one, is as it was. When a new build
-comes (`m1-rc2`), install it over the old one and repeat this guide: the manager only asks for what is left.
+Cuando hayas enviado el reporte, puedes desinstalar Notekea QA: **Configuración › Aplicaciones › Aplicaciones instaladas**, su botón **⋯**, **Desinstalar**. Sus notas y ajustes eran propios: tu Notekea de todos los días, si tienes
+uno, sigue como estaba. Cuando llegue una versión nueva (`m1-rc2`), instálala encima de la anterior y repite esta guía:
+el gestor solo pide lo que falta.

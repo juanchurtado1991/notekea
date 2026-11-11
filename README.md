@@ -18,6 +18,25 @@ and answers with exact citations — all on your machine.
 
 Planned for the MVP: Windows, macOS and Linux desktop. Mobile comes later. See the [roadmap](ROADMAP.md).
 
+## Install
+
+Each [release](https://github.com/juanchurtado1991/notekea/releases) has an installer per system: `Notekea-<version>.msi`
+for Windows, `Notekea-<version>.dmg` for macOS and `notekea_<version>.deb` for Debian, Ubuntu and Pop!_OS.
+`SHA256SUMS.txt` holds their checksums, so `sha256sum -c SHA256SUMS.txt` (or `shasum -a 256 -c` on macOS) can check
+a download.
+
+### First launch
+
+Notekea is not code-signed yet: a signature costs a yearly fee the project does not pay before it has users (see the
+roadmap, 5.3). So the first time, your system asks you to confirm that you want to open it. After that it opens like
+any app.
+
+- **Windows.** SmartScreen says "Windows protected your PC". Click **More info**, then **Run anyway**.
+- **macOS.** macOS says it cannot check Notekea for malicious software. Click **Done**, open **System Settings ›
+  Privacy & Security**, scroll down and click **Open Anyway** next to Notekea, then **Open**.
+- **Linux.** Nothing to confirm: double-click the `.deb` to install it with your software center (or run
+  `sudo apt install ./notekea_<version>.deb`) and open Notekea from the applications menu.
+
 ## Build from source
 
 Requirements: JDK 21 and Git.

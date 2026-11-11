@@ -73,6 +73,6 @@ Change ⬜ to ✅ with the pull request link as each one lands. Already done: th
 ## Files
 
 - `GUIDE_WINDOWS.md`, `GUIDE_MACOS.md`, `GUIDE_LINUX.md`: step by step for testers, written for people who are not
-  developers.
+  developers. In Spanish, like the manager and the manual cases (`AUTO_TEST.md`, Language).
 - `AUTO_TEST.md`: the Auto-Test's design and how every feature keeps it up to date.
 - `runs/TEMPLATE.md`: the record of one run; `runs/M<N>.md` once it starts.
