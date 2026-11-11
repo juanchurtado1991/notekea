@@ -141,4 +141,29 @@ class CheckPlanUseCaseTest {
             )
         )
     }
+
+    // Agent eval of 2026-11-11: "add a task to buy beans to the recipe…" named the note in the step's list, and the
+    // task was planned for today's note instead.
+    @Test
+    fun `a task or a text for one note may name it in the step's list`() {
+        val result = checked(
+            PlannedStep(
+                kind = ActionKind.ADD_TASK,
+                fields = mapOf(ActionField.TEXT to "Buy beans"),
+                notes = listOf("Arepas")
+            ),
+            PlannedStep(
+                kind = ActionKind.APPEND_TEXT,
+                fields = mapOf(ActionField.TEXT to "More salt."),
+                notes = listOf("Dune")
+            )
+        ) as Outcome.Success
+
+        assertEquals(
+            expected = listOf(listOf("Recipes/Arepas.md"), listOf("Books/Dune.md")),
+            actual = result.value.map { step ->
+                step.notes.map { it.value }
+            }
+        )
+    }
 }

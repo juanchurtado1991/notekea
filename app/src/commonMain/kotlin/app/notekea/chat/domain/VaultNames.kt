@@ -24,7 +24,8 @@ internal class VaultNames(
 
     private fun resolve(step: PlannedStep): StepTargets {
         val kind = step.kind
-        val named = step[ActionField.NOTE]
+        // A small model may write a step's one note in its list: the same note.
+        val named = step[ActionField.NOTE] ?: step.notes.firstOrNull()
         val folderName = step[ActionField.FOLDER]
 
         return when (kind) {
