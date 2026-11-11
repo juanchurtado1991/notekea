@@ -41,7 +41,8 @@ val syncModule = module {
             vaultPath = parameters.getOrNull(),
             engines = get(),
             settingsStore = get(),
-            tokens = get()
+            tokens = get(),
+            sizes = get()
         )
     }
 }

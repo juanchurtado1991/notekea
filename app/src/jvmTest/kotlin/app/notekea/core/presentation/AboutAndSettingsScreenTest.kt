@@ -17,6 +17,8 @@ import app.notekea.settings.presentation.SettingsDialog
 import app.notekea.settings.presentation.about.AboutDialog
 import app.notekea.settings.presentation.about.AboutViewModel
 import app.notekea.settings.presentation.appearance.AppearanceViewModel
+import app.notekea.settings.presentation.help.SettingsHelpViewModel
+import kotlinx.coroutines.flow.emptyFlow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -46,7 +48,8 @@ class AboutAndSettingsScreenTest {
                         },
                         aiModelSection = {},
                         syncSection = {},
-                        viewModel = AppearanceViewModel(appearanceStore = FakeAppearanceStore())
+                        viewModel = AppearanceViewModel(appearanceStore = FakeAppearanceStore()),
+                        helpViewModel = SettingsHelpViewModel(helper = { _, _, _ -> emptyFlow() })
                     )
                 }
             ).forEach { (close, dialog) ->

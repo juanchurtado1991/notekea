@@ -22,6 +22,8 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.texts
 import app.notekea.settings.presentation.SettingsDialog
 import app.notekea.settings.presentation.appearance.AppearanceViewModel
+import app.notekea.settings.presentation.help.SettingsHelpViewModel
+import kotlinx.coroutines.flow.emptyFlow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -66,7 +68,8 @@ class ModelManagerScreenTest {
                             )
                         },
                         syncSection = {},
-                        viewModel = AppearanceViewModel(appearanceStore = FakeAppearanceStore())
+                        viewModel = AppearanceViewModel(appearanceStore = FakeAppearanceStore()),
+                        helpViewModel = SettingsHelpViewModel(helper = { _, _, _ -> emptyFlow() })
                     )
                 }
             }.use { scene ->

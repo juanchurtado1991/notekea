@@ -1,7 +1,13 @@
 package app.notekea.autotest.cases.m4
 
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.hasText
+import app.notekea.autotest.ChatModels
 import app.notekea.autotest.cases.m1.PLAYGROUND
 import app.notekea.autotest.cases.m1.WELCOME
+import app.notekea.autotest.cases.m3.MODEL_CASE_TIMEOUT
+import app.notekea.autotest.cases.m3.awaitReply
+import app.notekea.autotest.notekea
 import app.notekea.autotest.openVault
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
@@ -9,6 +15,7 @@ import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 import org.eclipse.jgit.api.Git
 import java.io.File
+import java.io.RandomAccessFile
 import java.nio.file.Files
 import kotlin.time.Duration.Companion.minutes
 
@@ -20,6 +27,13 @@ private const val UP_TO_DATE = "Up to date"
 private const val REMOTE_WAIT_MILLIS = 40_000L
 private const val POLL_MILLIS = 500L
 private val SYNC_TIMEOUT = 2.minutes
+private const val HELP_FIELD = "Ask about a setting…"
+private const val FIRST_STEP = "1. Make a free account at github.com."
+private const val TOO_LARGE = "Large vault for GitHub"
+private const val GITHUB_ADDRESS = "https://github.com/ana/notes.git"
+
+// A vault past GitHub's 1 GB, written as a sparse file: it takes no room on the disk.
+private const val LARGE_BYTES = 1_100_000_000L
 
 /**
  * The cases of 4.2, Git sync (`MVP_SMOKE_TEST.md`): the Playground Vault synced with a repository on disk (a bare
@@ -30,6 +44,8 @@ fun SuiteBuilder.syncCases() {
     connectAndCommit()
     conflict()
     gitHub()
+    helpAndSize()
+    helpAnswers()
 }
 
 private fun SuiteBuilder.connectAndCommit() {
@@ -148,6 +164,98 @@ private fun SuiteBuilder.gitHub() {
     }
 }
 
+// The developer's requests of 2026-11-11: most people do not know GitHub, so Ask about Settings beside the dialog
+// shows the steps; a vault over 1 GB is warned of before GitHub only, never kept on this computer or synced elsewhere.
+private fun SuiteBuilder.helpAndSize() {
+    automated(
+        id = "4.2-04",
+        title = "Ask about Settings shows GitHub's steps beside Sync; a vault over 1 GB is warned of for GitHub only"
+    ) {
+        RandomAccessFile(file(path = "$PLAYGROUND/Trip.mp4").toFile(), "rw").use {
+            it.setLength(LARGE_BYTES)
+        }
+
+        openVault(
+            name = PLAYGROUND,
+            shownText = WELCOME
+        )
+
+        clickIcon(label = "Settings")
+        expectText(text = "Ask about Settings")
+
+        expectText(
+            text = "Ask what any setting here does",
+            substring = true
+        )
+
+        click(text = "Sync")
+
+        expectText(
+            text = FIRST_STEP,
+            substring = true
+        )
+
+        // Kept on this computer, with no address typed: nothing is said (local remotes are in the unit tests).
+        expectNoText(text = TOO_LARGE)
+        click(text = ADDRESS_HINT)
+        type(text = GITHUB_ADDRESS)
+        expectText(text = TOO_LARGE)
+
+        expectText(
+            text = "This vault is 1.1 GB.",
+            substring = true
+        )
+    }
+}
+
+private fun SuiteBuilder.helpAnswers() {
+    automated(
+        id = "4.2-05",
+        title = "Ask about Settings answers a question on GitHub, beside Sync, in the question's language",
+        timeout = MODEL_CASE_TIMEOUT,
+        precondition = ChatModels.any
+    ) {
+        notekea().useChatModel()
+        openSync()
+        clickIcon(label = HELP_FIELD)
+        type(text = "¿qué es un token?")
+        press(key = Key.Enter)
+        awaitReply()
+        expectAnyText("contraseña", "llave", "clave", "GitHub")
+    }
+}
+
+/** Opens the Playground Vault and Settings → Sync. */
+private fun CaseScope.openSync() {
+    openVault(
+        name = PLAYGROUND,
+        shownText = WELCOME
+    )
+
+    clickIcon(label = "Settings")
+    click(text = "Sync")
+}
+
+/** Fails unless one of [texts] is on screen, in part of a text: the words a model picks vary. */
+private fun CaseScope.expectAnyText(vararg texts: String) {
+    step(description = "Expect one of ${texts.joinToString()}")
+
+    val isShown = texts.any { text ->
+        ui
+            .onAllNodes(
+                matcher = hasText(
+                    text = text,
+                    substring = true,
+                    ignoreCase = true
+                )
+            )
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+    }
+
+    if (!isShown) throw CaseFailure(message = "expected the reply to say ${texts.joinToString(separator = " or ")}")
+}
+
 /** A bare repository in the case's data folder, the remote both computers share. */
 private fun CaseScope.bareRemote(): File {
     val remote = file(path = REMOTE).toFile()
@@ -165,13 +273,7 @@ private fun CaseScope.bareRemote(): File {
 
 /** Opens the Playground Vault and connects it to [remote] in Settings → Sync. */
 private fun CaseScope.connect(remote: File) {
-    openVault(
-        name = PLAYGROUND,
-        shownText = WELCOME
-    )
-
-    clickIcon(label = "Settings")
-    click(text = "Sync")
+    openSync()
     click(text = ADDRESS_HINT)
     type(text = remote.toURI().toString())
     click(text = "Connect")

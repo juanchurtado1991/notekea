@@ -568,14 +568,16 @@ runs the same kinds of requests on a copy of the Sample Vault by hand.
 
 ### 4.2 Sync
 
-Run on the Playground Vault. 4.2-01 and 4.2-02 use a repository on this computer (the Auto-Test makes one); 4.2-03
-needs a GitHub account and a second computer or vault folder.
+Run on the Playground Vault. 4.2-01 and 4.2-02 use a repository on this computer (the Auto-Test makes one), 4.2-05 a
+chat model; 4.2-03 needs a GitHub account and a second computer or vault folder.
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
 | 4.2-01 | In the Playground Vault open Settings → Sync, paste the file: address of an empty local repository and click Connect; then add a note in the vault's folder and wait 15 seconds | The status bar says Up to date and the repository holds the vault's notes; the new note reaches the repository by itself | 4.2 | Auto-Test | 4.2-01, `JGitRepositoryTest`, `SyncEngineTest`, `SyncSettingsViewModelTest` | | | |
 | 4.2-02 | Connect as in 4.2-01; change Welcome in a clone of the repository and push it; change Welcome in the vault; click Sync now; close Settings, click Review on the banner, then Keep mine | The banner names Welcome; Review shows both versions side by side; Keep mine leaves this computer's text in Welcome, no conflict copy, the banner gone, and the repository with it | 4.2 | Auto-Test | 4.2-02, `JGitRepositoryTest`, `SyncStatusViewModelTest`, `SyncConflictsScreenTest` | | | |
 | 4.2-03 | Make a private GitHub repository and a fine-grained token that can write its contents; connect the Playground Vault with them; change a note; connect a second empty vault; type a wrong token and click Connect | Up to date and the notes on github.com; the change arrives there; the second vault gets every note; the wrong token says the repository refused it and the status bar says Sync sign-in failed | 4.2 | Manual (system) | | | | |
+| 4.2-04 | Put a file of over 1 GB in the Playground Vault's folder; open Settings, then Sync; then type a github.com address in Repository address | Ask about Settings, a card beside Settings, says what it answers, and with Sync open shows the five steps to set up GitHub; no warning until the address is on GitHub, then Large vault for GitHub says the vault's size. A vault with no remote, a local one or another host is never warned | 4.2 | Auto-Test | 4.2-04, `SyncSettingsViewModelTest`, `OkioVaultSizesTest` | | | |
+| 4.2-05 | With a chat model, open Settings → Sync and ask ¿qué es un token? in Ask about Settings | The reply explains in Spanish, from the guide, what a token is for GitHub sync; Stop ends it where it is | 4.2 | Auto-Test | 4.2-05, `SettingsHelpViewModelTest`, `SettingsHelpFromGuideTest` | | | |
 
 ## M4b — Sources, study cards and agent
 
@@ -588,6 +590,7 @@ Run on the Playground Vault. 4.4-02 needs the internet and a chat model.
 | 4.4-01 | Close every note, click Clip a web page, type http://localhost:8080/secrets and click Clip | It says Notekea never opens addresses on this computer or its local network, and no Web sources folder is made | 4.4 | Auto-Test | 4.4-01, `ClipAdaptersTest`, `ClipWebPageUseCaseTest` | | | |
 | 4.4-02 | With a chat model, clip a news or blog article from the start actions; then https://www.youtube.com; then write clip and another article's address in the chat and click Do it | The article becomes Web sources/<title> with source and clipped, notes the article backs and Original text; YouTube says no article was found and writes nothing; the chat's card clips the page | 4.4 | Manual (system) | `ClipEvalChatModelTest` (20 saved pages) | | | |
 | 4.4-03 | With a chat model, close every note, click Clip a web page and paste https://www.traceloop.com/docs/openllmetry/integrations/introduction; click Clip; choose This page and 30 more. Then in the chat write clip and the same address, and click Only this page | The dialog asks only this page or this page and 30 more (2 more left out); with them it counts Clipping page n of 31, then opens Web sources/Overview, whose Pages list links each integration's note in Web sources/Overview/. In the chat the same question shows two buttons, and Only this page proposes one note | 4.4 | Manual (system) | `ClipSectionTest`, `ClipSectionDialogTest`, `ClipSectionChatTest`, `ClipSectionChatFlowTest` | | | |
+| 4.4-04 | Close every note, click Clip a web page and paste the address of a documentation page that links 34 pages under its folder (the Auto-Test serves one); click Clip, then All 34 pages | The dialog offers only this page, this page and 30 more, or All 34 pages; All clips every one into Web sources/Intro/, and Web sources/Intro's Pages list links all 34 | 4.4 | Auto-Test | 4.4-04, `SectionSourcesTest`, `ClipSectionChatTest` | | | |
 
 ### 4.5 Documents
 

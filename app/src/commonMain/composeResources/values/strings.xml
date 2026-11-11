@@ -869,6 +869,14 @@
     <string name="sync_error_offline">The repository cannot be reached now. Notekea keeps trying by itself.</string>
     <string name="sync_error_address">This is not the address of a Git repository. It starts with https://</string>
     <string name="sync_error_failed">Sync failed: %1$s</string>
+    <string name="settings_help_title">Ask about Settings</string>
+    <string name="settings_help_intro">Ask what any setting here does, or how to do something. Answers come from Notekea’s guide.</string>
+    <string name="settings_help_sync_steps">To sync, Notekea saves your vault in a private place on GitHub, a free website.\n1. Make a free account at github.com.\n2. Make a private repository: + at the top right, New repository, name it notes, choose Private.\n3. Copy its HTTPS address.\n4. Make a token: your picture, Settings, Developer settings, Fine-grained tokens. Contents: Read and write.\n5. Paste both here and click Connect.</string>
+    <string name="settings_help_hint">Ask about a setting…</string>
+    <string name="settings_help_no_model">Download a chat model in Settings → AI model to ask questions here.</string>
+    <string name="settings_help_failed">The model could not answer now. Try again in a moment.</string>
+    <string name="sync_too_large_title">Large vault for GitHub</string>
+    <string name="sync_too_large">This vault is %1$s. GitHub asks a repository to stay under about 1 GB, so its free account may refuse or slow down syncing it. Keep large videos outside the vault, or use another Git host.</string>
     <string name="document_open_in_app">Open in the system’s app</string>
     <string name="document_unreadable">Notekea can’t read this document: %1$s</string>
     <string name="document_no_text">This document has no text to read, as a scanned PDF. Reading it needs text recognition, which comes after this version.</string>
