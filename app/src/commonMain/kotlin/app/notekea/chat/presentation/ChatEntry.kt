@@ -8,9 +8,9 @@ import app.notekea.chat.domain.ReplyLanguage
 import app.notekea.chat.domain.TurnOutcome
 
 /**
- * A question of the chat and its answer, as the panel draws it, keyed by [id]: [step] says where it stands, [sources]
- * are the passages its `[n]` cite (numbered again once [outcome] is set), an action holds its [action], and a help
- * answer may offer a request the chat can do for them ([offered], "…" where they finish it).
+ * A question of the chat and its answer, keyed by [id]: [step] says where it stands, [sources] are the passages its
+ * `[n]` cite, an action holds its [action], a help answer may offer a request ([offered], "…" where they finish it),
+ * and [answeredWith] is the mode Auto, or the person, used for it.
  */
 data class ChatEntry(
     val id: Long,
@@ -25,7 +25,8 @@ data class ChatEntry(
     val error: ChatError?,
     val action: ChatAction? = null,
     val offered: String? = null,
-    val moves: List<AgentMoveLine> = emptyList()
+    val moves: List<AgentMoveLine> = emptyList(),
+    val answeredWith: ChatMode? = null
 ) {
     /**
      * Whether the history keeps it: once answered, and for a request the chat acted on only once done, since one

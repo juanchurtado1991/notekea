@@ -22,7 +22,8 @@ class ActOnRequestUseCase(
         vaultPath: String,
         notes: Collection<NoteEntry>,
         context: ActionContext,
-        openNote: RelativePath?
+        openNote: RelativePath?,
+        agentUse: AgentUse = AgentUse.NEVER
     ): Flow<ActionTurnStep> = flow {
         emit(value = ActionTurnStep.Planning)
 
@@ -31,12 +32,14 @@ class ActOnRequestUseCase(
             is Outcome.Failure -> return@flow emit(ActionTurnStep.Answer(question = request))
         }
 
-        replyOf(
+        val reply = replyOf(
             planned = planned,
             request = request,
             notes = notes,
             openNote = openNote
-        )?.let {
+        )
+
+        routed(agentUse, reply)?.let {
             return@flow emit(value = it)
         }
 
@@ -48,7 +51,7 @@ class ActOnRequestUseCase(
             )
         ) {
             is Outcome.Success -> steps.value
-            is Outcome.Failure -> return@flow problem(problem = steps.error)
+            is Outcome.Failure -> return@flow emit(value = failed(steps.error, agentUse))
         }
 
         checked.filter {
@@ -156,6 +159,27 @@ class ActOnRequestUseCase(
                 ?.notes
                 ?.firstOrNull()
         )
+    }
+
+    // Help, the overview and talk stay the plan's; questions and actions go to the agent if asked. Null: act on it.
+    private fun routed(
+        agentUse: AgentUse,
+        reply: ActionTurnStep?
+    ): ActionTurnStep? {
+        val isWork = reply == null || reply is ActionTurnStep.Answer
+        val isForAgent = isWork && agentUse == AgentUse.FOR_WORK
+
+        return if (isForAgent) ActionTurnStep.ToAgent else reply
+    }
+
+    // A plan that names what the vault does not hold goes to the agent where Auto allows it, else says so.
+    private fun failed(
+        problem: ActionProblem,
+        agentUse: AgentUse
+    ): ActionTurnStep {
+        val isStuck = agentUse.isStuckOn(problem = problem)
+
+        return if (isStuck) ActionTurnStep.ToAgent else ActionTurnStep.Problem(problem = problem)
     }
 
     private suspend fun kotlinx.coroutines.flow.FlowCollector<ActionTurnStep>.problem(

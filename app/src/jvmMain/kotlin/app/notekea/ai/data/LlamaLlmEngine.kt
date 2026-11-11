@@ -11,6 +11,7 @@ import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmError
 import app.notekea.core.llm.domain.LlmException
 import app.notekea.core.llm.domain.LlmModelInfo
+import app.notekea.core.llm.domain.ModelTier
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -97,6 +98,7 @@ class LlamaLlmEngine(
                 Outcome.Success(
                     value = LlmModelInfo(
                         isSmall = isSmall,
+                        tier = TIERS.getValue(found.value.size),
                         hasDeepAnswer = hasDeepAnswer,
                         hasAgent = found.value.size in AGENT_SIZES
                     )
@@ -242,9 +244,15 @@ class LlamaLlmEngine(
         // The sizes whose answers three drafts and a vote make better on the 3.4 set (docs/answer-quality.md, 3.6).
         val DEEP_ANSWER_SIZES = setOf(ModelSize.MEDIUM)
 
-        // Agent mode (4.7) for the sizes that reach 80 % on its evaluation: Medium 83 %, Large 70 %, Small 10 %
-        // (docs/answer-quality.md, 4.7).
-        val AGENT_SIZES = setOf(ModelSize.MEDIUM)
+        // Agent mode (4.7): Medium (83 % on its evaluation) and Large (70 %, by the developer's choice of
+        // 2026-11-11); not Small (10 %). docs/answer-quality.md, 4.7.
+        val AGENT_SIZES = setOf(ModelSize.MEDIUM, ModelSize.LARGE)
+
+        val TIERS = mapOf(
+            ModelSize.SMALL to ModelTier.SMALL,
+            ModelSize.MEDIUM to ModelTier.MEDIUM,
+            ModelSize.LARGE to ModelTier.LARGE
+        )
 
         private const val ALL_LAYERS = -1
         private const val RERANKER_CONTEXT = 4_096

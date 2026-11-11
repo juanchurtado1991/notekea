@@ -30,7 +30,7 @@ object ChatModels {
         preferred() != null
     }
 
-    /** What a case that needs Medium needs (Deep answer). */
+    /** What a case that needs Medium needs (Deep thinking, agent mode). */
     val medium = Precondition(missing = MISSING) { has(size = ModelSize.MEDIUM) }
 
     /** The size a case uses: Medium, as recommended, else the one there is. */

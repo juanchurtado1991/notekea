@@ -139,9 +139,7 @@ class ChatViewModel(
 
             ChatIntent.OnCopyChat -> clipboard.copy(text = ChatTranscript.of(state = state.value))
 
-            ChatIntent.OnDeepToggle -> reduce { it.copy(isDeep = !it.isDeep) }
-
-            ChatIntent.OnAgentToggle -> reduce { it.copy(isAgent = !it.isAgent) }
+            is ChatIntent.OnModeChoose -> reduce { it.copy(mode = intent.mode) }
 
             ChatIntent.OnModelSettingsOpen -> emit(effect = ChatEffect.OpenModelSettings)
 
@@ -299,32 +297,36 @@ class ChatViewModel(
         }) {
             val history = historyBefore(id = id)
 
+            val current = state.value
+
             // A request in the whole vault may be an action or talk; one asked of a note or a folder is answered.
-            // Agent mode works on the whole vault; it ends on a card or with what it found, never in an answer.
-            val isAgent =
-                scope == ChatScope.VAULT &&
-                    state.value.isAgent &&
-                    state.value.isAgentOffered
-
-            if (isAgent) {
-                return@launchGuarded agent.work(id, question, notes, history, activeNote).also {
-                    save()
-                }
-            }
-
             val reply = if (scope == ChatScope.VAULT) {
                 actions.act(
                     id = id,
                     request = question,
                     notes = notes,
                     history = history,
-                    openNote = activeNote
+                    openNote = activeNote,
+                    agentUse = current.mode.agentUse(isAgentOffered = current.isAgentOffered)
                 )
             } else {
                 ChatReply.Question(question = question)
             }
 
+            // The agent ends on a card or with what it found, never in an answer of 3.2.
+            if (reply == ChatReply.Agent) {
+                update(id = id) { it.copy(answeredWith = ChatMode.AGENT) }
+
+                return@launchGuarded agent.work(id, question, notes, history, activeNote).also {
+                    save()
+                }
+            }
+
             if (reply == ChatReply.Acted) return@launchGuarded save()
+
+            val isDeep = current.isDeepFor(reply = reply)
+
+            update(id = id) { it.copy(answeredWith = if (isDeep) ChatMode.DEEP else ChatMode.FAST) }
 
             val steps = replies.stepsFor(
                 reply = reply,
@@ -332,7 +334,7 @@ class ChatViewModel(
                 history = history,
                 notes = notes,
                 only = notesOf(scope, notes, activeNote),
-                isDeep = state.value.isDeep && state.value.isDeepOffered,
+                isDeep = isDeep,
                 onStep = { step ->
                     update(id = id) { it.copy(step = step) }
                 }
@@ -406,6 +408,7 @@ class ChatViewModel(
                     reduce {
                         it.copy(
                             isSmall = info.isSmall,
+                            tier = info.tier,
                             isDeepOffered = info.hasDeepAnswer,
                             isAgentOffered = info.hasAgent
                         )

@@ -16,7 +16,7 @@ private const val RATING_EN = "notes with a rating of 4 or more"
 private const val RATING_ES = "notas con calificación de más de 3"
 
 /**
- * The cases of 3.6, 3.8 and 3.9 (`MVP_SMOKE_TEST.md`): Deep answer, plain-word queries and actions, with a chat model
+ * The cases of 3.6, 3.8 and 3.9 (`MVP_SMOKE_TEST.md`): Deep thinking, plain-word queries and actions, with a chat model
  * on the machine ([ChatModels]); the actions that change notes are in `ActionChangeCases.kt`.
  */
 fun SuiteBuilder.actionCases() {
@@ -32,19 +32,18 @@ fun SuiteBuilder.actionCases() {
 private fun SuiteBuilder.deepAnswer() {
     automated(
         id = "3.6-01",
-        title = "Deep answer writes drafts and shows one answer, with Medium",
+        title = "Deep thinking writes drafts and shows one answer, with Medium",
         timeout = MODEL_CASE_TIMEOUT,
         precondition = ChatModels.medium
     ) {
         openChat()
-        expectText(text = "· slower")
-        clickIcon(label = "Deep answer")
+        chooseMode(mode = "Deep thinking")
         send(question = WATER)
         expectText(text = "Writing drafts and comparing them…")
         awaitReply()
 
         val chat = copiedChat()
-        expectInChat(chat, "Deep answer: true")
+        expectInChat(chat, "Mode: deep")
 
         expectInChat(
             replyTo(

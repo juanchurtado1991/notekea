@@ -164,6 +164,7 @@ Medium went up as the evaluation showed what was wrong, each fix with its test:
 - **An empty find said nothing:** it now says nothing was found and shows the query it ran, so the next move can try
   other words.
 
-Only Medium offers it (`LlamaLlmEngine.AGENT_SIZES`). Large proposes changes for plain questions and gives up after
-one search more often; Small rarely ends on the right plan. Every change still waits for the card, so a wrong plan is
+Medium and Large offer it (`LlamaLlmEngine.AGENT_SIZES`); Large below the 80 % by the developer's choice of
+2026-11-11. Large proposes changes for plain questions and gives up after one search more often; Small rarely ends on
+the right plan, and does not offer it. Every change still waits for the card, so a wrong plan is
 seen before anything is written.

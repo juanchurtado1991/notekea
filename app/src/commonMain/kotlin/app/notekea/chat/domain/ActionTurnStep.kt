@@ -22,6 +22,9 @@ sealed interface ActionTurnStep {
     /** What the vault holds as a whole, described from its map. */
     data object Overview : ActionTurnStep
 
+    /** Agent mode works on it ([AgentUse]): asked for, or the plan named what only a look-up finds. */
+    data object ToAgent : ActionTurnStep
+
     /** Notes or tasks a step found, shown as a table. */
     data class Found(
         val step: ActionStep,
