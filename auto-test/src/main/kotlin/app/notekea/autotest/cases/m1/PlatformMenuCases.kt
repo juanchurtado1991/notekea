@@ -10,19 +10,23 @@ internal fun SuiteBuilder.menuCases() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "El menú de la app en macOS")
+        title(text = "La barra de menús en macOS")
 
         steps(
             text =
             "Solo en macOS; en otro sistema márcalo como Pasó.\n1. En Notekea, abre la " +
                 "Playground Vault (mira DATOS DE PRUEBA arriba).\n2. Abre el menú Notekea arriba " +
-                "en la pantalla y haz clic en Acerca de Notekea y luego en Ajustes…"
+                "en la pantalla y haz clic en Acerca de Notekea y luego en Ajustes…\n3. Abre los " +
+                "menús Archivo, Nota, Visualización, Ir y Ayuda, y elige Archivo › Nueva nota y " +
+                "Visualización › Abrir el grafo.\n4. Pulsa ⌘N."
         )
 
         expected(
             text =
-            "El menú Notekea de macOS abre los mismos Acerca de y Ajustes que la barra de " +
-                "herramientas lateral, y Notekea no agrega ningún otro menú a la barra."
+            "El menú Notekea abre los mismos Acerca de y Ajustes que la barra de herramientas " +
+                "lateral. Cada menú muestra sus acciones con su atajo al lado; Nueva nota crea una " +
+                "nota y Abrir el grafo abre el grafo, igual que sus atajos. ⌘N crea una sola nota, " +
+                "no dos."
         )
     }
 }

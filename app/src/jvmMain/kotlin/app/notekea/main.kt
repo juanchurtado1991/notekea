@@ -28,6 +28,7 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.platform.AppEnvironment
 import app.notekea.core.presentation.platform.FollowWindowBounds
 import app.notekea.core.presentation.platform.LocalTitleBarSpace
+import app.notekea.core.presentation.platform.MacMenuBar
 import app.notekea.core.presentation.platform.MacTitleBar
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.SystemAppMenu
@@ -51,6 +52,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
 
+private const val SCREEN_MENU_BAR = "apple.laf.useScreenMenuBar"
 private const val APP_ID = "Notekea"
 private const val CRASH_TEST_DELAY_MILLIS = 3_000L
 private const val CRASH_TEST_MESSAGE = "Crash test: NOTEKEA_CRASH_TEST is set"
@@ -81,6 +83,9 @@ fun runNotekea(
 ) {
     // Started again to play a YouTube video in a window of its own: only that window, no vault, no database.
     if (YouTubePlayerWindow.runIfAsked()) return
+
+    // macOS's menu bar at the top of the screen, as every Mac app has it (macOS redesign); other systems ignore it.
+    System.setProperty(SCREEN_MENU_BAR, "true")
 
     val koin = startKoin { modules(modules) }.koin
 
@@ -205,6 +210,16 @@ private fun ApplicationScope.NotekeaWindow(
             with(MacTitleBar) { rememberTitleBar(state = windowState) }
         } else {
             null
+        }
+
+        if (isMac) {
+            with(MacMenuBar) {
+                Menus(
+                    conventions = conventions,
+                    shortcuts = host.shortcuts,
+                    dialogs = host.dialogs
+                )
+            }
         }
 
         CompositionLocalProvider(LocalTitleBarSpace provides titleBar) {

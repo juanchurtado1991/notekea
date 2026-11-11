@@ -43,6 +43,11 @@
     <string name="about_shortcut_zoom_out">Zoom out</string>
     <string name="about_shortcut_zoom_reset">Actual size</string>
     <string name="about_shortcuts_title">Keyboard shortcuts</string>
+    <string name="menu_file">File</string>
+    <string name="menu_go">Go</string>
+    <string name="menu_help">Help</string>
+    <string name="menu_note">Note</string>
+    <string name="menu_view">View</string>
     <string name="about_tagline">Your notes, on your computer, as plain Markdown.</string>
     <string name="about_version">Version %1$s</string>
     <string name="appearance_mode">Mode</string>
