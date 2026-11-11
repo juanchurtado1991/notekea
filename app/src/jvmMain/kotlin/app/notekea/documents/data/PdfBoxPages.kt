@@ -1,5 +1,6 @@
 package app.notekea.documents.data
 
+import app.notekea.core.documents.data.PdfFonts
 import app.notekea.core.documents.domain.DocumentError
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
@@ -122,6 +123,7 @@ class PdfBoxPages(private val dispatchers: AppDispatchers) : PdfPages {
         }
 
         open?.second?.close()
+        PdfFonts.useBundledOnly()
         val document = Loader.loadPDF(file)
         open = key to document
 
