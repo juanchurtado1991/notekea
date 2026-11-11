@@ -28,14 +28,17 @@ class ActOnRequestUseCase(
 
         val planned = when (val plan = planRequest(request = request, context = context)) {
             is Outcome.Success -> plan.value
-            is Outcome.Failure -> return@flow emit(value = ActionTurnStep.Answer)
+            is Outcome.Failure -> return@flow emit(ActionTurnStep.Answer(question = request))
         }
 
-        val isQuestion = planned.all {
-            it.kind == ActionKind.ANSWER
+        replyOf(
+            planned = planned,
+            request = request,
+            notes = notes,
+            openNote = openNote
+        )?.let {
+            return@flow emit(value = it)
         }
-
-        if (isQuestion) return@flow emit(value = ActionTurnStep.Answer)
 
         val checked = when (
             val steps = checkPlan(
@@ -51,9 +54,16 @@ class ActOnRequestUseCase(
         checked.filter {
             it.kind in FINDING
         }.forEach { step ->
-            when (
-                val found = actionRunner.find(vaultPath = vaultPath, step = step, notes = notes)
-            ) {
+            val found = actionRunner.find(
+                vaultPath = vaultPath,
+                step = step,
+                notes = notes
+            )
+
+            val asked = ActionTurnStep.Answer(question = request)
+            if (isAskedInstead(step, checked, found)) return@flow emit(value = asked)
+
+            when (found) {
                 is Outcome.Success -> emit(
                     value = ActionTurnStep.Found(
                         step = step,
@@ -103,6 +113,47 @@ class ActOnRequestUseCase(
         }
 
         emit(value = ActionTurnStep.Proposed(steps = composed + shown))
+    }
+
+    /**
+     * Whether notes by their properties that found nothing ("what trips do I have?" in a vault with a Travel folder
+     * and no property for it) are searched as any question instead, being all the plan asked.
+     */
+    private fun isAskedInstead(
+        step: ActionStep,
+        checked: List<ActionStep>,
+        found: Outcome<FoundNotes, ActionProblem>
+    ): Boolean {
+        val isNothing = found is Outcome.Failure || (found as Outcome.Success).value.rows.isEmpty()
+
+        return step.kind == ActionKind.FIND_NOTES &&
+            checked.size == 1 &&
+            isNothing
+    }
+
+    /** A plan that is a question or talk, as the step that hands it back to the chat; null for an action. */
+    private fun replyOf(
+        planned: List<PlannedStep>,
+        request: String,
+        notes: Collection<NoteEntry>,
+        openNote: RelativePath?
+    ): ActionTurnStep? {
+        val first = planned.first()
+        val isQuestion = first.kind == ActionKind.ANSWER && planned.size == 1
+        val standalone = first[ActionField.REQUEST] ?: request
+        if (isQuestion) return ActionTurnStep.Answer(question = standalone)
+        if (first.kind != ActionKind.CHAT) return null
+
+        val named = first[ActionField.NOTE]?.let {
+            VaultNames(notes, openNote).targetsOf(step = first)
+        }
+
+        return ActionTurnStep.Chat(
+            note = (named as? Outcome.Success)
+                ?.value
+                ?.notes
+                ?.firstOrNull()
+        )
     }
 
     private suspend fun kotlinx.coroutines.flow.FlowCollector<ActionTurnStep>.problem(

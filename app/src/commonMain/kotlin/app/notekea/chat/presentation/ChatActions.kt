@@ -5,6 +5,7 @@ import app.notekea.chat.domain.ActionContext
 import app.notekea.chat.domain.ActionKind
 import app.notekea.chat.domain.ActionRunner
 import app.notekea.chat.domain.ActionTurnStep
+import app.notekea.chat.domain.ChatExchange
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.domain.Outcome
@@ -27,14 +28,15 @@ internal class ChatActions(
     private val update: (id: Long, change: (ChatEntry) -> ChatEntry) -> Unit,
     private val emit: (ChatEffect) -> Unit
 ) {
-    /** Acts on [request] for the entry [id]; returns whether it was a question, left to be answered. */
+    /** Acts on [request] for the entry [id]; returns what is left to do: answer it, talk, or nothing. */
     suspend fun act(
         id: Long,
         request: String,
         notes: Collection<NoteEntry>,
+        history: List<ChatExchange>,
         openNote: RelativePath?
-    ): Boolean {
-        var isQuestion = false
+    ): ChatReply {
+        var reply: ChatReply = ChatReply.Acted
 
         actOnRequest(
             request = request,
@@ -44,20 +46,22 @@ internal class ChatActions(
                 request = request,
                 notes = notes,
                 openNote = openNote
-            ),
+            ).copy(history = history),
             openNote = openNote
         ).collect { step ->
-            if (step == ActionTurnStep.Answer) {
-                isQuestion = true
-            } else {
-                follow(
+            when (step) {
+                is ActionTurnStep.Answer -> reply = ChatReply.Question(question = step.question)
+
+                is ActionTurnStep.Chat -> reply = ChatReply.Talk(note = step.note)
+
+                else -> follow(
                     id = id,
                     step = step
                 )
             }
         }
 
-        return isQuestion
+        return reply
     }
 
     private fun follow(
@@ -71,7 +75,7 @@ internal class ChatActions(
             val action = entry.action ?: ChatAction(status = ActionStatus.FINISHED)
 
             when (step) {
-                ActionTurnStep.Planning, ActionTurnStep.Answer ->
+                ActionTurnStep.Planning, is ActionTurnStep.Answer, is ActionTurnStep.Chat ->
                     entry.copy(step = ChatStep.PLANNING)
 
                 ActionTurnStep.Writing -> entry.copy(

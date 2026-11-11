@@ -71,6 +71,15 @@ class CrashBuddyTest {
     }
 
     @Test
+    fun `once the notice shows, another window failing never brings the swing notice too`() {
+        crashWindow(window = MAIN_WINDOW)
+        crashBuddy.onNoticeShown()
+        crashWindow(window = NOTICE_WINDOW)
+
+        assertEquals(emptyList<String>(), events.toList())
+    }
+
+    @Test
     fun `an error on another thread is kept without a notice`() {
         crashBuddy.installThreadHandler()
 

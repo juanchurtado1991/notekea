@@ -2,13 +2,16 @@ package app.notekea.chat.presentation
 
 import app.notekea.chat.domain.ActOnRequestUseCase
 import app.notekea.chat.domain.ActionRunner
+import app.notekea.chat.domain.AgentAnswerUseCase
 import app.notekea.chat.domain.AnswerCitations
 import app.notekea.chat.domain.AnswerFromNotesUseCase
 import app.notekea.chat.domain.AnswerStep
 import app.notekea.chat.domain.ChatError
+import app.notekea.chat.domain.ChatExchange
 import app.notekea.chat.domain.ChatHistoryStore
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
+import app.notekea.chat.domain.ConverseUseCase
 import app.notekea.chat.domain.FoundRow
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.core.domain.Outcome
@@ -20,6 +23,9 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.BaseViewModel
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlin.time.Clock
 
 /**
@@ -29,7 +35,9 @@ import kotlin.time.Clock
  */
 class ChatViewModel(
     private val vaultPath: String,
-    private val answerFromNotes: AnswerFromNotesUseCase,
+    answerFromNotes: AnswerFromNotesUseCase,
+    converse: ConverseUseCase,
+    agentAnswer: AgentAnswerUseCase,
     actOnRequest: ActOnRequestUseCase,
     actionRunner: ActionRunner,
     localCalendar: LocalCalendar,
@@ -38,6 +46,13 @@ class ChatViewModel(
     private val llmEngine: LlmEngine
 ) : BaseViewModel<ChatState, ChatIntent, ChatEffect>(initialState = ChatState()) {
     private val logger = Logger.withTag(tag = LOG_TAG)
+
+    private val replies = ChatReplies(
+        vaultPath = vaultPath,
+        answerFromNotes = answerFromNotes,
+        converse = converse,
+        agentAnswer = agentAnswer
+    )
 
     private val actions = ChatActions(
         vaultPath = vaultPath,
@@ -62,7 +77,13 @@ class ChatViewModel(
     init {
         launchGuarded(onError = ::logError) {
             val turns = historyStore.load(vaultPath = vaultPath)
-            val entries = turns.map { entryOf(turn = it) }
+
+            val entries = turns.map {
+                ChatEntry.of(
+                    turn = it,
+                    id = nextId++
+                )
+            }
 
             reduce { it.copy(entries = entries + it.entries) }
         }
@@ -128,6 +149,21 @@ class ChatViewModel(
             is ChatIntent.OnFoundClick -> emit(effect = foundEffectOf(row = intent.row))
         }
     }
+
+    /** The last few questions answered before [id], so a follow-up knows what "it" was. */
+    private fun historyBefore(id: Long): List<ChatExchange> = state
+        .value
+        .entries
+        .filter {
+            it.id < id && it.answer.isNotBlank()
+        }
+        .takeLast(n = HISTORY_TURNS)
+        .map {
+            ChatExchange(
+                question = it.question,
+                reply = it.answer.take(n = HISTORY_REPLY_CHARS)
+            )
+        }
 
     private fun entryOf(id: Long): ChatEntry? = state
         .value
@@ -220,22 +256,36 @@ class ChatViewModel(
                 throwable = it
             )
         }) {
-            // A request in the whole vault may be an action; a question asked of a note or a folder is answered.
-            val isQuestion = scope != ChatScope.VAULT ||
-                actions.act(id = id, request = question, notes = notes, openNote = activeNote)
+            val history = historyBefore(id = id)
 
-            if (!isQuestion) return@launchGuarded save()
+            // A request in the whole vault may be an action or talk; one asked of a note or a folder is answered.
+            val reply = if (scope == ChatScope.VAULT) {
+                actions.act(
+                    id = id,
+                    request = question,
+                    notes = notes,
+                    history = history,
+                    openNote = activeNote
+                )
+            } else {
+                ChatReply.Question(question = question)
+            }
 
-            update(id = id) { it.copy(step = ChatStep.SEARCHING) }
-            val isDeep = state.value.isDeep && state.value.isDeepOffered
+            if (reply == ChatReply.Acted) return@launchGuarded save()
 
-            answerFromNotes(
-                vaultPath = vaultPath,
+            val steps = replies.stepsFor(
+                reply = reply,
+                message = question,
+                history = history,
                 notes = notes,
-                question = question,
                 only = onlyFor(scope = scope),
-                drafts = if (isDeep) DEEP_DRAFTS else 1
-            ).collect { step ->
+                isDeep = state.value.isDeep && state.value.isDeepOffered,
+                onStep = { step ->
+                    update(id = id) { it.copy(step = step) }
+                }
+            )
+
+            steps.collect { step ->
                 follow(
                     id = id,
                     step = step
@@ -422,22 +472,15 @@ class ChatViewModel(
         )
     }
 
-    /** A request the chat acted on is kept only once done: one refused, cancelled or undone changed nothing. */
-    private fun isUndone(entry: ChatEntry): Boolean {
-        val action = entry.action ?: return false
-
-        return action.status != ActionStatus.DONE && action.status != ActionStatus.FINISHED
-    }
-
     private fun save() {
         val turns = state
             .value
             .entries
             .filterNot {
-                it.isAnswering || isUndone(entry = it)
+                !it.isKept
             }
             .takeLast(n = MAX_TURNS)
-            .map { turnOf(entry = it) }
+            .map { it.toTurn() }
 
         launchGuarded(onError = ::logError) {
             historyStore.save(
@@ -459,28 +502,6 @@ class ChatViewModel(
         )
     }
 
-    private fun entryOf(turn: ChatTurn): ChatEntry = ChatEntry(
-        id = nextId++,
-        question = turn.question,
-        scope = turn.scope,
-        step = ChatStep.DONE,
-        answer = turn.answer,
-        sources = turn.sources,
-        readNotes = 0,
-        scopeName = turn.scopeName,
-        outcome = turn.outcome,
-        error = null
-    )
-
-    private fun turnOf(entry: ChatEntry): ChatTurn = ChatTurn(
-        question = entry.question,
-        scope = entry.scope,
-        outcome = entry.outcome ?: TurnOutcome.STOPPED,
-        answer = entry.answer,
-        sources = entry.sources,
-        scopeName = entry.scopeName
-    )
-
     private fun logError(throwable: Throwable) {
         logger.e(throwable = throwable) { UNEXPECTED_ERROR_MESSAGE }
     }
@@ -489,9 +510,9 @@ class ChatViewModel(
         const val FOLDER_SEPARATOR = "/"
         const val LOG_TAG = "ChatViewModel"
         const val MAX_TURNS = 100
+        const val HISTORY_TURNS = 4
+        const val HISTORY_REPLY_CHARS = 400
 
-        // Three drafts and a vote (3.6, docs/answer-quality.md).
-        const val DEEP_DRAFTS = 3
         const val UNEXPECTED_ERROR_MESSAGE = "The chat failed unexpectedly"
 
         fun statusOf(error: LlmError): ModelStatus = when (error) {

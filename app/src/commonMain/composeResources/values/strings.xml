@@ -818,4 +818,6 @@
     <string name="chat_problem_long_es">El texto tiene %1$d palabras, más de las que puedo convertir en notas de una vez. Pégalo por partes.</string>
     <string name="chat_problem_failed_es">El modelo de IA se detuvo antes de terminar. No se cambió nada.</string>
     <string name="chat_problem_refused_es">Eso no lo puedo hacer desde el chat. Puedo crear, editar, etiquetar, mover y organizar notas, y encontrarlas.</string>
+    <string name="chat_step_further">Looking further in your notes…</string>
+    <string name="chat_step_further_es">Buscando más a fondo en tus notas…</string>
 </resources>

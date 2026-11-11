@@ -140,6 +140,8 @@ import app.notekea.resources.chat_step_composing
 import app.notekea.resources.chat_step_composing_es
 import app.notekea.resources.chat_step_drafting
 import app.notekea.resources.chat_step_drafting_es
+import app.notekea.resources.chat_step_further
+import app.notekea.resources.chat_step_further_es
 import app.notekea.resources.chat_step_planning
 import app.notekea.resources.chat_step_planning_es
 import app.notekea.resources.chat_step_reading
@@ -186,6 +188,7 @@ private fun replyStringPreview() {
 
 // The chat's replies in Spanish, the other language its models are evaluated in (docs/answer-quality.md).
 private val SPANISH: Map<StringResource, StringResource> = mapOf(
+    Res.string.chat_step_further to Res.string.chat_step_further_es,
     Res.string.chat_not_found to Res.string.chat_not_found_es,
     Res.string.chat_stopped to Res.string.chat_stopped_es,
     Res.string.chat_acted to Res.string.chat_acted_es,

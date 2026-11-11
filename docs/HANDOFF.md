@@ -101,6 +101,13 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
     3.7: the CPU setup names no GPU device (it kept Vulkan and 1.9 GB with no layer on it); Small on the CPU peaks at
     3.3 GB, over 5.4's 2.5 GB, recorded in `docs/performance.md` as decided. The code review's nine findings are fixed.
     Not built: rewriting a note as a difference (3.9), web clips (4.4). All of 3.2–3.9 is one pull request.
+    After the first smoke run (2026-11-11): design B for the chat (quiet question bubble, the answer beside the
+    assistant's mark, sources as pills), replies in the question's language (`ReplyLanguage`, `replyString`, the
+    `_es` strings), the chat's last four exchanges given to the planner so follow-ups stand alone, a `chat` step for
+    greetings and opinions (`ConverseUseCase`), and a second try when nothing is found (`AgentAnswerUseCase`, the light
+    agent; Medium 90 against 89 % right, traps 88 against 91 %). CrashBuddy shows the Swing notice only when the
+    Compose one could not show. Running the app from the build folder while it is rebuilt fails with
+    NoClassDefFoundError: rebuild only with the app closed.
 
 ## Open work, in order
 

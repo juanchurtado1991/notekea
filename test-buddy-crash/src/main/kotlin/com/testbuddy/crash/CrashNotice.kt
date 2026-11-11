@@ -2,6 +2,7 @@ package com.testbuddy.crash
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.DpSize
@@ -35,6 +36,8 @@ public fun CrashNotice(
         title = crashBuddy.config.texts.title,
         resizable = false
     ) {
+        LaunchedEffect(report) { crashBuddy.onNoticeShown() }
+
         theme {
             CrashNoticeContent(
                 crash = report,

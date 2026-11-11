@@ -2,11 +2,13 @@ package app.notekea.chat.presentation
 
 import app.notekea.chat.data.GhostActionPlanReader
 import app.notekea.chat.domain.ActOnRequestUseCase
+import app.notekea.chat.domain.AgentAnswerUseCase
 import app.notekea.chat.domain.AnswerFromNotesUseCase
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.CheckPlanUseCase
 import app.notekea.chat.domain.ComposeNotesUseCase
+import app.notekea.chat.domain.ConverseUseCase
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.FakeChatHistoryStore
 import app.notekea.chat.domain.PlanRequestUseCase
@@ -340,16 +342,34 @@ class ChatViewModelTest {
         }
 
     private fun TestScope.started(): ChatViewModel {
+        val answer = AnswerFromNotesUseCase(
+            textEmbedder = embedder,
+            vectorIndex = index,
+            noteTextCache = NoteTextCache(
+                contentStore = store,
+                textFolder = TextFolder()
+            ),
+            llmEngine = engine
+        )
+
         val viewModel = ChatViewModel(
             vaultPath = VAULT,
-            answerFromNotes = AnswerFromNotesUseCase(
-                textEmbedder = embedder,
-                vectorIndex = index,
+            answerFromNotes = answer,
+            converse = ConverseUseCase(
+                llmEngine = engine,
+                noteTextCache = NoteTextCache(
+                    contentStore = store,
+                    textFolder = TextFolder()
+                )
+            ),
+            agentAnswer = AgentAnswerUseCase(
+                answerFromNotes = answer,
                 noteTextCache = NoteTextCache(
                     contentStore = store,
                     textFolder = TextFolder()
                 ),
-                llmEngine = engine
+                llmEngine = engine,
+                planReader = GhostActionPlanReader()
             ),
             actOnRequest = ActOnRequestUseCase(
                 planRequest = PlanRequestUseCase(

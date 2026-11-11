@@ -58,6 +58,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and done only with Do it; Undo takes it all back. Opening a note, a panel, splitting the pane or switching the
   theme is done at once. Notes by their properties ("books I rated 4 or more") and tasks ("what is due this week?")
   come back as lists, and the Query tab fills its rules from the same words in "Describe what you want".
+- The chat follows the conversation ("and how long does it rest?"), talks when it is not asked about the notes
+  (a greeting, your opinion of a note), replies in the language you write in, and looks further on its own when a
+  first search finds nothing.
 - Deep answer, with the Medium model: three drafts and the one they agree on, a little slower and more often right.
 - Settings → AI model: the chat model for this computer (Small, Medium or Large, from its memory and GPU) downloads
   with its reranker, with progress, pause and resume, checked by SHA-256 before use; the other sizes can be

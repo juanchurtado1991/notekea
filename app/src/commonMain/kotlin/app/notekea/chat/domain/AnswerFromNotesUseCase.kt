@@ -189,6 +189,30 @@ class AnswerFromNotesUseCase(
         return draft.toString()
     }
 
+    /**
+     * The passages the reranker scores best for [query], as the answer would read them (none under [GATE]): what the
+     * agent of [AgentAnswerUseCase] searches with.
+     */
+    suspend fun excerpts(
+        vaultPath: String,
+        notes: Collection<NoteEntry>,
+        query: String
+    ): Outcome<List<AnswerSource>, ChatError> {
+        val found = when (val passages = passagesFor(vaultPath, notes, query, null)) {
+            is Outcome.Success -> passages.value
+            is Outcome.Failure -> return passages
+        }
+
+        return if (found.isEmpty()) {
+            Outcome.Success(value = emptyList())
+        } else {
+            best(
+                question = query,
+                passages = found
+            )
+        }
+    }
+
     /** The index's [CANDIDATES] closest passages to [question], with their text. */
     private suspend fun passagesFor(
         vaultPath: String,

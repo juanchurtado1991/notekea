@@ -35,9 +35,12 @@ object ActionPrompt {
 needs: never add a step to find or open a note before acting on it; name the note in the step that acts.
 Actions (fill only the fields named; a note is named by its title, a folder by its path):
 - answer: any question about what the notes say, or a request to explain, summarize or list what a note says, in the
-  chat. Fields: none. When the request is a question, the plan is only answer.
-- find_notes: a list of notes chosen by the values of their properties (rating, status, finished, dates, author).
-  request: the request.
+  chat. request: the question rewritten to stand alone, naming what "it", "that" or "the trip" is from the chat so
+  far. When the request is a question, the plan is only answer.
+- chat: a greeting, thanks, small talk, or a request for your opinion, advice or ideas, not for what the notes say.
+  note: the note it is about, if any ("this note" for the open one).
+- find_notes: a list of notes chosen by the values of their properties (rating, status, finished, dates, author),
+  never a question about a topic or what a note says. request: the request.
 - show_tasks: show tasks. folder, tag, period (overdue, today, this week, later, no date, done): optional.
 - list_untagged: list notes without tags. list_broken_links: list links to notes that do not exist.
 - open_note: note, and text: a heading to go to (optional). open_today: today's daily note.
@@ -60,11 +63,16 @@ Actions (fill only the fields named; a note is named by its title, a folder by i
 Use "this note" for the open note. Dates are YYYY-MM-DD. Keep names, tags and quoted text exactly as the request
 writes them, never translated.
 Examples:
-"How long does the dough rest?" -> [answer]
+"How long does the dough rest?" -> [answer request="How long does the arepa dough rest?"]
+"hola" -> [chat]
+"what do you think of this note?" -> [chat note="this note"]
+"¿qué opinas del viaje a Lisboa?" -> [chat note="Lisbon trip"]
 "summarize this note" -> [answer]
 "list the ingredients of the soup" -> [answer]
 "summarize what my notes say about sleep" -> [answer]
 "when is the trip?" -> [answer]
+"explain the reading challenge" -> [answer request="explain the reading challenge"]
+"what books are in my reading list?" -> [answer request="what books are in my reading list?"]
 "books I rated 4 or more" -> [find_notes request="books I rated 4 or more"]
 "what is due this week?" -> [show_tasks period="this week"]
 "open Dune" -> [open_note note="Dune"]
