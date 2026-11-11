@@ -338,4 +338,52 @@ class JGitRepositoryTest {
             )
         )
     }
+
+    // CI on Windows, 2026-11-11: Git for Windows sets core.autocrlf, and JGit honors it, so a pulled note came back
+    // with CRLF line ends. A vault keeps its notes' bytes as they were written.
+    @Test
+    fun `a note keeps its line ends on a computer whose Git converts them`() {
+        laptop.write(
+            path = "Ideas/Plan.md",
+            text = "# Plan\n\nBuy seeds.\n"
+        )
+
+        runBlocking {
+            git.connect(
+                vaultPath = laptop.path,
+                remoteUrl = url,
+                token = null
+            )
+        }
+
+        Git
+            .init()
+            .setDirectory(desktop)
+            .setInitialBranch("main")
+            .call()
+            .use {
+                it
+                    .repository
+                    .config
+                    .setString("core", null, "autocrlf", "true")
+
+                it
+                    .repository
+                    .config
+                    .save()
+            }
+
+        runBlocking {
+            git.connect(
+                vaultPath = desktop.path,
+                remoteUrl = url,
+                token = null
+            )
+        }
+
+        assertEquals(
+            expected = "# Plan\n\nBuy seeds.\n",
+            actual = desktop.read(path = "Ideas/Plan.md")
+        )
+    }
 }
