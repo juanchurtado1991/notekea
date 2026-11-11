@@ -27,6 +27,7 @@ fun SuiteBuilder.attachmentCases() {
     embedsInEdit()
     attachmentFiles()
     embeddedNotes()
+    attachmentSystemCases()
     attachmentManualCases()
 }
 

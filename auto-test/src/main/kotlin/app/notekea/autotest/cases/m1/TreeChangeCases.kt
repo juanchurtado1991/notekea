@@ -1,19 +1,25 @@
 package app.notekea.autotest.cases.m1
 
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.ComposeTimeoutException
 import app.notekea.autotest.SmokeScenarios
 import app.notekea.autotest.clickInTree
+import app.notekea.autotest.notekea
 import app.notekea.autotest.openVault
 import app.notekea.autotest.relaunch
+import app.notekea.autotest.rightClickInTree
+import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.HostSystem
 import com.testbuddy.ManualReason
 import com.testbuddy.ShortcutModifier.Mod
+import com.testbuddy.ShortcutModifier.Shift
 import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
 
 private const val DELETE_NOTE = "Delete note"
 private const val SAMPLE_VAULT = "Sample Vault"
+private const val REVEAL_WAIT_MILLIS = 10_000L
 
 /** The cases of 1.4 that change the tree: deleting, other apps, a large vault, the sidebar (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.treeChangeCases() {
@@ -57,29 +63,51 @@ private fun SuiteBuilder.deleteNoteAndFolder() {
 }
 
 private fun SuiteBuilder.showInFiles() {
-    manual(
+    automated(
         id = "1.4-08",
-        reason = ManualReason.SYSTEM
+        title = "Show in Files asks the file manager for the note, from the right click and from Shift+F10"
     ) {
-        prepare(PLAYGROUND)
-        title(text = "Mostrar en Archivos abre el administrador de archivos")
-
-        steps(
-            text =
-            "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba).\n2. Haz " +
-                "clic derecho en una nota de la lista de la izquierda y elige Mostrar en el " +
-                "Explorador de archivos (Windows), Mostrar en el Finder (macOS) o Mostrar en " +
-                "Archivos (Linux).\n3. Selecciona otra nota y pulsa Shift+F10 (Fn+Shift+F10 en " +
-                "un teclado Mac, donde F10 solo silencia el sonido), o la tecla Menú si tu " +
-                "teclado la tiene."
+        openVault(
+            name = PLAYGROUND,
+            shownText = WELCOME
         )
 
-        expected(
-            text =
-            "El administrador de archivos se abre con la nota seleccionada (en Linux, al " +
-                "menos se abre su carpeta). El menú muestra el atajo de cada acción, y Shift+F10 " +
-                "lo abre sobre la nota seleccionada."
-        )
+        // Each system names its file manager (Show in Finder, Show in File Explorer).
+        val reveal = when (system) {
+            HostSystem.MACOS -> "Show in Finder"
+            HostSystem.WINDOWS -> "Show in File Explorer"
+            HostSystem.LINUX -> "Show in Files"
+        }
+
+        rightClickInTree(text = WELCOME)
+        click(text = reveal)
+        awaitRevealed(times = 1)
+
+        clickInTree(text = WELCOME)
+        press(shortcut = Shift + Key.F10)
+        click(text = reveal)
+        awaitRevealed(times = 2)
+    }
+}
+
+/** Waits until the case's file manager was asked [times] times for the Welcome note. */
+private fun CaseScope.awaitRevealed(times: Int) {
+    step(description = "Expect Welcome shown in the file manager $times time(s)")
+
+    try {
+        ui
+            .waitUntil(timeoutMillis = REVEAL_WAIT_MILLIS) {
+                notekea()
+                    .fileRevealer
+                    .revealed
+                    .count {
+                        it.name == "$WELCOME.md"
+                    } >= times
+            }
+    } catch (exception: ComposeTimeoutException) {
+        throw CaseFailure(message = "expected Welcome shown $times time(s)").apply {
+            initCause(exception)
+        }
     }
 }
 

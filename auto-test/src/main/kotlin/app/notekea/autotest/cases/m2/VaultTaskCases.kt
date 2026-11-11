@@ -6,11 +6,13 @@ import app.notekea.autotest.expectOrderOnScreen
 import app.notekea.autotest.openVault
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
+import java.nio.file.Files
 
 private const val SAMPLE = "Sample Vault"
 private const val HOME = "Home"
 private const val TASKS = "Tasks"
 private const val DEMO_TASK = "Record a demo video"
+private const val EDITED_TASK = "Record a short demo video"
 private const val FLAT_TASK = "Find a flat near the river"
 private const val LAUNCH_FILE = "$SAMPLE/Projects/Notekea launch.md"
 private const val OPEN_TASKS =
@@ -110,14 +112,24 @@ private fun SuiteBuilder.checkingATask() {
 }
 
 private fun SuiteBuilder.changedOutside() {
-    manual(
+    automated(
         id = "2.11-04",
-        reason = ManualReason.SYSTEM
+        title = "A task changed outside Notekea shows its new text in the Tasks tab"
     ) {
-        prepare(SAMPLE)
-        title(text = "Una tarea cambiada fuera de Notekea se actualiza en la pestaña")
-        steps(text = "$OPEN_TASKS\n3. Cambia el texto de una tarea en otro editor y guarda.")
-        expected(text = "La pestaña muestra el texto nuevo en menos de un segundo.")
+        openVault(
+            name = SAMPLE,
+            shownText = HOME
+        )
+
+        clickIcon(label = TASKS)
+        scrollTo(text = DEMO_TASK)
+
+        // Another editor saves the note: the tab follows the vault's files without a click.
+        val launch = file(path = LAUNCH_FILE)
+        Files.writeString(launch, Files.readString(launch).replace(DEMO_TASK, EDITED_TASK))
+
+        scrollTo(text = EDITED_TASK)
+        expectNoText(text = DEMO_TASK)
     }
 }
 

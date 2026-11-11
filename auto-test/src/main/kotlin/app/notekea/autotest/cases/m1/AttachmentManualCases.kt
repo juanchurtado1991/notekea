@@ -9,9 +9,6 @@ private const val OPEN_IMAGES =
 /** The cases of 1.8 that need the system (its file dialogs, file manager, clipboard, PDF viewer) or a person's eyes. */
 internal fun SuiteBuilder.attachmentManualCases() {
     pictureSizes()
-    pdfOpens()
-    locateMissing()
-    attachFromMenu()
     dropFiles()
     pasteScreenshot()
     obsidianAttachmentFolder()
@@ -37,75 +34,6 @@ private fun SuiteBuilder.pictureSizes() {
                 "enlace Markdown. Weekly menu.pdf y broken.png se ven como fichas de archivo con " +
                 "un clip y \"Se abre con su app\". Lost photo.png dice \"Falta este archivo\" " +
                 "con su nombre y Buscar…. En el último párrafo \"the menu\" es un enlace."
-        )
-    }
-}
-
-private fun SuiteBuilder.pdfOpens() {
-    manual(
-        id = "1.8-03",
-        reason = ManualReason.SYSTEM
-    ) {
-        prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "Un PDF se abre en el visor de PDF del sistema")
-
-        steps(
-            text =
-            "$OPEN_IMAGES\n3. Haz clic en la ficha Weekly menu.pdf.\n4. Cierra el visor de " +
-                "PDF y haz clic en \"the menu\" en el último párrafo."
-        )
-
-        expected(
-            text =
-            "Las dos veces el PDF \"Weekly menu: arepas\" se abre en el visor de PDF de tu " +
-                "sistema."
-        )
-    }
-}
-
-private fun SuiteBuilder.locateMissing() {
-    manual(
-        id = "1.8-04",
-        reason = ManualReason.SYSTEM
-    ) {
-        prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "Buscar una imagen que falta")
-
-        steps(
-            text =
-            "$OPEN_IMAGES\n3. Haz clic en Buscar… debajo de Lost photo.png.\n4. En la " +
-                "ventana que se abre, elige Found plate.png en la carpeta Outside files de la " +
-                "carpeta Test data."
-        )
-
-        expected(
-            text =
-            "La línea pasa a ser ![[Found plate.png]] y debajo se ve un plato verde. Found " +
-                "plate.png ahora está en la carpeta de adjuntos de la bóveda."
-        )
-    }
-}
-
-private fun SuiteBuilder.attachFromMenu() {
-    manual(
-        id = "1.8-05",
-        reason = ManualReason.SYSTEM
-    ) {
-        prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "Agregar un archivo desde la barra de herramientas")
-
-        steps(
-            text =
-            "$OPEN_IMAGES\n3. Haz clic al final de la nota, abre Más (⋯) en la barra de " +
-                "herramientas y haz clic en Imagen o archivo.\n4. Elige Shopping list.pdf en la " +
-                "carpeta Outside files de la carpeta Test data."
-        )
-
-        expected(
-            text =
-            "![[Shopping list.pdf]] se escribe en una línea propia con su ficha debajo, y el " +
-                "cursor queda en la línea siguiente. El PDF se copia en la carpeta de adjuntos " +
-                "de la bóveda."
         )
     }
 }
