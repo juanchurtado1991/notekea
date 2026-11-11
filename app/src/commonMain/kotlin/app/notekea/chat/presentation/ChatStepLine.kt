@@ -35,6 +35,7 @@ import app.notekea.resources.chat_step_planning
 import app.notekea.resources.chat_step_reading
 import app.notekea.resources.chat_step_reading_one
 import app.notekea.resources.chat_step_searching
+import app.notekea.resources.chat_step_working
 import app.notekea.resources.chat_step_writing
 import org.jetbrains.compose.resources.stringResource
 
@@ -100,6 +101,8 @@ private fun stepText(
     step == ChatStep.READING -> replyString(Res.string.chat_step_reading, notes)
 
     step == ChatStep.DRAFTING -> replyString(resource = Res.string.chat_step_drafting)
+
+    step == ChatStep.WORKING -> replyString(resource = Res.string.chat_step_working)
 
     else -> replyString(resource = Res.string.chat_step_writing)
 }

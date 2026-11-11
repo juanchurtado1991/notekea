@@ -33,6 +33,9 @@ sealed interface ActionProblem {
     /** Something the chat never does; [reason] as the model wrote it. */
     data class Refused(val reason: String) : ActionProblem
 
+    /** Agent mode ran out of moves or time, or its model failed, before it could propose or finish (4.7). */
+    data object AgentStopped : ActionProblem
+
     /** No study card could be made from the note: the note backs none the model proposed (4.6). */
     data object NoCards : ActionProblem
 

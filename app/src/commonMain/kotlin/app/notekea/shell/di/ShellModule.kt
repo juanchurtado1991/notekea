@@ -2,6 +2,7 @@ package app.notekea.shell.di
 
 import app.notekea.chat.domain.ActionRunner
 import app.notekea.chat.domain.CardMaker
+import app.notekea.chat.domain.PageReader
 import app.notekea.chat.domain.WebPageClipper
 import app.notekea.shell.data.CardsForChat
 import app.notekea.shell.data.ClipsForChat
@@ -51,8 +52,13 @@ val shellModule = module {
 
     single<CardMaker> { CardsForChat(makeCards = get()) }
 
-    single<WebPageClipper> {
+    single<PageReader> { get<ClipsForChat>() }
+    single<WebPageClipper> { get<ClipsForChat>() }
+
+    single {
         ClipsForChat(
+            fetcher = get(),
+            extractor = get(),
             clipWebPage = get(),
             localCalendar = get(),
             clock = get()

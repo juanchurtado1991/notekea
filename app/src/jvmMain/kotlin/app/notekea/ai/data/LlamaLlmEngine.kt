@@ -97,7 +97,8 @@ class LlamaLlmEngine(
                 Outcome.Success(
                     value = LlmModelInfo(
                         isSmall = isSmall,
-                        hasDeepAnswer = hasDeepAnswer
+                        hasDeepAnswer = hasDeepAnswer,
+                        hasAgent = found.value.size in AGENT_SIZES
                     )
                 )
             }
@@ -240,6 +241,9 @@ class LlamaLlmEngine(
 
         // The sizes whose answers three drafts and a vote make better on the 3.4 set (docs/answer-quality.md, 3.6).
         val DEEP_ANSWER_SIZES = setOf(ModelSize.MEDIUM)
+
+        // Agent mode (4.7) for the sizes that reach its evaluation's threshold (docs/answer-quality.md).
+        val AGENT_SIZES = setOf(ModelSize.MEDIUM, ModelSize.LARGE)
 
         private const val ALL_LAYERS = -1
         private const val RERANKER_CONTEXT = 4_096

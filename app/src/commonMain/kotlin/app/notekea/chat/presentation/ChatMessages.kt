@@ -245,13 +245,17 @@ private fun Answer(
     val isWriting = entry.step == ChatStep.WRITING && entry.isAnswering
 
     AnswerBubble {
-        AnswerContent(
-            entry = entry,
-            isWriting = isWriting,
-            isSmall = isSmall,
-            onIntent = onIntent,
-            onSourceClick = onSourceClick
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+            AgentMoves(moves = entry.moves)
+
+            AnswerContent(
+                entry = entry,
+                isWriting = isWriting,
+                isSmall = isSmall,
+                onIntent = onIntent,
+                onSourceClick = onSourceClick
+            )
+        }
     }
 }
 

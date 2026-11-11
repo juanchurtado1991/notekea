@@ -24,7 +24,8 @@ data class ChatEntry(
     val outcome: TurnOutcome?,
     val error: ChatError?,
     val action: ChatAction? = null,
-    val offered: String? = null
+    val offered: String? = null,
+    val moves: List<AgentMoveLine> = emptyList()
 ) {
     /**
      * Whether the history keeps it: once answered, and for a request the chat acted on only once done, since one

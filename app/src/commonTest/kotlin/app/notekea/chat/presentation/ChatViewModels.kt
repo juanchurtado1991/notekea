@@ -3,6 +3,7 @@ package app.notekea.chat.presentation
 import app.notekea.chat.data.GhostActionPlanReader
 import app.notekea.chat.domain.ActOnRequestUseCase
 import app.notekea.chat.domain.AgentAnswerUseCase
+import app.notekea.chat.domain.AgentTaskUseCase
 import app.notekea.chat.domain.AnswerFromNotesUseCase
 import app.notekea.chat.domain.AnswerHelpUseCase
 import app.notekea.chat.domain.ChatHistoryStore
@@ -12,7 +13,9 @@ import app.notekea.chat.domain.ConverseUseCase
 import app.notekea.chat.domain.DescribeVaultUseCase
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.HelpGuide
+import app.notekea.chat.domain.PageProblem
 import app.notekea.chat.domain.PlanRequestUseCase
+import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.llm.domain.FakeLlmEngine
@@ -79,6 +82,21 @@ internal fun chatViewModel(
                 planReader = GhostActionPlanReader()
             ),
             actionRunner = runner
+        ),
+        agentTask = AgentTaskUseCase(
+            llmEngine = engine,
+            planReader = GhostActionPlanReader(),
+            answerFromNotes = answer,
+            noteTextCache = cache,
+            actionRunner = runner,
+            pageReader = { Outcome.Failure(error = PageProblem.OFFLINE) },
+            checkPlan = CheckPlanUseCase(),
+            composeNotes = ComposeNotesUseCase(
+                llmEngine = engine,
+                noteTextCache = cache,
+                planReader = GhostActionPlanReader()
+            ),
+            clock = Clock.System
         ),
         actionRunner = runner,
         localCalendar = FakeLocalCalendar(),
