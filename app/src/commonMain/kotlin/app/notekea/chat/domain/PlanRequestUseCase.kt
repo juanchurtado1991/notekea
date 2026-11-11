@@ -43,7 +43,12 @@ class PlanRequestUseCase(
             ?.take(n = ActionPrompt.MAX_STEPS)
             .orEmpty()
 
-        val shaped = trimmed(steps = steps).map {
+        val asked = HowToAsked.shaped(
+            steps = steps,
+            request = request
+        )
+
+        val shaped = trimmed(steps = asked).map {
             val named = foldersNamed(
                 step = rescued(step = it),
                 context = context,
@@ -195,6 +200,20 @@ class PlanRequestUseCase(
      * vault does not first find or open the notes it names (the card lists them). No plan is a question.
      */
     private fun trimmed(steps: List<PlannedStep>): List<PlannedStep> {
+        // How to do something is explained, never done: "how do I create a note?" planned with create_note too.
+        steps.firstOrNull {
+            it.kind == ActionKind.HELP
+        }?.let {
+            return listOf(it)
+        }
+
+        val overview = steps.firstOrNull {
+            it.kind == ActionKind.OVERVIEW
+        }
+
+        val isOverview = overview != null && steps.none { it.kind.isConfirmed }
+        if (isOverview) return listOfNotNull(overview)
+
         // A plan that also acts is an action, its answer step left out: "move Retro October" with an answer
         // must say the note is not there, not that the notes do not answer.
         val isQuestion = steps.all {

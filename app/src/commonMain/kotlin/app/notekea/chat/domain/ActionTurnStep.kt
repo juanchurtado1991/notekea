@@ -16,6 +16,12 @@ sealed interface ActionTurnStep {
     /** Not about the notes' facts (a greeting, an opinion): the chat talks, reading the [note] it is about, if any. */
     data class Chat(val note: RelativePath?) : ActionTurnStep
 
+    /** How to use Notekea: explained from the guide, the plan's [request] being the question as it stands alone. */
+    data class Help(val request: String) : ActionTurnStep
+
+    /** What the vault holds as a whole, described from its map. */
+    data object Overview : ActionTurnStep
+
     /** Notes or tasks a step found, shown as a table. */
     data class Found(
         val step: ActionStep,

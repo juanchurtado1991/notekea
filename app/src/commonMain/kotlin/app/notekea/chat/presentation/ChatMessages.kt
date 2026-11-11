@@ -46,6 +46,7 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.designsystem.theme.motionTween
 import app.notekea.resources.Res
 import app.notekea.resources.chat_acted
+import app.notekea.resources.chat_do_it_for_me
 import app.notekea.resources.chat_failed
 import app.notekea.resources.chat_failed_search
 import app.notekea.resources.chat_not_found
@@ -292,7 +293,8 @@ private fun AnswerContent(
             entry = entry,
             isWriting = isWriting,
             isSourcesFirst = isSmall,
-            onSourceClick = onSourceClick
+            onSourceClick = onSourceClick,
+            onOfferedClick = { onIntent(ChatIntent.OnOfferedClick(id = entry.id)) }
         )
     }
 }
@@ -302,9 +304,11 @@ private fun Written(
     entry: ChatEntry,
     isWriting: Boolean,
     isSourcesFirst: Boolean,
-    onSourceClick: (AnswerSource) -> Unit
+    onSourceClick: (AnswerSource) -> Unit,
+    onOfferedClick: () -> Unit
 ) {
     val isDone = !entry.isAnswering && entry.sources.isNotEmpty()
+    val isOffered = !entry.isAnswering && entry.offered != null
 
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
         if (isSourcesFirst && isDone) {
@@ -325,6 +329,14 @@ private fun Written(
 
         if (entry.outcome == TurnOutcome.STOPPED) {
             Quiet(text = replyString(resource = Res.string.chat_stopped))
+        }
+
+        if (isOffered) {
+            NotekeaButton(
+                text = replyString(resource = Res.string.chat_do_it_for_me),
+                onClick = onOfferedClick,
+                style = NotekeaButtonStyle.TEXT
+            )
         }
 
         AnimatedVisibility(

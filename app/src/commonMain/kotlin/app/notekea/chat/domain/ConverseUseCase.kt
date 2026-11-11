@@ -85,7 +85,7 @@ class ConverseUseCase(
     }
 
     private companion object {
-        const val MAX_TOKENS = 300
+        const val MAX_TOKENS = 450
         const val TEMPERATURE = 0.6f
         const val SNIPPET_CHARS = 300
     }

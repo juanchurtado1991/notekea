@@ -2,7 +2,7 @@ package app.notekea.chat.presentation
 
 import app.notekea.core.notes.domain.RelativePath
 
-/** What is left to do once a request is planned: nothing more, answer it from the notes, or talk. */
+/** What is left to do once a request is planned: nothing more, answer it, talk, explain the app or the vault. */
 internal sealed interface ChatReply {
     data object Acted : ChatReply
 
@@ -11,4 +11,10 @@ internal sealed interface ChatReply {
 
     /** Talk (a greeting, an opinion), reading the [note] it is about, if any. */
     data class Talk(val note: RelativePath?) : ChatReply
+
+    /** How to use Notekea, [request] being what they want to know as it stands alone. */
+    data class Help(val request: String) : ChatReply
+
+    /** What the vault holds as a whole. */
+    data object Overview : ChatReply
 }

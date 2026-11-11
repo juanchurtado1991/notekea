@@ -5,6 +5,7 @@ import app.notekea.chat.domain.ActionRunner
 import app.notekea.chat.domain.AgentAnswerUseCase
 import app.notekea.chat.domain.AnswerCitations
 import app.notekea.chat.domain.AnswerFromNotesUseCase
+import app.notekea.chat.domain.AnswerHelpUseCase
 import app.notekea.chat.domain.AnswerStep
 import app.notekea.chat.domain.ChatError
 import app.notekea.chat.domain.ChatExchange
@@ -12,6 +13,7 @@ import app.notekea.chat.domain.ChatHistoryStore
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.ConverseUseCase
+import app.notekea.chat.domain.DescribeVaultUseCase
 import app.notekea.chat.domain.FoundRow
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.core.domain.Outcome
@@ -21,6 +23,7 @@ import app.notekea.core.llm.domain.LlmError
 import app.notekea.core.logging.domain.TextClipboard
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
@@ -39,6 +42,9 @@ class ChatViewModel(
     answerFromNotes: AnswerFromNotesUseCase,
     converse: ConverseUseCase,
     agentAnswer: AgentAnswerUseCase,
+    answerHelp: AnswerHelpUseCase,
+    describeVault: DescribeVaultUseCase,
+    conventions: PlatformConventions,
     actOnRequest: ActOnRequestUseCase,
     actionRunner: ActionRunner,
     localCalendar: LocalCalendar,
@@ -53,7 +59,10 @@ class ChatViewModel(
         vaultPath = vaultPath,
         answerFromNotes = answerFromNotes,
         converse = converse,
-        agentAnswer = agentAnswer
+        agentAnswer = agentAnswer,
+        answerHelp = answerHelp,
+        describeVault = describeVault,
+        shortcuts = HelpShortcuts.of(conventions = conventions)
     )
 
     private val actions = ChatActions(
@@ -151,7 +160,22 @@ class ChatViewModel(
             }
 
             is ChatIntent.OnFoundClick -> emit(effect = foundEffectOf(row = intent.row))
+
+            is ChatIntent.OnOfferedClick -> entryOf(id = intent.id)?.offered?.let {
+                offered(request = it)
+            }
         }
+    }
+
+    /** A request offered by a help answer: asked of the whole vault, or left in the field to finish its "…". */
+    private fun offered(request: String) {
+        if (UNFINISHED in request) return reduce { it.copy(question = request) }
+
+        ask(
+            question = request,
+            scope = ChatScope.VAULT,
+            scopeName = null
+        )
     }
 
     /** The last few questions answered before [id], so a follow-up knows what "it" was. */
@@ -302,44 +326,7 @@ class ChatViewModel(
         id: Long,
         step: AnswerStep
     ) {
-        update(id = id) { entry ->
-            when (step) {
-                AnswerStep.Searching -> entry.copy(step = ChatStep.SEARCHING)
-
-                is AnswerStep.Reading -> entry.copy(
-                    step = ChatStep.READING,
-                    readNotes = step.notes
-                )
-
-                is AnswerStep.Writing -> entry.copy(
-                    step = ChatStep.WRITING,
-                    answer = step.text,
-                    sources = step.read
-                )
-
-                is AnswerStep.Drafting -> entry.copy(step = ChatStep.DRAFTING)
-
-                is AnswerStep.Done -> entry.copy(
-                    step = ChatStep.DONE,
-                    answer = step.answer.text,
-                    sources = step.answer.sources,
-                    outcome = TurnOutcome.ANSWERED
-                )
-
-                AnswerStep.NotFound -> entry.copy(
-                    step = ChatStep.DONE,
-                    answer = "",
-                    sources = emptyList(),
-                    outcome = TurnOutcome.NOT_FOUND
-                )
-
-                is AnswerStep.Failed -> entry.copy(
-                    step = ChatStep.DONE,
-                    outcome = TurnOutcome.FAILED,
-                    error = step.error
-                )
-            }
-        }
+        update(id = id) { it.after(step = step) }
 
         if (step is AnswerStep.Failed) noteModelOf(error = step.error)
 
@@ -514,6 +501,7 @@ class ChatViewModel(
         const val FOLDER_SEPARATOR = "/"
         const val LOG_TAG = "ChatViewModel"
         const val MAX_TURNS = 100
+        const val UNFINISHED = "…"
         const val HISTORY_TURNS = 4
         const val HISTORY_REPLY_CHARS = 400
 

@@ -37,8 +37,13 @@ Actions (fill only the fields named; a note is named by its title, a folder by i
 - answer: any question about what the notes say, or a request to explain, summarize or list what a note says, in the
   chat. request: the question rewritten to stand alone, naming what "it", "that" or "the trip" is from the chat so
   far. When the request is a question, the plan is only answer.
-- chat: a greeting, thanks, small talk, or a request for your opinion, advice or ideas, not for what the notes say.
-  note: the note it is about, if any ("this note" for the open one).
+- chat: a greeting, thanks, small talk, or a request for your opinion, advice or ideas, not for what the notes say;
+  also a request to say your last reply again another way (in another language, shorter, simpler). note: the note
+  it is about, if any ("this note" for the open one).
+- help: how to use Notekea or what you can do: "how do I…", "how can I…", "what can you do", or a complaint that
+  your last reply did not do or explain it right. Never create, change or open anything for these. request: what
+  they want to know how to do, in English, standing alone.
+- overview: what the notes or the vault hold as a whole ("what is in my notes?", "explain my notes").
 - find_notes: a list of notes chosen by the values of their properties (rating, status, finished, dates, author),
   never a question about a topic or what a note says. request: the request.
 - show_tasks: show tasks. folder, tag, period (overdue, today, this week, later, no date, done): optional.
@@ -65,6 +70,12 @@ writes them, never translated.
 Examples:
 "How long does the dough rest?" -> [answer request="How long does the arepa dough rest?"]
 "hola" -> [chat]
+"en español" -> [chat]
+"¿cómo creo una nota nueva?" -> [help request="how do I create a note?"]
+"what can you do?" -> [help request="what can you do?"]
+"así no se crea una nota" -> [help request="how do I create a note?"]
+"how do I see my tasks?" -> [help request="how do I see my tasks?"]
+"¿qué hay en mis notas?" -> [overview]
 "what do you think of this note?" -> [chat note="this note"]
 "¿qué opinas del viaje a Lisboa?" -> [chat note="Lisbon trip"]
 "summarize this note" -> [answer]

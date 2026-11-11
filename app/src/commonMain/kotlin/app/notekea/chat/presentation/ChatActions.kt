@@ -54,6 +54,10 @@ internal class ChatActions(
 
                 is ActionTurnStep.Chat -> reply = ChatReply.Talk(note = step.note)
 
+                is ActionTurnStep.Help -> reply = ChatReply.Help(request = step.request)
+
+                ActionTurnStep.Overview -> reply = ChatReply.Overview
+
                 else -> follow(
                     id = id,
                     step = step
@@ -75,8 +79,11 @@ internal class ChatActions(
             val action = entry.action ?: ChatAction(status = ActionStatus.FINISHED)
 
             when (step) {
-                ActionTurnStep.Planning, is ActionTurnStep.Answer, is ActionTurnStep.Chat ->
-                    entry.copy(step = ChatStep.PLANNING)
+                ActionTurnStep.Planning,
+                is ActionTurnStep.Answer,
+                is ActionTurnStep.Chat,
+                is ActionTurnStep.Help,
+                ActionTurnStep.Overview -> entry.copy(step = ChatStep.PLANNING)
 
                 ActionTurnStep.Writing -> entry.copy(
                     step = ChatStep.COMPOSING,

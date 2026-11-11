@@ -142,6 +142,8 @@ class ActOnRequestUseCase(
         val isQuestion = first.kind == ActionKind.ANSWER && planned.size == 1
         val standalone = first[ActionField.REQUEST] ?: request
         if (isQuestion) return ActionTurnStep.Answer(question = standalone)
+        if (first.kind == ActionKind.HELP) return ActionTurnStep.Help(request = standalone)
+        if (first.kind == ActionKind.OVERVIEW) return ActionTurnStep.Overview
         if (first.kind != ActionKind.CHAT) return null
 
         val named = first[ActionField.NOTE]?.let {

@@ -374,57 +374,14 @@ class ChatViewModelTest {
         }
 
     private fun TestScope.started(): ChatViewModel {
-        val answer = AnswerFromNotesUseCase(
-            textEmbedder = embedder,
-            vectorIndex = index,
-            noteTextCache = NoteTextCache(
-                contentStore = store,
-                textFolder = TextFolder()
-            ),
-            llmEngine = engine
-        )
-
-        val viewModel = ChatViewModel(
-            vaultPath = VAULT,
-            answerFromNotes = answer,
-            converse = ConverseUseCase(
-                llmEngine = engine,
-                noteTextCache = NoteTextCache(
-                    contentStore = store,
-                    textFolder = TextFolder()
-                )
-            ),
-            agentAnswer = AgentAnswerUseCase(
-                answerFromNotes = answer,
-                noteTextCache = NoteTextCache(
-                    contentStore = store,
-                    textFolder = TextFolder()
-                ),
-                llmEngine = engine,
-                planReader = GhostActionPlanReader()
-            ),
-            actOnRequest = ActOnRequestUseCase(
-                planRequest = PlanRequestUseCase(
-                    llmEngine = engine,
-                    planReader = GhostActionPlanReader()
-                ),
-                checkPlan = CheckPlanUseCase(),
-                composeNotes = ComposeNotesUseCase(
-                    llmEngine = engine,
-                    noteTextCache = NoteTextCache(
-                        contentStore = store,
-                        textFolder = TextFolder()
-                    ),
-                    planReader = GhostActionPlanReader()
-                ),
-                actionRunner = runner
-            ),
-            actionRunner = runner,
-            localCalendar = FakeLocalCalendar(),
-            clock = Clock.System,
-            historyStore = history,
-            clipboard = clipboard,
-            llmEngine = engine
+        val viewModel = chatViewModel(
+            engine = engine,
+            store = store,
+            index = index,
+            embedder = embedder,
+            runner = runner,
+            history = history,
+            clipboard = clipboard
         )
 
         viewModel.onIntent(intent = ChatIntent.OnNotesChange(notes = notes))
