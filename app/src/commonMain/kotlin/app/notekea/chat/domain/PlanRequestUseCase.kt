@@ -46,7 +46,8 @@ class PlanRequestUseCase(
         val shaped = trimmed(steps = steps).map {
             foldersNamed(
                 step = rescued(step = it),
-                context = context
+                context = context,
+                request = request
             )
         }
 
@@ -85,8 +86,28 @@ class PlanRequestUseCase(
      */
     private fun foldersNamed(
         step: PlannedStep,
-        context: ActionContext
+        context: ActionContext,
+        request: String
     ): PlannedStep {
+        val isNewNote =
+            step.kind == ActionKind.CREATE_NOTE || step.kind == ActionKind.WRITE_FROM_NOTES
+
+        val asked = request.lowercase()
+
+        val said = context.folders.firstOrNull {
+            " in ${it.lowercase()}" in asked || " en ${it.lowercase()}" in asked
+        }
+
+        val isSaid =
+            isNewNote &&
+                step[ActionField.FOLDER] == null &&
+                step.notes.isEmpty()
+
+        // "create a note Groceries in Recipes": the folder the request names, when the plan left it out.
+        if (isSaid && said != null) {
+            return step.copy(fields = step.fields + (ActionField.FOLDER to said))
+        }
+
         val single = step
             .notes
             .singleOrNull()

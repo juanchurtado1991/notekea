@@ -47,7 +47,8 @@ Actions (fill only the fields named; a note is named by its title, a folder by i
 - create_note: title, folder (optional), template (optional, a template's name), text: what to write in it (optional).
 - write_from_notes: a new note written from other notes (a summary, a comparison, a list, a plan). title, text: what
   to write, and the notes to read: notes, or folder, or tag, or note ("this note" for the open one).
-- notes_from_text: the request holds a pasted text to turn into notes. folder: a short name for them.
+- notes_from_text: the request holds a pasted text to turn into notes. folder: a short name for them, in the
+  language of the text.
 - append_text: note (empty for today's daily note), text: the text to add.
 - set_property: property, value, and note, or notes, or folder.
 - add_tag: tag (a tag, never a property), and note, or notes, or folder.
