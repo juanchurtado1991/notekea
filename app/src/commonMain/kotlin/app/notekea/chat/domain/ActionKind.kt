@@ -13,6 +13,9 @@ enum class ActionKind(
 ) {
     // Asked of the notes: 3.2's answer, a list of notes by their properties or the tasks (3.8).
     ANSWER(written = "answer"),
+
+    // Not about what the notes say: a greeting, thanks, an opinion or advice, about a note or not.
+    CHAT(written = "chat"),
     FIND_NOTES(
         written = "find_notes",
         needs = setOf(ActionField.REQUEST)

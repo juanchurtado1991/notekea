@@ -35,6 +35,7 @@ public class CrashBuddy(
     private val failedWindow = AtomicReference<Any?>(null)
     private val closeFailedWindow = AtomicReference<(() -> Unit)?>(null)
     private val hasFallenBack = AtomicBoolean(false)
+    private val isNoticeShown = AtomicBoolean(false)
 
     /** The crash to tell the person about, once a window has failed. */
     public val crash: StateFlow<CrashReport?> = mutableCrash.asStateFlow()
@@ -80,7 +81,11 @@ public class CrashBuddy(
             return
         }
 
-        val isHandled = failedWindow.get() === window || !hasFallenBack.compareAndSet(false, true)
+        // The Swing notice is only for when the app's own could not show: one on screen is all the person needs.
+        val isHandled =
+            failedWindow.get() === window ||
+                isNoticeShown.get() ||
+                !hasFallenBack.compareAndSet(false, true)
 
         if (isHandled) return
 
@@ -93,6 +98,11 @@ public class CrashBuddy(
             fallback(crash)
             close()
         }
+    }
+
+    /** The notice is on screen: a later error of another window is kept in the log, not shown again. */
+    public fun onNoticeShown() {
+        isNoticeShown.set(true)
     }
 
     /** The person closed the notice: the failed window closes the usual way, once. */

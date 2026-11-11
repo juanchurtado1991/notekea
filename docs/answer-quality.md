@@ -99,3 +99,23 @@ folder's notes listed one by one count as the folder, and one action repeated pe
 Medium, the recommendation from 16 GB, passes the 90 % of 3.9. Small's misses are mostly fields under the wrong name
 (the period of tasks inside the request) and questions turned into searches; every change still waits for the card,
 which shows exactly what will be written, so a wrong plan is seen before anything is done.
+
+## After the first smoke run — follow-ups, talk and a second try
+
+- **Follow-ups:** the planner sees the chat's last four exchanges and writes the question as it stands alone
+  ("and how long does it rest?" → "How long does the arepa dough rest?"), which is what the notes are searched for.
+- **Talk:** a greeting, thanks, or a request for an opinion is a `chat` step, answered by `ConverseUseCase` in the
+  message's language, saying an opinion is the model's own and reading the note it is about, shown as the source.
+- **A second try (the light agent):** when the first search answers nothing in the whole vault, `AgentAnswerUseCase`
+  makes up to three moves (search with other words, read a whole note) and answers with 3.2's prompt. Medium on the
+  3.4 set, `-PchatAgent=true`:
+
+| | Right | Spanish | Traps declined | Whole answer (median / p90) |
+|---|---|---|---|---|
+| Without | 89 % (388) | 83 % | 91 % (61 of 67) | 2.6 / 4.0 s |
+| With the second try | 90 % (392) | 88 % | 88 % (59 of 67) | 3.1 / 5.6 s |
+
+Four more answers right, Spanish questions most of them, against two traps answered that should have been declined;
+the developer asked for it after the smoke run, and it stays on, recorded here.
+- **Notes by their properties that find nothing** ("what trips do I have?" in a vault with a Travel folder and no
+  property for it) are searched as any question instead of answering "No notes match".

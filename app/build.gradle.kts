@@ -227,6 +227,7 @@ tasks.register<Test>("chatModelTest") {
     systemProperty("notekea.chat.size", providers.gradleProperty("chatSize").getOrElse("small"))
     systemProperty("notekea.chat.gpu", providers.gradleProperty("chatGpu").getOrElse("true"))
     systemProperty("notekea.chat.drafts", providers.gradleProperty("chatDrafts").getOrElse("1"))
+    systemProperty("notekea.chat.agent", providers.gradleProperty("chatAgent").getOrElse("false"))
     // The answer evaluation (3.4) indexes the sample vaults with the bundled embedding model.
     dependsOn(downloadEmbeddingModel)
     systemProperty(EmbeddingModel.TEST_PROPERTY, EmbeddingModel.file(project).asFile.absolutePath)

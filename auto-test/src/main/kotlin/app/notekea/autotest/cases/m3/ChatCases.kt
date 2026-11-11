@@ -25,6 +25,7 @@ fun SuiteBuilder.chatCases() {
     stopAndHistory()
     notFound()
     noModel()
+    talkAndFollowUps()
 }
 
 private fun SuiteBuilder.chatShortcut() {
@@ -162,6 +163,29 @@ private fun SuiteBuilder.noModel() {
             "Step 2 shows No AI model yet, why, and Choose a model, with no question field. Step 3 opens Settings " +
                 "at AI model; after Esc the status bar shows AI model · with the percent and a ring that fills. " +
                 "Step 4 opens Settings at AI model again, and the entry leaves the status bar once cancelled."
+        )
+    }
+}
+
+private fun SuiteBuilder.talkAndFollowUps() {
+    manual(
+        id = "3.3-07",
+        reason = ManualReason.COSTLY
+    ) {
+        prepare(PLAYGROUND)
+        title(text = "The chat talks, follows the conversation and looks further")
+
+        steps(
+            text =
+            "$OPEN_CHAT\n3. Type hola.\n4. Ask How do I make arepas?, then and how long does it rest?\n5. Open " +
+                "Travel/Lisbon trip and ask ¿qué opinas de este viaje?\n6. Ask what trips do I have?"
+        )
+
+        expected(
+            text =
+            "Step 3 gets a short greeting in Spanish, not a search. Step 4's follow-up answers five minutes: it " +
+                "knows what \"it\" is. Step 5 gives an opinion in Spanish, said to be the assistant's view, with " +
+                "Lisbon trip as its source. Step 6 answers from Lisbon trip instead of saying no notes match."
         )
     }
 }

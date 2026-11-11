@@ -3,6 +3,7 @@ package app.notekea.chat.presentation
 import app.notekea.chat.domain.AnswerSource
 import app.notekea.chat.domain.ChatError
 import app.notekea.chat.domain.ChatScope
+import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.ReplyLanguage
 import app.notekea.chat.domain.TurnOutcome
 
@@ -24,8 +25,47 @@ data class ChatEntry(
     val error: ChatError?,
     val action: ChatAction? = null
 ) {
+    /**
+     * Whether the history keeps it: once answered, and for a request the chat acted on only once done, since one
+     * refused, cancelled or undone changed nothing.
+     */
+    val isKept: Boolean
+        get() {
+            val status = action?.status ?: return !isAnswering
+
+            return status == ActionStatus.DONE || status == ActionStatus.FINISHED
+        }
+
+    fun toTurn(): ChatTurn = ChatTurn(
+        question = question,
+        scope = scope,
+        outcome = outcome ?: TurnOutcome.STOPPED,
+        answer = answer,
+        sources = sources,
+        scopeName = scopeName
+    )
+
     /** The language the chat replies to it in: the question's. */
     val language: ReplyLanguage get() = ReplyLanguage.of(text = question)
 
     val isAnswering: Boolean get() = outcome == null
+
+    companion object {
+        /** A [turn] of the history, shown again as entry [id]. */
+        fun of(
+            turn: ChatTurn,
+            id: Long
+        ): ChatEntry = ChatEntry(
+            id = id,
+            question = turn.question,
+            scope = turn.scope,
+            step = ChatStep.DONE,
+            answer = turn.answer,
+            sources = turn.sources,
+            readNotes = 0,
+            scopeName = turn.scopeName,
+            outcome = turn.outcome,
+            error = null
+        )
+    }
 }

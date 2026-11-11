@@ -3,6 +3,8 @@ package app.notekea.chat.eval
 import app.notekea.ai.data.LlamaLlmEngine
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSize
+import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.domain.AgentAnswerUseCase
 import app.notekea.chat.domain.AnswerFromNotesUseCase
 import app.notekea.chat.domain.AnswerStep
 import app.notekea.core.data.JvmAppDispatchers
@@ -34,6 +36,7 @@ class AnswerEvalChatModelTest {
     private val size = ModelSize.fromId(id = System.getProperty(SIZE_PROPERTY)) ?: ModelSize.SMALL
     private val onGpu = System.getProperty(GPU_PROPERTY) != "false"
     private val drafts = System.getProperty(DRAFTS_PROPERTY)?.toIntOrNull() ?: 1
+    private val isAgent = System.getProperty(AGENT_PROPERTY) == "true"
     private val dispatchers = JvmAppDispatchers()
     private val natives = Files.createTempDirectory("notekea-natives").toString()
     private val embedder = LlamaTextEmbedder(
@@ -85,7 +88,8 @@ class AnswerEvalChatModelTest {
             answered = answered
         )
 
-        val name = "answer-eval-${size.id}" + if (drafts > 1) "-drafts$drafts" else ""
+        val name =
+            "answer-eval-${size.id}" + (if (drafts > 1) "-drafts$drafts" else "") + if (isAgent) "-agent" else ""
 
         File(REPORTS, "$name.txt").run {
             parentFile.mkdirs()
@@ -169,6 +173,20 @@ class AnswerEvalChatModelTest {
             last = step
         }
 
+        // The agent's second try, as the chat makes it when the first search answers nothing.
+        val agent = agentOf(
+            answer = answer,
+            indexed = indexed
+        )
+
+        if (agent != null && last == AnswerStep.NotFound) {
+            agent(
+                vaultPath = indexed.path,
+                notes = indexed.notes,
+                question = question.question
+            ).collect { last = it }
+        }
+
         val done = (last as? AnswerStep.Done)?.answer
 
         return AnsweredQuestion(
@@ -182,6 +200,19 @@ class AnswerEvalChatModelTest {
         )
     }
 
+    private fun agentOf(
+        answer: AnswerFromNotesUseCase,
+        indexed: EvalVault
+    ): AgentAnswerUseCase? = AgentAnswerUseCase(
+        answerFromNotes = answer,
+        noteTextCache = NoteTextCache(
+            contentStore = indexed.store,
+            textFolder = TextFolder()
+        ),
+        llmEngine = engine,
+        planReader = GhostActionPlanReader()
+    ).takeIf { isAgent }
+
     private fun millisSince(start: Long): Long = (System.nanoTime() - start) / NANOS_PER_MILLI
 
     private companion object {
@@ -189,6 +220,7 @@ class AnswerEvalChatModelTest {
         const val SIZE_PROPERTY = "notekea.chat.size"
         const val GPU_PROPERTY = "notekea.chat.gpu"
         const val DRAFTS_PROPERTY = "notekea.chat.drafts"
+        const val AGENT_PROPERTY = "notekea.chat.agent"
         const val EMBEDDING_PROPERTY = "notekea.embedding.model"
         const val RERANKER_FILE = "bge-reranker-v2-m3-Q4_K_M.gguf"
         const val REPORTS = "build/reports"

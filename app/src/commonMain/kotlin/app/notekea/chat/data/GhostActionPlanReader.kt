@@ -3,6 +3,7 @@ package app.notekea.chat.data
 import app.notekea.chat.domain.ActionField
 import app.notekea.chat.domain.ActionKind
 import app.notekea.chat.domain.ActionPlanReader
+import app.notekea.chat.domain.AgentMove
 import app.notekea.chat.domain.PlannedStep
 import com.ghost.serialization.Ghost
 
@@ -33,6 +34,18 @@ class GhostActionPlanReader : ActionPlanReader {
             .map {
                 it.title.trim() to it.text.trim()
             }
+    }
+
+    override fun readMove(json: String): AgentMove? = try {
+        Ghost.deserialize<AgentMoveDto>(json).let {
+            AgentMove(
+                move = it.move,
+                query = it.query,
+                note = it.note
+            )
+        }
+    } catch (_: RuntimeException) {
+        null
     }
 
     private fun stepOf(dto: PlannedStepDto): PlannedStep? {

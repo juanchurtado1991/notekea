@@ -30,6 +30,7 @@ import app.notekea.core.presentation.designsystem.theme.motionTween
 import app.notekea.resources.Res
 import app.notekea.resources.chat_step_composing
 import app.notekea.resources.chat_step_drafting
+import app.notekea.resources.chat_step_further
 import app.notekea.resources.chat_step_planning
 import app.notekea.resources.chat_step_reading
 import app.notekea.resources.chat_step_reading_one
@@ -88,6 +89,8 @@ private fun stepText(
     step == ChatStep.SEARCHING -> replyString(resource = Res.string.chat_step_searching)
 
     step == ChatStep.PLANNING -> replyString(resource = Res.string.chat_step_planning)
+
+    step == ChatStep.LOOKING_FURTHER -> replyString(resource = Res.string.chat_step_further)
 
     step == ChatStep.COMPOSING -> replyString(resource = Res.string.chat_step_composing)
 

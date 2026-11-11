@@ -7,4 +7,7 @@ interface ActionPlanReader {
 
     /** The notes as titles and texts, or null when [json] is not such a list. */
     fun readNotes(json: String): List<Pair<String, String>>?
+
+    /** The agent's move ([AgentPrompt]), or null when [json] is not one. */
+    fun readMove(json: String): AgentMove?
 }

@@ -98,15 +98,29 @@ class PlanRequestUseCase(
             " in ${it.lowercase()}" in asked || " en ${it.lowercase()}" in asked
         }
 
+        // A new note reads no notes, so what it lists is noise; one written from others keeps them.
         val isSaid =
             isNewNote &&
                 step[ActionField.FOLDER] == null &&
-                step.notes.isEmpty()
+                (step.kind == ActionKind.CREATE_NOTE || step.notes.isEmpty())
 
-        // "create a note Groceries in Recipes": the folder the request names, when the plan left it out.
+        // "create a note Groceries in Recipes with a shopping list": the folder and the content the request names,
+        // when the plan left them out.
+        val described =
+            step.kind == ActionKind.CREATE_NOTE &&
+                step[ActionField.TEXT] == null &&
+                DESCRIBED.any { it in asked }
+
+        val filled = if (described) step.fields + (ActionField.TEXT to request) else step.fields
+
         if (isSaid && said != null) {
-            return step.copy(fields = step.fields + (ActionField.FOLDER to said))
+            return step.copy(
+                fields = filled + (ActionField.FOLDER to said),
+                notes = emptyList()
+            )
         }
+
+        if (described) return step.copy(fields = filled)
 
         val single = step
             .notes
@@ -160,7 +174,14 @@ class PlanRequestUseCase(
             it.kind == ActionKind.ANSWER
         }
 
-        if (isQuestion) return listOf(PlannedStep(kind = ActionKind.ANSWER))
+        if (isQuestion) return listOf(steps.firstOrNull() ?: PlannedStep(kind = ActionKind.ANSWER))
+
+        // Talking is the whole reply: a greeting with a stray step is still a greeting.
+        steps.firstOrNull {
+            it.kind == ActionKind.CHAT
+        }?.let {
+            return listOf(it)
+        }
 
         val changes = steps.any { it.kind.isConfirmed }
         if (!changes) return steps
@@ -174,6 +195,7 @@ class PlanRequestUseCase(
         // A plan of five steps with their fields; text to write is written later, step by step.
         const val MAX_TOKENS = 400
         const val TEMPLATES = "templates/"
+        val DESCRIBED = listOf(" with ", " con ", " about ", " sobre ", " that ", " que ")
         val STRAY = listOf(ActionField.VALUE, ActionField.REQUEST, ActionField.TEXT)
         val RESCUED = setOf(ActionField.THEME, ActionField.PANEL, ActionField.TEXT)
         val PERIODS = listOf("overdue", "today", "this week", "later", "no date", "done")

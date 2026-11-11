@@ -5,6 +5,9 @@ enum class ChatStep {
     /** The model chooses whether to answer or what to do. */
     PLANNING,
     SEARCHING,
+
+    /** The first search found nothing: the agent searches with other words or reads whole notes. */
+    LOOKING_FURTHER,
     READING,
     WRITING,
 
