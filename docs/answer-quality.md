@@ -191,6 +191,19 @@ rather than a pass or fail. Six rounds on Medium found, each fixed with a test (
 - **Answers:** properties are passages (`PropertyPassages`), sums are checked (`SumsChecked`), tables found are
   answered in words while the turn still answers, and a poem or a joke is written from the notes, short.
 
-The action eval went from 92 % to 97 % (123 of 126) over the same work. Open: Medium's agent still mixes `finished`
-and `rating` for "how many books did I finish", and "going back to the start: how much flour was it?" after ten turns
-picks the wrong recipe.
+The action eval went from 92 % to 97 % (123 of 126) over the same work. Two more rounds on Medium and two on Large
+followed:
+
+- **Finished books:** "marked as finished" now reads the checkbox `finished` (`QueryPrompt`), the agent names the
+  property the task means, and the tables found are answered with every property of their notes, so "and which one
+  did I like most?" reads the rating. Medium answers 3 in Auto and in Agent mode.
+- **The chat's start:** the first exchange is always given beside the last four, so "going back to the start: how
+  much flour was it?" after ten turns is answered about the arepas on both sizes.
+- **Compacted after a while:** a question asked half an hour after the last one, or in a chat from an earlier
+  session, compacts the chat first, as a new session would.
+- **Large:** "?" is talk, a move's target listed among its notes is its target, "in spanish please" is always the
+  last reply said again, word counts come from the app (the model said 109, 128 and 63 for a note of 49 words).
+
+Open: the Sample Vault contradicts itself on finished books (Reading list checks The Pragmatic Programmer and Atomic
+Habits; the `finished` properties say Deep Work, Dune and The Pragmatic Programmer), so a model reading the list
+answers 2. On Medium the complaint and the joke still vary from run to run.
