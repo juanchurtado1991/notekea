@@ -50,7 +50,7 @@ class ChatProbeRulesTest {
         )
 
         assertEquals(
-            expected = listOf("Who is Ana?\n\nWrite your reply in Spanish.", "Who is Ana?"),
+            expected = listOf("Who is Ana?\n\nWrite your reply in Spanish, every word of it.", "Who is Ana?"),
             actual = listOf(
                 messages
                     .inLanguage(language = "Spanish")

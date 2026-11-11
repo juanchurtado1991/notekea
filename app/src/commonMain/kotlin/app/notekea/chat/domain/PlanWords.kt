@@ -22,6 +22,13 @@ internal object PlanWords {
 
     private val LETTER = Regex(pattern = "\\p{L}")
 
+    // "Notekea es una porquería, no sirve para nada" went to help, which listed what it does (the probe, Medium).
+    private val COMPLAINT = Regex(
+        pattern = "\\b(porquer[ií]a|basura|no sirve|in[uú]til|una mierda|odio|est[uú]pid[oa]|sucks|useless|garbage|" +
+            "rubbish|terrible|horrible|i hate|stupid|dumb)\\b",
+        option = RegexOption.IGNORE_CASE
+    )
+
     /** [steps] as the request's words say: talk with no word, a bookmark asked, or notes found by what they say. */
     fun shaped(
         steps: List<PlannedStep>,
@@ -30,6 +37,11 @@ internal object PlanWords {
         // "?" alone was planned as opening today's note (the chat probe on Large, 2026-11-11).
         val isWordless = !LETTER.containsMatchIn(input = request)
         if (isWordless) return listOf(PlannedStep(kind = ActionKind.CHAT))
+
+        val isComplaint = COMPLAINT.containsMatchIn(input = request) &&
+            steps.none { it.kind.isConfirmed }
+
+        if (isComplaint) return listOf(PlannedStep(kind = ActionKind.CHAT))
 
         val single = steps.singleOrNull() ?: return steps
 

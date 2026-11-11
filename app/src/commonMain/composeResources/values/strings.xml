@@ -822,7 +822,7 @@
     <string name="chat_step_further_es">Buscando más a fondo en tus notas…</string>
     <string name="chat_copy">Copy chat</string>
     <string name="chat_compact">Compact chat</string>
-    <string name="chat_memory">Chat memory %1$d %% · it compacts itself when full</string>
+    <string name="chat_memory">Chat memory %1$d %% · it compacts itself when full or after half an hour</string>
     <string name="chat_compacting">Compacting the chat…</string>
     <string name="sync_status_up_to_date">Up to date</string>
     <string name="sync_status_syncing">Syncing…</string>
