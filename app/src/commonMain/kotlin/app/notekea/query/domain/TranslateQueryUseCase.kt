@@ -82,8 +82,15 @@ class TranslateQueryUseCase(
             }
         }
 
+        // An order by a property the vault lacks asks which was meant too, rather than leaving the order out.
         val sort = query.sort?.let { sort ->
-            names[sort.property.lowercase()]?.let { sort.copy(property = it.name) }
+            val known = names[sort.property.lowercase()]
+                ?: return unknown(
+                    name = sort.property,
+                    among = catalog.keys.map { it.name }
+                )
+
+            sort.copy(property = known.name)
         }
 
         return QueryTranslation.Query(

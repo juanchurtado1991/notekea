@@ -240,14 +240,7 @@ class ActionRunChatModelTest {
     ) = ActionContext(
         today = "2026-11-10",
         openNote = open?.value?.removeSuffix(suffix = ".md"),
-        folders = notes.mapNotNull {
-            it
-                .file
-                .path
-                .parent
-                ?.takeUnless { p -> p.isRoot }
-                ?.value
-        }.distinct(),
+        folders = ActionContext.foldersOf(paths = notes.map { it.file.path }),
         notes = notes.map {
             it
                 .file

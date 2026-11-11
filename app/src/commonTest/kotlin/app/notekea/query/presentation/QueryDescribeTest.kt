@@ -127,7 +127,24 @@ class QueryDescribeTest {
             )
         }
 
+    @Test
+    fun `an order by a property the vault lacks asks which was meant, instead of being left out`() =
+        test {
+            show()
+
+            engine.reply = { BY_PRICE }
+            viewModel.onIntent(intent = QueryIntent.OnDescribe(request = "notes by price"))
+            advanceUntilIdle()
+            val notice = viewModel.state.value.notice as? QueryNotice.UnknownProperty
+
+            assertEquals(
+                expected = "price",
+                actual = notice?.property
+            )
+        }
+
     private companion object {
+        const val BY_PRICE = "{\"filters\":[],\"sort\":\"price\"}"
         const val DESCRIBED =
             "{\"filters\":[{\"property\":\"Rating\",\"condition\":\"more than\",\"value\":\"3\"}]}"
         const val UNKNOWN =

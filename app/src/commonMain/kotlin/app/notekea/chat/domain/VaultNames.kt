@@ -13,7 +13,7 @@ internal class VaultNames(
     private val notes: Collection<NoteEntry>,
     private val openNote: RelativePath?
 ) {
-    private val paths = notes.map { it.file.path }
+    private val paths = notes.map { it.file.path }.toMutableList()
     private val folders = paths.flatMap { ancestorsOf(path = it) }.toMutableSet()
 
     fun targetsOf(step: PlannedStep): Outcome<StepTargets, ActionProblem> = try {
@@ -36,7 +36,12 @@ internal class VaultNames(
                     )
                 },
                 template = step[ActionField.TEMPLATE]?.let { noteOf(name = it) }
-            )
+            ).also {
+                created(
+                    step = step,
+                    folder = it.folder
+                )
+            }
 
             ActionKind.CREATE_FOLDER -> StepTargets(folder = newFolder(name = folderName.orEmpty()))
 
@@ -178,6 +183,18 @@ internal class VaultNames(
         folders += ancestorsOf(path = created.child(name = "x")) + created
 
         return created
+    }
+
+    /** The note a new-note step makes, so a later step may name it: "create Budget, status todo". */
+    private fun created(
+        step: PlannedStep,
+        folder: RelativePath?
+    ) {
+        val title = step[ActionField.TITLE]
+        val isNote = step.kind == ActionKind.CREATE_NOTE && title != null
+        if (!isNote) return
+
+        paths += (folder ?: RelativePath.ROOT).child(name = "$title$MARKDOWN")
     }
 
     private fun ancestorsOf(path: RelativePath): List<RelativePath> =

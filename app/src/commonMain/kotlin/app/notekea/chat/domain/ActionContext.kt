@@ -1,5 +1,7 @@
 package app.notekea.chat.domain
 
+import app.notekea.core.notes.domain.RelativePath
+
 /**
  * What the plan may name in the vault, by name only (3.9): [today], the [openNote], its [folders], the [notes] closest
  * to the request (not all of a large vault), its [properties], [tags], the app's [themes] and the chat so far
@@ -58,7 +60,19 @@ data class ActionContext(
             separator = ", "
         )
 
-    private companion object {
-        const val MAX_NAMES = 60
+    companion object {
+        private const val MAX_NAMES = 60
+
+        /** Every folder of [paths] up to the vault's root: Projects holds only Projects/Garden, yet may be named. */
+        fun foldersOf(paths: List<RelativePath>): List<String> = paths
+            .flatMap { path ->
+                generateSequence(seed = path.parent) { it.parent }
+                    .takeWhile {
+                        !it.isRoot
+                    }
+                    .map { it.value }
+            }
+            .distinct()
+            .sorted()
     }
 }

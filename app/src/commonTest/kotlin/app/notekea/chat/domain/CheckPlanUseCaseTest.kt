@@ -68,6 +68,32 @@ class CheckPlanUseCaseTest {
     }
 
     @Test
+    fun `a note made by an earlier step can be named by a later one`() {
+        val result = checked(
+            PlannedStep(
+                kind = ActionKind.CREATE_NOTE,
+                fields = mapOf(ActionField.TITLE to "Budget", ActionField.FOLDER to "Recipes")
+            ),
+            PlannedStep(
+                kind = ActionKind.SET_PROPERTY,
+                fields = mapOf(
+                    ActionField.NOTE to "Budget",
+                    ActionField.PROPERTY to "status",
+                    ActionField.VALUE to "todo"
+                )
+            )
+        ) as Outcome.Success
+
+        assertEquals(
+            expected = listOf("Recipes/Budget.md"),
+            actual = result
+                .value[1]
+                .notes
+                .map { it.value }
+        )
+    }
+
+    @Test
     fun `a folder made by an earlier step can be moved into, and an unknown note stops the plan`() {
         val moved = checked(
             PlannedStep(

@@ -92,13 +92,21 @@ folder's notes listed one by one count as the folder, and one action repeated pe
 
 | Size | Right | Median time |
 |---|---|---|
-| Small (2B) | 75 % | 0.9 s |
-| Medium (4B) | 92 % | 1.9 s |
+| Small (2B) | 75 % → 73 % | 0.9 s |
+| Medium (4B) | 92 % → 94 % | 1.9 s |
 | Large (9B) | 91 % | 2.5 s |
 
 Medium, the recommendation from 16 GB, passes the 90 % of 3.9. Small's misses are mostly fields under the wrong name
 (the period of tasks inside the request) and questions turned into searches; every change still waits for the card,
 which shows exactly what will be written, so a wrong plan is seen before anything is done.
+
+After the M3 Auto-Test ran the model cases (the second figures, Large not measured again): the plan's period of
+tasks is kept only when the request names it, and taken from the request's words when the model left it out or wrote
+it under another field (`TaskPeriods`); a property the request gives a new note (", status draft") is set when the
+plan leaves it out (`PropertiesNamed`); a template it names ("from the Meeting template") is kept (`TemplateNamed`);
+a word of the title is no longer read as the note's content ("Call with Ana"); the plan sees every folder, also one
+that holds only folders; a later step may name a note an earlier one creates. Small went from 75 % to 73 %,
+still over its 72 % baseline.
 
 ## After the first smoke run — follow-ups, talk and a second try
 

@@ -44,14 +44,31 @@ class PlanRequestUseCase(
             .orEmpty()
 
         val shaped = trimmed(steps = steps).map {
-            foldersNamed(
+            val named = foldersNamed(
                 step = rescued(step = it),
                 context = context,
                 request = request
             )
+
+            val withTemplate = TemplateNamed.asked(
+                step = named,
+                request = request,
+                context = context
+            )
+
+            TaskPeriods.asked(
+                step = withTemplate,
+                request = request
+            )
         }
 
-        return Outcome.Success(value = shaped)
+        return Outcome.Success(
+            value = PropertiesNamed.added(
+                steps = shaped,
+                request = request,
+                context = context
+            )
+        )
     }
 
     /**
@@ -105,11 +122,21 @@ class PlanRequestUseCase(
                 (step.kind == ActionKind.CREATE_NOTE || step.notes.isEmpty())
 
         // "create a note Groceries in Recipes with a shopping list": the folder and the content the request names,
-        // when the plan left them out.
+        // when the plan left them out; a word of the title is no content ("Call with Ana").
+        val untitled = step[ActionField.TITLE]
+            ?.lowercase()
+            ?.let {
+                asked.replace(
+                    oldValue = it,
+                    newValue = ""
+                )
+            }
+            ?: asked
+
         val described =
             step.kind == ActionKind.CREATE_NOTE &&
                 step[ActionField.TEXT] == null &&
-                DESCRIBED.any { it in asked }
+                DESCRIBED.any { it in untitled }
 
         val filled = if (described) step.fields + (ActionField.TEXT to request) else step.fields
 
