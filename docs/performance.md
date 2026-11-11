@@ -331,3 +331,42 @@ the CPU setup must not use), and lets the model go. Resident memory, MB:
   again with the packaged app, whose memory trim and two compiler threads took 2.9's numbers down by a third.
 - **Memory comes back** to 1.06 GB after the model is let go, 0.42 GB over the start: glibc keeps the freed arenas
   of the test JVM; the packaged app trims them (2.9).
+
+## M4 — 4.3, Git sync
+
+`SyncRunTest` in `:auto-test:smokeRun` (`-PidleSeconds=600`), the app in a test JVM on Linux: the Sample Vault and the
+Ghost Serializer vault (371 notes) connected to repositories on disk, a note saved every two seconds for 20 s as typing
+saves it, a Sync now with one change, then ten minutes idle with sync on. Resident memory, MB:
+
+| Moment | Resident | Heap | Time |
+|---|---|---|---|
+| Sample Vault open | 524 | 64 | |
+| Its first sync (init, commit, push) | 590 | 88 | 0.8 s |
+| Ten saves, committed 10 s after the last | 645 | 107 | |
+| Sync now with one change | 647 | 107 | 0.2 s |
+| Ghost Serializer's first sync | 658 | 108 | 0.9 s |
+| Ten minutes idle, sync on | 672 | 105 | |
+
+- **A sync is under a second** for both vaults, so the auto-commit 10 s after typing is not felt.
+- **Idle sync costs nothing measurable:** 14 MB over ten minutes with the timer pulling every five, the heap flat;
+  JGit's objects are let go after each cycle.
+
+## M4b — 4.8, documents, clips and agent mode
+
+`DocumentsRunTest` in `:auto-test:smokeRun`: the Sample Vault open and indexed, then a PDF of 300 pages (12,000
+lines) and an HTML page of 2 MB of text dropped into its folder. Resident memory, MB:
+
+| Moment | Resident | Heap |
+|---|---|---|
+| Sample Vault indexed | 672 | 98 |
+| Both documents ready to search, 4.6 s after they were written | 773 | 105 |
+| Ten minutes idle | 754 | 105 |
+
+- **Large documents index in seconds** and add 100 MB, Tika's parsers and the documents' chunks in the index; the
+  heap stays near 100 MB because a document is read once and only its text is kept (at most 2 million characters;
+  the parse stops there, it never holds a whole large document).
+- **A web clip** was not timed on its own: its notes are one call of the chat's model on an article of at most 3 MB,
+  and its check one reranker call per sentence, both on the model the chat already holds. 5.4 times it in the
+  packaged app.
+- **An agent run** (`AgentEvalChatModelTest`, Medium): 11 s a task on average, 32 s at most, three moves on average;
+  it runs on the chat's model, already loaded, so it adds no memory beyond the chat's (3.7).
