@@ -6,6 +6,9 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.documents.domain.PageMark
 import app.notekea.documents.domain.PdfPages
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -17,11 +20,18 @@ import java.io.File
 import javax.imageio.ImageIO
 
 /**
- * [PdfPages] with PDFBox: the PDF open while its tab reads it (one at a time, closed when another is asked for), each
+ * [PdfPages] with PDFBox: the PDF open while its tab reads it (one at a time, closed when another is asked for or its
+ * tab closes), each
  * page drawn to a PNG, and a passage found on a page by its text positions ([PageTextPositions]).
  */
 class PdfBoxPages(private val dispatchers: AppDispatchers) : PdfPages {
     private val lock = Mutex()
+
+    // Where a release closes the PDF, after any page being drawn: a closed tab does not wait for it.
+    private val scope = CoroutineScope(context = SupervisorJob() + dispatchers.io)
+
+    /** Whether a PDF is open now. */
+    internal val isOpen: Boolean get() = open != null
     private var open: Pair<String, PDDocument>? = null
 
     override suspend fun count(
@@ -67,6 +77,23 @@ class PdfBoxPages(private val dispatchers: AppDispatchers) : PdfPages {
         }
 
         return (found as? Outcome.Success)?.value.orEmpty()
+    }
+
+    override fun release(
+        vaultPath: String,
+        path: RelativePath
+    ) {
+        val file = File(vaultPath, path.value).absolutePath
+
+        scope.launch {
+            lock.withLock {
+                val isThisOne = open?.first?.startsWith(prefix = "$file|") == true
+                if (!isThisOne) return@withLock
+
+                open?.second?.close()
+                open = null
+            }
+        }
     }
 
     private suspend fun <T> withDocument(

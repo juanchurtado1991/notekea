@@ -199,6 +199,16 @@ class DocumentViewerViewModel(
         logger.w(throwable = throwable) { FAILED_MESSAGE }
     }
 
+    override fun onCleared() {
+        // A large PDF is not kept in memory once its tab is closed.
+        pdfPages.release(
+            vaultPath = vaultPath,
+            path = path
+        )
+
+        super.onCleared()
+    }
+
     private companion object {
         const val LOG_TAG = "DocumentViewerViewModel"
         const val FAILED_MESSAGE = "The document could not be shown"
