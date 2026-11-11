@@ -26,8 +26,7 @@ import com.testbuddy.isShown
 import java.nio.file.Files
 import java.nio.file.Path
 
-// Section headers are written in capitals.
-private const val BOOKMARKS = "BOOKMARKS"
+private const val BOOKMARKS = "Bookmarks"
 private const val PLATE = "Arepas plate.png"
 private const val DRAG_STEPS = 10
 

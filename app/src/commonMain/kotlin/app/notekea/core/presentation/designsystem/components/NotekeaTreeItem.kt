@@ -45,9 +45,9 @@ private const val PREVIEW_RENAMED = "Tomato plan 2027"
 private const val PREVIEW_WIDTH_DP = 260
 
 /**
- * One row of a tree: indentation by [depth], a chevron for folders ([isExpanded] is null for leaves), an [icon], the
- * [label], a [badge] and optional [trailingText]. The [selected] row has a bar in the theme's color at its start and is
- * filled in the selection color while the tree is [focused], in grey otherwise. [labelContent] replaces the label.
+ * A row of macOS's source list (2A): indentation by [depth], a chevron for folders ([isExpanded] is null for leaves),
+ * an [icon], the [label] or [labelContent], a [badge] and an optional [trailingText]. The [selected] row is filled with
+ * the theme's color and its text is white while the tree is [focused], grey otherwise.
  */
 @Composable
 fun NotekeaTreeItem(
@@ -89,8 +89,11 @@ fun NotekeaTreeItem(
             selected = selected,
             focused = focused
         ),
-        contentColor = if (selected && focused) colors.onPrimaryContainer else colors.onSurface
+        contentColor = if (selected && focused) colors.onPrimary else colors.onSurface
     ) {
+        // On the filled selection the muted parts take the row's own color, as macOS's source list does.
+        val muted = if (selected && focused) LocalContentColor.current else colors.onSurfaceVariant
+
         Row(
             modifier = Modifier
                 .focusBorder(
@@ -102,11 +105,6 @@ fun NotekeaTreeItem(
                     onClickLabel = onClickLabel,
                     takesFocus = takesFocus
                 )
-                .treeRowMarks(
-                    depth = depth,
-                    guide = colors.outlineVariant,
-                    bar = colors.primary.takeIf { selected }
-                )
                 .padding(
                     start = NotekeaDimensions.SpacingXs + NotekeaDimensions.TreeIndent * depth,
                     end = NotekeaDimensions.SpacingS
@@ -114,6 +112,7 @@ fun NotekeaTreeItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Chevron(
+                color = muted,
                 isExpanded = isExpanded,
                 onToggleExpanded = onToggleExpanded
             )
@@ -132,7 +131,12 @@ fun NotekeaTreeItem(
 
             badge?.invoke()
 
-            trailingText?.let { TreeCountPill(text = it) }
+            trailingText?.let {
+                TreeCount(
+                    text = it,
+                    color = muted
+                )
+            }
         }
     }
 }
@@ -177,19 +181,20 @@ private fun RowIcon(
     Spacer(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
 }
 
-/** The selection color while the tree has the keyboard, a quiet grey for a selection without it, else nothing. */
+/** The theme's color while the tree has the keyboard, a grey for a selection without it, else nothing. */
 @Composable
 private fun rowColor(
     selected: Boolean,
     focused: Boolean
 ): Color = when {
-    selected && focused -> MaterialTheme.colorScheme.primaryContainer
-    selected -> MaterialTheme.colorScheme.surfaceVariant
+    selected && focused -> MaterialTheme.colorScheme.primary
+    selected -> MaterialTheme.colorScheme.outline
     else -> Color.Transparent
 }
 
 @Composable
 private fun Chevron(
+    color: Color,
     isExpanded: Boolean?,
     onToggleExpanded: (() -> Unit)?
 ) {
@@ -212,7 +217,7 @@ private fun Chevron(
             Icon(
                 imageVector = if (isExpanded) NotekeaIcons.Collapse else NotekeaIcons.Expand,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = color
             )
         }
     }

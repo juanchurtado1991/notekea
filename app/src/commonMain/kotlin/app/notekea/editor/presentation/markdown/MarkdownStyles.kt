@@ -42,13 +42,14 @@ class MarkdownStyles(
                 background = colorScheme.surfaceVariant
             )
 
+            // The note's own scale (NotekeaTypography): it does not follow the interface's text.
             val headings = listOf(
-                typography.headlineMedium,
-                typography.titleLarge,
-                typography.titleMedium,
-                typography.titleMedium,
-                typography.titleMedium,
-                typography.titleMedium
+                typography.displayMedium,
+                typography.displaySmall,
+                typography.bodyLarge,
+                typography.bodyLarge,
+                typography.bodyLarge,
+                typography.bodyLarge
             ).map {
                 SpanStyle(
                     fontSize = it.fontSize,

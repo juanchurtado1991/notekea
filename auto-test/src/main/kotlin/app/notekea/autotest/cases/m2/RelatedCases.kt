@@ -10,7 +10,7 @@ import com.testbuddy.SuiteBuilder
 
 private const val SAMPLE = "Sample Vault"
 private const val SAMPLE_READY = "41 notes ready to search"
-private const val ALREADY_LINKED = "ALREADY LINKED"
+private const val ALREADY_LINKED = "Already linked"
 private const val WAIT_MILLIS = 10_000L
 private const val OPEN_AREPAS =
     "1. En Notekea, abre la Sample Vault (mira DATOS DE PRUEBA arriba) y espera a que la barra de abajo " +

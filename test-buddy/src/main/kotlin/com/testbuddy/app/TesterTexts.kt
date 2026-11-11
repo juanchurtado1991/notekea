@@ -1,6 +1,5 @@
 package com.testbuddy.app
 
-import androidx.compose.runtime.staticCompositionLocalOf
 import com.testbuddy.ManualReason
 import com.testbuddy.TesterLanguage
 
@@ -211,5 +210,3 @@ internal class TesterTexts(
         )
     }
 }
-
-internal val LocalTesterTexts = staticCompositionLocalOf { TesterTexts.English }

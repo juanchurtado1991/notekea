@@ -13,7 +13,7 @@ import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.ShortcutModifier.Shift
 import com.testbuddy.SuiteBuilder
 
-private const val NOTE_INFO = "NOTE INFO"
+private const val NOTE_INFO = "Note info"
 
 /**
  * The cases of 3.3, the chat panel (`MVP_SMOKE_TEST.md`): those that ask the model run where a chat model is on the

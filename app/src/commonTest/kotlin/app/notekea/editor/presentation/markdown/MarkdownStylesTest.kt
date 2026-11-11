@@ -75,12 +75,12 @@ class MarkdownStylesTest {
     }
 
     @Test
-    fun `headings follow the type scale, largest first`() {
+    fun `headings follow the note's own type scale, largest first`() {
         assertEquals(
             expected = listOf(
-                typography.headlineMedium.fontSize,
-                typography.titleLarge.fontSize,
-                typography.titleMedium.fontSize
+                typography.displayMedium.fontSize,
+                typography.displaySmall.fontSize,
+                typography.bodyLarge.fontSize
             ),
             actual = listOf(
                 HighlightKind.HEADING_1,

@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.documents.domain.DocumentError
@@ -261,9 +262,14 @@ private fun ScrollToPassage(
 
 @Composable
 private fun styleOf(block: DocumentBlock) = when {
-    block.level in 1..2 -> MaterialTheme.typography.titleLarge
+    // A document reads on the note's scale (NotekeaTypography), as its text does.
+    block.level in 1..2 -> MaterialTheme.typography.displaySmall
 
-    block.level >= 3 -> MaterialTheme.typography.titleMedium
+    block.level >= 3 ->
+        MaterialTheme
+            .typography
+            .bodyLarge
+            .copy(fontWeight = FontWeight.SemiBold)
 
     block.isTableRow ->
         MaterialTheme

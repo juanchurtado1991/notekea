@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.designsystem.theme.sidebarSurface
 
 private const val PREVIEW_HEIGHT_DP = 260
 private const val RAIL_WIDTH_DP = 40
@@ -47,7 +48,7 @@ fun NotekeaToolRail(
             modifier = Modifier
                 .width(width = RAIL_WIDTH_DP.dp)
                 .fillMaxHeight()
-                .background(color = colors.background)
+                .background(color = colors.sidebarSurface)
                 .padding(vertical = NotekeaDimensions.SpacingS)
                 .semantics { contentDescription = label }
                 .selectableGroup(),
@@ -96,7 +97,7 @@ private fun RailButton(
     Box(
         modifier = Modifier
             .background(
-                color = if (item.isSelected) colors.primaryContainer else colors.background,
+                color = if (item.isSelected) colors.primaryContainer else colors.sidebarSurface,
                 shape = MaterialTheme.shapes.small
             )
             .semantics { selected = item.isSelected }

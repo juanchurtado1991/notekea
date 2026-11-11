@@ -2,6 +2,7 @@ package app.notekea.core.presentation.designsystem.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
@@ -41,6 +42,8 @@ fun NotekeaTheme(
         shapes = shapes
     ) {
         CompositionLocalProvider(
+            // A text with no style of its own is interface text, 13 as on macOS (3A); a note's text names bodyLarge.
+            LocalTextStyle provides MaterialTheme.typography.bodyMedium,
             LocalNotekeaCodeTextStyle provides notekeaCodeTextStyle(),
             LocalReduceMotion provides
                 (LocalAppearance.current.reduceMotion || LocalSystemReduceMotion.current)

@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.components.NotekeaSplitPane
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.sidebarSurface
 import app.notekea.tree.domain.TreePreferences
 import app.notekea.tree.presentation.VaultSidebar
 import app.notekea.tree.presentation.filepreview.NoteDetailsPanel
@@ -45,7 +46,7 @@ fun VaultTreeContent(
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background,
+        color = MaterialTheme.colorScheme.sidebarSurface,
         contentColor = MaterialTheme.colorScheme.onBackground
     ) {
         BoxWithConstraints {

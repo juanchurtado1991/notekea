@@ -176,6 +176,6 @@ class KeyboardReachScreenTest {
         private const val SETTLE_FRAMES = 4
         private const val TREE_ROW = "Tree row"
         private const val WIDTH = 500
-        private val STOPS = listOf(BOTTOM, HEADER.uppercase(), SEGMENT, BOOKMARK)
+        private val STOPS = listOf(BOTTOM, HEADER, SEGMENT, BOOKMARK)
     }
 }

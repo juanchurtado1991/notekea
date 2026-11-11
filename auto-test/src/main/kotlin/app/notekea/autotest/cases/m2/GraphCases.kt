@@ -44,9 +44,9 @@ private fun SuiteBuilder.graphFromNote() {
         pressInWindow(shortcut = Mod + Key.G)
         expectText(text = "This note")
         clickIcon(label = "Weekly menu")
-        expectText(text = "CONNECTED TO")
+        expectText(text = "Connected to")
         click(text = "Open note")
-        expectNoText(text = "CONNECTED TO")
+        expectNoText(text = "Connected to")
     }
 }
 
@@ -189,7 +189,7 @@ private fun SuiteBuilder.linkFromTheGraph() {
         steps(
             text =
             "$OPEN_GRAPH\n3. Haz clic en círculos hasta que el panel lateral muestre " +
-                "RELACIONADAS, SIN ENLAZAR.\n4. Haz clic en Enlazar en una fila.\n5. Haz clic en " +
+                "Relacionadas, sin enlazar.\n4. Haz clic en Enlazar en una fila.\n5. Haz clic en " +
                 "Abrir nota y mira el final de la nota, la que mostraba el panel; luego vuelve a " +
                 "la pestaña del grafo.\n6. Haz clic en Enlazar en otra fila y luego en Deshacer."
         )

@@ -21,7 +21,7 @@ import com.testbuddy.SuiteBuilder
 private const val TASKS = "Tasks and callouts"
 private const val TASKS_TEXT = "Buy corn flour"
 private const val OUTLINE_LIST = "Headings of this note"
-private const val NOTE_INFO = "NOTE INFO"
+private const val NOTE_INFO = "Note info"
 private const val WELCOME_TEXT = "This is a sample vault"
 
 /** The cases of 1.14 about the side panel, the status bar and the zoom (`MVP_SMOKE_TEST.md`). */
@@ -55,7 +55,7 @@ private fun SuiteBuilder.noteInfo() {
             containing = "- [x] Buy corn flour\n"
         )
 
-        click(text = "OUTLINE")
+        click(text = "Outline")
         click(text = NOTE_INFO)
         expectNoText(text = "Reading time")
         relaunch()
@@ -167,7 +167,7 @@ private fun SuiteBuilder.workspaceDetails() {
         click(text = "Editor")
         expectText(text = "Broken properties")
         pressInWindow(shortcut = Mod + Key.Backslash)
-        expectNoText(text = "FILES")
+        expectNoText(text = "Files")
         pressInWindow(shortcut = Mod + Key.Equals)
         click(text = "110 %")
         expectNoText(text = "110 %")

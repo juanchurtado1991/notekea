@@ -37,6 +37,7 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.designsystem.theme.motionTween
+import app.notekea.core.presentation.designsystem.theme.sidebarSurface
 import app.notekea.core.presentation.platform.label
 import app.notekea.editor.presentation.model.EditorPreviewData
 import app.notekea.editor.presentation.noteinfo.NoteInfo
@@ -76,7 +77,7 @@ fun SidePanel(
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        color = MaterialTheme.colorScheme.sidebarSurface
     ) {
         Column(modifier = Modifier.padding(vertical = NotekeaDimensions.SpacingXs)) {
             PanelHeader(

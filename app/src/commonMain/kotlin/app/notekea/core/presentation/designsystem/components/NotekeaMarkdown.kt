@@ -146,13 +146,13 @@ private fun ThemedMarkdown(
 private fun notekeaMarkdownTypography(): MarkdownTypography {
     val typography = MaterialTheme.typography
     val colors = MaterialTheme.colorScheme
-    val heading = typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+    val heading = typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
     // The theme's style, loaded once: building it again would look up its font files for every segment.
     val code = LocalNotekeaCodeTextStyle.current
 
     return markdownTypography(
-        h1 = typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
-        h2 = typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+        h1 = typography.displayMedium,
+        h2 = typography.displaySmall,
         h3 = heading,
         h4 = heading,
         h5 = heading,

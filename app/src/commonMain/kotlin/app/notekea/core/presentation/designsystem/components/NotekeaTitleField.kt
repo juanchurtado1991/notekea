@@ -32,7 +32,6 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
@@ -104,13 +103,11 @@ fun NotekeaTitleField(
                     isError = isError
                 )
             ),
+        // The note's H1, on the note's own scale (NotekeaTypography), not the interface's.
         textStyle = MaterialTheme
             .typography
-            .headlineMedium
-            .copy(
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.SemiBold
-            ),
+            .displayMedium
+            .copy(color = MaterialTheme.colorScheme.onSurface),
         lineLimits = TextFieldLineLimits.SingleLine,
         cursorBrush = SolidColor(value = MaterialTheme.colorScheme.primary)
     )

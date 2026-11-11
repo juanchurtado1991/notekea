@@ -83,7 +83,15 @@ class ColorThemeSchemesTest {
             Triple("selected text", onPrimaryContainer, primaryContainer),
             Triple("tag text", onTertiary, tertiary),
             Triple("link on page", primary, background),
-            Triple("link on surface", primary, surface)
+            Triple("link on surface", primary, surface),
+            // The macOS redesign's sidebar and chrome (4A), and the source list's filled selection (2A).
+            Triple("ink on sidebar", onSurface, sidebarSurface),
+            Triple("muted on sidebar", onSurfaceVariant, sidebarSurface),
+            Triple("link on sidebar", primary, sidebarSurface),
+            Triple("selected row", onPrimary, primary),
+            Triple("selected row without the keyboard", onSurface, outline),
+            Triple("ink on chrome", onSurface, chromeSurface),
+            Triple("muted on chrome", onSurfaceVariant, chromeSurface)
         )
     }
 

@@ -191,7 +191,7 @@ class ModelManagerScreenTest {
         private const val DOWNLOAD = "Download"
         private const val FRAME_NANOS = 16_000_000L
         private const val HEIGHT = 700
-        private const val OTHER_SIZES = "OTHER SIZES"
+        private const val OTHER_SIZES = "Other sizes"
         private const val PAUSE = "Pause"
         private const val RESUME = "Resume"
         private const val SECTION = "AI model"

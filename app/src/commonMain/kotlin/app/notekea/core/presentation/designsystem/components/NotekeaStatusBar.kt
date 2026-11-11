@@ -55,7 +55,8 @@ fun NotekeaStatusBar(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.background)
+        // On the note's own color, so the window reads as the note with a line under it (macOS redesign).
+        modifier = modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.surface)
     ) {
         Box(
             modifier = Modifier

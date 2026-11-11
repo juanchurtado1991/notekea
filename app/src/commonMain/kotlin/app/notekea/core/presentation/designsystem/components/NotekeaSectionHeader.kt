@@ -22,21 +22,19 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 
-private const val LETTER_SPACING_SP = 0.8
 private const val PREVIEW_BOOKMARKS = "Bookmarks"
 private const val PREVIEW_COUNT = 4
 private const val PREVIEW_FILES = "Files"
 private const val PREVIEW_WIDTH_DP = 280
 
 /**
- * A section's header, as desktop inspectors draw it: its [title] in small capitals and, when it folds ([onToggle]), a
- * chevron showing whether it [isOpen]; [count] sits at the end. Only a header with a [shortcutHint] has a tooltip: one
- * repeating the title would cover the section's first row.
+ * A section's header as macOS's sidebars draw it (2A): its [title] small, bold and muted, with a chevron showing
+ * whether it [isOpen] when it folds ([onToggle]), and [count] at the end. Only a header with a [shortcutHint] has a
+ * tooltip: one repeating the title would cover the section's first row.
  */
 @Composable
 fun NotekeaSectionHeader(
@@ -115,15 +113,12 @@ private fun HeaderRow(
         }
 
         Text(
-            text = title.uppercase(),
+            text = title,
             modifier = Modifier.weight(weight = 1f),
             style = MaterialTheme
                 .typography
-                .labelSmall
-                .copy(
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = LETTER_SPACING_SP.sp
-                ),
+                .labelMedium
+                .copy(fontWeight = FontWeight.SemiBold),
             color = muted
         )
 

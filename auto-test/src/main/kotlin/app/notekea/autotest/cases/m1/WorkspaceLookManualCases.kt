@@ -109,7 +109,7 @@ private fun SuiteBuilder.workspaceLook() {
                 "abiertas, con la abierta marcada, y permite elegir una; ninguna pestaña es más " +
                 "estrecha que un nombre corto. La nota seleccionada en la lista es azul mientras " +
                 "la lista tiene el teclado y gris cuando lo tiene el texto, sin anillo " +
-                "alrededor. La lista muestra los encabezados MARCADORES y ARCHIVOS. Los paneles " +
+                "alrededor. La lista muestra los encabezados Marcadores y Archivos. Los paneles " +
                 "se unen con líneas finas, sin un hueco oscuro. La barra de abajo termina con " +
                 "\"Sin guardar\" mientras escribes y luego \"Guardado\". La carpeta de la bóveda " +
                 "solo aparece al pasar el puntero por su nombre."

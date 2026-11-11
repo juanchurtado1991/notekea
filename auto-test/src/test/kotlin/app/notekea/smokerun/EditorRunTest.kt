@@ -129,7 +129,7 @@ class EditorRunTest {
         private const val HOME = "Home"
         private const val INGREDIENTS = "Ingredients"
         private const val OPEN_TASK = "- [ ] An open task"
-        private const val OUTLINE = "OUTLINE"
+        private const val OUTLINE = "Outline"
         private const val PANCAKES = "Pancakes"
         private const val PANCAKES_BODY = "# Pancakes\n\nFlour, milk, an egg and a pinch of salt."
         private const val PANCAKES_FILE = "Recipes/Pancakes.md"

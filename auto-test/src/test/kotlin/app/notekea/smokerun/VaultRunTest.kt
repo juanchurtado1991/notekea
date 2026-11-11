@@ -127,7 +127,7 @@ class VaultRunTest {
 
     companion object {
         private const val AREPAS = "Arepas"
-        private const val BOOKMARKS = "BOOKMARKS"
+        private const val BOOKMARKS = "Bookmarks"
         private const val CLOSE_TAB = "Close tab"
         private const val HOME = "Home"
         private const val INGREDIENTS = "Ingredients"

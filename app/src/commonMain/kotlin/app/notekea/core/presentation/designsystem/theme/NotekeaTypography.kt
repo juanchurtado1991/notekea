@@ -16,16 +16,23 @@ import app.notekea.resources.jetbrains_mono_regular
 import org.jetbrains.compose.resources.Font
 
 /*
- * Bundled typefaces (Inter for UI and text, JetBrains Mono for code) and the type scale 12 / 14 / 16 / 20 / 28 sp.
+ * Bundled typefaces (Inter for UI and text, JetBrains Mono for code) and two scales. The interface follows macOS's
+ * (macOS redesign 3A, 2026-11-11): text 13, small 11, titles 15 / 17 / 22. The note keeps its reading scale in slots no
+ * interface text uses: `displayMedium` (H1, 28), `displaySmall` (H2, 20) and `bodyLarge` (16, the body and H3–H6).
  * Built inside composition because `Font()` reads Compose resources there.
  */
 
-private const val BODY_SIZE_SP = 14
-private const val HEADLINE_SIZE_SP = 28
-private const val LARGE_SIZE_SP = 16
+private const val CODE_SIZE_SP = 14
+private const val NOTE_H1_SIZE_SP = 28
+private const val NOTE_H2_SIZE_SP = 20
+private const val NOTE_SIZE_SP = 16
 private const val READING_LINE_HEIGHT = 1.6f
-private const val SMALL_SIZE_SP = 12
-private const val TITLE_SIZE_SP = 20
+private const val UI_BODY_SIZE_SP = 13
+private const val UI_LARGE_TITLE_SIZE_SP = 22
+private const val UI_MINI_SIZE_SP = 10
+private const val UI_SMALL_SIZE_SP = 11
+private const val UI_TITLE_SIZE_SP = 17
+private const val UI_SUBTITLE_SIZE_SP = 15
 
 @Composable
 fun notekeaCodeTextStyle(): TextStyle = TextStyle(
@@ -39,7 +46,7 @@ fun notekeaCodeTextStyle(): TextStyle = TextStyle(
             weight = FontWeight.Bold
         )
     ),
-    fontSize = BODY_SIZE_SP.sp
+    fontSize = CODE_SIZE_SP.sp
 )
 
 @Composable
@@ -66,22 +73,28 @@ fun notekeaTypography(): Typography {
     val base = Typography()
 
     return Typography(
+        // The note's headings keep the line heights they always had, from the slots they used before 3A.
+        displayMedium = base.headlineMedium.withInter(inter, FontWeight.SemiBold, NOTE_H1_SIZE_SP),
+        displaySmall = base.titleLarge.withInter(inter, FontWeight.SemiBold, NOTE_H2_SIZE_SP),
         headlineMedium = base.headlineMedium.withInter(
             inter,
             FontWeight.SemiBold,
-            HEADLINE_SIZE_SP
+            UI_LARGE_TITLE_SIZE_SP
         ),
-        titleLarge = base.titleLarge.withInter(inter, FontWeight.SemiBold, TITLE_SIZE_SP),
-        titleMedium = base.titleMedium.withInter(inter, FontWeight.Medium, LARGE_SIZE_SP),
+        headlineSmall = base.headlineSmall.withInter(inter, FontWeight.SemiBold, UI_TITLE_SIZE_SP),
+        titleLarge = base.titleLarge.withInter(inter, FontWeight.SemiBold, UI_TITLE_SIZE_SP),
+        titleMedium = base.titleMedium.withInter(inter, FontWeight.SemiBold, UI_SUBTITLE_SIZE_SP),
+        titleSmall = base.titleSmall.withInter(inter, FontWeight.SemiBold, UI_BODY_SIZE_SP),
         // The notes' text, typed and drawn: lines as far apart as long reading wants (Bear, iA Writer).
         bodyLarge = base
             .bodyLarge
-            .withInter(inter, FontWeight.Normal, LARGE_SIZE_SP)
-            .copy(lineHeight = (LARGE_SIZE_SP * READING_LINE_HEIGHT).sp),
-        bodyMedium = base.bodyMedium.withInter(inter, FontWeight.Normal, BODY_SIZE_SP),
-        bodySmall = base.bodySmall.withInter(inter, FontWeight.Normal, SMALL_SIZE_SP),
-        labelLarge = base.labelLarge.withInter(inter, FontWeight.Medium, BODY_SIZE_SP),
-        labelMedium = base.labelMedium.withInter(inter, FontWeight.Medium, SMALL_SIZE_SP)
+            .withInter(inter, FontWeight.Normal, NOTE_SIZE_SP)
+            .copy(lineHeight = (NOTE_SIZE_SP * READING_LINE_HEIGHT).sp),
+        bodyMedium = base.bodyMedium.withInter(inter, FontWeight.Normal, UI_BODY_SIZE_SP),
+        bodySmall = base.bodySmall.withInter(inter, FontWeight.Normal, UI_SMALL_SIZE_SP),
+        labelLarge = base.labelLarge.withInter(inter, FontWeight.Medium, UI_BODY_SIZE_SP),
+        labelMedium = base.labelMedium.withInter(inter, FontWeight.Medium, UI_SMALL_SIZE_SP),
+        labelSmall = base.labelSmall.withInter(inter, FontWeight.Medium, UI_MINI_SIZE_SP)
     )
 }
 

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.designsystem.theme.chromeSurface
 import app.notekea.core.presentation.designsystem.theme.motionTween
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -100,7 +101,7 @@ fun NotekeaTabStrip(
         modifier = modifier
             .fillMaxWidth()
             .height(height = STRIP_HEIGHT_DP.dp)
-            .background(color = MaterialTheme.colorScheme.background),
+            .background(color = MaterialTheme.colorScheme.chromeSurface),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(modifier = Modifier.weight(weight = 1f)) {
@@ -202,7 +203,7 @@ private fun ScrollingTabs(
 /** The strip's background fading in over the tabs' end, where more tabs are out of view. */
 @Composable
 private fun OverflowFade(modifier: Modifier) {
-    val background = MaterialTheme.colorScheme.background
+    val background = MaterialTheme.colorScheme.chromeSurface
 
     Box(
         modifier = modifier

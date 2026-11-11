@@ -61,7 +61,7 @@ class NotekeaSectionHeaderTest {
                         .config
                         .getOrNull(SemanticsProperties.Text)
                         ?.any {
-                            it.text == title.uppercase()
+                            it.text == title
                         } == true
                 }
 
@@ -80,7 +80,8 @@ class NotekeaSectionHeaderTest {
 
                 repeat(times = HOVER_FRAMES) { scene.render(nanoTime = (it + 1) * FRAME_NANOS) }
 
-                isShown = scene.texts().any { it.startsWith(prefix = title) }
+                // The header writes its title as it is, so a tooltip is a second text that starts with it.
+                isShown = scene.texts().count { it.startsWith(prefix = title) } > 1
             }
         }
 
