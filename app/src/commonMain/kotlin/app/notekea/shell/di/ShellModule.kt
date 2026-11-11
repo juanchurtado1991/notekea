@@ -62,6 +62,7 @@ val shellModule = module {
             clipWebPage = get(),
             findSection = get(),
             clipSection = get(),
+            describeSection = get(),
             localCalendar = get(),
             clock = get()
         )

@@ -44,7 +44,8 @@ class ClipSectionUseCase(private val clipWebPage: ClipWebPageUseCase) {
             value = SectionStep.Done(
                 main = clips.first(),
                 pages = clips.drop(n = 1),
-                skipped = skipped
+                skipped = skipped,
+                about = links.about
             )
         )
     }

@@ -111,4 +111,48 @@ class SectionSourcesTest {
             actual = article?.title to article?.paragraphs
         )
     }
+
+    @Test
+    fun `more pages than can be clipped keep the closest to the page, and the index says what each is for`() =
+        runTest {
+            val urls = (1..40).map { "https://x.com/docs/page-$it" } + ANDROID
+
+            val links = SectionLinks(
+                prefix = "https://x.com/docs/",
+                urls = urls,
+                more = 0,
+                about = mapOf(ANDROID to "Android: Kotlin for Android apps")
+            )
+
+            val embedder = app
+                .notekea
+                .core
+                .embedding
+                .domain
+                .FakeTextEmbedder()
+
+            val ranked = SectionRanker(textEmbedder = embedder).ranked(
+                page = FetchedPage(
+                    url = "https://x.com/docs/android",
+                    html = "<title>Android</title>"
+                ),
+                links = links
+            )
+
+            val capped = links.capped(chosen = ranked ?: urls)
+
+            assertEquals(
+                expected = listOf<Any?>(ANDROID, true, 30, 11),
+                actual = listOf(
+                    ranked?.first(),
+                    ANDROID in capped.urls,
+                    capped.urls.size,
+                    capped.more
+                )
+            )
+        }
+
+    private companion object {
+        const val ANDROID = "https://x.com/docs/android-overview"
+    }
 }

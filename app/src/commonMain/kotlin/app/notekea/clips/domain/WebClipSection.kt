@@ -127,9 +127,25 @@ object WebClipSection {
             )
         }
 
+        // What each page is for, as the site's llms.txt says it: "Axiom: Send traces to Axiom" after its link.
+        val purposes = done.pages.map { clip ->
+            done
+                .about[clip.url]
+                ?.takeIf {
+                    ": " in it
+                }
+                ?.substringAfter(delimiter = ": ")
+        }
+
         val listed = buildString {
             append(PAGES).append("\n\n")
-            pages.forEach { (_, name, _) -> append("- [[$folderName/$name|$name]]\n") }
+            done.summary?.let { append(it.trim()).append("\n\n") }
+
+            pages.forEachIndexed { index, (_, name, _) ->
+                append("- [[$folderName/$name|$name]]")
+                purposes[index]?.let { append(" — ").append(it) }
+                append('\n')
+            }
 
             if (done.skipped.isNotEmpty()) {
                 append("\n").append(SKIPPED).append("\n\n")

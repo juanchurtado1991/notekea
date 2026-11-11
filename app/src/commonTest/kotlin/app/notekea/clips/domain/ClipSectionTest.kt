@@ -157,6 +157,36 @@ class ClipSectionTest {
 
     private companion object {
         val NOT_ARTICLE = Outcome.Failure(error = ClipError.NotArticle)
+        const val INDEXED = "## Pages\n\nGuides to send traces to observability platforms.\n\n" +
+            "- [[Docs/Axiom|Axiom]] — Send traces to Axiom"
         const val PAGES = "## Pages\n\n- [[Overview/Axiom|Axiom]]\n- [[Overview/Datadog|Datadog]]"
+    }
+
+    @Test
+    fun `the index lists each page with what the site says it is for, under what the section offers`() {
+        val clip = { title: String, url: String ->
+            WebClip(
+                url = url,
+                title = title,
+                notes = "",
+                article = Article(title, listOf("t"))
+            )
+        }
+
+        val notes = WebClipSection.notesOf(
+            done = SectionStep.Done(
+                main = clip("Docs", "https://x.com/docs"),
+                pages = listOf(clip("Axiom", "https://x.com/docs/axiom.md")),
+                skipped = emptyList(),
+                about = mapOf("https://x.com/docs/axiom.md" to "Axiom: Send traces to Axiom"),
+                summary = "Guides to send traces to observability platforms."
+            ),
+            today = "2026-11-11"
+        )
+
+        assertEquals(
+            expected = true,
+            actual = INDEXED in notes.first().second
+        )
     }
 }

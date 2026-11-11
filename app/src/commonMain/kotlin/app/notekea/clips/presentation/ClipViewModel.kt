@@ -3,6 +3,7 @@ package app.notekea.clips.presentation
 import app.notekea.clips.domain.ClipSectionUseCase
 import app.notekea.clips.domain.ClipStep
 import app.notekea.clips.domain.ClipWebPageUseCase
+import app.notekea.clips.domain.DescribeSectionUseCase
 import app.notekea.clips.domain.FindSectionUseCase
 import app.notekea.clips.domain.SectionLinks
 import app.notekea.clips.domain.SectionStep
@@ -29,6 +30,7 @@ class ClipViewModel(
     private val clipWebPage: ClipWebPageUseCase,
     private val findSection: FindSectionUseCase,
     private val clipSection: ClipSectionUseCase,
+    private val describeSection: DescribeSectionUseCase,
     private val noteContentStore: NoteContentStore,
     private val noteFileOperations: NoteFileOperations,
     private val localCalendar: LocalCalendar,
@@ -97,10 +99,13 @@ class ClipViewModel(
                     if (links.urls.isEmpty()) {
                         clipPage()
                     } else {
+                        val summary = describeSection(links = links)
+
                         reduce {
                             it.copy(
                                 step = null,
-                                section = links
+                                section = links,
+                                sectionSummary = summary
                             )
                         }
                     }
@@ -147,7 +152,10 @@ class ClipViewModel(
                         )
                     }
 
-                    is SectionStep.Done -> written(done = step)
+                    is SectionStep.Done -> {
+                        val summary = state.value.sectionSummary
+                        written(done = step.copy(summary = summary))
+                    }
                 }
             }
         }

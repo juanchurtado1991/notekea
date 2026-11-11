@@ -102,6 +102,7 @@ fun ClipDialog(
                 ?.let {
                     SectionQuestion(
                         links = it,
+                        summary = state.sectionSummary,
                         onIntent = onIntent
                     )
                 }
@@ -135,9 +136,18 @@ fun ClipDialog(
 @Composable
 private fun SectionQuestion(
     links: SectionLinks,
+    summary: String?,
     onIntent: (ClipIntent) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+        summary?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
         Text(
             text = stringResource(Res.string.clip_section_question, links.urls.size, links.prefix),
             style = MaterialTheme.typography.bodyMedium

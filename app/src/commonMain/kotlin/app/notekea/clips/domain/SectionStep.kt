@@ -12,7 +12,10 @@ sealed interface SectionStep {
     data class Done(
         val main: WebClip,
         val pages: List<WebClip>,
-        val skipped: List<String>
+        val skipped: List<String>,
+        // What the site says each page is, by its address, and what the section offers, for its index.
+        val about: Map<String, String> = emptyMap(),
+        val summary: String? = null
     ) : SectionStep
 
     /** The page itself could not be clipped; nothing is written. */
