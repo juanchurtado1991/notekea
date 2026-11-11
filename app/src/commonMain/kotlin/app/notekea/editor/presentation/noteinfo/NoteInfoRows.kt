@@ -15,9 +15,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.core.domain.time.MomentFormat
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.readableDate
+import app.notekea.core.presentation.readableMoment
 import app.notekea.editor.domain.NoteStats
 import app.notekea.editor.presentation.model.EditorPreviewData
 import app.notekea.resources.Res
@@ -37,8 +38,6 @@ private const val INFO_ROW_PADDING_DP = 3
 private const val MUTED_ALPHA = 0.5f
 private const val PROGRESS_HEIGHT_DP = 3
 private const val PROGRESS_WIDTH_DP = 56
-private const val CREATED_PATTERN = "MMM D, YYYY"
-private const val MODIFIED_PATTERN = "MMM D, YYYY, HH:mm"
 private const val PREVIEW_WIDTH_DP = 300
 
 /**
@@ -51,25 +50,17 @@ internal fun NoteInfoRows(info: NoteInfo) {
     Column(modifier = Modifier.padding(bottom = NotekeaDimensions.SpacingS)) {
         info.stats?.let { StatsRows(stats = it) }
 
-        val format = remember { MomentFormat() }
-
         info.createdAt?.let {
             InfoRow(
                 label = stringResource(resource = Res.string.note_info_created),
-                value = format.format(
-                    moment = it,
-                    pattern = CREATED_PATTERN
-                )
+                value = readableDate(date = it.date)
             )
         }
 
         info.modifiedAt?.let {
             InfoRow(
                 label = stringResource(resource = Res.string.note_info_modified),
-                value = format.format(
-                    moment = it,
-                    pattern = MODIFIED_PATTERN
-                )
+                value = readableMoment(moment = it)
             )
         }
     }

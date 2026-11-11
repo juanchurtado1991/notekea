@@ -80,6 +80,9 @@ This file is the dependency audit the developer asked for before anything was ap
    - The sidebar toggle stays the rail's Files button, right under the traffic lights. A second toggle in the title
      row would do the same thing twice.
 6. 6A: the note's page header.
+   - The line under the title shows when the note was last edited and its word count.
+   - The extra space above the page stays at 24 dp: 37 screen tests click the page at fixed points, and they move
+     first.
 7. 7B: the chat as a document.
 8. 8A: the alert, then 8C, the popovers.
 9. 9A: the springs.

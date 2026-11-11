@@ -28,6 +28,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaDateField
 import app.notekea.core.presentation.designsystem.components.NotekeaPropertyField
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.readableDate
 import app.notekea.resources.Res
 import app.notekea.resources.properties_add_item
 import app.notekea.resources.properties_calendar
@@ -39,7 +40,6 @@ import org.jetbrains.compose.resources.stringResource
 private const val ITEM_FIELD_WIDTH_DP = 120
 private const val OTHER_MAX_LINES = 2
 private const val PREVIEW_WIDTH_DP = 420
-private const val READABLE_DATE = "MMM D, YYYY"
 private const val TAG_MARK = "#"
 private val NUMBER = Regex(pattern = "-?\\d+(\\.\\d+)?")
 
@@ -109,10 +109,7 @@ private fun DateEditor(
         },
         onDatePick = { change(PropertyValue.Date(date = it)) },
         calendarLabel = stringResource(resource = Res.string.properties_calendar),
-        displayText = format.format(
-            moment = LocalMoment(date = value.date),
-            pattern = READABLE_DATE
-        ),
+        displayText = readableDate(date = value.date),
         today = today,
         isValid = {
             format.parseDate(

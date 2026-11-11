@@ -27,12 +27,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.time.LocalMoment
-import app.notekea.core.domain.time.MomentFormat
 import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.NotekeaProgressBar
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalNoteLooks
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.readableDate
 import app.notekea.resources.Res
 import app.notekea.resources.tasks_done_label
 import app.notekea.resources.tasks_progress
@@ -48,7 +48,6 @@ import app.notekea.tasks.domain.TaskWhen
 import org.jetbrains.compose.resources.stringResource
 
 private const val PROGRESS_WIDTH_DP = 72
-private const val SHORT_DATE = "MMM D"
 
 /**
  * A piece of a group's card in the Tasks tab: the list draws a card as its head and one piece per task, so a long
@@ -267,9 +266,9 @@ internal fun TaskCardRow(
 
         task.date?.let { date ->
             Text(
-                text = MomentFormat().format(
-                    moment = LocalMoment(date = date),
-                    pattern = SHORT_DATE
+                text = readableDate(
+                    date = date,
+                    withYear = false
                 ),
                 style = MaterialTheme.typography.bodySmall,
                 color = dueColor(due = row.due) ?: colors.onSurfaceVariant,

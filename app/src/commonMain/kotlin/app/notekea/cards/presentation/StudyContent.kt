@@ -35,6 +35,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaCard
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.readableDate
 import app.notekea.resources.Res
 import app.notekea.resources.study_done
 import app.notekea.resources.study_easy
@@ -186,13 +187,21 @@ private fun Card(
 }
 
 @Composable
-private fun emptyText(state: StudyState): String = when {
-    state.total == 0 -> stringResource(resource = Res.string.study_empty)
+private fun emptyText(state: StudyState): String {
+    val next = state.nextDate
 
-    state.nextDate != null ->
-        stringResource(Res.string.study_next, state.reviewed, state.nextDate.toString())
+    return when {
+        state.total == 0 -> stringResource(resource = Res.string.study_empty)
 
-    else -> stringResource(resource = Res.string.study_done, state.reviewed)
+        // A date as people read it, not the date's code form (bug hunt, 2026-11-11).
+        next != null -> stringResource(
+            Res.string.study_next,
+            state.reviewed,
+            readableDate(date = next)
+        )
+
+        else -> stringResource(resource = Res.string.study_done, state.reviewed)
+    }
 }
 
 private fun keyOf(

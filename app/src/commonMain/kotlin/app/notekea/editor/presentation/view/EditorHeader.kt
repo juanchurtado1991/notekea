@@ -37,20 +37,26 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaColors
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.platform.label
+import app.notekea.core.presentation.readableDate
 import app.notekea.editor.presentation.model.EditorHeaderData
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.EditorPreviewData
 import app.notekea.editor.presentation.model.EditorState
+import app.notekea.editor.presentation.noteinfo.NoteInfo
 import app.notekea.editor.presentation.properties.PropertiesView
 import app.notekea.resources.Res
 import app.notekea.resources.editor_bookmark_add
 import app.notekea.resources.editor_bookmark_remove
+import app.notekea.resources.editor_meta_edited
 import app.notekea.resources.editor_next_day
 import app.notekea.resources.editor_previous_day
 import app.notekea.resources.editor_reveal_folder
 import app.notekea.resources.editor_title_label
+import app.notekea.resources.status_words
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
+private const val META_SEPARATOR = " · "
 private const val PATH_SEPARATOR = " / "
 
 /**
@@ -152,6 +158,8 @@ internal fun EditorHeader(
         }
     }
 
+    NoteMetaLine(info = state.info)
+
     state.titleError?.let { error ->
         Text(
             text = notesErrorMessage(
@@ -167,6 +175,29 @@ internal fun EditorHeader(
         state = state,
         onIntent = onIntent,
         modifier = Modifier.padding(top = NotekeaDimensions.SpacingXs)
+    )
+}
+
+/**
+ * Under the title, one muted line (macOS redesign 6A): when the note was last edited and how many words it has, from
+ * what Note info knows; nothing until it knows.
+ */
+@Composable
+private fun NoteMetaLine(info: NoteInfo) {
+    val parts = listOfNotNull(
+        info.modifiedAt?.let {
+            stringResource(Res.string.editor_meta_edited, readableDate(date = it.date))
+        },
+        info.stats?.let { pluralStringResource(Res.plurals.status_words, it.words, it.words) }
+    )
+
+    if (parts.isEmpty()) return
+
+    Text(
+        text = parts.joinToString(separator = META_SEPARATOR),
+        modifier = Modifier.padding(top = NotekeaDimensions.SpacingXs),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 

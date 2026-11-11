@@ -474,6 +474,24 @@
     <string name="workspace_start_search">Buscar en las notas</string>
     <string name="workspace_start_today">Nota de hoy</string>
     <string name="workspace_empty_title">No hay pestañas abiertas</string>
+    <string-array name="months_short">
+        <item>ene</item>
+        <item>feb</item>
+        <item>mar</item>
+        <item>abr</item>
+        <item>may</item>
+        <item>jun</item>
+        <item>jul</item>
+        <item>ago</item>
+        <item>sept</item>
+        <item>oct</item>
+        <item>nov</item>
+        <item>dic</item>
+    </string-array>
+    <string name="date_long">%1$d %2$s %3$d</string>
+    <string name="date_short">%1$d %2$s</string>
+    <string name="date_with_time">%1$s, %2$s</string>
+    <string name="editor_meta_edited">Editada el %1$s</string>
     <string name="calendar_next_month">Mes siguiente</string>
     <string name="calendar_previous_month">Mes anterior</string>
     <string name="calendar_today">Hoy</string>
