@@ -19,13 +19,14 @@ internal object HowToAsked {
     ): List<PlannedStep> {
         val isAsked = HOW_TO.containsMatchIn(input = request.trim())
 
-        val isDone = steps.any {
-            it.kind != ActionKind.ANSWER &&
-                it.kind != ActionKind.HELP &&
-                it.kind != ActionKind.CHAT
+        // Done, or talked about: either way a how-to is explained from the guide.
+        val isHelped = steps.any {
+            it.kind == ActionKind.HELP
         }
 
-        if (!isAsked || !isDone) return steps
+        val isNotHelp = steps.any { it.kind != ActionKind.ANSWER } && !isHelped
+
+        if (!isAsked || !isNotHelp) return steps
 
         return listOf(
             PlannedStep(

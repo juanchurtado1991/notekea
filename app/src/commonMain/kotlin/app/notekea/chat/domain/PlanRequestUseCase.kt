@@ -18,6 +18,36 @@ class PlanRequestUseCase(
         request: String,
         context: ActionContext
     ): Outcome<List<PlannedStep>, ChatError> {
+        val first = planned(
+            request = request,
+            context = context
+        )
+
+        val isUnfounded =
+            first is Outcome.Success && RefusalChecked.isUnfounded(first.value, request)
+
+        if (!isUnfounded) return first
+
+        // A refusal of what Notekea can do is planned once more, then answered as a question if refused again.
+        val again = planned(
+            request = request,
+            context = context,
+            isRetried = true
+        )
+
+        val isRefusedAgain =
+            again is Outcome.Success && RefusalChecked.isUnfounded(again.value, request)
+
+        val isAnswered = isRefusedAgain && !RefusalChecked.isChange(request)
+
+        return if (isAnswered) Outcome.Success(value = RefusalChecked.answered(request)) else again
+    }
+
+    private suspend fun planned(
+        request: String,
+        context: ActionContext,
+        isRetried: Boolean = false
+    ): Outcome<List<PlannedStep>, ChatError> {
         val json = StringBuilder()
 
         try {
@@ -25,7 +55,8 @@ class PlanRequestUseCase(
                 .generate(
                     messages = ActionPrompt.messages(
                         request = request,
-                        context = context
+                        context = context,
+                        isRetried = isRetried
                     ),
                     options = GenerationOptions(
                         maxTokens = MAX_TOKENS,
@@ -45,15 +76,33 @@ class PlanRequestUseCase(
 
         val asked = HowToAsked.shaped(
             steps = UrlsNamed.shaped(
-                steps = steps,
+                steps = PlanWords.shaped(
+                    steps = steps,
+                    request = request
+                ),
                 request = request
             ),
             request = request
         )
 
-        val shaped = trimmed(steps = asked).map {
+        val reworded = OverviewAsked.shaped(
+            steps = ReplyReworded.shaped(
+                steps = QuestionKept.shaped(
+                    steps = asked,
+                    request = request
+                ),
+                request = request,
+                history = context.history
+            ),
+            request = request
+        )
+
+        val shaped = trimmed(steps = reworded).map {
             val named = foldersNamed(
-                step = rescued(step = it),
+                step = PlanWords.folderNamed(
+                    step = rescued(step = it),
+                    context = context
+                ),
                 context = context,
                 request = request
             )
@@ -64,8 +113,11 @@ class PlanRequestUseCase(
                 context = context
             )
 
-            TaskPeriods.asked(
-                step = withTemplate,
+            ThemeWords.shaped(
+                step = TaskPeriods.asked(
+                    step = withTemplate,
+                    request = request
+                ),
                 request = request
             )
         }

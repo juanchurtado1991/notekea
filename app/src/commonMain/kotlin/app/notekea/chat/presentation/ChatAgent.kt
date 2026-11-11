@@ -4,6 +4,7 @@ import app.notekea.chat.domain.ActionProblem
 import app.notekea.chat.domain.AgentStep
 import app.notekea.chat.domain.AgentTaskUseCase
 import app.notekea.chat.domain.ChatExchange
+import app.notekea.chat.domain.SpokenLanguage
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
@@ -18,7 +19,25 @@ internal class ChatAgent(
     private val actions: ChatActions,
     private val update: (id: Long, change: (ChatEntry) -> ChatEntry) -> Unit
 ) {
-    suspend fun work(
+    /** The entry handed to the agent, its end to come: asked of agent mode, or a question Auto could not answer. */
+    suspend fun takeOver(
+        id: Long,
+        task: String,
+        notes: Collection<NoteEntry>,
+        history: List<ChatExchange>,
+        openNote: RelativePath?
+    ) {
+        update(id) {
+            it.copy(
+                answeredWith = ChatMode.AGENT,
+                outcome = null
+            )
+        }
+
+        work(id, task, notes, history, openNote)
+    }
+
+    private suspend fun work(
         id: Long,
         task: String,
         notes: Collection<NoteEntry>,
@@ -31,7 +50,13 @@ internal class ChatAgent(
             request = task,
             notes = notes,
             openNote = openNote
-        ).copy(history = history)
+        ).copy(
+            history = history,
+            language = SpokenLanguage.inChat(
+                text = task,
+                history = history
+            )
+        )
 
         agentTask(
             task = task,

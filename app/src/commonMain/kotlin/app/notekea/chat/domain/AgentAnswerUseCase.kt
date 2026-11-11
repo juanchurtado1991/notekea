@@ -24,7 +24,8 @@ class AgentAnswerUseCase(
     operator fun invoke(
         vaultPath: String,
         notes: Collection<NoteEntry>,
-        question: String
+        question: String,
+        language: String? = null
     ): Flow<AnswerStep> = flow {
         val gathered = mutableListOf<AnswerSource>()
         val tried = mutableSetOf<String>()
@@ -99,7 +100,8 @@ class AgentAnswerUseCase(
         emitAll(
             answered(
                 question = question,
-                read = read
+                read = read,
+                language = language
             )
         )
     }
@@ -190,17 +192,23 @@ class AgentAnswerUseCase(
     /** The answer from what was gathered, with 3.2's prompt: cited, or not found. */
     private fun answered(
         question: String,
-        read: List<AnswerSource>
+        read: List<AnswerSource>,
+        language: String?
     ): Flow<AnswerStep> = flow {
         val written = StringBuilder()
 
         try {
             llmEngine
                 .generate(
-                    messages = AnswerPrompt.messages(
-                        question = question,
-                        excerpts = read.map { it.text }
-                    ),
+                    messages = AnswerPrompt
+                        .messages(
+                            question = question,
+                            excerpts = read.map { it.text }
+                        )
+                        .inLanguage(
+                            language = language,
+                            kept = AnswerPrompt.NOT_FOUND
+                        ),
                     options = GenerationOptions(maxTokens = ANSWER_TOKENS)
                 )
                 .collect { written.append(it) }
@@ -209,7 +217,7 @@ class AgentAnswerUseCase(
         }
 
         val text = written.toString().trim()
-        val isNotFound = text.isEmpty() || AnswerPrompt.NOT_FOUND in text
+        val isNotFound = AnswerPrompt.isNotFound(text = text)
         if (isNotFound) return@flow emit(value = AnswerStep.NotFound)
 
         emit(

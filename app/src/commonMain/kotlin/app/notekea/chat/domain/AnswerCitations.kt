@@ -13,16 +13,19 @@ object AnswerCitations {
         text: String,
         read: List<AnswerSource>
     ): Answer {
+        // Sums written out are done again: a small model adds badly.
+        val checked = SumsChecked.corrected(text = text)
+
         val order = mutableListOf<Int>()
 
-        CITATION.findAll(input = text).forEach { match ->
+        CITATION.findAll(input = checked).forEach { match ->
             val excerpt = match.groupValues[1].toInt()
             val isGiven = excerpt in 1..read.size
             if (isGiven && excerpt !in order) order += excerpt
         }
 
         val cited = CITATION
-            .replace(input = text) { match ->
+            .replace(input = checked) { match ->
                 val position = order.indexOf(element = match.groupValues[1].toInt())
 
                 if (position < 0) "" else " [${position + 1}]"

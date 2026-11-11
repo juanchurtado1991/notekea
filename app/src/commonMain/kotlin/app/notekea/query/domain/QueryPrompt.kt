@@ -32,6 +32,10 @@ note or a topic is not a filter. The request may be in another language than the
 When no listed property means what the request names, write the request's word as the property, never another one.
 Examples: "libros con más de 3" -> {"filters":[{"property":"","condition":"in folder","value":"Books"},
 {"property":"rating","condition":"more than","value":"3"}]}
+"cuántos libros terminé" -> {"filters":[{"property":"","condition":"in folder","value":"Books"},
+{"property":"finished","condition":"is","value":"true"}]}
+"el libro que más me gustó" -> {"filters":[{"property":"","condition":"in folder","value":"Books"}],"sort":"rating",
+"descending":true}
 "notes by price", with no property for a price -> {"filters":[],"sort":"price"}"""
 
     fun messages(

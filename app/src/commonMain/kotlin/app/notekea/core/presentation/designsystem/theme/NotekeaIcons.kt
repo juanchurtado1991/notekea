@@ -49,6 +49,7 @@ import com.composables.icons.lucide.FilePlus
 import com.composables.icons.lucide.FileText
 import com.composables.icons.lucide.FileX
 import com.composables.icons.lucide.Flame
+import com.composables.icons.lucide.FoldVertical
 import com.composables.icons.lucide.Folder
 import com.composables.icons.lucide.FolderOpen
 import com.composables.icons.lucide.FolderPlus
@@ -89,6 +90,7 @@ import com.composables.icons.lucide.Plus
 import com.composables.icons.lucide.Quote
 import com.composables.icons.lucide.Search
 import com.composables.icons.lucide.SearchX
+import com.composables.icons.lucide.SendHorizontal
 import com.composables.icons.lucide.SeparatorHorizontal
 import com.composables.icons.lucide.Settings
 import com.composables.icons.lucide.ShieldCheck
@@ -210,6 +212,7 @@ object NotekeaIcons {
     val ChatNotFound: ImageVector get() = Lucide.SearchX
     val ChatClear: ImageVector get() = Lucide.Eraser
     val ChatCopy: ImageVector get() = Lucide.Copy
+    val ChatCompact: ImageVector get() = Lucide.FoldVertical
     val ChatError: ImageVector get() = Lucide.CircleAlert
     val Study: ImageVector get() = Lucide.GraduationCap
     val Clip: ImageVector get() = Lucide.Globe
@@ -220,7 +223,7 @@ object NotekeaIcons {
     val SyncProblem: ImageVector get() = Lucide.CloudAlert
     val SyncConflict: ImageVector get() = Lucide.GitCompare
     val ChatModel: ImageVector get() = Lucide.Cpu
-    val Send: ImageVector get() = Lucide.ArrowUp
+    val Send: ImageVector get() = Lucide.SendHorizontal
     val Stop: ImageVector get() = Lucide.Square
     val Inspector: ImageVector get() = Lucide.Info
     val InfoModified: ImageVector get() = Lucide.Pencil

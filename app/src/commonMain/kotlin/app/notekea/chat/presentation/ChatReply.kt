@@ -1,5 +1,6 @@
 package app.notekea.chat.presentation
 
+import app.notekea.chat.domain.FoundNotes
 import app.notekea.core.notes.domain.RelativePath
 
 /** What is left to do once a request is planned: nothing more, answer it, talk, explain the app or the vault. */
@@ -17,6 +18,12 @@ internal sealed interface ChatReply {
 
     /** What the vault holds as a whole. */
     data object Overview : ChatReply
+
+    /** A question the plan answered with [tables] of notes: answered in words from them, above them. */
+    data class FromFound(
+        val question: String,
+        val tables: List<FoundNotes>
+    ) : ChatReply
 
     /** Agent mode works on it (4.7): its moves are listed on the entry, its end is a card or what it found. */
     data object Agent : ChatReply

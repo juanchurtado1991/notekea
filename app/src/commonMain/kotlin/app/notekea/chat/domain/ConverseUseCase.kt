@@ -20,7 +20,9 @@ class ConverseUseCase(
         message: String,
         history: List<ChatExchange>,
         vaultPath: String,
-        note: NoteEntry?
+        note: NoteEntry?,
+        language: String? = null,
+        today: String? = null
     ): Flow<AnswerStep> = flow {
         val body = note
             ?.let {
@@ -47,13 +49,16 @@ class ConverseUseCase(
         try {
             llmEngine
                 .generate(
-                    messages = ConversePrompt.messages(
-                        message = message,
-                        history = history,
-                        note = note?.let {
-                            it.file.path.nameWithoutExtension to body
-                        }
-                    ),
+                    messages = ConversePrompt
+                        .messages(
+                            message = message,
+                            history = history,
+                            note = note?.let {
+                                it.file.path.nameWithoutExtension to body
+                            },
+                            today = today
+                        )
+                        .inLanguage(language = language),
                     options = GenerationOptions(
                         maxTokens = MAX_TOKENS,
                         temperature = TEMPERATURE

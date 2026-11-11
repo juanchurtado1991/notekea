@@ -32,7 +32,8 @@ fun NotekeaStatusRing(
         modifier = modifier.size(size = RING_DP.dp),
         color = MaterialTheme.colorScheme.primary,
         strokeWidth = STROKE_DP.dp,
-        trackColor = MaterialTheme.colorScheme.surfaceVariant
+        trackColor = MaterialTheme.colorScheme.outlineVariant,
+        gapSize = 0.dp
     )
 }
 

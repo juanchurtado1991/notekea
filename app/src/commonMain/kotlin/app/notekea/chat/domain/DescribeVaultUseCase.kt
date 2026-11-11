@@ -9,13 +9,16 @@ import kotlinx.coroutines.flow.Flow
 class DescribeVaultUseCase(private val llmEngine: LlmEngine) {
     operator fun invoke(
         question: String,
-        notes: Collection<NoteEntry>
+        notes: Collection<NoteEntry>,
+        language: String? = null
     ): Flow<AnswerStep> = streamedReply(
         llmEngine = llmEngine,
-        messages = OverviewPrompt.messages(
-            question = question,
-            notes = notes
-        ),
+        messages = OverviewPrompt
+            .messages(
+                question = question,
+                notes = notes
+            )
+            .inLanguage(language = language),
         options = GenerationOptions(
             maxTokens = MAX_TOKENS,
             temperature = 0f

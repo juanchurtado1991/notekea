@@ -8,6 +8,7 @@ import app.notekea.chat.domain.DonePlan
 import app.notekea.chat.domain.FoundNotes
 import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.appearance.domain.ColorTheme
+import app.notekea.core.appearance.domain.ThemeMode
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.NoteContentStore
@@ -111,11 +112,25 @@ class VaultActionRunner(
                 newChar = '_'
             )
 
+        val appearance = appearanceStore.observe().first()
+
+        // "Dark", "oscuro", "light mode": the app's mode, not a color theme.
+        MODES
+            .entries
+            .firstOrNull { (_, words) ->
+                words.any {
+                    it in wanted
+                }
+            }
+            ?.let { (mode, _) ->
+                appearanceStore.save(appearance = appearance.copy(mode = mode))
+
+                return true
+            }
+
         val found = ColorTheme.entries.firstOrNull {
             it.id == wanted || it.id.endsWith(suffix = wanted)
         } ?: return false
-
-        val appearance = appearanceStore.observe().first()
 
         appearanceStore.save(appearance = appearance.copy(theme = found))
 
@@ -424,5 +439,11 @@ class VaultActionRunner(
 
     private companion object {
         val DATE = Regex(pattern = "\\d{4}-\\d{2}-\\d{2}")
+
+        val MODES = mapOf(
+            ThemeMode.DARK to listOf("dark", "oscuro", "oscura", "noche", "night", "negro"),
+            ThemeMode.LIGHT to listOf("light", "claro", "clara", "día", "dia", "blanco"),
+            ThemeMode.SYSTEM to listOf("system", "sistema", "automatic", "automático", "automatico")
+        )
     }
 }

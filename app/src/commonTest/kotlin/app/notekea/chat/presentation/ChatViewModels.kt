@@ -4,10 +4,12 @@ import app.notekea.chat.data.GhostActionPlanReader
 import app.notekea.chat.domain.ActOnRequestUseCase
 import app.notekea.chat.domain.AgentAnswerUseCase
 import app.notekea.chat.domain.AgentTaskUseCase
+import app.notekea.chat.domain.AnswerFromFoundUseCase
 import app.notekea.chat.domain.AnswerFromNotesUseCase
 import app.notekea.chat.domain.AnswerHelpUseCase
 import app.notekea.chat.domain.ChatHistoryStore
 import app.notekea.chat.domain.CheckPlanUseCase
+import app.notekea.chat.domain.CompactChatUseCase
 import app.notekea.chat.domain.ComposeNotesUseCase
 import app.notekea.chat.domain.ConverseUseCase
 import app.notekea.chat.domain.DescribeVaultUseCase
@@ -98,6 +100,8 @@ internal fun chatViewModel(
             ),
             clock = Clock.System
         ),
+        compactChat = CompactChatUseCase(llmEngine = engine),
+        answerFromFound = AnswerFromFoundUseCase(llmEngine = engine),
         actionRunner = runner,
         localCalendar = FakeLocalCalendar(),
         clock = Clock.System,
