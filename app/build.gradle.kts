@@ -22,6 +22,28 @@ private val galleryGradleProperty = "gallery"
 private val gallerySystemProperty = "notekea.gallery"
 private val mainClassName = "app.notekea.MainKt"
 private val appBundleId = "app.notekea"
+
+// The Sample Vault of the repository, bundled for "Try the sample vault" (5.1), with an index of its files.
+private val bundledSampleVault = layout.buildDirectory.dir("generated/sample-vault")
+
+val bundleSampleVault = tasks
+    .register<Sync>("bundleSampleVault") {
+        from(rootProject.file("smoke-data/vaults/Sample Vault"))
+        into(bundledSampleVault.map { it.dir("sample-vault") })
+
+        doLast {
+            val root = destinationDir
+
+            val files = root
+                .walkTopDown()
+                .filter { it.isFile }
+                .map { it.relativeTo(root).invariantSeparatorsPath }
+                .filter { it != "index.txt" }
+                .sorted()
+
+            root.resolve("index.txt").writeText(files.joinToString(separator = "\n", postfix = "\n"))
+        }
+    }
 private val appDescription = "Local-first notes, compatible with Obsidian vaults"
 private val appVendor = "Notekea"
 private val linuxAppCategory = "Office"
@@ -72,6 +94,10 @@ kotlin {
             implementation(libs.multiplatform.settings.test)
             implementation(libs.okio.fakefilesystem)
             implementation(libs.turbine)
+        }
+
+        jvmMain {
+            resources.srcDir(files(bundledSampleVault).builtBy(bundleSampleVault))
         }
 
         jvmMain.dependencies {

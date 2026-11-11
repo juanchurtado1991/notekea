@@ -37,6 +37,7 @@ import app.notekea.resources.welcome_create_vault
 import app.notekea.resources.welcome_new_vault_default_name
 import app.notekea.resources.welcome_open_folder
 import app.notekea.resources.welcome_open_hint
+import app.notekea.resources.welcome_sample_vault
 import app.notekea.resources.welcome_tagline
 import app.notekea.vault.domain.Vault
 import app.notekea.vault.domain.VaultError
@@ -291,6 +292,13 @@ private fun StartActions(
             text = stringResource(resource = Res.string.welcome_create_vault),
             onClick = { onIntent(WelcomeIntent.OnCreateVaultClick(suggestedName = suggestedName)) },
             style = NotekeaButtonStyle.SECONDARY,
+            enabled = !state.isBusy
+        )
+
+        NotekeaButton(
+            text = stringResource(resource = Res.string.welcome_sample_vault),
+            onClick = { onIntent(WelcomeIntent.OnSampleVaultClick) },
+            style = NotekeaButtonStyle.TEXT,
             enabled = !state.isBusy
         )
     }

@@ -18,6 +18,9 @@ sealed interface WelcomeIntent {
 
     data object OnOpenFolderClick : WelcomeIntent
 
+    /** Try the sample vault: a copy of the one Notekea ships, made in Documents and opened. */
+    data object OnSampleVaultClick : WelcomeIntent
+
     data class OnRecentVaultClick(val path: String) : WelcomeIntent
 
     data class OnRemoveRecentVaultClick(val path: String) : WelcomeIntent

@@ -11,6 +11,7 @@ import app.notekea.vault.domain.LocateVaultUseCase
 import app.notekea.vault.domain.OpenVaultUseCase
 import app.notekea.vault.domain.RemoveRecentVaultUseCase
 import app.notekea.vault.domain.RestoreLastVaultUseCase
+import app.notekea.vault.domain.SampleVaultSource
 import app.notekea.vault.domain.Vault
 import app.notekea.vault.domain.VaultError
 import app.notekea.vault.domain.VaultFileSystem
@@ -32,7 +33,8 @@ class WelcomeViewModel(
     private val removeRecentVault: RemoveRecentVaultUseCase,
     private val restoreLastVault: RestoreLastVaultUseCase,
     private val vaultFileSystem: VaultFileSystem,
-    private val preferencesStore: AppPreferencesStore
+    private val preferencesStore: AppPreferencesStore,
+    private val sampleVault: SampleVaultSource
 ) : BaseViewModel<WelcomeState, WelcomeIntent, Nothing>(
     initialState = WelcomeState(platformConventions = platformConventions)
 ) {
@@ -92,6 +94,8 @@ class WelcomeViewModel(
             WelcomeIntent.OnOpenFolderClick -> pickAndOpen()
 
             is WelcomeIntent.OnRecentVaultClick -> openWith { openVault(path = intent.path) }
+
+            WelcomeIntent.OnSampleVaultClick -> openWith { openSample() }
 
             is WelcomeIntent.OnRemoveRecentVaultClick -> remove(path = intent.path)
 
@@ -156,6 +160,35 @@ class WelcomeViewModel(
 
     private fun openWith(open: suspend () -> Outcome<Vault, VaultError>) {
         launchGuarded(onError = ::showUnexpectedError) { openNow(open = open) }
+    }
+
+    // A new folder for the sample vault in Documents, numbered when one is there already, filled and opened.
+    private suspend fun openSample(): Outcome<Vault, VaultError> {
+        val parent = vaultFileSystem.suggestedParentFolder()
+
+        val folder = sampleFolderIn(parent = parent)
+            ?: return Outcome.Failure(error = VaultError.CreationFailed(path = parent))
+
+        return when (val copied = sampleVault.copyTo(folder = folder)) {
+            is Outcome.Success -> openVault(path = folder)
+            is Outcome.Failure -> copied
+        }
+    }
+
+    // "Notekea Sample Vault", or "… 2" and on when one is there already with its files.
+    private suspend fun sampleFolderIn(parent: String): String? {
+        for (number in 1..MAX_SAMPLES) {
+            val name = if (number == 1) SAMPLE_NAME else "$SAMPLE_NAME $number"
+
+            val created = vaultFileSystem.createFolder(
+                parentPath = parent,
+                name = name
+            )
+
+            if (created is Outcome.Success) return created.value
+        }
+
+        return null
     }
 
     private fun pickAndOpen() {
@@ -229,6 +262,8 @@ class WelcomeViewModel(
 
     companion object {
         private const val LOG_TAG = "WelcomeViewModel"
+        private const val SAMPLE_NAME = "Notekea Sample Vault"
+        private const val MAX_SAMPLES = 20
         private const val UNEXPECTED_ERROR_MESSAGE = "Unexpected error in the welcome flow"
     }
 }

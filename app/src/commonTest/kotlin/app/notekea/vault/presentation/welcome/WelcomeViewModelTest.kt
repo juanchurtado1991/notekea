@@ -1,5 +1,6 @@
 package app.notekea.vault.presentation.welcome
 
+import app.notekea.core.domain.Outcome
 import app.notekea.core.preferences.domain.AppPreferences
 import app.notekea.core.preferences.domain.FakeAppPreferencesStore
 import app.notekea.vault.domain.FakeVaultFileSystem
@@ -68,6 +69,33 @@ class WelcomeViewModelTest {
             assertEquals(
                 expected = listOf<Any?>(null, 1),
                 actual = listOf(state.openedVault, state.recentVaults.size)
+            )
+        }
+
+    // 5.1 (2026-11-11): the sample vault is copied into Documents and opened, a second one numbered.
+    @Test
+    fun `the sample vault opens from a fresh copy in Documents, a second one numbered`() =
+        runWelcomeTest {
+            val viewModel = startedViewModel()
+
+            send(
+                viewModel = viewModel,
+                intent = WelcomeIntent.OnSampleVaultClick
+            )
+
+            val first = viewModel.state.value.openedVault?.path
+
+            send(
+                viewModel = viewModel,
+                intent = WelcomeIntent.OnSampleVaultClick
+            )
+
+            assertEquals(
+                expected = listOf(
+                    "/home/ana/Documents/Notekea Sample Vault",
+                    "/home/ana/Documents/Notekea Sample Vault 2"
+                ),
+                actual = listOf(first, viewModel.state.value.openedVault?.path)
             )
         }
 
@@ -440,7 +468,11 @@ class WelcomeViewModelTest {
             removeRecentVault = fixture.removeRecentVault,
             restoreLastVault = fixture.restoreLastVault,
             vaultFileSystem = fixture.fileSystem,
-            preferencesStore = FakeAppPreferencesStore(initial = preferences)
+            preferencesStore = FakeAppPreferencesStore(initial = preferences),
+            sampleVault = { folder ->
+                fixture.fileSystem.filled += folder
+                Outcome.Success(value = Unit)
+            }
         )
 
         advanceUntilIdle()

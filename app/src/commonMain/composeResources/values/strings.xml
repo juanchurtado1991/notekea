@@ -420,6 +420,7 @@
     <string name="tree_untitled_note">Untitled</string>
 
     <string name="welcome_busy">Opening vault…</string>
+    <string name="welcome_sample_vault">Try the sample vault</string>
     <string name="welcome_create_vault">Create new vault</string>
     <string name="welcome_feature_ai_text">Related notes and answers, worked out on your computer.</string>
     <string name="welcome_feature_ai_title">Local AI</string>
