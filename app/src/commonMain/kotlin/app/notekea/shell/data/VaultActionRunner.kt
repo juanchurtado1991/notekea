@@ -138,12 +138,12 @@ class VaultActionRunner(
         ActionKind.WRITE_FROM_NOTES, ActionKind.NOTES_FROM_TEXT -> writer.createDrafts(step = step)
 
         ActionKind.APPEND_TEXT -> writer.append(
-            notes = notesOrToday(vaultPath, step),
+            notes = notesOrToday(vaultPath, step, writer.journal),
             text = step.text.orEmpty()
         )
 
         ActionKind.ADD_TASK -> writer.append(
-            notes = notesOrToday(vaultPath, step),
+            notes = notesOrToday(vaultPath, step, writer.journal),
             text = taskLine(step = step)
         )
 
@@ -188,14 +188,27 @@ class VaultActionRunner(
     /** The step's notes, or today's daily note (made if it is not there yet) when it names none. */
     private suspend fun notesOrToday(
         vaultPath: String,
-        step: ActionStep
+        step: ActionStep,
+        journal: ActionJournal
     ): List<RelativePath> {
         if (step.notes.isNotEmpty()) return step.notes
 
-        return when (val today = openDailyNote(vaultPath = vaultPath)) {
-            is Outcome.Success -> listOf(today.value.path)
-            is Outcome.Failure -> emptyList()
+        val today =
+            (openDailyNote(vaultPath = vaultPath) as? Outcome.Success)?.value ?: return emptyList()
+
+        // A daily note the step had to make goes with Undo too.
+        if (today.isNew) {
+            journal.created += today.path
+
+            journal.undoSteps += { vault ->
+                trash.moveToTrash(
+                    vaultPath = vault,
+                    path = today.path
+                )
+            }
         }
+
+        return listOf(today.path)
     }
 
     private fun taskLine(step: ActionStep): String {

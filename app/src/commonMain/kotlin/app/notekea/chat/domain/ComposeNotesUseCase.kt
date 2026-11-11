@@ -49,7 +49,21 @@ class ComposeNotesUseCase(
             else -> emptyList()
         }
 
-        Outcome.Success(value = step.copy(content = content))
+        val known = (notes.map { it.file.path } + content.map { it.path })
+            .mapTo(destination = HashSet()) { it.nameWithoutExtension.lowercase() }
+
+        Outcome.Success(
+            value = step.copy(
+                content = content.map {
+                    it.copy(
+                        text = cleaned(
+                            text = it.text,
+                            known = known
+                        )
+                    )
+                }
+            )
+        )
     } catch (exception: LlmException) {
         Outcome.Failure(error = ActionProblem.Failed(ChatError.Model(exception.error)))
     } catch (problem: ComposeProblem) {
@@ -223,6 +237,31 @@ class ComposeNotesUseCase(
             }
     }
 
+    /**
+     * [text] as a note: its own title only (models add one of theirs, or stray `# A # B` lines), and links only to
+     * notes that exist or are written with it ([known]); a link to a note that is not there reads as its words.
+     */
+    private fun cleaned(
+        text: String,
+        known: Set<String>
+    ): String {
+        val lines = text.lines()
+        val body = lines.drop(n = 1).filterNot { TITLE_LINE.matches(input = it) }
+        val joined = (listOf(lines.first()) + body).joinToString(separator = "\n")
+
+        return WIKI_LINK
+            .replace(input = joined) { link ->
+                val target = link
+                    .groupValues[1]
+                    .substringBefore(delimiter = '|')
+                    .substringBefore(delimiter = '#')
+
+                val isKnown = target.substringAfterLast(delimiter = '/').lowercase() in known
+
+                if (isKnown) link.value else link.groupValues[1].substringAfter(delimiter = '|')
+            }
+    }
+
     /** [text] in parts the model can read at once, cut between paragraphs. */
     private fun partsOf(text: String): List<String> {
         val parts = mutableListOf<StringBuilder>()
@@ -290,6 +329,8 @@ class ComposeNotesUseCase(
         const val PART_CHARS = 5_000
         const val MAX_PARTS = 5
         const val MAX_TEXT_NOTES = 15
+        val TITLE_LINE = Regex(pattern = "^#\\s.*")
+        val WIKI_LINK = Regex(pattern = "\\[\\[([^\\]]+)]]")
         val PARAGRAPH = Regex(pattern = "\\n\\s*\\n")
         val WHITESPACE = Regex(pattern = "\\s+")
         val FORBIDDEN = Regex(pattern = "[\\\\/:*?\"<>|#^\\[\\]]")

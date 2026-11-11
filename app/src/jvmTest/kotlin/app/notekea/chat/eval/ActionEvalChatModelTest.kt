@@ -215,6 +215,7 @@ class ActionEvalChatModelTest {
             ModelSize.MEDIUM to "Qwen3.5-4B-Q4_K_M.gguf",
             ModelSize.LARGE to "Qwen3.5-9B-Q4_K_M.gguf"
         )
+
         // Three points under the first runs, 75 / 92 / 91 % (docs/answer-quality.md, 3.9).
         val BASELINES = mapOf(
             ModelSize.SMALL to 0.72,
