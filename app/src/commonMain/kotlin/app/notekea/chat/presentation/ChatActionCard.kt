@@ -62,6 +62,9 @@ import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_LINES = 4
 private const val ARROW = " → "
+private val MARKS = Regex(pattern = "^\\s*(#+|>\\s*\\[![^]]*]|>)\\s*")
+private val WIKI_LINK = Regex(pattern = "\\[\\[([^\\]]+)]]")
+private val EMPHASIS = Regex(pattern = "\\*\\*|__")
 
 /**
  * The card of an action turn (3.9): what Notekea will do, one line per step with every note it touches and the start
@@ -226,7 +229,7 @@ private fun DraftPreview(draft: NoteDraft) {
                 .filter { it.isNotBlank() }
                 .drop(n = 1)
                 .take(n = PREVIEW_LINES)
-                .joinToString("\n"),
+                .joinToString(separator = "\n") { readable(line = it) },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = PREVIEW_LINES,
@@ -234,6 +237,12 @@ private fun DraftPreview(draft: NoteDraft) {
         )
     }
 }
+
+/** [line] of Markdown as it reads: without heading, quote and callout marks, links as their names, bold as words. */
+private fun readable(line: String): String = line
+    .replace(MARKS, "")
+    .replace(WIKI_LINK) { it.groupValues[1].substringAfter(delimiter = '|') }
+    .replace(EMPHASIS, "")
 
 /** What a step acts on, as the person names it: notes by name, folders by path. */
 @Composable

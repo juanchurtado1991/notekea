@@ -309,3 +309,25 @@ What it says:
 - As before, nothing comes back when the note or the vault closes.
 
 Not measured: Windows and macOS, the packaged app, and a median of several runs.
+
+## M3 — 3.7, chatting
+
+`ChatMemoryChatModelTest`, run by hand: the test JVM indexes the Sample Vault with the embedding model, then answers
+ten questions with Small on the CPU and one slot, as an 8 GB computer would (Linux, Ryzen with an RTX 5060 Ti that
+the CPU setup must not use), and lets the model go. Resident memory, MB:
+
+| | Before the chat model | Peak over ten answers | After the model is let go | First words (median / max) |
+|---|---|---|---|---|
+| As 3.2 left it | 656 | 5,150 | 1,003 | 0.7 / 2.1 s |
+| No GPU device on the CPU | 632 | 3,292 | 1,055 | 1.2 / 3.1 s |
+
+- **The GPU took memory with no layer on it.** With `gpuLayers = 0` llama.cpp still keeps the Vulkan device, with its
+  host buffers and the large operations sent to it: 1.9 GB more, and on a computer with a weak GPU, work on it. The CPU
+  setup now names no device (`setDevices("none")`), for the chat model and the reranker. The first words come later
+  (1.2 s against 0.7) because the CPU does all the work, as it does on a computer without that GPU.
+- **Over 5.4's budget of 2.5 GB, by 0.8 GB.** The weights are 1.72 GB (Small 1.28, the reranker 0.44) on top of the
+  0.63 GB of the app with its index; their working memory and the JVM's growth make the rest.  A smaller reranker
+  batch (1,024 against 4,096) changed nothing, so it stays. Recorded, as decided with the developer for M3; 5.4 sets the budget
+  again with the packaged app, whose memory trim and two compiler threads took 2.9's numbers down by a third.
+- **Memory comes back** to 1.06 GB after the model is let go, 0.42 GB over the start: glibc keeps the freed arenas
+  of the test JVM; the packaged app trims them (2.9).
