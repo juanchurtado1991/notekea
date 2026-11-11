@@ -12,6 +12,11 @@ internal object PropertyPassages {
     private const val MAX_PASSAGES = 8
     private const val MIN_WORD = 3
     private const val STEM = 4
+    private val ENGLISH = mapOf(
+        "libr" to "books", "recet" to "recipes", "proyect" to "projects", "reuni" to "meetings",
+        "diari" to "journal", "termin" to "finished", "calific" to "rating", "presupuest" to "budget",
+        "dueñ" to "owner", "vence" to "due", "porcion" to "servings"
+    )
     private val NOT_A_LETTER = Regex(pattern = "[^\\p{L}\\p{N}]+")
 
     private val COMMON = setOf(
@@ -26,8 +31,16 @@ internal object PropertyPassages {
         notes: Collection<NoteEntry>,
         only: Set<RelativePath>?
     ): List<AnswerSource> {
-        val asked = wordsOf(text = question).filter {
+        val words = wordsOf(text = question).filter {
             it !in COMMON
+        }
+
+        // A vault named in English asked in Spanish: "cuántos libros terminé" names Books and finished.
+        val asked = words + words.mapNotNull { word ->
+            ENGLISH
+                .entries
+                .firstOrNull { word.startsWith(prefix = it.key) }
+                ?.value
         }
 
         if (asked.isEmpty()) return emptyList()

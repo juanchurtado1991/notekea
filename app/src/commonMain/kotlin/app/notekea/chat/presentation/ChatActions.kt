@@ -13,6 +13,7 @@ import app.notekea.chat.domain.SpokenLanguage
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.domain.Outcome
+import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
@@ -231,10 +232,71 @@ internal class ChatActions(
     }
 
     /** Today's date as the model reads it, YYYY-MM-DD. */
-    fun today(): String {
-        val today = localCalendar.momentOf(instant = clock.now()).date
+    fun today(): String = dateOf(date = localCalendar.momentOf(instant = clock.now()).date)
 
-        return "${today.year}-${twoDigits(today.month)}-${twoDigits(today.day)}"
+    private fun dateOf(date: CalendarDate): String =
+        "${date.year}-${twoDigits(date.month)}-${twoDigits(date.day)}"
+
+    /** Today for the talk, with what changed in [notes]: "2026-11-11. Notes changed today: none. Last changed: …". */
+    fun todayIn(notes: Collection<NoteEntry>): String {
+        val context = contextOf(
+            request = "",
+            notes = notes,
+            openNote = null
+        )
+
+        val changed = context
+            .changedToday
+            .joinToString()
+            .ifEmpty { "none" }
+
+        val lastAt = notes
+            .mapNotNull { it.file.modifiedAt }
+            .maxOrNull()
+            ?.let { dateOf(date = localCalendar.momentOf(instant = it).date) }
+
+        val last = context
+            .latestNote
+            ?.let { " The last changed note is $it, changed on $lastAt." }
+            .orEmpty()
+
+        return "${context.today}. Notes changed today: $changed.$last"
+    }
+
+    /** The note changed last in [notes] and those changed today, by their paths without the extension. */
+    private fun changesIn(notes: Collection<NoteEntry>): Pair<String?, List<String>> {
+        val latest = notes
+            .filter {
+                it.file.modifiedAt != null
+            }
+            .maxByOrNull {
+                it.file.modifiedAt!!
+            }
+            ?.file
+            ?.path
+            ?.value
+            ?.removeSuffix(suffix = MARKDOWN)
+
+        val day = localCalendar.momentOf(instant = clock.now()).date
+
+        val changedToday = notes
+            .filter { note ->
+                note
+                    .file
+                    .modifiedAt
+                    ?.let {
+                        localCalendar.momentOf(instant = it).date == day
+                    } == true
+            }
+            .map {
+                it
+                    .file
+                    .path
+                    .value
+                    .removeSuffix(suffix = MARKDOWN)
+            }
+
+        return latest to changedToday
     }
 
     /** What the plan, or agent mode, may name in the vault: its names, the closest to [request] first. */
@@ -261,9 +323,13 @@ internal class ChatActions(
             }
             .map { it.value.removeSuffix(suffix = MARKDOWN) }
 
+        val (latest, changedToday) = changesIn(notes = notes)
+
         return ActionContext(
             today = today(),
+            changedToday = changedToday,
             openNote = openNote?.value?.removeSuffix(suffix = MARKDOWN),
+            latestNote = latest,
             folders = ActionContext.foldersOf(paths = paths),
             notes = names,
             properties = notes

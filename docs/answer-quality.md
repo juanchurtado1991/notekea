@@ -214,3 +214,32 @@ the ring. Compaction now gives the model only what fits, forgets on failure, nev
 it replaces, and clears Compacting however it ends. The prompt's worked sum ("4500 + 300 = 4800") was copied into an
 answer about water; it is gone. Notes that disagree are said to disagree; the finished books come out 3 on both sizes,
 the three rated 5 named together.
+
+## Compared with Claude — the bar of "as smart as Claude Code"
+
+The developer's goal (2026-11-11) was a chat that feels as smart as talking to Claude Code. Claude, the model behind
+Claude Code, read the committed Sample Vault and wrote its own answer to every turn of the 62 probe conversations
+(about 75 turns); each reply of Notekea on Medium and Large was then marked the same as Claude's (same facts, said
+plainly, in the person's language), a difference, or a matter of taste. The differences found, all fixed with a test
+(`ChatComparisonTest`, `ChatProbeTest`):
+
+- **Totals:** "what is the 2026 budget and how much have I spent?" said no excerpt gives a total; it adds them now
+  (7050 planned, 760 spent), without a worked example in the prompt to copy.
+- **A late project:** answered from the budget, or from the project's due date. "Late" asks for the overdue tasks
+  now, each task row says its period (`overdue`, `today`, …), the tables' answer knows today and leaves the note's
+  properties out of a task table, and the agent is told the tasks are where lateness is: both sizes say Notekea
+  launch is late, its announcement overdue since 2026-10-30.
+- **The last note, what changed today:** guessed. The plan and the talk are given the note changed last and those
+  changed today; "tráeme la última nota" opens it.
+- **What Notekea is:** talk; it is the guide's now.
+- **Due dates nobody asked for:** "add those as tasks here" got today's; a due date stays only when the request
+  writes or names one.
+- **Notes that disagree:** said to disagree only when two excerpts give different values for the same thing.
+- **Deep thinking** hands a question it cannot answer to the agent, as Auto does.
+
+Final round, after the fixes: every factual answer of Medium and Large matches Claude's, on both sizes and in English,
+Spanish and French, except two matters of wording: Medium's summary of the October meetings says "one meeting" and
+then names three, and Large answers "which are the most important notes?" by saying no note is marked important. The
+answers are seeded, so the same question gives the same reply on every run (three runs each of the complaint and the
+joke on both sizes). This is Claude's own reading against Claude's own answers, not the developer's; the developer's
+own conversations remain the test that counts.

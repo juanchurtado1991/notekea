@@ -5,5 +5,7 @@ data class FoundNotes(
     val columns: List<String> = emptyList(),
     val rows: List<FoundRow> = emptyList(),
     val query: String? = null,
-    val isTasks: Boolean = false
+    val isTasks: Boolean = false,
+    // The tasks' period ("overdue"), so an answer from them knows what they are.
+    val period: String? = null
 )

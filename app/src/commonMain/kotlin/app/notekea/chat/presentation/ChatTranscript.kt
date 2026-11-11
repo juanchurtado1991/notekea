@@ -103,6 +103,7 @@ internal object ChatTranscript {
         step.tag?.let { "#$it" },
         step.period?.let { "period=$it" },
         step.text?.let { "text=${it.take(n = SNIPPET_CHARS)}" },
+        step.due?.let { "due=$it" },
         step
             .content
             .takeIf { it.isNotEmpty() }

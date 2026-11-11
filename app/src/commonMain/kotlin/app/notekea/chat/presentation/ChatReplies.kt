@@ -29,7 +29,8 @@ internal class ChatReplies(
     private val describeVault: DescribeVaultUseCase,
     private val answerFromFound: AnswerFromFoundUseCase,
     private val shortcuts: Map<String, String>,
-    private val today: () -> String
+    private val today: () -> String,
+    private val todayIn: (Collection<NoteEntry>) -> String = { today() }
 ) {
     /** The steps of the reply to [message]; [only] limits an answer to a note or a folder, [onStep] shows progress. */
     fun stepsFor(
@@ -72,7 +73,7 @@ internal class ChatReplies(
                 it.file.path == reply.note
             },
             language = language,
-            today = today()
+            today = todayIn(notes)
         )
 
         is ChatReply.Question -> answered(
@@ -102,7 +103,8 @@ internal class ChatReplies(
             question = reply.question,
             tables = reply.tables,
             notes = notes,
-            language = language
+            language = language,
+            today = today()
         )
 
         ChatReply.Acted, ChatReply.Agent -> flow { }

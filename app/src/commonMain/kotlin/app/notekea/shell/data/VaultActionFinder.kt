@@ -146,11 +146,20 @@ class VaultActionFinder(
 
         return FoundNotes(
             isTasks = true,
+            period = step.period?.lowercase(),
             rows = rows.map {
                 FoundRow(
                     note = it.path,
                     cells = listOf(it.task.text),
-                    line = it.task.stateIndex
+                    line = it.task.stateIndex,
+                    due = it
+                        .due
+                        .name
+                        .lowercase()
+                        .replace(
+                            oldChar = '_',
+                            newChar = ' '
+                        )
                 )
             }
         )

@@ -6,5 +6,7 @@ import app.notekea.core.notes.domain.RelativePath
 data class FoundRow(
     val note: RelativePath,
     val cells: List<String> = emptyList(),
-    val line: Int? = null
+    val line: Int? = null,
+    // A task's when, as the Tasks tab sorts it ("overdue", "today", "later"), for the model to read.
+    val due: String? = null
 )

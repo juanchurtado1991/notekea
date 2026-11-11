@@ -140,7 +140,11 @@ internal class AgentLookUp(
         return "${step.kind.written} ${step.request.orEmpty()}:\n" + rows
             .take(n = ROWS)
             .joinToString(separator = "\n") {
-                "- ${it.note.nameWithoutExtension} ${it.cells.joinToString(separator = " · ")}"
+                "- ${it.note.nameWithoutExtension} ${it.cells.joinToString(separator = " · ")}" +
+                    it
+                        .due
+                        ?.let { due -> " ($due)" }
+                        .orEmpty()
             }
     }
 

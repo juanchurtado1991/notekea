@@ -451,7 +451,49 @@ class ChatProbeTest {
             )
         }
 
+    // The comparison with Claude, 2026-11-11: "What did I change today?" was answered "I cannot access your computer".
+    @Test
+    fun `the talk knows the notes changed today and the last one changed`() = runTest(dispatcher) {
+        plan = "{\"steps\":[{\"action\":\"chat\"}]}"
+
+        clock.currentTime = kotlin
+            .time
+            .Instant
+            .fromEpochMilliseconds(epochMilliseconds = 1_800_000_000_000L)
+
+        val viewModel = started()
+
+        viewModel.onIntent(
+            intent = ChatIntent.OnNotesChange(
+                notes = listOf(
+                    entry(path = "Books/Dune.md"),
+                    entry(
+                        path = "Recipes/Old.md",
+                        modifiedOffsetMillis = -THREE_DAYS
+                    )
+                )
+            )
+        )
+
+        asked(
+            viewModel = viewModel,
+            question = "What did I change today?"
+        )
+
+        val talk = engine
+            .generated
+            .last()
+            .first()
+            .text
+
+        assertEquals(
+            expected = true,
+            actual = "Notes changed today: Books/Dune. The last changed note is Books/Dune" in talk
+        )
+    }
+
     private companion object {
+        const val THREE_DAYS = 3L * 24 * 60 * 60 * 1_000
         const val TABLES_ANSWER = "Terminaste 3: Deep Work, Dune y Sapiens."
         const val FINISHED = "{\"move\":\"finish\",\"summary\":\"Focus.\"}"
     }
