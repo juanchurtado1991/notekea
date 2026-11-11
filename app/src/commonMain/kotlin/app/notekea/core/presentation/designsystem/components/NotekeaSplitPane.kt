@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
-import app.notekea.core.presentation.designsystem.theme.motionTween
+import app.notekea.core.presentation.designsystem.theme.motionSpring
 import app.notekea.core.presentation.platform.LocalResizePointerIcon
 
 private const val HANDLE_WIDTH_DP = 8
@@ -70,7 +70,7 @@ fun NotekeaSplitPane(
     val widthAnimation: AnimationSpec<Dp> = if (isDragging) {
         snap()
     } else {
-        motionTween(durationMillis = NotekeaDimensions.MOTION_PANEL_MILLIS)
+        motionSpring()
     }
 
     val shownWidth by animateDpAsState(

@@ -84,7 +84,9 @@ This file is the dependency audit the developer asked for before anything was ap
    - The extra space above the page stays at 24 dp: 37 screen tests click the page at fixed points, and they move
      first.
 7. 7B: the chat as a document.
-8. 8A: the alert, then 8C, the popovers.
+8. 8A: the alert.
+   - 8C, the popovers for rename and new folder, is not built. Both already edit the name in place, in the tree's
+     row, as Finder does, and a popover over the row would add a step.
 9. 9A: the springs.
 10. The menu bar.
 11. 4B: the system accent.
