@@ -8,7 +8,9 @@ import com.testbuddy.SuiteBuilder
 
 private const val SAMPLE = "Sample Vault"
 private const val GHOST = "Ghost Serializer"
-private const val SAMPLE_READY = "40 notes ready to search"
+
+// The 40 notes and Assets/Weekly menu.pdf, which 4.5 reads as a document.
+private const val SAMPLE_READY = "41 notes ready to search"
 private const val GHOST_READY = "371 notes ready to search"
 private const val OPEN_GHOST =
     "1. In Notekea, open the Ghost Serializer vault (see TEST DATA above)."

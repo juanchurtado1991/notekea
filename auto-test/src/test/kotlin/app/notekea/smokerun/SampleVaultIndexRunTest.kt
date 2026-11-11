@@ -27,7 +27,9 @@ class SampleVaultIndexRunTest {
 
     companion object {
         private const val HOME = "Home"
-        private const val NOTES = 40
+
+        // The 40 notes and Assets/Weekly menu.pdf, read as a document since 4.5.
+        private const val NOTES = 41
         private const val RUN = "index-sample-vault"
         private val SEARCH = "arepas water" to "Arepas"
     }

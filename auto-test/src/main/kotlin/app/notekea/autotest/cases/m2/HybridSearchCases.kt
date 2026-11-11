@@ -18,7 +18,7 @@ private const val REST_LINE =
 private const val HOT_PAN_LINE = "Shape discs and cook them on a hot pan, five minutes a side."
 private const val OPEN_SEARCH =
     "1. In Notekea, open the Sample Vault (see TEST DATA above) and wait until the bar at the bottom says " +
-        "\"40 notes ready to search\".\n2. Press Ctrl+Shift+F (Cmd+Shift+F on macOS)."
+        "\"41 notes ready to search\".\n2. Press Ctrl+Shift+F (Cmd+Shift+F on macOS)."
 
 /** The cases of 2.6, hybrid search (`MVP_SMOKE_TEST.md`): the palette's Content tab by meaning and keywords. */
 fun SuiteBuilder.hybridSearchCases() {
