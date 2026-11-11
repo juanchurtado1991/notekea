@@ -18,7 +18,7 @@ private const val AREPAS_TEXT = "pre-cooked corn flour"
 private const val TASKS_LINE = "Buy flour for the arepas"
 private const val OPEN_AREPAS =
     "1. In Notekea, open the Sample Vault (see TEST DATA above) and wait until the bar at " +
-        "the bottom says \"40 notes ready to search\".\n2. Open Recipes/Arepas and look at Connections in the " +
+        "the bottom says \"41 notes ready to search\".\n2. Open Recipes/Arepas and look at Connections in the " +
         "panel on the right."
 
 /** The cases of 2.5, backlinks (`MVP_SMOKE_TEST.md`): Connections' Linked and Unlinked tabs. */

@@ -11,7 +11,7 @@ import com.testbuddy.SuiteBuilder
 private const val SAMPLE = "Sample Vault"
 private const val OPEN_GRAPH =
     "1. In Notekea, open the Sample Vault (see TEST DATA above) and wait until the bar at the bottom says " +
-        "\"40 notes ready to search\".\n2. Open Recipes/Arepas and press Ctrl+G (Cmd+G on macOS)."
+        "\"41 notes ready to search\".\n2. Open Recipes/Arepas and press Ctrl+G (Cmd+G on macOS)."
 
 /** The cases of 2.7, the graph (`MVP_SMOKE_TEST.md`): its tab, opened around a note or on the whole vault. */
 fun SuiteBuilder.graphCases() {

@@ -9,7 +9,7 @@ import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val SAMPLE = "Sample Vault"
-private const val SAMPLE_READY = "40 notes ready to search"
+private const val SAMPLE_READY = "41 notes ready to search"
 private const val ALREADY_LINKED = "ALREADY LINKED"
 private const val WAIT_MILLIS = 10_000L
 private const val OPEN_AREPAS =

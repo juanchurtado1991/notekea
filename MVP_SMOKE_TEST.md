@@ -404,20 +404,20 @@ Settings is the gear at the bottom of the tool rail. Leave Settings → Appearan
 
 ### 2.3 Hybrid index
 
-The cases run in `smoke-data/vaults/Sample Vault` (40 notes) and `smoke-data/vaults/Ghost Serializer` (371 notes), as
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes; its index counts 41, with `Assets/Weekly menu.pdf` read as a document since 4.5) and `smoke-data/vaults/Ghost Serializer` (371 notes), as
 `smoke.sh prepare` (`smoke.ps1 prepare` on Windows) leaves them. The search index's status is on the right of the
 status bar; its card opens with a click on it.
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
-| 2.3-01 | Open the Sample Vault and wait | The status bar ends with "40 notes ready to search" | 2.3 | Auto-Test | `IndexVaultUseCaseTest`, `SearchIndexViewModelTest`, `LuceneVectorIndexTest` | | | |
-| 2.3-02 | In the Sample Vault, once ready, open Recipes/Arepas, type a line at its end, wait for "Saved", then click "40 notes ready to search"; then delete the line again (the vault is the repository's) | Within two seconds of the save the status is ready again, and the card says the last run was "Just now" | 2.3 | Auto-Test | `IndexVaultUseCaseTest`, `SearchIndexViewModelTest` | | | |
+| 2.3-01 | Open the Sample Vault and wait | The status bar ends with "41 notes ready to search" | 2.3 | Auto-Test | `IndexVaultUseCaseTest`, `SearchIndexViewModelTest`, `LuceneVectorIndexTest` | | | |
+| 2.3-02 | In the Sample Vault, once ready, open Recipes/Arepas, type a line at its end, wait for "Saved", then click "41 notes ready to search"; then delete the line again (the vault is the repository's) | Within two seconds of the save the status is ready again, and the card says the last run was "Just now" | 2.3 | Auto-Test | `IndexVaultUseCaseTest`, `SearchIndexViewModelTest` | | | |
 | 2.3-03 | Open the Ghost Serializer vault; while it says Indexing, click it and note how many of 371 notes are done; quit before it ends, relaunch and click Indexing again | It goes on from the notes it had done (the count and the percent do not start again from 0) and ends with "371 notes ready to search" | 2.3 | Manual (packaged) | `IndexVaultUseCaseTest` | | | |
 | 2.3-04 | Open the Ghost Serializer vault for the first time; Dismiss the notice at the top; click Indexing; when ready, click it and Rebuild index | A notice says Notekea is reading your notes; Dismiss hides it; the card shows a bar, notes done of 371 and the time left, the status a ring and the percent; Rebuild index starts again from 0 % and ends ready | 2.3 | Manual (eyes) | `SearchIndexScreenTest` | | | |
 
 ### 2.4 Related notes panel
 
-The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; wait until the status bar says "40 notes ready to search". Related is the first tab of Connections, a
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; wait until the status bar says "41 notes ready to search". Related is the first tab of Connections, a
 section of the inspector, the panel on the right of the editor. The vault is the repository's: undo any line or link a case adds before the next.
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
@@ -429,7 +429,7 @@ section of the inspector, the panel on the right of the editor. The vault is the
 
 ### 2.5 Backlinks
 
-The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; wait until the status bar says "40 notes ready to search". Linked and Unlinked are tabs of Connections, in
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; wait until the status bar says "41 notes ready to search". Linked and Unlinked are tabs of Connections, in
 the inspector on the right of the editor, next to Related. The vault is the repository's: undo any change a case makes
 before the next (Ctrl+Z / Cmd+Z in the note).
 
@@ -442,7 +442,7 @@ before the next (Ctrl+Z / Cmd+Z in the note).
 
 ### 2.6 Hybrid search
 
-The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; wait until the status bar says "40 notes ready to search". Mod+Shift+F is ⇧⌘F or Ctrl+Shift+F.
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; wait until the status bar says "41 notes ready to search". Mod+Shift+F is ⇧⌘F or Ctrl+Shift+F.
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
@@ -453,7 +453,7 @@ The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; w
 
 ### 2.7 Graph view
 
-The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; wait until the status bar says "40 notes ready to search". Mod+G is ⌘G or Ctrl+G.
+The cases run in `smoke-data/vaults/Sample Vault` (40 notes), opened directly; wait until the status bar says "41 notes ready to search". Mod+G is ⌘G or Ctrl+G.
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
