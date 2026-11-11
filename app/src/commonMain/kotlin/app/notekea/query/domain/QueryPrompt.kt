@@ -24,7 +24,8 @@ object QueryPrompt {
 Each filter has a property (one of the vault's, or "" for "in folder" and "has tag"), a condition and a value.
 Conditions: is, contains, more than, less than (numbers), before, after (dates YYYY-MM-DD), is empty (value ""),
 in folder (value: a folder), has tag (value: a tag without #). "more than" and "less than" are strict: "4 or more" is
-"more than 3", "in 2026" is after 2025-12-31 and before 2027-01-01. A checkbox is "true" or "false".
+"more than 3", "in 2026" is after 2025-12-31 and before 2027-01-01. A checkbox is "true" or "false": "marked as
+finished", "finished" or "terminados", with a checkbox finished, is finished is true.
 "sort" names a property to order by ("" for none), "descending" true for the highest first. Use only the properties,
 folders and tags listed, never others (there is no property "title" or "name" unless listed); a word that names a
 note or a topic is not a filter. The request may be in another language than the vault: match its words to them by meaning

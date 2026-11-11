@@ -84,6 +84,7 @@ Examples:
 "and the water?" after a question about the arepas -> [answer request="How much water do the arepas take?"]
 "when is it due?" after a question about the Notekea launch -> [answer request="When is the Notekea launch due?"]
 "hola" -> [chat]
+"Notekea es una porquería, no sirve para nada" -> [chat]
 "what's 2 + 2?" -> [chat]
 "¿qué día es hoy?" -> [chat]
 "escribe un poema sobre mis recetas" -> [answer request="Escribe un poema sobre mis recetas"]

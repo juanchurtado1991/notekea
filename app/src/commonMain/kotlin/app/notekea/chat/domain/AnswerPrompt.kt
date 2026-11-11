@@ -17,11 +17,11 @@ object AnswerPrompt {
             "(the )?(excerpts?|passages?|notes?) (do|does) not|there is no|i (could not|couldn't|cannot|can't) " +
             "find|(it is )?not (mentioned|found|stated)|no se puede (determinar|saber|decir)|" +
             "i cannot (tell|determine|say))\\b[^.]*\\b(extractos?|fragmentos?|excerpts?|passages?|notas|notes?|" +
-            "mention\\w*|menciona\\w*)",
+            "mention\\w*|menciona\\w*|lista|list|informaci[oó]n|information)",
         option = RegexOption.IGNORE_CASE
     )
 
-    private const val SHORT_REPLY = 200
+    private const val SHORT_REPLY = 320
 
     /** Whether [text], an answer written from excerpts, says they do not answer the question. */
     fun isNotFound(text: String): Boolean {
@@ -35,7 +35,8 @@ object AnswerPrompt {
     private const val INSTRUCTIONS =
         "Answer in one to three sentences using only the excerpts, in the language of the question. Cite each " +
             "sentence with the number of its excerpt, like [1]. If the excerpts do not contain the answer, reply " +
-            "exactly $NOT_FOUND. Do not explain your reasoning. Speak to the person as you (\"you wrote\"). To add " +
+            "exactly $NOT_FOUND. A question of what the person learned or thinks about something is answered with what the " +
+            "excerpts say about it. Do not explain your reasoning. Speak to the person as you (\"you wrote\"). To add " +
             "or count numbers from the excerpts, write " +
             "each number and the result (4500 + 300 = 4800)."
 
@@ -53,6 +54,9 @@ object AnswerPrompt {
             "a joke: write one about what they say. Only if the excerpts have nothing on the subject asked, " +
             "reply exactly $NOT_FOUND."
 
+    /** Whether [text] asks for something written from the notes, a poem, a story or a joke, rather than a fact. */
+    fun isCreative(text: String): Boolean = CREATIVE.containsMatchIn(input = text)
+
     fun messages(
         question: String,
         excerpts: List<String>
@@ -61,7 +65,7 @@ object AnswerPrompt {
             .mapIndexed { index, text -> "[${index + 1}] $text" }
             .joinToString(separator = "\n\n")
 
-        val isCreative = CREATIVE.containsMatchIn(input = question)
+        val isCreative = isCreative(text = question)
 
         return listOf(
             ChatMessage(

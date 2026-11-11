@@ -53,7 +53,7 @@ class ChatViewModel(
     compactChat: CompactChatUseCase,
     actionRunner: ActionRunner,
     localCalendar: LocalCalendar,
-    clock: Clock,
+    private val clock: Clock,
     private val historyStore: ChatHistoryStore,
     private val clipboard: TextClipboard,
     private val llmEngine: LlmEngine
@@ -139,6 +139,7 @@ class ChatViewModel(
                 )
             }
 
+            if (entries.isNotEmpty()) memory.resume()
             reduce { it.copy(entries = entries + it.entries) }
         }
 
@@ -311,6 +312,8 @@ class ChatViewModel(
                 throwable = it
             )
         }) {
+            compactIfIdle()
+
             answering.answer(
                 id = id,
                 question = question,
@@ -442,17 +445,26 @@ class ChatViewModel(
         val isDue = (isAsked || usage >= 1f) && !state.value.isCompacting
         if (!isDue) return
 
+        // Marked at once, so a second answer that ends meanwhile does not compact too.
         reduce { it.copy(isCompacting = true) }
+        launchGuarded(onError = ::compactFailed) { compacted() }
+    }
 
-        launchGuarded(onError = ::compactFailed) {
-            memory.compact(entries = entries)
+    /** The chat so far written into its summary before a question asked after a while, as a new session starts. */
+    private suspend fun compactIfIdle() {
+        val isIdle = memory.isIdleAt(now = clock.now())
+        if (isIdle && !state.value.isCompacting) compacted()
+    }
 
-            reduce {
-                it.copy(
-                    isCompacting = false,
-                    contextUsage = memory.usageOf(entries = it.entries)
-                )
-            }
+    private suspend fun compacted() {
+        reduce { it.copy(isCompacting = true) }
+        memory.compact(entries = state.value.entries)
+
+        reduce {
+            it.copy(
+                isCompacting = false,
+                contextUsage = memory.usageOf(entries = it.entries)
+            )
         }
     }
 

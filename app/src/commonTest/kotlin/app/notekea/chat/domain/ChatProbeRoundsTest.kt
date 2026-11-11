@@ -262,4 +262,193 @@ class ChatProbeRoundsTest {
             }
         )
     }
+
+    @Test
+    fun `the tables found are read with every property of their notes`() = kotlinx
+        .coroutines
+        .test
+        .runTest {
+            val engine = app
+                .notekea
+                .core
+                .llm
+                .domain
+                .FakeLlmEngine()
+
+            val dune = app
+                .notekea
+                .core
+                .notes
+                .domain
+                .NoteFixtures
+                .entry(
+                    path = "Books/Dune.md",
+                    metadata = app
+                        .notekea
+                        .core
+                        .notes
+                        .domain
+                        .NoteMetadata
+                        .NONE
+                        .copy(
+                            properties = listOf(
+                                app
+                                    .notekea
+                                    .core
+                                    .notes
+                                    .domain
+                                    .NoteProperty(
+                                        key = "rating",
+                                        value = app
+                                            .notekea
+                                            .core
+                                            .notes
+                                            .domain
+                                            .PropertyValue
+                                            .Number(text = "5")
+                                    )
+                            )
+                        )
+                )
+
+            AnswerFromFoundUseCase(llmEngine = engine)(
+                question = "which finished book did I like most?",
+                tables = listOf(
+                    FoundNotes(
+                        rows = listOf(
+                            FoundRow(
+                                note = dune.file.path,
+                                cells = listOf("true")
+                            )
+                        )
+                    )
+                ),
+                notes = listOf(dune)
+            ).collect {}
+
+            assertEquals(
+                expected = true,
+                actual = engine
+                    .generated
+                    .last()
+                    .last()
+                    .text
+                    .contains("- Dune | true (rating: 5)")
+            )
+        }
+
+    // The chat probe on Large, 2026-11-11.
+    @Test
+    fun `a message with no word is talk, and a move's target listed among its notes is its target`() {
+        val today = listOf(PlannedStep(kind = ActionKind.OPEN_TODAY))
+
+        val planned = listOf(
+            PlannedStep(
+                kind = ActionKind.CREATE_FOLDER,
+                fields = mapOf(ActionField.FOLDER to "Archive")
+            ),
+            PlannedStep(
+                kind = ActionKind.MOVE,
+                notes = listOf("Arepas", "Pancakes", "Archive")
+            )
+        )
+
+        val moved = PlanWords
+            .targetsNamed(
+                steps = planned,
+                context = ActionContext(today = "2026-11-11")
+            )
+            .last()
+
+        assertEquals(
+            expected = listOf<Any?>(ActionKind.CHAT, "Archive", listOf("Arepas", "Pancakes")),
+            actual = listOf(
+                PlanWords
+                    .shaped(
+                        steps = today,
+                        request = "?"
+                    )
+                    .single()
+                    .kind,
+                moved[ActionField.TARGET],
+                moved.notes
+            )
+        )
+    }
+
+    @Test
+    fun `a long reply that says the list does not tell is not found`() {
+        assertEquals(
+            expected = true,
+            actual = AnswerPrompt.isNotFound(
+                text = "No se puede determinar cuántos libros terminaste ni cuál te gustó más, ya que la lista solo " +
+                    "muestra los títulos y su estado de completado, pero no incluye información sobre tus " +
+                    "preferencias personales [1]."
+            )
+        )
+    }
+
+    @Test
+    fun `a joke planned as talk is written from the notes`() {
+        assertEquals(
+            expected = listOf(ActionKind.ANSWER, ActionKind.CHAT),
+            actual = listOf(
+                PlanWords.shaped(
+                    steps = listOf(PlannedStep(kind = ActionKind.CHAT)),
+                    request = "tell me a joke about my notes"
+                ),
+                PlanWords.shaped(
+                    steps = listOf(PlannedStep(kind = ActionKind.CHAT)),
+                    request = "hola"
+                )
+            ).map { it.single().kind }
+        )
+    }
+
+    @Test
+    fun `only a language asked says the last reply again, a question in a language is answered`() {
+        val history = listOf(
+            ChatExchange(
+                question = "How long does the dough rest?",
+                reply = "Five minutes."
+            )
+        )
+
+        val talk = listOf(
+            PlannedStep(
+                kind = ActionKind.CHAT,
+                fields = mapOf(ActionField.NOTE to "this note")
+            )
+        )
+
+        val answer = listOf(PlannedStep(kind = ActionKind.ANSWER))
+
+        assertEquals(
+            expected = listOf<Any?>(null, ActionKind.CHAT, ActionKind.ANSWER),
+            actual = listOf(
+                ReplyReworded.shaped(
+                    steps = talk,
+                    request = "in spanish please",
+                    history = history
+                )
+                    .single()[ActionField.NOTE],
+                ReplyReworded
+                    .shaped(
+                        steps = answer,
+                        request = "en inglés",
+                        history = history
+                    )
+                    .single()
+                    .kind,
+                ReplyReworded
+                    .shaped(
+                        steps = answer,
+                        request = "en español, ¿qué opinas de Dune?",
+                        history = history
+                    )
+                    .single()
+                    .kind
+            )
+        )
+    }
 }

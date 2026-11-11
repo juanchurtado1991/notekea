@@ -101,6 +101,7 @@ internal class ChatReplies(
         is ChatReply.FromFound -> answerFromFound(
             question = reply.question,
             tables = reply.tables,
+            notes = notes,
             language = language
         )
 

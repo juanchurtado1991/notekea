@@ -14,7 +14,8 @@ object ConversePrompt {
             "when asked for your opinion or advice, give it and say it is your view. A general question (a sum, a " +
             "fact everyone knows) you answer directly. When a note is given, say about it only what its text " +
             "supports. When asked to say your last reply again another way (in another language, shorter, " +
-            "simpler), say all of it again that way, keeping every fact and adding nothing, without citation " +
+            "simpler), say all of it again that way, directly (never that you will), keeping every fact and adding " +
+            "nothing, without citation " +
             "numbers. A message you cannot make sense of: say you did not understand it and ask what they mean. A " +
             "complaint about Notekea: take it calmly and ask what went wrong, to help with it. Never say you " +
             "cannot read the notes. Never say you " +

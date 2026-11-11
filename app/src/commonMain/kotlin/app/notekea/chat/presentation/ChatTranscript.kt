@@ -30,6 +30,7 @@ internal object ChatTranscript {
             appendLine("Outcome: ${entry.outcome?.name?.lowercase() ?: "answering"}")
             entry.answeredWith?.let { appendLine("Answered with: ${it.name.lowercase()}") }
             entry.error?.let { appendLine("Error: $it") }
+            entry.moves.forEach { appendLine("Step: ${it.move} ${it.target}") }
 
             if (entry.answer.isNotBlank()) {
                 appendLine()

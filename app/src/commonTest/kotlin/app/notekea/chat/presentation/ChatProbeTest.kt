@@ -61,8 +61,20 @@ class ChatProbeTest {
         Dispatchers.resetMain()
     }
 
+    private val clock = app
+        .notekea
+        .core
+        .domain
+        .FakeClock(
+            currentTime = kotlin
+                .time
+                .Instant
+                .parse("2026-11-11T09:00:00Z")
+        )
+
     private fun TestScope.started(): ChatViewModel {
         val viewModel = chatViewModel(
+            clock = clock,
             engine = engine,
             store = FakeNoteContentStore(),
             index = FakeVectorIndex(),
@@ -240,6 +252,87 @@ class ChatProbeTest {
                     written is app.notekea.core.domain.Outcome.Success
             )
         }
+
+    // The developer's goal of 2026-11-11: the chat compacts itself after a while, as a new session.
+    @Test
+    fun `a chat left for half an hour is compacted before the next question, one asked at once is not`() =
+        runTest(dispatcher) {
+            plan = "{\"steps\":[{\"action\":\"chat\"}]}"
+            val viewModel = started()
+
+            repeat(times = 4) {
+                asked(
+                    viewModel = viewModel,
+                    question = "question $it"
+                )
+            }
+
+            val summaries = {
+                engine.generated.count {
+                    it
+                        .first()
+                        .text
+                        .startsWith("Summarize this conversation")
+                }
+            }
+
+            val before = summaries()
+
+            clock.currentTime += kotlin
+                .time
+                .Duration
+                .parse("31m")
+
+            asked(
+                viewModel = viewModel,
+                question = "back again"
+            )
+
+            val afterIdle = summaries()
+
+            asked(
+                viewModel = viewModel,
+                question = "and now?"
+            )
+
+            assertEquals(
+                expected = listOf(before + 1, before + 1),
+                actual = listOf(afterIdle, summaries())
+            )
+        }
+
+    // The chat probe of 2026-11-11: "going back to the start: how much flour was it?" after ten turns had lost it.
+    @Test
+    fun `the chat's first exchange is given to a question long after it`() = runTest(dispatcher) {
+        plan = "{\"steps\":[{\"action\":\"chat\"}]}"
+        val viewModel = started()
+
+        listOf("how much flour do the arepas take?", "a", "b", "c", "d", "e").forEach {
+            asked(
+                viewModel = viewModel,
+                question = it
+            )
+        }
+
+        asked(
+            viewModel = viewModel,
+            question = "going back to the start: how much flour was it?"
+        )
+
+        val talk = engine.generated.last {
+            it
+                .first()
+                .text
+                .startsWith("You are")
+        }
+
+        assertEquals(
+            expected = true,
+            actual = talk.any {
+                it.text == "how much flour do the arepas take?"
+            }
+        )
+    }
 
     // The chat probe of 2026-11-11: in Auto, questions the passages could not answer were left unanswered.
     @Test
