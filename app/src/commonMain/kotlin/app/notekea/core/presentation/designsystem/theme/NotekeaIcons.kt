@@ -30,6 +30,11 @@ import com.composables.icons.lucide.CircleCheck
 import com.composables.icons.lucide.CircleQuestionMark
 import com.composables.icons.lucide.ClipboardList
 import com.composables.icons.lucide.ClockArrowDown
+import com.composables.icons.lucide.CloudAlert
+import com.composables.icons.lucide.CloudCheck
+import com.composables.icons.lucide.CloudOff
+import com.composables.icons.lucide.CloudSync
+import com.composables.icons.lucide.CloudUpload
 import com.composables.icons.lucide.Code
 import com.composables.icons.lucide.Columns3
 import com.composables.icons.lucide.Copy
@@ -49,6 +54,7 @@ import com.composables.icons.lucide.FolderOpen
 import com.composables.icons.lucide.FolderPlus
 import com.composables.icons.lucide.FolderSearch
 import com.composables.icons.lucide.FolderTree
+import com.composables.icons.lucide.GitCompare
 import com.composables.icons.lucide.Globe
 import com.composables.icons.lucide.Hash
 import com.composables.icons.lucide.Heading
@@ -204,6 +210,12 @@ object NotekeaIcons {
     val ChatClear: ImageVector get() = Lucide.Eraser
     val ChatCopy: ImageVector get() = Lucide.Copy
     val ChatError: ImageVector get() = Lucide.CircleAlert
+    val SyncUpToDate: ImageVector get() = Lucide.CloudCheck
+    val Syncing: ImageVector get() = Lucide.CloudSync
+    val SyncPending: ImageVector get() = Lucide.CloudUpload
+    val SyncOffline: ImageVector get() = Lucide.CloudOff
+    val SyncProblem: ImageVector get() = Lucide.CloudAlert
+    val SyncConflict: ImageVector get() = Lucide.GitCompare
     val ChatModel: ImageVector get() = Lucide.Cpu
     val Send: ImageVector get() = Lucide.ArrowUp
     val Stop: ImageVector get() = Lucide.Square

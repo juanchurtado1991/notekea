@@ -49,7 +49,7 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The vault's sidebar beside the editor's tabs and panes, with the side panel of the active pane on the right. Each tab
  * shows a note in its pane's editor, a file's preview, a folder's grid or, for a file that is gone, says so. The status
- * bar runs under all of it, with the search index's status ([searchIndex]).
+ * bar runs under all of it, with the search index's status ([searchIndex]); a [banner] (a sync conflict) over it.
  */
 @Composable
 internal fun VaultWorkspace(
@@ -60,9 +60,12 @@ internal fun VaultWorkspace(
     panes: List<EditorPaneTools>,
     sidePanel: SidePanelHost,
     onSwitchVault: () -> Unit,
-    searchIndex: @Composable () -> Unit = {}
+    searchIndex: @Composable () -> Unit = {},
+    banner: @Composable () -> Unit = {}
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
+        banner()
+
         WorkspaceBody(
             state = state,
             workspaceState = workspaceState,

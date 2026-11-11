@@ -7,5 +7,6 @@ package app.notekea.core.presentation.platform
 enum class WindowDialog {
     ABOUT,
     SETTINGS,
-    AI_MODEL
+    AI_MODEL,
+    SYNC
 }

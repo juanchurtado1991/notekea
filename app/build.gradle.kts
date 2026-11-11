@@ -80,6 +80,8 @@ kotlin {
             implementation(projects.testBuddyCrash)
 
             implementation(libs.directory.watcher)
+            implementation(libs.java.keyring)
+            implementation(libs.jgit)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.okhttp)

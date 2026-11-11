@@ -41,6 +41,7 @@ import app.notekea.search.presentation.switcher.QuickSwitcherContent
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherViewModel
 import app.notekea.shell.domain.Workspace
+import app.notekea.sync.presentation.SyncStatusViewModel
 import app.notekea.tasks.presentation.TasksViewModel
 import app.notekea.templates.presentation.TemplatePickerContent
 import app.notekea.templates.presentation.TemplatePickerIntent
@@ -86,6 +87,7 @@ fun VaultTreeScreen(
     mentionsViewModel: NoteMentionsViewModel = vaultViewModel(vaultPath),
     chatViewModel: ChatViewModel = vaultViewModel(vaultPath),
     modelDownloadViewModel: ModelDownloadViewModel = vaultViewModel(vaultPath),
+    syncViewModel: SyncStatusViewModel = vaultViewModel(vaultPath),
     panes: List<EditorPaneTools> = remember(vaultPath) {
         List(size = Workspace.MAX_PANES) { EditorPaneTools() }
     }
@@ -141,7 +143,11 @@ fun VaultTreeScreen(
                 panes = panes,
                 sidePanel = sidePanel,
                 onSwitchVault = onSwitchVault,
-                searchIndex = { AiStatusOf(searchIndexViewModel, modelDownloadViewModel) }
+                searchIndex = {
+                    SyncStatusOf(sync = syncViewModel)
+                    AiStatusOf(searchIndexViewModel, modelDownloadViewModel)
+                },
+                banner = { SyncConflictsOf(sync = syncViewModel) }
             )
         }
 

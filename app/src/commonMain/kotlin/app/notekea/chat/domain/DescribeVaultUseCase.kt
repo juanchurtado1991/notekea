@@ -10,7 +10,8 @@ class DescribeVaultUseCase(private val llmEngine: LlmEngine) {
     operator fun invoke(
         question: String,
         notes: Collection<NoteEntry>
-    ): Flow<AnswerStep> = llmEngine.streamedReply(
+    ): Flow<AnswerStep> = streamedReply(
+        llmEngine = llmEngine,
         messages = OverviewPrompt.messages(
             question = question,
             notes = notes

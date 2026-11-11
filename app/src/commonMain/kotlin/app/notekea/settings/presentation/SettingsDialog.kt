@@ -40,7 +40,6 @@ import app.notekea.resources.settings_section_editor
 import app.notekea.resources.settings_section_files
 import app.notekea.resources.settings_section_general
 import app.notekea.resources.settings_section_shortcuts
-import app.notekea.resources.settings_section_sync
 import app.notekea.resources.settings_section_templates
 import app.notekea.resources.settings_soon_badge
 import app.notekea.resources.settings_title
@@ -62,19 +61,19 @@ private val SECTIONS_TO_COME = listOf(
     Res.string.settings_section_files,
     Res.string.settings_section_daily_notes,
     Res.string.settings_section_templates,
-    Res.string.settings_section_sync,
     Res.string.settings_section_shortcuts
 )
 
 /**
- * Settings: the sections on the left, Appearance and AI model (3.1) to choose from, the chosen one
- * on the right, and the sections to come dimmed under "Coming soon" (5.2). AI model belongs to a feature, so the app
- * gives it as [aiModelSection]. It opens at [initialSection]. Esc, a click outside or ✕ closes it ([onDismiss]).
+ * Settings: the sections on the left (Appearance, AI model, Sync), the chosen one on the right, and the sections to
+ * come dimmed under "Coming soon" (5.2). AI model and Sync belong to features, so the app gives them
+ * ([aiModelSection], [syncSection]). It opens at [initialSection]; Esc, a click outside or ✕ closes it.
  */
 @Composable
 fun SettingsDialog(
     onDismiss: () -> Unit,
     aiModelSection: @Composable (Modifier) -> Unit,
+    syncSection: @Composable (Modifier) -> Unit,
     initialSection: SettingsSection = SettingsSection.APPEARANCE,
     viewModel: AppearanceViewModel = koinViewModel()
 ) {
@@ -102,6 +101,8 @@ fun SettingsDialog(
                 )
 
                 SettingsSection.AI_MODEL -> aiModelSection(Modifier.fillMaxSize())
+
+                SettingsSection.SYNC -> syncSection(Modifier.fillMaxSize())
             }
         }
     }

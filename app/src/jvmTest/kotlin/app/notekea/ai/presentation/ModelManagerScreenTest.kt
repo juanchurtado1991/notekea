@@ -65,6 +65,7 @@ class ModelManagerScreenTest {
                                 viewModel = viewModel
                             )
                         },
+                        syncSection = {},
                         viewModel = AppearanceViewModel(appearanceStore = FakeAppearanceStore())
                     )
                 }

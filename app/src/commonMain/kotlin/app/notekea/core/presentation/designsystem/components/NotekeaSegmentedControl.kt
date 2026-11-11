@@ -88,12 +88,14 @@ private fun Segment(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
     ) {
-        Icon(
-            imageVector = segment.icon,
-            contentDescription = null,
-            modifier = Modifier.size(size = SEGMENT_ICON_DP.dp),
-            tint = if (isSelected) colors.onSurface else colors.onSurfaceVariant
-        )
+        segment.icon?.let {
+            Icon(
+                imageVector = it,
+                contentDescription = null,
+                modifier = Modifier.size(size = SEGMENT_ICON_DP.dp),
+                tint = if (isSelected) colors.onSurface else colors.onSurfaceVariant
+            )
+        }
 
         Text(
             text = segment.label,

@@ -150,3 +150,18 @@ and keeps the best supported one.
 # Copy the chat
 words: copy chat, copiar chat, clear history, borrar historial, report, reportar
 Click ⋯ at the top right of the chat: Copy chat puts the conversation on the clipboard, and Clear history empties it.
+
+# Sync with Git
+words: sync, sincronizar, sincronización, git, github, gitlab, backup, copia de seguridad, another computer, otro computador, otra computadora, repository, repositorio
+Open Settings (the gear at the bottom of the tool rail), then Sync: paste the HTTPS address of a Git repository (for
+example on GitHub) and an access token that can write to it, then Connect. Notekea saves your changes to it 10
+seconds after you stop typing and brings the changes made on your other computers; the status bar says Up to date,
+Syncing… or how many changes are pending, and a click on it opens Settings → Sync. Sync now sends everything at once,
+and Stop syncing forgets the repository and the token. The token is kept in your system's keychain.
+
+# Settle a sync conflict
+words: conflict, conflicto, both versions, ambas versiones, keep mine, keep theirs, conflict copy, copia en conflicto
+When a note changed on this computer and on another one, a banner over the notes names it. Review shows both versions
+side by side: Keep mine uses this computer's, Keep theirs the other one's, and Keep both saves yours as "Note
+(mine)" beside it. Nothing is lost while you decide: your version waits as "Note (conflict)".
+

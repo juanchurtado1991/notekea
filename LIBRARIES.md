@@ -87,20 +87,24 @@ Alternative to evaluate for the mobile phase: **Llamatik** (`com.llamatik:librar
 
 ## 5. Git sync
 
-**Not in the build yet:** approved, and added back with the code that uses them (M3–M4), so the app does not ship them unused.
+In the build since 4.1 (2026-11-11). About 7 MB on the JVM: JGit 3.3 MB, JNA and its platform classes 3.3 MB (shared
+with nothing else), Commons Codec 0.4 MB, JavaEWAH 0.2 MB, java-keyring 32 KB.
 
 | Library | Coordinates | Version | Purpose |
 |---|---|---|---|
-| JGit | `org.eclipse.jgit:org.eclipse.jgit` | 7.8.0.202609011348-r | Pure-Java Git: clone, commit, pull, push (no `git` install needed) |
-| JGit SSH | `org.eclipse.jgit:org.eclipse.jgit.ssh.apache` | 7.8.0.202609011348-r | SSH key authentication |
-| Java Keyring | `com.github.javakeyring:java-keyring` | 1.0.4 | Stores the token in the OS keychain (never in plain text) |
+| JGit | `org.eclipse.jgit:org.eclipse.jgit` | 7.8.0.202609011348-r | Pure-Java Git: init, commit, fetch, rebase, merge, push over HTTPS (no `git` install needed) |
+| Java Keyring | `com.github.javakeyring:java-keyring` | 1.0.4 | Keeps the HTTPS token in the system's keychain (Keychain, Credential Manager, Secret Service), never in a file |
 
-MVP behavior:
-1. Connect the vault to a repository (clone an existing one, or `init` + remote).
-2. Auto-commit a few seconds after the user stops typing.
-3. `pull --rebase` when the app opens and every X minutes, then `push`.
-4. Conflicts: no merging; both versions are kept (`note.md` and `note (conflict).md`) and the user is notified.
-5. The AI index is in `.gitignore`; each device rebuilds it.
+HTTPS tokens only, decided with the developer on 2026-11-11: no SSH keys, so `org.eclipse.jgit.ssh.apache` is not
+added. How it behaves (`JGitRepository`, `SyncEngine`):
+1. Connect the vault to a repository: an existing one, or `init` + remote; a vault made in Notekea follows the remote's
+   branch (`main`, `master`).
+2. Commit 10 s after the last change, then pull and push.
+3. `pull --rebase` when the vault opens and every 1 to 30 minutes, then `push`; a rebase that clashes becomes a merge.
+4. Conflicts are never merged by hand: the note keeps the remote's version and ours is written beside it as
+   `Note (conflict).md`; a banner offers Keep mine, Keep theirs or Keep both.
+5. The AI index lives in the app's data folder, outside the vault; Notekea's own files (`*.notekea-tmp`, `.trash/`,
+   Obsidian's window layout) are excluded through `.git/info/exclude`, which is never committed.
 
 ## 6. Infrastructure
 

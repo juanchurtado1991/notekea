@@ -65,7 +65,9 @@ class HelpGuideFileTest {
             "que puedes hacer por mi?" to "What the chat can do",
             "how do I see my tasks?" to "Tasks",
             "¿cómo cambio el tema a modo oscuro?" to "Color theme and appearance",
-            "how do I open today's note" to "Today's note"
+            "how do I open today's note" to "Today's note",
+            "¿cómo sincronizo mis notas con github?" to "Sync with Git",
+            "what do I do with a conflict copy?" to "Settle a sync conflict"
         )
 
         assertEquals(
