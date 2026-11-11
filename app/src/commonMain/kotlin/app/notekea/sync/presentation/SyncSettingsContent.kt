@@ -121,15 +121,10 @@ private fun Form(
         if (state.hasToken) Quiet(text = stringResource(resource = Res.string.sync_token_saved))
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)) {
-        NotekeaCheckbox(
-            checked = state.isAuto,
-            onClick = { onIntent(SyncSettingsIntent.OnAutoToggle) },
-            label = stringResource(resource = Res.string.sync_auto)
-        )
-
-        Quiet(text = stringResource(resource = Res.string.sync_auto_explain))
-    }
+    AutoSync(
+        isAuto = state.isAuto,
+        onToggle = { onIntent(SyncSettingsIntent.OnAutoToggle) }
+    )
 
     Interval(
         state = state,
@@ -140,6 +135,35 @@ private fun Form(
         state = state,
         onIntent = onIntent
     )
+}
+
+@Composable
+private fun AutoSync(
+    isAuto: Boolean,
+    onToggle: () -> Unit
+) {
+    val label = stringResource(resource = Res.string.sync_auto)
+
+    Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            NotekeaCheckbox(
+                checked = isAuto,
+                onClick = onToggle,
+                label = label
+            )
+
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        Quiet(text = stringResource(resource = Res.string.sync_auto_explain))
+    }
 }
 
 @Composable
