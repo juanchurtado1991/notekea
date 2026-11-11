@@ -22,7 +22,10 @@ import java.io.File
  * PDF once.
  */
 class TikaDocumentReader(private val dispatchers: AppDispatchers) : DocumentReader {
-    private val parser by lazy { AutoDetectParser() }
+    private val parser by lazy {
+        PdfFonts.useBundledOnly()
+        AutoDetectParser()
+    }
     private val lock = Mutex()
     private val recent = LinkedHashMap<String, DocumentText>(RECENT, LOAD_FACTOR, true)
 
