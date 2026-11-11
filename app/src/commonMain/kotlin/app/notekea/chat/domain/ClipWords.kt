@@ -20,4 +20,13 @@ internal object ClipWords {
         ONLY.containsMatchIn(input = request) && !isSection(request)
 
     fun isSection(request: String): Boolean = SECTION.containsMatchIn(input = request)
+
+    // "with all its linked pages", "con todas sus páginas": every page, not only the closest 30.
+    fun isEvery(request: String): Boolean =
+        isSection(request) && EVERY.containsMatchIn(input = request)
+
+    private val EVERY = Regex(
+        pattern = "\\b(all|every|todas|todos|cada)\\b",
+        option = RegexOption.IGNORE_CASE
+    )
 }

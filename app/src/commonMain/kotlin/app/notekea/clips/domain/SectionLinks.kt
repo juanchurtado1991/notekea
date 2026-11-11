@@ -9,8 +9,17 @@ data class SectionLinks(
     val urls: List<String>,
     val more: Int,
     // What each page is, when the site says it (llms.txt: "Axiom: send traces to Axiom"), by its address.
-    val about: Map<String, String> = emptyMap()
+    val about: Map<String, String> = emptyMap(),
+    // The pages past the first [MAX_PAGES], clipped only when the person asks for all of them.
+    val rest: List<String> = emptyList()
 ) {
+    /** Every page, the [rest] too: what "all of them" clips. */
+    fun everyPage(): SectionLinks = copy(
+        urls = urls + rest,
+        more = 0,
+        rest = emptyList()
+    )
+
     /** What the page at [url] is: what the site says of it, or the words of its address. */
     fun aboutOf(url: String): String = about[url] ?: wordsOf(url = url)
 
@@ -18,11 +27,19 @@ data class SectionLinks(
     fun capped(chosen: List<String> = urls): SectionLinks {
         val kept = chosen.take(n = MAX_PAGES).toSet()
 
+        // The rest in the same order of value, then any page the order left out.
+        val rest = chosen.filterNot {
+            it in kept
+        } + urls.filterNot {
+            it in kept || it in chosen
+        }
+
         return copy(
             urls = urls.filter {
                 it in kept
             },
-            more = urls.size - kept.size
+            more = urls.size - kept.size,
+            rest = rest
         )
     }
 

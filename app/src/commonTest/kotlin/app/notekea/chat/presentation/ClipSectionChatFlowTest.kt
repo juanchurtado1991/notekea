@@ -62,7 +62,10 @@ class ClipSectionChatFlowTest {
             )
         )
 
-        override suspend fun clipSection(url: String) = Outcome.Success(
+        override suspend fun clipSection(
+            url: String,
+            isEvery: Boolean
+        ) = Outcome.Success(
             value = listOf(draft(name = "Overview"), draft(name = "Overview/Axiom"), draft(name = "Overview/Datadog"))
         )
     }

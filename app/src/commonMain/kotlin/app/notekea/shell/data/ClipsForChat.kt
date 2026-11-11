@@ -92,9 +92,12 @@ class ClipsForChat(
         is Outcome.Failure -> Outcome.Failure(error = problemOf(error = found.error))
     }
 
-    override suspend fun clipSection(url: String): Outcome<List<NoteDraft>, PageProblem> {
+    override suspend fun clipSection(
+        url: String,
+        isEvery: Boolean
+    ): Outcome<List<NoteDraft>, PageProblem> {
         val links = when (val found = findSection(url = url)) {
-            is Outcome.Success -> found.value
+            is Outcome.Success -> if (isEvery) found.value.everyPage() else found.value
             is Outcome.Failure -> return Outcome.Failure(error = problemOf(error = found.error))
         }
 

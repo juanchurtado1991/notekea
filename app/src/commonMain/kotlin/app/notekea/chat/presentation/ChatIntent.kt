@@ -60,7 +60,8 @@ sealed interface ChatIntent {
     /** The answer to "only this page, or the pages it links too?" ([ChatEntry.sectionAsked]), asked as a request. */
     data class OnSectionChoose(
         val id: Long,
-        val isWhole: Boolean
+        val isWhole: Boolean,
+        val isEvery: Boolean = false
     ) : ChatIntent
 
     /** A row of a table the chat found: its note opens, at the task's line for a task. */

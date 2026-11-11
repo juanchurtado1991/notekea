@@ -885,8 +885,10 @@
     <string name="chat_action_clip_url_es">Recortar página web</string>
     <string name="chat_section_question">This page links %1$d more pages under %2$s. Clip only this page, or those pages too? Each becomes a note in a folder, with this page as their index.</string>
     <string name="chat_section_question_es">Esta página enlaza %1$d páginas más bajo %2$s. ¿Recorto solo esta página, o también esas? Cada una será una nota en una carpeta, con esta página como índice.</string>
-    <string name="chat_section_more">%1$d more are left out: at most 30 at once.</string>
-    <string name="chat_section_more_es">Quedan fuera %1$d más: como mucho 30 de una vez.</string>
+    <string name="chat_section_more">These are the 30 closest to this page; %1$d more can be clipped with All, which takes longer.</string>
+    <string name="chat_section_more_es">Estas son las 30 más relacionadas con esta página; otras %1$d se recortan con Todas, que tarda más.</string>
+    <string name="chat_section_every">All %1$d pages</string>
+    <string name="chat_section_every_es">Todas (%1$d páginas)</string>
     <string name="chat_section_only">Only this page</string>
     <string name="chat_section_only_es">Solo esta página</string>
     <string name="chat_section_all">This page and %1$d more</string>
@@ -913,7 +915,8 @@
     <string name="clip_error_large">The page is too large to be an article.</string>
     <string name="clip_error_refused">The site refused the page: it may need a login, a subscription, or not exist.</string>
     <string name="clip_section_question">This page links %1$d more pages under %2$s. Clip only this page, or those pages too? Each becomes a note in a folder, with this page as their index.</string>
-    <string name="clip_section_more">%1$d more are left out: at most 30 at once.</string>
+    <string name="clip_section_more">These are the 30 closest to this page; %1$d more can be clipped with All, which takes longer.</string>
+    <string name="clip_with_all">All %1$d pages</string>
     <string name="clip_only_page">Only this page</string>
     <string name="clip_with_section">This page and %1$d more</string>
     <string name="clip_section_progress">Clipping page %1$d of %2$d…</string>

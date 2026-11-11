@@ -14,6 +14,7 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
 import app.notekea.resources.chat_section_all
+import app.notekea.resources.chat_section_every
 import app.notekea.resources.chat_section_more
 import app.notekea.resources.chat_section_only
 import app.notekea.resources.chat_section_question
@@ -22,7 +23,7 @@ import app.notekea.resources.chat_section_question
 @Composable
 internal fun ChatSectionQuestion(
     section: SectionAsked,
-    onChoose: (isWhole: Boolean) -> Unit
+    onChoose: (isWhole: Boolean, isEvery: Boolean) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
         section.summary?.let {
@@ -48,14 +49,22 @@ internal fun ChatSectionQuestion(
         FlowRow(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
             NotekeaButton(
                 text = replyString(resource = Res.string.chat_section_only),
-                onClick = { onChoose(false) },
+                onClick = { onChoose(false, false) },
                 style = NotekeaButtonStyle.TEXT
             )
 
             NotekeaButton(
                 text = replyString(Res.string.chat_section_all, section.count),
-                onClick = { onChoose(true) }
+                onClick = { onChoose(true, false) }
             )
+
+            if (section.more > 0) {
+                NotekeaButton(
+                    text = replyString(Res.string.chat_section_every, section.count + section.more),
+                    onClick = { onChoose(true, true) },
+                    style = NotekeaButtonStyle.TEXT
+                )
+            }
         }
     }
 }
@@ -71,7 +80,7 @@ private fun ChatSectionQuestionPreview() {
                 count = 30,
                 more = 4
             ),
-            onChoose = {}
+            onChoose = { _, _ -> }
         )
     }
 }

@@ -155,13 +155,6 @@ class ClipSectionTest {
         )
     }
 
-    private companion object {
-        val NOT_ARTICLE = Outcome.Failure(error = ClipError.NotArticle)
-        const val INDEXED = "## Pages\n\nGuides to send traces to observability platforms.\n\n" +
-            "- [[Docs/Axiom|Axiom]] — Send traces to Axiom"
-        const val PAGES = "## Pages\n\n- [[Overview/Axiom|Axiom]]\n- [[Overview/Datadog|Datadog]]"
-    }
-
     @Test
     fun `the index lists each page with what the site says it is for, under what the section offers`() {
         val clip = { title: String, url: String ->
@@ -188,5 +181,12 @@ class ClipSectionTest {
             expected = true,
             actual = INDEXED in notes.first().second
         )
+    }
+
+    private companion object {
+        val NOT_ARTICLE = Outcome.Failure(error = ClipError.NotArticle)
+        const val INDEXED = "## Pages\n\nGuides to send traces to observability platforms.\n\n" +
+            "- [[Docs/Axiom|Axiom]] — Send traces to Axiom"
+        const val PAGES = "## Pages\n\n- [[Overview/Axiom|Axiom]]\n- [[Overview/Datadog|Datadog]]"
     }
 }

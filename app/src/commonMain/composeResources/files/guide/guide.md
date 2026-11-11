@@ -173,12 +173,42 @@ Compact chat, in the ⋯ menu, does it at once, and Clear history forgets everyt
 you write in, or the one you ask for ("in Spanish please").
 
 # Sync with Git
-words: sync, sincronizar, sincronización, git, github, gitlab, backup, copia de seguridad, another computer, otro computador, otra computadora, repository, repositorio
-Open Settings (the gear at the bottom of the tool rail), then Sync: paste the HTTPS address of a Git repository (for
+words: sync, sincronizar, sincronización, git, gitlab, backup, copia de seguridad, another computer, otro computador, otra computadora
+New to GitHub? See Set up GitHub sync, step by step. Open Settings (the gear at the bottom of the tool rail), then Sync: paste the HTTPS address of a Git repository (for
 example on GitHub) and an access token that can write to it, then Connect. Notekea saves your changes to it 10
 seconds after you stop typing and brings the changes made on your other computers; the status bar says Up to date,
 Syncing… or how many changes are pending, and a click on it opens Settings → Sync. Sync now sends everything at once,
 and Stop syncing forgets the repository and the token. The token is kept in your system's keychain.
+
+# Set up GitHub sync, step by step
+words: github, qué es github, que es github, how do I connect github, cómo conecto github, como conecto github, no sé usar github, no se usar github, token, access token, personal access token, repository, repositorio, crear repositorio, cuenta de github, github account, set up sync, configurar sincronización
+GitHub is a free website that keeps folders of files online. Notekea saves your vault there, in a private place only
+you can see, so your notes are the same on every computer and safe if this one breaks. You need it only to sync; a
+vault that stays on this computer needs nothing. Five steps, once:
+1. Make a free account at github.com (Sign up).
+2. Make a private repository, the place your vault goes: the + at the top right of GitHub, New repository. Name it
+   (for example notes), choose Private, leave Add a README off, and click Create repository.
+3. Copy its address: the page that opens shows it under HTTPS, like https://github.com/your-name/notes.git.
+4. Make a token, the key Notekea uses instead of your password: your picture at the top right, Settings, Developer
+   settings (at the bottom), Personal access tokens, Fine-grained tokens, Generate new token. Name it Notekea, pick
+   an expiration, under Repository access choose Only select repositories and your notes repository, and under
+   Repository permissions set Contents to Read and write. Click Generate token and copy it: GitHub shows it once.
+5. In Notekea open Settings (the gear at the bottom of the tool rail), then Sync: paste the address and the token,
+   and click Connect. On your other computer, open the same Settings → Sync with the same address and a token.
+Your token stays in your system's keychain, never in the vault. Settings → Sync also has How do I set this up?, a
+chat that walks you through these steps and answers questions.
+
+# Sync sign-in failed
+words: sync sign-in failed, sign-in failed, error de sincronización, no sincroniza, token expired, token caducado, token vencido, the repository refused the token, rechazó el token
+The repository refused the token. Most often the token expired (GitHub tokens last the time you chose), was made for
+another repository, or cannot write: Contents must be Read and write. Make a new token as in Set up GitHub sync, step
+4, paste it in Settings → Sync and click Connect; your notes stay as they are.
+
+# GitHub's limits for your vault
+words: limit, límite, 100 mb, 1 gb, too large, demasiado grande, video, vídeo, big file, archivo grande, github free, cuenta gratuita, repository size, tamaño del repositorio
+GitHub refuses any single file over 100 MB, and asks that a repository stay under about 1 GB (5 GB at most). When a
+vault synced with GitHub grows past 1 GB, Notekea warns you, since a free account may have problems with it. A vault
+that stays on this computer has no limit and is never warned.
 
 # Settle a sync conflict
 words: conflict, conflicto, both versions, ambas versiones, keep mine, keep theirs, conflict copy, copia en conflicto

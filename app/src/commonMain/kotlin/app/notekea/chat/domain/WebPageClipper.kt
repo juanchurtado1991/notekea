@@ -16,5 +16,8 @@ interface WebPageClipper {
     ): Outcome<SectionAsked, PageProblem>
 
     /** The page and the pages it links under its path, each a note, the page their index. */
-    suspend fun clipSection(url: String): Outcome<List<NoteDraft>, PageProblem>
+    suspend fun clipSection(
+        url: String,
+        isEvery: Boolean = false
+    ): Outcome<List<NoteDraft>, PageProblem>
 }

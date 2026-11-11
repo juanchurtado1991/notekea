@@ -210,8 +210,11 @@ class ChatViewModel(
             is ChatIntent.OnFoundClick -> emit(effect = foundEffectOf(row = intent.row))
 
             is ChatIntent.OnSectionChoose -> entryOf(id = intent.id)?.sectionAsked?.let {
-                val request =
-                    if (intent.isWhole) "clip ${it.url} with its linked pages" else "clip only ${it.url}"
+                val request = when {
+                    intent.isEvery -> "clip ${it.url} with all its linked pages"
+                    intent.isWhole -> "clip ${it.url} with its linked pages"
+                    else -> "clip only ${it.url}"
+                }
 
                 offered(request = request)
             }
