@@ -37,9 +37,7 @@ object DraftVote {
 
     /** Whether [draft] says the notes do not answer. */
     fun isNotFound(draft: String): Boolean {
-        val text = draft.trim()
-
-        return text.isEmpty() || AnswerPrompt.NOT_FOUND in text
+        return AnswerPrompt.isNotFound(text = draft)
     }
 
     private fun wordsOf(text: String): Set<String> = WORD

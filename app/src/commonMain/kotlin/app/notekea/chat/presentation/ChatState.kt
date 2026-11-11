@@ -18,6 +18,8 @@ data class ChatState(
     val isDeepOffered: Boolean = false,
     val isAgentOffered: Boolean = false,
     val mode: ChatMode = ChatMode.AUTO,
+    val contextUsage: Float = 0f,
+    val isCompacting: Boolean = false,
     val isIndexReady: Boolean = false,
     val noteName: String? = null,
     val folderName: String? = null

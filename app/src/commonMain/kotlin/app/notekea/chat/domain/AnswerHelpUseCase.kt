@@ -19,7 +19,8 @@ class AnswerHelpUseCase(
         question: String,
         request: String,
         history: List<ChatExchange>,
-        shortcuts: Map<String, String>
+        shortcuts: Map<String, String>,
+        language: String? = null
     ): Flow<AnswerStep> = flow {
         val guide = guideSource.load()
 
@@ -42,11 +43,13 @@ class AnswerHelpUseCase(
         emitAll(
             flow = streamedReply(
                 llmEngine = llmEngine,
-                messages = HelpPrompt.messages(
-                    question = question,
-                    topics = found,
-                    history = history
-                ),
+                messages = HelpPrompt
+                    .messages(
+                        question = question,
+                        topics = found,
+                        history = history
+                    )
+                    .inLanguage(language = language),
                 options = GenerationOptions(
                     maxTokens = MAX_TOKENS,
                     temperature = 0f

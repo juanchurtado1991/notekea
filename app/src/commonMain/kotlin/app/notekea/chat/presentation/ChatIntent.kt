@@ -27,6 +27,9 @@ sealed interface ChatIntent {
     /** Copy chat: the whole conversation on the clipboard, to report an answer that went wrong. */
     data object OnCopyChat : ChatIntent
 
+    /** Compact chat: what the chat remembers of itself written short, as Claude Code's /compact. */
+    data object OnCompact : ChatIntent
+
     /** The [mode] the chat answers in, from the menu under its question field. */
     data class OnModeChoose(val mode: ChatMode) : ChatIntent
 

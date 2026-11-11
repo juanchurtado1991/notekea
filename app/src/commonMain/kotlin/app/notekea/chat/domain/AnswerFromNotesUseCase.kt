@@ -37,7 +37,8 @@ class AnswerFromNotesUseCase(
         notes: Collection<NoteEntry>,
         question: String,
         only: Set<RelativePath>? = null,
-        drafts: Int = 1
+        drafts: Int = 1,
+        language: String? = null
     ): Flow<AnswerStep> = flow {
         emit(value = AnswerStep.Searching)
 
@@ -67,12 +68,14 @@ class AnswerFromNotesUseCase(
             voted(
                 question = question,
                 read = read,
-                drafts = drafts
+                drafts = drafts,
+                language = language
             )
         } else {
             written(
                 question = question,
-                read = read
+                read = read,
+                language = language
             )
         }
 
@@ -82,17 +85,23 @@ class AnswerFromNotesUseCase(
     /** The answer written once, shown as it is written. */
     private fun written(
         question: String,
-        read: List<AnswerSource>
+        read: List<AnswerSource>,
+        language: String?
     ): Flow<AnswerStep> = flow {
         val written = StringBuilder()
 
         try {
             llmEngine
                 .generate(
-                    messages = AnswerPrompt.messages(
-                        question = question,
-                        excerpts = read.map { it.text }
-                    ),
+                    messages = AnswerPrompt
+                        .messages(
+                            question = question,
+                            excerpts = read.map { it.text }
+                        )
+                        .inLanguage(
+                            language = language,
+                            kept = AnswerPrompt.NOT_FOUND
+                        ),
                     options = GenerationOptions(maxTokens = MAX_TOKENS)
                 )
                 .collect { piece ->
@@ -113,7 +122,7 @@ class AnswerFromNotesUseCase(
         }
 
         val text = written.toString().trim()
-        val isNotFound = text.isEmpty() || AnswerPrompt.NOT_FOUND in text
+        val isNotFound = AnswerPrompt.isNotFound(text = text)
         if (isNotFound) return@flow emit(value = AnswerStep.NotFound)
 
         emit(
@@ -130,7 +139,8 @@ class AnswerFromNotesUseCase(
     private fun voted(
         question: String,
         read: List<AnswerSource>,
-        drafts: Int
+        drafts: Int,
+        language: String?
     ): Flow<AnswerStep> = flow {
         emit(value = AnswerStep.Drafting(drafts = drafts))
 
@@ -142,7 +152,8 @@ class AnswerFromNotesUseCase(
                             draftOf(
                                 question = question,
                                 read = read,
-                                seed = seed
+                                seed = seed,
+                                language = language
                             )
                         }
                     }
@@ -168,16 +179,22 @@ class AnswerFromNotesUseCase(
     private suspend fun draftOf(
         question: String,
         read: List<AnswerSource>,
-        seed: Int
+        seed: Int,
+        language: String?
     ): String {
         val draft = StringBuilder()
 
         llmEngine
             .generate(
-                messages = AnswerPrompt.messages(
-                    question = question,
-                    excerpts = read.map { it.text }
-                ),
+                messages = AnswerPrompt
+                    .messages(
+                        question = question,
+                        excerpts = read.map { it.text }
+                    )
+                    .inLanguage(
+                        language = language,
+                        kept = AnswerPrompt.NOT_FOUND
+                    ),
                 options = GenerationOptions(
                     maxTokens = MAX_TOKENS,
                     temperature = DRAFT_TEMPERATURE,
@@ -244,14 +261,15 @@ class AnswerFromNotesUseCase(
             }.distinct()
         )
 
-        return Outcome.Success(
-            value = hits.mapNotNull { hit ->
-                sourceOf(
-                    hit = hit,
-                    body = texts[hit.note]?.body
-                )
-            }
-        )
+        val passages = hits.mapNotNull { hit ->
+            sourceOf(
+                hit = hit,
+                body = texts[hit.note]?.body
+            )
+        }
+
+        // The frontmatter is not in the index: the properties of the notes the question names compete beside it.
+        return Outcome.Success(value = passages + PropertyPassages.of(question, notes, only))
     }
 
     private fun sourceOf(

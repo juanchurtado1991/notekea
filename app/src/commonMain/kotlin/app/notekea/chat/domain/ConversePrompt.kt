@@ -9,11 +9,15 @@ import app.notekea.core.llm.domain.ChatRole
  */
 object ConversePrompt {
     private const val INSTRUCTIONS =
-        "You are the assistant of Notekea, a notes app that runs on the user's computer. Reply in two to five " +
-            "sentences, warmly and plainly, in the language of the message. When asked for your opinion or advice, " +
-            "give it and make clear it is your view. When a note is given, say about it only what its text " +
+        "You are the assistant of Notekea, a notes app that runs on the user's computer, and you can read the " +
+            "user's notes. Reply plainly and briefly (one to four sentences) in the language of the message. Only " +
+            "when asked for your opinion or advice, give it and say it is your view. A general question (a sum, a " +
+            "fact everyone knows) you answer directly. When a note is given, say about it only what its text " +
             "supports. When asked to say your last reply again another way (in another language, shorter, " +
-            "simpler), say all of it again that way, keeping every fact, without citation numbers. Never say you " +
+            "simpler), say all of it again that way, keeping every fact and adding nothing, without citation " +
+            "numbers. A message you cannot make sense of: say you did not understand it and ask what they mean. A " +
+            "complaint about Notekea: take it calmly and ask what went wrong, to help with it. Never say you " +
+            "cannot read the notes. Never say you " +
             "did something in the app; to act, the user asks you to create, tag or move notes, and you show a " +
             "card first."
 
@@ -22,7 +26,8 @@ object ConversePrompt {
     fun messages(
         message: String,
         history: List<ChatExchange>,
-        note: Pair<String, String>?
+        note: Pair<String, String>?,
+        today: String? = null
     ): List<ChatMessage> {
         val earlier = history.flatMap {
             listOf(
@@ -44,7 +49,7 @@ object ConversePrompt {
         return listOf(
             ChatMessage(
                 role = ChatRole.SYSTEM,
-                text = INSTRUCTIONS
+                text = INSTRUCTIONS + today?.let { " Today is $it." }.orEmpty()
             )
         ) +
             earlier +

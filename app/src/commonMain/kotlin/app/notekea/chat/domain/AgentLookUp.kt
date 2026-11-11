@@ -3,7 +3,6 @@ package app.notekea.chat.domain
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
-import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
 
 /**
@@ -68,7 +67,10 @@ internal class AgentLookUp(
 
         return notes
             .filter { note ->
-                val values = propertiesOf(note = note).joinToString(separator = "\n").lowercase()
+                val values = NoteProperties
+                    .of(note = note)
+                    .joinToString(separator = "\n")
+                    .lowercase()
 
                 words.any {
                     it in values
@@ -76,17 +78,11 @@ internal class AgentLookUp(
             }
             .take(n = PROPERTY_NOTES)
             .map { note ->
-                val written = propertiesOf(note = note).joinToString(separator = "; ")
+                val written = NoteProperties.of(note = note).joinToString(separator = "; ")
 
                 "- ${note.file.path.nameWithoutExtension} (properties: $written)"
             }
     }
-
-    /** [note]'s properties as its frontmatter writes them, one `key: value` each. */
-    private fun propertiesOf(note: NoteEntry): List<String> = note
-        .metadata
-        .properties
-        .map { "${it.key}: ${writtenOf(value = it.value)}" }
 
     private suspend fun read(name: String): String {
         val path = runCatching {
@@ -109,25 +105,10 @@ internal class AgentLookUp(
             ?.body
             .orEmpty()
 
-        val properties = propertiesOf(note = note).joinToString(separator = "") { "$it\n" }
+        val properties = NoteProperties.of(note = note).joinToString(separator = "") { "$it\n" }
 
         return "read \"${path.nameWithoutExtension}\":\n$properties${body.take(n = NOTE_CHARS)}"
     }
-
-    // A property as its frontmatter writes it, so a value such as an owner or a date is read with the text.
-    private fun writtenOf(value: PropertyValue): String = when (value) {
-        is PropertyValue.Text -> value.text
-        is PropertyValue.Number -> value.text
-        is PropertyValue.Checkbox -> value.isChecked.toString()
-        is PropertyValue.Date -> with(value.date) { "$year-${month.padded()}-${day.padded()}" }
-        is PropertyValue.Items -> value.items.joinToString(separator = ", ")
-        is PropertyValue.Other -> value.source
-    }
-
-    private fun Int.padded(): String = toString().padStart(
-        length = 2,
-        padChar = '0'
-    )
 
     private suspend fun found(step: ActionStep): String {
         val found = when (

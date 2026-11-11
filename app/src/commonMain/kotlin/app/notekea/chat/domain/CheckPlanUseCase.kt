@@ -21,7 +21,7 @@ class CheckPlanUseCase {
         )
 
         val checked = steps.map { step ->
-            when (val one = check(step = step, vault = vault)) {
+            when (val one = check(step = MovedInto.of(step = step), vault = vault)) {
                 is Outcome.Success -> one.value
                 is Outcome.Failure -> return one
             }

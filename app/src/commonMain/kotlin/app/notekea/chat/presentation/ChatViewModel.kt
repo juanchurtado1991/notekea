@@ -5,14 +5,15 @@ import app.notekea.chat.domain.ActionRunner
 import app.notekea.chat.domain.AgentAnswerUseCase
 import app.notekea.chat.domain.AgentTaskUseCase
 import app.notekea.chat.domain.AnswerCitations
+import app.notekea.chat.domain.AnswerFromFoundUseCase
 import app.notekea.chat.domain.AnswerFromNotesUseCase
 import app.notekea.chat.domain.AnswerHelpUseCase
 import app.notekea.chat.domain.AnswerStep
 import app.notekea.chat.domain.ChatError
-import app.notekea.chat.domain.ChatExchange
 import app.notekea.chat.domain.ChatHistoryStore
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
+import app.notekea.chat.domain.CompactChatUseCase
 import app.notekea.chat.domain.ConverseUseCase
 import app.notekea.chat.domain.DescribeVaultUseCase
 import app.notekea.chat.domain.FoundRow
@@ -45,9 +46,11 @@ class ChatViewModel(
     agentAnswer: AgentAnswerUseCase,
     answerHelp: AnswerHelpUseCase,
     describeVault: DescribeVaultUseCase,
+    answerFromFound: AnswerFromFoundUseCase,
     conventions: PlatformConventions,
     actOnRequest: ActOnRequestUseCase,
     agentTask: AgentTaskUseCase,
+    compactChat: CompactChatUseCase,
     actionRunner: ActionRunner,
     localCalendar: LocalCalendar,
     clock: Clock,
@@ -64,7 +67,9 @@ class ChatViewModel(
         agentAnswer = agentAnswer,
         answerHelp = answerHelp,
         describeVault = describeVault,
-        shortcuts = HelpShortcuts.of(conventions = conventions)
+        answerFromFound = answerFromFound,
+        shortcuts = HelpShortcuts.of(conventions = conventions),
+        today = { actions.today() }
     )
 
     private val actions = ChatActions(
@@ -82,6 +87,8 @@ class ChatViewModel(
         emit = { emit(effect = it) }
     )
 
+    private val memory = ChatMemory(compactChat = compactChat)
+
     private val agent = ChatAgent(
         vaultPath = vaultPath,
         agentTask = agentTask,
@@ -94,9 +101,31 @@ class ChatViewModel(
         }
     )
 
+    private val answering = ChatAnswering(
+        memory = memory,
+        actions = actions,
+        agent = agent,
+        replies = replies,
+        state = { state.value },
+        notes = { notes },
+        activeNote = { activeNote },
+        update = { id, change ->
+            update(
+                id = id,
+                change = change
+            )
+        },
+        follow = { id, step ->
+            follow(
+                id = id,
+                step = step
+            )
+        }
+    )
+
     private var notes: Collection<NoteEntry> = emptyList()
     private var activeNote: RelativePath? = null
-    private var answering: Job? = null
+    private var answer: Job? = null
     private var nextId = 0L
 
     init {
@@ -138,6 +167,8 @@ class ChatViewModel(
             ChatIntent.OnClearHistory -> clear()
 
             ChatIntent.OnCopyChat -> clipboard.copy(text = ChatTranscript.of(state = state.value))
+
+            ChatIntent.OnCompact -> remember(isAsked = true)
 
             is ChatIntent.OnModeChoose -> reduce { it.copy(mode = intent.mode) }
 
@@ -192,21 +223,6 @@ class ChatViewModel(
         )
     }
 
-    /** The last few questions answered before [id], so a follow-up knows what "it" was. */
-    private fun historyBefore(id: Long): List<ChatExchange> = state
-        .value
-        .entries
-        .filter {
-            it.id < id && it.answer.isNotBlank()
-        }
-        .takeLast(n = HISTORY_TURNS)
-        .map {
-            ChatExchange(
-                question = it.question,
-                reply = it.answer.take(n = HISTORY_REPLY_CHARS)
-            )
-        }
-
     private fun entryOf(id: Long): ChatEntry? = state
         .value
         .entries
@@ -223,7 +239,7 @@ class ChatViewModel(
     } ?: ChatEffect.Open(note = row.note)
 
     override fun onCleared() {
-        answering?.cancel()
+        answer?.cancel()
         super.onCleared()
     }
 
@@ -289,63 +305,19 @@ class ChatViewModel(
 
         reduce { it.copy(entries = it.entries + entry) }
 
-        answering = launchGuarded(onError = {
+        answer = launchGuarded(onError = {
             failed(
                 id = id,
                 throwable = it
             )
         }) {
-            val history = historyBefore(id = id)
-
-            val current = state.value
-
-            // A request in the whole vault may be an action or talk; one asked of a note or a folder is answered.
-            val reply = if (scope == ChatScope.VAULT) {
-                actions.act(
-                    id = id,
-                    request = question,
-                    notes = notes,
-                    history = history,
-                    openNote = activeNote,
-                    agentUse = current.mode.agentUse(isAgentOffered = current.isAgentOffered)
-                )
-            } else {
-                ChatReply.Question(question = question)
-            }
-
-            // The agent ends on a card or with what it found, never in an answer of 3.2.
-            if (reply == ChatReply.Agent) {
-                update(id = id) { it.copy(answeredWith = ChatMode.AGENT) }
-
-                return@launchGuarded agent.work(id, question, notes, history, activeNote).also {
-                    save()
-                }
-            }
-
-            if (reply == ChatReply.Acted) return@launchGuarded save()
-
-            val isDeep = current.isDeepFor(reply = reply)
-
-            update(id = id) { it.copy(answeredWith = if (isDeep) ChatMode.DEEP else ChatMode.FAST) }
-
-            val steps = replies.stepsFor(
-                reply = reply,
-                message = question,
-                history = history,
-                notes = notes,
-                only = notesOf(scope, notes, activeNote),
-                isDeep = isDeep,
-                onStep = { step ->
-                    update(id = id) { it.copy(step = step) }
-                }
+            answering.answer(
+                id = id,
+                question = question,
+                scope = scope
             )
 
-            steps.collect { step ->
-                follow(
-                    id = id,
-                    step = step
-                )
-            }
+            save()
         }
     }
 
@@ -373,7 +345,7 @@ class ChatViewModel(
             .lastOrNull()
             ?.takeIf { it.isAnswering } ?: return
 
-        answering?.cancel()
+        answer?.cancel()
 
         val kept = AnswerCitations.of(
             text = entry.answer,
@@ -393,8 +365,15 @@ class ChatViewModel(
     }
 
     private fun clear() {
-        if (state.value.isAnswering) answering?.cancel()
-        reduce { it.copy(entries = emptyList()) }
+        if (state.value.isAnswering) answer?.cancel()
+        memory.clear()
+
+        reduce {
+            it.copy(
+                entries = emptyList(),
+                contextUsage = 0f
+            )
+        }
 
         launchGuarded(onError = ::logError) { historyStore.clear(vaultPath = vaultPath) }
     }
@@ -454,7 +433,37 @@ class ChatViewModel(
         )
     }
 
+    // The chat's memory filled by the last answer, compacted by itself once full or when asked to.
+    private fun remember(isAsked: Boolean = false) {
+        val entries = state.value.entries
+        val usage = memory.usageOf(entries = entries)
+        reduce { it.copy(contextUsage = usage) }
+
+        val isDue = (isAsked || usage >= 1f) && !state.value.isCompacting
+        if (!isDue) return
+
+        reduce { it.copy(isCompacting = true) }
+
+        launchGuarded(onError = ::compactFailed) {
+            memory.compact(entries = entries)
+
+            reduce {
+                it.copy(
+                    isCompacting = false,
+                    contextUsage = memory.usageOf(entries = it.entries)
+                )
+            }
+        }
+    }
+
+    private fun compactFailed(throwable: Throwable) {
+        reduce { it.copy(isCompacting = false) }
+        logError(throwable = throwable)
+    }
+
     private fun save() {
+        remember()
+
         val turns = state
             .value
             .entries
@@ -492,8 +501,6 @@ class ChatViewModel(
         const val LOG_TAG = "ChatViewModel"
         const val MAX_TURNS = 100
         const val UNFINISHED = "…"
-        const val HISTORY_TURNS = 4
-        const val HISTORY_REPLY_CHARS = 400
 
         const val UNEXPECTED_ERROR_MESSAGE = "The chat failed unexpectedly"
 

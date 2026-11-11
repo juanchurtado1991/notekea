@@ -40,6 +40,7 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res
 import app.notekea.resources.chat_clear
+import app.notekea.resources.chat_compact
 import app.notekea.resources.chat_copy
 import app.notekea.resources.chat_index_wait
 import app.notekea.resources.chat_more
@@ -134,6 +135,12 @@ private fun ChatHeader(
                         onClick = { onIntent(ChatIntent.OnCopyChat) },
                         icon = NotekeaIcons.ChatCopy,
                         enabled = state.entries.isNotEmpty()
+                    ),
+                    NotekeaMenuItem(
+                        label = stringResource(resource = Res.string.chat_compact),
+                        onClick = { onIntent(ChatIntent.OnCompact) },
+                        icon = NotekeaIcons.ChatCompact,
+                        enabled = state.entries.isNotEmpty() && !state.isCompacting
                     )
                 ),
                 listOf(
@@ -259,16 +266,27 @@ private fun ChatInput(
             onStop = { onIntent(ChatIntent.OnStop) },
             modifier = Modifier.focusRequester(focusRequester = inputFocus),
             bottom = {
-                // The model and the mode at the bottom right, as in Claude Code.
-                ChatModeMenu(
-                    tier = state.tier,
-                    mode = state.mode,
-                    modes = state.modes,
-                    onChoose = { onIntent(ChatIntent.OnModeChoose(mode = it)) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentWidth(align = Alignment.End)
-                )
+                // The chat's memory, the model and the mode at the bottom right, as in Claude Code.
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        space = NotekeaDimensions.SpacingS,
+                        alignment = Alignment.End
+                    ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ChatMemoryRing(
+                        usage = state.contextUsage,
+                        isCompacting = state.isCompacting
+                    )
+
+                    ChatModeMenu(
+                        mode = state.mode,
+                        modes = state.modes,
+                        onChoose = { onIntent(ChatIntent.OnModeChoose(mode = it)) },
+                        tier = state.tier
+                    )
+                }
             }
         )
     }

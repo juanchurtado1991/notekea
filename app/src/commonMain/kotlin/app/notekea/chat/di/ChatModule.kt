@@ -6,9 +6,11 @@ import app.notekea.chat.domain.ActOnRequestUseCase
 import app.notekea.chat.domain.ActionPlanReader
 import app.notekea.chat.domain.AgentAnswerUseCase
 import app.notekea.chat.domain.AgentTaskUseCase
+import app.notekea.chat.domain.AnswerFromFoundUseCase
 import app.notekea.chat.domain.AnswerFromNotesUseCase
 import app.notekea.chat.domain.AnswerHelpUseCase
 import app.notekea.chat.domain.CheckPlanUseCase
+import app.notekea.chat.domain.CompactChatUseCase
 import app.notekea.chat.domain.ComposeNotesUseCase
 import app.notekea.chat.domain.ConverseUseCase
 import app.notekea.chat.domain.DescribeVaultUseCase
@@ -41,6 +43,8 @@ val chatModule = module {
     factoryOf(::AgentTaskUseCase)
     factoryOf(::AnswerHelpUseCase)
     factoryOf(::DescribeVaultUseCase)
+    factoryOf(::CompactChatUseCase)
+    factoryOf(::AnswerFromFoundUseCase)
     factory<ActionPlanReader> { GhostActionPlanReader() }
     single<HelpGuideSource> { BundledHelpGuideSource(dispatchers = get()) }
 
@@ -55,6 +59,8 @@ val chatModule = module {
             conventions = get(),
             actOnRequest = get(),
             agentTask = get(),
+            compactChat = get(),
+            answerFromFound = get(),
             actionRunner = get(),
             localCalendar = get(),
             clock = get(),

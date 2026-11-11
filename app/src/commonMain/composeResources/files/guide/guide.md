@@ -15,6 +15,15 @@ or your tasks, open a note or today's note, show a panel, and change the color t
 is shown first on a card with Do it and Cancel, and Undo takes it back. It can also explain how to use Notekea. Open
 the chat with {chat}.
 
+# What the chat cannot do
+words: what can't you do, what cannot you do, limits, limitations, qué no puedes hacer, que no puedes hacer, qué no podés hacer, que no podes hacer, límites, no puedes, can't you
+It works only with the notes of this vault, on this computer, and it never goes online by itself. It cannot send
+emails or messages, set reminders or alarms (it can add a task with a due date, which shows in Today and Tasks),
+look at the calendar, search the web or know the weather and the news (it reads a web page only when you paste its
+address, to clip it), change Settings or the AI model (it can change the color theme), delete notes for good (it moves
+them to the trash, and Undo brings them back), or reach files outside the vault. When it cannot do something it says
+so, and what it can do instead.
+
 # Create a note
 words: create a note, new note, make a note, crear nota, nueva nota, nota nueva, crear una nota, creo una nota, hacer una nota, add a note
 try: create a note called …
@@ -153,6 +162,14 @@ Agent works step by step. Deep thinking comes with the Medium model, Agent with 
 # Copy the chat
 words: copy chat, copiar chat, clear history, borrar historial, report, reportar
 Click ⋯ at the top right of the chat: Copy chat puts the conversation on the clipboard, and Clear history empties it.
+
+# The chat's memory
+words: memory, memoria, context, contexto, context window, ventana de contexto, compact, compactar, forget, olvidar, ring, rueda, círculo
+The chat remembers the conversation so you can ask "and the water?" or "make it shorter". The ring beside the mode, at
+the bottom right of the question field, fills as the conversation grows; hold the pointer on it to see how full it
+is. When it is full, the chat writes the earlier conversation into a short summary by itself and keeps going with it.
+Compact chat, in the ⋯ menu, does it at once, and Clear history forgets everything. The chat replies in the language
+you write in, or the one you ask for ("in Spanish please").
 
 # Sync with Git
 words: sync, sincronizar, sincronización, git, github, gitlab, backup, copia de seguridad, another computer, otro computador, otra computadora, repository, repositorio

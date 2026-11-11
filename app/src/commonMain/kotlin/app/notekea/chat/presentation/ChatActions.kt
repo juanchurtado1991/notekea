@@ -6,7 +6,10 @@ import app.notekea.chat.domain.ActionKind
 import app.notekea.chat.domain.ActionRunner
 import app.notekea.chat.domain.ActionTurnStep
 import app.notekea.chat.domain.AgentUse
+import app.notekea.chat.domain.AskedWords
 import app.notekea.chat.domain.ChatExchange
+import app.notekea.chat.domain.FoundNotes
+import app.notekea.chat.domain.SpokenLanguage
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.domain.Outcome
@@ -39,6 +42,7 @@ internal class ChatActions(
         openNote: RelativePath?
     ): ChatReply {
         var reply: ChatReply = ChatReply.Acted
+        val found = mutableListOf<FoundNotes>()
 
         actOnRequest(
             request = request,
@@ -48,7 +52,13 @@ internal class ChatActions(
                 request = request,
                 notes = notes,
                 openNote = openNote
-            ).copy(history = history),
+            ).copy(
+                history = history,
+                language = SpokenLanguage.inChat(
+                    text = request,
+                    history = history
+                )
+            ),
             openNote = openNote,
             agentUse = agentUse
         ).collect { step ->
@@ -63,14 +73,31 @@ internal class ChatActions(
 
                 ActionTurnStep.ToAgent -> reply = ChatReply.Agent
 
-                else -> follow(
-                    id = id,
-                    step = step
-                )
+                else -> {
+                    if (step is ActionTurnStep.Found) found += step.found
+
+                    follow(
+                        id = id,
+                        step = step
+                    )
+                }
             }
         }
 
-        return reply
+        // A question the plan answered with tables is also answered in words, above them.
+        val isAskedOfTables =
+            reply == ChatReply.Acted &&
+                found.isNotEmpty() &&
+                AskedWords.asksAbout(request)
+
+        return if (isAskedOfTables) {
+            ChatReply.FromFound(
+                question = request,
+                tables = found
+            )
+        } else {
+            reply
+        }
     }
 
     private fun follow(
@@ -203,6 +230,13 @@ internal class ChatActions(
         update(entry.id) { it.copy(action = action.copy(status = ActionStatus.UNDONE)) }
     }
 
+    /** Today's date as the model reads it, YYYY-MM-DD. */
+    fun today(): String {
+        val today = localCalendar.momentOf(instant = clock.now()).date
+
+        return "${today.year}-${twoDigits(today.month)}-${twoDigits(today.day)}"
+    }
+
     /** What the plan, or agent mode, may name in the vault: its names, the closest to [request] first. */
     fun contextOf(
         request: String,
@@ -227,10 +261,8 @@ internal class ChatActions(
             }
             .map { it.value.removeSuffix(suffix = MARKDOWN) }
 
-        val today = localCalendar.momentOf(instant = clock.now()).date
-
         return ActionContext(
-            today = "${today.year}-${twoDigits(today.month)}-${twoDigits(today.day)}",
+            today = today(),
             openNote = openNote?.value?.removeSuffix(suffix = MARKDOWN),
             folders = ActionContext.foldersOf(paths = paths),
             notes = names,
@@ -254,7 +286,7 @@ internal class ChatActions(
                     oldChar = '_',
                     newChar = ' '
                 )
-            }
+            } + MODE_THEMES
         )
     }
 
@@ -266,5 +298,8 @@ internal class ChatActions(
     private companion object {
         const val MARKDOWN = ".md"
         val WORD_BREAK = Regex(pattern = "[^\\p{L}\\p{N}]+")
+
+        // The app's light or dark mode, which set_theme also takes.
+        val MODE_THEMES = listOf("dark", "light", "system")
     }
 }

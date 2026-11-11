@@ -15,7 +15,8 @@ data class ActionContext(
     val properties: List<String> = emptyList(),
     val tags: List<String> = emptyList(),
     val themes: List<String> = emptyList(),
-    val history: List<ChatExchange> = emptyList()
+    val history: List<ChatExchange> = emptyList(),
+    val language: String? = null
 ) {
     /** The context as the model reads it, a line each. */
     fun described(): String = listOfNotNull(

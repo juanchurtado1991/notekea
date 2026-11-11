@@ -69,7 +69,7 @@ internal class VaultNames(
                     isOpenByDefault = true
                 ),
                 folder = folderName?.let { folderOf(name = it) },
-                target = folderOf(name = step[ActionField.TARGET].orEmpty())
+                target = movedTo(name = step[ActionField.TARGET].orEmpty())
             )
 
             ActionKind.RENAME, ActionKind.BOOKMARK, ActionKind.TRASH -> StepTargets(
@@ -101,6 +101,7 @@ internal class VaultNames(
     )
 
     /** The notes a step acts on: those named, a folder's or a tag's, or the open one when it names none. */
+
     private fun selected(
         step: PlannedStep,
         isOpenByDefault: Boolean
@@ -158,6 +159,10 @@ internal class VaultNames(
             ?: folders.firstOrNull { it.name.equals(wanted, ignoreCase = true) }
             ?: throw ProblemFound(problem = ActionProblem.UnknownFolder(name = name))
     }
+
+    /** Where a move goes: a folder of the vault, or a new one the move makes ("move Pancakes to Desayunos"). */
+    private fun movedTo(name: String): RelativePath = runCatching { folderOf(name = name) }
+        .getOrElse { newFolder(name = name) }
 
     private fun newOrExisting(
         name: String,

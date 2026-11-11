@@ -234,7 +234,12 @@ private fun problemText(problem: ActionProblem): String = when (problem) {
 
     is ActionProblem.Failed -> replyString(resource = Res.string.chat_problem_failed)
 
-    is ActionProblem.Refused -> replyString(resource = Res.string.chat_problem_refused)
+    // The model's own why, written in the person's language and saying what it can do instead; the general one if none.
+    is ActionProblem.Refused ->
+        problem
+            .reason
+            .takeIf { it.isNotBlank() }
+            ?: replyString(resource = Res.string.chat_problem_refused)
 
     ActionProblem.NoCards -> replyString(resource = Res.string.chat_problem_no_cards)
 

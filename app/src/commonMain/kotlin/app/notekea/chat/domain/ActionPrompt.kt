@@ -11,7 +11,10 @@ import app.notekea.core.llm.domain.ChatRole
 object ActionPrompt {
     const val MAX_STEPS = 5
 
+    // A plan listing a whole folder note by note repeated names until it was cut (the chat probe, 2026-11-11).
+    private const val MAX_NOTES = 12
     private const val LONG_REQUEST = 1_200
+    private const val RETRIED = "Notekea can do this request: plan it, do not refuse it."
     private const val REQUEST_START = 500
 
     private val FIELDS = ActionField
@@ -27,7 +30,7 @@ object ActionPrompt {
     val SCHEMA =
         "{\"type\":\"object\",\"properties\":{\"steps\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":$MAX_STEPS," +
             "\"items\":{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[$ACTIONS]}," +
-            "$FIELDS,\"notes\":{\"type\":\"array\",\"maxItems\":50,\"items\":{\"type\":\"string\"}}}," +
+            "$FIELDS,\"notes\":{\"type\":\"array\",\"maxItems\":$MAX_NOTES,\"items\":{\"type\":\"string\"}}}," +
             "\"required\":[\"action\"]}}},\"required\":[\"steps\"]}"
 
     private const val INSTRUCTIONS =
@@ -67,12 +70,27 @@ Actions (fill only the fields named; a note is named by its title, a folder by i
 - link_notes: note, target: the note to link to. bookmark: note or folder.
 - create_folder: folder. rename: note or folder, title: the new name. move: note, notes or folder, target: the
   folder to move to. trash: note, notes or folder.
-- refuse: deleting for good, Settings, models, files outside the vault, or writing code. text: why, in one sentence.
+- refuse: only when the request asks for one of these, which Notekea cannot do: deleting for good (a plain
+  "delete" or "borrar" is trash, never refused), Settings,
+  models, files outside the vault, writing code, sending emails or messages, reminders, alarms or notifications,
+  the calendar, searching the web, the weather or the news. Never for a question about the notes, a follow-up, or
+  any action above. text: in one sentence in the person's language, that Notekea cannot do it and what it can do
+  instead (a task with a due date for a reminder, the trash for deleting, a pasted address to clip a page).
+A request about every note of a folder ("all my recipes") names the folder, never its notes one by one.
 Use "this note" for the open note. Dates are YYYY-MM-DD. Keep names, tags and quoted text exactly as the request
 writes them, never translated.
 Examples:
 "How long does the dough rest?" -> [answer request="How long does the arepa dough rest?"]
+"and the water?" after a question about the arepas -> [answer request="How much water do the arepas take?"]
+"when is it due?" after a question about the Notekea launch -> [answer request="When is the Notekea launch due?"]
 "hola" -> [chat]
+"what's 2 + 2?" -> [chat]
+"¿qué día es hoy?" -> [chat]
+"escribe un poema sobre mis recetas" -> [answer request="Escribe un poema sobre mis recetas"]
+"tell me a joke about my notes" -> [answer request="Tell me a joke about my notes"]
+"delete the note Pancakes" -> [trash note="Pancakes"]
+"what can't you do?" -> [help request="What can't Notekea do?"]
+"how many notes do I have?" -> [overview]
 "en español" -> [chat]
 "¿cómo creo una nota nueva?" -> [help request="how do I create a note?"]
 "what can you do?" -> [help request="what can you do?"]
@@ -95,6 +113,8 @@ Examples:
 "show the backlinks" -> [show_panel panel="backlinks"]
 "show my bookmarks" -> [show_panel panel="bookmarks"]
 "find my notes about Lisbon" -> [search text="Lisbon"]
+"which notes link to Dune?" -> [search text="Dune"]
+"¿cuál de mis proyectos está más atrasado?" -> [find_notes request="projects by due date"]
 "create a note Ideas in Projects" -> [create_note title="Ideas" folder="Projects"]
 "create a note Call with Ana in Meetings from the Meeting template" -> [create_note title="Call with Ana"
   folder="Meetings" template="Meeting"]
@@ -111,6 +131,8 @@ Examples:
 "clip https://example.com/sleep-and-memory" -> [clip_url url="https://example.com/sleep-and-memory"]
 "guarda este artículo: https://example.org/pan" -> [clip_url url="https://example.org/pan"]
 "tag Dune and Sapiens as favorite" -> [add_tag tag="favorite" notes=["Dune","Sapiens"]]
+"remind me tomorrow to call Ana" -> [refuse text="Notekea cannot send reminders; I can add a task 'call Ana' due
+  tomorrow, which shows in Today."]
 "mark Dune as finished" -> [set_property note="Dune" property="finished" value="true"]
 "add the task 'paint' to Kitchen for 2026-12-01" -> [add_task note="Kitchen" text="paint" due="2026-12-01"]
 "mark the task 'buy flour' in Arepas as done" -> [complete_task note="Arepas" text="buy flour"]
@@ -118,11 +140,21 @@ Examples:
 "bookmark the folder Projects" -> [bookmark folder="Projects"]
 "añade la etiqueta viaje a Lisboa" -> [add_tag tag="viaje" note="Lisboa"]
 "rename the folder Ideas to Drafts" -> [rename folder="Ideas" title="Drafts"]
-"move every note in Guides to Archive" -> [move folder="Guides" target="Archive"]"""
+"move every note in Guides to Archive" -> [move folder="Guides" target="Archive"]
+"tag every recipe with food and move them all to Archive" -> [add_tag folder="Recipes" tag="food"], [move
+  folder="Recipes" target="Archive"]
+"pon todas las recetas en una carpeta Cocina y etiquetalas con cocina" -> [add_tag folder="Recipes" tag="cocina"],
+  [move folder="Recipes" target="Cocina"]"""
 
+    /**
+     * The plan asked for [request]; [isRetried] says Notekea can do it, after a refusal of something it can do. Both
+     * the person's language and that are said before the request, so neither is read as part of it (the chat probe,
+     * 2026-11-11: "and the water?" was answered as "Write a refusal explaining why…").
+     */
     fun messages(
         request: String,
-        context: ActionContext
+        context: ActionContext,
+        isRetried: Boolean = false
     ): List<ChatMessage> = listOf(
         ChatMessage(
             role = ChatRole.SYSTEM,
@@ -130,7 +162,12 @@ Examples:
         ),
         ChatMessage(
             role = ChatRole.USER,
-            text = "${context.described()}\n\nRequest: ${shortened(request = request)}"
+            text = listOfNotNull(
+                context.described(),
+                context.language?.let { "The person writes in $it." },
+                RETRIED.takeIf { isRetried },
+                "Request: ${shortened(request = request)}"
+            ).joinToString(separator = "\n\n")
         )
     )
 
