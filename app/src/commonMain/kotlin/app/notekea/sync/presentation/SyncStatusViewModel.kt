@@ -5,6 +5,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.sync.domain.ConflictChoice
 import app.notekea.sync.domain.ConflictCopies
+import app.notekea.sync.domain.SyncStatus
 import app.notekea.sync.domain.VaultSyncs
 import co.touchlab.kermit.Logger
 
@@ -27,7 +28,15 @@ class SyncStatusViewModel(
 
         launchGuarded(onError = ::logError) {
             engine.status.collect { status ->
-                reduce { it.copy(status = status) }
+                reduce {
+                    it.copy(
+                        status = status,
+                        conflicts = conflictsAfter(
+                            status = status,
+                            before = it.conflicts
+                        )
+                    )
+                }
             }
         }
     }
@@ -82,6 +91,16 @@ class SyncStatusViewModel(
                 choice = choice
             )
         }
+    }
+
+    // A sync under way keeps the conflicts it started with; any other status says what is left.
+    private fun conflictsAfter(
+        status: SyncStatus,
+        before: List<RelativePath>
+    ): List<RelativePath> = when (status) {
+        is SyncStatus.Conflict -> status.notes
+        SyncStatus.Syncing -> before
+        else -> emptyList()
     }
 
     private fun logError(throwable: Throwable) {
