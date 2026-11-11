@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The chat no longer refuses follow-ups ("and the water?") nor answers them with its own instructions, no longer says
+  it deleted a note it did not, and reads "¿de qué tratan las notas?" as the vault's overview, "delete the note X" as
+  the trash, "bookmark X" as a bookmark and "all my recipes" as their folder.
 - A reply of the model cut off or of the wrong shape is read as no reply by its parse error only, so a programming
   error is no longer taken for a bad reply.
 - Related notes quote a passage as plain text: `> [!summary]`, `- [ ]`, `[[`, `**` and the like no longer show.
@@ -46,6 +49,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The chat's memory, as in Claude Code: a ring beside the mode fills as the conversation grows, and once full the
+  chat writes the earlier part into a short summary by itself and goes on with it; Compact chat, in the ⋯ menu, does
+  it at once. The send button is an arrow.
+- The chat replies in the language it is written to (English, Spanish, French, Portuguese, German, Italian), or in the
+  one asked for, also after a short "gracias!".
+- The chat answers from the notes' properties (who owns a project, a book's rating), sums the numbers it adds right,
+  writes a poem or a joke from the notes when asked, answers from the tables it found in words, and says plainly what
+  Notekea cannot do, with what it can do instead. In Auto, a question the passages do not answer goes to the agent.
 - Chat modes: the bottom right of the chat's field says the model and the mode ("Medium · Auto"), and a click picks
   Auto (the default: Deep thinking for a question that asks to reason, the agent for a task whose note must be looked
   for, a fast answer otherwise), Fast, Deep thinking (Deep answer, renamed) or Agent, each where the model offers

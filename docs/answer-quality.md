@@ -168,3 +168,29 @@ Medium and Large offer it (`LlamaLlmEngine.AGENT_SIZES`); Large below the 80 % b
 2026-11-11. Large proposes changes for plain questions and gives up after one search more often; Small rarely ends on
 the right plan, and does not offer it. Every change still waits for the card, so a wrong plan is
 seen before anything is written.
+
+## The chat probe — talking to it as a person does
+
+`ChatProbeChatModelTest` (2026-11-11) drives the app's own `ChatViewModel` over the real models and a copy of the
+committed Sample Vault, with the 62 conversations of `smoke-data/eval/chat-probes.txt`: questions and follow-ups in
+English, Spanish and French, actions, refusals, prompt injection, gibberish, complaints, creative requests. It writes
+each conversation as Copy chat does, with the model's plans, to `build/reports/chat-probe-<size>.md`, a report to read
+rather than a pass or fail. Six rounds on Medium found, each fixed with a test (`ChatProbeRulesTest`,
+`ChatProbeRoundsTest`, `ChatProbeTest`):
+
+- **Language:** replies came in English to Spanish questions. Every reply prompt now ends with the person's language
+  (`SpokenLanguage`, `inLanguage`), the chat's when a message is too short to tell; `NOT_FOUND` is kept untranslated,
+  and its paraphrases ("No se menciona en los extractos…") count as not found, so Auto still hands them to the agent.
+- **Planner prompt leaks:** the language line named "a refusal's why", and the model refused follow-ups and copied the
+  line as the question. The language and the retry after an unfounded refusal are said before the request now.
+- **Wrong routes:** the vault's overview, a search for a question, a bookmark planned as showing the bookmarks, a folder
+  named as a note, a whole folder listed note by note until the plan was cut (at most 12 notes now), a plain "delete"
+  refused as deleting for good. Each has a shaping rule (`OverviewAsked`, `QuestionKept`, `PlanWords`).
+- **A claimed change:** "delete the note Pancakes" refused twice was answered by the agent "has been deleted". A change
+  refused twice keeps its refusal, the agent can propose the trash, and its summary never says it changed anything.
+- **Answers:** properties are passages (`PropertyPassages`), sums are checked (`SumsChecked`), tables found are
+  answered in words while the turn still answers, and a poem or a joke is written from the notes, short.
+
+The action eval went from 92 % to 97 % (123 of 126) over the same work. Open: Medium's agent still mixes `finished`
+and `rating` for "how many books did I finish", and "going back to the start: how much flour was it?" after ten turns
+picks the wrong recipe.
