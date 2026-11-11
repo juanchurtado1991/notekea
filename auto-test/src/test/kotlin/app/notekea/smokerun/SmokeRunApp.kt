@@ -57,7 +57,17 @@ internal class SmokeRunApp(
     override fun close() {
         app.close()
 
-        Runtime.getRuntime().addShutdownHook(Thread { root.deleteRecursively() })
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                // Git writes its objects read-only (the sync run's vaults), which Windows refuses to delete.
+                root
+                    .toFile()
+                    .walkBottomUp()
+                    .forEach { it.setWritable(true) }
+
+                root.deleteRecursively()
+            }
+        )
     }
 
     companion object {
