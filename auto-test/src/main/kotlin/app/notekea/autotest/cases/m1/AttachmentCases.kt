@@ -97,7 +97,8 @@ private fun SuiteBuilder.attachmentFiles() {
         )
 
         clickInTree(text = "Weekly menu.pdf")
-        expectText(text = "Open with its app")
+        // A PDF opens as its pages (4.5), with the system's app one click away.
+        expectText(text = "Open in the system’s app")
         clickInTree(text = "broken.png")
 
         expectText(

@@ -25,6 +25,7 @@ fun SuiteBuilder.sourceCases() {
     localClip()
     clipOfPage()
     review()
+    madeCards()
 }
 
 private fun SuiteBuilder.document() {
@@ -162,6 +163,29 @@ private fun SuiteBuilder.review() {
         expectFile(
             path = "$PLAYGROUND/$CARDS",
             containing = "<!--SR:!"
+        )
+    }
+}
+
+private fun SuiteBuilder.madeCards() {
+    manual(
+        id = "4.6-02",
+        reason = ManualReason.COSTLY
+    ) {
+        prepare(PLAYGROUND)
+        title(text = "The chat makes study cards from a note, and they are reviewed in Study cards")
+
+        steps(
+            text =
+            "1. With a chat model installed (Settings → AI model), open Recipes/Arepas in the Playground Vault.\n" +
+                "2. Open the chat (the speech bubble in the narrow bar on the far left) and ask: make study cards " +
+                "from this note.\n3. Click Do it on the card.\n4. Click Study cards (the cap in the narrow bar)."
+        )
+
+        expected(
+            text =
+            "Step 2's card lists questions the note answers, each with its answer. Step 3 adds them at the end of " +
+                "Arepas under a Flashcards heading with #flashcards. Step 4 shows them one at a time."
         )
     }
 }
