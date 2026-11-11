@@ -125,7 +125,8 @@ class ClipWebPageUseCase(
         url = page.url,
         title = article.title,
         notes = notes,
-        article = article
+        article = article,
+        videos = PageVideos.of(html = page.html)
     )
 
     private companion object {

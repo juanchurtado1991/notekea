@@ -1,16 +1,21 @@
 package app.notekea.clips.domain
 
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.YouTubeLinks
 
 /**
- * A clip as the note it becomes: `Web sources/<title>.md`, with the properties `source` and `clipped`, the notes, and
- * the article under `## Original text`, so search and the chat keep it if the page goes away.
+ * A clip as the note it becomes: `Web sources/<title>.md`, with the properties `source` and `clipped`, the notes, the
+ * page's YouTube videos under `## Videos`, and the article under `## Original text`, kept if the page goes away.
  */
 object WebClipNote {
     val FOLDER = RelativePath(value = "Web sources")
     private const val MAX_NAME = 80
     private val UNSAFE = Regex(pattern = "[\\\\/:*?\"<>|#^\\[\\]]")
     private const val ORIGINAL = "## Original text"
+    private const val VIDEOS = "## Videos"
+
+    // A title's brackets would end its embed's alt text early.
+    private val BRACKETS = Regex(pattern = "[\\[\\]]")
 
     /** The note's path in [FOLDER], from the clip's title, made safe for a file name. */
     fun pathOf(title: String): RelativePath =
@@ -35,6 +40,26 @@ object WebClipNote {
         append("# ").append(clip.title).append("\n\n")
         if (clip.notes.isNotBlank()) append(clip.notes.trim()).append("\n\n")
         if (before.isNotBlank()) append(before.trim()).append("\n\n")
+
+        // Each video the page plays, as its card (`![Title](https://www.youtube.com/watch?v=…)`).
+        if (clip.videos.isNotEmpty()) {
+            append(VIDEOS).append("\n\n")
+
+            clip.videos.forEach { video ->
+                val title = video
+                    .title
+                    ?.replace(BRACKETS, " ")
+                    ?.trim()
+                    .orEmpty()
+
+                append("![")
+                    .append(title)
+                    .append("](")
+                    .append(YouTubeLinks.pageOf(id = video.id))
+                    .append(")\n\n")
+            }
+        }
+
         append(ORIGINAL).append("\n\n")
 
         append(
