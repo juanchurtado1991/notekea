@@ -5,10 +5,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.ai.presentation.ModelDownloadViewModel
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.core.presentation.platform.WindowDialog
+import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.sync.domain.SyncStatus
 import app.notekea.sync.presentation.ConflictBanner
 import app.notekea.sync.presentation.ConflictDialog
@@ -35,6 +37,17 @@ internal fun SyncStatusOf(sync: SyncStatusViewModel) {
         status = state.status,
         onClick = { sync.onIntent(SyncStatusIntent.OnOpenSettings) }
     )
+}
+
+/** The status bar's entries of the open vault: its sync, then the AI model's download and the search index. */
+@Composable
+internal fun VaultStatusOf(
+    sync: SyncStatusViewModel,
+    searchIndex: SearchIndexViewModel,
+    modelDownload: ModelDownloadViewModel
+) {
+    SyncStatusOf(sync = sync)
+    AiStatusOf(searchIndex, modelDownload)
 }
 
 /** Over the workspace while notes changed in two places: the banner, and the review of one side by side. */
@@ -74,6 +87,17 @@ private fun SyncConflictsOfPreview() {
         ConflictBanner(
             notes = listOf(RelativePath(value = "Plan.md")),
             onReview = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun VaultStatusOfPreview() {
+    NotekeaPreviewThemes {
+        SyncStatusItem(
+            status = SyncStatus.Pending(changes = 2),
+            onClick = {}
         )
     }
 }

@@ -51,6 +51,7 @@ data class WorkspaceState(
         Workspace.GRAPH -> TabKind.GRAPH
         Workspace.QUERY -> TabKind.QUERY
         Workspace.TASKS -> TabKind.TASKS
+        Workspace.STUDY -> TabKind.STUDY
         in tree.notes -> TabKind.NOTE
         in tree.attachments -> TabKind.FILE
         in tree.folders -> TabKind.FOLDER

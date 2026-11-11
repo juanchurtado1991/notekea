@@ -41,6 +41,9 @@ internal class SmokeRunApp(
     val folderPicker get() = app.folderPicker
     val windowFocus get() = app.windowFocus
 
+    /** The sync of the copy of the vault [name]. */
+    fun syncOf(name: String) = app.syncOf(name = name)
+
     /** Where the copy of the vault [name] is. */
     fun vaultPath(name: String): String = app.vaultPath(name = name)
 

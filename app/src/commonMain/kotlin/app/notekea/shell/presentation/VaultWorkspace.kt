@@ -10,6 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.cards.presentation.StudyContent
+import app.notekea.core.documents.domain.DocumentFormat
 import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.RelativePath
@@ -248,7 +250,8 @@ private fun startActionsOf(
         onToday = { viewModels.tree.onIntent(intent = VaultTreeIntent.OnTodayClick) },
         onSearchNotes = {
             viewModels.onSwitcher(QuickSwitcherIntent.OnOpen(mode = QuickSwitcherMode.CONTENT))
-        }
+        },
+        onClipPage = viewModels.onClipRequest
     )
 }
 
@@ -269,26 +272,10 @@ private fun PaneContent(
             context = context
         )
 
-        TabKind.FILE ->
-            state
-                .tree
-                .attachments[path]
-                ?.let { file ->
-                    FileDetails(
-                        preview = context
-                            .workspaceState
-                            .previews[path]
-                            ?.takeIf {
-                                it.file == file
-                            }
-                            ?: FilePreview(
-                                file = file,
-                                kind = AttachmentKind.of(name = path.name)
-                            ),
-                        platformConventions = state.platformConventions,
-                        onIntent = context.viewModels.tree::onIntent
-                    )
-                }
+        TabKind.FILE -> FileTab(
+            path = path,
+            context = context
+        )
 
         TabKind.FOLDER -> FolderTab(
             folder = path,
@@ -326,6 +313,16 @@ private fun PaneContent(
                 .collectAsState()
                 .value,
             onIntent = context.viewModels.tasks::onIntent
+        )
+
+        TabKind.STUDY -> StudyContent(
+            state = context
+                .viewModels
+                .study
+                .state
+                .collectAsState()
+                .value,
+            onIntent = context.viewModels.study::onIntent
         )
 
         TabKind.MISSING -> MissingTab()

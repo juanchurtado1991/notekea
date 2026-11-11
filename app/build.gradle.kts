@@ -82,6 +82,13 @@ kotlin {
             implementation(libs.directory.watcher)
             implementation(libs.java.keyring)
             implementation(libs.jgit)
+            implementation(libs.pdfbox)
+            implementation(libs.readability4j)
+            implementation(libs.tika.core)
+            implementation(libs.tika.parser.html)
+            implementation(libs.tika.parser.microsoft)
+            implementation(libs.tika.parser.miscoffice)
+            implementation(libs.tika.parser.pdf)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.okhttp)
@@ -94,6 +101,7 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(libs.konsist)
+            implementation(libs.poi.ooxml.full)
             implementation(libs.compose.ui.test)
         }
     }

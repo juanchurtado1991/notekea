@@ -1,11 +1,14 @@
 package app.notekea.di
 
 import app.notekea.ai.di.modelsModule
+import app.notekea.cards.di.cardsModule
 import app.notekea.chat.di.chatModule
+import app.notekea.clips.di.clipsModule
 import app.notekea.connections.di.connectionsModule
 import app.notekea.core.di.coreModule
 import app.notekea.core.notes.di.coreNotesModule
 import app.notekea.core.platform.di.platformModule
+import app.notekea.documents.di.documentsModule
 import app.notekea.editor.di.editorModule
 import app.notekea.graph.di.graphModule
 import app.notekea.query.di.queryModule
@@ -38,6 +41,9 @@ val appModule = module {
         templatesModule,
         shellModule,
         syncModule,
+        documentsModule,
+        clipsModule,
+        cardsModule,
         vaultModule
     )
 }

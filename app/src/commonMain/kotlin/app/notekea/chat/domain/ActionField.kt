@@ -16,5 +16,6 @@ enum class ActionField(val written: String) {
     PERIOD(written = "period"),
     PANEL(written = "panel"),
     THEME(written = "theme"),
-    REQUEST(written = "request")
+    REQUEST(written = "request"),
+    URL(written = "url")
 }

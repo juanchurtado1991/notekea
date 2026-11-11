@@ -19,6 +19,7 @@ import app.notekea.resources.rail_label
 import app.notekea.resources.rail_query
 import app.notekea.resources.rail_settings
 import app.notekea.resources.rail_side_panel
+import app.notekea.resources.rail_study
 import app.notekea.resources.rail_tasks
 import app.notekea.resources.tree_files
 import app.notekea.resources.tree_search
@@ -131,6 +132,11 @@ private fun toolItems(
             label = stringResource(resource = Res.string.tree_today),
             onClick = { onIntent(VaultTreeIntent.OnTodayClick) },
             shortcutHint = shortcut(conventions.todayShortcut)
+        ),
+        NotekeaToolRailItem(
+            icon = NotekeaIcons.Study,
+            label = stringResource(resource = Res.string.rail_study),
+            onClick = actions.onStudy
         )
     )
 }

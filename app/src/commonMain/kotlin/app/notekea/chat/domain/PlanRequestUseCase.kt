@@ -44,7 +44,10 @@ class PlanRequestUseCase(
             .orEmpty()
 
         val asked = HowToAsked.shaped(
-            steps = steps,
+            steps = UrlsNamed.shaped(
+                steps = steps,
+                request = request
+            ),
             request = request
         )
 

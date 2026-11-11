@@ -77,8 +77,8 @@ internal fun FollowChat(
     val currentNotes by rememberUpdatedState(newValue = tree.tree.notes.keys)
     val isIndexReady = !indexState.isRunning && indexState.readyNotes != null
 
-    LaunchedEffect(chat, tree.tree.notes) {
-        chat.onIntent(intent = ChatIntent.OnNotesChange(notes = tree.tree.notes.values))
+    LaunchedEffect(chat, tree.tree.notes, tree.tree.attachments) {
+        chat.onIntent(intent = ChatIntent.OnNotesChange(notes = tree.tree.readable))
     }
 
     LaunchedEffect(chat, isIndexReady) {

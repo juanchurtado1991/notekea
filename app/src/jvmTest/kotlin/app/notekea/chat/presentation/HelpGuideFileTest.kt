@@ -67,7 +67,10 @@ class HelpGuideFileTest {
             "¿cómo cambio el tema a modo oscuro?" to "Color theme and appearance",
             "how do I open today's note" to "Today's note",
             "¿cómo sincronizo mis notas con github?" to "Sync with Git",
-            "what do I do with a conflict copy?" to "Settle a sync conflict"
+            "what do I do with a conflict copy?" to "Settle a sync conflict",
+            "¿puedo buscar en mis pdf?" to "Documents: PDF, Word, Excel and more",
+            "how do I clip a web page?" to "Clip a web page",
+            "¿cómo hago tarjetas de estudio?" to "Study cards"
         )
 
         assertEquals(

@@ -55,6 +55,9 @@ Actions (fill only the fields named; a note is named by its title, a folder by i
 - create_note: title, folder (optional), template (optional, a template's name), text: what to write in it (optional).
 - write_from_notes: a new note written from other notes (a summary, a comparison, a list, a plan). title, text: what
   to write, and the notes to read: notes, or folder, or tag, or note ("this note" for the open one).
+- make_cards: study cards (flashcards) made from a note and added to it. note ("this note" for the open one).
+- clip_url: url: a web address (http or https) written in the request, to save that page as a note with notes
+  about it. Only an address the request writes, never one you know or guess.
 - notes_from_text: the request holds a pasted text to turn into notes. folder: a short name for them, in the
   language of the text.
 - append_text: note (empty for today's daily note), text: the text to add.
@@ -103,6 +106,10 @@ Examples:
 "summarize my meetings in a note Meetings summary" -> [write_from_notes title="Meetings summary" text="a summary"
   folder="Meetings"]
 "add 'call Ana' to today's note" -> [append_text note="" text="call Ana"]
+"make study cards from this note" -> [make_cards note="this note"]
+"hazme tarjetas de estudio de Sapiens" -> [make_cards note="Sapiens"]
+"clip https://example.com/sleep-and-memory" -> [clip_url url="https://example.com/sleep-and-memory"]
+"guarda este artículo: https://example.org/pan" -> [clip_url url="https://example.org/pan"]
 "tag Dune and Sapiens as favorite" -> [add_tag tag="favorite" notes=["Dune","Sapiens"]]
 "mark Dune as finished" -> [set_property note="Dune" property="finished" value="true"]
 "add the task 'paint' to Kitchen for 2026-12-01" -> [add_task note="Kitchen" text="paint" due="2026-12-01"]

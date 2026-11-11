@@ -10,6 +10,7 @@ import app.notekea.connections.presentation.FollowNoteMentions
 import app.notekea.connections.presentation.FollowRelatedNotes
 import app.notekea.connections.presentation.NoteMentionsViewModel
 import app.notekea.connections.presentation.RelatedNotesViewModel
+import app.notekea.core.documents.domain.DocumentFormat
 import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.domain.FormatAction
@@ -78,6 +79,14 @@ internal fun connectionActions(
         range: IntRange
     ) {
         workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = path))
+
+        // A document opens in its own tab at the passage, not in a note's editor.
+        if (DocumentFormat.of(path = path) != null) {
+            return editors.documents.reveal(
+                path = path,
+                range = range
+            )
+        }
 
         editors.of(path = path).onIntent(
             intent = EditorIntent.OnRevealRequest(

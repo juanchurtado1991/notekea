@@ -37,6 +37,7 @@ import app.notekea.resources.status_zoom
 import app.notekea.resources.status_zoom_tooltip
 import app.notekea.resources.tab_graph
 import app.notekea.resources.tab_query
+import app.notekea.resources.tab_study
 import app.notekea.resources.tab_tasks
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -131,6 +132,7 @@ private fun Breadcrumbs(
         TabKind.GRAPH -> NotekeaIcons.Graph
         TabKind.QUERY -> NotekeaIcons.Query
         TabKind.TASKS -> NotekeaIcons.Tasks
+        TabKind.STUDY -> NotekeaIcons.Study
         else -> NotekeaIcons.OtherFile
     }
 
@@ -139,6 +141,7 @@ private fun Breadcrumbs(
         TabKind.GRAPH -> stringResource(resource = Res.string.tab_graph)
         TabKind.QUERY -> stringResource(resource = Res.string.tab_query)
         TabKind.TASKS -> stringResource(resource = Res.string.tab_tasks)
+        TabKind.STUDY -> stringResource(resource = Res.string.tab_study)
         else -> path.name
     }
 

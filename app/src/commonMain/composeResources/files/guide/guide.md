@@ -165,3 +165,28 @@ When a note changed on this computer and on another one, a banner over the notes
 side by side: Keep mine uses this computer's, Keep theirs the other one's, and Keep both saves yours as "Note
 (mine)" beside it. Nothing is lost while you decide: your version waits as "Note (conflict)".
 
+
+# Documents: PDF, Word, Excel and more
+words: pdf, mis pdf, my pdfs, word, docx, excel, xlsx, powerpoint, pptx, epub, document, documento, documentos, libro, ebook, spreadsheet, hoja de cálculo, buscar en mis pdf, search my pdfs
+Put PDFs, Word (.docx), OpenDocument (.odt), EPUB, PowerPoint (.pptx), Excel (.xlsx), HTML and text files anywhere in
+the vault: Notekea reads them, never changes them, and finds them in search, Related notes and the chat beside your
+notes. Click one in the Files sidebar, or a citation of it, to read it in a tab: a PDF shows its real pages, the
+others their text, with the cited passage marked. Open in the system's app opens it with the app your computer uses.
+A scanned PDF without text cannot be read yet.
+
+# Clip a web page
+words: clip, recortar, web page, página web, article, artículo, save a page, guardar una página, link, url, enlace
+try: clip …
+Click Clip a web page where no note is open (the start of the editor), or ask the chat "clip https://…" with the
+page's address. Notekea downloads only that page, keeps its article in the Web sources folder with the properties
+source and clipped, writes notes about it with the AI model and keeps only the sentences the article backs, and puts
+the article itself under Original text. Pages that need a login or JavaScript cannot be clipped.
+
+# Study cards
+words: study cards, flashcards, tarjetas, tarjetas de estudio, repaso, review, memorize, memorizar, spaced repetition
+try: make study cards from this note
+Ask the chat "make study cards from this note": it proposes cards whose answers the note backs and adds them at the
+note's end as Question::Answer lines under #flashcards, the format of Obsidian's Spaced Repetition plugin. Review them
+in Study cards, in the tool rail on the left: Show answer (Space), then Hard, Good or Easy (1, 2, 3); each card comes
+back when it is due.
+

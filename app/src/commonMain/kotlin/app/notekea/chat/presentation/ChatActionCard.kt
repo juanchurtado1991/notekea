@@ -39,6 +39,8 @@ import app.notekea.resources.chat_action_append_text
 import app.notekea.resources.chat_action_bookmark
 import app.notekea.resources.chat_action_cancel
 import app.notekea.resources.chat_action_cancelled
+import app.notekea.resources.chat_action_cards_count
+import app.notekea.resources.chat_action_clip_url
 import app.notekea.resources.chat_action_close_tabs
 import app.notekea.resources.chat_action_complete_task
 import app.notekea.resources.chat_action_confirm
@@ -46,6 +48,7 @@ import app.notekea.resources.chat_action_create_folder
 import app.notekea.resources.chat_action_create_note
 import app.notekea.resources.chat_action_done_title
 import app.notekea.resources.chat_action_link_notes
+import app.notekea.resources.chat_action_make_cards
 import app.notekea.resources.chat_action_move
 import app.notekea.resources.chat_action_notes_from_text
 import app.notekea.resources.chat_action_open
@@ -282,6 +285,20 @@ private fun targetOf(step: ActionStep): String {
                 ?.value
                 .orEmpty()
 
+        ActionKind.MAKE_CARDS ->
+            notes + "\n" + step
+                .text
+                .orEmpty()
+                .lines()
+                .count {
+                    "::" in it
+                }
+                .let { replyString(Res.string.chat_action_cards_count, it) }
+
+        ActionKind.CLIP_URL -> step.content.joinToString {
+            nameOf(path = it.path)
+        } + "\n← " + step.url.orEmpty()
+
         ActionKind.APPEND_TEXT, ActionKind.ADD_TASK ->
             notes.ifEmpty { today } + "\n" + step.text.orEmpty()
 
@@ -315,6 +332,8 @@ private fun verbOf(kind: ActionKind): StringResource = when (kind) {
     ActionKind.CREATE_NOTE -> Res.string.chat_action_create_note
     ActionKind.WRITE_FROM_NOTES -> Res.string.chat_action_write_from_notes
     ActionKind.NOTES_FROM_TEXT -> Res.string.chat_action_notes_from_text
+    ActionKind.CLIP_URL -> Res.string.chat_action_clip_url
+    ActionKind.MAKE_CARDS -> Res.string.chat_action_make_cards
     ActionKind.APPEND_TEXT -> Res.string.chat_action_append_text
     ActionKind.SET_PROPERTY -> Res.string.chat_action_set_property
     ActionKind.ADD_TAG -> Res.string.chat_action_add_tag
@@ -336,7 +355,11 @@ private fun verbOf(kind: ActionKind): StringResource = when (kind) {
 }
 
 private fun iconOf(kind: ActionKind): ImageVector = when (kind) {
-    ActionKind.CREATE_NOTE, ActionKind.WRITE_FROM_NOTES, ActionKind.NOTES_FROM_TEXT ->
+    ActionKind.CREATE_NOTE,
+    ActionKind.WRITE_FROM_NOTES,
+    ActionKind.NOTES_FROM_TEXT,
+    ActionKind.CLIP_URL,
+    ActionKind.MAKE_CARDS ->
         NotekeaIcons.NewNote
 
     ActionKind.APPEND_TEXT -> NotekeaIcons.Note

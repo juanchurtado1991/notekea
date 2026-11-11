@@ -46,6 +46,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Documents (4.5): PDFs, Word, OpenDocument, EPUB, PowerPoint, Excel, HTML and text files anywhere in the vault are
+  read with Apache Tika, never changed, and found by search, Related notes and the chat beside the notes. A citation
+  of one, or a click in Files, opens it in a read-only tab: a PDF as its real pages, at the cited page with the passage
+  marked; the others as their text, with headings, a table per sheet and each slide. Open in the system's app is
+  always there. A damaged file or a scan without text is only skipped and named.
+- Web clips (4.4): Clip a web page (where no note is open) or "clip https://…" in the chat downloads only that page,
+  never one on this computer or its network, keeps its article in Web sources with the properties source and clipped,
+  writes notes about it with the AI model, keeps only the sentences the article backs, and keeps the article itself
+  under Original text. Without a model the article is clipped alone.
+- Study cards (4.6): "make study cards from this note" in the chat proposes cards the note backs and adds them in the
+  format of Obsidian's Spaced Repetition plugin; Study cards in the tool rail reviews the cards due, with Show answer
+  and Hard, Good or Easy, and writes each card's next date in its note.
 - Git sync (4.1, 4.2): Settings → Sync connects the vault to a Git repository over HTTPS with an access token kept
   in the system's keychain. Changes are committed 10 seconds after you stop typing, pulled when the vault opens and
   every few minutes, and pushed. The status bar says Up to date, Syncing…, how many changes are pending, Offline or

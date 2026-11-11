@@ -152,4 +152,32 @@ class PlanShapingTest {
             actual = (today + note + recipe).map { it.kind }
         )
     }
+
+    @Test
+    fun `a page is clipped only from an address the request writes`() = runTest {
+        val guessed = planned(
+            request = "clip https://example.com/sleep, please",
+            plan = "{\"steps\":[{\"action\":\"clip_url\",\"url\":\"https://evil.example/x\"}]}"
+        )
+
+        val unwritten = planned(
+            request = "clip the article about sleep",
+            plan = "{\"steps\":[{\"action\":\"clip_url\",\"url\":\"https://example.com/sleep\"}]}"
+        )
+
+        val asked = planned(
+            request = "what does https://example.org/pan say?",
+            plan = "{\"steps\":[{\"action\":\"answer\"}]}"
+        )
+
+        assertEquals(
+            expected = listOf<Any?>("https://example.com/sleep", null, ActionKind.CLIP_URL, "https://example.org/pan"),
+            actual = listOf(
+                guessed.single()[ActionField.URL],
+                unwritten.single()[ActionField.URL],
+                asked.single().kind,
+                asked.single()[ActionField.URL]
+            )
+        )
+    }
 }

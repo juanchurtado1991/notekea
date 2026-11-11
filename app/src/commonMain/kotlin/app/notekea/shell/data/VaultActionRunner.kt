@@ -143,7 +143,13 @@ class VaultActionRunner(
     ): Outcome<Unit, ActionProblem> = when (step.kind) {
         ActionKind.CREATE_NOTE -> writer.createNote(step = step)
 
-        ActionKind.WRITE_FROM_NOTES, ActionKind.NOTES_FROM_TEXT -> writer.createDrafts(step = step)
+        ActionKind.WRITE_FROM_NOTES, ActionKind.NOTES_FROM_TEXT, ActionKind.CLIP_URL ->
+            writer.createDrafts(step = step)
+
+        ActionKind.MAKE_CARDS -> writer.append(
+            notes = step.notes,
+            text = step.text.orEmpty()
+        )
 
         ActionKind.APPEND_TEXT -> writer.append(
             notes = notesOrToday(vaultPath, step, writer.journal),

@@ -31,6 +31,8 @@ import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.core.presentation.platform.WindowHost
 import app.notekea.di.desktopModules
 import app.notekea.editor.domain.AttachmentPicker
+import app.notekea.sync.domain.VaultSync
+import app.notekea.sync.domain.VaultSyncs
 import app.notekea.tree.data.VaultFolderTrash
 import app.notekea.tree.domain.FileRevealer
 import app.notekea.tree.domain.Trash
@@ -105,6 +107,10 @@ class CaseApp(
 
         runBlocking { koin.get<ActiveModelStore>().save(size = size) }
     }
+
+    /** The sync of the vault [name], for the performance runs that time it without the UI. */
+    fun syncOf(name: String): VaultSync =
+        koin.get<VaultSyncs>().of(vaultPath = vaultPath(name = name))
 
     /** Where the vault [name] is. */
     fun vaultPath(name: String): String = vaults.resolve(name).toString()

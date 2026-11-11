@@ -22,6 +22,9 @@ internal fun railActionsOf(
     onTasks = {
         viewModels.workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = Workspace.TASKS))
     },
+    onStudy = {
+        viewModels.workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = Workspace.STUDY))
+    },
     onSidePanelToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
     onSwitchVault = onSwitchVault,
     onAbout = { onDialog(WindowDialog.ABOUT) },

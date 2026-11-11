@@ -56,6 +56,7 @@ import com.composables.icons.lucide.FolderSearch
 import com.composables.icons.lucide.FolderTree
 import com.composables.icons.lucide.GitCompare
 import com.composables.icons.lucide.Globe
+import com.composables.icons.lucide.GraduationCap
 import com.composables.icons.lucide.Hash
 import com.composables.icons.lucide.Heading
 import com.composables.icons.lucide.House
@@ -210,6 +211,8 @@ object NotekeaIcons {
     val ChatClear: ImageVector get() = Lucide.Eraser
     val ChatCopy: ImageVector get() = Lucide.Copy
     val ChatError: ImageVector get() = Lucide.CircleAlert
+    val Study: ImageVector get() = Lucide.GraduationCap
+    val Clip: ImageVector get() = Lucide.Globe
     val SyncUpToDate: ImageVector get() = Lucide.CloudCheck
     val Syncing: ImageVector get() = Lucide.CloudSync
     val SyncPending: ImageVector get() = Lucide.CloudUpload

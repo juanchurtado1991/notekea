@@ -11,6 +11,9 @@ internal class PaneEditors(
     private val workspace: WorkspaceViewModel,
     private val editors: List<EditorViewModel>
 ) {
+    /** The passage of a document to show, for what is not a note's editor. */
+    val documents = DocumentFocus()
+
     val active: EditorViewModel
         get() = editors[workspace.state.value.workspace.activePane]
 

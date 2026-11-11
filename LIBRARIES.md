@@ -106,6 +106,24 @@ added. How it behaves (`JGitRepository`, `SyncEngine`):
 5. The AI index lives in the app's data folder, outside the vault; Notekea's own files (`*.notekea-tmp`, `.trash/`,
    Obsidian's window layout) are excluded through `.git/info/exclude`, which is never committed.
 
+## 5b. Documents and web clips
+
+In the build since 4.5 and 4.4 (2026-11-11). Documents add about 38 MB of jars on the JVM (51 jars, before the
+installer compresses them): the largest are BouncyCastle 7.2 MB (PDFBox opens encrypted PDFs with it), POI 7 MB in
+three jars (Word, Excel, PowerPoint), Commons Math 2.2 MB, XMLBeans 2.2 MB and PDFBox 2.1 MB. Only the parser modules
+of the formats Notekea reads are added, not Tika's standard package (OCR, audio, images, mail, archives). Web clips
+add 2.5 MB (Readability4J and jsoup).
+
+| Library | Coordinates | Version | Purpose |
+|---|---|---|---|
+| Apache Tika | `org.apache.tika:tika-core` and the `tika-parser-{pdf,microsoft,miscoffice,html}-module`s | 4.1.0 | A document's text as XHTML, turned into Markdown with a heading per page, slide or sheet (`TikaDocumentReader`): PDF, Word, OpenDocument, EPUB, PowerPoint, Excel, HTML |
+| PDFBox | `org.apache.pdfbox:pdfbox` | 3.0.8 | A PDF's real pages drawn in the document's tab, and the cited passage found on its page by its letters' positions (`PdfBoxPages`) |
+| Readability4J | `net.dankito.readability4j:readability4j` | 1.0.8 | Mozilla's Readability in Kotlin: the article of a web page without its menus, ads and comments (`ReadabilityArticleExtractor`) |
+| POI OOXML full | `org.apache.poi:poi-ooxml-full` (tests only) | 5.5.1 | Writes the Word, Excel and PowerPoint files the tests read; Tika reads them without it |
+
+The roadmap asked to weigh Tika against one small library per format: the developer chose Tika for every format on
+2026-11-11, before measuring, and these sizes are what that choice costs.
+
 ## 6. Infrastructure
 
 | Library | Coordinates | Version | Purpose |

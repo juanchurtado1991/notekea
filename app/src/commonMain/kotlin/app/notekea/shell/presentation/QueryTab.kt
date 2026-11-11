@@ -36,6 +36,11 @@ internal fun FollowTools(
         state = state
     )
 
+    FollowStudy(
+        viewModels = viewModels,
+        state = state
+    )
+
     FollowGraph(
         viewModels = viewModels,
         state = state,

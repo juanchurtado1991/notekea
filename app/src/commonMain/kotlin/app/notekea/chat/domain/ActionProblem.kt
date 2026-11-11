@@ -32,4 +32,10 @@ sealed interface ActionProblem {
 
     /** Something the chat never does; [reason] as the model wrote it. */
     data class Refused(val reason: String) : ActionProblem
+
+    /** No study card could be made from the note: the note backs none the model proposed (4.6). */
+    data object NoCards : ActionProblem
+
+    /** A web page could not be clipped (4.4), for [reason]; no note was written. */
+    data class PageFailed(val reason: PageProblem) : ActionProblem
 }

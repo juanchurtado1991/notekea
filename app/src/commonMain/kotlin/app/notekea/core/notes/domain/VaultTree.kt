@@ -1,5 +1,7 @@
 package app.notekea.core.notes.domain
 
+import app.notekea.core.documents.domain.DocumentFormat
+
 /**
  * The notes, other files ([attachments]) and folders of a vault, kept flat (keyed by path) so one change from the file
  * watcher is applied without rebuilding anything. Adding an entry adds its missing parent folders; removing a folder
@@ -11,6 +13,29 @@ data class VaultTree(
     val attachments: Map<RelativePath, NoteFile> = emptyMap(),
     val isFromCache: Boolean = false
 ) {
+    /**
+     * The documents among the other files (4.5: PDF, Word, EPUB…), as entries with no metadata, so the index, the chat
+     * and search read them beside the notes.
+     */
+    val documents: List<NoteEntry> by lazy {
+        attachments
+            .values
+            .filter {
+                DocumentFormat.of(path = it.path) != null
+            }
+            .map {
+                NoteEntry(
+                    file = it,
+                    metadata = NoteMetadata.NONE
+                )
+            }
+    }
+
+    /** Notes and documents: what the index and the chat read. */
+    val readable: Collection<NoteEntry> by lazy {
+        notes.values + documents
+    }
+
     /** Whether [path] is one of the vault's notes, other files or folders. */
     operator fun contains(path: RelativePath): Boolean =
         path in notes ||
