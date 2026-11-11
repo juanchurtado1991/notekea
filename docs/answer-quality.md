@@ -206,4 +206,6 @@ followed:
 
 Open: the Sample Vault contradicts itself on finished books (Reading list checks The Pragmatic Programmer and Atomic
 Habits; the `finished` properties say Deep Work, Dune and The Pragmatic Programmer), so a model reading the list
-answers 2. On Medium the complaint and the joke still vary from run to run.
+answers 2. A complaint is talk and a joke planned as talk is written (`PlanWords`): three runs on Medium and on Large
+gave the same reply each, in Spanish to the end. The memory ring is checked on screen over the real view model
+(`ChatMemoryRingUiTest`).
