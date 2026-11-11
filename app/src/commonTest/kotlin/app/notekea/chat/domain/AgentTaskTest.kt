@@ -8,7 +8,10 @@ import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteMetadata
+import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.core.notes.domain.NoteTextCache
+import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
 import kotlinx.coroutines.flow.toList
@@ -27,7 +30,18 @@ class AgentTaskTest {
         contentStore = store,
         textFolder = TextFolder()
     )
-    private val notes = listOf(entry(path = "Books/Dune.md"), entry(path = "Books/Sapiens.md"))
+    private val author = NoteProperty(
+        key = "author",
+        value = PropertyValue.Text(text = "Frank Herbert")
+    )
+
+    private val notes = listOf(
+        entry(
+            path = "Books/Dune.md",
+            metadata = NoteMetadata.NONE.copy(properties = listOf(author))
+        ),
+        entry(path = "Books/Sapiens.md")
+    )
 
     private val agent = AgentTaskUseCase(
         llmEngine = engine,
@@ -95,7 +109,8 @@ class AgentTaskTest {
                     ),
                     listOf(ActionKind.ADD_TAG to listOf("Books/Dune.md")),
                     "Tagged it.",
-                    emptyList<List<ActionStep>>()
+                    emptyList<List<ActionStep>>(),
+                    true
                 ),
                 actual = listOf(
                     steps.first(),
@@ -103,7 +118,11 @@ class AgentTaskTest {
                         it.kind to it.notes.map { path -> path.value }
                     },
                     proposed.summary,
-                    runner.ran
+                    runner.ran,
+                    "author: Frank Herbert\nDune is a novel" in engine
+                        .generated[1]
+                        .last()
+                        .text
                 )
             )
         }
@@ -130,29 +149,59 @@ class AgentTaskTest {
     }
 
     @Test
-    fun `a move made again is told so, and it stops after its last move`() = runTest {
-        script(*Array(size = AgentTaskUseCase.MAX_MOVES) { "{\"move\":\"search\",\"query\":\"sleep\"}" })
+    fun `a move made again leaves only an end to choose, and it stops after its last move`() =
+        runTest {
+            script(*Array(size = AgentTaskUseCase.MAX_MOVES) { "{\"move\":\"search\",\"query\":\"sleep\"}" })
 
-        val steps = run(task = "find everything about sleep")
+            val steps = run(task = "find everything about sleep")
+
+            assertEquals(
+                expected = listOf<Any?>(
+                    AgentTaskUseCase.MAX_MOVES,
+                    AgentStep.Stopped(problem = null),
+                    true
+                ),
+                actual = listOf(
+                    steps.count {
+                        it is AgentStep.Moving
+                    },
+                    steps.last(),
+                    schemasAndLastPrompt()
+                )
+            )
+        }
+
+    // Agent eval of 2026-11-11: "which meetings did Marta attend?" found nothing, her name being only in a property.
+    @Test
+    fun `a search also lists the notes whose properties hold its words`() = runTest {
+        script(
+            "{\"move\":\"search\",\"query\":\"books by Herbert\"}",
+            "{\"move\":\"finish\",\"summary\":\"Dune.\"}"
+        )
+
+        run(task = "which books are by Herbert?")
 
         assertEquals(
-            expected = listOf<Any?>(
-                AgentTaskUseCase.MAX_MOVES,
-                AgentStep.Stopped(problem = null),
-                true
-            ),
-            actual = listOf(
-                steps.count {
-                    it is AgentStep.Moving
-                },
-                steps.last(),
-                engine
-                    .generated
-                    .last()
-                    .last()
-                    .text
-                    .contains("already done")
-            )
+            expected = true,
+            actual = "- Dune (properties: author: Frank Herbert)" in promptOf(move = 2)
         )
     }
+
+    // After a move made again only an end may come, and the model is told so.
+    private fun schemasAndLastPrompt(): Boolean {
+        val schemas = engine
+            .options
+            .take(n = 3)
+            .map { it.jsonSchema }
+
+        val ends =
+            listOf(AgentTaskPrompt.SCHEMA, AgentTaskPrompt.SCHEMA, AgentTaskPrompt.END_SCHEMA)
+
+        return schemas == ends && "propose the changes or finish now" in promptOf(move = 3)
+    }
+
+    private fun promptOf(move: Int): String = engine
+        .generated[move - 1]
+        .last()
+        .text
 }

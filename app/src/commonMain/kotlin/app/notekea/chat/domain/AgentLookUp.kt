@@ -3,6 +3,7 @@ package app.notekea.chat.domain
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
+import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
 
 /**
@@ -47,14 +48,45 @@ internal class AgentLookUp(
         val passages =
             (answerFromNotes.excerpts(vaultPath, notes, query) as? Outcome.Success)?.value.orEmpty()
 
-        if (passages.isEmpty()) return "search \"$query\": nothing found."
+        val lines = passages.take(n = PASSAGES).map {
+            "- ${it.note.nameWithoutExtension}: ${it.text.take(n = PASSAGE_CHARS).replace('\n', ' ')}"
+        } + propertiesMatching(query = query)
 
-        return "search \"$query\":\n" + passages
-            .take(n = PASSAGES)
-            .joinToString(separator = "\n") {
-                "- ${it.note.nameWithoutExtension}: ${it.text.take(n = PASSAGE_CHARS).replace('\n', ' ')}"
+        if (lines.isEmpty()) return "search \"$query\": nothing found."
+
+        return "search \"$query\":\n" + lines.joinToString(separator = "\n")
+    }
+
+    // The index reads a note's text, not its frontmatter: notes whose property values hold a word of the query.
+    private fun propertiesMatching(query: String): List<String> {
+        val words = query
+            .lowercase()
+            .split(' ', ',', '.', '?')
+            .filter {
+                it.length >= MIN_WORD
+            }
+
+        return notes
+            .filter { note ->
+                val values = propertiesOf(note = note).joinToString(separator = "\n").lowercase()
+
+                words.any {
+                    it in values
+                }
+            }
+            .take(n = PROPERTY_NOTES)
+            .map { note ->
+                val written = propertiesOf(note = note).joinToString(separator = "; ")
+
+                "- ${note.file.path.nameWithoutExtension} (properties: $written)"
             }
     }
+
+    /** [note]'s properties as its frontmatter writes them, one `key: value` each. */
+    private fun propertiesOf(note: NoteEntry): List<String> = note
+        .metadata
+        .properties
+        .map { "${it.key}: ${writtenOf(value = it.value)}" }
 
     private suspend fun read(name: String): String {
         val path = runCatching {
@@ -77,15 +109,44 @@ internal class AgentLookUp(
             ?.body
             .orEmpty()
 
-        return "read \"${path.nameWithoutExtension}\":\n${body.take(n = NOTE_CHARS)}"
+        val properties = propertiesOf(note = note).joinToString(separator = "") { "$it\n" }
+
+        return "read \"${path.nameWithoutExtension}\":\n$properties${body.take(n = NOTE_CHARS)}"
     }
 
+    // A property as its frontmatter writes it, so a value such as an owner or a date is read with the text.
+    private fun writtenOf(value: PropertyValue): String = when (value) {
+        is PropertyValue.Text -> value.text
+        is PropertyValue.Number -> value.text
+        is PropertyValue.Checkbox -> value.isChecked.toString()
+        is PropertyValue.Date -> with(value.date) { "$year-${month.padded()}-${day.padded()}" }
+        is PropertyValue.Items -> value.items.joinToString(separator = ", ")
+        is PropertyValue.Other -> value.source
+    }
+
+    private fun Int.padded(): String = toString().padStart(
+        length = 2,
+        padChar = '0'
+    )
+
     private suspend fun found(step: ActionStep): String {
-        val rows = when (
-            val found = actionRunner.find(vaultPath = vaultPath, step = step, notes = notes)
+        val found = when (
+            val result = actionRunner.find(vaultPath = vaultPath, step = step, notes = notes)
         ) {
-            is Outcome.Success -> found.value.rows
+            is Outcome.Success -> result.value
             is Outcome.Failure -> return "${step.kind.written}: nothing found."
+        }
+
+        val rows = found.rows
+
+        // The query it ran, so the next move can try other words when a tag or a property was guessed wrong.
+        if (rows.isEmpty()) {
+            val query = found
+                .query
+                ?.let { " with the query:\n$it" }
+                .orEmpty()
+
+            return "${step.kind.written} ${step.request.orEmpty()}: nothing found$query."
         }
 
         return "${step.kind.written} ${step.request.orEmpty()}:\n" + rows
@@ -109,6 +170,8 @@ internal class AgentLookUp(
 
     private companion object {
         const val PASSAGES = 4
+        const val MIN_WORD = 3
+        const val PROPERTY_NOTES = 8
         const val PASSAGE_CHARS = 400
         const val NOTE_CHARS = 2_500
         const val ROWS = 30

@@ -38,6 +38,7 @@ class AgentTaskUseCase(
     ): Flow<AgentStep> = flow {
         val found = mutableListOf<String>()
         val made = mutableSetOf<String>()
+        var mustEnd = false
         val deadline = clock.now() + TIME_LIMIT
 
         val lookUp = AgentLookUp(
@@ -57,7 +58,8 @@ class AgentTaskUseCase(
                 task = task,
                 context = context,
                 found = found,
-                movesLeft = MAX_MOVES - number + 1
+                movesLeft = MAX_MOVES - number + 1,
+                mustEnd = mustEnd || number == MAX_MOVES
             )
                 ?: return@flow emit(value = AgentStep.Stopped(problem = null))
 
@@ -85,13 +87,16 @@ class AgentTaskUseCase(
                         )
                     )
 
-                    found += if (made.add(key)) {
+                    val isNew = made.add(key)
+                    mustEnd = mustEnd || !isNew
+
+                    found += if (isNew) {
                         lookUp.result(
                             move = move,
                             task = task
                         )
                     } else {
-                        "(${move.move} ${targetOf(move)}: already done, try another move or end the task)"
+                        "(${move.move} ${targetOf(move)} again: its result is above)"
                     }
                 }
             }
@@ -104,18 +109,19 @@ class AgentTaskUseCase(
         task: String,
         context: ActionContext,
         found: List<String>,
-        movesLeft: Int
+        movesLeft: Int,
+        mustEnd: Boolean
     ): AgentTaskMove? {
         val json = StringBuilder()
 
         try {
             llmEngine
                 .generate(
-                    messages = AgentTaskPrompt.messages(task, context, found, movesLeft),
+                    messages = AgentTaskPrompt.messages(task, context, found, movesLeft, mustEnd),
                     options = GenerationOptions(
                         maxTokens = MOVE_TOKENS,
                         temperature = 0f,
-                        jsonSchema = AgentTaskPrompt.SCHEMA
+                        jsonSchema = AgentTaskPrompt.schemaOf(mustEnd = mustEnd)
                     )
                 )
                 .collect { json.append(it) }

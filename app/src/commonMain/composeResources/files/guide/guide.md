@@ -190,3 +190,11 @@ note's end as Question::Answer lines under #flashcards, the format of Obsidian's
 in Study cards, in the tool rail on the left: Show answer (Space), then Hard, Good or Easy (1, 2, 3); each card comes
 back when it is due.
 
+
+# Agent mode
+words: agent, agente, modo agente, agent mode, step by step, paso a paso, multi-step, varios pasos, do a task, haz una tarea
+try: find my unfinished books and tag them with to-read
+With the Medium model, check Agent mode at the bottom of the chat's field for a task that needs looking things up
+first, such as "find my unfinished books and tag them with to-read". It works step by step, listing each step
+(searched, read a note, listed notes, looked at the tasks), and ends on the usual card: nothing changes until you
+press Do it. It reads a web page only when your request writes its address, and stops after 30 steps or 10 minutes.
