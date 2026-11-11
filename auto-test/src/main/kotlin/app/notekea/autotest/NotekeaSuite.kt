@@ -37,6 +37,7 @@ import app.notekea.autotest.cases.m3.actionCases
 import app.notekea.autotest.cases.m3.chatCases
 import app.notekea.autotest.cases.m3.modelManagerCases
 import com.testbuddy.Suite
+import com.testbuddy.only
 import com.testbuddy.testBuddy
 import java.nio.file.Files
 
@@ -48,6 +49,7 @@ object NotekeaSuite {
     private const val WINDOW_WIDTH = 1280
     private const val WINDOW_HEIGHT = 800
     private const val LOG_LINES = 50
+    private const val CASES_PROPERTY = "notekea.autotest.cases"
 
     val suite: Suite by lazy {
         testBuddy(
@@ -104,6 +106,16 @@ object NotekeaSuite {
             freeUseCase()
         }
     }
+
+    /** The suite with only the cases `-Pcases=1.6,3.3-02` names, on `:auto-test:run` and `:auto-test:test`. */
+    fun selected(): Suite = suite.only(
+        prefixes = System
+            .getProperty(CASES_PROPERTY)
+            .orEmpty()
+            .split(",")
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+    )
 
     // The last lines of Notekea QA's log (logs/notekea.log, as About's Copy diagnostics reads it).
     private fun recentLog(): String? {

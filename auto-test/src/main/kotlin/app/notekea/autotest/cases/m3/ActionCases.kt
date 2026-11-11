@@ -1,10 +1,24 @@
 package app.notekea.autotest.cases.m3
 
+import androidx.compose.ui.input.key.Key
+import app.notekea.autotest.ChatModels
 import app.notekea.autotest.cases.m1.PLAYGROUND
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
-/** The cases of 3.6, 3.8 and 3.9 (`MVP_SMOKE_TEST.md`): Deep answer, plain-word queries and actions, with a model. */
+private const val TASKS = "what tasks are open?"
+private const val WEEK_TASKS = "¿qué tareas hay esta semana?"
+private const val CALL = "create a note Call with Ana in Projects, status draft"
+private const val CALL_NOTE = "$PLAYGROUND/Projects/Call with Ana.md"
+private const val DESCRIBE = "Describe what you want, like books I rated 4 or more…"
+private const val MORE_THAN = "more than"
+private const val RATING_EN = "notes with a rating of 4 or more"
+private const val RATING_ES = "notas con calificación de más de 3"
+
+/**
+ * The cases of 3.6, 3.8 and 3.9 (`MVP_SMOKE_TEST.md`): Deep answer, plain-word queries and actions, with a chat model
+ * on the machine ([ChatModels]); the actions that change notes are in `ActionChangeCases.kt`.
+ */
 fun SuiteBuilder.actionCases() {
     deepAnswer()
     describeQuery()
@@ -12,57 +26,145 @@ fun SuiteBuilder.actionCases() {
     noteFromTemplate()
     summaryOfNotes()
     notesFromText()
-    tagFolder()
-    moveKeepsLinks()
-    shownAtOnce()
-    refusedAndTrash()
+    actionChangeCases()
 }
 
 private fun SuiteBuilder.deepAnswer() {
-    manual(
+    automated(
         id = "3.6-01",
-        reason = ManualReason.COSTLY
+        title = "Deep answer writes drafts and shows one answer, with Medium",
+        timeout = MODEL_CASE_TIMEOUT,
+        precondition = ChatModels.medium
     ) {
-        prepare(PLAYGROUND)
-        title(text = "Deep answer writes drafts and shows one answer, only with Medium")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with Medium in use (Settings → AI model).\n2. Press Ctrl+L (Cmd+L on macOS), tick Deep answer under the question field and ask How much water does the arepa dough take?\n3. Ask another question with Deep answer on and press Esc while it is prepared.\n4. Switch to Small in Settings → AI model and look under the question field.")
-        expected(text = "Deep answer and its hint fit on one line. Step 2 shows Writing drafts and comparing them…, then the whole answer at once with its citation. Step 3 stops it, marked Stopped. In step 4 the Deep answer box is gone.")
+        openChat()
+        expectText(text = "· slower")
+        clickIcon(label = "Deep answer")
+        send(question = WATER)
+        expectText(text = "Writing drafts and comparing them…")
+        awaitReply()
+
+        val chat = copiedChat()
+        expectInChat(chat, "Deep answer: true")
+
+        expectInChat(
+            replyTo(
+                chat = chat,
+                question = WATER
+            ),
+            *TWO_AND_A_HALF
+        )
+
+        expectInChat(
+            replyTo(
+                chat = chat,
+                question = WATER
+            ),
+            "] Recipes/Arepas"
+        )
+
+        send(question = REST)
+        awaitReplyStart()
+        press(key = Key.Escape)
+        expectText(text = "Stopped")
     }
 }
 
 private fun SuiteBuilder.describeQuery() {
-    manual(
+    automated(
         id = "3.8-01",
-        reason = ManualReason.COSTLY
+        title = "The Query tab fills its rules from plain words, in English or Spanish",
+        timeout = MODEL_CASE_TIMEOUT,
+        precondition = ChatModels.any
     ) {
-        prepare(PLAYGROUND)
-        title(text = "The Query tab fills its rules from plain words, in English or Spanish")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use.\n2. Open the Query tab (the table icon on the narrow bar on the left).\n3. Type notes with a rating of 4 or more in Describe what you want and press Enter.\n4. Type notas con calificación de más de 3 and press Enter.\n5. Type notes by stars and press Enter.")
-        expected(text = "Steps 3 and 4 set the rule rating more than 3 and the table lists Properties practice; the rule can be changed by hand. Step 5 says that no note has a property stars and names the closest ones; the rules stay as they were.")
+        openChat(withArepas = false)
+        clickIcon(label = "Query")
+
+        listOf(RATING_EN, RATING_ES).forEach { request ->
+            clickIcon(label = DESCRIBE)
+            clearText()
+            type(text = request)
+            press(key = Key.Enter)
+            awaitReply(running = "Filling the rules…")
+            expectText(text = MORE_THAN)
+            expectText(text = "3")
+            expectText(text = "Properties practice")
+            clickIcon(label = "Remove filter")
+            expectNoText(text = MORE_THAN)
+        }
+
+        clickIcon(label = DESCRIBE)
+        clearText()
+        type(text = "notes by stars")
+        press(key = Key.Enter)
+        awaitReply(running = "Filling the rules…")
+
+        expectText(
+            text = "No note has a property “stars”",
+            substring = true
+        )
     }
 }
 
 private fun SuiteBuilder.chatLists() {
-    manual(
+    automated(
         id = "3.8-02",
-        reason = ManualReason.COSTLY
+        title = "The chat lists open tasks, and says when none match",
+        timeout = MODEL_CASE_TIMEOUT,
+        precondition = ChatModels.any
     ) {
-        prepare(PLAYGROUND)
-        title(text = "The chat lists open tasks, and says when none match")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask what tasks are open? and click one of its rows.\n3. Ask ¿qué tareas hay esta semana?")
-        expected(text = "Step 2 answers with the open tasks and their notes (Packing checklist, Reading list…), counted; the click opens the note at the task. Step 3 says, in Spanish, that no open task matches: the vault has no dated task this week.")
+        openChat(withArepas = false)
+        ask(question = TASKS)
+
+        val tasks = replyTo(
+            chat = copiedChat(),
+            question = TASKS
+        )
+
+        expectInChat(tasks, "Packing checklist")
+        expectInChat(tasks, "Reading list")
+
+        expectText(
+            text = " tasks",
+            substring = true
+        )
+
+        click(text = "Packing checklist")
+
+        expectText(
+            text = "Rain jacket",
+            substring = true
+        )
+
+        ask(question = WEEK_TASKS)
+        expectText(text = "Ninguna tarea pendiente coincide.")
     }
 }
 
 private fun SuiteBuilder.noteFromTemplate() {
-    manual(
+    automated(
         id = "3.9-01",
-        reason = ManualReason.COSTLY
+        title = "A note is proposed, cancelled, done and undone",
+        timeout = MODEL_CASE_TIMEOUT,
+        precondition = ChatModels.any
     ) {
-        prepare(PLAYGROUND)
-        title(text = "A note is proposed, cancelled, done and undone")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask create a note Call with Ana in Projects, status draft, and click Cancel on the card.\n3. Ask it again and click Do it.\n4. Click Undo on the card.")
-        expected(text = "Step 2's card says Notekea will: Create note Projects/Call with Ana, and Set property status: draft; Cancel changes nothing. Step 3 makes the note with status draft and opens it. Step 4 removes it.")
+        openChat(withArepas = false)
+        ask(question = CALL)
+        expectText(text = "Notekea will:")
+        expectText(text = "Create note")
+        expectText(text = "Set property")
+        click(text = "Cancel")
+        expectText(text = "Cancelled. Nothing was changed.")
+        expectNoFile(path = CALL_NOTE)
+        ask(question = CALL)
+        click(text = "Do it")
+
+        expectFile(
+            path = CALL_NOTE,
+            containing = "status: draft"
+        )
+
+        click(text = "Undo")
+        expectNoFile(path = CALL_NOTE)
     }
 }
 
@@ -87,53 +189,5 @@ private fun SuiteBuilder.notesFromText() {
         title(text = "A pasted text becomes a folder of linked notes")
         steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Type Créame notas a partir de este texto: and paste five paragraphs of any article in Spanish, send it and click Do it.\n3. Open the folder it made and read its notes, then click Undo.")
         expected(text = "The card lists a folder with an index note and one note per topic. Each note keeps the facts of its part, formatted with headings, bold and lists, in Spanish, and the index links them all. Undo removes the folder's notes.")
-    }
-}
-
-private fun SuiteBuilder.tagFolder() {
-    manual(
-        id = "3.9-04",
-        reason = ManualReason.COSTLY
-    ) {
-        prepare(PLAYGROUND)
-        title(text = "Tagging a folder tags every note in it, and Undo takes it back")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask tag every note in Recipes with food and click Do it.\n3. Open Arepas and look at its properties, then click Undo on the card.")
-        expected(text = "The card lists Arepas, Café con leche and Pasta e fagioli. After Do it each has the tag food; after Undo none has it.")
-    }
-}
-
-private fun SuiteBuilder.moveKeepsLinks() {
-    manual(
-        id = "3.9-05",
-        reason = ManualReason.COSTLY
-    ) {
-        prepare(PLAYGROUND)
-        title(text = "Moving a note keeps its links, and Undo moves it back")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask create a folder Archive and move Packing checklist into it, and click Do it.\n3. In Lisbon trip click the link to Packing checklist, then click Undo on the card.")
-        expected(text = "Archive holds Packing checklist and the link in Lisbon trip opens it there. Undo moves it back to Travel.")
-    }
-}
-
-private fun SuiteBuilder.shownAtOnce() {
-    manual(
-        id = "3.9-06",
-        reason = ManualReason.COSTLY
-    ) {
-        prepare(PLAYGROUND)
-        title(text = "What only shows something is done at once")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask open Arepas and split the pane.\n3. Ask switch to the sage theme.\n4. Ask show the backlinks.")
-        expected(text = "Each is done at once, with no card, and a line in the chat says what was done.")
-    }
-}
-
-private fun SuiteBuilder.refusedAndTrash() {
-    manual(
-        id = "3.9-07",
-        reason = ManualReason.COSTLY
-    ) {
-        prepare(PLAYGROUND)
-        title(text = "Deleting for good is refused in the request's language, and the trash is confirmed")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask borra todas mis notas para siempre.\n3. Ask send Café con leche to the trash and click Do it.")
-        expected(text = "Step 2 is refused in Spanish, saying what the chat can do instead, and nothing changes. Step 3's card lists Café con leche and says the trash gives notes back, not Undo; after Do it the note is in the trash.")
     }
 }

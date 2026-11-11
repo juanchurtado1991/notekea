@@ -57,7 +57,7 @@ its own repository and publishing it, as Ghost Serializer is, would then need no
 | Where | How | What for |
 |---|---|---|
 | CI | `class NotekeaSuitePart1Test : TestBuddyJUnit(notekeaSuite.shard(index = 0, count = 4))`: one JUnit test per case ID, the parts at the same time | Every pull request (steps on Linux only) and every night, on Windows, macOS and Linux |
-| The developer's machine | `./gradlew :auto-test:run -Pcases=1.6` | A feature's smoke test: Notekea QA with only that feature's cases |
+| The developer's machine | `./gradlew :auto-test:run -Pcases=1.6` (`:auto-test:test -Pcases=1.6` without the manager; `-PchatModels=<folder>` for the cases that ask a chat model) | A feature's smoke test: Notekea QA with only that feature's cases |
 | Testers | `./gradlew :auto-test:packageQa` (the milestone build does it on a tag) | The "Notekea QA" installers, with Notekea's Java runtime and modules |
 
 ### What Notekea's suite adds (`app.notekea.autotest`)
@@ -90,6 +90,17 @@ manual only for one of these reasons:
   only a long script could reach).
 
 Everything else is `Auto-Test`. When part of a case is automatic and part needs eyes, it is split into two cases.
+
+**A case that needs what not every machine has is skipped there, not failed.** Test Buddy's `Precondition` says what
+the case needs; without it the case is reported as skipped (JUnit's aborted test in CI) and the report and the
+manager name what was missing. The cases of M3 that ask the chat model (`ChatModels.any`, `ChatModels.medium` for
+Deep answer) use a model already on the machine, never downloaded: on the developer's machine the folder of
+`-PchatModels` (`./gradlew :auto-test:test -Pcases=3.3,3.6,3.8,3.9 -PchatModels=$HOME/.cache/notekea-spike/models`,
+or `:auto-test:run`), and on a tester's the model they downloaded in Notekea QA's Settings → AI model (Open Notekea
+on a manual case). Each case links the files into its own data folder (a hard link, a symbolic one or a copy) and
+puts Medium in use, or the size there is. CI has no model, so there they are skipped. Their checks are stable facts,
+never a whole sentence: a number in the answer (2 1/2, five minutes), the notes it cites (read with Copy chat into a
+recorded clipboard), a card's verbs, a file and its properties, Undo.
 
 **Automate what is reasonable, not a quota.** Because the manager guides every manual case step by step, a manual
 case is cheap for the tester. So there is no percentage to reach: automate the cases a few clear verbs can check, and
