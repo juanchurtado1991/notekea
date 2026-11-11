@@ -4,6 +4,7 @@ import app.notekea.autotest.clickLast
 import app.notekea.autotest.expectLineSelected
 import app.notekea.autotest.expectOrderOnScreen
 import app.notekea.autotest.openVault
+import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
@@ -13,6 +14,8 @@ private const val HOME = "Home"
 private const val TASKS = "Tasks"
 private const val DEMO_TASK = "Record a demo video"
 private const val EDITED_TASK = "Record a short demo video"
+private const val SCROLL_TRIES = 10
+private const val SCROLL_WAIT_MILLIS = 500L
 private const val FLAT_TASK = "Find a flat near the river"
 private const val LAUNCH_FILE = "$SAMPLE/Projects/Notekea launch.md"
 private const val OPEN_TASKS =
@@ -128,7 +131,8 @@ private fun SuiteBuilder.changedOutside() {
         val launch = file(path = LAUNCH_FILE)
         Files.writeString(launch, Files.readString(launch).replace(DEMO_TASK, EDITED_TASK))
 
-        scrollTo(text = EDITED_TASK)
+        // The vault's watcher tells the tab a moment after the file is written.
+        awaitScrolledTo(text = EDITED_TASK)
         expectNoText(text = DEMO_TASK)
     }
 }
@@ -174,4 +178,17 @@ private fun SuiteBuilder.cardsLook() {
                 "tarea nombra su nota."
         )
     }
+}
+
+/** Scrolls the tab to [text], trying again while the change that brings it is on its way. */
+private fun CaseScope.awaitScrolledTo(text: String) {
+    repeat(times = SCROLL_TRIES - 1) {
+        try {
+            return scrollTo(text = text)
+        } catch (_: AssertionError) {
+            settle(millis = SCROLL_WAIT_MILLIS)
+        }
+    }
+
+    scrollTo(text = text)
 }

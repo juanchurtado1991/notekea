@@ -3,6 +3,7 @@ package app.notekea.autotest.cases.m5
 import androidx.compose.ui.input.key.Key
 import app.notekea.autotest.cases.m1.PLAYGROUND
 import app.notekea.autotest.cases.m1.WELCOME
+import app.notekea.autotest.clickLast
 import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.relaunch
@@ -108,7 +109,8 @@ private fun SuiteBuilder.filesInObsidian() {
         )
 
         pressInWindow(shortcut = Mod + Key.Comma)
-        click(text = "Files")
+        // The tree's section header says Files too: Settings' section is drawn over it, last.
+        clickLast(text = "Files")
         click(text = "YYYY-MM-DD")
         type(text = "DD-MM-YYYY")
 
