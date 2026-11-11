@@ -84,14 +84,18 @@ internal class AgentLookUp(
             }
     }
 
+    /** The vault's path of the note [name] names, without its extension, or null when no note has that name. */
+    fun pathOf(name: String): String? = noteNamed(name = name)?.value?.removeSuffix(suffix = ".md")
+
+    private fun noteNamed(name: String): RelativePath? = runCatching {
+        VaultNames(
+            notes = notes,
+            openNote = openNote
+        ).noteOf(name = name)
+    }.getOrNull()
+
     private suspend fun read(name: String): String {
-        val path = runCatching {
-            VaultNames(
-                notes = notes,
-                openNote = openNote
-            ).noteOf(name = name)
-        }.getOrNull()
-            ?: return "read \"$name\": no note of that name."
+        val path = noteNamed(name = name) ?: return "read \"$name\": no note of that name."
 
         val note = notes.first {
             it.file.path == path

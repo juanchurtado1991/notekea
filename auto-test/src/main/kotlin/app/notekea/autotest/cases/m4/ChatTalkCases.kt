@@ -1,7 +1,10 @@
 package app.notekea.autotest.cases.m4
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.performClick
 import app.notekea.autotest.ChatModels
-import app.notekea.autotest.cases.m1.PLAYGROUND
 import app.notekea.autotest.cases.m3.FIVE_MINUTES
 import app.notekea.autotest.cases.m3.MODEL_CASE_TIMEOUT
 import app.notekea.autotest.cases.m3.TWO_AND_A_HALF
@@ -10,12 +13,24 @@ import app.notekea.autotest.cases.m3.copiedChat
 import app.notekea.autotest.cases.m3.expectInChat
 import app.notekea.autotest.cases.m3.openChat
 import app.notekea.autotest.cases.m3.replyTo
-import com.testbuddy.ManualReason
+import com.testbuddy.CaseFailure
+import com.testbuddy.CaseScope
 import com.testbuddy.SuiteBuilder
 
 private const val WATER_ES = "¿cuánta agua llevan las arepas?"
 private const val REST_FOLLOW_UP = "¿y cuánto reposa la masa?"
 private const val REMINDER = "mandame un recordatorio mañana a las 9"
+private const val FIRST_RECIPE = "and the first recipe I asked about, how much water did it take?"
+private const val RING = "Chat memory "
+private const val MORE = "More"
+private const val COMPACT = "Compact chat"
+private const val COMPACT_MILLIS = 120_000L
+private val QUESTIONS = listOf(
+    "How much water do the arepas need?",
+    "How long does the dough rest?",
+    "How many servings do the black beans make?",
+    "What is in the café con leche?"
+)
 
 /**
  * The chat as the developer's probe of 2026-11-11 talked to it (`MVP_SMOKE_TEST.md`): it replies in the language it
@@ -46,26 +61,73 @@ private fun SuiteBuilder.spanishFollowUp() {
     }
 }
 
+// The developer's goal of 2026-11-11: a ring like Claude Code's context, compacted when asked or when full.
 private fun SuiteBuilder.memoryRing() {
-    manual(
+    automated(
         id = "4.7-06",
-        reason = ManualReason.EYES
+        title = "The chat's memory ring fills as it talks, and Compact chat empties it into a summary",
+        timeout = MODEL_CASE_TIMEOUT,
+        precondition = ChatModels.medium
     ) {
-        prepare(PLAYGROUND)
-        title(text = "The chat's memory ring fills as it talks, and Compact chat empties it into a summary")
+        openChat(withArepas = false)
 
-        steps(
-            text =
-            "1. Open the Playground Vault and the chat (the speech bubble in the narrow bar on the far left).\n2. Ask " +
-                "five questions about the recipes, one after another.\n3. Hold the pointer on the ring beside " +
-                "Medium · Auto at the bottom right of the field.\n4. Open the chat's ⋯ menu and click Compact " +
-                "chat.\n5. Ask: and the first recipe I asked about?"
-        )
+        val filled = QUESTIONS.map {
+            ask(question = it)
+            ringPercent()
+        }
 
-        expected(
-            text =
-            "The ring fills a little with each reply; its tooltip says how full the memory is. After Compact chat " +
-                "the ring is nearly empty, and step 5 is still answered about the first recipe."
-        )
+        expect(
+            filled.zipWithNext().all { (before, after) ->
+                after > before
+            }
+        ) { "expected the ring to fill with each reply, it read $filled" }
+
+        ui.onNode(matcher = hasContentDescription(value = MORE)).performClick()
+        click(text = COMPACT)
+
+        ui
+            .waitUntil(timeoutMillis = COMPACT_MILLIS) {
+                ringPercent() < filled.last()
+            }
+
+        ask(question = FIRST_RECIPE)
+        expectInChat(replyTo(copiedChat(), FIRST_RECIPE), "arepa")
     }
+}
+
+/** The ring's share, as it says it to a screen reader ("Chat memory 42 % · …"), once a compaction under way ends. */
+private fun CaseScope.ringPercent(): Int {
+    runCatching {
+        ui
+            .waitUntil(timeoutMillis = COMPACT_MILLIS) {
+                saidOnScreen().any { it.startsWith(prefix = RING) }
+            }
+    }
+
+    val said = saidOnScreen()
+
+    val ring = said.firstOrNull { it.startsWith(prefix = RING) }
+        ?: throw CaseFailure(message = "expected the memory ring, the screen said: $said")
+
+    return ring
+        .substringAfter(delimiter = RING)
+        .substringBefore(delimiter = " ")
+        .toInt()
+}
+
+private fun CaseScope.saidOnScreen(): List<String> = ui
+    .onAllNodes(
+        matcher = SemanticsMatcher.keyIsDefined(SemanticsProperties.ContentDescription),
+        useUnmergedTree = true
+    )
+    .fetchSemanticsNodes()
+    .flatMap {
+        it.config[SemanticsProperties.ContentDescription]
+    }
+
+private fun expect(
+    holds: Boolean,
+    message: () -> String
+) {
+    if (!holds) throw CaseFailure(message = message())
 }

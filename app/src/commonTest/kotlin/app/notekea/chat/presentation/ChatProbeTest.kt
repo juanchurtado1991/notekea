@@ -2,8 +2,6 @@ package app.notekea.chat.presentation
 
 import app.notekea.chat.domain.ActionProblem
 import app.notekea.chat.domain.AnswerPrompt
-import app.notekea.chat.domain.ChatExchange
-import app.notekea.chat.domain.CompactChatUseCase
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.FakeChatHistoryStore
 import app.notekea.chat.domain.FoundNotes
@@ -233,26 +231,6 @@ class ChatProbeTest {
         )
     }
 
-    @Test
-    fun `compacting writes the earlier chat short, in the person's language`() =
-        runTest(dispatcher) {
-            val written = CompactChatUseCase(llmEngine = engine)(
-                exchanges = listOf(
-                    ChatExchange(
-                        question = "¿Cuánta agua llevan las arepas?",
-                        reply = "Dos tazas y media."
-                    )
-                ),
-                summary = null
-            )
-
-            assertEquals(
-                expected = true,
-                actual = engine.generated.last().last().text.contains("Person: ¿Cuánta agua llevan las arepas?") &&
-                    written is app.notekea.core.domain.Outcome.Success
-            )
-        }
-
     // The developer's goal of 2026-11-11: the chat compacts itself after a while, as a new session.
     @Test
     fun `a chat left for half an hour is compacted before the next question, one asked at once is not`() =
@@ -418,6 +396,58 @@ class ChatProbeTest {
             assertEquals(
                 expected = listOf<Any?>(ChatMode.AGENT, "Focus.", TurnOutcome.ANSWERED),
                 actual = listOf(entry.answeredWith, entry.answer, entry.outcome)
+            )
+        }
+
+    // The Auto-Test on the real app, 2026-11-11: with a long chat from an earlier session, the ring stayed on
+    // Compacting after the replies.
+    @Test
+    fun `a long chat from an earlier session is compacted, and the ring says the memory again`() =
+        runTest(dispatcher) {
+            plan = "{\"steps\":[{\"action\":\"chat\"}]}"
+            val history = FakeChatHistoryStore()
+
+            history.turns[app.notekea.core.notes.domain.NoteFixtures.VAULT] = (1..60).map {
+                app
+                    .notekea
+                    .chat
+                    .domain
+                    .ChatTurn(
+                        question = "earlier question $it",
+                        scope = app.notekea.chat.domain.ChatScope.VAULT,
+                        outcome = TurnOutcome.ANSWERED,
+                        answer = "A long answer about the notes. ".repeat(n = 20),
+                        sources = emptyList(),
+                        scopeName = null
+                    )
+            }
+
+            val viewModel = chatViewModel(
+                engine = engine,
+                store = FakeNoteContentStore(),
+                index = FakeVectorIndex(),
+                embedder = FakeTextEmbedder(),
+                runner = runner,
+                history = history,
+                clipboard = FakeTextClipboard(),
+                clock = clock
+            )
+
+            viewModel.onIntent(intent = ChatIntent.OnIndexChange(isReady = true))
+            advanceUntilIdle()
+
+            repeat(times = 3) {
+                asked(
+                    viewModel = viewModel,
+                    question = "question $it"
+                )
+            }
+
+            val state = viewModel.state.value
+
+            assertEquals(
+                expected = listOf(false, true),
+                actual = listOf(state.isCompacting, state.contextUsage < 1f)
             )
         }
 

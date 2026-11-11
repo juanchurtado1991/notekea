@@ -105,7 +105,7 @@ class AgentTaskTest {
                     AgentStep.Moving(
                         number = 1,
                         move = "read",
-                        target = "Dune"
+                        target = "Books/Dune"
                     ),
                     listOf(ActionKind.ADD_TAG to listOf("Books/Dune.md")),
                     "Tagged it.",

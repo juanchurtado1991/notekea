@@ -1,5 +1,9 @@
 package app.notekea.chat.eval
 
+import app.notekea.chat.domain.ChatScope
+import app.notekea.chat.domain.ChatTurn
+import app.notekea.chat.domain.FakeChatHistoryStore
+import app.notekea.chat.domain.TurnOutcome
 import java.io.File
 import java.nio.file.Files
 
@@ -37,4 +41,25 @@ internal object CommittedVault {
 
         return output
     }
+
+    /** A chat of [earlier] turns from an earlier session, as the app finds one when [vault] opens again. */
+    fun earlierChat(
+        vault: File,
+        earlier: Int
+    ): FakeChatHistoryStore = FakeChatHistoryStore().apply {
+        turns[vault.path] = (1..earlier).map {
+            ChatTurn(
+                question = "How much water do the arepas need, take $it?",
+                scope = ChatScope.VAULT,
+                outcome = TurnOutcome.ANSWERED,
+                answer = EARLIER_ANSWER.repeat(n = EARLIER_REPEATS),
+                sources = emptyList(),
+                scopeName = null
+            )
+        }
+    }
+
+    private const val EARLIER_ANSWER =
+        "You wrote that the arepas need 2½ cups of warm water and rest five minutes. "
+    private const val EARLIER_REPEATS = 6
 }

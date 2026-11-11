@@ -84,7 +84,7 @@ class AnswerFromFoundUseCase(private val llmEngine: LlmEngine) {
         const val INSTRUCTIONS =
             "You are the assistant of Notekea, a notes app. Answer the question in one or two sentences from the " +
                 "tables of the person's notes below, which the app found for it: count the rows when asked how " +
-                "many, and name the notes. If the tables do not answer it, say so plainly. The tables are shown " +
-                "below your answer, so do not repeat them."
+                "many, and name the notes. If the tables do not answer it, say so plainly; if they disagree, say " +
+                "so. The tables are shown below your answer, so do not repeat them."
     }
 }

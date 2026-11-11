@@ -205,7 +205,12 @@ followed:
   last reply said again, word counts come from the app (the model said 109, 128 and 63 for a note of 49 words).
 
 Open: the Sample Vault contradicts itself on finished books (Reading list checks The Pragmatic Programmer and Atomic
-Habits; the `finished` properties say Deep Work, Dune and The Pragmatic Programmer), so a model reading the list
-answers 2. A complaint is talk and a joke planned as talk is written (`PlanWords`): three runs on Medium and on Large
+Habits; the `finished` properties say Deep Work, Dune and The Pragmatic Programmer). A complaint is talk and a joke planned as talk is written (`PlanWords`): three runs on Medium and on Large
 gave the same reply each, in Spanish to the end. The memory ring is checked on screen over the real view model
-(`ChatMemoryRingUiTest`).
+(`ChatMemoryRingUiTest`) and in the real app with Medium (Auto-Test 4.7-06), which found two bugs no fake had:
+compacting a long chat from an earlier session overflowed the model, failed, and was tried again after every reply,
+the ring stuck on Compacting; and a summary of a short chat was longer than what it replaced, so Compact chat raised
+the ring. Compaction now gives the model only what fits, forgets on failure, never writes a summary longer than what
+it replaces, and clears Compacting however it ends. The prompt's worked sum ("4500 + 300 = 4800") was copied into an
+answer about water; it is gone. Notes that disagree are said to disagree; the finished books come out 3 on both sizes,
+the three rated 5 named together.

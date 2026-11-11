@@ -10,6 +10,8 @@ import app.notekea.chat.domain.AgentTaskUseCase
 import app.notekea.chat.domain.AnswerFromFoundUseCase
 import app.notekea.chat.domain.AnswerFromNotesUseCase
 import app.notekea.chat.domain.AnswerHelpUseCase
+import app.notekea.chat.domain.ChatScope
+import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.CheckPlanUseCase
 import app.notekea.chat.domain.CompactChatUseCase
 import app.notekea.chat.domain.ComposeNotesUseCase
@@ -19,6 +21,7 @@ import app.notekea.chat.domain.FakeChatHistoryStore
 import app.notekea.chat.domain.HelpGuide
 import app.notekea.chat.domain.PageProblem
 import app.notekea.chat.domain.PlanRequestUseCase
+import app.notekea.chat.domain.TurnOutcome
 import app.notekea.chat.presentation.ChatIntent
 import app.notekea.chat.presentation.ChatMode
 import app.notekea.chat.presentation.ChatViewModel
@@ -173,7 +176,6 @@ class ChatProbeChatModelTest {
 
         probes.forEachIndexed { index, probe ->
             val vault = CommittedVault.copy()
-            val chat = chatOf(vault = vault)
 
             val lines = probe
                 .lines()
@@ -182,9 +184,20 @@ class ChatProbeChatModelTest {
                     it.isNotEmpty() && !it.startsWith("#")
                 }
 
+            val earlier = lines
+                .firstOrNull { it.startsWith(HISTORY) }
+                ?.removePrefix(HISTORY)
+                ?.trim()
+                ?.toInt() ?: 0
+
+            val chat = chatOf(
+                vault = vault,
+                earlier = earlier
+            )
+
             val start = System.nanoTime()
 
-            lines.forEach { line ->
+            lines.filterNot { it.startsWith(HISTORY) }.forEach { line ->
                 play(
                     chat = chat,
                     line = line
@@ -206,6 +219,7 @@ class ChatProbeChatModelTest {
                     .orEmpty()
             )
 
+            report.append("\n<!-- ${memoryOf(chat = chat.second)} -->")
             plans.forEach { report.append("\n<!-- plan: $it -->") }
             plans.clear()
             vault.deleteRecursively()
@@ -264,7 +278,27 @@ class ChatProbeChatModelTest {
         delay(timeMillis = SETTLE_MILLIS)
     }
 
-    private suspend fun chatOf(vault: File): Triple<File, ChatViewModel, FakeTextClipboard> {
+    /** The chat's memory once a compaction under way ends, or after [COMPACT_SECONDS] if it never does. */
+    private suspend fun memoryOf(chat: ChatViewModel): String {
+        val start = System.nanoTime()
+        val limit = COMPACT_SECONDS * NANOS_PER_SECOND
+
+        while (chat.state.value.isCompacting) {
+            val isLate = System.nanoTime() - start >= limit
+            if (isLate) break
+            delay(timeMillis = SETTLE_MILLIS)
+        }
+
+        val state = chat.state.value
+        val waited = (System.nanoTime() - start) / NANOS_PER_SECOND
+
+        return "memory: ${(state.contextUsage * PERCENT).toInt()} %, compacting: ${state.isCompacting}, waited $waited s"
+    }
+
+    private suspend fun chatOf(
+        vault: File,
+        earlier: Int
+    ): Triple<File, ChatViewModel, FakeTextClipboard> {
         val store = OkioNoteContentStore(fileSystem, dispatchers, NioNoteFileAttributes())
         val scanner = OkioNoteScanner(fileSystem, dispatchers)
         val cache = NoteTextCache(store, TextFolder())
@@ -294,14 +328,21 @@ class ChatProbeChatModelTest {
 
         val viewModel = viewModelOf(
             vault = vault,
-            runner = runnerOf(
+            runner = ProbeRunner.of(
                 store = store,
                 scanner = scanner,
-                cache = cache
+                cache = cache,
+                engine = engine,
+                fileSystem = fileSystem,
+                dispatchers = dispatchers
             ),
             answer = AnswerFromNotesUseCase(embedder, index, cache, engine),
             cache = cache,
-            clipboard = clipboard
+            clipboard = clipboard,
+            history = CommittedVault.earlierChat(
+                vault = vault,
+                earlier = earlier
+            )
         )
 
         viewModel.onIntent(intent = ChatIntent.OnShown)
@@ -312,56 +353,13 @@ class ChatProbeChatModelTest {
         return Triple(vault, viewModel, clipboard)
     }
 
-    private fun runnerOf(
-        store: OkioNoteContentStore,
-        scanner: OkioNoteScanner,
-        cache: NoteTextCache
-    ): VaultActionRunner {
-        val operations = OkioNoteFileOperations(fileSystem, dispatchers)
-        val settings = ObsidianVaultSettingsReader(fileSystem, dispatchers)
-        val apply = ApplyLinkUpdatesUseCase(noteContentStore = store)
-        val calendar = JvmLocalCalendar()
-        val clock = Clock.System
-
-        val template =
-            ApplyTemplateUseCase(FillTemplateUseCase(settings, store, calendar, clock), store)
-
-        val links = PlanLinkUpdatesUseCase(store, JetBrainsMarkdownLinkFinder())
-
-        return VaultActionRunner(
-            noteContentStore = store,
-            noteFileOperations = operations,
-            noteScanner = scanner,
-            renameEntry = RenameEntryUseCase(operations, ValidateFileNameUseCase()),
-            updateLinksAfterRename = UpdateLinksAfterRenameUseCase(links, apply),
-            applyLinkUpdates = apply,
-            applyTemplate = template,
-            openDailyNote = OpenDailyNoteUseCase(settings, operations, store, calendar, clock),
-            bookmarkStore = FakeBookmarkStore(),
-            trash = VaultFolderTrash(fileSystem, dispatchers),
-            finder = VaultActionFinder(
-                TranslateQueryUseCase(engine, GhostQueryJsonReader()),
-                BuildQueryCatalogUseCase(),
-                RunQueryUseCase(),
-                QueryYaml(),
-                ListTasksUseCase(),
-                SetTaskDoneUseCase(store, apply),
-                SetPropertyUseCase(store, apply),
-                cache,
-                JetBrainsMarkdownLinkFinder(),
-                calendar,
-                Clock.System
-            ),
-            appearanceStore = FakeAppearanceStore()
-        )
-    }
-
     private fun viewModelOf(
         vault: File,
         runner: VaultActionRunner,
         answer: AnswerFromNotesUseCase,
         cache: NoteTextCache,
-        clipboard: FakeTextClipboard
+        clipboard: FakeTextClipboard,
+        history: FakeChatHistoryStore
     ): ChatViewModel {
         val compose = ComposeNotesUseCase(engine, cache, GhostActionPlanReader())
         val guide = HelpGuide.of(markdown = File(GUIDE).readText())
@@ -399,7 +397,7 @@ class ChatProbeChatModelTest {
             actionRunner = runner,
             localCalendar = JvmLocalCalendar(),
             clock = Clock.System,
-            historyStore = FakeChatHistoryStore(),
+            historyStore = history,
             clipboard = clipboard,
             llmEngine = engine
         )
@@ -424,6 +422,9 @@ class ChatProbeChatModelTest {
         const val MODE = "@mode"
         const val OPEN = "@open"
         const val CONFIRM = "@confirm"
+        const val HISTORY = "@history"
+        const val COMPACT_SECONDS = 120L
+        const val PERCENT = 100
         const val PROBES_PROPERTY = "notekea.chat.probes"
         const val DEFAULT_PROBES = "../smoke-data/eval/chat-probes.txt"
         const val GUIDE = "src/commonMain/composeResources/files/guide/guide.md"

@@ -17,14 +17,23 @@ class CompactChatUseCase(private val llmEngine: LlmEngine) {
         exchanges: List<ChatExchange>,
         summary: String?
     ): Outcome<String, LlmError> {
-        val conversation = buildString {
-            summary?.let { append("Summary so far: ").append(it).append("\n\n") }
-
-            exchanges.forEach {
-                append("Person: ").append(it.question).append('\n')
-                append("Assistant: ").append(it.reply.take(n = REPLY_CHARS)).append("\n\n")
-            }
+        // Only what fits the model: the summary so far and the latest exchanges. A long chat from an earlier session
+        // overflowed it, failed, and was tried again after every reply (the Auto-Test on the real app, 2026-11-11).
+        val lines = exchanges.map {
+            "Person: ${it.question.take(n = REPLY_CHARS)}\nAssistant: ${it.reply.take(n = REPLY_CHARS)}\n\n"
         }
+
+        val said = lines
+            .asReversed()
+            .runningFold(initial = "") { kept, exchange ->
+                exchange + kept
+            }
+            .takeWhile {
+                it.length <= MAX_INPUT_CHARS
+            }
+            .last()
+
+        val conversation = summary?.let { "Summary so far: $it\n\n$said" } ?: said
 
         val written = StringBuilder()
 
@@ -57,6 +66,7 @@ class CompactChatUseCase(private val llmEngine: LlmEngine) {
     private companion object {
         const val MAX_TOKENS = 260
         const val REPLY_CHARS = 600
+        const val MAX_INPUT_CHARS = 6_000
         const val INSTRUCTIONS =
             "Summarize this conversation between a person and the assistant of their notes app, for the assistant " +
                 "to remember it: what the person wanted, the notes, names and numbers that came up, what was " +

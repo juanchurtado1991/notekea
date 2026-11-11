@@ -83,7 +83,10 @@ class AgentTaskUseCase(
                         value = AgentStep.Moving(
                             number = number,
                             move = move.move,
-                            target = targetOf(move = move)
+                            target = targetOf(
+                                move = move,
+                                lookUp = lookUp
+                            )
                         )
                     )
 
@@ -96,7 +99,7 @@ class AgentTaskUseCase(
                             task = task
                         )
                     } else {
-                        "(${move.move} ${targetOf(move)} again: its result is above)"
+                        "(${move.move} ${targetOf(move, lookUp)} again: its result is above)"
                     }
                 }
             }
@@ -168,7 +171,17 @@ class AgentTaskUseCase(
         )
     }
 
-    private fun targetOf(move: AgentTaskMove): String = move.query ?: move.note ?: move.url ?: ""
+    // A note read is listed by its path in the vault ("Read Recipes/Arepas"), however the model named it.
+    private fun targetOf(
+        move: AgentTaskMove,
+        lookUp: AgentLookUp
+    ): String {
+        val note = move.note?.let {
+            lookUp.pathOf(name = it) ?: it
+        }
+
+        return move.query ?: note ?: move.url ?: ""
+    }
 
     companion object {
         const val MAX_MOVES = 30
