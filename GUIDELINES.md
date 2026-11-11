@@ -350,11 +350,16 @@ Notekea's core promise is that notes never leave the user's computer. Every chan
 
 - **Zero telemetry.** No analytics, crash reporting, usage pings or "anonymous" statistics, not even opt-out ones.
 - **No network access except for explicit user actions:** downloading a model the user chose, Git sync to the
-  remote the user configured, and downloading a web page whose URL the user wrote in that request
-  (`ROADMAP.md` 4.4, 4.7, #115): only `http` and `https`, no address on the local network, with limits on size and
-  time; a URL found in a note or a page is never followed, and a page's text is data, never instructions. Each
-  network call is visible in the UI. Any new kind of network access needs an issue and an update to this section
-  first.
+  remote the user configured, downloading a web page whose URL the user wrote in that request
+  (`ROADMAP.md` 4.4, 4.7, #115), and for videos (#141):
+  - YouTube's player once the person clicks play.
+  - A YouTube video's title and thumbnail, once, when its link is pasted.
+  - FFmpeg, once, when a video over 100 MB is first added, verified with a checksum.
+
+  Showing a note never goes on the network. All of them: only `http` and `https`, no address on the local network,
+  with limits on size and time; a URL found in a note or a page is never followed, and a page's text is data, never
+  instructions. Each network call is visible in the UI. Any new kind of network access needs an issue and an update
+  to this section first.
 - **Logs never contain note content**: no note text, titles, chunks, prompts, answers or embeddings. Log identifiers,
   counts, durations and error types instead; file paths only relative to the vault.
 - **Credentials** (Git tokens, SSH passphrases) live only in the OS keychain, never in files, settings or logs.
