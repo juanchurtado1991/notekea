@@ -108,6 +108,10 @@ a word of the title is no longer read as the note's content ("Call with Ana"); t
 that holds only folders; a later step may name a note an earlier one creates. Small went from 75 % to 73 %,
 still over its 72 % baseline.
 
+With M4b the set has 126 requests (help, the vault's overview, clips and study cards added): Medium 95 % (120 of
+126), Small 73 %. A request that writes a URL and asks for nothing else is a clip (`UrlsNamed`), and only a URL the
+request writes is ever clipped.
+
 ## After the first smoke run — follow-ups, talk and a second try
 
 - **Follow-ups:** the planner sees the chat's last four exchanges and writes the question as it stands alone
@@ -127,3 +131,39 @@ Four more answers right, Spanish questions most of them, against two traps answe
 the developer asked for it after the smoke run, and it stays on, recorded here.
 - **Notes by their properties that find nothing** ("what trips do I have?" in a vault with a Travel folder and no
   property for it) are searched as any question instead of answering "No notes match".
+
+## 4.4 — web clips
+
+`ClipEvalChatModelTest`: 20 saved pages in `smoke-data/eval/web-pages` (news, blogs, docs, a recipe, and pages that are
+not articles), clipped with Medium. All 20 got notes, every article was taken out without the site's menu, and 91 % of
+the kept sentences are backed by the article's words (at least half the words of each, past its opening, are in the
+article).
+
+## 4.7 — agent mode
+
+`AgentEvalChatModelTest`: 30 tasks over the committed Sample Vault that need a look-up before the change or the answer
+(tag the books not finished, set a property on the project on hold, write a note from several notes, add a task to
+the right note, link, move, and questions whose answer is in a property), graded on the card's steps or the final
+answer (`AgentEvalCases`). A size offers agent mode at 80 % right.
+
+| Size | Right | Moves (mean / max) | Time a task (mean / max) |
+|---|---|---|---|
+| Small (2B) | 10 % | 3 / 7 | 6 / 24 s |
+| Medium (4B) | 23 % → 43 % → 73 % → 83 % | 3 / 8 | 11 / 32 s |
+| Large (9B) | 70 % | 2 / 8 | 12 / 43 s |
+
+Medium went up as the evaluation showed what was wrong, each fix with its test:
+
+- **It looped:** the same `find` 24 times to the 30-move limit. A move made again now leaves only `propose` and `finish`
+  in the grammar (`AgentTaskPrompt.END_SCHEMA`); the old "already done" note had the model believe a change was made.
+- **Properties were invisible:** `read` gave a note's body without its frontmatter, and the index reads no properties,
+  so the owner, the servings or a vendor could not be found. `read` writes the properties first, and `search` also
+  lists the notes whose property values hold the query's words.
+- **A task went to today's note:** a step that named its note in its list, not its `note` field, lost it; plan mode had
+  the same gap (`VaultNames`).
+- **An empty find said nothing:** it now says nothing was found and shows the query it ran, so the next move can try
+  other words.
+
+Only Medium offers it (`LlamaLlmEngine.AGENT_SIZES`). Large proposes changes for plain questions and gives up after
+one search more often; Small rarely ends on the right plan. Every change still waits for the card, so a wrong plan is
+seen before anything is written.

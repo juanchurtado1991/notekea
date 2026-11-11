@@ -46,6 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Agent mode (4.7): with the Medium model, Agent mode at the bottom of the chat's field works on a task that
+  needs looking things up first, one step at a time (search, read a note, list notes, look at the tasks, read a page
+  whose address the request writes), listing each step. It ends on the usual card, and nothing changes until you
+  confirm it, or with what it found. It stops after 30 steps or 10 minutes.
 - Documents (4.5): PDFs, Word, OpenDocument, EPUB, PowerPoint, Excel, HTML and text files anywhere in the vault are
   read with Apache Tika, never changed, and found by search, Related notes and the chat beside the notes. A citation
   of one, or a click in Files, opens it in a read-only tab: a PDF as its real pages, at the cited page with the passage
