@@ -163,6 +163,7 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
 
             git.use {
                 excludeOwnFiles(git = it)
+                keepLineEnds(git = it)
                 Outcome.Success(value = block(it))
             }
         } catch (exception: Exception) {
@@ -270,6 +271,16 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
         it.isNotBlank()
     }?.let { UsernamePasswordCredentialsProvider(TOKEN_USER, it) }
 
+    // Notes stay byte for byte as written: Git for Windows sets core.autocrlf, which would rewrite their line ends.
+    private fun keepLineEnds(git: Git) {
+        val config = git.repository.config
+        val isKept = config.getString(CORE, null, AUTO_CRLF) == FALSE
+        if (isKept) return
+
+        config.setString(CORE, null, AUTO_CRLF, FALSE)
+        config.save()
+    }
+
     // Notekea's own files: a half-written save, its trash, Obsidian's window layout, macOS's folder files.
     private fun excludeOwnFiles(git: Git) {
         val exclude = File(git.repository.directory, "info/exclude")
@@ -294,6 +305,9 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
 
     private companion object {
         const val MAIN = "main"
+        const val CORE = "core"
+        const val AUTO_CRLF = "autocrlf"
+        const val FALSE = "false"
         const val ORIGIN = "origin"
         const val REMOTE = "remote"
         const val BRANCH = "branch"
