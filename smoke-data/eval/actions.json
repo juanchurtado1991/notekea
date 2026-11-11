@@ -1386,5 +1386,77 @@
     "fields": {}
    }
   ]
+ },
+ {
+  "request": "make study cards from Dune",
+  "open": null,
+  "steps": [
+   {
+    "action": "make_cards",
+    "fields": {
+     "note": "Dune"
+    }
+   }
+  ]
+ },
+ {
+  "request": "hazme tarjetas de estudio de Sapiens",
+  "open": null,
+  "steps": [
+   {
+    "action": "make_cards",
+    "fields": {
+     "note": "Sapiens"
+    }
+   }
+  ]
+ },
+ {
+  "request": "quiz me on Atomic Habits with flashcards",
+  "open": null,
+  "steps": [
+   {
+    "action": "make_cards",
+    "fields": {
+     "note": "Atomic Habits"
+    }
+   }
+  ]
+ },
+ {
+  "request": "clip https://example.com/sourdough",
+  "open": null,
+  "steps": [
+   {
+    "action": "clip_url",
+    "fields": {
+     "url": "https://example.com/sourdough"
+    }
+   }
+  ]
+ },
+ {
+  "request": "guarda esta página en mis notas: https://example.org/arepas",
+  "open": null,
+  "steps": [
+   {
+    "action": "clip_url",
+    "fields": {
+     "url": "https://example.org/arepas"
+    }
+   }
+  ]
+ },
+ {
+  "request": "save this article to my notes https://example.com/sleep-and-memory",
+  "open": null,
+  "steps": [
+   {
+    "action": "clip_url",
+    "fields": {
+     "url": "https://example.com/sleep-and-memory"
+    }
+   }
+  ]
  }
 ]

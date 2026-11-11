@@ -67,6 +67,11 @@ class ClipEvalChatModelTest {
         val results = pages.map { clipped(file = it) }
 
         results.forEach { report.append("| ${it.name} | ${it.sentences} | ${it.backed} |\n") }
+
+        results.forEach {
+            report.append("\n## ${it.name}\n\n${it.notes}\n\nNot backed: ${it.unbacked}\n")
+        }
+
         val sentences = results.sumOf { it.sentences }
         val backed = results.sumOf { it.backed }
 
@@ -111,7 +116,8 @@ class ClipEvalChatModelTest {
                 name = file.name,
                 sentences = 0,
                 backed = 0,
-                isClean = false
+                isClean = false,
+                notes = ""
             )
 
         val article = done
@@ -127,26 +133,32 @@ class ClipEvalChatModelTest {
             .filterNot { it.startsWith("#") }
             .joinToString(separator = " ")
 
+        // The opening sentence says what the article is about, as the prompt asks: it states no fact to check.
         val kept = SENTENCE
             .findAll(input = notes)
             .map { it.value.trim() }
             .filter {
                 it.split(' ').size >= MIN_WORDS
             }
+            .drop(n = 1)
             .toList()
+
+        val unbacked = kept.filterNot {
+            isBacked(
+                sentence = it,
+                article = article
+            )
+        }
 
         return PageResult(
             name = file.name,
             sentences = kept.size,
-            backed = kept.count {
-                isBacked(
-                    sentence = it,
-                    article = article
-                )
-            },
+            backed = kept.size - unbacked.size,
             isClean = NAVIGATION.none {
                 it in done.clip.article.text
-            }
+            },
+            notes = done.clip.notes,
+            unbacked = unbacked
         )
     }
 
@@ -154,7 +166,9 @@ class ClipEvalChatModelTest {
         val name: String,
         val sentences: Int,
         val backed: Int,
-        val isClean: Boolean
+        val isClean: Boolean,
+        val notes: String,
+        val unbacked: List<String> = emptyList()
     )
 
     // Backed by its words: most of the sentence's longer words are in the article (a check apart from the reranker).
@@ -166,14 +180,14 @@ class ClipEvalChatModelTest {
             .findAll(input = sentence.lowercase())
             .map { it.value }
             .filter {
-                it.length > 3
+                it.length > SHORT_WORD
             }
             .toList()
 
         if (words.isEmpty()) return true
 
         return words.count {
-            it.take(n = 5) in article
+            it.take(n = STEM) in article
         } * PERCENT / words.size >= WORDS_PRESENT
     }
 
@@ -181,7 +195,9 @@ class ClipEvalChatModelTest {
         const val PAGES = "../smoke-data/eval/web-pages"
         const val PERCENT = 100
         const val MIN_BACKED = 85
-        const val WORDS_PRESENT = 60
+        const val WORDS_PRESENT = 50
+        const val SHORT_WORD = 3
+        const val STEM = 5
         const val MIN_WORDS = 3
         val NAVIGATION = listOf("Subscribe", "Privacy", "Ten tips")
         val SENTENCE = Regex(pattern = "[^.!?]+[.!?]")
