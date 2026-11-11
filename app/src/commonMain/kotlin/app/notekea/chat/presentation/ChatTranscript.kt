@@ -41,8 +41,8 @@ internal object ChatTranscript {
         appendLine("Sources:")
 
         sources.forEach { source ->
-            val place =
-                (listOf(source.note.value) + source.headingPath.drop(n = 1)).joinToString(separator = " › ")
+            val place = (listOf(source.note.value) + source.headingPath.drop(n = 1))
+                .joinToString(separator = " › ")
 
             val snippet = source
                 .text
