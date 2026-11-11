@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -275,9 +276,11 @@ private fun StartActions(
     val conventions = state.platformConventions
     val suggestedName = stringResource(resource = Res.string.welcome_new_vault_default_name)
 
-    Row(
+    // A row that wraps, so longer words (Spanish) move a button to the next line instead of squeezing it.
+    FlowRow(
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
+        itemVerticalAlignment = Alignment.CenterVertically
     ) {
         NotekeaButton(
             text = stringResource(resource = Res.string.welcome_open_folder),
@@ -307,7 +310,7 @@ private fun StartActions(
 @Composable
 private fun StartHint(isBusy: Boolean) {
     Row(
-        modifier = Modifier.height(height = HINT_HEIGHT_DP.dp),
+        modifier = Modifier.heightIn(min = HINT_HEIGHT_DP.dp),
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
         verticalAlignment = Alignment.CenterVertically
     ) {

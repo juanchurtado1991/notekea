@@ -10,15 +10,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.ai.presentation.ModelManagerScreen
 import app.notekea.core.appearance.domain.Appearance
+import app.notekea.core.preferences.domain.AppLanguage
 import app.notekea.core.preferences.domain.AppPreferences
 import app.notekea.core.presentation.designsystem.theme.LocalAppearance
 import app.notekea.core.presentation.designsystem.theme.LocalSystemDarkTheme
 import app.notekea.core.presentation.designsystem.theme.LocalSystemReduceMotion
 import app.notekea.core.presentation.platform.AppEnvironment
+import app.notekea.core.presentation.platform.AppLocale
 import app.notekea.core.presentation.platform.AppVersionDefaults
 import app.notekea.core.presentation.platform.DesktopVideoPlayer
 import app.notekea.core.presentation.platform.LocalAppPreferences
@@ -47,6 +50,12 @@ import java.awt.Cursor
 
 private const val PREVIEW_TEXT = "Every window of the app"
 
+/*
+ * Static, so a new language recomposes every scope under it, windows and dialogs included, keeping what they remember:
+ * Compose's resources read the locale only when they recompose.
+ */
+private val LocalLanguage = staticCompositionLocalOf { AppLanguage.SYSTEM }
+
 /**
  * What every window of the app reads, around them: the system's dark theme and reduced motion, the kept appearance
  * ([initialAppearance] until the store answers), the desktop's file drop and resize cursor, and the app's version. The
@@ -71,7 +80,12 @@ fun NotekeaAppLocals(
         value = environment.systemMotion.isReduced()
     }
 
-    CompositionLocalProvider(LocalAppPreferences provides preferences) {
+    remember(preferences.language) { AppLocale.apply(language = preferences.language) }
+
+    CompositionLocalProvider(
+        LocalAppPreferences provides preferences,
+        LocalLanguage provides preferences.language
+    ) {
         AppLocals(
             isMotionReduced = isMotionReduced,
             appearance = appearance,

@@ -250,6 +250,7 @@
     <string name="settings_open_last_vault_hint">Off, Notekea starts on the welcome screen with your vaults listed.</string>
     <string name="settings_show_welcome">Welcome</string>
     <string name="settings_show_welcome_button">Show again</string>
+    <string name="settings_show_welcome_hint">Shows the first-run welcome again: what Notekea does, your notes and the AI.</string>
     <string name="settings_text_size">Text size</string>
     <string name="settings_text_size_points">%1$d pt</string>
     <string name="settings_line_width">Line width</string>
@@ -267,7 +268,7 @@
     <string name="settings_files_failed">This setting couldn’t be saved in .obsidian.</string>
     <string name="settings_shortcuts_hint">Shortcuts follow your system: ⌘ on macOS, Ctrl on Windows and Linux.</string>
     <string name="settings_about_privacy">Privacy</string>
-    <string name="settings_about_privacy_text">Your notes never leave this computer. Notekea has no telemetry; it only goes on the internet when you ask: to download a model or FFmpeg, to sync with your repository, to clip a page, or to play and title a YouTube video.</string>
+    <string name="settings_about_privacy_text">Your notes stay on this computer unless you turn on sync, and the AI runs here too. Notekea has no telemetry; it only goes on the internet when you ask: to download a model or FFmpeg, to sync with your repository, to clip a page, or to play and title a YouTube video.</string>
     <string name="settings_about_licenses">Licenses</string>
     <string name="settings_about_licenses_text">Notekea is open source under the Apache License 2.0. The libraries it uses and their licenses are listed in LIBRARIES.md on GitHub.</string>
     <string name="settings_about_diagnostics">Diagnostics</string>
@@ -421,8 +422,8 @@
 
     <string name="welcome_busy">Opening vault…</string>
     <string name="onboarding_welcome_title">Welcome to Notekea</string>
-    <string name="onboarding_private_title">Your notes stay here</string>
-    <string name="onboarding_private_text">Nothing leaves this computer.</string>
+    <string name="onboarding_private_title">Private by default</string>
+    <string name="onboarding_private_text">The AI runs on this computer. Notes leave it only if you turn on sync.</string>
     <string name="onboarding_related_title">Related notes</string>
     <string name="onboarding_related_text">See what connects, without tagging anything.</string>
     <string name="onboarding_ask_title">Ask your notes</string>

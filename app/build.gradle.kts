@@ -240,6 +240,11 @@ val jvmTest = tasks.named<Test>("jvmTest") {
         excludeTestsMatching(chatModelTestPattern)
     }
 }
+// Tests read the English words, whatever language the computer that runs them is in (5.2 added Spanish).
+tasks.withType<Test>().configureEach {
+    systemProperty("user.language", "en")
+    systemProperty("user.country", "US")
+}
 tasks.register<Test>("modelTest") {
     description = "Runs the tests that load the bundled embedding model"
     group = "verification"

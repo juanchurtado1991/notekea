@@ -28,6 +28,7 @@ import app.notekea.resources.settings_open_last_vault_hint
 import app.notekea.resources.settings_section_general
 import app.notekea.resources.settings_show_welcome
 import app.notekea.resources.settings_show_welcome_button
+import app.notekea.resources.settings_show_welcome_hint
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -70,7 +71,7 @@ internal fun GeneralSettings(
                     spotlight = spotlight
                 )
             }),
-            footnote = stringResource(resource = Res.string.settings_open_last_vault_hint)
+            footnote = stringResource(resource = Res.string.settings_show_welcome_hint)
         )
     }
 }

@@ -20,7 +20,7 @@ import java.nio.file.Path
 import java.util.UUID
 
 /**
- * [VideoCompressor] with FFmpeg ([FfmpegTool], installed by [FfmpegInstaller] into [toolsFolder] the first time):
+ * [VideoCompressor] with FFmpeg ([FfmpegTool], installed by [FfmpegInstaller] in its tools folder the first time):
  * H.264 (OpenH264) and AAC in an `.mp4`, at the bit rate that fits ([VideoBitrate]), tried again a little lower when
  * the copy is still too big; the copy goes in [workFolder]. Four threads, so the computer stays usable meanwhile.
  */
