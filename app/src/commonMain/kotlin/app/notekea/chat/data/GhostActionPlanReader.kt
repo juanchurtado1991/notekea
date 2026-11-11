@@ -6,13 +6,14 @@ import app.notekea.chat.domain.ActionPlanReader
 import app.notekea.chat.domain.AgentMove
 import app.notekea.chat.domain.PlannedStep
 import com.ghost.serialization.Ghost
+import com.ghost.serialization.exception.GhostJsonException
 
 /** [ActionPlanReader] over the model's JSON: a step naming no known action is left out, a reply not JSON is null. */
 class GhostActionPlanReader : ActionPlanReader {
     override fun read(json: String): List<PlannedStep>? {
         val dto = try {
             Ghost.deserialize<ActionPlanDto>(json)
-        } catch (_: RuntimeException) {
+        } catch (_: GhostJsonException) {
             return null
         }
 
@@ -22,7 +23,7 @@ class GhostActionPlanReader : ActionPlanReader {
     override fun readNotes(json: String): List<Pair<String, String>>? {
         val dto = try {
             Ghost.deserialize<TextNotesDto>(json)
-        } catch (_: RuntimeException) {
+        } catch (_: GhostJsonException) {
             return null
         }
 
@@ -44,7 +45,7 @@ class GhostActionPlanReader : ActionPlanReader {
                 note = it.note
             )
         }
-    } catch (_: RuntimeException) {
+    } catch (_: GhostJsonException) {
         null
     }
 
