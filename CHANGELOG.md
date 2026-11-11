@@ -50,8 +50,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - The chat's memory, as in Claude Code: a ring beside the mode fills as the conversation grows, and once full the
-  chat writes the earlier part into a short summary by itself and goes on with it; Compact chat, in the ⋯ menu, does
-  it at once. The send button is an arrow.
+  chat writes the earlier part into a short summary by itself and goes on with it, as it does after half an hour
+  without questions or in a chat from an earlier session; Compact chat, in the ⋯ menu, does it at once. Copy chat
+  lists the agent's steps. The send button is an arrow.
 - The chat replies in the language it is written to (English, Spanish, French, Portuguese, German, Italian), or in the
   one asked for, also after a short "gracias!".
 - The chat answers from the notes' properties (who owns a project, a book's rating), sums the numbers it adds right,

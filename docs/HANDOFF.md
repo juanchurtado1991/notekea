@@ -128,8 +128,8 @@ Where it stands (2026-11-11): 4.1–4.8 built, with the chat's help guide and th
 - **Chat probe (2026-11-11, overnight):** six rounds of 62 conversations in English, Spanish and French against
   Medium (`ChatProbeChatModelTest`, `docs/answer-quality.md`): replies in the person's language, follow-ups,
   honest refusals, the memory ring with compaction, answers from properties and tables, and no claimed changes.
-  Action eval 97 %. Open: Medium's agent mixes `finished` and `rating`; a "going back to the start" after ten turns
-  picks the wrong recipe. 4.7-05 automated, 4.7-06 manual. Not yet probed on Large.
+  Action eval 97 %. Eight rounds on Medium, two on Large; the chat also compacts itself after half an hour idle.
+  4.7-05 automated, 4.7-06 manual. Open: the Sample Vault's Reading list and `finished` properties disagree.
 
 Decided before the work started:
 
