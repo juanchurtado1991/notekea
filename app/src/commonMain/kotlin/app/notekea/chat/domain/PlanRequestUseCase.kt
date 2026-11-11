@@ -176,17 +176,23 @@ class PlanRequestUseCase(
 
         if (isQuestion) return listOf(steps.firstOrNull() ?: PlannedStep(kind = ActionKind.ANSWER))
 
-        // Talking is the whole reply: a greeting with a stray step is still a greeting.
-        steps.firstOrNull {
-            it.kind == ActionKind.CHAT
-        }?.let {
-            return listOf(it)
+        // Talk is the reply only when nothing else is asked: "hola, create a note" still proposes the note.
+        val acts = steps.filterNot {
+            it.kind == ActionKind.CHAT || it.kind == ActionKind.ANSWER
         }
 
-        val changes = steps.any { it.kind.isConfirmed }
-        if (!changes) return steps
+        if (acts.isEmpty()) {
+            return listOf(
+                steps.first {
+                    it.kind == ActionKind.CHAT
+                }
+            )
+        }
 
-        return steps.filterNot {
+        val changes = acts.any { it.kind.isConfirmed }
+        if (!changes) return acts
+
+        return acts.filterNot {
             it.kind in LOOK_UPS
         }
     }

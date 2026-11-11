@@ -113,6 +113,23 @@ class AgentAndTalkTest {
             )
         }
 
+    @Test
+    fun `a greeting with an action still proposes the action`() = runTest {
+        engine.reply = {
+            "{\"steps\":[{\"action\":\"chat\"},{\"action\":\"create_note\",\"title\":\"Compras\"}]}"
+        }
+
+        val plan = PlanRequestUseCase(engine, GhostActionPlanReader())(
+            request = "hola, crea una nota Compras",
+            context = ActionContext(today = "2026-11-10")
+        ) as Outcome.Success
+
+        assertEquals(
+            expected = listOf(ActionKind.CREATE_NOTE),
+            actual = plan.value.map { it.kind }
+        )
+    }
+
     private suspend fun indexed(
         path: RelativePath,
         body: String

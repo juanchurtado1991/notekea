@@ -46,7 +46,7 @@ data class ChatEntry(
     )
 
     /** The language the chat replies to it in: the question's. */
-    val language: ReplyLanguage get() = ReplyLanguage.of(text = question)
+    val language: ReplyLanguage by lazy { ReplyLanguage.of(text = question) }
 
     val isAnswering: Boolean get() = outcome == null
 

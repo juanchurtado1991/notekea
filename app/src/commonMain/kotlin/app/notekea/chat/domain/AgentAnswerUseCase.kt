@@ -28,7 +28,24 @@ class AgentAnswerUseCase(
     ): Flow<AnswerStep> = flow {
         val gathered = mutableListOf<AnswerSource>()
         val tried = mutableSetOf<String>()
-        val names = notes.map { it.file.path.nameWithoutExtension }
+
+        val words = WORD
+            .findAll(input = question.lowercase())
+            .map { it.value }
+            .filter {
+                it.length > 2
+            }
+            .toSet()
+
+        // The names that share the question's words first, so in a large vault the agent sees the ones it may read.
+        val names = notes
+            .map { it.file.path }
+            .sortedByDescending { path ->
+                words.count {
+                    it in path.value.lowercase()
+                }
+            }
+            .map { it.nameWithoutExtension }
 
         try {
             for (turn in 1..MAX_MOVES) {
@@ -197,6 +214,7 @@ class AgentAnswerUseCase(
 
     private companion object {
         const val MAX_MOVES = 3
+        val WORD = Regex(pattern = "[\\p{L}\\p{N}]+")
         const val MAX_EXCERPTS = 6
         const val MAX_NAMES = 80
         const val PER_SEARCH = 3
