@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
@@ -32,7 +33,10 @@ class TemplatePickerContentTest {
                 rows = rows,
                 hasTemplates = true
             ),
-            listOf(FIRST, SECOND)
+            act = {
+                pressAt(position = FIRST)
+                pressAt(position = SECOND)
+            }
         )
 
         val created = clicks(
@@ -40,7 +44,10 @@ class TemplatePickerContentTest {
                 isOpen = true,
                 hasFolder = false
             ),
-            positions = listOf(CREATE)
+            // Create by its word, wherever the layout puts the button.
+            act = {
+                clickText(text = CREATE) { render(nanoTime = SETTLE_FRAMES * FRAME_NANOS) }
+            }
         )
 
         assertEquals(
@@ -60,7 +67,7 @@ class TemplatePickerContentTest {
 
     private fun clicks(
         state: TemplatePickerState,
-        positions: List<Offset>
+        act: ImageComposeScene.() -> Unit
     ): List<TemplatePickerIntent> {
         val intents = mutableListOf<TemplatePickerIntent>()
 
@@ -82,23 +89,25 @@ class TemplatePickerContentTest {
             }.use { scene ->
                 repeat(times = SETTLE_FRAMES) { scene.render(nanoTime = it * FRAME_NANOS) }
 
-                positions.forEach { position ->
-                    scene.sendPointerEvent(
-                        eventType = PointerEventType.Press,
-                        position = position
-                    )
-
-                    scene.sendPointerEvent(
-                        eventType = PointerEventType.Release,
-                        position = position
-                    )
-
-                    scene.render(nanoTime = SETTLE_FRAMES * FRAME_NANOS)
-                }
+                scene.act()
             }
         }
 
         return intents
+    }
+
+    private fun ImageComposeScene.pressAt(position: Offset) {
+        sendPointerEvent(
+            eventType = PointerEventType.Press,
+            position = position
+        )
+
+        sendPointerEvent(
+            eventType = PointerEventType.Release,
+            position = position
+        )
+
+        render(nanoTime = SETTLE_FRAMES * FRAME_NANOS)
     }
 
     companion object {
@@ -107,10 +116,7 @@ class TemplatePickerContentTest {
         private const val SETTLE_FRAMES = 3
         private const val WINDOW_HEIGHT = 640
         private const val WINDOW_WIDTH = 1200
-        private val CREATE = Offset(
-            x = 600f,
-            y = 404f
-        )
+        private const val CREATE = "Create"
         private val FIRST = Offset(
             x = 600f,
             y = 227f

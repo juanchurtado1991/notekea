@@ -16,10 +16,10 @@ import app.notekea.core.presentation.nodes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** Buttons and text fields are as tall as the rest of a dense desktop interface, not Material's 40 and 56 dp. */
+/** Buttons are macOS push buttons (24 dp, redesign 5A) and text fields a control tall, not Material's 40 and 56 dp. */
 class CompactControlsScreenTest {
     @Test
-    fun `every button style and a one line text field are one control tall`() {
+    fun `every button style is a push button tall and a one line text field a control`() {
         var heights = emptyMap<String, Float>()
 
         UiThread.run {
@@ -65,12 +65,15 @@ class CompactControlsScreenTest {
             }
         }
 
-        val control = NotekeaDimensions.ControlHeight.value
+        val button = NotekeaDimensions.PushButtonHeight.value
 
         assertEquals(
-            expected = (
-                NotekeaButtonStyle.entries.map { it.name } + FIELD
-                ).associateWith { control },
+            expected = NotekeaButtonStyle
+                .entries
+                .associate { style ->
+                    style.name to button
+                }
+                .plus(FIELD to NotekeaDimensions.ControlHeight.value),
             actual = heights
         )
     }

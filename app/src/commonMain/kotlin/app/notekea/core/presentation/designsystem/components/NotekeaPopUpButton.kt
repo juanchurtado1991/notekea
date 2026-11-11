@@ -1,11 +1,15 @@
 package app.notekea.core.presentation.designsystem.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -18,15 +22,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 
+private const val ARROW_BOX_DP = 16
+private const val ARROW_INSET_DP = 3
+private const val ARROW_RADIUS_DP = 4
 private const val PREVIEW_CHOICE = "Español"
 private const val PREVIEW_LABEL = "Language"
 
 /**
- * A setting with a few choices, as a macOS pop-up button: the current [choice] with a chevron; a click opens the
+ * A setting with a few choices, as a macOS pop-up button: the current [choice] with its double arrow; a click opens the
  * [choices] below it, the current one checked. [label] names the setting for screen readers.
  */
 @Composable
@@ -44,15 +52,18 @@ fun NotekeaPopUpButton(
         modifier = modifier,
         state = menuState
     ) {
+        val shape = RoundedCornerShape(size = NotekeaDimensions.PushButtonRadius)
+
         Surface(
             modifier = Modifier
-                .clip(shape = MaterialTheme.shapes.small)
+                .heightIn(min = NotekeaDimensions.PushButtonHeight)
+                .clip(shape = shape)
                 .clickable(
                     onClickLabel = label,
                     role = Role.DropdownList,
                     onClick = { menuState.open(at = Offset.Zero) }
                 ),
-            shape = MaterialTheme.shapes.small,
+            shape = shape,
             color = colors.surface,
             border = BorderStroke(
                 width = NotekeaDimensions.BorderWidth,
@@ -61,10 +72,10 @@ fun NotekeaPopUpButton(
         ) {
             Row(
                 modifier = Modifier.padding(
-                    horizontal = NotekeaDimensions.SpacingS,
-                    vertical = NotekeaDimensions.SpacingXs
+                    start = NotekeaDimensions.SpacingS,
+                    end = ARROW_INSET_DP.dp
                 ),
-                horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs),
+                horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -73,14 +84,30 @@ fun NotekeaPopUpButton(
                     color = colors.onSurface
                 )
 
-                Icon(
-                    imageVector = NotekeaIcons.Dropdown,
-                    contentDescription = null,
-                    modifier = Modifier.size(size = NotekeaDimensions.IconSize),
-                    tint = colors.onSurfaceVariant
-                )
+                PopUpArrows()
             }
         }
+    }
+}
+
+/** macOS's pop-up arrows: a double chevron on a small square in the theme's color (redesign 5A). */
+@Composable
+private fun PopUpArrows() {
+    Box(
+        modifier = Modifier
+            .size(size = ARROW_BOX_DP.dp)
+            .background(
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(size = ARROW_RADIUS_DP.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = NotekeaIcons.PopUp,
+            contentDescription = null,
+            modifier = Modifier.size(size = NotekeaDimensions.BadgeIconSize),
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
     }
 }
 

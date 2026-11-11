@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 
@@ -36,16 +38,17 @@ private const val PREVIEW_DISABLED = "Disabled"
 private const val PREVIEW_OPEN = "Open folder…"
 private const val PREVIEW_REMOVE = "Remove"
 private const val PREVIEW_SHORTCUT = "Ctrl+O"
+private const val DISABLED_ALPHA = 0.38f
 private const val SHORTCUT_HINT_ALPHA = 0.72f
 private val BUTTON_PADDING = PaddingValues(
     horizontal = NotekeaDimensions.SpacingM,
-    vertical = NotekeaDimensions.SpacingXs
+    vertical = 0.dp
 )
 
 /**
- * Text button in the four Notekea weights, as tall as the app's other controls ([NotekeaDimensions.ControlHeight]);
- * colors come from semantic roles. [shortcutHint] shows the keyboard shortcut ("Ctrl+O", "⌘O") as a muted label after
- * the text, so it is discovered without being the only way in. A focused button shows its focus as a border.
+ * A text button in the four Notekea weights, as macOS's push button (5A): 24 dp tall, the secondary one white with a
+ * fine border. [shortcutHint] shows the shortcut ("Ctrl+O", "⌘O") muted after the text, so it is discovered without
+ * being the only way in. A focused button shows its focus as a border.
  */
 @Composable
 fun NotekeaButton(
@@ -68,13 +71,13 @@ fun NotekeaButton(
     // Read from the focus modifier, not from interactions: a dialog may focus the button before it collects them.
     var isFocused by remember { mutableStateOf(value = false) }
 
-    // Material's 48 dp touch target is for phones: a pointer needs none around the 32 dp button.
+    // Material's 48 dp touch target is for phones: a pointer needs none around the 24 dp button.
     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
         StyledButton(
             style = style,
             onClick = onClick,
             modifier = modifier
-                .heightIn(min = NotekeaDimensions.ControlHeight)
+                .heightIn(min = NotekeaDimensions.PushButtonHeight)
                 .onFocusChanged { isFocused = it.isFocused },
             enabled = enabled,
             border = borderOf(
@@ -96,7 +99,7 @@ private fun StyledButton(
     border: BorderStroke?,
     label: @Composable RowScope.() -> Unit
 ) {
-    val shape = MaterialTheme.shapes.small
+    val shape = RoundedCornerShape(size = NotekeaDimensions.PushButtonRadius)
 
     when (style) {
         NotekeaButtonStyle.DESTRUCTIVE, NotekeaButtonStyle.PRIMARY -> Button(
@@ -114,6 +117,10 @@ private fun StyledButton(
             modifier = modifier,
             enabled = enabled,
             shape = shape,
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ),
             border = border,
             contentPadding = BUTTON_PADDING
         ) { label() }
@@ -162,9 +169,15 @@ private fun borderOf(
             color = focusColor
         )
 
-        style == NotekeaButtonStyle.SECONDARY -> ButtonDefaults.outlinedButtonBorder(
-            enabled = enabled
-        )
+        style == NotekeaButtonStyle.SECONDARY -> {
+            val outline = MaterialTheme.colorScheme.outline
+            val color = if (enabled) outline else outline.copy(alpha = DISABLED_ALPHA)
+
+            BorderStroke(
+                width = NotekeaDimensions.BorderWidth,
+                color = color
+            )
+        }
 
         else -> null
     }

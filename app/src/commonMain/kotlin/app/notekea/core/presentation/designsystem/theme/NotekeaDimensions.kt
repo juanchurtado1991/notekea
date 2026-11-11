@@ -17,6 +17,10 @@ object NotekeaDimensions {
     val FocusRingWidth = 2.dp
     val IconSize = 16.dp
     val MenuItemHeight = 32.dp
+
+    /** macOS's push buttons and pop-up buttons (redesign 5A): fields keep [ControlHeight]. */
+    val PushButtonHeight = 24.dp
+    val PushButtonRadius = 5.dp
     val SpacingL = 16.dp
     val SpacingM = 12.dp
     val SpacingS = 8.dp

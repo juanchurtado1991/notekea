@@ -39,6 +39,9 @@ object NotekeaColors {
     /** Text and icons on a picture, over its dark shade: white whatever the theme, as the shade is. */
     val onImage: Color = NotekeaPalette.OnImage
 
+    /** A switch's thumb (macOS redesign 5A): white in both modes, as macOS draws it. */
+    val switchThumb: Color = NotekeaPalette.OnImage
+
     /** What went well and needs nothing done (a note that is saved): a calm green. */
     val success: Color
         @Composable get() = themed(

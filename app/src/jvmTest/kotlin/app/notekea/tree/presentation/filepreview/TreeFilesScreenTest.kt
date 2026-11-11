@@ -16,6 +16,7 @@ import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.tree.domain.FlattenTreeUseCase
@@ -55,18 +56,23 @@ class TreeFilesScreenTest {
             }.use { scene ->
                 scene.render(nanoTime = 0L)
 
-                listOf(MENU_ROW, OPEN_BUTTON, REVEAL_BUTTON).forEachIndexed { index, position ->
-                    scene.sendPointerEvent(
-                        eventType = PointerEventType.Press,
-                        position = position
-                    )
+                scene.sendPointerEvent(
+                    eventType = PointerEventType.Press,
+                    position = MENU_ROW
+                )
 
-                    scene.sendPointerEvent(
-                        eventType = PointerEventType.Release,
-                        position = position
-                    )
+                scene.sendPointerEvent(
+                    eventType = PointerEventType.Release,
+                    position = MENU_ROW
+                )
 
-                    scene.render(nanoTime = FRAME_NANOS * (index + 1))
+                scene.render(nanoTime = FRAME_NANOS)
+
+                // The buttons by their words, wherever the layout puts them.
+                listOf(OPEN, REVEAL).forEachIndexed { index, text ->
+                    val frame = FRAME_NANOS * (index + 2)
+
+                    scene.clickText(text = text) { scene.render(nanoTime = frame) }
                 }
             }
         }
@@ -143,6 +149,8 @@ class TreeFilesScreenTest {
         private const val FRAME_NANOS = 16_000_000L
         private const val IMAGE_HEIGHT = 240
         private const val IMAGE_WIDTH = 480
+        private const val OPEN = "Open with its app"
+        private const val REVEAL = "Show in Files"
         private const val VAULT_NAME = "Playground Vault"
         private const val VAULT_PATH = "/home/ana/Playground Vault"
         private const val WINDOW_HEIGHT = 800
@@ -152,15 +160,7 @@ class TreeFilesScreenTest {
             x = 168f,
             y = 154f
         )
-        private val OPEN_BUTTON = Offset(
-            x = 463f,
-            y = 388f
-        )
         private val PLATE = RelativePath(value = "attachments/Arepas plate.png")
-        private val REVEAL_BUTTON = Offset(
-            x = 623f,
-            y = 388f
-        )
         private val WELCOME = RelativePath(value = "Welcome.md")
     }
 }
