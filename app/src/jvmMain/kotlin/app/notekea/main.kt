@@ -18,6 +18,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import app.notekea.core.appearance.domain.WindowBoundsStore
 import app.notekea.core.logging.data.FileLogWriter
+import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.SystemEnvironment
 import app.notekea.core.presentation.IntentTrail
@@ -26,6 +27,8 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaBrand
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.platform.AppEnvironment
 import app.notekea.core.presentation.platform.FollowWindowBounds
+import app.notekea.core.presentation.platform.LocalTitleBarSpace
+import app.notekea.core.presentation.platform.MacTitleBar
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.SystemAppMenu
 import app.notekea.core.presentation.platform.SystemQuit
@@ -195,10 +198,21 @@ private fun ApplicationScope.NotekeaWindow(
         FollowWindowBounds(state = windowState)
         if (isCrashTest) CrashTest()
 
-        NotekeaRoot(
-            host = host,
-            onClose = onClose
-        )
+        // macOS's unified title bar (1A); Windows and Linux keep the system's own above the content.
+        val isMac = conventions.operatingSystem == OperatingSystem.MACOS
+
+        val titleBar = if (isMac) {
+            with(MacTitleBar) { rememberTitleBar(state = windowState) }
+        } else {
+            null
+        }
+
+        CompositionLocalProvider(LocalTitleBarSpace provides titleBar) {
+            NotekeaRoot(
+                host = host,
+                onClose = onClose
+            )
+        }
     }
 }
 

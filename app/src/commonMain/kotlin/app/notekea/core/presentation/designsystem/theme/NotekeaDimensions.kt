@@ -29,6 +29,7 @@ object NotekeaDimensions {
     val SpacingXxl = 32.dp
     val StatusBarHeight = 24.dp
     val TableCellPadding = 16.dp
+    val ToolRailWidth = 40.dp
     val TreeIndent = 16.dp
     val TreeRowHeight = 28.dp
 }

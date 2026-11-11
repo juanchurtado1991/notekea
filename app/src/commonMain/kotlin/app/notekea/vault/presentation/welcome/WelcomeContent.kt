@@ -28,6 +28,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaLogo
 import app.notekea.core.presentation.designsystem.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
+import app.notekea.core.presentation.designsystem.components.NotekeaTitleBarBand
 import app.notekea.core.presentation.designsystem.components.NotekeaWordmark
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
@@ -79,10 +80,19 @@ fun WelcomeContent(
                     onIntent(WelcomeIntent.OnSwitchVaultClick)
                 }
 
-                else -> WelcomeHome(
-                    state = state,
-                    onIntent = onIntent
-                )
+                else -> {
+                    // Under macOS's unified title bar the welcome screen's top moves the window (1A).
+                    NotekeaTitleBarBand(
+                        modifier = Modifier
+                            .align(alignment = Alignment.TopCenter)
+                            .fillMaxWidth()
+                    )
+
+                    WelcomeHome(
+                        state = state,
+                        onIntent = onIntent
+                    )
+                }
             }
 
             // A vault that fails to open from the open one (Open folder… and its shortcut) says why over it.

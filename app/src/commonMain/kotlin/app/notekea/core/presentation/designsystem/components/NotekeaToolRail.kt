@@ -26,7 +26,6 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.designsystem.theme.sidebarSurface
 
 private const val PREVIEW_HEIGHT_DP = 260
-private const val RAIL_WIDTH_DP = 40
 
 /**
  * A narrow strip of icon buttons along the window's edge that stays when the panel beside it is hidden, each with a
@@ -46,7 +45,7 @@ fun NotekeaToolRail(
     Row(modifier = modifier.fillMaxHeight()) {
         Column(
             modifier = Modifier
-                .width(width = RAIL_WIDTH_DP.dp)
+                .width(width = NotekeaDimensions.ToolRailWidth)
                 .fillMaxHeight()
                 .background(color = colors.sidebarSurface)
                 .padding(vertical = NotekeaDimensions.SpacingS)

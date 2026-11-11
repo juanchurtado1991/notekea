@@ -184,17 +184,23 @@ private fun SuiteBuilder.nativeTitleBar() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "Las pestañas están debajo de la barra de título del sistema")
+        title(text = "La parte de arriba de la ventana, con los botones del sistema")
 
         steps(
             text =
-            "$OPEN_PLAYGROUND\n2. Abre algunas notas y mira la parte de arriba de la ventana."
+            "$OPEN_PLAYGROUND\n2. Abre algunas notas y mira la parte de arriba de la ventana.\n3. " +
+                "Oculta la barra lateral (Ctrl+\\, Cmd+\\ en macOS) y vuelve a mirar.\n4. En macOS, " +
+                "arrastra la ventana desde la fila de las pestañas y haz doble clic en un espacio vacío " +
+                "de esa fila."
         )
 
         expected(
             text =
-            "Las pestañas están dentro de la ventana, debajo de su barra de título; la barra " +
-                "de título y sus botones son los de tu sistema."
+            "Los botones de cerrar, minimizar y maximizar son los de tu sistema. En Windows y Linux " +
+                "las pestañas están debajo de la barra de título del sistema. En macOS la barra " +
+                "lateral sube hasta arriba con los botones sobre su color y las pestañas ocupan la " +
+                "fila del título; con la barra lateral oculta, las pestañas empiezan después de los " +
+                "botones. Arrastrar la fila mueve la ventana y el doble clic la maximiza."
         )
     }
 }

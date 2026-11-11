@@ -7,8 +7,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +34,7 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.designsystem.theme.chromeSurface
 import app.notekea.core.presentation.designsystem.theme.motionTween
+import app.notekea.core.presentation.platform.LocalTitleBarSpace
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -96,45 +99,55 @@ fun NotekeaTabStrip(
     )
 
     val scroll = rememberScrollState()
+    val titleBar = LocalTitleBarSpace.current
 
-    Row(
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .height(height = STRIP_HEIGHT_DP.dp)
-            .background(color = MaterialTheme.colorScheme.chromeSurface),
-        verticalAlignment = Alignment.CenterVertically
+            .background(color = MaterialTheme.colorScheme.chromeSurface)
     ) {
-        Box(modifier = Modifier.weight(weight = 1f)) {
-            ScrollingTabs(
-                tabs = tabs,
-                look = StripLook(
-                    selectedIndex = selectedIndex,
-                    isActive = isActive,
-                    closeLabel = closeLabel
-                ),
-                targets = targets,
-                scroll = scroll,
-                menuOf = menuOf,
-                onSelect = onSelect,
-                onClose = onClose,
-                release = release,
-                trailing = trailing
-            )
+        // On macOS the strip is the title row (1A): its empty part moves the window, under the tabs.
+        titleBar?.dragArea(Modifier.matchParentSize())
 
-            if (scroll.canScrollForward) {
-                OverflowFade(
-                    modifier = Modifier.align(alignment = Alignment.CenterEnd)
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = titleBar?.leading ?: 0.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(weight = 1f)) {
+                ScrollingTabs(
+                    tabs = tabs,
+                    look = StripLook(
+                        selectedIndex = selectedIndex,
+                        isActive = isActive,
+                        closeLabel = closeLabel
+                    ),
+                    targets = targets,
+                    scroll = scroll,
+                    menuOf = menuOf,
+                    onSelect = onSelect,
+                    onClose = onClose,
+                    release = release,
+                    trailing = trailing
+                )
+
+                if (scroll.canScrollForward) {
+                    OverflowFade(
+                        modifier = Modifier.align(alignment = Alignment.CenterEnd)
+                    )
+                }
+            }
+
+            if (allTabsLabel != null && (scroll.canScrollForward || scroll.canScrollBackward)) {
+                AllTabsButton(
+                    tabs = tabs,
+                    selectedIndex = selectedIndex,
+                    label = allTabsLabel,
+                    onSelect = onSelect
                 )
             }
-        }
-
-        if (allTabsLabel != null && (scroll.canScrollForward || scroll.canScrollBackward)) {
-            AllTabsButton(
-                tabs = tabs,
-                selectedIndex = selectedIndex,
-                label = allTabsLabel,
-                onSelect = onSelect
-            )
         }
     }
 }

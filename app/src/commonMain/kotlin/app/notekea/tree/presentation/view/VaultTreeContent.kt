@@ -1,20 +1,26 @@
 package app.notekea.tree.presentation.view
 
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.components.NotekeaSplitPane
+import app.notekea.core.presentation.designsystem.components.NotekeaTitleBarBand
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.sidebarSurface
+import app.notekea.core.presentation.platform.LocalTitleBarSpace
 import app.notekea.tree.domain.TreePreferences
 import app.notekea.tree.presentation.VaultSidebar
 import app.notekea.tree.presentation.filepreview.NoteDetailsPanel
@@ -52,13 +58,24 @@ fun VaultTreeContent(
         BoxWithConstraints {
             val isOverlay = maxWidth < TreePreferences.SIDEBAR_OVERLAY_BELOW_DP.dp
 
+            val titleBar = LocalTitleBarSpace.current
+            val isTreeShown = !state.isSidebarCollapsed && !isOverlay
+            val railWidth = NotekeaDimensions.ToolRailWidth
+
             Row {
-                SidebarRail(
-                    state = state,
-                    onIntent = onIntent,
-                    actions = rail,
-                    isSidePanelVisible = isSidePanelVisible
-                )
+                // On macOS the window's buttons sit in the sidebar's color, over the rail and the tree (1A).
+                Column {
+                    NotekeaTitleBarBand(
+                        modifier = Modifier.width(width = NotekeaDimensions.ToolRailWidth)
+                    )
+
+                    SidebarRail(
+                        state = state,
+                        onIntent = onIntent,
+                        actions = rail,
+                        isSidePanelVisible = isSidePanelVisible
+                    )
+                }
 
                 NotekeaSplitPane(
                     panelWidth = state.sidebarWidthDp.dp,
@@ -69,17 +86,28 @@ fun VaultTreeContent(
                     minPanelWidth = TreePreferences.MIN_SIDEBAR_WIDTH_DP.dp,
                     maxPanelWidth = TreePreferences.MAX_SIDEBAR_WIDTH_DP.dp,
                     panel = {
-                        VaultSidebar(
-                            state = state,
-                            vaultName = vaultName,
-                            onIntent = onIntent
-                        )
+                        Column {
+                            NotekeaTitleBarBand(modifier = Modifier.fillMaxWidth())
+
+                            VaultSidebar(
+                                state = state,
+                                vaultName = vaultName,
+                                onIntent = onIntent
+                            )
+                        }
                     },
                     content = {
-                        NoteDetailsPanel(
-                            state = state,
-                            content = content
-                        )
+                        // Without the tree beside them, the tabs leave the window buttons their room.
+                        CompositionLocalProvider(
+                            LocalTitleBarSpace provides titleBar?.withLeading(
+                                leading = if (isTreeShown) 0.dp else titleBar.leading - railWidth
+                            )
+                        ) {
+                            NoteDetailsPanel(
+                                state = state,
+                                content = content
+                            )
+                        }
                     },
                     isOverlay = isOverlay
                 )

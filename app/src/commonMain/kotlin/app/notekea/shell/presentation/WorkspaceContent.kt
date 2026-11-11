@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.platform.LocalTitleBarSpace
 import app.notekea.core.presentation.platform.keys
 import app.notekea.resources.Res
 import app.notekea.resources.workspace_empty_message
@@ -102,18 +104,29 @@ fun WorkspaceContent(
             workspace.panes.forEachIndexed { index, pane ->
                 if (index > 0) PaneDivider()
 
-                PaneColumn(
-                    pane = pane,
-                    index = index,
-                    state = state,
-                    platformConventions = platformConventions,
-                    onIntent = onIntent,
-                    startActions = startActions,
-                    unsavedPaths = unsavedPaths,
-                    onDrop = onDrop,
-                    onBounds = { paneBounds[index] = it },
-                    paneContent = paneContent
-                )
+                // Only the first pane's tabs meet the window's buttons (macOS, 1A).
+                val titleBar = LocalTitleBarSpace
+                    .current
+                    ?.takeIf {
+                        index > 0
+                    }
+                    ?.withLeading(leading = 0.dp)
+                    ?: LocalTitleBarSpace.current
+
+                CompositionLocalProvider(LocalTitleBarSpace provides titleBar) {
+                    PaneColumn(
+                        pane = pane,
+                        index = index,
+                        state = state,
+                        platformConventions = platformConventions,
+                        onIntent = onIntent,
+                        startActions = startActions,
+                        unsavedPaths = unsavedPaths,
+                        onDrop = onDrop,
+                        onBounds = { paneBounds[index] = it },
+                        paneContent = paneContent
+                    )
+                }
             }
         }
     }

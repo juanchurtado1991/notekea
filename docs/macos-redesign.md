@@ -75,7 +75,10 @@ This file is the dependency audit the developer asked for before anything was ap
 2. 4A: the sidebar and chrome surfaces, and the status bar on the note's color.
 3. 2A: the source list.
 4. 5A: the push buttons and the pop-up button.
-5. 1A: the unified title bar on macOS, and the sidebar toggle.
+5. 1A: the unified title bar on macOS.
+   - The row of tabs and the sidebar's top band move the window, and a double click maximizes it.
+   - The sidebar toggle stays the rail's Files button, right under the traffic lights. A second toggle in the title
+     row would do the same thing twice.
 6. 6A: the note's page header.
 7. 7B: the chat as a document.
 8. 8A: the alert, then 8C, the popovers.
