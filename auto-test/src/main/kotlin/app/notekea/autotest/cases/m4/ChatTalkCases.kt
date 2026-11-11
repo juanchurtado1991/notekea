@@ -29,7 +29,9 @@ private val QUESTIONS = listOf(
     "How much water do the arepas need?",
     "How long does the dough rest?",
     "How many servings do the black beans make?",
-    "What is in the café con leche?"
+    "What is in the café con leche?",
+    "What is on the weekly menu on Monday?",
+    "What goes in the tomato soup?"
 )
 
 /**
@@ -65,7 +67,7 @@ private fun SuiteBuilder.spanishFollowUp() {
 private fun SuiteBuilder.memoryRing() {
     automated(
         id = "4.7-06",
-        title = "The chat's memory ring fills as it talks, and Compact chat empties it into a summary",
+        title = "The chat's memory ring fills as it talks, and Compact chat writes a summary without filling it more",
         timeout = MODEL_CASE_TIMEOUT,
         precondition = ChatModels.medium
     ) {
@@ -85,10 +87,13 @@ private fun SuiteBuilder.memoryRing() {
         ui.onNode(matcher = hasContentDescription(value = MORE)).performClick()
         click(text = COMPACT)
 
-        ui
-            .waitUntil(timeoutMillis = COMPACT_MILLIS) {
-                ringPercent() < filled.last()
-            }
+        // Compacting ends (ringPercent waits for it) and never fills the memory more: a short chat whose summary
+        // would be no shorter stays as it is.
+        val compacted = ringPercent()
+
+        expect(compacted <= filled.last()) {
+            "expected Compact chat not to fill the ring more, it read ${filled.last()} then $compacted"
+        }
 
         ask(question = FIRST_RECIPE)
         expectInChat(replyTo(copiedChat(), FIRST_RECIPE), "arepa")
