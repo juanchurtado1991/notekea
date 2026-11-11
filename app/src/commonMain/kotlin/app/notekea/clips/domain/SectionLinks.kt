@@ -1,8 +1,8 @@
 package app.notekea.clips.domain
 
 /**
- * The pages a page links under its own path ([prefix]), as a documentation site's index does: same site, a deeper or a
- * sibling page of the same folder, no file, no anchor of itself. At most [MAX_PAGES]; [more] says how many were left.
+ * The pages a page has under its own path ([prefix]), as a documentation site's index does, from its llms.txt, its
+ * sitemap or its links; at most [MAX_PAGES], [more] says how many were left out. A news page has none.
  */
 data class SectionLinks(
     val prefix: String,
@@ -12,39 +12,56 @@ data class SectionLinks(
     companion object {
         const val MAX_PAGES = 30
 
+        // Quoted or not: Node.js's minified docs write href=assert.html.
         private val HREF = Regex(
-            pattern = "href\\s*=\\s*[\"']([^\"'#]+)",
+            pattern = "href\\s*=\\s*(?:\"([^\"#]*)\"|'([^'#]*)'|([^\\s>#\"']+))",
             option = RegexOption.IGNORE_CASE
         )
+
         private val ORIGIN = Regex(
             pattern = "^(https?://[^/?#]+)(/[^?#]*)?",
             option = RegexOption.IGNORE_CASE
         )
 
         private val FILES = Regex(
-            pattern = "\\.(png|jpe?g|gif|svg|webp|ico|css|js|json|xml|pdf|zip|gz|mp4|mp3|woff2?|ttf|md|txt)$",
+            pattern = "\\.(png|jpe?g|gif|svg|webp|ico|css|js|json|xml|pdf|zip|gz|mp4|mp3|woff2?|ttf)$",
             option = RegexOption.IGNORE_CASE
         )
 
-        /** The links of [page] under its folder: "/docs/a/intro" holds "/docs/a/axiom" and "/docs/a/b/c". */
-        fun of(page: FetchedPage): SectionLinks {
-            val (origin, path) = ORIGIN
-                .find(input = page.url)
-                ?.let {
-                    it.groupValues[1] to it.groupValues[2].ifEmpty { "/" }
-                }
-                ?: return SectionLinks(
-                    prefix = page.url,
-                    urls = emptyList(),
-                    more = 0
-                )
+        // A copy of a page for machines: the same page, by another name.
+        private val COPY = Regex(
+            pattern = "\\.(md|txt|html?)$",
+            option = RegexOption.IGNORE_CASE
+        )
 
-            val self = path.trimEnd('/')
-            val prefix = origin + path.substringBeforeLast(delimiter = '/') + "/"
+        // "/2026/11/11/eeuu/": a news site's day, whose pages are other stories, not a section (CNN, 2026-11-11).
+        private val DATED = Regex(pattern = "/\\d{4}/\\d{1,2}/")
 
-            val found = HREF
+        // A news site's or a blog's folder, whose pages are other stories (WCK's /es/news/, 2026-11-11).
+        private val NEWS = Regex(
+            pattern = "/(news|noticias|noticia|blog|blogs|posts?|articles?|articulos?|stories|press|prensa)/",
+            option = RegexOption.IGNORE_CASE
+        )
+
+        /** The links [page] writes under its path. */
+        fun of(page: FetchedPage): SectionLinks = within(
+            url = page.url,
+            candidates = linksIn(page = page)
+        )
+
+        /** The addresses [page] links, whole. */
+        fun linksIn(page: FetchedPage): List<String> {
+            val (origin, path) = partsOf(url = page.url) ?: return emptyList()
+
+            return HREF
                 .findAll(input = page.html)
-                .map { it.groupValues[1].trim() }
+                .map { match ->
+                    match
+                        .groupValues
+                        .drop(n = 1)
+                        .first { it.isNotEmpty() }
+                        .trim()
+                }
                 .mapNotNull {
                     resolved(
                         href = it,
@@ -52,21 +69,128 @@ data class SectionLinks(
                         path = path
                     )
                 }
-                .map { it.substringBefore(delimiter = '?').trimEnd('/') }
-                .filter {
-                    it.startsWith(prefix = prefix) &&
-                        it != origin + self &&
-                        !FILES.containsMatchIn(input = it)
-                }
-                .distinct()
                 .toList()
+        }
+
+        /**
+         * Of [candidates] (a site's index, its sitemap, or a page's links), those under the page at [url]; beside it in
+         * its folder, only those the page itself [linked] (a flat docs site lists every page of it in its index).
+         */
+        fun within(
+            url: String,
+            candidates: List<String>,
+            linked: List<String>? = null
+        ): SectionLinks {
+            val (origin, path) = partsOf(url = url) ?: return none(prefix = url)
+            val self = normalized(path = path)
+
+            val pages = candidates
+                .map { it.substringBefore(delimiter = '?').substringBefore(delimiter = '#') }
+                .filter {
+                    it.startsWith(prefix = origin) && !FILES.containsMatchIn(input = it)
+                }
+                .distinctBy {
+                    keyOf(
+                        url = it,
+                        origin = origin
+                    )
+                }
+                .filter {
+                    keyOf(
+                        url = it,
+                        origin = origin
+                    ) != self
+                }
+
+            // The page as a folder first ("/develop" holds "/develop/ui"), else the folder it is in
+            // ("/integrations/introduction" beside "/integrations/axiom").
+            val keys = pages.map {
+                keyOf(
+                    url = it,
+                    origin = origin
+                )
+            }
+
+            val own = "$self/"
+            val parent = self.substringBeforeLast(delimiter = '/') + "/"
+            val folder = if (keys.any { it.startsWith(prefix = own) }) own else parent
+
+            val isNews =
+                DATED.containsMatchIn(input = folder) || NEWS.containsMatchIn(input = folder)
+
+            if (isNews) return none(prefix = origin + folder)
+
+            val isBeside = folder != own
+
+            val linkedKeys = linked?.map {
+                keyOf(
+                    url = it,
+                    origin = origin
+                )
+            }?.toSet()
+
+            val under = pages.filterIndexed { index, _ ->
+                val key = keys[index]
+
+                key.startsWith(prefix = folder) && (
+                    !isBeside ||
+                        linkedKeys == null ||
+                        key in linkedKeys
+                    )
+            }
 
             return SectionLinks(
-                prefix = prefix,
-                urls = found.take(n = MAX_PAGES),
-                more = (found.size - MAX_PAGES).coerceAtLeast(minimumValue = 0)
+                prefix = origin + folder,
+                urls = under.take(n = MAX_PAGES),
+                more = (under.size - MAX_PAGES).coerceAtLeast(minimumValue = 0)
             )
         }
+
+        /** Where a site may keep a file [name] about the page at [url]: its folder and each above it, deepest first. */
+        fun placesAbove(
+            url: String,
+            name: String
+        ): List<String> {
+            val (origin, path) = partsOf(url = url) ?: return emptyList()
+
+            val folders = path
+                .trim('/')
+                .split('/')
+                .dropLast(n = 1)
+                .filter { it.isNotEmpty() }
+
+            return (folders.size downTo 0).map { depth ->
+                val folder = folders.take(n = depth).joinToString(separator = "/")
+                if (folder.isEmpty()) "$origin/$name" else "$origin/$folder/$name"
+            }
+        }
+
+        private fun partsOf(url: String): Pair<String, String>? = ORIGIN
+            .find(input = url)
+            ?.let {
+                it.groupValues[1] to it.groupValues[2].ifEmpty { "/" }
+            }
+
+        private fun keyOf(
+            url: String,
+            origin: String
+        ): String = normalized(path = url.removePrefix(prefix = origin))
+
+        // A page's path as one name, however it is written: "/docs/a/", "/docs/a.md", "/docs/_llms/a.txt".
+        private fun normalized(path: String): String = path
+            .replace(
+                oldValue = "/_llms/",
+                newValue = "/"
+            )
+            .replace(COPY, replacement = "")
+            .removeSuffix(suffix = "/index")
+            .trimEnd('/')
+
+        private fun none(prefix: String) = SectionLinks(
+            prefix = prefix,
+            urls = emptyList(),
+            more = 0
+        )
 
         // An address as the browser reads it from the page at [origin][path]: whole, from the root, or beside it.
         private fun resolved(
@@ -74,6 +198,7 @@ data class SectionLinks(
             origin: String,
             path: String
         ): String? = when {
+            href.isEmpty() -> null
             href.startsWith(prefix = "http://") || href.startsWith(prefix = "https://") -> href
             href.startsWith(prefix = "//") -> origin.substringBefore(delimiter = "//") + href
             href.startsWith(prefix = "/") -> origin + href
