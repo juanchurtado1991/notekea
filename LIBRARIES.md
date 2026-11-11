@@ -138,6 +138,7 @@ Videos in notes (the developer's request of 2026-11-11). Decided after a spike:
 | Library | Coordinates | Version | Purpose |
 |---|---|---|---|
 | ComposeMediaPlayer | `io.github.kdroidfilter:composemediaplayer` (MIT) | 0.11.4 | Plays a video file in its note with the system's player (`DesktopVideoPlayer`); a format the system cannot play opens with its app |
+| webview-kmp | `cn.enaium.webview:webview-kmp` (MIT) | 1.0.1 | The YouTube player window: the system's web view in Notekea started again as a process of its own (`YouTubePlayerWindow`), about 290 MB while it is open, all given back when it closes |
 
 ## 6. Infrastructure
 

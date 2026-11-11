@@ -35,6 +35,7 @@ import app.notekea.core.presentation.platform.WindowOpening
 import app.notekea.core.presentation.platform.WindowQuit
 import app.notekea.core.presentation.platform.WindowSizes
 import app.notekea.di.desktopModules
+import app.notekea.video.player.YouTubePlayerWindow
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.platformLogWriter
 import com.testbuddy.crash.Breadcrumbs
@@ -75,6 +76,9 @@ fun runNotekea(
     modules: List<Module> = desktopModules,
     extraWindows: @Composable ApplicationScope.() -> Unit = {}
 ) {
+    // Started again to play a YouTube video in a window of its own: only that window, no vault, no database.
+    if (YouTubePlayerWindow.runIfAsked()) return
+
     val koin = startKoin { modules(modules) }.koin
 
     val crashBuddy = crashBuddyOf(

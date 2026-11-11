@@ -27,6 +27,7 @@ import app.notekea.core.presentation.platform.LocalShortcutDispatcher
 import app.notekea.core.presentation.platform.LocalVideoPlayer
 import app.notekea.core.presentation.platform.LocalWindowCloseGuard
 import app.notekea.core.presentation.platform.LocalWindowDialogs
+import app.notekea.core.presentation.platform.LocalYouTubePlayer
 import app.notekea.core.presentation.platform.UiZoom
 import app.notekea.core.presentation.platform.WindowCloseShortcuts
 import app.notekea.core.presentation.platform.WindowHost
@@ -38,6 +39,7 @@ import app.notekea.tree.presentation.view.VaultScope
 import app.notekea.vault.presentation.welcome.WelcomeContent
 import app.notekea.vault.presentation.welcome.WelcomePreviewData
 import app.notekea.vault.presentation.welcome.WelcomeScreen
+import app.notekea.video.player.YouTubePlayerProcess
 import java.awt.Cursor
 
 private const val PREVIEW_TEXT = "Every window of the app"
@@ -81,7 +83,14 @@ private fun AppLocals(
     content: @Composable () -> Unit,
     isSystemDark: Boolean?
 ) {
+    val youTube = remember { YouTubePlayerProcess() }
+
+    DisposableEffect(youTube) {
+        onDispose { youTube.close() }
+    }
+
     CompositionLocalProvider(
+        LocalYouTubePlayer provides youTube::play,
         LocalSystemDarkTheme provides isSystemDark,
         LocalSystemReduceMotion provides isMotionReduced,
         LocalAppearance provides appearance,

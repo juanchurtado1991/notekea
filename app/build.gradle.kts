@@ -82,6 +82,7 @@ kotlin {
             implementation(libs.directory.watcher)
             implementation(libs.java.keyring)
             implementation(libs.composemediaplayer)
+            implementation(libs.webview.kmp)
             implementation(libs.jgit)
             implementation(libs.pdfbox)
             implementation(libs.readability4j)
