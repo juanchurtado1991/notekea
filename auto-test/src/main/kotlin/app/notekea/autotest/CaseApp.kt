@@ -16,9 +16,12 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import app.notekea.NotekeaAppLocals
 import app.notekea.NotekeaRoot
+import app.notekea.ai.data.ModelFolder
+import app.notekea.ai.domain.ActiveModelStore
 import app.notekea.core.appearance.domain.Appearance
 import app.notekea.core.embedding.data.LlamaTextEmbedder
 import app.notekea.core.embedding.domain.TextEmbedder
+import app.notekea.core.logging.domain.TextClipboard
 import app.notekea.core.notes.domain.FileOpener
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
@@ -32,6 +35,7 @@ import app.notekea.tree.data.VaultFolderTrash
 import app.notekea.tree.domain.FileRevealer
 import app.notekea.tree.domain.Trash
 import app.notekea.vault.domain.FolderPicker
+import kotlinx.coroutines.runBlocking
 import okio.FileSystem
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
@@ -43,7 +47,7 @@ import java.nio.file.Path
 /**
  * The real Notekea for one automated case or smoke run: every Koin module of the desktop app, with its data in
  * [appData], its vaults in [vaults], a home of its own ([home]), and the system's dialogs and apps replaced
- * ([fileOpener], [fileRevealer], [uriHandler]). [closeGuard] runs before the window closes.
+ * ([fileOpener], [fileRevealer], [uriHandler], [clipboard]). [closeGuard] runs before the window closes.
  */
 class CaseApp(
     private val appData: Path,
@@ -51,6 +55,7 @@ class CaseApp(
 ) : AutoCloseable {
     val home: Path = appData.resolveSibling(HOME)
     val uriHandler = RecordingUriHandler()
+    val clipboard = RecordingTextClipboard()
     private var isClosed = false
 
     val folderPicker = ScriptedFolderPicker()
@@ -85,6 +90,21 @@ class CaseApp(
 
     /** The title the app's window shows now. */
     val windowTitle: String get() = host.title
+
+    /**
+     * Puts the chat model of [ChatModels] in use, as if downloaded in Settings → AI model; before the chat shows, which
+     * looks at the model then. A Notekea started again on the same data keeps it.
+     */
+    fun useChatModel() {
+        val size = requireNotNull(ChatModels.preferred()) { "No chat model is on this machine" }
+
+        ChatModels.install(
+            size = size,
+            folder = koin.get<ModelFolder>().root
+        )
+
+        runBlocking { koin.get<ActiveModelStore>().save(size = size) }
+    }
 
     /** Where the vault [name] is. */
     fun vaultPath(name: String): String = vaults.resolve(name).toString()
@@ -143,6 +163,7 @@ class CaseApp(
         single<AttachmentPicker> { attachmentPicker }
         single<FileOpener> { fileOpener }
         single<FileRevealer> { fileRevealer }
+        single<TextClipboard> { clipboard }
 
         single<Trash> {
             VaultFolderTrash(
