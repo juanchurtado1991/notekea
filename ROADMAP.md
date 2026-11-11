@@ -994,7 +994,7 @@ when the GPU holds it), with nothing technical to choose. The models and sizes a
   `/sys/class/drm`; other GPUs are recommended by RAM until 3.7 measures them. The status bar entry moves to the
   chat panel (3.3), which links to Settings → AI model when no model is in use.
 
-### ✅ 3.2 Chat engine — `feature/m3-chat`
+### ✅ 3.2 Chat engine — `feature/m3-chat` — [notekea#139](https://github.com/juanchurtado1991/notekea/pull/139)
 
 `LlmEngine.generate` with java-llama.cpp, streaming tokens as a `Flow`, cancellable. The engine loads the model once
 with the slot count chosen by 3.0 and accepts concurrent generations (a `Semaphore` caps them at the slot count);
@@ -1009,7 +1009,7 @@ citations that do not match a retrieved chunk.
   CPU keeps both the mapped file and its own copy, 3.0), never locked in memory, and the context size is the one
   3.0 measured, not the model's maximum (budgets in 5.4).
 
-### ✅ 3.3 Chat panel — `feature/m3-chat`
+### ✅ 3.3 Chat panel — `feature/m3-chat` — [notekea#139](https://github.com/juanchurtado1991/notekea/pull/139)
 
 **UI — Right panel, Chat mode** (its "Coming soon" screen and the Inspector | Chat control exist since 1.14)**:**
 - Message list; the answer streams token by token with a "Stop" button (`Esc`).
@@ -1036,7 +1036,7 @@ citations that do not match a retrieved chunk.
   model already downloaded. The history keeps the last 100 questions of each vault, and each question is answered
   alone (a follow-up does not see the earlier ones yet).
 
-### ✅ 3.4 Answer evaluation — `feature/m3-chat`
+### ✅ 3.4 Answer evaluation — `feature/m3-chat` — [notekea#139](https://github.com/juanchurtado1991/notekea/pull/139)
 
 Extends the eval set with expected facts per question; a manual-run task reports citation accuracy
 (cited paragraph actually contains the fact) for the active model. It also reports latency per step, so 3.5
@@ -1050,7 +1050,7 @@ Ministral 3B, Phi-4-mini and Gemma 4 E2B and E4B at every size, so the 3.0 defau
 by a model that pastes its chunks, so 3.4 grades strictly (facts, the question's language, no pasted excerpt); the
 504 questions start its set.
 
-### ✅ 3.5 Answer pipeline — `feature/m3-chat`
+### ✅ 3.5 Answer pipeline — `feature/m3-chat` — [notekea#139](https://github.com/juanchurtado1991/notekea/pull/139)
 
 Replaces the single "retrieve and answer" call of 3.2 with steps that make small models precise
 (`ARCHITECTURE.md` §12):
@@ -1076,7 +1076,7 @@ their own and −5 turned away answerable questions.
   its note and headings left Medium at 389 right against 388, extraction and checking lost in the spike, and a
   rewrite could win at most the 2 % of answerable questions declined. None is built; the single call is the pipeline.
 
-### ✅ 3.6 Deep answer mode — `feature/m3-chat`
+### ✅ 3.6 Deep answer mode — `feature/m3-chat` — [notekea#139](https://github.com/juanchurtado1991/notekea/pull/139)
 
 An opt-in mode for when precision matters more than speed. Several drafts are written in parallel (different
 seeds, same evidence), each goes through the verification of 3.5, and the draft with the most supported sentences
@@ -1096,7 +1096,7 @@ the mode only for the sizes the 3.4 set shows it helps.
   80, Large 85 against 85; Deep answer is offered with Medium only. The drafts are written at once, so Stop ends them
   all and keeps nothing; there is no "best draft so far" to keep.
 
-### ✅ 3.8 Questions in plain words — `feature/m3-chat`
+### ✅ 3.8 Questions in plain words — `feature/m3-chat` — [notekea#139](https://github.com/juanchurtado1991/notekea/pull/139)
 
 Notes and tasks asked for in plain words ("books I rated 4 or more in 2026", "what is due this week in Garden?") and
 answered exactly by the queries of 2.10 and 2.11: the model only turns the question into a query.
@@ -1118,7 +1118,7 @@ answered exactly by the queries of 2.10 and 2.11: the model only turns the quest
   that fills the Query tab from "Describe what you want"; tasks are a `show_tasks` step. The 30 questions are part of
   the 106 requests of `smoke-data/eval/actions.json`.
 
-### ✅ 3.9 Actions from chat — `feature/m3-chat`
+### ✅ 3.9 Actions from chat — `feature/m3-chat` — [notekea#139](https://github.com/juanchurtado1991/notekea/pull/139)
 
 The chat is a way to use Notekea, not only to ask about notes (decided with the developer, 2026-10-29, widened on
 2026-11-04): it can do almost anything a person can do with their notes. A request becomes **a plan of up to 5 steps**,
@@ -1175,7 +1175,7 @@ You:  create a note "Meeting with Ana" in Work from the Meeting template, status
   suggestion Small's plans need. The end to end run of 13 requests on the Sample Vault (`ActionRunChatModelTest`)
   passes with Medium, Undo included. Not built: rewriting a note as a difference, and clipping a web page (4.4).
 
-### ✅ 3.7 M3 performance pass — `feature/m3-chat`
+### ✅ 3.7 M3 performance pass — `feature/m3-chat` — [notekea#139](https://github.com/juanchurtado1991/notekea/pull/139)
 
 The performance pass of M3 (see "Closing a milestone"), on the automated smoke runs of M1 to M3: memory while a model
 loads, chats and answers deeply on an 8 GB machine, how fast it returns to the editor's level after the chat is
