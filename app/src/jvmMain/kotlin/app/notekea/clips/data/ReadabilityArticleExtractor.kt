@@ -20,17 +20,26 @@ class ReadabilityArticleExtractor : ArticleExtractor {
             return Outcome.Failure(error = ClipError.NotArticle)
         }
 
-        val content = parsed.content ?: return Outcome.Failure(error = ClipError.NotArticle)
+        val read = parsed
+            .content
+            ?.let { blocksOf(html = it) }
+            .orEmpty()
 
-        val paragraphs = Jsoup
-            .parse(content)
-            .select(BLOCKS)
-            .map { it.text().trim() }
-            .filter { it.isNotEmpty() }
-            .distinct()
+        // A short documentation page had Readability take its menu for the article; the page's <main> holds it.
+        val main = Jsoup
+            .parse(page.html)
+            .selectFirst(MAIN)
+            ?.apply { select(CHROME).remove() }
+            ?.let { blocksOf(html = it.html()) }
+            .orEmpty()
 
+        val isMainBetter =
+            main.isNotEmpty() && proseOf(paragraphs = main) >= proseOf(paragraphs = read)
+
+        val paragraphs = if (isMainBetter) main else read
         val words = paragraphs.sumOf { it.split(' ').size }
-        if (words < MIN_WORDS) return Outcome.Failure(error = ClipError.NotArticle)
+        val least = if (isMainBetter) MIN_MAIN_WORDS else MIN_WORDS
+        if (words < least) return Outcome.Failure(error = ClipError.NotArticle)
 
         val title = parsed
             .title
@@ -45,9 +54,30 @@ class ReadabilityArticleExtractor : ArticleExtractor {
         )
     }
 
+    private fun blocksOf(html: String): List<String> = Jsoup
+        .parse(html)
+        .select(BLOCKS)
+        .map { it.text().trim() }
+        .filter { it.isNotEmpty() }
+        .distinct()
+
+    // The words in sentences, not in menu entries of a word or two.
+    private fun proseOf(paragraphs: List<String>): Int = paragraphs
+        .map { it.split(' ').size }
+        .filter {
+            it >= PROSE_WORDS
+        }
+        .sum()
+
     private companion object {
-        const val BLOCKS = "p, h1, h2, h3, h4, li, blockquote, pre"
+        // Mintlify's docs write paragraphs as <span data-as="p">.
+        const val BLOCKS = "p, [data-as=p], h1, h2, h3, h4, li, blockquote, pre"
         const val MIN_WORDS = 80
+        const val MIN_MAIN_WORDS = 30
+        const val PROSE_WORDS = 6
+        const val MAIN = "main, [role=main], #content, article"
+        const val CHROME =
+            "nav, aside, header, footer, [role=navigation], #sidebar, [id*=sidebar], [id*=navigation]"
         const val TITLE_CHARS = 60
     }
 }

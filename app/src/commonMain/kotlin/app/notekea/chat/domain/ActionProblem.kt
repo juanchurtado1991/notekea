@@ -41,4 +41,7 @@ sealed interface ActionProblem {
 
     /** A web page could not be clipped (4.4), for [reason]; no note was written. */
     data class PageFailed(val reason: PageProblem) : ActionProblem
+
+    /** A pasted page links pages under its path: the chat asks whether to clip only it or them too; nothing written. */
+    data class SectionAsked(val section: app.notekea.chat.domain.SectionAsked) : ActionProblem
 }

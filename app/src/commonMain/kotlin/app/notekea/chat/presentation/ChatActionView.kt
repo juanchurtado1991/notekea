@@ -48,6 +48,7 @@ import app.notekea.resources.chat_problem_query
 import app.notekea.resources.chat_problem_query_failed
 import app.notekea.resources.chat_problem_refused
 import app.notekea.resources.chat_problem_task
+import app.notekea.resources.chat_section_question
 import app.notekea.resources.chat_shown_close_tabs
 import app.notekea.resources.chat_shown_open_note
 import app.notekea.resources.chat_shown_open_today
@@ -246,6 +247,9 @@ private fun problemText(problem: ActionProblem): String = when (problem) {
     ActionProblem.AgentStopped -> replyString(resource = Res.string.chat_problem_agent_stopped)
 
     is ActionProblem.PageFailed -> replyString(resource = PAGE_PROBLEMS.getValue(problem.reason))
+
+    is ActionProblem.SectionAsked ->
+        replyString(Res.string.chat_section_question, problem.section.count, problem.section.prefix)
 }
 
 private val PAGE_PROBLEMS = mapOf(

@@ -3,6 +3,7 @@ package app.notekea.chat.presentation
 import app.notekea.chat.domain.ActOnRequestUseCase
 import app.notekea.chat.domain.ActionContext
 import app.notekea.chat.domain.ActionKind
+import app.notekea.chat.domain.ActionProblem
 import app.notekea.chat.domain.ActionRunner
 import app.notekea.chat.domain.ActionTurnStep
 import app.notekea.chat.domain.AgentUse
@@ -138,7 +139,13 @@ internal class ChatActions(
                     )
                 )
 
-                is ActionTurnStep.Problem -> acted(
+                is ActionTurnStep.Problem -> (step.problem as? ActionProblem.SectionAsked)?.let {
+                    entry.copy(
+                        step = ChatStep.DONE,
+                        outcome = TurnOutcome.ANSWERED,
+                        sectionAsked = it.section
+                    )
+                } ?: acted(
                     entry,
                     action.copy(
                         status = ActionStatus.FAILED,

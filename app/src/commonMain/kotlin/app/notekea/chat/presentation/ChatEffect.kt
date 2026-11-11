@@ -1,6 +1,7 @@
 package app.notekea.chat.presentation
 
 import app.notekea.chat.domain.ActionStep
+import app.notekea.chat.domain.FoundRow
 import app.notekea.core.notes.domain.RelativePath
 
 sealed interface ChatEffect {
@@ -19,3 +20,11 @@ sealed interface ChatEffect {
     /** Does what [step] shows (a note, a panel, the theme...): the window carries it out (3.9). */
     data class Show(val step: ActionStep) : ChatEffect
 }
+
+/** A task opens at its line; a note opens. */
+internal fun foundEffectOf(row: FoundRow): ChatEffect = row.line?.let {
+    ChatEffect.Reveal(
+        note = row.note,
+        range = it..it
+    )
+} ?: ChatEffect.Open(note = row.note)

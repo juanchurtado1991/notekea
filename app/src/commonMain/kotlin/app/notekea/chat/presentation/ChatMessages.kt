@@ -293,6 +293,18 @@ private fun AnswerContent(
             onRetry = { onIntent(ChatIntent.OnRetry(id = entry.id)) }
         )
 
+        entry.sectionAsked != null -> ChatSectionQuestion(
+            section = entry.sectionAsked,
+            onChoose = { isWhole ->
+                onIntent(
+                    ChatIntent.OnSectionChoose(
+                        id = entry.id,
+                        isWhole = isWhole
+                    )
+                )
+            }
+        )
+
         else -> Written(
             entry = entry,
             isWriting = isWriting,

@@ -5,6 +5,7 @@ import app.notekea.chat.domain.ChatError
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.ReplyLanguage
+import app.notekea.chat.domain.SectionAsked
 import app.notekea.chat.domain.TurnOutcome
 
 /**
@@ -25,6 +26,8 @@ data class ChatEntry(
     val error: ChatError?,
     val action: ChatAction? = null,
     val offered: String? = null,
+    // A pasted page that links pages under its path: the chat asks whether to clip only it or them too.
+    val sectionAsked: SectionAsked? = null,
     val moves: List<AgentMoveLine> = emptyList(),
     val answeredWith: ChatMode? = null
 ) {

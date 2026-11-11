@@ -1,6 +1,8 @@
 package app.notekea.clips.di
 
+import app.notekea.clips.domain.ClipSectionUseCase
 import app.notekea.clips.domain.ClipWebPageUseCase
+import app.notekea.clips.domain.FindSectionUseCase
 import app.notekea.clips.domain.SupportCheck
 import app.notekea.clips.presentation.ClipViewModel
 import org.koin.core.module.dsl.factoryOf
@@ -11,11 +13,15 @@ import org.koin.dsl.module
 val clipsModule = module {
     factoryOf(::SupportCheck)
     factoryOf(::ClipWebPageUseCase)
+    factoryOf(::FindSectionUseCase)
+    factoryOf(::ClipSectionUseCase)
 
     viewModel { parameters ->
         ClipViewModel(
             vaultPath = parameters.get(),
             clipWebPage = get(),
+            findSection = get(),
+            clipSection = get(),
             noteContentStore = get(),
             noteFileOperations = get(),
             localCalendar = get(),

@@ -30,7 +30,10 @@ class ComposeNotesUseCase(
         vaultPath: String,
         notes: Collection<NoteEntry>
     ): Outcome<ActionStep, ActionProblem> = when (step.kind) {
-        ActionKind.CLIP_URL -> clipped(step = step)
+        ActionKind.CLIP_URL -> clipped(
+            step = step,
+            request = request
+        )
 
         ActionKind.MAKE_CARDS -> withCards(
             step = step,
@@ -113,11 +116,30 @@ class ComposeNotesUseCase(
     }
 
     /** A web page clipped as it is written (4.4): its note is the page's, never cleaned like the model's notes. */
-    private suspend fun clipped(step: ActionStep): Outcome<ActionStep, ActionProblem> {
+    // The page alone, or with the pages it links under its path when the request says so; asked when it says neither.
+    private suspend fun clipped(
+        step: ActionStep,
+        request: String
+    ): Outcome<ActionStep, ActionProblem> {
         val clipping =
             clipper ?: return problem(ActionProblem.PageFailed(reason = PageProblem.REFUSED))
 
-        return when (val clip = clipping.clip(url = step.url.orEmpty())) {
+        val url = step.url.orEmpty()
+
+        if (ClipWords.isSection(request)) {
+            return when (val clips = clipping.clipSection(url = url)) {
+                is Outcome.Success -> Outcome.Success(value = step.copy(content = clips.value))
+                is Outcome.Failure -> problem(ActionProblem.PageFailed(reason = clips.error))
+            }
+        }
+
+        if (!ClipWords.isOnly(request)) {
+            val section = clipping.sectionOf(url = url)
+            val isAsked = section is Outcome.Success && section.value.count > 0
+            if (isAsked) return problem(ActionProblem.SectionAsked(section = section.value))
+        }
+
+        return when (val clip = clipping.clip(url = url)) {
             is Outcome.Success -> Outcome.Success(value = step.copy(content = listOf(clip.value)))
             is Outcome.Failure -> problem(problem = ActionProblem.PageFailed(reason = clip.error))
         }

@@ -2,17 +2,32 @@ package app.notekea.clips.presentation
 
 import app.notekea.clips.domain.ClipError
 import app.notekea.clips.domain.ClipStep
+import app.notekea.clips.domain.SectionLinks
+import app.notekea.clips.domain.SectionStep
 
-/** The clip dialog: whether it [isOpen], the [url] typed, the [step] of the clip under way, and why it failed. */
+/**
+ * The clip dialog: whether it [isOpen], the [url] typed, the [step] of the clip under way, why it failed, and the
+ * [section] it asks about before clipping it too, then the [progress] through its pages.
+ */
 data class ClipState(
     val isOpen: Boolean = false,
     val url: String = "",
     val step: ClipStep? = null,
-    val error: ClipError? = null
+    val error: ClipError? = null,
+    // The pages the page links under its own path: the dialog asks whether to clip them too.
+    val section: SectionLinks? = null,
+    val progress: SectionStep.Clipping? = null
 ) {
-    val isBusy: Boolean get() =
+    val isAsking: Boolean get() =
+        section != null &&
+            step == null &&
+            progress == null
+
+    private val isStepRunning: Boolean get() =
         step != null &&
             step !is ClipStep.Done &&
             step !is ClipStep.Failed
+
+    val isBusy: Boolean get() = progress != null || isStepRunning
     val canClip: Boolean get() = url.isNotBlank() && !isBusy
 }

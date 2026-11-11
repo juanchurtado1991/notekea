@@ -125,6 +125,9 @@ Where it stands (2026-11-11): 4.1–4.8 built, with the chat's help guide and th
   Windows' core.autocrlf rewrote pulled notes' line ends, and PDFBox scanned every system font on its first
   non-embedded font, slowing the Playground Vault's opening until Auto-Test cases timed out; it now uses its own fonts.
 - **Known:** a test JVM that ran two model cases sometimes aborts at exit (native teardown), with every case passed.
+- **Docs sections (added 2026-11-11, the developer's request):** clipping a page that links pages under its own path
+  asks first, in the dialog and the chat: only it, or it and those (at most 30), into a folder with the page as their
+  index. Tried on the Traceloop docs; 4.4-03 is the manual case.
 - **Chat probe (2026-11-11, overnight):** six rounds of 62 conversations in English, Spanish and French against
   Medium (`ChatProbeChatModelTest`, `docs/answer-quality.md`): replies in the person's language, follow-ups,
   honest refusals, the memory ring with compaction, answers from properties and tables, and no claimed changes.

@@ -84,6 +84,46 @@ class ClipAdaptersTest {
     }
 
     // Code review of 2026-11-11: an address checked public could turn local when looked up again to connect.
+    // The Traceloop docs (2026-11-11): a short page had its menu taken for the article, and Mintlify writes paragraphs
+    // as <span data-as="p">.
+    @Test
+    fun `a short docs page is read from its main, with its paragraphs written as spans, not its menu`() {
+        val menu =
+            (1..20).joinToString(separator = "") { "<li><a href=\"/docs/p$it\">Page $it</a></li>" }
+
+        val code =
+            "TRACELOOP_BASE_URL=https://api.axiom.co TRACELOOP_HEADERS=Authorization ".repeat(n = 8)
+
+        val html =
+            "<html><head><title>Axiom</title></head><body><main><div id=\"sidebar\"><ul>$menu</ul></div>" +
+                "<div id=\"content\"><h1>LLM Observability with Axiom</h1><span data-as=\"p\">Axiom is an observability " +
+                "platform that natively supports OpenTelemetry, you just need to route the traces to its endpoint.</span>" +
+                "<pre>$code</pre></div></main></body></html>"
+
+        val article = ReadabilityArticleExtractor().extract(
+            page = FetchedPage(
+                url = "https://x.com/docs/axiom",
+                html = html
+            )
+        ) as Outcome.Success
+
+        assertEquals(
+            expected = listOf(true, false),
+            actual = listOf(
+                article
+                    .value
+                    .paragraphs
+                    .any { it.startsWith(prefix = "Axiom is an observability platform") },
+                article
+                    .value
+                    .paragraphs
+                    .any {
+                        it == "Page 1"
+                    }
+            )
+        )
+    }
+
     @Test
     fun `the lookup a request connects with refuses a host that turns local`() {
         var answers = 0
