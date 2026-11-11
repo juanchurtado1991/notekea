@@ -262,22 +262,25 @@ private fun ChatInput(
             onStop = { onIntent(ChatIntent.OnStop) },
             modifier = Modifier.focusRequester(focusRequester = inputFocus),
             bottom = {
-                if (state.isDeepOffered) {
-                    ModeToggle(
-                        isOn = state.isDeep,
-                        label = Res.string.chat_deep,
-                        hint = Res.string.chat_deep_hint,
-                        onToggle = { onIntent(ChatIntent.OnDeepToggle) }
-                    )
-                }
+                // One under the other: Medium offers both.
+                Column {
+                    if (state.isDeepOffered) {
+                        ModeToggle(
+                            isOn = state.isDeep,
+                            label = Res.string.chat_deep,
+                            hint = Res.string.chat_deep_hint,
+                            onToggle = { onIntent(ChatIntent.OnDeepToggle) }
+                        )
+                    }
 
-                if (state.isAgentOffered) {
-                    ModeToggle(
-                        isOn = state.isAgent,
-                        label = Res.string.chat_agent,
-                        hint = Res.string.chat_agent_hint,
-                        onToggle = { onIntent(ChatIntent.OnAgentToggle) }
-                    )
+                    if (state.isAgentOffered) {
+                        ModeToggle(
+                            isOn = state.isAgent,
+                            label = Res.string.chat_agent,
+                            hint = Res.string.chat_agent_hint,
+                            onToggle = { onIntent(ChatIntent.OnAgentToggle) }
+                        )
+                    }
                 }
             }
         )
