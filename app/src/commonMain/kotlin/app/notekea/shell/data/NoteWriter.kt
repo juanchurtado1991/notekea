@@ -28,7 +28,7 @@ internal class NoteWriter(
         val draft = step.content.firstOrNull()
 
         val path =
-            draft?.path ?: (step.folder ?: RelativePath.ROOT).child(name = "${step.title}.md")
+            draft?.path ?: (step.folder ?: RelativePath.ROOT).child(name = "${fileName(step.title)}.md")
 
         val created = create(
             path = path,
@@ -119,11 +119,13 @@ internal class NoteWriter(
         notes: List<RelativePath>,
         text: String
     ): Outcome<Unit, ActionProblem> {
+        if (notes.isEmpty()) return Outcome.Failure(error = ActionProblem.UnknownNote(name = ""))
+
         notes.forEach { path ->
             val before = noteContentStore.read(
                 vaultPath = vaultPath,
                 path = path
-            ) ?: return@forEach
+            ) ?: return Outcome.Failure(ActionProblem.UnknownNote(path.nameWithoutExtension))
 
             val after = before.trimEnd() + "\n\n" + text.trim() + "\n"
 
@@ -185,5 +187,17 @@ internal class NoteWriter(
                 rewrites = listOf(rewrite.reversed())
             )
         }
+    }
+
+    /** [title] as a file's name: the characters no system allows in one are left out. */
+    private fun fileName(title: String?): String = title
+        .orEmpty()
+        .replace(FORBIDDEN, "")
+        .trim()
+        .ifEmpty { UNTITLED }
+
+    private companion object {
+        const val UNTITLED = "Untitled"
+        val FORBIDDEN = Regex(pattern = "[\\\\/:*?\"<>|#^\\[\\]]")
     }
 }

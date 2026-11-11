@@ -109,6 +109,8 @@ class ChatViewModel(
                         entry = it,
                         notes = notes
                     )
+
+                    save()
                 }
             }
 
@@ -117,7 +119,10 @@ class ChatViewModel(
             }
 
             is ChatIntent.OnActionUndo -> entryOf(id = intent.id)?.let {
-                launchGuarded(onError = ::logError) { actions.undo(entry = it) }
+                launchGuarded(onError = ::logError) {
+                    actions.undo(entry = it)
+                    save()
+                }
             }
 
             is ChatIntent.OnFoundClick -> emit(effect = foundEffectOf(row = intent.row))
@@ -417,11 +422,20 @@ class ChatViewModel(
         )
     }
 
+    /** A request the chat acted on is kept only once done: one refused, cancelled or undone changed nothing. */
+    private fun isUndone(entry: ChatEntry): Boolean {
+        val action = entry.action ?: return false
+
+        return action.status != ActionStatus.DONE && action.status != ActionStatus.FINISHED
+    }
+
     private fun save() {
         val turns = state
             .value
             .entries
-            .filterNot { it.isAnswering }
+            .filterNot {
+                it.isAnswering || isUndone(entry = it)
+            }
             .takeLast(n = MAX_TURNS)
             .map { turnOf(entry = it) }
 

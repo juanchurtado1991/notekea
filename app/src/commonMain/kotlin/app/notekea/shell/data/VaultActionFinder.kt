@@ -10,10 +10,10 @@ import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.notes.domain.LinkFinder
 import app.notekea.core.notes.domain.LinkResolver
-import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.core.notes.domain.NoteRewrite
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.query.domain.BuildQueryCatalogUseCase
@@ -43,7 +43,7 @@ class VaultActionFinder(
     private val listTasks: ListTasksUseCase,
     private val setTaskDone: SetTaskDoneUseCase,
     private val setPropertyUseCase: SetPropertyUseCase,
-    private val noteContentStore: NoteContentStore,
+    private val noteTextCache: NoteTextCache,
     private val linkFinder: LinkFinder,
     private val localCalendar: LocalCalendar,
     private val clock: Clock
@@ -176,11 +176,13 @@ class VaultActionFinder(
     ): FoundNotes {
         val resolver = LinkResolver(notePaths = notes.map { it.file.path })
 
+        val texts = noteTextCache.textsOf(
+            vaultPath = vaultPath,
+            notes = notes
+        )
+
         val rows = notes.flatMap { note ->
-            val text = noteContentStore.read(
-                vaultPath = vaultPath,
-                path = note.file.path
-            ).orEmpty()
+            val text = texts[note.file.path]?.body.orEmpty()
 
             linkFinder
                 .find(markdown = text)

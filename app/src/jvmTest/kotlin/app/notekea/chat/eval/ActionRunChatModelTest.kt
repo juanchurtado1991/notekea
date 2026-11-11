@@ -121,7 +121,7 @@ class ActionRunChatModelTest {
             ListTasksUseCase(),
             SetTaskDoneUseCase(store, apply),
             SetPropertyUseCase(store, apply),
-            store,
+            NoteTextCache(store, TextFolder()),
             JetBrainsMarkdownLinkFinder(),
             calendar,
             Clock.System
