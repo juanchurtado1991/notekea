@@ -17,6 +17,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.formatBytes
 import app.notekea.resources.Res
 import app.notekea.resources.models_delete
 import app.notekea.resources.models_download

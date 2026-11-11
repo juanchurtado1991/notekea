@@ -46,12 +46,18 @@ import app.notekea.resources.settings_title
 import app.notekea.settings.presentation.appearance.AppearanceSettings
 import app.notekea.settings.presentation.appearance.AppearanceState
 import app.notekea.settings.presentation.appearance.AppearanceViewModel
+import app.notekea.settings.presentation.help.SettingsHelpBar
+import app.notekea.settings.presentation.help.SettingsHelpIntent
+import app.notekea.settings.presentation.help.SettingsHelpViewModel
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 private const val DIALOG_HEIGHT_DP = 560
 private const val DIALOG_WIDTH_DP = 760
+
+// Ask about Settings, a card beside the dialog (the developer's review of 2026-11-11).
+private const val HELP_WIDTH_DP = 340
 private const val NAV_TINT_ALPHA = 0.4f
 private const val NAV_WIDTH_DP = 200
 private const val SECTION_ALPHA = 0.55f
@@ -65,9 +71,9 @@ private val SECTIONS_TO_COME = listOf(
 )
 
 /**
- * Settings: the sections on the left (Appearance, AI model, Sync), the chosen one on the right, and the sections to
- * come dimmed under "Coming soon" (5.2). AI model and Sync belong to features, so the app gives them
- * ([aiModelSection], [syncSection]). It opens at [initialSection]; Esc, a click outside or ✕ closes it.
+ * Settings: the sections on the left (Appearance, AI model, Sync), the chosen one on the right, the sections to come
+ * dimmed under "Coming soon" (5.2), and Ask about Settings in a card beside it. AI model and Sync belong to features,
+ * so the app gives them ([aiModelSection], [syncSection]). Esc, a click outside or ✕ closes it.
  */
 @Composable
 fun SettingsDialog(
@@ -75,9 +81,11 @@ fun SettingsDialog(
     aiModelSection: @Composable (Modifier) -> Unit,
     syncSection: @Composable (Modifier) -> Unit,
     initialSection: SettingsSection = SettingsSection.APPEARANCE,
-    viewModel: AppearanceViewModel = koinViewModel()
+    viewModel: AppearanceViewModel = koinViewModel(),
+    helpViewModel: SettingsHelpViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val help by helpViewModel.state.collectAsState()
 
     var section by remember { mutableStateOf(value = initialSection) }
 
@@ -86,7 +94,20 @@ fun SettingsDialog(
         modifier = Modifier.size(
             width = DIALOG_WIDTH_DP.dp,
             height = DIALOG_HEIGHT_DP.dp
-        )
+        ),
+        side = {
+            SettingsHelpBar(
+                state = help,
+                isSync = section == SettingsSection.SYNC,
+                onDraftChange = {
+                    helpViewModel.onIntent(SettingsHelpIntent.OnDraftChange(text = it))
+                },
+                onAsk = { helpViewModel.onIntent(SettingsHelpIntent.OnAsk(topic = section.topic)) },
+                onStop = { helpViewModel.onIntent(SettingsHelpIntent.OnStop) },
+                modifier = Modifier.fillMaxSize()
+            )
+        },
+        sideWidth = HELP_WIDTH_DP.dp
     ) {
         SettingsContent(
             section = section,

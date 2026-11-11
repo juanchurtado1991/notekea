@@ -42,6 +42,8 @@ class SyncSettingsViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private var vaultBytes = 0L
+
     private fun TestScope.viewModel(vaultPath: String? = VAULT): SyncSettingsViewModel {
         val engine = SyncEngine(
             vaultPath = VAULT,
@@ -56,6 +58,7 @@ class SyncSettingsViewModelTest {
             engines = VaultSyncs { engine },
             settingsStore = settings,
             tokens = tokens,
+            sizes = { vaultBytes },
             vaultPath = vaultPath
         )
     }
@@ -183,6 +186,31 @@ class SyncSettingsViewModelTest {
             )
         }
 
+    // The developer's request of 2026-11-11: a vault over 1 GB is warned of before GitHub only, never kept on this
+    // computer or synced elsewhere.
+    @Test
+    fun `a vault over a gigabyte is warned of with a GitHub address only`() = runTest(dispatcher) {
+        vaultBytes = 1_400_000_000L
+        val viewModel = viewModel()
+        runCurrent()
+
+        val warned = listOf("", "file:///home/me/remote.git", URL_ON_GITLAB, URL_ON_GITHUB)
+            .map {
+                viewModel.onIntent(intent = SyncSettingsIntent.OnUrlChange(url = it))
+                viewModel.state.value.isTooLargeForGitHub
+            }
+
+        vaultBytes = 900_000_000L
+        val small = viewModel()
+        runCurrent()
+        small.onIntent(intent = SyncSettingsIntent.OnUrlChange(url = URL_ON_GITHUB))
+
+        assertEquals(
+            expected = listOf(false, false, false, true, false),
+            actual = warned + small.state.value.isTooLargeForGitHub
+        )
+    }
+
     // Code review of 2026-11-11: an address typed but not connected was saved by a change of auto-sync, and the
     // token was then looked up under it.
     @Test
@@ -213,5 +241,7 @@ class SyncSettingsViewModelTest {
     private companion object {
         const val VAULT = "/vaults/Notes"
         const val URL = "https://example.com/notes.git"
+        const val URL_ON_GITHUB = "https://github.com/ana/notes.git"
+        const val URL_ON_GITLAB = "https://gitlab.com/ana/notes.git"
     }
 }

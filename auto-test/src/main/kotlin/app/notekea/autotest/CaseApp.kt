@@ -18,6 +18,8 @@ import app.notekea.NotekeaAppLocals
 import app.notekea.NotekeaRoot
 import app.notekea.ai.data.ModelFolder
 import app.notekea.ai.domain.ActiveModelStore
+import app.notekea.clips.data.KtorPageFetcher
+import app.notekea.clips.domain.PageFetcher
 import app.notekea.core.appearance.domain.Appearance
 import app.notekea.core.embedding.data.LlamaTextEmbedder
 import app.notekea.core.embedding.domain.TextEmbedder
@@ -47,9 +49,9 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 /**
- * The real Notekea for one automated case or smoke run: every Koin module of the desktop app, with its data in
- * [appData], its vaults in [vaults], a home of its own ([home]), and the system's dialogs and apps replaced
- * ([fileOpener], [fileRevealer], [uriHandler], [clipboard]). [closeGuard] runs before the window closes.
+ * The real Notekea for one case: the desktop app's Koin modules, its data in [appData], its vaults in [vaults], a home
+ * of its own ([home]), the system's dialogs and apps replaced ([fileOpener], [uriHandler], [clipboard]…) and the web by
+ * a documentation site ([StandInDocsSite]). [closeGuard] runs before the window closes.
  */
 class CaseApp(
     private val appData: Path,
@@ -170,6 +172,7 @@ class CaseApp(
         single<FileOpener> { fileOpener }
         single<FileRevealer> { fileRevealer }
         single<TextClipboard> { clipboard }
+        single<PageFetcher> { StandInDocsSite(real = KtorPageFetcher(dispatchers = get())) }
 
         single<Trash> {
             VaultFolderTrash(

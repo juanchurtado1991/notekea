@@ -138,13 +138,24 @@ is. Image or file in the toolbar picks one with the system's picker.
 # Color theme and appearance
 words: theme, tema, dark mode, modo oscuro, light mode, colors, colores, appearance, apariencia
 try: use the … theme
-Open Settings (the gear at the bottom of the tool rail) and then Appearance: light or dark mode and a color theme. The
-chat can change the theme too.
+Open Settings (the gear at the bottom of the tool rail) and then Appearance. Mode is Light, Dark or System, which
+follows your computer's light or dark setting. Theme is the set of colors the whole app takes; each card shows it in
+light and dark. Reduce motion makes panels and lists change at once, without sliding; it is also on when your computer
+asks for less motion. The chat can change the theme too.
 
 # AI model
-words: model, modelo, download, descargar, ai model, modelo de ia, llm
-Open Settings, then AI model: Notekea recommends a size for your computer and downloads it. The model runs on your
-computer; your notes never leave it.
+words: model, modelo, download, descargar, ai model, modelo de ia, llm, small, medium, large, pequeño, mediano, grande, memory, memoria, gpu
+Open Settings, then AI model: Notekea checks this computer's memory and recommends a size. Small is fast and light
+but gets more answers wrong, so check its sources; Medium gives good answers on most computers; Large gives the best
+answers and needs a GPU or 32 GB of memory. Click Download (it can be paused and goes on where it stopped), then Use.
+The first download also brings the model search uses. The model runs on your computer and works without internet;
+your notes never leave it. Delete frees its space on the disk.
+
+# Ask about Settings
+words: settings help, ayuda de ajustes, ask about settings, preguntar sobre ajustes, what does this setting do, qué hace este ajuste
+Beside Settings, Ask about Settings answers what an option does or how to do something, about the section open, in
+your language and from this guide. With Sync open it shows the steps to set up GitHub, which need no model; the
+answers need the AI model.
 
 # Open another vault
 words: vault, bóveda, boveda, open folder, abrir carpeta, another vault, otra bóveda, switch vault
@@ -195,8 +206,8 @@ vault that stays on this computer needs nothing. Five steps, once:
    Repository permissions set Contents to Read and write. Click Generate token and copy it: GitHub shows it once.
 5. In Notekea open Settings (the gear at the bottom of the tool rail), then Sync: paste the address and the token,
    and click Connect. On your other computer, open the same Settings → Sync with the same address and a token.
-Your token stays in your system's keychain, never in the vault. Settings → Sync also has How do I set this up?, a
-chat that walks you through these steps and answers questions.
+Your token stays in your system's keychain, never in the vault. Beside Settings, Ask about Settings shows these steps
+when Sync is open and answers questions on them, as on every setting.
 
 # Sync sign-in failed
 words: sync sign-in failed, sign-in failed, error de sincronización, no sincroniza, token expired, token caducado, token vencido, the repository refused the token, rechazó el token
@@ -207,8 +218,9 @@ another repository, or cannot write: Contents must be Read and write. Make a new
 # GitHub's limits for your vault
 words: limit, límite, 100 mb, 1 gb, too large, demasiado grande, video, vídeo, big file, archivo grande, github free, cuenta gratuita, repository size, tamaño del repositorio
 GitHub refuses any single file over 100 MB, and asks that a repository stay under about 1 GB (5 GB at most). When a
-vault synced with GitHub grows past 1 GB, Notekea warns you, since a free account may have problems with it. A vault
-that stays on this computer has no limit and is never warned.
+vault over 1 GB is synced with GitHub, or its GitHub address is typed in Settings → Sync, Large vault for GitHub says
+how much it takes, since a free account may refuse or slow it. Keep large videos outside the vault, or use another
+Git host. A vault that stays on this computer, or syncs elsewhere, is never warned.
 
 # Settle a sync conflict
 words: conflict, conflicto, both versions, ambas versiones, keep mine, keep theirs, conflict copy, copia en conflicto

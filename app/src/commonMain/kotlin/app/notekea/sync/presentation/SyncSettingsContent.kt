@@ -16,13 +16,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.designsystem.components.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
+import app.notekea.core.presentation.designsystem.components.NotekeaCallout
 import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaSegment
 import app.notekea.core.presentation.designsystem.components.NotekeaSegmentedControl
 import app.notekea.core.presentation.designsystem.components.NotekeaTextField
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.theme.NotekeaColors
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.formatBytes
 import app.notekea.resources.Res
 import app.notekea.resources.settings_section_sync
 import app.notekea.resources.sync_auto
@@ -41,6 +45,8 @@ import app.notekea.resources.sync_now
 import app.notekea.resources.sync_token_hint
 import app.notekea.resources.sync_token_label
 import app.notekea.resources.sync_token_saved
+import app.notekea.resources.sync_too_large
+import app.notekea.resources.sync_too_large_title
 import app.notekea.resources.sync_url_hint
 import app.notekea.resources.sync_url_label
 import app.notekea.sync.domain.SyncError
@@ -48,6 +54,8 @@ import app.notekea.sync.domain.SyncSettings
 import app.notekea.sync.domain.SyncStatus
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+
+private const val PREVIEW_BYTES = 1_400_000_000L
 
 /**
  * Settings → Sync: what it does, the repository's address and token, auto-sync and how often it looks for changes,
@@ -99,6 +107,8 @@ private fun Form(
 ) {
     state.error?.let { ErrorBanner(message = messageOf(error = it)) }
 
+    if (state.isTooLargeForGitHub) TooLarge(bytes = state.vaultBytes ?: 0L)
+
     Field(label = stringResource(resource = Res.string.sync_url_label)) {
         NotekeaTextField(
             value = state.url,
@@ -135,6 +145,25 @@ private fun Form(
         state = state,
         onIntent = onIntent
     )
+}
+
+// Only for a GitHub remote, typed or connected: a vault kept on this computer is never told (2026-11-11).
+@Composable
+private fun TooLarge(bytes: Long) {
+    NotekeaCallout(
+        title = stringResource(resource = Res.string.sync_too_large_title),
+        icon = NotekeaIcons.CalloutWarning,
+        color = NotekeaColors.warning
+    ) {
+        Text(
+            text = stringResource(
+                resource = Res.string.sync_too_large,
+                formatBytes(bytes = bytes)
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
 }
 
 @Composable
@@ -273,7 +302,8 @@ private fun SyncSettingsContentPreview() {
                 url = "https://github.com/ana/notes.git",
                 hasToken = true,
                 isConnected = true,
-                status = SyncStatus.UpToDate
+                status = SyncStatus.UpToDate,
+                vaultBytes = PREVIEW_BYTES
             ),
             onIntent = {}
         )

@@ -1,5 +1,6 @@
 package app.notekea.autotest.cases.m4
 
+import app.notekea.autotest.StandInDocsSite
 import app.notekea.autotest.cases.m1.PLAYGROUND
 import app.notekea.autotest.cases.m1.WELCOME
 import app.notekea.autotest.openVault
@@ -25,6 +26,7 @@ fun SuiteBuilder.sourceCases() {
     localClip()
     clipOfPage()
     clipOfSection()
+    allOfSection()
     review()
     madeCards()
 }
@@ -150,6 +152,42 @@ private fun SuiteBuilder.clipOfSection() {
                 "page n of 31, then opens Web sources/Overview, whose Pages list links each integration's note in " +
                 "Web sources/Overview/. Step 4 asks the same with two buttons; Only this page shows a card with one " +
                 "note."
+        )
+    }
+}
+
+// The developer's request of 2026-11-11: thirty pages are the default, all of them when asked; on a site of the case's
+// own, so no network is needed.
+private fun SuiteBuilder.allOfSection() {
+    automated(
+        id = "4.4-04",
+        title = "A documentation page offers its closest thirty pages or all of them, and All clips every one"
+    ) {
+        openVault(
+            name = PLAYGROUND,
+            shownText = WELCOME
+        )
+
+        click(text = "Clip a web page")
+        click(text = "https://example.com/an-article")
+        type(text = StandInDocsSite.ADDRESS)
+        click(text = "Clip")
+        expectText(text = "This page and 30 more")
+        click(text = "All ${StandInDocsSite.PAGES} pages")
+
+        expectFile(
+            path = "$PLAYGROUND/Web sources/Intro/Page ${StandInDocsSite.PAGES}.md",
+            containing = "Page ${StandInDocsSite.PAGES} explains"
+        )
+
+        expectFile(
+            path = "$PLAYGROUND/Web sources/Intro.md",
+            containing = "[[Intro/Page 1|Page 1]]"
+        )
+
+        expectFile(
+            path = "$PLAYGROUND/Web sources/Intro.md",
+            containing = "[[Intro/Page ${StandInDocsSite.PAGES}|Page ${StandInDocsSite.PAGES}]]"
         )
     }
 }

@@ -6,18 +6,21 @@ import app.notekea.sync.domain.SyncError
 import app.notekea.sync.domain.SyncSettings
 import app.notekea.sync.domain.SyncSettingsStore
 import app.notekea.sync.domain.TokenStore
+import app.notekea.sync.domain.VaultSizes
 import app.notekea.sync.domain.VaultSync
 import app.notekea.sync.domain.VaultSyncs
 import co.touchlab.kermit.Logger
 
 /**
  * Settings → Sync (4.2) for the vault at [vaultPath], or none when no vault is open: the address and token connect it
- * through its [VaultSync], whose status it shows; auto-sync and the interval change the engine's timer at once.
+ * through its [VaultSync], whose status it shows; auto-sync and the interval change the engine's timer at once. The
+ * vault's size ([VaultSizes]) warns before a GitHub remote that it may be too large for GitHub's free account.
  */
 class SyncSettingsViewModel(
     engines: VaultSyncs,
     private val settingsStore: SyncSettingsStore,
     private val tokens: TokenStore,
+    private val sizes: VaultSizes,
     vaultPath: String?
 ) : BaseViewModel<SyncSettingsState, SyncSettingsIntent, Nothing>(
     initialState = SyncSettingsState(hasVault = vaultPath != null)
@@ -31,6 +34,11 @@ class SyncSettingsViewModel(
 
         if (vault != null && engine != null) {
             launchGuarded(onError = ::logError) { load(vaultPath = vault) }
+
+            launchGuarded(onError = ::logError) {
+                val bytes = sizes.bytesOf(vaultPath = vault)
+                reduce { it.copy(vaultBytes = bytes) }
+            }
 
             launchGuarded(onError = ::logError) {
                 engine.status.collect { s ->

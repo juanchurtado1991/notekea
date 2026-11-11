@@ -54,7 +54,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and the page's note lists them under Pages with what each is for; a menu every page repeats is left out, and a short
   page is read from its main content rather than its menu. The pages come from the site's llms.txt, else its sitemap,
   else the page's links; when there are more than 30, the closest to the page are kept, and the question says in a
-  sentence what they offer.
+  sentence what they offer. All N pages, or asking the chat for all of them, clips every one.
+- Ask about Settings, a card beside Settings: a chat that says what each setting does and how to do something, about
+  the section open, from the guide and in the question's language. With Sync open it shows the five steps to set up
+  GitHub, with no model needed. The guide explains GitHub for people new to it, what to do when sign-in fails, and
+  GitHub's limits. The chat's field there is one line, its send button beside the text.
+- A vault over 1 GB is warned of in Settings → Sync when its address is on GitHub, whose free account asks a
+  repository to stay under about 1 GB; a vault kept on this computer or synced elsewhere is never told.
 - The chat's memory, as in Claude Code: a ring beside the mode fills as the conversation grows, and once full the
   chat writes the earlier part into a short summary by itself and goes on with it, as it does after half an hour
   without questions or in a chat from an earlier session; Compact chat, in the ⋯ menu, does it at once. Copy chat

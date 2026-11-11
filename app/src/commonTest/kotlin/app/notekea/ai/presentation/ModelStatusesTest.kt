@@ -4,6 +4,7 @@ import app.notekea.ai.domain.InstallProgress
 import app.notekea.ai.domain.InstallSession
 import app.notekea.ai.domain.ModelError
 import app.notekea.ai.domain.ModelSize
+import app.notekea.core.presentation.formatBytes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

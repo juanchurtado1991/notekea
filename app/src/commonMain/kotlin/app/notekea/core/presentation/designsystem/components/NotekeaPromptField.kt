@@ -58,9 +58,9 @@ private const val PREVIEW_WIDTH_DP = 300
 private const val PREVIEW_PLACEHOLDER = "Ask about your notes…"
 
 /**
- * A field for a question to a model: several lines, `Enter` sends ([onSend], when [canSend]) and `Shift+Enter` breaks
- * the line; while [isRunning] its button stops the reply ([onStop], as `Esc` does). Its border takes the theme's color
- * while it has the keyboard, and [bottom] holds what goes under the text (a scope, a mode).
+ * A field for a question to a model: `Enter` sends ([onSend]), `Shift+Enter` breaks the line, Stop or `Esc` ends a
+ * running reply ([onStop]); [bottom] holds what goes under the text (a scope, a mode). [isCompact] puts the button
+ * beside the text, centered on it: one line until more is typed. Its border takes the theme's color while focused.
  */
 @Composable
 fun NotekeaPromptField(
@@ -74,6 +74,7 @@ fun NotekeaPromptField(
     onSend: () -> Unit,
     onStop: () -> Unit,
     modifier: Modifier = Modifier,
+    isCompact: Boolean = false,
     bottom: @Composable () -> Unit = {}
 ) {
     val colors = MaterialTheme.colorScheme
@@ -87,70 +88,110 @@ fun NotekeaPromptField(
         animationSpec = spec
     )
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = colors.surface,
-                shape = MaterialTheme.shapes.medium
-            )
-            .border(
-                width = NotekeaDimensions.BorderWidth,
-                color = border,
-                shape = MaterialTheme.shapes.medium
-            )
-            .padding(all = NotekeaDimensions.SpacingS)
-    ) {
-        Box {
-            if (value.isEmpty()) {
-                Text(
-                    text = placeholder,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.onSurfaceVariant
+    val frame = modifier
+        .fillMaxWidth()
+        .background(
+            color = colors.surface,
+            shape = MaterialTheme.shapes.medium
+        )
+        .border(
+            width = NotekeaDimensions.BorderWidth,
+            color = border,
+            shape = MaterialTheme.shapes.medium
+        )
+        .padding(all = NotekeaDimensions.SpacingS)
+
+    val text: @Composable (Modifier) -> Unit = {
+        PromptText(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = placeholder,
+            interaction = interaction,
+            onKey = { event ->
+                isPromptKey(
+                    event = event,
+                    canSend = canSend,
+                    isRunning = isRunning,
+                    onSend = onSend,
+                    onStop = onStop
                 )
-            }
+            },
+            modifier = it
+        )
+    }
 
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics { contentDescription = placeholder }
-                    .onPreviewKeyEvent { event ->
-                        isPromptKey(
-                            event = event,
-                            canSend = canSend,
-                            isRunning = isRunning,
-                            onSend = onSend,
-                            onStop = onStop
-                        )
-                    },
-                textStyle = MaterialTheme
-                    .typography
-                    .bodyMedium
-                    .copy(color = colors.onSurface),
-                cursorBrush = SolidColor(value = colors.primary),
-                maxLines = MAX_LINES,
-                interactionSource = interaction
-            )
-        }
+    val button: @Composable () -> Unit = {
+        PromptButton(
+            isRunning = isRunning,
+            canSend = canSend,
+            label = if (isRunning) stopLabel else sendLabel,
+            onClick = if (isRunning) onStop else onSend
+        )
+    }
 
+    if (isCompact) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = NotekeaDimensions.SpacingS),
+            modifier = frame,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(modifier = Modifier.weight(weight = 1f)) { bottom() }
+            text(Modifier.weight(weight = 1f))
             Box(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
+            button()
+        }
+    } else {
+        Column(modifier = frame) {
+            text(Modifier.fillMaxWidth())
 
-            PromptButton(
-                isRunning = isRunning,
-                canSend = canSend,
-                label = if (isRunning) stopLabel else sendLabel,
-                onClick = if (isRunning) onStop else onSend
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = NotekeaDimensions.SpacingS),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(modifier = Modifier.weight(weight = 1f)) { bottom() }
+                Box(modifier = Modifier.width(width = NotekeaDimensions.SpacingS))
+                button()
+            }
+        }
+    }
+}
+
+/** The question as typed, with the [placeholder] over it while empty; [onKey] sends and stops. */
+@Composable
+private fun PromptText(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    interaction: MutableInteractionSource,
+    onKey: (KeyEvent) -> Boolean,
+    modifier: Modifier
+) {
+    val colors = MaterialTheme.colorScheme
+
+    Box(modifier = modifier) {
+        if (value.isEmpty()) {
+            Text(
+                text = placeholder,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant
             )
         }
+
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = placeholder }
+                .onPreviewKeyEvent(onPreviewKeyEvent = onKey),
+            textStyle = MaterialTheme
+                .typography
+                .bodyMedium
+                .copy(color = colors.onSurface),
+            cursorBrush = SolidColor(value = colors.primary),
+            maxLines = MAX_LINES,
+            interactionSource = interaction
+        )
     }
 }
 
