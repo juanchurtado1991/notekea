@@ -15,11 +15,13 @@ branch name is given next to it. Estimates assume one developer and are meant fo
   the related notes panel suggests connections and the user turns one into a real `[[link]]` with one click.
 - **Obsidian compatibility:** a vault edited in Notekea stays valid in Obsidian and vice versa. Obsidian-flavored
   Markdown (wiki links, embeds, callouts, tasks, frontmatter properties) is supported. When `.obsidian/` exists,
-  its settings for attachments, daily notes and templates folders are honored (read-only).
+  its settings for attachments, daily notes and templates folders are honored, and Settings → Files writes them
+  there (5.2).
 - **Local only:** see the privacy rules in `GUIDELINES.md`.
 
 **Closing a milestone:** every milestone ends with its **performance pass** (its last item: 1.18, 2.9, 3.7, 4.3, 4.8,
-5.4), and it is done when all its items are ✅; the next one then starts.
+5.4), and it is done when all its items are ✅; the next one then starts. 4.3 and 4.8 were moved into 5.4 by the
+developer on 2026-11-11, with videos and all of M5 in one pull request before the single release run.
 
 **One QA run before the release (decided with the developer, 2026-11-04):** after M1's, the only QA run is the release
 run, between 5.4 and 5.5, on Windows, macOS and Linux (`qa/README.md`). It covers every case of `MVP_SMOKE_TEST.md`, so
@@ -41,7 +43,8 @@ regressions on every run and are the workload each performance pass measures; th
 a person can judge (looks, feel, the operating system's own dialogs).
 
 **Status tracking:** features are never removed from this file. Each feature title carries its status —
-⬜ not started, 🚧 in progress (branch open), ✅ done (with its pull request) — and the table below counts them.
+⬜ not started, 🚧 in progress (branch open), ✅ done (with its pull request), ↪ moved into a later item — and the table
+below counts them.
 `CHANGELOG.md` records what changed; this file records what is planned and what is left.
 
 | Milestone | Goal | Estimate | Status |
@@ -49,9 +52,9 @@ a person can judge (looks, feel, the operating system's own dialogs).
 | M0 — Foundation | Project setup, tooling, guidelines | Done | ✅ |
 | M1 — Vault and editor | Open a folder, browse, read and edit notes with Obsidian-level essentials | 3.5 weeks | 18 / 18 |
 | M2 — Indexing, links and related notes | Color themes, local embeddings, hybrid search, related notes, backlinks, graph, vault queries and tasks, packaged check | 5 weeks | 13 / 13 |
-| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 2 / 10 |
-| M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 0 / 3 |
-| M4b — Sources, study cards and agent | Web clips, documents, study cards, agent mode | 10 weeks | 0 / 5 |
+| M3 — Chat with citations | Local LLM, model download, RAG chat with citations, verified answers, deep answer mode, questions in plain words, actions from chat | 7 weeks | 10 / 10 |
+| M4 — Git sync | Optional commit / pull / push of the vault | 1 week | 2 / 2 (4.3 moved into 5.4) |
+| M4b — Sources, study cards and agent | Web clips, documents, study cards, agent mode, videos | 10 weeks | 4 / 5 (4.8 moved into 5.4) |
 | M5 — Release | Onboarding polish, performance and memory, packaging, first public release | 1.5 weeks | 0 / 5 |
 | Post-MVP | Extensions (Koog + MCP), mobile, repositories, more | — |
 
@@ -1186,13 +1189,13 @@ closed, time to the first token, and idle memory with the chat open but unused. 
 
 ## M4 — Git sync
 
-### ⬜ 4.1 Git sync engine — `feature/git-sync`
+### ✅ 4.1 Git sync engine — `feature/m4-sync-sources` — [notekea#140](https://github.com/juanchurtado1991/notekea/pull/140)
 
 `GitSync` with JGit: connect (clone or init + remote), auto-commit after 10 s of inactivity, `pull --rebase` on
 open and every 5 minutes, push after commit. Conflicts keep both versions (`note.md` and `note (conflict).md`).
 The index folder is never committed. Token stored in the OS keychain (Java Keyring).
 
-### ⬜ 4.2 Sync UI — `feature/sync-ui`
+### ✅ 4.2 Sync UI — `feature/m4-sync-sources` — [notekea#140](https://github.com/juanchurtado1991/notekea/pull/140)
 
 - **Settings → Sync:** remote URL, authentication (an HTTPS access token; SSH keys after the MVP, decided with the
   developer on 2026-11-11), auto-sync on/off, interval, "Sync now".
@@ -1202,11 +1205,14 @@ The index folder is never committed. Token stored in the OS keychain (Java Keyri
 - States: not configured (status item hidden), offline (retries silently, shows "Offline"), auth failed
   (opens Settings → Sync with the error).
 
-### ⬜ 4.3 M4 performance pass — `chore/m4-performance`
+### ↪ 4.3 M4 performance pass — moved into 5.4
 
 The performance pass of M4 (see "Closing a milestone"), on the automated smoke runs of M1 to M4: memory and time of
 a sync of the Sample Vault and the Ghost Serializer vault, of the auto-commit while typing, and idle memory with sync on.
 Compared with 3.7 in `docs/performance.md`.
+
+**Moved into 5.4 (the developer's decision, 2026-11-11):** M4's numbers were taken in #140 (a sync under 1 s on the
+Sample and Ghost Serializer vaults, 672 MB idle with sync on); the rest is measured once, in 5.4, with all of M5 built.
 
 ---
 
@@ -1215,7 +1221,7 @@ Compared with 3.7 in `docs/performance.md`.
 Added to the MVP with the developer on 2026-11-04. It comes after M4 so Git sync is done, and before M5 so the
 performance work of 5.4 and the release run cover all of it. Repositories stays after the MVP.
 
-### ⬜ 4.4 Web clips — `feature/web-clips`
+### ✅ 4.4 Web clips — `feature/m4-sync-sources` — [notekea#140](https://github.com/juanchurtado1991/notekea/pull/140)
 
 Notes from a web page: give Notekea a URL and it writes notes about the article into a folder.
 
@@ -1231,7 +1237,7 @@ Notes from a web page: give Notekea a URL and it writes notes about the article 
 - **Done when:** the articles of an evaluation set of 20 saved pages make notes whose every sentence is backed by the
   article, and a page that cannot be read leaves no note behind.
 
-### ⬜ 4.5 Documents — `feature/document-sources`
+### ✅ 4.5 Documents — `feature/m4-sync-sources` — [notekea#140](https://github.com/juanchurtado1991/notekea/pull/140)
 
 Documents inside the vault are indexed like notes, whatever their format (decided with the developer, 2026-11-04):
 search, Related and the chat find them. Notekea reads them and never edits them, and they do not become notes.
@@ -1249,14 +1255,14 @@ search, Related and the chat find them. Notekea reads them and never edits them,
 - **Done when:** a sentence of each format can be found and cited, a change to a file indexes it again, and a damaged
   file is only skipped and reported.
 
-### ⬜ 4.6 Study cards — `feature/study-cards`
+### ✅ 4.6 Study cards — `feature/m4-sync-sources` — [notekea#140](https://github.com/juanchurtado1991/notekea/pull/140)
 
 Flashcards made by the local model from a note: each question cites the sentence it comes from and passes the
 verification of 3.5; reviewed with spaced repetition in a review tab, and stored in the note in the format of Obsidian's
 Spaced Repetition plugin, so they work in both. Chosen with the developer on 2026-10-28, when the answer pipeline is
 measured.
 
-### ⬜ 4.7 Agent mode — `feature/agent-mode`
+### ✅ 4.7 Agent mode — `feature/m4-sync-sources` — [notekea#140](https://github.com/juanchurtado1991/notekea/pull/140)
 
 Work that must decide as it goes (decided with the developer, 2026-11-04): "read these 10 articles, compare them and
 reorganize my notes about it". Local models are small and choosing tools over several steps is the hardest thing asked
@@ -1276,16 +1282,34 @@ of them, so it is built to be safe when they get it wrong, and 3.0 and 3.4 decid
 - **Done when:** the model sizes that offer it reach the threshold set in 3.4 on those tasks, and a failed run ends with
   no change to the vault. A model size that falls short does not offer it; the rest of the chat is unaffected.
 
-### ⬜ 4.8 M4b performance pass — `chore/m4b-performance`
+### ↪ 4.8 M4b performance pass — moved into 5.4
 
 The performance pass of M4b (see "Closing a milestone"): memory and time of a web clip, of indexing large documents and of a
 long agent run. Compared with 4.3 in `docs/performance.md`.
+
+**Moved into 5.4 (the developer's decision, 2026-11-11):** measured there, with all of M5 built, and checked by the
+single release run.
+
+### 🚧 4.9 Videos in notes — `feature/videos`
+
+Added with the developer on 2026-11-11, decided after a spike (`LIBRARIES.md` §5c, privacy in issue #141):
+
+- **A video in a note** (`![[trip.mp4]]`, and mov, m4v, webm, mkv, ogv) is a card: a dark frame with a play mark,
+  its name and format. A click plays it in place with the system's player (ComposeMediaPlayer), with pause, a bar to
+  move in it, its time and ✕ back to the card. A format the system cannot play says so and opens with its app.
+- **A YouTube video** (`![Title](https://youtu.be/…)`, as Obsidian embeds it) is the same card. A click plays it in a
+  Notekea window of its own: the system's web view, in Notekea started again as a separate process.
+  - Pasting a YouTube link writes its embed, with the title and thumbnail YouTube gives, asked once.
+  - Showing a note never goes on the network.
+- **A clipped page's YouTube videos** are written under `## Videos` as cards, with the titles the page gives them.
+- **Videos over 100 MB** (GitHub's limit per file) are recompressed to H.264 under 100 MB when added, at the best
+  quality that fits. FFmpeg (LGPL, about 27 MB) is downloaded the first time, verified with a checksum.
 
 ---
 
 ## M5 — Release
 
-### ⬜ 5.1 Onboarding — `feature/onboarding`
+### 🚧 5.1 Onboarding — `feature/videos`
 
 First run flow, three steps, skippable at any point:
 
@@ -1293,15 +1317,25 @@ First run flow, three steps, skippable at any point:
 2. **Choose your notes:** open folder / create vault / use the sample vault.
 3. **Get the AI:** recommended model for this machine's RAM, download in the background while indexing starts.
 
-### ⬜ 5.2 Settings — `feature/settings`
+### 🚧 5.2 Settings — `feature/videos`
 
 `Mod+,` opens Settings (the dialog the tool rail's Settings opens since 1.14, with its sections marked "Coming soon")
-with sections: General (language, open last vault), Appearance (mode and color theme, built in 2.12), Editor (font size, line width,
-spell check), Files (update links when renaming: always or ask, default always; attachments folder, daily notes folder and date format, templates folder — prefilled from
-`.obsidian/` when present), AI (model manager, chat scope default), Sync (M4), Shortcuts (read-only list),
-About (version, licenses, privacy statement).
+with sections: General (language, open last vault), Appearance (mode and color theme, built in 2.12), Editor (font size, line width),
+Files (attachments folder, daily notes folder and date format, templates folder), AI (model manager, chat scope default),
+Sync (M4), Shortcuts (read-only list), About (version, licenses, privacy statement).
 
-### ⬜ 5.3 Packaging — `chore/release-pipeline`
+Decided with the developer on 2026-11-11:
+
+- **Language:** the whole interface also in Spanish, with English, Español or the system's language in General.
+- **Files:** settings are written to the vault's `.obsidian/` files, the ones Notekea already reads, so Obsidian and
+  Notekea agree.
+- **Renames:** they update links without asking, as decided in 1.x; there is no "ask" setting.
+- **Spell check:** moved after the MVP.
+- **Designs:** 2–3 rendered designs per new section, picked by the developer before they are built.
+- **Already in Settings since #140:** Ask about Settings beside the dialog. Every setting has a `SettingsPlace` the chat
+  opens and makes blink, so each new setting here gets one (GUIDELINES §15).
+
+### 🚧 5.3 Packaging — `feature/videos`
 
 GitHub Actions on tag `v*`: build `.dmg` (macOS), `.msi` (Windows) and `.deb` (Linux), attach them to a GitHub
 Release with checksums.
@@ -1314,7 +1348,7 @@ Release with checksums.
 - **Later, when there are users to justify it:** free signing for open source projects (SignPath Foundation) for
   Windows, and an Apple Developer ID with notarization for macOS. Neither blocks the release.
 
-### ⬜ 5.4 Performance and memory — `chore/performance`
+### 🚧 5.4 Performance and memory — `feature/videos`
 
 M5's performance pass, the last one (see "Closing a milestone"). Notekea should run well on the laptop a
 non-technical person has (8 GB of RAM). With the whole app built, measure it on the reference machines (Windows,
@@ -1399,6 +1433,8 @@ with download links, README screenshots, announcement (Hacker News, r/ObsidianMD
 9. **OCR** — text from scanned PDFs and pictures, on the computer. Tesseract first, as an optional download.
 10. **Use an installed Ollama** — when the user already runs Ollama, Notekea can use its model instead of loading its
    own, so the memory is not spent twice. For technical users; the bundled model stays the default.
+11. **Spell check** — in English and Spanish, in Settings → Editor. Moved out of 5.2 by the developer on 2026-11-11:
+   Compose Desktop has none, and its dictionaries are a new download.
 
 ## Out of scope for the MVP
 
