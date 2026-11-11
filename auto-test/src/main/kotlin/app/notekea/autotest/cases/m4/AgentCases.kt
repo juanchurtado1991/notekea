@@ -1,5 +1,6 @@
 package app.notekea.autotest.cases.m4
 
+import androidx.compose.ui.test.hasText
 import app.notekea.autotest.ChatModels
 import app.notekea.autotest.cases.m1.PLAYGROUND
 import app.notekea.autotest.cases.m3.MODEL_CASE_TIMEOUT
@@ -16,6 +17,8 @@ private const val SAMPLE_VAULT = "Sample Vault"
 private const val NOTES_ABOUT = "me podes contar de que tratan las notas?"
 private const val TASK = "find my recipe made with corn flour and tag it with latin"
 private const val AREPAS = "$PLAYGROUND/Recipes/Arepas.md"
+private const val STEP_MILLIS = 60_000L
+private val STEPS = listOf("Read Recipes/Arepas", "Searched the notes", "Listed notes")
 
 /**
  * The case of 4.7, agent mode (`MVP_SMOKE_TEST.md`), with Medium, the smallest size that offers it: a task that
@@ -39,11 +42,21 @@ private fun SuiteBuilder.agentWorks() {
         chooseMode(mode = "Agent")
         ask(question = TASK)
 
-        // Its steps vary (a search or notes listed), but it reads the recipe before it proposes.
-        expectText(
-            text = "Read Recipes/Arepas",
-            substring = true
-        )
+        // Its steps vary (a search, notes listed, the recipe read): one of them is listed before the card.
+        ui
+            .waitUntil(timeoutMillis = STEP_MILLIS) {
+                STEPS.any { step ->
+                    ui
+                        .onAllNodes(
+                            matcher = hasText(
+                                text = step,
+                                substring = true
+                            )
+                        )
+                        .fetchSemanticsNodes()
+                        .isNotEmpty()
+                }
+            }
 
         expectText(text = "Do it")
 
