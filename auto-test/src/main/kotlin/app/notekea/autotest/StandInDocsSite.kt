@@ -21,6 +21,11 @@ class StandInDocsSite(private val real: PageFetcher) : PageFetcher {
                 links = (1..PAGES).joinToString(separator = "\n") { "<a href=\"/guide/page-$it\">Page $it</a>" }
             )
 
+            name == WATCH -> pageOf(
+                title = "Watch",
+                links = ""
+            ).replace("</main>", "<iframe src=\"https://www.youtube.com/embed/$VIDEO_ID\" title=\"$VIDEO_TITLE\"></iframe></main>")
+
             PAGE.matches(input = name) -> pageOf(
                 title = "Page ${name.removePrefix(prefix = "page-")}",
                 links = ""
@@ -50,6 +55,12 @@ class StandInDocsSite(private val real: PageFetcher) : PageFetcher {
         private const val ORIGIN = "https://docs.notekea.example"
         private const val INTRO = "intro"
         const val ADDRESS = "$ORIGIN/guide/$INTRO"
+        private const val WATCH = "watch"
+
+        // A page that plays a YouTube video (4.9-05), kept under Videos when it is clipped.
+        const val VIDEO_ADDRESS = "$ORIGIN/guide/$WATCH"
+        const val VIDEO_ID = "dQw4w9WgXcQ"
+        const val VIDEO_TITLE = "Making arepas"
         private const val NOT_FOUND = 404
         private val PAGE = Regex(pattern = "page-\\d+")
 

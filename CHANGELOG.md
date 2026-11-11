@@ -49,6 +49,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Videos in notes** (4.9).
+  - A video file is a card that plays in place with the system's player; a format the system can't play opens with
+    its app.
+  - A YouTube link pasted alone becomes a card, titled by YouTube once. It plays in a Notekea window of its own with
+    the system's web view.
+  - A clipped page's YouTube videos are kept under Videos.
+  - A video over 100 MB is made smaller (H.264) before it is attached. FFmpeg is downloaded the first time and
+    checked against its checksum.
+  - Showing a note never goes on the network (#141).
+
 - Clipping a documentation page asks first, in the clip dialog and in the chat: only this page, or this page and the
   pages it links under its own path (at most 30). With them, each becomes a note in a folder named after the page,
   and the page's note lists them under Pages with what each is for; a menu every page repeats is left out, and a short

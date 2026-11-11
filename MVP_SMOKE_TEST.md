@@ -623,3 +623,17 @@ Run on the Playground Vault with the Medium model (Medium and Large offer it).
 | 4.7-04 | With Medium in Auto, ask in the Sample Vault "compare Deep Work and Atomic Habits", then "add a task 'buy beans' to the recipe that uses black beans"; Copy chat | The first is Answered with: deep, the second lists the agent's steps and ends on a card for Black beans | 4.7 | Manual (costly) | `ChatModeTest`, `ChatAgentTest` | | | |
 | 4.7-05 | With Medium in Auto, ask "¿cuánta agua llevan las arepas?", then "¿y cuánto reposa la masa?", then "mandame un recordatorio mañana a las 9"; Copy chat | Both answers are in Spanish (2½ tazas, cinco minutos); the reminder is refused plainly, saying a task with a due date is what it can add | 4.7 | Auto-Test | 4.7-05, `ChatProbeRulesTest`, `ChatProbeRoundsTest` | | | |
 | 4.7-06 | With Medium in Auto, ask three questions about the recipes; hold the pointer on the ring beside Medium · Auto; click ⋯ → Compact chat; ask "and the first recipe I asked about, how much water did it take?" | The ring fills with each reply and its tooltip says how full the memory is; after Compact chat it is not higher (lower once there is enough to summarize), and the last question is still answered about the arepas | 4.7 | Auto-Test | 4.7-06, `ChatMemoryRingUiTest`, `ChatProbeTest` | | | |
+
+### 4.9 Videos
+
+Run on the Playground Vault. 4.9-04 and 4.9-06 need the internet; 4.9-06 needs a video over 100 MB (a phone video of
+a few minutes).
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 4.9-01 | Put trip.mp4 in the vault's attachments folder; write a note with `![[trip.mp4]]` | The note shows a card with a dark frame and a play mark, trip and Video · MP4; nothing plays until it is clicked | 4.9 | Auto-Test | 4.9-01, `AttachmentRulesTest`, `EditorAttachmentsTest` | | | |
+| 4.9-02 | Drop a real mp4 into a note; click its card; pause, click the middle of the bar, then ✕. Do it again with a webm on macOS | It plays in place with its time; the bar moves it; ✕ brings the card back. The webm on macOS says this computer can't play it, and a click opens it with its app | 4.9 | Manual (eyes) | | | | |
+| 4.9-03 | Write a note with `![Cómo hacer arepas](https://youtu.be/dQw4w9WgXcQ)`, with the network off | A card titled Cómo hacer arepas, from YouTube, shows, and nothing goes on the network | 4.9 | Auto-Test | 4.9-03, `YouTubeLinksTest`, `EditorAttachmentsTest` | | | |
+| 4.9-04 | Copy a YouTube video's address; paste it alone on a line of a note; click its card; close Notekea | The embed is written at once and gets the video's title a moment later, and the card its picture. A Notekea window plays the video, and closing Notekea closes it | 4.9 | Manual (system) | `EditorNewAttachmentsTest`, `OEmbedJsonTest` | | | |
+| 4.9-05 | Clip the Auto-Test's docs page that plays a YouTube video, Only this page | Its note has a Videos section with the video's card, titled as the page titles it | 4.9 | Auto-Test | 4.9-05, `PageVideosTest` | | | |
+| 4.9-06 | Drop a video over 100 MB into a note; the first time, watch the banner above the note; drop it again and click Cancel | It downloads the video tool (about 27 MB), then makes the video smaller, then embeds trip.mp4 under 100 MB that plays. Cancel stops it and attaches nothing; the original video is unchanged | 4.9 | Manual (system) | `EditorNewAttachmentsTest`, `VideoBitrateTest` | | | |

@@ -1290,7 +1290,7 @@ long agent run. Compared with 4.3 in `docs/performance.md`.
 **Moved into 5.4 (the developer's decision, 2026-11-11):** measured there, with all of M5 built, and checked by the
 single release run.
 
-### 🚧 4.9 Videos in notes — `feature/videos`
+### 🚧 4.9 Videos in notes — `feature/videos` (built; in the PR with M5)
 
 Added with the developer on 2026-11-11, decided after a spike (`LIBRARIES.md` §5c, privacy in issue #141):
 

@@ -40,6 +40,7 @@ import app.notekea.autotest.cases.m4.agentCases
 import app.notekea.autotest.cases.m4.chatTalkCases
 import app.notekea.autotest.cases.m4.sourceCases
 import app.notekea.autotest.cases.m4.syncCases
+import app.notekea.autotest.cases.m4.videoCases
 import com.testbuddy.Suite
 import com.testbuddy.only
 import com.testbuddy.testBuddy
@@ -108,6 +109,7 @@ object NotekeaSuite {
             actionCases()
             syncCases()
             sourceCases()
+            videoCases()
             agentCases()
             chatTalkCases()
             // Free use comes last, after every other manual case.

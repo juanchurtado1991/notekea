@@ -135,6 +135,16 @@ words: image, imagen, picture, foto, paste, pegar, attachment, adjunto, file, ar
 Paste an image ({paste}) or drop a file into a note: it is saved in the attachments folder and linked where the cursor
 is. Image or file in the toolbar picks one with the system's picker.
 
+# Videos in notes
+words: video, vídeo, youtube, mp4, mov, play, reproducir, película, clip de video, ver un video
+Drop or pick a video file (mp4, mov, m4v, webm, mkv, ogv) into a note: it shows as a card with a play mark. Click it
+to play it right there, with pause, a bar to move in it and ✕ back to the card. A format this computer can't play
+opens with its app instead. Paste a YouTube link alone on a line: it becomes a card, and Notekea asks YouTube once for
+its title and picture; click it to play the video in a Notekea window of its own. Showing a note never goes on the
+internet. A video over 100 MB, GitHub's limit for one file, is made smaller before it is attached, at the best
+quality that fits; the first time, Notekea downloads the video tool FFmpeg (about 27 MB). Cancel stops it, and the
+video stays where it was.
+
 # Color theme and appearance
 words: theme, tema, dark mode, modo oscuro, light mode, colors, colores, appearance, apariencia
 try: use the … theme
@@ -247,10 +257,11 @@ source and clipped, writes notes about it with the AI model and keeps only the s
 the article itself under Original text. When the page has other pages under its own path, such as a documentation's
 section, Notekea asks first: only this page, or this page and those, saying in a sentence what they offer. It finds
 them in the site's llms.txt (its pages written for machines, clean of menus), else its sitemap, else the page's
-links; news and blog pages are never a section. At most 30 are clipped, the closest to the page first. With them,
-each becomes a note in a folder named after the page, and the page's note lists them under Pages with what each is
-for. A page the site also serves as Markdown (page.md) is read from it. Say "with its linked pages" or "only" in the
-chat to answer before it asks. Pages that need a login or JavaScript cannot be clipped.
+links; news and blog pages are never a section. The 30 closest to the page are the default; All N pages clips every
+one. With them, each becomes a note in a folder named after the page, and the page's note lists them under Pages with
+what each is for. A page the site also serves as Markdown (page.md) is read from it. Say "with its linked pages",
+"all its pages" or "only" in the chat to answer before it asks. A page's YouTube videos are kept under Videos, as
+cards that play. Pages that need a login or JavaScript cannot be clipped.
 
 # Study cards
 words: study cards, flashcards, tarjetas, tarjetas de estudio, repaso, review, memorize, memorizar, spaced repetition
