@@ -576,3 +576,41 @@ needs a GitHub account and a second computer or vault folder.
 | 4.2-01 | In the Playground Vault open Settings → Sync, paste the file: address of an empty local repository and click Connect; then add a note in the vault's folder and wait 15 seconds | The status bar says Up to date and the repository holds the vault's notes; the new note reaches the repository by itself | 4.2 | Auto-Test | 4.2-01, `JGitRepositoryTest`, `SyncEngineTest`, `SyncSettingsViewModelTest` | | | |
 | 4.2-02 | Connect as in 4.2-01; change Welcome in a clone of the repository and push it; change Welcome in the vault; click Sync now; close Settings, click Review on the banner, then Keep mine | The banner names Welcome; Review shows both versions side by side; Keep mine leaves this computer's text in Welcome, no conflict copy, the banner gone, and the repository with it | 4.2 | Auto-Test | 4.2-02, `JGitRepositoryTest`, `SyncStatusViewModelTest`, `SyncConflictsScreenTest` | | | |
 | 4.2-03 | Make a private GitHub repository and a fine-grained token that can write its contents; connect the Playground Vault with them; change a note; connect a second empty vault; type a wrong token and click Connect | Up to date and the notes on github.com; the change arrives there; the second vault gets every note; the wrong token says the repository refused it and the status bar says Sync sign-in failed | 4.2 | Manual (system) | | | | |
+
+## M4b — Sources, study cards and agent
+
+### 4.4 Web clips
+
+Run on the Playground Vault. 4.4-02 needs the internet and a chat model.
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 4.4-01 | Close every note, click Clip a web page, type http://localhost:8080/secrets and click Clip | It says Notekea never opens addresses on this computer or its local network, and no Web sources folder is made | 4.4 | Auto-Test | 4.4-01, `ClipAdaptersTest`, `ClipWebPageUseCaseTest` | | | |
+| 4.4-02 | With a chat model, clip a news or blog article from the start actions; then https://www.youtube.com; then write clip and another article's address in the chat and click Do it | The article becomes Web sources/<title> with source and clipped, notes the article backs and Original text; YouTube says no article was found and writes nothing; the chat's card clips the page | 4.4 | Manual (system) | `ClipEvalChatModelTest` (20 saved pages) | | | |
+
+### 4.5 Documents
+
+Run on the Playground Vault; 4.5-02 needs a PDF with text of a few pages.
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 4.5-01 | Put Field guide.html (a heading and a paragraph) in the vault's folder, open the vault and click it in Files | It opens read-only as its text, with Open in the system's app; the file is unchanged | 4.5 | Auto-Test | 4.5-01, `TikaDocumentReaderTest`, `DocumentAwareContentStoreTest`, `DocumentBlockTest` | | | |
+| 4.5-02 | Copy a PDF into the vault; click it in Files; ask the chat a question its third page answers; click the PDF's citation | The PDF shows its real pages; the answer cites the PDF and its page; the citation opens that page with the passage marked | 4.5 | Manual (eyes) | `PdfBoxPagesTest` | | | |
+
+### 4.6 Study cards
+
+Run on the Playground Vault.
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 4.6-01 | Write Capitals.md with #flashcards and the line Capital of Portugal::Lisbon; open Study cards in the tool rail; Show answer; Good | The question shows without the answer, then the answer; Good says all done for today, and the line in the note ends with <!--SR:!date,3,250--> | 4.6 | Auto-Test | 4.6-01, `CardFormatTest`, `CardScheduleTest`, `StudyCardsUseCasesTest` | | | |
+| 4.6-02 | With a chat model open Recipes/Arepas and ask the chat "make study cards from this note"; click Do it | The card lists questions the note answers; Do it adds them at the note's end under Flashcards, and Study cards shows them | 4.6 | Manual (costly) | `StudyCardsUseCasesTest` | | | |
+
+### 4.7 Agent mode
+
+Run on the Playground Vault with the Medium model (the smallest size that offers it).
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 4.7-01 | Open the chat, check Agent mode and ask "find my recipe made with corn flour and tag it with latin"; wait; click Do it | Each step is listed (Searched the notes for …, Read Arepas); it ends on the card and Arepas is unchanged until Do it, which adds the tag | 4.7 | Auto-Test | 4.7-01, `AgentTaskTest`, `ChatAgentTest`, `AgentEvalChatModelTest` | | | |
+| 4.7-02 | With the Small model, open the chat | Agent mode is not offered; the chat works as before | 4.7 | Manual (costly) | `ChatAgentTest` | | | |

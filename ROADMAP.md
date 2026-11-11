@@ -1194,8 +1194,8 @@ The index folder is never committed. Token stored in the OS keychain (Java Keyri
 
 ### ⬜ 4.2 Sync UI — `feature/sync-ui`
 
-- **Settings → Sync:** remote URL, authentication (HTTPS token or SSH key), auto-sync on/off, interval,
-  "Sync now".
+- **Settings → Sync:** remote URL, authentication (an HTTPS access token; SSH keys after the MVP, decided with the
+  developer on 2026-11-11), auto-sync on/off, interval, "Sync now".
 - **Status bar:** "Up to date", "Syncing…", "3 changes pending", "Conflict" (`error` color).
 - **Conflicts:** banner listing conflicted notes; opening one shows both versions side by side with
   "Keep mine", "Keep theirs" and "Keep both".
@@ -1223,7 +1223,8 @@ Notes from a web page: give Notekea a URL and it writes notes about the article 
   `LIBRARIES.md`), the local model writes the notes with 3.5, each one checked against the article, and Notekea creates
   `Web sources/<title>.md` with the properties `source` and `clipped`, the notes, and the article's text under
   `## Original text`, so search and the chat keep working if the page disappears.
-- **Where:** "Clip web page…" in the editor toolbar's More menu, and in the chat as an action of 3.9.
+- **Where:** "Clip a web page" in the start actions shown where no note is open, and in the chat as an action of 3.9
+  ("clip https://…"). Not in the editor's More menu: the start actions keep the editor's toolbar as it is.
 - **With no model installed,** it saves the article alone and says the notes need a model.
 - **What fails, in plain words:** a page that needs JavaScript or a login, a paywall, a page that is not an article. No
   browser is built into the app.
@@ -1240,8 +1241,9 @@ search, Related and the chat find them. Notekea reads them and never edits them,
   starts by measuring what Apache Tika adds to the app's size against one small library per format; the choice goes in
   `LIBRARIES.md`.
 - **One reader per format,** so another format is cheap to add later.
-- **Citations:** a click opens the file in the system's app, at its page or slide in PDF and PowerPoint where the system
-  allows it, and names the section or line in the rest.
+- **Citations:** a click opens the file in a read-only tab (decided with the developer, 2026-11-11): a PDF as its real
+  pages, drawn with PDFBox, at the cited page with the passage marked; the other formats as their text. "Open in the
+  system's app" is always there. Apache Tika reads every format (`LIBRARIES.md` §5b).
 - **Left out:** scanned PDFs and images with no text, listed as not readable (OCR comes after the MVP), other binary
   files, and source code, which Repositories indexes properly.
 - **Done when:** a sentence of each format can be found and cited, a change to a file indexes it again, and a damaged
@@ -1267,8 +1269,10 @@ of them, so it is built to be safe when they get it wrong, and 3.0 and 3.4 decid
   its notes listed, and nothing happens until the user confirms it. Undoing it undoes the whole plan.
 - **Safety:** here the agent does read notes and pages, so their text can steer what it proposes. It cannot fetch a URL
   the user did not write, cannot leave the vault, and every change still passes the user's confirmation.
-- **Tools:** plain coroutines like the rest of the pipeline, unless 3.0 shows Koog's agent runtime is worth it.
-- **Evaluation:** about 30 tasks over the Sample Vault with the plan each should reach, in the set of 3.4.
+- **Tools:** plain coroutines like the rest of the pipeline: search, read a note, find notes by their properties, the
+  open tasks, and fetch a page whose address the request writes.
+- **Evaluation:** 30 tasks over the Sample Vault with the plan or answer each should reach (`AgentEvalChatModelTest`);
+  a size offers agent mode at 80 % right.
 - **Done when:** the model sizes that offer it reach the threshold set in 3.4 on those tasks, and a failed run ends with
   no change to the vault. A model size that falls short does not offer it; the rest of the chat is unaffected.
 
