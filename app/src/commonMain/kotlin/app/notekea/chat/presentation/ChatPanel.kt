@@ -4,11 +4,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +60,9 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_WIDTH_DP = 320
+
+// The ring's room at the end of the row under the field: the ring in its middle, as far from the mode as from the edge.
+private const val RING_SLOT_DP = 36
 private const val PREVIEW_HEIGHT_DP = 560
 
 /**
@@ -267,15 +275,14 @@ private fun ChatInput(
             modifier = Modifier.focusRequester(focusRequester = inputFocus)
         )
 
-        // Under the field, at its right as in Claude Code: the model and the mode, then the chat's memory.
+        // Under the field, at its right as in Claude Code: the model and the mode, then the chat's memory, centered
+        // in height on the mode and in width between the mode's end and the field's.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(intrinsicSize = IntrinsicSize.Min)
                 .padding(top = NotekeaDimensions.SpacingXs),
-            horizontalArrangement = Arrangement.spacedBy(
-                space = NotekeaDimensions.SpacingS,
-                alignment = Alignment.End
-            ),
+            horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
             ChatModeMenu(
@@ -285,10 +292,19 @@ private fun ChatInput(
                 tier = state.tier
             )
 
-            ChatMemoryRing(
-                usage = state.contextUsage,
-                isCompacting = state.isCompacting
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(width = RING_SLOT_DP.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                // The mode's own inner padding to the left: centered on what is seen, not on its box.
+                ChatMemoryRing(
+                    usage = state.contextUsage,
+                    isCompacting = state.isCompacting,
+                    modifier = Modifier.offset(x = -NotekeaDimensions.SpacingXs)
+                )
+            }
         }
     }
 }
