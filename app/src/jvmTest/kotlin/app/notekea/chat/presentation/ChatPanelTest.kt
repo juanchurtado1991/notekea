@@ -2,7 +2,6 @@ package app.notekea.chat.presentation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -17,13 +16,14 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import app.notekea.core.llm.domain.ModelTier
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
  * The chat panel on screen: what it offers without a model, a source that opens its passage, Enter that sends, and
- * Deep answer only where the model offers it.
+ * the model and the mode under the field, with only the modes the model offers.
  */
 @OptIn(ExperimentalTestApi::class)
 class ChatPanelTest {
@@ -126,54 +126,57 @@ class ChatPanelTest {
     }
 
     @Test
-    fun `Deep answer shows only for a model that offers it, which Small does not`() =
+    fun `the model and the mode show at the field's bottom, and a mode is chosen from the menu`() =
         runComposeUiTest {
-            val state = mutableStateOf(value = ChatPreviewData.state.copy(isDeepOffered = true))
+            val intents = mutableListOf<ChatIntent>()
 
-            setContent {
-                NotekeaTheme(darkTheme = false) {
-                    ChatPanel(
-                        state = state.value,
-                        onIntent = {},
-                        inputFocus = remember { FocusRequester() }
-                    )
-                }
-            }
-
-            onNodeWithText(text = DEEP_ANSWER).assertExists()
-            state.value = state.value.copy(isDeepOffered = false)
-            onNodeWithText(text = DEEP_ANSWER).assertDoesNotExist()
-        }
-
-    // Auto-Test 4.7-01 of 2026-11-11: with Medium both modes are offered, and they were drawn over each other.
-    @Test
-    fun `Deep answer and Agent mode show one under the other when both are offered`() =
-        runComposeUiTest {
             show(
                 state = ChatPreviewData.state.copy(
+                    tier = ModelTier.MEDIUM,
                     isDeepOffered = true,
                     isAgentOffered = true
                 ),
-                intents = mutableListOf()
+                intents = intents
             )
 
-            val deep = onNodeWithText(text = DEEP_ANSWER).fetchSemanticsNode().boundsInRoot
-            val agent = onNodeWithText(text = AGENT_MODE).fetchSemanticsNode().boundsInRoot
+            onNodeWithText(text = "Medium · Auto").performClick()
+
+            val shown = MODES.map {
+                onAllNodesWithText(text = it).fetchSemanticsNodes().isNotEmpty()
+            }
+
+            onNodeWithText(text = DEEP_THINKING).performClick()
 
             assertEquals(
-                expected = true,
-                actual = agent.top >= deep.bottom
+                expected = listOf(true, true, true, true) to
+                    listOf<ChatIntent>(ChatIntent.OnModeChoose(mode = ChatMode.DEEP)),
+                actual = shown to intents
             )
         }
 
+    @Test
+    fun `Small offers only Auto and Fast`() = runComposeUiTest {
+        show(
+            state = ChatPreviewData.state.copy(tier = ModelTier.SMALL),
+            intents = mutableListOf()
+        )
+
+        onNodeWithText(text = "Small · Auto").performClick()
+
+        assertEquals(
+            expected = listOf(true, true, false, false),
+            actual = MODES.map { onAllNodesWithText(text = it).fetchSemanticsNodes().isNotEmpty() }
+        )
+    }
+
     private companion object {
-        const val AGENT_MODE = "Agent mode"
         const val WIDTH_DP = 340
         const val HEIGHT_DP = 640
         const val NO_MODEL_TITLE = "No AI model yet"
         const val MODEL_ACTION = "Choose a model"
         const val STEPS_PLACE = "Arepas › Steps"
         const val QUESTION = "How long does the dough rest?"
-        const val DEEP_ANSWER = "Deep answer"
+        const val DEEP_THINKING = "Deep thinking"
+        val MODES = listOf("Auto", "Fast", DEEP_THINKING, "Agent")
     }
 }

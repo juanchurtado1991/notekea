@@ -118,7 +118,8 @@ Where it stands (2026-11-11): 4.1–4.8 built, with the chat's help guide and th
   large documents ready in 4.6 s (`docs/performance.md`).
 - **Auto-Test:** 4.2-01/02, 4.4-01, 4.5-01, 4.6-01 and 4.7-01 automated; 4.2-03, 4.4-02, 4.5-02, 4.6-02 and 4.7-02
   manual (`MVP_SMOKE_TEST.md`).
-- **For the developer to decide:** Large not offering agent mode although it is the bigger model; Web clip moved from
+- **Decided 2026-11-11:** agent mode on Medium and Large (Large at 70 %), and the chat's modes Auto, Fast, Deep
+  thinking and Agent in a menu at the field's bottom right. **For the developer to decide:** Web clip moved from
   the editor's More menu to the start actions (and the chat); Tika's ~38 MB in the installers; HTTPS tokens only.
 - **CI (all three systems green on fddd9e98):** it found two Windows/macOS-only bugs, both fixed with tests. Git for
   Windows' core.autocrlf rewrote pulled notes' line ends, and PDFBox scanned every system font on its first

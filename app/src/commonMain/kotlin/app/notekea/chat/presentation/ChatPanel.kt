@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,12 +39,8 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res
-import app.notekea.resources.chat_agent
-import app.notekea.resources.chat_agent_hint
 import app.notekea.resources.chat_clear
 import app.notekea.resources.chat_copy
-import app.notekea.resources.chat_deep
-import app.notekea.resources.chat_deep_hint
 import app.notekea.resources.chat_index_wait
 import app.notekea.resources.chat_more
 import app.notekea.resources.chat_placeholder
@@ -262,70 +259,17 @@ private fun ChatInput(
             onStop = { onIntent(ChatIntent.OnStop) },
             modifier = Modifier.focusRequester(focusRequester = inputFocus),
             bottom = {
-                // One under the other: Medium offers both.
-                Column {
-                    if (state.isDeepOffered) {
-                        ModeToggle(
-                            isOn = state.isDeep,
-                            label = Res.string.chat_deep,
-                            hint = Res.string.chat_deep_hint,
-                            onToggle = { onIntent(ChatIntent.OnDeepToggle) }
-                        )
-                    }
-
-                    if (state.isAgentOffered) {
-                        ModeToggle(
-                            isOn = state.isAgent,
-                            label = Res.string.chat_agent,
-                            hint = Res.string.chat_agent_hint,
-                            onToggle = { onIntent(ChatIntent.OnAgentToggle) }
-                        )
-                    }
-                }
+                // The model and the mode at the bottom right, as in Claude Code.
+                ChatModeMenu(
+                    tier = state.tier,
+                    mode = state.mode,
+                    modes = state.modes,
+                    onChoose = { onIntent(ChatIntent.OnModeChoose(mode = it)) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentWidth(align = Alignment.End)
+                )
             }
-        )
-    }
-}
-
-/** A way of answering, off by default, with what it costs and gives: Deep answer (3.6), agent mode (4.7). */
-@Composable
-private fun ModeToggle(
-    isOn: Boolean,
-    label: StringResource,
-    hint: StringResource,
-    onToggle: () -> Unit
-) {
-    val name = stringResource(resource = label)
-
-    Row(
-        modifier = Modifier.padding(top = NotekeaDimensions.SpacingXs),
-        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        NotekeaCheckbox(
-            checked = isOn,
-            onClick = onToggle,
-            label = name
-        )
-
-        // One line whatever the panel's width: the hint gives way first.
-        Text(
-            text = name,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1
-        )
-
-        Text(
-            text = stringResource(resource = hint),
-            modifier = Modifier.weight(
-                weight = 1f,
-                fill = false
-            ),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
         )
     }
 }

@@ -27,11 +27,8 @@ sealed interface ChatIntent {
     /** Copy chat: the whole conversation on the clipboard, to report an answer that went wrong. */
     data object OnCopyChat : ChatIntent
 
-    /** Deep answer on or off (3.6): three drafts and a vote, slower and more often right. */
-    data object OnDeepToggle : ChatIntent
-
-    /** Agent mode on or off (4.7): a request is worked on move after move, ending on a card. */
-    data object OnAgentToggle : ChatIntent
+    /** The [mode] the chat answers in, from the menu under its question field. */
+    data class OnModeChoose(val mode: ChatMode) : ChatIntent
 
     data object OnModelSettingsOpen : ChatIntent
 

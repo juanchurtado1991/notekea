@@ -14,7 +14,13 @@ internal object ChatTranscript {
     fun of(state: ChatState): String = buildString {
         appendLine("# Notekea chat")
         appendLine()
-        appendLine("Model: ${if (state.isSmall) "Small" else "Medium or Large"} · Deep answer: ${state.isDeep}")
+
+        val model = state
+            .tier
+            ?.name
+            ?.lowercase() ?: if (state.isSmall) "small" else "medium or large"
+
+        appendLine("Model: $model · Mode: ${state.mode.name.lowercase()}")
 
         state.entries.forEach { entry ->
             appendLine()
@@ -22,6 +28,7 @@ internal object ChatTranscript {
             appendLine()
             appendLine("Scope: ${entry.scope.name.lowercase()}${entry.scopeName?.let { " ($it)" }.orEmpty()}")
             appendLine("Outcome: ${entry.outcome?.name?.lowercase() ?: "answering"}")
+            entry.answeredWith?.let { appendLine("Answered with: ${it.name.lowercase()}") }
             entry.error?.let { appendLine("Error: $it") }
 
             if (entry.answer.isNotBlank()) {

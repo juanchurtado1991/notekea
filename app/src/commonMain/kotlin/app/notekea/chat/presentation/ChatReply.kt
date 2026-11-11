@@ -17,4 +17,7 @@ internal sealed interface ChatReply {
 
     /** What the vault holds as a whole. */
     data object Overview : ChatReply
+
+    /** Agent mode works on it (4.7): its moves are listed on the entry, its end is a card or what it found. */
+    data object Agent : ChatReply
 }

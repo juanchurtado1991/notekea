@@ -533,13 +533,13 @@ wording.
 | 3.3-10 | In the Playground Vault ask the chat explícame qué hay en las notas | It describes the vault in Spanish by its folders (recipes, travel, ideas, journal…), naming a few notes of each, not a few random passages | 3.3 | Auto-Test | 3.3-10, `ChatHelpTest` | | | |
 | 3.3-11 | In the Playground Vault ask what is in my notes?, then en español | The second reply says the first one again in Spanish, without searching or acting | 3.3 | Auto-Test | 3.3-11, `ChatHelpTest` | | | |
 
-### 3.6 Deep answer
+### 3.6 Deep thinking
 
-Same vault and model as 3.3; Deep answer is offered with Medium only (`docs/answer-quality.md`, 3.6).
+Same vault and model as 3.3; Deep thinking (Deep answer until 2026-11-11) is offered with Medium only (`docs/answer-quality.md`, 3.6).
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
-| 3.6-01 | In the Playground Vault with Medium in use, tick Deep answer under the question field and ask How much water does the arepa dough take?; press Esc during another Deep answer; switch to Small in Settings → AI model and look at the field | Deep answer and its hint fit on one line; the step line says Writing drafts and comparing them…, then the whole answer shows at once with its citation; Esc stops it, marked Stopped; with Small the Deep answer box is not there | 3.6 | Auto-Test | 3.6-01, `ChatPanelTest`, `DraftVoteTest`, `AnswerFromNotesUseCaseTest`, `AnswerEvalChatModelTest` (by hand) | | | |
+| 3.6-01 | In the Playground Vault with Medium in use, choose Deep thinking in the mode menu at the bottom right of the question field and ask How much water does the arepa dough take?; press Esc during another Deep answer; switch to Small in Settings → AI model and look at the field | Deep answer and its hint fit on one line; the step line says Writing drafts and comparing them…, then the whole answer shows at once with its citation; Esc stops it, marked Stopped; with Small the Deep answer box is not there | 3.6 | Auto-Test | 3.6-01, `ChatPanelTest`, `DraftVoteTest`, `AnswerFromNotesUseCaseTest`, `AnswerEvalChatModelTest` (by hand) | | | |
 
 ### 3.8 Questions in plain words
 
@@ -608,9 +608,11 @@ Run on the Playground Vault.
 
 ### 4.7 Agent mode
 
-Run on the Playground Vault with the Medium model (the smallest size that offers it).
+Run on the Playground Vault with the Medium model (Medium and Large offer it).
 
 | ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
 |---|---|---|---|---|---|---|---|---|
-| 4.7-01 | Open the chat, check Agent mode and ask "find my recipe made with corn flour and tag it with latin"; wait; click Do it | Each step is listed (Searched the notes for …, Read Arepas); it ends on the card and Arepas is unchanged until Do it, which adds the tag | 4.7 | Auto-Test | 4.7-01, `AgentTaskTest`, `ChatAgentTest`, `AgentEvalChatModelTest` | | | |
-| 4.7-02 | With the Small model, open the chat | Agent mode is not offered; the chat works as before | 4.7 | Manual (costly) | `ChatAgentTest` | | | |
+| 4.7-01 | Open the chat, choose Agent in the mode menu (Medium · Auto at the bottom right of the field) and ask "find my recipe made with corn flour and tag it with latin"; wait; click Do it | Each step is listed (Searched the notes for …, Read Arepas); it ends on the card and Arepas is unchanged until Do it, which adds the tag | 4.7 | Auto-Test | 4.7-01, `AgentTaskTest`, `ChatAgentTest`, `AgentEvalChatModelTest` | | | |
+| 4.7-02 | With the Small model, open the chat and click Small · Auto at the bottom right of the field | Only Auto and Fast are offered; the chat works as before | 4.7 | Manual (costly) | `ChatAgentTest` | | | |
+| 4.7-03 | With Medium, choose Agent and ask "me podes contar de que tratan las notas?"; then Copy chat | Told from the vault's folders (Recipes, Travel…), not a search for the word "notas"; the copied chat says Answered with: fast | 4.7 | Auto-Test | 4.7-03, `ChatAgentTest` | | | |
+| 4.7-04 | With Medium in Auto, ask in the Sample Vault "compare Deep Work and Atomic Habits", then "add a task 'buy beans' to the recipe that uses black beans"; Copy chat | The first is Answered with: deep, the second lists the agent's steps and ends on a card for Black beans | 4.7 | Manual (costly) | `ChatModeTest`, `ChatAgentTest` | | | |

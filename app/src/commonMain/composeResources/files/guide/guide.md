@@ -142,10 +142,13 @@ words: vault, bóveda, boveda, open folder, abrir carpeta, another vault, otra b
 Press {openFolder} to open a folder as a vault, or click the vaults button at the bottom of the tool rail to switch to a
 recent one.
 
-# Deep answer
-words: deep answer, respuesta profunda, more precise, más preciso, slower, drafts
-Turn on Deep answer under the chat's question field when precision matters more than speed: it writes several drafts
-and keeps the best supported one.
+# Chat modes: Auto, Fast, Deep thinking, Agent
+words: mode, modo, modes, modos, deep thinking, deep answer, respuesta profunda, pensar, more precise, más preciso, slower, drafts, auto, fast, rápido, normal
+At the bottom right of the chat's question field it says the model in use and the mode, such as "Medium · Auto"; a
+click opens the modes. Auto, the default, picks for each request: Deep thinking for a question that asks to compare,
+explain or sum up, the agent for a task whose note it must look for first, and a fast answer for the rest. Fast is
+one answer, the quickest. Deep thinking writes three drafts and keeps the one they agree on: slower, more often right.
+Agent works step by step. Deep thinking comes with the Medium model, Agent with Medium and Large.
 
 # Copy the chat
 words: copy chat, copiar chat, clear history, borrar historial, report, reportar
@@ -194,7 +197,8 @@ back when it is due.
 # Agent mode
 words: agent, agente, modo agente, agent mode, step by step, paso a paso, multi-step, varios pasos, do a task, haz una tarea
 try: find my unfinished books and tag them with to-read
-With the Medium model, check Agent mode at the bottom of the chat's field for a task that needs looking things up
-first, such as "find my unfinished books and tag them with to-read". It works step by step, listing each step
-(searched, read a note, listed notes, looked at the tasks), and ends on the usual card: nothing changes until you
-press Do it. It reads a web page only when your request writes its address, and stops after 30 steps or 10 minutes.
+With the Medium or Large model, choose Agent in the mode menu at the bottom right of the chat's field (Auto also uses it when
+a task names a note it must look for first). It works step by step, listing each step (searched, read a note, listed
+notes, looked at the tasks), and ends on the usual card: nothing changes until you press Do it. Help, what the notes
+are about and talk are answered as usual. It reads a web page only when your request writes its address, and stops
+after 30 steps or 10 minutes.

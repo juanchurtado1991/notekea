@@ -46,10 +46,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Agent mode (4.7): with the Medium model, Agent mode at the bottom of the chat's field works on a task that
-  needs looking things up first, one step at a time (search, read a note, list notes, look at the tasks, read a page
-  whose address the request writes), listing each step. It ends on the usual card, and nothing changes until you
-  confirm it, or with what it found. It stops after 30 steps or 10 minutes.
+- Chat modes: the bottom right of the chat's field says the model and the mode ("Medium · Auto"), and a click picks
+  Auto (the default: Deep thinking for a question that asks to reason, the agent for a task whose note must be looked
+  for, a fast answer otherwise), Fast, Deep thinking (Deep answer, renamed) or Agent, each where the model offers
+  it.
+- Agent mode (4.7): with the Medium or Large model, the agent works on a task that needs looking things up first, one step at
+  a time (search, read a note, list notes, look at the tasks, read a page whose address the request writes), listing
+  each step. It ends on the usual card, and nothing changes until you confirm it, or with what it found. It stops after
+  30 steps or 10 minutes. Help, the vault's overview and talk are answered as usual.
 - Documents (4.5): PDFs, Word, OpenDocument, EPUB, PowerPoint, Excel, HTML and text files anywhere in the vault are
   read with Apache Tika, never changed, and found by search, Related notes and the chat beside the notes. A citation
   of one, or a click in Files, opens it in a read-only tab: a PDF as its real pages, at the cited page with the passage
@@ -88,7 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The chat follows the conversation ("and how long does it rest?"), talks when it is not asked about the notes
   (a greeting, your opinion of a note), replies in the language you write in, and looks further on its own when a
   first search finds nothing.
-- Deep answer, with the Medium model: three drafts and the one they agree on, a little slower and more often right.
+- Deep answer (now Deep thinking), with the Medium model: three drafts and the one they agree on, a little slower and more often right.
 - Settings → AI model: the chat model for this computer (Small, Medium or Large, from its memory and GPU) downloads
   with its reranker, with progress, pause and resume, checked by SHA-256 before use; the other sizes can be
   downloaded, used or deleted.

@@ -60,6 +60,13 @@ internal fun CaseScope.openChat(withArepas: Boolean = true) {
     expectText(text = QUESTION_FIELD)
 }
 
+/** Chooses [mode] in the menu under the chat's field, with Medium in use (it reads "Medium · Auto" until then). */
+internal fun CaseScope.chooseMode(mode: String) {
+    click(text = "Medium · Auto")
+    click(text = mode)
+    expectText(text = "Medium · $mode")
+}
+
 /** Asks [question] in the chat's field and waits until its reply is whole (the Stop button is Send again). */
 internal fun CaseScope.ask(question: String) {
     send(question = question)

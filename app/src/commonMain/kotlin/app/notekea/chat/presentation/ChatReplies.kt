@@ -66,7 +66,7 @@ internal class ChatReplies(
             notes = notes
         )
 
-        ChatReply.Acted -> flow { }
+        ChatReply.Acted, ChatReply.Agent -> flow { }
     }
 
     private fun answered(

@@ -5,6 +5,7 @@ import app.notekea.chat.domain.ActionContext
 import app.notekea.chat.domain.ActionKind
 import app.notekea.chat.domain.ActionRunner
 import app.notekea.chat.domain.ActionTurnStep
+import app.notekea.chat.domain.AgentUse
 import app.notekea.chat.domain.ChatExchange
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.core.appearance.domain.ColorTheme
@@ -34,6 +35,7 @@ internal class ChatActions(
         request: String,
         notes: Collection<NoteEntry>,
         history: List<ChatExchange>,
+        agentUse: AgentUse,
         openNote: RelativePath?
     ): ChatReply {
         var reply: ChatReply = ChatReply.Acted
@@ -47,7 +49,8 @@ internal class ChatActions(
                 notes = notes,
                 openNote = openNote
             ).copy(history = history),
-            openNote = openNote
+            openNote = openNote,
+            agentUse = agentUse
         ).collect { step ->
             when (step) {
                 is ActionTurnStep.Answer -> reply = ChatReply.Question(question = step.question)
@@ -57,6 +60,8 @@ internal class ChatActions(
                 is ActionTurnStep.Help -> reply = ChatReply.Help(request = step.request)
 
                 ActionTurnStep.Overview -> reply = ChatReply.Overview
+
+                ActionTurnStep.ToAgent -> reply = ChatReply.Agent
 
                 else -> follow(
                     id = id,
@@ -83,6 +88,7 @@ internal class ChatActions(
                 is ActionTurnStep.Answer,
                 is ActionTurnStep.Chat,
                 is ActionTurnStep.Help,
+                ActionTurnStep.ToAgent,
                 ActionTurnStep.Overview -> entry.copy(step = ChatStep.PLANNING)
 
                 ActionTurnStep.Writing -> entry.copy(
