@@ -109,7 +109,21 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
     Compose one could not show. Running the app from the build folder while it is rebuilt fails with
     NoClassDefFoundError: rebuild only with the app closed.
 
-## M4 and M4b, in progress
+## M4 and M4b, done on `feature/m4-sync-sources` (one pull request, awaiting review)
+
+Where it stands (2026-11-11): 4.1–4.8 built, with the chat's help guide and the developer's chat smoke fixes.
+
+- **Measured:** plans Medium 95 % / Small 73 % (126 requests); clips 20 of 20 pages, 91 % of sentences backed; agent
+  mode Medium 83 %, Large 70 %, Small 10 %, so only Medium offers it (`docs/answer-quality.md`). Sync under a second,
+  large documents ready in 4.6 s (`docs/performance.md`).
+- **Auto-Test:** 4.2-01/02, 4.4-01, 4.5-01, 4.6-01 and 4.7-01 automated; 4.2-03, 4.4-02, 4.5-02, 4.6-02 and 4.7-02
+  manual (`MVP_SMOKE_TEST.md`).
+- **For the developer to decide:** Large not offering agent mode although it is the bigger model; Web clip moved from
+  the editor's More menu to the start actions (and the chat); Tika's ~38 MB in the installers; HTTPS tokens only.
+- **Known:** a test JVM that ran two model cases sometimes aborts at exit (native teardown), with every case passed;
+  the last PDF opened stays loaded until another one opens.
+
+Decided before the work started:
 
 One pull request for 4.1–4.8, branch `feature/m4-sync-sources`, decided with the developer on 2026-11-11, with
 these choices taken before the work started:
