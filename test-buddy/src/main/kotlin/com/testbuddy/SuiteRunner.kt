@@ -21,6 +21,16 @@ public class SuiteRunner(
     private val system: HostSystem = HostSystem.current(),
     private val waitMillis: Long = DEFAULT_WAIT_MILLIS
 ) {
+    init {
+        // Compose's runDesktopComposeUiTest wraps a case in a runTest bound by this property (a minute by default),
+        // not by the case's timeout: it is raised to the longest case's before the first case runs.
+        if (System.getProperty(TEST_TIMEOUT_PROPERTY) == null) {
+            val longest = suite.automated.maxOfOrNull { it.timeout }
+
+            if (longest != null) System.setProperty(TEST_TIMEOUT_PROPERTY, longest.toString())
+        }
+    }
+
     private val workspace = CaseWorkspace(
         workFolder = workFolder,
         dataSources = suite.dataSources
@@ -55,6 +65,7 @@ public class SuiteRunner(
         case: AutomatedCase,
         onStep: (String) -> Unit = {}
     ): CaseResult {
+        if (!case.canRun()) return CaseResult.Skipped(id = case.id)
         val steps = ArrayDeque<String>()
 
         val keepStep: (String) -> Unit = { step ->
@@ -147,5 +158,6 @@ public class SuiteRunner(
         // The steps a failure's report lists: what led to it, not the whole case.
         const val KEPT_STEPS = 8
         const val DEFAULT_WAIT_MILLIS = 10_000L
+        const val TEST_TIMEOUT_PROPERTY = "kotlinx.coroutines.test.default_timeout"
     }
 }

@@ -19,6 +19,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.testbuddy.AutomatedCase
+import com.testbuddy.CaseResult
+import com.testbuddy.canRun
 
 /**
  * A tab's screen: its [body], which scrolls when the window is too short for it, and its [actions] under it, always
@@ -66,6 +69,31 @@ internal fun CountChip(
                 vertical = 3.dp
             )
     )
+}
+
+/** Under the counts, what this machine lacks for the cases it skipped: "3 skipped: they need a chat model…". */
+@Composable
+internal fun UnmetNote(
+    cases: List<AutomatedCase>,
+    results: Collection<CaseResult>
+) {
+    val skipped = results
+        .filterIsInstance<CaseResult.Skipped>()
+        .map { it.id }
+        .toSet()
+
+    cases
+        .filter {
+            it.id in skipped && !it.canRun()
+        }
+        .groupBy { it.precondition?.missing }
+        .forEach { (missing, needy) ->
+            Text(
+                text = "${needy.size} skipped: they need $missing.",
+                fontSize = 12.sp,
+                color = AutoTestColors.Muted
+            )
+        }
 }
 
 /** A section's small capital title: NOW, RECENT. */

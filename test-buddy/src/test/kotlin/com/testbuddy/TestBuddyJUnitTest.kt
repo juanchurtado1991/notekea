@@ -1,5 +1,6 @@
 package com.testbuddy
 
+import org.opentest4j.TestAbortedException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -37,5 +38,23 @@ class TestBuddyJUnitTest {
                 .orEmpty()
                 .startsWith("expected to see \"Ghost\", it did not appear (screenshot: ")
         )
+    }
+
+    @Test
+    fun `a case whose precondition is not met is aborted, which JUnit reports as skipped`() {
+        val needy = sampleSuite {
+            automated(
+                id = "3.3-02",
+                title = "Answers",
+                precondition = Precondition(missing = "a chat model") { false }
+            ) { error("must not run") }
+        }
+
+        val test = object : TestBuddyJUnit(suite = needy) {}
+            .automatedCases()
+            .single()
+
+        val skipped = assertFailsWith<TestAbortedException> { test.executable.execute() }
+        assertEquals("Assumption failed: Skipped: it needs a chat model", skipped.message)
     }
 }

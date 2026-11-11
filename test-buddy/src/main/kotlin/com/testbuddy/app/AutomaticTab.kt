@@ -238,6 +238,11 @@ private fun Finished(
         waiting = cases.size - state.results.size
     )
 
+    UnmetNote(
+        cases = cases,
+        results = state.results.values
+    )
+
     if (failed.isNotEmpty()) {
         Text(
             text = "The failures go in the report: there is nothing to do about them now.",

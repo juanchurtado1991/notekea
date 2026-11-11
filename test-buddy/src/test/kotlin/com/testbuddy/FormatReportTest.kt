@@ -100,6 +100,26 @@ class FormatReportTest {
         )
     }
 
+    @Test
+    fun `the cases skipped for a missing precondition are named with what they need`() {
+        val needy = sampleSuite {
+            automated(
+                id = "3.3-02",
+                title = "Answers",
+                precondition = Precondition(missing = "a chat model") { false }
+            ) {}
+        }
+
+        val report = formatReport(
+            suite = needy,
+            environment = environment,
+            automatic = listOf(CaseResult.Skipped(id = "3.3-02")),
+            manual = emptyList()
+        )
+
+        assertTrue(report.contains("  Skipped, they need a chat model: 3.3-02"))
+    }
+
     private companion object {
         val EXPECTED_REPORT = """
             Sample QA report

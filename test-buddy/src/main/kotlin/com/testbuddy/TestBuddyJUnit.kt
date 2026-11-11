@@ -1,5 +1,6 @@
 package com.testbuddy
 
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 import java.nio.file.Files
@@ -7,7 +8,8 @@ import java.nio.file.Path
 
 /**
  * Runs a suite's automated cases as JUnit 5 tests, one per case named after its ID, so CI runs the cases the Auto-Test
- * app runs: `class NotekeaSuiteTest : TestBuddyJUnit(notekeaSuite)`.
+ * app runs: `class NotekeaSuiteTest : TestBuddyJUnit(notekeaSuite)`. A case
+ * without its [Precondition] is reported as skipped.
  */
 public abstract class TestBuddyJUnit(private val suite: Suite) {
     @TestFactory
@@ -20,6 +22,7 @@ public abstract class TestBuddyJUnit(private val suite: Suite) {
         return suite.automated.map { case ->
             DynamicTest
                 .dynamicTest("${case.id} ${case.title}") {
+                    assumeTrue(case.canRun()) { "Skipped: it needs ${case.precondition?.missing}" }
                     val result = runner.run(case = case)
 
                     if (result is CaseResult.Failed) {

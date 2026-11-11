@@ -78,6 +78,32 @@ private fun StringBuilder.appendAutomatic(
             steps = result.steps
         )
     }
+
+    appendUnmet(
+        suite = suite,
+        results = results
+    )
+}
+
+// The skipped cases this machine could not run, by what they need, so the tester knows what to add.
+private fun StringBuilder.appendUnmet(
+    suite: Suite,
+    results: List<CaseResult>
+) {
+    val skipped = results
+        .filterIsInstance<CaseResult.Skipped>()
+        .map { it.id }
+        .toSet()
+
+    suite
+        .automated
+        .filter {
+            it.id in skipped && !it.canRun()
+        }
+        .groupBy { it.precondition?.missing }
+        .forEach { (missing, cases) ->
+            appendLine("  Skipped, they need $missing: ${cases.joinToString { it.id }}")
+        }
 }
 
 private fun StringBuilder.appendManual(

@@ -150,6 +150,27 @@ class SuiteRunnerTest {
         assertEquals(CaseResult.Skipped(id = "2"), results[1])
     }
 
+    @Test
+    fun `a case whose precondition is not met is skipped, and one whose precondition is met runs`() {
+        val suite = sampleSuite {
+            automated(
+                id = "1",
+                title = "Needs a model",
+                precondition = Precondition(missing = "a model") { false }
+            ) { error("must not run") }
+
+            automated(
+                id = "2",
+                title = "Has its model",
+                precondition = Precondition(missing = "a model") { true }
+            ) { expectText(text = "Save later") }
+        }
+
+        val results = runner(suite = suite).run()
+        assertEquals(CaseResult.Skipped(id = "1"), results[0])
+        assertIs<CaseResult.Passed>(results[1])
+    }
+
     private fun runner(suite: Suite) = SuiteRunner(
         suite = suite,
         workFolder = workFolder,
