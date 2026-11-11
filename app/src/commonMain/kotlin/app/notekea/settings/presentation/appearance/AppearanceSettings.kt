@@ -21,11 +21,14 @@ import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaSegment
 import app.notekea.core.presentation.designsystem.components.NotekeaSegmentedControl
+import app.notekea.core.presentation.designsystem.components.NotekeaSpotlight
 import app.notekea.core.presentation.designsystem.components.NotekeaThemeCard
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.ColorThemeSchemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.settings.SettingsSpotlight
+import app.notekea.core.settings.domain.SettingsPlace
 import app.notekea.resources.Res
 import app.notekea.resources.appearance_mode
 import app.notekea.resources.appearance_mode_dark
@@ -59,7 +62,8 @@ private const val THEMES_PER_ROW = 3
 fun AppearanceSettings(
     state: AppearanceState,
     onIntent: (AppearanceIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    spotlight: SettingsSpotlight? = null
 ) {
     val scrollState = rememberScrollState()
 
@@ -88,20 +92,32 @@ fun AppearanceSettings(
                 )
             }
 
-            ModeChoice(
-                mode = state.appearance.mode,
-                onIntent = onIntent
-            )
+            NotekeaSpotlight(
+                shownAt = spotlight?.serialFor(place = SettingsPlace.APPEARANCE_MODE)
+            ) {
+                ModeChoice(
+                    mode = state.appearance.mode,
+                    onIntent = onIntent
+                )
+            }
 
-            ReduceMotionChoice(
-                isOn = state.appearance.reduceMotion,
-                onIntent = onIntent
-            )
+            NotekeaSpotlight(
+                shownAt = spotlight?.serialFor(place = SettingsPlace.APPEARANCE_REDUCE_MOTION)
+            ) {
+                ReduceMotionChoice(
+                    isOn = state.appearance.reduceMotion,
+                    onIntent = onIntent
+                )
+            }
 
-            ThemeChoice(
-                theme = state.appearance.theme,
-                onIntent = onIntent
-            )
+            NotekeaSpotlight(
+                shownAt = spotlight?.serialFor(place = SettingsPlace.APPEARANCE_THEME)
+            ) {
+                ThemeChoice(
+                    theme = state.appearance.theme,
+                    onIntent = onIntent
+                )
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,9 +23,12 @@ import app.notekea.core.presentation.designsystem.components.NotekeaFold
 import app.notekea.core.presentation.designsystem.components.NotekeaProgressIndicator
 import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
+import app.notekea.core.presentation.designsystem.components.NotekeaSpotlight
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.formatBytes
+import app.notekea.core.presentation.settings.SettingsSpotlight
+import app.notekea.core.settings.domain.SettingsPlace
 import app.notekea.resources.Res
 import app.notekea.resources.models_cancel
 import app.notekea.resources.models_checking
@@ -51,9 +55,17 @@ private const val PREVIEW_WIDTH_DP = 560
 fun ModelManagerContent(
     state: ModelManagerState,
     onIntent: (ModelManagerIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    spotlight: SettingsSpotlight? = null
 ) {
     val scrollState = rememberScrollState()
+
+    // Other sizes shown by the help unfold first, as a tab opens before its setting is shown.
+    LaunchedEffect(spotlight) {
+        val isOtherSizes = spotlight?.place == SettingsPlace.AI_MODEL_OTHER_SIZES
+        val isFolded = !state.isOtherSizesShown
+        if (isOtherSizes && isFolded) onIntent(ModelManagerIntent.OnOtherSizesToggle)
+    }
 
     NotekeaScrollArea(
         state = scrollState,
@@ -81,7 +93,8 @@ fun ModelManagerContent(
 
                 else -> Models(
                     state = state,
-                    onIntent = onIntent
+                    onIntent = onIntent,
+                    spotlight = spotlight
                 )
             }
         }
@@ -116,7 +129,8 @@ private fun Checking() {
 @Composable
 private fun Models(
     state: ModelManagerState,
-    onIntent: (ModelManagerIntent) -> Unit
+    onIntent: (ModelManagerIntent) -> Unit,
+    spotlight: SettingsSpotlight?
 ) {
     val featured = state.models.firstOrNull {
         it.size == state.featured
@@ -150,26 +164,38 @@ private fun Models(
         }
 
     featured?.let {
-        ModelCard(
-            row = it,
+        NotekeaSpotlight(
+            shownAt = spotlight?.serialFor(place = SettingsPlace.AI_MODEL_SIZE)
+        ) {
+            ModelCard(
+                row = it,
+                state = state,
+                isFeatured = true,
+                onIntent = onIntent,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+
+    NotekeaSpotlight(
+        shownAt = spotlight?.serialFor(place = SettingsPlace.AI_MODEL_OTHER_SIZES)
+    ) {
+        OtherSizes(
+            others = others,
             state = state,
-            isFeatured = true,
-            onIntent = onIntent,
-            modifier = Modifier.fillMaxWidth()
+            onIntent = onIntent
         )
     }
 
-    OtherSizes(
-        others = others,
-        state = state,
-        onIntent = onIntent
-    )
-
-    Text(
-        text = stringResource(resource = Res.string.models_folder, state.folder),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+    NotekeaSpotlight(
+        shownAt = spotlight?.serialFor(place = SettingsPlace.AI_MODEL_FOLDER)
+    ) {
+        Text(
+            text = stringResource(resource = Res.string.models_folder, state.folder),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 /** "Other sizes" and, once opened, the sizes not featured, as plain rows. */

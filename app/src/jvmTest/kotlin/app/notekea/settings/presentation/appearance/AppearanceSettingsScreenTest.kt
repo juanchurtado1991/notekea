@@ -48,8 +48,8 @@ class AppearanceSettingsScreenTest {
                 NotekeaTheme(darkTheme = false) {
                     SettingsDialog(
                         onDismiss = {},
-                        aiModelSection = {},
-                        syncSection = {},
+                        aiModelSection = { _, _ -> },
+                        syncSection = { _, _ -> },
                         viewModel = AppearanceViewModel(appearanceStore = store),
                         helpViewModel = SettingsHelpViewModel(helper = { _, _, _ -> emptyFlow() })
                     )

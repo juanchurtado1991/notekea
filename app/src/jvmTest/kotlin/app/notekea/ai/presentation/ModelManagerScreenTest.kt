@@ -61,13 +61,13 @@ class ModelManagerScreenTest {
                 NotekeaTheme(darkTheme = false) {
                     SettingsDialog(
                         onDismiss = {},
-                        aiModelSection = {
+                        aiModelSection = { modifier, _ ->
                             ModelManagerScreen(
-                                modifier = it,
+                                modifier = modifier,
                                 viewModel = viewModel
                             )
                         },
-                        syncSection = {},
+                        syncSection = { _, _ -> },
                         viewModel = AppearanceViewModel(appearanceStore = FakeAppearanceStore()),
                         helpViewModel = SettingsHelpViewModel(helper = { _, _, _ -> emptyFlow() })
                     )

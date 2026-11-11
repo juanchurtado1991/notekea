@@ -46,6 +46,7 @@ fun SuiteBuilder.syncCases() {
     gitHub()
     helpAndSize()
     helpAnswers()
+    helpShows()
 }
 
 private fun SuiteBuilder.connectAndCommit() {
@@ -222,6 +223,32 @@ private fun SuiteBuilder.helpAnswers() {
         press(key = Key.Enter)
         awaitReply()
         expectAnyText("contraseña", "llave", "clave", "GitHub")
+    }
+}
+
+// The developer's request of 2026-11-11: the chat opens the setting a question names and makes it blink, as an
+// intent opens a screen; named in the question, it needs no model.
+private fun SuiteBuilder.helpShows() {
+    automated(
+        id = "4.2-06",
+        title = "A question in Ask about Settings opens the section of the setting it names, which Show shows again"
+    ) {
+        openVault(
+            name = PLAYGROUND,
+            shownText = WELCOME
+        )
+
+        clickIcon(label = "Settings")
+        expectText(text = "Theme")
+        clickIcon(label = HELP_FIELD)
+        type(text = "¿dónde pongo el token?")
+        press(key = Key.Enter)
+        expectText(text = "Access token")
+        expectText(text = "Show Access token")
+        expectNoText(text = "Theme")
+        click(text = "Appearance")
+        click(text = "Show Access token")
+        expectText(text = "Access token")
     }
 }
 

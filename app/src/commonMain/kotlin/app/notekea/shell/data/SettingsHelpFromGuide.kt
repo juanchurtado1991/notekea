@@ -8,11 +8,11 @@ import app.notekea.chat.domain.SpokenLanguage
 import app.notekea.chat.presentation.HelpShortcuts
 import app.notekea.core.llm.domain.LlmError
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.settings.domain.SettingsTopic
 import app.notekea.settings.domain.SettingsHelpError
 import app.notekea.settings.domain.SettingsHelpExchange
 import app.notekea.settings.domain.SettingsHelpStep
 import app.notekea.settings.domain.SettingsHelper
-import app.notekea.settings.domain.SettingsTopic
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 

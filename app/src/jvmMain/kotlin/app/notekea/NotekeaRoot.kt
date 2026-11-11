@@ -145,11 +145,17 @@ private fun WindowContent(host: WindowHost) {
         WindowDialogsHost(
             platformConventions = host.conventions,
             dialogs = host.dialogs,
-            aiModelSection = { ModelManagerScreen(modifier = it) },
-            syncSection = {
+            aiModelSection = { modifier, spotlight ->
+                ModelManagerScreen(
+                    modifier = modifier,
+                    spotlight = spotlight
+                )
+            },
+            syncSection = { modifier, spotlight ->
                 SyncSettingsScreen(
                     vaultPath = openVault,
-                    modifier = it
+                    modifier = modifier,
+                    spotlight = spotlight
                 )
             }
         )

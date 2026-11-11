@@ -58,7 +58,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ask about Settings, a card beside Settings: a chat that says what each setting does and how to do something, about
   the section open, from the guide and in the question's language. With Sync open it shows the five steps to set up
   GitHub, with no model needed. The guide explains GitHub for people new to it, what to do when sign-in fails, and
-  GitHub's limits. The chat's field there is one line, its send button beside the text.
+  GitHub's limits. The chat's field there is one line, its send button beside the text. A question or answer that
+  names a setting opens its section and makes it blink, as an intent opens a screen; Show does it again. Every setting
+  has its place, and a test fails while one has none.
 - A vault over 1 GB is warned of in Settings → Sync when its address is on GitHub, whose free account asks a
   repository to stay under about 1 GB; a vault kept on this computer or synced elsewhere is never told.
 - The chat's memory, as in Claude Code: a ring beside the mode fills as the conversation grows, and once full the

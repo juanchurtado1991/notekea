@@ -46,8 +46,8 @@ class AboutAndSettingsScreenTest {
                         onDismiss = {
                             dismissed++
                         },
-                        aiModelSection = {},
-                        syncSection = {},
+                        aiModelSection = { _, _ -> },
+                        syncSection = { _, _ -> },
                         viewModel = AppearanceViewModel(appearanceStore = FakeAppearanceStore()),
                         helpViewModel = SettingsHelpViewModel(helper = { _, _, _ -> emptyFlow() })
                     )
