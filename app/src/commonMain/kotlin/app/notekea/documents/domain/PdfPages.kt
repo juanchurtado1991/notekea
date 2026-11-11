@@ -26,4 +26,10 @@ interface PdfPages {
         page: Int,
         passage: String
     ): List<PageMark>
+
+    /** The PDF at [path] is no longer shown: whatever it holds open is let go (its tab closed). */
+    fun release(
+        vaultPath: String,
+        path: RelativePath
+    )
 }

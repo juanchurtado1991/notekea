@@ -4,6 +4,7 @@ import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.documents.data.DocumentFixtures
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.RelativePath
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.nio.file.Files
@@ -71,5 +72,39 @@ class PdfBoxPagesTest {
                 elsewhere.size
             )
         )
+    }
+
+    // Code review of 2026-11-11: the last PDF opened stayed loaded after its tab closed.
+    @Test
+    fun `a PDF is let go when its tab closes, and another PDF's release leaves it open`() =
+        runBlocking {
+            DocumentFixtures.pdf(file = File(vault, path.value))
+
+            pages.count(
+                vaultPath = vault.path,
+                path = path
+            )
+
+            pages.release(vault.path, RelativePath(value = "Other.pdf"))
+            val afterOther = settledOpen()
+
+            pages.release(vault.path, path)
+            val afterItsOwn = settledOpen()
+
+            assertEquals(
+                expected = listOf(true, false),
+                actual = listOf(afterOther, afterItsOwn)
+            )
+        }
+
+    // Whether the PDF is open once the release, done in the background, has run.
+    private suspend fun settledOpen(): Boolean {
+        delay(timeMillis = SETTLE_MILLIS)
+
+        return pages.isOpen
+    }
+
+    private companion object {
+        const val SETTLE_MILLIS = 300L
     }
 }
