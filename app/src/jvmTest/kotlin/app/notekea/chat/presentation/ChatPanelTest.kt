@@ -2,6 +2,7 @@ package app.notekea.chat.presentation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -20,7 +21,10 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** The chat panel on screen: what it offers without a model, a source that opens its passage, and Enter that sends. */
+/**
+ * The chat panel on screen: what it offers without a model, a source that opens its passage, Enter that sends, and
+ * Deep answer only where the model offers it.
+ */
 @OptIn(ExperimentalTestApi::class)
 class ChatPanelTest {
     private fun ComposeUiTest.show(
@@ -121,6 +125,26 @@ class ChatPanelTest {
         )
     }
 
+    @Test
+    fun `Deep answer shows only for a model that offers it, which Small does not`() =
+        runComposeUiTest {
+            val state = mutableStateOf(value = ChatPreviewData.state.copy(isDeepOffered = true))
+
+            setContent {
+                NotekeaTheme(darkTheme = false) {
+                    ChatPanel(
+                        state = state.value,
+                        onIntent = {},
+                        inputFocus = remember { FocusRequester() }
+                    )
+                }
+            }
+
+            onNodeWithText(text = DEEP_ANSWER).assertExists()
+            state.value = state.value.copy(isDeepOffered = false)
+            onNodeWithText(text = DEEP_ANSWER).assertDoesNotExist()
+        }
+
     private companion object {
         const val WIDTH_DP = 340
         const val HEIGHT_DP = 640
@@ -128,5 +152,6 @@ class ChatPanelTest {
         const val MODEL_ACTION = "Choose a model"
         const val STEPS_PLACE = "Arepas › Steps"
         const val QUESTION = "How long does the dough rest?"
+        const val DEEP_ANSWER = "Deep answer"
     }
 }
