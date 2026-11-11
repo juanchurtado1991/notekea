@@ -23,6 +23,7 @@ import app.notekea.editor.domain.FakeAttachmentPicker
 import app.notekea.editor.domain.FakeClipboardReader
 import app.notekea.editor.domain.FakeEditorPreferencesStore
 import app.notekea.editor.domain.FakeNoteTimesReader
+import app.notekea.editor.domain.FakeVideoCompressor
 import app.notekea.editor.domain.FakeYouTubeDetails
 import app.notekea.editor.domain.GetNoteStatsUseCase
 import app.notekea.editor.domain.KeepUnsavedTextUseCase
@@ -53,6 +54,7 @@ class EditorViewModels(
     val picker = FakeAttachmentPicker()
     val clipboard = FakeClipboardReader()
     val youTube = FakeYouTubeDetails()
+    val videos = FakeVideoCompressor()
     val opener = FakeFileOpener()
     val times = FakeNoteTimesReader()
     private val dispatchers = FakeAppDispatchers(
@@ -97,6 +99,7 @@ class EditorViewModels(
             attachmentPicker = picker,
             clipboardReader = clipboard,
             youTubeDetails = youTube,
+            videoCompressor = videos,
             dispatchers = dispatchers
         ),
         fillTemplate = fillTemplate(),

@@ -122,6 +122,11 @@ sealed interface EditorIntent {
 
     data object OnActionErrorDismiss : EditorIntent
 
+    /** Cancel, beside a video being made smaller: it stops, and the video is not attached. */
+    data object OnVideoCompressionCancel : EditorIntent
+
+    data object OnCompressErrorDismiss : EditorIntent
+
     /** The toolbar's Source button or Mod+E: show the whole note as written, or as it looks again. */
     data object OnSourceModeToggle : EditorIntent
 

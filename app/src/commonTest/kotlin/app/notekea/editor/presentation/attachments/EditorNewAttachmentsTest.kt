@@ -8,8 +8,11 @@ import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.domain.CompressError
+import app.notekea.editor.domain.CompressStep
 import app.notekea.editor.domain.EmbedProblem
 import app.notekea.editor.presentation.model.EditorIntent
+import app.notekea.editor.presentation.model.VideoCompression
 import app.notekea.editor.presentation.viewmodel.EditorViewModels
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -178,6 +181,64 @@ class EditorNewAttachmentsTest : EditorAttachmentsTestBase() {
                     .buffer
                     .text
                     .toString()
+            )
+        }
+
+    // The developer's request of 2026-11-11 (#141): a video over GitHub's 100 MB is made smaller before it is attached.
+    @Test
+    fun `a video over 100 MB is attached as its smaller copy, a failed or cancelled one is not attached`() =
+        runAttachmentsTest {
+            open(text = "")
+            fixture.attachmentStore.outside[BIG_VIDEO] = PDF
+            fixture.attachmentStore.outside[SMALL_COPY] = PDF
+            fixture.videos.sizes[BIG_VIDEO] = 300_000_000L
+
+            fixture.videos.steps = listOf(
+                CompressStep.Downloading(fraction = 1f),
+                CompressStep.Compressing(fraction = 0.5f),
+                CompressStep.Done(path = SMALL_COPY)
+            )
+
+            send(intent = EditorIntent.OnFilesDrop(paths = listOf(BIG_VIDEO)))
+
+            val attached = viewModel
+                .buffer
+                .text
+                .toString()
+
+            fixture.videos.steps = listOf(CompressStep.Failed(error = CompressError.Failed))
+            send(intent = EditorIntent.OnFilesDrop(paths = listOf(BIG_VIDEO)))
+            val failed = viewModel.state.value.compressError
+
+            fixture.videos.steps = listOf(CompressStep.Compressing(fraction = 0.1f))
+            fixture.videos.isStuck = true
+            send(intent = EditorIntent.OnFilesDrop(paths = listOf(BIG_VIDEO)))
+            val shown = viewModel.state.value.videoCompression
+            send(intent = EditorIntent.OnVideoCompressionCancel)
+
+            assertEquals(
+                expected = listOf<Any?>(
+                    "![[trip.mp4]]\n\n",
+                    listOf(SMALL_COPY),
+                    CompressError.Failed,
+                    VideoCompression(
+                        name = "trip.mov",
+                        fraction = 0.1f
+                    ),
+                    null,
+                    "![[trip.mp4]]\n\n"
+                ),
+                actual = listOf(
+                    attached,
+                    fixture.videos.discarded,
+                    failed,
+                    shown,
+                    viewModel.state.value.videoCompression,
+                    viewModel
+                        .buffer
+                        .text
+                        .toString()
+                )
             )
         }
 

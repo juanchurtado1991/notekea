@@ -5,6 +5,9 @@ import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.SystemEnvironment
 import app.notekea.editor.data.AwtClipboardReader
+import app.notekea.editor.data.FfmpegInstaller
+import app.notekea.editor.data.FfmpegTool
+import app.notekea.editor.data.FfmpegVideoCompressor
 import app.notekea.editor.data.FileKitAttachmentPicker
 import app.notekea.editor.data.KtorYouTubeDetails
 import app.notekea.editor.data.OkioNoteTimesReader
@@ -12,6 +15,7 @@ import app.notekea.editor.data.WaylandClipboardReader
 import app.notekea.editor.domain.AttachmentPicker
 import app.notekea.editor.domain.ClipboardReader
 import app.notekea.editor.domain.NoteTimesReader
+import app.notekea.editor.domain.VideoCompressor
 import app.notekea.editor.domain.YouTubeDetails
 import okio.FileSystem
 import org.koin.dsl.module
@@ -24,12 +28,38 @@ private val WAYLAND_SELECTION_TIMEOUT = 1.seconds
 // The pictures of YouTube videos pasted into notes, kept so a note never asks YouTube again (#141).
 private const val YOUTUBE_FOLDER = "youtube"
 
+// FFmpeg, downloaded the first time a video needs making smaller, and the copies it makes until they are attached.
+private const val FFMPEG_FOLDER = "ffmpeg"
+private const val COMPRESSING_FOLDER = "compressing"
+
 /**
  * Desktop implementations of the editor's ports: the file picker, the clipboard, the note's dates and YouTube's
  * details of a pasted video.
  */
 val jvmEditorModule = module {
     single<AttachmentPicker> { FileKitAttachmentPicker() }
+
+    single<VideoCompressor> {
+        val appData = get<PlatformConventions>().appDataDirectory
+
+        val system = when (get<PlatformConventions>().operatingSystem) {
+            OperatingSystem.LINUX -> "linux"
+            OperatingSystem.MACOS -> "macosx"
+            OperatingSystem.WINDOWS -> "windows"
+        }
+
+        FfmpegVideoCompressor(
+            installer = FfmpegInstaller(
+                folder = Path.of(appData, FFMPEG_FOLDER),
+                tool = FfmpegTool.of(
+                    system = system,
+                    architecture = System.getProperty("os.arch").orEmpty()
+                )
+            ),
+            workFolder = Path.of(appData, COMPRESSING_FOLDER),
+            dispatchers = get()
+        )
+    }
 
     single<YouTubeDetails> {
         KtorYouTubeDetails(

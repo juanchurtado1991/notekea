@@ -138,6 +138,7 @@ Videos in notes (the developer's request of 2026-11-11). Decided after a spike:
 | Library | Coordinates | Version | Purpose |
 |---|---|---|---|
 | ComposeMediaPlayer | `io.github.kdroidfilter:composemediaplayer` (MIT) | 0.11.4 | Plays a video file in its note with the system's player (`DesktopVideoPlayer`); a format the system cannot play opens with its app |
+| FFmpeg (downloaded, not built in) | `org.bytedeco:ffmpeg` (LGPL v3: `--enable-version3`, no `--enable-gpl`) | 8.1.2-1.5.14 | Makes a video over GitHub's 100 MB smaller before it is attached: H.264 with OpenH264 and AAC (`FfmpegVideoCompressor`). Its jar for the system (20–30 MB) is downloaded from Maven Central the first time and checked against the SHA-256 pinned in `FfmpegTool` (#141). A 2-minute 1080p video, 153 MB to 93.6 MB, took 47 s with the download, 4 threads and 0.12 GB of memory |
 | webview-kmp | `cn.enaium.webview:webview-kmp` (MIT) | 1.0.1 | The YouTube player window: the system's web view in Notekea started again as a process of its own (`YouTubePlayerWindow`), about 290 MB while it is open, all given back when it closes |
 
 ## 6. Infrastructure

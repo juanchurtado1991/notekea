@@ -2,9 +2,14 @@ package app.notekea.editor.presentation.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -14,11 +19,14 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
+import app.notekea.core.presentation.designsystem.components.NotekeaProgressBar
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.editor.domain.CompressError
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.EditorPreviewData
 import app.notekea.editor.presentation.model.EditorState
+import app.notekea.editor.presentation.model.VideoCompression
 import app.notekea.resources.Res
 import app.notekea.resources.editor_close
 import app.notekea.resources.editor_conflict_message
@@ -29,6 +37,11 @@ import app.notekea.resources.editor_load_theirs
 import app.notekea.resources.editor_restore
 import app.notekea.resources.editor_retry
 import app.notekea.resources.editor_save_failed
+import app.notekea.resources.video_compress_cancel
+import app.notekea.resources.video_compress_downloading
+import app.notekea.resources.video_compress_failed
+import app.notekea.resources.video_compress_progress
+import app.notekea.resources.video_compress_tool_unavailable
 import org.jetbrains.compose.resources.stringResource
 
 private const val PREVIEW_WIDTH_DP = 720
@@ -74,6 +87,26 @@ internal fun EditorBanners(
             )
         }
 
+        state.videoCompression?.let { compression ->
+            CompressionBanner(
+                compression = compression,
+                onCancel = { onIntent(EditorIntent.OnVideoCompressionCancel) }
+            )
+        }
+
+        state.compressError?.let { error ->
+            val message = when (error) {
+                CompressError.ToolUnavailable -> Res.string.video_compress_tool_unavailable
+                CompressError.Failed -> Res.string.video_compress_failed
+            }
+
+            ErrorBanner(message = stringResource(resource = message)) {
+                BannerAction(text = stringResource(resource = Res.string.editor_close)) {
+                    onIntent(EditorIntent.OnCompressErrorDismiss)
+                }
+            }
+        }
+
         state.actionError?.let { error ->
             ErrorBanner(
                 message = notesErrorMessage(
@@ -86,6 +119,46 @@ internal fun EditorBanners(
                 }
             }
         }
+    }
+}
+
+// A video over GitHub's 100 MB being made smaller, or FFmpeg downloaded for it the first time, with Cancel.
+@Composable
+private fun CompressionBanner(
+    compression: VideoCompression,
+    onCancel: () -> Unit
+) {
+    val label = if (compression.isDownloading) {
+        stringResource(resource = Res.string.video_compress_downloading)
+    } else {
+        stringResource(resource = Res.string.video_compress_progress, compression.name)
+    }
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingM),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(weight = 1f),
+            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            NotekeaProgressBar(
+                label = label,
+                fraction = compression.fraction,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        BannerAction(
+            text = stringResource(resource = Res.string.video_compress_cancel),
+            onClick = onCancel
+        )
     }
 }
 

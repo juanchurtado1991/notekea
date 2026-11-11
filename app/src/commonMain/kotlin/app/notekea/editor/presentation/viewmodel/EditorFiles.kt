@@ -4,17 +4,23 @@ import androidx.compose.ui.text.TextRange
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.StringPatterns.NEW_LINE
 import app.notekea.core.domain.StringPatterns.WINDOWS_NEW_LINE
+import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.YouTubeLinks
 import app.notekea.editor.domain.AttachmentSource
+import app.notekea.editor.domain.CompressStep
 import app.notekea.editor.domain.Embed
 import app.notekea.editor.domain.FormatAction
+import app.notekea.editor.domain.VideoLimits
 import app.notekea.editor.presentation.attachments.AttachmentTools
 import app.notekea.editor.presentation.attachments.EditorAttachments
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.EditorState
+import app.notekea.editor.presentation.model.VideoCompression
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -39,6 +45,7 @@ internal class EditorFiles(
         dispatchers = tools.dispatchers
     )
     private var attachmentsJob: Job? = null
+    private var compression: Job? = null
 
     fun onIntent(intent: EditorIntent) {
         when (intent) {
@@ -48,6 +55,8 @@ internal class EditorFiles(
             is EditorIntent.OnAttachmentOpen -> open(path = intent.path)
             is EditorIntent.OnAttachmentLocate -> locate(embed = intent.embed)
             EditorIntent.OnActionErrorDismiss -> host.reduce { it.copy(actionError = null) }
+            EditorIntent.OnVideoCompressionCancel -> compression?.cancel()
+            EditorIntent.OnCompressErrorDismiss -> host.reduce { it.copy(compressError = null) }
             else -> Unit
         }
     }
@@ -213,16 +222,25 @@ internal class EditorFiles(
         val embeds = mutableListOf<String>()
 
         for (source in sources) {
+            val small = smallEnough(source = source) ?: continue
+
             when (
                 val attached = attachments.attach(
                     note = note,
-                    source = source,
+                    source = small,
                     withDefaultWidth = true
                 )
             ) {
                 is Outcome.Success -> embeds += attached.value
                 is Outcome.Failure -> host.reduce { it.copy(actionError = attached.error) }
             }
+
+            // A compressed copy is let go once it is attached; the video it came from stays where it was.
+            val copy = (small as? AttachmentSource.File)?.takeIf {
+                small != source
+            }
+
+            copy?.let { tools.videoCompressor.discard(path = it.absolutePath) }
         }
 
         if (!isOpen(note = note)) {
@@ -230,6 +248,82 @@ internal class EditorFiles(
         } else if (embeds.isNotEmpty()) {
             textEdits.format(action = FormatAction.Embed(markdown = embeds.joinToString(NEW_LINE)))
         }
+    }
+
+    /**
+     * [source], or a copy of it under GitHub's 100 MB when it is a bigger video (#141), compressed with its progress
+     * above the note; null when that fails or is cancelled, and the video is then not attached.
+     */
+    private suspend fun smallEnough(source: AttachmentSource): AttachmentSource? {
+        if (source !is AttachmentSource.File) return source
+
+        val name = source
+            .absolutePath
+            .substringAfterLast(delimiter = '/')
+            .substringAfterLast(delimiter = '\\')
+
+        val isVideo = AttachmentKind.of(name = name) == AttachmentKind.VIDEO
+
+        val isOver = isVideo && tools.videoCompressor.isOverLimit(
+            source = source.absolutePath,
+            maxBytes = VideoLimits.MAX_BYTES
+        )
+
+        if (!isOver) return source
+        var small: AttachmentSource? = null
+
+        host.reduce {
+            it.copy(
+                videoCompression = VideoCompression(name = name),
+                compressError = null
+            )
+        }
+
+        coroutineScope {
+            compression = launch {
+                tools
+                    .videoCompressor
+                    .compress(
+                        source = source.absolutePath,
+                        maxBytes = VideoLimits.MAX_BYTES
+                    )
+                    .collect { step -> small = onCompressStep(step = step) ?: small }
+            }
+        }
+
+        compression = null
+        host.reduce { it.copy(videoCompression = null) }
+
+        return small
+    }
+
+    // Shows how far a video's compression is; the compressed copy once it is done.
+    private fun onCompressStep(step: CompressStep): AttachmentSource? {
+        when (step) {
+            is CompressStep.Downloading -> host.reduce {
+                it.copy(
+                    videoCompression = it.videoCompression?.copy(
+                        isDownloading = true,
+                        fraction = step.fraction
+                    )
+                )
+            }
+
+            is CompressStep.Compressing -> host.reduce {
+                it.copy(
+                    videoCompression = it.videoCompression?.copy(
+                        isDownloading = false,
+                        fraction = step.fraction
+                    )
+                )
+            }
+
+            is CompressStep.Failed -> host.reduce { it.copy(compressError = step.error) }
+
+            is CompressStep.Done -> return AttachmentSource.File(absolutePath = step.path)
+        }
+
+        return null
     }
 
     /** Whether [note], which an edit started from, is still the one in the text. */

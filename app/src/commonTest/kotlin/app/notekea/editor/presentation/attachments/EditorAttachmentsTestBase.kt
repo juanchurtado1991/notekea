@@ -92,6 +92,8 @@ abstract class EditorAttachmentsTestBase {
 
     protected companion object {
         const val OUTSIDE = "/home/ana/Downloads/recipe.pdf"
+        const val BIG_VIDEO = "/home/ana/Videos/trip.mov"
+        const val SMALL_COPY = "/home/ana/.notekea/compressing/1/trip.mp4"
         const val PNG_BASE64 =
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
         const val SETTLE_MILLIS = 400L

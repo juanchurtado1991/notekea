@@ -5,6 +5,7 @@ import app.notekea.core.notes.domain.FrontmatterContent
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.OutlineHeading
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.domain.CompressError
 import app.notekea.editor.presentation.attachments.AttachmentView
 import app.notekea.editor.presentation.find.FindState
 import app.notekea.editor.presentation.noteinfo.NoteInfo
@@ -28,6 +29,8 @@ data class EditorState(
     val isRevealing: Boolean = false,
     val attachments: List<AttachmentView> = emptyList(),
     val actionError: NotesError? = null,
+    val videoCompression: VideoCompression? = null,
+    val compressError: CompressError? = null,
     val outline: List<OutlineHeading> = emptyList(),
     val properties: FrontmatterContent = FrontmatterContent.None,
     val propertiesSource: String = "",
