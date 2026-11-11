@@ -137,7 +137,9 @@ class KtorPageFetcher(private val dispatchers: AppDispatchers) : PageFetcher {
         const val USER_AGENT = "Notekea (web clip)"
         const val MAX_REDIRECTS = 5
         const val TOO_MANY_REDIRECTS = 310
-        const val MAX_BYTES = 3 * 1024 * 1024
+
+        // A news page of 2026 weighs 4 MB with its scripts (CNN, the developer's try of 2026-11-11).
+        const val MAX_BYTES = 10 * 1024 * 1024
         const val BUFFER = 64 * 1024
         const val TIMEOUT_MILLIS = 20_000L
         const val CONNECT_MILLIS = 10_000L

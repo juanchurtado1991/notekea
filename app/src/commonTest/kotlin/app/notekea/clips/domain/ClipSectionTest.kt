@@ -70,21 +70,21 @@ class ClipSectionTest {
                     Outcome.Success(
                         value = FetchedPage(
                             url = url,
-                            html = url
+                            html = "<html>$url</html>"
                         )
                     )
                 },
                 extractor = { page ->
                     when {
-                        page.html.endsWith(suffix = "/empty") -> NOT_ARTICLE
+                        page.url.endsWith(suffix = "/empty") -> NOT_ARTICLE
 
                         else -> Outcome.Success(
                             value = Article(
                                 title = page
-                                    .html
+                                    .url
                                     .substringAfterLast(delimiter = '/')
                                     .replaceFirstChar { it.uppercase() },
-                                paragraphs = listOf("About ${page.html}.")
+                                paragraphs = listOf("About ${page.url}.")
                             )
                         )
                     }
