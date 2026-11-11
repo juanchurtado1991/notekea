@@ -32,6 +32,8 @@ dependencies {
     // The sync cases (4.2) make a local remote and play the other computer with it.
     implementation(libs.jgit)
 
+    // The documents run (4.8) writes a large PDF into the vault.
+    testImplementation(libs.pdfbox)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.kotlin.test)
     testRuntimeOnly(libs.junit.platform.launcher)
