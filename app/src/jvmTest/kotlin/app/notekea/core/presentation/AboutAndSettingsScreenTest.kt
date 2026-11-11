@@ -45,6 +45,7 @@ class AboutAndSettingsScreenTest {
                             dismissed++
                         },
                         aiModelSection = {},
+                        syncSection = {},
                         viewModel = AppearanceViewModel(appearanceStore = FakeAppearanceStore())
                     )
                 }

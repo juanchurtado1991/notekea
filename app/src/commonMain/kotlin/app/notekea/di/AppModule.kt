@@ -12,6 +12,7 @@ import app.notekea.query.di.queryModule
 import app.notekea.search.di.searchModule
 import app.notekea.settings.di.settingsModule
 import app.notekea.shell.di.shellModule
+import app.notekea.sync.di.syncModule
 import app.notekea.tasks.di.tasksModule
 import app.notekea.templates.di.templatesModule
 import app.notekea.tree.di.treeModule
@@ -36,6 +37,7 @@ val appModule = module {
         tasksModule,
         templatesModule,
         shellModule,
+        syncModule,
         vaultModule
     )
 }

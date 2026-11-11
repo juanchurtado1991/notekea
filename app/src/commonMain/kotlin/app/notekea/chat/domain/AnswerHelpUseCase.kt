@@ -40,7 +40,8 @@ class AnswerHelpUseCase(
             ?.let { emit(value = AnswerStep.Offered(request = it)) }
 
         emitAll(
-            flow = llmEngine.streamedReply(
+            flow = streamedReply(
+                llmEngine = llmEngine,
                 messages = HelpPrompt.messages(
                     question = question,
                     topics = found,

@@ -46,6 +46,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Git sync (4.1, 4.2): Settings → Sync connects the vault to a Git repository over HTTPS with an access token kept
+  in the system's keychain. Changes are committed 10 seconds after you stop typing, pulled when the vault opens and
+  every few minutes, and pushed. The status bar says Up to date, Syncing…, how many changes are pending, Offline or
+  a problem, and a click opens Settings → Sync. A note changed on two computers keeps both versions: a banner offers
+  them side by side with Keep mine, Keep theirs and Keep both.
 - The chat explains how to use Notekea: "how do I create a note?" or "what can you do?" is answered from a guide
   built into the app, with the shortcuts of your system, and never creates anything; when the chat can do it for
   you, "Do it for me" is under the answer. "What is in my notes?" describes the vault by its folders and notes, and

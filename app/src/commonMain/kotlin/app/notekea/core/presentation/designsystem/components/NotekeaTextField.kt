@@ -21,6 +21,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
@@ -40,7 +41,7 @@ private val TEXT_MIN_HEIGHT = NotekeaDimensions.ControlHeight - NotekeaDimension
 /**
  * Single- or multi-line text input, one line as tall as the app's other controls ([NotekeaDimensions.ControlHeight]).
  * [errorText] shows a validation message under the field while keeping the typed value. [onSubmit] runs on Enter in a
- * single-line field, handled as a key event so it behaves the same on every platform.
+ * single-line field, as a key event so it behaves the same on every platform; [isSecret] shows dots for a token.
  */
 @Composable
 fun NotekeaTextField(
@@ -50,11 +51,14 @@ fun NotekeaTextField(
     placeholder: String? = null,
     singleLine: Boolean = true,
     errorText: String? = null,
+    isSecret: Boolean = false,
     onSubmit: (() -> Unit)? = null
 ) {
     val colors = MaterialTheme.colorScheme
 
     val interaction = remember { MutableInteractionSource() }
+
+    val shown = if (isSecret) PasswordVisualTransformation() else VisualTransformation.None
 
     val isError = errorText != null
 
@@ -80,6 +84,7 @@ fun NotekeaTextField(
             .copy(color = colors.onSurface),
         cursorBrush = SolidColor(value = if (isError) colors.error else colors.primary),
         singleLine = singleLine,
+        visualTransformation = shown,
         interactionSource = interaction
     ) { innerField ->
         FieldDecoration(

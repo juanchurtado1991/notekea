@@ -11,6 +11,9 @@ import app.notekea.shell.domain.SaveSidePanelUseCase
 import app.notekea.shell.domain.WorkspaceStore
 import app.notekea.shell.presentation.WorkspaceTools
 import app.notekea.shell.presentation.WorkspaceViewModel
+import app.notekea.sync.domain.VaultEdits
+import app.notekea.tree.domain.FileWatcher
+import kotlinx.coroutines.flow.map
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -32,6 +35,15 @@ val shellModule = module {
     factoryOf(::GetSidePanelUseCase)
     factoryOf(::SaveSidePanelUseCase)
     factoryOf(::VaultActionFinder)
+
+    // Sync commits after a pause in the vault's changes, which the tree's watcher sees.
+    single<VaultEdits> {
+        val watcher = get<FileWatcher>()
+
+        VaultEdits { vaultPath ->
+            watcher.watch(vaultPath = vaultPath).map { }
+        }
+    }
 
     single<ActionRunner> {
         VaultActionRunner(

@@ -8,14 +8,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 /** A reply the model writes from [messages], shown as it comes, citing nothing: help, the vault's overview. */
-internal fun LlmEngine.streamedReply(
+internal fun streamedReply(
+    llmEngine: LlmEngine,
     messages: List<ChatMessage>,
     options: GenerationOptions
 ): Flow<AnswerStep> = flow {
     val written = StringBuilder()
 
     try {
-        generate(
+        llmEngine.generate(
             messages = messages,
             options = options
         ).collect { piece ->

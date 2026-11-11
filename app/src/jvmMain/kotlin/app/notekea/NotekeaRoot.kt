@@ -3,10 +3,13 @@ package app.notekea
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.ai.presentation.ModelManagerScreen
@@ -28,6 +31,7 @@ import app.notekea.core.presentation.platform.WindowHost
 import app.notekea.core.presentation.platform.awtFileDrop
 import app.notekea.shell.presentation.VaultTreeScreen
 import app.notekea.shell.presentation.WindowDialogsHost
+import app.notekea.sync.presentation.SyncSettingsScreen
 import app.notekea.tree.presentation.view.VaultScope
 import app.notekea.vault.presentation.welcome.WelcomeContent
 import app.notekea.vault.presentation.welcome.WelcomePreviewData
@@ -112,10 +116,21 @@ fun NotekeaRoot(
 
 @Composable
 private fun WindowContent(host: WindowHost) {
+    // Settings → Sync is about the open vault, and Settings opens over the welcome screen too.
+    var openVault by remember { mutableStateOf<String?>(value = null) }
+
     App {
         WelcomeScreen(
             onVaultNameChange = { host.vaultName = it },
             openedVaultContent = { vault, onSwitchVault ->
+                DisposableEffect(vault.path) {
+                    openVault = vault.path
+
+                    onDispose {
+                        if (openVault == vault.path) openVault = null
+                    }
+                }
+
                 VaultScope(vaultPath = vault.path) { close ->
                     VaultTreeScreen(
                         vaultPath = vault.path,
@@ -130,7 +145,13 @@ private fun WindowContent(host: WindowHost) {
         WindowDialogsHost(
             platformConventions = host.conventions,
             dialogs = host.dialogs,
-            aiModelSection = { ModelManagerScreen(modifier = it) }
+            aiModelSection = { ModelManagerScreen(modifier = it) },
+            syncSection = {
+                SyncSettingsScreen(
+                    vaultPath = openVault,
+                    modifier = it
+                )
+            }
         )
     }
 }

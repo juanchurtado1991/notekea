@@ -823,4 +823,49 @@
     <string name="chat_step_further">Looking further in your notes…</string>
     <string name="chat_step_further_es">Buscando más a fondo en tus notas…</string>
     <string name="chat_copy">Copy chat</string>
+    <string name="sync_status_up_to_date">Up to date</string>
+    <string name="sync_status_syncing">Syncing…</string>
+    <plurals name="sync_status_pending">
+        <item quantity="one">1 change pending</item>
+        <item quantity="other">%1$d changes pending</item>
+    </plurals>
+    <string name="sync_status_offline">Offline</string>
+    <string name="sync_status_auth">Sync sign-in failed</string>
+    <plurals name="sync_status_conflict">
+        <item quantity="one">Conflict in 1 note</item>
+        <item quantity="other">Conflict in %1$d notes</item>
+    </plurals>
+    <string name="sync_status_failed">Sync failed</string>
+    <string name="sync_status_tooltip">Sync: click for Settings → Sync</string>
+    <string name="sync_conflict_banner">Changed here and on another computer: %1$s</string>
+    <string name="sync_conflict_review">Review</string>
+    <string name="sync_conflict_title">%1$s changed in two places</string>
+    <string name="sync_conflict_explain">Pick what to keep. Keep both saves yours as a note of its own beside it.</string>
+    <string name="sync_conflict_mine">On this computer</string>
+    <string name="sync_conflict_theirs">On the other computer</string>
+    <string name="sync_keep_mine">Keep mine</string>
+    <string name="sync_keep_theirs">Keep theirs</string>
+    <string name="sync_keep_both">Keep both</string>
+    <string name="sync_intro">Keep this vault in a Git repository, so it is the same on every computer. Your notes go only to the repository you choose.</string>
+    <string name="sync_no_vault">Open a vault to sync it.</string>
+    <string name="sync_url_label">Repository address (HTTPS)</string>
+    <string name="sync_url_hint">https://github.com/you/notes.git</string>
+    <string name="sync_token_label">Access token</string>
+    <string name="sync_token_hint">A personal access token that can write to the repository</string>
+    <string name="sync_token_saved">A token is saved in the system’s keychain. Type a new one to replace it.</string>
+    <string name="sync_auto">Sync by itself</string>
+    <string name="sync_auto_explain">Saves your changes to the repository 10 seconds after you stop typing, and brings the others’ changes.</string>
+    <string name="sync_interval">Look for changes every</string>
+    <plurals name="sync_minutes">
+        <item quantity="one">1 minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <string name="sync_connect">Connect</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sync_disconnect">Stop syncing</string>
+    <string name="sync_connected">Synced with %1$s</string>
+    <string name="sync_error_auth">The repository refused the token. Check that it can write to this repository.</string>
+    <string name="sync_error_offline">The repository cannot be reached now. Notekea keeps trying by itself.</string>
+    <string name="sync_error_address">This is not the address of a Git repository. It starts with https://</string>
+    <string name="sync_error_failed">Sync failed: %1$s</string>
 </resources>

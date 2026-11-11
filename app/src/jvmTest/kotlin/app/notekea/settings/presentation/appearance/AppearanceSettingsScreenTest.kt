@@ -47,6 +47,7 @@ class AppearanceSettingsScreenTest {
                     SettingsDialog(
                         onDismiss = {},
                         aiModelSection = {},
+                        syncSection = {},
                         viewModel = AppearanceViewModel(appearanceStore = store)
                     )
                 }

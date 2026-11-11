@@ -17,13 +17,14 @@ private const val PREVIEW_TEXT = "About or Settings open over this"
 
 /**
  * About or Settings over the window while [dialogs] says so, with a vault open or on the welcome screen; Settings
- * shows [aiModelSection] as its AI model section.
+ * shows [aiModelSection] and [syncSection] as its AI model and Sync sections.
  */
 @Composable
 fun WindowDialogsHost(
     platformConventions: PlatformConventions,
     dialogs: WindowDialogs,
-    aiModelSection: @Composable (Modifier) -> Unit
+    aiModelSection: @Composable (Modifier) -> Unit,
+    syncSection: @Composable (Modifier) -> Unit
 ) {
     val onDismiss = { dialogs.shown = null }
 
@@ -33,19 +34,22 @@ fun WindowDialogsHost(
             onDismiss = onDismiss
         )
 
-        WindowDialog.SETTINGS -> SettingsDialog(
-            onDismiss = onDismiss,
-            aiModelSection = aiModelSection
-        )
-
-        WindowDialog.AI_MODEL -> SettingsDialog(
+        WindowDialog.SETTINGS, WindowDialog.AI_MODEL, WindowDialog.SYNC -> SettingsDialog(
             onDismiss = onDismiss,
             aiModelSection = aiModelSection,
-            initialSection = SettingsSection.AI_MODEL
+            syncSection = syncSection,
+            initialSection = sectionOf(dialog = dialogs.shown)
         )
 
         null -> Unit
     }
+}
+
+/** The section Settings opens at for [dialog]: AI model or Sync when asked for, Appearance otherwise. */
+private fun sectionOf(dialog: WindowDialog?): SettingsSection = when (dialog) {
+    WindowDialog.AI_MODEL -> SettingsSection.AI_MODEL
+    WindowDialog.SYNC -> SettingsSection.SYNC
+    else -> SettingsSection.APPEARANCE
 }
 
 @Preview
@@ -57,7 +61,8 @@ private fun WindowDialogsHostPreview() {
         WindowDialogsHost(
             platformConventions = PreviewPlatformConventions.linux,
             dialogs = WindowDialogs(),
-            aiModelSection = {}
+            aiModelSection = {},
+            syncSection = {}
         )
     }
 }
