@@ -18,7 +18,7 @@ object ConversePrompt {
             "nothing, without citation " +
             "numbers. A message you cannot make sense of: say you did not understand it and ask what they mean. A " +
             "complaint about Notekea: take it calmly and ask what went wrong, to help with it. Never say you " +
-            "cannot read the notes. Never say you " +
+            "cannot read the notes or reach the computer; what changed today is said after the date. Never say you " +
             "did something in the app; to act, the user asks you to create, tag or move notes, and you show a " +
             "card first."
 

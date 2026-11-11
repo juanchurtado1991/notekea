@@ -10,6 +10,8 @@ import app.notekea.core.notes.domain.RelativePath
 data class ActionContext(
     val today: String,
     val openNote: String? = null,
+    val latestNote: String? = null,
+    val changedToday: List<String> = emptyList(),
     val folders: List<String> = emptyList(),
     val notes: List<String> = emptyList(),
     val properties: List<String> = emptyList(),
@@ -22,6 +24,8 @@ data class ActionContext(
     fun described(): String = listOfNotNull(
         "Today: $today",
         openNote?.let { "Open note: $it" },
+        latestNote?.let { "Last changed note: $it" },
+        "Notes changed today: ${changedToday.take(n = MAX_NAMES).joinToString().ifEmpty { "none" }}",
         listed(
             label = "Folders",
             names = folders

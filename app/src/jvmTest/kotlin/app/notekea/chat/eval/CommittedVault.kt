@@ -27,6 +27,13 @@ internal object CommittedVault {
                 val target = File(vault, file.removePrefix(prefix = root))
                 target.parentFile.mkdirs()
                 target.writeBytes(git("show", "HEAD:$file"))
+
+                // When the note was last committed, so "the last note I wrote" is the vault's, not the copy's.
+                git("log", "-1", "--format=%ct", "--", file)
+                    .decodeToString()
+                    .trim()
+                    .toLongOrNull()
+                    ?.let { target.setLastModified(it * MILLIS_PER_SECOND) }
             }
 
         return vault
@@ -62,4 +69,5 @@ internal object CommittedVault {
     private const val EARLIER_ANSWER =
         "You wrote that the arepas need 2½ cups of warm water and rest five minutes. "
     private const val EARLIER_REPEATS = 6
+    private const val MILLIS_PER_SECOND = 1_000L
 }

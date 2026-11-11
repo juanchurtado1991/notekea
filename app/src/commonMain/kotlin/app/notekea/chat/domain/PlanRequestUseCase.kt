@@ -74,32 +74,16 @@ class PlanRequestUseCase(
             ?.take(n = ActionPrompt.MAX_STEPS)
             .orEmpty()
 
-        val asked = HowToAsked.shaped(
-            steps = UrlsNamed.shaped(
-                steps = PlanWords.shaped(
-                    steps = steps,
-                    request = request
-                ),
-                request = request
-            ),
-            request = request
-        )
-
-        val reworded = OverviewAsked.shaped(
-            steps = ReplyReworded.shaped(
-                steps = QuestionKept.shaped(
-                    steps = asked,
-                    request = request
-                ),
-                request = request,
-                history = context.history
-            ),
-            request = request
+        val reworded = worded(
+            steps = steps,
+            request = request,
+            context = context
         )
 
         val shaped = PlanWords.targetsNamed(
             steps = trimmed(steps = reworded),
-            context = context
+            context = context,
+            request = request
         ).map {
             val named = foldersNamed(
                 step = PlanWords.folderNamed(
@@ -118,7 +102,10 @@ class PlanRequestUseCase(
 
             ThemeWords.shaped(
                 step = TaskPeriods.asked(
-                    step = withTemplate,
+                    step = PlanWords.dueAsked(
+                        step = withTemplate,
+                        request = request
+                    ),
                     request = request
                 ),
                 request = request
@@ -131,6 +118,37 @@ class PlanRequestUseCase(
                 request = request,
                 context = context
             )
+        )
+    }
+
+    /** [steps] as the request's own words call for, before each step's fields are put right. */
+    private fun worded(
+        steps: List<PlannedStep>,
+        request: String,
+        context: ActionContext
+    ): List<PlannedStep> {
+        val asked = HowToAsked.shaped(
+            steps = UrlsNamed.shaped(
+                steps = PlanWords.shaped(
+                    steps = steps,
+                    request = request,
+                    context = context
+                ),
+                request = request
+            ),
+            request = request
+        )
+
+        return OverviewAsked.shaped(
+            steps = ReplyReworded.shaped(
+                steps = QuestionKept.shaped(
+                    steps = asked,
+                    request = request
+                ),
+                request = request,
+                history = context.history
+            ),
+            request = request
         )
     }
 

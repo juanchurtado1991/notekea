@@ -69,7 +69,8 @@ class ChatViewModel(
         describeVault = describeVault,
         answerFromFound = answerFromFound,
         shortcuts = HelpShortcuts.of(conventions = conventions),
-        today = { actions.today() }
+        today = { actions.today() },
+        todayIn = { actions.todayIn(notes = it) }
     )
 
     private val actions = ChatActions(

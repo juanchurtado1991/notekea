@@ -31,12 +31,12 @@ class ChatModeTest {
     }
 
     @Test
-    fun `the agent works when chosen, when Auto's plan is stuck, and never where it is not offered`() {
+    fun `the agent works when chosen, when Auto or Deep thinking is stuck, and never where it is not offered`() {
         assertEquals(
             expected = listOf(
                 AgentUse.WHEN_STUCK,
                 AgentUse.NEVER,
-                AgentUse.NEVER,
+                AgentUse.WHEN_STUCK,
                 AgentUse.FOR_WORK,
                 AgentUse.NEVER
             ),

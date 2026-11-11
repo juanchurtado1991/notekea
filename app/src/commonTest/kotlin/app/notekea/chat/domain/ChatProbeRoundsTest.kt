@@ -2,6 +2,7 @@ package app.notekea.chat.domain
 
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.ChatRole
+import kotlinx.coroutines.flow.toList
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

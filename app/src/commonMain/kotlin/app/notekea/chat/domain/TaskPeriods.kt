@@ -16,6 +16,9 @@ internal object TaskPeriods {
         "done" to listOf("done", "finish", "complet", "checked", "hech", "terminad", "acabad", "cerrad")
     )
 
+    private const val OVERDUE = "overdue"
+    private val LATE = Regex(pattern = "\\b(late|behind|retrasad\\w*)\\b")
+
     fun asked(
         step: PlannedStep,
         request: String
@@ -24,17 +27,27 @@ internal object TaskPeriods {
 
         val asked = request.lowercase()
 
-        val said = WORDS
-            .entries
-            .firstOrNull { (_, words) ->
-                words.any {
-                    it in asked
+        // "which of my projects is late?" ("later" is no "late").
+        val isLate = LATE.containsMatchIn(input = asked)
+
+        val said = if (isLate) {
+            OVERDUE
+        } else {
+            WORDS
+                .entries
+                .firstOrNull { (_, words) ->
+                    words.any {
+                        it in asked
+                    }
                 }
-            }
-            ?.key
+                ?.key
+        }
 
         val period = step[ActionField.PERIOD]?.lowercase()
-        val isNamed = period != null && WORDS[period]?.any { it in asked } != false
+
+        val isNamed =
+            period != null && (period == said || WORDS[period]?.any { it in asked } != false)
+
         if (isNamed) return step
 
         val fields = step.fields - ActionField.PERIOD

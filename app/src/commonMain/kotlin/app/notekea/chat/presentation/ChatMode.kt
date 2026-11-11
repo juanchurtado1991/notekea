@@ -22,8 +22,12 @@ enum class ChatMode {
     /** When a request of this mode goes to the agent, the model offering it as [isAgentOffered] says. */
     fun agentUse(isAgentOffered: Boolean): AgentUse = when {
         !isAgentOffered -> AgentUse.NEVER
+
         this == AGENT -> AgentUse.FOR_WORK
-        this == AUTO -> AgentUse.WHEN_STUCK
+
+        // Deep thinking looks further too: "what did I learn from my books?" was left unanswered (the probe).
+        this == AUTO || this == DEEP -> AgentUse.WHEN_STUCK
+
         else -> AgentUse.NEVER
     }
 }

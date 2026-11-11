@@ -129,7 +129,8 @@ Where it stands (2026-11-11): 4.1–4.8 built, with the chat's help guide and th
   Medium (`ChatProbeChatModelTest`, `docs/answer-quality.md`): replies in the person's language, follow-ups,
   honest refusals, the memory ring with compaction, answers from properties and tables, and no claimed changes.
   Action eval 97 %. Eight rounds on Medium, two on Large; the chat also compacts itself after half an hour idle.
-  4.7-05 and 4.7-06 automated and passing on the real app with Medium. Open: the Sample Vault's Reading list and
+  4.7-05 and 4.7-06 automated and passing on the real app with Medium. Compared turn by turn with Claude's own
+  answers to the same probe: every factual answer matches on both sizes (`docs/answer-quality.md`). Open: the Sample Vault's Reading list and
   `finished` properties disagree.
 
 Decided before the work started:
