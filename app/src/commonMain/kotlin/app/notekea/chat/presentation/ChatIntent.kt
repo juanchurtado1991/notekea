@@ -30,6 +30,9 @@ sealed interface ChatIntent {
     /** Deep answer on or off (3.6): three drafts and a vote, slower and more often right. */
     data object OnDeepToggle : ChatIntent
 
+    /** Agent mode on or off (4.7): a request is worked on move after move, ending on a card. */
+    data object OnAgentToggle : ChatIntent
+
     data object OnModelSettingsOpen : ChatIntent
 
     /** The panel shows the chat: the model in use is looked at again, a download may have ended meanwhile. */

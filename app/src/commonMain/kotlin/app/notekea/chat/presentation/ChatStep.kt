@@ -16,5 +16,8 @@ enum class ChatStep {
 
     /** The text of the notes an action will write is being written. */
     COMPOSING,
+
+    /** Agent mode works on a task, move after move (4.7). */
+    WORKING,
     DONE
 }

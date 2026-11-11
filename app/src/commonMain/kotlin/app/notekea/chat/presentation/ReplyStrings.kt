@@ -84,6 +84,16 @@ import app.notekea.resources.chat_action_will
 import app.notekea.resources.chat_action_will_es
 import app.notekea.resources.chat_action_write_from_notes
 import app.notekea.resources.chat_action_write_from_notes_es
+import app.notekea.resources.chat_agent_fetch
+import app.notekea.resources.chat_agent_fetch_es
+import app.notekea.resources.chat_agent_find
+import app.notekea.resources.chat_agent_find_es
+import app.notekea.resources.chat_agent_read
+import app.notekea.resources.chat_agent_read_es
+import app.notekea.resources.chat_agent_search
+import app.notekea.resources.chat_agent_search_es
+import app.notekea.resources.chat_agent_tasks
+import app.notekea.resources.chat_agent_tasks_es
 import app.notekea.resources.chat_do_it_for_me
 import app.notekea.resources.chat_do_it_for_me_es
 import app.notekea.resources.chat_failed
@@ -114,6 +124,8 @@ import app.notekea.resources.chat_page_refused
 import app.notekea.resources.chat_page_refused_es
 import app.notekea.resources.chat_page_slow
 import app.notekea.resources.chat_page_slow_es
+import app.notekea.resources.chat_problem_agent_stopped
+import app.notekea.resources.chat_problem_agent_stopped_es
 import app.notekea.resources.chat_problem_exists
 import app.notekea.resources.chat_problem_exists_es
 import app.notekea.resources.chat_problem_failed
@@ -174,6 +186,8 @@ import app.notekea.resources.chat_step_reading_one
 import app.notekea.resources.chat_step_reading_one_es
 import app.notekea.resources.chat_step_searching
 import app.notekea.resources.chat_step_searching_es
+import app.notekea.resources.chat_step_working
+import app.notekea.resources.chat_step_working_es
 import app.notekea.resources.chat_step_writing
 import app.notekea.resources.chat_step_writing_es
 import app.notekea.resources.chat_stopped
@@ -217,6 +231,13 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_stopped to Res.string.chat_stopped_es,
     Res.string.chat_acted to Res.string.chat_acted_es,
     Res.string.chat_do_it_for_me to Res.string.chat_do_it_for_me_es,
+    Res.string.chat_step_working to Res.string.chat_step_working_es,
+    Res.string.chat_agent_search to Res.string.chat_agent_search_es,
+    Res.string.chat_agent_read to Res.string.chat_agent_read_es,
+    Res.string.chat_agent_find to Res.string.chat_agent_find_es,
+    Res.string.chat_agent_tasks to Res.string.chat_agent_tasks_es,
+    Res.string.chat_agent_fetch to Res.string.chat_agent_fetch_es,
+    Res.string.chat_problem_agent_stopped to Res.string.chat_problem_agent_stopped_es,
     Res.string.chat_action_make_cards to Res.string.chat_action_make_cards_es,
     Res.string.chat_action_cards_count to Res.string.chat_action_cards_count_es,
     Res.string.chat_problem_no_cards to Res.string.chat_problem_no_cards_es,

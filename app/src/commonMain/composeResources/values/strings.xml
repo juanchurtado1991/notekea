@@ -923,4 +923,22 @@
     <string name="chat_action_cards_count_es">%1$d tarjetas</string>
     <string name="chat_problem_no_cards_es">No pude crear tarjetas que la nota respalde. Prueba con una nota con más datos.</string>
     <string name="rail_study">Study cards</string>
+    <string name="chat_agent">Agent mode</string>
+    <string name="chat_agent_hint">works step by step, then shows its plan</string>
+    <string name="chat_step_working">Working on it, step by step…</string>
+    <string name="chat_agent_search">Searched the notes for “%1$s”</string>
+    <string name="chat_agent_read">Read %1$s</string>
+    <string name="chat_agent_find">Listed notes: %1$s</string>
+    <string name="chat_agent_tasks">Looked at the tasks</string>
+    <string name="chat_agent_fetch">Read the page %1$s</string>
+    <string name="chat_problem_agent_stopped">I stopped before finishing: the task needed more than 30 steps or 10 minutes, or the model failed. Try a smaller task.</string>
+    <string name="chat_agent_es">Modo agente</string>
+    <string name="chat_agent_hint_es">trabaja paso a paso y luego muestra su plan</string>
+    <string name="chat_step_working_es">Trabajando en ello, paso a paso…</string>
+    <string name="chat_agent_search_es">Busqué en las notas «%1$s»</string>
+    <string name="chat_agent_read_es">Leí %1$s</string>
+    <string name="chat_agent_find_es">Listé notas: %1$s</string>
+    <string name="chat_agent_tasks_es">Miré las tareas</string>
+    <string name="chat_agent_fetch_es">Leí la página %1$s</string>
+    <string name="chat_problem_agent_stopped_es">Me detuve antes de terminar: la tarea necesitaba más de 30 pasos o 10 minutos, o el modelo falló. Prueba con una tarea más pequeña.</string>
 </resources>

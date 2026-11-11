@@ -197,8 +197,8 @@ internal class ChatActions(
         update(entry.id) { it.copy(action = action.copy(status = ActionStatus.UNDONE)) }
     }
 
-    /** What the plan may name: the open note, the folders, the notes closest to the request first, and so on. */
-    private fun contextOf(
+    /** What the plan, or agent mode, may name in the vault: its names, the closest to [request] first. */
+    fun contextOf(
         request: String,
         notes: Collection<NoteEntry>,
         openNote: RelativePath?

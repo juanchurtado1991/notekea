@@ -4,6 +4,7 @@ import app.notekea.chat.domain.ActionField
 import app.notekea.chat.domain.ActionKind
 import app.notekea.chat.domain.ActionPlanReader
 import app.notekea.chat.domain.AgentMove
+import app.notekea.chat.domain.AgentTaskMove
 import app.notekea.chat.domain.PlannedStep
 import com.ghost.serialization.Ghost
 import com.ghost.serialization.exception.GhostJsonException
@@ -43,6 +44,21 @@ class GhostActionPlanReader : ActionPlanReader {
                 move = it.move,
                 query = it.query,
                 note = it.note
+            )
+        }
+    } catch (_: GhostJsonException) {
+        null
+    }
+
+    override fun readTask(json: String): AgentTaskMove? = try {
+        Ghost.deserialize<AgentTaskMoveDto>(json).let { dto ->
+            AgentTaskMove(
+                move = dto.move,
+                query = dto.query,
+                note = dto.note,
+                url = dto.url,
+                summary = dto.summary,
+                steps = dto.steps.mapNotNull { stepOf(dto = it) }
             )
         }
     } catch (_: GhostJsonException) {

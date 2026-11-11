@@ -3,6 +3,7 @@ package app.notekea.chat.presentation
 import app.notekea.chat.domain.ActOnRequestUseCase
 import app.notekea.chat.domain.ActionRunner
 import app.notekea.chat.domain.AgentAnswerUseCase
+import app.notekea.chat.domain.AgentTaskUseCase
 import app.notekea.chat.domain.AnswerCitations
 import app.notekea.chat.domain.AnswerFromNotesUseCase
 import app.notekea.chat.domain.AnswerHelpUseCase
@@ -46,6 +47,7 @@ class ChatViewModel(
     describeVault: DescribeVaultUseCase,
     conventions: PlatformConventions,
     actOnRequest: ActOnRequestUseCase,
+    agentTask: AgentTaskUseCase,
     actionRunner: ActionRunner,
     localCalendar: LocalCalendar,
     clock: Clock,
@@ -78,6 +80,18 @@ class ChatViewModel(
             )
         },
         emit = { emit(effect = it) }
+    )
+
+    private val agent = ChatAgent(
+        vaultPath = vaultPath,
+        agentTask = agentTask,
+        actions = actions,
+        update = { id, change ->
+            update(
+                id = id,
+                change = change
+            )
+        }
     )
 
     private var notes: Collection<NoteEntry> = emptyList()
@@ -126,6 +140,8 @@ class ChatViewModel(
             ChatIntent.OnCopyChat -> clipboard.copy(text = ChatTranscript.of(state = state.value))
 
             ChatIntent.OnDeepToggle -> reduce { it.copy(isDeep = !it.isDeep) }
+
+            ChatIntent.OnAgentToggle -> reduce { it.copy(isAgent = !it.isAgent) }
 
             ChatIntent.OnModelSettingsOpen -> emit(effect = ChatEffect.OpenModelSettings)
 
@@ -217,15 +233,12 @@ class ChatViewModel(
         val current = state.value
         if (!current.canSend) return
 
-        val scope = scopeOf(current = current)
+        val scope = current.askedScope()
 
         ask(
             question = current.question.trim(),
             scope = scope,
-            scopeName = nameOf(
-                scope = scope,
-                current = current
-            )
+            scopeName = current.nameOf(scope = scope)
         )
 
         reduce { it.copy(question = "") }
@@ -287,6 +300,18 @@ class ChatViewModel(
             val history = historyBefore(id = id)
 
             // A request in the whole vault may be an action or talk; one asked of a note or a folder is answered.
+            // Agent mode works on the whole vault; it ends on a card or with what it found, never in an answer.
+            val isAgent =
+                scope == ChatScope.VAULT &&
+                    state.value.isAgent &&
+                    state.value.isAgentOffered
+
+            if (isAgent) {
+                return@launchGuarded agent.work(id, question, notes, history, activeNote).also {
+                    save()
+                }
+            }
+
             val reply = if (scope == ChatScope.VAULT) {
                 actions.act(
                     id = id,
@@ -306,7 +331,7 @@ class ChatViewModel(
                 message = question,
                 history = history,
                 notes = notes,
-                only = onlyFor(scope = scope),
+                only = notesOf(scope, notes, activeNote),
                 isDeep = state.value.isDeep && state.value.isDeepOffered,
                 onStep = { step ->
                     update(id = id) { it.copy(step = step) }
@@ -381,7 +406,8 @@ class ChatViewModel(
                     reduce {
                         it.copy(
                             isSmall = info.isSmall,
-                            isDeepOffered = info.hasDeepAnswer
+                            isDeepOffered = info.hasDeepAnswer,
+                            isAgentOffered = info.hasAgent
                         )
                     }
 
@@ -411,44 +437,6 @@ class ChatViewModel(
                     ?.takeUnless { folder -> folder.isRoot }
                     ?.name
             )
-        }
-    }
-
-    /** The scope chosen, or the whole vault when there is no open note (or folder) to ask of. */
-    private fun scopeOf(current: ChatState): ChatScope = when {
-        current.scope == ChatScope.NOTE && current.noteName == null -> ChatScope.VAULT
-        current.scope == ChatScope.FOLDER && current.folderName == null -> ChatScope.VAULT
-        else -> current.scope
-    }
-
-    private fun nameOf(
-        scope: ChatScope,
-        current: ChatState
-    ): String? = when (scope) {
-        ChatScope.VAULT -> null
-        ChatScope.NOTE -> current.noteName
-        ChatScope.FOLDER -> current.folderName
-    }
-
-    private fun onlyFor(scope: ChatScope): Set<RelativePath>? {
-        val note = activeNote ?: return null
-
-        return when (scope) {
-            ChatScope.VAULT -> null
-
-            ChatScope.NOTE -> setOf(note)
-
-            ChatScope.FOLDER -> {
-                val prefix = note
-                    .parent
-                    ?.value
-                    .orEmpty() + FOLDER_SEPARATOR
-
-                notes
-                    .map { it.file.path }
-                    .filter { it.value.startsWith(prefix = prefix) }
-                    .toSet()
-            }
         }
     }
 
@@ -498,7 +486,6 @@ class ChatViewModel(
     }
 
     private companion object {
-        const val FOLDER_SEPARATOR = "/"
         const val LOG_TAG = "ChatViewModel"
         const val MAX_TURNS = 100
         const val UNFINISHED = "…"

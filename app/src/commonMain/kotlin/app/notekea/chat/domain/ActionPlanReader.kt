@@ -10,4 +10,7 @@ interface ActionPlanReader {
 
     /** The agent's move ([AgentPrompt]), or null when [json] is not one. */
     fun readMove(json: String): AgentMove?
+
+    /** Agent mode's next move (4.7); null when the reply is not one. */
+    fun readTask(json: String): AgentTaskMove?
 }
