@@ -85,20 +85,20 @@ private fun stepText(
     step: ChatStep,
     notes: Int
 ): String = when {
-    step == ChatStep.SEARCHING -> stringResource(resource = Res.string.chat_step_searching)
+    step == ChatStep.SEARCHING -> replyString(resource = Res.string.chat_step_searching)
 
-    step == ChatStep.PLANNING -> stringResource(resource = Res.string.chat_step_planning)
+    step == ChatStep.PLANNING -> replyString(resource = Res.string.chat_step_planning)
 
-    step == ChatStep.COMPOSING -> stringResource(resource = Res.string.chat_step_composing)
+    step == ChatStep.COMPOSING -> replyString(resource = Res.string.chat_step_composing)
 
     step == ChatStep.READING && notes == 1 ->
-        stringResource(resource = Res.string.chat_step_reading_one)
+        replyString(resource = Res.string.chat_step_reading_one)
 
-    step == ChatStep.READING -> stringResource(Res.string.chat_step_reading, notes)
+    step == ChatStep.READING -> replyString(Res.string.chat_step_reading, notes)
 
-    step == ChatStep.DRAFTING -> stringResource(resource = Res.string.chat_step_drafting)
+    step == ChatStep.DRAFTING -> replyString(resource = Res.string.chat_step_drafting)
 
-    else -> stringResource(resource = Res.string.chat_step_writing)
+    else -> replyString(resource = Res.string.chat_step_writing)
 }
 
 @Composable

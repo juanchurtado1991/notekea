@@ -154,7 +154,12 @@ class PlanRequestUseCase(
      * vault does not first find or open the notes it names (the card lists them). No plan is a question.
      */
     private fun trimmed(steps: List<PlannedStep>): List<PlannedStep> {
-        val isQuestion = steps.isEmpty() || steps.any { it.kind == ActionKind.ANSWER }
+        // A plan that also acts is an action, its answer step left out: "move Retro October" with an answer
+        // must say the note is not there, not that the notes do not answer.
+        val isQuestion = steps.all {
+            it.kind == ActionKind.ANSWER
+        }
+
         if (isQuestion) return listOf(PlannedStep(kind = ActionKind.ANSWER))
 
         val changes = steps.any { it.kind.isConfirmed }

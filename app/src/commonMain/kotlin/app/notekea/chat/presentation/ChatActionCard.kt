@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -94,15 +95,16 @@ internal fun ChatActionCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surface,
+            .border(
+                width = NotekeaDimensions.BorderWidth,
+                color = MaterialTheme.colorScheme.outlineVariant,
                 shape = MaterialTheme.shapes.medium
             )
             .padding(all = NotekeaDimensions.SpacingM),
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
     ) {
         Text(
-            text = stringResource(resource = title),
+            text = replyString(resource = title),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -149,13 +151,13 @@ private fun CardFooter(
         when (status) {
             ActionStatus.PROPOSED -> {
                 NotekeaButton(
-                    text = stringResource(resource = Res.string.chat_action_cancel),
+                    text = replyString(resource = Res.string.chat_action_cancel),
                     onClick = onCancel,
                     style = NotekeaButtonStyle.SECONDARY
                 )
 
                 NotekeaButton(
-                    text = stringResource(resource = Res.string.chat_action_confirm),
+                    text = replyString(resource = Res.string.chat_action_confirm),
                     onClick = onConfirm
                 )
             }
@@ -163,7 +165,7 @@ private fun CardFooter(
             ActionStatus.RUNNING -> Quiet(resource = Res.string.chat_action_running)
 
             ActionStatus.DONE -> NotekeaButton(
-                text = stringResource(resource = Res.string.chat_action_undo),
+                text = replyString(resource = Res.string.chat_action_undo),
                 onClick = onUndo,
                 style = NotekeaButtonStyle.TEXT
             )
@@ -194,7 +196,7 @@ private fun StepLine(step: ActionStep) {
 
             Column {
                 Text(
-                    text = stringResource(resource = verbOf(kind = step.kind)),
+                    text = replyString(resource = verbOf(kind = step.kind)),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -255,7 +257,7 @@ private fun readable(line: String): String = line
 @Composable
 private fun targetOf(step: ActionStep): String {
     val notes = step.notes.joinToString { it.nameWithoutExtension }
-    val today = stringResource(resource = Res.string.chat_action_today)
+    val today = replyString(resource = Res.string.chat_action_today)
     val folder = step.folder?.value
 
     return when (step.kind) {
@@ -266,7 +268,7 @@ private fun targetOf(step: ActionStep): String {
                 ?.path
                 ?.let { nameOf(path = it) } ?: listOfNotNull(folder, step.title).joinToString("/"),
             step.template?.let {
-                stringResource(Res.string.chat_action_template, it.nameWithoutExtension)
+                replyString(Res.string.chat_action_template, it.nameWithoutExtension)
             }
         ).joinToString(separator = "\n")
 
@@ -371,7 +373,7 @@ private fun iconOf(kind: ActionKind): ImageVector = when (kind) {
 @Composable
 private fun Quiet(resource: StringResource) {
     Text(
-        text = stringResource(resource = resource),
+        text = replyString(resource = resource),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )

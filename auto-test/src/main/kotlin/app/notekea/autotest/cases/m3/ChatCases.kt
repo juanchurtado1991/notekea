@@ -63,7 +63,7 @@ private fun SuiteBuilder.answerWithCitations() {
         expected(
             text =
             "Step 3 shows the question on the right, then one line with moving dots (Searching your notes…, " +
-                "Reading 5 notes…), then the answer word by word with a blinking bar, in English, citing [1]-like " +
+                "Reading 3 notes…), then the answer word by word with a blinking bar, in English, citing [1]-like " +
                 "chips; Sources lists the cited notes with their headings. Step 4 shows the cited passage in a " +
                 "tooltip, and the click opens Arepas with that passage selected. Step 5 does the same for its own " +
                 "passage."
@@ -82,15 +82,15 @@ private fun SuiteBuilder.scopes() {
         steps(
             text =
             "$OPEN_CHAT\n3. Click Whole vault above the messages and choose This note (Arepas).\n4. Ask " +
-                "What is Atomic Habits about?\n5. Choose This folder (Recipes) and ask How long does the dough " +
-                "rest?\n6. Open Books/Atomic Habits and look at the scope."
+                "What is in the packing checklist?\n5. Choose This folder (Recipes) and ask How long does the dough " +
+                "rest?\n6. Open Travel/Lisbon trip and look at the scope."
         )
 
         expected(
             text =
-            "Step 4 answers I couldn't find this in your notes, since the book is not in Arepas. Step 5 answers " +
+            "Step 4 answers I couldn't find this in your notes, since the checklist is not in Arepas. Step 5 answers " +
                 "from a recipe and cites only notes of Recipes. In step 6 the scope follows the open note: This " +
-                "folder (Books)."
+                "folder (Travel)."
         )
     }
 }
@@ -105,7 +105,7 @@ private fun SuiteBuilder.stopAndHistory() {
 
         steps(
             text =
-            "$OPEN_CHAT\n3. Ask Summarize what the vault says about habits and, while the answer is being " +
+            "$OPEN_CHAT\n3. Ask Summarize my Lisbon trip and, while the answer is being " +
                 "written, press Esc.\n4. Quit Notekea, open it again and show the chat (Ctrl+L, Cmd+L on macOS).\n" +
                 "5. Click ⋯ at the top right of the chat, then Clear history."
         )

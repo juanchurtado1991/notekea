@@ -145,6 +145,7 @@ class VaultActionFinder(
             }
 
         return FoundNotes(
+            isTasks = true,
             rows = rows.map {
                 FoundRow(
                     note = it.path,
@@ -328,7 +329,16 @@ class VaultActionFinder(
             "this week" to TaskWhen.THIS_WEEK,
             "later" to TaskWhen.LATER,
             "no date" to TaskWhen.NO_DATE,
-            "done" to TaskWhen.DONE
+            "done" to TaskWhen.DONE,
+            // As a small model may leave them, in the request's Spanish.
+            "vencidas" to TaskWhen.OVERDUE,
+            "atrasadas" to TaskWhen.OVERDUE,
+            "hoy" to TaskWhen.TODAY,
+            "esta semana" to TaskWhen.THIS_WEEK,
+            "después" to TaskWhen.LATER,
+            "sin fecha" to TaskWhen.NO_DATE,
+            "hechas" to TaskWhen.DONE,
+            "terminadas" to TaskWhen.DONE
         )
     }
 }
