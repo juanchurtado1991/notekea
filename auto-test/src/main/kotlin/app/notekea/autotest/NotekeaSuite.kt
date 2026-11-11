@@ -36,6 +36,7 @@ import app.notekea.autotest.cases.m2.vaultTaskCases
 import app.notekea.autotest.cases.m3.actionCases
 import app.notekea.autotest.cases.m3.chatCases
 import app.notekea.autotest.cases.m3.modelManagerCases
+import app.notekea.autotest.cases.m4.syncCases
 import com.testbuddy.Suite
 import com.testbuddy.only
 import com.testbuddy.testBuddy
@@ -102,6 +103,7 @@ object NotekeaSuite {
             modelManagerCases()
             chatCases()
             actionCases()
+            syncCases()
             // Free use comes last, after every other manual case.
             freeUseCase()
         }

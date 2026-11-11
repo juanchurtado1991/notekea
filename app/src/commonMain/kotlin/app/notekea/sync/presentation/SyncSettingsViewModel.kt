@@ -168,7 +168,7 @@ class SyncSettingsViewModel(
         const val LOG_TAG = "SyncSettingsViewModel"
         const val FAILED_MESSAGE = "Sync settings failed"
 
-        // HTTPS for a real remote; a local one (file://) for trying sync with a folder on this computer.
-        val ADDRESS_PREFIXES = listOf("https://", "file://")
+        // HTTPS for a real remote; a local one (file:) for trying sync with a folder on this computer.
+        val ADDRESS_PREFIXES = listOf("https://", "file:")
     }
 }

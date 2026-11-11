@@ -41,10 +41,9 @@ internal fun SyncStatusOf(sync: SyncStatusViewModel) {
 @Composable
 internal fun SyncConflictsOf(sync: SyncStatusViewModel) {
     val state by sync.state.collectAsState()
-    val conflict = state.status as? SyncStatus.Conflict ?: return
 
     ConflictBanner(
-        notes = conflict.notes,
+        notes = state.conflicts,
         onReview = { sync.onIntent(SyncStatusIntent.OnReview(note = it)) }
     )
 

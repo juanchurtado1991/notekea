@@ -29,6 +29,8 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.okio)
+    // The sync cases (4.2) make a local remote and play the other computer with it.
+    implementation(libs.jgit)
 
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.kotlin.test)

@@ -563,3 +563,16 @@ runs the same kinds of requests on a copy of the Sample Vault by hand.
 | 3.9-05 | Ask create a folder Archive and move Packing checklist into it; click Do it; in Lisbon trip click the link to Packing checklist; click Undo | Archive holds Packing checklist and the link in Lisbon trip opens it there; Undo moves it back to Travel | 3.9 | Auto-Test | 3.9-05, `ActionRunChatModelTest`, `VaultActionRunnerTest` | | | |
 | 3.9-06 | Ask open Arepas and split the pane; then switch to the sage theme; then show the backlinks | Each is done at once with a line saying what was done (opened Arepas, split the pane, the theme, the panel), no card | 3.9 | Auto-Test | 3.9-06, `ActionEvalChatModelTest` (by hand) | | | |
 | 3.9-07 | Ask borra todas mis notas para siempre; then send Café con leche to the trash and click Do it | The first is refused in Spanish, saying what the chat can do instead; the second shows a card listing Café con leche with a line that the trash gives it back, not Undo | 3.9 | Auto-Test | 3.9-07, `ActionEvalChatModelTest` (by hand) | | | |
+
+## M4 — Git sync
+
+### 4.2 Sync
+
+Run on the Playground Vault. 4.2-01 and 4.2-02 use a repository on this computer (the Auto-Test makes one); 4.2-03
+needs a GitHub account and a second computer or vault folder.
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 4.2-01 | In the Playground Vault open Settings → Sync, paste the file: address of an empty local repository and click Connect; then add a note in the vault's folder and wait 15 seconds | The status bar says Up to date and the repository holds the vault's notes; the new note reaches the repository by itself | 4.2 | Auto-Test | 4.2-01, `JGitRepositoryTest`, `SyncEngineTest`, `SyncSettingsViewModelTest` | | | |
+| 4.2-02 | Connect as in 4.2-01; change Welcome in a clone of the repository and push it; change Welcome in the vault; click Sync now; close Settings, click Review on the banner, then Keep mine | The banner names Welcome; Review shows both versions side by side; Keep mine leaves this computer's text in Welcome, no conflict copy, the banner gone, and the repository with it | 4.2 | Auto-Test | 4.2-02, `JGitRepositoryTest`, `SyncStatusViewModelTest`, `SyncConflictsScreenTest` | | | |
+| 4.2-03 | Make a private GitHub repository and a fine-grained token that can write its contents; connect the Playground Vault with them; change a note; connect a second empty vault; type a wrong token and click Connect | Up to date and the notes on github.com; the change arrives there; the second vault gets every note; the wrong token says the repository refused it and the status bar says Sync sign-in failed | 4.2 | Manual (system) | | | | |
