@@ -85,6 +85,7 @@ import com.composables.icons.lucide.SeparatorHorizontal
 import com.composables.icons.lucide.Settings
 import com.composables.icons.lucide.ShieldCheck
 import com.composables.icons.lucide.SlidersHorizontal
+import com.composables.icons.lucide.Sparkle
 import com.composables.icons.lucide.Sparkles
 import com.composables.icons.lucide.Square
 import com.composables.icons.lucide.SquareArrowOutUpRight
@@ -195,6 +196,9 @@ object NotekeaIcons {
     val Heading: ImageVector get() = Lucide.Heading
     val Chat: ImageVector get() = Lucide.MessagesSquare
     val ChatAnswer: ImageVector get() = Lucide.Sparkles
+
+    // One symmetric star, so it sits in the middle of the assistant's small circle.
+    val ChatAssistant: ImageVector get() = Lucide.Sparkle
     val ChatNotFound: ImageVector get() = Lucide.SearchX
     val ChatClear: ImageVector get() = Lucide.Eraser
     val ChatError: ImageVector get() = Lucide.CircleAlert

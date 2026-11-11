@@ -55,8 +55,10 @@ import app.notekea.resources.chat_stopped
 import org.jetbrains.compose.resources.stringResource
 
 private const val BUBBLE_RADIUS_DP = 12
-private const val AVATAR_DP = 22
-private const val AVATAR_ICON_DP = 13
+
+// As tall as a line of the answer, so the mark sits beside its first line.
+private const val AVATAR_DP = 20
+private const val AVATAR_ICON_DP = 12
 private const val AVATAR_ALPHA = 0.14f
 private const val BUBBLE_TAIL_DP = 4
 private const val BUBBLE_INSET_DP = 40
@@ -218,7 +220,7 @@ private fun AnswerBubble(content: @Composable () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = NotekeaIcons.ChatAnswer,
+                imageVector = NotekeaIcons.ChatAssistant,
                 contentDescription = null,
                 modifier = Modifier.size(size = AVATAR_ICON_DP.dp),
                 tint = MaterialTheme.colorScheme.primary
@@ -376,7 +378,7 @@ private fun Failed(
 private fun Quiet(text: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.bodySmall,
+        style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
