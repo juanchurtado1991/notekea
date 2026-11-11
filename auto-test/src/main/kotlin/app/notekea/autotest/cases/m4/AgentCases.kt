@@ -25,8 +25,9 @@ fun SuiteBuilder.agentCases() {
         clickIcon(label = "Agent mode")
         ask(question = TASK)
 
+        // Its steps vary (a search or notes listed), but it reads the recipe before it proposes.
         expectText(
-            text = "Searched the notes for",
+            text = "Read Recipes/Arepas",
             substring = true
         )
 

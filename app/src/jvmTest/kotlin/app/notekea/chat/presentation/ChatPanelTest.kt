@@ -145,7 +145,29 @@ class ChatPanelTest {
             onNodeWithText(text = DEEP_ANSWER).assertDoesNotExist()
         }
 
+    // Auto-Test 4.7-01 of 2026-11-11: with Medium both modes are offered, and they were drawn over each other.
+    @Test
+    fun `Deep answer and Agent mode show one under the other when both are offered`() =
+        runComposeUiTest {
+            show(
+                state = ChatPreviewData.state.copy(
+                    isDeepOffered = true,
+                    isAgentOffered = true
+                ),
+                intents = mutableListOf()
+            )
+
+            val deep = onNodeWithText(text = DEEP_ANSWER).fetchSemanticsNode().boundsInRoot
+            val agent = onNodeWithText(text = AGENT_MODE).fetchSemanticsNode().boundsInRoot
+
+            assertEquals(
+                expected = true,
+                actual = agent.top >= deep.bottom
+            )
+        }
+
     private companion object {
+        const val AGENT_MODE = "Agent mode"
         const val WIDTH_DP = 340
         const val HEIGHT_DP = 640
         const val NO_MODEL_TITLE = "No AI model yet"
