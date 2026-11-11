@@ -30,7 +30,7 @@ private const val SHARED_NOTE_TEXT = "Another app changes or deletes this note"
 private const val OUTLINE_MIDDLE = "Serving note 1:"
 private const val TYPED_BEFORE_MOVE = "Typed just before the move"
 private const val OPEN_PLAYGROUND =
-    "1. In Notekea, open the Playground Vault (see TEST DATA above)."
+    "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba)."
 
 /** The cases of 1.11 about two panes, the tabs' memory and the folders' cards (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.paneCases() {
@@ -184,13 +184,17 @@ private fun SuiteBuilder.nativeTitleBar() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "The tabs sit under the system's own title bar")
-        steps(text = "$OPEN_PLAYGROUND\n2. Open a few notes and look at the top of the window.")
+        title(text = "Las pestañas están debajo de la barra de título del sistema")
+
+        steps(
+            text =
+            "$OPEN_PLAYGROUND\n2. Abre algunas notas y mira la parte de arriba de la ventana."
+        )
 
         expected(
             text =
-            "The tabs are inside the window, under its title bar; the title bar and its buttons are your " +
-                "system's own."
+            "Las pestañas están dentro de la ventana, debajo de su barra de título; la barra " +
+                "de título y sus botones son los de tu sistema."
         )
     }
 }
@@ -201,20 +205,21 @@ private fun SuiteBuilder.windowSize() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "The window keeps a sensible size")
+        title(text = "La ventana mantiene un tamaño razonable")
 
         steps(
             text =
-            "$OPEN_PLAYGROUND\n2. Quit Notekea and open it again.\n3. Click Open another vault at the bottom " +
-                "left and look at the window, then open the Playground Vault from Recent. Do this twice more.\n4. " +
-                "Resize the window and quit and open Notekea once more."
+            "$OPEN_PLAYGROUND\n2. Sal de Notekea y ábrelo de nuevo.\n3. Haz clic en Abrir " +
+                "otra bóveda abajo a la izquierda y mira la ventana; luego abre la Playground " +
+                "Vault desde Recientes. Hazlo dos veces más.\n4. Cambia el tamaño de la ventana, " +
+                "sal y abre Notekea una vez más."
         )
 
         expected(
             text =
-            "The window opens centered, never larger than the screen, showing the tools, the list of notes, a " +
-                "note and the outline. It keeps its size when a vault opens or closes, and the size you gave it " +
-                "stays."
+            "La ventana se abre centrada, nunca más grande que la pantalla, mostrando las " +
+                "herramientas, la lista de notas, una nota y el índice. Mantiene su tamaño " +
+                "cuando una bóveda se abre o se cierra, y el tamaño que le diste se queda."
         )
     }
 }
@@ -318,18 +323,19 @@ private fun SuiteBuilder.tabSlides() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "A dragged tab slides along the row")
+        title(text = "Una pestaña arrastrada se desliza por la fila")
 
         steps(
             text =
-            "$OPEN_PLAYGROUND\n2. Open three notes, then drag the last tab slowly along the row and let it go " +
-                "in the first place."
+            "$OPEN_PLAYGROUND\n2. Abre tres notas y arrastra despacio la última pestaña por " +
+                "la fila hasta soltarla en el primer lugar."
         )
 
         expected(
             text =
-            "While dragged, the tab stays on the row's line and the other tabs slide aside to open its place; " +
-                "let go, it glides into the first place and stays there."
+            "Mientras la arrastras, la pestaña se queda en la línea de la fila y las demás " +
+                "se apartan para abrirle lugar; al soltarla, se desliza al primer lugar y se " +
+                "queda ahí."
         )
     }
 }

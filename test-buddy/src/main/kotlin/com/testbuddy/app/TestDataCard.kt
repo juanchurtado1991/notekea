@@ -18,12 +18,14 @@ internal fun TestDataCard(
     folders: List<String>,
     dataFolder: Path
 ) {
+    val texts = LocalTesterTexts.current
+
     Card {
-        SectionLabel(text = "TEST DATA")
+        SectionLabel(text = texts.testData)
 
         folders.forEach { name ->
             Text(
-                text = "This case uses a fresh copy of $name:",
+                text = texts.freshCopyOf(name),
                 fontSize = 12.sp
             )
 
@@ -38,10 +40,7 @@ internal fun TestDataCard(
         }
 
         Text(
-            text =
-            "To open it in $appName: click Open another vault at the bottom left (when a vault is " +
-                "open), then Open folder…, go to that folder and choose it. Each case starts from a new copy, so " +
-                "what you changed in an earlier case is gone.",
+            text = texts.openDataHint(appName),
             fontSize = 11.sp,
             color = AutoTestColors.Muted
         )

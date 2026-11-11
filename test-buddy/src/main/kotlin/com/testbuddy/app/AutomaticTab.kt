@@ -63,15 +63,13 @@ private fun Idle(
     onStart: () -> Unit
 ) = TabLayout(actions = {}) {
     Text(
-        text = "Automatic tests",
+        text = LocalTesterTexts.current.automaticTests,
         fontSize = 16.sp,
         fontWeight = FontWeight.SemiBold
     )
 
     Text(
-        text =
-        "$total cases check the app on their own, on copies of the test data, out of sight. It takes a while " +
-            "and you can keep using the computer.",
+        text = LocalTesterTexts.current.automaticIntro(total),
         fontSize = 12.sp,
         color = AutoTestColors.Muted
     )
@@ -79,7 +77,7 @@ private fun Idle(
     Button(
         onClick = onStart,
         modifier = Modifier.fillMaxWidth()
-    ) { Text(text = "Start the automatic tests") }
+    ) { Text(text = LocalTesterTexts.current.startAutomatic) }
 }
 
 @Composable
@@ -90,13 +88,13 @@ private fun Running(
 ) = TabLayout(actions = {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "You can keep using the computer.",
+            text = LocalTesterTexts.current.keepUsing,
             fontSize = 11.sp,
             color = AutoTestColors.Muted,
             modifier = Modifier.weight(weight = 1f)
         )
 
-        OutlinedButton(onClick = onStop) { Text(text = "Stop") }
+        OutlinedButton(onClick = onStop) { Text(text = LocalTesterTexts.current.stop) }
     }
 }) {
     val elapsed = rememberElapsedMillis(startedAt = state.startedAt)
@@ -109,7 +107,7 @@ private fun Running(
         )
 
         Text(
-            text = "Running tests",
+            text = LocalTesterTexts.current.runningTests,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(start = 8.dp).weight(weight = 1f)
@@ -132,8 +130,10 @@ private fun Running(
         modifier = Modifier.fillMaxWidth()
     )
 
+    val texts = LocalTesterTexts.current
+
     Text(
-        text = "$done of ${cases.size}" + timeLeft(done, cases.size, elapsed),
+        text = texts.doneOf(done, cases.size) + timeLeft(done, cases.size, elapsed, texts),
         fontSize = 11.sp,
         color = AutoTestColors.Muted
     )
@@ -165,10 +165,10 @@ private fun NowCard(
     case: AutomatedCase?
 ) {
     Card {
-        SectionLabel(text = "NOW")
+        SectionLabel(text = LocalTesterTexts.current.now)
 
         Text(
-            text = case?.let { "${it.id} · ${it.title}" } ?: "Starting…",
+            text = case?.let { "${it.id} · ${it.title}" } ?: LocalTesterTexts.current.starting,
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold
         )
@@ -186,7 +186,7 @@ private fun Recent(
     results: List<CaseResult>
 ) {
     if (results.isEmpty()) return
-    SectionLabel(text = "RECENT")
+    SectionLabel(text = LocalTesterTexts.current.recent)
 
     results
         .takeLast(n = RECENT)
@@ -211,13 +211,13 @@ private fun Finished(
     actions: ManagerActions
 ) = TabLayout(actions = {
     Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
-        OutlinedButton(onClick = actions.onStart) { Text(text = "Run again") }
+        OutlinedButton(onClick = actions.onStart) { Text(text = LocalTesterTexts.current.runAgain) }
 
         Spacer(modifier = Modifier.weight(weight = 1f))
 
         Button(onClick = {
             actions.onTab(ManagerTab.MANUAL)
-        }) { Text(text = "Next: manual cases ›") }
+        }) { Text(text = LocalTesterTexts.current.nextManual) }
     }
 }) {
     val failed = state
@@ -225,7 +225,8 @@ private fun Finished(
         .values
         .filterIsInstance<CaseResult.Failed>()
 
-    val title = if (failed.isEmpty()) "All automatic tests passed" else "Automatic tests done"
+    val texts = LocalTesterTexts.current
+    val title = if (failed.isEmpty()) texts.allPassed else texts.automaticDone
 
     Text(
         text = title,
@@ -245,7 +246,7 @@ private fun Finished(
 
     if (failed.isNotEmpty()) {
         Text(
-            text = "The failures go in the report: there is nothing to do about them now.",
+            text = LocalTesterTexts.current.failuresInReport,
             fontSize = 12.sp,
             color = AutoTestColors.Muted
         )
@@ -271,18 +272,26 @@ private fun Counts(
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
         CountChip(
-            text = "✓ ${results.count { it is CaseResult.Passed }} passed",
+            text = LocalTesterTexts.current.passedCount(
+                results.count {
+                    it is CaseResult.Passed
+                }
+            ),
             color = AutoTestColors.Passed
         )
 
         CountChip(
-            text = "✕ ${results.count { it is CaseResult.Failed }} failed",
+            text = LocalTesterTexts.current.failedCount(
+                results.count {
+                    it is CaseResult.Failed
+                }
+            ),
             color = AutoTestColors.Failed
         )
 
         if (waiting > 0) {
             CountChip(
-                text = "$waiting to go",
+                text = LocalTesterTexts.current.toGo(waiting),
                 color = AutoTestColors.Muted
             )
         }
@@ -339,7 +348,8 @@ private fun clock(millis: Long): String {
 private fun timeLeft(
     done: Int,
     total: Int,
-    elapsed: Long
+    elapsed: Long,
+    texts: TesterTexts
 ): String {
     if (done == 0 || done >= total) return ""
 
@@ -348,7 +358,7 @@ private fun timeLeft(
             minimumValue = 1
         )
 
-    return " · about $minutes minute${if (minutes == 1L) "" else "s"} left"
+    return texts.minutesLeft(minutes)
 }
 
 private const val RECENT = 3

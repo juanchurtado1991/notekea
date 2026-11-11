@@ -11,9 +11,9 @@ private const val GHOST = "Ghost Serializer"
 
 // The 40 notes and Assets/Weekly menu.pdf, which 4.5 reads as a document.
 private const val SAMPLE_READY = "41 notes ready to search"
-private const val GHOST_READY = "371 notes ready to search"
+private const val GHOST_READY = "371 notas listas para buscar"
 private const val OPEN_GHOST =
-    "1. In Notekea, open the Ghost Serializer vault (see TEST DATA above)."
+    "1. En Notekea, abre la bóveda Ghost Serializer (mira DATOS DE PRUEBA arriba)."
 
 /** The cases of 2.3, the hybrid index (`MVP_SMOKE_TEST.md`): the index follows the vault's notes. */
 fun SuiteBuilder.indexCases() {
@@ -72,19 +72,19 @@ private fun SuiteBuilder.resumes() {
         reason = ManualReason.PACKAGED
     ) {
         prepare(GHOST)
-        title(text = "Indexing goes on after Notekea is closed in the middle")
+        title(text = "La indexación continúa después de cerrar Notekea a la mitad")
 
         steps(
             text =
-            "$OPEN_GHOST\n2. While the bar at the bottom says Indexing, click it and note how many notes are " +
-                "done (\"120 of 371 notes\").\n3. Close Notekea before it ends, open it again and click Indexing " +
-                "again."
+            "$OPEN_GHOST\n2. Mientras la barra de abajo dice Indexando, haz clic en ella y " +
+                "anota cuántas notas van (\"120 de 371 notas\").\n3. Cierra Notekea antes de que " +
+                "termine, ábrelo de nuevo y vuelve a hacer clic en Indexando."
         )
 
         expected(
             text =
-            "It goes on from the notes it had done: the count and the percent do not start again from 0, " +
-                "and it ends with \"$GHOST_READY\"."
+            "Sigue desde las notas que ya tenía: la cuenta y el porcentaje no vuelven a " +
+                "empezar desde 0, y termina con \"$GHOST_READY\"."
         )
     }
 }
@@ -95,20 +95,23 @@ private fun SuiteBuilder.noticeAndDetails() {
         reason = ManualReason.EYES
     ) {
         prepare(GHOST)
-        title(text = "The first indexing's notice and the index's details")
+        title(text = "El aviso de la primera indexación y los detalles del índice")
 
         steps(
             text =
-            "$OPEN_GHOST\n2. Look at the top of the window, then click Dismiss on the notice there.\n3. Click " +
-                "Indexing in the bar at the bottom and look at the card that opens.\n4. When it says " +
-                "\"$GHOST_READY\", click it, then click Rebuild index."
+            "$OPEN_GHOST\n2. Mira la parte de arriba de la ventana y haz clic en Descartar " +
+                "en el aviso que hay ahí.\n3. Haz clic en Indexando en la barra de abajo y mira " +
+                "la tarjeta que se abre.\n4. Cuando diga \"$GHOST_READY\", haz clic en ella y " +
+                "luego en Reconstruir el índice."
         )
 
         expected(
             text =
-            "A notice says Notekea is reading your notes and you can keep writing; Dismiss hides it. The " +
-                "card shows a bar, how many notes of 371 and about how long is left; the bar at the bottom shows " +
-                "the percent with a small ring. Rebuild index starts again from 0 % and ends ready again."
+            "Un aviso dice que Notekea está leyendo tus notas y que puedes seguir " +
+                "escribiendo; Descartar lo oculta. La tarjeta muestra una barra, cuántas notas " +
+                "de 371 y cuánto falta aproximadamente; la barra de abajo muestra el porcentaje " +
+                "con un anillo pequeño. Reconstruir el índice empieza de nuevo desde 0 % y " +
+                "termina lista otra vez."
         )
     }
 }

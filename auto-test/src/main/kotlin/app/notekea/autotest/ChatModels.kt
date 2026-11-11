@@ -19,7 +19,8 @@ import java.nio.file.Path
 object ChatModels {
     private const val FOLDER_PROPERTY = "notekea.autotest.chatModels"
     private const val QA_MODELS = "models"
-    private const val MISSING = "a chat model: download Medium in Notekea QA's Settings → AI model"
+    private const val MISSING =
+        "un modelo de chat: descarga Mediano en Ajustes → Modelo de IA de Notekea QA"
 
     private val catalog: ModelCatalog by lazy {
         runBlocking { BundledModelCatalogSource(dispatchers = JvmAppDispatchers()).load() }

@@ -20,8 +20,8 @@ internal object DesktopActions {
         runCatching { Desktop.getDesktop().open(folder.toFile()) }
     }
 
-    fun pickPicture(): Path? {
-        val dialog = FileDialog(null as Frame?, "Add a screenshot", FileDialog.LOAD)
+    fun pickPicture(title: String): Path? {
+        val dialog = FileDialog(null as Frame?, title, FileDialog.LOAD)
         dialog.isVisible = true
         val name = dialog.file ?: return null
 

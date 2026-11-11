@@ -9,7 +9,8 @@ import kotlin.time.Duration.Companion.minutes
 @TestBuddyDsl
 public class SuiteBuilder internal constructor(
     private val appName: String,
-    private val version: String
+    private val version: String,
+    private val language: TesterLanguage
 ) {
     private val automated = mutableListOf<AutomatedCase>()
     private val manual = mutableListOf<ManualCase>()
@@ -75,7 +76,8 @@ public class SuiteBuilder internal constructor(
         manual.add(
             ManualCaseBuilder(
                 id = checkedId(id = id),
-                reason = reason
+                reason = reason,
+                language = language
             ).apply(build).build()
         )
     }
@@ -83,6 +85,7 @@ public class SuiteBuilder internal constructor(
     internal fun build(): Suite = Suite(
         appName = appName,
         version = version,
+        language = language,
         automated = automated.toList(),
         manual = manual.toList(),
         window = window,

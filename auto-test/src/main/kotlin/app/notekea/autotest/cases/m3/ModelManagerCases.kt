@@ -7,8 +7,8 @@ import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val OPEN_AI_MODEL =
-    "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Click Settings (the " +
-        "gear at the bottom of the narrow bar on the far left), then AI model in the list on the left."
+    "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba).\n2. Haz clic en Ajustes (el " +
+        "engranaje abajo en la barra estrecha de la izquierda) y luego en Modelo de IA en la lista de la izquierda."
 
 /** The cases of 3.1, the model manager (`MVP_SMOKE_TEST.md`): Settings → AI model. */
 fun SuiteBuilder.modelManagerCases() {
@@ -80,21 +80,24 @@ private fun SuiteBuilder.downloadAndResume() {
         reason = ManualReason.COSTLY
     ) {
         prepare(PLAYGROUND)
-        title(text = "The recommended model downloads, pauses, resumes and is put in use")
+        title(text = "El modelo recomendado se descarga, se pausa, se reanuda y queda en uso")
 
         steps(
             text =
-            "$OPEN_AI_MODEL\n3. Click Download on the card marked Recommended.\n4. When the bar passes a " +
-                "quarter, click Pause, press Esc to close Settings, and open AI model again.\n5. Click Resume and " +
-                "wait until the download ends (from a few minutes to half an hour, depending on the connection)."
+            "$OPEN_AI_MODEL\n3. Haz clic en Descargar en la tarjeta marcada como " +
+                "Recomendado.\n4. Cuando la barra pase de un cuarto, haz clic en Pausar, pulsa " +
+                "Esc para cerrar Ajustes y vuelve a abrir Modelo de IA.\n5. Haz clic en Reanudar " +
+                "y espera a que termine la descarga (de unos minutos a media hora, según la " +
+                "conexión)."
         )
 
         expected(
             text =
-            "The bar grows with the gigabytes done of the total and the speed (as in 1.9 GB of 3.2 GB · " +
-                "24.5 MB/s). In step 4 it stays paused where it was, also after closing Settings. In step 5 it goes " +
-                "on from there, not from the start, shows Checking the file… for a moment, and then the card says " +
-                "In use, with Delete next to it."
+            "La barra crece con los gigabytes descargados del total y la velocidad (por " +
+                "ejemplo 1.9 GB de 3.2 GB · 24.5 MB/s). En el paso 4 se queda en pausa donde " +
+                "estaba, también después de cerrar Ajustes. En el paso 5 sigue desde ahí, no " +
+                "desde el principio, muestra Revisando el archivo… un momento, y luego la " +
+                "tarjeta dice En uso, con Eliminar al lado."
         )
     }
 }
@@ -105,16 +108,19 @@ private fun SuiteBuilder.cancelAndDelete() {
         reason = ManualReason.COSTLY
     ) {
         prepare(PLAYGROUND)
-        title(text = "Deleting a model asks first and frees it")
+        title(text = "Eliminar un modelo pregunta primero y libera el espacio")
 
         steps(
             text =
-            "$OPEN_AI_MODEL\n3. On the model in use (download one first if none says In use), click Delete, " +
-                "then Cancel in the question.\n4. Click Delete again and confirm with Delete."
+            "$OPEN_AI_MODEL\n3. En el modelo en uso (descarga uno primero si ninguno dice En " +
+                "uso), haz clic en Eliminar y luego en Cancelar en la pregunta.\n4. Haz clic de " +
+                "nuevo en Eliminar y confirma con Eliminar."
         )
 
         expected(
-            text = "Step 3 keeps the model. Step 4 deletes it: the card shows Download again and no size says In use."
+            text =
+            "El paso 3 conserva el modelo. El paso 4 lo elimina: la tarjeta vuelve a mostrar " +
+                "Descargar y ningún tamaño dice En uso."
         )
     }
 }
@@ -127,20 +133,23 @@ private fun SuiteBuilder.droppedConnection() {
         prepare(PLAYGROUND)
 
         title(
-            text = "A dropped connection stops the download, which goes on later from where it stopped"
+            text =
+            "Si se cae la conexión, la descarga se detiene y luego sigue desde donde se " +
+                "detuvo"
         )
 
         steps(
             text =
-            "$OPEN_AI_MODEL\n3. Click Download on a size that is not downloaded.\n4. While it downloads, turn " +
-                "off the Wi-Fi or unplug the network cable and wait half a minute.\n5. Turn the connection on " +
-                "again and click Try again."
+            "$OPEN_AI_MODEL\n3. Haz clic en Descargar en un tamaño que no esté " +
+                "descargado.\n4. Mientras se descarga, apaga el Wi-Fi o desconecta el cable de " +
+                "red y espera medio minuto.\n5. Vuelve a encender la conexión y haz clic en " +
+                "Reintentar."
         )
 
         expected(
             text =
-            "Step 4 shows that the download stopped and asks to check the connection, with Try again. In " +
-                "step 5 the bar goes on from where it stopped, not from zero."
+            "El paso 4 muestra que la descarga se detuvo y pide revisar la conexión, con " +
+                "Reintentar. En el paso 5 la barra sigue desde donde se detuvo, no desde cero."
         )
     }
 }

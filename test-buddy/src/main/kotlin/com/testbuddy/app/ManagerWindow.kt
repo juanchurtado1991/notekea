@@ -1,6 +1,7 @@
 package com.testbuddy.app
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -44,7 +45,8 @@ internal fun ApplicationScope.ManagerWindow(
     val actions = remember {
         managerActions(
             session = session,
-            folders = folders
+            folders = folders,
+            texts = TesterTexts.of(language = suite.language)
         )
     }
 
@@ -55,20 +57,25 @@ internal fun ApplicationScope.ManagerWindow(
         alwaysOnTop = true
     ) {
         AutoTestTheme {
-            ManagerContent(
-                suite = suite,
-                machine = machine,
-                dataFolder = folders.data,
-                state = state,
-                actions = actions
-            )
+            val texts = TesterTexts.of(language = suite.language)
+
+            CompositionLocalProvider(LocalTesterTexts provides texts) {
+                ManagerContent(
+                    suite = suite,
+                    machine = machine,
+                    dataFolder = folders.data,
+                    state = state,
+                    actions = actions
+                )
+            }
         }
     }
 }
 
 private fun managerActions(
     session: ManagerSession,
-    folders: AutoTestFolders
+    folders: AutoTestFolders,
+    texts: TesterTexts
 ): ManagerActions {
     fun restart() {
         AppProcess.start(
@@ -90,7 +97,7 @@ private fun managerActions(
         onSkip = session::skip,
         onPreviousCase = session::previousCase,
         onRestart = { restart() },
-        onPickScreenshot = DesktopActions::pickPicture,
+        onPickScreenshot = { DesktopActions.pickPicture(title = texts.addScreenshot) },
         onCopy = DesktopActions::copy,
         onOpenReport = { DesktopActions.open(folder = folders.report) }
     )

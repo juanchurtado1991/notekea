@@ -4,7 +4,7 @@ import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val OPEN_IMAGES =
-    "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Open the note Editor › Images and files."
+    "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba).\n2. Abre la nota Editor › Images and files."
 
 /** The cases of 1.8 that need the system (its file dialogs, file manager, clipboard, PDF viewer) or a person's eyes. */
 internal fun SuiteBuilder.attachmentManualCases() {
@@ -27,15 +27,16 @@ private fun SuiteBuilder.pictureSizes() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "Pictures at the right size, files as chips")
-        steps(text = "$OPEN_IMAGES\n3. Scroll through the note without clicking in its text.")
+        title(text = "Imágenes al tamaño correcto, archivos como fichas")
+        steps(text = "$OPEN_IMAGES\n3. Desplázate por la nota sin hacer clic en su texto.")
 
         expected(
             text =
-            "The orange and blue plate shows three times: at its own size (480 wide, or the note's width if " +
-                "narrower), 200 wide, and once more from the Markdown link. Weekly menu.pdf and broken.png show as " +
-                "file chips with a paperclip and \"Opens with its app\". Lost photo.png says \"This file is " +
-                "missing\" with its name and Locate…. In the last paragraph \"the menu\" is a link."
+            "El plato naranja y azul se ve tres veces: a su propio tamaño (480 de ancho, o " +
+                "el ancho de la nota si es más estrecha), a 200 de ancho, y una vez más desde el " +
+                "enlace Markdown. Weekly menu.pdf y broken.png se ven como fichas de archivo con " +
+                "un clip y \"Se abre con su app\". Lost photo.png dice \"Falta este archivo\" " +
+                "con su nombre y Buscar…. En el último párrafo \"the menu\" es un enlace."
         )
     }
 }
@@ -46,16 +47,18 @@ private fun SuiteBuilder.pdfOpens() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "A PDF opens in the system's PDF viewer")
+        title(text = "Un PDF se abre en el visor de PDF del sistema")
 
         steps(
             text =
-            "$OPEN_IMAGES\n3. Click the Weekly menu.pdf chip.\n4. Close the PDF viewer and click \"the menu\" " +
-                "in the last paragraph."
+            "$OPEN_IMAGES\n3. Haz clic en la ficha Weekly menu.pdf.\n4. Cierra el visor de " +
+                "PDF y haz clic en \"the menu\" en el último párrafo."
         )
 
         expected(
-            text = "Both times the PDF \"Weekly menu: arepas\" opens in your system's PDF viewer."
+            text =
+            "Las dos veces el PDF \"Weekly menu: arepas\" se abre en el visor de PDF de tu " +
+                "sistema."
         )
     }
 }
@@ -66,18 +69,19 @@ private fun SuiteBuilder.locateMissing() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "Locating a missing picture")
+        title(text = "Buscar una imagen que falta")
 
         steps(
             text =
-            "$OPEN_IMAGES\n3. Click Locate… under Lost photo.png.\n4. In the window that opens, choose Found " +
-                "plate.png in the Outside files folder of the Test data folder."
+            "$OPEN_IMAGES\n3. Haz clic en Buscar… debajo de Lost photo.png.\n4. En la " +
+                "ventana que se abre, elige Found plate.png en la carpeta Outside files de la " +
+                "carpeta Test data."
         )
 
         expected(
             text =
-            "The line becomes ![[Found plate.png]] and a green plate shows under it. Found plate.png is now " +
-                "in the vault's attachments folder."
+            "La línea pasa a ser ![[Found plate.png]] y debajo se ve un plato verde. Found " +
+                "plate.png ahora está en la carpeta de adjuntos de la bóveda."
         )
     }
 }
@@ -88,18 +92,20 @@ private fun SuiteBuilder.attachFromMenu() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "Adding a file from the toolbar")
+        title(text = "Agregar un archivo desde la barra de herramientas")
 
         steps(
             text =
-            "$OPEN_IMAGES\n3. Click at the end of the note, open More (⋯) in the toolbar and click Image or " +
-                "file.\n4. Choose Shopping list.pdf in the Outside files folder of the Test data folder."
+            "$OPEN_IMAGES\n3. Haz clic al final de la nota, abre Más (⋯) en la barra de " +
+                "herramientas y haz clic en Imagen o archivo.\n4. Elige Shopping list.pdf en la " +
+                "carpeta Outside files de la carpeta Test data."
         )
 
         expected(
             text =
-            "![[Shopping list.pdf]] is written on a line of its own with its chip under it, and the cursor is " +
-                "on the next line. The PDF is copied into the vault's attachments folder."
+            "![[Shopping list.pdf]] se escribe en una línea propia con su ficha debajo, y el " +
+                "cursor queda en la línea siguiente. El PDF se copia en la carpeta de adjuntos " +
+                "de la bóveda."
         )
     }
 }
@@ -110,20 +116,21 @@ private fun SuiteBuilder.dropFiles() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "Dropping pictures from the file manager")
+        title(text = "Soltar imágenes desde el administrador de archivos")
 
         steps(
             text =
-            "$OPEN_IMAGES\n3. In your file manager, open the Outside files folder of the Test data folder and " +
-                "drag Found plate.png onto the note.\n4. Then drag Arepas plate.png from the vault's attachments " +
-                "folder onto the note."
+            "$OPEN_IMAGES\n3. En tu administrador de archivos, abre la carpeta Outside files " +
+                "de la carpeta Test data y arrastra Found plate.png a la nota.\n4. Luego " +
+                "arrastra Arepas plate.png desde la carpeta de adjuntos de la bóveda a la nota."
         )
 
         expected(
             text =
-            "The first is copied as \"Found plate 1.png\" (the name was taken) and shows with its width, " +
-                "![[Found plate 1.png|320]]. The second is already in the vault, so it is shown as ![[Arepas " +
-                "plate.png|400]] without a copy. Changing one of the numbers resizes the picture."
+            "La primera se copia como \"Found plate 1.png\" (el nombre ya existía) y se ve " +
+                "con su ancho, ![[Found plate 1.png|320]]. La segunda ya está en la bóveda, así " +
+                "que se muestra como ![[Arepas plate.png|400]] sin copiarla. Cambiar uno de los " +
+                "números cambia el tamaño de la imagen."
         )
     }
 }
@@ -134,19 +141,22 @@ private fun SuiteBuilder.pasteScreenshot() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "Pasting a screenshot")
+        title(text = "Pegar una captura de pantalla")
 
         steps(
             text =
-            "$OPEN_IMAGES\n3. Take a screenshot to the clipboard: Win+Shift+S on Windows, Ctrl+Shift+Cmd+4 on " +
-                "macOS, your desktop's screenshot tool on Linux (copy to clipboard).\n4. Click an empty line of the " +
-                "note and press Ctrl+V (Cmd+V on macOS).\n5. Copy a word from anywhere and paste it in the note too."
+            "$OPEN_IMAGES\n3. Haz una captura al portapapeles: Win+Shift+S en Windows, " +
+                "Ctrl+Shift+Cmd+4 en macOS, la herramienta de capturas de tu escritorio en Linux " +
+                "(copiar al portapapeles).\n4. Haz clic en una línea vacía de la nota y pulsa " +
+                "Ctrl+V (Cmd+V en macOS).\n5. Copia una palabra de cualquier lugar y pégala " +
+                "también en la nota."
         )
 
         expected(
             text =
-            "A line ![[Pasted image <date and time>.png|400]] appears with the screenshot under it, and the " +
-                "file is in the attachments folder. The copied word is pasted as plain text."
+            "Aparece una línea ![[Pasted image <fecha y hora>.png|400]] con la captura " +
+                "debajo, y el archivo está en la carpeta de adjuntos. La palabra copiada se pega " +
+                "como texto simple."
         )
     }
 }
@@ -157,18 +167,22 @@ private fun SuiteBuilder.obsidianAttachmentFolder() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "Pasted pictures follow Obsidian's attachment setting")
+        title(text = "Las imágenes pegadas siguen el ajuste de adjuntos de Obsidian")
 
         steps(
             text =
-            "$OPEN_IMAGES\n3. Close Notekea. In the Playground Vault folder, open the hidden folder .obsidian " +
-                "(on macOS press Cmd+Shift+. in Finder to see it) and open app.json with a text editor.\n4. Add " +
-                "\"attachmentFolderPath\": \"./\" inside its braces, save, and open the Playground Vault in Notekea " +
-                "again.\n5. Paste a screenshot into Editor › Images and files, as in the case before."
+            "$OPEN_IMAGES\n3. Cierra Notekea. En la carpeta Playground Vault, abre la " +
+                "carpeta oculta .obsidian (en macOS pulsa Cmd+Shift+. en el Finder para verla) y " +
+                "abre app.json con un editor de texto.\n4. Agrega \"attachmentFolderPath\": " +
+                "\"./\" dentro de sus llaves, guarda y vuelve a abrir la Playground Vault en " +
+                "Notekea.\n5. Pega una captura en Editor › Images and files, como en el caso " +
+                "anterior."
         )
 
         expected(
-            text = "The pasted picture is saved next to the note, in the Editor folder, as Obsidian would do it."
+            text =
+            "La imagen pegada se guarda junto a la nota, en la carpeta Editor, como lo haría " +
+                "Obsidian."
         )
     }
 }
@@ -179,18 +193,19 @@ private fun SuiteBuilder.sameInObsidian() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "The same pictures in Obsidian")
+        title(text = "Las mismas imágenes en Obsidian")
 
         steps(
             text =
-            "If Obsidian is not installed, press Skip for now.\n$OPEN_IMAGES\n3. Open the Playground Vault in " +
-                "Obsidian and look at Editor › Images and files."
+            "Si Obsidian no está instalado, pulsa Saltar este caso.\n$OPEN_IMAGES\n3. Abre " +
+                "la Playground Vault en Obsidian y mira Editor › Images and files."
         )
 
         expected(
             text =
-            "The text is unchanged and every picture, the PDFs and the pasted screenshot show as in Notekea. " +
-                "Only Lost photo.png is gone, replaced by Found plate.png."
+            "El texto no cambió y todas las imágenes, los PDF y la captura pegada se ven " +
+                "como en Notekea. Solo Lost photo.png ya no está, reemplazada por Found " +
+                "plate.png."
         )
     }
 }
@@ -201,20 +216,22 @@ private fun SuiteBuilder.pictureInTable() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "A picture inside a table")
+        title(text = "Una imagen dentro de una tabla")
 
         steps(
             text =
-            "$OPEN_IMAGES\n3. Scroll to the table at the end.\n4. Click Source (</>) in the toolbar, add a row | " +
-                "Cachapa |  | under the table, put the cursor in its empty Photo cell and choose More (⋯) › Image or " +
-                "file, picking Found plate.png from the Outside files folder."
+            "$OPEN_IMAGES\n3. Desplázate hasta la tabla del final.\n4. Haz clic en Fuente " +
+                "(</>) en la barra de herramientas, agrega una fila | Cachapa |  | debajo de la " +
+                "tabla, pon el cursor en su celda Photo vacía y elige Más (⋯) › Imagen o " +
+                "archivo, eligiendo Found plate.png de la carpeta Outside files."
         )
 
         expected(
             text =
-            "The plate shows 80 wide inside its cell, not the text \"80\". The new picture is written inside " +
-                "the cell with its width and the pipe escaped, the row keeps its two columns, and a second click on " +
-                "Source shows the green plate in it."
+            "El plato se ve de 80 de ancho dentro de su celda, no el texto \"80\". La imagen " +
+                "nueva se escribe dentro de la celda con su ancho y la barra vertical escapada, " +
+                "la fila conserva sus dos columnas, y un segundo clic en Fuente muestra el plato " +
+                "verde en ella."
         )
     }
 }
@@ -225,20 +242,22 @@ private fun SuiteBuilder.waylandClipboard() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "Pasting pictures on Linux with Wayland")
+        title(text = "Pegar imágenes en Linux con Wayland")
 
         steps(
             text =
-            "Only on a Linux desktop with Wayland (GNOME, KDE, COSMIC). On Windows and macOS press Skip for " +
-                "now.\n$OPEN_IMAGES\n3. If wl-clipboard is installed (wl-paste --version answers), uninstall it for " +
-                "this case, copy a screenshot and press Ctrl+V in the note.\n4. Install wl-clipboard again, restart " +
-                "Notekea and press Ctrl+V."
+            "Solo en un escritorio Linux con Wayland (GNOME, KDE, COSMIC). En Windows y " +
+                "macOS pulsa Saltar este caso.\n$OPEN_IMAGES\n3. Si wl-clipboard está instalado " +
+                "(wl-paste --version responde), desinstálalo para este caso, copia una captura y " +
+                "pulsa Ctrl+V en la nota.\n4. Instala de nuevo wl-clipboard, reinicia Notekea y " +
+                "pulsa Ctrl+V."
         )
 
         expected(
             text =
-            "Without wl-clipboard, within a second a notice says how to install it and nothing is pasted. " +
-                "With it, the screenshot is pasted at once. On GNOME, write in a note whether it pasted."
+            "Sin wl-clipboard, en menos de un segundo un aviso dice cómo instalarlo y no se " +
+                "pega nada. Con él, la captura se pega al instante. En GNOME, anota en una nota " +
+                "si se pegó."
         )
     }
 }
@@ -249,18 +268,19 @@ private fun SuiteBuilder.dropNote() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND, "Outside files", PERSONAL_NOTES)
-        title(text = "Dropping a note from the file manager")
+        title(text = "Soltar una nota desde el administrador de archivos")
 
         steps(
             text =
-            "$OPEN_IMAGES\n3. In your file manager, drag any .md note (for example Welcome.md of the Personal " +
-                "Notes vault in the Test data folder) onto the note."
+            "$OPEN_IMAGES\n3. En tu administrador de archivos, arrastra cualquier nota .md " +
+                "(por ejemplo Welcome.md de la bóveda Personal Notes en la carpeta Test data) a " +
+                "la nota."
         )
 
         expected(
             text =
-            "The note is copied into the attachments folder, embedded on a line of its own, and its text " +
-                "shows in a frame."
+            "La nota se copia en la carpeta de adjuntos, se inserta en una línea propia y su " +
+                "texto se ve en un marco."
         )
     }
 }

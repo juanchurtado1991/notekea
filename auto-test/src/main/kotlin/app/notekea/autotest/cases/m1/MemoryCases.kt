@@ -65,18 +65,20 @@ private fun SuiteBuilder.sharpPictures() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "A folder's cards and an opened picture are sharp")
+        title(text = "Las tarjetas de una carpeta y una imagen abierta se ven nítidas")
 
         steps(
             text =
-            "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Click the attachments folder " +
-                "in the list on the left and look at the card of Market photo.jpg.\n3. Click that card."
+            "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba).\n2. Haz " +
+                "clic en la carpeta de adjuntos en la lista de la izquierda y mira la tarjeta de " +
+                "Market photo.jpg.\n3. Haz clic en esa tarjeta."
         )
 
         expected(
             text =
-            "The card shows the photo cropped to the card and sharp: \"Market photo 4000 x 3000\" reads at " +
-                "its top. The photo opens in a tab and shows whole, sharp."
+            "La tarjeta muestra la foto recortada a la tarjeta y nítida: arriba se lee " +
+                "\"Market photo 4000 x 3000\". La foto se abre en una pestaña y se ve entera y " +
+                "nítida."
         )
     }
 }

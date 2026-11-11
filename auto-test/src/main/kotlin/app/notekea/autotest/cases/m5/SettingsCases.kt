@@ -70,21 +70,28 @@ private fun SuiteBuilder.look() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "Settings looks like macOS's System Settings, and the editor follows Text size and Line width")
+
+        title(
+            text =
+            "Ajustes se ve como los Ajustes del Sistema de macOS, y el editor sigue el " +
+                "Tamaño del texto y el Ancho de línea"
+        )
 
         steps(
             text =
-            "1. Open the Playground Vault and a long note; press Ctrl+, (⌘, on macOS).\n2. Look at every section " +
-                "in the sidebar.\n3. In Editor choose Text size 20 pt and Line width Readable, then Full width; look " +
-                "at the note behind.\n4. Set Text size back to 16 pt and Line width to Wide."
+            "1. Abre la Playground Vault y una nota larga; pulsa Ctrl+, (⌘, en macOS).\n2. " +
+                "Mira cada sección de la barra lateral.\n3. En Editor elige Tamaño del texto 20 " +
+                "pt y Ancho de línea Legible, luego Ancho completo; mira la nota detrás.\n4. " +
+                "Vuelve a poner Tamaño del texto en 16 pt y Ancho de línea en Ancho."
         )
 
         expected(
             text =
-            "Step 2: a sidebar with a colored square icon per section; each section's settings in rounded groups, " +
-                "the name on the left and the control on the right, a short note under some groups. Step 3: the " +
-                "note's text grows, headings and code with it, and its lines go to a narrow column, then the whole " +
-                "pane. Step 4 brings it back as it was."
+            "Paso 2: una barra lateral con un icono cuadrado de color por sección; los " +
+                "ajustes de cada sección en grupos redondeados, el nombre a la izquierda y el " +
+                "control a la derecha, y una nota breve bajo algunos grupos. Paso 3: el texto de " +
+                "la nota crece, con los encabezados y el código, y sus líneas pasan a una " +
+                "columna estrecha y luego a todo el panel. El paso 4 la deja como estaba."
         )
     }
 }

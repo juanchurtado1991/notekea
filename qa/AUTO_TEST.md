@@ -116,7 +116,7 @@ adds the behavior:
    cases themselves, and regenerates the file).
 2. Writes each `Auto-Test` case as an `AutomatedCase` named after its ID, in `:auto-test`; it runs in CI from then on.
 3. Writes each manual case as a `ManualCase`, its numbered steps (the manager shows one at a time) and expected
-   result in plain English: the button and menu names as the tester sees them, the shortcut of each system, never a
+   result in plain Spanish (see Language below): the button and menu names as the tester sees them, the shortcut of each system, never a
    terminal command or a file path the tester must type.
 4. Adds the data the cases need to `smoke-data/` (bundled automatically).
 5. Keeps the consistency test green: it fails when a case of `MVP_SMOKE_TEST.md` has no `AutomatedCase` or
@@ -142,8 +142,15 @@ from them (`./gradlew :auto-test:smokeCases`), so no case is written twice:
 
 ## Language
 
-The manager and every manual case are in English only, like the rest of the repository (the developer's decision):
-plain words a tester who is not a developer can follow.
+The manager and every manual case are in **Spanish** (the developer's decision of 2026-11-11, replacing English only):
+plain words a tester who is not a developer can follow, naming the buttons and menus as Notekea's Spanish interface
+shows them. The rest of the repository stays in English, the automated cases included.
+
+- `NotekeaSuite` declares `language = TesterLanguage.SPANISH`, so the manager's own words and the default answers
+  (Pasó / Falló) are Spanish.
+- Notekea QA starts in Spanish the first time on its data folder (`QaLanguage`); the tester can change it in
+  Ajustes → General afterwards.
+- Each automated case starts its Notekea in English (`CaseApp`), since the cases look for the English words.
 
 ## Never touching the tester's notes
 

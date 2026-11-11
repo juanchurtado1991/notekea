@@ -27,13 +27,17 @@ class GeneralSettingsTest {
             expected = listOf(1, 1),
             actual = listOf(
                 onAllNodesWithText(text = LAST_VAULT_HINT).fetchSemanticsNodes().size,
-                onAllNodesWithText(text = WELCOME_HINT, substring = true).fetchSemanticsNodes().size
+                onAllNodesWithText(
+                    text = WELCOME_HINT,
+                    substring = true
+                ).fetchSemanticsNodes().size
             )
         )
     }
 
     private companion object {
-        const val LAST_VAULT_HINT = "Off, Notekea starts on the welcome screen with your vaults listed."
+        const val LAST_VAULT_HINT =
+            "Off, Notekea starts on the welcome screen with your vaults listed."
         const val WELCOME_HINT = "Shows the first-run welcome again"
     }
 }

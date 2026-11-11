@@ -15,7 +15,7 @@ private const val READ_MODE = "Read mode"
 private const val RAW_BOLD = "Some **bold**"
 private const val DRAWN_TASK = "A task to do"
 private const val OPEN_READ_MODE =
-    "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Open the note Editor › Read mode."
+    "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba).\n2. Abre la nota Editor › Read mode."
 
 /** The cases of 1.5 that show a note: how it looks, finding in it, Source and its links (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.editorViewCases() {
@@ -33,19 +33,23 @@ private fun SuiteBuilder.editLook() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "The line the cursor is on shows its Markdown signs")
+        title(text = "La línea donde está el cursor muestra sus signos de Markdown")
 
         steps(
-            text = "$OPEN_READ_MODE\n3. Click the words Some bold in the note and look at that line and at the " +
-                "others.\n4. Click Source (</>) at the end of the toolbar, look, and click it again."
+            text =
+            "$OPEN_READ_MODE\n3. Haz clic en las palabras Some bold de la nota y mira esa " +
+                "línea y las demás.\n4. Haz clic en Fuente (</>) al final de la barra de " +
+                "herramientas, mira, y haz clic de nuevo."
         )
 
         expected(
             text =
-            "The clicked line shows its Markdown signs (**, *, `, #) muted, with bold and italic as such, and the " +
-                "toolbar marks Bold (B) in blue while the cursor is in the bold word; every other line stays as " +
-                "it reads. Source shows the whole note as written, with the signs muted, links " +
-                "and tags blue and code on a shaded background; the second click draws the note again."
+            "La línea en la que hiciste clic muestra sus signos de Markdown (**, *, `, #) " +
+                "atenuados, con la negrita y la cursiva como tales, y la barra de herramientas " +
+                "marca Negrita (B) en azul mientras el cursor está en la palabra en negrita; las " +
+                "demás líneas se quedan como se leen. Fuente muestra toda la nota tal como está " +
+                "escrita, con los signos atenuados, los enlaces y etiquetas en azul y el código " +
+                "sobre fondo sombreado; el segundo clic dibuja la nota de nuevo."
         )
     }
 }
@@ -178,13 +182,13 @@ private fun SuiteBuilder.readingLook() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "How a note reads")
-        steps(text = "$OPEN_READ_MODE\n3. Look at the note without clicking in its text.")
+        title(text = "Cómo se lee una nota")
+        steps(text = "$OPEN_READ_MODE\n3. Mira la nota sin hacer clic en su texto.")
 
         expected(
             text =
-            "Headings, lists, checkboxes and the quote are drawn as such, and both code blocks are colored by " +
-                "their language (Kotlin and Python)."
+            "Los encabezados, las listas, las casillas y la cita se dibujan como tales, y " +
+                "los dos bloques de código se colorean según su lenguaje (Kotlin y Python)."
         )
     }
 }
@@ -195,17 +199,19 @@ private fun SuiteBuilder.createdKept() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "Saving a note keeps the date it was created")
+        title(text = "Guardar una nota conserva la fecha en que se creó")
 
         steps(
-            text = "$OPEN_READ_MODE\n3. Look at Created under Note info in the side panel.\n" +
-                "4. Type a word in the note, wait until it says Saved, then open another note and come back."
+            text =
+            "$OPEN_READ_MODE\n3. Mira Creada en Información de la nota, en el panel " +
+                "lateral.\n4. Escribe una palabra en la nota, espera a que diga Guardado, luego " +
+                "abre otra nota y vuelve."
         )
 
         expected(
             text =
-            "On Windows and macOS, Created shows the same date and time as before. Linux cannot keep it, so " +
-                "this case does not apply there."
+            "En Windows y macOS, Creada muestra la misma fecha y hora que antes. Linux no " +
+                "puede conservarla, así que este caso no aplica ahí."
         )
     }
 }

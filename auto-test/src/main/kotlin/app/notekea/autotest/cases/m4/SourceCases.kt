@@ -65,21 +65,27 @@ private fun SuiteBuilder.pdfPages() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "A PDF opens as its real pages, and the chat's citation of it opens the cited page, marked")
+
+        title(
+            text =
+            "Un PDF se abre con sus páginas reales, y la cita del chat abre la página " +
+                "citada, marcada"
+        )
 
         steps(
             text =
-            "1. Copy any PDF with text (a paper, a manual) of a few pages into the Playground Vault's folder.\n" +
-                "2. Open the Playground Vault in Notekea and click the PDF in Files.\n3. Open the chat (the " +
-                "speech bubble in the narrow bar on the far left) and ask a question a sentence of the PDF's " +
-                "third page answers.\n4. Click the citation of the PDF under the answer."
+            "1. Copia cualquier PDF con texto (un artículo, un manual) de unas pocas páginas " +
+                "en la carpeta de la Playground Vault.\n2. Abre la Playground Vault en Notekea y " +
+                "haz clic en el PDF en Archivos.\n3. Abre el chat (el globo de diálogo en la " +
+                "barra estrecha de la izquierda) y haz una pregunta que responda una frase de la " +
+                "tercera página del PDF.\n4. Haz clic en la cita del PDF bajo la respuesta."
         )
 
         expected(
             text =
-            "Step 2 shows the PDF's pages as they print, with Open in the system's app above them. Step 3 cites " +
-                "the PDF and its page. Step 4 opens the PDF at that page with the cited passage marked in the " +
-                "theme's color."
+            "El paso 2 muestra las páginas del PDF como se imprimen, con Abrir en la app del " +
+                "sistema encima. El paso 3 cita el PDF y su página. El paso 4 abre el PDF en esa " +
+                "página con el pasaje citado marcado en el color del tema."
         )
     }
 }
@@ -109,22 +115,30 @@ private fun SuiteBuilder.clipOfPage() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "A web article is clipped with notes the article backs, and a page that is not one says why")
+
+        title(
+            text =
+            "Un artículo web se recorta con notas que el artículo respalda, y una página que " +
+                "no lo es dice por qué"
+        )
 
         steps(
             text =
-            "1. Open the Playground Vault with a chat model installed (Settings → AI model).\n2. Close every " +
-                "note, click Clip a web page and paste the address of a news or blog article; click Clip.\n3. " +
-                "Do it again with https://www.youtube.com.\n4. In the chat, write clip followed by another " +
-                "article's address."
+            "1. Abre la Playground Vault con un modelo de chat instalado (Ajustes → Modelo " +
+                "de IA).\n2. Cierra todas las notas, haz clic en Recortar una página web y pega " +
+                "la dirección de un artículo de noticias o de un blog; haz clic en Recortar.\n3. " +
+                "Hazlo de nuevo con https://www.youtube.com.\n4. En el chat, escribe clip " +
+                "seguido de la dirección de otro artículo."
         )
 
         expected(
             text =
-            "Step 2 says Downloading the page…, Writing notes about it… and Checking the notes…, then opens " +
-                "Web sources/<the article's title> with source and clipped properties, notes about the article and " +
-                "its text under Original text. Step 3 says no article was found and writes nothing. Step 4 shows " +
-                "the usual card and clips the page once you click Do it."
+            "El paso 2 dice Descargando la página…, Escribiendo notas sobre ella… y " +
+                "Revisando las notas contra el artículo…, y luego abre Web sources/<el título " +
+                "del artículo> con las propiedades source y clipped, notas sobre el artículo y " +
+                "su texto bajo Original text. El paso 3 dice que no se encontró un artículo y no " +
+                "escribe nada. El paso 4 muestra la tarjeta de siempre y recorta la página " +
+                "cuando haces clic en Do it."
         )
     }
 }
@@ -136,22 +150,30 @@ private fun SuiteBuilder.clipOfSection() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "A documentation page asks whether to clip the pages it links under its path too")
+
+        title(
+            text =
+            "Una página de documentación pregunta si recortar también las páginas que enlaza " +
+                "bajo su ruta"
+        )
 
         steps(
             text =
-            "1. Open the Playground Vault with a chat model installed.\n2. Close every note, click Clip a web " +
-                "page and paste https://www.traceloop.com/docs/openllmetry/integrations/introduction; click Clip." +
-                "\n3. Click This page and 30 more and wait.\n4. In the chat (the speech bubble on the far left) " +
-                "write clip and the same address, then click Only this page."
+            "1. Abre la Playground Vault con un modelo de chat instalado.\n2. Cierra todas " +
+                "las notas, haz clic en Recortar una página web y pega " +
+                "https://www.traceloop.com/docs/openllmetry/integrations/introduction; haz clic " +
+                "en Recortar.\n3. Haz clic en Esta página y 30 más y espera.\n4. En el chat (el " +
+                "globo de diálogo de la izquierda) escribe clip y la misma dirección, y luego " +
+                "haz clic en Only this page."
         )
 
         expected(
             text =
-            "Step 2 asks: only this page, or this page and 30 more, with 2 more left out. Step 3 counts Clipping " +
-                "page n of 31, then opens Web sources/Overview, whose Pages list links each integration's note in " +
-                "Web sources/Overview/. Step 4 asks the same with two buttons; Only this page shows a card with one " +
-                "note."
+            "El paso 2 pregunta: solo esta página, o esta página y 30 más, con 2 más fuera. " +
+                "El paso 3 cuenta Recortando la página n de 31 y luego abre Web " +
+                "sources/Overview, cuya lista Pages enlaza la nota de cada integración en Web " +
+                "sources/Overview/. El paso 4 pregunta lo mismo con dos botones; Only this page " +
+                "muestra una tarjeta con una nota."
         )
     }
 }
@@ -239,19 +261,27 @@ private fun SuiteBuilder.madeCards() {
         reason = ManualReason.COSTLY
     ) {
         prepare(PLAYGROUND)
-        title(text = "The chat makes study cards from a note, and they are reviewed in Study cards")
+
+        title(
+            text =
+            "El chat crea tarjetas de estudio de una nota, y se repasan en Tarjetas de " +
+                "estudio"
+        )
 
         steps(
             text =
-            "1. With a chat model installed (Settings → AI model), open Recipes/Arepas in the Playground Vault.\n" +
-                "2. Open the chat (the speech bubble in the narrow bar on the far left) and ask: make study cards " +
-                "from this note.\n3. Click Do it on the card.\n4. Click Study cards (the cap in the narrow bar)."
+            "1. Con un modelo de chat instalado (Ajustes → Modelo de IA), abre " +
+                "Recipes/Arepas en la Playground Vault.\n2. Abre el chat (el globo de diálogo en " +
+                "la barra estrecha de la izquierda) y pide: make study cards from this note.\n3. " +
+                "Haz clic en Do it en la tarjeta.\n4. Haz clic en Tarjetas de estudio (el " +
+                "birrete en la barra estrecha)."
         )
 
         expected(
             text =
-            "Step 2's card lists questions the note answers, each with its answer. Step 3 adds them at the end of " +
-                "Arepas under a Flashcards heading with #flashcards. Step 4 shows them one at a time."
+            "La tarjeta del paso 2 muestra preguntas que la nota responde, cada una con su " +
+                "respuesta. El paso 3 las agrega al final de Arepas bajo un encabezado " +
+                "Flashcards con #flashcards. El paso 4 las muestra una a una."
         )
     }
 }

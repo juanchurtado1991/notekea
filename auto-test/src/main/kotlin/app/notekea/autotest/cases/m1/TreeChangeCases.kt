@@ -62,20 +62,23 @@ private fun SuiteBuilder.showInFiles() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "Show in Files opens the file manager")
+        title(text = "Mostrar en Archivos abre el administrador de archivos")
 
         steps(
             text =
-            "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Right-click a note in the " +
-                "list on the left and choose Show in File Explorer (Windows), Show in Finder (macOS) or Show in " +
-                "Files (Linux).\n3. Select another note and press Shift+F10 (Fn+Shift+F10 on a Mac keyboard, " +
-                "where F10 alone mutes the sound), or the Menu key if your keyboard has one."
+            "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba).\n2. Haz " +
+                "clic derecho en una nota de la lista de la izquierda y elige Mostrar en el " +
+                "Explorador de archivos (Windows), Mostrar en el Finder (macOS) o Mostrar en " +
+                "Archivos (Linux).\n3. Selecciona otra nota y pulsa Shift+F10 (Fn+Shift+F10 en " +
+                "un teclado Mac, donde F10 solo silencia el sonido), o la tecla Menú si tu " +
+                "teclado la tiene."
         )
 
         expected(
             text =
-            "The file manager opens with the note selected (on Linux, at least its folder opens). The menu " +
-                "shows each action's shortcut, and Shift+F10 opens it on the selected note."
+            "El administrador de archivos se abre con la nota seleccionada (en Linux, al " +
+                "menos se abre su carpeta). El menú muestra el atajo de cada acción, y Shift+F10 " +
+                "lo abre sobre la nota seleccionada."
         )
     }
 }
@@ -176,18 +179,21 @@ private fun SuiteBuilder.restoreFromTrash() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "A deleted note comes back from the system's trash")
+        title(text = "Una nota eliminada vuelve desde la papelera del sistema")
 
         steps(
             text =
-            "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Delete the note Travel › " +
-                "Packing checklist (select it and press Delete, on macOS Delete or Cmd+Delete, then Delete " +
-                "note).\n3. Open " +
-                "the system's trash (Recycle Bin on Windows, Trash on macOS and Linux) and restore it."
+            "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba).\n2. " +
+                "Elimina la nota Travel › Packing checklist (selecciónala y pulsa Suprimir, en " +
+                "macOS Delete o Cmd+Delete, y luego Eliminar nota).\n3. Abre la papelera del " +
+                "sistema (Papelera de reciclaje en Windows, Papelera en macOS y Linux) y " +
+                "restáurala."
         )
 
         expected(
-            text = "Packing checklist is back under Travel in Notekea within a second, without clicking anything."
+            text =
+            "Packing checklist vuelve a estar bajo Travel en Notekea en menos de un segundo, " +
+                "sin hacer clic en nada."
         )
     }
 }
@@ -198,19 +204,20 @@ private fun SuiteBuilder.noteIcons() {
         reason = ManualReason.EYES
     ) {
         prepare(SAMPLE_VAULT)
-        title(text = "Home, templates and daily notes have icons of their own")
+        title(text = "Home, las plantillas y las notas diarias tienen sus propios iconos")
 
         steps(
             text =
-            "1. In Notekea, open the Sample Vault (see TEST DATA above).\n2. In the list on the left, look at " +
-                "the icon of Home, open the Templates folder, then Journal › Daily, and look at their notes."
+            "1. En Notekea, abre la Sample Vault (mira DATOS DE PRUEBA arriba).\n2. En la " +
+                "lista de la izquierda, mira el icono de Home, abre la carpeta Templates y luego " +
+                "Journal › Daily, y mira sus notas."
         )
 
         expected(
             text =
-            "Home has a house. Daily and Meeting, in Templates, have the template icon in the color of their " +
-                "folder. The notes of Journal › Daily have a calendar in the color of Journal. Every other note " +
-                "has a page."
+            "Home tiene una casa. Daily y Meeting, en Templates, tienen el icono de " +
+                "plantilla en el color de su carpeta. Las notas de Journal › Daily tienen un " +
+                "calendario en el color de Journal. Todas las demás notas tienen una página."
         )
     }
 }

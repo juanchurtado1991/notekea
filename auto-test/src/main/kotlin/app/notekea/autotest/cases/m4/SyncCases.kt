@@ -143,24 +143,33 @@ private fun SuiteBuilder.gitHub() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "The vault syncs with a private GitHub repository through a token, on two computers")
+
+        title(
+            text =
+            "La bóveda se sincroniza con un repositorio privado de GitHub mediante un token, " +
+                "en dos computadoras"
+        )
 
         steps(
             text =
-            "1. On github.com make a private repository with no files, and a fine-grained personal access token " +
-                "that can read and write its contents.\n2. In Notekea open the Playground Vault, click Settings " +
-                "(the gear at the bottom of the narrow bar on the far left), then Sync; paste the repository's " +
-                "HTTPS address and the token, and click Connect.\n3. Change a note, wait 15 seconds and look at " +
-                "the repository on github.com.\n4. On a second computer (or a copy of Notekea QA with another " +
-                "vault folder), connect an empty vault to the same repository with the token.\n5. Type a wrong " +
-                "token in Settings → Sync and click Connect."
+            "1. En github.com crea un repositorio privado sin archivos, y un token de acceso " +
+                "personal fine-grained que pueda leer y escribir su contenido.\n2. En Notekea " +
+                "abre la Playground Vault, haz clic en Ajustes (el engranaje abajo en la barra " +
+                "estrecha de la izquierda) y luego en Sincronización; pega la dirección HTTPS " +
+                "del repositorio y el token, y haz clic en Conectar.\n3. Cambia una nota, espera " +
+                "15 segundos y mira el repositorio en github.com.\n4. En una segunda computadora " +
+                "(o una copia de Notekea QA con otra carpeta de bóveda), conecta una bóveda " +
+                "vacía al mismo repositorio con el token.\n5. Escribe un token incorrecto en " +
+                "Ajustes → Sincronización y haz clic en Conectar."
         )
 
         expected(
             text =
-            "Step 2 says Up to date in the status bar and the repository holds the vault's notes. Step 3's change " +
-                "is in the repository. Step 4 brings every note to the second vault. Step 5 says the repository " +
-                "refused the token, and the status bar says Sync sign-in failed; the right token fixes it."
+            "El paso 2 dice Al día en la barra de estado y el repositorio tiene las notas de " +
+                "la bóveda. El cambio del paso 3 está en el repositorio. El paso 4 trae todas " +
+                "las notas a la segunda bóveda. El paso 5 dice que el repositorio rechazó el " +
+                "token, y la barra de estado dice Falló el acceso de la sincronización; el token " +
+                "correcto lo arregla."
         )
     }
 }

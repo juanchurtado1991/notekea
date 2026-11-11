@@ -4,7 +4,7 @@ import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val OPEN_PLAYGROUND =
-    "1. In Notekea, open the Playground Vault (see TEST DATA above)."
+    "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba)."
 
 /** The cases of 1.14 a person must look at: the tool rail, the scrollbars and the workspace's details. */
 internal fun SuiteBuilder.workspaceLookManualCases() {
@@ -19,26 +19,32 @@ private fun SuiteBuilder.toolRail() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "The tool rail, About and Settings look right")
+        title(text = "La barra de herramientas lateral, Acerca de y Ajustes se ven bien")
 
         steps(
             text =
-            "$OPEN_PLAYGROUND\n2. Open two notes. Point at each icon of the narrow bar on the far left.\n3. " +
-                "Click About Notekea (the ⓘ at the bottom), look at it and press Esc.\n4. Click Settings (the gear) " +
-                "and close it with ✕.\n5. Click Side panel (the second icon) twice.\n6. Click Open another vault."
+            "$OPEN_PLAYGROUND\n2. Abre dos notas. Pasa el puntero por cada icono de la barra " +
+                "estrecha de la izquierda.\n3. Haz clic en Acerca de Notekea (la ⓘ de abajo), " +
+                "míralo y pulsa Esc.\n4. Haz clic en Ajustes (el engranaje) y ciérralo con " +
+                "✕.\n5. Haz clic dos veces en Panel lateral (el segundo icono).\n6. Haz clic en " +
+                "Abrir otra bóveda."
         )
 
         expected(
             text =
-            "The bar's top has the Notekea logo, then Files, Side panel, Search notes and Today; its bottom " +
-                "has Open another vault, About Notekea and Settings, each named when pointed at. The open note's tab " +
-                "rises with rounded corners into the note; the other tabs are quiet, with a thin line between them " +
-                "and their ✕ only when pointed at. About shows the logo, Notekea, \"Version 0.1.0-alpha\", GitHub " +
-                "and this computer's shortcuts as keys (Notes, Writing, Workspace) with a scrollbar beside them; Esc " +
-                "closes it. Settings opens on General, with every section in a sidebar of colored icons, as macOS's " +
-                "System Settings, and Ask about Settings beside it. Side panel hides and shows the " +
-                "panel on the right. Open another vault shows the welcome screen: the logo, Notekea and the actions " +
-                "on the left, the recent vaults on the right."
+            "Arriba la barra tiene el logo de Notekea, luego Archivos, Panel lateral, Buscar " +
+                "notas y Hoy; abajo tiene Abrir otra bóveda, Acerca de Notekea y Ajustes, cada " +
+                "uno con su nombre al pasar el puntero. La pestaña de la nota abierta sube con " +
+                "esquinas redondeadas hacia la nota; las demás pestañas son discretas, con una " +
+                "línea fina entre ellas y su ✕ solo al pasar el puntero. Acerca de muestra el " +
+                "logo, Notekea, \"Versión 0.1.0-alpha\", GitHub y los atajos de esta computadora " +
+                "como teclas (Notas, Escritura, Espacio de trabajo) con una barra de " +
+                "desplazamiento al lado; Esc lo cierra. Ajustes se abre en General, con cada " +
+                "sección en una barra lateral de iconos de colores, como los Ajustes del Sistema " +
+                "de macOS, y Pregunta sobre los Ajustes a su lado. Panel lateral oculta y " +
+                "muestra el panel de la derecha. Abrir otra bóveda muestra la pantalla de " +
+                "bienvenida: el logo, Notekea y las acciones a la izquierda, las bóvedas " +
+                "recientes a la derecha."
         )
     }
 }
@@ -57,22 +63,25 @@ private fun SuiteBuilder.scrollbars() {
             "Templates Vault"
         )
 
-        title(text = "Long lists show a thin scrollbar")
+        title(text = "Las listas largas muestran una barra de desplazamiento fina")
 
         steps(
             text =
-            "1. In Notekea, with Open another vault (bottom left) and Open folder…, open one after another " +
-                "these vaults of the Test data folder: Personal Notes, Work Obsidian, Empty Vault, Playground Vault, " +
-                "Daily Vault and Templates Vault.\n2. Click Open another vault and scroll the Recent list.\n3. Open " +
-                "the Playground Vault, click Expand all folders (above the list of notes) and scroll the list.\n4. " +
-                "Open Editor/Outline practice and scroll the outline on the right."
+            "1. En Notekea, con Abrir otra bóveda (abajo a la izquierda) y Abrir carpeta…, " +
+                "abre una tras otra estas bóvedas de la carpeta Test data: Personal Notes, Work " +
+                "Obsidian, Empty Vault, Playground Vault, Daily Vault y Templates Vault.\n2. Haz " +
+                "clic en Abrir otra bóveda y desplaza la lista Recientes.\n3. Abre la Playground " +
+                "Vault, haz clic en Expandir todas las carpetas (sobre la lista de notas) y " +
+                "desplaza la lista.\n4. Abre Editor/Outline practice y desplaza el índice de la " +
+                "derecha."
         )
 
         expected(
             text =
-            "Recent shows five vaults with a thin scrollbar on its right and scrolls inside to the sixth. The " +
-                "list of notes and the outline show a scrollbar only while they hold more than fits, and it darkens " +
-                "when pointed at."
+            "Recientes muestra cinco bóvedas con una barra de desplazamiento fina a su " +
+                "derecha y se desplaza por dentro hasta la sexta. La lista de notas y el índice " +
+                "muestran una barra solo mientras tienen más de lo que cabe, y se oscurece al " +
+                "pasar el puntero."
         )
     }
 }
@@ -83,24 +92,27 @@ private fun SuiteBuilder.workspaceLook() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "Tabs, the tree's selection and the status bar look right")
+        title(text = "Las pestañas, la selección del árbol y la barra de estado se ven bien")
 
         steps(
             text =
-            "$OPEN_PLAYGROUND\n2. Open ten notes in tabs and make the window narrow.\n3. Click the ⌄ at the " +
-                "end of the row of tabs and pick a tab.\n4. Click a note in the list on the left, then click in the " +
-                "note's text and type a word, watching the end of the bar at the bottom.\n5. Point at the vault's " +
-                "name at the top of the list."
+            "$OPEN_PLAYGROUND\n2. Abre diez notas en pestañas y haz la ventana estrecha.\n3. " +
+                "Haz clic en la ⌄ al final de la fila de pestañas y elige una pestaña.\n4. Haz " +
+                "clic en una nota de la lista de la izquierda, luego en el texto de la nota, y " +
+                "escribe una palabra mirando el final de la barra de abajo.\n5. Pasa el puntero " +
+                "por el nombre de la bóveda arriba de la lista."
         )
 
         expected(
             text =
-            "The row of tabs fades out at its end; the ⌄ lists every open tab, the open one checked, and " +
-                "picks one; no tab is narrower than a short name. The selected note in the list is blue while the " +
-                "list has the keyboard and grey once the text has it, with no ring around it. The list shows " +
-                "BOOKMARKS and FILES headers. The panes meet at thin lines with no dark gap. The bottom bar ends " +
-                "with \"Unsaved\" while you type, then \"Saved\". The vault's folder shows only when pointing at its " +
-                "name."
+            "La fila de pestañas se desvanece al final; la ⌄ lista todas las pestañas " +
+                "abiertas, con la abierta marcada, y permite elegir una; ninguna pestaña es más " +
+                "estrecha que un nombre corto. La nota seleccionada en la lista es azul mientras " +
+                "la lista tiene el teclado y gris cuando lo tiene el texto, sin anillo " +
+                "alrededor. La lista muestra los encabezados MARCADORES y ARCHIVOS. Los paneles " +
+                "se unen con líneas finas, sin un hueco oscuro. La barra de abajo termina con " +
+                "\"Sin guardar\" mientras escribes y luego \"Guardado\". La carpeta de la bóveda " +
+                "solo aparece al pasar el puntero por su nombre."
         )
     }
 }

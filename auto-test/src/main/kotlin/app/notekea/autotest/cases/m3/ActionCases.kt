@@ -173,9 +173,22 @@ private fun SuiteBuilder.summaryOfNotes() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "A summary of several notes is useful and sized to them")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Ask write a summary of my Travel notes in a new note called Travel summary, read the card and click Do it.\n3. Read the new note, then click Undo.")
-        expected(text = "The card names Lisbon trip and Packing checklist and shows the start of the summary. The note has headings, lists and links to both, says nothing they do not say, and reads well. Undo removes it.")
+        title(text = "Un resumen de varias notas es útil y a su medida")
+
+        steps(
+            text =
+            "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba) con un " +
+                "modelo de chat en uso y pulsa Ctrl+L (Cmd+L en macOS).\n2. Pide write a summary " +
+                "of my Travel notes in a new note called Travel summary, lee la tarjeta y haz " +
+                "clic en Do it.\n3. Lee la nota nueva y luego haz clic en Undo."
+        )
+
+        expected(
+            text =
+            "La tarjeta nombra Lisbon trip y Packing checklist y muestra el principio del " +
+                "resumen. La nota tiene encabezados, listas y enlaces a ambas, no dice nada que " +
+                "ellas no digan, y se lee bien. Undo la quita."
+        )
     }
 }
 
@@ -185,8 +198,23 @@ private fun SuiteBuilder.notesFromText() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "A pasted text becomes a folder of linked notes")
-        steps(text = "1. In Notekea, open the Playground Vault (see TEST DATA above) with a chat model in use and press Ctrl+L (Cmd+L on macOS).\n2. Type Créame notas a partir de este texto: and paste five paragraphs of any article in Spanish, send it and click Do it.\n3. Open the folder it made and read its notes, then click Undo.")
-        expected(text = "The card lists a folder with an index note and one note per topic. Each note keeps the facts of its part, formatted with headings, bold and lists, in Spanish, and the index links them all. Undo removes the folder's notes.")
+        title(text = "Un texto pegado se convierte en una carpeta de notas enlazadas")
+
+        steps(
+            text =
+            "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba) con un " +
+                "modelo de chat en uso y pulsa Ctrl+L (Cmd+L en macOS).\n2. Escribe Créame notas " +
+                "a partir de este texto: y pega cinco párrafos de cualquier artículo en español, " +
+                "envíalo y haz clic en Hacerlo.\n3. Abre la carpeta que creó y lee sus notas; " +
+                "luego haz clic en Deshacer."
+        )
+
+        expected(
+            text =
+            "La tarjeta muestra una carpeta con una nota índice y una nota por tema. Cada " +
+                "nota conserva los datos de su parte, con formato de encabezados, negrita y " +
+                "listas, en español, y el índice las enlaza todas. Deshacer quita las notas de " +
+                "la carpeta."
+        )
     }
 }

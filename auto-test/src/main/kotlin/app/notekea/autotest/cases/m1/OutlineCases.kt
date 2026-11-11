@@ -136,21 +136,23 @@ private fun SuiteBuilder.outlineKeyboard() {
         reason = ManualReason.COSTLY
     ) {
         prepare(PLAYGROUND)
-        title(text = "The outline with the keyboard")
+        title(text = "El índice con el teclado")
 
         steps(
             text =
-            "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Open the note Editor › " +
-                "Outline practice and click in its text.\n3. Press Ctrl+Shift+O (Cmd+Shift+O on macOS), then the " +
-                "Down arrow twice and Enter, and type x.\n4. Press Ctrl+Shift+O (Cmd+Shift+O) again, then Esc, and " +
-                "type y.\n5. Undo both letters with Ctrl+Z (Cmd+Z)."
+            "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba).\n2. Abre " +
+                "la nota Editor › Outline practice y haz clic en su texto.\n3. Pulsa " +
+                "Ctrl+Shift+O (Cmd+Shift+O en macOS), luego dos veces la flecha abajo y Enter, y " +
+                "escribe x.\n4. Pulsa de nuevo Ctrl+Shift+O (Cmd+Shift+O), luego Esc, y escribe " +
+                "y.\n5. Deshaz las dos letras con Ctrl+Z (Cmd+Z)."
         )
 
         expected(
             text =
-            "Ctrl+Shift+O puts a ring around the highlighted heading of the outline and the arrows move it; " +
-                "Enter goes to that heading and x is typed at the end of its line. After Esc the keyboard is back in " +
-                "the note and y is typed where the cursor was."
+            "Ctrl+Shift+O pone un anillo alrededor del encabezado resaltado del índice y las " +
+                "flechas lo mueven; Enter va a ese encabezado y la x se escribe al final de su " +
+                "línea. Después de Esc el teclado vuelve a la nota y la y se escribe donde " +
+                "estaba el cursor."
         )
     }
 }

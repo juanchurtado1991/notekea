@@ -20,7 +20,7 @@ private const val STATE_BLOCKS =
     "\n\n```query\nfilters:\n  - property: rating\n    condition: more than\n" +
         "    value: 99\n```\n\n```query\nsorted: rating\n```\n\n```query\ncolumns: [mood]\n```\n"
 private const val OPEN_QUERY =
-    "1. In Notekea, open the Sample Vault (see TEST DATA above).\n2. Click Query in the rail on the left."
+    "1. En Notekea, abre la Sample Vault (mira DATOS DE PRUEBA arriba).\n2. Haz clic en Consulta en la barra de la izquierda."
 
 /** The cases of 2.10, vault queries (`MVP_SMOKE_TEST.md`): the Query tab and the query blocks of notes. */
 fun SuiteBuilder.queryCases() {
@@ -141,19 +141,21 @@ private fun SuiteBuilder.cellsEditNotes() {
         reason = ManualReason.EYES
     ) {
         prepare(SAMPLE)
-        title(text = "A cell edits its note, and an edit in the note reaches the table")
+        title(text = "Una celda edita su nota, y una edición en la nota llega a la tabla")
 
         steps(
             text =
-            "$OPEN_QUERY\n3. Add the filter Folder, Books, and the columns rating and finished.\n4. Change a " +
-                "book's rating in its cell, press Enter, and click its finished box.\n5. Click the book's name, and " +
-                "look at its properties.\n6. Change its rating there, and go back to the Query tab."
+            "$OPEN_QUERY\n3. Agrega el filtro Carpeta, Books, y las columnas rating y " +
+                "finished.\n4. Cambia el rating de un libro en su celda, pulsa Enter y haz clic " +
+                "en su casilla finished.\n5. Haz clic en el nombre del libro y mira sus " +
+                "propiedades.\n6. Cambia ahí su rating y vuelve a la pestaña Consulta."
         )
 
         expected(
             text =
-            "The table shows each change at once. The note holds the new rating and finished, the rest of " +
-                "its frontmatter unchanged. Within a second of step 6 the table shows the note's new rating."
+            "La tabla muestra cada cambio al instante. La nota tiene el nuevo rating y " +
+                "finished, y el resto de su frontmatter sin cambios. En menos de un segundo " +
+                "después del paso 6 la tabla muestra el nuevo rating de la nota."
         )
     }
 }
@@ -227,16 +229,18 @@ private fun SuiteBuilder.queryInObsidian() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(SAMPLE)
-        title(text = "A note with a query block opens unchanged in Obsidian")
+        title(text = "Una nota con un bloque de consulta se abre sin cambios en Obsidian")
 
         steps(
             text =
-            "1. Save a query in Books/Reading list, as in 2.10-05.\n2. Open that vault in Obsidian and open " +
-                "the note, in Reading view and in Source mode."
+            "1. Guarda una consulta en Books/Reading list, como en 2.10-05.\n2. Abre esa " +
+                "bóveda en Obsidian y abre la nota, en la vista de lectura y en el modo fuente."
         )
 
         expected(
-            text = "Obsidian shows the block as a code block, and the rest of the note as before."
+            text =
+            "Obsidian muestra el bloque como un bloque de código, y el resto de la nota como " +
+                "antes."
         )
     }
 }

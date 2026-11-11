@@ -29,6 +29,8 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.okio)
+    // Notekea QA's first start in Spanish writes the language into its settings file (QaLanguage).
+    implementation(libs.multiplatform.settings)
     // The sync cases (4.2) make a local remote and play the other computer with it.
     implementation(libs.jgit)
 

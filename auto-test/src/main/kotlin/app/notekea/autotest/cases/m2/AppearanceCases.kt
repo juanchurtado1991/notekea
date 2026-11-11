@@ -13,9 +13,9 @@ import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val OPEN_PLAYGROUND =
-    "1. In Notekea, open the Playground Vault (see TEST DATA above)."
+    "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba)."
 private const val OPEN_APPEARANCE =
-    "Click Settings (the gear at the bottom of the narrow bar on the far left)"
+    "Haz clic en Ajustes (el engranaje abajo en la barra estrecha de la izquierda) y en Apariencia"
 private const val THEME = "Sage"
 private const val SELECTED_MILLIS = 10_000L
 
@@ -77,22 +77,25 @@ private fun SuiteBuilder.reduceMotion() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "Reduce motion")
+        title(text = "Reducir movimiento")
 
         steps(
             text =
-            "$OPEN_PLAYGROUND\n2. $OPEN_APPEARANCE, tick Reduce motion and press Esc.\n3. Press the sidebar's " +
-                "shortcut (Ctrl+\\, Cmd+\\ on macOS) twice, open a folder in Files and switch the side panel between " +
-                "Inspector and Chat.\n4. $OPEN_APPEARANCE, untick Reduce motion and do step 3 again.\n5. Turn on the " +
-                "system's own setting (Reduce motion on macOS, Animation effects off on Windows, Animations off on " +
-                "GNOME), start Notekea again and do step 3."
+            "$OPEN_PLAYGROUND\n2. $OPEN_APPEARANCE, marca Reducir movimiento y pulsa " +
+                "Esc.\n3. Pulsa dos veces el atajo de la barra lateral (Ctrl+\\, Cmd+\\ en " +
+                "macOS), abre una carpeta en Archivos y cambia el panel lateral entre Inspector " +
+                "y Chat.\n4. $OPEN_APPEARANCE, desmarca Reducir movimiento y repite el paso " +
+                "3.\n5. Activa el ajuste del propio sistema (Reducir movimiento en macOS, " +
+                "Efectos de animación desactivados en Windows, Animaciones desactivadas en " +
+                "GNOME), vuelve a iniciar Notekea y repite el paso 3."
         )
 
         expected(
             text =
-            "In step 3 everything changes at once, nothing slides or fades. In step 4 panels slide and rows " +
-                "fade as usual. In step 5 they change at once again, with the box in Settings unticked; on Linux " +
-                "desktops that do not share this setting they slide."
+            "En el paso 3 todo cambia al instante, nada se desliza ni se desvanece. En el " +
+                "paso 4 los paneles se deslizan y las filas se desvanecen como siempre. En el " +
+                "paso 5 vuelven a cambiar al instante, con la casilla de Ajustes desmarcada; en " +
+                "los escritorios Linux que no comparten este ajuste se deslizan."
         )
     }
 }
@@ -103,20 +106,23 @@ private fun SuiteBuilder.themesLook() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "Every color theme in light and dark")
+        title(text = "Todos los temas de color en claro y oscuro")
 
         steps(
             text =
-            "$OPEN_PLAYGROUND\n2. $OPEN_APPEARANCE.\n3. Under Mode click Light, then click each theme's card " +
-                "and look at the window behind the dialog.\n4. Under Mode click Dark and click each card again.\n5. " +
-                "Press Tab until a card has a ring around it and press Enter.\n6. Choose Workspace Blue and System again."
+            "$OPEN_PLAYGROUND\n2. $OPEN_APPEARANCE.\n3. En Modo haz clic en Claro, luego en " +
+                "la tarjeta de cada tema, y mira la ventana detrás del diálogo.\n4. En Modo haz " +
+                "clic en Oscuro y vuelve a hacer clic en cada tarjeta.\n5. Pulsa Tab hasta que " +
+                "una tarjeta tenga un anillo alrededor y pulsa Enter.\n6. Vuelve a elegir Azul " +
+                "Workspace y Sistema."
         )
 
         expected(
             text =
-            "Each click changes the whole window at once (the list on the left, the tabs, the note and the " +
-                "logo) to the colors of the card, and every text stays easy to read. The chosen card is outlined and " +
-                "checked. Enter chooses the card with the ring, as a click does."
+            "Cada clic cambia toda la ventana al instante (la lista de la izquierda, las " +
+                "pestañas, la nota y el logo) a los colores de la tarjeta, y todos los textos se " +
+                "siguen leyendo fácilmente. La tarjeta elegida tiene borde y una marca. Enter " +
+                "elige la tarjeta con el anillo, como un clic."
         )
     }
 }
@@ -127,19 +133,20 @@ private fun SuiteBuilder.systemMode() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "System follows the computer's light or dark setting")
+        title(text = "Sistema sigue el modo claro u oscuro de la computadora")
 
         steps(
             text =
-            "$OPEN_PLAYGROUND\n2. $OPEN_APPEARANCE and choose a theme other than Workspace Blue.\n3. With Mode on " +
-                "System, switch your computer between light and dark mode.\n4. Click Light under Mode and switch " +
-                "your computer again.\n5. Choose Workspace Blue and System again, and set your computer back."
+            "$OPEN_PLAYGROUND\n2. $OPEN_APPEARANCE y elige un tema que no sea Azul " +
+                "Workspace.\n3. Con Modo en Sistema, cambia tu computadora entre modo claro y " +
+                "oscuro.\n4. Haz clic en Claro en Modo y vuelve a cambiar tu computadora.\n5. " +
+                "Vuelve a elegir Azul Workspace y Sistema, y deja tu computadora como estaba."
         )
 
         expected(
             text =
-            "On System, Notekea turns light or dark with the computer, in the chosen theme. On Light it stays " +
-                "light whatever the computer does."
+            "En Sistema, Notekea se pone claro u oscuro con la computadora, en el tema " +
+                "elegido. En Claro se queda claro haga lo que haga la computadora."
         )
     }
 }

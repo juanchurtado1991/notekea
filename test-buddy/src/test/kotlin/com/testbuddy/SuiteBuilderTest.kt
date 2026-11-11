@@ -174,6 +174,33 @@ class SuiteBuilderTest {
     }
 
     @Test
+    fun `a suite in Spanish answers in Spanish unless a case says otherwise`() {
+        val suite = testBuddy(
+            appName = "Sample",
+            version = "1.0",
+            language = TesterLanguage.SPANISH
+        ) {
+            launch { folders -> SampleApp(folders = folders) }
+
+            manual(
+                id = "G-01",
+                reason = ManualReason.EYES
+            ) {
+                title(text = "T")
+                steps(text = "S")
+                expected(text = "E")
+            }
+        }
+
+        val case = suite.manual.single()
+
+        assertEquals(
+            listOf(TesterLanguage.SPANISH, "Pasó", "Falló"),
+            listOf(suite.language, case.passLabel, case.failLabel)
+        )
+    }
+
+    @Test
     fun `the report's diagnostics come from the suite, none unless it says`() {
         assertEquals(null, sampleSuite {}.diagnostics())
 

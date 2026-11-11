@@ -38,19 +38,20 @@ private fun SuiteBuilder.quitShortcut() {
         id = "1.1-01",
         reason = ManualReason.PACKAGED
     ) {
-        title(text = "Quitting Notekea with the system's shortcut")
+        title(text = "Salir de Notekea con el atajo del sistema")
 
         steps(
             text =
-            "1. Click in Notekea's window.\n2. Press the quit shortcut of your system: Alt+F4 on Windows, " +
-                "Cmd+Q on macOS, Ctrl+Q on Linux.\n3. Open Notekea QA again from the system's launcher; this window " +
-                "comes back on this case.\n4. On macOS, open the Notekea menu at the top left of the screen."
+            "1. Haz clic en la ventana de Notekea.\n2. Pulsa el atajo para salir de tu " +
+                "sistema: Alt+F4 en Windows, Cmd+Q en macOS, Ctrl+Q en Linux.\n3. Abre de nuevo " +
+                "Notekea QA desde el lanzador del sistema; esta ventana vuelve a este caso.\n4. " +
+                "En macOS, abre el menú Notekea arriba a la izquierda de la pantalla."
         )
 
         expected(
             text =
-            "Notekea closes at once, with this window. On macOS the Notekea menu ends with \"Quit Notekea\" " +
-                "and ⌘Q."
+            "Notekea se cierra al instante, con esta ventana. En macOS el menú Notekea " +
+                "termina con la opción para salir de Notekea y ⌘Q."
         )
     }
 }
@@ -61,19 +62,23 @@ private fun SuiteBuilder.quitSavesTheNote() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "Quitting from the system keeps what was just typed")
+        title(text = "Salir desde el sistema conserva lo que se acaba de escribir")
 
         steps(
             text =
-            "1. In Notekea, open the Playground Vault (see TEST DATA above) and the note Welcome.\n2. Type a " +
-                "few words at the end of the note and, within a second, end Notekea: on macOS press Cmd+Q; on " +
-                "Windows and Linux end it from a terminal (taskkill /PID <its id>, or kill <its id>), without " +
-                "closing its window first.\n3. Open Notekea QA again from the system's launcher; this window comes " +
-                "back on this case.\n4. Open the Playground Vault's Welcome.md in a text editor."
+            "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba) y la nota " +
+                "Welcome.\n2. Escribe unas palabras al final de la nota y, en menos de un " +
+                "segundo, termina Notekea: en macOS pulsa Cmd+Q; en Windows y Linux termínalo " +
+                "desde una terminal (taskkill /PID <su id>, o kill <su id>), sin cerrar antes su " +
+                "ventana.\n3. Abre de nuevo Notekea QA desde el lanzador del sistema; esta " +
+                "ventana vuelve a este caso.\n4. Abre el Welcome.md de la Playground Vault en un " +
+                "editor de texto."
         )
 
         expected(
-            text = "Notekea closes. The words typed in step 2 are in Welcome.md, none of them lost."
+            text =
+            "Notekea se cierra. Las palabras escritas en el paso 2 están en Welcome.md, " +
+                "ninguna se perdió."
         )
     }
 }

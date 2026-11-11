@@ -124,17 +124,20 @@ private fun SuiteBuilder.openFolderShortcut() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PERSONAL_NOTES)
-        title(text = "Ctrl+O (Cmd+O) opens the folder picker")
+        title(text = "Ctrl+O (Cmd+O) abre el selector de carpetas")
 
         steps(
             text =
-            "1. In Notekea, if a vault is open, click Open another vault at the bottom left.\n2. Press Ctrl+O " +
-                "(Cmd+O on macOS), then press Cancel in the window that opens.\n3. Open any vault from the Test data " +
-                "folder, click inside a note, and press Ctrl+O (Cmd+O) again."
+            "1. En Notekea, si hay una bóveda abierta, haz clic en Abrir otra bóveda abajo a " +
+                "la izquierda.\n2. Pulsa Ctrl+O (Cmd+O en macOS) y luego Cancelar en la ventana " +
+                "que se abre.\n3. Abre cualquier bóveda de la carpeta Test data, haz clic dentro " +
+                "de una nota y pulsa de nuevo Ctrl+O (Cmd+O)."
         )
 
         expected(
-            text = "The system's window for choosing a folder opens both times. Cancelling it changes nothing."
+            text =
+            "La ventana del sistema para elegir una carpeta se abre las dos veces. " +
+                "Cancelarla no cambia nada."
         )
     }
 }
@@ -250,22 +253,24 @@ private fun SuiteBuilder.lockedVault() {
         reason = ManualReason.COSTLY
     ) {
         prepare("Locked Vault")
-        title(text = "A vault whose folder cannot be read")
+        title(text = "Una bóveda cuya carpeta no se puede leer")
 
         steps(
             text =
-            "1. In Notekea, open the Locked Vault (see TEST DATA above), then click Open another vault.\n2. " +
-                "Take away your permission to read the Locked Vault folder: on Windows, right-click it › Properties " +
-                "› Security › Edit, select your user and check Deny for Read; on macOS, Get Info › Sharing & " +
-                "Permissions, your user to No Access; on Linux, run chmod 000 on it.\n3. Click Locked Vault in " +
-                "Recent.\n4. Click another vault in Recent, press Ctrl+O (Cmd+O on macOS) and choose the Locked " +
-                "Vault folder.\n5. Give the permission back the same way."
+            "1. En Notekea, abre la Locked Vault (mira DATOS DE PRUEBA arriba) y luego haz " +
+                "clic en Abrir otra bóveda.\n2. Quítate el permiso de lectura de la carpeta " +
+                "Locked Vault: en Windows, clic derecho › Propiedades › Seguridad › Editar, " +
+                "selecciona tu usuario y marca Denegar en Lectura; en macOS, Obtener información " +
+                "› Compartir y permisos, tu usuario en Sin acceso; en Linux, ejecuta chmod 000 " +
+                "sobre ella.\n3. Haz clic en Locked Vault en Recientes.\n4. Haz clic en otra " +
+                "bóveda de Recientes, pulsa Ctrl+O (Cmd+O en macOS) y elige la carpeta Locked " +
+                "Vault.\n5. Devuelve el permiso de la misma forma."
         )
 
         expected(
             text =
-            "Both times a banner names the folder and says to check its permissions (in step 4, over the open " +
-                "vault); Dismiss hides it. Nothing crashes."
+            "Las dos veces un aviso nombra la carpeta y dice que revises sus permisos (en el " +
+                "paso 4, sobre la bóveda abierta); Descartar lo oculta. Nada se cierra de golpe."
         )
     }
 }

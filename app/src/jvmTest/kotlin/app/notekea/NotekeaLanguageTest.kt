@@ -28,7 +28,8 @@ import kotlin.test.assertEquals
 
 /** A language picked in Settings shows at once, everywhere, without losing what the screens remember (5.2). */
 class NotekeaLanguageTest {
-    private val store = FakeAppPreferencesStore(initial = AppPreferences(language = AppLanguage.ENGLISH))
+    private val store =
+        FakeAppPreferencesStore(initial = AppPreferences(language = AppLanguage.ENGLISH))
     private val shown = mutableListOf<String>()
     private val remembered = mutableSetOf<Any>()
 
@@ -50,9 +51,19 @@ class NotekeaLanguageTest {
                     content = { LanguageLabel() }
                 )
             }.use { scene ->
-                renderFrames(scene = scene, from = 0)
-                runBlocking { store.save(preferences = AppPreferences(language = AppLanguage.SPANISH)) }
-                renderFrames(scene = scene, from = FRAMES)
+                renderFrames(
+                    scene = scene,
+                    from = 0
+                )
+
+                runBlocking {
+                    store.save(preferences = AppPreferences(language = AppLanguage.SPANISH))
+                }
+
+                renderFrames(
+                    scene = scene,
+                    from = FRAMES
+                )
             }
         }
 

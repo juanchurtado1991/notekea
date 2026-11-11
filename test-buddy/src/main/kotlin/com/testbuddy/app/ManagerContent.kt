@@ -155,7 +155,7 @@ private fun Tabs(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = tab.label,
+                    text = tab.label(texts = LocalTesterTexts.current),
                     fontSize = 12.sp,
                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                 )

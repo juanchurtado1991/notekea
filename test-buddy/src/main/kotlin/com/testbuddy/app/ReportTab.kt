@@ -28,6 +28,7 @@ internal fun ReportTab(
     actions: ManagerActions
 ) {
     var isCopied by remember(state.report) { mutableStateOf(value = false) }
+    val texts = LocalTesterTexts.current
 
     TabLayout(actions = {
         Row(horizontalArrangement = Arrangement.spacedBy(space = 8.dp)) {
@@ -36,26 +37,28 @@ internal fun ReportTab(
                     actions.onCopy(state.report).also { isCopied = true }
                 },
                 modifier = Modifier.weight(weight = 1f)
-            ) { Text(text = if (isCopied) "Copied" else "Copy report") }
+            ) { Text(text = if (isCopied) texts.copied else texts.copyReport) }
 
             OutlinedButton(
                 onClick = actions.onOpenReport,
                 modifier = Modifier.weight(weight = 1f)
-            ) { Text(text = "Open the Report folder") }
+            ) { Text(text = texts.openReportFolder) }
         }
     }) { Report(report = state.report) }
 }
 
 @Composable
 private fun ColumnScope.Report(report: String) {
+    val texts = LocalTesterTexts.current
+
     Text(
-        text = "Send the report",
+        text = texts.sendReport,
         fontSize = 16.sp,
         fontWeight = FontWeight.SemiBold
     )
 
     Text(
-        text = "Copy it into a message to whoever asked you to test, with the pictures of the Report folder.",
+        text = texts.sendReportHint,
         fontSize = 12.sp,
         color = AutoTestColors.Muted
     )

@@ -27,6 +27,7 @@ import app.notekea.core.logging.domain.TextClipboard
 import app.notekea.core.notes.domain.FileOpener
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
+import app.notekea.core.preferences.domain.AppLanguage
 import app.notekea.core.preferences.domain.AppPreferencesStore
 import app.notekea.core.presentation.platform.AppEnvironment
 import app.notekea.core.presentation.platform.ShortcutDispatcher
@@ -88,12 +89,12 @@ class CaseApp(
 
         koin = startKoin { modules(desktopModules + overrides()) }.koin
 
-        // A case starts past the first-run welcome, once per data folder, so a case that asks for it again (5.1-01)
-        // still gets it after Notekea starts again on the same data.
+        // A case starts past the first-run welcome and in English, the words the cases look for, once per data
+        // folder, so a case that asks for the welcome again (5.1-01) still gets it after Notekea starts again.
         val welcomeMarker = appData.resolve(WELCOME_MARKER)
 
         if (!Files.exists(welcomeMarker)) {
-            setWelcomeSeen(isSeen = true)
+            startPastWelcomeInEnglish()
             Files.createFile(welcomeMarker)
         }
 
@@ -119,6 +120,22 @@ class CaseApp(
         )
 
         runBlocking { koin.get<ActiveModelStore>().save(size = size) }
+    }
+
+    private fun startPastWelcomeInEnglish() {
+        val store = koin.get<AppPreferencesStore>()
+
+        runBlocking {
+            store.save(
+                preferences = store
+                    .observe()
+                    .first()
+                    .copy(
+                        hasSeenWelcome = true,
+                        language = AppLanguage.ENGLISH
+                    )
+            )
+        }
     }
 
     /** Whether the next Notekea started on this data shows the first-run welcome (false) or not. */

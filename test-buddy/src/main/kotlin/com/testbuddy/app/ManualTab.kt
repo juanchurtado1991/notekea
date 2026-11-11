@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.testbuddy.ManualAnswer
 import com.testbuddy.ManualCase
-import com.testbuddy.ManualReason
 import java.nio.file.Path
 
 /**
@@ -34,10 +33,11 @@ internal fun ManualTab(
     actions: ManagerActions
 ) {
     val case = cases.getOrNull(state.manualIndex)
+    val texts = LocalTesterTexts.current
 
     if (case == null) {
         Text(
-            text = "There are no manual cases.",
+            text = texts.noManualCases,
             fontSize = 13.sp
         )
 
@@ -89,7 +89,7 @@ internal fun ManualTab(
                 )
 
                 else -> Text(
-                    text = "Test data: a fresh copy of ${case.data.joinToString()}",
+                    text = texts.testDataLine(case.data.joinToString()),
                     fontSize = 11.sp,
                     color = AutoTestColors.Muted
                 )
@@ -111,15 +111,17 @@ private fun CaseHeader(
     count: Int,
     state: ManagerState
 ) {
+    val texts = LocalTesterTexts.current
+
     val answered = state
         .answers[case.id]
         ?.let {
-            if (it is ManualAnswer.Passed) " · passed" else " · failed"
+            if (it is ManualAnswer.Passed) texts.passedMark else texts.failedMark
         }
         .orEmpty()
 
     Text(
-        text = "Case ${state.manualIndex + 1} of $count · ${case.reason.hint()}$answered",
+        text = "${texts.caseOf(state.manualIndex + 1, count)} · ${texts.hint(reason = case.reason)}$answered",
         fontSize = 11.sp,
         color = AutoTestColors.Muted
     )
@@ -142,7 +144,7 @@ private fun OtherCases(
             enabled = index > 0
         ) {
             Text(
-                text = "‹ Previous case",
+                text = LocalTesterTexts.current.previousCase,
                 fontSize = 12.sp
             )
         }
@@ -151,7 +153,7 @@ private fun OtherCases(
 
         TextButton(onClick = actions.onSkip) {
             Text(
-                text = "Skip this case ›",
+                text = LocalTesterTexts.current.skipCase,
                 fontSize = 12.sp
             )
         }
@@ -166,7 +168,7 @@ private fun Steps(
     actions: ManagerActions
 ) {
     Card {
-        SectionLabel(text = "STEP ${step + 1} OF ${case.stepList.size}")
+        SectionLabel(text = LocalTesterTexts.current.stepOf(step + 1, case.stepList.size))
 
         StepTimeline(
             done = case.stepList.take(n = step),
@@ -178,7 +180,7 @@ private fun Steps(
     if (case.launchEnvironment.isNotEmpty()) {
         OutlinedButton(onClick = actions.onRestart) {
             Text(
-                text = "Restart $appName for this case",
+                text = LocalTesterTexts.current.restartApp(appName),
                 fontSize = 12.sp
             )
         }
@@ -191,6 +193,8 @@ private fun StepButtons(
     step: Int,
     actions: ManagerActions
 ) {
+    val texts = LocalTesterTexts.current
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
         modifier = Modifier.fillMaxWidth()
@@ -198,19 +202,12 @@ private fun StepButtons(
         OutlinedButton(
             onClick = actions.onPreviousStep,
             enabled = step > 0
-        ) { Text(text = "‹ Back") }
+        ) { Text(text = texts.back) }
 
         Spacer(modifier = Modifier.weight(weight = 1f))
 
         Button(onClick = actions.onNextStep) {
-            Text(text = if (step == case.stepList.lastIndex) "Done ›" else "Done, next step ›")
+            Text(text = if (step == case.stepList.lastIndex) texts.done else texts.doneNextStep)
         }
     }
-}
-
-internal fun ManualReason.hint(): String = when (this) {
-    ManualReason.EYES -> "Needs your eyes"
-    ManualReason.SYSTEM -> "Uses your system"
-    ManualReason.PACKAGED -> "Uses the installed app"
-    ManualReason.COSTLY -> "Checked by hand"
 }

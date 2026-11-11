@@ -196,17 +196,20 @@ private fun SuiteBuilder.dailyInObsidian() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(DAILY_VAULT)
-        title(text = "Obsidian finds the daily note Notekea made")
+        title(text = "Obsidian encuentra la nota diaria que hizo Notekea")
 
         steps(
             text =
-            "If Obsidian is not installed, press Skip for now.\n1. Open the Daily Vault from the Test data " +
-                "folder in Notekea and press Ctrl+D (Cmd+D on macOS).\n2. Open the same Daily Vault in Obsidian, " +
-                "turn on the Daily notes core plugin and run \"Open today's daily note\"."
+            "Si Obsidian no está instalado, pulsa Saltar este caso.\n1. Abre la Daily Vault " +
+                "desde la carpeta Test data en Notekea y pulsa Ctrl+D (Cmd+D en macOS).\n2. Abre " +
+                "la misma Daily Vault en Obsidian, activa el plugin principal Daily notes y " +
+                "ejecuta \"Open today's daily note\"."
         )
 
         expected(
-            text = "Obsidian opens the note Notekea made, with the same name and folder, instead of making another."
+            text =
+            "Obsidian abre la nota que hizo Notekea, con el mismo nombre y carpeta, en lugar " +
+                "de crear otra."
         )
     }
 }

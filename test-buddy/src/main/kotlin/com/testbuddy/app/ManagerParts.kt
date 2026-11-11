@@ -89,7 +89,7 @@ internal fun UnmetNote(
         .groupBy { it.precondition?.missing }
         .forEach { (missing, needy) ->
             Text(
-                text = "${needy.size} skipped: they need $missing.",
+                text = LocalTesterTexts.current.skippedNeed(needy.size, missing.orEmpty()),
                 fontSize = 12.sp,
                 color = AutoTestColors.Muted
             )

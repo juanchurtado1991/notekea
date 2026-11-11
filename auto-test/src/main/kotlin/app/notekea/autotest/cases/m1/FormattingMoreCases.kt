@@ -117,21 +117,29 @@ private fun SuiteBuilder.undoAndObsidian() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "Undo takes back a toolbar change, and Obsidian shows the same formats")
+
+        title(
+            text =
+            "Deshacer revierte un cambio de la barra, y Obsidian muestra los mismos formatos"
+        )
 
         steps(
             text =
-            "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Open Editor/Formatting " +
-                "practice, select \"corn flour\" and click Bold (B) in the bar under the title.\n3. Press Ctrl+Z " +
-                "(Cmd+Z on a Mac), then Ctrl+Shift+Z (Cmd+Shift+Z).\n4. Format the note with the bar: a heading, a " +
-                "checklist, a link, a tag, a callout, a table, a code block and a quote. Wait for \"Saved\" at the " +
-                "bottom right.\n5. If Obsidian is installed, open the Playground Vault there and open the same note."
+            "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba).\n2. Abre " +
+                "Editor/Formatting practice, selecciona \"corn flour\" y haz clic en Negrita (B) " +
+                "en la barra bajo el título.\n3. Pulsa Ctrl+Z (Cmd+Z en una Mac) y luego " +
+                "Ctrl+Shift+Z (Cmd+Shift+Z).\n4. Da formato a la nota con la barra: un " +
+                "encabezado, una lista de tareas, un enlace, una etiqueta, un destacado, una " +
+                "tabla, un bloque de código y una cita. Espera a que diga \"Guardado\" abajo a " +
+                "la derecha.\n5. Si Obsidian está instalado, abre ahí la Playground Vault y la " +
+                "misma nota."
         )
 
         expected(
             text =
-            "Ctrl+Z takes the bold away in one step and Ctrl+Shift+Z puts it back. Obsidian shows the same " +
-                "heading, bold, checklist, link, tag, callout, table, code block and quote as Notekea draws them."
+            "Ctrl+Z quita la negrita en un paso y Ctrl+Shift+Z la vuelve a poner. Obsidian " +
+                "muestra el mismo encabezado, negrita, lista de tareas, enlace, etiqueta, " +
+                "destacado, tabla, bloque de código y cita que dibuja Notekea."
         )
     }
 }

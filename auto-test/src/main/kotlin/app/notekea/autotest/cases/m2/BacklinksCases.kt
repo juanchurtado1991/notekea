@@ -17,9 +17,8 @@ private const val AREPAS = "Arepas"
 private const val AREPAS_TEXT = "pre-cooked corn flour"
 private const val TASKS_LINE = "Buy flour for the arepas"
 private const val OPEN_AREPAS =
-    "1. In Notekea, open the Sample Vault (see TEST DATA above) and wait until the bar at " +
-        "the bottom says \"41 notes ready to search\".\n2. Open Recipes/Arepas and look at Connections in the " +
-        "panel on the right."
+    "1. En Notekea, abre la Sample Vault (mira DATOS DE PRUEBA arriba) y espera a que la barra de abajo " +
+        "diga \"41 notas listas para buscar\".\n2. Abre Recipes/Arepas y mira Conexiones en el panel de la derecha."
 
 /** The cases of 2.5, backlinks (`MVP_SMOKE_TEST.md`): Connections' Linked and Unlinked tabs. */
 fun SuiteBuilder.backlinksCases() {
@@ -128,19 +127,26 @@ private fun SuiteBuilder.rightClickMenus() {
         reason = ManualReason.EYES
     ) {
         prepare(SAMPLE)
-        title(text = "A right click offers a menu on rows, headings, cards and recent vaults")
+
+        title(
+            text =
+            "Un clic derecho ofrece un menú en filas, encabezados, tarjetas y bóvedas " +
+                "recientes"
+        )
 
         steps(
             text =
-            "$OPEN_AREPAS\n3. Click Linked and right-click a row.\n4. Right-click a heading of the " +
-                "Outline.\n5. Click the Recipes folder in the tree to open its tab, and right-click a card.\n" +
-                "6. Close the vault and right-click a recent vault."
+            "$OPEN_AREPAS\n3. Haz clic en Enlazadas y haz clic derecho en una fila.\n4. Haz " +
+                "clic derecho en un encabezado del Índice.\n5. Haz clic en la carpeta Recipes en " +
+                "el árbol para abrir su pestaña, y haz clic derecho en una tarjeta.\n6. Cierra " +
+                "la bóveda y haz clic derecho en una bóveda reciente."
         )
 
         expected(
             text =
-            "The row offers Open and Open to the side, the heading Go to heading, the card Bookmark, " +
-                "Rename, Show in Files and Delete, and the recent vault Open vault and Remove."
+            "La fila ofrece Abrir y Abrir al lado; el encabezado, Ir al encabezado; la " +
+                "tarjeta, Agregar a marcadores, Renombrar, Mostrar en Archivos y Eliminar; y la " +
+                "bóveda reciente, Abrir bóveda y Quitar."
         )
     }
 }
@@ -151,21 +157,23 @@ private fun SuiteBuilder.connectionsLook() {
         reason = ManualReason.EYES
     ) {
         prepare(SAMPLE)
-        title(text = "Connections reads well, and a mention opens where it is")
+        title(text = "Conexiones se lee bien, y una mención se abre donde está")
 
         steps(
             text =
-            "$OPEN_AREPAS\n3. Click Related, Linked and Unlinked in turn.\n4. On Linked, click the Weekly " +
-                "menu row; go back to Arepas and, on another row, click Open to the side (it shows under the " +
-                "pointer).\n5. Close the vault and open it again."
+            "$OPEN_AREPAS\n3. Haz clic por turnos en Relacionadas, Enlazadas y Sin " +
+                "enlazar.\n4. En Enlazadas, haz clic en la fila Weekly menu; vuelve a Arepas y, " +
+                "en otra fila, haz clic en Abrir al lado (aparece bajo el puntero).\n5. Cierra " +
+                "la bóveda y ábrela de nuevo."
         )
 
         expected(
             text =
-            "Each tab says how many it holds; each row shows the note, its folder and the line that names " +
-                "Arepas with the name highlighted, without Markdown marks. Clicking Weekly menu opens it with the " +
-                "mention selected and in view; Open to the side splits the editor. Note info reads as a small " +
-                "table. After reopening, the tab you left chosen is still chosen."
+            "Cada pestaña dice cuántas contiene; cada fila muestra la nota, su carpeta y la " +
+                "línea que nombra Arepas con el nombre resaltado, sin marcas de Markdown. Hacer " +
+                "clic en Weekly menu la abre con la mención seleccionada y a la vista; Abrir al " +
+                "lado divide el editor. Información de la nota se lee como una tabla pequeña. Al " +
+                "reabrir, la pestaña que dejaste elegida sigue elegida."
         )
     }
 }

@@ -14,7 +14,7 @@ private const val DEMO_TASK = "Record a demo video"
 private const val FLAT_TASK = "Find a flat near the river"
 private const val LAUNCH_FILE = "$SAMPLE/Projects/Notekea launch.md"
 private const val OPEN_TASKS =
-    "1. In Notekea, open the Sample Vault (see TEST DATA above).\n2. Click Tasks in the rail on the left."
+    "1. En Notekea, abre la Sample Vault (mira DATOS DE PRUEBA arriba).\n2. Haz clic en Tareas en la barra de la izquierda."
 
 /** The cases of 2.11, vault tasks (`MVP_SMOKE_TEST.md`): the Tasks tab. */
 fun SuiteBuilder.vaultTaskCases() {
@@ -115,9 +115,9 @@ private fun SuiteBuilder.changedOutside() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(SAMPLE)
-        title(text = "A task changed outside Notekea updates in the tab")
-        steps(text = "$OPEN_TASKS\n3. Change a task's text in another editor, and save.")
-        expected(text = "The tab shows the new text within a second.")
+        title(text = "Una tarea cambiada fuera de Notekea se actualiza en la pestaña")
+        steps(text = "$OPEN_TASKS\n3. Cambia el texto de una tarea en otro editor y guarda.")
+        expected(text = "La pestaña muestra el texto nuevo en menos de un segundo.")
     }
 }
 
@@ -144,20 +144,22 @@ private fun SuiteBuilder.cardsLook() {
         reason = ManualReason.EYES
     ) {
         prepare(SAMPLE)
-        title(text = "The Tasks tab shows notes and dates as cards")
+        title(text = "La pestaña Tareas muestra notas y fechas como tarjetas")
 
         steps(
             text =
-            "1. In Notekea, open the Sample Vault (see TEST DATA above).\n2. Click Tasks in the rail on the left " +
-                "and look at the tab.\n3. Click Show done, then By date."
+            "1. En Notekea, abre la Sample Vault (mira DATOS DE PRUEBA arriba).\n2. Haz clic " +
+                "en Tareas en la barra de la izquierda y mira la pestaña.\n3. Haz clic en " +
+                "Mostrar terminadas y luego en Por fecha."
         )
 
         expected(
             text =
-            "Each note is a card on a soft background: its icon in its folder's color, its name, its folder " +
-                "and, at the card's end, a bar with \"N of M done\"; under it its tasks, a late date in red. By " +
-                "date each group is a card with its count: Overdue in red, Today in blue, and each task names " +
-                "its note."
+            "Cada nota es una tarjeta sobre un fondo suave: su icono en el color de su " +
+                "carpeta, su nombre, su carpeta y, al final de la tarjeta, una barra con \"N de " +
+                "M terminadas\"; debajo, sus tareas, con una fecha vencida en rojo. Por fecha, " +
+                "cada grupo es una tarjeta con su cuenta: Vencidas en rojo, Hoy en azul, y cada " +
+                "tarea nombra su nota."
         )
     }
 }

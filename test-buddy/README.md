@@ -64,7 +64,8 @@ val notesSuite = testBuddy(appName = "Notes", version = "1.0") {
 ```
 
 - A case ID is used once and has no spaces. A manual case needs a title, steps and an expected result, in plain
-  English for a tester who is not a developer. Number its steps (`1.`, `2.`…): the manager shows them one at a time.
+  words for a tester who is not a developer, in the suite's language: `testBuddy(…, language = TesterLanguage.SPANISH)`
+  shows the manager in Spanish too (English by default). Number its steps (`1.`, `2.`…): the manager shows them one at a time.
 - An automated case can have a `window` size and a `timeout` of its own.
 - `answers(passed, failed)` renames a manual case's two answers ("Nothing odd" / "I found something" for free use);
   `launchWith(name, value)` gives it a **Restart** button that starts the app again with that variable (a crash test).

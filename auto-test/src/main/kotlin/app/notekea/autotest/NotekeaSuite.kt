@@ -44,6 +44,7 @@ import app.notekea.autotest.cases.m4.videoCases
 import app.notekea.autotest.cases.m5.onboardingCases
 import app.notekea.autotest.cases.m5.settingsCases
 import com.testbuddy.Suite
+import com.testbuddy.TesterLanguage
 import com.testbuddy.only
 import com.testbuddy.testBuddy
 import java.nio.file.Files
@@ -61,7 +62,9 @@ object NotekeaSuite {
     val suite: Suite by lazy {
         testBuddy(
             appName = APP_NAME,
-            version = System.getProperty(VERSION_PROPERTY) ?: DEVELOPMENT_VERSION
+            version = System.getProperty(VERSION_PROPERTY) ?: DEVELOPMENT_VERSION,
+            // The developer runs the QA smoke in Spanish (2026-11-11): the manager and the manual cases speak it.
+            language = TesterLanguage.SPANISH
         ) {
             launch { folders -> NotekeaCase(folders = folders) }
 

@@ -46,21 +46,26 @@ private fun SuiteBuilder.welcomeLook() {
         id = "5.1-02",
         reason = ManualReason.EYES
     ) {
-        title(text = "The first-run welcome looks like Apple's, and Download and start downloads the recommended model")
+        title(
+            text =
+            "La bienvenida del primer inicio se ve como la de Apple, y Descargar y empezar " +
+                "descarga el modelo recomendado"
+        )
 
         steps(
             text =
-            "1. Install Notekea QA fresh (or Settings → General → Welcome → Show again, then quit and start it).\n" +
-                "2. Look at each step; press Esc on the first, then start again.\n3. Choose Open a folder… with " +
-                "your own notes; on Get the AI click Download and start."
+            "1. Instala Notekea QA desde cero (o Ajustes → General → Bienvenida → Mostrar de " +
+                "nuevo, y luego sal y vuelve a iniciarlo).\n2. Mira cada paso; pulsa Esc en el " +
+                "primero y luego empieza de nuevo.\n3. Elige Abrir una carpeta… con tus propias " +
+                "notas; en Consigue la IA haz clic en Descargar y empezar."
         )
 
         expected(
             text =
-            "Step 2: a sheet over the welcome screen with the logo, three promises with icons, Continue and Skip, " +
-                "\"1 of 3\"; Esc closes it and it does not come back. Step 3: the vault opens, the AI step names " +
-                "the size that fits this computer, and the download shows in the status bar while the vault is " +
-                "indexed."
+            "Paso 2: una hoja sobre la pantalla de bienvenida con el logo, tres promesas con " +
+                "iconos, Continuar y Omitir, \"1 de 3\"; Esc la cierra y no vuelve. Paso 3: la " +
+                "bóveda se abre, el paso de la IA nombra el tamaño que cabe en esta computadora, " +
+                "y la descarga se ve en la barra de estado mientras se indexa la bóveda."
         )
     }
 }

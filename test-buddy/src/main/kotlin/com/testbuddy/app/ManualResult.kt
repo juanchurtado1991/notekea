@@ -39,6 +39,7 @@ internal fun ManualResult(
     var note by remember(case.id) { mutableStateOf(value = "") }
 
     var screenshot by remember(case.id) { mutableStateOf<Path?>(value = null) }
+    val texts = LocalTesterTexts.current
 
     TabLayout(actions = {
         if (isFailing) {
@@ -46,18 +47,18 @@ internal fun ManualResult(
                 onClick = { actions.onFail(note, screenshot) },
                 enabled = note.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
-            ) { Text(text = "Save and go to the next case") }
+            ) { Text(text = texts.saveAndNext) }
         } else {
             OutlinedButton(
                 onClick = actions.onPreviousStep,
                 modifier = Modifier.fillMaxWidth()
-            ) { Text(text = "‹ Back to the steps") }
+            ) { Text(text = texts.backToSteps) }
         }
 
         otherCases()
     }) {
         header()
-        SectionLabel(text = "YOU SHOULD HAVE SEEN")
+        SectionLabel(text = texts.shouldHaveSeen)
 
         Text(
             text = case.expected,
@@ -115,9 +116,11 @@ private fun WhatYouSaw(
     OutlinedTextField(
         value = note,
         onValueChange = onNote,
-        label = { Text(text = "What did you see?") },
+        label = { Text(text = LocalTesterTexts.current.whatDidYouSee) },
         modifier = Modifier.fillMaxWidth().height(height = 96.dp)
     )
+
+    val texts = LocalTesterTexts.current
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
@@ -125,13 +128,13 @@ private fun WhatYouSaw(
     ) {
         OutlinedButton(onClick = onPickScreenshot) {
             Text(
-                text = if (hasScreenshot) "Screenshot added" else "Add a screenshot",
+                text = if (hasScreenshot) texts.screenshotAdded else texts.addScreenshot,
                 fontSize = 12.sp
             )
         }
 
         Text(
-            text = "Your last steps in the app are added for you.",
+            text = texts.lastStepsAdded,
             fontSize = 10.sp,
             color = AutoTestColors.Muted
         )

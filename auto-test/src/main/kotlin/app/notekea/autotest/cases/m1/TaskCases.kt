@@ -18,7 +18,7 @@ private const val TASKS_NOTE = "Tasks and callouts"
 private const val TASKS_FILE = "$PLAYGROUND/Editor/Tasks and callouts.md"
 private const val SHOWN = "Buy corn flour"
 private const val OPEN_TASKS =
-    "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Open the note Editor › Tasks and callouts."
+    "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba).\n2. Abre la nota Editor › Tasks and callouts."
 
 /** The cases of 1.7, tasks and callouts (`MVP_SMOKE_TEST.md`). */
 fun SuiteBuilder.taskCases() {
@@ -120,15 +120,16 @@ private fun SuiteBuilder.calloutColors() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "Callouts look like cards, each in its color")
-        steps(text = "$OPEN_TASKS\n3. Scroll through the Callouts and Aliases sections.")
+        title(text = "Los destacados se ven como tarjetas, cada uno en su color")
+        steps(text = "$OPEN_TASKS\n3. Desplázate por las secciones Callouts y Aliases.")
 
         expected(
             text =
-            "Each callout is a card with an icon and a title. Note, Abstract, Info, To do, Tip, Success, " +
-                "Question and Example are blue; Warning and \"Caution is a warning\" orange; Failure, Danger and Bug " +
-                "red; Quote gray. \"TL;DR is an abstract\" looks like Abstract and \"An unknown type is a note\" " +
-                "like Note. No [! text shows anywhere."
+            "Cada destacado es una tarjeta con un icono y un título. Note, Abstract, Info, " +
+                "To do, Tip, Success, Question y Example son azules; Warning y \"Caution is a " +
+                "warning\" naranjas; Failure, Danger y Bug rojos; Quote gris. \"TL;DR is an " +
+                "abstract\" se ve como Abstract y \"An unknown type is a note\" como Note. No se " +
+                "ve texto [! en ningún lugar."
         )
     }
 }
@@ -168,14 +169,14 @@ private fun SuiteBuilder.nestedCallouts() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "Callouts inside callouts, and code inside a callout")
-        steps(text = "$OPEN_TASKS\n3. Look at the Nesting section and at the Example callout.")
+        title(text = "Destacados dentro de destacados, y código dentro de un destacado")
+        steps(text = "$OPEN_TASKS\n3. Mira la sección Nesting y el destacado Example.")
 
         expected(
             text =
-            "\"Level one\" holds \"Level two\", which holds \"Level three\", each in its own color. The " +
-                "Example callout shows val servings = 6 as colored code, with no > signs. The last quote is a plain " +
-                "quote with a bar on its left."
+            "\"Level one\" contiene \"Level two\", que contiene \"Level three\", cada uno en " +
+                "su color. El destacado Example muestra val servings = 6 como código coloreado, " +
+                "sin signos >. La última cita es una cita simple con una barra a su izquierda."
         )
     }
 }

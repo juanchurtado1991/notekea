@@ -1,17 +1,20 @@
 package com.testbuddy
 
-/** Describes a [ManualCase]: what to prepare, and the texts the tester reads, in plain English. */
+import com.testbuddy.app.TesterTexts
+
+/** Describes a [ManualCase]: what to prepare, and the texts the tester reads, plainly, in the suite's language. */
 @TestBuddyDsl
 public class ManualCaseBuilder internal constructor(
     private val id: String,
-    private val reason: ManualReason
+    private val reason: ManualReason,
+    language: TesterLanguage
 ) {
     private val data = mutableListOf<String>()
     private var title: String? = null
     private var steps: String? = null
     private var expected: String? = null
-    private var passLabel = DEFAULT_PASS
-    private var failLabel = DEFAULT_FAIL
+    private var passLabel = TesterTexts.of(language = language).passed
+    private var failLabel = TesterTexts.of(language = language).failed
     private val launchEnvironment = mutableMapOf<String, String>()
 
     /** The folders of the suite's data this case needs, prepared before the tester starts it. */
@@ -59,9 +62,4 @@ public class ManualCaseBuilder internal constructor(
         failLabel = failLabel,
         launchEnvironment = launchEnvironment.toMap()
     )
-
-    private companion object {
-        const val DEFAULT_PASS = "Passed"
-        const val DEFAULT_FAIL = "Failed"
-    }
 }

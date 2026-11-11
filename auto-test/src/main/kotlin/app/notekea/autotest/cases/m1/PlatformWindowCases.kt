@@ -35,22 +35,25 @@ private fun SuiteBuilder.windowKept() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "The window comes back as it was left, and narrows well")
+        title(text = "La ventana vuelve como se dejó y se estrecha bien")
 
         steps(
             text =
-            "1. In Notekea, open the Playground Vault (see TEST DATA above) and the note Welcome.\n2. Make " +
-                "the window as narrow and as short as it goes.\n3. Make it about 700 wide; show Files with the top " +
-                "icon of the narrow bar if it is hidden.\n4. Move it to a corner, quit Notekea and start it again " +
-                "from Notekea QA.\n5. Maximize it, quit and start it again, then unmaximize it."
+            "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba) y la nota " +
+                "Welcome.\n2. Haz la ventana tan estrecha y tan baja como se pueda.\n3. Ponla de " +
+                "unos 700 de ancho; muestra Archivos con el icono de arriba de la barra estrecha " +
+                "si está oculto.\n4. Muévela a una esquina, sal de Notekea y vuelve a iniciarlo " +
+                "desde Notekea QA.\n5. Maximízala, sal y vuelve a iniciarlo; luego quita la " +
+                "maximización."
         )
 
         expected(
             text =
-            "In step 2 the window stops at a size where a note still fits. In step 3 Files floats over the " +
-                "note, with a shadow, instead of squeezing it. After step 4 the window is in the same place at the " +
-                "same size. After step 5 it starts maximized and goes back to that size. The title always starts " +
-                "with the note's name."
+            "En el paso 2 la ventana se detiene en un tamaño donde todavía cabe una nota. En " +
+                "el paso 3 Archivos flota sobre la nota, con una sombra, en lugar de apretarla. " +
+                "Después del paso 4 la ventana está en el mismo lugar y con el mismo tamaño. " +
+                "Después del paso 5 empieza maximizada y vuelve a ese tamaño. El título siempre " +
+                "empieza con el nombre de la nota."
         )
     }
 }

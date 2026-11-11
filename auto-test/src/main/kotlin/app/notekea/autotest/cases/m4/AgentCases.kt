@@ -102,18 +102,23 @@ private fun SuiteBuilder.notOnSmall() {
         reason = ManualReason.COSTLY
     ) {
         prepare(PLAYGROUND)
-        title(text = "With the Small model, Agent mode is not offered and the chat works as before")
+
+        title(
+            text =
+            "Con el modelo Pequeño no se ofrece el modo Agente y el chat funciona como antes"
+        )
 
         steps(
             text =
-            "1. In Settings → AI model choose Small (download it if needed).\n2. Open the Playground Vault and the " +
-                "chat (the speech bubble in the narrow bar on the far left).\n3. Ask: what do my recipes need?"
+            "1. En Ajustes → Modelo de IA elige Pequeño (descárgalo si hace falta).\n2. Abre " +
+                "la Playground Vault y el chat (el globo de diálogo en la barra estrecha de la " +
+                "izquierda).\n3. Pregunta: what do my recipes need?"
         )
 
         expected(
             text =
-            "Under the question field it says Small · Auto, and its menu offers only Auto and Fast. Step 3 is " +
-                "answered from the notes, with its sources, as before."
+            "Bajo el campo de pregunta dice Pequeño · Auto, y su menú ofrece solo Auto y " +
+                "Rápido. El paso 3 se responde con las notas, con sus fuentes, como antes."
         )
     }
 }
@@ -124,20 +129,27 @@ private fun SuiteBuilder.autoPicks() {
         reason = ManualReason.COSTLY
     ) {
         prepare(SAMPLE_VAULT)
-        title(text = "Auto thinks deeply about a comparison and hands the agent a task whose note it must find")
+
+        title(
+            text =
+            "Auto piensa a fondo una comparación y le pasa al agente una tarea cuya nota " +
+                "debe encontrar"
+        )
 
         steps(
             text =
-            "1. With the Medium model, open the Sample Vault and the chat; leave the mode at Medium · Auto.\n2. Ask: " +
-                "compare Deep Work and Atomic Habits\n3. Ask: add a task 'buy beans' to the recipe that uses black " +
-                "beans\n4. Open the chat's ⋯ menu and Copy chat; paste it anywhere."
+            "1. Con el modelo Mediano, abre la Sample Vault y el chat; deja el modo en " +
+                "Mediano · Auto.\n2. Pregunta: compare Deep Work and Atomic Habits\n3. Pregunta: " +
+                "add a task 'buy beans' to the recipe that uses black beans\n4. Abre el menú ⋯ " +
+                "del chat y Copiar el chat; pégalo en cualquier lugar."
         )
 
         expected(
             text =
-            "Step 2 says it is writing drafts and comparing them; step 3 lists the agent's steps and ends on a card " +
-                "that adds the task to Black beans. The copied chat says Answered with: deep for step 2 and Answered " +
-                "with: agent for step 3."
+            "El paso 2 dice que está escribiendo borradores y comparándolos; el paso 3 " +
+                "muestra los pasos del agente y termina en una tarjeta que agrega la tarea a " +
+                "Black beans. El chat copiado dice Answered with: deep para el paso 2 y Answered " +
+                "with: agent para el paso 3."
         )
     }
 }

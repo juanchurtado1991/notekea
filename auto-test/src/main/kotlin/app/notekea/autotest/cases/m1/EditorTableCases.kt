@@ -76,26 +76,30 @@ private fun SuiteBuilder.tableBarLook() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "A table's cell, its bar and its menu")
+        title(text = "La celda de una tabla, su barra y su menú")
 
         steps(
             text =
-            "1. In Notekea, open the Playground Vault (see TEST DATA above).\n2. Open the note Travel › Lisbon " +
-                "trip and click the cell \"Alfama walk, tram 28\".\n3. Press Tab, Shift+Tab, Enter and the " +
-                "arrows.\n4. In the bar over the table click Align column center, then Align column right.\n" +
-                "5. Right-click another cell.\n6. Press the Down arrow on the last row.\n7. Click Source (</>) " +
-                "at the end of the toolbar."
+            "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba).\n2. Abre " +
+                "la nota Travel › Lisbon trip y haz clic en la celda \"Alfama walk, tram " +
+                "28\".\n3. Pulsa Tab, Shift+Tab, Enter y las flechas.\n4. En la barra sobre la " +
+                "tabla haz clic en Centrar la columna y luego en Alinear la columna a la " +
+                "derecha.\n5. Haz clic derecho en otra celda.\n6. Pulsa la flecha abajo en la " +
+                "última fila.\n7. Haz clic en Fuente (</>) al final de la barra de herramientas."
         )
 
         expected(
             text =
-            "The clicked cell gets a frame in the accent color with the cursor in it, and a small bar shows " +
-                "over the table: insert row above and below, insert column left and right, align left, center and " +
-                "right, delete row, delete column, each with a tooltip. Tab and Shift+Tab go to the next and the " +
-                "previous cell, Enter to the cell below, the arrows to the neighbour cells. The column is drawn " +
-                "centered, then right-aligned. The right click moves the cursor to that cell and offers the " +
-                "bar's actions. Down on the last row leaves the table and the bar goes. Source shows the table " +
-                "as written, its second row saying the alignment (--:)."
+            "La celda en la que hiciste clic tiene un marco del color de acento con el " +
+                "cursor dentro, y sobre la tabla aparece una barra pequeña: insertar fila arriba " +
+                "y abajo, insertar columna a la izquierda y a la derecha, alinear a la " +
+                "izquierda, al centro y a la derecha, eliminar fila, eliminar columna, cada una " +
+                "con su descripción emergente. Tab y Shift+Tab van a la celda siguiente y a la " +
+                "anterior, Enter a la celda de abajo, las flechas a las celdas vecinas. La " +
+                "columna se dibuja centrada y luego alineada a la derecha. El clic derecho mueve " +
+                "el cursor a esa celda y ofrece las acciones de la barra. Abajo en la última " +
+                "fila sale de la tabla y la barra desaparece. Fuente muestra la tabla tal como " +
+                "está escrita, con su segunda fila indicando la alineación (--:)."
         )
     }
 }

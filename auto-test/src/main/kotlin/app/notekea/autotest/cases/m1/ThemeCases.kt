@@ -4,7 +4,7 @@ import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
 private const val OPEN_PLAYGROUND =
-    "1. In Notekea, open the Playground Vault (see TEST DATA above)."
+    "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba)."
 
 /** The cases of 1.2, the theme and the design system (`MVP_SMOKE_TEST.md`): all of them need a person's eyes. */
 fun SuiteBuilder.themeCases() {
@@ -23,16 +23,19 @@ private fun SuiteBuilder.fonts() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "The app's fonts")
+        title(text = "Las fuentes de la app")
 
         steps(
-            text = "$OPEN_PLAYGROUND\n2. Open the note Editor › Read mode and look at its text and at its code blocks."
+            text =
+            "$OPEN_PLAYGROUND\n2. Abre la nota Editor › Read mode y mira su texto y sus " +
+                "bloques de código."
         )
 
         expected(
             text =
-            "The text uses Notekea's own clean font (Inter), not your system's usual font; the code uses a " +
-                "monospaced font where every letter has the same width (JetBrains Mono)."
+            "El texto usa la fuente limpia propia de Notekea (Inter), no la fuente habitual " +
+                "de tu sistema; el código usa una fuente monoespaciada donde todas las letras " +
+                "tienen el mismo ancho (JetBrains Mono)."
         )
     }
 }
@@ -43,16 +46,19 @@ private fun SuiteBuilder.lightAndDark() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "Colors in light and dark mode")
+        title(text = "Colores en modo claro y oscuro")
 
         steps(
             text =
-            "$OPEN_PLAYGROUND\n2. With Settings → Appearance as it starts (Mode System, Workspace Blue theme), look " +
-                "around, then switch your system to dark mode (or light, if it is dark) and look again."
+            "$OPEN_PLAYGROUND\n2. Con Ajustes → Apariencia como empieza (Modo Sistema, tema " +
+                "Azul Workspace), mira alrededor; luego cambia tu sistema a modo oscuro (o " +
+                "claro, si está en oscuro) y vuelve a mirar."
         )
 
         expected(
-            text = "Blue is the main color and orange marks small details. In both modes every text is easy to read."
+            text =
+            "El azul es el color principal y el naranja marca detalles pequeños. En los dos " +
+                "modos todos los textos se leen fácilmente."
         )
     }
 }
@@ -63,13 +69,15 @@ private fun SuiteBuilder.roundedCorners() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "Rounded corners")
+        title(text = "Esquinas redondeadas")
 
         steps(
-            text = "$OPEN_PLAYGROUND\n2. Look at the buttons, the text fields and the rows of the list on the left."
+            text =
+            "$OPEN_PLAYGROUND\n2. Mira los botones, los campos de texto y las filas de la " +
+                "lista de la izquierda."
         )
 
-        expected(text = "They have small rounded corners, not round pill shapes.")
+        expected(text = "Tienen esquinas ligeramente redondeadas, no forma de píldora.")
     }
 }
 
@@ -79,16 +87,18 @@ private fun SuiteBuilder.keyboardFocus() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "Moving through the window with the keyboard")
+        title(text = "Moverse por la ventana con el teclado")
 
         steps(
             text =
-            "$OPEN_PLAYGROUND\n2. Without the mouse, press Tab several times, then Shift+Tab, and press Enter " +
-                "or Space on a button."
+            "$OPEN_PLAYGROUND\n2. Sin el mouse, pulsa Tab varias veces, luego Shift+Tab, y " +
+                "pulsa Enter o Espacio sobre un botón."
         )
 
         expected(
-            text = "Each time, a clear ring shows which element has the keyboard, and Enter or Space uses it."
+            text =
+            "Cada vez, un anillo claro muestra qué elemento tiene el teclado, y Enter o " +
+                "Espacio lo usa."
         )
     }
 }
@@ -99,17 +109,19 @@ private fun SuiteBuilder.screenReader() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "A screen reader reads the window")
+        title(text = "Un lector de pantalla lee la ventana")
 
         steps(
             text =
-            "1. Turn on your system's screen reader: Narrator (Ctrl+Win+Enter) on Windows, VoiceOver (Cmd+F5) " +
-                "on macOS, Orca on Linux.\n2. Open the Playground Vault in Notekea and move through it with Tab.\n3. " +
-                "Turn the screen reader off."
+            "1. Activa el lector de pantalla de tu sistema: Narrador (Ctrl+Win+Enter) en " +
+                "Windows, VoiceOver (Cmd+F5) en macOS, Orca en Linux.\n2. Abre la Playground " +
+                "Vault en Notekea y recórrela con Tab.\n3. Apaga el lector de pantalla."
         )
 
         expected(
-            text = "Buttons, tabs and rows are read aloud with their name and what they are (\"button\", \"tab\")."
+            text =
+            "Los botones, pestañas y filas se leen en voz alta con su nombre y lo que son " +
+                "(\"botón\", \"pestaña\")."
         )
     }
 }
@@ -119,9 +131,9 @@ private fun SuiteBuilder.noDeveloperTools() {
         id = "1.2-06",
         reason = ManualReason.PACKAGED
     ) {
-        title(text = "No developer tools in the installed app")
-        steps(text = "1. In Notekea, look through About, Settings and the right-click menus.")
-        expected(text = "Nothing offers a design gallery or a developer screen.")
+        title(text = "Sin herramientas de desarrollo en la app instalada")
+        steps(text = "1. En Notekea, revisa Acerca de, Ajustes y los menús del clic derecho.")
+        expected(text = "Nada ofrece una galería de diseño ni una pantalla de desarrollo.")
     }
 }
 
@@ -131,16 +143,19 @@ private fun SuiteBuilder.narrowWindow() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "A very narrow window")
+        title(text = "Una ventana muy estrecha")
 
         steps(
-            text = "$OPEN_PLAYGROUND\n2. Open a few notes, then make the window as narrow as it goes."
+            text =
+            "$OPEN_PLAYGROUND\n2. Abre algunas notas y luego haz la ventana tan estrecha " +
+                "como se pueda."
         )
 
         expected(
             text =
-            "The labels of the bottom bar and of the tabs stay on one line and end with … when they do not " +
-                "fit; numbers are never cut in two; nothing is cut off."
+            "Las etiquetas de la barra inferior y de las pestañas se quedan en una línea y " +
+                "terminan con … cuando no caben; los números nunca se parten en dos; nada queda " +
+                "cortado."
         )
     }
 }

@@ -152,21 +152,29 @@ private fun SuiteBuilder.noModel() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "Without a model the chat says so and leads to Settings, where the download shows in the status bar")
+
+        title(
+            text =
+            "Sin modelo, el chat lo dice y lleva a Ajustes, donde la descarga se ve en la " +
+                "barra de estado"
+        )
 
         steps(
             text =
-            "1. In Notekea, open the Playground Vault (see TEST DATA above). In Settings → AI model, delete the " +
-                "model in use if there is one.\n2. Press Ctrl+L (Cmd+L on macOS).\n3. Click Choose a model, click " +
-                "Download on the recommended size and press Esc.\n4. Click the AI model entry of the status bar, " +
-                "then Cancel the download."
+            "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba). En " +
+                "Ajustes → Modelo de IA, elimina el modelo en uso si hay uno.\n2. Pulsa Ctrl+L " +
+                "(Cmd+L en macOS).\n3. Haz clic en Elegir un modelo, haz clic en Descargar en el " +
+                "tamaño recomendado y pulsa Esc.\n4. Haz clic en la entrada del modelo de IA de " +
+                "la barra de estado y luego cancela la descarga."
         )
 
         expected(
             text =
-            "Step 2 shows No AI model yet, why, and Choose a model, with no question field. Step 3 opens Settings " +
-                "at AI model; after Esc the status bar shows AI model · with the percent and a ring that fills. " +
-                "Step 4 opens Settings at AI model again, and the entry leaves the status bar once cancelled."
+            "El paso 2 muestra Todavía no hay modelo de IA, por qué y Elegir un modelo, sin " +
+                "campo de pregunta. El paso 3 abre Ajustes en Modelo de IA; después de Esc la " +
+                "barra de estado muestra Modelo de IA · con el porcentaje y un anillo que se " +
+                "llena. El paso 4 abre de nuevo Ajustes en Modelo de IA, y la entrada sale de la " +
+                "barra de estado al cancelar."
         )
     }
 }

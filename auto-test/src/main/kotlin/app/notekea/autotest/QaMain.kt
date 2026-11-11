@@ -13,6 +13,8 @@ import org.koin.dsl.module
  * opens it with only the cases of 1.6, for a feature's smoke test.
  */
 fun main(args: Array<String>) {
+    QaLanguage.startInSpanishOnce(folder = QaAppData.current())
+
     testBuddyMain(
         args = args,
         suite = NotekeaSuite.selected()

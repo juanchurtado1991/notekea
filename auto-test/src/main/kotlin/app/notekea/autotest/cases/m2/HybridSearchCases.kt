@@ -17,8 +17,8 @@ private const val REST_LINE =
     "Mix the flour, the water and the salt, then let it rest five minutes. ^dough"
 private const val HOT_PAN_LINE = "Shape discs and cook them on a hot pan, five minutes a side."
 private const val OPEN_SEARCH =
-    "1. In Notekea, open the Sample Vault (see TEST DATA above) and wait until the bar at the bottom says " +
-        "\"41 notes ready to search\".\n2. Press Ctrl+Shift+F (Cmd+Shift+F on macOS)."
+    "1. En Notekea, abre la Sample Vault (mira DATOS DE PRUEBA arriba) y espera a que la barra de abajo " +
+        "diga \"41 notas listas para buscar\".\n2. Pulsa Ctrl+Shift+F (Cmd+Shift+F en macOS)."
 
 /** The cases of 2.6, hybrid search (`MVP_SMOKE_TEST.md`): the palette's Content tab by meaning and keywords. */
 fun SuiteBuilder.hybridSearchCases() {
@@ -66,16 +66,24 @@ private fun SuiteBuilder.byMeaning() {
         reason = ManualReason.EYES
     ) {
         prepare(SAMPLE)
-        title(text = "A search by meaning finds a note without its words, in another language too")
+
+        title(
+            text =
+            "Una búsqueda por significado encuentra una nota sin sus palabras, también en " +
+                "otro idioma"
+        )
 
         steps(
-            text = "$OPEN_SEARCH\n3. Type: cómo hacer la masa\n4. Clear it and type: trip to Portugal"
+            text =
+            "$OPEN_SEARCH\n3. Escribe: cómo hacer la masa\n4. Bórralo y escribe: trip to " +
+                "Portugal"
         )
 
         expected(
             text =
-            "The first search lists Arepas near the top with a line about its dough, although the note " +
-                "has none of those words. The second lists Trip to Lisbon first."
+            "La primera búsqueda muestra Arepas cerca de arriba con una línea sobre su masa, " +
+                "aunque la nota no tiene ninguna de esas palabras. La segunda muestra primero " +
+                "Trip to Lisbon."
         )
     }
 }
@@ -86,13 +94,20 @@ private fun SuiteBuilder.nothingClose() {
         reason = ManualReason.EYES
     ) {
         prepare(SAMPLE)
-        title(text = "A search with nothing close finds nothing, instead of the closest notes")
 
-        steps(
-            text = "$OPEN_SEARCH\n3. Type: football match results\n4. Clear it and type: football in the park"
+        title(
+            text =
+            "Una búsqueda sin nada cercano no encuentra nada, en lugar de las notas más " +
+                "cercanas"
         )
 
-        expected(text = "The palette says \"No notes match\" both times.")
+        steps(
+            text =
+            "$OPEN_SEARCH\n3. Escribe: football match results\n4. Bórralo y escribe: " +
+                "football in the park"
+        )
+
+        expected(text = "La paleta dice \"Ninguna nota coincide\" las dos veces.")
     }
 }
 
@@ -102,18 +117,20 @@ private fun SuiteBuilder.exactWordsNotice() {
         reason = ManualReason.EYES
     ) {
         prepare(SAMPLE)
-        title(text = "While the index is not ready, search keeps working and says so")
+        title(text = "Mientras el índice no está listo, la búsqueda sigue funcionando y lo dice")
 
         steps(
             text =
-            "$OPEN_SEARCH\n3. Press Esc, click the index status in the bar at the bottom and choose " +
-                "Rebuild index.\n4. While it runs, press Ctrl+Shift+F (Cmd+Shift+F on macOS) and type: tomato"
+            "$OPEN_SEARCH\n3. Pulsa Esc, haz clic en el estado del índice en la barra de " +
+                "abajo y elige Reconstruir el índice.\n4. Mientras corre, pulsa Ctrl+Shift+F " +
+                "(Cmd+Shift+F en macOS) y escribe: tomato"
         )
 
         expected(
             text =
-            "Notes with the word tomato are listed, with \"Showing exact words only until your notes are " +
-                "ready to search.\" below them. Once the bar says the notes are ready, the line is gone."
+            "Se muestran las notas con la palabra tomato, con \"Solo se muestran palabras " +
+                "exactas hasta que tus notas estén listas para buscar.\" debajo. Cuando la barra " +
+                "dice que las notas están listas, la línea desaparece."
         )
     }
 }

@@ -302,19 +302,20 @@ private fun SuiteBuilder.templatesInObsidian() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(TEMPLATES_VAULT)
-        title(text = "Obsidian lists the same templates")
+        title(text = "Obsidian muestra las mismas plantillas")
 
         steps(
             text =
-            "If Obsidian is not installed, press Skip for now.\n1. Open the Templates Vault from the Test " +
-                "data folder in Obsidian and turn on the Templates core plugin.\n2. Open Projects › Kickoff notes " +
-                "and run \"Templates: Insert template\"."
+            "Si Obsidian no está instalado, pulsa Saltar este caso.\n1. Abre la Templates " +
+                "Vault desde la carpeta Test data en Obsidian y activa el plugin principal " +
+                "Templates.\n2. Abre Projects › Kickoff notes y ejecuta \"Templates: Insert " +
+                "template\"."
         )
 
         expected(
             text =
-            "Obsidian lists the same templates of Snippets and fills in the date and time in the same formats " +
-                "as Notekea."
+            "Obsidian muestra las mismas plantillas de Snippets y completa la fecha y la " +
+                "hora con los mismos formatos que Notekea."
         )
     }
 }

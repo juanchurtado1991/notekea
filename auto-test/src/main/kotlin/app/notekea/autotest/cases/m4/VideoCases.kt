@@ -50,19 +50,26 @@ private fun SuiteBuilder.playing() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "A video plays in its note, and one this computer cannot play opens with its app")
+
+        title(
+            text =
+            "Un video se reproduce en su nota, y uno que esta computadora no puede " +
+                "reproducir se abre con su app"
+        )
 
         steps(
             text =
-            "1. Open the Playground Vault and a note; drop a real mp4 (a phone video) into it.\n2. Click its card; " +
-                "pause it, click the middle of the bar under it, then ✕.\n3. On macOS, drop a .webm video and click " +
-                "its card."
+            "1. Abre la Playground Vault y una nota; suelta en ella un mp4 real (un video " +
+                "del teléfono).\n2. Haz clic en su tarjeta; páusalo, haz clic en el medio de la " +
+                "barra de abajo y luego en ✕.\n3. En macOS, suelta un video .webm y haz clic en " +
+                "su tarjeta."
         )
 
         expected(
             text =
-            "Step 2 plays the video in place with its time; the bar moves it to the middle; ✕ brings the card back. " +
-                "Step 3 says this computer can't play it, and a click opens it with its app."
+            "El paso 2 reproduce el video ahí mismo con su tiempo; la barra lo lleva a la " +
+                "mitad; ✕ devuelve la tarjeta. El paso 3 dice que esta computadora no puede " +
+                "reproducirlo aquí, y un clic lo abre con su app."
         )
     }
 }
@@ -92,18 +99,25 @@ private fun SuiteBuilder.pastedYouTube() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "A pasted YouTube link becomes its card, titled once, and plays in a Notekea window")
+
+        title(
+            text =
+            "Un enlace de YouTube pegado se convierte en su tarjeta, con título una sola " +
+                "vez, y se reproduce en una ventana de Notekea"
+        )
 
         steps(
             text =
-            "1. Copy a YouTube video's address from the browser.\n2. Open a note of the Playground Vault and paste " +
-                "it alone on a line.\n3. Click its card.\n4. Close Notekea."
+            "1. Copia la dirección de un video de YouTube desde el navegador.\n2. Abre una " +
+                "nota de la Playground Vault y pégala sola en una línea.\n3. Haz clic en su " +
+                "tarjeta.\n4. Cierra Notekea."
         )
 
         expected(
             text =
-            "Step 2 writes the embed at once; a moment later it has the video's title and the card its picture. " +
-                "Step 3 opens a Notekea window that plays the video. Step 4 closes that window too."
+            "El paso 2 escribe la inserción al instante; un momento después tiene el título " +
+                "del video y la tarjeta su imagen. El paso 3 abre una ventana de Notekea que " +
+                "reproduce el video. El paso 4 cierra también esa ventana."
         )
     }
 }
@@ -137,20 +151,25 @@ private fun SuiteBuilder.compressed() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "A video over 100 MB is made smaller before it is attached, and Cancel attaches nothing")
+
+        title(
+            text =
+            "Un video de más de 100 MB se reduce antes de adjuntarlo, y Cancelar no adjunta " +
+                "nada"
+        )
 
         steps(
             text =
-            "1. Open a note of the Playground Vault with the internet on.\n2. Drop a video over 100 MB into it (a " +
-                "phone video of a few minutes) and watch the banner above the note.\n3. Drop it again and click " +
-                "Cancel on the banner."
+            "1. Abre una nota de la Playground Vault con internet.\n2. Suelta en ella un " +
+                "video de más de 100 MB (un video del teléfono de unos minutos) y mira el aviso " +
+                "sobre la nota.\n3. Suéltalo de nuevo y haz clic en Cancelar en el aviso."
         )
 
         expected(
             text =
-            "Step 2: the first time it downloads the video tool (about 27 MB), then makes the video smaller, then " +
-                "embeds an .mp4 under 100 MB that plays. Step 3 stops and attaches nothing. The original video is " +
-                "unchanged."
+            "Paso 2: la primera vez descarga la herramienta de video (unos 27 MB), luego " +
+                "reduce el video y luego inserta un .mp4 de menos de 100 MB que se reproduce. El " +
+                "paso 3 se detiene y no adjunta nada. El video original no cambia."
         )
     }
 }

@@ -4,12 +4,13 @@ import app.notekea.autotest.cases.m1.PLAYGROUND
 import com.testbuddy.ManualReason
 import com.testbuddy.SuiteBuilder
 
-private const val OPEN_PLAYGROUND = "In Notekea, open the Playground Vault (see TEST DATA above)"
+private const val OPEN_PLAYGROUND =
+    "En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba)"
 private const val PROCESS_LIST =
-    "the list of running apps (Windows: Task Manager, Ctrl+Shift+Esc; macOS: Activity Monitor, in Applications › " +
-        "Utilities; Linux: System Monitor)"
+    "la lista de apps en ejecución (Windows: Administrador de tareas, Ctrl+Shift+Esc; macOS: Monitor de " +
+        "Actividad, en Aplicaciones › Utilidades; Linux: Monitor del sistema)"
 private const val REOPEN =
-    "Open Notekea QA again from the system's launcher: this window comes back on this case."
+    "Abre de nuevo Notekea QA desde el lanzador del sistema: esta ventana vuelve a este caso."
 
 /** The General cases of `MVP_SMOKE_TEST.md`: the installed app, the system and privacy. */
 fun SuiteBuilder.generalCases() {
@@ -30,24 +31,25 @@ fun SuiteBuilder.freeUseCase() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "Use Notekea freely for 15 minutes")
+        title(text = "Usa Notekea libremente durante 15 minutos")
 
         answers(
-            passed = "Nothing odd",
-            failed = "I found something"
+            passed = "Nada raro",
+            failed = "Encontré algo"
         )
 
         steps(
             text =
-            "1. $OPEN_PLAYGROUND.\n2. For 15 minutes, use Notekea as you really would: write notes, link " +
-                "them, search, open and close notes and tabs, open another vault and come back.\n3. Whenever " +
-                "something looks wrong, surprising or slow, note what you did and what you saw."
+            "1. $OPEN_PLAYGROUND.\n2. Durante 15 minutos, usa Notekea como lo usarías de " +
+                "verdad: escribe notas, enlázalas, busca, abre y cierra notas y pestañas, abre " +
+                "otra bóveda y vuelve.\n3. Cada vez que algo se vea mal, sorprenda o vaya lento, " +
+                "anota qué hiciste y qué viste."
         )
 
         expected(
             text =
-            "Nothing odd happens: no error, no lost text, nothing that looks wrong. If something did, choose " +
-                "I found something and describe it, with a screenshot if you can."
+            "No pasa nada raro: ningún error, ningún texto perdido, nada que se vea mal. Si " +
+                "pasó algo, elige Encontré algo y descríbelo, con una captura si puedes."
         )
     }
 }
@@ -57,19 +59,19 @@ private fun SuiteBuilder.installAndLaunch() {
         id = "G-01",
         reason = ManualReason.PACKAGED
     ) {
-        title(text = "Notekea installs and opens like any app")
+        title(text = "Notekea se instala y se abre como cualquier app")
 
         steps(
             text =
-            "1. Think back to installing Notekea QA from the file you were sent (msi on Windows, dmg on " +
-                "macOS, deb on Linux) and opening it from the system's launcher (the Start menu, Launchpad or the " +
-                "applications menu)."
+            "1. Recuerda cómo instalaste Notekea QA desde el archivo que te enviaron (msi en " +
+                "Windows, dmg en macOS, deb en Linux) y cómo lo abriste desde el lanzador del " +
+                "sistema (el menú Inicio, Launchpad o el menú de aplicaciones)."
         )
 
         expected(
             text =
-            "It installed and opened. The system asked at most its usual question for an app opened the first " +
-                "time, and nothing else."
+            "Se instaló y se abrió. El sistema hizo como mucho su pregunta habitual para una " +
+                "app que se abre por primera vez, y nada más."
         )
     }
 }
@@ -80,18 +82,18 @@ private fun SuiteBuilder.cleanOutput() {
         reason = ManualReason.PACKAGED
     ) {
         prepare(PLAYGROUND)
-        title(text = "Notekea starts without errors")
+        title(text = "Notekea arranca sin errores")
 
         steps(
             text =
-            "1. $OPEN_PLAYGROUND, and open a note.\n2. In this window, click Report, then Open the Report " +
-                "folder, and open the file output.txt."
+            "1. $OPEN_PLAYGROUND y abre una nota.\n2. En esta ventana, haz clic en Reporte, " +
+                "luego en Abrir la carpeta Report, y abre el archivo output.txt."
         )
 
         expected(
             text =
-            "The file has no line with \"Exception\" and no \"WARNING: A restricted method\". An empty file " +
-                "is fine."
+            "El archivo no tiene ninguna línea con \"Exception\" ni \"WARNING: A restricted " +
+                "method\". Un archivo vacío está bien."
         )
     }
 }
@@ -101,15 +103,15 @@ private fun SuiteBuilder.processExits() {
         id = "G-03",
         reason = ManualReason.PACKAGED
     ) {
-        title(text = "Closing the window quits Notekea")
+        title(text = "Cerrar la ventana cierra Notekea")
 
         steps(
             text =
-            "1. Close Notekea's window: this window closes with it.\n2. A few seconds later, look for Notekea " +
-                "QA in $PROCESS_LIST.\n3. $REOPEN"
+            "1. Cierra la ventana de Notekea: esta ventana se cierra con ella.\n2. Unos " +
+                "segundos después, busca Notekea QA en $PROCESS_LIST.\n3. $REOPEN"
         )
 
-        expected(text = "Notekea QA was not in the list: it quit completely.")
+        expected(text = "Notekea QA no estaba en la lista: se cerró por completo.")
     }
 }
 
@@ -119,16 +121,18 @@ private fun SuiteBuilder.worksOffline() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "Notekea works without the internet")
+        title(text = "Notekea funciona sin internet")
 
         steps(
             text =
-            "1. Turn off Wi-Fi and unplug the network cable.\n2. $OPEN_PLAYGROUND, edit a note and " +
-                "search.\n3. Turn the network back on."
+            "1. Apaga el Wi-Fi y desconecta el cable de red.\n2. $OPEN_PLAYGROUND, edita una " +
+                "nota y busca.\n3. Vuelve a encender la red."
         )
 
         expected(
-            text = "Everything works as with the internet; nothing waits or shows an error about the network."
+            text =
+            "Todo funciona como con internet; nada se queda esperando ni muestra un error de " +
+                "red."
         )
     }
 }
@@ -139,16 +143,16 @@ private fun SuiteBuilder.noTraffic() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "Notekea sends nothing over the network")
+        title(text = "Notekea no envía nada por la red")
 
         steps(
             text =
-            "1. Open an app that shows which apps use the network (Windows: Resource Monitor, Network tab; " +
-                "macOS: Activity Monitor, Network tab; Linux: System Monitor or your firewall).\n2. $OPEN_PLAYGROUND " +
-                "and use it for 10 minutes."
+            "1. Abre una app que muestre qué apps usan la red (Windows: Monitor de recursos, " +
+                "pestaña Red; macOS: Monitor de Actividad, pestaña Red; Linux: el Monitor del " +
+                "sistema o tu firewall).\n2. $OPEN_PLAYGROUND y úsalo durante 10 minutos."
         )
 
-        expected(text = "Notekea QA sends and receives nothing: its row stays at zero.")
+        expected(text = "Notekea QA no envía ni recibe nada: su fila se queda en cero.")
     }
 }
 
@@ -158,16 +162,18 @@ private fun SuiteBuilder.followsSystemTheme() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "Notekea follows the system's light and dark mode")
+        title(text = "Notekea sigue el modo claro y oscuro del sistema")
 
         steps(
             text =
-            "1. $OPEN_PLAYGROUND.\n2. In the system's settings, switch between light and dark mode while " +
-                "Notekea is open."
+            "1. $OPEN_PLAYGROUND.\n2. En los ajustes del sistema, cambia entre modo claro y " +
+                "oscuro con Notekea abierto."
         )
 
         expected(
-            text = "Notekea turns light or dark at once, with the system, and every text reads well."
+            text =
+            "Notekea se pone claro u oscuro al instante, con el sistema, y todos los textos " +
+                "se leen bien."
         )
     }
 }
@@ -178,7 +184,7 @@ private fun SuiteBuilder.crashNotice() {
         reason = ManualReason.PACKAGED
     ) {
         prepare(PLAYGROUND)
-        title(text = "A crash shows a notice and keeps what you typed")
+        title(text = "Un cierre inesperado muestra un aviso y conserva lo que escribiste")
 
         launchWith(
             name = "NOTEKEA_CRASH_TEST",
@@ -187,18 +193,20 @@ private fun SuiteBuilder.crashNotice() {
 
         steps(
             text =
-            "1. Click Restart Notekea for this case below: Notekea starts again in a test mode that fails on " +
-                "purpose.\n2. Quickly open the Playground Vault from the Test data folder, open a note and type a " +
-                "word, then wait.\n3. In the window that appears, click Copy details, then Report on GitHub, then " +
-                "Close Notekea.\n4. $REOPEN Open the same note."
+            "1. Haz clic abajo en Reiniciar Notekea para este caso: Notekea arranca de nuevo " +
+                "en un modo de prueba que falla a propósito.\n2. Rápido, abre la Playground " +
+                "Vault desde la carpeta Test data, abre una nota, escribe una palabra y " +
+                "espera.\n3. En la ventana que aparece, haz clic en Copiar detalles, luego en " +
+                "Reportar en GitHub y luego en Cerrar Notekea.\n4. $REOPEN Abre la misma nota."
         )
 
         expected(
             text =
-            "About 3 seconds after Notekea opened, a window \"Notekea needs to close\" named a report file. " +
-                "Copy details said \"Copied to the clipboard\"; Report on GitHub opened a Crash report form in the " +
-                "browser with your last steps in the report; Close Notekea closed it. The word you typed is in the " +
-                "note."
+            "Unos 3 segundos después de abrirse Notekea, una ventana \"Notekea necesita " +
+                "cerrarse\" nombró un archivo de reporte. Copiar detalles dijo \"Copiado al " +
+                "portapapeles\"; Reportar en GitHub abrió en el navegador un formulario Crash " +
+                "report con tus últimos pasos en el reporte; Cerrar Notekea la cerró. La palabra " +
+                "que escribiste está en la nota."
         )
     }
 }
@@ -209,21 +217,23 @@ private fun SuiteBuilder.launcherAndUpdate() {
         reason = ManualReason.PACKAGED
     ) {
         prepare(PLAYGROUND)
-        title(text = "Notekea is in the launcher, and installing again updates it")
+        title(text = "Notekea está en el lanzador, e instalarlo de nuevo lo actualiza")
 
         steps(
             text =
-            "1. Look for Notekea QA in the system's launcher.\n2. $OPEN_PLAYGROUND, open a note and search " +
-                "for \"plan\" (the magnifier on the left).\n3. On Windows only: close Notekea, run its installer " +
-                "again, and open Notekea QA again: this window comes back on this case."
+            "1. Busca Notekea QA en el lanzador del sistema.\n2. $OPEN_PLAYGROUND, abre una " +
+                "nota y busca \"plan\" (la lupa a la izquierda).\n3. Solo en Windows: cierra " +
+                "Notekea, ejecuta de nuevo su instalador y vuelve a abrir Notekea QA: esta " +
+                "ventana vuelve a este caso."
         )
 
         expected(
             text =
-            "Notekea QA is in the launcher with its logo (Windows: the Start menu and a desktop shortcut; " +
-                "macOS: Applications and Launchpad; Linux: the applications menu). The vault opens and the search " +
-                "lists results, with no crash notice. On Windows, installing again leaves one Notekea QA in " +
-                "Installed apps."
+            "Notekea QA está en el lanzador con su logo (Windows: el menú Inicio y un acceso " +
+                "directo en el escritorio; macOS: Aplicaciones y Launchpad; Linux: el menú de " +
+                "aplicaciones). La bóveda se abre y la búsqueda muestra resultados, sin ningún " +
+                "aviso de cierre. En Windows, instalarlo de nuevo deja un solo Notekea QA en " +
+                "Aplicaciones instaladas."
         )
     }
 }

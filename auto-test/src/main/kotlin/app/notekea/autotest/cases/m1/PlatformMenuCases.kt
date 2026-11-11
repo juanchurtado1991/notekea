@@ -10,19 +10,19 @@ internal fun SuiteBuilder.menuCases() {
         reason = ManualReason.SYSTEM
     ) {
         prepare(PLAYGROUND)
-        title(text = "The app menu on macOS")
+        title(text = "El menú de la app en macOS")
 
         steps(
             text =
-            "Only on macOS; on another system mark it passed.\n1. In Notekea, open the Playground Vault " +
-                "(see TEST DATA above).\n2. Open the Notekea menu at the top of the screen and click About Notekea, " +
-                "then Settings…"
+            "Solo en macOS; en otro sistema márcalo como Pasó.\n1. En Notekea, abre la " +
+                "Playground Vault (mira DATOS DE PRUEBA arriba).\n2. Abre el menú Notekea arriba " +
+                "en la pantalla y haz clic en Acerca de Notekea y luego en Ajustes…"
         )
 
         expected(
             text =
-            "macOS's Notekea menu opens the same About and Settings as the tool rail, and Notekea adds no " +
-                "other menu to the bar."
+            "El menú Notekea de macOS abre los mismos Acerca de y Ajustes que la barra de " +
+                "herramientas lateral, y Notekea no agrega ningún otro menú a la barra."
         )
     }
 }

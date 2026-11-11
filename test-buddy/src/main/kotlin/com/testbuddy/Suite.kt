@@ -7,6 +7,7 @@ import java.nio.file.Path
 public class Suite internal constructor(
     public val appName: String,
     public val version: String,
+    public val language: TesterLanguage,
     public val automated: List<AutomatedCase>,
     public val manual: List<ManualCase>,
     internal val window: WindowSize,
@@ -21,6 +22,7 @@ public class Suite internal constructor(
     ): Suite = Suite(
         appName = appName,
         version = version,
+        language = language,
         automated = automated,
         manual = manual,
         window = window,
