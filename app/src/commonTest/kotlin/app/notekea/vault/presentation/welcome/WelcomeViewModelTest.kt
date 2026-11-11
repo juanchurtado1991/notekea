@@ -1,5 +1,7 @@
 package app.notekea.vault.presentation.welcome
 
+import app.notekea.core.preferences.domain.AppPreferences
+import app.notekea.core.preferences.domain.FakeAppPreferencesStore
 import app.notekea.vault.domain.FakeVaultFileSystem
 import app.notekea.vault.domain.FolderAccess
 import app.notekea.vault.domain.Vault
@@ -52,6 +54,22 @@ class WelcomeViewModelTest {
             actual = state.openedVault
         )
     }
+
+    // Settings → General (5.2, 2026-11-11): the welcome screen instead of the last vault, with it still listed.
+    @Test
+    fun `startup shows the welcome screen when General says not to reopen the last vault`() =
+        runWelcomeTest {
+            fixture.addFolder(path = VaultFixture.NOTES)
+            fixture.store.recentVaults = listOf(fixture.recent(path = VaultFixture.NOTES))
+
+            val state =
+                startedViewModel(preferences = AppPreferences(opensLastVault = false)).state.value
+
+            assertEquals(
+                expected = listOf<Any?>(null, 1),
+                actual = listOf(state.openedVault, state.recentVaults.size)
+            )
+        }
 
     @Test
     fun `without recents the welcome screen shows only its actions`() = runWelcomeTest {
@@ -409,7 +427,9 @@ class WelcomeViewModelTest {
         advanceUntilIdle()
     }
 
-    private fun TestScope.startedViewModel(): WelcomeViewModel {
+    private fun TestScope.startedViewModel(
+        preferences: AppPreferences = AppPreferences()
+    ): WelcomeViewModel {
         val viewModel = WelcomeViewModel(
             platformConventions = WelcomePreviewData.platformConventions,
             createVault = fixture.createVault,
@@ -419,7 +439,8 @@ class WelcomeViewModelTest {
             folderPicker = fixture.folderPicker,
             removeRecentVault = fixture.removeRecentVault,
             restoreLastVault = fixture.restoreLastVault,
-            vaultFileSystem = fixture.fileSystem
+            vaultFileSystem = fixture.fileSystem,
+            preferencesStore = FakeAppPreferencesStore(initial = preferences)
         )
 
         advanceUntilIdle()

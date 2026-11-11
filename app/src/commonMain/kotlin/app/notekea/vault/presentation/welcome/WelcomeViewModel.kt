@@ -2,6 +2,7 @@ package app.notekea.vault.presentation.welcome
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.preferences.domain.AppPreferencesStore
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.vault.domain.CreateVaultUseCase
 import app.notekea.vault.domain.FolderPicker
@@ -14,11 +15,12 @@ import app.notekea.vault.domain.Vault
 import app.notekea.vault.domain.VaultError
 import app.notekea.vault.domain.VaultFileSystem
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.flow.first
 
 /**
- * Welcome flow, the MVI reference screen (`ARCHITECTURE.md` §10): restores the last vault at startup, opens, creates
- * and locates vaults, and keeps the recent list fresh. It has no one-shot effects, so its effect type is [Nothing];
- * picking a folder is a suspend call to the native dialog. Editing the new vault form clears its error.
+ * Welcome flow, the MVI reference screen (`ARCHITECTURE.md` §10): restores the last vault at startup unless General
+ * says not to, opens, creates and locates vaults, and keeps the recent list fresh; it has no one-shot effects. Picking
+ * a folder is a suspend call to the native dialog; editing the new vault form clears its error.
  */
 class WelcomeViewModel(
     platformConventions: PlatformConventions,
@@ -29,7 +31,8 @@ class WelcomeViewModel(
     private val folderPicker: FolderPicker,
     private val removeRecentVault: RemoveRecentVaultUseCase,
     private val restoreLastVault: RestoreLastVaultUseCase,
-    private val vaultFileSystem: VaultFileSystem
+    private val vaultFileSystem: VaultFileSystem,
+    private val preferencesStore: AppPreferencesStore
 ) : BaseViewModel<WelcomeState, WelcomeIntent, Nothing>(
     initialState = WelcomeState(platformConventions = platformConventions)
 ) {
@@ -37,7 +40,13 @@ class WelcomeViewModel(
 
     init {
         launchGuarded(onError = ::showUnexpectedError) {
-            val restored = restoreLastVault()
+            // Settings → General can ask for the welcome screen instead of the last vault at startup.
+            val opensLast = preferencesStore
+                .observe()
+                .first()
+                .opensLastVault
+
+            val restored = if (opensLast) restoreLastVault() else null
             val recentVaults = getRecentVaults()
 
             reduce {

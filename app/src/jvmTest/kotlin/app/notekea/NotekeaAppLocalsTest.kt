@@ -11,6 +11,7 @@ import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.platform.domain.FakeSystemEnvironment
 import app.notekea.core.platform.domain.SystemAppearance
 import app.notekea.core.platform.domain.SystemMotion
+import app.notekea.core.preferences.domain.FakeAppPreferencesStore
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.theme.LocalAppearance
 import app.notekea.core.presentation.designsystem.theme.LocalSystemDarkTheme
@@ -39,7 +40,8 @@ class NotekeaAppLocalsTest {
             operatingSystemName = "Linux",
             userHome = "/home/ana"
         ),
-        appearanceStore = FakeAppearanceStore(initial = appearance)
+        appearanceStore = FakeAppearanceStore(initial = appearance),
+        preferencesStore = FakeAppPreferencesStore()
     )
 
     @Test

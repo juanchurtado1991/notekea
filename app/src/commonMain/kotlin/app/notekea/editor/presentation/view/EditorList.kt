@@ -34,10 +34,12 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.preferences.domain.LineWidth
 import app.notekea.core.presentation.designsystem.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.designsystem.components.TextMarks
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.platform.LocalAppPreferences
 import app.notekea.editor.domain.TableAction
 import app.notekea.editor.presentation.find.FindState
 import app.notekea.editor.presentation.find.NoteSearch
@@ -54,6 +56,7 @@ private const val END_KEY = "end"
 private const val END_ROOM_DP = 320
 private const val HEADER_KEY = "header"
 private const val PAGE_MAX_WIDTH_DP = 1100
+private const val READABLE_WIDTH_DP = 720
 private const val PAGE_MIN_WIDTH_DP = 760
 private const val PAGE_SHARE = 0.7f
 private const val PREVIEW_HEIGHT_DP = 520
@@ -63,35 +66,43 @@ private val SKELETON_WIDTHS = listOf(0.9f, 0.75f, 0.85f, 0.6f, 0.8f, 0.4f)
 internal const val TOOLBAR_KEY = "toolbar"
 
 /**
- * The page's width as the pane allows: [PAGE_SHARE] of it, never narrower than [PAGE_MIN_WIDTH_DP]
- * nor wider than [PAGE_MAX_WIDTH_DP] (lines stay readable on a wide screen), and never wider than the pane.
+ * The page's width as the pane allows and Settings → Editor asks ([lineWidth]): wide, [PAGE_SHARE] of it between
+ * [PAGE_MIN_WIDTH_DP] and [PAGE_MAX_WIDTH_DP]; readable, at most [READABLE_WIDTH_DP]; or the whole pane.
  */
-private fun Modifier.readableWidth(): Modifier = layout { measurable, constraints ->
-    val width = (constraints.maxWidth * PAGE_SHARE)
-        .roundToInt()
-        .coerceIn(
-            minimumValue = PAGE_MIN_WIDTH_DP.dp.roundToPx(),
-            maximumValue = PAGE_MAX_WIDTH_DP.dp.roundToPx()
-        )
-        .coerceAtMost(maximumValue = constraints.maxWidth)
+private fun Modifier.readableWidth(lineWidth: LineWidth): Modifier =
+    layout { measurable, constraints ->
+        val wide = (constraints.maxWidth * PAGE_SHARE)
+            .roundToInt()
+            .coerceIn(
+                minimumValue = PAGE_MIN_WIDTH_DP.dp.roundToPx(),
+                maximumValue = PAGE_MAX_WIDTH_DP.dp.roundToPx()
+            )
 
-    val placeable = measurable.measure(
-        constraints = constraints.copy(
-            minWidth = width,
-            maxWidth = width
-        )
-    )
+        val chosen = when (lineWidth) {
+            LineWidth.WIDE -> wide
+            LineWidth.READABLE -> READABLE_WIDTH_DP.dp.roundToPx()
+            LineWidth.FULL -> constraints.maxWidth
+        }
 
-    layout(
-        width = placeable.width,
-        height = placeable.height
-    ) {
-        placeable.place(
-            x = 0,
-            y = 0
+        val width = chosen.coerceAtMost(maximumValue = constraints.maxWidth)
+
+        val placeable = measurable.measure(
+            constraints = constraints.copy(
+                minWidth = width,
+                maxWidth = width
+            )
         )
+
+        layout(
+            width = placeable.width,
+            height = placeable.height
+        ) {
+            placeable.place(
+                x = 0,
+                y = 0
+            )
+        }
     }
-}
 
 /**
  * Find's matches for the blocks drawn as they read, or null while Find is closed. The query is read when a
@@ -301,7 +312,7 @@ private fun PageItem(
         contentAlignment = Alignment.TopCenter
     ) {
         val column = Modifier
-            .readableWidth()
+            .readableWidth(lineWidth = LocalAppPreferences.current.lineWidth)
             .padding(horizontal = NotekeaDimensions.SpacingXxl)
 
         Column(modifier = column) {

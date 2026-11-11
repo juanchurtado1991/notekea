@@ -14,12 +14,14 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.ai.presentation.ModelManagerScreen
 import app.notekea.core.appearance.domain.Appearance
+import app.notekea.core.preferences.domain.AppPreferences
 import app.notekea.core.presentation.designsystem.theme.LocalAppearance
 import app.notekea.core.presentation.designsystem.theme.LocalSystemDarkTheme
 import app.notekea.core.presentation.designsystem.theme.LocalSystemReduceMotion
 import app.notekea.core.presentation.platform.AppEnvironment
 import app.notekea.core.presentation.platform.AppVersionDefaults
 import app.notekea.core.presentation.platform.DesktopVideoPlayer
+import app.notekea.core.presentation.platform.LocalAppPreferences
 import app.notekea.core.presentation.platform.LocalAppVersion
 import app.notekea.core.presentation.platform.LocalFileDrop
 import app.notekea.core.presentation.platform.LocalResizePointerIcon
@@ -58,6 +60,8 @@ fun NotekeaAppLocals(
     val darkTheme = remember(environment) { environment.systemAppearance.observeDarkTheme() }
 
     val appearances = remember(environment) { environment.appearanceStore.observe() }
+    val preferenceChanges = remember(environment) { environment.preferencesStore.observe() }
+    val preferences by preferenceChanges.collectAsState(initial = AppPreferences())
 
     val isSystemDark by darkTheme.collectAsState(initial = null)
     val appearance by appearances.collectAsState(initial = initialAppearance)
@@ -66,13 +70,15 @@ fun NotekeaAppLocals(
         value = environment.systemMotion.isReduced()
     }
 
-    AppLocals(
-        isMotionReduced = isMotionReduced,
-        appearance = appearance,
-        appVersion = environment.systemEnvironment.appVersion,
-        content = content,
-        isSystemDark = isSystemDark
-    )
+    CompositionLocalProvider(LocalAppPreferences provides preferences) {
+        AppLocals(
+            isMotionReduced = isMotionReduced,
+            appearance = appearance,
+            appVersion = environment.systemEnvironment.appVersion,
+            content = content,
+            isSystemDark = isSystemDark
+        )
+    }
 }
 
 @Composable

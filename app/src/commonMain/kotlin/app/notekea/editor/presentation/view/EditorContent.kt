@@ -113,19 +113,21 @@ fun EditorContent(
                 onIntent = onIntent
             )
 
-            EditorList(
-                state = state,
-                page = page,
-                header = EditorHeaderData(
-                    dayNeighbors = dayNeighbors,
-                    isBookmarked = isBookmarked
-                ),
-                platformConventions = platformConventions,
-                onIntent = withModClicks(
-                    pressed = pressed,
-                    onIntent = onIntent
+            NoteTextSize {
+                EditorList(
+                    state = state,
+                    page = page,
+                    header = EditorHeaderData(
+                        dayNeighbors = dayNeighbors,
+                        isBookmarked = isBookmarked
+                    ),
+                    platformConventions = platformConventions,
+                    onIntent = withModClicks(
+                        pressed = pressed,
+                        onIntent = onIntent
+                    )
                 )
-            )
+            }
         }
     }
 }

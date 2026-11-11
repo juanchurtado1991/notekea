@@ -10,6 +10,8 @@ import app.notekea.core.appearance.domain.UiScaleStore
 import app.notekea.core.appearance.domain.WindowBoundsStore
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.domain.time.DescribeElapsedTimeUseCase
+import app.notekea.core.preferences.data.SettingsAppPreferencesStore
+import app.notekea.core.preferences.domain.AppPreferencesStore
 import app.notekea.core.presentation.platform.UiZoomViewModel
 import app.notekea.core.presentation.platform.WindowBoundsViewModel
 import org.koin.core.module.dsl.factoryOf
@@ -35,6 +37,13 @@ val coreModule = module {
 
     single<AppearanceStore> {
         SettingsAppearanceStore(
+            settings = get(),
+            dispatchers = get()
+        )
+    }
+
+    single<AppPreferencesStore> {
+        SettingsAppPreferencesStore(
             settings = get(),
             dispatchers = get()
         )
