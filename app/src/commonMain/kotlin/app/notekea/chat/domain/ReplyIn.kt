@@ -19,8 +19,8 @@ internal fun List<ChatMessage>.inLanguage(
     val isKept = language == null || last < 0
     if (isKept) return this
 
-    val said =
-        "Write your reply in $language." + kept?.let { " When your reply is $it, write $it as it is." }.orEmpty()
+    val keeping = kept?.let { " When your reply is $it, write $it as it is." }.orEmpty()
+    val said = "Write your reply in $language, every word of it.$keeping"
 
     return mapIndexed { index, message ->
         if (index == last) message.copy(text = "${message.text}\n\n$said") else message

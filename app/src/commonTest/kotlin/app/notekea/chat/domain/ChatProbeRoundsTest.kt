@@ -451,4 +451,34 @@ class ChatProbeRoundsTest {
             )
         )
     }
+
+    @Test
+    fun `a complaint is talk, a change asked with it is still planned`() {
+        val help = listOf(PlannedStep(kind = ActionKind.HELP))
+
+        val trash = listOf(
+            PlannedStep(
+                kind = ActionKind.TRASH,
+                fields = mapOf(ActionField.NOTE to "Pancakes")
+            )
+        )
+
+        assertEquals(
+            expected = listOf(ActionKind.CHAT, ActionKind.CHAT, ActionKind.TRASH),
+            actual = listOf(
+                PlanWords.shaped(
+                    steps = help,
+                    request = "Notekea es una porquería, no sirve para nada"
+                ),
+                PlanWords.shaped(
+                    steps = help,
+                    request = "this app is useless"
+                ),
+                PlanWords.shaped(
+                    steps = trash,
+                    request = "this note is garbage, delete Pancakes"
+                )
+            ).map { it.single().kind }
+        )
+    }
 }
