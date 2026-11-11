@@ -4,12 +4,13 @@ import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.YouTubeLinks
 import app.notekea.core.notes.domain.percentDecoded
 
 /**
- * The embedded files of a note's text, as Obsidian reads them: a wiki embed with an optional `|300` width or
- * `|caption`, and `![alt](path)` (a path in `<…>` or percent-encoded, an optional `|300` after the alt). Embeds of
- * notes are found only when [embeds] is asked for them, marked [Embed.isNote]; anything in code is left out.
+ * The embedded files of a note's text, as Obsidian reads them: `![[file|300]]` (a width or a caption), `![alt](path)`
+ * (in `<…>` or percent-encoded, `|300` after the alt) and `![Title](https://youtu.be/…)`. Notes embedded are found
+ * only when asked for, marked [Embed.isNote]; anything in code is left out.
  */
 class EmbedFinder {
     fun embeds(
@@ -32,7 +33,8 @@ class EmbedFinder {
         }
 
         return embeds.filter {
-            if (it.isNote) includeNotes else isFile(target = it.target)
+            val isShown = isFile(target = it.target) || isYouTube(target = it.target)
+            if (it.isNote) includeNotes else isShown
         }
     }
 
@@ -142,6 +144,9 @@ class EmbedFinder {
                 ?.toInt()
         )
     }
+
+    // A YouTube video, shown as its card (`![Title](https://youtu.be/…)`, as Obsidian embeds it).
+    private fun isYouTube(target: String): Boolean = YouTubeLinks.idOf(url = target) != null
 
     /** A file, not a note: its name has an extension other than `.md`. */
     private fun isFile(target: String): Boolean {

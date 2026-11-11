@@ -874,6 +874,8 @@
     <string name="video_position">Position in the video</string>
     <string name="video_close">Close the video</string>
     <string name="video_cannot_play">This computer can’t play it here: click to open it with its app</string>
+    <string name="video_youtube">YouTube</string>
+    <string name="video_youtube_untitled">YouTube video</string>
     <string name="video_local_subtitle">Video · %1$s</string>
     <string name="settings_help_title">Ask about Settings</string>
     <string name="settings_help_intro">Ask what any setting here does, or how to do something. Answers come from Notekea’s guide.</string>

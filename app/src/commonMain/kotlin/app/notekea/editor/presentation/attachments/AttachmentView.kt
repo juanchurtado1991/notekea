@@ -8,8 +8,8 @@ import app.notekea.editor.domain.EmbedProblem
 
 /**
  * One file embedded in the open note: [path] found (null when missing), an image's decoded [image], a video's place
- * on the disk ([location]) to play, or an embedded note's [noteText] with its own embeds ([nested]) or the [problem]
- * that keeps it from showing.
+ * on the disk ([location]) or a YouTube video's [youTubeId] to play, or an embedded note's [noteText] with its own
+ * embeds ([nested]) or the [problem] that keeps it from showing.
  */
 data class AttachmentView(
     val embed: Embed,
@@ -20,7 +20,8 @@ data class AttachmentView(
     val noteText: String? = null,
     val nested: List<AttachmentView> = emptyList(),
     val problem: EmbedProblem? = null,
-    val location: String? = null
+    val location: String? = null,
+    val youTubeId: String? = null
 ) {
     /** Shown as a picture: an image that was found, read and drawn. */
     val isPicture: Boolean get() = kind == AttachmentKind.IMAGE && image != null

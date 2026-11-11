@@ -12,7 +12,10 @@ enum class AttachmentKind {
     OTHER,
 
     /** A note embedded in another (`![[Other note]]`), whose text is shown in place. */
-    NOTE;
+    NOTE,
+
+    /** A YouTube video (`![Title](https://youtu.be/…)`), shown as its card and played in a window of its own. */
+    YOUTUBE;
 
     companion object {
         private const val EXTENSION_MARK = "."

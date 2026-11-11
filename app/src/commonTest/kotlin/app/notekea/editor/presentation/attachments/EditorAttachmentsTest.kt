@@ -100,6 +100,24 @@ class EditorAttachmentsTest : EditorAttachmentsTestBase() {
         }
 
     @Test
+    fun `a YouTube video embedded with its title is a video card, a plain link or another site is not`() =
+        runAttachmentsTest {
+            open(
+                text = "![Cómo hacer arepas](https://youtu.be/dQw4w9WgXcQ)\n" +
+                    "See https://www.youtube.com/watch?v=dQw4w9WgXcQ\n![](https://example.com/video)\n"
+            )
+
+            assertEquals(
+                expected = listOf(listOf(AttachmentKind.YOUTUBE, "dQw4w9WgXcQ", "Cómo hacer arepas")),
+                actual = viewModel
+                    .state
+                    .value
+                    .attachments
+                    .map { listOf(it.kind, it.youTubeId, it.embed.label) }
+            )
+        }
+
+    @Test
     fun `a picture stays decoded while its note is shown, and is let go once another note is`() =
         runAttachmentsTest {
             val plate = RelativePath(value = "attachments/plate.png")

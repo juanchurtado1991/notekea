@@ -9,6 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.StringPatterns
@@ -16,6 +18,7 @@ import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.LinkKind
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.YouTubeLinks
 import app.notekea.core.presentation.designsystem.components.NotekeaAttachmentImage
 import app.notekea.core.presentation.designsystem.components.NotekeaEmbeddedNote
 import app.notekea.core.presentation.designsystem.components.NotekeaFileChip
@@ -23,6 +26,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaMissingFile
 import app.notekea.core.presentation.designsystem.components.NotekeaVideoCard
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.platform.LocalVideoPlayer
+import app.notekea.core.presentation.platform.LocalYouTubePlayer
 import app.notekea.editor.domain.Embed
 import app.notekea.editor.domain.EmbedKind
 import app.notekea.editor.presentation.model.EditorIntent
@@ -37,6 +41,8 @@ import app.notekea.resources.embedded_note_open
 import app.notekea.resources.video_cannot_play
 import app.notekea.resources.video_local_subtitle
 import app.notekea.resources.video_play
+import app.notekea.resources.video_youtube
+import app.notekea.resources.video_youtube_untitled
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -72,6 +78,13 @@ fun AttachmentBlock(
             modifier = modifier
         )
 
+        view.youTubeId != null -> YouTubeEmbed(
+            id = view.youTubeId,
+            title = view.embed.label,
+            thumbnail = view.image,
+            modifier = modifier
+        )
+
         path != null && view.location != null -> VideoEmbed(
             path = path,
             location = view.location,
@@ -101,6 +114,37 @@ fun AttachmentBlock(
             modifier = modifier
         )
     }
+}
+
+/**
+ * A YouTube video in the note: its card, with the title the note gives it, which plays it in Notekea's window, or in
+ * the browser where there is none. Showing the card never goes on the network; only a click does.
+ */
+@Composable
+private fun YouTubeEmbed(
+    id: String,
+    modifier: Modifier,
+    title: String?,
+    thumbnail: ImageBitmap?
+) {
+    val player = LocalYouTubePlayer.current
+    val browser = LocalUriHandler.current
+    val shown = title ?: stringResource(resource = Res.string.video_youtube_untitled)
+
+    NotekeaVideoCard(
+        title = shown,
+        subtitle = stringResource(resource = Res.string.video_youtube),
+        playLabel = stringResource(resource = Res.string.video_play),
+        onPlay = {
+            if (player != null) {
+                player(id, shown)
+            } else {
+                browser.openUri(uri = YouTubeLinks.pageOf(id = id))
+            }
+        },
+        modifier = modifier,
+        thumbnail = thumbnail
+    )
 }
 
 /**

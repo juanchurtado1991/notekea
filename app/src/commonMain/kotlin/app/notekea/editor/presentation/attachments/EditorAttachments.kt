@@ -10,6 +10,7 @@ import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultSettingsReader
+import app.notekea.core.notes.domain.YouTubeLinks
 import app.notekea.core.presentation.designsystem.images.decodedImage
 import app.notekea.editor.domain.AttachFileUseCase
 import app.notekea.editor.domain.AttachmentFolder
@@ -94,7 +95,7 @@ class EditorAttachments(
 
         // A file or note added, moved or renamed outside Notekea since the last listing is found by listing again once.
         val isAnyMissing = views.any {
-            it.path == null
+            it.path == null && it.kind != AttachmentKind.YOUTUBE
         }
 
         return if (isAnyMissing) {
@@ -127,6 +128,15 @@ class EditorAttachments(
             // A note embedded inside a sentence stays a link, so only notes on their own line are read.
             if (embed.isNote) {
                 return@mapNotNull embed.takeIf { it.isOwnLine }?.let { noteView(it, notes, chain) }
+            }
+
+            YouTubeLinks.idOf(url = embed.target)?.let {
+                return@mapNotNull AttachmentView(
+                    embed = embed,
+                    kind = AttachmentKind.YOUTUBE,
+                    path = null,
+                    youTubeId = it
+                )
             }
 
             fileView(
