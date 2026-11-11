@@ -52,6 +52,7 @@ public class SuiteBuilder internal constructor(
         title: String,
         timeout: Duration = DEFAULT_TIMEOUT,
         window: WindowSize? = null,
+        precondition: Precondition? = null,
         body: CaseScope.() -> Unit
     ) {
         automated.add(
@@ -60,6 +61,7 @@ public class SuiteBuilder internal constructor(
                 title = title,
                 timeout = timeout,
                 window = window,
+                precondition = precondition,
                 body = body
             )
         )

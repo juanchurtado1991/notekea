@@ -24,6 +24,6 @@ public sealed class CaseResult {
         val steps: List<String> = emptyList()
     ) : CaseResult()
 
-    /** The case did not run, because the run was stopped before it. */
+    /** The case did not run: the run was stopped before it, or this machine lacks its [Precondition]. */
     public data class Skipped(override val id: String) : CaseResult()
 }
