@@ -105,23 +105,42 @@ class TikaDocumentReader(private val dispatchers: AppDispatchers) : DocumentRead
         format: DocumentFormat
     ): DocumentText {
         val isPlain = format == DocumentFormat.TEXT
-        if (isPlain) return DocumentText(text = file.readText().take(n = MAX_CHARS))
+        if (isPlain) return DocumentText(text = plainText(file = file))
 
-        val handler = MarkdownContentHandler(format = format)
+        val handler = MarkdownContentHandler(
+            format = format,
+            maxChars = MAX_CHARS
+        )
+
         val metadata = Metadata()
 
-        TikaInputStream.get(file.toPath()).use { stream ->
-            parser.parse(stream, handler, metadata, ParseContext())
+        try {
+            TikaInputStream.get(file.toPath()).use { stream ->
+                parser.parse(stream, handler, metadata, ParseContext())
+            }
+        } catch (exception: Exception) {
+            // The handler stops a long document at its limit: what it read so far is the document's text.
+            if (!handler.isFull) throw exception
         }
 
         // Bytes Tika does not recognize at all (a damaged file, or another kind renamed) are no document.
         check(metadata.get(CONTENT_TYPE) != UNKNOWN_TYPE) { NOT_RECOGNIZED }
 
-        val result = handler.result()
+        return handler.result()
+    }
 
-        val isLong = result.text.length > MAX_CHARS
+    // At most MAX_CHARS of a text file, read no further.
+    private fun plainText(file: File): String = file.bufferedReader().use { reader ->
+        val chars = CharArray(size = MAX_CHARS)
+        var read = 0
 
-        return if (isLong) result.copy(text = result.text.take(n = MAX_CHARS)) else result
+        while (read < MAX_CHARS) {
+            val count = reader.read(chars, read, MAX_CHARS - read)
+            if (count < 0) break
+            read += count
+        }
+
+        String(chars, 0, read)
     }
 
     private fun unreadable(message: String): Outcome<DocumentText, DocumentError> =

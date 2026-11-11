@@ -183,6 +183,33 @@ class SyncSettingsViewModelTest {
             )
         }
 
+    // Code review of 2026-11-11: an address typed but not connected was saved by a change of auto-sync, and the
+    // token was then looked up under it.
+    @Test
+    fun `a change of auto-sync keeps the address it is connected to, not one only typed`() =
+        runTest(dispatcher) {
+            val viewModel = viewModel()
+
+            connect(
+                viewModel = viewModel,
+                url = "https://example.com/notes.git",
+                token = "secret"
+            )
+
+            viewModel.onIntent(intent = SyncSettingsIntent.OnUrlChange(url = "https://example.com/other.git"))
+            viewModel.onIntent(intent = SyncSettingsIntent.OnAutoToggle)
+            advanceTimeBy(delayTime = 1.seconds)
+            runCurrent()
+
+            assertEquals(
+                expected = SyncSettings(
+                    remoteUrl = "https://example.com/notes.git",
+                    isAuto = false
+                ),
+                actual = settings.read(vaultPath = VAULT)
+            )
+        }
+
     private companion object {
         const val VAULT = "/vaults/Notes"
         const val URL = "https://example.com/notes.git"

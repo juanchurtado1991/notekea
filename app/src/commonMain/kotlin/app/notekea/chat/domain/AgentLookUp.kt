@@ -160,7 +160,8 @@ internal class AgentLookUp(
         url: String,
         task: String
     ): String {
-        if (url.isBlank() || url !in task) return "fetch \"$url\": refused, the task does not write this address."
+        // Only an address the task writes whole: not a piece of one, such as its site's root.
+        if (url !in UrlsNamed.writtenIn(text = task)) return "fetch \"$url\": refused, the task does not write this address."
 
         return when (val page = pageReader.read(url = url)) {
             is Outcome.Success -> "fetch \"$url\":\n${page.value.take(n = PAGE_CHARS)}"

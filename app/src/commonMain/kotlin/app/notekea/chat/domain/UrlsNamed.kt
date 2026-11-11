@@ -12,14 +12,17 @@ internal object UrlsNamed {
     )
     private const val TRAILING = ".,;:!?)]}"
 
+    /** The web addresses [text] writes, without the punctuation that ends its sentence. */
+    fun writtenIn(text: String): List<String> = URL
+        .findAll(input = text)
+        .map { it.value.trimEnd(*TRAILING.toCharArray()) }
+        .toList()
+
     fun shaped(
         steps: List<PlannedStep>,
         request: String
     ): List<PlannedStep> {
-        val written = URL
-            .findAll(input = request)
-            .map { it.value.trimEnd(*TRAILING.toCharArray()) }
-            .toList()
+        val written = writtenIn(text = request)
 
         val isClip = steps.any {
             it.kind == ActionKind.CLIP_URL

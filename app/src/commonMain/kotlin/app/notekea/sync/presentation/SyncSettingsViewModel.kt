@@ -134,9 +134,11 @@ class SyncSettingsViewModel(
         if (!current.isConnected) return
 
         launchGuarded(onError = ::logError) {
+            // The address it is connected to: one typed in the field counts only once Connect is clicked.
+            val saved = vault?.let { settingsStore.read(vaultPath = it) } ?: return@launchGuarded
+
             engine.change(
-                settings = SyncSettings(
-                    remoteUrl = current.url.trim(),
+                settings = saved.copy(
                     isAuto = current.isAuto,
                     intervalMinutes = current.intervalMinutes
                 )

@@ -8,6 +8,8 @@ import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.presentation.BaseViewModel
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 
 /**
@@ -24,6 +26,9 @@ class StudyViewModel(
     private val logger = Logger.withTag(tag = LOG_TAG)
     private var notes: Collection<NoteEntry> = emptyList()
     private var isShown = false
+
+    // One answer written at a time: two cards of a note answered quickly would each rewrite the note's old text.
+    private val writing = Mutex()
 
     override fun handleIntent(intent: StudyIntent) {
         when (intent) {
@@ -100,12 +105,14 @@ class StudyViewModel(
         }
 
         launchGuarded(onError = ::logError) {
-            val scheduled = answerCard(
-                vaultPath = vaultPath,
-                card = card,
-                answer = answer,
-                today = today()
-            )
+            val scheduled = writing.withLock {
+                answerCard(
+                    vaultPath = vaultPath,
+                    card = card,
+                    answer = answer,
+                    today = today()
+                )
+            }
 
             if (scheduled != null) emit(effect = StudyEffect.NoteRewritten(path = card.note))
 

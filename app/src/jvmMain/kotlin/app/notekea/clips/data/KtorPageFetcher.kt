@@ -13,9 +13,9 @@ import io.ktor.client.request.header
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.HttpHeaders
+import io.ktor.http.charset
 import io.ktor.utils.io.readAvailable
 import kotlinx.coroutines.withContext
-import java.net.Inet6Address
 import java.net.InetAddress
 import java.net.URI
 import java.net.UnknownHostException
@@ -27,6 +27,10 @@ import java.net.UnknownHostException
 class KtorPageFetcher(private val dispatchers: AppDispatchers) : PageFetcher {
     private val client by lazy {
         HttpClient(engineFactory = OkHttp) {
+            engine {
+                config { dns(LocalRefusingDns()) }
+            }
+
             expectSuccess = false
             followRedirects = false
 
@@ -92,19 +96,9 @@ class KtorPageFetcher(private val dispatchers: AppDispatchers) : PageFetcher {
             return ClipError.Offline
         }
 
-        return if (addresses.any { isLocal(address = it) }) ClipError.LocalAddress else null
-    }
+        val isLocal = addresses.any { LocalRefusingDns.isLocal(address = it) }
 
-    private fun isLocal(address: InetAddress): Boolean {
-        val isUniqueLocal = address is Inet6Address &&
-            (address.address[0].toInt() and UNIQUE_LOCAL_MASK) == UNIQUE_LOCAL
-
-        return address.isLoopbackAddress ||
-            address.isSiteLocalAddress ||
-            address.isLinkLocalAddress ||
-            address.isAnyLocalAddress ||
-            address.isMulticastAddress ||
-            isUniqueLocal
+        return if (isLocal) ClipError.LocalAddress else null
     }
 
     private suspend fun bodyOf(response: HttpResponse): String? {
@@ -119,13 +113,22 @@ class KtorPageFetcher(private val dispatchers: AppDispatchers) : PageFetcher {
             if (read < 0) break
         }
 
-        return bytes.toString(Charsets.UTF_8)
+        // The charset the response declares, else UTF-8: an older site's Latin-1 page keeps its accents.
+        return bytes.toString(response.charset() ?: Charsets.UTF_8)
     }
 
     private fun errorOf(exception: Exception): ClipError {
         val name = exception::class.simpleName.orEmpty()
 
-        return if ("Timeout" in name) ClipError.TooSlow else ClipError.Offline
+        val isLocal = generateSequence<Throwable>(exception) { it.cause }.any {
+            it is LocalRefusingDns.Refused
+        }
+
+        return when {
+            isLocal -> ClipError.LocalAddress
+            "Timeout" in name -> ClipError.TooSlow
+            else -> ClipError.Offline
+        }
     }
 
     private companion object {
@@ -138,8 +141,6 @@ class KtorPageFetcher(private val dispatchers: AppDispatchers) : PageFetcher {
         const val BUFFER = 64 * 1024
         const val TIMEOUT_MILLIS = 20_000L
         const val CONNECT_MILLIS = 10_000L
-        const val UNIQUE_LOCAL = 0xfc
-        const val UNIQUE_LOCAL_MASK = 0xfe
         val OK = 200..299
         val REDIRECTS = setOf(301, 302, 303, 307, 308)
     }

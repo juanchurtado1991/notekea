@@ -5,6 +5,7 @@ import app.notekea.clips.domain.FetchedPage
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import kotlinx.coroutines.runBlocking
+import java.net.InetAddress
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -79,6 +80,26 @@ class ClipAdaptersTest {
                 article.text.contains("About"),
                 home
             )
+        )
+    }
+
+    // Code review of 2026-11-11: an address checked public could turn local when looked up again to connect.
+    @Test
+    fun `the lookup a request connects with refuses a host that turns local`() {
+        var answers = 0
+
+        val rebinding = LocalRefusingDns { host ->
+            answers++
+            val address = if (answers == 1) "93.184.216.34" else "127.0.0.1"
+            listOf(InetAddress.getByAddress(host, InetAddress.getByName(address).address))
+        }
+
+        val first = rebinding.lookup(hostname = "example.com").map { it.hostAddress }
+        val second = runCatching { rebinding.lookup(hostname = "example.com") }.exceptionOrNull()
+
+        assertEquals(
+            expected = listOf<Any?>(listOf("93.184.216.34"), true),
+            actual = listOf(first, second is LocalRefusingDns.Refused)
         )
     }
 
