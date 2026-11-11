@@ -114,10 +114,10 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
 Where it stands (2026-11-11): 4.1–4.8 built, with the chat's help guide and the developer's chat smoke fixes.
 
 - **Measured:** plans Medium 95 % / Small 73 % (126 requests); clips 20 of 20 pages, 91 % of sentences backed; agent
-  mode Medium 83 %, Large 70 %, Small 10 %, so only Medium offers it (`docs/answer-quality.md`). Sync under a second,
+  mode Medium 83 %, Large 70 %, Small 10 %; Medium and Large offer it (`docs/answer-quality.md`). Sync under a second,
   large documents ready in 4.6 s (`docs/performance.md`).
-- **Auto-Test:** 4.2-01/02, 4.4-01, 4.5-01, 4.6-01 and 4.7-01 automated; 4.2-03, 4.4-02, 4.5-02, 4.6-02 and 4.7-02
-  manual (`MVP_SMOKE_TEST.md`).
+- **Auto-Test:** 4.2-01/02, 4.4-01, 4.5-01, 4.6-01, 4.7-01, 4.7-03 and 4.7-05 automated; 4.2-03, 4.4-02, 4.5-02,
+  4.6-02, 4.7-02, 4.7-04 and 4.7-06 manual (`MVP_SMOKE_TEST.md`).
 - **Decided 2026-11-11:** agent mode on Medium and Large (Large at 70 %), and the chat's modes Auto, Fast, Deep
   thinking and Agent in a menu at the field's bottom right. **For the developer to decide:** Web clip moved from
   the editor's More menu to the start actions (and the chat); Tika's ~38 MB in the installers; HTTPS tokens only.
@@ -125,6 +125,11 @@ Where it stands (2026-11-11): 4.1–4.8 built, with the chat's help guide and th
   Windows' core.autocrlf rewrote pulled notes' line ends, and PDFBox scanned every system font on its first
   non-embedded font, slowing the Playground Vault's opening until Auto-Test cases timed out; it now uses its own fonts.
 - **Known:** a test JVM that ran two model cases sometimes aborts at exit (native teardown), with every case passed.
+- **Chat probe (2026-11-11, overnight):** six rounds of 62 conversations in English, Spanish and French against
+  Medium (`ChatProbeChatModelTest`, `docs/answer-quality.md`): replies in the person's language, follow-ups,
+  honest refusals, the memory ring with compaction, answers from properties and tables, and no claimed changes.
+  Action eval 97 %. Open: Medium's agent mixes `finished` and `rating`; a "going back to the start" after ten turns
+  picks the wrong recipe. 4.7-05 automated, 4.7-06 manual. Not yet probed on Large.
 
 Decided before the work started:
 
