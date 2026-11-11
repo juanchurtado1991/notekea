@@ -27,6 +27,7 @@ import app.notekea.core.logging.domain.TextClipboard
 import app.notekea.core.notes.domain.FileOpener
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase
+import app.notekea.core.preferences.domain.AppPreferencesStore
 import app.notekea.core.presentation.platform.AppEnvironment
 import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.WindowCloseGuard
@@ -39,6 +40,7 @@ import app.notekea.tree.data.VaultFolderTrash
 import app.notekea.tree.domain.FileRevealer
 import app.notekea.tree.domain.Trash
 import app.notekea.vault.domain.FolderPicker
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okio.FileSystem
 import org.koin.core.Koin
@@ -86,6 +88,15 @@ class CaseApp(
 
         koin = startKoin { modules(desktopModules + overrides()) }.koin
 
+        // A case starts past the first-run welcome, once per data folder, so a case that asks for it again (5.1-01)
+        // still gets it after Notekea starts again on the same data.
+        val welcomeMarker = appData.resolve(WELCOME_MARKER)
+
+        if (!Files.exists(welcomeMarker)) {
+            setWelcomeSeen(isSeen = true)
+            Files.createFile(welcomeMarker)
+        }
+
         host = WindowHost(conventions = koin.get())
     }
 
@@ -108,6 +119,20 @@ class CaseApp(
         )
 
         runBlocking { koin.get<ActiveModelStore>().save(size = size) }
+    }
+
+    /** Whether the next Notekea started on this data shows the first-run welcome (false) or not. */
+    fun setWelcomeSeen(isSeen: Boolean) {
+        val store = koin.get<AppPreferencesStore>()
+
+        runBlocking {
+            store.save(
+                preferences = store
+                    .observe()
+                    .first()
+                    .copy(hasSeenWelcome = isSeen)
+            )
+        }
     }
 
     /** The sync of the vault [name], for the performance runs that time it without the UI. */
@@ -197,6 +222,7 @@ class CaseApp(
 
     private companion object {
         const val HOME = "home"
+        const val WELCOME_MARKER = "welcome-seen-by-default"
         const val DOCUMENTS = "Documents"
         const val RESOURCES_PROPERTY = "compose.application.resources.dir"
     }

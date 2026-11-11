@@ -41,6 +41,7 @@ import app.notekea.autotest.cases.m4.chatTalkCases
 import app.notekea.autotest.cases.m4.sourceCases
 import app.notekea.autotest.cases.m4.syncCases
 import app.notekea.autotest.cases.m4.videoCases
+import app.notekea.autotest.cases.m5.onboardingCases
 import app.notekea.autotest.cases.m5.settingsCases
 import com.testbuddy.Suite
 import com.testbuddy.only
@@ -111,6 +112,7 @@ object NotekeaSuite {
             syncCases()
             sourceCases()
             videoCases()
+            onboardingCases()
             settingsCases()
             agentCases()
             chatTalkCases()

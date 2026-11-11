@@ -36,6 +36,7 @@ import app.notekea.core.presentation.platform.WindowHost
 import app.notekea.core.presentation.platform.awtFileDrop
 import app.notekea.shell.presentation.VaultTreeScreen
 import app.notekea.shell.presentation.WindowDialogsHost
+import app.notekea.shell.presentation.onboarding.OnboardingHost
 import app.notekea.sync.presentation.SyncSettingsScreen
 import app.notekea.tree.presentation.view.VaultScope
 import app.notekea.vault.presentation.welcome.WelcomeContent
@@ -185,6 +186,9 @@ private fun WindowContent(host: WindowHost) {
                 )
             }
         )
+
+        // The first-run welcome over everything, until it is finished or skipped (5.1).
+        OnboardingHost()
     }
 }
 

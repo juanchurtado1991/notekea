@@ -18,11 +18,13 @@ import app.notekea.shell.domain.SaveSidePanelUseCase
 import app.notekea.shell.domain.WorkspaceStore
 import app.notekea.shell.presentation.WorkspaceTools
 import app.notekea.shell.presentation.WorkspaceViewModel
+import app.notekea.shell.presentation.onboarding.OnboardingViewModel
 import app.notekea.sync.domain.VaultEdits
 import app.notekea.tree.domain.FileWatcher
 import kotlinx.coroutines.flow.map
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 /**
@@ -90,4 +92,6 @@ val shellModule = module {
             tools = get()
         )
     }
+
+    viewModelOf(::OnboardingViewModel)
 }

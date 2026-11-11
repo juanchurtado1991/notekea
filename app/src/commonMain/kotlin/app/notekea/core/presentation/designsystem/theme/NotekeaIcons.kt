@@ -68,11 +68,13 @@ import com.composables.icons.lucide.Keyboard
 import com.composables.icons.lucide.LayoutTemplate
 import com.composables.icons.lucide.Library
 import com.composables.icons.lucide.Link
+import com.composables.icons.lucide.Link2
 import com.composables.icons.lucide.List
 import com.composables.icons.lucide.ListChecks
 import com.composables.icons.lucide.ListOrdered
 import com.composables.icons.lucide.ListTodo
 import com.composables.icons.lucide.ListTree
+import com.composables.icons.lucide.Lock
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.MessageSquareQuote
 import com.composables.icons.lucide.MessagesSquare
@@ -273,6 +275,11 @@ object NotekeaIcons {
     val SettingsAppearance: ImageVector get() = Lucide.Palette
     val SettingsEditor: ImageVector get() = Lucide.Type
     val SettingsShortcuts: ImageVector get() = Lucide.Keyboard
+    val OnboardingPrivate: ImageVector get() = Lucide.Lock
+    val OnboardingRelated: ImageVector get() = Lucide.Link2
+    val OnboardingAsk: ImageVector get() = Lucide.MessageSquareQuote
+    val NewVault: ImageVector get() = Lucide.FolderPlus
+    val SampleVault: ImageVector get() = Lucide.BookOpen
     val SwitchVault: ImageVector get() = Lucide.Library
     val SortByModified: ImageVector get() = Lucide.ClockArrowDown
     val SortByName: ImageVector get() = Lucide.ArrowDownAZ

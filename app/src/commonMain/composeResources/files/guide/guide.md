@@ -161,6 +161,14 @@ answers and needs a GPU or 32 GB of memory. Click Download (it can be paused and
 The first download also brings the model search uses. The model runs on your computer and works without internet;
 your notes never leave it. Delete frees its space on the disk.
 
+# First-run welcome
+words: welcome, bienvenida, onboarding, getting started, primeros pasos, sample vault, vault de ejemplo, start, empezar
+The first time Notekea starts, a welcome in three steps shows over the welcome screen: what Notekea does, choose your
+notes (open a folder, create a vault, or try the sample vault, a copy made in Documents), and get the AI, the model
+size that fits this computer, downloaded in the background. Skip or Esc closes it and it does not come back; Settings
+→ General → Welcome → Show again brings it back the next time Notekea starts. The welcome screen also has Open the
+sample vault.
+
 # Settings: General
 words: settings, ajustes, configuración, preferences, preferencias, language, idioma, español, english, startup, al iniciar, last vault, último vault, welcome again, bienvenida otra vez
 Open Settings (the gear at the bottom of the tool rail; {settings} where the system has it), then General. Language

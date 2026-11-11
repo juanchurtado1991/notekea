@@ -49,6 +49,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **First-run welcome** (5.1): an Apple-style sheet in three steps over the welcome screen.
+  - What Notekea does.
+  - Choose your notes: open a folder, create a vault, or try the sample vault, which Notekea now ships and copies
+    into Documents.
+  - Get the AI: the size that fits this computer, downloaded in the background.
+  - Skip or Esc ends it for good, and Settings → General shows it again.
+
 - **Settings as macOS's System Settings** (5.2, the developer's choice).
   - Every section is in a sidebar with a colored icon, and its settings are in rounded groups: the name on the left,
     the control on the right, a short note under some.

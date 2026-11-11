@@ -1309,7 +1309,7 @@ Added with the developer on 2026-11-11, decided after a spike (`LIBRARIES.md` §
 
 ## M5 — Release
 
-### 🚧 5.1 Onboarding — `feature/videos`
+### 🚧 5.1 Onboarding — `feature/videos` (built: an Apple-style welcome sheet over the welcome screen, the sample vault shipped)
 
 First run flow, three steps, skippable at any point:
 
@@ -1317,7 +1317,7 @@ First run flow, three steps, skippable at any point:
 2. **Choose your notes:** open folder / create vault / use the sample vault.
 3. **Get the AI:** recommended model for this machine's RAM, download in the background while indexing starts.
 
-### 🚧 5.2 Settings — `feature/videos`
+### 🚧 5.2 Settings — `feature/videos` (built: macOS System Settings style, General, Editor, Files, Shortcuts, About; Spanish pending)
 
 `Mod+,` opens Settings (the dialog the tool rail's Settings opens since 1.14, with its sections marked "Coming soon")
 with sections: General (language, open last vault), Appearance (mode and color theme, built in 2.12), Editor (font size, line width),

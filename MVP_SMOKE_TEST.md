@@ -640,6 +640,15 @@ a few minutes).
 
 ## M5 — Release
 
+### 5.1 Onboarding
+
+Run on a fresh install of Notekea QA, or after Settings → General → Welcome → Show again and a restart.
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 5.1-01 | Start Notekea for the first time; Continue; Try the sample vault; Not now; quit and start again | The welcome sheet shows over the welcome screen; the notes step opens a copy of the sample vault in Documents; the AI step follows; Not now closes it, and it does not come back | 5.1 | Auto-Test | 5.1-01, `OnboardingViewModelTest`, `WelcomeViewModelTest` | | | |
+| 5.1-02 | Look at each step and press Esc on the first; start again, Open a folder… with your notes, then Download and start | A sheet like Apple's welcome windows: logo, three promises with icons, Continue and Skip, "1 of 3"; Esc closes it for good; the AI step names the size that fits, and the download shows in the status bar while the vault is indexed | 5.1 | Manual (eyes) | | | | |
+
 ### 5.2 Settings
 
 Run on the Playground Vault.
