@@ -6,13 +6,14 @@ import app.notekea.query.domain.QueryJsonReader
 import app.notekea.query.domain.QuerySort
 import app.notekea.query.domain.VaultQuery
 import com.ghost.serialization.Ghost
+import com.ghost.serialization.exception.GhostJsonException
 
 /** [QueryJsonReader] over Ghost; a filter with a condition the query tab does not have is left out. */
 class GhostQueryJsonReader : QueryJsonReader {
     override fun read(json: String): VaultQuery? {
         val dto = try {
             Ghost.deserialize<QueryJsonDto>(json)
-        } catch (_: RuntimeException) {
+        } catch (_: GhostJsonException) {
             return null
         }
 
