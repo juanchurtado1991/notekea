@@ -255,7 +255,8 @@ private fun DeleteDialog(
         buttonOrder = state.buttonOrder,
         onConfirm = { onIntent(ModelManagerIntent.OnDeleteConfirm) },
         onDismiss = { onIntent(ModelManagerIntent.OnDeleteDismiss) },
-        isDestructive = true
+        isDestructive = true,
+        isStacked = state.stacksAlertButtons
     )
 }
 

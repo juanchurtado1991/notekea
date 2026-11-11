@@ -32,7 +32,8 @@ internal fun DeleteEntryDialog(
     tree: VaultTree,
     buttonOrder: DialogButtonOrder,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    isStacked: Boolean = false
 ) {
     val isFolder = path in tree.folders
     val isFile = path in tree.attachments
@@ -71,7 +72,8 @@ internal fun DeleteEntryDialog(
         buttonOrder = buttonOrder,
         onConfirm = onConfirm,
         onDismiss = onDismiss,
-        isDestructive = true
+        isDestructive = true,
+        isStacked = isStacked
     )
 }
 

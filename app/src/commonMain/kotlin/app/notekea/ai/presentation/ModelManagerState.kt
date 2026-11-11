@@ -22,7 +22,8 @@ data class ModelManagerState(
     val folder: String = "",
     val isOtherSizesShown: Boolean = false,
     val pendingDelete: ModelSize? = null,
-    val buttonOrder: DialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY
+    val buttonOrder: DialogButtonOrder = DialogButtonOrder.CANCEL_THEN_PRIMARY,
+    val stacksAlertButtons: Boolean = false
 ) {
     /** The size shown first: the one in use, else the one installing, else the one recommended. */
     val featured: ModelSize? get() = active ?: session?.size ?: recommended

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.platform.domain.stacksAlertButtons
 import app.notekea.core.presentation.designsystem.components.NotekeaSplitPane
 import app.notekea.core.presentation.designsystem.components.NotekeaTitleBarBand
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
@@ -132,7 +133,8 @@ private fun TreeQuestions(
             tree = state.tree,
             buttonOrder = state.platformConventions.dialogButtonOrder,
             onConfirm = { onIntent(VaultTreeIntent.OnDeleteConfirm) },
-            onDismiss = { onIntent(VaultTreeIntent.OnDeleteCancel) }
+            onDismiss = { onIntent(VaultTreeIntent.OnDeleteCancel) },
+            isStacked = state.platformConventions.stacksAlertButtons
         )
     }
 }

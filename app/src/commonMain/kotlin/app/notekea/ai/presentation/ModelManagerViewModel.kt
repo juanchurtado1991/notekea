@@ -9,6 +9,7 @@ import app.notekea.ai.domain.ModelSize
 import app.notekea.ai.domain.ModelStorage
 import app.notekea.ai.domain.RecommendModelUseCase
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.platform.domain.stacksAlertButtons
 import app.notekea.core.presentation.BaseViewModel
 import co.touchlab.kermit.Logger
 
@@ -25,7 +26,10 @@ class ModelManagerViewModel(
     private val recommendModel: RecommendModelUseCase,
     platformConventions: PlatformConventions
 ) : BaseViewModel<ModelManagerState, ModelManagerIntent, Nothing>(
-    initialState = ModelManagerState(buttonOrder = platformConventions.dialogButtonOrder)
+    initialState = ModelManagerState(
+        buttonOrder = platformConventions.dialogButtonOrder,
+        stacksAlertButtons = platformConventions.stacksAlertButtons
+    )
 ) {
     private val logger = Logger.withTag(tag = LOG_TAG)
 
