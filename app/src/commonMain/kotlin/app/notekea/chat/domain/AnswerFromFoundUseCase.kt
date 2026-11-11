@@ -35,13 +35,18 @@ class AnswerFromFoundUseCase(private val llmEngine: LlmEngine) {
             maxTokens = MAX_TOKENS,
             temperature = 0f
         )
-    ).map { it.withoutTables() }
+    ).map { withoutTables(step = it) }
 
     // Large wrote the tables again under its answer, though told not to (the comparison with Claude, 2026-11-11).
-    private fun AnswerStep.withoutTables(): AnswerStep = when (this) {
-        is AnswerStep.Writing -> copy(text = withoutTables(text = text))
-        is AnswerStep.Done -> copy(answer = answer.copy(text = withoutTables(text = answer.text)))
-        else -> this
+    private fun withoutTables(step: AnswerStep): AnswerStep = when (step) {
+        is AnswerStep.Writing -> step.copy(text = withoutTables(text = step.text))
+
+        is AnswerStep.Done -> {
+            val text = withoutTables(text = step.answer.text)
+            step.copy(answer = step.answer.copy(text = text))
+        }
+
+        else -> step
     }
 
     // The text before a table written again, as "Table 1 (…)" or as Markdown rows.
