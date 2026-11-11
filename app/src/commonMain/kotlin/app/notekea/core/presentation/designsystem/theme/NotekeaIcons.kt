@@ -85,7 +85,9 @@ import com.composables.icons.lucide.PanelLeftClose
 import com.composables.icons.lucide.PanelRight
 import com.composables.icons.lucide.PanelTop
 import com.composables.icons.lucide.Paperclip
+import com.composables.icons.lucide.Pause
 import com.composables.icons.lucide.Pencil
+import com.composables.icons.lucide.Play
 import com.composables.icons.lucide.Plus
 import com.composables.icons.lucide.Quote
 import com.composables.icons.lucide.Search
@@ -115,6 +117,7 @@ import com.composables.icons.lucide.TextSearch
 import com.composables.icons.lucide.Trash2
 import com.composables.icons.lucide.TriangleAlert
 import com.composables.icons.lucide.Type
+import com.composables.icons.lucide.Video
 import com.composables.icons.lucide.X
 import com.composables.icons.lucide.Zap
 import com.composables.icons.lucide.ZoomIn
@@ -199,6 +202,8 @@ object NotekeaIcons {
     val FindPrevious: ImageVector get() = Lucide.ArrowUp
     val ImageFile: ImageVector get() = Lucide.FileImage
     val MediaFile: ImageVector get() = Lucide.FilePlay
+    val Pause: ImageVector get() = Lucide.Pause
+    val Play: ImageVector get() = Lucide.Play
     val Minimize: ImageVector get() = Lucide.Minus
     val Folder: ImageVector get() = Lucide.Folder
     val Home: ImageVector get() = Lucide.House
@@ -225,6 +230,7 @@ object NotekeaIcons {
     val ChatModel: ImageVector get() = Lucide.Cpu
     val Send: ImageVector get() = Lucide.SendHorizontal
     val Stop: ImageVector get() = Lucide.Square
+    val Video: ImageVector get() = Lucide.Video
     val Inspector: ImageVector get() = Lucide.Info
     val InfoModified: ImageVector get() = Lucide.Pencil
     val HideSidebar: ImageVector get() = Lucide.PanelLeftClose

@@ -80,6 +80,25 @@ class EditorAttachmentsTest : EditorAttachmentsTestBase() {
             )
         }
 
+    // The developer's request of 2026-11-11: a video plays in its note, from where it is on the disk.
+    @Test
+    fun `an embedded video is found with where it is on the disk, to play, and nothing else is`() =
+        runAttachmentsTest {
+            open(text = "![[Arepas.mp4]]\n![[menu.pdf]]\n")
+
+            assertEquals(
+                expected = listOf(
+                    listOf(AttachmentKind.VIDEO, "$VAULT/attachments/Arepas.mp4"),
+                    listOf(AttachmentKind.OTHER, null)
+                ),
+                actual = viewModel
+                    .state
+                    .value
+                    .attachments
+                    .map { listOf(it.kind, it.location) }
+            )
+        }
+
     @Test
     fun `a picture stays decoded while its note is shown, and is let go once another note is`() =
         runAttachmentsTest {

@@ -156,11 +156,18 @@ class EditorAttachments(
         val kind = AttachmentKind.of(name = path?.name ?: embed.target)
         val image = if (path != null && kind == AttachmentKind.IMAGE) imageOf(path = path) else null
 
+        val location = path
+            ?.takeIf {
+                kind == AttachmentKind.VIDEO
+            }
+            ?.let { "$vaultPath${RelativePath.SEPARATOR}${it.value}" }
+
         return AttachmentView(
             embed = embed,
             path = path,
             kind = kind,
             image = image,
+            location = location,
             isUnreadable = path != null &&
                 kind == AttachmentKind.IMAGE &&
                 image == null

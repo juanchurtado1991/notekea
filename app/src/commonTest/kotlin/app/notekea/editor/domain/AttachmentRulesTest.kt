@@ -8,15 +8,18 @@ import kotlin.test.assertEquals
 /** The kind of an attachment, the folder new ones go to, how an embed finds its file and how a new one is written. */
 class AttachmentRulesTest {
     @Test
-    fun `images are the formats Notekea can draw, everything else is a file`() {
+    fun `images are the formats Notekea can draw, videos those a player plays, everything else is a file`() {
         assertEquals(
             expected = listOf(
                 AttachmentKind.IMAGE,
                 AttachmentKind.IMAGE,
+                AttachmentKind.VIDEO,
+                AttachmentKind.VIDEO,
+                AttachmentKind.VIDEO,
                 AttachmentKind.OTHER,
                 AttachmentKind.OTHER
             ),
-            actual = listOf("a.PNG", "b.jpeg", "c.svg", "d.pdf").map {
+            actual = listOf("a.PNG", "b.jpeg", "trip.mp4", "talk.MOV", "clip.webm", "c.svg", "d.pdf").map {
                 AttachmentKind.of(name = it)
             }
         )

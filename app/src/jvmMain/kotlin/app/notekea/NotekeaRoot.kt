@@ -19,10 +19,12 @@ import app.notekea.core.presentation.designsystem.theme.LocalSystemDarkTheme
 import app.notekea.core.presentation.designsystem.theme.LocalSystemReduceMotion
 import app.notekea.core.presentation.platform.AppEnvironment
 import app.notekea.core.presentation.platform.AppVersionDefaults
+import app.notekea.core.presentation.platform.DesktopVideoPlayer
 import app.notekea.core.presentation.platform.LocalAppVersion
 import app.notekea.core.presentation.platform.LocalFileDrop
 import app.notekea.core.presentation.platform.LocalResizePointerIcon
 import app.notekea.core.presentation.platform.LocalShortcutDispatcher
+import app.notekea.core.presentation.platform.LocalVideoPlayer
 import app.notekea.core.presentation.platform.LocalWindowCloseGuard
 import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.core.presentation.platform.UiZoom
@@ -84,6 +86,14 @@ private fun AppLocals(
         LocalSystemReduceMotion provides isMotionReduced,
         LocalAppearance provides appearance,
         LocalFileDrop provides ::awtFileDrop,
+        LocalVideoPlayer provides { location, onClose, onCannotPlay, modifier ->
+            DesktopVideoPlayer(
+                location = location,
+                onClose = onClose,
+                onCannotPlay = onCannotPlay,
+                modifier = modifier
+            )
+        },
         LocalAppVersion provides appVersion,
         LocalResizePointerIcon provides PointerIcon(cursor = Cursor(Cursor.E_RESIZE_CURSOR)),
         content = content

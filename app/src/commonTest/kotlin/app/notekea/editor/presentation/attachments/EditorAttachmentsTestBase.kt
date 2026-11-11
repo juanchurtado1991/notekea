@@ -40,6 +40,7 @@ abstract class EditorAttachmentsTestBase {
         Dispatchers.setMain(dispatcher = testDispatcher)
         fixture.attachmentStore.contents[RelativePath(value = "attachments/plate.png")] = png
         fixture.attachmentStore.contents[RelativePath(value = "Recipes/menu.pdf")] = PDF
+        fixture.attachmentStore.contents[RelativePath(value = "attachments/Arepas.mp4")] = PDF
         fixture.attachmentStore.contents[RelativePath(value = "attachments/broken.png")] = PDF
     }
 

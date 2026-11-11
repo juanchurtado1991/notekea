@@ -1,7 +1,13 @@
 package app.notekea.editor.presentation.attachments
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -14,7 +20,9 @@ import app.notekea.core.presentation.designsystem.components.NotekeaAttachmentIm
 import app.notekea.core.presentation.designsystem.components.NotekeaEmbeddedNote
 import app.notekea.core.presentation.designsystem.components.NotekeaFileChip
 import app.notekea.core.presentation.designsystem.components.NotekeaMissingFile
+import app.notekea.core.presentation.designsystem.components.NotekeaVideoCard
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.platform.LocalVideoPlayer
 import app.notekea.editor.domain.Embed
 import app.notekea.editor.domain.EmbedKind
 import app.notekea.editor.presentation.model.EditorIntent
@@ -26,6 +34,9 @@ import app.notekea.resources.attachment_locate
 import app.notekea.resources.attachment_missing
 import app.notekea.resources.attachment_open_hint
 import app.notekea.resources.embedded_note_open
+import app.notekea.resources.video_cannot_play
+import app.notekea.resources.video_local_subtitle
+import app.notekea.resources.video_play
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -61,6 +72,13 @@ fun AttachmentBlock(
             modifier = modifier
         )
 
+        path != null && view.location != null -> VideoEmbed(
+            path = path,
+            location = view.location,
+            onIntent = onIntent,
+            modifier = modifier
+        )
+
         view.isPicture && image != null -> NotekeaAttachmentImage(
             bitmap = image,
             contentDescription = view.embed.label ?: view.embed.target,
@@ -80,6 +98,57 @@ fun AttachmentBlock(
             path = view.embed.target,
             locateLabel = stringResource(resource = Res.string.attachment_locate),
             onLocate = { onIntent(EditorIntent.OnAttachmentLocate(embed = view.embed)) },
+            modifier = modifier
+        )
+    }
+}
+
+/**
+ * A video in the note: its card until it is played, then the system's player in its place, at most
+ * [VIDEO_MAX_WIDTH_DP] wide; ✕ puts the card back. One this system cannot play says so and opens with its app.
+ */
+@Composable
+private fun VideoEmbed(
+    path: RelativePath,
+    location: String,
+    onIntent: (EditorIntent) -> Unit,
+    modifier: Modifier
+) {
+    val player = LocalVideoPlayer.current
+    var isPlaying by remember(location) { mutableStateOf(value = false) }
+    var cannotPlay by remember(location) { mutableStateOf(value = false) }
+    val isPlayable = player != null && !cannotPlay
+
+    if (isPlaying && player != null) {
+        player(
+            location,
+            { isPlaying = false },
+            {
+                isPlaying = false
+                cannotPlay = true
+            },
+            modifier
+                .fillMaxWidth()
+                .widthIn(max = VIDEO_MAX_WIDTH_DP.dp)
+        )
+    } else {
+        NotekeaVideoCard(
+            title = path.name.substringBeforeLast(delimiter = '.'),
+            subtitle = stringResource(
+                resource = Res.string.video_local_subtitle,
+                path
+                    .name
+                    .substringAfterLast(delimiter = '.')
+                    .uppercase()
+            ),
+            playLabel = stringResource(resource = Res.string.video_play),
+            onPlay = {
+                if (player != null) {
+                    isPlaying = true
+                } else {
+                    onIntent(EditorIntent.OnAttachmentOpen(path = path))
+                }
+            },
             modifier = modifier
         )
     }
@@ -159,4 +228,5 @@ private fun AttachmentBlockPreview() {
 }
 
 private const val PREVIEW_FILE = "attachments/menu.pdf"
+private const val VIDEO_MAX_WIDTH_DP = 720
 internal const val SECTION_SEPARATOR = " › "

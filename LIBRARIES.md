@@ -124,6 +124,21 @@ add 2.5 MB (Readability4J and jsoup).
 The roadmap asked to weigh Tika against one small library per format: the developer chose Tika for every format on
 2026-11-11, before measuring, and these sizes are what that choice costs.
 
+## 5c. Videos
+
+Videos in notes (the developer's request of 2026-11-11). Decided after a spike:
+
+- **Rejected:**
+  - vlcj is GPL v3, which Notekea's Apache 2.0 cannot ship without Caprica's commercial license.
+  - KCEF (Chromium) was archived in October 2025, and its Chromium has no H.264.
+  - ComposeNativeWebView needs the whole window on Nucleus Tao.
+- **The player is the system's:** Media Foundation on Windows, AVFoundation on macOS, GStreamer on Linux. It adds
+  0.8 MB with its natives, and 170–290 MB of memory only while a 1080p video plays (measured on Linux).
+
+| Library | Coordinates | Version | Purpose |
+|---|---|---|---|
+| ComposeMediaPlayer | `io.github.kdroidfilter:composemediaplayer` (MIT) | 0.11.4 | Plays a video file in its note with the system's player (`DesktopVideoPlayer`); a format the system cannot play opens with its app |
+
 ## 6. Infrastructure
 
 | Library | Coordinates | Version | Purpose |
