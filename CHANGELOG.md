@@ -49,6 +49,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Clipping a documentation page asks first, in the clip dialog and in the chat: only this page, or this page and the
+  pages it links under its own path (at most 30). With them, each becomes a note in a folder named after the page,
+  and the page's note lists them under Pages; a menu every page repeats is left out, and a short page is read from
+  its main content rather than its menu.
 - The chat's memory, as in Claude Code: a ring beside the mode fills as the conversation grows, and once full the
   chat writes the earlier part into a short summary by itself and goes on with it, as it does after half an hour
   without questions or in a chat from an earlier session; Compact chat, in the ⋯ menu, does it at once. Copy chat

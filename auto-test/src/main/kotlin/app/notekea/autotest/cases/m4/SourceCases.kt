@@ -24,6 +24,7 @@ fun SuiteBuilder.sourceCases() {
     pdfPages()
     localClip()
     clipOfPage()
+    clipOfSection()
     review()
     madeCards()
 }
@@ -122,6 +123,33 @@ private fun SuiteBuilder.clipOfPage() {
                 "Web sources/<the article's title> with source and clipped properties, notes about the article and " +
                 "its text under Original text. Step 3 says no article was found and writes nothing. Step 4 shows " +
                 "the usual card and clips the page once you click Do it."
+        )
+    }
+}
+
+// The developer's request of 2026-11-11: a documentation page asks whether to clip the pages it links too.
+private fun SuiteBuilder.clipOfSection() {
+    manual(
+        id = "4.4-03",
+        reason = ManualReason.SYSTEM
+    ) {
+        prepare(PLAYGROUND)
+        title(text = "A documentation page asks whether to clip the pages it links under its path too")
+
+        steps(
+            text =
+            "1. Open the Playground Vault with a chat model installed.\n2. Close every note, click Clip a web " +
+                "page and paste https://www.traceloop.com/docs/openllmetry/integrations/introduction; click Clip." +
+                "\n3. Click This page and 30 more and wait.\n4. In the chat (the speech bubble on the far left) " +
+                "write clip and the same address, then click Only this page."
+        )
+
+        expected(
+            text =
+            "Step 2 asks: only this page, or this page and 30 more, with 2 more left out. Step 3 counts Clipping " +
+                "page n of 31, then opens Web sources/Overview, whose Pages list links each integration's note in " +
+                "Web sources/Overview/. Step 4 asks the same with two buttons; Only this page shows a card with one " +
+                "note."
         )
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.clips.domain.ClipError
 import app.notekea.clips.domain.ClipStep
+import app.notekea.clips.domain.SectionLinks
 import app.notekea.core.presentation.designsystem.components.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
@@ -36,8 +37,13 @@ import app.notekea.resources.clip_error_refused
 import app.notekea.resources.clip_error_slow
 import app.notekea.resources.clip_explain
 import app.notekea.resources.clip_fetching
+import app.notekea.resources.clip_only_page
+import app.notekea.resources.clip_section_more
+import app.notekea.resources.clip_section_progress
+import app.notekea.resources.clip_section_question
 import app.notekea.resources.clip_title
 import app.notekea.resources.clip_url_hint
+import app.notekea.resources.clip_with_section
 import app.notekea.resources.clip_writing
 import org.jetbrains.compose.resources.stringResource
 
@@ -84,6 +90,22 @@ fun ClipDialog(
             state.error?.let { ErrorBanner(message = messageOf(error = it)) }
             progressOf(step = state.step)?.let { NotekeaStatusProgress(label = it) }
 
+            state.progress?.let {
+                NotekeaStatusProgress(
+                    label = stringResource(Res.string.clip_section_progress, it.done + 1, it.total)
+                )
+            }
+
+            state
+                .section
+                ?.takeIf { state.isAsking }
+                ?.let {
+                    SectionQuestion(
+                        links = it,
+                        onIntent = onIntent
+                    )
+                }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(
@@ -97,12 +119,49 @@ fun ClipDialog(
                     style = NotekeaButtonStyle.TEXT
                 )
 
-                NotekeaButton(
-                    text = stringResource(resource = Res.string.clip_clip),
-                    onClick = { onIntent(ClipIntent.OnClip) },
-                    enabled = state.canClip
-                )
+                if (!state.isAsking) {
+                    NotekeaButton(
+                        text = stringResource(resource = Res.string.clip_clip),
+                        onClick = { onIntent(ClipIntent.OnClip) },
+                        enabled = state.canClip
+                    )
+                }
             }
+        }
+    }
+}
+
+/** "This page links 30 more pages under …/integrations/": only it, or them too. */
+@Composable
+private fun SectionQuestion(
+    links: SectionLinks,
+    onIntent: (ClipIntent) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+        Text(
+            text = stringResource(Res.string.clip_section_question, links.urls.size, links.prefix),
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        if (links.more > 0) {
+            Text(
+                text = stringResource(resource = Res.string.clip_section_more, links.more),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+            NotekeaButton(
+                text = stringResource(resource = Res.string.clip_only_page),
+                onClick = { onIntent(ClipIntent.OnClipPage) },
+                style = NotekeaButtonStyle.TEXT
+            )
+
+            NotekeaButton(
+                text = stringResource(resource = Res.string.clip_with_section, links.urls.size),
+                onClick = { onIntent(ClipIntent.OnClipSection) }
+            )
         }
     }
 }

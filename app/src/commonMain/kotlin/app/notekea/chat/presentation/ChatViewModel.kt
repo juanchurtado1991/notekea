@@ -209,6 +209,13 @@ class ChatViewModel(
 
             is ChatIntent.OnFoundClick -> emit(effect = foundEffectOf(row = intent.row))
 
+            is ChatIntent.OnSectionChoose -> entryOf(id = intent.id)?.sectionAsked?.let {
+                val request =
+                    if (intent.isWhole) "clip ${it.url} with its linked pages" else "clip only ${it.url}"
+
+                offered(request = request)
+            }
+
             is ChatIntent.OnOfferedClick -> entryOf(id = intent.id)?.offered?.let {
                 offered(request = it)
             }
@@ -232,14 +239,6 @@ class ChatViewModel(
         .firstOrNull {
             it.id == id
         }
-
-    /** A task opens at its line; a note opens. */
-    private fun foundEffectOf(row: FoundRow): ChatEffect = row.line?.let {
-        ChatEffect.Reveal(
-            note = row.note,
-            range = it..it
-        )
-    } ?: ChatEffect.Open(note = row.note)
 
     override fun onCleared() {
         answer?.cancel()
