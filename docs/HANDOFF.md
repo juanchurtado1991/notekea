@@ -120,8 +120,10 @@ Where it stands (2026-11-11): 4.1–4.8 built, with the chat's help guide and th
   manual (`MVP_SMOKE_TEST.md`).
 - **For the developer to decide:** Large not offering agent mode although it is the bigger model; Web clip moved from
   the editor's More menu to the start actions (and the chat); Tika's ~38 MB in the installers; HTTPS tokens only.
-- **Known:** a test JVM that ran two model cases sometimes aborts at exit (native teardown), with every case passed;
-  the last PDF opened stays loaded until another one opens.
+- **CI (all three systems green on fddd9e98):** it found two Windows/macOS-only bugs, both fixed with tests. Git for
+  Windows' core.autocrlf rewrote pulled notes' line ends, and PDFBox scanned every system font on its first
+  non-embedded font, slowing the Playground Vault's opening until Auto-Test cases timed out; it now uses its own fonts.
+- **Known:** a test JVM that ran two model cases sometimes aborts at exit (native teardown), with every case passed.
 
 Decided before the work started:
 
