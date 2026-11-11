@@ -18,6 +18,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.llm.domain.LlmError
+import app.notekea.core.logging.domain.TextClipboard
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.BaseViewModel
@@ -43,6 +44,7 @@ class ChatViewModel(
     localCalendar: LocalCalendar,
     clock: Clock,
     private val historyStore: ChatHistoryStore,
+    private val clipboard: TextClipboard,
     private val llmEngine: LlmEngine
 ) : BaseViewModel<ChatState, ChatIntent, ChatEffect>(initialState = ChatState()) {
     private val logger = Logger.withTag(tag = LOG_TAG)
@@ -111,6 +113,8 @@ class ChatViewModel(
             is ChatIntent.OnRetry -> retry(id = intent.id)
 
             ChatIntent.OnClearHistory -> clear()
+
+            ChatIntent.OnCopyChat -> clipboard.copy(text = ChatTranscript.of(state = state.value))
 
             ChatIntent.OnDeepToggle -> reduce { it.copy(isDeep = !it.isDeep) }
 

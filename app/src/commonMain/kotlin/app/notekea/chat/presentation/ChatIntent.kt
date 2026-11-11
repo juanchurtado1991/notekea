@@ -24,6 +24,9 @@ sealed interface ChatIntent {
 
     data object OnClearHistory : ChatIntent
 
+    /** Copy chat: the whole conversation on the clipboard, to report an answer that went wrong. */
+    data object OnCopyChat : ChatIntent
+
     /** Deep answer on or off (3.6): three drafts and a vote, slower and more often right. */
     data object OnDeepToggle : ChatIntent
 

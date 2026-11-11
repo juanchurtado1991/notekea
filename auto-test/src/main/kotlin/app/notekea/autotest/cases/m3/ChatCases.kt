@@ -26,6 +26,7 @@ fun SuiteBuilder.chatCases() {
     notFound()
     noModel()
     talkAndFollowUps()
+    copyChat()
 }
 
 private fun SuiteBuilder.chatShortcut() {
@@ -186,6 +187,28 @@ private fun SuiteBuilder.talkAndFollowUps() {
             "Step 3 gets a short greeting in Spanish, not a search. Step 4's follow-up answers five minutes: it " +
                 "knows what \"it\" is. Step 5 gives an opinion in Spanish, said to be the assistant's view, with " +
                 "Lisbon trip as its source. Step 6 answers from Lisbon trip instead of saying no notes match."
+        )
+    }
+}
+
+private fun SuiteBuilder.copyChat() {
+    manual(
+        id = "3.3-08",
+        reason = ManualReason.SYSTEM
+    ) {
+        prepare(PLAYGROUND)
+        title(text = "Copy chat puts the whole conversation on the clipboard")
+
+        steps(
+            text =
+            "$OPEN_CHAT\n3. Ask two questions.\n4. Click ⋯ at the chat's top right, then Copy chat.\n5. Paste " +
+                "into a text editor."
+        )
+
+        expected(
+            text =
+            "The text holds each question, how it ended, the answer, and the passages it read with their note " +
+                "and heading."
         )
     }
 }

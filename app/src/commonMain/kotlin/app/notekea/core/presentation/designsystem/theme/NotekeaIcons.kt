@@ -32,6 +32,7 @@ import com.composables.icons.lucide.ClipboardList
 import com.composables.icons.lucide.ClockArrowDown
 import com.composables.icons.lucide.Code
 import com.composables.icons.lucide.Columns3
+import com.composables.icons.lucide.Copy
 import com.composables.icons.lucide.Cpu
 import com.composables.icons.lucide.Ellipsis
 import com.composables.icons.lucide.Eraser
@@ -201,6 +202,7 @@ object NotekeaIcons {
     val ChatAssistant: ImageVector get() = Lucide.Sparkle
     val ChatNotFound: ImageVector get() = Lucide.SearchX
     val ChatClear: ImageVector get() = Lucide.Eraser
+    val ChatCopy: ImageVector get() = Lucide.Copy
     val ChatError: ImageVector get() = Lucide.CircleAlert
     val ChatModel: ImageVector get() = Lucide.Cpu
     val Send: ImageVector get() = Lucide.ArrowUp

@@ -39,6 +39,7 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res
 import app.notekea.resources.chat_clear
+import app.notekea.resources.chat_copy
 import app.notekea.resources.chat_deep
 import app.notekea.resources.chat_deep_hint
 import app.notekea.resources.chat_index_wait
@@ -127,6 +128,14 @@ private fun ChatHeader(
             icon = NotekeaIcons.More,
             label = stringResource(resource = Res.string.chat_more),
             sections = listOf(
+                listOf(
+                    NotekeaMenuItem(
+                        label = stringResource(resource = Res.string.chat_copy),
+                        onClick = { onIntent(ChatIntent.OnCopyChat) },
+                        icon = NotekeaIcons.ChatCopy,
+                        enabled = state.entries.isNotEmpty()
+                    )
+                ),
                 listOf(
                     NotekeaMenuItem(
                         label = stringResource(resource = Res.string.chat_clear),

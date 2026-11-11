@@ -36,6 +36,7 @@ val chatModule = module {
             localCalendar = get(),
             clock = get(),
             historyStore = get(),
+            clipboard = get(),
             llmEngine = get()
         )
     }

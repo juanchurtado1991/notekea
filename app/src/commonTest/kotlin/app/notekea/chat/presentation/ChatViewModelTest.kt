@@ -19,6 +19,7 @@ import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.llm.domain.LlmError
 import app.notekea.core.llm.domain.LlmModelInfo
+import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
 import app.notekea.core.notes.domain.NoteChunk
@@ -54,6 +55,7 @@ class ChatViewModelTest {
     private val embedder = FakeTextEmbedder()
     private val engine = FakeLlmEngine()
     private val runner = FakeActionRunner()
+    private val clipboard = FakeTextClipboard()
     private val history = FakeChatHistoryStore()
     private val notes = mutableListOf<NoteEntry>()
 
@@ -111,6 +113,36 @@ class ChatViewModelTest {
                     .getValue(VAULT)
                     .single()
                     .question
+            )
+        }
+
+    @Test
+    fun `Copy chat puts each question, its answer and the passages it read on the clipboard`() =
+        runTest(
+            testDispatcher
+        ) {
+            indexed(
+                path = AREPAS,
+                body = AREPAS_BODY
+            )
+
+            engine.reply = { "Corn flour and warm water [1]." }
+            val viewModel = started()
+
+            viewModel.onIntent(intent = ChatIntent.OnQuestionChange(text = "What goes in the dough?"))
+            viewModel.onIntent(intent = ChatIntent.OnSend)
+            advanceUntilIdle()
+            viewModel.onIntent(intent = ChatIntent.OnCopyChat)
+
+            val copied = clipboard.copied.single()
+
+            assertEquals(
+                expected = listOf(true, true, true),
+                actual = listOf(
+                    "## What goes in the dough?" in copied,
+                    "Corn flour and warm water [1]." in copied,
+                    "[1] Recipes/Arepas.md: $AREPAS_BODY" in copied
+                )
             )
         }
 
@@ -391,6 +423,7 @@ class ChatViewModelTest {
             localCalendar = FakeLocalCalendar(),
             clock = Clock.System,
             historyStore = history,
+            clipboard = clipboard,
             llmEngine = engine
         )
 
