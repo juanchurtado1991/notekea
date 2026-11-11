@@ -5,6 +5,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.StringPatterns.NEW_LINE
 import app.notekea.core.domain.StringPatterns.WINDOWS_NEW_LINE
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.YouTubeLinks
 import app.notekea.editor.domain.AttachmentSource
 import app.notekea.editor.domain.Embed
 import app.notekea.editor.domain.FormatAction
@@ -34,6 +35,7 @@ internal class EditorFiles(
         attachmentStore = tools.attachmentStore,
         vaultSettingsReader = tools.vaultSettingsReader,
         attachFile = tools.attachFile,
+        youTubeDetails = tools.youTubeDetails,
         dispatchers = tools.dispatchers
     )
     private var attachmentsJob: Job? = null
@@ -105,6 +107,19 @@ internal class EditorFiles(
 
             if (!isOpen(note = note)) return@launch
 
+            // A YouTube video's address pasted alone becomes its card, then gets its title (#141).
+            val youTubeId = text?.trim()?.let { YouTubeLinks.idOf(url = it) }
+
+            if (text != null && youTubeId != null) {
+                pasteYouTube(
+                    note = note,
+                    id = youTubeId,
+                    address = text.trim()
+                )
+
+                return@launch
+            }
+
             // The text being edited only has `\n` breaks, as [app.notekea.core.notes.domain.NoteDocument] says.
             text?.replace(
                 oldValue = WINDOWS_NEW_LINE,
@@ -121,6 +136,35 @@ internal class EditorFiles(
 
                     selection = TextRange(index = start + pasted.length)
                 }
+            }
+        }
+    }
+
+    /**
+     * Writes the embed of a pasted YouTube video, `![](address)`, then asks YouTube once for its title and picture and
+     * puts the title in the embed, as long as the same note is open and the embed is still there as written.
+     */
+    private suspend fun pasteYouTube(
+        note: RelativePath,
+        id: String,
+        address: String
+    ) {
+        val embed = "![]($address)"
+        textEdits.format(action = FormatAction.Embed(markdown = embed))
+
+        val title = tools.youTubeDetails.fetch(id = id) ?: return
+        if (!isOpen(note = note)) return
+        val titled = "![${title.replace(BRACKETS, " ").trim()}]($address)"
+
+        host.buffer.edit {
+            val at = toString().indexOf(string = embed)
+
+            if (at >= 0) {
+                replace(
+                    start = at,
+                    end = at + embed.length,
+                    text = titled
+                )
             }
         }
     }
@@ -265,5 +309,8 @@ internal class EditorFiles(
 
     companion object {
         private val PAUSE = 150.milliseconds
+
+        // A title's brackets would end its embed's alt text early.
+        private val BRACKETS = Regex(pattern = "[\\[\\]]")
     }
 }

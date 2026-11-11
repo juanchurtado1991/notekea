@@ -28,6 +28,7 @@ import app.notekea.editor.data.SettingsEditorPreferencesStore
 import app.notekea.editor.domain.AttachFileUseCase
 import app.notekea.editor.domain.FakeAttachmentPicker
 import app.notekea.editor.domain.FakeClipboardReader
+import app.notekea.editor.domain.FakeYouTubeDetails
 import app.notekea.editor.domain.GetNoteStatsUseCase
 import app.notekea.editor.domain.KeepUnsavedTextUseCase
 import app.notekea.editor.domain.ObserveNoteOnDiskUseCase
@@ -295,6 +296,7 @@ class EditorOnDiskTest {
             fileOpener = FakeFileOpener(),
             attachmentPicker = picker,
             clipboardReader = clipboard,
+            youTubeDetails = FakeYouTubeDetails(),
             dispatchers = dispatchers
         )
     }

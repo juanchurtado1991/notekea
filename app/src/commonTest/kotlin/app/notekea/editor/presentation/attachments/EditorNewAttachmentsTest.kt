@@ -85,6 +85,40 @@ class EditorNewAttachmentsTest : EditorAttachmentsTestBase() {
             )
         }
 
+    // The developer's request of 2026-11-11 (#141): a pasted YouTube link becomes its card, titled once.
+    @Test
+    fun `a pasted YouTube link becomes its embed, titled by YouTube once, and its kept picture shows on the card`() =
+        runAttachmentsTest {
+            fixture.youTube.titles["dQw4w9WgXcQ"] = "Cómo hacer [arepas]"
+            fixture.youTube.pictures["dQw4w9WgXcQ"] = png
+            open(text = "Intro")
+            viewModel.buffer.edit { selection = TextRange(index = length) }
+
+            fixture.clipboard.text = "  https://youtu.be/dQw4w9WgXcQ \n"
+            send(intent = EditorIntent.OnPaste)
+
+            assertEquals(
+                expected = listOf<Any?>(
+                    "Intro\n\n![Cómo hacer  arepas](https://youtu.be/dQw4w9WgXcQ)\n\n",
+                    listOf("dQw4w9WgXcQ"),
+                    true
+                ),
+                actual = listOf(
+                    viewModel
+                        .buffer
+                        .text
+                        .toString(),
+                    fixture.youTube.fetched,
+                    viewModel
+                        .state
+                        .value
+                        .attachments
+                        .single()
+                        .image != null
+                )
+            )
+        }
+
     @Test
     fun `a new image gets a width to see and change, at most 400, and other files none`() =
         runAttachmentsTest {

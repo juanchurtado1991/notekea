@@ -9,6 +9,7 @@ import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.domain.AttachFileUseCase
 import app.notekea.editor.domain.EmbedProblem
+import app.notekea.editor.domain.FakeYouTubeDetails
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
@@ -136,6 +137,7 @@ class SmokeEmbedsTest {
             localTimeFormatter = JvmLocalTimeFormatter(),
             clock = Clock.System
         ),
+        youTubeDetails = FakeYouTubeDetails(),
         dispatchers = dispatchers
     )
 

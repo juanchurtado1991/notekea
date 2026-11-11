@@ -21,6 +21,7 @@ import app.notekea.editor.domain.EmbedFinder
 import app.notekea.editor.domain.EmbedProblem
 import app.notekea.editor.domain.EmbedText
 import app.notekea.editor.domain.EmbeddedNoteText
+import app.notekea.editor.domain.YouTubeDetails
 import kotlinx.coroutines.withContext
 
 /**
@@ -33,6 +34,7 @@ class EditorAttachments(
     private val attachmentStore: AttachmentStore,
     private val vaultSettingsReader: VaultSettingsReader,
     private val attachFile: AttachFileUseCase,
+    private val youTubeDetails: YouTubeDetails,
     private val dispatchers: AppDispatchers
 ) {
     private val embedFinder = EmbedFinder()
@@ -40,6 +42,9 @@ class EditorAttachments(
     private var files: List<RelativePath>? = null
     private var folderSetting: String? = null
     private val images = mutableMapOf<RelativePath, CachedImage>()
+
+    // The pictures of the YouTube videos shown, by id: read from the app's data folder, never the network.
+    private val youTubePictures = mutableMapOf<String, ImageBitmap>()
 
     // Counts the readings of a note's embeds, so a picture no reading has used since the last one is let go.
     private var reading = 0
@@ -135,7 +140,8 @@ class EditorAttachments(
                     embed = embed,
                     kind = AttachmentKind.YOUTUBE,
                     path = null,
-                    youTubeId = it
+                    youTubeId = it,
+                    image = youTubePictureOf(id = it)
                 )
             }
 
@@ -328,6 +334,17 @@ class EditorAttachments(
     }
 
     /** The picture at [path], decoded once and kept while the notes read use it (null when it cannot be read). */
+    private suspend fun youTubePictureOf(id: String): ImageBitmap? = youTubePictures[id]
+        ?: youTubeDetails
+            .thumbnail(id = id)
+            ?.let {
+                decodedImage(
+                    bytes = it,
+                    dispatcher = dispatchers.default
+                )
+            }
+            ?.also { youTubePictures[id] = it }
+
     private suspend fun imageOf(path: RelativePath): ImageBitmap? {
         val cached = images[path] ?: CachedImage(
             reading = reading,
