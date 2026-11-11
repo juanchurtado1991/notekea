@@ -238,8 +238,10 @@ plainly, in the person's language), a difference, or a matter of taste. The diff
 - **Deep thinking** hands a question it cannot answer to the agent, as Auto does.
 
 Final round, after the fixes: every factual answer of Medium and Large matches Claude's, on both sizes and in English,
-Spanish and French, except two matters of wording: Medium's summary of the October meetings says "one meeting" and
-then names three, and Large answers "which are the most important notes?" by saying no note is marked important. The
+Spanish and French. The last two differences, of wording, are fixed too: a count is said only when asked for
+("one meeting" before naming three), and "which are the most important notes?" is the overview, which now lists the
+notes marked with a priority, a status or a due date. "How many books did I finish?" is counted from the properties
+(3 on both sizes, in Spanish when asked in Spanish). The
 answers are seeded, so the same question gives the same reply on every run (three runs each of the complaint and the
 joke on both sizes). This is Claude's own reading against Claude's own answers, not the developer's; the developer's
 own conversations remain the test that counts.

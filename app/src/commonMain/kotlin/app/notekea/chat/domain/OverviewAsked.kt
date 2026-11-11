@@ -10,7 +10,8 @@ internal object OverviewAsked {
             "what (are|is) (all )?(my|the) notes( all)? about|what('s| is) in my (notes|vault)|" +
             "(summari[sz]e|resum[ií]\\w*|resume) (everything|all my notes|my notes|my vault|todo|todas mis notas|" +
             "mis notas)\\b|tell me (something )?about my notes|(cont[aá]me|cu[eé]ntame|dime|decime) (algo )?(de|sobre) " +
-            "(mis|las) notas",
+            "(mis|las) notas|(cu[aá]les|qu[eé]) (son|notas son) (las )?m[aá]s importantes|(which|what) (are )?(my |the )?" +
+            "most important( notes)?",
         option = RegexOption.IGNORE_CASE
     )
 
