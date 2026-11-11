@@ -29,23 +29,10 @@ class AgentAnswerUseCase(
         val gathered = mutableListOf<AnswerSource>()
         val tried = mutableSetOf<String>()
 
-        val words = WORD
-            .findAll(input = question.lowercase())
-            .map { it.value }
-            .filter {
-                it.length > 2
-            }
-            .toSet()
-
-        // The names that share the question's words first, so in a large vault the agent sees the ones it may read.
-        val names = notes
-            .map { it.file.path }
-            .sortedByDescending { path ->
-                words.count {
-                    it in path.value.lowercase()
-                }
-            }
-            .map { it.nameWithoutExtension }
+        val names = namesFor(
+            question = question,
+            notes = notes
+        )
 
         try {
             for (turn in 1..MAX_MOVES) {
@@ -115,6 +102,29 @@ class AgentAnswerUseCase(
                 read = read
             )
         )
+    }
+
+    /** The names that share the question's words first, so in a large vault the agent sees the ones it may read. */
+    private fun namesFor(
+        question: String,
+        notes: Collection<NoteEntry>
+    ): List<String> {
+        val words = WORD
+            .findAll(input = question.lowercase())
+            .map { it.value }
+            .filter {
+                it.length > 2
+            }
+            .toSet()
+
+        return notes
+            .map { it.file.path }
+            .sortedByDescending { path ->
+                words.count {
+                    it in path.value.lowercase()
+                }
+            }
+            .map { it.nameWithoutExtension }
     }
 
     private suspend fun nextMove(
