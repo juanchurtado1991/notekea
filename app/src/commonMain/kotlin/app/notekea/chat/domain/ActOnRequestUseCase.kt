@@ -69,18 +69,22 @@ class ActOnRequestUseCase(
             !it.kind.isConfirmed && it.kind !in FINDING
         }
 
-        shown.filter {
-            it.kind == ActionKind.SET_THEME
-        }.forEach { step ->
-            val isKnown = actionRunner.setTheme(theme = step.theme.orEmpty())
-            val unknown = ActionProblem.Missing(step.kind, ActionField.THEME)
-            if (!isKnown) return@flow problem(problem = unknown)
-        }
-
-        if (shown.isNotEmpty()) emit(value = ActionTurnStep.Shown(steps = shown))
-
         val confirmed = checked.filter { it.kind.isConfirmed }
-        if (confirmed.isEmpty()) return@flow emit(value = ActionTurnStep.Finished)
+
+        // With a card, what only shows something waits for its Do it too: Cancel must leave everything as it was.
+        if (confirmed.isEmpty()) {
+            shown.filter {
+                it.kind == ActionKind.SET_THEME
+            }.forEach { step ->
+                val isKnown = actionRunner.setTheme(theme = step.theme.orEmpty())
+                val unknown = ActionProblem.Missing(step.kind, ActionField.THEME)
+                if (!isKnown) return@flow problem(problem = unknown)
+            }
+
+            if (shown.isNotEmpty()) emit(value = ActionTurnStep.Shown(steps = shown))
+
+            return@flow emit(value = ActionTurnStep.Finished)
+        }
 
         if (confirmed.any { it.kind in COMPOSED }) emit(value = ActionTurnStep.Writing)
 
@@ -98,7 +102,7 @@ class ActOnRequestUseCase(
             }
         }
 
-        emit(value = ActionTurnStep.Proposed(steps = composed))
+        emit(value = ActionTurnStep.Proposed(steps = composed + shown))
     }
 
     private suspend fun kotlinx.coroutines.flow.FlowCollector<ActionTurnStep>.problem(

@@ -85,7 +85,15 @@ class VaultActionRunner(
                 writer = writer
             )
 
-            if (done is Outcome.Failure) return@withLock done
+            // A plan is done whole or not at all: what it did before the step that failed is taken back.
+            if (done is Outcome.Failure) {
+                journal
+                    .undoSteps
+                    .asReversed()
+                    .forEach { it(vaultPath) }
+
+                return@withLock done
+            }
         }
 
         val id = nextId++
@@ -182,6 +190,11 @@ class VaultActionRunner(
             journal = writer.journal
         )
 
+        ActionKind.SET_THEME -> {
+            setTheme(theme = step.theme.orEmpty())
+            Outcome.Success(value = Unit)
+        }
+
         else -> Outcome.Success(value = Unit)
     }
 
@@ -251,9 +264,15 @@ class VaultActionRunner(
         )
 
         journal.undoSteps += { path ->
+            val now = bookmarkStore.read(vaultPath = path)
+
+            val added = wanted.filter {
+                it in now
+            }
+
             bookmarkStore.write(
                 vaultPath = path,
-                bookmarks = before
+                bookmarks = added.fold(now) { marks, mark -> marks.toggled(mark) }
             )
         }
 

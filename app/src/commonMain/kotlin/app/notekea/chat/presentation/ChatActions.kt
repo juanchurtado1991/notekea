@@ -2,6 +2,7 @@ package app.notekea.chat.presentation
 
 import app.notekea.chat.domain.ActOnRequestUseCase
 import app.notekea.chat.domain.ActionContext
+import app.notekea.chat.domain.ActionKind
 import app.notekea.chat.domain.ActionRunner
 import app.notekea.chat.domain.ActionTurnStep
 import app.notekea.chat.domain.TurnOutcome
@@ -62,42 +63,46 @@ internal class ChatActions(
     private fun follow(
         id: Long,
         step: ActionTurnStep
-    ) = update(id) { entry ->
-        val action = entry.action ?: ChatAction(status = ActionStatus.FINISHED)
+    ) {
+        // The window acts outside the state's update, which may run more than once.
+        if (step is ActionTurnStep.Shown) step.steps.forEach { emit(ChatEffect.Show(step = it)) }
 
-        when (step) {
-            ActionTurnStep.Planning, ActionTurnStep.Answer -> entry.copy(step = ChatStep.PLANNING)
+        update(id) { entry ->
+            val action = entry.action ?: ChatAction(status = ActionStatus.FINISHED)
 
-            ActionTurnStep.Writing -> entry.copy(
-                step = ChatStep.COMPOSING,
-                action = action
-            )
+            when (step) {
+                ActionTurnStep.Planning, ActionTurnStep.Answer ->
+                    entry.copy(step = ChatStep.PLANNING)
 
-            is ActionTurnStep.Found ->
-                entry.copy(action = action.copy(found = action.found + step.found))
+                ActionTurnStep.Writing -> entry.copy(
+                    step = ChatStep.COMPOSING,
+                    action = action
+                )
 
-            is ActionTurnStep.Shown -> {
-                step.steps.forEach { emit(ChatEffect.Show(step = it)) }
-                entry.copy(action = action.copy(shown = action.shown + step.steps))
+                is ActionTurnStep.Found ->
+                    entry.copy(action = action.copy(found = action.found + step.found))
+
+                is ActionTurnStep.Shown ->
+                    entry.copy(action = action.copy(shown = action.shown + step.steps))
+
+                is ActionTurnStep.Proposed -> acted(
+                    entry,
+                    action.copy(
+                        status = ActionStatus.PROPOSED,
+                        steps = step.steps
+                    )
+                )
+
+                is ActionTurnStep.Problem -> acted(
+                    entry,
+                    action.copy(
+                        status = ActionStatus.FAILED,
+                        problem = step.problem
+                    )
+                )
+
+                ActionTurnStep.Finished -> acted(entry, action.copy(status = ActionStatus.FINISHED))
             }
-
-            is ActionTurnStep.Proposed -> acted(
-                entry,
-                action.copy(
-                    status = ActionStatus.PROPOSED,
-                    steps = step.steps
-                )
-            )
-
-            is ActionTurnStep.Problem -> acted(
-                entry,
-                action.copy(
-                    status = ActionStatus.FAILED,
-                    problem = step.problem
-                )
-            )
-
-            ActionTurnStep.Finished -> acted(entry, action.copy(status = ActionStatus.FINISHED))
         }
     }
 
@@ -138,6 +143,13 @@ internal class ChatActions(
                     .value
                     .opened
                     ?.let { emit(ChatEffect.Open(note = it)) }
+
+                action
+                    .steps
+                    .filter {
+                        !it.kind.isConfirmed && it.kind != ActionKind.SET_THEME
+                    }
+                    .forEach { emit(ChatEffect.Show(step = it)) }
             }
 
             is Outcome.Failure -> update(entry.id) {

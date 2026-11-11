@@ -19,9 +19,11 @@ import app.notekea.core.notes.domain.FakeNoteScanner
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.core.notes.domain.FillTemplateUseCase
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.RenameEntryUseCase
+import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.UpdateLinksAfterRenameUseCase
 import app.notekea.query.data.GhostQueryJsonReader
 import app.notekea.query.domain.BuildQueryCatalogUseCase
@@ -94,7 +96,10 @@ class VaultActionRunnerTest {
                 noteContentStore = store,
                 applyLinkUpdates = apply
             ),
-            noteContentStore = store,
+            noteTextCache = NoteTextCache(
+                contentStore = store,
+                textFolder = TextFolder()
+            ),
             linkFinder = JetBrainsMarkdownLinkFinder(),
             localCalendar = calendar,
             clock = clock
@@ -199,10 +204,62 @@ class VaultActionRunnerTest {
         )
     }
 
+    @Test
+    fun `a plan that fails halfway takes back what it did, and an append with no note fails`() =
+        runTest {
+            store.texts[HOME] = "# Home\n"
+            store.texts[SUMMARY] = "Mine"
+            operations.existing += SUMMARY
+
+            val halfway = runner.run(
+                vaultPath = VAULT,
+                steps = listOf(
+                    ActionStep(
+                        kind = ActionKind.APPEND_TEXT,
+                        notes = listOf(HOME),
+                        text = "Added"
+                    ),
+                    ActionStep(
+                        kind = ActionKind.CREATE_NOTE,
+                        title = "Summary",
+                        content = listOf(
+                            NoteDraft(
+                                path = SUMMARY,
+                                text = "Theirs"
+                            )
+                        )
+                    )
+                ),
+                notes = notes
+            )
+
+            val nowhere = runner.run(
+                vaultPath = VAULT,
+                steps = listOf(
+                    ActionStep(
+                        kind = ActionKind.APPEND_TEXT,
+                        notes = listOf(MISSING),
+                        text = "Lost"
+                    )
+                ),
+                notes = notes
+            )
+
+            assertEquals(
+                expected = Triple(true, "# Home\n", true),
+                actual = Triple(
+                    halfway is Outcome.Failure,
+                    store.texts[HOME],
+                    nowhere is Outcome.Failure
+                )
+            )
+        }
+
     private companion object {
         const val VAULT = "/vault"
         val DUNE = RelativePath(value = "Books/Dune.md")
         val HOME = RelativePath(value = "Home.md")
         val SUMMARY = RelativePath(value = "Books/Summary.md")
+        val MISSING = RelativePath(value = "Gone.md")
     }
 }

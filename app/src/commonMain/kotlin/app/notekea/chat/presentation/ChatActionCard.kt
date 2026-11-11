@@ -38,6 +38,7 @@ import app.notekea.resources.chat_action_append_text
 import app.notekea.resources.chat_action_bookmark
 import app.notekea.resources.chat_action_cancel
 import app.notekea.resources.chat_action_cancelled
+import app.notekea.resources.chat_action_close_tabs
 import app.notekea.resources.chat_action_complete_task
 import app.notekea.resources.chat_action_confirm
 import app.notekea.resources.chat_action_create_folder
@@ -46,10 +47,16 @@ import app.notekea.resources.chat_action_done_title
 import app.notekea.resources.chat_action_link_notes
 import app.notekea.resources.chat_action_move
 import app.notekea.resources.chat_action_notes_from_text
+import app.notekea.resources.chat_action_open
+import app.notekea.resources.chat_action_panel
 import app.notekea.resources.chat_action_rename
 import app.notekea.resources.chat_action_running
+import app.notekea.resources.chat_action_search
 import app.notekea.resources.chat_action_set_property
+import app.notekea.resources.chat_action_source
+import app.notekea.resources.chat_action_split
 import app.notekea.resources.chat_action_template
+import app.notekea.resources.chat_action_theme
 import app.notekea.resources.chat_action_today
 import app.notekea.resources.chat_action_trash
 import app.notekea.resources.chat_action_trash_note
@@ -295,7 +302,8 @@ private fun targetOf(step: ActionStep): String {
             ?.value
             .orEmpty()
 
-        else -> listOfNotNull(folder, notes.ifEmpty { null }).joinToString(separator = "\n")
+        else -> listOfNotNull(folder, notes.ifEmpty { null }, step.panel, step.theme, step.text)
+            .joinToString(separator = "\n")
     }
 }
 
@@ -315,7 +323,14 @@ private fun verbOf(kind: ActionKind): StringResource = when (kind) {
     ActionKind.CREATE_FOLDER -> Res.string.chat_action_create_folder
     ActionKind.RENAME -> Res.string.chat_action_rename
     ActionKind.MOVE -> Res.string.chat_action_move
-    else -> Res.string.chat_action_trash
+    ActionKind.TRASH -> Res.string.chat_action_trash
+    ActionKind.OPEN_NOTE, ActionKind.OPEN_TODAY -> Res.string.chat_action_open
+    ActionKind.SEARCH -> Res.string.chat_action_search
+    ActionKind.SPLIT_PANE -> Res.string.chat_action_split
+    ActionKind.CLOSE_OTHER_TABS -> Res.string.chat_action_close_tabs
+    ActionKind.TOGGLE_SOURCE -> Res.string.chat_action_source
+    ActionKind.SET_THEME -> Res.string.chat_action_theme
+    else -> Res.string.chat_action_panel
 }
 
 private fun iconOf(kind: ActionKind): ImageVector = when (kind) {
@@ -340,7 +355,17 @@ private fun iconOf(kind: ActionKind): ImageVector = when (kind) {
 
     ActionKind.MOVE -> NotekeaIcons.FolderOpen
 
-    else -> NotekeaIcons.Delete
+    ActionKind.TRASH -> NotekeaIcons.Delete
+
+    ActionKind.OPEN_NOTE, ActionKind.OPEN_TODAY -> NotekeaIcons.Note
+
+    ActionKind.SEARCH -> NotekeaIcons.SearchNotes
+
+    ActionKind.TOGGLE_SOURCE -> NotekeaIcons.Source
+
+    ActionKind.SET_THEME -> NotekeaIcons.ModeLight
+
+    else -> NotekeaIcons.SidePanel
 }
 
 @Composable
