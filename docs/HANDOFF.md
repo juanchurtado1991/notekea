@@ -109,6 +109,31 @@ review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
     Compose one could not show. Running the app from the build folder while it is rebuilt fails with
     NoClassDefFoundError: rebuild only with the app closed.
 
+## M4 and M4b, in progress
+
+One pull request for 4.1–4.8, branch `feature/m4-sync-sources`, decided with the developer on 2026-11-11, with
+these choices taken before the work started:
+
+- **Sync:** JGit, HTTPS token only (in the OS keychain through java-keyring), no SSH keys. Tests use local bare
+  repositories (`file://`) only; the developer tries GitHub in the smoke.
+- **Documents:** Apache Tika for every format. A citation, or opening the file, shows the document in a read-only tab
+  at the cited passage, highlighted, the whole document readable: PDFs as real pages rendered with PDFBox at the
+  cited page; Word, EPUB and text as extracted text with headings; Excel as one table per sheet; PowerPoint as each
+  slide's text. Every one has "Open in the system's app".
+- **Agent mode:** all of 4.7: at most 30 steps and 10 minutes, the plan on one card at the end, about 30 tasks in the
+  evaluation, offered only for the sizes that pass.
+- **Libraries approved:** JGit, Apache Tika with PDFBox, Readability4J (web clips) and java-keyring; each goes in
+  `LIBRARIES.md` with its size.
+- **Chat help (added):** "how do I…" and "what can you do" are answered from a guide built into the app, with the
+  system's real shortcuts, never by creating a note; when the chat can do it, the answer has a button that opens the
+  usual card. The guide is for the chat only (no Help page).
+- **Chat fixes from the developer's smoke (added):** "what is in my notes" answers from an overview of the vault, not
+  from a few passages; "in Spanish" says the last answer again in Spanish instead of searching; a question about how
+  to do something or a complaint never creates a note; asking the same question again answers it again.
+- **Ghost (added):** the readers of the model's JSON catch only Ghost Serializer's parse error, so a programming
+  error is not taken for a bad reply.
+- **Not in it:** web search (dropped by the developer for now).
+
 ## Open work, in order
 
 1. **No `m1-rc2`:** the developer decided to go straight to M2. The macOS run's fixes (#104: 1.3-09, 1.4-13, 1.8-05,
