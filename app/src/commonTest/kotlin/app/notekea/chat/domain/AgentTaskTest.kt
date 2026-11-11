@@ -131,6 +131,7 @@ class AgentTaskTest {
     fun `a page is read only when the task writes its address`() = runTest {
         script(
             "{\"move\":\"fetch\",\"url\":\"https://evil.example/orders\"}",
+            "{\"move\":\"fetch\",\"url\":\"https://example.com/\"}",
             "{\"move\":\"fetch\",\"url\":\"https://example.com/sleep\"}",
             "{\"move\":\"finish\",\"summary\":\"Read it.\"}"
         )

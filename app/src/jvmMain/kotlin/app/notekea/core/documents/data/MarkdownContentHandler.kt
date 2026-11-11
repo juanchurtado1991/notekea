@@ -5,6 +5,7 @@ import app.notekea.core.documents.domain.DocumentPart
 import app.notekea.core.documents.domain.DocumentPartKind
 import app.notekea.core.documents.domain.DocumentText
 import org.xml.sax.Attributes
+import org.xml.sax.SAXException
 import org.xml.sax.helpers.DefaultHandler
 
 /**
@@ -12,7 +13,10 @@ import org.xml.sax.helpers.DefaultHandler
  * a `## Page n` before each page of a PDF and `## Slide n` before each slide, `## Sheet` and its name before each
  * sheet of a workbook, and the [DocumentPart] of each, so a citation knows the page it is on.
  */
-internal class MarkdownContentHandler(private val format: DocumentFormat) : DefaultHandler() {
+internal class MarkdownContentHandler(
+    private val format: DocumentFormat,
+    private val maxChars: Int
+) : DefaultHandler() {
     private val text = StringBuilder()
     private val line = StringBuilder()
     private val parts = mutableListOf<DocumentPart>()
@@ -26,13 +30,22 @@ internal class MarkdownContentHandler(private val format: DocumentFormat) : Defa
     private var isSheetTitle = false
     private var isInHead = false
 
+    /** Whether the text reached [maxChars]: the parse was stopped there, and the parts end within it. */
+    var isFull = false
+        private set
+
     fun result(): DocumentText {
         flush()
         closeLastPart()
 
+        val written = text.toString().trimEnd() + "\n"
+
+        // The trimmed end may be shorter than where the last part closed.
         return DocumentText(
-            text = text.toString().trimEnd() + "\n",
-            parts = parts.toList()
+            text = written,
+            parts = parts.map {
+                it.copy(range = it.range.first until minOf(it.range.last + 1, written.length))
+            }
         )
     }
 
@@ -119,6 +132,12 @@ internal class MarkdownContentHandler(private val format: DocumentFormat) : Defa
         val isSpaceAgain = piece.isBlank() && (line.isEmpty() || line.endsWith(' '))
         if (isSpaceAgain) return
         line.append(piece)
+
+        // A long document stops being read at the limit, so it is never held whole.
+        if (text.length + line.length > maxChars) {
+            isFull = true
+            throw SAXException(FULL)
+        }
     }
 
     private fun start(level: Int) {
@@ -231,6 +250,7 @@ internal class MarkdownContentHandler(private val format: DocumentFormat) : Defa
     }
 
     private companion object {
+        const val FULL = "The document is longer than Notekea reads"
         const val CLASS = "class"
         const val DIV = "div"
         const val PAGE = "page"

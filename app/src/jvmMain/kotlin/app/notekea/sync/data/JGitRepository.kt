@@ -97,26 +97,21 @@ class JGitRepository(private val dispatchers: AppDispatchers) : GitRepository {
 
     override suspend fun conflicts(vaultPath: String): List<RelativePath> =
         withContext(context = dispatchers.io) {
-            val root = File(vaultPath).toPath()
-            if (!Files.isDirectory(root)) return@withContext emptyList()
+            val root = File(vaultPath)
+            if (!root.isDirectory) return@withContext emptyList()
 
-            Files.walk(root).use { files ->
-                files
-                    .filter { Files.isRegularFile(it) }
-                    .map {
-                        root.relativize(it).map { part -> part.toString() }
-                    }
-                    .filter {
-                        GIT_FOLDER !in it
-                    }
-                    .map {
-                        RelativePath(value = it.joinToString(separator = RelativePath.SEPARATOR))
-                    }
-                    .toList()
-                    .mapNotNull { ConflictCopies.noteOf(copy = it) }
-                    .filter { File(vaultPath, it.value).isFile }
-                    .sortedBy { it.value }
-            }
+            // Never into .git, whose objects outnumber the notes; this runs after every sync.
+            root
+                .walkTopDown()
+                .onEnter {
+                    it.name != GIT_FOLDER
+                }
+                .filter { it.isFile }
+                .map { RelativePath(value = it.relativeTo(root).invariantSeparatorsPath) }
+                .mapNotNull { ConflictCopies.noteOf(copy = it) }
+                .filter { File(vaultPath, it.value).isFile }
+                .sortedBy { it.value }
+                .toList()
         }
 
     override suspend fun resolve(
