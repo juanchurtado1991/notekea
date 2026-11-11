@@ -746,6 +746,8 @@
     <string name="chat_action_theme">Switch the theme</string>
     <string name="chat_action_panel">Show</string>
     <string name="chat_found_no_tasks">No open tasks match.</string>
+    <string name="chat_do_it_for_me">Do it for me</string>
+    <string name="chat_do_it_for_me_es">Hazlo por mí</string>
     <string name="chat_not_found_es">No encontré esto en tus notas.</string>
     <string name="chat_stopped_es">Detenida</string>
     <string name="chat_acted_es">Hecho en este vault.</string>

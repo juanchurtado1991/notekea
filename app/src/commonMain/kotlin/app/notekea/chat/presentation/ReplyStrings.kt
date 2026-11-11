@@ -78,6 +78,8 @@ import app.notekea.resources.chat_action_will
 import app.notekea.resources.chat_action_will_es
 import app.notekea.resources.chat_action_write_from_notes
 import app.notekea.resources.chat_action_write_from_notes_es
+import app.notekea.resources.chat_do_it_for_me
+import app.notekea.resources.chat_do_it_for_me_es
 import app.notekea.resources.chat_failed
 import app.notekea.resources.chat_failed_es
 import app.notekea.resources.chat_failed_search
@@ -192,6 +194,7 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_not_found to Res.string.chat_not_found_es,
     Res.string.chat_stopped to Res.string.chat_stopped_es,
     Res.string.chat_acted to Res.string.chat_acted_es,
+    Res.string.chat_do_it_for_me to Res.string.chat_do_it_for_me_es,
     Res.string.chat_failed to Res.string.chat_failed_es,
     Res.string.chat_failed_search to Res.string.chat_failed_search_es,
     Res.string.chat_retry to Res.string.chat_retry_es,

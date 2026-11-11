@@ -8,9 +8,9 @@ import app.notekea.chat.domain.ReplyLanguage
 import app.notekea.chat.domain.TurnOutcome
 
 /**
- * A question of the chat and its answer, as the panel draws it: [id] keys it in the list. While it is answered,
- * [step] says where it stands and [sources] are the passages read, which its `[n]` cite; once [outcome] is set they
- * are the passages it cites, numbered again. A request that is not a question holds its [action] instead.
+ * A question of the chat and its answer, as the panel draws it, keyed by [id]: [step] says where it stands, [sources]
+ * are the passages its `[n]` cite (numbered again once [outcome] is set), an action holds its [action], and a help
+ * answer may offer a request the chat can do for them ([offered], "…" where they finish it).
  */
 data class ChatEntry(
     val id: Long,
@@ -23,7 +23,8 @@ data class ChatEntry(
     val scopeName: String?,
     val outcome: TurnOutcome?,
     val error: ChatError?,
-    val action: ChatAction? = null
+    val action: ChatAction? = null,
+    val offered: String? = null
 ) {
     /**
      * Whether the history keeps it: once answered, and for a request the chat acted on only once done, since one

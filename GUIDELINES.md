@@ -376,3 +376,23 @@ leaves vulnerabilities unpatched. The policy:
   Dependabot ignores them; security alerts for them still appear in the Security tab.
 - Every upgrade goes through a `chore/` branch and a pull request with green CI on the three OSes. Upgrades of
   runtime libraries also need the manual smoke test (§8) and a `Changed` entry in `CHANGELOG.md`.
+
+## 15. The chat's guide to the app
+
+The chat answers "how do I…" and "what can you do" from a guide shipped with the app,
+`app/src/commonMain/composeResources/files/guide/guide.md` (decided with the developer, 2026-11-11), never from
+the model's memory, which does not know Notekea.
+
+- **Every feature or change that adds or changes something people do updates the guide in the same pull request:**
+  a new topic, or the steps, buttons, menus and shortcuts of an existing one. A feature is not done while the guide
+  describes the app as it was. Removing something removes it from the guide.
+- **A topic** is a `# ` heading, a `words:` line with what people say for it in English and Spanish, an optional
+  `try:` line with a request the chat can do for them (a "…" where they finish it), then plain steps.
+- **Shortcuts are never written by hand:** write `{name}`, the `PlatformConventions` property without `Shortcut`
+  (`{newNote}`); the chat writes it as the person's system does (⌘N, Ctrl+N). A new shortcut goes in
+  `HelpShortcuts` too.
+- **Only what the app does:** name the real buttons, menus and panels as the app labels them; never promise what is
+  not built.
+- `HelpGuideFileTest` checks that every `{name}` is known and that common questions find their topic; add the new
+  topic's question there.
+

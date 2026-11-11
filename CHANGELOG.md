@@ -37,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- A reply of the model cut off or of the wrong shape is read as no reply by its parse error only, so a programming
+  error is no longer taken for a bad reply.
 - Related notes quote a passage as plain text: `> [!summary]`, `- [ ]`, `[[`, `**` and the like no longer show.
 
 - Files and folders whose names have digits of another script (`٣`, `३`) no longer break the order of the tree:
@@ -44,6 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The chat explains how to use Notekea: "how do I create a note?" or "what can you do?" is answered from a guide
+  built into the app, with the shortcuts of your system, and never creates anything; when the chat can do it for
+  you, "Do it for me" is under the answer. "What is in my notes?" describes the vault by its folders and notes, and
+  "in Spanish" or "shorter" says the last reply again that way.
 - Chat with your notes in the side panel's Chat (`Mod+L`): a question is answered from the vault's notes by the
   model of Settings → AI model, on this computer. The answer appears as it is written, after one line saying what is
   going on (searching, reading 5 notes), and cites its passages as numbered chips: pointing at one shows the

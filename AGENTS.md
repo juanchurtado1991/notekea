@@ -46,7 +46,9 @@ developer sometimes allows one pull request for a whole feature; that exception 
 
 Every step brings the tests of `GUIDELINES.md` §10: fakes that behave like the real thing, an integration test on
 real files, a screen test for UI, and a regression test for every smoke bug that fails without its fix (check it by
-taking the fix out for a moment).
+taking the fix out for a moment). A feature that adds or changes something people do also updates the chat's guide
+to the app (`composeResources/files/guide/guide.md`, `GUIDELINES.md` §15), its Auto-Test cases and
+`MVP_SMOKE_TEST.md`.
 
 **Before writing a feature, read the reference implementations in `ARCHITECTURE.md` §10 and mirror their
 structure**. Build every screen from the design system components (`ARCHITECTURE.md` §11); add missing ones there.

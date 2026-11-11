@@ -1246,5 +1246,145 @@
     }
    }
   ]
+ },
+ {
+  "request": "how can I add a tag to a note?",
+  "open": null,
+  "steps": [
+   {
+    "action": "help",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "¿cómo abro la nota de hoy?",
+  "open": null,
+  "steps": [
+   {
+    "action": "help",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "como creo la nota?",
+  "open": null,
+  "steps": [
+   {
+    "action": "help",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "what can you do for me?",
+  "open": null,
+  "steps": [
+   {
+    "action": "help",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "¿qué puedes hacer por mí?",
+  "open": null,
+  "steps": [
+   {
+    "action": "help",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "how do I change the theme?",
+  "open": null,
+  "steps": [
+   {
+    "action": "help",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "eso no es lo que pedí, ¿cómo se hace un enlace entre notas?",
+  "open": null,
+  "steps": [
+   {
+    "action": "help",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "is there a shortcut to search my notes?",
+  "open": null,
+  "steps": [
+   {
+    "action": "help",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "explícame qué hay en las notas",
+  "open": null,
+  "steps": [
+   {
+    "action": "overview",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "what do my notes contain?",
+  "open": null,
+  "steps": [
+   {
+    "action": "overview",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "give me an overview of my vault",
+  "open": null,
+  "steps": [
+   {
+    "action": "overview",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "in Spanish please",
+  "open": null,
+  "steps": [
+   {
+    "action": "chat",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "más corto",
+  "open": null,
+  "steps": [
+   {
+    "action": "chat",
+    "fields": {}
+   }
+  ]
+ },
+ {
+  "request": "say that again more simply",
+  "open": null,
+  "steps": [
+   {
+    "action": "chat",
+    "fields": {}
+   }
+  ]
  }
 ]

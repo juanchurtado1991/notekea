@@ -129,4 +129,27 @@ class PlanShapingTest {
             actual = folders
         )
     }
+
+    @Test
+    fun `asking how to do something is explained even when the model plans the action`() = runTest {
+        val today = planned(
+            request = "¿cómo abro la nota de hoy?",
+            plan = "{\"steps\":[{\"action\":\"open_today\"}]}"
+        )
+
+        val note = planned(
+            request = "como creo la nota?",
+            plan = "{\"steps\":[{\"action\":\"create_note\",\"title\":\"La nota\"}]}"
+        )
+
+        val recipe = planned(
+            request = "how do I make arepas?",
+            plan = "{\"steps\":[{\"action\":\"answer\"}]}"
+        )
+
+        assertEquals(
+            expected = listOf(ActionKind.HELP, ActionKind.HELP, ActionKind.ANSWER),
+            actual = (today + note + recipe).map { it.kind }
+        )
+    }
 }

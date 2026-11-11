@@ -16,6 +16,12 @@ enum class ActionKind(
 
     // Not about what the notes say: a greeting, thanks, an opinion or advice, about a note or not.
     CHAT(written = "chat"),
+
+    // How to use Notekea, from its guide; never an action ("how do I create a note?").
+    HELP(written = "help"),
+
+    // What the vault holds as a whole ("what is in my notes?"), from its folders and names.
+    OVERVIEW(written = "overview"),
     FIND_NOTES(
         written = "find_notes",
         needs = setOf(ActionField.REQUEST)

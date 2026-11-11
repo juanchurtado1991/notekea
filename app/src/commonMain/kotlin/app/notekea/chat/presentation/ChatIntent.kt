@@ -48,6 +48,12 @@ sealed interface ChatIntent {
 
     data class OnActionUndo(val id: Long) : ChatIntent
 
+    /**
+     * The request a help answer offers ([ChatEntry.offered]): done at once, or put in the question field when it has
+     * a "…" to finish.
+     */
+    data class OnOfferedClick(val id: Long) : ChatIntent
+
     /** A row of a table the chat found: its note opens, at the task's line for a task. */
     data class OnFoundClick(val row: FoundRow) : ChatIntent
 }
