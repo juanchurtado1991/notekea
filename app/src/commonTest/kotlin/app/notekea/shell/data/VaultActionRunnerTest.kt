@@ -168,6 +168,46 @@ class VaultActionRunnerTest {
         }
 
     @Test
+    fun `only the latest twenty plans can be undone, so the journals do not grow with the session`() =
+        runTest {
+            store.texts[HOME] = "# Home\n"
+
+            val plans = (1..21).map {
+                run(
+                    ActionStep(
+                        kind = ActionKind.APPEND_TEXT,
+                        notes = listOf(HOME),
+                        text = "Line $it"
+                    )
+                )
+            }
+
+            runner.undo(
+                vaultPath = VAULT,
+                done = plans.first()
+            )
+
+            val afterOldest = store.texts[HOME]
+
+            runner.undo(
+                vaultPath = VAULT,
+                done = plans.last()
+            )
+
+            // The oldest journal was let go (memory leak hunt): undoing it does nothing; the newest still undoes.
+            assertEquals(
+                expected = listOf(true, false),
+                actual = listOf(
+                    afterOldest.orEmpty().contains(other = "Line 1\n"),
+                    store
+                        .texts[HOME]
+                        .orEmpty()
+                        .contains(other = "Line 21")
+                )
+            )
+        }
+
+    @Test
     fun `a note in the way is never overwritten, and the theme changes by its name`() = runTest {
         store.texts[SUMMARY] = "Mine"
         operations.existing += SUMMARY

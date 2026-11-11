@@ -43,8 +43,9 @@ class EditorAttachments(
     private var folderSetting: String? = null
     private val images = mutableMapOf<RelativePath, CachedImage>()
 
-    // The pictures of the YouTube videos shown, by id: read from the app's data folder, never the network.
-    private val youTubePictures = mutableMapOf<String, ImageBitmap>()
+    // The pictures of the YouTube videos shown, by id: read from the app's data folder, never the network. Like the
+    // images, only the note shown keeps them (bug hunt, 2026-11-11: they were kept for the whole session).
+    private val youTubePictures = mutableMapOf<String, CachedImage>()
 
     // Counts the readings of a note's embeds, so a picture no reading has used since the last one is let go.
     private var reading = 0
@@ -71,6 +72,10 @@ class EditorAttachments(
         // started meanwhile (the text changed again) prunes for itself.
         if (reading == current) {
             images.values.removeAll {
+                it.reading < current
+            }
+
+            youTubePictures.values.removeAll {
                 it.reading < current
             }
         }
@@ -334,16 +339,24 @@ class EditorAttachments(
     }
 
     /** The picture at [path], decoded once and kept while the notes read use it (null when it cannot be read). */
-    private suspend fun youTubePictureOf(id: String): ImageBitmap? = youTubePictures[id]
-        ?: youTubeDetails
+    private suspend fun youTubePictureOf(id: String): ImageBitmap? {
+        // A picture not there yet (its title and picture are still on their way) is asked for again next time.
+        val image = youTubePictures[id]?.image ?: youTubeDetails
             .thumbnail(id = id)
             ?.let {
                 decodedImage(
                     bytes = it,
                     dispatcher = dispatchers.default
                 )
-            }
-            ?.also { youTubePictures[id] = it }
+            } ?: return null
+
+        youTubePictures[id] = CachedImage(
+            reading = reading,
+            image = image
+        )
+
+        return image
+    }
 
     private suspend fun imageOf(path: RelativePath): ImageBitmap? {
         val cached = images[path] ?: CachedImage(

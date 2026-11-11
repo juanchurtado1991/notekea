@@ -118,6 +118,23 @@ class EditorAttachmentsTest : EditorAttachmentsTestBase() {
         }
 
     @Test
+    fun `a YouTube picture stays decoded while its note is shown, and is let go once another note is`() =
+        runAttachmentsTest {
+            fixture.youTube.pictures[VIDEO_ID] = png
+            open(text = "![Arepas](https://youtu.be/$VIDEO_ID)\n")
+            fixture.store.texts[PLAIN] = "No videos here.\n"
+            fixture.scanner.addNote(file = file(path = PLAIN.value))
+            send(intent = EditorIntent.OnOpen(path = PLAIN))
+            send(intent = EditorIntent.OnOpen(path = NOTE))
+
+            // Read again only because another note was shown in between: kept for the session before (bug hunt).
+            assertEquals(
+                expected = listOf(VIDEO_ID, VIDEO_ID),
+                actual = fixture.youTube.read
+            )
+        }
+
+    @Test
     fun `a picture stays decoded while its note is shown, and is let go once another note is`() =
         runAttachmentsTest {
             val plate = RelativePath(value = "attachments/plate.png")

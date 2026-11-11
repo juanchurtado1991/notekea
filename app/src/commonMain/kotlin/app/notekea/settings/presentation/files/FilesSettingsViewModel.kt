@@ -22,7 +22,9 @@ class FilesSettingsViewModel(
     initialState = FilesSettingsState(hasVault = vaultPath != null)
 ) {
     private val logger = Logger.withTag(tag = LOG_TAG)
-    private var saving: Job? = null
+
+    // Each field waits for its own pause, so typing in one never drops another's write (bug hunt, 2026-11-11).
+    private val saving = mutableMapOf<Field, Job>()
 
     init {
         vaultPath?.let { vault ->
@@ -71,9 +73,9 @@ class FilesSettingsViewModel(
     ) {
         val vault = vaultPath ?: return
         reduce { transform(it).copy(hasFailed = false) }
-        saving?.cancel()
+        saving[field]?.cancel()
 
-        saving = launchGuarded(onError = ::logError) {
+        saving[field] = launchGuarded(onError = ::logError) {
             delay(duration = PAUSE)
 
             val saved = save(

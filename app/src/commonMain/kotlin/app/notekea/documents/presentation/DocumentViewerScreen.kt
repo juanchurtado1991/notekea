@@ -1,6 +1,7 @@
 package app.notekea.documents.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,6 +39,10 @@ fun DocumentViewerScreen(
                 )
             )
         }
+    }
+
+    DisposableEffect(viewModel) {
+        onDispose { viewModel.onIntent(intent = DocumentViewerIntent.OnHidden) }
     }
 
     DocumentViewerContent(

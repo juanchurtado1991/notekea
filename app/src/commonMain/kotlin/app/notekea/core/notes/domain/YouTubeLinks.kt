@@ -6,21 +6,37 @@ package app.notekea.core.notes.domain
  */
 object YouTubeLinks {
     private val ADDRESS = Regex(
-        pattern = "^https?://(?:www\\.|m\\.|music\\.)?(?:youtube\\.com|youtube-nocookie\\.com|youtu\\.be)/(.*)$",
+        pattern = "^https?://(?:www\\.|m\\.|music\\.)?(youtube\\.com|youtube-nocookie\\.com|youtu\\.be)/(.*)$",
         option = RegexOption.IGNORE_CASE
     )
     private val WATCH = Regex(pattern = "^watch\\?(?:.*&)?v=([A-Za-z0-9_-]{11})(?:[&#].*)?$")
-    private val PATH =
-        Regex(pattern = "^(?:(?:shorts|embed|live|v)/)?([A-Za-z0-9_-]{11})(?:[?&#/].*)?$")
+    private val PATH = Regex(pattern = "^(?:shorts|embed|live|v)/([A-Za-z0-9_-]{11})(?:[?&#/].*)?$")
+
+    // Only youtu.be names a video by its id alone: youtube.com/<eleven letters> is a channel or a page.
+    private val SHORT_PATH = Regex(pattern = "^([A-Za-z0-9_-]{11})(?:[?&#/].*)?$")
+    private const val SHORT_HOST = "youtu.be"
 
     /** The video's id in [url] ("dQw4w9WgXcQ"), or null when it is not a YouTube video's address. */
     fun idOf(url: String): String? {
-        val rest = ADDRESS
+        val parts = ADDRESS
             .matchEntire(input = url.trim())
-            ?.groupValues
-            ?.get(index = 1) ?: return null
+            ?.groupValues ?: return null
 
-        return (WATCH.matchEntire(input = rest) ?: PATH.matchEntire(input = rest))
+        val host = parts[1]
+        val rest = parts[2]
+
+        val bare = SHORT_PATH.takeIf {
+            host.equals(
+                other = SHORT_HOST,
+                ignoreCase = true
+            )
+        }
+
+        val match = WATCH.matchEntire(input = rest)
+            ?: PATH.matchEntire(input = rest)
+            ?: bare?.matchEntire(input = rest)
+
+        return match
             ?.groupValues
             ?.get(index = 1)
     }

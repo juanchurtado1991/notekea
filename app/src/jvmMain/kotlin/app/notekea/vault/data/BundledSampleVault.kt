@@ -35,7 +35,7 @@ class BundledSampleVault(private val dispatchers: AppDispatchers) : SampleVaultS
 
     private fun index(): List<String> = resource(path = INDEX)
         .bufferedReader()
-        .readLines()
+        .use { it.readLines() }
         .filter(String::isNotBlank)
 
     private fun resource(path: String) =

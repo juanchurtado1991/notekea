@@ -6,6 +6,7 @@ import app.notekea.editor.domain.CompressStep
 import app.notekea.editor.domain.VideoCompressor
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -72,6 +73,33 @@ class FfmpegVideoCompressor internal constructor(
         val target = workFolder.resolve(UUID.randomUUID().toString()).resolve("$name$MP4")
         Files.createDirectories(target.parent)
 
+        // Only a copy that is handed over stays: a failed or cancelled one is deleted (bug hunt, 2026-11-11).
+        var isHandedOver = false
+
+        try {
+            isHandedOver = encodeSmallEnough(
+                program = program,
+                source = source,
+                target = target,
+                seconds = seconds,
+                maxBytes = maxBytes
+            )
+        } finally {
+            // Also when cancelled, which a plain suspending call would skip.
+            if (!isHandedOver) {
+                withContext(context = NonCancellable) { discard(path = target.toString()) }
+            }
+        }
+    }.flowOn(context = dispatchers.io)
+
+    /** Encodes [source] into [target], a little smaller each attempt; true once it fits in [maxBytes] and is sent. */
+    private suspend fun ProducerScope<CompressStep>.encodeSmallEnough(
+        program: String,
+        source: String,
+        target: Path,
+        seconds: Double,
+        maxBytes: Long
+    ): Boolean {
         var bitrate = VideoBitrate.of(
             seconds = seconds,
             maxBytes = maxBytes
@@ -87,7 +115,9 @@ class FfmpegVideoCompressor internal constructor(
             )
 
             if (isMade && Files.size(target) <= maxBytes) {
-                return@channelFlow send(CompressStep.Done(path = target.toString()))
+                send(CompressStep.Done(path = target.toString()))
+
+                return true
             }
 
             bitrate = bitrate.copy(videoKbps = bitrate.videoKbps * LOWER_PERCENT / PERCENT)
@@ -95,7 +125,9 @@ class FfmpegVideoCompressor internal constructor(
 
         logger.w { "A video could not be made small enough" }
         send(CompressStep.Failed(error = CompressError.Failed))
-    }.flowOn(context = dispatchers.io)
+
+        return false
+    }
 
     // The video's length in seconds, as FFmpeg reads it ("Duration: 00:02:00.00").
     private suspend fun durationOf(
@@ -166,6 +198,8 @@ class FfmpegVideoCompressor internal constructor(
 
             process.waitFor()
         } finally {
+            // Stopped between two lines, FFmpeg is still running: end it here, or it goes on writing on its own.
+            if (process.isAlive) process.destroyForcibly()
             stop?.dispose()
         }
 

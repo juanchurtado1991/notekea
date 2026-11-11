@@ -77,6 +77,31 @@ class FilesSettingsViewModelTest {
         }
 
     @Test
+    fun `typing in one folder and then another writes both`() = runTest(dispatcher) {
+        val writer = FakeVaultSettingsWriter()
+
+        val viewModel = FilesSettingsViewModel(
+            reader = FakeVaultSettingsReader(),
+            writer = writer,
+            vaultPath = "/home/ana/Notes"
+        )
+
+        advanceUntilIdle()
+        viewModel.onIntent(intent = FilesSettingsIntent.OnAttachmentsChange(folder = "files"))
+        viewModel.onIntent(intent = FilesSettingsIntent.OnTemplatesFolderChange(folder = "Templates"))
+        advanceUntilIdle()
+
+        // Before the fix the second field's pause cancelled the first one's write (bug hunt, 2026-11-11).
+        assertEquals(
+            expected = listOf(
+                "app.json attachmentFolderPath=files",
+                "templates.json folder=Templates"
+            ),
+            actual = writer.written
+        )
+    }
+
+    @Test
     fun `without a vault there is nothing to change`() = runTest(dispatcher) {
         val viewModel = FilesSettingsViewModel(
             reader = FakeVaultSettingsReader(),

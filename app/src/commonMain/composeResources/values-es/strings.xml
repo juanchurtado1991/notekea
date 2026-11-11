@@ -257,7 +257,7 @@
     <string name="settings_open_last_vault_hint">Si está desactivado, Notekea empieza en la pantalla de bienvenida con tus bóvedas.</string>
     <string name="settings_show_welcome">Bienvenida</string>
     <string name="settings_show_welcome_button">Mostrar de nuevo</string>
-    <string name="settings_show_welcome_hint">Muestra otra vez la bienvenida del primer inicio: qué hace Notekea, tus notas y la IA.</string>
+    <string name="settings_show_welcome_hint">Muestra otra vez la bienvenida del primer inicio la próxima vez que abras Notekea: qué hace, tus notas y la IA.</string>
     <string name="settings_text_size">Tamaño del texto</string>
     <string name="settings_text_size_points">%1$d pt</string>
     <string name="settings_line_width">Ancho de línea</string>

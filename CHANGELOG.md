@@ -30,12 +30,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   reformatted to it.
 - More color in the tree and the inspector. Each top-level folder has the color it has in the graph: on its icon and
   its subfolders' in the tree, and as the folder's chip of a mention or a related note. Daily notes show a calendar.
-  The selected row has a bar in the theme's color, folder counts are pills and nested rows have indent guides.
+  (The macOS look later replaced the selection bar, the count pills and the indent guides with a source list.)
 - Matched words in mentions and related notes are marked in the theme's color instead of underlined, the open
   tab's count is a pill, and the status bar's *Saved* check is green.
 - Note info mutes the counts that are zero and draws the done tasks as a bar.
 
 ### Fixed
+
+- A cancelled video compression stops FFmpeg instead of leaving it writing, and a copy that fails or is cancelled is
+  deleted instead of staying in the app's folder.
+- The Study tab says the day the next card comes back as a date ("Nov 12, 2026"), not in its code form.
+- The onboarding and Settings → About no longer say that nothing leaves the computer: notes do when sync is on.
+- Settings → General's Welcome group explains itself instead of repeating the last vault's hint.
 
 - The chat no longer refuses follow-ups ("and the water?") nor answers them with its own instructions, no longer says
   it deleted a note it did not, and reads "¿de qué tratan las notas?" as the vault's overview, "delete the note X" as
@@ -48,6 +54,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   only `0`–`9` count as numbers, so three such names can no longer order in a cycle.
 
 ### Added
+
+- **Notekea in Spanish** (5.2): the whole interface, chosen in Settings → General (System, English, Español) and
+  switched at once, without losing what the screens hold. The chat keeps answering in the language of each question.
+  Dates in the interface read in its language. Notekea QA's manager, its manual cases and the testers' guides are in
+  Spanish too.
+- **A macOS look** (the developer's approval of the macOS review, `docs/macos-redesign.md`):
+  - macOS's type scale (interface text 13, small 11). The note keeps its own reading scale.
+  - The sidebar a gray of its own, a source list: section headers in small bold type, counts as muted text, and the
+    selected row filled with the theme's color.
+  - macOS's push buttons and pop-up buttons, 24 dp, and a 32 × 18 switch.
+  - On macOS, a unified title bar: the sidebar reaches the top with the traffic lights on it, and the tabs share the
+    title row. Windows and Linux keep their title bar, and the window buttons stay the system's own everywhere.
+  - On macOS, a menu bar (File, Note, View, Go, Help) of the app's shortcuts, and confirmations as macOS's alert,
+    with stacked buttons.
+  - The chat as a document: the question in bold, the answer as text, the sources as lines.
+  - Under the note's title, when it was last edited and its word count.
+  - Panels move on a spring without bounce.
+  - Optionally, the system's accent color (macOS and Windows), always readable at WCAG AA.
+- **Releases** (5.3): a tag `v*` publishes the .msi, .dmg and .deb with their checksums, and the README explains the
+  first launch of the unsigned installers.
 
 - **First-run welcome** (5.1): an Apple-style sheet in three steps over the welcome screen.
   - What Notekea does.

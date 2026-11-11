@@ -370,3 +370,63 @@ lines) and an HTML page of 2 MB of text dropped into its folder. Resident memory
   packaged app.
 - **An agent run** (`AgentEvalChatModelTest`, Medium): 11 s a task on average, 32 s at most, three moves on average;
   it runs on the chat's model, already loaded, so it adds no memory beyond the chat's (3.7).
+
+## M5 — 5.4, the whole MVP
+
+Linux (Pop!_OS 24.04, OpenJDK 21), test JVM, the stand-in embedder, `-PidleSeconds=60`, every smoke run with all of
+M5 built (videos, Settings, Spanish, the macOS redesign). Resident memory and heap in megabytes.
+
+| Run | Moment | Heap | Resident | Before (pass) |
+|---|---|---|---|---|
+| Personal Notes | 12 notes open | 86 | 718 | 657 (One editing mode) |
+| | long note scrolled as it reads | 89 | 809 | 703 |
+| | long note scrolled in Source | 101 | 913 | 855 |
+| | vault closed | 82 | 849 | 855 |
+| Ghost Serializer | 20 notes open | 90 | 735 | |
+| | idle one minute | 91 | 744 | |
+| | vault closed | 82 | 748 | |
+| Ghost Serializer's index | first indexing (371 notes) | 73 | 588 | |
+| | model let go after its idle time | 80 | 612 | |
+| Documents | a 300-page PDF and a 2 MB page indexed | 104 | 715 | 773 (4.8) |
+| Sync | ten saves committed, then a minute idle with sync on | 107 | 684 | 672 (4.3) |
+
+What it says:
+
+- **The heap stays small and flat:** 80–110 MB in every run, including Ghost Serializer's 371 notes. What Notekea
+  holds, its notes, index and caches, is not where the memory goes.
+- **The resident memory is native:** Skia's surfaces, compiled code and the test framework, 450 MB before a vault opens.
+  It is the test JVM's number. The packaged app starts with less (`-XX:CICompilerCount=2`, the periodic collection and
+  the native heap's trim of 2.9).
+- **The long note in Source** is still the largest step (+100 MB): Source lays the whole note out in one text field, as
+  One editing mode measured. Reading a long note costs 90 MB.
+- **Indexing lets its model go:** after its idle time the embedding model is unloaded, and memory does not grow while
+  the vault is searched again.
+
+### JVM options compared
+
+`-PsmokeJvmArgs` on the Ghost Serializer memory run and the sync run, one run each, `-PidleSeconds=60`. Committed heap
+and resident memory, MB:
+
+| Options | 20 notes open | Notes closed | Vault closed | Sync idle | Committed heap |
+|---|---|---|---|---|---|
+| G1 as it comes | 754 | 753 | 761 | 666 | 180–187 |
+| `-XX:+UseStringDeduplication` | 753 | 745 | 766 | 799 | 177–314 |
+| `-XX:MaxHeapFreeRatio=20 -XX:MinHeapFreeRatio=5` | 737 | 710 | 730 | 622 | 107–142 |
+| `-XX:ReservedCodeCacheSize=64m` | 732 | 702 | 759 | 655 | 185–191 |
+
+- **The heap's free ratios win:** G1 gives back what the heap does not use, so the committed heap is 40 % smaller and
+  the process 30–45 MB lighter. The heap in use does not change, and neither does the time of any step. The packaged
+  app takes them (`NotekeaDesktopApp.memoryJvmArgs`).
+- **String deduplication does nothing here:** notes are not held as many equal strings.
+- **A smaller code cache** is within the runs' noise, so it is left out.
+
+### Memory leaks found (5.4)
+
+- **A document's tab** kept its drawn pages and its open PDF while the vault was open, since its ViewModel lives as
+  long as the vault: a tab that leaves the screen now lets them go and draws them again when it comes back
+  (`DocumentViewerViewModelTest`).
+- **YouTube pictures** stayed decoded for the whole session: they go with the note, as the images do.
+- **The chat's undo journals**, which hold what the notes were, grew with every action: only the latest 20 plans can
+  be undone now.
+- **A cancelled video compression** left FFmpeg running and its copy on the disk.
+

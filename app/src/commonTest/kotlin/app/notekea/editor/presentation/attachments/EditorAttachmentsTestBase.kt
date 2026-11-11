@@ -97,6 +97,7 @@ abstract class EditorAttachmentsTestBase {
         const val PNG_BASE64 =
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
         const val SETTLE_MILLIS = 400L
+        const val VIDEO_ID = "dQw4w9WgXcQ"
 
         // A 500 x 2 picture, wider than the default width of a new image.
         const val WIDE_PNG_BASE64 =

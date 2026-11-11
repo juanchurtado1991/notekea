@@ -3,8 +3,8 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-09, with the code layout rules (`GUIDELINES.md` §6 *Layout*, the `:ktlint-rules` module) in
-review: `./gradlew ktlintFormat` applies them and `ktlintCheck` enforces them.
+Last updated: 2026-11-11, with videos and all of M5 on `feature/videos`, one pull request
+([notekea#142](https://github.com/juanchurtado1991/notekea/pull/142)), and the release run (5.5) next.
 
 ## Milestones
 
@@ -160,6 +160,26 @@ these choices taken before the work started:
 - **Ghost (added):** the readers of the model's JSON catch only Ghost Serializer's parse error, so a programming
   error is not taken for a bad reply.
 - **Not in it:** web search (dropped by the developer for now).
+
+## Videos and M5, on `feature/videos` (one pull request, #142)
+
+The developer decided on 2026-11-11 to skip M4's separate performance pass and build every M5 item in one pull
+request, with one QA run at the end, in Notekea QA, for the whole MVP.
+
+- **4.9 Videos:** done. It plays local videos and YouTube (a Notekea window of its own), and compresses videos over
+  100 MB with FFmpeg, downloaded once and verified.
+- **5.1 Onboarding:** an Apple-style sheet in three steps, and the sample vault shipped with the app.
+- **5.2 Settings:** like macOS's System Settings.
+  - **Spanish:** the whole interface, switched live; the chat follows each question's language. Notekea QA's manager,
+    manual cases and guides are in Spanish too.
+- **The macOS redesign:** the developer approved every pick of the HIG review. The audit, the order and what was left
+  out are in `docs/macos-redesign.md`, and the rules in `PLATFORM_GUIDELINES.md`. The window buttons stay the
+  system's own everywhere.
+- **5.3 Packaging:** `.github/workflows/release.yml` on tag `v*`, and the README's First launch.
+- **5.4 Performance:** measured on Linux with everything built (`docs/performance.md`, M5). Windows and macOS come
+  from the release run.
+- **After it:** a code review and a bug hunt of the whole project. Then a test audit, which the developer reviews
+  before the QA build is made.
 
 ## Open work, in order
 

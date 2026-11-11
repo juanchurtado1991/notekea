@@ -44,11 +44,16 @@ fun JvmApplication.notekeaDesktopApp(project: Project) {
 }
 
 /**
- * The options 2.9 measured to cost no speed (`docs/performance.md`): two compiler threads, a collection when idle, and
- * on Linux, where glibc keeps what the app frees, a trim of the native heap. An installer is built on its own system.
+ * The options 2.9 and 5.4 measured to cost no speed (`docs/performance.md`): two compiler threads, a collection when
+ * idle, a heap that gives back what it does not use, and on Linux a trim of the native heap. Built on each system.
  */
 private fun memoryJvmArgs(): List<String> {
-    val everywhere = listOf("-XX:CICompilerCount=2", "-XX:G1PeriodicGCInterval=15000")
+    val everywhere = listOf(
+        "-XX:CICompilerCount=2",
+        "-XX:G1PeriodicGCInterval=15000",
+        "-XX:MaxHeapFreeRatio=20",
+        "-XX:MinHeapFreeRatio=5"
+    )
     val linux = listOf("-XX:+UnlockExperimentalVMOptions", "-XX:TrimNativeHeapInterval=10000")
     return if (System.getProperty("os.name").startsWith("Linux")) everywhere + linux else everywhere
 }

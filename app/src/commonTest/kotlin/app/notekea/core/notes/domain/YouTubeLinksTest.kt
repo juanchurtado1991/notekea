@@ -8,7 +8,7 @@ class YouTubeLinksTest {
     @Test
     fun `every form of a video's address gives its id, other addresses none`() {
         assertEquals(
-            expected = listOf(ID, ID, ID, ID, ID, ID, ID, null, null, null, null),
+            expected = listOf(ID, ID, ID, ID, ID, ID, ID, null, null, null, null, null),
             actual = listOf(
                 "https://www.youtube.com/watch?v=$ID",
                 "https://youtube.com/watch?feature=share&v=$ID&t=42",
@@ -20,6 +20,8 @@ class YouTubeLinksTest {
                 "https://www.youtube.com/@notekea",
                 "https://www.youtube.com/playlist?list=PL123",
                 "https://notyoutube.com/watch?v=$ID",
+                // A page of youtube.com named with eleven letters is not a video (bug hunt, 2026-11-11).
+                "https://www.youtube.com/channelpage",
                 "attachments/trip.mp4"
             ).map { YouTubeLinks.idOf(url = it) }
         )

@@ -257,7 +257,7 @@
     <string name="settings_open_last_vault_hint">Off, Notekea starts on the welcome screen with your vaults listed.</string>
     <string name="settings_show_welcome">Welcome</string>
     <string name="settings_show_welcome_button">Show again</string>
-    <string name="settings_show_welcome_hint">Shows the first-run welcome again: what Notekea does, your notes and the AI.</string>
+    <string name="settings_show_welcome_hint">Shows the first-run welcome again the next time Notekea starts: what it does, your notes and the AI.</string>
     <string name="settings_text_size">Text size</string>
     <string name="settings_text_size_points">%1$d pt</string>
     <string name="settings_line_width">Line width</string>

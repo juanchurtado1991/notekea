@@ -1309,15 +1309,16 @@ Added with the developer on 2026-11-11, decided after a spike (`LIBRARIES.md` §
 
 ## M5 — Release
 
-### 🚧 5.1 Onboarding — `feature/videos` (built: an Apple-style welcome sheet over the welcome screen, the sample vault shipped)
+### 🚧 5.1 Onboarding — `feature/videos` (built, in [notekea#142](https://github.com/juanchurtado1991/notekea/pull/142): an Apple-style welcome sheet over the welcome screen, the sample vault shipped)
 
 First run flow, three steps, skippable at any point:
 
-1. **Welcome:** what Notekea does in one sentence and the privacy promise ("Your notes never leave this computer").
+1. **Welcome:** what Notekea does in one sentence and the privacy promise ("The AI runs on this computer. Notes leave
+   it only if you turn on sync.", reworded on 2026-11-11 because sync sends them to the repository).
 2. **Choose your notes:** open folder / create vault / use the sample vault.
 3. **Get the AI:** recommended model for this machine's RAM, download in the background while indexing starts.
 
-### 🚧 5.2 Settings — `feature/videos` (built: macOS System Settings style, General, Editor, Files, Shortcuts, About; Spanish pending)
+### 🚧 5.2 Settings — `feature/videos` (built, in [notekea#142](https://github.com/juanchurtado1991/notekea/pull/142): macOS System Settings style, General, Editor, Files, Shortcuts, About, and Spanish)
 
 `Mod+,` opens Settings (the dialog the tool rail's Settings opens since 1.14, with its sections marked "Coming soon")
 with sections: General (language, open last vault), Appearance (mode and color theme, built in 2.12), Editor (font size, line width),
@@ -1335,7 +1336,19 @@ Decided with the developer on 2026-11-11:
 - **Already in Settings since #140:** Ask about Settings beside the dialog. Every setting has a `SettingsPlace` the chat
   opens and makes blink, so each new setting here gets one (GUIDELINES §15).
 
-### 🚧 5.3 Packaging — `feature/videos`
+Built in #142:
+
+- **Spanish:** every string of the interface has a Spanish version (`values-es`), switched live, without losing what the
+  screens hold. The chat's replies keep following the question's language. The tests run in English whatever the
+  computer's language.
+- **Notekea QA in Spanish (the developer's decision):** the manager (Test Buddy's `TesterLanguage`), the 95 manual
+  cases and the testers' guides. Notekea QA starts in Spanish, and the automated cases run in English.
+- **macOS redesign (the developer's approval of the HIG review, 2026-11-11):** the picks and the dependency audit are in
+  `docs/macos-redesign.md`. It covers macOS's type scale, the sidebar's and chrome's colors, the source list, push
+  buttons, a unified title bar and a menu bar on macOS, the chat as a document, macOS's alert, springs and the system's
+  accent color. The window buttons stay the system's own on every platform.
+
+### 🚧 5.3 Packaging — `feature/videos` (built, in [notekea#142](https://github.com/juanchurtado1991/notekea/pull/142): `.github/workflows/release.yml` and the README's Install and First launch)
 
 GitHub Actions on tag `v*`: build `.dmg` (macOS), `.msi` (Windows) and `.deb` (Linux), attach them to a GitHub
 Release with checksums.

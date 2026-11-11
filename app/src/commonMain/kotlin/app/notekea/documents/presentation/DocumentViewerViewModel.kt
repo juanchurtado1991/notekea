@@ -49,6 +49,15 @@ class DocumentViewerViewModel(
 
             is DocumentViewerIntent.OnPageShown -> draw(page = intent.page)
 
+            DocumentViewerIntent.OnHidden -> {
+                reduce { it.copy(pages = emptyMap()) }
+
+                pdfPages.release(
+                    vaultPath = vaultPath,
+                    path = path
+                )
+            }
+
             DocumentViewerIntent.OnOpenInApp -> launchGuarded(onError = ::logError) {
                 fileOpener.open(
                     vaultPath = vaultPath,

@@ -100,6 +100,14 @@ class VaultActionRunner(
         val id = nextId++
         journals[id] = journal
 
+        // Only the latest plans can be undone: a journal holds what the notes were, so all of them would grow with
+        // the session (memory leak hunt, 2026-11-11).
+        journals
+            .keys
+            .sorted()
+            .dropLast(n = MAX_UNDOABLE)
+            .forEach { journals.remove(key = it) }
+
         Outcome.Success(value = journal.plan(id = id))
     }
 
@@ -438,6 +446,7 @@ class VaultActionRunner(
         }
 
     private companion object {
+        const val MAX_UNDOABLE = 20
         val DATE = Regex(pattern = "\\d{4}-\\d{2}-\\d{2}")
 
         val MODES = mapOf(
