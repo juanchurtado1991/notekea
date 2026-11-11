@@ -4,6 +4,7 @@ import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.ChatRole
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
+import app.notekea.core.notes.domain.NoteEntry
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -14,6 +15,7 @@ class AnswerFromFoundUseCase(private val llmEngine: LlmEngine) {
     operator fun invoke(
         question: String,
         tables: List<FoundNotes>,
+        notes: Collection<NoteEntry> = emptyList(),
         language: String? = null
     ): Flow<AnswerStep> = streamedReply(
         llmEngine = llmEngine,
@@ -24,7 +26,7 @@ class AnswerFromFoundUseCase(private val llmEngine: LlmEngine) {
             ),
             ChatMessage(
                 role = ChatRole.USER,
-                text = "${described(tables = tables)}\n\nQuestion: $question"
+                text = "${described(tables = tables, notes = notes)}\n\nQuestion: $question"
             )
         ).inLanguage(language = language),
         options = GenerationOptions(
@@ -33,7 +35,12 @@ class AnswerFromFoundUseCase(private val llmEngine: LlmEngine) {
         )
     )
 
-    private fun described(tables: List<FoundNotes>): String = tables
+    // Each row with all its note's properties, not only the table's columns: "and which one did I like most?" asked
+    // of a table of finished books reads their rating (the chat probe, 2026-11-11).
+    private fun described(
+        tables: List<FoundNotes>,
+        notes: Collection<NoteEntry>
+    ): String = tables
         .mapIndexed { index, table ->
             val header = "Table ${index + 1} (${table.rows.size} notes): note" +
                 table.columns.joinToString(separator = "") { " | $it" }
@@ -41,13 +48,35 @@ class AnswerFromFoundUseCase(private val llmEngine: LlmEngine) {
             val rows = table
                 .rows
                 .take(n = MAX_ROWS)
-                .joinToString(separator = "\n") { row ->
-                    "- ${row.note.nameWithoutExtension}" + row.cells.joinToString(separator = "") { " | $it" }
+                .joinToString(separator = "\n") {
+                    rowOf(
+                        row = it,
+                        notes = notes
+                    )
                 }
 
             "$header\n${rows.ifEmpty { "(no notes)" }}"
         }
         .joinToString(separator = "\n\n")
+
+    private fun rowOf(
+        row: FoundRow,
+        notes: Collection<NoteEntry>
+    ): String {
+        val properties = notes
+            .firstOrNull {
+                it.file.path == row.note
+            }
+            ?.let { NoteProperties.of(note = it) }
+            .orEmpty()
+
+        val cells = row.cells.joinToString(separator = "") { " | $it" }
+
+        val more =
+            if (properties.isEmpty()) "" else " (${properties.joinToString(separator = "; ")})"
+
+        return "- ${row.note.nameWithoutExtension}$cells$more"
+    }
 
     private companion object {
         const val MAX_TOKENS = 220

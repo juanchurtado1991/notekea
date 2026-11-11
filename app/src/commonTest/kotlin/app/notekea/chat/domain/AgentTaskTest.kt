@@ -127,6 +127,27 @@ class AgentTaskTest {
             )
         }
 
+    // The chat probe of 2026-11-11: the model counted Arepas' words as 109, 128 and 63.
+    @Test
+    fun `a note read says how many words it has, counted by the app`() = runTest {
+        store.texts[RelativePath(value = "Books/Dune.md")] = "Dune is a novel by Frank Herbert's son? No, by Frank."
+
+        script(
+            "{\"move\":\"read\",\"note\":\"Dune\"}",
+            "{\"move\":\"finish\",\"summary\":\"11 words.\"}"
+        )
+
+        run(task = "how many words does Dune have?")
+
+        assertEquals(
+            expected = true,
+            actual = "read \"Dune\" (11 words):" in engine
+                .generated[1]
+                .last()
+                .text
+        )
+    }
+
     @Test
     fun `a page is read only when the task writes its address`() = runTest {
         script(

@@ -3,6 +3,8 @@ package app.notekea.chat.presentation
 import app.notekea.chat.domain.ChatExchange
 import app.notekea.chat.domain.CompactChatUseCase
 import app.notekea.core.domain.Outcome
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 
 /**
  * What the chat remembers of itself for the model, as Claude Code's context: a [summary] of what came before and the
@@ -15,7 +17,29 @@ internal class ChatMemory(private val compactChat: CompactChatUseCase) {
 
     private var compactedThrough = NONE
 
-    /** What a question asked as entry [id] is given of the chat before it: the summary, then the last exchanges. */
+    // When the last question was asked: a chat left for a while, or one from an earlier session, is compacted first.
+    private var lastAsked: Instant? = null
+
+    /** The chat loaded from an earlier session: its next question compacts it first. */
+    fun resume() {
+        lastAsked = Instant.DISTANT_PAST
+    }
+
+    /** Whether a question asked [now] comes [IDLE] or more after the last one; it becomes the last one. */
+    fun isIdleAt(now: Instant): Boolean {
+        val isIdle = lastAsked?.let {
+            now - it >= IDLE
+        } == true
+
+        lastAsked = now
+
+        return isIdle
+    }
+
+    /**
+     * What a question asked as entry [id] is given of the chat before it: the summary, the chat's first exchange (its
+     * start, for "going back to the start…", the chat probe of 2026-11-11), then the last exchanges.
+     */
     fun historyBefore(
         entries: List<ChatEntry>,
         id: Long
@@ -27,14 +51,17 @@ internal class ChatMemory(private val compactChat: CompactChatUseCase) {
             )
         }
 
-        val recent = remembered(entries = entries)
-            .filter {
-                it.id < id
-            }
-            .takeLast(n = TURNS)
-            .map { it.exchange() }
+        val before = remembered(entries = entries).filter {
+            it.id < id
+        }
 
-        return listOfNotNull(earlier) + recent
+        val recent = before.takeLast(n = TURNS)
+
+        val start = before.firstOrNull()?.takeIf {
+            it !in recent
+        }
+
+        return listOfNotNull(earlier, start?.exchange()) + recent.map { it.exchange() }
     }
 
     /** How full the memory is, from 0 to 1 and over: the summary and every exchange since, against its budget. */
@@ -83,6 +110,7 @@ internal class ChatMemory(private val compactChat: CompactChatUseCase) {
     private companion object {
         const val NONE = -1L
         const val TURNS = 4
+        val IDLE = 30.minutes
         const val KEPT = 2
         const val REPLY_CHARS = 400
         const val BUDGET_CHARS = 6_000

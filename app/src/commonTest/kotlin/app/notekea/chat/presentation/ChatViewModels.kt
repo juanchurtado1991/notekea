@@ -39,7 +39,8 @@ internal fun chatViewModel(
     runner: FakeActionRunner,
     history: ChatHistoryStore,
     clipboard: FakeTextClipboard,
-    guide: HelpGuide = HelpGuide(topics = emptyList())
+    guide: HelpGuide = HelpGuide(topics = emptyList()),
+    clock: Clock = Clock.System
 ): ChatViewModel {
     val cache = NoteTextCache(
         contentStore = store,
@@ -104,7 +105,7 @@ internal fun chatViewModel(
         answerFromFound = AnswerFromFoundUseCase(llmEngine = engine),
         actionRunner = runner,
         localCalendar = FakeLocalCalendar(),
-        clock = Clock.System,
+        clock = clock,
         historyStore = history,
         clipboard = clipboard,
         llmEngine = engine

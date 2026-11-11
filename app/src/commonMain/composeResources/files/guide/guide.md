@@ -167,7 +167,8 @@ Click ⋯ at the top right of the chat: Copy chat puts the conversation on the c
 words: memory, memoria, context, contexto, context window, ventana de contexto, compact, compactar, forget, olvidar, ring, rueda, círculo
 The chat remembers the conversation so you can ask "and the water?" or "make it shorter". The ring beside the mode, at
 the bottom right of the question field, fills as the conversation grows; hold the pointer on it to see how full it
-is. When it is full, the chat writes the earlier conversation into a short summary by itself and keeps going with it.
+is. When it is full, or when you ask again after half an hour or in a chat from an earlier session, the chat writes
+the earlier conversation into a short summary by itself and keeps going with it.
 Compact chat, in the ⋯ menu, does it at once, and Clear history forgets everything. The chat replies in the language
 you write in, or the one you ask for ("in Spanish please").
 

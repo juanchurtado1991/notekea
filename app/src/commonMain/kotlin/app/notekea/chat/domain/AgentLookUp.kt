@@ -107,7 +107,10 @@ internal class AgentLookUp(
 
         val properties = NoteProperties.of(note = note).joinToString(separator = "") { "$it\n" }
 
-        return "read \"${path.nameWithoutExtension}\":\n$properties${body.take(n = NOTE_CHARS)}"
+        // Counted here, not by the model: "how many words does Arepas have?" got 109, 128 and 63 (the chat probe).
+        val words = WORDS.findAll(input = body).count()
+
+        return "read \"${path.nameWithoutExtension}\" ($words words):\n$properties${body.take(n = NOTE_CHARS)}"
     }
 
     private suspend fun found(step: ActionStep): String {
@@ -151,6 +154,7 @@ internal class AgentLookUp(
     }
 
     private companion object {
+        val WORDS = Regex(pattern = "[\\p{L}\\p{N}]+(['’-][\\p{L}\\p{N}]+)*")
         const val PASSAGES = 4
         const val MIN_WORD = 3
         const val PROPERTY_NOTES = 8

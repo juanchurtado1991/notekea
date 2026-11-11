@@ -20,12 +20,30 @@ internal object PlanWords {
 
     private val TAGGING = setOf(ActionKind.ADD_TAG, ActionKind.SET_PROPERTY)
 
-    /** [steps] as the request's words say: a bookmark asked, or notes found by what they say. */
+    private val LETTER = Regex(pattern = "\\p{L}")
+
+    /** [steps] as the request's words say: talk with no word, a bookmark asked, or notes found by what they say. */
     fun shaped(
         steps: List<PlannedStep>,
         request: String
     ): List<PlannedStep> {
+        // "?" alone was planned as opening today's note (the chat probe on Large, 2026-11-11).
+        val isWordless = !LETTER.containsMatchIn(input = request)
+        if (isWordless) return listOf(PlannedStep(kind = ActionKind.CHAT))
+
         val single = steps.singleOrNull() ?: return steps
+
+        // "tell me a joke about my notes" planned as talk was answered "I cannot tell jokes about your notes".
+        val isWritten = single.kind == ActionKind.CHAT && AnswerPrompt.isCreative(text = request)
+
+        if (isWritten) {
+            return listOf(
+                PlannedStep(
+                    kind = ActionKind.ANSWER,
+                    fields = mapOf(ActionField.REQUEST to request)
+                )
+            )
+        }
 
         val bookmarked = BOOKMARKING
             .find(input = request)
@@ -93,5 +111,40 @@ internal object PlanWords {
         }
 
         return step.copy(fields = step.fields - ActionField.NOTE + (ActionField.FOLDER to folder))
+    }
+
+    /**
+     * [steps] with a move's missing target found among its notes: the folder the plan creates or the vault holds,
+     * listed as one of them ("move Arepas, Pancakes, Archive" after create_folder Archive, the probe on Large).
+     */
+    fun targetsNamed(
+        steps: List<PlannedStep>,
+        context: ActionContext
+    ): List<PlannedStep> {
+        val created = steps.mapNotNull {
+            it[ActionField.FOLDER].takeIf { _ ->
+                it.kind == ActionKind.CREATE_FOLDER
+            }
+        }
+
+        val folders = (created + context.folders).associateBy { it.lowercase() }
+
+        return steps.map { step ->
+            val isUntargeted = step.kind == ActionKind.MOVE && step[ActionField.TARGET] == null
+
+            val target = step
+                .notes
+                .lastOrNull()
+                ?.let {
+                    folders[it.trim('/').lowercase()]
+                }
+
+            if (!isUntargeted || target == null) return@map step
+
+            step.copy(
+                fields = step.fields + (ActionField.TARGET to target),
+                notes = step.notes.dropLast(n = 1)
+            )
+        }
     }
 }

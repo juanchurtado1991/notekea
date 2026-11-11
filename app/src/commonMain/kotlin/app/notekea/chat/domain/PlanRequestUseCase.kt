@@ -97,7 +97,10 @@ class PlanRequestUseCase(
             request = request
         )
 
-        val shaped = trimmed(steps = reworded).map {
+        val shaped = PlanWords.targetsNamed(
+            steps = trimmed(steps = reworded),
+            context = context
+        ).map {
             val named = foldersNamed(
                 step = PlanWords.folderNamed(
                     step = rescued(step = it),

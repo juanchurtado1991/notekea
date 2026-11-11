@@ -41,7 +41,8 @@ object AgentTaskPrompt {
         """You work on a task in a notes app, one move at a time, and see what each move finds. Moves:
 - search: query: words to look for in the notes; you get the passages that match.
 - read: note: a note's name; you get its text.
-- find: query: notes chosen by their properties, in plain words ("books rated 4 or more").
+- find: query: notes chosen by their properties, in plain words, naming the property the task means as the vault
+  lists it ("books rated 4 or more", "books with finished true"); never another property in its place.
 - tasks: the open tasks of the vault.
 - fetch: url: a web page whose address the task writes; you get its article. Never another address.
 - propose: steps: the changes the task asks for, as actions of the app: create_note (title, folder, text: what to
