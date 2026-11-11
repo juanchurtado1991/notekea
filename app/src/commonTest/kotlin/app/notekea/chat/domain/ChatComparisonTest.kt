@@ -241,4 +241,94 @@ class ChatComparisonTest {
             )
         )
     }
+
+    @Test
+    fun `the most important notes are the vault's overview, which names the notes marked with a priority`() {
+        val launch = app
+            .notekea
+            .core
+            .notes
+            .domain
+            .NoteFixtures
+            .entry(
+                path = "Projects/Notekea launch.md",
+                metadata = app
+                    .notekea
+                    .core
+                    .notes
+                    .domain
+                    .NoteMetadata
+                    .NONE
+                    .copy(
+                        properties = listOf(
+                            app
+                                .notekea
+                                .core
+                                .notes
+                                .domain
+                                .NoteProperty(
+                                    key = "priority",
+                                    value = app
+                                        .notekea
+                                        .core
+                                        .notes
+                                        .domain
+                                        .PropertyValue
+                                        .Number(text = "1")
+                                )
+                        )
+                    )
+            )
+
+        assertEquals(
+            expected = listOf(ActionKind.OVERVIEW, ActionKind.OVERVIEW, true),
+            actual = listOf(
+                OverviewAsked
+                    .shaped(
+                        steps = listOf(PlannedStep(kind = ActionKind.ANSWER)),
+                        request = "y cuales son las mas importantes?"
+                    )
+                    .single()
+                    .kind,
+                OverviewAsked
+                    .shaped(
+                        steps = listOf(PlannedStep(kind = ActionKind.ANSWER)),
+                        request = "which are my most important notes?"
+                    )
+                    .single()
+                    .kind,
+                MARKED in OverviewPrompt.mapOf(notes = listOf(launch))
+            )
+        )
+    }
+
+    @Test
+    fun `how many books is counted from the properties, and asked in Spanish it is answered in Spanish`() {
+        val answer = listOf(PlannedStep(kind = ActionKind.ANSWER))
+
+        assertEquals(
+            expected = listOf<Any?>(ActionKind.FIND_NOTES, ActionKind.ANSWER, "Spanish"),
+            actual = listOf(
+                PlanWords
+                    .shaped(
+                        steps = answer,
+                        request = "cuántos libros terminé?"
+                    )
+                    .single()
+                    .kind,
+                PlanWords
+                    .shaped(
+                        steps = answer,
+                        request = "how many servings do the black beans make?"
+                    )
+                    .single()
+                    .kind,
+                SpokenLanguage.of(text = "cuántos libros terminé?")
+            )
+        )
+    }
+
+    private companion object {
+        const val MARKED = "Marked: Notekea launch (priority: 1)"
+    }
 }

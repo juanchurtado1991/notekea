@@ -56,6 +56,13 @@ internal object PlanWords {
         option = RegexOption.IGNORE_CASE
     )
 
+    // "¿cuántos libros terminé?": counted from the notes' properties, not from a few passages (said 2 of 3).
+    private val COUNTED = Regex(
+        pattern = "\\b(how many|cu[aá]nt[oa]s)\\s+(\\w+\\s+){0,2}(books|libros|recipes|recetas|projects|proyectos|" +
+            "meetings|reuniones)\\b",
+        option = RegexOption.IGNORE_CASE
+    )
+
     // "¿cuál de mis proyectos está más atrasado?": its overdue tasks, not its budget.
     private val LATE = Regex(
         pattern = "\\b(atrasad\\w*|retrasad\\w*|late|behind|overdue|vencid\\w*)\\b",
@@ -187,6 +194,15 @@ internal object PlanWords {
                 PlannedStep(
                     kind = ActionKind.OPEN_NOTE,
                     fields = mapOf(ActionField.NOTE to latest)
+                )
+            )
+        }
+
+        if (COUNTED.containsMatchIn(input = request)) {
+            return listOf(
+                PlannedStep(
+                    kind = ActionKind.FIND_NOTES,
+                    fields = mapOf(ActionField.REQUEST to request)
                 )
             )
         }

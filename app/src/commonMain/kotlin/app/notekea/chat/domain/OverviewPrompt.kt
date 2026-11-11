@@ -13,11 +13,13 @@ object OverviewPrompt {
         "You are the assistant of Notekea, a notes app. Say what the user's notes are about, from the map of the " +
             "vault below: group them by folder, name a few notes of each, and say what they seem to be for. Use " +
             "only the names given and never claim what a note says. Reply in the language of the user's message, " +
-            "in four to seven sentences or a short list, and end by offering to answer a question about any of them."
+            "in four to seven sentences or a short list, and end by offering to answer a question about any of them. " +
+            "Asked which notes matter most, name the ones marked with a priority, a status or a due date, and why."
 
     private const val NAMES_PER_FOLDER = 8
     private const val MAX_FOLDERS = 25
     private const val MAX_TAGS = 15
+    private val MARKS = setOf("priority", "status", "due")
 
     fun messages(
         question: String,
@@ -68,7 +70,30 @@ object OverviewPrompt {
             .takeIf { it.isNotEmpty() }
             ?.let { "Tags: $it" }
 
-        val lines = listOf("${notes.size} notes.") + folders + listOfNotNull(root, tags)
+        // What marks a note as one that matters: "which are the most important?" found nothing marked "important".
+        val marked = notes
+            .mapNotNull { note ->
+                val keys = note
+                    .metadata
+                    .properties
+                    .filter {
+                        it.key.lowercase() in MARKS
+                    }
+
+                if (keys.isEmpty()) return@mapNotNull null
+
+                val said = NoteProperties.of(note = note).filter { line ->
+                    keys.any { line.startsWith(prefix = "${it.key}:") }
+                }
+
+                "${note.file.path.nameWithoutExtension} (${said.joinToString()})"
+            }
+            .take(n = NAMES_PER_FOLDER)
+            .joinToString(separator = "; ")
+            .takeIf { it.isNotEmpty() }
+            ?.let { "Marked: $it" }
+
+        val lines = listOf("${notes.size} notes.") + folders + listOfNotNull(root, tags, marked)
 
         return lines.joinToString(separator = "\n")
     }

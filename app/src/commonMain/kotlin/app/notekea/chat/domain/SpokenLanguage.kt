@@ -17,7 +17,8 @@ object SpokenLanguage {
             "que", "qué", "de", "la", "el", "los", "las", "mis", "mi", "una", "un", "por", "para", "con", "hay",
             "es", "esta", "está", "este", "notas", "nota", "tareas", "cuál", "cuáles", "cuanto", "cuánto", "cuántos",
             "cuantos", "cómo", "como", "dónde", "quién", "quien", "y", "del", "lo", "se", "me", "podés", "puedes",
-            "decime", "dime", "escribe", "escribí", "hola", "gracias", "sobre", "tengo", "en", "más", "mas"
+            "decime", "dime", "escribe", "escribí", "hola", "gracias", "sobre", "tengo", "en", "más", "mas",
+            "terminé", "cambié", "leí", "libros", "recetas", "reuniones", "proyectos", "necesito", "quiero"
         ),
         "French" to setOf(
             "le", "les", "des", "est", "je", "j'ai", "que", "qui", "quoi", "sur", "mes", "mon", "ma", "une", "et",
@@ -39,6 +40,8 @@ object SpokenLanguage {
 
     // A word only one language says, enough alone: "gracias!", "merci".
     private val OWN = setOf(
+        "cuántos", "cuántas", "cuánto", "cuánta", "qué", "cuál", "cuáles", "dónde", "quién", "cómo", "terminé",
+        "escribí", "cambié", "leí", "libros", "recetas", "reuniones", "proyectos", "necesito", "quiero",
         "gracias", "hola", "thanks", "hello", "merci", "bonjour", "obrigado", "obrigada", "olá", "danke", "hallo",
         "grazie", "ciao"
     )

@@ -38,9 +38,9 @@ object AnswerPrompt {
             "exactly $NOT_FOUND. A question of what the person learned or thinks about something is answered with what the " +
             "excerpts say about it. Only when two excerpts give different values for the same thing (two counts of " +
             "one book list), say so and give each with its number; excerpts about other things do not disagree, " +
-            "leave them out. Do not explain your reasoning. Speak to the person as you (\"you wrote\"). When the question asks for a total " +
-            "or a count, work it out yourself from the excerpts' numbers, even when no excerpt says it: write each " +
-            "number and the result (a + b + c = total)."
+            "leave them out. Say how many there are only when asked how many. Do not explain your reasoning. Speak to the person as you (\"you wrote\"). When the question asks for a total " +
+            "or a count, work it out yourself from the excerpts' numbers, even when no excerpt says it: when you add " +
+            "two or more, write each number and the result (a + b + c = total)."
 
     // "Escribe un poema sobre mis recetas": written from the excerpts, not reported (the chat probe, 2026-11-11).
     private val CREATIVE = Regex(
