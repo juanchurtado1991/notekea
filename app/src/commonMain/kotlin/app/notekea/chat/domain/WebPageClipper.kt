@@ -10,7 +10,10 @@ interface WebPageClipper {
     suspend fun clip(url: String): Outcome<NoteDraft, PageProblem>
 
     /** How many pages the page links under its path ([SectionAsked.prefix]); none when it links none. */
-    suspend fun sectionOf(url: String): Outcome<SectionAsked, PageProblem>
+    suspend fun sectionOf(
+        url: String,
+        language: String? = null
+    ): Outcome<SectionAsked, PageProblem>
 
     /** The page and the pages it links under its path, each a note, the page their index. */
     suspend fun clipSection(url: String): Outcome<List<NoteDraft>, PageProblem>

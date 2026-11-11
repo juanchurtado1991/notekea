@@ -25,6 +25,13 @@ internal fun ChatSectionQuestion(
     onChoose: (isWhole: Boolean) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+        section.summary?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
         Text(
             text = replyString(Res.string.chat_section_question, section.count, section.prefix),
             style = MaterialTheme.typography.bodyMedium

@@ -19,7 +19,10 @@ class ClipSectionChatTest {
     private val clipper = object : WebPageClipper {
         override suspend fun clip(url: String) = Outcome.Success(value = draft(name = "Overview"))
 
-        override suspend fun sectionOf(url: String) = Outcome.Success(
+        override suspend fun sectionOf(
+            url: String,
+            language: String?
+        ) = Outcome.Success(
             value = SectionAsked(
                 url = url,
                 prefix = "https://x.com/docs/",

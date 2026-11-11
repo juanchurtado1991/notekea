@@ -7,8 +7,25 @@ package app.notekea.clips.domain
 data class SectionLinks(
     val prefix: String,
     val urls: List<String>,
-    val more: Int
+    val more: Int,
+    // What each page is, when the site says it (llms.txt: "Axiom: send traces to Axiom"), by its address.
+    val about: Map<String, String> = emptyMap()
 ) {
+    /** What the page at [url] is: what the site says of it, or the words of its address. */
+    fun aboutOf(url: String): String = about[url] ?: wordsOf(url = url)
+
+    /** At most [MAX_PAGES], the first of [chosen] (the most valuable first), kept in the site's own order. */
+    fun capped(chosen: List<String> = urls): SectionLinks {
+        val kept = chosen.take(n = MAX_PAGES).toSet()
+
+        return copy(
+            urls = urls.filter {
+                it in kept
+            },
+            more = urls.size - kept.size
+        )
+    }
+
     companion object {
         const val MAX_PAGES = 30
 
@@ -43,11 +60,11 @@ data class SectionLinks(
             option = RegexOption.IGNORE_CASE
         )
 
-        /** The links [page] writes under its path. */
+        /** The links [page] writes under its path, at most [MAX_PAGES]. */
         fun of(page: FetchedPage): SectionLinks = within(
             url = page.url,
             candidates = linksIn(page = page)
-        )
+        ).capped()
 
         /** The addresses [page] links, whole. */
         fun linksIn(page: FetchedPage): List<String> {
@@ -73,8 +90,9 @@ data class SectionLinks(
         }
 
         /**
-         * Of [candidates] (a site's index, its sitemap, or a page's links), those under the page at [url]; beside it in
-         * its folder, only those the page itself [linked] (a flat docs site lists every page of it in its index).
+         * Of [candidates] (a site's index, its sitemap, or a page's links), all those under the page at
+         * [url]; beside it in its folder, only those the page itself [linked] (a flat docs site lists every page of it
+         * in its index).
          */
         fun within(
             url: String,
@@ -141,8 +159,8 @@ data class SectionLinks(
 
             return SectionLinks(
                 prefix = origin + folder,
-                urls = under.take(n = MAX_PAGES),
-                more = (under.size - MAX_PAGES).coerceAtLeast(minimumValue = 0)
+                urls = under,
+                more = 0
             )
         }
 
@@ -164,6 +182,22 @@ data class SectionLinks(
                 if (folder.isEmpty()) "$origin/$name" else "$origin/$folder/$name"
             }
         }
+
+        /** "https://kotlinlang.org/docs/_llms/android-overview.txt" as "android overview". */
+        fun wordsOf(url: String): String = url
+            .substringAfter(delimiter = "://")
+            .substringAfter(delimiter = '/')
+            .replace(COPY, replacement = "")
+            .split('/', '-', '_')
+            .filter {
+                it.isNotEmpty() &&
+                    it != "docs" &&
+                    it != "llms"
+            }
+            .takeLast(n = WORDS_PARTS)
+            .joinToString(separator = " ")
+
+        private const val WORDS_PARTS = 3
 
         private fun partsOf(url: String): Pair<String, String>? = ORIGIN
             .find(input = url)

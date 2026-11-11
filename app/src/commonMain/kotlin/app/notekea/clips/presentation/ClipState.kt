@@ -16,6 +16,8 @@ data class ClipState(
     val error: ClipError? = null,
     // The pages the page links under its own path: the dialog asks whether to clip them too.
     val section: SectionLinks? = null,
+    // What the section offers, in a sentence the model wrote; none without a model.
+    val sectionSummary: String? = null,
     val progress: SectionStep.Clipping? = null
 ) {
     val isAsking: Boolean get() =

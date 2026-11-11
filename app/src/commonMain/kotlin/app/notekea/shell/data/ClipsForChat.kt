@@ -10,6 +10,7 @@ import app.notekea.clips.domain.ClipError
 import app.notekea.clips.domain.ClipSectionUseCase
 import app.notekea.clips.domain.ClipStep
 import app.notekea.clips.domain.ClipWebPageUseCase
+import app.notekea.clips.domain.DescribeSectionUseCase
 import app.notekea.clips.domain.FindSectionUseCase
 import app.notekea.clips.domain.PageFetcher
 import app.notekea.clips.domain.SectionStep
@@ -24,6 +25,7 @@ class ClipsForChat(
     private val clipWebPage: ClipWebPageUseCase,
     private val findSection: FindSectionUseCase,
     private val clipSection: ClipSectionUseCase,
+    private val describeSection: DescribeSectionUseCase,
     private val fetcher: PageFetcher,
     private val extractor: ArticleExtractor,
     private val localCalendar: LocalCalendar,
@@ -64,19 +66,31 @@ class ClipsForChat(
         }
     }
 
-    override suspend fun sectionOf(url: String): Outcome<SectionAsked, PageProblem> =
-        when (val found = findSection(url = url)) {
-            is Outcome.Success -> Outcome.Success(
-                value = SectionAsked(
-                    url = url,
-                    prefix = found.value.prefix,
-                    count = found.value.urls.size,
-                    more = found.value.more
-                )
+    override suspend fun sectionOf(
+        url: String,
+        language: String?
+    ): Outcome<SectionAsked, PageProblem> = when (val found = findSection(url = url)) {
+        is Outcome.Success -> Outcome.Success(
+            value = SectionAsked(
+                url = url,
+                prefix = found.value.prefix,
+                count = found.value.urls.size,
+                more = found.value.more,
+                summary = found
+                    .value
+                    .urls
+                    .takeIf { it.isNotEmpty() }
+                    ?.let {
+                        describeSection(
+                            links = found.value,
+                            language = language
+                        )
+                    }
             )
+        )
 
-            is Outcome.Failure -> Outcome.Failure(error = problemOf(error = found.error))
-        }
+        is Outcome.Failure -> Outcome.Failure(error = problemOf(error = found.error))
+    }
 
     override suspend fun clipSection(url: String): Outcome<List<NoteDraft>, PageProblem> {
         val links = when (val found = findSection(url = url)) {
@@ -95,7 +109,7 @@ class ClipsForChat(
             is SectionStep.Done -> Outcome.Success(
                 value = WebClipSection
                     .notesOf(
-                        done = step,
+                        done = step.copy(summary = describeSection(links = links)),
                         today = today()
                     )
                     .map { (path, text) ->

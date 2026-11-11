@@ -201,10 +201,13 @@ try: clip …
 Click Clip a web page where no note is open (the start of the editor), or ask the chat "clip https://…" with the
 page's address. Notekea downloads the page, keeps its article in the Web sources folder with the properties
 source and clipped, writes notes about it with the AI model and keeps only the sentences the article backs, and puts
-the article itself under Original text. When the page links other pages under its own path, such as a
-documentation's section, Notekea asks first: only this page, or this page and those (at most 30). With them, each
-becomes a note in a folder named after the page, and the page's note lists them under Pages. Say "with its linked
-pages" or "only" in the chat to answer before it asks. Pages that need a login or JavaScript cannot be clipped.
+the article itself under Original text. When the page has other pages under its own path, such as a documentation's
+section, Notekea asks first: only this page, or this page and those, saying in a sentence what they offer. It finds
+them in the site's llms.txt (its pages written for machines, clean of menus), else its sitemap, else the page's
+links; news and blog pages are never a section. At most 30 are clipped, the closest to the page first. With them,
+each becomes a note in a folder named after the page, and the page's note lists them under Pages with what each is
+for. A page the site also serves as Markdown (page.md) is read from it. Say "with its linked pages" or "only" in the
+chat to answer before it asks. Pages that need a login or JavaScript cannot be clipped.
 
 # Study cards
 words: study cards, flashcards, tarjetas, tarjetas de estudio, repaso, review, memorize, memorizar, spaced repetition

@@ -3,6 +3,7 @@ package app.notekea.clips.presentation
 import app.notekea.clips.domain.Article
 import app.notekea.clips.domain.ClipSectionUseCase
 import app.notekea.clips.domain.ClipWebPageUseCase
+import app.notekea.clips.domain.DescribeSectionUseCase
 import app.notekea.clips.domain.FetchedPage
 import app.notekea.clips.domain.FindSectionUseCase
 import app.notekea.clips.domain.SupportCheck
@@ -76,6 +77,7 @@ class ClipSectionDialogTest {
             Outcome.Success(FetchedPage(url, pages[url].orEmpty()))
         }),
         clipSection = ClipSectionUseCase(clipWebPage = clip),
+        describeSection = DescribeSectionUseCase(llmEngine = engine),
         noteContentStore = store,
         noteFileOperations = files,
         localCalendar = FakeLocalCalendar(),

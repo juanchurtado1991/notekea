@@ -5,5 +5,6 @@ data class SectionAsked(
     val url: String,
     val prefix: String,
     val count: Int,
-    val more: Int
+    val more: Int,
+    val summary: String? = null
 )

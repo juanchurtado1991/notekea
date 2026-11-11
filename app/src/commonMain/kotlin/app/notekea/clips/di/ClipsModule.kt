@@ -2,7 +2,9 @@ package app.notekea.clips.di
 
 import app.notekea.clips.domain.ClipSectionUseCase
 import app.notekea.clips.domain.ClipWebPageUseCase
+import app.notekea.clips.domain.DescribeSectionUseCase
 import app.notekea.clips.domain.FindSectionUseCase
+import app.notekea.clips.domain.SectionRanker
 import app.notekea.clips.domain.SupportCheck
 import app.notekea.clips.presentation.ClipViewModel
 import org.koin.core.module.dsl.factoryOf
@@ -13,6 +15,8 @@ import org.koin.dsl.module
 val clipsModule = module {
     factoryOf(::SupportCheck)
     factoryOf(::ClipWebPageUseCase)
+    factoryOf(::SectionRanker)
+    factoryOf(::DescribeSectionUseCase)
     factoryOf(::FindSectionUseCase)
     factoryOf(::ClipSectionUseCase)
 
@@ -22,6 +26,7 @@ val clipsModule = module {
             clipWebPage = get(),
             findSection = get(),
             clipSection = get(),
+            describeSection = get(),
             noteContentStore = get(),
             noteFileOperations = get(),
             localCalendar = get(),

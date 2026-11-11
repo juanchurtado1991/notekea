@@ -134,7 +134,11 @@ class ComposeNotesUseCase(
         }
 
         if (!ClipWords.isOnly(request)) {
-            val section = clipping.sectionOf(url = url)
+            val section = clipping.sectionOf(
+                url = url,
+                language = SpokenLanguage.of(text = request)
+            )
+
             val isAsked = section is Outcome.Success && section.value.count > 0
             if (isAsked) return problem(ActionProblem.SectionAsked(section = section.value))
         }
