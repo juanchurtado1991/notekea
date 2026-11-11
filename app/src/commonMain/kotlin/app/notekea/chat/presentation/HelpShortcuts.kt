@@ -2,6 +2,7 @@ package app.notekea.chat.presentation
 
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.graphShortcut
+import app.notekea.core.platform.domain.settingsShortcut
 import app.notekea.core.presentation.platform.label
 
 /**
@@ -30,6 +31,7 @@ internal object HelpShortcuts {
             "toggleSidePanel" to toggleSidePanelShortcut,
             "outline" to outlineShortcut,
             "chat" to chatShortcut,
+            "settings" to settingsShortcut,
             "today" to todayShortcut,
             "previousDay" to previousDayShortcut,
             "nextDay" to nextDayShortcut,

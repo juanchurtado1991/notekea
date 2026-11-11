@@ -17,6 +17,7 @@ enum class ShortcutKey {
     B,
     BACKSLASH,
     BACKSPACE,
+    COMMA,
     D,
     DELETE,
     E,

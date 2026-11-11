@@ -25,13 +25,14 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 private const val PREVIEW_WIDTH_DP = 480
 
 /**
- * A group of settings, as macOS's System Settings draws them (the developer's choice, 2026-11-11): rounded, on the
- * container's color with a hairline, one row each with a line between them, and an optional [footnote] under it.
+ * A group of settings, as macOS's System Settings draws them (the developer's choice, 2026-11-11): an optional
+ * [header], then rounded on the container's color, one row each with a line between, and an optional [footnote].
  */
 @Composable
 fun NotekeaSettingsGroup(
     rows: List<@Composable () -> Unit>,
     modifier: Modifier = Modifier,
+    header: String? = null,
     footnote: String? = null
 ) {
     val colors = MaterialTheme.colorScheme
@@ -40,6 +41,15 @@ fun NotekeaSettingsGroup(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)
     ) {
+        header?.let {
+            Text(
+                text = it,
+                modifier = Modifier.padding(horizontal = NotekeaDimensions.SpacingM),
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.onSurfaceVariant
+            )
+        }
+
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,

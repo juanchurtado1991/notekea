@@ -22,3 +22,10 @@ val PlatformConventions.zoomResetShortcut: Shortcut
         key = ShortcutKey.DIGIT_0,
         modifiers = setOf(primaryModifier)
     )
+
+/** `Mod+,` opens Settings, as macOS's apps do (5.2), the same on every system with its primary modifier. */
+val PlatformConventions.settingsShortcut: Shortcut
+    get() = Shortcut(
+        key = ShortcutKey.COMMA,
+        modifiers = setOf(primaryModifier)
+    )

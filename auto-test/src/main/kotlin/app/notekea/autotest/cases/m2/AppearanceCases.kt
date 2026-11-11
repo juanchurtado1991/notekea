@@ -39,6 +39,7 @@ private fun SuiteBuilder.keptChoice() {
         )
 
         clickIcon(label = "Settings")
+        click(text = "Appearance")
         scrollTo(text = THEME)
         click(text = THEME)
         click(text = "Dark")
@@ -47,6 +48,7 @@ private fun SuiteBuilder.keptChoice() {
         relaunch()
         expectText(text = WELCOME)
         clickIcon(label = "Settings")
+        click(text = "Appearance")
         expectChosen(text = THEME)
         expectChosen(text = "Dark")
     }
@@ -63,6 +65,7 @@ private fun SuiteBuilder.startingChoice() {
         )
 
         clickIcon(label = "Settings")
+        click(text = "Appearance")
         expectChosen(text = "Workspace Blue")
         expectChosen(text = "System")
     }

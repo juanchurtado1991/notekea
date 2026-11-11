@@ -18,10 +18,13 @@ import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.appearance.domain.ThemeMode
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickText
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.nodes
 import app.notekea.settings.presentation.SettingsDialog
+import app.notekea.settings.presentation.SettingsSection
 import app.notekea.settings.presentation.help.SettingsHelpViewModel
+import app.notekea.settings.presentation.testSettingsViewModels
 import kotlinx.coroutines.flow.emptyFlow
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,11 +50,13 @@ class AppearanceSettingsScreenTest {
             ) {
                 NotekeaTheme(darkTheme = false) {
                     SettingsDialog(
+                        platformConventions = PreviewPlatformConventions.linux,
+                        vaultPath = null,
                         onDismiss = {},
                         aiModelSection = { _, _ -> },
                         syncSection = { _, _ -> },
-                        viewModel = AppearanceViewModel(appearanceStore = store),
-                        helpViewModel = SettingsHelpViewModel(helper = { _, _, _ -> emptyFlow() })
+                        initialSection = SettingsSection.APPEARANCE,
+                        viewModels = testSettingsViewModels(appearanceStore = store)
                     )
                 }
             }.use { scene ->

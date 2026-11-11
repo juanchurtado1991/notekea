@@ -5,10 +5,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.platform.domain.settingsShortcut
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.platform.WindowDialog
 import app.notekea.core.presentation.platform.WindowDialogs
+import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.core.presentation.settings.SettingsSpotlight
 import app.notekea.settings.presentation.SettingsDialog
 import app.notekea.settings.presentation.SettingsSection
@@ -25,9 +27,15 @@ fun WindowDialogsHost(
     platformConventions: PlatformConventions,
     dialogs: WindowDialogs,
     aiModelSection: @Composable (Modifier, SettingsSpotlight?) -> Unit,
-    syncSection: @Composable (Modifier, SettingsSpotlight?) -> Unit
+    syncSection: @Composable (Modifier, SettingsSpotlight?) -> Unit,
+    vaultPath: String?
 ) {
     val onDismiss = { dialogs.shown = null }
+
+    // Mod+, opens Settings from anywhere, the welcome screen too (5.2).
+    WindowShortcut(shortcut = platformConventions.settingsShortcut) {
+        dialogs.shown = WindowDialog.SETTINGS
+    }
 
     when (dialogs.shown) {
         WindowDialog.ABOUT -> AboutDialog(
@@ -37,6 +45,8 @@ fun WindowDialogsHost(
 
         WindowDialog.SETTINGS, WindowDialog.AI_MODEL, WindowDialog.SYNC -> SettingsDialog(
             onDismiss = onDismiss,
+            platformConventions = platformConventions,
+            vaultPath = vaultPath,
             aiModelSection = aiModelSection,
             syncSection = syncSection,
             initialSection = sectionOf(dialog = dialogs.shown)
@@ -46,11 +56,11 @@ fun WindowDialogsHost(
     }
 }
 
-/** The section Settings opens at for [dialog]: AI model or Sync when asked for, Appearance otherwise. */
+/** The section Settings opens at for [dialog]: AI model or Sync when asked for, General otherwise. */
 private fun sectionOf(dialog: WindowDialog?): SettingsSection = when (dialog) {
     WindowDialog.AI_MODEL -> SettingsSection.AI_MODEL
     WindowDialog.SYNC -> SettingsSection.SYNC
-    else -> SettingsSection.APPEARANCE
+    else -> SettingsSection.GENERAL
 }
 
 @Preview
@@ -62,6 +72,7 @@ private fun WindowDialogsHostPreview() {
         WindowDialogsHost(
             platformConventions = PreviewPlatformConventions.linux,
             dialogs = WindowDialogs(),
+            vaultPath = null,
             aiModelSection = { _, _ -> },
             syncSection = { _, _ -> }
         )

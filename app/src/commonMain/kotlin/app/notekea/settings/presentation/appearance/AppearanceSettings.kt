@@ -21,7 +21,11 @@ import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaSegment
 import app.notekea.core.presentation.designsystem.components.NotekeaSegmentedControl
+import app.notekea.core.presentation.designsystem.components.NotekeaSettingsGroup
+import app.notekea.core.presentation.designsystem.components.NotekeaSettingsPage
+import app.notekea.core.presentation.designsystem.components.NotekeaSettingsRow
 import app.notekea.core.presentation.designsystem.components.NotekeaSpotlight
+import app.notekea.core.presentation.designsystem.components.NotekeaSwitch
 import app.notekea.core.presentation.designsystem.components.NotekeaThemeCard
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.ColorThemeSchemes
@@ -65,59 +69,56 @@ fun AppearanceSettings(
     modifier: Modifier = Modifier,
     spotlight: SettingsSpotlight? = null
 ) {
-    val scrollState = rememberScrollState()
-
-    NotekeaScrollArea(
-        state = scrollState,
+    NotekeaSettingsPage(
+        title = stringResource(resource = Res.string.settings_section_appearance),
         modifier = modifier
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(state = scrollState)
-                .padding(all = NotekeaDimensions.SpacingXl),
-            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingL)
-        ) {
+        if (state.hasSaveFailed) {
             Text(
-                text = stringResource(resource = Res.string.settings_section_appearance),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                text = stringResource(resource = Res.string.appearance_save_failed),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
             )
+        }
 
-            if (state.hasSaveFailed) {
-                Text(
-                    text = stringResource(resource = Res.string.appearance_save_failed),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
+        NotekeaSettingsGroup(
+            rows = listOf(
+                {
+                    NotekeaSpotlight(
+                        shownAt = spotlight?.serialFor(place = SettingsPlace.APPEARANCE_MODE)
+                    ) {
+                        ModeChoice(
+                            mode = state.appearance.mode,
+                            onIntent = onIntent
+                        )
+                    }
+                },
+                {
+                    val shown = spotlight?.serialFor(place = SettingsPlace.APPEARANCE_REDUCE_MOTION)
 
-            NotekeaSpotlight(
-                shownAt = spotlight?.serialFor(place = SettingsPlace.APPEARANCE_MODE)
-            ) {
-                ModeChoice(
-                    mode = state.appearance.mode,
-                    onIntent = onIntent
-                )
-            }
+                    NotekeaSpotlight(shownAt = shown) {
+                        ReduceMotionChoice(
+                            isOn = state.appearance.reduceMotion,
+                            onIntent = onIntent
+                        )
+                    }
+                }
+            ),
+            footnote = stringResource(resource = Res.string.appearance_mode_hint)
+        )
 
-            NotekeaSpotlight(
-                shownAt = spotlight?.serialFor(place = SettingsPlace.APPEARANCE_REDUCE_MOTION)
-            ) {
-                ReduceMotionChoice(
-                    isOn = state.appearance.reduceMotion,
-                    onIntent = onIntent
-                )
-            }
-
-            NotekeaSpotlight(
-                shownAt = spotlight?.serialFor(place = SettingsPlace.APPEARANCE_THEME)
-            ) {
-                ThemeChoice(
-                    theme = state.appearance.theme,
-                    onIntent = onIntent
-                )
-            }
+        NotekeaSpotlight(
+            shownAt = spotlight?.serialFor(place = SettingsPlace.APPEARANCE_THEME)
+        ) {
+            NotekeaSettingsGroup(
+                rows = listOf({
+                    ThemeChoice(
+                        theme = state.appearance.theme,
+                        onIntent = onIntent
+                    )
+                }),
+                header = stringResource(resource = Res.string.appearance_theme)
+            )
         }
     }
 }
@@ -127,9 +128,7 @@ private fun ModeChoice(
     mode: ThemeMode,
     onIntent: (AppearanceIntent) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-        GroupLabel(text = stringResource(resource = Res.string.appearance_mode))
-
+    NotekeaSettingsRow(label = stringResource(resource = Res.string.appearance_mode)) {
         NotekeaSegmentedControl(
             segments = listOf(
                 NotekeaSegment(
@@ -148,12 +147,6 @@ private fun ModeChoice(
             selectedIndex = MODES.indexOf(element = mode),
             onSelect = { onIntent(AppearanceIntent.OnModeChoose(mode = MODES[it])) }
         )
-
-        Text(
-            text = stringResource(resource = Res.string.appearance_mode_hint),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }
 
@@ -164,25 +157,15 @@ private fun ReduceMotionChoice(
 ) {
     val label = stringResource(resource = Res.string.appearance_reduce_motion)
 
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
-        verticalAlignment = Alignment.CenterVertically
+    NotekeaSettingsRow(
+        label = label,
+        detail = stringResource(resource = Res.string.appearance_reduce_motion_hint)
     ) {
-        NotekeaCheckbox(
-            checked = isOn,
-            onClick = { onIntent(AppearanceIntent.OnReduceMotionToggle) },
+        NotekeaSwitch(
+            isOn = isOn,
+            onToggle = { onIntent(AppearanceIntent.OnReduceMotionToggle) },
             label = label
         )
-
-        Column {
-            GroupLabel(text = label)
-
-            Text(
-                text = stringResource(resource = Res.string.appearance_reduce_motion_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
     }
 }
 
@@ -191,9 +174,10 @@ private fun ThemeChoice(
     theme: ColorTheme,
     onIntent: (AppearanceIntent) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-        GroupLabel(text = stringResource(resource = Res.string.appearance_theme))
-
+    Column(
+        modifier = Modifier.padding(all = NotekeaDimensions.SpacingM),
+        verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
+    ) {
         ColorTheme
             .entries
             .chunked(size = THEMES_PER_ROW)
@@ -219,18 +203,6 @@ private fun ThemeChoice(
                 }
             }
     }
-}
-
-@Composable
-private fun GroupLabel(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme
-            .typography
-            .titleSmall
-            .copy(fontWeight = FontWeight.SemiBold),
-        color = MaterialTheme.colorScheme.onSurface
-    )
 }
 
 /** The name a theme is shown with. */

@@ -64,6 +64,7 @@ import com.composables.icons.lucide.House
 import com.composables.icons.lucide.ImagePlus
 import com.composables.icons.lucide.Info
 import com.composables.icons.lucide.Italic
+import com.composables.icons.lucide.Keyboard
 import com.composables.icons.lucide.LayoutTemplate
 import com.composables.icons.lucide.Library
 import com.composables.icons.lucide.Link
@@ -79,6 +80,7 @@ import com.composables.icons.lucide.Minus
 import com.composables.icons.lucide.Monitor
 import com.composables.icons.lucide.Moon
 import com.composables.icons.lucide.Network
+import com.composables.icons.lucide.Palette
 import com.composables.icons.lucide.PanelBottom
 import com.composables.icons.lucide.PanelLeft
 import com.composables.icons.lucide.PanelLeftClose
@@ -268,6 +270,9 @@ object NotekeaIcons {
     val SidePanel: ImageVector get() = Lucide.PanelRight
     val RemoveRow: ImageVector get() = Lucide.Minus
     val Settings: ImageVector get() = Lucide.Settings
+    val SettingsAppearance: ImageVector get() = Lucide.Palette
+    val SettingsEditor: ImageVector get() = Lucide.Type
+    val SettingsShortcuts: ImageVector get() = Lucide.Keyboard
     val SwitchVault: ImageVector get() = Lucide.Library
     val SortByModified: ImageVector get() = Lucide.ClockArrowDown
     val SortByName: ImageVector get() = Lucide.ArrowDownAZ

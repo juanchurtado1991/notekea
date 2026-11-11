@@ -170,6 +170,7 @@ private fun WindowContent(host: WindowHost) {
         WindowDialogsHost(
             platformConventions = host.conventions,
             dialogs = host.dialogs,
+            vaultPath = openVault,
             aiModelSection = { modifier, spotlight ->
                 ModelManagerScreen(
                     modifier = modifier,

@@ -27,6 +27,7 @@ private const val CONTROL_NAME = "Ctrl"
 private const val DELETE_NAME = "Delete"
 private const val ENTER_NAME = "Enter"
 private const val EQUALS_NAME = "="
+private const val COMMA_NAME = ","
 private const val MINUS_NAME = "-"
 private const val KEY_SEPARATOR = "+"
 private const val DIGIT_PREFIX = "DIGIT_"
@@ -108,6 +109,7 @@ internal fun ShortcutKey.composeKey(): Key = when (this) {
     ShortcutKey.E -> Key.E
     ShortcutKey.ENTER -> Key.Enter
     ShortcutKey.EQUALS -> Key.Equals
+    ShortcutKey.COMMA -> Key.Comma
     ShortcutKey.F -> Key.F
     ShortcutKey.G -> Key.G
     ShortcutKey.F2 -> Key.F2
@@ -136,6 +138,7 @@ private val KEY_NAMES = mapOf(
     ShortcutKey.DELETE to DELETE_NAME,
     ShortcutKey.ENTER to ENTER_NAME,
     ShortcutKey.EQUALS to EQUALS_NAME,
+    ShortcutKey.COMMA to COMMA_NAME,
     ShortcutKey.DOWN to DOWN_ARROW,
     ShortcutKey.LEFT to LEFT_ARROW,
     ShortcutKey.MINUS to MINUS_NAME,

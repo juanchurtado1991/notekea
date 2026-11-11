@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -13,15 +14,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.components.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaCallout
 import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
+import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
+import app.notekea.core.presentation.designsystem.components.NotekeaPopUpButton
 import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaSegment
 import app.notekea.core.presentation.designsystem.components.NotekeaSegmentedControl
+import app.notekea.core.presentation.designsystem.components.NotekeaSettingsGroup
+import app.notekea.core.presentation.designsystem.components.NotekeaSettingsPage
+import app.notekea.core.presentation.designsystem.components.NotekeaSettingsRow
 import app.notekea.core.presentation.designsystem.components.NotekeaSpotlight
+import app.notekea.core.presentation.designsystem.components.NotekeaSwitch
 import app.notekea.core.presentation.designsystem.components.NotekeaTextField
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaColors
@@ -58,6 +66,7 @@ import app.notekea.sync.domain.SyncStatus
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
+private const val FIELD_WIDTH_DP = 300
 private const val PREVIEW_BYTES = 1_400_000_000L
 
 /**
@@ -71,36 +80,18 @@ fun SyncSettingsContent(
     modifier: Modifier = Modifier,
     spotlight: SettingsSpotlight? = null
 ) {
-    val scrollState = rememberScrollState()
-
-    NotekeaScrollArea(
-        state = scrollState,
+    NotekeaSettingsPage(
+        title = stringResource(resource = Res.string.settings_section_sync),
         modifier = modifier
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(state = scrollState)
-                .padding(all = NotekeaDimensions.SpacingXl),
-            verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingL)
-        ) {
-            Text(
-                text = stringResource(resource = Res.string.settings_section_sync),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+        if (state.hasVault) {
+            Form(
+                state = state,
+                onIntent = onIntent,
+                spotlight = spotlight
             )
-
-            Quiet(text = stringResource(resource = Res.string.sync_intro))
-
-            if (state.hasVault) {
-                Form(
-                    state = state,
-                    onIntent = onIntent,
-                    spotlight = spotlight
-                )
-            } else {
-                Quiet(text = stringResource(resource = Res.string.sync_no_vault))
-            }
+        } else {
+            Quiet(text = stringResource(resource = Res.string.sync_no_vault))
         }
     }
 }
@@ -115,45 +106,62 @@ private fun Form(
 
     if (state.isTooLargeForGitHub) TooLarge(bytes = state.vaultBytes ?: 0L)
 
-    NotekeaSpotlight(
-        shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_ADDRESS)
-    ) {
-        Field(label = stringResource(resource = Res.string.sync_url_label)) {
-            NotekeaTextField(
-                value = state.url,
-                onValueChange = { onIntent(SyncSettingsIntent.OnUrlChange(url = it)) },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = stringResource(resource = Res.string.sync_url_hint)
-            )
-        }
-    }
+    NotekeaSettingsGroup(
+        rows = listOf(
+            {
+                NotekeaSpotlight(
+                    shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_ADDRESS)
+                ) {
+                    val label = stringResource(resource = Res.string.sync_url_label)
 
-    NotekeaSpotlight(
-        shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_TOKEN)
-    ) {
-        Token(
-            state = state,
-            onIntent = onIntent
-        )
-    }
+                    NotekeaSettingsRow(label = label) {
+                        NotekeaTextField(
+                            value = state.url,
+                            onValueChange = { onIntent(SyncSettingsIntent.OnUrlChange(url = it)) },
+                            modifier = Modifier.width(width = FIELD_WIDTH_DP.dp),
+                            placeholder = stringResource(resource = Res.string.sync_url_hint)
+                        )
+                    }
+                }
+            },
+            {
+                NotekeaSpotlight(
+                    shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_TOKEN)
+                ) {
+                    Token(
+                        state = state,
+                        onIntent = onIntent
+                    )
+                }
+            }
+        ),
+        footnote = stringResource(resource = Res.string.sync_intro)
+    )
 
-    NotekeaSpotlight(
-        shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_AUTO)
-    ) {
-        AutoSync(
-            isAuto = state.isAuto,
-            onToggle = { onIntent(SyncSettingsIntent.OnAutoToggle) }
+    NotekeaSettingsGroup(
+        rows = listOf(
+            {
+                NotekeaSpotlight(
+                    shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_AUTO)
+                ) {
+                    AutoSync(
+                        isAuto = state.isAuto,
+                        onToggle = { onIntent(SyncSettingsIntent.OnAutoToggle) }
+                    )
+                }
+            },
+            {
+                NotekeaSpotlight(
+                    shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_INTERVAL)
+                ) {
+                    Interval(
+                        state = state,
+                        onIntent = onIntent
+                    )
+                }
+            }
         )
-    }
-
-    NotekeaSpotlight(
-        shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_INTERVAL)
-    ) {
-        Interval(
-            state = state,
-            onIntent = onIntent
-        )
-    }
+    )
 
     NotekeaSpotlight(
         shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_CONNECT)
@@ -170,17 +178,20 @@ private fun Token(
     state: SyncSettingsState,
     onIntent: (SyncSettingsIntent) -> Unit
 ) {
-    Field(label = stringResource(resource = Res.string.sync_token_label)) {
+    val saved = stringResource(resource = Res.string.sync_token_saved).takeIf { state.hasToken }
+
+    NotekeaSettingsRow(
+        label = stringResource(resource = Res.string.sync_token_label),
+        detail = saved
+    ) {
         NotekeaTextField(
             value = state.token,
             onValueChange = { onIntent(SyncSettingsIntent.OnTokenChange(token = it)) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.width(width = FIELD_WIDTH_DP.dp),
             placeholder = stringResource(resource = Res.string.sync_token_hint),
             isSecret = true,
             onSubmit = { onIntent(SyncSettingsIntent.OnConnect) }
         )
-
-        if (state.hasToken) Quiet(text = stringResource(resource = Res.string.sync_token_saved))
     }
 }
 
@@ -210,25 +221,15 @@ private fun AutoSync(
 ) {
     val label = stringResource(resource = Res.string.sync_auto)
 
-    Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            NotekeaCheckbox(
-                checked = isAuto,
-                onClick = onToggle,
-                label = label
-            )
-
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        Quiet(text = stringResource(resource = Res.string.sync_auto_explain))
+    NotekeaSettingsRow(
+        label = label,
+        detail = stringResource(resource = Res.string.sync_auto_explain)
+    ) {
+        NotekeaSwitch(
+            isOn = isAuto,
+            onToggle = { onToggle() },
+            label = label
+        )
     }
 }
 
@@ -237,24 +238,23 @@ private fun Interval(
     state: SyncSettingsState,
     onIntent: (SyncSettingsIntent) -> Unit
 ) {
-    Field(label = stringResource(resource = Res.string.sync_interval)) {
-        NotekeaSegmentedControl(
-            segments = SyncSettings.INTERVALS.map {
-                NotekeaSegment(
-                    label = pluralStringResource(
-                        resource = Res.plurals.sync_minutes,
-                        quantity = it,
-                        it
-                    )
+    val label = stringResource(resource = Res.string.sync_interval)
+
+    NotekeaSettingsRow(label = label) {
+        NotekeaPopUpButton(
+            choice = pluralStringResource(
+                Res.plurals.sync_minutes,
+                state.intervalMinutes,
+                state.intervalMinutes
+            ),
+            choices = SyncSettings.INTERVALS.map {
+                NotekeaMenuItem(
+                    label = pluralStringResource(Res.plurals.sync_minutes, it, it),
+                    onClick = { onIntent(SyncSettingsIntent.OnIntervalChoose(minutes = it)) },
+                    isChecked = it == state.intervalMinutes
                 )
             },
-            selectedIndex = SyncSettings
-                .INTERVALS
-                .indexOf(state.intervalMinutes)
-                .coerceAtLeast(minimumValue = 0),
-            onSelect = {
-                onIntent(SyncSettingsIntent.OnIntervalChoose(minutes = SyncSettings.INTERVALS[it]))
-            }
+            label = label
         )
     }
 }
@@ -293,22 +293,6 @@ private fun Actions(
                 onClick = { onIntent(SyncSettingsIntent.OnSyncNow) }
             )
         }
-    }
-}
-
-@Composable
-private fun Field(
-    label: String,
-    content: @Composable () -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingXs)) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        content()
     }
 }
 

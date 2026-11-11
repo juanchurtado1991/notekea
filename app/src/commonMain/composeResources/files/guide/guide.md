@@ -161,6 +161,30 @@ answers and needs a GPU or 32 GB of memory. Click Download (it can be paused and
 The first download also brings the model search uses. The model runs on your computer and works without internet;
 your notes never leave it. Delete frees its space on the disk.
 
+# Settings: General
+words: settings, ajustes, configuración, preferences, preferencias, language, idioma, español, english, startup, al iniciar, last vault, último vault, welcome again, bienvenida otra vez
+Open Settings (the gear at the bottom of the tool rail; {settings} where the system has it), then General. Language
+is English, Español or System, which follows your computer's language; the chat always answers in the language you
+write in. Open the last vault at startup: off, Notekea starts on the welcome screen with your vaults listed. Welcome,
+Show again: the three first-run steps come back the next time Notekea starts.
+
+# Settings: Editor
+words: text size, tamaño de letra, font size, letra más grande, bigger text, line width, ancho de línea, readable, wide, full width, columna
+Settings → Editor: Text size makes the note's text bigger or smaller, headings, code and tables with it (zoom changes
+the whole window instead). Line width is Readable (a narrow column), Wide (the default) or Full width.
+
+# Settings: Files
+words: attachments folder, carpeta de adjuntos, daily notes folder, carpeta de notas diarias, date format, formato de fecha, templates folder, carpeta de plantillas
+Settings → Files, with a vault open: where new attachments go, the daily notes' folder and their date format (as
+YYYY-MM-DD), and the templates' folder. Blank is the vault's top folder. They are saved in the vault's .obsidian
+folder, the same settings Obsidian uses, so both apps agree.
+
+# Settings: Shortcuts and About
+words: shortcuts list, lista de atajos, keyboard shortcuts, atajos de teclado, about, acerca de, version, versión, diagnostics, diagnóstico, privacy, privacidad, licenses, licencias
+Settings → Shortcuts lists every keyboard shortcut of your system. Settings → About shows Notekea's version, Copy
+diagnostics (what helps fix a problem, without any note's text, to paste in a bug report), the privacy promise and
+the licenses, with the project on GitHub.
+
 # Ask about Settings
 words: settings help, ayuda de ajustes, ask about settings, preguntar sobre ajustes, what does this setting do, qué hace este ajuste
 Beside Settings, Ask about Settings answers what an option does or how to do something, about the section open, in

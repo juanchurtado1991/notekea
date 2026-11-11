@@ -9,6 +9,58 @@ enum class SettingsPlace(
     val topic: SettingsTopic,
     val words: List<String>
 ) {
+    GENERAL_LANGUAGE(
+        topic = SettingsTopic.GENERAL,
+        words = listOf("language", "idioma", "english", "inglés", "spanish", "español", "lenguaje")
+    ),
+    GENERAL_OPEN_LAST_VAULT(
+        topic = SettingsTopic.GENERAL,
+        words = listOf("last vault", "at startup", "when it starts", "último vault", "al iniciar", "al abrir")
+    ),
+    GENERAL_SHOW_WELCOME(
+        topic = SettingsTopic.GENERAL,
+        words = listOf("welcome", "onboarding", "bienvenida", "tutorial", "first run", "primeros pasos")
+    ),
+    EDITOR_TEXT_SIZE(
+        topic = SettingsTopic.EDITOR,
+        words = listOf("text size", "font size", "bigger text", "smaller text", "tamaño de letra", "letra", "fuente")
+    ),
+    EDITOR_LINE_WIDTH(
+        topic = SettingsTopic.EDITOR,
+        words = listOf("line width", "wide", "narrow", "ancho de línea", "ancho", "angosto", "columna")
+    ),
+    FILES_ATTACHMENTS(
+        topic = SettingsTopic.FILES,
+        words = listOf("attachments folder", "attachments", "adjuntos", "carpeta de adjuntos", "images folder")
+    ),
+    FILES_DAILY_FOLDER(
+        topic = SettingsTopic.FILES,
+        words = listOf("daily notes folder", "daily notes", "notas diarias", "carpeta de notas diarias", "journal")
+    ),
+    FILES_DAILY_FORMAT(
+        topic = SettingsTopic.FILES,
+        words = listOf("date format", "formato de fecha", "yyyy", "fecha de la nota")
+    ),
+    FILES_TEMPLATES(
+        topic = SettingsTopic.FILES,
+        words = listOf("templates folder", "templates", "plantillas", "carpeta de plantillas")
+    ),
+    SHORTCUTS_LIST(
+        topic = SettingsTopic.SHORTCUTS,
+        words = listOf("shortcuts", "keyboard shortcuts", "atajos", "atajos de teclado", "teclas")
+    ),
+    ABOUT_VERSION(
+        topic = SettingsTopic.ABOUT,
+        words = listOf("version", "versión", "which version", "qué versión", "update", "actualizar")
+    ),
+    ABOUT_DIAGNOSTICS(
+        topic = SettingsTopic.ABOUT,
+        words = listOf("diagnostics", "diagnóstico", "report a bug", "reportar un error", "logs", "registros")
+    ),
+    ABOUT_PRIVACY(
+        topic = SettingsTopic.ABOUT,
+        words = listOf("privacy", "privacidad", "my data", "mis datos", "telemetry", "telemetría", "licenses", "licencias")
+    ),
     APPEARANCE_MODE(
         topic = SettingsTopic.APPEARANCE,
         words = listOf("mode", "dark mode", "light mode", "modo", "modo oscuro", "modo claro", "oscuro", "claro")

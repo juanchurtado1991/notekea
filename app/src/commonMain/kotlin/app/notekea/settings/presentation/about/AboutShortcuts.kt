@@ -2,6 +2,7 @@ package app.notekea.settings.presentation.about
 
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.graphShortcut
+import app.notekea.core.platform.domain.settingsShortcut
 import app.notekea.core.platform.domain.zoomInShortcut
 import app.notekea.core.platform.domain.zoomOutShortcut
 import app.notekea.core.platform.domain.zoomResetShortcut
@@ -31,6 +32,7 @@ import app.notekea.resources.about_shortcut_quit
 import app.notekea.resources.about_shortcut_rename
 import app.notekea.resources.about_shortcut_save
 import app.notekea.resources.about_shortcut_search_notes
+import app.notekea.resources.about_shortcut_settings
 import app.notekea.resources.about_shortcut_side_panel
 import app.notekea.resources.about_shortcut_sidebar
 import app.notekea.resources.about_shortcut_source
@@ -188,6 +190,10 @@ object AboutShortcuts {
                 AboutShortcut(
                     label = Res.string.about_shortcut_split,
                     shortcut = splitRightShortcut
+                ),
+                AboutShortcut(
+                    label = Res.string.about_shortcut_settings,
+                    shortcut = settingsShortcut
                 ),
                 AboutShortcut(
                     label = Res.string.about_shortcut_zoom_in,

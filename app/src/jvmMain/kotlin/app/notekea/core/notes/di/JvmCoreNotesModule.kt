@@ -6,6 +6,7 @@ import app.notekea.core.documents.domain.DocumentReader
 import app.notekea.core.notes.data.LuceneVectorIndex
 import app.notekea.core.notes.data.NioNoteFileAttributes
 import app.notekea.core.notes.data.ObsidianVaultSettingsReader
+import app.notekea.core.notes.data.ObsidianVaultSettingsWriter
 import app.notekea.core.notes.data.OkioAttachmentStore
 import app.notekea.core.notes.data.OkioNoteContentStore
 import app.notekea.core.notes.data.OkioNoteFileOperations
@@ -18,6 +19,7 @@ import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteFileOperations
 import app.notekea.core.notes.domain.NoteScanner
 import app.notekea.core.notes.domain.VaultSettingsReader
+import app.notekea.core.notes.domain.VaultSettingsWriter
 import app.notekea.core.notes.domain.VectorIndex
 import app.notekea.core.platform.domain.PlatformConventions
 import okio.FileSystem
@@ -73,6 +75,13 @@ val jvmCoreNotesModule = module {
 
     single<AttachmentStore> {
         OkioAttachmentStore(
+            fileSystem = FileSystem.SYSTEM,
+            dispatchers = get()
+        )
+    }
+
+    single<VaultSettingsWriter> {
+        ObsidianVaultSettingsWriter(
             fileSystem = FileSystem.SYSTEM,
             dispatchers = get()
         )

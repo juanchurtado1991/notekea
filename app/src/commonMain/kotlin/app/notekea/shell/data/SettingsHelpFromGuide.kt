@@ -62,8 +62,13 @@ class SettingsHelpFromGuide(
 
     // The guide's words for the section's topic, so it is read whatever the question says.
     private fun wordsOf(topic: SettingsTopic): String = when (topic) {
+        SettingsTopic.GENERAL -> "settings general language"
         SettingsTopic.APPEARANCE -> "appearance theme"
+        SettingsTopic.EDITOR -> "settings editor text size"
+        SettingsTopic.FILES -> "settings files attachments folder"
         SettingsTopic.AI_MODEL -> "ai model"
         SettingsTopic.SYNC -> "set up sync github"
+        SettingsTopic.SHORTCUTS -> "keyboard shortcuts"
+        SettingsTopic.ABOUT -> "about notekea version privacy"
     }
 }

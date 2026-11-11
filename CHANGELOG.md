@@ -49,6 +49,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Settings as macOS's System Settings** (5.2, the developer's choice).
+  - Every section is in a sidebar with a colored icon, and its settings are in rounded groups: the name on the left,
+    the control on the right, a short note under some.
+  - Mod+, opens it from anywhere.
+  - New sections: General, Editor, Files, Shortcuts and About.
+    - General: language, the last vault at startup, the welcome again.
+    - Editor: the note's text size, with headings and code, and its line width.
+    - Files: the attachments, daily notes and templates folders, and the date format, written to the vault's
+      `.obsidian` so Obsidian agrees.
+    - Shortcuts: the list of keyboard shortcuts.
+    - About: version, diagnostics, privacy and licenses.
+  - Appearance and Sync take the same look.
+  - Every new setting has its place for Ask about Settings.
+
 - **Videos in notes** (4.9).
   - A video file is a card that plays in place with the system's player; a format the system can't play opens with
     its app.
