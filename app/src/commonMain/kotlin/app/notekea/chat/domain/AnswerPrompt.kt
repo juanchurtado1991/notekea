@@ -36,9 +36,9 @@ object AnswerPrompt {
         "Answer in one to three sentences using only the excerpts, in the language of the question. Cite each " +
             "sentence with the number of its excerpt, like [1]. If the excerpts do not contain the answer, reply " +
             "exactly $NOT_FOUND. A question of what the person learned or thinks about something is answered with what the " +
-            "excerpts say about it. Do not explain your reasoning. Speak to the person as you (\"you wrote\"). To add " +
-            "or count numbers from the excerpts, write " +
-            "each number and the result (4500 + 300 = 4800)."
+            "excerpts say about it. When the excerpts disagree, say so and give what each says with its number. Do not " +
+            "explain your reasoning. Speak to the person as you (\"you wrote\"). Only when the question asks for a " +
+            "total or a count, write each number of the excerpts and the result (a + b = total)."
 
     // "Escribe un poema sobre mis recetas": written from the excerpts, not reported (the chat probe, 2026-11-11).
     private val CREATIVE = Regex(

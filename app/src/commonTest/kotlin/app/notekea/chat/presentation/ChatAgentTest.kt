@@ -112,7 +112,7 @@ class ChatAgentTest {
                     listOf(
                         AgentMoveLine(
                             move = "read",
-                            target = "Dune"
+                            target = "Books/Dune"
                         )
                     ),
                     ActionStatus.PROPOSED,

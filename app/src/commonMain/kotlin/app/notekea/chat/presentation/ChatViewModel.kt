@@ -127,6 +127,7 @@ class ChatViewModel(
     private var activeNote: RelativePath? = null
     private var answer: Job? = null
     private var nextId = 0L
+    private var compaction: Job? = null
 
     init {
         launchGuarded(onError = ::logError) {
@@ -442,35 +443,33 @@ class ChatViewModel(
         val usage = memory.usageOf(entries = entries)
         reduce { it.copy(contextUsage = usage) }
 
-        val isDue = (isAsked || usage >= 1f) && !state.value.isCompacting
+        val isDue = (isAsked || usage >= 1f) && compaction?.isActive != true
         if (!isDue) return
 
-        // Marked at once, so a second answer that ends meanwhile does not compact too.
-        reduce { it.copy(isCompacting = true) }
-        launchGuarded(onError = ::compactFailed) { compacted() }
+        compaction = launchGuarded(onError = ::logError) { compacted() }
     }
 
     /** The chat so far written into its summary before a question asked after a while, as a new session starts. */
     private suspend fun compactIfIdle() {
         val isIdle = memory.isIdleAt(now = clock.now())
-        if (isIdle && !state.value.isCompacting) compacted()
+        if (isIdle && compaction?.isActive != true) compacted()
     }
 
+    // The ring says Compacting only while this runs: ended, failed or cancelled, it says the memory again (the
+    // Auto-Test on the real app, 2026-11-11, found it stuck on Compacting).
     private suspend fun compacted() {
         reduce { it.copy(isCompacting = true) }
-        memory.compact(entries = state.value.entries)
 
-        reduce {
-            it.copy(
-                isCompacting = false,
-                contextUsage = memory.usageOf(entries = it.entries)
-            )
+        try {
+            memory.compact(entries = state.value.entries)
+        } finally {
+            reduce {
+                it.copy(
+                    isCompacting = false,
+                    contextUsage = memory.usageOf(entries = it.entries)
+                )
+            }
         }
-    }
-
-    private fun compactFailed(throwable: Throwable) {
-        reduce { it.copy(isCompacting = false) }
-        logError(throwable = throwable)
     }
 
     private fun save() {

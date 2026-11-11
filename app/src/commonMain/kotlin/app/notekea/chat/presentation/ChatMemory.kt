@@ -83,12 +83,42 @@ internal class ChatMemory(private val compactChat: CompactChatUseCase) {
             summary = summary
         )
 
-        if (compacted !is Outcome.Success || compacted.value.isBlank()) return false
+        val isWritten = compacted is Outcome.Success && compacted.value.isNotBlank()
 
-        summary = compacted.value
+        val replaced = summary.orEmpty().length + older.sumOf { it.exchange().size }
+
+        val shorter = if (isWritten) {
+            within(
+                text = compacted.value,
+                chars = replaced
+            )
+        } else {
+            null
+        }
+
+        // Nothing shorter to say than what is there: the chat stays as it is.
+        if (isWritten && shorter == null) return false
+
+        // Failed, the older exchanges are forgotten all the same, so the memory empties and is not compacted again
+        // after every reply.
+        if (shorter != null) summary = shorter
         compactedThrough = older.last().id
 
-        return true
+        return isWritten
+    }
+
+    // A summary never fills the memory more than what it replaces: compacting a short chat raised the ring (the
+    // Auto-Test on the real app, 2026-11-11). It is cut at a sentence when longer; null when no sentence fits.
+    private fun within(
+        text: String,
+        chars: Int
+    ): String? {
+        if (text.length <= chars) return text
+
+        val cut = text.take(n = chars)
+        val end = cut.lastIndexOfAny(chars = SENTENCE_ENDS)
+
+        return if (end > 0) cut.take(n = end + 1) else null
     }
 
     fun clear() {
@@ -110,6 +140,7 @@ internal class ChatMemory(private val compactChat: CompactChatUseCase) {
     private companion object {
         const val NONE = -1L
         const val TURNS = 4
+        val SENTENCE_ENDS = charArrayOf('.', '!', '?')
         val IDLE = 30.minutes
         const val KEPT = 2
         const val REPLY_CHARS = 400
