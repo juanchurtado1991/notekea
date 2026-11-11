@@ -1361,7 +1361,7 @@ Release with checksums.
 - **Later, when there are users to justify it:** free signing for open source projects (SignPath Foundation) for
   Windows, and an Apple Developer ID with notarization for macOS. Neither blocks the release.
 
-### 🚧 5.4 Performance and memory — `feature/videos`
+### 🚧 5.4 Performance and memory — `feature/videos` (measured on Linux in [notekea#142](https://github.com/juanchurtado1991/notekea/pull/142); Windows and macOS in the release run)
 
 M5's performance pass, the last one (see "Closing a milestone"). Notekea should run well on the laptop a
 non-technical person has (8 GB of RAM). With the whole app built, measure it on the reference machines (Windows,
@@ -1390,6 +1390,19 @@ macOS, Linux) with every automated smoke run and cut what the numbers point at, 
   index and highlights from the first visible item, and each tab remembers the list's position. Embedded notes keep
   their `Column`. Measured with the Personal Notes memory run, before and after.
 - **Done when:** the release run (5.5) meets every budget on Windows, macOS and Linux.
+
+Done in #142, on Linux (`docs/performance.md`, M5):
+
+- **Measured** every smoke run with all of M5 built. The heap stays at 80–110 MB, and the rest of the process is
+  native (Skia, compiled code).
+- **JVM:** the packaged app gives back the heap it does not use (`-XX:MaxHeapFreeRatio=20 -XX:MinHeapFreeRatio=5`),
+  so the committed heap is 40 % smaller. String deduplication and a smaller code cache were tried and left out.
+- **Leaks fixed:**
+  - a document tab's drawn pages and its open PDF;
+  - YouTube pictures;
+  - the chat's undo journals;
+  - a cancelled FFmpeg.
+- **The long note's preview** was already done by One editing mode: the note is a lazy list of blocks.
 
 ### ⬜ 5.5 Release v0.1.0
 
