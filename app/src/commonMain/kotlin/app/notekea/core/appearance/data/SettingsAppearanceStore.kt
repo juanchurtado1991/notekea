@@ -50,6 +50,11 @@ class SettingsAppearanceStore(
                 key = REDUCE_MOTION_KEY,
                 value = appearance.reduceMotion
             )
+
+            settings.putBoolean(
+                key = SYSTEM_ACCENT_KEY,
+                value = appearance.usesSystemAccent
+            )
         }
 
         current.value = appearance
@@ -62,6 +67,10 @@ class SettingsAppearanceStore(
             reduceMotion = settings.getBoolean(
                 key = REDUCE_MOTION_KEY,
                 defaultValue = false
+            ),
+            usesSystemAccent = settings.getBoolean(
+                key = SYSTEM_ACCENT_KEY,
+                defaultValue = false
             )
         )
     }
@@ -69,6 +78,7 @@ class SettingsAppearanceStore(
     private companion object {
         const val MODE_KEY = "app.theme_mode"
         const val REDUCE_MOTION_KEY = "app.reduce_motion"
+        const val SYSTEM_ACCENT_KEY = "app.system_accent"
         const val THEME_KEY = "app.theme"
     }
 }

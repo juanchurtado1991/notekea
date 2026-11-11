@@ -90,5 +90,10 @@ This file is the dependency audit the developer asked for before anything was ap
 9. 9A: the springs.
 10. The menu bar.
 11. 4B: the system accent.
+    - A switch in Settings → Appearance turns it on. It reads the accent from macOS's `defaults` and from Windows'
+      registry, once, at start.
+    - The accent is moved toward the ink until links reach WCAG AA, and the text on it is white or black, whichever
+      reads better. `AccentSchemesTest` checks macOS's eight accents and Windows' blue in the 11 themes.
+    - Linux has no common accent and keeps the theme's color.
 
 Each step renders its screens for review in the chat, runs the whole test suite, and is committed on its own.

@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import app.notekea.core.appearance.domain.ColorTheme
@@ -33,11 +34,25 @@ fun NotekeaTheme(
         large = RoundedCornerShape(size = NotekeaDimensions.CardRadius)
     )
 
+    val themeScheme = ColorThemeSchemes.of(
+        theme = theme,
+        darkTheme = darkTheme
+    )
+
+    // The system's accent in place of the theme's, when Appearance asks for it and the system has one (4B).
+    val accent = LocalSystemAccent.current.takeIf { LocalAppearance.current.usesSystemAccent }
+
+    val colorScheme = remember(themeScheme, accent, darkTheme) {
+        accent?.let {
+            themeScheme.withAccent(
+                accent = it,
+                darkTheme = darkTheme
+            )
+        } ?: themeScheme
+    }
+
     MaterialTheme(
-        colorScheme = ColorThemeSchemes.of(
-            theme = theme,
-            darkTheme = darkTheme
-        ),
+        colorScheme = colorScheme,
         typography = notekeaTypography(),
         shapes = shapes
     ) {

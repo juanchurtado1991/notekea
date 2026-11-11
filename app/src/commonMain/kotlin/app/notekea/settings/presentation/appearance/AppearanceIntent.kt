@@ -13,4 +13,7 @@ sealed interface AppearanceIntent {
 
     /** Reduce motion, clicked. */
     data object OnReduceMotionToggle : AppearanceIntent
+
+    /** Use the system's accent color, clicked. */
+    data object OnSystemAccentToggle : AppearanceIntent
 }

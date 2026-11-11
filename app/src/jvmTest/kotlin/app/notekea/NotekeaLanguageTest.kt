@@ -8,6 +8,7 @@ import androidx.compose.ui.use
 import app.notekea.core.appearance.domain.Appearance
 import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.platform.domain.FakeSystemEnvironment
+import app.notekea.core.platform.domain.SystemAccent
 import app.notekea.core.platform.domain.SystemAppearance
 import app.notekea.core.platform.domain.SystemMotion
 import app.notekea.core.preferences.domain.AppLanguage
@@ -94,6 +95,9 @@ class NotekeaLanguageTest {
     private fun environment() = AppEnvironment(
         systemAppearance = object : SystemAppearance {
             override fun observeDarkTheme(): Flow<Boolean?> = flowOf(value = false)
+        },
+        systemAccent = object : SystemAccent {
+            override suspend fun read(): Long? = null
         },
         systemMotion = object : SystemMotion {
             override suspend fun isReduced(): Boolean = false

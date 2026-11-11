@@ -8,10 +8,12 @@ import app.notekea.core.data.SqliteDatabaseFactory
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.LocalTimeFormatter
 import app.notekea.core.domain.time.LocalCalendar
+import app.notekea.core.platform.data.CommandSystemAccent
 import app.notekea.core.platform.data.CommandSystemMotion
 import app.notekea.core.platform.data.JvmSystemEnvironment
 import app.notekea.core.platform.data.PortalSystemAppearance
 import app.notekea.core.platform.domain.PlatformConventions
+import app.notekea.core.platform.domain.SystemAccent
 import app.notekea.core.platform.domain.SystemAppearance
 import app.notekea.core.platform.domain.SystemEnvironment
 import app.notekea.core.platform.domain.SystemMotion
@@ -47,6 +49,13 @@ val jvmPlatformModule = module {
     single<SystemEnvironment> { JvmSystemEnvironment() }
 
     factoryOf(::AppEnvironment)
+
+    single<SystemAccent> {
+        CommandSystemAccent(
+            operatingSystem = get<PlatformConventions>().operatingSystem,
+            dispatchers = get()
+        )
+    }
 
     single<SystemMotion> {
         CommandSystemMotion(

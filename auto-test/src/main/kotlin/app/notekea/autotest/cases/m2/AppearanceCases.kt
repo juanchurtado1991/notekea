@@ -26,6 +26,33 @@ fun SuiteBuilder.appearanceCases() {
     themesLook()
     systemMode()
     reduceMotion()
+    systemAccent()
+}
+
+private fun SuiteBuilder.systemAccent() {
+    manual(
+        id = "2.12-06",
+        reason = ManualReason.SYSTEM
+    ) {
+        prepare(PLAYGROUND)
+        title(text = "Usar el color de acento del sistema")
+
+        steps(
+            text =
+            "Solo en macOS y Windows; en Linux márcalo como Pasó.\n$OPEN_PLAYGROUND\n2. " +
+                "$OPEN_APPEARANCE y activa Usar el color de acento del sistema.\n3. En los ajustes del " +
+                "sistema elige otro color de acento (macOS: Ajustes del Sistema › Apariencia; Windows: " +
+                "Configuración › Personalización › Colores), sal de Notekea y vuelve a abrirlo.\n4. Prueba " +
+                "el amarillo y el gris, en modo claro y oscuro."
+        )
+
+        expected(
+            text =
+            "Los botones, los enlaces, la selección de la lista y el interruptor toman el color elegido " +
+                "en el sistema, y todos los textos se siguen leyendo bien, también con amarillo o gris. " +
+                "Al desactivarlo vuelve el color del tema."
+        )
+    }
 }
 
 private fun SuiteBuilder.keptChoice() {

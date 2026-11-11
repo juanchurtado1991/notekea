@@ -11,6 +11,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.ai.presentation.ModelManagerScreen
@@ -18,6 +19,7 @@ import app.notekea.core.appearance.domain.Appearance
 import app.notekea.core.preferences.domain.AppLanguage
 import app.notekea.core.preferences.domain.AppPreferences
 import app.notekea.core.presentation.designsystem.theme.LocalAppearance
+import app.notekea.core.presentation.designsystem.theme.LocalSystemAccent
 import app.notekea.core.presentation.designsystem.theme.LocalSystemDarkTheme
 import app.notekea.core.presentation.designsystem.theme.LocalSystemReduceMotion
 import app.notekea.core.presentation.platform.AppEnvironment
@@ -80,11 +82,19 @@ fun NotekeaAppLocals(
         value = environment.systemMotion.isReduced()
     }
 
+    val systemAccent by produceState<Color?>(initialValue = null, environment) {
+        value = environment
+            .systemAccent
+            .read()
+            ?.let { Color(color = it) }
+    }
+
     remember(preferences.language) { AppLocale.apply(language = preferences.language) }
 
     CompositionLocalProvider(
         LocalAppPreferences provides preferences,
-        LocalLanguage provides preferences.language
+        LocalLanguage provides preferences.language,
+        LocalSystemAccent provides systemAccent
     ) {
         AppLocals(
             isMotionReduced = isMotionReduced,

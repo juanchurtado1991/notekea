@@ -9,6 +9,7 @@ import app.notekea.core.appearance.domain.Appearance
 import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.platform.domain.FakeSystemEnvironment
+import app.notekea.core.platform.domain.SystemAccent
 import app.notekea.core.platform.domain.SystemAppearance
 import app.notekea.core.platform.domain.SystemMotion
 import app.notekea.core.preferences.domain.FakeAppPreferencesStore
@@ -32,6 +33,9 @@ class NotekeaAppLocalsTest {
     private val environment = AppEnvironment(
         systemAppearance = object : SystemAppearance {
             override fun observeDarkTheme(): Flow<Boolean?> = flowOf(value = true)
+        },
+        systemAccent = object : SystemAccent {
+            override suspend fun read(): Long? = null
         },
         systemMotion = object : SystemMotion {
             override suspend fun isReduced(): Boolean = true

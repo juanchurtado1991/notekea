@@ -4,6 +4,7 @@ import app.notekea.core.settings.domain.SettingsPlace
 import app.notekea.resources.Res
 import app.notekea.resources.appearance_mode
 import app.notekea.resources.appearance_reduce_motion
+import app.notekea.resources.appearance_system_accent
 import app.notekea.resources.appearance_theme
 import app.notekea.resources.models_other_sizes
 import app.notekea.resources.settings_about_diagnostics
@@ -45,6 +46,7 @@ internal fun nameOf(place: SettingsPlace): StringResource = when (place) {
     SettingsPlace.ABOUT_PRIVACY -> Res.string.settings_about_privacy
     SettingsPlace.APPEARANCE_MODE -> Res.string.appearance_mode
     SettingsPlace.APPEARANCE_REDUCE_MOTION -> Res.string.appearance_reduce_motion
+    SettingsPlace.APPEARANCE_SYSTEM_ACCENT -> Res.string.appearance_system_accent
     SettingsPlace.APPEARANCE_THEME -> Res.string.appearance_theme
     SettingsPlace.AI_MODEL_SIZE -> Res.string.settings_place_model_size
     SettingsPlace.AI_MODEL_OTHER_SIZES -> Res.string.models_other_sizes

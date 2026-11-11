@@ -42,6 +42,8 @@ import app.notekea.resources.appearance_mode_system
 import app.notekea.resources.appearance_reduce_motion
 import app.notekea.resources.appearance_reduce_motion_hint
 import app.notekea.resources.appearance_save_failed
+import app.notekea.resources.appearance_system_accent
+import app.notekea.resources.appearance_system_accent_hint
 import app.notekea.resources.appearance_theme
 import app.notekea.resources.settings_section_appearance
 import app.notekea.resources.theme_clay
@@ -111,13 +113,27 @@ fun AppearanceSettings(
             shownAt = spotlight?.serialFor(place = SettingsPlace.APPEARANCE_THEME)
         ) {
             NotekeaSettingsGroup(
-                rows = listOf({
-                    ThemeChoice(
-                        theme = state.appearance.theme,
-                        onIntent = onIntent
-                    )
-                }),
-                header = stringResource(resource = Res.string.appearance_theme)
+                rows = listOf(
+                    {
+                        ThemeChoice(
+                            theme = state.appearance.theme,
+                            onIntent = onIntent
+                        )
+                    },
+                    {
+                        val shown =
+                            spotlight?.serialFor(place = SettingsPlace.APPEARANCE_SYSTEM_ACCENT)
+
+                        NotekeaSpotlight(shownAt = shown) {
+                            SystemAccentChoice(
+                                isOn = state.appearance.usesSystemAccent,
+                                onIntent = onIntent
+                            )
+                        }
+                    }
+                ),
+                header = stringResource(resource = Res.string.appearance_theme),
+                footnote = stringResource(resource = Res.string.appearance_system_accent_hint)
             )
         }
     }
@@ -164,6 +180,22 @@ private fun ReduceMotionChoice(
         NotekeaSwitch(
             isOn = isOn,
             onToggle = { onIntent(AppearanceIntent.OnReduceMotionToggle) },
+            label = label
+        )
+    }
+}
+
+@Composable
+private fun SystemAccentChoice(
+    isOn: Boolean,
+    onIntent: (AppearanceIntent) -> Unit
+) {
+    val label = stringResource(resource = Res.string.appearance_system_accent)
+
+    NotekeaSettingsRow(label = label) {
+        NotekeaSwitch(
+            isOn = isOn,
+            onToggle = { onIntent(AppearanceIntent.OnSystemAccentToggle) },
             label = label
         )
     }

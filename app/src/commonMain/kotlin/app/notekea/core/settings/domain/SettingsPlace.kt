@@ -69,6 +69,10 @@ enum class SettingsPlace(
         topic = SettingsTopic.APPEARANCE,
         words = listOf("reduce motion", "motion", "animations", "animaciones", "movimiento", "reducir movimiento")
     ),
+    APPEARANCE_SYSTEM_ACCENT(
+        topic = SettingsTopic.APPEARANCE,
+        words = listOf("accent color", "system accent", "highlight color", "color de acento", "color del sistema", "acento")
+    ),
     APPEARANCE_THEME(
         topic = SettingsTopic.APPEARANCE,
         words = listOf("theme", "themes", "color theme", "colors", "tema", "temas", "colores")

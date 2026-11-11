@@ -3,9 +3,7 @@ package app.notekea.core.platform.data
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.platform.domain.SystemMotion
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
-import java.io.IOException
 
 /**
  * [SystemMotion] through each system's own tool, as the JDK does not read it: `defaults` on macOS, the registry on
@@ -15,7 +13,7 @@ import java.io.IOException
 class CommandSystemMotion(
     private val operatingSystem: OperatingSystem,
     private val dispatchers: AppDispatchers,
-    private val run: (List<String>) -> String? = ::outputOf
+    private val run: (List<String>) -> String? = CommandOutput::of
 ) : SystemMotion {
     override suspend fun isReduced(): Boolean = withContext(context = dispatchers.io) {
         when (operatingSystem) {
@@ -32,9 +30,7 @@ class CommandSystemMotion(
 
     companion object {
         private const val LINUX_ANIMATIONS_OFF = "<false>"
-        private const val LOG_TAG = "SystemMotion"
         private const val MACOS_REDUCED = "1"
-        private const val UNAVAILABLE_MESSAGE = "The system's reduce motion setting cannot be read"
         private const val WINDOWS_ANIMATIONS_OFF = " 0"
         private val LINUX_COMMAND = listOf(
             "gdbus", "call", "--session", "--dest", "org.freedesktop.portal.Desktop",
@@ -50,20 +46,5 @@ class CommandSystemMotion(
             "/v",
             "MinAnimate"
         )
-
-        private fun outputOf(command: List<String>): String? = try {
-            val process = ProcessBuilder(command).redirectErrorStream(true).start()
-
-            process
-                .inputStream
-                .bufferedReader()
-                .use { it.readText() }
-        } catch (exception: IOException) {
-            Logger
-                .withTag(tag = LOG_TAG)
-                .w(throwable = exception) { UNAVAILABLE_MESSAGE }
-
-            null
-        }
     }
 }

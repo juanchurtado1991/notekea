@@ -31,6 +31,10 @@ class AppearanceViewModel(
             AppearanceIntent.OnReduceMotionToggle -> save {
                 it.copy(reduceMotion = !it.reduceMotion)
             }
+
+            AppearanceIntent.OnSystemAccentToggle -> save {
+                it.copy(usesSystemAccent = !it.usesSystemAccent)
+            }
         }
     }
 

@@ -80,6 +80,28 @@ class AppearanceViewModelTest {
     }
 
     @Test
+    fun `use the system's accent is kept as it is turned on and off`() =
+        runTest(context = testDispatcher) {
+            val store = FakeAppearanceStore()
+            val viewModel = AppearanceViewModel(appearanceStore = store)
+            advanceUntilIdle()
+
+            viewModel.onIntent(intent = AppearanceIntent.OnSystemAccentToggle)
+            advanceUntilIdle()
+            val turnedOn = store.kept
+            viewModel.onIntent(intent = AppearanceIntent.OnSystemAccentToggle)
+            advanceUntilIdle()
+
+            assertEquals(
+                expected = listOf(
+                    Appearance(usesSystemAccent = true),
+                    Appearance()
+                ),
+                actual = listOf(turnedOn, store.kept)
+            )
+        }
+
+    @Test
     fun `it shows the kept appearance, and a theme and a mode chosen are kept together`() = runTest(
         context = testDispatcher
     ) {

@@ -58,6 +58,8 @@
     <string name="appearance_reduce_motion">Reducir movimiento</string>
     <string name="appearance_reduce_motion_hint">Los paneles y las listas cambian al instante, sin deslizarse. También se activa cuando tu computadora pide menos movimiento.</string>
     <string name="appearance_save_failed">No se pudo guardar esta opción: se perderá al cerrar Notekea.</string>
+    <string name="appearance_system_accent">Usar el color de acento del sistema</string>
+    <string name="appearance_system_accent_hint">En macOS y Windows, los botones, los enlaces y la selección toman el color elegido en los ajustes del sistema. Linux conserva el del tema.</string>
     <string name="appearance_theme">Tema</string>
     <string name="attachment_locate">Buscar…</string>
     <string name="attachment_missing">Falta este archivo</string>
