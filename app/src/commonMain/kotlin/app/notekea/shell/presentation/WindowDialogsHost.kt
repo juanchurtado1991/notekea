@@ -9,6 +9,7 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.platform.WindowDialog
 import app.notekea.core.presentation.platform.WindowDialogs
+import app.notekea.core.presentation.settings.SettingsSpotlight
 import app.notekea.settings.presentation.SettingsDialog
 import app.notekea.settings.presentation.SettingsSection
 import app.notekea.settings.presentation.about.AboutDialog
@@ -23,8 +24,8 @@ private const val PREVIEW_TEXT = "About or Settings open over this"
 fun WindowDialogsHost(
     platformConventions: PlatformConventions,
     dialogs: WindowDialogs,
-    aiModelSection: @Composable (Modifier) -> Unit,
-    syncSection: @Composable (Modifier) -> Unit
+    aiModelSection: @Composable (Modifier, SettingsSpotlight?) -> Unit,
+    syncSection: @Composable (Modifier, SettingsSpotlight?) -> Unit
 ) {
     val onDismiss = { dialogs.shown = null }
 
@@ -61,8 +62,8 @@ private fun WindowDialogsHostPreview() {
         WindowDialogsHost(
             platformConventions = PreviewPlatformConventions.linux,
             dialogs = WindowDialogs(),
-            aiModelSection = {},
-            syncSection = {}
+            aiModelSection = { _, _ -> },
+            syncSection = { _, _ -> }
         )
     }
 }

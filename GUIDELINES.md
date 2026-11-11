@@ -396,3 +396,16 @@ the model's memory, which does not know Notekea.
 - `HelpGuideFileTest` checks that every `{name}` is known and that common questions find their topic; add the new
   topic's question there.
 
+### Settings
+
+Ask about Settings, the chat beside Settings, opens the setting a question is about and makes it blink, as an
+Android intent opens a screen (decided with the developer, 2026-11-11). So **every setting has a place**:
+
+- **A new setting gets a `SettingsPlace`** (`core/settings/domain`) in the same pull request: its section and the
+  words people use for it in English and Spanish, a name on Show (`SettingsPlaceNames`), and a `NotekeaSpotlight`
+  around it on its screen, `shownAt = spotlight?.serialFor(place = SettingsPlace.…)`. A setting inside something
+  folded or in a tab opens it first, as Other sizes does.
+- **A new section** gets its `SettingsTopic`, its guide topic, and its screen takes the `SettingsSpotlight`.
+- `SettingsPlacesShownTest` fails while a place is spotlit on no screen; `SettingsPlacesTest` holds the questions
+  that name each setting: add the new setting's question there. Removing a setting removes its place.
+

@@ -6,12 +6,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.settings.SettingsSpotlight
 import org.koin.compose.viewmodel.koinViewModel
 
-/** Settings → AI model on its [ModelManagerViewModel]; the app gives it to Settings as its AI model section. */
+/** Settings → AI model on its [ModelManagerViewModel], showing the help's [spotlight]; the app gives it to Settings. */
 @Composable
 fun ModelManagerScreen(
     modifier: Modifier = Modifier,
+    spotlight: SettingsSpotlight? = null,
     viewModel: ModelManagerViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -19,7 +21,8 @@ fun ModelManagerScreen(
     ModelManagerContent(
         state = state,
         onIntent = viewModel::onIntent,
-        modifier = modifier
+        modifier = modifier,
+        spotlight = spotlight
     )
 }
 

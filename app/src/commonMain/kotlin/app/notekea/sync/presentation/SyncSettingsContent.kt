@@ -21,12 +21,15 @@ import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaSegment
 import app.notekea.core.presentation.designsystem.components.NotekeaSegmentedControl
+import app.notekea.core.presentation.designsystem.components.NotekeaSpotlight
 import app.notekea.core.presentation.designsystem.components.NotekeaTextField
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaColors
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.formatBytes
+import app.notekea.core.presentation.settings.SettingsSpotlight
+import app.notekea.core.settings.domain.SettingsPlace
 import app.notekea.resources.Res
 import app.notekea.resources.settings_section_sync
 import app.notekea.resources.sync_auto
@@ -65,7 +68,8 @@ private const val PREVIEW_BYTES = 1_400_000_000L
 fun SyncSettingsContent(
     state: SyncSettingsState,
     onIntent: (SyncSettingsIntent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    spotlight: SettingsSpotlight? = null
 ) {
     val scrollState = rememberScrollState()
 
@@ -91,7 +95,8 @@ fun SyncSettingsContent(
             if (state.hasVault) {
                 Form(
                     state = state,
-                    onIntent = onIntent
+                    onIntent = onIntent,
+                    spotlight = spotlight
                 )
             } else {
                 Quiet(text = stringResource(resource = Res.string.sync_no_vault))
@@ -103,21 +108,68 @@ fun SyncSettingsContent(
 @Composable
 private fun Form(
     state: SyncSettingsState,
-    onIntent: (SyncSettingsIntent) -> Unit
+    onIntent: (SyncSettingsIntent) -> Unit,
+    spotlight: SettingsSpotlight?
 ) {
     state.error?.let { ErrorBanner(message = messageOf(error = it)) }
 
     if (state.isTooLargeForGitHub) TooLarge(bytes = state.vaultBytes ?: 0L)
 
-    Field(label = stringResource(resource = Res.string.sync_url_label)) {
-        NotekeaTextField(
-            value = state.url,
-            onValueChange = { onIntent(SyncSettingsIntent.OnUrlChange(url = it)) },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = stringResource(resource = Res.string.sync_url_hint)
+    NotekeaSpotlight(
+        shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_ADDRESS)
+    ) {
+        Field(label = stringResource(resource = Res.string.sync_url_label)) {
+            NotekeaTextField(
+                value = state.url,
+                onValueChange = { onIntent(SyncSettingsIntent.OnUrlChange(url = it)) },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = stringResource(resource = Res.string.sync_url_hint)
+            )
+        }
+    }
+
+    NotekeaSpotlight(
+        shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_TOKEN)
+    ) {
+        Token(
+            state = state,
+            onIntent = onIntent
         )
     }
 
+    NotekeaSpotlight(
+        shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_AUTO)
+    ) {
+        AutoSync(
+            isAuto = state.isAuto,
+            onToggle = { onIntent(SyncSettingsIntent.OnAutoToggle) }
+        )
+    }
+
+    NotekeaSpotlight(
+        shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_INTERVAL)
+    ) {
+        Interval(
+            state = state,
+            onIntent = onIntent
+        )
+    }
+
+    NotekeaSpotlight(
+        shownAt = spotlight?.serialFor(place = SettingsPlace.SYNC_CONNECT)
+    ) {
+        Actions(
+            state = state,
+            onIntent = onIntent
+        )
+    }
+}
+
+@Composable
+private fun Token(
+    state: SyncSettingsState,
+    onIntent: (SyncSettingsIntent) -> Unit
+) {
     Field(label = stringResource(resource = Res.string.sync_token_label)) {
         NotekeaTextField(
             value = state.token,
@@ -130,21 +182,6 @@ private fun Form(
 
         if (state.hasToken) Quiet(text = stringResource(resource = Res.string.sync_token_saved))
     }
-
-    AutoSync(
-        isAuto = state.isAuto,
-        onToggle = { onIntent(SyncSettingsIntent.OnAutoToggle) }
-    )
-
-    Interval(
-        state = state,
-        onIntent = onIntent
-    )
-
-    Actions(
-        state = state,
-        onIntent = onIntent
-    )
 }
 
 // Only for a GitHub remote, typed or connected: a vault kept on this computer is never told (2026-11-11).

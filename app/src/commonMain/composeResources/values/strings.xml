@@ -872,6 +872,9 @@
     <string name="settings_help_title">Ask about Settings</string>
     <string name="settings_help_intro">Ask what any setting here does, or how to do something. Answers come from Notekea’s guide.</string>
     <string name="settings_help_sync_steps">To sync, Notekea saves your vault in a private place on GitHub, a free website.\n1. Make a free account at github.com.\n2. Make a private repository: + at the top right, New repository, name it notes, choose Private.\n3. Copy its HTTPS address.\n4. Make a token: your picture, Settings, Developer settings, Fine-grained tokens. Contents: Read and write.\n5. Paste both here and click Connect.</string>
+    <string name="settings_help_show">Show %1$s</string>
+    <string name="settings_place_model_size">Model to download</string>
+    <string name="settings_place_models_folder">Models folder</string>
     <string name="settings_help_hint">Ask about a setting…</string>
     <string name="settings_help_no_model">Download a chat model in Settings → AI model to ask questions here.</string>
     <string name="settings_help_failed">The model could not answer now. Try again in a moment.</string>

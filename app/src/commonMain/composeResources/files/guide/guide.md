@@ -154,8 +154,9 @@ your notes never leave it. Delete frees its space on the disk.
 # Ask about Settings
 words: settings help, ayuda de ajustes, ask about settings, preguntar sobre ajustes, what does this setting do, qué hace este ajuste
 Beside Settings, Ask about Settings answers what an option does or how to do something, about the section open, in
-your language and from this guide. With Sync open it shows the steps to set up GitHub, which need no model; the
-answers need the AI model.
+your language and from this guide. When a question or its answer names a setting, Settings opens its section and
+the setting blinks; Show under the answer shows it again. With Sync open it shows the steps to set up GitHub. The
+steps and the blinking need no model; the answers need the AI model.
 
 # Open another vault
 words: vault, bóveda, boveda, open folder, abrir carpeta, another vault, otra bóveda, switch vault

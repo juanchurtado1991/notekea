@@ -6,14 +6,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.settings.SettingsSpotlight
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-/** Settings → Sync for the open vault ([vaultPath], null with none); the app gives it to Settings. */
+/** Settings → Sync for the open vault ([vaultPath], null with none), showing the help's [spotlight]; for Settings. */
 @Composable
 fun SyncSettingsScreen(
     vaultPath: String?,
     modifier: Modifier = Modifier,
+    spotlight: SettingsSpotlight? = null,
     viewModel: SyncSettingsViewModel = koinViewModel(key = "SyncSettings:$vaultPath") {
         parametersOf(vaultPath)
     }
@@ -23,7 +25,8 @@ fun SyncSettingsScreen(
     SyncSettingsContent(
         state = state,
         onIntent = viewModel::onIntent,
-        modifier = modifier
+        modifier = modifier,
+        spotlight = spotlight
     )
 }
 

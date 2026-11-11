@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +34,7 @@ import app.notekea.core.presentation.designsystem.components.focusBorder
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.settings.SettingsSpotlight
 import app.notekea.resources.Res
 import app.notekea.resources.settings_close
 import app.notekea.resources.settings_section_daily_notes
@@ -71,15 +73,15 @@ private val SECTIONS_TO_COME = listOf(
 )
 
 /**
- * Settings: the sections on the left (Appearance, AI model, Sync), the chosen one on the right, the sections to come
- * dimmed under "Coming soon" (5.2), and Ask about Settings in a card beside it. AI model and Sync belong to features,
- * so the app gives them ([aiModelSection], [syncSection]). Esc, a click outside or ✕ closes it.
+ * Settings: its sections on the left, the chosen one on the right (AI model and Sync from the app: [aiModelSection],
+ * [syncSection]), the sections to come dimmed, and Ask about Settings beside it, which opens the section of the
+ * setting it shows. Esc, a click outside or ✕ closes it.
  */
 @Composable
 fun SettingsDialog(
     onDismiss: () -> Unit,
-    aiModelSection: @Composable (Modifier) -> Unit,
-    syncSection: @Composable (Modifier) -> Unit,
+    aiModelSection: @Composable (Modifier, SettingsSpotlight?) -> Unit,
+    syncSection: @Composable (Modifier, SettingsSpotlight?) -> Unit,
     initialSection: SettingsSection = SettingsSection.APPEARANCE,
     viewModel: AppearanceViewModel = koinViewModel(),
     helpViewModel: SettingsHelpViewModel = koinViewModel()
@@ -88,6 +90,12 @@ fun SettingsDialog(
     val help by helpViewModel.state.collectAsState()
 
     var section by remember { mutableStateOf(value = initialSection) }
+    val spotlight = help.spotlight
+
+    // A setting the help shows opens its section first, as an intent opens its screen.
+    LaunchedEffect(spotlight) {
+        spotlight?.let { section = SettingsSection.of(topic = it.place.topic) }
+    }
 
     NotekeaDialog(
         onDismiss = onDismiss,
@@ -104,6 +112,7 @@ fun SettingsDialog(
                 },
                 onAsk = { helpViewModel.onIntent(SettingsHelpIntent.OnAsk(topic = section.topic)) },
                 onStop = { helpViewModel.onIntent(SettingsHelpIntent.OnStop) },
+                onShow = { helpViewModel.onIntent(SettingsHelpIntent.OnShow(place = it)) },
                 modifier = Modifier.fillMaxSize()
             )
         },
@@ -118,12 +127,13 @@ fun SettingsDialog(
                 SettingsSection.APPEARANCE -> AppearanceSettings(
                     state = state,
                     onIntent = viewModel::onIntent,
+                    spotlight = spotlight,
                     modifier = Modifier.fillMaxSize()
                 )
 
-                SettingsSection.AI_MODEL -> aiModelSection(Modifier.fillMaxSize())
+                SettingsSection.AI_MODEL -> aiModelSection(Modifier.fillMaxSize(), spotlight)
 
-                SettingsSection.SYNC -> syncSection(Modifier.fillMaxSize())
+                SettingsSection.SYNC -> syncSection(Modifier.fillMaxSize(), spotlight)
             }
         }
     }

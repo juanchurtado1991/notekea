@@ -20,10 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.notekea.core.presentation.designsystem.components.NotekeaButton
+import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaPromptField
 import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.settings.domain.SettingsPlace
 import app.notekea.resources.Res
 import app.notekea.resources.chat_send
 import app.notekea.resources.chat_stop
@@ -31,6 +34,7 @@ import app.notekea.resources.settings_help_failed
 import app.notekea.resources.settings_help_hint
 import app.notekea.resources.settings_help_intro
 import app.notekea.resources.settings_help_no_model
+import app.notekea.resources.settings_help_show
 import app.notekea.resources.settings_help_sync_steps
 import app.notekea.resources.settings_help_title
 import app.notekea.settings.domain.SettingsHelpError
@@ -51,6 +55,7 @@ internal fun SettingsHelpBar(
     onDraftChange: (String) -> Unit,
     onAsk: () -> Unit,
     onStop: () -> Unit,
+    onShow: (SettingsPlace) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -66,6 +71,7 @@ internal fun SettingsHelpBar(
         Conversation(
             state = state,
             isSync = isSync,
+            onShow = onShow,
             modifier = Modifier.weight(weight = 1f)
         )
 
@@ -90,6 +96,7 @@ internal fun SettingsHelpBar(
 private fun Conversation(
     state: SettingsHelpState,
     isSync: Boolean,
+    onShow: (SettingsPlace) -> Unit,
     modifier: Modifier
 ) {
     val intro = if (isSync) Res.string.settings_help_sync_steps else Res.string.settings_help_intro
@@ -112,7 +119,12 @@ private fun Conversation(
         ) {
             Reply(text = stringResource(resource = intro))
 
-            state.exchanges.forEach { exchange -> Exchange(exchange = exchange) }
+            state.exchanges.forEach { exchange ->
+                Exchange(
+                    exchange = exchange,
+                    onShow = onShow
+                )
+            }
 
             state.error?.let { Problem(error = it) }
         }
@@ -120,7 +132,10 @@ private fun Conversation(
 }
 
 @Composable
-private fun Exchange(exchange: SettingsHelpExchange) {
+private fun Exchange(
+    exchange: SettingsHelpExchange,
+    onShow: (SettingsPlace) -> Unit
+) {
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.CenterEnd
@@ -137,6 +152,17 @@ private fun Exchange(exchange: SettingsHelpExchange) {
     }
 
     if (exchange.reply.isNotEmpty()) Reply(text = exchange.reply)
+
+    exchange.place?.let { place ->
+        NotekeaButton(
+            text = stringResource(
+                resource = Res.string.settings_help_show,
+                stringResource(resource = nameOf(place = place))
+            ),
+            onClick = { onShow(place) },
+            style = NotekeaButtonStyle.SECONDARY
+        )
+    }
 }
 
 @Composable
@@ -179,7 +205,8 @@ private fun SettingsHelpBarPreview() {
                 exchanges = listOf(
                     SettingsHelpExchange(
                         question = "¿qué es un token?",
-                        reply = "Es una llave que Notekea usa en lugar de tu contraseña."
+                        reply = "Es una llave que Notekea usa en lugar de tu contraseña.",
+                        place = SettingsPlace.SYNC_TOKEN
                     )
                 )
             ),
@@ -187,6 +214,7 @@ private fun SettingsHelpBarPreview() {
             onDraftChange = {},
             onAsk = {},
             onStop = {},
+            onShow = {},
             modifier = Modifier
                 .width(width = PREVIEW_WIDTH_DP.dp)
                 .height(height = PREVIEW_HEIGHT_DP.dp)

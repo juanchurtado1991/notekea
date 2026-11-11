@@ -1,5 +1,6 @@
 package app.notekea.settings.domain
 
+import app.notekea.core.settings.domain.SettingsTopic
 import kotlinx.coroutines.flow.Flow
 
 /**

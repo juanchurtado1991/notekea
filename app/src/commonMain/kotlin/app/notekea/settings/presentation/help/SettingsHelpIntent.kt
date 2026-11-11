@@ -1,6 +1,7 @@
 package app.notekea.settings.presentation.help
 
-import app.notekea.settings.domain.SettingsTopic
+import app.notekea.core.settings.domain.SettingsPlace
+import app.notekea.core.settings.domain.SettingsTopic
 
 sealed interface SettingsHelpIntent {
     data class OnDraftChange(val text: String) : SettingsHelpIntent
@@ -10,4 +11,7 @@ sealed interface SettingsHelpIntent {
 
     /** The reply being written stops where it is. */
     data object OnStop : SettingsHelpIntent
+
+    /** Show, under a reply: the setting it is about is shown again. */
+    data class OnShow(val place: SettingsPlace) : SettingsHelpIntent
 }
