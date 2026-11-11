@@ -13,11 +13,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.chat.domain.AnswerSource
@@ -55,14 +57,6 @@ import app.notekea.resources.chat_small_hint
 import app.notekea.resources.chat_stopped
 import org.jetbrains.compose.resources.stringResource
 
-private const val BUBBLE_RADIUS_DP = 12
-
-// As tall as a line of the answer, so the mark sits beside its first line.
-private const val AVATAR_DP = 20
-private const val AVATAR_ICON_DP = 12
-private const val AVATAR_ALPHA = 0.14f
-private const val BUBBLE_TAIL_DP = 4
-private const val BUBBLE_INSET_DP = 40
 private const val RISE_DP = 12f
 private const val ENTRY = "entry"
 
@@ -99,11 +93,14 @@ internal fun ChatMessages(
             contentPadding = PaddingValues(all = NotekeaDimensions.SpacingM),
             verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingL)
         ) {
-            items(
+            itemsIndexed(
                 items = entries,
-                key = { it.id },
-                contentType = { ENTRY }
-            ) { entry ->
+                key = { _, entry -> entry.id },
+                contentType = { _, _ -> ENTRY }
+            ) { index, entry ->
+                // A thin line between turns, as between a document's sections (7B).
+                if (index > 0) TurnDivider()
+
                 ChatEntryView(
                     entry = entry,
                     isSmall = isSmall,
@@ -146,7 +143,7 @@ private fun ChatEntryView(
             },
         verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
     ) {
-        QuestionBubble(text = entry.question)
+        QuestionHeading(text = entry.question)
 
         CompositionLocalProvider(LocalReplyLanguage provides entry.language) {
             Answer(
@@ -158,78 +155,18 @@ private fun ChatEntryView(
     }
 }
 
+/** The question as the turn's heading, in bold over the answer (macOS redesign 7B): no bubble, no avatar. */
 @Composable
-private fun QuestionBubble(text: String) {
-    // As in a messaging app: your own messages on the right in a quiet bubble, the corner of the tail sharp.
-    val shape = RoundedCornerShape(
-        topStart = BUBBLE_RADIUS_DP.dp,
-        topEnd = BUBBLE_RADIUS_DP.dp,
-        bottomEnd = BUBBLE_TAIL_DP.dp,
-        bottomStart = BUBBLE_RADIUS_DP.dp
+private fun QuestionHeading(text: String) {
+    Text(
+        text = text,
+        modifier = Modifier.fillMaxWidth(),
+        style = MaterialTheme
+            .typography
+            .bodyMedium
+            .copy(fontWeight = FontWeight.SemiBold),
+        color = MaterialTheme.colorScheme.onSurface
     )
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End
-    ) {
-        // Room on the left, so a long question stays a bubble on the right.
-        Box(modifier = Modifier.width(width = BUBBLE_INSET_DP.dp))
-
-        Text(
-            text = text,
-            modifier = Modifier
-                .weight(
-                    weight = 1f,
-                    fill = false
-                )
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = shape
-                )
-                .border(
-                    width = NotekeaDimensions.BorderWidth,
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                    shape = shape
-                )
-                .padding(
-                    horizontal = NotekeaDimensions.SpacingM,
-                    vertical = NotekeaDimensions.SpacingS
-                ),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-    }
-}
-
-/** The answer on the page itself, beside the assistant's small mark: the step line, the answer, its sources. */
-@Composable
-private fun AnswerBubble(content: @Composable () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(size = AVATAR_DP.dp)
-                .background(
-                    color = MaterialTheme
-                        .colorScheme
-                        .primary
-                        .copy(alpha = AVATAR_ALPHA),
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = NotekeaIcons.ChatAssistant,
-                contentDescription = null,
-                modifier = Modifier.size(size = AVATAR_ICON_DP.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        Box(modifier = Modifier.weight(weight = 1f)) { content() }
-    }
 }
 
 @Composable
@@ -244,18 +181,17 @@ private fun Answer(
 
     val isWriting = entry.step == ChatStep.WRITING && entry.isAnswering
 
-    AnswerBubble {
-        Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-            AgentMoves(moves = entry.moves)
+    // The answer reads as the note's own text under its question (7B).
+    Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
+        AgentMoves(moves = entry.moves)
 
-            AnswerContent(
-                entry = entry,
-                isWriting = isWriting,
-                isSmall = isSmall,
-                onIntent = onIntent,
-                onSourceClick = onSourceClick
-            )
-        }
+        AnswerContent(
+            entry = entry,
+            isWriting = isWriting,
+            isSmall = isSmall,
+            onIntent = onIntent,
+            onSourceClick = onSourceClick
+        )
     }
 }
 
@@ -409,6 +345,17 @@ private fun Quiet(text: String) {
         text = text,
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+@Composable
+private fun TurnDivider() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = NotekeaDimensions.SpacingL)
+            .height(height = NotekeaDimensions.BorderWidth)
+            .background(color = MaterialTheme.colorScheme.outlineVariant)
     )
 }
 
