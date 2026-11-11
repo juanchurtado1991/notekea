@@ -524,3 +524,33 @@ were written with.
 | 3.3-04 | In the Playground Vault, ask Summarize what the vault says about habits and press Esc while it is written; quit, relaunch and press Mod+L; click ⋯, then Clear history | Esc stops the answer where it was, marked Stopped; after relaunch the earlier questions and answers are there with their sources; Clear history empties the chat | 3.3 | Manual (costly) | `ChatViewModelTest`, `FileChatHistoryStoreTest` | | | |
 | 3.3-05 | In the Playground Vault ask When is my dentist appointment?, then ¿Cuánta agua lleva la masa de las arepas? | The first answers I couldn't find this in your notes, with no sources; the second answers in Spanish (two and a half cups) citing Arepas | 3.3 | Manual (costly) | `AnswerEvalChatModelTest` (by hand) | | | |
 | 3.3-06 | In the Playground Vault with no model in use (delete it in Settings → AI model), press Mod+L; click Choose a model, click Download on the recommended size and press Esc; click the status bar's AI model entry and cancel the download | The chat says No AI model yet and offers Choose a model, with no question field; Choose a model opens Settings at AI model; the status bar shows AI model · with the percent and a filling ring while it downloads, a click opens Settings at AI model, and the entry leaves once cancelled | 3.3 | Manual (system) | `ChatPanelTest`, `ModelDownloadViewModelTest` | | | |
+
+### 3.6 Deep answer
+
+Same vault and model as 3.3; Deep answer is offered with Medium only (`docs/answer-quality.md`, 3.6).
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 3.6-01 | In the Playground Vault with Medium in use, tick Deep answer under the question field and ask How much water does the arepa dough take?; press Esc during another Deep answer; switch to Small in Settings → AI model and look at the field | The line says Writing drafts and comparing them…, then the whole answer shows at once with its citations; Esc stops it, marked Stopped; with Small the Deep answer box is not there | 3.6 | Manual (costly) | `DraftVoteTest`, `AnswerFromNotesUseCaseTest`, `AnswerEvalChatModelTest` (by hand) | | | |
+
+### 3.8 Questions in plain words
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 3.8-01 | In the Playground Vault open the Query tab, type books I rated 4 or more in Describe what you want and press Enter; then type books by stars | The rules below become rating more than 3 and the table lists the books rated 4 and 5, which can be corrected by hand; books by stars says no note has a property stars and names the closest | 3.8 | Manual (costly) | `QueryDescribeTest`, `TranslateQueryUseCase` | | | |
+| 3.8-02 | In the Playground Vault ask the chat books I rated 4 or more, then what is due this week?; click a row of each | The answer is a list of notes with their rating, then of tasks with their notes, counted; a note row opens the note, a task row opens its note at the task | 3.8 | Manual (costly) | `ActionEvalChatModelTest` (by hand), `ChatViewModelTest` | | | |
+
+### 3.9 Actions from chat
+
+Run on the Playground Vault; every change is undone with the card's Undo before the next case. `ActionRunChatModelTest`
+runs the same kinds of requests on a copy of the Sample Vault by hand.
+
+| ID | Steps | Expected | Testable from | Checked by | Automated | Win | macOS | Linux |
+|---|---|---|---|---|---|---|---|---|
+| 3.9-01 | Ask create a note Call with Ana in Projects from the Meeting template, status draft; click Cancel; ask again and click Do it; click Undo | A card Notekea will: lists Create note Projects/Call with Ana from the template Meeting and Set property status: draft, with Cancel and Do it; Cancel changes nothing; Do it makes the note from the template with status draft and opens it; Undo removes it | 3.9 | Manual (costly) | `ActionRunChatModelTest`, `VaultActionRunnerTest`, `ChatViewModelTest` | | | |
+| 3.9-02 | Ask write a summary of my book notes in a new note called Books summary; read the card's preview; click Do it | The card names the six book notes it reads and shows the start of the summary; the note has headings, lists and links to the books, a few hundred words, and nothing the books do not say | 3.9 | Manual (eyes) | `ActionRunChatModelTest` | | | |
+| 3.9-03 | Paste a text of five paragraphs with Créame notas a partir de este texto: before it and send it; click Do it | The card lists a folder with an index note and one note per topic; each note keeps the facts of its part, formatted, in the text's language; the index links them all | 3.9 | Manual (eyes) | `ActionRunChatModelTest` | | | |
+| 3.9-04 | Ask tag every note in Recipes with food; click Do it; open Arepas; click Undo | The card lists every note of Recipes; each gets the tag food in its properties; Undo takes the tag off every one | 3.9 | Manual (costly) | `ActionRunChatModelTest`, `CheckPlanUseCaseTest` | | | |
+| 3.9-05 | Ask create a folder Archive and move Retro October into it; click Do it; open the note that linked Retro October; click Undo | Archive holds Retro October, and links to it still work; Undo moves it back | 3.9 | Manual (costly) | `ActionRunChatModelTest`, `VaultActionRunnerTest` | | | |
+| 3.9-06 | Ask open Dune and split the pane; then switch to the sage theme; then show the backlinks | Each is done at once with a line saying what was done (opened Dune, split the pane, the theme, the panel), no card | 3.9 | Manual (costly) | `ActionEvalChatModelTest` (by hand) | | | |
+| 3.9-07 | Ask delete all my notes permanently; then send Vendor call to the trash and click Do it | The first is refused, saying what the chat can do instead; the second shows a card listing Vendor call with a line that the trash gives it back, not Undo | 3.9 | Manual (costly) | `ActionEvalChatModelTest` (by hand) | | | |

@@ -1072,6 +1072,9 @@ to beat, and a step is kept only if 3.4 shows it helps. The reranker gate is −
 their own and −5 turned away answerable questions.
 - **Done when:** on the evaluation set, citation accuracy beats 3.2 for Small, Medium and Large, and the median
   answer time stays within the budget set by 3.0.
+- **Measured (2026-11-10):** no step beats 3.2's single call (`docs/answer-quality.md`, 3.5): giving each excerpt
+  its note and headings left Medium at 389 right against 388, extraction and checking lost in the spike, and a
+  rewrite could win at most the 2 % of answerable questions declined. None is built; the single call is the pipeline.
 
 ### ⬜ 3.6 Deep answer mode — `feature/deep-answer`
 
@@ -1089,6 +1092,9 @@ Measured before it is built (`docs/spikes/2026-11-08-answer-quality.md`, "Parall
 draft by support did not beat one answer on any model; a majority of 3 drafts helped Medium (4 more right answers,
 none wrong) and not Small or Large, and a model judge did not help. 3.6 starts from the majority vote and offers
 the mode only for the sizes the 3.4 set shows it helps.
+- **Measured (2026-11-10):** three drafts and a vote (`DraftVote`): Medium 91 % right against 89 %, Small 79 against
+  80, Large 85 against 85; Deep answer is offered with Medium only. The drafts are written at once, so Stop ends them
+  all and keeps nothing; there is no "best draft so far" to keep.
 
 ### ⬜ 3.8 Questions in plain words — `feature/plain-queries`
 
@@ -1107,6 +1113,10 @@ answered exactly by the queries of 2.10 and 2.11: the model only turns the quest
   reported per model size.
 - **Done when:** the Small model returns the expected notes for most of them (the threshold set in 3.4), and a wrong
   translation always shows as a query the user can see and correct, never as a silently wrong answer.
+- **Decided while building it (2026-11-10):** the chat and the actions share one planner (3.9): a request about notes
+  by their properties is a `find_notes` step, translated by the query feature's `TranslateQueryUseCase`, the same
+  that fills the Query tab from "Describe what you want"; tasks are a `show_tasks` step. The 30 questions are part of
+  the 106 requests of `smoke-data/eval/actions.json`.
 
 ### ⬜ 3.9 Actions from chat — `feature/chat-actions`
 
@@ -1155,6 +1165,15 @@ You:  create a note "Meeting with Ana" in Work from the Meeting template, status
   Small, Medium and Large like 3.4.
 - **Done when:** the recommended model writes the right plan with the right fields for at least 90% of the set;
   where a model size falls short, its writing actions are offered as suggestions the user completes instead.
+- **Decided while building it (2026-11-10):** one call plans the request as JSON under a grammar (`ActionPrompt`,
+  with examples), and code fixes what small models do on their way (a question is only answered, a plan that writes
+  does not first open what it names, a folder or a template written as a note is moved to its field). The text to
+  write is written before the card, so the card shows it: 120 words plus 20 per note read, at most 600; notes too long
+  to read at once are read as digests first; written notes use the formatting toolbar's Markdown and keep only links
+  to notes that exist. A pasted text becomes a folder of up to 15 notes with an index note (asked by the developer).
+  Plans: Small 75 %, Medium 92 %, Large 91 % of 106 requests; every change still waits for the card, which is the
+  suggestion Small's plans need. The end to end run of 13 requests on the Sample Vault (`ActionRunChatModelTest`)
+  passes with Medium, Undo included. Not built: rewriting a note as a difference, and clipping a web page (4.4).
 
 ### ⬜ 3.7 M3 performance pass — `chore/m3-performance`
 

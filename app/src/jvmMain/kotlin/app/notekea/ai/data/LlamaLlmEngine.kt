@@ -248,12 +248,21 @@ class LlamaLlmEngine(
         private const val ERRORS_ONLY = 1
         private const val NATIVE_FOLDER_PROPERTY = "net.ladenthin.llama.tmpdir"
         private const val THINKING_KEY = "enable_thinking"
+
+        // On the CPU no GPU backend may hold buffers or take operations: llama.cpp otherwise keeps the Vulkan device
+        // in use with no layer on it, which costs gigabytes of memory (3.7, docs/performance.md).
+        private const val NO_DEVICES = "none"
         private const val THINKING_OFF = "false"
         private const val LOG_TAG = "LlamaLlmEngine"
         private const val LOAD_FAILED_MESSAGE = "The chat model failed to load"
         private const val ENGINE_FAILED_MESSAGE = "The chat model failed"
 
         /** Each slot keeps its own cache (3.0), and the CPU reads the weights without mmap. */
+
+        // These parameters with no GPU device in use, unless the model runs on the GPU.
+        private fun ModelParameters.cpuOnlyUnless(isOnGpu: Boolean): ModelParameters =
+            if (isOnGpu) this else setDevices(NO_DEVICES)
+
         private fun chatParameters(setup: ModelSetup): ModelParameters = ModelParameters()
             .setModel(setup.modelPath)
             .setParallel(setup.slots)
@@ -261,6 +270,7 @@ class LlamaLlmEngine(
             .setKvUnified(false)
             .setGpuLayers(if (setup.onGpu) ALL_LAYERS else 0)
             .setLoadMode(if (setup.onGpu) LoadMode.AUTO else LoadMode.NONE)
+            .cpuOnlyUnless(isOnGpu = setup.onGpu)
             .setLogVerbosity(ERRORS_ONLY)
 
         private fun rerankerParameters(setup: ModelSetup): ModelParameters = ModelParameters()
@@ -271,6 +281,7 @@ class LlamaLlmEngine(
             .setUbatchSize(RERANKER_CONTEXT)
             .setGpuLayers(if (setup.onGpu) ALL_LAYERS else 0)
             .setLoadMode(if (setup.onGpu) LoadMode.AUTO else LoadMode.NONE)
+            .cpuOnlyUnless(isOnGpu = setup.onGpu)
             .setLogVerbosity(ERRORS_ONLY)
 
         /** Qwen3.5 thinks before it answers unless told not to: the answers here need no thinking (3.0). */
