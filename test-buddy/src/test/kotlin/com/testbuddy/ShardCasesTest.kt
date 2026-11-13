@@ -47,6 +47,28 @@ class ShardCasesTest {
     }
 
     @Test
+    fun `the cases kept together all run in the first part, one after another`() {
+        val parts = (0 until 3).map { index ->
+            suite.shard(
+                index = index,
+                count = 3,
+                together = { it.id in setOf("1.1-02", "1.1-05") }
+            )
+        }
+
+        assertEquals(
+            listOf(
+                listOf("1.1-02", "1.1-05", "1.1-01", "1.1-06"),
+                listOf("1.1-03", "1.1-07"),
+                listOf("1.1-04")
+            ),
+            parts.map { part ->
+                part.automated.map { it.id }
+            }
+        )
+    }
+
+    @Test
     fun `a part that does not exist is refused`() {
         assertFailsWith<IllegalArgumentException> {
             suite.shard(

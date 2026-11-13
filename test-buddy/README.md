@@ -101,7 +101,7 @@ class NotesSuiteTest : TestBuddyJUnit(notesSuite)    // one JUnit 5 test per cas
 
 The test task needs `useJUnitPlatform()`; `testbuddy.workFolder` keeps failures' screenshots where CI uploads. A long
 suite runs in parts at the same time: `suite.shard(index, count)`, one `TestBuddyJUnit` class per part, with Gradle's
-`maxParallelForks`. `suite.only(listOf("1.6"))` keeps the cases of one feature.
+`maxParallelForks`; `together` keeps the cases that cannot share the machine (a model on the GPU) in part 0. `suite.only(listOf("1.6"))` keeps the cases of one feature.
 
 ## 4. Build the QA app
 

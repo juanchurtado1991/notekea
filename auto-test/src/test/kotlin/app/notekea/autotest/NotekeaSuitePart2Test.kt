@@ -7,6 +7,7 @@ import com.testbuddy.shard
 class NotekeaSuitePart2Test : TestBuddyJUnit(
     suite = NotekeaSuite.selected().shard(
         index = 1,
-        count = NotekeaSuiteParts.COUNT
+        count = NotekeaSuiteParts.COUNT,
+        together = NotekeaSuiteParts::asksModel
     )
 )
