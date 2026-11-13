@@ -97,9 +97,10 @@ internal class AgentLookUp(
     private suspend fun read(name: String): String {
         val path = noteNamed(name = name) ?: return "read \"$name\": no note of that name."
 
-        val note = notes.first {
+        // The open tab is no note when it is a PDF, a folder or a view: it reads as a name nothing matches.
+        val note = notes.firstOrNull {
             it.file.path == path
-        }
+        } ?: return "read \"$name\": no note of that name."
 
         val body = noteTextCache
             .textsOf(

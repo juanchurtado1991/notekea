@@ -75,7 +75,10 @@ class AgentTaskTest {
         }
     }
 
-    private suspend fun run(task: String) = agent(
+    private suspend fun run(
+        task: String,
+        openNote: RelativePath? = null
+    ) = agent(
         task = task,
         vaultPath = VAULT,
         notes = notes,
@@ -83,7 +86,7 @@ class AgentTaskTest {
             today = "2026-11-11",
             notes = listOf("Books/Dune", "Books/Sapiens")
         ),
-        openNote = null
+        openNote = openNote
     ).toList()
 
     @Test
@@ -126,6 +129,28 @@ class AgentTaskTest {
                 )
             )
         }
+
+    // The macOS smoke of 2026-11-12: "this note" with a PDF open ended the chat with a NoSuchElementException.
+    @Test
+    fun `reading the open tab when it is no note says so instead of failing`() = runTest {
+        script(
+            "{\"move\":\"read\",\"note\":\"this note\"}",
+            "{\"move\":\"finish\",\"summary\":\"It is a PDF.\"}"
+        )
+
+        run(
+            task = "summarize this note",
+            openNote = RelativePath(value = "Books/menu.pdf")
+        )
+
+        assertEquals(
+            expected = true,
+            actual = "read \"this note\": no note of that name." in engine
+                .generated[1]
+                .last()
+                .text
+        )
+    }
 
     // The chat probe of 2026-11-11: the model counted Arepas' words as 109, 128 and 63.
     @Test
