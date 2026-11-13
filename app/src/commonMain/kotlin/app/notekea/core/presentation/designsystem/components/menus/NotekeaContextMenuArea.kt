@@ -28,6 +28,7 @@ import androidx.compose.ui.window.PopupProperties
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.platform.CoversWindow
 
 private const val PREVIEW_DELETE = "Delete note"
 private const val PREVIEW_DELETE_SHORTCUT = "Delete"
@@ -107,6 +108,8 @@ fun NotekeaContextMenuArea(
                 color = MaterialTheme.colorScheme.outline
             )
         ) {
+            CoversWindow()
+
             MenuRows(
                 sections = menu(),
                 onChosen = state::close

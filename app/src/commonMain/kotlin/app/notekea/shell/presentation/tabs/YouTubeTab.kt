@@ -10,6 +10,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.platform.LocalWindowCovers
 import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.core.presentation.platform.LocalYouTubePlayer
 import app.notekea.core.presentation.platform.LocalYouTubeView
@@ -22,7 +23,8 @@ import app.notekea.shell.domain.PlayedVideo
 @Composable
 internal fun YouTubeTab(video: PlayedVideo?) {
     val view = LocalYouTubeView.current
-    val isCovered = LocalWindowDialogs.current.shown != null
+    // Anything drawn over the window: a native view would cover it (the code review of 2026-11-13).
+    val isCovered = LocalWindowCovers.current.isCovered || LocalWindowDialogs.current.shown != null
 
     Box(
         modifier = Modifier

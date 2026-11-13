@@ -18,6 +18,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.platform.CoversWindow
 
 private const val WIDTH_DP = 340
 private const val PREVIEW_TEXT = "Details"
@@ -39,6 +40,8 @@ fun NotekeaPopover(
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true)
     ) {
+        CoversWindow()
+
         Surface(
             modifier = Modifier.width(width = WIDTH_DP.dp),
             shape = MaterialTheme.shapes.medium,

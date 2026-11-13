@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.DialogButtonOrder
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.platform.CoversWindow
 
 private const val ALERT_ICON_DP = 48
 private const val ALERT_WIDTH_DP = 232
@@ -62,6 +63,8 @@ fun NotekeaConfirmDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
+            CoversWindow()
+
             DialogButtons(
                 confirmLabel = confirmLabel,
                 cancelLabel = cancelLabel,

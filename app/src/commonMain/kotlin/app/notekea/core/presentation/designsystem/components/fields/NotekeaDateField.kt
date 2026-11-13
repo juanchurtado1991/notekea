@@ -24,6 +24,7 @@ import app.notekea.core.presentation.designsystem.components.menus.DropdownPosit
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.platform.CoversWindow
 
 private const val FIELD_WIDTH_DP = 132
 private const val PREVIEW_CALENDAR = "Choose a date"
@@ -104,6 +105,8 @@ private fun CalendarPopup(
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true)
     ) {
+        CoversWindow()
+
         Surface(
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.surface,

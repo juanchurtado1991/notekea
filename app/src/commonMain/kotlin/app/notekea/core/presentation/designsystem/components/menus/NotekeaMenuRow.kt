@@ -44,6 +44,7 @@ import androidx.compose.ui.window.PopupProperties
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.platform.CoversWindow
 
 private const val PREVIEW_ROW = "Callout"
 private const val SHORTCUT_MIN_WIDTH_DP = 48
@@ -214,6 +215,7 @@ private fun Submenu(
         onDismissRequest = onLeave.takeIf { hasKeyboard },
         properties = PopupProperties(focusable = hasKeyboard)
     ) {
+        CoversWindow()
         val focusManager = LocalFocusManager.current
 
         LaunchedEffect(hasKeyboard) {

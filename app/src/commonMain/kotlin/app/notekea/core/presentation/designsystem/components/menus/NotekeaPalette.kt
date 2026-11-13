@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.TestTags
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.platform.CoversWindow
 
 private const val PALETTE_WIDTH_DP = 560
 private const val PALETTE_TOP_DP = 72
@@ -76,6 +77,8 @@ fun NotekeaPalette(
     header: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    CoversWindow()
+
     Box(modifier = modifier.fillMaxSize()) {
         Scrim(onDismiss = onDismiss)
 

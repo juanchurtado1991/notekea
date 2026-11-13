@@ -18,6 +18,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
+import app.notekea.core.presentation.platform.CoversWindow
 
 private const val ELEVATION_DP = 12
 private const val DEFAULT_SIDE_DP = 340
@@ -43,6 +44,8 @@ fun NotekeaDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
+        CoversWindow()
+
         Layout(
             contents = listOf(
                 {
