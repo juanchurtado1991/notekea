@@ -3,8 +3,9 @@
 The state of the work for the next agent, whichever it is (`AGENTS.md` has the rules). Update this file whenever a
 milestone, a release candidate or the open work changes, so it never needs a conversation's memory to be understood.
 
-Last updated: 2026-11-11, with videos and all of M5 on `feature/videos`, one pull request
-([notekea#142](https://github.com/juanchurtado1991/notekea/pull/142)), and the release run (5.5) next.
+Last updated: 2026-11-12, with videos and all of M5 on `feature/videos`, one pull request
+([notekea#142](https://github.com/juanchurtado1991/notekea/pull/142), draft, CI green locally), and the developer's
+smoke test of it on macOS next.
 
 ## Milestones
 
@@ -181,7 +182,39 @@ request, with one QA run at the end, in Notekea QA, for the whole MVP.
 - **After it:** a code review and a bug hunt of the whole project. Then a test audit, which the developer reviews
   before the QA build is made.
 
-## Open work, in order
+### Next: the developer's smoke test on macOS (2026-11-12)
+
+Everything of #142 is built and pushed. `check koverVerify` passed in a clean worktree on Linux. Nothing of it has run
+on macOS or Windows yet. The developer continues on their Mac:
+
+1. **Check out `feature/videos`** in a clean checkout. The bundled Sample Vault is copied from `smoke-data`, so local
+   edits there would ship in the build.
+2. **Run Notekea QA locally** with `./gradlew :auto-test:run`. Add `-Pcases=5.2,4.9` for one feature's cases and
+   `-PchatModels=<folder>` for the cases that ask a chat model.
+   - The manager, its manual cases and the guides are in Spanish, and Notekea QA starts in Spanish.
+3. **macOS-only work never seen running** (written on Linux; check each first):
+   - the unified title bar (`MacTitleBar`): the traffic lights over the sidebar, the band and the tabs row moving the
+     window, a double click zooming, full screen;
+   - the menu bar (`MacMenuBar`, screen menu bar): each item does its shortcut once, not twice (case 1.1-10);
+   - the system's accent (`CommandSystemAccent`, `defaults read -g AppleAccentColor`; case 2.12-06);
+   - the stacked alert (case 5.2-05);
+   - the YouTube player window and the video player on macOS (cases 4.9-02, 4.9-04).
+4. **What the developer finds** goes into #142 as fixes, each with a regression test (`AGENTS.md`). Every fix keeps
+   the Spanish strings (`values-es`) and both `MVP_SMOKE_TEST.md` and the Auto-Test case in step.
+5. **Then the QA build**, only when the developer asks for it: a tag `m5-rc1` publishes Notekea and Notekea QA
+   (`.github/workflows/milestone-build.yml`). `./gradlew :auto-test:packageQa` builds this system's installer locally.
+   The release run (5.5) covers every case on the three systems and closes M2 to M5.
+
+**Decisions of this pull request** (also in `ROADMAP.md` 5.1–5.4, `docs/macos-redesign.md`, `PLATFORM_GUIDELINES.md`,
+`qa/AUTO_TEST.md` *Language*):
+
+- **Spanish:** the whole interface switches live. The chat's `_es` reply strings stay in English inside `values-es`,
+  because replies follow the question's language. Tests run with `user.language=en`.
+- **The macOS redesign** was approved whole. The window buttons stay the system's own everywhere. 8C (popovers), the
+  high-contrast mode and the page's extra top margin were left out, with reasons in `docs/macos-redesign.md`.
+- **Test audit:** the developer asked to automate every manual case a text, an order or a count can check. There are
+  191 automatic and 91 manual cases now.
+
 
 1. **No `m1-rc2`:** the developer decided to go straight to M2. The macOS run's fixes (#104: 1.3-09, 1.4-13, 1.8-05,
    the case text of 1.4-08, the cut-off buttons of #101, the report's last steps and the cases not run) are on
