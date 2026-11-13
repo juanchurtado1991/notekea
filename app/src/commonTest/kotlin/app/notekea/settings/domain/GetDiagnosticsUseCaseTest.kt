@@ -1,5 +1,6 @@
-package app.notekea.core.logging.domain
+package app.notekea.settings.domain
 
+import app.notekea.core.logging.domain.FakeLogStore
 import app.notekea.core.platform.domain.FakeSystemEnvironment
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test

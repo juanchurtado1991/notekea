@@ -1,6 +1,5 @@
 package app.notekea.search.domain
 
-import app.notekea.core.domain.firstSorted
 import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NaturalNameComparator

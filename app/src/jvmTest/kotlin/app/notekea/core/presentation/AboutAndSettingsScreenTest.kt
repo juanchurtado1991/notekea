@@ -9,10 +9,10 @@ import androidx.compose.ui.use
 import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.logging.domain.FakeLogStore
 import app.notekea.core.logging.domain.FakeTextClipboard
-import app.notekea.core.logging.domain.GetDiagnosticsUseCase
 import app.notekea.core.platform.domain.FakeSystemEnvironment
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
+import app.notekea.settings.domain.GetDiagnosticsUseCase
 import app.notekea.settings.presentation.SettingsDialog
 import app.notekea.settings.presentation.about.AboutDialog
 import app.notekea.settings.presentation.about.AboutViewModel

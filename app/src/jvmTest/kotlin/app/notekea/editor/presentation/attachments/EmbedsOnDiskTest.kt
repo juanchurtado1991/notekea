@@ -1,11 +1,11 @@
 package app.notekea.editor.presentation.attachments
 
-import app.notekea.core.data.JvmLocalTimeFormatter
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.notes.data.ObsidianVaultSettingsReader
 import app.notekea.core.notes.data.OkioAttachmentStore
 import app.notekea.core.notes.data.OkioNoteFileOperations
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.data.JvmLocalTimeFormatter
 import app.notekea.editor.domain.AttachFileUseCase
 import app.notekea.editor.domain.EmbedProblem
 import app.notekea.editor.domain.FakeYouTubeDetails

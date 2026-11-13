@@ -13,7 +13,7 @@ import app.notekea.ai.domain.ModelInstaller
 import app.notekea.ai.domain.ModelSetupSource
 import app.notekea.ai.domain.ModelStorage
 import app.notekea.core.llm.domain.LlmEngine
-import app.notekea.core.notes.data.readCommand
+import app.notekea.core.platform.data.readCommand
 import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.platform.domain.PlatformConventions
 import io.ktor.client.HttpClient

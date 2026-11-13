@@ -1,8 +1,8 @@
 package app.notekea.settings.presentation.about
 
-import app.notekea.core.logging.domain.GetDiagnosticsUseCase
 import app.notekea.core.logging.domain.TextClipboard
 import app.notekea.core.presentation.BaseViewModel
+import app.notekea.settings.domain.GetDiagnosticsUseCase
 import co.touchlab.kermit.Logger
 
 /**

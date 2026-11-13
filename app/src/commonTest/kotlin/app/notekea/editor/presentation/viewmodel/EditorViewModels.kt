@@ -2,7 +2,6 @@ package app.notekea.editor.presentation.viewmodel
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.FakeClock
-import app.notekea.core.domain.FakeLocalTimeFormatter
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
@@ -22,6 +21,7 @@ import app.notekea.editor.domain.AttachFileUseCase
 import app.notekea.editor.domain.FakeAttachmentPicker
 import app.notekea.editor.domain.FakeClipboardReader
 import app.notekea.editor.domain.FakeEditorPreferencesStore
+import app.notekea.editor.domain.FakeLocalTimeFormatter
 import app.notekea.editor.domain.FakeNoteTimesReader
 import app.notekea.editor.domain.FakeVideoCompressor
 import app.notekea.editor.domain.FakeYouTubeDetails

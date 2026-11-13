@@ -1,6 +1,5 @@
 package app.notekea.editor.domain
 
-import app.notekea.core.domain.LocalTimeFormatter
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.AttachmentStore
 import app.notekea.core.notes.domain.NoteFileOperations

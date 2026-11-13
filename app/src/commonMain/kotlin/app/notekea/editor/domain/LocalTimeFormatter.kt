@@ -1,4 +1,4 @@
-package app.notekea.core.domain
+package app.notekea.editor.domain
 
 import kotlin.time.Instant
 

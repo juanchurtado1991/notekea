@@ -2,7 +2,6 @@ package app.notekea.search.domain
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
-import app.notekea.core.domain.firstSorted
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NaturalNameComparator

@@ -1,4 +1,4 @@
-package app.notekea.core.domain
+package app.notekea.search.domain
 
 import kotlin.random.Random
 import kotlin.test.Test

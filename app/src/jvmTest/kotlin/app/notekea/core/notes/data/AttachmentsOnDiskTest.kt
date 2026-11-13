@@ -1,10 +1,10 @@
 package app.notekea.core.notes.data
 
-import app.notekea.core.data.JvmLocalTimeFormatter
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.editor.data.JvmLocalTimeFormatter
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem

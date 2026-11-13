@@ -2,9 +2,9 @@ package app.notekea.settings.presentation.about
 
 import app.notekea.core.logging.domain.FakeLogStore
 import app.notekea.core.logging.domain.FakeTextClipboard
-import app.notekea.core.logging.domain.GetDiagnosticsUseCase
 import app.notekea.core.logging.domain.TextClipboard
 import app.notekea.core.platform.domain.FakeSystemEnvironment
+import app.notekea.settings.domain.GetDiagnosticsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher

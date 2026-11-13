@@ -1,4 +1,4 @@
-package app.notekea.core.notes.data
+package app.notekea.core.platform.data
 
 import java.io.IOException
 import java.util.concurrent.CompletableFuture

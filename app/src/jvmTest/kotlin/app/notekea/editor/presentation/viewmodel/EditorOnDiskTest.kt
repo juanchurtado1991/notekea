@@ -4,7 +4,6 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.text.TextRange
 import androidx.lifecycle.viewModelScope
 import app.notekea.core.data.JvmAppDispatchers
-import app.notekea.core.data.JvmLocalTimeFormatter
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
@@ -23,6 +22,7 @@ import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.RenameEntryUseCase
 import app.notekea.core.notes.domain.UpdateLinksAfterRenameUseCase
+import app.notekea.editor.data.JvmLocalTimeFormatter
 import app.notekea.editor.data.OkioNoteTimesReader
 import app.notekea.editor.data.SettingsEditorPreferencesStore
 import app.notekea.editor.domain.AttachFileUseCase

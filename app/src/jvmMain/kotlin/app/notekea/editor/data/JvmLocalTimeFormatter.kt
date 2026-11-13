@@ -1,6 +1,6 @@
-package app.notekea.core.data
+package app.notekea.editor.data
 
-import app.notekea.core.domain.LocalTimeFormatter
+import app.notekea.editor.domain.LocalTimeFormatter
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.time.Instant

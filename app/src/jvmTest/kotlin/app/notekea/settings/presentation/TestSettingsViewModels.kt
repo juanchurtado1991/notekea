@@ -4,11 +4,11 @@ import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.logging.domain.FakeLogStore
 import app.notekea.core.logging.domain.FakeTextClipboard
-import app.notekea.core.logging.domain.GetDiagnosticsUseCase
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.core.notes.domain.FakeVaultSettingsWriter
 import app.notekea.core.platform.domain.FakeSystemEnvironment
 import app.notekea.core.preferences.domain.FakeAppPreferencesStore
+import app.notekea.settings.domain.GetDiagnosticsUseCase
 import app.notekea.settings.presentation.about.AboutViewModel
 import app.notekea.settings.presentation.appearance.AppearanceViewModel
 import app.notekea.settings.presentation.files.FilesSettingsViewModel

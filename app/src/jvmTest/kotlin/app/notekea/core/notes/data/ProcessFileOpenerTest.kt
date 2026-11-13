@@ -4,6 +4,7 @@ import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.platform.data.runCommand
 import app.notekea.core.platform.domain.OperatingSystem
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Files

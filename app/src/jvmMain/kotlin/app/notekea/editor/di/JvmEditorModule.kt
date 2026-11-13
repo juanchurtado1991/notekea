@@ -1,6 +1,6 @@
 package app.notekea.editor.di
 
-import app.notekea.core.notes.data.readCommand
+import app.notekea.core.platform.data.readCommand
 import app.notekea.core.platform.domain.OperatingSystem
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.SystemEnvironment
@@ -9,11 +9,13 @@ import app.notekea.editor.data.FfmpegInstaller
 import app.notekea.editor.data.FfmpegTool
 import app.notekea.editor.data.FfmpegVideoCompressor
 import app.notekea.editor.data.FileKitAttachmentPicker
+import app.notekea.editor.data.JvmLocalTimeFormatter
 import app.notekea.editor.data.KtorYouTubeDetails
 import app.notekea.editor.data.OkioNoteTimesReader
 import app.notekea.editor.data.WaylandClipboardReader
 import app.notekea.editor.domain.AttachmentPicker
 import app.notekea.editor.domain.ClipboardReader
+import app.notekea.editor.domain.LocalTimeFormatter
 import app.notekea.editor.domain.NoteTimesReader
 import app.notekea.editor.domain.VideoCompressor
 import app.notekea.editor.domain.YouTubeDetails
@@ -38,6 +40,7 @@ private const val COMPRESSING_FOLDER = "compressing"
  */
 val jvmEditorModule = module {
     single<AttachmentPicker> { FileKitAttachmentPicker() }
+    single<LocalTimeFormatter> { JvmLocalTimeFormatter() }
 
     single<VideoCompressor> {
         val appData = get<PlatformConventions>().appDataDirectory

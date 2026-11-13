@@ -12,7 +12,6 @@ import app.notekea.core.notes.data.OkioNoteContentStore
 import app.notekea.core.notes.data.OkioNoteFileOperations
 import app.notekea.core.notes.data.OkioNoteScanner
 import app.notekea.core.notes.data.ProcessFileOpener
-import app.notekea.core.notes.data.runCommand
 import app.notekea.core.notes.domain.AttachmentStore
 import app.notekea.core.notes.domain.FileOpener
 import app.notekea.core.notes.domain.NoteContentStore
@@ -21,6 +20,7 @@ import app.notekea.core.notes.domain.NoteScanner
 import app.notekea.core.notes.domain.VaultSettingsReader
 import app.notekea.core.notes.domain.VaultSettingsWriter
 import app.notekea.core.notes.domain.VectorIndex
+import app.notekea.core.platform.data.runCommand
 import app.notekea.core.platform.domain.PlatformConventions
 import okio.FileSystem
 import org.koin.dsl.module

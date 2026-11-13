@@ -1,7 +1,6 @@
 package app.notekea.editor.domain
 
 import app.notekea.core.domain.FakeClock
-import app.notekea.core.domain.FakeLocalTimeFormatter
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.FakeAttachmentStore
 import app.notekea.core.notes.domain.FakeNoteFileOperations

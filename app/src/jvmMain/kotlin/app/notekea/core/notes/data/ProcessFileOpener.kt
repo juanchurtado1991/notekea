@@ -5,6 +5,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.FileOpener
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.platform.data.runCommand
 import app.notekea.core.platform.domain.OperatingSystem
 import kotlinx.coroutines.withContext
 import kotlin.io.path.Path

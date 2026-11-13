@@ -1,4 +1,4 @@
-package app.notekea.core.domain
+package app.notekea.search.domain
 
 /**
  * The first [n] elements as `sortedWith(comparator).take(n)` gives them, equal elements in their order here included,

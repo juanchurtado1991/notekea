@@ -1,8 +1,8 @@
 package app.notekea.editor.data
 
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.data.readCommand
 import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.platform.data.readCommand
 import app.notekea.editor.domain.ClipboardReader
 import app.notekea.editor.domain.FakeClipboardReader
 import java.awt.image.BufferedImage

@@ -1,5 +1,6 @@
 package app.notekea.core.notes.data
 
+import app.notekea.core.platform.data.runCommand
 import app.notekea.core.platform.domain.OperatingSystem
 import java.awt.Desktop
 import java.io.File

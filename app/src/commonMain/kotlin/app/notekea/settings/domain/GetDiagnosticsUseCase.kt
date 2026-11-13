@@ -1,7 +1,8 @@
-package app.notekea.core.logging.domain
+package app.notekea.settings.domain
 
 import app.notekea.core.domain.StringPatterns.NEW_LINE
 import app.notekea.core.domain.StringPatterns.SPACE
+import app.notekea.core.logging.domain.LogStore
 import app.notekea.core.platform.domain.SystemEnvironment
 
 /**

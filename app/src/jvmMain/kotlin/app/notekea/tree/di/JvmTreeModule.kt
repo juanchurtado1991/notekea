@@ -1,7 +1,7 @@
 package app.notekea.tree.di
 
 import app.notekea.core.notes.data.JvmSystemTrash
-import app.notekea.core.notes.data.runCommand
+import app.notekea.core.platform.data.runCommand
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.tree.data.DirectoryWatcherFileWatcher
 import app.notekea.tree.data.OkioNoteMetadataReader
