@@ -47,7 +47,7 @@ internal class EditorFiles(
     private var attachmentsJob: Job? = null
     private var compression: Job? = null
 
-    fun onIntent(intent: EditorIntent) {
+    fun onIntent(intent: EditorIntent.Attachment) {
         when (intent) {
             EditorIntent.OnPaste -> paste()
             is EditorIntent.OnFilesDrop -> drop(paths = intent.paths)
@@ -57,7 +57,6 @@ internal class EditorFiles(
             EditorIntent.OnActionErrorDismiss -> host.reduce { it.copy(actionError = null) }
             EditorIntent.OnVideoCompressionCancel -> compression?.cancel()
             EditorIntent.OnCompressErrorDismiss -> host.reduce { it.copy(compressError = null) }
-            else -> Unit
         }
     }
 

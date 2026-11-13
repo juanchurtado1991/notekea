@@ -99,7 +99,7 @@ class OutlineScreenTest {
         }
 
         assertEquals(
-            expected = listOf(
+            expected = listOf<EditorIntent>(
                 EditorIntent.OnHeadingClick(index = 2),
                 EditorIntent.OnFocusRequest()
             ),

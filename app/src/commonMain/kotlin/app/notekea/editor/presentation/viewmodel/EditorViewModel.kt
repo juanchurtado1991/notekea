@@ -113,6 +113,26 @@ class EditorViewModel(
 
     override fun handleIntent(intent: EditorIntent) {
         when (intent) {
+            is EditorIntent.Edit -> onEditIntent(intent = intent)
+
+            is EditorIntent.Find -> onFindIntent(intent = intent)
+
+            is EditorIntent.Note -> onNoteIntent(intent = intent)
+
+            is EditorIntent.Navigation -> onNavigationIntent(intent = intent)
+
+            is EditorIntent.Attachment -> files.onIntent(intent = intent)
+
+            is PropertyIntent -> properties.onIntent(intent = intent)
+
+            // The side panel's own host acts on these, beside the editor.
+            is EditorIntent.SidePanel -> Unit
+        }
+    }
+
+    /** The intents that edit the note's text. */
+    private fun onEditIntent(intent: EditorIntent.Edit) {
+        when (intent) {
             is EditorIntent.OnTaskToggle -> textEdits.toggleTask(stateIndex = intent.stateIndex)
 
             EditorIntent.OnTaskToggleShortcut -> textEdits.toggleTaskAtCursor()
@@ -137,9 +157,12 @@ class EditorViewModel(
             is EditorIntent.OnTemplateInsert -> saving.runSave {
                 templates.insert(template = intent.template)
             }
+        }
+    }
 
-            is PropertyIntent -> properties.onIntent(intent = intent)
-
+    /** Find in the note. */
+    private fun onFindIntent(intent: EditorIntent.Find) {
+        when (intent) {
             EditorIntent.OnFindClose -> find.close()
 
             EditorIntent.OnFindNext -> find.moveToMatch(step = 1)
@@ -154,13 +177,11 @@ class EditorViewModel(
             EditorIntent.OnFindPrevious -> find.moveToMatch(step = -1)
 
             is EditorIntent.OnFindQueryChange -> find.search(query = intent.query)
-
-            else -> onNoteIntent(intent = intent)
         }
     }
 
     /** The intents about the note itself: opening, saving, its file, its title, links and focus. */
-    private fun onNoteIntent(intent: EditorIntent) {
+    private fun onNoteIntent(intent: EditorIntent.Note) {
         when (intent) {
             is EditorIntent.OnOpen -> saving.runSave { open(path = intent.path) }
 
@@ -202,13 +223,11 @@ class EditorViewModel(
             EditorIntent.OnTitleErrorDismiss -> reduce { it.copy(titleError = null) }
 
             EditorIntent.OnSourceModeToggle -> reduce { it.copy(isSourceMode = !it.isSourceMode) }
-
-            else -> onNavigationIntent(intent = intent)
         }
     }
 
     /** The intents that lead elsewhere: links, tags, the star, the folder, headings, days, focus, and files. */
-    private fun onNavigationIntent(intent: EditorIntent) {
+    private fun onNavigationIntent(intent: EditorIntent.Navigation) {
         when (intent) {
             is EditorIntent.OnLinkClick -> openLink(
                 link = intent.link,
@@ -235,8 +254,6 @@ class EditorViewModel(
             )
 
             is EditorIntent.OnDayStep -> emit(effect = EditorEffect.DayStep(step = intent.step))
-
-            else -> files.onIntent(intent = intent)
         }
     }
 

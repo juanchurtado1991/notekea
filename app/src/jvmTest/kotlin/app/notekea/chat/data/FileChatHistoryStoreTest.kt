@@ -94,12 +94,6 @@ class FileChatHistoryStoreTest {
         )
     }
 
-    private companion object {
-        const val VAULT = "/home/someone/Notes"
-        const val OTHER = "/home/someone/Work"
-        const val SAVES = 40
-    }
-
     // The macOS smoke of 2026-11-12: two saves at once shared the partial file, and the second found it moved away.
     @Test
     fun `saves at the same time each land, and none fails on the other's partial file`() =
@@ -139,4 +133,10 @@ class FileChatHistoryStoreTest {
                 actual = failures
             )
         }
+
+    private companion object {
+        const val VAULT = "/home/someone/Notes"
+        const val OTHER = "/home/someone/Work"
+        const val SAVES = 40
+    }
 }
