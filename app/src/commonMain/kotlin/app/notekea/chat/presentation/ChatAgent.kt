@@ -17,7 +17,7 @@ internal class ChatAgent(
     private val vaultPath: String,
     private val agentTask: AgentTaskUseCase,
     private val actions: ChatActions,
-    private val update: (id: Long, change: (ChatEntry) -> ChatEntry) -> Unit
+    private val host: ChatHost
 ) {
     /** The entry handed to the agent, its end to come: asked of agent mode, or a question Auto could not answer. */
     suspend fun takeOver(
@@ -27,12 +27,13 @@ internal class ChatAgent(
         history: List<ChatExchange>,
         openNote: RelativePath?
     ) {
-        update(id) {
-            it.copy(
-                answeredWith = ChatMode.AGENT,
-                outcome = null
-            )
-        }
+        host
+            .update(id) {
+                it.copy(
+                    answeredWith = ChatMode.AGENT,
+                    outcome = null
+                )
+            }
 
         work(id, task, notes, history, openNote)
     }
@@ -44,7 +45,7 @@ internal class ChatAgent(
         history: List<ChatExchange>,
         openNote: RelativePath?
     ) {
-        update(id) { it.copy(step = ChatStep.WORKING) }
+        host.update(id) { it.copy(step = ChatStep.WORKING) }
 
         val context = actions.contextOf(
             request = task,
@@ -66,7 +67,7 @@ internal class ChatAgent(
             openNote = openNote
         )
             .collect { step ->
-                update(id) { entry -> entry.after(step = step) }
+                host.update(id) { entry -> entry.after(step = step) }
             }
     }
 

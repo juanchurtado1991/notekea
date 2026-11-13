@@ -17,11 +17,7 @@ internal class ChatAnswering(
     private val actions: ChatActions,
     private val agent: ChatAgent,
     private val replies: ChatReplies,
-    private val state: () -> ChatState,
-    private val notes: () -> Collection<NoteEntry>,
-    private val activeNote: () -> RelativePath?,
-    private val update: (id: Long, change: (ChatEntry) -> ChatEntry) -> Unit,
-    private val follow: (id: Long, step: AnswerStep) -> Unit
+    private val host: ChatHost
 ) {
     suspend fun answer(
         id: Long,
@@ -29,20 +25,20 @@ internal class ChatAnswering(
         scope: ChatScope
     ) {
         val history = memory.historyBefore(
-            entries = state().entries,
+            entries = host.state.value.entries,
             id = id
         )
 
-        val current = state()
+        val current = host.state.value
 
         // A request in the whole vault may be an action or talk; one asked of a note or a folder is answered.
         val reply = if (scope == ChatScope.VAULT) {
             actions.act(
                 id = id,
                 request = question,
-                notes = notes(),
+                notes = host.notes,
                 history = history,
-                openNote = activeNote(),
+                openNote = host.activeNote,
                 agentUse = current.mode.agentUse(isAgentOffered = current.isAgentOffered)
             )
         } else {
@@ -51,7 +47,7 @@ internal class ChatAnswering(
 
         // The agent ends on a card or with what it found, never in an answer of 3.2.
         if (reply == ChatReply.Agent) {
-            return agent.takeOver(id, question, notes(), history, activeNote())
+            return agent.takeOver(id, question, host.notes, history, host.activeNote)
         }
 
         if (reply == ChatReply.Acted) return
@@ -66,11 +62,11 @@ internal class ChatAnswering(
 
         // Auto does what it can: a question the notes' passages did not answer is worked on by the agent.
         val isAgentNext =
-            state().entries.lastOrNull { it.id == id }?.outcome == TurnOutcome.NOT_FOUND &&
+            host.state.value.entries.lastOrNull { it.id == id }?.outcome == TurnOutcome.NOT_FOUND &&
                 scope == ChatScope.VAULT &&
                 current.mode.agentUse(current.isAgentOffered) == AgentUse.WHEN_STUCK
 
-        if (isAgentNext) agent.takeOver(id, question, notes(), history, activeNote())
+        if (isAgentNext) agent.takeOver(id, question, host.notes, history, host.activeNote)
     }
 
     private suspend fun written(
@@ -80,29 +76,33 @@ internal class ChatAnswering(
         reply: ChatReply,
         history: List<ChatExchange>
     ) {
-        val isDeep = state().isDeepFor(reply = reply)
+        val isDeep = host
+            .state
+            .value
+            .isDeepFor(reply = reply)
 
         // Tables found are answered in words while the turn is still answering: its end was the action's
         // (the chat probe, 2026-11-11: the reply was cut at its first words).
-        update(id) {
-            it.copy(
-                answeredWith = if (isDeep) ChatMode.DEEP else ChatMode.FAST,
-                outcome = if (reply is ChatReply.FromFound) null else it.outcome
-            )
-        }
+        host
+            .update(id) {
+                it.copy(
+                    answeredWith = if (isDeep) ChatMode.DEEP else ChatMode.FAST,
+                    outcome = if (reply is ChatReply.FromFound) null else it.outcome
+                )
+            }
 
         replies
             .stepsFor(
                 reply = reply,
                 message = question,
                 history = history,
-                notes = notes(),
-                only = notesOf(scope, notes(), activeNote()),
+                notes = host.notes,
+                only = notesOf(scope, host.notes, host.activeNote),
                 isDeep = isDeep,
                 onStep = { step ->
-                    update(id) { it.copy(step = step) }
+                    host.update(id) { it.copy(step = step) }
                 }
             )
-            .collect { step -> follow(id, step) }
+            .collect { step -> host.follow(id, step) }
     }
 }

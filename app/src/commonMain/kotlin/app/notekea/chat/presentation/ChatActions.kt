@@ -31,8 +31,7 @@ internal class ChatActions(
     private val actionRunner: ActionRunner,
     private val localCalendar: LocalCalendar,
     private val clock: Clock,
-    private val update: (id: Long, change: (ChatEntry) -> ChatEntry) -> Unit,
-    private val emit: (ChatEffect) -> Unit
+    private val host: ChatHost
 ) {
     /** Acts on [request] for the entry [id]; returns what is left to do: answer it, talk, or nothing. */
     suspend fun act(
@@ -107,57 +106,64 @@ internal class ChatActions(
         step: ActionTurnStep
     ) {
         // The window acts outside the state's update, which may run more than once.
-        if (step is ActionTurnStep.Shown) step.steps.forEach { emit(ChatEffect.Show(step = it)) }
-
-        update(id) { entry ->
-            val action = entry.action ?: ChatAction(status = ActionStatus.FINISHED)
-
-            when (step) {
-                ActionTurnStep.Planning,
-                is ActionTurnStep.Answer,
-                is ActionTurnStep.Chat,
-                is ActionTurnStep.Help,
-                ActionTurnStep.ToAgent,
-                ActionTurnStep.Overview -> entry.copy(step = ChatStep.PLANNING)
-
-                ActionTurnStep.Writing -> entry.copy(
-                    step = ChatStep.COMPOSING,
-                    action = action
-                )
-
-                is ActionTurnStep.Found ->
-                    entry.copy(action = action.copy(found = action.found + step.found))
-
-                is ActionTurnStep.Shown ->
-                    entry.copy(action = action.copy(shown = action.shown + step.steps))
-
-                is ActionTurnStep.Proposed -> acted(
-                    entry,
-                    action.copy(
-                        status = ActionStatus.PROPOSED,
-                        steps = step.steps
-                    )
-                )
-
-                is ActionTurnStep.Problem -> (step.problem as? ActionProblem.SectionAsked)?.let {
-                    // The question takes the turn's place: an action card left there would be drawn instead of it.
-                    entry.copy(
-                        step = ChatStep.DONE,
-                        outcome = TurnOutcome.ANSWERED,
-                        action = null,
-                        sectionAsked = it.section
-                    )
-                } ?: acted(
-                    entry,
-                    action.copy(
-                        status = ActionStatus.FAILED,
-                        problem = step.problem
-                    )
-                )
-
-                ActionTurnStep.Finished -> acted(entry, action.copy(status = ActionStatus.FINISHED))
-            }
+        if (step is ActionTurnStep.Shown) {
+            step.steps.forEach { host.emit(ChatEffect.Show(step = it)) }
         }
+
+        host
+            .update(id) { entry ->
+                val action = entry.action ?: ChatAction(status = ActionStatus.FINISHED)
+
+                when (step) {
+                    ActionTurnStep.Planning,
+                    is ActionTurnStep.Answer,
+                    is ActionTurnStep.Chat,
+                    is ActionTurnStep.Help,
+                    ActionTurnStep.ToAgent,
+                    ActionTurnStep.Overview -> entry.copy(step = ChatStep.PLANNING)
+
+                    ActionTurnStep.Writing -> entry.copy(
+                        step = ChatStep.COMPOSING,
+                        action = action
+                    )
+
+                    is ActionTurnStep.Found ->
+                        entry.copy(action = action.copy(found = action.found + step.found))
+
+                    is ActionTurnStep.Shown ->
+                        entry.copy(action = action.copy(shown = action.shown + step.steps))
+
+                    is ActionTurnStep.Proposed -> acted(
+                        entry,
+                        action.copy(
+                            status = ActionStatus.PROPOSED,
+                            steps = step.steps
+                        )
+                    )
+
+                    // The question takes the turn's place: an action card there was drawn instead.
+                    is ActionTurnStep.Problem ->
+                        (step.problem as? ActionProblem.SectionAsked)?.let {
+                            entry.copy(
+                                step = ChatStep.DONE,
+                                outcome = TurnOutcome.ANSWERED,
+                                action = null,
+                                sectionAsked = it.section
+                            )
+                        } ?: acted(
+                            entry,
+                            action.copy(
+                                status = ActionStatus.FAILED,
+                                problem = step.problem
+                            )
+                        )
+
+                    ActionTurnStep.Finished -> acted(
+                        entry,
+                        action.copy(status = ActionStatus.FINISHED)
+                    )
+                }
+            }
     }
 
     private fun acted(
@@ -178,42 +184,45 @@ internal class ChatActions(
             it.status == ActionStatus.PROPOSED
         } ?: return
 
-        update(entry.id) { it.copy(action = action.copy(status = ActionStatus.RUNNING)) }
+        host.update(entry.id) { it.copy(action = action.copy(status = ActionStatus.RUNNING)) }
 
         when (
             val done = actionRunner.run(vaultPath = vaultPath, steps = action.steps, notes = notes)
         ) {
             is Outcome.Success -> {
-                update(entry.id) {
-                    it.copy(
-                        action = action.copy(
-                            status = ActionStatus.DONE,
-                            done = done.value
+                host
+                    .update(entry.id) {
+                        it.copy(
+                            action = action.copy(
+                                status = ActionStatus.DONE,
+                                done = done.value
+                            )
                         )
-                    )
-                }
+                    }
 
                 done
                     .value
                     .opened
-                    ?.let { emit(ChatEffect.Open(note = it)) }
+                    ?.let { host.emit(ChatEffect.Open(note = it)) }
 
                 action
                     .steps
                     .filter {
                         !it.kind.isConfirmed && it.kind != ActionKind.SET_THEME
                     }
-                    .forEach { emit(ChatEffect.Show(step = it)) }
+                    .forEach { host.emit(ChatEffect.Show(step = it)) }
             }
 
-            is Outcome.Failure -> update(entry.id) {
-                it.copy(
-                    action = action.copy(
-                        status = ActionStatus.FAILED,
-                        problem = done.error
-                    )
-                )
-            }
+            is Outcome.Failure ->
+                host
+                    .update(entry.id) {
+                        it.copy(
+                            action = action.copy(
+                                status = ActionStatus.FAILED,
+                                problem = done.error
+                            )
+                        )
+                    }
         }
     }
 
@@ -222,7 +231,7 @@ internal class ChatActions(
             it.status == ActionStatus.PROPOSED
         } ?: return
 
-        update(entry.id) { it.copy(action = action.copy(status = ActionStatus.CANCELLED)) }
+        host.update(entry.id) { it.copy(action = action.copy(status = ActionStatus.CANCELLED)) }
     }
 
     suspend fun undo(entry: ChatEntry) {
@@ -237,7 +246,7 @@ internal class ChatActions(
             done = done
         )
 
-        update(entry.id) { it.copy(action = action.copy(status = ActionStatus.UNDONE)) }
+        host.update(entry.id) { it.copy(action = action.copy(status = ActionStatus.UNDONE)) }
     }
 
     /** Today's date as the model reads it, YYYY-MM-DD. */

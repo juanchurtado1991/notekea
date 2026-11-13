@@ -30,6 +30,7 @@ import app.notekea.core.presentation.BaseViewModel
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlin.time.Clock
@@ -60,6 +61,38 @@ class ChatViewModel(
 ) : BaseViewModel<ChatState, ChatIntent, ChatEffect>(initialState = ChatState()) {
     private val logger = Logger.withTag(tag = LOG_TAG)
 
+    private val host = object : ChatHost {
+        override val state: StateFlow<ChatState> get() = this@ChatViewModel.state
+        override val notes: Collection<NoteEntry> get() = this@ChatViewModel.notes
+        override val activeNote: RelativePath? get() = this@ChatViewModel.activeNote
+
+        override fun reduce(transform: (ChatState) -> ChatState) =
+            this@ChatViewModel.reduce(transform = transform)
+
+        override fun emit(effect: ChatEffect) = this@ChatViewModel.emit(effect = effect)
+
+        override fun launch(block: suspend () -> Unit): Job = launchGuarded(
+            onError = ::logError,
+            block = block
+        )
+
+        override fun update(
+            id: Long,
+            change: (ChatEntry) -> ChatEntry
+        ) = this@ChatViewModel.update(
+            id = id,
+            change = change
+        )
+
+        override fun follow(
+            id: Long,
+            step: AnswerStep
+        ) = this@ChatViewModel.follow(
+            id = id,
+            step = step
+        )
+    }
+
     private val replies = ChatReplies(
         vaultPath = vaultPath,
         answerFromNotes = answerFromNotes,
@@ -79,27 +112,24 @@ class ChatViewModel(
         actionRunner = actionRunner,
         localCalendar = localCalendar,
         clock = clock,
-        update = { id, change ->
-            update(
-                id = id,
-                change = change
-            )
-        },
-        emit = { emit(effect = it) }
+        host = host
     )
 
     private val memory = ChatMemory(compactChat = compactChat)
+
+    private val keeping = ChatKeeping(
+        vaultPath = vaultPath,
+        historyStore = historyStore,
+        memory = memory,
+        clock = clock,
+        host = host
+    )
 
     private val agent = ChatAgent(
         vaultPath = vaultPath,
         agentTask = agentTask,
         actions = actions,
-        update = { id, change ->
-            update(
-                id = id,
-                change = change
-            )
-        }
+        host = host
     )
 
     private val answering = ChatAnswering(
@@ -107,28 +137,13 @@ class ChatViewModel(
         actions = actions,
         agent = agent,
         replies = replies,
-        state = { state.value },
-        notes = { notes },
-        activeNote = { activeNote },
-        update = { id, change ->
-            update(
-                id = id,
-                change = change
-            )
-        },
-        follow = { id, step ->
-            follow(
-                id = id,
-                step = step
-            )
-        }
+        host = host
     )
 
     private var notes: Collection<NoteEntry> = emptyList()
     private var activeNote: RelativePath? = null
     private var answer: Job? = null
     private var nextId = 0L
-    private var compaction: Job? = null
 
     init {
         launchGuarded(onError = ::logError) {
@@ -171,7 +186,7 @@ class ChatViewModel(
 
             ChatIntent.OnCopyChat -> clipboard.copy(text = ChatTranscript.of(state = state.value))
 
-            ChatIntent.OnCompact -> remember(isAsked = true)
+            ChatIntent.OnCompact -> keeping.remember(isAsked = true)
 
             is ChatIntent.OnModeChoose -> reduce { it.copy(mode = intent.mode) }
 
@@ -192,7 +207,7 @@ class ChatViewModel(
                         notes = notes
                     )
 
-                    save()
+                    keeping.save()
                 }
             }
 
@@ -203,7 +218,7 @@ class ChatViewModel(
             is ChatIntent.OnActionUndo -> entryOf(id = intent.id)?.let {
                 launchGuarded(onError = ::logError) {
                     actions.undo(entry = it)
-                    save()
+                    keeping.save()
                 }
             }
 
@@ -316,7 +331,7 @@ class ChatViewModel(
                 throwable = it
             )
         }) {
-            compactIfIdle()
+            keeping.compactIfIdle()
 
             answering.answer(
                 id = id,
@@ -324,7 +339,7 @@ class ChatViewModel(
                 scope = scope
             )
 
-            save()
+            keeping.save()
         }
     }
 
@@ -341,7 +356,7 @@ class ChatViewModel(
                 step == AnswerStep.NotFound ||
                 step is AnswerStep.Failed
 
-        if (isEnd) save()
+        if (isEnd) keeping.save()
     }
 
     /** Stops the answer being written; its text so far stays, with the citations it already holds. */
@@ -368,12 +383,12 @@ class ChatViewModel(
             )
         }
 
-        save()
+        keeping.save()
     }
 
     private fun clear() {
         if (state.value.isAnswering) answer?.cancel()
-        memory.clear()
+        keeping.clear()
 
         reduce {
             it.copy(
@@ -381,8 +396,6 @@ class ChatViewModel(
                 contextUsage = 0f
             )
         }
-
-        launchGuarded(onError = ::logError) { historyStore.clear(vaultPath = vaultPath) }
     }
 
     private fun checkModel() {
@@ -440,61 +453,6 @@ class ChatViewModel(
         )
     }
 
-    // The chat's memory filled by the last answer, compacted by itself once full or when asked to.
-    private fun remember(isAsked: Boolean = false) {
-        val entries = state.value.entries
-        val usage = memory.usageOf(entries = entries)
-        reduce { it.copy(contextUsage = usage) }
-
-        val isDue = (isAsked || usage >= 1f) && compaction?.isActive != true
-        if (!isDue) return
-
-        compaction = launchGuarded(onError = ::logError) { compacted() }
-    }
-
-    /** The chat so far written into its summary before a question asked after a while, as a new session starts. */
-    private suspend fun compactIfIdle() {
-        val isIdle = memory.isIdleAt(now = clock.now())
-        if (isIdle && compaction?.isActive != true) compacted()
-    }
-
-    // The ring says Compacting only while this runs: ended, failed or cancelled, it says the memory again (the
-    // Auto-Test on the real app, 2026-11-11, found it stuck on Compacting).
-    private suspend fun compacted() {
-        reduce { it.copy(isCompacting = true) }
-
-        try {
-            memory.compact(entries = state.value.entries)
-        } finally {
-            reduce {
-                it.copy(
-                    isCompacting = false,
-                    contextUsage = memory.usageOf(entries = it.entries)
-                )
-            }
-        }
-    }
-
-    private fun save() {
-        remember()
-
-        val turns = state
-            .value
-            .entries
-            .filterNot {
-                !it.isKept
-            }
-            .takeLast(n = MAX_TURNS)
-            .map { it.toTurn() }
-
-        launchGuarded(onError = ::logError) {
-            historyStore.save(
-                vaultPath = vaultPath,
-                turns = turns
-            )
-        }
-    }
-
     private fun failed(
         id: Long,
         throwable: Throwable
@@ -513,7 +471,6 @@ class ChatViewModel(
 
     private companion object {
         const val LOG_TAG = "ChatViewModel"
-        const val MAX_TURNS = 100
         const val UNFINISHED = "…"
 
         const val UNEXPECTED_ERROR_MESSAGE = "The chat failed unexpectedly"
