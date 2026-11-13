@@ -10,7 +10,7 @@ import org.jetbrains.compose.desktop.application.tasks.AbstractSuggestModulesTas
 
 /**
  * What Notekea and Notekea QA share as desktop apps: the toolchain's JDK in the installers, the same runtime, the same
- * versions, the embedding model bundled in and the check that the runtime holds what the app needs.
+ * versions, the embedding model and the video player's library bundled in, and the check of the runtime's modules.
  */
 fun JvmApplication.notekeaDesktopApp(project: Project) {
     // Package the toolchain's JDK, not the one that runs Gradle, so the installers ship the JDK the app is built and
@@ -24,6 +24,7 @@ fun JvmApplication.notekeaDesktopApp(project: Project) {
     jvmArgs += "--enable-native-access=ALL-UNNAMED"
     jvmArgs += memoryJvmArgs()
     jvmArgs += "-Dnotekea.version=${NotekeaVersions.displayVersion(project = project)}"
+    jvmArgs += VideoPlayerNatives.LIBRARY_PATH
     nativeDistributions {
         // The embedding model goes with the app, read from compose.application.resources.dir.
         appResourcesRootDir.set(project.layout.buildDirectory.dir("app-resources"))
@@ -37,9 +38,13 @@ fun JvmApplication.notekeaDesktopApp(project: Project) {
         )
     }
     val modelResources = EmbeddingModel.appResources(project)
+    val videoNatives = VideoPlayerNatives.appResources(
+        project = project,
+        classpath = if (project.name == "app") "jvmRuntimeClasspath" else "runtimeClasspath"
+    )
     project.tasks.matching {
         it.name == "prepareAppResources"
-    }.configureEach { dependsOn(modelResources) }
+    }.configureEach { dependsOn(modelResources, videoNatives) }
     registerRuntimeCheck(project = project)
 }
 
