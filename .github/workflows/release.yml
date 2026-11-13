@@ -34,14 +34,15 @@ jobs:
       - name: Set up JDK, the embedding model and Gradle
         uses: ./.github/actions/setup
 
-      # v1.2.3 → package version 1.2.3, which the installers need as plain numbers. A pull request builds as v0.0.1.
+      # v1.2.3 → package version 1.2.3, which the installers need as plain numbers. A pull request builds as v1.0.0:
+      # macOS's jpackage refuses a version whose first number is 0 ("cannot be zero or negative").
       - name: Version
         id: version
         shell: bash
         run: |
           name="${GITHUB_REF_NAME}"
-          if [ "$GITHUB_EVENT_NAME" != "push" ]; then name="v0.0.1"; fi
-          if [[ ! "$name" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then echo "Not a release tag: $name"; exit 1; fi
+          if [ "$GITHUB_EVENT_NAME" != "push" ]; then name="v1.0.0"; fi
+          if [[ ! "$name" =~ ^v([1-9][0-9]*\.[0-9]+\.[0-9]+)$ ]]; then echo "Not a release tag (v1.0.0 or later): $name"; exit 1; fi
           echo "name=$name" >> "$GITHUB_OUTPUT"
           echo "package=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
 
