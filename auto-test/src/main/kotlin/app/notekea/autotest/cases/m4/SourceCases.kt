@@ -30,6 +30,8 @@ fun SuiteBuilder.sourceCases() {
     review()
     madeCards()
     studyChoiceCases()
+    webUpdateCases()
+    clipDepthCases()
 }
 
 private fun SuiteBuilder.document() {
