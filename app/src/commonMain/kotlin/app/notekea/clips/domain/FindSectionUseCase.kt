@@ -1,6 +1,9 @@
 package app.notekea.clips.domain
 
 import app.notekea.core.domain.Outcome
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 /**
  * The pages a page has under its own path, before clipping (the developer's choice of 2026-11-11): from the site's
@@ -10,7 +13,15 @@ class FindSectionUseCase(
     private val fetcher: PageFetcher,
     private val ranker: SectionRanker? = null
 ) {
-    suspend operator fun invoke(url: String): Outcome<SectionLinks, ClipError> {
+    /**
+     * The pages under the page at [url]. With a [depth] over 1 and no index of the site to list them, the pages
+     * those link are followed too, [depth] levels in all, [onFound] told how many there are so far.
+     */
+    suspend operator fun invoke(
+        url: String,
+        depth: Int = 1,
+        onFound: suspend (pages: Int) -> Unit = {}
+    ): Outcome<SectionLinks, ClipError> {
         val page = when (val fetched = fetcher.fetch(url = url.trim())) {
             is Outcome.Success -> fetched.value
             is Outcome.Failure -> return fetched
@@ -34,7 +45,25 @@ class FindSectionUseCase(
         val found = listed ?: SectionLinks.within(
             url = page.url,
             candidates = linked
-        )
+        ).copy(canGoDeeper = true)
+
+        val levels = depth.coerceIn(1, SectionLinks.MAX_DEPTH)
+
+        val isDeepened =
+            found.canGoDeeper &&
+                levels > 1 &&
+                found.urls.isNotEmpty()
+
+        if (isDeepened) {
+            return Outcome.Success(
+                value = deepened(
+                    start = page.url,
+                    found = found,
+                    levels = levels,
+                    onFound = onFound
+                )
+            )
+        }
 
         if (found.urls.size <= SectionLinks.MAX_PAGES) return Outcome.Success(value = found)
 
@@ -45,6 +74,55 @@ class FindSectionUseCase(
         ) ?: found.urls
 
         return Outcome.Success(value = found.capped(chosen = ranked))
+    }
+
+    // The section one level at a time: each page of a level read for the pages it links under the section, a few at
+    // once, until [levels] are done or there are more than a deep clip takes.
+    private suspend fun deepened(
+        start: String,
+        found: SectionLinks,
+        levels: Int,
+        onFound: suspend (Int) -> Unit
+    ): SectionLinks {
+        val all = found.urls.toMutableList()
+        var level = found.urls
+
+        repeat(times = levels - 1) {
+            val next = mutableListOf<String>()
+
+            for (batch in level.chunked(size = AT_ONCE)) {
+                if (all.size >= SectionLinks.MAX_DEEP_PAGES) break
+
+                val pages = coroutineScope {
+                    batch
+                        .map {
+                            async { (fetcher.fetch(url = it) as? Outcome.Success)?.value }
+                        }
+                        .awaitAll()
+                }
+
+                pages.filterNotNull().forEach { read ->
+                    val added = SectionLinks.newUnder(
+                        prefix = found.prefix,
+                        page = read,
+                        known = all + start
+                    )
+
+                    all += added
+                    next += added
+                }
+
+                onFound(all.size)
+            }
+
+            level = next
+        }
+
+        return found.copy(
+            urls = all.take(n = SectionLinks.MAX_DEEP_PAGES),
+            more = (all.size - SectionLinks.MAX_DEEP_PAGES).coerceAtLeast(minimumValue = 0),
+            rest = all.drop(n = SectionLinks.MAX_DEEP_PAGES)
+        )
     }
 
     // The first index file [name] above the page that lists pages under its path; null when none does.
@@ -100,6 +178,8 @@ class FindSectionUseCase(
         }
 
     private companion object {
+        // The pages read at once for their links: a site answers a few at a time without slowing.
+        const val AT_ONCE = 4
         val ENTRY =
             Regex(pattern = "\\[([^\\]]+)\\]\\((https?://[^)\\s]+)\\)(?::[ \\t]*([^\\n]*))?")
         const val LLMS = "llms.txt"

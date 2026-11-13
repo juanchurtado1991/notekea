@@ -6,6 +6,7 @@ import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.chat.domain.answer.AnswerSource
 import app.notekea.chat.domain.language.ReplyLanguage
+import app.notekea.chat.domain.plan.PageProgress
 import app.notekea.chat.domain.plan.SectionAsked
 
 /**
@@ -28,6 +29,8 @@ data class ChatEntry(
     val offered: String? = null,
     // A pasted page that links pages under its path: the chat asks whether to clip only it or them too.
     val sectionAsked: SectionAsked? = null,
+    // A clip of many pages under way: how far it is, shown under the step's line.
+    val progress: PageProgress? = null,
     val moves: List<AgentMoveLine> = emptyList(),
     val answeredWith: ChatMode? = null
 ) {

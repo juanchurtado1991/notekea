@@ -14,16 +14,20 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
 import app.notekea.resources.chat_section_all
+import app.notekea.resources.chat_section_deeper
 import app.notekea.resources.chat_section_every
+import app.notekea.resources.chat_section_levels
 import app.notekea.resources.chat_section_more
 import app.notekea.resources.chat_section_only
 import app.notekea.resources.chat_section_question
+
+private val DEEPER = listOf(2, 3)
 
 /** "This page links 30 more pages under …": clip only it, or them too; [onChoose] says whether the whole section. */
 @Composable
 internal fun ChatSectionQuestion(
     section: SectionAsked,
-    onChoose: (isWhole: Boolean, isEvery: Boolean) -> Unit
+    onChoose: (isWhole: Boolean, isEvery: Boolean, depth: Int) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
         section.summary?.let {
@@ -46,22 +50,41 @@ internal fun ChatSectionQuestion(
             )
         }
 
+        if (section.canGoDeeper) {
+            Text(
+                text = replyString(resource = Res.string.chat_section_deeper),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
         FlowRow(horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
             NotekeaButton(
                 text = replyString(resource = Res.string.chat_section_only),
-                onClick = { onChoose(false, false) },
+                onClick = { onChoose(false, false, 1) },
                 style = NotekeaButtonStyle.TEXT
             )
 
             NotekeaButton(
                 text = replyString(Res.string.chat_section_all, section.count),
-                onClick = { onChoose(true, false) }
+                onClick = { onChoose(true, false, 1) }
             )
+
+            // The pages those pages link, and the ones they link: how deep is the person's to say.
+            if (section.canGoDeeper) {
+                DEEPER.forEach { depth ->
+                    NotekeaButton(
+                        text = replyString(Res.string.chat_section_levels, depth),
+                        onClick = { onChoose(true, false, depth) },
+                        style = NotekeaButtonStyle.SECONDARY
+                    )
+                }
+            }
 
             if (section.more > 0) {
                 NotekeaButton(
                     text = replyString(Res.string.chat_section_every, section.count + section.more),
-                    onClick = { onChoose(true, true) },
+                    onClick = { onChoose(true, true, 1) },
                     style = NotekeaButtonStyle.TEXT
                 )
             }
@@ -78,9 +101,10 @@ private fun ChatSectionQuestionPreview() {
                 url = "https://example.com/docs/integrations/introduction",
                 prefix = "https://example.com/docs/integrations/",
                 count = 30,
-                more = 4
+                more = 4,
+                canGoDeeper = true
             ),
-            onChoose = { _, _ -> }
+            onChoose = { _, _, _ -> }
         )
     }
 }

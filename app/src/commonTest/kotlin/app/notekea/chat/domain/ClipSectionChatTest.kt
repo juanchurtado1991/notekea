@@ -7,6 +7,8 @@ import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.chat.domain.plan.ClipWords
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.NoteDraft
+import app.notekea.chat.domain.plan.PageProblem
+import app.notekea.chat.domain.plan.PageProgress
 import app.notekea.chat.domain.plan.SectionAsked
 import app.notekea.chat.domain.plan.WebPageClipper
 import app.notekea.core.domain.Outcome
@@ -24,6 +26,9 @@ import kotlin.test.assertEquals
  * request says neither "only" nor "with its links", the chat asks; each answer clips what it says.
  */
 class ClipSectionChatTest {
+    private val depths = mutableListOf<Int>()
+    private var progressShown: () -> Unit = {}
+
     private val clipper = object : WebPageClipper {
         override suspend fun clip(url: String) = Outcome.Success(value = draft(name = "Overview"))
 
@@ -41,8 +46,26 @@ class ClipSectionChatTest {
 
         override suspend fun clipSection(
             url: String,
-            isEvery: Boolean
-        ) = Outcome.Success(
+            isEvery: Boolean,
+            depth: Int,
+            onProgress: suspend (PageProgress) -> Unit
+        ): Outcome<List<NoteDraft>, PageProblem> {
+            depths += depth
+            onProgress(PageProgress(found = FOUND))
+            progressShown()
+
+            onProgress(
+                PageProgress(
+                    done = 1,
+                    total = FOUND,
+                    url = "https://x.com/docs/axiom"
+                )
+            )
+
+            return clips()
+        }
+
+        private fun clips() = Outcome.Success(
             value = listOf(draft(name = "Overview"), draft(name = "Overview/Axiom"), draft(name = "Overview/Datadog"))
         )
     }
@@ -116,7 +139,39 @@ class ClipSectionChatTest {
         text = name
     )
 
+    // The developer's request of 2026-11-13: the Android docs gave only the pages their first page links.
+    @Test
+    fun `how deep the links are followed is said in levels, in English or Spanish, and told to the clipper`() =
+        runTest {
+            val progress = mutableListOf<PageProgress>()
+
+            compose(
+                step = ActionStep(
+                    kind = ActionKind.CLIP_URL,
+                    url = URL
+                ),
+                request = "clip $URL with its linked pages, 2 levels deep",
+                vaultPath = "/vault",
+                notes = emptyList(),
+                onProgress = { progress += it }
+            )
+
+            clipped(request = "recorta $URL a 3 niveles")
+            clipped(request = "clip $URL with its linked pages")
+            clipped(request = "clip $URL 9 levels deep")
+
+            assertEquals(
+                expected = listOf<Any?>(listOf(2, 3, 1, 3), FOUND, 1 to FOUND),
+                actual = listOf(
+                    depths,
+                    progress.first().found,
+                    progress.last().done to progress.last().total
+                )
+            )
+        }
+
     private companion object {
         const val URL = "https://x.com/docs/overview"
+        const val FOUND = 12
     }
 }

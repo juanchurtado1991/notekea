@@ -37,6 +37,9 @@ sealed interface ActionTurnStep {
     /** The text of the notes to write is being written. */
     data object Writing : ActionTurnStep
 
+    /** A clip of many pages is under way: how far it is. */
+    data class Progress(val progress: PageProgress) : ActionTurnStep
+
     /** Steps that change the vault, written out, waiting for the card's Do it. */
     data class Proposed(val steps: List<ActionStep>) : ActionTurnStep
 

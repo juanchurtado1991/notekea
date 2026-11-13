@@ -241,6 +241,7 @@ class ChatViewModel(
 
             is ChatIntent.OnSectionChoose -> entryOf(id = intent.id)?.sectionAsked?.let {
                 val request = when {
+                    intent.depth > 1 -> "clip ${it.url} with its linked pages, ${intent.depth} levels deep"
                     intent.isEvery -> "clip ${it.url} with all its linked pages"
                     intent.isWhole -> "clip ${it.url} with its linked pages"
                     else -> "clip only ${it.url}"

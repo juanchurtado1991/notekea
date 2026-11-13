@@ -19,11 +19,28 @@ internal object ClipWords {
     fun isOnly(request: String): Boolean =
         ONLY.containsMatchIn(input = request) && !isSection(request)
 
-    fun isSection(request: String): Boolean = SECTION.containsMatchIn(input = request)
+    fun isSection(request: String): Boolean =
+        SECTION.containsMatchIn(input = request) || DEPTH.containsMatchIn(input = request)
 
     // "with all its linked pages", "con todas sus páginas": every page, not only the closest 30.
     fun isEvery(request: String): Boolean =
         isSection(request) && EVERY.containsMatchIn(input = request)
+
+    /** "… 2 levels deep", "a 3 niveles": how many levels of links are followed, 1 when the request says none. */
+    fun depthOf(request: String): Int = DEPTH
+        .find(input = request)
+        ?.groupValues
+        ?.get(index = 1)
+        ?.toIntOrNull()
+        ?.coerceIn(1, MAX_DEPTH)
+        ?: 1
+
+    private const val MAX_DEPTH = 3
+
+    private val DEPTH = Regex(
+        pattern = "\\b(\\d)\\s*(levels?|niveles?)\\b",
+        option = RegexOption.IGNORE_CASE
+    )
 
     private val EVERY = Regex(
         pattern = "\\b(all|every|todas|todos|cada)\\b",

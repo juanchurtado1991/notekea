@@ -127,6 +127,8 @@ internal class ChatActions(
                     ActionTurnStep.ToAgent,
                     ActionTurnStep.Overview -> entry.copy(step = ChatStep.PLANNING)
 
+                    is ActionTurnStep.Progress -> entry.copy(progress = step.progress)
+
                     ActionTurnStep.Writing -> entry.copy(
                         step = ChatStep.COMPOSING,
                         action = action

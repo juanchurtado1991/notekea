@@ -219,6 +219,11 @@ private fun AnswerContent(
         entry.outcome == TurnOutcome.ACTED ->
             Quiet(text = replyString(resource = Res.string.chat_acted))
 
+        entry.isAnswering &&
+            !isWriting &&
+            entry.progress != null ->
+            ChatClipProgress(progress = entry.progress)
+
         entry.isAnswering && !isWriting -> ChatStepLine(
             step = entry.step,
             readNotes = entry.readNotes
@@ -235,12 +240,13 @@ private fun AnswerContent(
 
         entry.sectionAsked != null -> ChatSectionQuestion(
             section = entry.sectionAsked,
-            onChoose = { isWhole, isEvery ->
+            onChoose = { isWhole, isEvery, depth ->
                 onIntent(
                     ChatIntent.OnSectionChoose(
                         id = entry.id,
                         isWhole = isWhole,
-                        isEvery = isEvery
+                        isEvery = isEvery,
+                        depth = depth
                     )
                 )
             }

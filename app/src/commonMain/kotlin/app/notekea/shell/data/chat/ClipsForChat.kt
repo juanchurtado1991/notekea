@@ -2,6 +2,7 @@ package app.notekea.shell.data.chat
 
 import app.notekea.chat.domain.plan.NoteDraft
 import app.notekea.chat.domain.plan.PageProblem
+import app.notekea.chat.domain.plan.PageProgress
 import app.notekea.chat.domain.plan.PageReader
 import app.notekea.chat.domain.plan.SectionAsked
 import app.notekea.chat.domain.plan.WebPageClipper
@@ -76,6 +77,7 @@ class ClipsForChat(
                 prefix = found.value.prefix,
                 count = found.value.urls.size,
                 more = found.value.more,
+                canGoDeeper = found.value.canGoDeeper,
                 summary = found
                     .value
                     .urls
@@ -94,9 +96,17 @@ class ClipsForChat(
 
     override suspend fun clipSection(
         url: String,
-        isEvery: Boolean
+        isEvery: Boolean,
+        depth: Int,
+        onProgress: suspend (PageProgress) -> Unit
     ): Outcome<List<NoteDraft>, PageProblem> {
-        val links = when (val found = findSection(url = url)) {
+        val found = findSection(
+            url = url,
+            depth = depth,
+            onFound = { onProgress(PageProgress(found = it)) }
+        )
+
+        val links = when (found) {
             is Outcome.Success -> if (isEvery) found.value.everyPage() else found.value
             is Outcome.Failure -> return Outcome.Failure(error = problemOf(error = found.error))
         }
@@ -106,7 +116,19 @@ class ClipsForChat(
         clipSection(
             url = url,
             links = links
-        ).collect { last = it }
+        ).collect { step ->
+            last = step
+
+            if (step is SectionStep.Clipping) {
+                onProgress(
+                    PageProgress(
+                        done = step.done,
+                        total = step.total,
+                        url = step.url
+                    )
+                )
+            }
+        }
 
         return when (val step = last) {
             is SectionStep.Done -> Outcome.Success(

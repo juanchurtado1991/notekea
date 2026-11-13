@@ -15,9 +15,14 @@ interface WebPageClipper {
         language: String? = null
     ): Outcome<SectionAsked, PageProblem>
 
-    /** The page and the pages it links under its path, each a note, the page their index. */
+    /**
+     * The page and the pages it links under its path, each a note, the page their index; [depth] levels of links
+     * followed, [onProgress] told how far it is.
+     */
     suspend fun clipSection(
         url: String,
-        isEvery: Boolean = false
+        isEvery: Boolean = false,
+        depth: Int = 1,
+        onProgress: suspend (PageProgress) -> Unit = {}
     ): Outcome<List<NoteDraft>, PageProblem>
 }

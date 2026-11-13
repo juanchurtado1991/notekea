@@ -6,5 +6,7 @@ data class SectionAsked(
     val prefix: String,
     val count: Int,
     val more: Int,
-    val summary: String? = null
+    val summary: String? = null,
+    // The pages those pages link can be followed too: the question offers two and three levels.
+    val canGoDeeper: Boolean = false
 )

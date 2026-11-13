@@ -1000,6 +1000,15 @@
     <string name="chat_section_more_es">Estas son las 30 más relacionadas con esta página; otras %1$d se recortan con Todas, que tarda más.</string>
     <string name="chat_section_every">All %1$d pages</string>
     <string name="chat_section_every_es">Todas (%1$d páginas)</string>
+    <string name="chat_section_levels">%1$d levels deep</string>
+    <string name="chat_section_levels_es">%1$d niveles</string>
+    <string name="chat_section_deeper">Deeper levels follow the links of those pages too (up to 150 pages); it takes longer.</string>
+    <string name="chat_section_deeper_es">Con más niveles también se siguen los enlaces de esas páginas (hasta 150 páginas); tarda más.</string>
+    <string name="chat_step_finding">Following the links: %1$d pages so far…</string>
+    <string name="chat_step_finding_es">Siguiendo los enlaces: %1$d páginas hasta ahora…</string>
+    <string name="chat_step_clipping">Clipping page %1$d of %2$d: %3$s</string>
+    <string name="chat_step_clipping_es">Recortando la página %1$d de %2$d: %3$s</string>
+    <string name="chat_step_clipping_label">Pages clipped</string>
     <string name="chat_section_only">Only this page</string>
     <string name="chat_section_only_es">Solo esta página</string>
     <string name="chat_section_all">This page and %1$d more</string>

@@ -32,11 +32,13 @@ class ComposeNotesUseCase(
         step: ActionStep,
         request: String,
         vaultPath: String,
-        notes: Collection<NoteEntry>
+        notes: Collection<NoteEntry>,
+        onProgress: suspend (PageProgress) -> Unit = {}
     ): Outcome<ActionStep, ActionProblem> = when (step.kind) {
         ActionKind.CLIP_URL -> clipped(
             step = step,
-            request = request
+            request = request,
+            onProgress = onProgress
         )
 
         ActionKind.MAKE_CARDS -> withCards(
@@ -123,7 +125,8 @@ class ComposeNotesUseCase(
     // The page alone, or with the pages it links under its path when the request says so; asked when it says neither.
     private suspend fun clipped(
         step: ActionStep,
-        request: String
+        request: String,
+        onProgress: suspend (PageProgress) -> Unit
     ): Outcome<ActionStep, ActionProblem> {
         val clipping =
             clipper ?: return problem(ActionProblem.PageFailed(reason = PageProblem.REFUSED))
@@ -134,7 +137,9 @@ class ComposeNotesUseCase(
             return when (
                 val clips = clipping.clipSection(
                     url = url,
-                    isEvery = ClipWords.isEvery(request)
+                    isEvery = ClipWords.isEvery(request),
+                    depth = ClipWords.depthOf(request = request),
+                    onProgress = onProgress
                 )
             ) {
                 is Outcome.Success -> Outcome.Success(value = step.copy(content = clips.value))

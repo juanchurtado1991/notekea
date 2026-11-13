@@ -154,8 +154,12 @@ import app.notekea.resources.chat_retry
 import app.notekea.resources.chat_retry_es
 import app.notekea.resources.chat_section_all
 import app.notekea.resources.chat_section_all_es
+import app.notekea.resources.chat_section_deeper
+import app.notekea.resources.chat_section_deeper_es
 import app.notekea.resources.chat_section_every
 import app.notekea.resources.chat_section_every_es
+import app.notekea.resources.chat_section_levels
+import app.notekea.resources.chat_section_levels_es
 import app.notekea.resources.chat_section_more
 import app.notekea.resources.chat_section_more_es
 import app.notekea.resources.chat_section_only
@@ -182,10 +186,14 @@ import app.notekea.resources.chat_small_hint
 import app.notekea.resources.chat_small_hint_es
 import app.notekea.resources.chat_sources
 import app.notekea.resources.chat_sources_es
+import app.notekea.resources.chat_step_clipping
+import app.notekea.resources.chat_step_clipping_es
 import app.notekea.resources.chat_step_composing
 import app.notekea.resources.chat_step_composing_es
 import app.notekea.resources.chat_step_drafting
 import app.notekea.resources.chat_step_drafting_es
+import app.notekea.resources.chat_step_finding
+import app.notekea.resources.chat_step_finding_es
 import app.notekea.resources.chat_step_further
 import app.notekea.resources.chat_step_further_es
 import app.notekea.resources.chat_step_planning
@@ -256,6 +264,10 @@ private val SPANISH: Map<StringResource, StringResource> = mapOf(
     Res.string.chat_section_more to Res.string.chat_section_more_es,
     Res.string.chat_section_only to Res.string.chat_section_only_es,
     Res.string.chat_section_all to Res.string.chat_section_all_es,
+    Res.string.chat_step_clipping to Res.string.chat_step_clipping_es,
+    Res.string.chat_step_finding to Res.string.chat_step_finding_es,
+    Res.string.chat_section_deeper to Res.string.chat_section_deeper_es,
+    Res.string.chat_section_levels to Res.string.chat_section_levels_es,
     Res.string.chat_section_every to Res.string.chat_section_every_es,
     Res.string.chat_page_address to Res.string.chat_page_address_es,
     Res.string.chat_page_local to Res.string.chat_page_local_es,

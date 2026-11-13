@@ -108,7 +108,8 @@ class ActOnRequestUseCase(
                     step = step,
                     request = request,
                     vaultPath = vaultPath,
-                    notes = notes
+                    notes = notes,
+                    onProgress = { emit(value = ActionTurnStep.Progress(progress = it)) }
                 )
             ) {
                 is Outcome.Success -> written.value

@@ -11,7 +11,9 @@ data class SectionLinks(
     // What each page is, when the site says it (llms.txt: "Axiom: send traces to Axiom"), by its address.
     val about: Map<String, String> = emptyMap(),
     // The pages past the first [MAX_PAGES], clipped only when the person asks for all of them.
-    val rest: List<String> = emptyList()
+    val rest: List<String> = emptyList(),
+    // Found in the page's own links, not in an index of the site: the pages those link may be followed too.
+    val canGoDeeper: Boolean = false
 ) {
     /** Every page, the [rest] too: what "all of them" clips. */
     fun everyPage(): SectionLinks = copy(
@@ -82,6 +84,52 @@ data class SectionLinks(
             url = page.url,
             candidates = linksIn(page = page)
         ).capped()
+
+        /** The deepest the links are followed, and the most pages a clip that goes deeper than one level takes. */
+        const val MAX_DEPTH = 3
+        const val MAX_DEEP_PAGES = 150
+
+        /**
+         * The pages [page] links under [prefix] that are not among [known] yet: what one more level of a section adds
+         * (the developer's request of 2026-11-13, a documentation's pages link the pages under them).
+         */
+        fun newUnder(
+            prefix: String,
+            page: FetchedPage,
+            known: Collection<String>
+        ): List<String> {
+            val (origin, _) = partsOf(url = prefix) ?: return emptyList()
+            val folder = prefix.removePrefix(prefix = origin)
+
+            val knownKeys = known
+                .map {
+                    keyOf(
+                        url = it,
+                        origin = origin
+                    )
+                }
+                .toSet()
+
+            return linksIn(page = page)
+                .map { it.substringBefore(delimiter = '?').substringBefore(delimiter = '#') }
+                .filter {
+                    it.startsWith(prefix = origin) && !FILES.containsMatchIn(input = it)
+                }
+                .distinctBy {
+                    keyOf(
+                        url = it,
+                        origin = origin
+                    )
+                }
+                .filter {
+                    val key = keyOf(
+                        url = it,
+                        origin = origin
+                    )
+
+                    key.startsWith(prefix = folder) && key !in knownKeys
+                }
+        }
 
         /** The addresses [page] links, whole. */
         fun linksIn(page: FetchedPage): List<String> {

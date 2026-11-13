@@ -69,7 +69,9 @@ sealed interface ChatIntent {
     data class OnSectionChoose(
         val id: Long,
         val isWhole: Boolean,
-        val isEvery: Boolean = false
+        val isEvery: Boolean = false,
+        // How many levels of links are followed: the pages the page links, then those they link…
+        val depth: Int = 1
     ) : ChatIntent
 
     /** A row of a table the chat found: its note opens, at the task's line for a task. */
