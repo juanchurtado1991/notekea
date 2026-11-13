@@ -32,6 +32,8 @@ data class ChatEntry(
     // A clip of many pages under way: how far it is, shown under the step's line.
     val progress: PageProgress? = null,
     val moves: List<AgentMoveLine> = emptyList(),
+    // The steps it already left, oldest first: the checked lines over the one it is on.
+    val passed: List<PassedStep> = emptyList(),
     val answeredWith: ChatMode? = null
 ) {
     /**

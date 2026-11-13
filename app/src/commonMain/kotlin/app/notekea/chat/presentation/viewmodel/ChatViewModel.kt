@@ -464,7 +464,7 @@ class ChatViewModel(
     ) = reduce { current ->
         current.copy(
             entries = current.entries.map {
-                if (it.id == id) change(it) else it
+                if (it.id == id) it.changedBy(change = change) else it
             }
         )
     }

@@ -11,37 +11,32 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import app.notekea.chat.domain.answer.AnswerSource
+import app.notekea.chat.presentation.model.AnswerMarkdown
 import app.notekea.chat.presentation.model.ChatPreviewData
 import app.notekea.core.presentation.designsystem.components.NotekeaCitationChip
+import app.notekea.core.presentation.designsystem.components.markdown.NotekeaMarkdown
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalReduceMotion
 
-private const val CITATION_PREFIX = "citation:"
-private const val CARET = "caret"
 private const val CARET_BLINK_MILLIS = 530
 private const val CARET_WIDTH_DP = 2
-private val CITATION = Regex(pattern = """\[(\d+)]""")
-private val WIKI_LINK = Regex(pattern = """\[\[(?:[^\]|]*\|)?([^\]]+)]]""")
 
 /**
- * An answer's text with each `[n]` drawn as a citation chip of [sources] (`[n]` is the source numbered n), a wiki link
- * as its name, and while [isWriting] a blinking caret where the model writes next.
+ * An answer's text drawn as the Markdown the model writes (lists, bold, code, tables), each `[n]` a citation chip of
+ * [sources] (`[n]` is the source numbered n), a wiki link as its name, and while [isWriting] a blinking caret where
+ * the model writes next.
  */
 @Composable
 internal fun ChatAnswerText(
@@ -56,7 +51,7 @@ internal fun ChatAnswerText(
     }
 
     val shown = remember(text, byNumber, isWriting) {
-        annotated(
+        AnswerMarkdown.of(
             text = text,
             numbers = byNumber.keys,
             isWriting = isWriting
@@ -64,7 +59,7 @@ internal fun ChatAnswerText(
     }
 
     val inline = byNumber.map { (number, source) ->
-        "$CITATION_PREFIX$number" to InlineTextContent(
+        "${AnswerMarkdown.CITATION}$number" to InlineTextContent(
             placeholder = Placeholder(
                 width = 1.45.em,
                 height = 1.3.em,
@@ -77,57 +72,14 @@ internal fun ChatAnswerText(
                 onClick = { onSourceClick(source) }
             )
         }
-    }.toMap() + (CARET to caretContent())
+    }.toMap() + (AnswerMarkdown.CARET to caretContent())
 
-    Text(
-        text = shown,
+    NotekeaMarkdown(
+        content = shown,
         modifier = modifier,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurface,
-        inlineContent = inline
+        inlineContent = inline,
+        isCompact = true
     )
-}
-
-/** [text] with its citations of [numbers] as inline chips, its wiki links as their names, and the caret if writing. */
-private fun annotated(
-    text: String,
-    numbers: Set<Int>,
-    isWriting: Boolean
-): AnnotatedString = buildAnnotatedString {
-    val plain = WIKI_LINK
-        .replace(input = text) {
-            it.groupValues[1]
-        }
-
-    var at = 0
-
-    CITATION.findAll(input = plain).forEach { match ->
-        val number = match.groupValues[1].toInt()
-        if (number !in numbers) return@forEach
-
-        append(
-            plain.substring(
-                startIndex = at,
-                endIndex = match.range.first
-            )
-        )
-
-        appendInlineContent(
-            id = "$CITATION_PREFIX$number",
-            alternateText = match.value
-        )
-
-        at = match.range.last + 1
-    }
-
-    append(plain.substring(startIndex = at))
-
-    if (isWriting) {
-        appendInlineContent(
-            id = CARET,
-            alternateText = " "
-        )
-    }
 }
 
 /** The caret of an answer being written: a thin bar in the theme's color, blinking unless motion is reduced. */

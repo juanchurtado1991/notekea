@@ -76,16 +76,11 @@ internal fun ChatMessages(
     modifier: Modifier = Modifier
 ) {
     val list = rememberLazyListState()
-    val last = entries.lastOrNull()
 
-    LaunchedEffect(entries.size, last?.answer?.length, last?.step) {
-        if (entries.isNotEmpty()) {
-            list.scrollToItem(
-                index = entries.lastIndex,
-                scrollOffset = Int.MAX_VALUE
-            )
-        }
-    }
+    FollowNewest(
+        list = list,
+        entries = entries
+    )
 
     NotekeaLazyScrollArea(
         state = list,
@@ -187,7 +182,7 @@ private fun Answer(
 
     // The answer reads as the note's own text under its question (7B).
     Column(verticalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS)) {
-        AgentMoves(moves = entry.moves)
+        ChatTasks(entry = entry)
 
         AnswerContent(
             entry = entry,
@@ -224,10 +219,8 @@ private fun AnswerContent(
             entry.progress != null ->
             ChatClipProgress(progress = entry.progress)
 
-        entry.isAnswering && !isWriting -> ChatStepLine(
-            step = entry.step,
-            readNotes = entry.readNotes
-        )
+        // Its list of tasks, above, says where it stands.
+        entry.isAnswering && !isWriting -> Unit
 
         entry.outcome == TurnOutcome.NOT_FOUND -> Quiet(
             text = replyString(resource = Res.string.chat_not_found)
