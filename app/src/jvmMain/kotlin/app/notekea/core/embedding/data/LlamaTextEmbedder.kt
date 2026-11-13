@@ -14,9 +14,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import net.ladenthin.llama.LlamaModel
 import net.ladenthin.llama.parameters.ModelParameters
 import java.nio.file.Files
@@ -24,6 +26,8 @@ import java.nio.file.Path
 import java.util.concurrent.Executors
 import kotlin.coroutines.coroutineContext
 import kotlin.math.sqrt
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * [TextEmbedder] on java-llama.cpp with the bundled model at [modelPath]. The model loads on the first call and is let
@@ -76,19 +80,29 @@ class LlamaTextEmbedder(
             }
         }
 
-    /** Stops the idle timer and lets the model go; a call still running lets it go as it ends. */
+    /** Stops the idle timer and lets the model go, waiting a moment for a call still running. */
     override fun close() {
+        freed(within = CLOSE_WAIT)
+    }
+
+    /**
+     * Lets the model go for good, waiting up to [within] for a call still running; false when it still held the
+     * model, which must not be there when the process ends (`LlamaLlmEngine.freed`).
+     */
+    fun freed(within: Duration): Boolean {
         scope.cancel()
 
-        if (mutex.tryLock()) {
-            try {
-                unload()
-            } finally {
-                mutex.unlock()
-            }
-        }
+        val isGone = runBlocking {
+            withTimeoutOrNull(timeout = within) {
+                mutex.withLock { unload() }
 
-        modelThread.close()
+                true
+            }
+        } ?: false
+
+        if (isGone) modelThread.close()
+
+        return isGone
     }
 
     private fun releaseWhenIdle() {
@@ -148,6 +162,8 @@ class LlamaTextEmbedder(
             .enableEmbedding()
             // On the CPU always: the vectors stay the ones indexed, and the GPU is left to the chat model.
             .setGpuLayers(0)
+            // No GPU device at all: llama.cpp otherwise keeps one in use with no layer on it, and its buffers too.
+            .setDevices(NO_DEVICES)
             .setCtxSize(CONTEXT_TOKENS)
             .setBatchSize(CONTEXT_TOKENS)
             .setUbatchSize(CONTEXT_TOKENS)
@@ -177,6 +193,8 @@ class LlamaTextEmbedder(
 
         private const val ENGINE_VERSION = "llama.cpp-b11968"
         private const val CONTEXT_TOKENS = 512
+        private const val NO_DEVICES = "none"
+        private val CLOSE_WAIT = 2.seconds
         private const val DIMENSIONS = 384
 
         // The model adds a token at each end of every text, inside its context.

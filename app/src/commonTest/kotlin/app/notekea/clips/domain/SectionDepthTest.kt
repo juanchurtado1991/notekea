@@ -127,10 +127,10 @@ class SectionDepthTest {
                 } ?: Outcome.Failure(error = ClipError.Refused(status = 404))
             }
 
-            val one =
-                FindSectionUseCase(fetcher = fetcher)(url = "https://w.org/documentation/") as Outcome.Success
+            val find = FindSectionUseCase(fetcher = fetcher)
+            val one = find(url = "https://w.org/documentation/") as Outcome.Success
 
-            val two = FindSectionUseCase(fetcher = fetcher)(
+            val two = find(
                 url = "https://w.org/documentation/",
                 depth = 2
             ) as Outcome.Success

@@ -16,6 +16,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -24,10 +25,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import net.ladenthin.llama.LlamaModel
 import net.ladenthin.llama.args.LoadMode
 import net.ladenthin.llama.parameters.InferenceParameters
@@ -35,6 +38,9 @@ import net.ladenthin.llama.parameters.ModelParameters
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.coroutines.coroutineContext
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import net.ladenthin.llama.value.ChatMessage as LlamaMessage
 
 /**
@@ -55,6 +61,9 @@ class LlamaLlmEngine(
     private var loaded: LoadedLlama? = null
     private var users = 0
     private var release: Job? = null
+
+    @Volatile
+    private var isClosing = false
 
     /** Whether a model is in memory now. */
     val isLoaded: Boolean get() = loaded != null
@@ -128,21 +137,42 @@ class LlamaLlmEngine(
         Outcome.Failure(error = exception.error)
     }
 
-    /** Lets the model go now; a reply still running keeps it until it ends. */
+    /** Lets the model go now, waiting a moment for a reply still running ([freed] says whether it left). */
     override fun close() {
+        freed(within = CLOSE_WAIT)
+    }
+
+    /**
+     * Lets the model go for good, waiting up to [within] for the replies still running to end, and takes no new one.
+     * False when a reply was still using it: the caller must not let the process run the native library's own exit,
+     * which aborts with a model on Metal (the crash at quit, code review of 2026-11-13).
+     */
+    fun freed(within: Duration): Boolean {
+        isClosing = true
         scope.cancel()
 
-        if (mutex.tryLock()) {
-            try {
-                if (users == 0) unload()
-            } finally {
-                mutex.unlock()
+        return runBlocking {
+            withTimeoutOrNull(timeout = within) {
+                while (true) {
+                    val isGone = mutex.withLock {
+                        if (users == 0) unload()
+
+                        users == 0
+                    }
+
+                    if (isGone) break
+                    delay(duration = CLOSE_POLL)
+                }
+
+                true
             }
-        }
+        } ?: false
     }
 
     /** Runs [block] with the models loaded and a slot of their own; fails with [LlmException] when they cannot load. */
     private suspend fun <T> withModels(block: suspend (LoadedLlama) -> T): T {
+        if (isClosing) throw LlmException(error = LlmError.EngineFailed)
+
         val models = mutex.withLock {
             release?.cancel()
             users++
@@ -167,9 +197,13 @@ class LlamaLlmEngine(
             logger.e(throwable = exception) { ENGINE_FAILED_MESSAGE }
             throw LlmException(error = LlmError.EngineFailed)
         } finally {
-            mutex.withLock {
-                users--
-                releaseWhenIdle()
+            // Not cancellable: a reply stopped while another waits for the lock would never give its use back, and
+            // the model would then never leave memory nor change (code review, 2026-11-13).
+            withContext(context = NonCancellable) {
+                mutex.withLock {
+                    users--
+                    releaseWhenIdle()
+                }
             }
         }
     }
@@ -185,7 +219,11 @@ class LlamaLlmEngine(
         if (models != null && (models.setup == setup || users > 1)) return models
         unload()
 
-        return withContext(context = dispatchers.io) { load(setup = setup) }.also { loaded = it }
+        // Loaded and kept in one step that a Stop cannot cut: a model loaded for a caller that left would stay in
+        // memory with nobody to close it, and the next message would load a second one.
+        return withContext(context = dispatchers.io + NonCancellable) {
+            load(setup = setup).also { loaded = it }
+        }
     }
 
     private fun load(setup: ModelSetup): LoadedLlama {
@@ -240,6 +278,10 @@ class LlamaLlmEngine(
     companion object {
         /** Five minutes without a reply, then the model leaves memory (3.2). */
         const val IDLE_MILLIS = 5 * 60_000L
+
+        // Closing with Koin (a case of the Auto-Test ending) waits this long for a reply; quitting waits longer.
+        private val CLOSE_WAIT = 2.seconds
+        private val CLOSE_POLL = 50.milliseconds
 
         // The sizes whose answers three drafts and a vote make better on the 3.4 set (docs/answer-quality.md, 3.6).
         val DEEP_ANSWER_SIZES = setOf(ModelSize.MEDIUM)

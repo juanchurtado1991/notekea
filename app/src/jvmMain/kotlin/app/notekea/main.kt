@@ -88,6 +88,7 @@ fun runNotekea(
     System.setProperty(SCREEN_MENU_BAR, "true")
 
     val koin = startKoin { modules(modules) }.koin
+    ModelsAtExit.install(koin = koin)
 
     val crashBuddy = crashBuddyOf(
         koin = koin,
