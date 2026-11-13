@@ -140,9 +140,11 @@ internal class ChatActions(
                 )
 
                 is ActionTurnStep.Problem -> (step.problem as? ActionProblem.SectionAsked)?.let {
+                    // The question takes the turn's place: an action card left there would be drawn instead of it.
                     entry.copy(
                         step = ChatStep.DONE,
                         outcome = TurnOutcome.ANSWERED,
+                        action = null,
                         sectionAsked = it.section
                     )
                 } ?: acted(

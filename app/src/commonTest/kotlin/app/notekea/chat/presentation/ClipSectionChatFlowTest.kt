@@ -123,9 +123,11 @@ class ClipSectionChatFlowTest {
                 .last()
 
             assertEquals(
-                expected = listOf<Any?>(2, "clip $URL with its linked pages", 3),
+                // No action card on the asking turn: it was drawn in place of the question, which never showed.
+                expected = listOf<Any?>(2, null, "clip $URL with its linked pages", 3),
                 actual = listOf(
                     asked.sectionAsked?.count,
+                    asked.action,
                     chosen.question,
                     chosen
                         .action

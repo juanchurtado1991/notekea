@@ -10,7 +10,7 @@ internal object UrlsNamed {
         pattern = "https?://[^\\s<>\"']+",
         option = RegexOption.IGNORE_CASE
     )
-    private const val TRAILING = ".,;:!?)]}"
+    private const val TRAILING = ".,;:!?)]}…"
 
     /** The web addresses [text] writes, without the punctuation that ends its sentence. */
     fun writtenIn(text: String): List<String> = URL
