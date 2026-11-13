@@ -9,7 +9,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
-import app.notekea.core.appearance.domain.UiScale
+import app.notekea.core.appearance.domain.UiZoomLevels
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.zoomInShortcut
 import app.notekea.core.platform.domain.zoomOutShortcut
@@ -22,7 +22,7 @@ private const val PREVIEW_TEXT = "Zoomed text"
 
 /**
  * [content], the whole window, drawn at the app's zoom: the platform's zoom shortcuts make it larger, smaller or back
- * to the system's size, one [UiScale] step at a time. [UiZoomViewModel] holds the zoom and keeps it. [LocalUiZoom]
+ * to the system's size, one [UiZoomLevels] step at a time. [UiZoomViewModel] holds the zoom and keeps it. [LocalUiZoom]
  * tells the screens the zoom and how to reset it.
  */
 @Composable
@@ -88,7 +88,7 @@ val LocalUiZoom = staticCompositionLocalOf { UiZoomState() }
 private fun UiZoomPreview() {
     NotekeaPreviewThemes {
         ZoomedContent(
-            scale = UiScale.MAX,
+            scale = UiZoomLevels.MAX,
             platformConventions = PreviewPlatformConventions.linux,
             onIntent = {}
         ) { Text(text = PREVIEW_TEXT) }

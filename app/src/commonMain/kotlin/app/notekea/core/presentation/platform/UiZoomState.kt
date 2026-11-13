@@ -1,7 +1,7 @@
 package app.notekea.core.presentation.platform
 
 import androidx.compose.runtime.Immutable
-import app.notekea.core.appearance.domain.UiScale
+import app.notekea.core.appearance.domain.UiZoomLevels
 
 /**
  * The window's zoom as the screens see it: its [scale], [onReset] back to the system's size, and [resetHint], the
@@ -9,10 +9,10 @@ import app.notekea.core.appearance.domain.UiScale
  */
 @Immutable
 data class UiZoomState(
-    val scale: Float = UiScale.DEFAULT,
+    val scale: Float = UiZoomLevels.DEFAULT,
     val onReset: () -> Unit = {},
     val resetHint: String = ""
 ) {
     /** Whether the window is drawn at another size than the system's. */
-    val isZoomed: Boolean get() = scale != UiScale.DEFAULT
+    val isZoomed: Boolean get() = scale != UiZoomLevels.DEFAULT
 }

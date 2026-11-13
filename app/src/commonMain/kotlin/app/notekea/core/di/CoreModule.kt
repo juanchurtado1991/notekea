@@ -1,12 +1,12 @@
 package app.notekea.core.di
 
 import app.notekea.core.appearance.data.SettingsAppearanceStore
-import app.notekea.core.appearance.data.SettingsUiScaleStore
+import app.notekea.core.appearance.data.SettingsUiZoomStore
 import app.notekea.core.appearance.data.SettingsWindowBoundsStore
 import app.notekea.core.appearance.domain.AppearanceStore
-import app.notekea.core.appearance.domain.GetUiScaleUseCase
-import app.notekea.core.appearance.domain.SaveUiScaleUseCase
-import app.notekea.core.appearance.domain.UiScaleStore
+import app.notekea.core.appearance.domain.GetUiZoomUseCase
+import app.notekea.core.appearance.domain.SaveUiZoomUseCase
+import app.notekea.core.appearance.domain.UiZoomStore
 import app.notekea.core.appearance.domain.WindowBoundsStore
 import app.notekea.core.domain.files.ValidateFileNameUseCase
 import app.notekea.core.domain.time.DescribeElapsedTimeUseCase
@@ -28,8 +28,8 @@ val coreModule = module {
     factoryOf(::DescribeElapsedTimeUseCase)
     factoryOf(::ValidateFileNameUseCase)
 
-    single<UiScaleStore> {
-        SettingsUiScaleStore(
+    single<UiZoomStore> {
+        SettingsUiZoomStore(
             settings = get(),
             dispatchers = get()
         )
@@ -56,8 +56,8 @@ val coreModule = module {
         )
     }
 
-    factoryOf(::GetUiScaleUseCase)
-    factoryOf(::SaveUiScaleUseCase)
+    factoryOf(::GetUiZoomUseCase)
+    factoryOf(::SaveUiZoomUseCase)
     viewModelOf(::WindowBoundsViewModel)
     viewModelOf(::UiZoomViewModel)
 }

@@ -14,7 +14,7 @@ app.notekea
 │   ├── domain          Outcome, AppDispatchers, shared domain types
 │   ├── presentation    BaseViewModel, the window's platform locals, and designsystem/ (theme, tokens, components,
 │   │                   previews, the gallery)
-│   ├── appearance      App-wide look the user sets: the UI zoom (UiScale, its store and use cases)
+│   ├── appearance      App-wide look the user sets: the UI zoom (UiZoomLevels, its store and use cases)
 │   ├── embedding       The embedding model's port, used by the index and search
 │   ├── llm             The chat model's port (LlmEngine), used by the chat, the queries and the actions
 │   ├── notes           What features share about notes: paths, documents, files, links, frontmatter

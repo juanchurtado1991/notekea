@@ -1,9 +1,9 @@
 package app.notekea.core.presentation.platform
 
-import app.notekea.core.appearance.data.SettingsUiScaleStore
-import app.notekea.core.appearance.domain.GetUiScaleUseCase
-import app.notekea.core.appearance.domain.SaveUiScaleUseCase
-import app.notekea.core.appearance.domain.UiScaleStore
+import app.notekea.core.appearance.data.SettingsUiZoomStore
+import app.notekea.core.appearance.domain.GetUiZoomUseCase
+import app.notekea.core.appearance.domain.SaveUiZoomUseCase
+import app.notekea.core.appearance.domain.UiZoomStore
 import app.notekea.core.domain.FakeAppDispatchers
 import com.russhwolf.settings.MapSettings
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +22,7 @@ import kotlin.test.assertEquals
 @OptIn(ExperimentalCoroutinesApi::class)
 class UiZoomViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
-    private val store = SettingsUiScaleStore(
+    private val store = SettingsUiZoomStore(
         settings = MapSettings(),
         dispatchers = FakeAppDispatchers(dispatcher = testDispatcher)
     )
@@ -37,9 +37,9 @@ class UiZoomViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel(uiScaleStore: UiScaleStore = store) = UiZoomViewModel(
-        getUiScale = GetUiScaleUseCase(uiScaleStore = uiScaleStore),
-        saveUiScale = SaveUiScaleUseCase(uiScaleStore = uiScaleStore)
+    private fun viewModel(uiZoomStore: UiZoomStore = store) = UiZoomViewModel(
+        getUiZoom = GetUiZoomUseCase(uiZoomStore = uiZoomStore),
+        saveUiZoom = SaveUiZoomUseCase(uiZoomStore = uiZoomStore)
     )
 
     @Test
@@ -71,7 +71,7 @@ class UiZoomViewModelTest {
     fun `a zoom that cannot be read or kept still changes the window`() = runTest(
         context = testDispatcher
     ) {
-        val viewModel = viewModel(uiScaleStore = FailingStore())
+        val viewModel = viewModel(uiZoomStore = FailingStore())
         advanceUntilIdle()
 
         viewModel.onIntent(intent = UiZoomIntent.OnLarger)
@@ -83,7 +83,7 @@ class UiZoomViewModelTest {
         )
     }
 
-    private class FailingStore : UiScaleStore {
+    private class FailingStore : UiZoomStore {
         override suspend fun scale(): Float = error(MESSAGE)
 
         override suspend fun setScale(scale: Float) = error(MESSAGE)

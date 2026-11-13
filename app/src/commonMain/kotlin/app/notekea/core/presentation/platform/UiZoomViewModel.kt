@@ -1,8 +1,8 @@
 package app.notekea.core.presentation.platform
 
-import app.notekea.core.appearance.domain.GetUiScaleUseCase
-import app.notekea.core.appearance.domain.SaveUiScaleUseCase
-import app.notekea.core.appearance.domain.UiScale
+import app.notekea.core.appearance.domain.GetUiZoomUseCase
+import app.notekea.core.appearance.domain.SaveUiZoomUseCase
+import app.notekea.core.appearance.domain.UiZoomLevels
 import app.notekea.core.presentation.BaseViewModel
 import co.touchlab.kermit.Logger
 
@@ -11,14 +11,14 @@ import co.touchlab.kermit.Logger
  * is the scale; one that cannot be read or kept only logs, and the window stays at the size it shows.
  */
 class UiZoomViewModel(
-    private val getUiScale: GetUiScaleUseCase,
-    private val saveUiScale: SaveUiScaleUseCase
-) : BaseViewModel<Float, UiZoomIntent, Nothing>(initialState = UiScale.DEFAULT) {
+    private val getUiZoom: GetUiZoomUseCase,
+    private val saveUiZoom: SaveUiZoomUseCase
+) : BaseViewModel<Float, UiZoomIntent, Nothing>(initialState = UiZoomLevels.DEFAULT) {
     private val logger = Logger.withTag(tag = LOG_TAG)
 
     init {
         launchGuarded(onError = ::logUnexpectedError) {
-            val kept = getUiScale()
+            val kept = getUiZoom()
             reduce { kept }
         }
     }
@@ -27,9 +27,9 @@ class UiZoomViewModel(
         val scale = state.value
 
         val newScale = when (intent) {
-            UiZoomIntent.OnLarger -> UiScale.larger(scale = scale)
-            UiZoomIntent.OnSmaller -> UiScale.smaller(scale = scale)
-            UiZoomIntent.OnReset -> UiScale.DEFAULT
+            UiZoomIntent.OnLarger -> UiZoomLevels.larger(scale = scale)
+            UiZoomIntent.OnSmaller -> UiZoomLevels.smaller(scale = scale)
+            UiZoomIntent.OnReset -> UiZoomLevels.DEFAULT
         }
 
         change(scale = newScale)
@@ -38,7 +38,7 @@ class UiZoomViewModel(
     private fun change(scale: Float) {
         reduce { scale }
 
-        launchGuarded(onError = ::logUnexpectedError) { saveUiScale(scale = scale) }
+        launchGuarded(onError = ::logUnexpectedError) { saveUiZoom(scale = scale) }
     }
 
     private fun logUnexpectedError(throwable: Throwable) {
