@@ -6,7 +6,6 @@ import app.notekea.core.notes.domain.FindRelatedNotesUseCase
 import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.core.notes.domain.NoteRewrite
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.BaseViewModel
@@ -43,14 +42,48 @@ class GraphViewModel(
     private val layout = GraphLayout()
     private var notes: Map<RelativePath, NoteEntry> = emptyMap()
     private var graph: NoteGraph? = null
+
+    private val host = object : GraphHost {
+        override val state get() = this@GraphViewModel.state
+        override val notes: Map<RelativePath, NoteEntry> get() = this@GraphViewModel.notes
+
+        override var graph: NoteGraph?
+            get() = this@GraphViewModel.graph
+            set(value) {
+                this@GraphViewModel.graph = value
+            }
+
+        override fun reduce(transform: (GraphState) -> GraphState) =
+            this@GraphViewModel.reduce(transform = transform)
+
+        override fun emit(effect: GraphEffect) = this@GraphViewModel.emit(effect = effect)
+
+        override fun launch(block: suspend () -> Unit): Job = launchGuarded(
+            onError = ::logUnexpectedError,
+            block = block
+        )
+
+        override fun change(transform: (GraphState) -> GraphState) =
+            this@GraphViewModel.change(transform = transform)
+    }
+
+    private val search = GraphSearch(
+        fuzzyMatcher = fuzzyMatcher,
+        host = host
+    )
+
+    private val linking = GraphLinking(
+        vaultPath = vaultPath,
+        linkNotes = linkNotes,
+        applyLinkUpdates = applyLinkUpdates,
+        host = host
+    )
     private var openedFrom: RelativePath? = null
     private val relatedNotes = GraphRelatedNotes(vaultPath, findRelatedNotes, noteTextCache)
     private val previews = GraphPreviews(vaultPath, noteTextCache, markdownLineStripper)
     private var isShown = false
     private var refreshJob: Job? = null
     private var previewJob: Job? = null
-    private var linkJob: Job? = null
-    private var lastLink: NoteRewrite? = null
 
     init {
         launchGuarded(onError = ::logUnexpectedError) {
@@ -100,15 +133,15 @@ class GraphViewModel(
 
             GraphIntent.OnSearchOpen -> reduce { it.copy(isSearching = true) }
 
-            GraphIntent.OnSearchClose -> closeSearch()
+            GraphIntent.OnSearchClose -> search.close()
 
-            is GraphIntent.OnQueryChange -> changeQuery(query = intent.query)
+            is GraphIntent.OnQueryChange -> search.changeQuery(query = intent.query)
 
-            is GraphIntent.OnMatchStep -> stepMatch(isForward = intent.isForward)
+            is GraphIntent.OnMatchStep -> search.step(isForward = intent.isForward)
 
-            is GraphIntent.OnLink -> link(target = intent.path)
+            is GraphIntent.OnLink -> linking.link(target = intent.path)
 
-            GraphIntent.OnLinkUndo -> undoLink()
+            GraphIntent.OnLinkUndo -> linking.undo()
         }
     }
 
@@ -181,135 +214,6 @@ class GraphViewModel(
         noteTowards(direction, selected, current.dots, current.lines)?.let { select(path = it) }
     }
 
-    private fun closeSearch() {
-        reduce {
-            it.copy(
-                isSearching = false,
-                query = "",
-                matches = emptyList(),
-                matchIndex = -1
-            )
-        }
-    }
-
-    private fun changeQuery(query: String) {
-        reduce {
-            withMatches(
-                state = it.copy(
-                    query = query,
-                    matchIndex = -1
-                )
-            )
-        }
-    }
-
-    private fun withMatches(state: GraphState): GraphState {
-        val paths = graph
-            ?.withoutFolders(folders = state.excludedFolders)
-            ?.nodes
-            ?.map { it.path }
-            .orEmpty()
-
-        val matches = matchesOf(
-            query = state.query,
-            paths = paths,
-            matcher = fuzzyMatcher
-        )
-
-        val matchIndex = state.matchIndex.coerceAtMost(maximumValue = matches.lastIndex)
-
-        return state.copy(
-            matches = matches,
-            matchIndex = matchIndex
-        )
-    }
-
-    private fun stepMatch(isForward: Boolean) {
-        val current = state.value
-        val count = current.matches.size
-        if (count == 0) return
-
-        val index = when {
-            current.matchIndex >= 0 -> (current.matchIndex + if (isForward) 1 else count - 1) %
-                count
-
-            isForward -> 0
-
-            else -> count - 1
-        }
-
-        val path = current.matches[index]
-
-        change {
-            it.copy(
-                scope = GraphScope.THIS_NOTE,
-                center = path,
-                selected = path,
-                matchIndex = index,
-                reveals = it.reveals + 1,
-                linked = null,
-                linkFailed = false
-            )
-        }
-    }
-
-    private fun link(target: RelativePath) {
-        val source = state.value.preview?.path ?: return
-        if (linkJob?.isActive == true) return
-
-        linkJob = launchGuarded(onError = ::logUnexpectedError) {
-            lastLink = linkNotes(vaultPath, source, target, notes.keys)
-            val isLinked = lastLink != null
-
-            if (isLinked) {
-                graph = graph?.withLink(
-                    one = source,
-                    other = target
-                )
-
-                emit(effect = GraphEffect.NoteRewritten(path = source))
-            }
-
-            change {
-                it.copy(
-                    linked = target.takeIf { isLinked },
-                    linkFailed = !isLinked
-                )
-            }
-        }
-    }
-
-    private fun undoLink() {
-        val rewrite = lastLink ?: return
-        val target = state.value.linked ?: return
-        if (linkJob?.isActive == true) return
-
-        linkJob = launchGuarded(onError = ::logUnexpectedError) {
-            val isUndone = applyLinkUpdates(
-                vaultPath,
-                listOf(rewrite.reversed())
-            ).updated.isNotEmpty()
-
-            if (isUndone) {
-                graph = graph?.withoutLink(
-                    one = rewrite.path,
-                    other = target
-                )
-
-                emit(effect = GraphEffect.NoteRewritten(path = rewrite.path))
-            }
-
-            lastLink = null
-
-            change {
-                it.copy(
-                    linked = null,
-                    linkFailed = !isUndone
-                )
-            }
-        }
-    }
-
     private fun toggleFolder(folder: String) {
         change {
             val excluded = it.excludedFolders
@@ -367,7 +271,7 @@ class GraphViewModel(
             }
 
             reduce {
-                withMatches(
+                search.withMatches(
                     state = it.copy(
                         isLoading = false,
                         center = center,
