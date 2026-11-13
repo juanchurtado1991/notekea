@@ -29,6 +29,7 @@ fun SuiteBuilder.sourceCases() {
     allOfSection()
     review()
     madeCards()
+    studyChoiceCases()
 }
 
 private fun SuiteBuilder.document() {

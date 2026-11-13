@@ -25,23 +25,24 @@ class AnswerPromptTest {
     }
 
     @Test
-    fun `tables that do not answer the question give the not found reply, not the model's words`() = runTest {
-        val engine = FakeLlmEngine()
-        engine.reply = { "No dentist appointment was found in your notes or tasks." }
+    fun `tables that do not answer the question give the not found reply, not the model's words`() =
+        runTest {
+            val engine = FakeLlmEngine()
+            engine.reply = { "No dentist appointment was found in your notes or tasks." }
 
-        val last = AnswerFromFoundUseCase(llmEngine = engine)(
-            question = "When is my dentist appointment?",
-            tables = listOf(
-                FoundNotes(
-                    isTasks = true,
-                    rows = emptyList()
+            val last = AnswerFromFoundUseCase(llmEngine = engine)(
+                question = "When is my dentist appointment?",
+                tables = listOf(
+                    FoundNotes(
+                        isTasks = true,
+                        rows = emptyList()
+                    )
                 )
-            )
-        ).last()
+            ).last()
 
-        assertEquals(
-            expected = AnswerStep.NotFound,
-            actual = last
-        )
-    }
+            assertEquals(
+                expected = AnswerStep.NotFound,
+                actual = last
+            )
+        }
 }

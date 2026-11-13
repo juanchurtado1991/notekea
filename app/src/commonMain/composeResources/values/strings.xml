@@ -1021,7 +1021,6 @@
     <string name="clip_error_not_article">No article was found in this page: it may need JavaScript, or be a home page or a file.</string>
     <string name="workspace_start_clip">Clip a web page</string>
     <string name="study_title">Study</string>
-    <string name="study_progress">%1$d due · from %2$s</string>
     <string name="study_show">Show answer</string>
     <string name="study_hard">Hard</string>
     <string name="study_good">Good</string>
@@ -1030,6 +1029,12 @@
     <string name="study_empty">No study cards yet. Ask the chat “make study cards from this note”, or write Question::Answer lines in a note tagged #flashcards.</string>
     <string name="study_done">All done for today: %1$d cards reviewed.</string>
     <string name="study_next">All done for today: %1$d cards reviewed. The next one comes back on %2$s.</string>
+    <string name="study_position">%1$d of %2$d</string>
+    <string name="study_right">Right!</string>
+    <string name="study_wrong">Not quite. The answer is %1$s.</string>
+    <string name="study_continue">Next</string>
+    <string name="study_making">Writing the options…</string>
+    <string name="study_progress_label">Cards reviewed</string>
     <string name="tab_study">Study</string>
     <string name="chat_action_make_cards">Make study cards</string>
     <string name="chat_action_cards_count">%1$d cards</string>

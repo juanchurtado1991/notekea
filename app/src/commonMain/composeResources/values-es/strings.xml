@@ -1021,7 +1021,6 @@
     <string name="clip_error_not_article">No se encontró un artículo en esta página: puede necesitar JavaScript o ser una portada o un archivo.</string>
     <string name="workspace_start_clip">Recortar una página web</string>
     <string name="study_title">Estudiar</string>
-    <string name="study_progress">%1$d pendientes · de %2$s</string>
     <string name="study_show">Mostrar la respuesta</string>
     <string name="study_hard">Difícil</string>
     <string name="study_good">Bien</string>
@@ -1030,6 +1029,12 @@
     <string name="study_empty">Todavía no hay tarjetas de estudio. Pide al chat “crea tarjetas de estudio de esta nota” o escribe líneas Pregunta::Respuesta en una nota con la etiqueta #flashcards.</string>
     <string name="study_done">Listo por hoy: %1$d tarjetas repasadas.</string>
     <string name="study_next">Listo por hoy: %1$d tarjetas repasadas. La siguiente vuelve el %2$s.</string>
+    <string name="study_position">%1$d de %2$d</string>
+    <string name="study_right">¡Correcto!</string>
+    <string name="study_wrong">No exactamente. La respuesta es %1$s.</string>
+    <string name="study_continue">Siguiente</string>
+    <string name="study_making">Escribiendo las opciones…</string>
+    <string name="study_progress_label">Tarjetas repasadas</string>
     <string name="tab_study">Estudiar</string>
     <string name="chat_action_make_cards">Make study cards</string>
     <string name="chat_action_cards_count">%1$d cards</string>

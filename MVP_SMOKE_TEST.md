@@ -611,6 +611,7 @@ Run on the Playground Vault.
 |---|---|---|---|---|---|---|---|---|
 | 4.6-01 | Write Capitals.md with #flashcards and the line Capital of Portugal::Lisbon; open Study cards in the tool rail; Show answer; Good | The question shows without the answer, then the answer; Good says all done for today, and the line in the note ends with <!--SR:!date,3,250--> | 4.6 | Auto-Test | 4.6-01, `CardFormatTest`, `CardScheduleTest`, `StudyCardsUseCasesTest` | | | |
 | 4.6-02 | With a chat model open Recipes/Arepas and ask the chat "make study cards from this note"; click Do it | The card lists questions the note answers; Do it adds them at the note's end under Flashcards, and Study cards shows them | 4.6 | Manual (costly) | `StudyCardsUseCasesTest` | | | |
+| 4.6-03 | With a chat model, write Rivers.md with #flashcards and the line Longest river of Portugal::Tagus; open Study cards; click Tagus; press Enter | The card shows its deck, 1 of 1 and a progress bar, the question and four options A to D (keys 1 to 4) with Tagus among them, no Show answer; Tagus turns green with Right!, the others dim; Enter says all done for today and the line ends with <!--SR:!date,3,250-->; a wrong option turns red, shows the right one and schedules the card as Hard | 4.6 | Auto-Test | 4.6-03, `StudyViewModelTest`, `MakeChoicesUseCaseTest` | | | |
 
 ### 4.7 Agent mode
 
