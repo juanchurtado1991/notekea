@@ -23,6 +23,8 @@ import app.notekea.shell.domain.GetSidePanelUseCase
 import app.notekea.shell.domain.GetWorkspaceUseCase
 import app.notekea.shell.domain.SaveSidePanelUseCase
 import app.notekea.shell.domain.Workspace
+import app.notekea.shell.presentation.workspace.WorkspaceEffect
+import app.notekea.shell.presentation.workspace.WorkspaceIntent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first

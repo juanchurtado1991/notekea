@@ -25,6 +25,12 @@ import app.notekea.shell.domain.GetSidePanelUseCase
 import app.notekea.shell.domain.GetWorkspaceUseCase
 import app.notekea.shell.domain.SaveSidePanelUseCase
 import app.notekea.shell.domain.Workspace
+import app.notekea.shell.presentation.follow.connectionActions
+import app.notekea.shell.presentation.follow.followSwitcherEffect
+import app.notekea.shell.presentation.workspace.PaneEditors
+import app.notekea.shell.presentation.workspace.WorkspaceIntent
+import app.notekea.shell.presentation.workspace.WorkspaceTools
+import app.notekea.shell.presentation.workspace.WorkspaceViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel

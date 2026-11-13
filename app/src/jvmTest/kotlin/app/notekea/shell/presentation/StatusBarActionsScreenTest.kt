@@ -11,6 +11,8 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.platform.LocalUiZoom
 import app.notekea.core.presentation.platform.UiZoomState
 import app.notekea.core.presentation.texts
+import app.notekea.shell.presentation.tabs.TabKind
+import app.notekea.shell.presentation.workspace.WorkspaceStatusBar
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

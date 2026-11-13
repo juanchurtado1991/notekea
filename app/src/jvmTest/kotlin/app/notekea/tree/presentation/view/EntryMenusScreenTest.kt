@@ -20,7 +20,7 @@ import app.notekea.core.presentation.rightClickText
 import app.notekea.core.presentation.texts
 import app.notekea.editor.presentation.sidepanel.OutlineSection
 import app.notekea.editor.presentation.sidepanel.SidePanelActions
-import app.notekea.shell.presentation.FolderGrid
+import app.notekea.shell.presentation.tabs.FolderGrid
 import app.notekea.tree.domain.FolderCard
 import app.notekea.tree.presentation.model.TreePreviewData
 import app.notekea.tree.presentation.model.VaultTreeIntent

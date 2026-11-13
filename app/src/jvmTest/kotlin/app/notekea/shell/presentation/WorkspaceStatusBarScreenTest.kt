@@ -14,6 +14,8 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.editor.domain.NoteStats
 import app.notekea.editor.presentation.model.EditorState
 import app.notekea.editor.presentation.noteinfo.NoteInfo
+import app.notekea.shell.presentation.tabs.TabKind
+import app.notekea.shell.presentation.workspace.WorkspaceStatusBar
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

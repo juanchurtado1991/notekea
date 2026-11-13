@@ -15,6 +15,9 @@ import app.notekea.core.presentation.descriptions
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.shell.domain.Workspace
+import app.notekea.shell.presentation.workspace.WorkspaceContent
+import app.notekea.shell.presentation.workspace.WorkspaceStartActions
+import app.notekea.shell.presentation.workspace.WorkspaceState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

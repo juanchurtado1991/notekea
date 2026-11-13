@@ -3,6 +3,7 @@ package app.notekea.shell.presentation
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.shell.domain.EditorPane
 import app.notekea.shell.domain.Workspace
+import app.notekea.shell.presentation.workspace.WorkspaceState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

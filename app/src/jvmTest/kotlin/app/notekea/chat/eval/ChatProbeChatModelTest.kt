@@ -66,8 +66,8 @@ import app.notekea.query.domain.TranslateQueryUseCase
 import app.notekea.search.domain.FakeIndexStateStore
 import app.notekea.search.domain.IndexVaultUseCase
 import app.notekea.search.domain.PlanIndexUseCase
-import app.notekea.shell.data.VaultActionFinder
-import app.notekea.shell.data.VaultActionRunner
+import app.notekea.shell.data.chat.VaultActionFinder
+import app.notekea.shell.data.chat.VaultActionRunner
 import app.notekea.tasks.domain.ListTasksUseCase
 import app.notekea.tasks.domain.SetTaskDoneUseCase
 import app.notekea.tree.data.OkioNoteMetadataReader

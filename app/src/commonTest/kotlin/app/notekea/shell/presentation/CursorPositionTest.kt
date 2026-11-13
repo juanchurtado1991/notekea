@@ -1,5 +1,6 @@
 package app.notekea.shell.presentation
 
+import app.notekea.shell.presentation.workspace.cursorOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

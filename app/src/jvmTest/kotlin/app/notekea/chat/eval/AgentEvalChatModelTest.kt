@@ -34,7 +34,7 @@ import app.notekea.query.domain.RunQueryUseCase
 import app.notekea.query.domain.SetPropertyUseCase
 import app.notekea.query.domain.TranslateQueryUseCase
 import app.notekea.search.eval.EvalVault
-import app.notekea.shell.data.VaultActionFinder
+import app.notekea.shell.data.chat.VaultActionFinder
 import app.notekea.tasks.domain.ListTasksUseCase
 import app.notekea.tasks.domain.SetTaskDoneUseCase
 import app.notekea.tree.data.OkioNoteMetadataReader

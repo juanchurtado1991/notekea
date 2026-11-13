@@ -8,6 +8,7 @@ import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConvent
 import app.notekea.core.settings.domain.SettingsTopic
 import app.notekea.settings.domain.SettingsHelpError
 import app.notekea.settings.domain.SettingsHelpStep
+import app.notekea.shell.data.chat.SettingsHelpFromGuide
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test

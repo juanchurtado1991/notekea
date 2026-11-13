@@ -7,6 +7,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
+import app.notekea.shell.presentation.follow.SyncConflictsOf
 import app.notekea.sync.domain.FakeVaultSync
 import app.notekea.sync.domain.SyncStatus
 import app.notekea.sync.domain.VaultSyncs
