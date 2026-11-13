@@ -5,7 +5,8 @@ package app.notekea.chat.domain.answer
  * and the cited ones are numbered again from 1 in the order they first appear, so the answer lists only its sources.
  */
 object AnswerCitations {
-    private val CITATION = Regex(pattern = """\s*\[(\d+)]""")
+    // Up to three digits: "[202311081234]" is a note's own number, not a citation, and no Int holds it.
+    private val CITATION = Regex(pattern = """\s*\[(\d{1,3})]""")
     private val SPACE_BEFORE_MARK = Regex(pattern = """\s+([.,;:!?])""")
 
     /** [text], written over [read] (excerpt `[n]` is `read[n - 1]`), with its citations checked and renumbered. */

@@ -7,6 +7,7 @@ import app.notekea.chat.domain.plan.ActionRunner
 import app.notekea.chat.domain.plan.CheckPlanUseCase
 import app.notekea.chat.domain.plan.ComposeNotesUseCase
 import app.notekea.chat.domain.plan.PageReader
+import app.notekea.chat.domain.plan.UrlsNamed
 import app.notekea.chat.domain.prompt.AgentTaskPrompt
 import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.GenerationOptions
@@ -151,7 +152,13 @@ class AgentTaskUseCase(
         notes: Collection<NoteEntry>,
         openNote: RelativePath?
     ) {
-        val confirmed = move.steps.filter { it.kind.isConfirmed }
+        // A page is clipped only from an address the task itself writes: a note or a page read on the way cannot
+        // have the agent fetch an address of its own, with what it read in it (code review, 2026-11-13).
+        val confirmed = UrlsNamed.shaped(
+            steps = move.steps.filter { it.kind.isConfirmed },
+            request = task
+        )
+
         val summary = move.summary.orEmpty()
         if (confirmed.isEmpty()) return emit(value = AgentStep.Finished(summary = summary))
 

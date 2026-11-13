@@ -1,11 +1,16 @@
 package app.notekea.chat.domain.answer
 
+import kotlin.math.abs
+import kotlin.math.round
+
 /**
  * The sums an answer writes out, done again: a small model adds badly even when it shows the numbers ("9250 (4500 +
- * 300 + 2000 + 250)" for 7050, the chat probe of 2026-11-11). "a + b = r" and "r (a + b)" get the right r.
+ * 300 + 2000 + 250)" for 7050, the chat probe of 2026-11-11). "a + b = r" and "r (a + b)" get the right r; a sum that
+ * was right is left as it was written, with its thousands marks ("4,500 + 300 = 4,800").
  */
 internal object SumsChecked {
-    private const val NUMBER = "\\d+(?:[.,]\\d+)?"
+    // "4500", "4,500", "1.250.000", "0.25": digits with marks between them, read by [valueOf].
+    private const val NUMBER = "\\d+(?:[.,]\\d+)*"
     private const val TERMS = "$NUMBER(?:\\s*[+\\-]\\s*$NUMBER)+"
 
     // Only additions before a result in brackets: "3 (2026-10-21)" is a date, not a sum.
@@ -13,42 +18,71 @@ internal object SumsChecked {
 
     private val RESULT_AFTER = Regex(pattern = "($TERMS)(\\s*=\\s*)($NUMBER)")
     private val RESULT_BEFORE = Regex(pattern = "($NUMBER)(\\s*\\(\\s*)($ADDED)(\\s*\\))")
+    private val TERM = Regex(pattern = "([+\\-]?)\\s*($NUMBER)")
+
+    // Groups of three after a mark are thousands ("4,500", "1.250.000"), in English or Spanish.
+    private val THOUSANDS = Regex(pattern = "^\\d{1,3}(?:[.,]\\d{3})+$")
+    private const val CLOSE = 0.000_001
+    private const val DECIMALS = 1_000_000.0
 
     fun corrected(text: String): String {
         val after = RESULT_AFTER
             .replace(input = text) { match ->
-                val (terms, equals, _) = match.destructured
+                val (terms, equals, result) = match.destructured
 
-                "$terms$equals${written(total = totalOf(terms = terms))}"
+                "$terms$equals${rightResult(terms = terms, written = result)}"
             }
 
         return RESULT_BEFORE
             .replace(input = after) { match ->
-                val (_, open, terms, close) = match.destructured
+                val (result, open, terms, close) = match.destructured
 
-                "${written(total = totalOf(terms = terms))}$open$terms$close"
+                "${rightResult(terms = terms, written = result)}$open$terms$close"
             }
     }
 
-    private fun totalOf(terms: String): Double {
-        val parts = Regex(pattern = "([+\\-]?)\\s*($NUMBER)").findAll(input = terms)
+    // The result as it was written when it is right, or when a number cannot be read; else the sum done again.
+    private fun rightResult(
+        terms: String,
+        written: String
+    ): String {
+        val total = totalOf(terms = terms) ?: return written
+        val given = valueOf(number = written) ?: return written
 
-        return parts.sumOf { part ->
-            val value = part
-                .groupValues[2]
-                .replace(
-                    oldChar = ',',
-                    newChar = '.'
-                )
-                .toDouble()
-
-            if (part.groupValues[1] == "-") -value else value
-        }
+        return if (abs(x = total - given) < CLOSE) written else writtenOf(total = total)
     }
 
-    private fun written(total: Double): String {
-        val whole = total.toLong()
+    private fun totalOf(terms: String): Double? {
+        val values = TERM
+            .findAll(input = terms)
+            .map { part ->
+                val value = valueOf(number = part.groupValues[2])
 
-        return if (total == whole.toDouble()) whole.toString() else total.toString()
+                if (part.groupValues[1] == "-") value?.unaryMinus() else value
+            }
+            .toList()
+
+        return if (values.any { it == null }) null else values.filterNotNull().sum()
+    }
+
+    private fun valueOf(number: String): Double? {
+        val plain = if (THOUSANDS.matches(input = number)) {
+            number.filter { it.isDigit() }
+        } else {
+            number.replace(
+                oldChar = ',',
+                newChar = '.'
+            )
+        }
+
+        return plain.toDoubleOrNull()
+    }
+
+    // 304 for a whole total, 0.3 for 0.1 + 0.2: never the double's own tail of digits.
+    private fun writtenOf(total: Double): String {
+        val rounded = round(x = total * DECIMALS) / DECIMALS
+        val whole = rounded.toLong()
+
+        return if (rounded == whole.toDouble()) whole.toString() else rounded.toString()
     }
 }

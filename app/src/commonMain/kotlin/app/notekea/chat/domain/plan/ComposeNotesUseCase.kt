@@ -282,7 +282,7 @@ class ComposeNotesUseCase(
         val noFolder = ActionProblem.Missing(step.kind, ActionField.FOLDER)
         val folder = step.folder ?: throw ComposeProblem(noFolder)
 
-        val parts = partsOf(text = request)
+        val parts = TextParts.of(text = request)
 
         if (parts.size > MAX_PARTS) {
             throw ComposeProblem(ActionProblem.TextTooLong(request.split(WHITESPACE).size))
@@ -355,24 +355,6 @@ class ComposeNotesUseCase(
             }
     }
 
-    /** [text] in parts the model can read at once, cut between paragraphs. */
-    private fun partsOf(text: String): List<String> {
-        val parts = mutableListOf<StringBuilder>()
-
-        text.split(PARAGRAPH).forEach { paragraph ->
-            val last = parts.lastOrNull()
-            val fits = last != null && last.length + paragraph.length <= PART_CHARS
-
-            if (fits) {
-                last.append("\n\n").append(paragraph)
-            } else {
-                parts += StringBuilder(paragraph.take(n = PART_CHARS))
-            }
-        }
-
-        return parts.map { it.toString() }.filter { it.isNotBlank() }
-    }
-
     private suspend fun written(
         messages: List<ChatMessage>,
         maxTokens: Int,
@@ -419,12 +401,10 @@ class ComposeNotesUseCase(
         // About 2,500 tokens of notes, which leaves room for the instructions and the answer in a 4,096 context.
         const val READ_AT_ONCE_CHARS = 9_000
         const val DIGEST_CHARS = 6_000
-        const val PART_CHARS = 5_000
         const val MAX_PARTS = 5
         const val MAX_TEXT_NOTES = 15
         val TITLE_LINE = Regex(pattern = "^#\\s.*")
         val WIKI_LINK = Regex(pattern = "\\[\\[([^\\]]+)]]")
-        val PARAGRAPH = Regex(pattern = "\\n\\s*\\n")
         val WHITESPACE = Regex(pattern = "\\s+")
         val FORBIDDEN = Regex(pattern = "[\\\\/:*?\"<>|#^\\[\\]]")
     }
