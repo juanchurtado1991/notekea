@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
  * Colors that stay the same in every theme: the brand's cobalt and tangerine, which keep the logo Notekea's own, and
  * what has a meaning of its own, as files, bookmarks, warnings and what went well. Only the theme package reads them.
  */
-internal object NotekeaPalette {
+internal object FixedPalette {
     val AccentLight = Color(0xFFFF7A45)
     val BookmarkDark = Color(0xFFF5C542)
     val BookmarkLight = Color(0xFFE5A800)

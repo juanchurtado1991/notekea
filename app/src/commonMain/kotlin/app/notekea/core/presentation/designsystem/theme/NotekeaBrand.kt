@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.unit.dp
-import app.notekea.core.presentation.designsystem.theme.palette.NotekeaPalette
+import app.notekea.core.presentation.designsystem.theme.palette.FixedPalette
 
 /**
  * Notekea's logo, as vectors drawn at any size: a kea and an "N" on a note with a folded corner, the note in the
@@ -57,9 +57,9 @@ object NotekeaBrand {
 
     val Logo: ImageVector by lazy {
         logoOf(
-            note = NotekeaPalette.PrimaryContainerLight,
-            mark = NotekeaPalette.PrimaryLight,
-            fold = NotekeaPalette.AccentLight
+            note = FixedPalette.PrimaryContainerLight,
+            mark = FixedPalette.PrimaryLight,
+            fold = FixedPalette.AccentLight
         )
     }
 

@@ -6,8 +6,8 @@ import app.notekea.core.settings.domain.SettingsPlace
 import app.notekea.core.settings.domain.SettingsPlaces
 import app.notekea.core.settings.domain.SettingsTopic
 import app.notekea.settings.domain.SettingsHelpExchange
+import app.notekea.settings.domain.SettingsHelpSource
 import app.notekea.settings.domain.SettingsHelpStep
-import app.notekea.settings.domain.SettingsHelper
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 
@@ -16,7 +16,7 @@ import kotlinx.coroutines.Job
  * setting it names (or else its reply names) is shown at once, as an intent opens a screen; Show shows it again.
  */
 class SettingsHelpViewModel(
-    private val helper: SettingsHelper
+    private val helper: SettingsHelpSource
 ) : BaseViewModel<SettingsHelpState, SettingsHelpIntent, Nothing>(
     initialState = SettingsHelpState()
 ) {

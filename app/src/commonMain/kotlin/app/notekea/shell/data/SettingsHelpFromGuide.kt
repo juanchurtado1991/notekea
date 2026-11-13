@@ -11,8 +11,8 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.settings.domain.SettingsTopic
 import app.notekea.settings.domain.SettingsHelpError
 import app.notekea.settings.domain.SettingsHelpExchange
+import app.notekea.settings.domain.SettingsHelpSource
 import app.notekea.settings.domain.SettingsHelpStep
-import app.notekea.settings.domain.SettingsHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 
@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.mapNotNull
 class SettingsHelpFromGuide(
     private val answerHelp: AnswerHelpUseCase,
     private val conventions: PlatformConventions
-) : SettingsHelper {
+) : SettingsHelpSource {
     override fun answer(
         question: String,
         topic: SettingsTopic,

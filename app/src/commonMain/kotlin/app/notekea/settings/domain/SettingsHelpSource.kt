@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
  * [question] answered from the app's guide by the chat model, about the section open ([topic]), in the question's
  * language, with the earlier questions and replies ([history]) so a follow-up knows what "it" was.
  */
-fun interface SettingsHelper {
+fun interface SettingsHelpSource {
     fun answer(
         question: String,
         topic: SettingsTopic,

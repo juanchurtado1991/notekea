@@ -4,7 +4,7 @@ import app.notekea.chat.domain.ActionRunner
 import app.notekea.chat.domain.CardMaker
 import app.notekea.chat.domain.PageReader
 import app.notekea.chat.domain.WebPageClipper
-import app.notekea.settings.domain.SettingsHelper
+import app.notekea.settings.domain.SettingsHelpSource
 import app.notekea.shell.data.CardsForChat
 import app.notekea.shell.data.ClipsForChat
 import app.notekea.shell.data.SettingsHelpFromGuide
@@ -59,7 +59,7 @@ val shellModule = module {
     single<PageReader> { get<ClipsForChat>() }
     single<WebPageClipper> { get<ClipsForChat>() }
 
-    single<SettingsHelper> {
+    single<SettingsHelpSource> {
         SettingsHelpFromGuide(
             answerHelp = get(),
             conventions = get()
