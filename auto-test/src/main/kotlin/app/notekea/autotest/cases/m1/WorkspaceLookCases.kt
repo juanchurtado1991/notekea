@@ -148,7 +148,8 @@ private fun SuiteBuilder.zoom() {
         expectText(text = "120 %")
         pressInWindow(shortcut = Mod + Key.Zero)
         expectNoText(text = "120 %")
-        clickIcon(label = "About Notekea")
+        clickIcon(label = "Settings")
+        click(text = "Shortcuts")
 
         listOf("Zoom in", "Zoom out", "Actual size").forEach { expectText(text = it) }
     }

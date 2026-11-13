@@ -125,7 +125,7 @@ class DailyNoteScreenTest {
         )
         private val TODAY_ROW = Offset(
             x = 20f,
-            y = 252f
+            y = 167f
         )
     }
 }

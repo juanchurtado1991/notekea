@@ -241,7 +241,6 @@
     <string name="properties_type_list">List</string>
     <string name="properties_type_number">Number</string>
     <string name="properties_type_text">Text</string>
-    <string name="rail_about">About Notekea</string>
     <string name="rail_label">Sidebar tools</string>
     <string name="rail_settings">Settings</string>
     <string name="rail_graph">Graph</string>

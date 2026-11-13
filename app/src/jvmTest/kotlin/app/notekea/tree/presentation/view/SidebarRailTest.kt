@@ -13,9 +13,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * The tool rail and the sidebar header, as in Android Studio: the rail's Search, Files, side panel, Today, Open
- * another vault, About and Settings work with the sidebar shown or hidden, and the header expands, collapses and
- * minimizes.
+ * The tool rail and the sidebar header, as in Android Studio: the rail's Search, Files and side panel, its views under
+ * a line (Today, tasks, graph, queries, study), Open another vault and Settings work with the sidebar shown or hidden,
+ * and the header expands, collapses and minimizes.
  */
 class SidebarRailTest {
     @Test
@@ -34,13 +34,12 @@ class SidebarRailTest {
             SEARCH,
             VaultTreeIntent.OnSidebarToggle,
             SIDE_PANEL,
+            VaultTreeIntent.OnTodayClick,
+            TASKS,
             GRAPH,
             QUERY,
-            TASKS,
-            VaultTreeIntent.OnTodayClick,
             STUDY,
             SWITCH_VAULT,
-            ABOUT,
             SETTINGS
         )
 
@@ -81,7 +80,6 @@ class SidebarRailTest {
                             onStudy = { intents += STUDY },
                             onSidePanelToggle = { intents += SIDE_PANEL },
                             onSwitchVault = { intents += SWITCH_VAULT },
-                            onAbout = { intents += ABOUT },
                             onSettings = { intents += SETTINGS }
                         )
                     ) {}
@@ -126,7 +124,6 @@ class SidebarRailTest {
                 y = 26f
             )
         )
-        private const val ABOUT = "about"
         private const val GRAPH = "graph"
         private const val QUERY = "query"
         private const val SEARCH = "search"
@@ -135,8 +132,7 @@ class SidebarRailTest {
         private const val SWITCH_VAULT = "switch vault"
         private const val TASKS = "tasks"
         private const val STUDY = "study"
-        private val RAIL_ROWS =
-            listOf(57f, 89f, 122f, 154f, 187f, 219f, 252f, 284f, 334f, 366f, 398f)
+        private val RAIL_ROWS = listOf(57f, 89f, 122f, 167f, 200f, 232f, 265f, 297f, 366f, 398f)
         private val RAIL = RAIL_ROWS.map {
             Offset(
                 x = 20f,

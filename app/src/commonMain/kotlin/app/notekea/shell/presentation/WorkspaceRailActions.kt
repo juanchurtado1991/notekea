@@ -27,6 +27,5 @@ internal fun railActionsOf(
     },
     onSidePanelToggle = { sidePanel.onIntent(intent = EditorIntent.OnSidePanelToggle) },
     onSwitchVault = onSwitchVault,
-    onAbout = { onDialog(WindowDialog.ABOUT) },
     onSettings = { onDialog(WindowDialog.SETTINGS) }
 )

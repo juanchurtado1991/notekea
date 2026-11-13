@@ -1,5 +1,6 @@
 package com.testbuddy.app
 
+import com.testbuddy.HostSystem
 import java.io.File
 import java.lang.management.ManagementFactory
 import java.nio.file.Files
@@ -12,6 +13,14 @@ import java.nio.file.Path
  */
 internal object AppProcess {
     const val RUNNER_FLAG = "--test-buddy-runner"
+
+    // AppKit reads this default from the command line too. App Nap slows a process whose window is covered to a
+    // tenth: on macOS an automatic run behind another window waited past its cases' timeouts.
+    private val NO_APP_NAP = listOf("-NSAppSleepDisabled", "YES")
+
+    /** What starts the automatic run on [system]: [RUNNER_FLAG], and on macOS App Nap turned off for the process. */
+    fun runnerArguments(system: HostSystem = HostSystem.current()): List<String> =
+        listOf(RUNNER_FLAG) + if (system == HostSystem.MACOS) NO_APP_NAP else emptyList()
 
     fun start(
         arguments: List<String>,

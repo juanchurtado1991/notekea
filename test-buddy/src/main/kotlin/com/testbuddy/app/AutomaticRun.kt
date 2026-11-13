@@ -13,7 +13,7 @@ internal class AutomaticRun(
     private val onEvent: (RunnerEvent) -> Unit,
     private val onEnd: (exitCode: Int) -> Unit,
     private val startProcess: () -> Process = {
-        AppProcess.start(arguments = listOf(AppProcess.RUNNER_FLAG))
+        AppProcess.start(arguments = AppProcess.runnerArguments())
     }
 ) {
     private var process: Process? = null

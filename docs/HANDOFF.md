@@ -205,6 +205,13 @@ on macOS or Windows yet. The developer continues on their Mac:
    (`.github/workflows/milestone-build.yml`). `./gradlew :auto-test:packageQa` builds this system's installer locally.
    The release run (5.5) covers every case on the three systems and closes M2 to M5.
 
+**From the macOS smoke (2026-11-12):** the title bar moves the window again; seven themes, Workspace Blue the default
+(`ROADMAP.md` 2.12); the rail in groups (Search, Files, Side panel; Today, Tasks, Graph, Query, Study; Open another
+vault and Settings), with no About button, About being in Settings; Settings' icons drawn as the rail's. Notekea QA's
+automatic run starts with App Nap off (`-NSAppSleepDisabled YES`, Test Buddy's `AppProcess`): behind another window
+macOS slowed it tenfold and cases waiting for the index failed at random. Still open: the YouTube window crashes on
+macOS (its web view needs Cocoa's main thread).
+
 **Decisions of this pull request** (also in `ROADMAP.md` 5.1–5.4, `docs/macos-redesign.md`, `PLATFORM_GUIDELINES.md`,
 `qa/AUTO_TEST.md` *Language*):
 

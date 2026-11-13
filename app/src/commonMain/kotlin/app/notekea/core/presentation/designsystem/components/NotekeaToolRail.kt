@@ -25,18 +25,20 @@ import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.designsystem.theme.sidebarSurface
 
+private const val DIVIDER_WIDTH_DP = 20
 private const val PREVIEW_HEIGHT_DP = 260
 
 /**
- * A narrow strip of icon buttons along the window's edge that stays when the panel beside it is hidden, each with a
- * tooltip beside it. [items] leave the keyboard where it was; [bottomItems] sit at the bottom and Tab reaches them;
- * [header] sits above them all; [label] names the strip for screen readers.
+ * A narrow strip of icon buttons along the window's edge that stays when the panel beside it is hidden, with tooltips.
+ * [items] leave the keyboard where it was, [toolItems] follow under a short line; [bottomItems] sit at the bottom and
+ * Tab reaches them; [header] tops them all; [label] names the strip for screen readers.
  */
 @Composable
 fun NotekeaToolRail(
     items: List<NotekeaToolRailItem>,
     label: String,
     modifier: Modifier = Modifier,
+    toolItems: List<NotekeaToolRailItem> = emptyList(),
     bottomItems: List<NotekeaToolRailItem> = emptyList(),
     header: (@Composable () -> Unit)? = null
 ) {
@@ -66,6 +68,15 @@ fun NotekeaToolRail(
                 )
             }
 
+            if (toolItems.isNotEmpty()) RailDivider()
+
+            toolItems.forEach {
+                RailButton(
+                    item = it,
+                    takesFocus = false
+                )
+            }
+
             Spacer(modifier = Modifier.weight(weight = 1f))
 
             bottomItems.forEach {
@@ -83,6 +94,18 @@ fun NotekeaToolRail(
                 .background(color = colors.outlineVariant)
         )
     }
+}
+
+/** The short line between the rail's groups. */
+@Composable
+private fun RailDivider() {
+    Box(
+        modifier = Modifier
+            .padding(vertical = NotekeaDimensions.SpacingXs)
+            .width(width = DIVIDER_WIDTH_DP.dp)
+            .height(height = NotekeaDimensions.BorderWidth)
+            .background(color = MaterialTheme.colorScheme.outline)
+    )
 }
 
 /** One button of the rail, on the selected color while [NotekeaToolRailItem.isSelected], its tooltip beside it. */

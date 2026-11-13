@@ -3,7 +3,6 @@ package app.notekea.settings.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -26,15 +25,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.components.focusBorder
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.designsystem.theme.NotekeaColors
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res
 import app.notekea.resources.settings_title
 import org.jetbrains.compose.resources.stringResource
 
 private const val SIDEBAR_WIDTH_DP = 200
-private const val ICON_BOX_DP = 22
-private const val ICON_DP = 14
 private const val TINT_ALPHA = 0.4f
 
 /**
@@ -109,20 +105,13 @@ private fun SectionRow(
         horizontalArrangement = Arrangement.spacedBy(space = NotekeaDimensions.SpacingS),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(size = ICON_BOX_DP.dp)
-                .clip(shape = shape)
-                .background(color = colorOf(section = section)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = section.icon,
-                contentDescription = null,
-                modifier = Modifier.size(size = ICON_DP.dp),
-                tint = colors.surface
-            )
-        }
+        // The rail's style: the section's outline icon in the text's muted color, as Files and Settings show there.
+        Icon(
+            imageVector = section.icon,
+            contentDescription = null,
+            modifier = Modifier.size(size = NotekeaDimensions.IconSize),
+            tint = if (isChosen) colors.onPrimaryContainer else colors.onSurfaceVariant
+        )
 
         Text(
             text = stringResource(resource = section.label),
@@ -130,24 +119,6 @@ private fun SectionRow(
             color = if (isChosen) colors.onPrimaryContainer else colors.onSurface
         )
     }
-}
-
-// Each section's color, from the theme's own, as macOS gives each pane of its settings a color of its own.
-@Composable
-private fun colorOf(section: SettingsSection): Color = when (section) {
-    SettingsSection.GENERAL,
-    SettingsSection.SHORTCUTS,
-    SettingsSection.ABOUT -> MaterialTheme.colorScheme.outline
-
-    SettingsSection.APPEARANCE -> MaterialTheme.colorScheme.primary
-
-    SettingsSection.EDITOR -> NotekeaColors.success
-
-    SettingsSection.FILES -> NotekeaColors.warning
-
-    SettingsSection.AI_MODEL -> NotekeaColors.fileMedia
-
-    SettingsSection.SYNC -> NotekeaColors.fileImage
 }
 
 @Preview

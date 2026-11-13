@@ -19,32 +19,31 @@ private fun SuiteBuilder.toolRail() {
         reason = ManualReason.EYES
     ) {
         prepare(PLAYGROUND)
-        title(text = "La barra de herramientas lateral, Acerca de y Ajustes se ven bien")
+        title(text = "La barra de herramientas lateral y Ajustes se ven bien")
 
         steps(
             text =
             "$OPEN_PLAYGROUND\n2. Abre dos notas. Pasa el puntero por cada icono de la barra " +
-                "estrecha de la izquierda.\n3. Haz clic en Acerca de Notekea (la ⓘ de abajo), " +
-                "míralo y pulsa Esc.\n4. Haz clic en Ajustes (el engranaje) y ciérralo con " +
-                "✕.\n5. Haz clic dos veces en Panel lateral (el segundo icono).\n6. Haz clic en " +
-                "Abrir otra bóveda."
+                "estrecha de la izquierda.\n3. Haz clic en Ajustes (el engranaje de abajo), luego " +
+                "en Acerca de, y ciérralo con ✕.\n4. Haz clic dos veces en Panel lateral (el " +
+                "tercer icono).\n5. Haz clic en Abrir otra bóveda."
         )
 
         expected(
             text =
-            "Arriba la barra tiene el logo de Notekea, luego Archivos, Panel lateral, Buscar " +
-                "notas y Hoy; abajo tiene Abrir otra bóveda, Acerca de Notekea y Ajustes, cada " +
-                "uno con su nombre al pasar el puntero. La pestaña de la nota abierta sube con " +
-                "esquinas redondeadas hacia la nota; las demás pestañas son discretas, con una " +
-                "línea fina entre ellas y su ✕ solo al pasar el puntero. Acerca de muestra el " +
-                "logo, Notekea, \"Versión 0.1.0-alpha\", GitHub y los atajos de esta computadora " +
-                "como teclas (Notas, Escritura, Espacio de trabajo) con una barra de " +
-                "desplazamiento al lado; Esc lo cierra. Ajustes se abre en General, con cada " +
-                "sección en una barra lateral de iconos de colores, como los Ajustes del Sistema " +
-                "de macOS, y Pregunta sobre los Ajustes a su lado. Panel lateral oculta y " +
-                "muestra el panel de la derecha. Abrir otra bóveda muestra la pantalla de " +
-                "bienvenida: el logo, Notekea y las acciones a la izquierda, las bóvedas " +
-                "recientes a la derecha."
+            "Arriba la barra tiene el logo de Notekea, luego Buscar notas, Archivos y Panel " +
+                "lateral; bajo una línea corta, Hoy, Tareas, Grafo, Consulta y Tarjetas de " +
+                "estudio; abajo, Abrir otra bóveda y Ajustes, sin Acerca de. Cada icono muestra " +
+                "su nombre al pasar el puntero. La pestaña de la nota abierta sube con esquinas " +
+                "redondeadas hacia la nota; las demás pestañas son discretas, con una línea " +
+                "fina entre ellas y su ✕ solo al pasar el puntero. Ajustes se abre en General, " +
+                "con cada sección en una barra lateral de iconos de contorno como los de la " +
+                "barra estrecha (Archivos con el mismo icono), y Pregunta sobre los Ajustes a " +
+                "su lado; Acerca de muestra el logo, Notekea, \"Versión 0.1.0-alpha\", Copiar " +
+                "diagnóstico, privacidad, licencias y GitHub. Panel lateral oculta y muestra el " +
+                "panel de la derecha. Abrir otra bóveda muestra la pantalla de bienvenida: el " +
+                "logo, Notekea y las acciones a la izquierda, las bóvedas recientes a la " +
+                "derecha."
         )
     }
 }

@@ -241,7 +241,6 @@
     <string name="properties_type_list">Lista</string>
     <string name="properties_type_number">Número</string>
     <string name="properties_type_text">Texto</string>
-    <string name="rail_about">Acerca de Notekea</string>
     <string name="rail_label">Herramientas de la barra lateral</string>
     <string name="rail_settings">Ajustes</string>
     <string name="rail_graph">Grafo</string>

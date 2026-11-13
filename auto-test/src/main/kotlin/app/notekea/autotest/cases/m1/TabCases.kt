@@ -49,7 +49,6 @@ private fun SuiteBuilder.toolRail() {
             "Today",
             "Side panel",
             "Open another vault",
-            "About Notekea",
             "Settings"
         )
             .forEach { expectIcon(label = it) }

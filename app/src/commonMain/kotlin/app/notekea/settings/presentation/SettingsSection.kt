@@ -37,7 +37,7 @@ enum class SettingsSection(
     ),
     FILES(
         label = Res.string.settings_section_files,
-        icon = NotekeaIcons.Folder,
+        icon = NotekeaIcons.Files,
         topic = SettingsTopic.FILES
     ),
     AI_MODEL(
