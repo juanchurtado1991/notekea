@@ -11,6 +11,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +36,7 @@ import app.notekea.core.presentation.platform.LocalVideoPlayer
 import app.notekea.core.presentation.platform.LocalWindowCloseGuard
 import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.core.presentation.platform.LocalYouTubePlayer
+import app.notekea.core.presentation.platform.LocalYouTubeView
 import app.notekea.core.presentation.platform.UiZoom
 import app.notekea.core.presentation.platform.WindowCloseShortcuts
 import app.notekea.core.presentation.platform.WindowHost
@@ -47,7 +49,9 @@ import app.notekea.tree.presentation.view.VaultScope
 import app.notekea.vault.presentation.welcome.WelcomeContent
 import app.notekea.vault.presentation.welcome.WelcomePreviewData
 import app.notekea.vault.presentation.welcome.WelcomeScreen
+import app.notekea.video.player.MacYouTubeView
 import app.notekea.video.player.YouTubePlayerProcess
+import com.sun.jna.Platform
 import java.awt.Cursor
 
 private const val PREVIEW_TEXT = "Every window of the app"
@@ -122,6 +126,7 @@ private fun AppLocals(
 
     CompositionLocalProvider(
         LocalYouTubePlayer provides youTube::play,
+        LocalYouTubeView provides youTubeView(),
         LocalSystemDarkTheme provides isSystemDark,
         LocalSystemReduceMotion provides isMotionReduced,
         LocalAppearance provides appearance,
@@ -137,6 +142,19 @@ private fun AppLocals(
         LocalResizePointerIcon provides PointerIcon(cursor = Cursor(Cursor.E_RESIZE_CURSOR)),
         content = content
     )
+}
+
+// On macOS a YouTube video plays in a tab of the window; elsewhere in a window of its own, until it does there too.
+private fun youTubeView(): (@Composable (String, Boolean, Modifier) -> Unit)? {
+    if (!Platform.isMac()) return null
+
+    return { id, isCovered, modifier ->
+        MacYouTubeView(
+            id = id,
+            isCovered = isCovered,
+            modifier = modifier
+        )
+    }
 }
 
 /**

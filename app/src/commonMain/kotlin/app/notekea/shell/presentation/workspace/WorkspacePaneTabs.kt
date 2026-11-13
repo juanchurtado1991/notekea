@@ -27,6 +27,7 @@ import app.notekea.resources.tab_split_right
 import app.notekea.resources.tab_study
 import app.notekea.resources.tab_tasks
 import app.notekea.resources.tab_unsaved
+import app.notekea.resources.video_youtube
 import app.notekea.shell.domain.EditorPane
 import app.notekea.shell.domain.Workspace
 import app.notekea.shell.presentation.tabs.TabKind
@@ -210,6 +211,7 @@ private fun labelOf(
     TabKind.QUERY -> stringResource(resource = Res.string.tab_query)
     TabKind.TASKS -> stringResource(resource = Res.string.tab_tasks)
     TabKind.STUDY -> stringResource(resource = Res.string.tab_study)
+    TabKind.YOUTUBE -> state.video?.title ?: stringResource(resource = Res.string.video_youtube)
     else -> path.name
 }
 
@@ -223,6 +225,7 @@ private fun iconOf(
     TabKind.QUERY -> NotekeaIcons.Query
     TabKind.TASKS -> NotekeaIcons.Tasks
     TabKind.STUDY -> NotekeaIcons.Study
+    TabKind.YOUTUBE -> NotekeaIcons.Play
     TabKind.MISSING -> NotekeaIcons.MissingFile
     TabKind.FILE -> fileIconOf(path = path)
 }

@@ -12,6 +12,7 @@ import app.notekea.core.notes.domain.sidepanel.SidePanelSection
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.core.presentation.designsystem.images.decodedImage
 import app.notekea.core.presentation.designsystem.images.scaledToCover
+import app.notekea.shell.domain.PlayedVideo
 import app.notekea.shell.domain.Workspace
 import app.notekea.tree.presentation.viewmodel.TreeFilePreviews
 import co.touchlab.kermit.Logger
@@ -68,6 +69,16 @@ class WorkspaceViewModel(
                     path = intent.path,
                     inBackground = intent.inBackground
                 )
+            }
+
+            is WorkspaceIntent.OnYouTubePlay -> {
+                val video = PlayedVideo(
+                    id = intent.id,
+                    title = intent.title
+                )
+
+                reduce { it.copy(video = video) }
+                change { it.open(path = Workspace.YOUTUBE) }
             }
 
             is WorkspaceIntent.OnTabSelect -> change {
@@ -241,10 +252,11 @@ class WorkspaceViewModel(
             .panes
             .flatMap { it.tabs }
 
+        // The YouTube tab of the last run has no video to play: it does not come back.
+        val kept = workspace.without(path = Workspace.YOUTUBE)
+
         val restored = opened
-            .fold(initial = workspace.keepingOnly(existing = existing)) { tabs, path ->
-                tabs.open(path)
-            }
+            .fold(initial = kept.keepingOnly(existing = existing)) { tabs, path -> tabs.open(path) }
 
         reduce {
             it.copy(

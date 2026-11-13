@@ -386,8 +386,11 @@ data class Workspace(
         val TASKS = RelativePath(value = ".notekea-tasks")
         val STUDY = RelativePath(value = ".notekea-study")
 
+        /** The tab that plays a YouTube video, one at a time; it is not kept between runs. */
+        val YOUTUBE = RelativePath(value = ".notekea-youtube")
+
         /** The tabs that show a tool of the vault, not one of its files. */
-        val TOOL_TABS = setOf(GRAPH, QUERY, TASKS, STUDY)
+        val TOOL_TABS = setOf(GRAPH, QUERY, TASKS, STUDY, YOUTUBE)
         const val MAX_PANES = 2
         private const val LAST_TAB_NUMBER = 9
         val EMPTY = Workspace()

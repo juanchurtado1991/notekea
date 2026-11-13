@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
 import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
+import app.notekea.shell.domain.PlayedVideo
 import app.notekea.shell.domain.Workspace
 import app.notekea.shell.presentation.tabs.TabKind
 import app.notekea.tree.presentation.filepreview.FilePreview
@@ -19,7 +20,8 @@ data class WorkspaceState(
     val tree: VaultTree = VaultTree.EMPTY,
     val previews: Map<RelativePath, FilePreview> = emptyMap(),
     val covers: Map<RelativePath, ImageBitmap?> = emptyMap(),
-    val sidePanel: SidePanelPreferences = SidePanelPreferences.DEFAULT
+    val sidePanel: SidePanelPreferences = SidePanelPreferences.DEFAULT,
+    val video: PlayedVideo? = null
 ) {
     /** What the active tab shows, as a person names it: a note without its extension; null without tabs. */
     val activeTabName: String?
@@ -53,6 +55,7 @@ data class WorkspaceState(
         Workspace.QUERY -> TabKind.QUERY
         Workspace.TASKS -> TabKind.TASKS
         Workspace.STUDY -> TabKind.STUDY
+        Workspace.YOUTUBE -> TabKind.YOUTUBE
         in tree.notes -> TabKind.NOTE
         in tree.attachments -> TabKind.FILE
         in tree.folders -> TabKind.FOLDER

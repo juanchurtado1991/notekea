@@ -39,6 +39,7 @@ import app.notekea.resources.tab_graph
 import app.notekea.resources.tab_query
 import app.notekea.resources.tab_study
 import app.notekea.resources.tab_tasks
+import app.notekea.resources.video_youtube
 import app.notekea.shell.presentation.tabs.TabKind
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -134,6 +135,7 @@ private fun Breadcrumbs(
         TabKind.QUERY -> NotekeaIcons.Query
         TabKind.TASKS -> NotekeaIcons.Tasks
         TabKind.STUDY -> NotekeaIcons.Study
+        TabKind.YOUTUBE -> NotekeaIcons.Play
         else -> NotekeaIcons.OtherFile
     }
 
@@ -143,6 +145,7 @@ private fun Breadcrumbs(
         TabKind.QUERY -> stringResource(resource = Res.string.tab_query)
         TabKind.TASKS -> stringResource(resource = Res.string.tab_tasks)
         TabKind.STUDY -> stringResource(resource = Res.string.tab_study)
+        TabKind.YOUTUBE -> stringResource(resource = Res.string.video_youtube)
         else -> path.name
     }
 

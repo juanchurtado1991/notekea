@@ -28,6 +28,12 @@ sealed interface WorkspaceIntent {
         val inBackground: Boolean = false
     ) : WorkspaceIntent
 
+    /** A YouTube video's card was clicked in a note: the YouTube tab opens, or shows again, playing it. */
+    data class OnYouTubePlay(
+        val id: String,
+        val title: String
+    ) : WorkspaceIntent
+
     data class OnTabSelect(
         val pane: Int,
         val tab: Int

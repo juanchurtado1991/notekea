@@ -9,5 +9,6 @@ enum class TabKind {
     QUERY,
     TASKS,
     STUDY,
+    YOUTUBE,
     MISSING
 }

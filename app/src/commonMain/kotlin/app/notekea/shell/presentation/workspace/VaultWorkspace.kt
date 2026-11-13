@@ -38,6 +38,8 @@ import app.notekea.shell.presentation.tabs.FileTab
 import app.notekea.shell.presentation.tabs.FolderGrid
 import app.notekea.shell.presentation.tabs.FollowQueryBlocks
 import app.notekea.shell.presentation.tabs.TabKind
+import app.notekea.shell.presentation.tabs.WithYouTubeTab
+import app.notekea.shell.presentation.tabs.YouTubeTab
 import app.notekea.tasks.presentation.TasksContent
 import app.notekea.tree.domain.FolderCards
 import app.notekea.tree.presentation.filepreview.FileDetails
@@ -171,11 +173,22 @@ private fun WorkspaceBody(
             }
         ) {
             FollowQueryBlocks(query = viewModels.query) {
-                PaneArea(
-                    state = state,
-                    context = context,
-                    onFindNote = findNote
-                )
+                WithYouTubeTab(
+                    onPlay = { id, title ->
+                        viewModels.workspace.onIntent(
+                            intent = WorkspaceIntent.OnYouTubePlay(
+                                id = id,
+                                title = title
+                            )
+                        )
+                    }
+                ) {
+                    PaneArea(
+                        state = state,
+                        context = context,
+                        onFindNote = findNote
+                    )
+                }
             }
         }
     }
@@ -328,6 +341,8 @@ private fun PaneContent(
                 .value,
             onIntent = context.viewModels.study::onIntent
         )
+
+        TabKind.YOUTUBE -> YouTubeTab(video = context.workspaceState.video)
 
         TabKind.MISSING -> MissingTab()
     }
