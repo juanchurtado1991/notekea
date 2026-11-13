@@ -26,6 +26,7 @@ fun SuiteBuilder.chatCases() {
     stopAndHistory()
     noModel()
     chatReplyCases()
+    chatWorkCases()
     chatHelpCases()
 }
 

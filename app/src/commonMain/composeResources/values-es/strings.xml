@@ -553,6 +553,13 @@
     <string name="chat_no_model_title">Todavía no hay modelo de IA</string>
     <string name="chat_not_found">I couldn't find this in your notes.</string>
     <string name="chat_placeholder">Pregunta sobre tus notas…</string>
+    <string name="chat_work_graph">Grafo</string>
+    <string name="chat_work_query">Consulta</string>
+    <string name="chat_work_tasks">Tareas</string>
+    <string name="chat_work_study">Tarjetas de estudio</string>
+    <string name="chat_work_settings">Ajustes</string>
+    <string name="chat_work_selected">Seleccionado: “%1$s”</string>
+    <string name="chat_work_remove">No compartir con el chat</string>
     <string name="chat_retry">Try again</string>
     <string name="chat_scope_folder">Esta carpeta (%1$s)</string>
     <string name="chat_scope_label">Preguntar a</string>

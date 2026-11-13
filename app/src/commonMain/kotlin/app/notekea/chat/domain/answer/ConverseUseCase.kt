@@ -26,7 +26,8 @@ class ConverseUseCase(
         vaultPath: String,
         note: NoteEntry?,
         language: String? = null,
-        today: String? = null
+        today: String? = null,
+        working: String? = null
     ): Flow<AnswerStep> = flow {
         val body = note
             ?.let {
@@ -60,7 +61,8 @@ class ConverseUseCase(
                             note = note?.let {
                                 it.file.path.nameWithoutExtension to body
                             },
-                            today = today
+                            today = today,
+                            working = working
                         )
                         .inLanguage(language = language),
                     options = GenerationOptions(

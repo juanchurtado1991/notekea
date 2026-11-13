@@ -533,6 +533,7 @@ wording.
 | 3.3-09 | In the Playground Vault press Mod+L and ask ¿cómo creo una nota nueva?; then what can you do?; click Hazlo por mí under the first answer | The first answer explains in Spanish how to create a note, with the shortcut of this system (Ctrl+N, ⌘N on macOS), and creates nothing; the second lists what the chat does; the button puts create a note called … in the question field | 3.3 | Auto-Test | 3.3-09, `ChatHelpTest`, `HelpGuideFileTest` | | | |
 | 3.3-10 | In the Playground Vault ask the chat explícame qué hay en las notas | It describes the vault in Spanish by its folders (recipes, travel, ideas, journal…), naming a few notes of each, not a few random passages | 3.3 | Auto-Test | 3.3-10, `ChatHelpTest` | | | |
 | 3.3-11 | In the Playground Vault ask what is in my notes?, then en español | The second reply says the first one again in Spanish, without searching or acting | 3.3 | Auto-Test | 3.3-11, `ChatHelpTest` | | | |
+| 3.3-12 | In the Playground Vault open Recipes/Arepas, press Mod+L; click in the note under Ingredients and select a line; open the Graph tab; click the × of a chip | Over the question field a chip names Arepas, then Arepas · Ingredients and a Selected: “…” chip; the Graph tab shows a Graph chip; the × takes the chip away until you move to another place; asked “what is this about?” the chat answers about the open place | 3.3 | Auto-Test | 3.3-12, `ChatWorkTest`, `FollowWorkTest`, `ChatWorkChipsTest` | | | |
 
 ### 3.6 Deep thinking
 

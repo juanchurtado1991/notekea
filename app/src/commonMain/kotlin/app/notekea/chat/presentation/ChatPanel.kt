@@ -42,6 +42,7 @@ import app.notekea.chat.presentation.view.ChatMemoryRing
 import app.notekea.chat.presentation.view.ChatMessages
 import app.notekea.chat.presentation.view.ChatModeMenu
 import app.notekea.chat.presentation.view.ChatNotice
+import app.notekea.chat.presentation.view.ChatWorkChips
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaPromptField
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuArea
@@ -267,6 +268,17 @@ private fun ChatInput(
                 modifier = Modifier.padding(bottom = NotekeaDimensions.SpacingXs),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        val working = state.working
+
+        if (working != null) {
+            ChatWorkChips(
+                working = working,
+                isPlaceHidden = state.isPlaceHidden,
+                isSelectedHidden = state.isSelectedHidden,
+                onRemove = { onIntent(ChatIntent.OnWorkRemove(part = it)) }
             )
         }
 

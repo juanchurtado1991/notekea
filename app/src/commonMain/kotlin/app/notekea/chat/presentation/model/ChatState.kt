@@ -2,12 +2,14 @@ package app.notekea.chat.presentation.model
 
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.answer.DeepQuestion
+import app.notekea.chat.domain.context.WorkContext
 import app.notekea.chat.presentation.viewmodel.ChatReply
 import app.notekea.core.llm.domain.ModelTier
 
 /**
  * The chat panel: its [entries] (oldest first), the [question] being written, the [scope] it will be asked of (the
- * open note is [noteName], its folder [folderName]), the model in use ([tier]) and the [mode] it answers in.
+ * open note is [noteName], its folder [folderName]), the model in use ([tier]) and the [mode] it answers in; where the
+ * person is ([working]), shared with the model as chips unless removed ([isPlaceHidden], [isSelectedHidden]).
  */
 data class ChatState(
     val entries: List<ChatEntry> = emptyList(),
@@ -23,7 +25,10 @@ data class ChatState(
     val isCompacting: Boolean = false,
     val isIndexReady: Boolean = false,
     val noteName: String? = null,
-    val folderName: String? = null
+    val folderName: String? = null,
+    val working: WorkContext? = null,
+    val isPlaceHidden: Boolean = false,
+    val isSelectedHidden: Boolean = false
 ) {
     val isAnswering: Boolean get() = entries.lastOrNull()?.isAnswering == true
 
@@ -47,6 +52,15 @@ data class ChatState(
 
         else -> false
     }
+
+    /** What the model is told of where the person is: [working] without the chips removed. */
+    val shared: WorkContext?
+        get() {
+            val context = working ?: return null
+            if (isPlaceHidden) return null
+
+            return if (isSelectedHidden) context.copy(selected = null) else context
+        }
 
     val canSend: Boolean
         get() =

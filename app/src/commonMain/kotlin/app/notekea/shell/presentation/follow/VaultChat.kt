@@ -92,6 +92,17 @@ internal fun FollowChat(
         chat.onIntent(intent = ChatIntent.OnActiveNoteChange(path = editorState.notePath))
     }
 
+    val activePath = tabs.workspace.activePath
+
+    FollowWork(
+        chat = chat,
+        editor = activeEditor,
+        outline = editorState.outline,
+        kind = activePath?.let { tabs.kindOf(path = it) },
+        path = activePath,
+        dialog = dialogs.shown
+    )
+
     LaunchedEffect(chat, editors) {
         val actions = connectionActions(
             workspace = workspace,

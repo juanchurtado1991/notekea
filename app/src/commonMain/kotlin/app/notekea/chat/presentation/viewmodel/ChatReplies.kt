@@ -7,6 +7,7 @@ import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.answer.AnswerStep
 import app.notekea.chat.domain.answer.ConverseUseCase
 import app.notekea.chat.domain.answer.DescribeVaultUseCase
+import app.notekea.chat.domain.context.WorkContext
 import app.notekea.chat.domain.help.AnswerHelpUseCase
 import app.notekea.chat.domain.language.SpokenLanguage
 import app.notekea.chat.presentation.model.ChatStep
@@ -31,7 +32,8 @@ internal class ChatReplies(
     private val answerFromFound: AnswerFromFoundUseCase,
     private val shortcuts: Map<String, String>,
     private val today: () -> String,
-    private val todayIn: (Collection<NoteEntry>) -> String = { today() }
+    private val todayIn: (Collection<NoteEntry>) -> String = { today() },
+    private val working: () -> WorkContext? = { null }
 ) {
     /** The steps of the reply to [message]; [only] limits an answer to a note or a folder, [onStep] shows progress. */
     fun stepsFor(
@@ -74,7 +76,8 @@ internal class ChatReplies(
                 it.file.path == reply.note
             },
             language = language,
-            today = todayIn(notes)
+            today = todayIn(notes),
+            working = working()?.described()
         )
 
         is ChatReply.Question -> answered(

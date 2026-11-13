@@ -14,6 +14,7 @@ import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
 import app.notekea.chat.domain.answer.AnswerStep
 import app.notekea.chat.domain.answer.ConverseUseCase
 import app.notekea.chat.domain.answer.DescribeVaultUseCase
+import app.notekea.chat.domain.context.WorkContext
 import app.notekea.chat.domain.help.AnswerHelpUseCase
 import app.notekea.chat.domain.plan.ActOnRequestUseCase
 import app.notekea.chat.domain.plan.ActionRunner
@@ -24,6 +25,8 @@ import app.notekea.chat.presentation.model.ChatIntent
 import app.notekea.chat.presentation.model.ChatState
 import app.notekea.chat.presentation.model.ChatStep
 import app.notekea.chat.presentation.model.ModelStatus
+import app.notekea.chat.presentation.model.at
+import app.notekea.chat.presentation.model.without
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.llm.domain.LlmEngine
@@ -71,6 +74,7 @@ class ChatViewModel(
         override val state: StateFlow<ChatState> get() = this@ChatViewModel.state
         override val notes: Collection<NoteEntry> get() = this@ChatViewModel.notes
         override val activeNote: RelativePath? get() = this@ChatViewModel.activeNote
+        override val working: WorkContext? get() = state.value.shared
 
         override fun reduce(transform: (ChatState) -> ChatState) =
             this@ChatViewModel.reduce(transform = transform)
@@ -109,7 +113,8 @@ class ChatViewModel(
         answerFromFound = answerFromFound,
         shortcuts = HelpShortcuts.of(conventions = conventions),
         today = { actions.today() },
-        todayIn = { actions.todayIn(notes = it) }
+        todayIn = { actions.todayIn(notes = it) },
+        working = { state.value.shared }
     )
 
     private val actions = ChatActions(
@@ -205,6 +210,10 @@ class ChatViewModel(
             is ChatIntent.OnIndexChange -> reduce { it.copy(isIndexReady = intent.isReady) }
 
             is ChatIntent.OnActiveNoteChange -> changeActiveNote(path = intent.path)
+
+            is ChatIntent.OnWorkChange -> reduce { it.at(working = intent.working) }
+
+            is ChatIntent.OnWorkRemove -> reduce { it.without(part = intent.part) }
 
             is ChatIntent.OnActionConfirm -> entryOf(id = intent.id)?.let {
                 launchGuarded(onError = ::logError) {

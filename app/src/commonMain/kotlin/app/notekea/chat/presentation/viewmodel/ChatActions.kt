@@ -350,6 +350,7 @@ internal class ChatActions(
 
         return ActionContext(
             today = today(),
+            working = host.working?.described(),
             changedToday = changedToday,
             openNote = openNote?.value?.removeSuffix(suffix = MARKDOWN),
             latestNote = latest,

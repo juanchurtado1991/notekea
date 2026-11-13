@@ -29,7 +29,8 @@ object ConversePrompt {
         message: String,
         history: List<ChatExchange>,
         note: Pair<String, String>?,
-        today: String? = null
+        today: String? = null,
+        working: String? = null
     ): List<ChatMessage> {
         val earlier = history.flatMap {
             listOf(
@@ -57,7 +58,7 @@ object ConversePrompt {
             earlier +
             ChatMessage(
                 role = ChatRole.USER,
-                text = about + message
+                text = about + working?.let { "$it\n\n" }.orEmpty() + message
             )
     }
 }

@@ -1,6 +1,7 @@
 package app.notekea.chat.presentation.viewmodel
 
 import app.notekea.chat.domain.answer.AnswerStep
+import app.notekea.chat.domain.context.WorkContext
 import app.notekea.chat.presentation.model.ChatEffect
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatState
@@ -16,6 +17,9 @@ import app.notekea.core.presentation.ViewModelHost
 internal interface ChatHost : ViewModelHost<ChatState, ChatEffect> {
     val notes: Collection<NoteEntry>
     val activeNote: RelativePath?
+
+    /** Where the person is, as the model may be told ([ChatState.shared]). */
+    val working: WorkContext?
 
     fun update(
         id: Long,

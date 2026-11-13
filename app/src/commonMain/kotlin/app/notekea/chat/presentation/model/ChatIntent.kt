@@ -2,6 +2,7 @@ package app.notekea.chat.presentation.model
 
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.answer.AnswerSource
+import app.notekea.chat.domain.context.WorkContext
 import app.notekea.chat.domain.plan.FoundRow
 import app.notekea.chat.presentation.viewmodel.after
 import app.notekea.core.notes.domain.NoteEntry
@@ -44,6 +45,12 @@ sealed interface ChatIntent {
     data class OnIndexChange(val isReady: Boolean) : ChatIntent
 
     data class OnActiveNoteChange(val path: RelativePath?) : ChatIntent
+
+    /** Where the person is changed: the tab, the section the cursor is in or the selection. */
+    data class OnWorkChange(val working: WorkContext?) : ChatIntent
+
+    /** A context chip's ×: that part is not told to the model until the person moves somewhere else. */
+    data class OnWorkRemove(val part: WorkPart) : ChatIntent
 
     /** The action card of [id]: Do it, Cancel, or Undo once done (3.9). */
     data class OnActionConfirm(val id: Long) : ChatIntent

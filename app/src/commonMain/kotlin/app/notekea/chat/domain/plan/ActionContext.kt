@@ -5,8 +5,8 @@ import app.notekea.core.notes.domain.RelativePath
 
 /**
  * What the plan may name in the vault, by name only (3.9): [today], the [openNote], its [folders], the [notes] closest
- * to the request (not all of a large vault), its [properties], [tags], the app's [themes] and the chat so far
- * ([history]).
+ * to the request (not all of a large vault), its [properties], [tags], the app's [themes], the chat so far
+ * ([history]) and where the person is ([working], `WorkContext.described`).
  */
 data class ActionContext(
     val today: String,
@@ -19,11 +19,13 @@ data class ActionContext(
     val tags: List<String> = emptyList(),
     val themes: List<String> = emptyList(),
     val history: List<ChatExchange> = emptyList(),
-    val language: String? = null
+    val language: String? = null,
+    val working: String? = null
 ) {
     /** The context as the model reads it, a line each. */
     fun described(): String = listOfNotNull(
         "Today: $today",
+        working,
         openNote?.let { "Open note: $it" },
         latestNote?.let { "Last changed note: $it" },
         "Notes changed today: ${changedToday.take(n = MAX_NAMES).joinToString().ifEmpty { "none" }}",
