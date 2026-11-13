@@ -6,6 +6,7 @@ import app.notekea.chat.domain.agent.AgentStep
 import app.notekea.chat.domain.agent.AgentTaskUseCase
 import app.notekea.chat.domain.language.SpokenLanguage
 import app.notekea.chat.domain.plan.ActionProblem
+import app.notekea.chat.domain.prompt.AnswerPrompt
 import app.notekea.chat.presentation.model.ActionStatus
 import app.notekea.chat.presentation.model.AgentMoveLine
 import app.notekea.chat.presentation.model.ChatAction
@@ -95,11 +96,20 @@ internal class ChatAgent(
             )
         )
 
-        is AgentStep.Finished -> copy(
-            step = ChatStep.DONE,
-            answer = step.summary,
-            outcome = TurnOutcome.ANSWERED
-        )
+        // "No dentist appointment was found in your notes or tasks." is the not found reply (Auto-Test 3.3-05).
+        is AgentStep.Finished -> if (AnswerPrompt.isNotFound(text = step.summary)) {
+            copy(
+                step = ChatStep.DONE,
+                answer = "",
+                outcome = TurnOutcome.NOT_FOUND
+            )
+        } else {
+            copy(
+                step = ChatStep.DONE,
+                answer = step.summary,
+                outcome = TurnOutcome.ANSWERED
+            )
+        }
 
         is AgentStep.Stopped -> copy(
             step = ChatStep.DONE,

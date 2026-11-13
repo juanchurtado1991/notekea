@@ -197,6 +197,23 @@ class ChatAgentTest {
             )
         }
 
+    @Test
+    fun `an agent that finds nothing ends on the not found reply, not its own words`() =
+        runTest(dispatcher) {
+            moves += "{\"move\":\"search\",\"query\":\"dentist\"}"
+            moves += "{\"move\":\"finish\",\"summary\":\"No dentist appointment was found in your notes.\"}"
+
+            val entry = asked(
+                viewModel = started(hasAgent = true),
+                request = "When is my dentist appointment?"
+            )
+
+            assertEquals(
+                expected = listOf<Any?>(TurnOutcome.NOT_FOUND, ""),
+                actual = listOf(entry.outcome, entry.answer)
+            )
+        }
+
     private companion object {
         const val TALK = "{\"steps\":[{\"action\":\"chat\"}]}"
         const val OVERVIEW_PROMPT = "You are the assistant of Notekea, a notes app. Say"

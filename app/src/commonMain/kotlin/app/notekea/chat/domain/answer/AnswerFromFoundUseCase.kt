@@ -4,6 +4,7 @@ import app.notekea.chat.domain.language.inLanguage
 import app.notekea.chat.domain.plan.FoundNotes
 import app.notekea.chat.domain.plan.FoundRow
 import app.notekea.chat.domain.plan.NoteProperties
+import app.notekea.chat.domain.prompt.AnswerPrompt
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.ChatRole
 import app.notekea.core.llm.domain.GenerationOptions
@@ -47,7 +48,13 @@ class AnswerFromFoundUseCase(private val llmEngine: LlmEngine) {
 
         is AnswerStep.Done -> {
             val text = withoutTables(text = step.answer.text)
-            step.copy(answer = step.answer.copy(text = text))
+
+            // "No dentist appointment was found in your notes or tasks." is the not found reply (Auto-Test 3.3-05).
+            if (AnswerPrompt.isNotFound(text = text)) {
+                AnswerStep.NotFound
+            } else {
+                step.copy(answer = step.answer.copy(text = text))
+            }
         }
 
         else -> step
