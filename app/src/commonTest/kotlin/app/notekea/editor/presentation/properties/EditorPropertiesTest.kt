@@ -2,10 +2,10 @@ package app.notekea.editor.presentation.properties
 
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.viewModelScope
-import app.notekea.core.notes.domain.FrontmatterContent
 import app.notekea.core.notes.domain.NoteFixtures.file
-import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.editor.domain.PropertyType
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.PropertyIntent

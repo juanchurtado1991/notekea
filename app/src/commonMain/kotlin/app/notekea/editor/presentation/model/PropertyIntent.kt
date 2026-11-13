@@ -1,7 +1,7 @@
 package app.notekea.editor.presentation.model
 
-import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.editor.domain.PropertyType
 
 /** What the user did in the properties above the note. */

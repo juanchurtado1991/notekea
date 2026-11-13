@@ -1,7 +1,7 @@
 package app.notekea.editor.domain
 
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.resolvedFrom
+import app.notekea.core.notes.domain.links.resolvedFrom
 
 /**
  * Where new attachments of a note are saved, as Obsidian's `attachmentFolderPath` setting says:

@@ -1,8 +1,8 @@
 package app.notekea.query.presentation
 
-import app.notekea.core.notes.domain.NoteProperty
-import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.query.domain.QueryCatalog
 import app.notekea.query.domain.QueryCondition
 import app.notekea.query.domain.QueryFilter

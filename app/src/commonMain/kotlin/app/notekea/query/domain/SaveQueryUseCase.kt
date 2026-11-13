@@ -2,11 +2,11 @@ package app.notekea.query.domain
 
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.MarkdownSyntax
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteDocument
-import app.notekea.core.notes.domain.NoteRewrite
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.links.NoteRewrite
 
 /**
  * Saves a query at the end of a note as a ```` ```query ```` block, written only if the note does

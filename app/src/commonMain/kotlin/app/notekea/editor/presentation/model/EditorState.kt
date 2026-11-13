@@ -1,10 +1,10 @@
 package app.notekea.editor.presentation.model
 
 import app.notekea.core.domain.time.CalendarDate
-import app.notekea.core.notes.domain.FrontmatterContent
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.OutlineHeading
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
 import app.notekea.editor.domain.CompressError
 import app.notekea.editor.presentation.attachments.AttachmentView
 import app.notekea.editor.presentation.find.FindState

@@ -25,8 +25,8 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.notes.domain.DayNeighbors
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.templates.DayNeighbors
 import app.notekea.core.notes.presentation.notesErrorMessage
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton

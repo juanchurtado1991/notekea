@@ -1,6 +1,8 @@
 package app.notekea.core.notes.domain
 
 import app.notekea.core.domain.time.CalendarDate
+import app.notekea.core.notes.domain.frontmatter.FrontmatterPatch
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

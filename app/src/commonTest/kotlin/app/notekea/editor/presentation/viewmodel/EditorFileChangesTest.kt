@@ -1,10 +1,10 @@
 package app.notekea.editor.presentation.viewmodel
 
 import androidx.compose.runtime.snapshots.Snapshot
-import app.notekea.core.notes.domain.LinkUpdateResult
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.LinkUpdateResult
 import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.SaveStatus

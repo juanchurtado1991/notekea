@@ -2,6 +2,10 @@ package app.notekea.core.notes.domain
 
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.links.LinkUpdateResult
+import app.notekea.core.notes.domain.links.NoteRewrite
+import app.notekea.core.notes.domain.links.PlanLinkUpdatesUseCase
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

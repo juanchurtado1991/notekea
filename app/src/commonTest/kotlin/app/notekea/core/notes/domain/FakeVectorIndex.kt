@@ -1,6 +1,11 @@
 package app.notekea.core.notes.domain
 
 import app.notekea.core.domain.Outcome
+import app.notekea.core.notes.domain.index.IndexError
+import app.notekea.core.notes.domain.index.NoteChunk
+import app.notekea.core.notes.domain.index.RankFusion
+import app.notekea.core.notes.domain.index.SearchHit
+import app.notekea.core.notes.domain.index.VectorIndex
 
 /**
  * [VectorIndex] in memory, per vault: each note's chunks and vectors, found by the dot product of the vectors and by

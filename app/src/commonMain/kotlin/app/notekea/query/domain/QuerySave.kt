@@ -1,6 +1,6 @@
 package app.notekea.query.domain
 
-import app.notekea.core.notes.domain.NoteRewrite
+import app.notekea.core.notes.domain.links.NoteRewrite
 
 /** What saving a query in a note came to. */
 sealed interface QuerySave {

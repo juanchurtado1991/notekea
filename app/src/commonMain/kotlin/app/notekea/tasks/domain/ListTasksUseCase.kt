@@ -3,7 +3,7 @@ package app.notekea.tasks.domain
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.core.notes.domain.NoteTask
+import app.notekea.core.notes.domain.tasks.NoteTask
 
 /**
  * The vault's tasks as the Tasks tab shows them, from the note cache: by note, in name order, each

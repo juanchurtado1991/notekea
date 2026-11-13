@@ -1,10 +1,10 @@
 package app.notekea.tree.presentation.viewmodel
 
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.LinkUpdateResult
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.RenameEntryUseCase
-import app.notekea.core.notes.domain.UpdateLinksAfterRenameUseCase
+import app.notekea.core.notes.domain.links.LinkUpdateResult
+import app.notekea.core.notes.domain.links.UpdateLinksAfterRenameUseCase
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.tree.presentation.model.VaultTreeState

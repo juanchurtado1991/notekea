@@ -1,7 +1,7 @@
 package app.notekea.search.presentation.index
 
 import app.notekea.core.domain.time.ElapsedTime
-import app.notekea.core.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.index.IndexRunError
 import app.notekea.search.domain.IndexProgress
 import kotlin.time.Duration
 

@@ -23,10 +23,10 @@ import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
 import app.notekea.core.notes.data.GhostFrontmatterParser
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import app.notekea.query.data.GhostQueryJsonReader
 import app.notekea.query.domain.BuildQueryCatalogUseCase
 import app.notekea.query.domain.QueryYaml

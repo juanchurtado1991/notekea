@@ -2,7 +2,7 @@ package app.notekea.query.domain
 
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 
 /**
  * Runs a query over the vault's [NoteEntry]s, exactly, from what the note cache holds: no model is

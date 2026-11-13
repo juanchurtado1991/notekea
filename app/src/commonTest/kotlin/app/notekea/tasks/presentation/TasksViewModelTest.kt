@@ -5,13 +5,13 @@ import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.domain.time.LocalMoment
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.NoteMetadata
-import app.notekea.core.notes.domain.NoteTask
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.tasks.NoteTask
 import app.notekea.tasks.domain.ListTasksUseCase
 import app.notekea.tasks.domain.SetTaskDoneUseCase
 import app.notekea.tasks.domain.TaskGroup

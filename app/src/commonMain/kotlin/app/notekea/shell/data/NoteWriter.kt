@@ -3,12 +3,12 @@ package app.notekea.shell.data
 import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFileOperations
-import app.notekea.core.notes.domain.NoteRewrite
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.links.NoteRewrite
 import app.notekea.tree.domain.ApplyTemplateUseCase
 import app.notekea.tree.domain.Trash
 

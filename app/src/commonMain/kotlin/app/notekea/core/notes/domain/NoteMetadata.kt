@@ -1,5 +1,8 @@
 package app.notekea.core.notes.domain
 
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.tasks.NoteTask
+
 /**
  * What a note's frontmatter says about it, its typed [properties] among it, and what its text holds: the `#tags`
  * ([textTags], see [TextTagFinder]) and the [tasks]. [title] is null when the frontmatter has none; a note without

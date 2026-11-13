@@ -19,6 +19,8 @@ import app.notekea.chat.domain.prompt.AgentTaskPrompt
 import app.notekea.chat.domain.prompt.AnswerPrompt
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.ChatRole
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import kotlinx.coroutines.flow.toList
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -254,21 +256,11 @@ class ChatProbeRoundsTest {
                         .NONE
                         .copy(
                             properties = listOf(
-                                app
-                                    .notekea
-                                    .core
-                                    .notes
-                                    .domain
-                                    .NoteProperty(
-                                        key = "rating",
-                                        value = app
-                                            .notekea
-                                            .core
-                                            .notes
-                                            .domain
-                                            .PropertyValue
-                                            .Number(text = "5")
-                                    )
+                                NoteProperty(
+                                    key = "rating",
+                                    value = PropertyValue
+                                        .Number(text = "5")
+                                )
                             )
                         )
                 )

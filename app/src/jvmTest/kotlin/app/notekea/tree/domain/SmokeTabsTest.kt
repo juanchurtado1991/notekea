@@ -6,7 +6,7 @@ import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
-import app.notekea.core.notes.domain.relativeTo
+import app.notekea.core.notes.domain.links.relativeTo
 import app.notekea.shell.domain.GetNoteCoverUseCase
 import kotlinx.coroutines.test.runTest
 import java.io.File

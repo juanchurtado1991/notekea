@@ -1,7 +1,7 @@
 package app.notekea.tree.presentation.viewmodel
 
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.DailyNoteSettings
+import app.notekea.core.notes.domain.templates.DailyNoteSettings
 import app.notekea.tree.domain.DailyNotes
 import app.notekea.tree.presentation.model.VaultTreeIntent
 import app.notekea.tree.presentation.model.VaultTreeState

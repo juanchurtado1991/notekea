@@ -4,10 +4,10 @@ import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.notes.data.ObsidianVaultSettingsReader
-import app.notekea.core.notes.domain.DailyNoteSettings
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TemplateFiller
-import app.notekea.core.notes.domain.relativeTo
+import app.notekea.core.notes.domain.links.relativeTo
+import app.notekea.core.notes.domain.templates.DailyNoteSettings
+import app.notekea.core.notes.domain.templates.TemplateFiller
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem

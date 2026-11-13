@@ -8,9 +8,9 @@ import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TemplateSettings
 import app.notekea.core.notes.domain.TextFolder
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.notes.domain.templates.TemplateSettings
 import app.notekea.templates.domain.CreateTemplatesFolderUseCase
 import app.notekea.templates.domain.GetTemplateSettingsUseCase
 import kotlinx.coroutines.Dispatchers

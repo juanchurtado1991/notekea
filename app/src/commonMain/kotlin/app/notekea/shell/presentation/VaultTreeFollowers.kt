@@ -5,9 +5,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
-import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.LinkResolver
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.editor.domain.FormatAction

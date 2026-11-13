@@ -2,9 +2,9 @@ package app.notekea.editor.presentation.viewmodel
 
 import androidx.compose.ui.text.TextRange
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.FillTemplateUseCase
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TemplateInsertion
+import app.notekea.core.notes.domain.templates.FillTemplateUseCase
+import app.notekea.core.notes.domain.templates.TemplateInsertion
 import app.notekea.editor.presentation.model.EditorEffect
 
 /**

@@ -5,7 +5,7 @@ import app.notekea.core.domain.markdown.CalloutKind
 import app.notekea.core.domain.markdown.CalloutParser
 import app.notekea.core.domain.markdown.ReadingMarkdown
 import app.notekea.core.notes.domain.NoteDocument
-import app.notekea.core.notes.domain.TaskFinder
+import app.notekea.core.notes.domain.tasks.TaskFinder
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

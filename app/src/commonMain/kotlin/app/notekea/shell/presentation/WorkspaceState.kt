@@ -2,8 +2,8 @@ package app.notekea.shell.presentation
 
 import androidx.compose.ui.graphics.ImageBitmap
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.SidePanelPreferences
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
 import app.notekea.shell.domain.Workspace
 import app.notekea.tree.presentation.filepreview.FilePreview
 

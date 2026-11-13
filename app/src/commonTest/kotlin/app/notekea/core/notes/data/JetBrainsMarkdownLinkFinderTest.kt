@@ -1,6 +1,6 @@
 package app.notekea.core.notes.data
 
-import app.notekea.core.notes.domain.LinkKind
+import app.notekea.core.notes.domain.links.LinkKind
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

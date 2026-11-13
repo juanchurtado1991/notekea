@@ -4,7 +4,6 @@ import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.data.LlamaTextEmbedder
 import app.notekea.core.notes.data.LuceneVectorIndex
-import app.notekea.core.notes.domain.ChunkNoteUseCase
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NaturalNameComparator
@@ -16,6 +15,7 @@ import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.index.ChunkNoteUseCase
 import app.notekea.search.domain.FakeIndexStateStore
 import app.notekea.search.domain.IndexVaultUseCase
 import app.notekea.search.domain.PlanIndexUseCase

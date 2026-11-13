@@ -3,11 +3,11 @@ package app.notekea.editor.presentation.model
 import androidx.compose.foundation.text.input.TextFieldState
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
-import app.notekea.core.notes.domain.FrontmatterContent
-import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.core.notes.domain.OutlineFinder
-import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.editor.domain.NoteStats
 import app.notekea.editor.presentation.noteinfo.NoteInfo

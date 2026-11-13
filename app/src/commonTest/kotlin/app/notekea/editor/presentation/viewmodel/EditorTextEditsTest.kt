@@ -2,7 +2,7 @@ package app.notekea.editor.presentation.viewmodel
 
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.text.TextRange
-import app.notekea.core.notes.domain.LinkKind
+import app.notekea.core.notes.domain.links.LinkKind
 import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.domain.ListAction
 import app.notekea.editor.presentation.find.FindState

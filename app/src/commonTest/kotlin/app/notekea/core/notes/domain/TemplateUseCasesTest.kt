@@ -4,6 +4,9 @@ import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
+import app.notekea.core.notes.domain.templates.FillTemplateUseCase
+import app.notekea.core.notes.domain.templates.TemplateSettings
+import app.notekea.core.notes.domain.templates.Templates
 import app.notekea.templates.domain.CreateTemplatesFolderUseCase
 import app.notekea.tree.domain.ApplyTemplateUseCase
 import kotlinx.coroutines.test.runTest

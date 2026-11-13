@@ -1,12 +1,12 @@
 package app.notekea.tree.domain
 
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.FillTemplateUseCase
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TemplateInsertion
+import app.notekea.core.notes.domain.templates.FillTemplateUseCase
+import app.notekea.core.notes.domain.templates.TemplateInsertion
 
 /**
  * Fills the note at `note` on disk from `template`, for a note made with "New note from template":

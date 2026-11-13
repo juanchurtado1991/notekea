@@ -1,13 +1,13 @@
 package app.notekea.tree.presentation.viewmodel
 
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.LinkUpdateResult
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.notes.domain.links.LinkUpdateResult
 import app.notekea.tree.domain.FollowedLink
 import app.notekea.tree.domain.TrashLocation
 import app.notekea.tree.domain.TreePreferences

@@ -2,7 +2,7 @@ package app.notekea.editor.domain
 
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.resolvedFrom
+import app.notekea.core.notes.domain.links.resolvedFrom
 
 /**
  * Finds the file an [Embed] shows among the vault's [files], as Obsidian does, ignoring letter case: a target with a

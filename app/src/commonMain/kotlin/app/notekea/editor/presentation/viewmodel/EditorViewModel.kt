@@ -3,9 +3,9 @@ package app.notekea.editor.presentation.viewmodel
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.FillTemplateUseCase
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.templates.FillTemplateUseCase
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.editor.domain.EditorPreferencesStore
 import app.notekea.editor.domain.KeepUnsavedTextUseCase

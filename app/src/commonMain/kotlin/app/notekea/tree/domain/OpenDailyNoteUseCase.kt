@@ -3,14 +3,14 @@ package app.notekea.tree.domain
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar
-import app.notekea.core.notes.domain.DailyNoteSettings
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteFileOperations
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TemplateFiller
 import app.notekea.core.notes.domain.VaultSettingsReader
 import app.notekea.core.notes.domain.createMissingFolders
+import app.notekea.core.notes.domain.templates.DailyNoteSettings
+import app.notekea.core.notes.domain.templates.TemplateFiller
 import kotlin.time.Clock
 
 /**

@@ -3,13 +3,13 @@ package app.notekea.search.domain
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.TextEmbedder
-import app.notekea.core.notes.domain.ChunkNoteUseCase
-import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.VectorIndex
-import app.notekea.core.notes.domain.embedChunks
+import app.notekea.core.notes.domain.index.ChunkNoteUseCase
+import app.notekea.core.notes.domain.index.IndexRunError
+import app.notekea.core.notes.domain.index.VectorIndex
+import app.notekea.core.notes.domain.index.embedChunks
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlin.coroutines.cancellation.CancellationException

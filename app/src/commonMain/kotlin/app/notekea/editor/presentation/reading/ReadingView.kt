@@ -12,8 +12,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import app.notekea.core.notes.domain.OutlineFinder
-import app.notekea.core.notes.domain.TaskFinder
-import app.notekea.core.notes.domain.percentDecoded
+import app.notekea.core.notes.domain.links.percentDecoded
+import app.notekea.core.notes.domain.tasks.TaskFinder
 import app.notekea.core.presentation.designsystem.components.attachments.ScaledBitmapPainter
 import app.notekea.core.presentation.designsystem.components.attachments.attachmentImageSize
 import app.notekea.core.presentation.designsystem.components.markdown.NotekeaMarkdown

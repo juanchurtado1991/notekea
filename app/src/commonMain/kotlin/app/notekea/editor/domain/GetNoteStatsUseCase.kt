@@ -1,9 +1,9 @@
 package app.notekea.editor.domain
 
 import app.notekea.core.domain.StringPatterns
-import app.notekea.core.notes.domain.LinkFinder
-import app.notekea.core.notes.domain.TaskFinder
 import app.notekea.core.notes.domain.TextTagFinder
+import app.notekea.core.notes.domain.links.LinkFinder
+import app.notekea.core.notes.domain.tasks.TaskFinder
 
 /**
  * Counts what a note's [NoteStats] say from its body: words are runs of text holding a letter or a digit (Markdown's

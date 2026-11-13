@@ -1,7 +1,7 @@
 package app.notekea.templates.presentation
 
 import app.notekea.core.notes.domain.NotesError
-import app.notekea.core.notes.domain.TemplateSettings
+import app.notekea.core.notes.domain.templates.TemplateSettings
 
 /**
  * State of the template picker: the templates matching [query] as [rows], and [selectedIndex] the one `Enter` chooses,

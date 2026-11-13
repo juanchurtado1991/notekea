@@ -6,9 +6,9 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.SidePanelMode
-import app.notekea.core.notes.domain.SidePanelPreferences
-import app.notekea.core.notes.domain.SidePanelSection
+import app.notekea.core.notes.domain.sidepanel.SidePanelMode
+import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
+import app.notekea.core.notes.domain.sidepanel.SidePanelSection
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.core.presentation.designsystem.images.decodedImage
 import app.notekea.core.presentation.designsystem.images.scaledToCover

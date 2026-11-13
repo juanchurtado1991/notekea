@@ -27,13 +27,13 @@ import app.notekea.core.llm.domain.LlmModelInfo
 import app.notekea.core.logging.domain.FakeTextClipboard
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
-import app.notekea.core.notes.domain.NoteChunk
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.index.NoteChunk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first

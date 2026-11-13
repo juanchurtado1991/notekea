@@ -1,7 +1,7 @@
 package app.notekea.tree.domain
 
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.SidePanelPreferences
+import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
 
 /**
  * How the user left the vault sidebar: which folders were open, how notes are sorted, how wide the sidebar is

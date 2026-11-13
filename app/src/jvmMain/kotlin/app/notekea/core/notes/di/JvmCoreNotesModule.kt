@@ -19,7 +19,7 @@ import app.notekea.core.notes.domain.NoteFileOperations
 import app.notekea.core.notes.domain.NoteScanner
 import app.notekea.core.notes.domain.VaultSettingsReader
 import app.notekea.core.notes.domain.VaultSettingsWriter
-import app.notekea.core.notes.domain.VectorIndex
+import app.notekea.core.notes.domain.index.VectorIndex
 import app.notekea.core.platform.data.runCommand
 import app.notekea.core.platform.domain.PlatformConventions
 import okio.FileSystem

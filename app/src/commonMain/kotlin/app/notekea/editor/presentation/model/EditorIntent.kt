@@ -1,8 +1,8 @@
 package app.notekea.editor.presentation.model
 
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.SidePanelMode
-import app.notekea.core.notes.domain.SidePanelSection
+import app.notekea.core.notes.domain.sidepanel.SidePanelMode
+import app.notekea.core.notes.domain.sidepanel.SidePanelSection
 import app.notekea.core.presentation.FeedIntent
 import app.notekea.editor.domain.Embed
 import app.notekea.editor.domain.FormatAction

@@ -1,6 +1,6 @@
 package app.notekea.editor.domain
 
-import app.notekea.core.notes.domain.NoteLink
+import app.notekea.core.notes.domain.links.NoteLink
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

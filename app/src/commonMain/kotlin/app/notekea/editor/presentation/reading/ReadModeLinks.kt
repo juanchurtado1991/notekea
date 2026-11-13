@@ -6,9 +6,9 @@ import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.AttachmentKind
-import app.notekea.core.notes.domain.LinkKind
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.percentDecoded
+import app.notekea.core.notes.domain.links.LinkKind
+import app.notekea.core.notes.domain.links.percentDecoded
 
 /**
  * Links in a drawn note. [prepare] rewrites what the renderer does not know as Markdown links: a wiki link to

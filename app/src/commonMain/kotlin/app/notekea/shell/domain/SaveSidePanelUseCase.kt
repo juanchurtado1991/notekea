@@ -1,6 +1,6 @@
 package app.notekea.shell.domain
 
-import app.notekea.core.notes.domain.SidePanelPreferences
+import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
 import app.notekea.editor.domain.EditorPreferencesStore
 
 /** Remembers how the panel on the right of the editor was left, its width kept within its limits. */

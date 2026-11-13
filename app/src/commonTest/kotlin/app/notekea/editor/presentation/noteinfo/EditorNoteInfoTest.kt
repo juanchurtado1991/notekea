@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.notes.domain.NoteFixtures.file
-import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.editor.domain.NoteStats
 import app.notekea.editor.domain.NoteTimes
 import app.notekea.editor.presentation.model.EditorIntent

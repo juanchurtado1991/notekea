@@ -9,7 +9,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.core.notes.domain.ConnectionsTab
+import app.notekea.core.notes.domain.sidepanel.ConnectionsTab
 import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
 import app.notekea.core.presentation.designsystem.components.layout.NotekeaFold
 import app.notekea.core.presentation.designsystem.components.tabs.NotekeaCountTabs

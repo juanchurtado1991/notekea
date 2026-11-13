@@ -4,14 +4,14 @@ import androidx.lifecycle.viewModelScope
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.llm.domain.FakeLlmEngine
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.NoteMetadata
-import app.notekea.core.notes.domain.NoteProperty
-import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import app.notekea.query.data.GhostQueryJsonReader
 import app.notekea.query.domain.BuildQueryCatalogUseCase
 import app.notekea.query.domain.QueryCondition

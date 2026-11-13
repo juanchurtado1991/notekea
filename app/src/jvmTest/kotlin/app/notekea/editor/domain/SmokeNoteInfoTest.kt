@@ -1,11 +1,11 @@
 package app.notekea.editor.domain
 
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
-import app.notekea.core.notes.domain.FrontmatterContent
-import app.notekea.core.notes.domain.FrontmatterReader
 import app.notekea.core.notes.domain.NoteDocument
-import app.notekea.core.notes.domain.PropertyKeys
-import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
+import app.notekea.core.notes.domain.frontmatter.FrontmatterReader
+import app.notekea.core.notes.domain.frontmatter.PropertyKeys
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

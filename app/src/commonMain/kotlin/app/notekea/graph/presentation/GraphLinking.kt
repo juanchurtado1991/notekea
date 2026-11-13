@@ -1,8 +1,8 @@
 package app.notekea.graph.presentation
 
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
-import app.notekea.core.notes.domain.NoteRewrite
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.links.NoteRewrite
 import app.notekea.graph.domain.LinkNotesUseCase
 import kotlinx.coroutines.Job
 

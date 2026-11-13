@@ -1,10 +1,10 @@
 package app.notekea.query.domain
 
 import app.notekea.core.domain.StringPatterns
-import app.notekea.core.notes.domain.FrontmatterBlocks
-import app.notekea.core.notes.domain.FrontmatterReader
-import app.notekea.core.notes.domain.PropertyValue
-import app.notekea.core.notes.domain.YamlValues
+import app.notekea.core.notes.domain.frontmatter.FrontmatterBlocks
+import app.notekea.core.notes.domain.frontmatter.FrontmatterReader
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
+import app.notekea.core.notes.domain.frontmatter.YamlValues
 
 /**
  * A query as the YAML of its `query` code block: `filters` (each a `property`, a `condition` and a `value`), `sort` (a

@@ -1,6 +1,9 @@
 package app.notekea.core.notes.domain
 
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.core.notes.domain.templates.TemplateListing
+import app.notekea.core.notes.domain.templates.TemplateSettings
+import app.notekea.core.notes.domain.templates.Templates
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

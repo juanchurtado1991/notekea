@@ -8,8 +8,8 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.domain.time.CalendarDate
-import app.notekea.core.notes.domain.DayNeighbors
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.templates.DayNeighbors
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme

@@ -2,7 +2,6 @@ package app.notekea.shell.presentation
 
 import androidx.compose.ui.unit.IntSize
 import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.core.notes.domain.ConnectionsTab
 import app.notekea.core.notes.domain.FakeAttachmentStore
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
@@ -11,10 +10,11 @@ import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.SidePanelMode
-import app.notekea.core.notes.domain.SidePanelPreferences
-import app.notekea.core.notes.domain.SidePanelSection
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.notes.domain.sidepanel.ConnectionsTab
+import app.notekea.core.notes.domain.sidepanel.SidePanelMode
+import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
+import app.notekea.core.notes.domain.sidepanel.SidePanelSection
 import app.notekea.editor.domain.FakeEditorPreferencesStore
 import app.notekea.shell.domain.EditorPane
 import app.notekea.shell.domain.FakeWorkspaceStore

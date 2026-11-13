@@ -1,10 +1,10 @@
 package app.notekea.graph.presentation
 
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.FindRelatedNotesUseCase
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.index.FindRelatedNotesUseCase
 import app.notekea.graph.domain.NoteGraph
 
 /**

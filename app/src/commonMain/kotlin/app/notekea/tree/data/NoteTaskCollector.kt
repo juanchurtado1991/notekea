@@ -5,11 +5,11 @@ import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.MomentFormat
 import app.notekea.core.notes.domain.MarkdownLineStripper
-import app.notekea.core.notes.domain.NoteTask
 import app.notekea.core.notes.domain.OutlineFinder
-import app.notekea.core.notes.domain.TaskFinder
-import app.notekea.core.notes.domain.TaskMarker
 import app.notekea.core.notes.domain.TextTagFinder
+import app.notekea.core.notes.domain.tasks.NoteTask
+import app.notekea.core.notes.domain.tasks.TaskFinder
+import app.notekea.core.notes.domain.tasks.TaskMarker
 
 /**
  * Collects the [tasks] of a note's body read line by line ([TaskFinder]), each with the heading above it and its date:

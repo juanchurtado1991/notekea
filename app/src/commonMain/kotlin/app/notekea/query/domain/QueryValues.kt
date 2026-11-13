@@ -3,7 +3,7 @@ package app.notekea.query.domain
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.domain.time.MomentFormat
-import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 
 /** A property's value as queries read it: as words to match, and in order against another value of its type. */
 internal class QueryValues {

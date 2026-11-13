@@ -2,14 +2,14 @@ package app.notekea.tree.presentation.viewmodel
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.CalendarDate
-import app.notekea.core.notes.domain.DailyNoteSettings
-import app.notekea.core.notes.domain.DayNeighbors
-import app.notekea.core.notes.domain.LinkKind
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TemplateSettings
+import app.notekea.core.notes.domain.links.LinkKind
+import app.notekea.core.notes.domain.templates.DailyNoteSettings
+import app.notekea.core.notes.domain.templates.DayNeighbors
+import app.notekea.core.notes.domain.templates.TemplateSettings
 import app.notekea.tree.presentation.model.BookmarkIntent
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeIntent

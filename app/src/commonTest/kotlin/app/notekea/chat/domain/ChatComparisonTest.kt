@@ -16,6 +16,8 @@ import app.notekea.chat.domain.plan.TaskPeriods
 import app.notekea.chat.domain.prompt.OverviewPrompt
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.ChatRole
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import kotlinx.coroutines.flow.toList
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -155,21 +157,11 @@ class ChatComparisonTest {
                     .NONE
                     .copy(
                         properties = listOf(
-                            app
-                                .notekea
-                                .core
-                                .notes
-                                .domain
-                                .NoteProperty(
-                                    key = "finished",
-                                    value = app
-                                        .notekea
-                                        .core
-                                        .notes
-                                        .domain
-                                        .PropertyValue
-                                        .Checkbox(isChecked = true)
-                                )
+                            NoteProperty(
+                                key = "finished",
+                                value = PropertyValue
+                                    .Checkbox(isChecked = true)
+                            )
                         )
                     )
             )
@@ -275,21 +267,11 @@ class ChatComparisonTest {
                     .NONE
                     .copy(
                         properties = listOf(
-                            app
-                                .notekea
-                                .core
-                                .notes
-                                .domain
-                                .NoteProperty(
-                                    key = "priority",
-                                    value = app
-                                        .notekea
-                                        .core
-                                        .notes
-                                        .domain
-                                        .PropertyValue
-                                        .Number(text = "1")
-                                )
+                            NoteProperty(
+                                key = "priority",
+                                value = PropertyValue
+                                    .Number(text = "1")
+                            )
                         )
                     )
             )

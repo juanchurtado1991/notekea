@@ -1,5 +1,9 @@
 package app.notekea.core.notes.domain
 
+import app.notekea.core.notes.domain.links.percentDecoded
+import app.notekea.core.notes.domain.links.relativeTo
+import app.notekea.core.notes.domain.links.resolvedFrom
+import app.notekea.core.notes.domain.links.spacesEncoded
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

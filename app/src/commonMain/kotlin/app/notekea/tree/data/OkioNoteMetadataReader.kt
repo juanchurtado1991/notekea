@@ -2,13 +2,13 @@ package app.notekea.tree.data
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.notes.data.GhostFrontmatterParser
-import app.notekea.core.notes.domain.FrontmatterBlocks
-import app.notekea.core.notes.domain.FrontmatterContent
-import app.notekea.core.notes.domain.FrontmatterReader
 import app.notekea.core.notes.domain.NoteMetadata
-import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextTagFinder
+import app.notekea.core.notes.domain.frontmatter.FrontmatterBlocks
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
+import app.notekea.core.notes.domain.frontmatter.FrontmatterReader
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
 import app.notekea.tree.domain.NoteMetadataReader
 import kotlinx.coroutines.withContext
 import okio.BufferedSource

@@ -3,9 +3,9 @@ package app.notekea.query.presentation
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.core.notes.domain.NoteProperty
-import app.notekea.core.notes.domain.NoteRewrite
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.links.NoteRewrite
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.query.domain.BuildQueryCatalogUseCase
 import app.notekea.query.domain.QueryPreferencesStore

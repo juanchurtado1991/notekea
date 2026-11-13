@@ -16,9 +16,9 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.AttachmentKind
-import app.notekea.core.notes.domain.LinkKind
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.YouTubeLinks
+import app.notekea.core.notes.domain.links.LinkKind
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaAttachmentImage
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaEmbeddedNote
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaFileChip

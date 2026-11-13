@@ -8,8 +8,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
-import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.index.IndexRunError
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickText
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme

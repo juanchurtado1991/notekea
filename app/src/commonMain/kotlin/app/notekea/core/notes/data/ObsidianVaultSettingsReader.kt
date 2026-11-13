@@ -2,10 +2,10 @@ package app.notekea.core.notes.data
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.time.MomentFormat
-import app.notekea.core.notes.domain.DailyNoteSettings
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TemplateSettings
 import app.notekea.core.notes.domain.VaultSettingsReader
+import app.notekea.core.notes.domain.templates.DailyNoteSettings
+import app.notekea.core.notes.domain.templates.TemplateSettings
 import co.touchlab.kermit.Logger
 import com.ghost.serialization.Ghost
 import com.ghost.serialization.exception.GhostJsonException

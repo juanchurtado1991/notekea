@@ -2,7 +2,7 @@ package app.notekea.tree.presentation.viewmodel
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TemplateSettings
+import app.notekea.core.notes.domain.templates.TemplateSettings
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeIntent
 

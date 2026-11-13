@@ -1,5 +1,7 @@
 package app.notekea.core.notes.domain
 
+import app.notekea.core.notes.domain.frontmatter.FrontmatterBlocks
+import app.notekea.core.notes.domain.frontmatter.YamlValues
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

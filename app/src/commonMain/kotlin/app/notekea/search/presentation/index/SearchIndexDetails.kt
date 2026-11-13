@@ -17,8 +17,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.time.ElapsedTime
-import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.index.IndexRunError
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes

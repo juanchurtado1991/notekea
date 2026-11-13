@@ -1,8 +1,8 @@
 package app.notekea.core.notes.data
 
-import app.notekea.core.notes.domain.LinkFinder
-import app.notekea.core.notes.domain.LinkKind
-import app.notekea.core.notes.domain.NoteLink
+import app.notekea.core.notes.domain.links.LinkFinder
+import app.notekea.core.notes.domain.links.LinkKind
+import app.notekea.core.notes.domain.links.NoteLink
 
 /**
  * [LinkFinder] that uses the JetBrains Markdown parser only to know where code is ([MarkdownCodeRanges]), since it

@@ -3,10 +3,10 @@ package app.notekea.editor.presentation.viewmodel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
-import app.notekea.core.notes.domain.FrontmatterReader
 import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.FrontmatterReader
 import app.notekea.editor.domain.SaveNoteUseCase
 import app.notekea.editor.presentation.model.EditorState
 import app.notekea.editor.presentation.model.SaveStatus

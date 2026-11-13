@@ -4,9 +4,9 @@ import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.StringPatterns.NEW_LINE
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.domain.markdown.MarkdownSyntax
-import app.notekea.core.notes.domain.NoteLink
 import app.notekea.core.notes.domain.TextEdit
 import app.notekea.core.notes.domain.isTableRow
+import app.notekea.core.notes.domain.links.NoteLink
 
 /**
  * What a formatting toolbar button does to a note's text, as the single [TextEdit] a person would type. With a

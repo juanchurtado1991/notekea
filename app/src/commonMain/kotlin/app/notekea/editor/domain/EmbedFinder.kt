@@ -5,7 +5,7 @@ import app.notekea.core.domain.markdown.FenceTracker
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.YouTubeLinks
-import app.notekea.core.notes.domain.percentDecoded
+import app.notekea.core.notes.domain.links.percentDecoded
 
 /**
  * The embedded files of a note's text, as Obsidian reads them: `![[file|300]]` (a width or a caption), `![alt](path)`

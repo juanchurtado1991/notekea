@@ -1,0 +1,17 @@
+package app.notekea.core.notes.domain.links
+
+import app.notekea.core.notes.domain.RelativePath
+
+/** A note whose links change: its text as it was read, and the same text with [linkCount] links rewritten. */
+data class NoteRewrite(
+    val path: RelativePath,
+    val original: String,
+    val updated: String,
+    val linkCount: Int
+) {
+    /** The same change the other way, which takes it back. */
+    fun reversed(): NoteRewrite = copy(
+        original = updated,
+        updated = original
+    )
+}

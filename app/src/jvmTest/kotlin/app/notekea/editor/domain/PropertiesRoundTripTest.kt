@@ -1,11 +1,11 @@
 package app.notekea.editor.domain
 
-import app.notekea.core.notes.domain.FrontmatterBlocks
-import app.notekea.core.notes.domain.FrontmatterContent
-import app.notekea.core.notes.domain.FrontmatterPatch
-import app.notekea.core.notes.domain.FrontmatterReader
 import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.FrontmatterBlocks
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
+import app.notekea.core.notes.domain.frontmatter.FrontmatterPatch
+import app.notekea.core.notes.domain.frontmatter.FrontmatterReader
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

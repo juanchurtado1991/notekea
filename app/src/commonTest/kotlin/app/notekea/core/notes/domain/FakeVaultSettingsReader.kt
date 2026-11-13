@@ -1,5 +1,8 @@
 package app.notekea.core.notes.domain
 
+import app.notekea.core.notes.domain.templates.DailyNoteSettings
+import app.notekea.core.notes.domain.templates.TemplateSettings
+
 /** Obsidian's vault settings in memory: none unless a test sets them. */
 class FakeVaultSettingsReader(
     var attachmentFolder: String? = null,

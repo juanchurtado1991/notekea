@@ -1,9 +1,9 @@
 package app.notekea.search.presentation.switcher
 
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.index.IndexRunError
 import app.notekea.search.domain.PassageResult
 import kotlin.test.Test
 import kotlin.test.assertEquals

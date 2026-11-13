@@ -1,11 +1,11 @@
 package app.notekea.graph.domain
 
 import app.notekea.core.domain.AppDispatchers
-import app.notekea.core.notes.domain.LinkFinder
-import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.LinkFinder
+import app.notekea.core.notes.domain.links.LinkResolver
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 

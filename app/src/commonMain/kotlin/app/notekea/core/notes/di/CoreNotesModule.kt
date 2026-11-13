@@ -2,20 +2,20 @@ package app.notekea.core.notes.di
 
 import app.notekea.core.notes.data.GhostFrontmatterParser
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
-import app.notekea.core.notes.domain.ChunkNoteUseCase
-import app.notekea.core.notes.domain.FillTemplateUseCase
 import app.notekea.core.notes.domain.FuzzyMatcher
-import app.notekea.core.notes.domain.LinkFinder
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteSections
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.OutlineFinder
-import app.notekea.core.notes.domain.PlanLinkUpdatesUseCase
 import app.notekea.core.notes.domain.RenameEntryUseCase
 import app.notekea.core.notes.domain.TextFolder
-import app.notekea.core.notes.domain.UpdateLinksAfterRenameUseCase
+import app.notekea.core.notes.domain.index.ChunkNoteUseCase
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.links.LinkFinder
+import app.notekea.core.notes.domain.links.PlanLinkUpdatesUseCase
+import app.notekea.core.notes.domain.links.UpdateLinksAfterRenameUseCase
+import app.notekea.core.notes.domain.templates.FillTemplateUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 

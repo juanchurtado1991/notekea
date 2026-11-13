@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.OutlineHeading
-import app.notekea.core.notes.domain.SidePanelPreferences
+import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.layout.NotekeaSplitPane
 import app.notekea.core.presentation.designsystem.components.layout.PaneSide

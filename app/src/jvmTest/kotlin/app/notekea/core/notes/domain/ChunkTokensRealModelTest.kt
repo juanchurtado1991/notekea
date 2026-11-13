@@ -1,5 +1,7 @@
 package app.notekea.core.notes.domain
 
+import app.notekea.core.notes.domain.index.ChunkNoteUseCase
+import app.notekea.core.notes.domain.index.TokenEstimate
 import net.ladenthin.llama.LlamaModel
 import net.ladenthin.llama.parameters.ModelParameters
 import java.io.File

@@ -2,12 +2,12 @@ package app.notekea.core.notes.data
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.IndexError
-import app.notekea.core.notes.domain.NoteChunk
-import app.notekea.core.notes.domain.RankFusion
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.SearchHit
-import app.notekea.core.notes.domain.VectorIndex
+import app.notekea.core.notes.domain.index.IndexError
+import app.notekea.core.notes.domain.index.NoteChunk
+import app.notekea.core.notes.domain.index.RankFusion
+import app.notekea.core.notes.domain.index.SearchHit
+import app.notekea.core.notes.domain.index.VectorIndex
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

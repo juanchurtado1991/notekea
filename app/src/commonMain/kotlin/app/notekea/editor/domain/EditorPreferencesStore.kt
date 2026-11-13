@@ -1,6 +1,6 @@
 package app.notekea.editor.domain
 
-import app.notekea.core.notes.domain.SidePanelPreferences
+import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
 
 /**
  * Keeps the editor's choices between notes and runs, for every vault: how the panel on its right was left,

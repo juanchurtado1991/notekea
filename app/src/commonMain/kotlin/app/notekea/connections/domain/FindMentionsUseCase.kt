@@ -1,13 +1,13 @@
 package app.notekea.connections.domain
 
-import app.notekea.core.notes.domain.LinkFinder
-import app.notekea.core.notes.domain.LinkKind
-import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.core.notes.domain.NoteLink
 import app.notekea.core.notes.domain.NoteText
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.LinkFinder
+import app.notekea.core.notes.domain.links.LinkKind
+import app.notekea.core.notes.domain.links.LinkResolver
+import app.notekea.core.notes.domain.links.NoteLink
 
 /**
  * The notes that name [note], read from [texts]: those with a link that leads to it ([LinkResolver.closest]) and those

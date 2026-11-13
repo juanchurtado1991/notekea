@@ -1,10 +1,10 @@
 package app.notekea.query.domain
 
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.FakeNoteContentStore
-import app.notekea.core.notes.domain.NoteProperty
-import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

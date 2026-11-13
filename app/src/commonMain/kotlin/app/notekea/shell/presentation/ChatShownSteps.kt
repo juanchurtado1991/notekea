@@ -2,7 +2,7 @@ package app.notekea.shell.presentation
 
 import app.notekea.chat.domain.plan.ActionKind
 import app.notekea.chat.domain.plan.ActionStep
-import app.notekea.core.notes.domain.SidePanelMode
+import app.notekea.core.notes.domain.sidepanel.SidePanelMode
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherMode

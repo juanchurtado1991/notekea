@@ -27,8 +27,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.core.notes.domain.FrontmatterContent
-import app.notekea.core.notes.domain.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
 import app.notekea.core.presentation.designsystem.components.NotekeaChip
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.focusBorder

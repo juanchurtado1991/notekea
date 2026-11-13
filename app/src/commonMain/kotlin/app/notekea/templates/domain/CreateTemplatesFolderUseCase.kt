@@ -5,9 +5,9 @@ import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteFileOperations
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TemplateSettings
 import app.notekea.core.notes.domain.VaultSettingsReader
 import app.notekea.core.notes.domain.createMissingFolders
+import app.notekea.core.notes.domain.templates.TemplateSettings
 
 /**
  * Creates the vault's templates folder ([TemplateSettings.folder]) with an example template named `exampleName` holding

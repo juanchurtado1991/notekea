@@ -5,11 +5,8 @@ import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
-import app.notekea.core.notes.domain.ChunkNoteUseCase
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeVectorIndex
-import app.notekea.core.notes.domain.FindRelatedNotesUseCase
 import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
@@ -19,7 +16,10 @@ import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
-import app.notekea.core.notes.domain.embedChunks
+import app.notekea.core.notes.domain.index.ChunkNoteUseCase
+import app.notekea.core.notes.domain.index.FindRelatedNotesUseCase
+import app.notekea.core.notes.domain.index.embedChunks
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import app.notekea.graph.domain.BuildNoteGraphUseCase
 import app.notekea.graph.domain.GraphPreferences
 import app.notekea.graph.domain.GraphPreferencesStore

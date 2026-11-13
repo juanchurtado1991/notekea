@@ -1,13 +1,13 @@
 package app.notekea.graph.presentation
 
 import app.notekea.core.domain.AppDispatchers
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
-import app.notekea.core.notes.domain.FindRelatedNotesUseCase
 import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.index.FindRelatedNotesUseCase
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.graph.domain.BuildNoteGraphUseCase
 import app.notekea.graph.domain.GraphLayout

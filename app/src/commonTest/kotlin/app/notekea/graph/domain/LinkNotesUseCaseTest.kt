@@ -1,9 +1,9 @@
 package app.notekea.graph.domain
 
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteFixtures.VAULT
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

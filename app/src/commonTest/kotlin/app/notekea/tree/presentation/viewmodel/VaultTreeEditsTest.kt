@@ -1,9 +1,9 @@
 package app.notekea.tree.presentation.viewmodel
 
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.LinkUpdateResult
 import app.notekea.core.notes.domain.NoteFixtures.file
 import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.links.LinkUpdateResult
 import app.notekea.tree.domain.TrashLocation
 import app.notekea.tree.presentation.model.RenameDraft
 import app.notekea.tree.presentation.model.TreeNotice

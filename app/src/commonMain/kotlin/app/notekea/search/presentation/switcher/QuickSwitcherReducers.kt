@@ -1,8 +1,8 @@
 package app.notekea.search.presentation.switcher
 
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.index.IndexRunError
 import app.notekea.search.domain.ContentSearchResult
 import app.notekea.search.domain.NoteMatchField
 import app.notekea.search.domain.NoteSearchResult

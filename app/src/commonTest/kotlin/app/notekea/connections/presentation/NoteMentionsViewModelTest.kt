@@ -5,13 +5,13 @@ import app.notekea.connections.domain.FindMentionsUseCase
 import app.notekea.connections.domain.LinkMentionUseCase
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFixtures.entry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.TextFolder
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher

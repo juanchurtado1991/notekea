@@ -10,11 +10,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.connections.domain.NoteMention
 import app.notekea.connections.domain.NoteMentions
-import app.notekea.core.notes.domain.ConnectionsTab
-import app.notekea.core.notes.domain.IndexRunError
-import app.notekea.core.notes.domain.PassageSnippet
-import app.notekea.core.notes.domain.RelatedNote
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.index.IndexRunError
+import app.notekea.core.notes.domain.index.PassageSnippet
+import app.notekea.core.notes.domain.index.RelatedNote
+import app.notekea.core.notes.domain.sidepanel.ConnectionsTab
 import app.notekea.core.presentation.TestTags
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.clickDescription

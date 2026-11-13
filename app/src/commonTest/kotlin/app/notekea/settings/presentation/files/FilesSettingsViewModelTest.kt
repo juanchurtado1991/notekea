@@ -1,8 +1,8 @@
 package app.notekea.settings.presentation.files
 
-import app.notekea.core.notes.domain.DailyNoteSettings
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.core.notes.domain.FakeVaultSettingsWriter
+import app.notekea.core.notes.domain.templates.DailyNoteSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher

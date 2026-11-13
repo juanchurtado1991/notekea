@@ -3,7 +3,6 @@ package app.notekea.search.eval
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.embedding.domain.TextEmbedder
 import app.notekea.core.notes.data.LuceneVectorIndex
-import app.notekea.core.notes.domain.ChunkNoteUseCase
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFile
@@ -11,6 +10,7 @@ import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NoteSections
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.index.ChunkNoteUseCase
 import app.notekea.search.domain.FakeIndexStateStore
 import app.notekea.search.domain.IndexVaultUseCase
 import app.notekea.search.domain.PlanIndexUseCase

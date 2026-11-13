@@ -24,9 +24,9 @@ import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.OutlineHeading
-import app.notekea.core.notes.domain.SidePanelMode
-import app.notekea.core.notes.domain.SidePanelPreferences
-import app.notekea.core.notes.domain.SidePanelSection
+import app.notekea.core.notes.domain.sidepanel.SidePanelMode
+import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
+import app.notekea.core.notes.domain.sidepanel.SidePanelSection
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader

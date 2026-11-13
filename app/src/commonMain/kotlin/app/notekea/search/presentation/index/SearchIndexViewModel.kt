@@ -2,9 +2,9 @@ package app.notekea.search.presentation.index
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.DescribeElapsedTimeUseCase
-import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.core.notes.domain.NoteFile
-import app.notekea.core.notes.domain.VectorIndex
+import app.notekea.core.notes.domain.index.IndexRunError
+import app.notekea.core.notes.domain.index.VectorIndex
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.search.domain.IndexProgress
 import app.notekea.search.domain.IndexStateStore

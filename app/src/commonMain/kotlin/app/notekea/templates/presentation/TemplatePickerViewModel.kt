@@ -7,10 +7,10 @@ import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.NoteMetadata
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TemplateListing
-import app.notekea.core.notes.domain.TemplateSettings
-import app.notekea.core.notes.domain.Templates
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.notes.domain.templates.TemplateListing
+import app.notekea.core.notes.domain.templates.TemplateSettings
+import app.notekea.core.notes.domain.templates.Templates
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.templates.domain.CreateTemplatesFolderUseCase
 import app.notekea.templates.domain.GetTemplateSettingsUseCase

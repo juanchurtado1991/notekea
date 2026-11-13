@@ -1,5 +1,9 @@
 package app.notekea.core.notes.domain
 
+import app.notekea.core.notes.domain.templates.DailyNoteSettings
+import app.notekea.core.notes.domain.templates.TemplateSettings
+import app.notekea.core.notes.domain.templates.Templates
+
 /** Obsidian's settings of a vault (in `.obsidian`) that Notekea follows. */
 interface VaultSettingsReader {
     /** The `attachmentFolderPath` setting, or null when the vault has none or it cannot be read. */

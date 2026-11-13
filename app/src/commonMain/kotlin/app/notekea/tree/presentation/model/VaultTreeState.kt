@@ -1,9 +1,9 @@
 package app.notekea.tree.presentation.model
 
-import app.notekea.core.notes.domain.DayNeighbors
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.notes.domain.templates.DayNeighbors
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.tree.domain.Bookmarks
 import app.notekea.tree.domain.TreePreferences

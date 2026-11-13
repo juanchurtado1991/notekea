@@ -4,9 +4,9 @@ import app.notekea.core.data.JvmLocalCalendar
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.FillTemplateUseCase
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.TemplateSettings
+import app.notekea.core.notes.domain.templates.FillTemplateUseCase
+import app.notekea.core.notes.domain.templates.TemplateSettings
 import app.notekea.templates.domain.CreateTemplatesFolderUseCase
 import app.notekea.tree.domain.ApplyTemplateUseCase
 import kotlinx.coroutines.test.StandardTestDispatcher

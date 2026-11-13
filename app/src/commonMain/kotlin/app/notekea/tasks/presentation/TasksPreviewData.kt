@@ -1,8 +1,8 @@
 package app.notekea.tasks.presentation
 
 import app.notekea.core.domain.time.CalendarDate
-import app.notekea.core.notes.domain.NoteTask
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.tasks.NoteTask
 import app.notekea.tasks.domain.TaskGroup
 import app.notekea.tasks.domain.TaskList
 import app.notekea.tasks.domain.TaskRow

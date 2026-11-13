@@ -1,6 +1,6 @@
 package app.notekea.editor.presentation.reading
 
-import app.notekea.core.notes.domain.LinkKind
+import app.notekea.core.notes.domain.links.LinkKind
 
 /**
  * A link clicked in a note: to a note of the vault, a `#tag` (searched in all notes), a file embedded in a

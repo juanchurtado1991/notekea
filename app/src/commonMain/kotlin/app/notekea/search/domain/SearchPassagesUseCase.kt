@@ -2,15 +2,15 @@ package app.notekea.search.domain
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.TextEmbedder
-import app.notekea.core.notes.domain.IndexRunError
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
-import app.notekea.core.notes.domain.PassageSnippet
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.SearchHit
 import app.notekea.core.notes.domain.TextFolder
-import app.notekea.core.notes.domain.VectorIndex
+import app.notekea.core.notes.domain.index.IndexRunError
+import app.notekea.core.notes.domain.index.PassageSnippet
+import app.notekea.core.notes.domain.index.SearchHit
+import app.notekea.core.notes.domain.index.VectorIndex
 
 /**
  * Hybrid search: the query reaches the index by meaning and keywords together, and each note counts once, with its best

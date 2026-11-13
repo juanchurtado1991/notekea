@@ -1,11 +1,11 @@
 package app.notekea.tasks.domain
 
 import app.notekea.core.domain.StringPatterns
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteDocument
-import app.notekea.core.notes.domain.NoteRewrite
-import app.notekea.core.notes.domain.TaskFinder
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.links.NoteRewrite
+import app.notekea.core.notes.domain.tasks.TaskFinder
 
 /**
  * Checks or unchecks a task from the Tasks tab, changing that one character of its note: to the opposite of what

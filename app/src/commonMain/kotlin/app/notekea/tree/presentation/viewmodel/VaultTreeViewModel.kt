@@ -4,7 +4,7 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.FileOpener
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.RenameEntryUseCase
-import app.notekea.core.notes.domain.UpdateLinksAfterRenameUseCase
+import app.notekea.core.notes.domain.links.UpdateLinksAfterRenameUseCase
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.BaseViewModel
 import app.notekea.tree.domain.BookmarkStore

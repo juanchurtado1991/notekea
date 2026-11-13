@@ -1,11 +1,11 @@
 package app.notekea.core.notes.data
 
-import app.notekea.core.notes.domain.FrontmatterContent
-import app.notekea.core.notes.domain.FrontmatterReader
-import app.notekea.core.notes.domain.LinkKind
-import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
+import app.notekea.core.notes.domain.frontmatter.FrontmatterReader
+import app.notekea.core.notes.domain.links.LinkKind
+import app.notekea.core.notes.domain.links.LinkResolver
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

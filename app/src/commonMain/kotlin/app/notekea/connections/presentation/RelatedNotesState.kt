@@ -1,8 +1,8 @@
 package app.notekea.connections.presentation
 
-import app.notekea.core.notes.domain.IndexRunError
-import app.notekea.core.notes.domain.RelatedNote
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.index.IndexRunError
+import app.notekea.core.notes.domain.index.RelatedNote
 
 /**
  * The open note's Related section: its [related] notes and those it [linked] already (folded unless [isLinkedOpen]),

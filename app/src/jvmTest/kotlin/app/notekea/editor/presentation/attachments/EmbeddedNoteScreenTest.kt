@@ -6,8 +6,8 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.notes.domain.AttachmentKind
-import app.notekea.core.notes.domain.LinkKind
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.LinkKind
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.editor.domain.Embed

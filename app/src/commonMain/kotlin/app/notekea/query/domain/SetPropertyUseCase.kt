@@ -1,14 +1,14 @@
 package app.notekea.query.domain
 
 import app.notekea.core.domain.StringPatterns
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
-import app.notekea.core.notes.domain.FrontmatterBlocks
-import app.notekea.core.notes.domain.FrontmatterPatch
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteDocument
-import app.notekea.core.notes.domain.NoteProperty
-import app.notekea.core.notes.domain.NoteRewrite
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.FrontmatterBlocks
+import app.notekea.core.notes.domain.frontmatter.FrontmatterPatch
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.links.NoteRewrite
 
 /**
  * Sets a property of a note from a query's table, adding it when the note has none, with the same

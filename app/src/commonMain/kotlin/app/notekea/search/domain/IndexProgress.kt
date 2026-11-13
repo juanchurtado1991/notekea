@@ -1,6 +1,6 @@
 package app.notekea.search.domain
 
-import app.notekea.core.notes.domain.IndexRunError
+import app.notekea.core.notes.domain.index.IndexRunError
 
 /**
  * How an indexing run goes: [done] of the vault's [total] notes (those indexed before the run count as done, so a

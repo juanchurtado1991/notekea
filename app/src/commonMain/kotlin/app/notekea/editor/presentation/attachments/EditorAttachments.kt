@@ -6,11 +6,11 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.AttachmentStore
-import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultSettingsReader
 import app.notekea.core.notes.domain.YouTubeLinks
+import app.notekea.core.notes.domain.links.LinkResolver
 import app.notekea.core.presentation.designsystem.images.decodedImage
 import app.notekea.editor.domain.AttachFileUseCase
 import app.notekea.editor.domain.AttachmentFolder

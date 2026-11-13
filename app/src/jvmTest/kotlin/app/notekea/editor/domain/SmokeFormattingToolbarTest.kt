@@ -1,9 +1,9 @@
 package app.notekea.editor.domain
 
-import app.notekea.core.notes.domain.LinkResolver
-import app.notekea.core.notes.domain.NoteLink
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.relativeTo
+import app.notekea.core.notes.domain.links.LinkResolver
+import app.notekea.core.notes.domain.links.NoteLink
+import app.notekea.core.notes.domain.links.relativeTo
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -2,10 +2,10 @@ package app.notekea.editor.presentation.noteinfo
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.domain.time.LocalMoment
-import app.notekea.core.notes.domain.FrontmatterContent
 import app.notekea.core.notes.domain.OutlineFinder
-import app.notekea.core.notes.domain.PropertyKeys
-import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
+import app.notekea.core.notes.domain.frontmatter.PropertyKeys
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.editor.presentation.properties.PropertyTools
 import app.notekea.editor.presentation.viewmodel.EditorHost
 import kotlinx.coroutines.Job

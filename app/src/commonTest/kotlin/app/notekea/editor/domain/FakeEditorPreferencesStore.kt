@@ -1,6 +1,6 @@
 package app.notekea.editor.domain
 
-import app.notekea.core.notes.domain.SidePanelPreferences
+import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
 import kotlinx.coroutines.delay
 
 /**

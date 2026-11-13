@@ -1,11 +1,11 @@
 package app.notekea.shell.presentation
 
 import androidx.compose.ui.unit.IntSize
-import app.notekea.core.notes.domain.ConnectionsTab
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.SidePanelMode
-import app.notekea.core.notes.domain.SidePanelSection
 import app.notekea.core.notes.domain.VaultTree
+import app.notekea.core.notes.domain.sidepanel.ConnectionsTab
+import app.notekea.core.notes.domain.sidepanel.SidePanelMode
+import app.notekea.core.notes.domain.sidepanel.SidePanelSection
 import app.notekea.core.presentation.FeedIntent
 
 /** What the user did with the tabs and panes, or what the panes around them report. */

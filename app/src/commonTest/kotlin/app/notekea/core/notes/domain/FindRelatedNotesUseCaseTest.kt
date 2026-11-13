@@ -4,6 +4,10 @@ import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.notes.data.JetBrainsMarkdownLinkFinder
+import app.notekea.core.notes.domain.index.ChunkNoteUseCase
+import app.notekea.core.notes.domain.index.FindRelatedNotesUseCase
+import app.notekea.core.notes.domain.index.IndexRunError
+import app.notekea.core.notes.domain.index.RelatedNotes
 import app.notekea.search.domain.FakeIndexStateStore
 import app.notekea.search.domain.IndexVaultUseCase
 import app.notekea.search.domain.PlanIndexUseCase

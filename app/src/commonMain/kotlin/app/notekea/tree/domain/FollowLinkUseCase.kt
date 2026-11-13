@@ -2,13 +2,13 @@ package app.notekea.tree.domain
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.files.ValidateFileNameUseCase
-import app.notekea.core.notes.domain.LinkKind
-import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NoteFileOperations
-import app.notekea.core.notes.domain.NoteLink
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.wikiPath
+import app.notekea.core.notes.domain.links.LinkKind
+import app.notekea.core.notes.domain.links.LinkResolver
+import app.notekea.core.notes.domain.links.NoteLink
+import app.notekea.core.notes.domain.links.wikiPath
 
 /**
  * Where a link clicked in a note leads, resolved among `notes` from the note `source` ([LinkResolver]). A wiki link

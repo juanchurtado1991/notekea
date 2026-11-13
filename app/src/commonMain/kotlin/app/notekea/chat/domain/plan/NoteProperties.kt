@@ -1,7 +1,7 @@
 package app.notekea.chat.domain.plan
 
 import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 
 /** A note's properties as its frontmatter writes them, one `key: value` each, for the model to read. */
 internal object NoteProperties {

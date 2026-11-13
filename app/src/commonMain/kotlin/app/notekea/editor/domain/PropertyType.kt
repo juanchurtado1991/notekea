@@ -1,7 +1,7 @@
 package app.notekea.editor.domain
 
 import app.notekea.core.domain.time.CalendarDate
-import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 
 /** The types a new property can have, each with the empty value it starts with. */
 enum class PropertyType {

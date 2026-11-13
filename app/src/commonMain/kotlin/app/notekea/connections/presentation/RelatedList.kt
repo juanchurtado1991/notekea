@@ -17,10 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.core.notes.domain.IndexRunError
-import app.notekea.core.notes.domain.PassageSnippet
-import app.notekea.core.notes.domain.RelatedNote
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.index.IndexRunError
+import app.notekea.core.notes.domain.index.PassageSnippet
+import app.notekea.core.notes.domain.index.RelatedNote
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.NotekeaPassageRow
 import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader

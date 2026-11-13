@@ -24,12 +24,12 @@ import app.notekea.connections.presentation.ConnectionActions
 import app.notekea.connections.presentation.ConnectionsSection
 import app.notekea.connections.presentation.NoteMentionsState
 import app.notekea.connections.presentation.RelatedNotesState
-import app.notekea.core.notes.domain.ConnectionsTab
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.SidePanelMode
-import app.notekea.core.notes.domain.SidePanelPreferences
-import app.notekea.core.notes.domain.SidePanelSection
+import app.notekea.core.notes.domain.sidepanel.ConnectionsTab
+import app.notekea.core.notes.domain.sidepanel.SidePanelMode
+import app.notekea.core.notes.domain.sidepanel.SidePanelPreferences
+import app.notekea.core.notes.domain.sidepanel.SidePanelSection
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme

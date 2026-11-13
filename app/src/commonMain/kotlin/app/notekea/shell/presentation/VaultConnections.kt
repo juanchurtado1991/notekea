@@ -11,8 +11,8 @@ import app.notekea.connections.presentation.FollowRelatedNotes
 import app.notekea.connections.presentation.NoteMentionsViewModel
 import app.notekea.connections.presentation.RelatedNotesViewModel
 import app.notekea.core.documents.domain.DocumentFormat
-import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.LinkResolver
 import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.sidepanel.SidePanelHost

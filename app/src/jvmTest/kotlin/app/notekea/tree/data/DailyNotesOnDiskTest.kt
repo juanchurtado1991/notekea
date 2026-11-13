@@ -8,8 +8,8 @@ import app.notekea.core.notes.data.NioNoteFileAttributes
 import app.notekea.core.notes.data.ObsidianVaultSettingsReader
 import app.notekea.core.notes.data.OkioNoteContentStore
 import app.notekea.core.notes.data.OkioNoteFileOperations
-import app.notekea.core.notes.domain.DailyNoteSettings
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.templates.DailyNoteSettings
 import app.notekea.tree.domain.FollowedLink
 import app.notekea.tree.domain.OpenDailyNoteUseCase
 import kotlinx.coroutines.test.StandardTestDispatcher

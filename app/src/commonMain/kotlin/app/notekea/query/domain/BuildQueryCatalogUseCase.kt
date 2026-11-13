@@ -2,7 +2,7 @@ package app.notekea.query.domain
 
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 
 /** The [QueryCatalog] of the vault's notes: a property's kind is the one most of its notes give it. */
 class BuildQueryCatalogUseCase {

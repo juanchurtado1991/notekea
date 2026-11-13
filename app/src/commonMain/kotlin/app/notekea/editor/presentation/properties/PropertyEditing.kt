@@ -2,10 +2,10 @@ package app.notekea.editor.presentation.properties
 
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.time.CalendarDate
-import app.notekea.core.notes.domain.FrontmatterBlocks
-import app.notekea.core.notes.domain.FrontmatterContent
-import app.notekea.core.notes.domain.FrontmatterPatch
-import app.notekea.core.notes.domain.PropertyKeys
+import app.notekea.core.notes.domain.frontmatter.FrontmatterBlocks
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
+import app.notekea.core.notes.domain.frontmatter.FrontmatterPatch
+import app.notekea.core.notes.domain.frontmatter.PropertyKeys
 import app.notekea.editor.presentation.model.PropertyIntent
 
 /**

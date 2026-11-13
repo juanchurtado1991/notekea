@@ -2,6 +2,8 @@ package app.notekea.core.notes.domain
 
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
+import app.notekea.core.notes.domain.templates.TemplateFiller
+import app.notekea.core.notes.domain.templates.Templates
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

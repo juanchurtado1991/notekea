@@ -19,9 +19,9 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.domain.time.MomentFormat
-import app.notekea.core.notes.domain.NoteProperty
-import app.notekea.core.notes.domain.PropertyKeys
-import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyKeys
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.core.presentation.designsystem.components.NotekeaChip
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaDateField

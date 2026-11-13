@@ -1,11 +1,11 @@
 package app.notekea.graph.domain
 
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
-import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteDocument
-import app.notekea.core.notes.domain.NoteRewrite
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.links.LinkResolver
+import app.notekea.core.notes.domain.links.NoteRewrite
 
 /**
  * Links two notes from the graph, only because the person clicked Link: `[[target]]` goes at the end

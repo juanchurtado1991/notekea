@@ -31,9 +31,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.time.CalendarDate
-import app.notekea.core.notes.domain.NoteProperty
-import app.notekea.core.notes.domain.PropertyKeys
-import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyKeys
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 import app.notekea.core.notes.presentation.PropertyValueEditor
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaFieldFrame

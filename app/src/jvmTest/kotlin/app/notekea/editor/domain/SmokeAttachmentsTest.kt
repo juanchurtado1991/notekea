@@ -2,7 +2,7 @@ package app.notekea.editor.domain
 
 import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.notes.domain.relativeTo
+import app.notekea.core.notes.domain.links.relativeTo
 import org.jetbrains.compose.resources.decodeToImageBitmap
 import java.io.File
 import kotlin.test.Test

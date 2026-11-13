@@ -18,8 +18,8 @@ import androidx.compose.ui.use
 import app.notekea.connections.presentation.ConnectionActions
 import app.notekea.connections.presentation.RelatedList
 import app.notekea.connections.presentation.RelatedNotesState
-import app.notekea.core.notes.domain.FrontmatterContent
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
 import app.notekea.core.presentation.UiThread
 import app.notekea.core.presentation.designsystem.components.fields.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons

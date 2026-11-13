@@ -7,8 +7,8 @@ import app.notekea.core.notes.data.isDatabaseFailure
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.NoteMetadata
-import app.notekea.core.notes.domain.NoteTask
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.tasks.NoteTask
 import app.notekea.db.NotekeaDatabase
 import app.notekea.db.SelectTasks
 import app.notekea.tree.domain.NoteMetadataCache

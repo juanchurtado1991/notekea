@@ -18,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.core.notes.domain.DayNeighbors
 import app.notekea.core.notes.domain.NotesError
+import app.notekea.core.notes.domain.templates.DayNeighbors
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaFindBar
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes

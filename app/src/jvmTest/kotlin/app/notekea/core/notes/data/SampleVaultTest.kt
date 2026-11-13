@@ -1,12 +1,12 @@
 package app.notekea.core.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
-import app.notekea.core.notes.domain.FrontmatterContent
-import app.notekea.core.notes.domain.FrontmatterReader
-import app.notekea.core.notes.domain.LinkKind
-import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.frontmatter.FrontmatterContent
+import app.notekea.core.notes.domain.frontmatter.FrontmatterReader
+import app.notekea.core.notes.domain.links.LinkKind
+import app.notekea.core.notes.domain.links.LinkResolver
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem

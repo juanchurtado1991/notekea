@@ -1,9 +1,9 @@
 package app.notekea.tree.domain
 
 import app.notekea.core.domain.time.CalendarDate
-import app.notekea.core.notes.domain.DailyNoteSettings
-import app.notekea.core.notes.domain.DayNeighbors
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.templates.DailyNoteSettings
+import app.notekea.core.notes.domain.templates.DayNeighbors
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

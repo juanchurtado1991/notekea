@@ -2,8 +2,8 @@ package app.notekea.tree.data
 
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.domain.time.MomentFormat
-import app.notekea.core.notes.domain.NoteProperty
-import app.notekea.core.notes.domain.PropertyValue
+import app.notekea.core.notes.domain.frontmatter.NoteProperty
+import app.notekea.core.notes.domain.frontmatter.PropertyValue
 
 /**
  * A property as two text columns of the note cache: its type and its value. A list joins its items with a character no

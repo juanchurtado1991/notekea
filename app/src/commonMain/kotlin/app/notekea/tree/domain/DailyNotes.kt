@@ -3,9 +3,9 @@ package app.notekea.tree.domain
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalMoment
 import app.notekea.core.domain.time.MomentFormat
-import app.notekea.core.notes.domain.DailyNoteSettings
-import app.notekea.core.notes.domain.DayNeighbors
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.templates.DailyNoteSettings
+import app.notekea.core.notes.domain.templates.DayNeighbors
 
 /**
  * Daily notes as Obsidian names them: the note of a date is its name in the settings' format,

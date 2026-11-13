@@ -1,5 +1,6 @@
 package app.notekea.core.notes.domain
 
+import app.notekea.core.notes.domain.templates.TemplateInsertion
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

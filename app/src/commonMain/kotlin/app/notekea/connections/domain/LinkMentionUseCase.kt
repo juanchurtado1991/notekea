@@ -1,14 +1,14 @@
 package app.notekea.connections.domain
 
 import app.notekea.core.domain.markdown.MarkdownSyntax
-import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
-import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteDocument
 import app.notekea.core.notes.domain.NoteEntry
-import app.notekea.core.notes.domain.NoteRewrite
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.isTableRow
+import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
+import app.notekea.core.notes.domain.links.LinkResolver
+import app.notekea.core.notes.domain.links.NoteRewrite
 
 /**
  * Turns an unlinked mention into `[[target]]`, or `[[target|words]]` when the words are written differently (the `|`

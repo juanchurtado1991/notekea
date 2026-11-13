@@ -2,9 +2,9 @@ package app.notekea.core.notes.data
 
 import app.notekea.core.domain.FakeAppDispatchers
 import app.notekea.core.domain.Outcome
-import app.notekea.core.notes.domain.IndexError
-import app.notekea.core.notes.domain.NoteChunk
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.index.IndexError
+import app.notekea.core.notes.domain.index.NoteChunk
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.apache.lucene.index.IndexWriter

@@ -6,7 +6,7 @@ import app.notekea.connections.domain.LinkMentionUseCase
 import app.notekea.connections.domain.MentionFinder
 import app.notekea.connections.presentation.NoteMentionsViewModel
 import app.notekea.connections.presentation.RelatedNotesViewModel
-import app.notekea.core.notes.domain.FindRelatedNotesUseCase
+import app.notekea.core.notes.domain.index.FindRelatedNotesUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module

@@ -1,10 +1,10 @@
 package app.notekea.search.domain
 
 import app.notekea.core.notes.domain.FuzzyMatcher
-import app.notekea.core.notes.domain.LinkResolver
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.links.LinkResolver
 
 /**
  * The notes the quick switcher lists for `query`, best first: each matches by its name, an alias or its frontmatter

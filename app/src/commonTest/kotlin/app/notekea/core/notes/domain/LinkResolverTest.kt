@@ -1,5 +1,9 @@
 package app.notekea.core.notes.domain
 
+import app.notekea.core.notes.domain.links.LinkKind
+import app.notekea.core.notes.domain.links.LinkResolver
+import app.notekea.core.notes.domain.links.NoteLink
+import app.notekea.core.notes.domain.links.ResolvedLink
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
