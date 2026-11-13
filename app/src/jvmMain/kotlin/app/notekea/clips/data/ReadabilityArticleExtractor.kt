@@ -54,7 +54,7 @@ class ReadabilityArticleExtractor : ArticleExtractor {
 
         val title = parsed
             .title
-            ?.trim()
+            ?.let { ArticleBlocks.titleOf(title = it) }
             ?.takeIf { it.isNotEmpty() } ?: paragraphs.first().take(n = TITLE_CHARS)
 
         return Outcome.Success(

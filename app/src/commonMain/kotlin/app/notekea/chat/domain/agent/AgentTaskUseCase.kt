@@ -38,6 +38,8 @@ class AgentTaskUseCase(
     private val composeNotes: ComposeNotesUseCase,
     private val clock: Clock
 ) {
+    private val finalAnswer = AgentFinalAnswer(llmEngine = llmEngine)
+
     operator fun invoke(
         task: String,
         vaultPath: String,
@@ -74,7 +76,13 @@ class AgentTaskUseCase(
 
             when (move.move) {
                 AgentTaskPrompt.FINISH -> {
-                    return@flow emit(value = AgentStep.Finished(summary = move.summary.orEmpty()))
+                    val answer = finalAnswer.written(
+                        task = task,
+                        found = found,
+                        summary = move.summary.orEmpty()
+                    )
+
+                    return@flow emit(value = AgentStep.Finished(summary = answer))
                 }
 
                 AgentTaskPrompt.PROPOSE -> return@flow proposed(

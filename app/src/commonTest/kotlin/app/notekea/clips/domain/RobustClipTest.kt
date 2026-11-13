@@ -110,4 +110,16 @@ class RobustClipTest {
             actual = listOf(article, index)
         )
     }
+
+    @Test
+    fun `a note is named after its page, not after its site`() {
+        assertEquals(
+            expected = listOf("Create pages", "HTTPS – Advanced Administration Handbook", "| odd"),
+            actual = listOf(
+                ArticleBlocks.titleOf(title = "Create pages | Documentation | WordPress.org"),
+                ArticleBlocks.titleOf(title = " HTTPS – Advanced Administration Handbook "),
+                ArticleBlocks.titleOf(title = " | odd")
+            )
+        )
+    }
 }

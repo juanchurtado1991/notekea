@@ -49,8 +49,14 @@ class ChatAgentTest {
         engine.reply = { messages ->
             when {
                 messages.first().text.startsWith("You work on a task") -> moves.removeFirst()
+
+                // The answer written from what was found: here the notes hold nothing of what is asked.
+                messages.first().text.startsWith("Write the answer to the task") -> "NOT_FOUND"
+
                 messages.first().text.startsWith("You turn a request") -> plan
+
                 messages.first().text.startsWith(OVERVIEW_PROMPT) -> "Books, mostly science fiction."
+
                 else -> "Hello."
             }
         }

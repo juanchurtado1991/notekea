@@ -80,7 +80,13 @@ class AgentTaskTest {
         val left = ArrayDeque(elements = moves.toList())
 
         engine.reply = { messages ->
-            if (messages.first().text.startsWith("You work on a task")) left.removeFirst() else "A note."
+            val asked = messages.first().text
+
+            when {
+                asked.startsWith("You work on a task") -> left.removeFirst()
+                asked.startsWith("Write the answer to the task") -> WRITTEN
+                else -> "A note."
+            }
         }
     }
 
@@ -198,9 +204,21 @@ class AgentTaskTest {
             expected = listOf<Any?>(
                 listOf("https://example.com/sleep"),
                 true,
-                AgentStep.Finished(summary = "Read it.")
+                // The answer is written from the page it read, not the move's own summary (the smoke of 2026-11-13).
+                AgentStep.Finished(summary = WRITTEN),
+                true
             ),
-            actual = listOf(pages, "the task does not write this address" in prompts, steps.last())
+            actual = listOf(
+                pages,
+                "the task does not write this address" in prompts,
+                steps.last(),
+                engine
+                    .generated
+                    .last()
+                    .last()
+                    .text
+                    .startsWith("Task: summarize https://example.com/sleep")
+            )
         )
     }
 
@@ -260,4 +278,8 @@ class AgentTaskTest {
         .generated[move - 1]
         .last()
         .text
+
+    private companion object {
+        const val WRITTEN = "Written from what was found."
+    }
 }

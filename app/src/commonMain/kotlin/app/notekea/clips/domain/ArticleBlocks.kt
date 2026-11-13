@@ -27,6 +27,15 @@ object ArticleBlocks {
         option = RegexOption.IGNORE_CASE
     )
 
+    /**
+     * A page's title without its site's name after it: "Create pages | Documentation | WordPress.org" is "Create
+     * pages", so a section's notes are not all named after their site.
+     */
+    fun titleOf(title: String): String = title
+        .substringBefore(delimiter = " | ")
+        .trim()
+        .ifEmpty { title.trim() }
+
     fun cleaned(blocks: List<String>): List<String> {
         val kept = blocks
             .map { it.replace(INSIDE, replacement = "").trim() }
