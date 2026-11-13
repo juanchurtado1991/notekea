@@ -17,7 +17,11 @@ class ClipWebPageUseCase(
     private val llmEngine: LlmEngine,
     private val supportCheck: SupportCheck
 ) {
-    operator fun invoke(url: String): Flow<ClipStep> = flow {
+    /** The clip of the page at [url]; without [withNotes] only its article, as an update of a clipped note needs. */
+    operator fun invoke(
+        url: String,
+        withNotes: Boolean = true
+    ): Flow<ClipStep> = flow {
         emit(value = ClipStep.Fetching)
 
         // The page's Markdown copy first (a docs site's "page.md"): its text without menus; else the page itself.
@@ -33,7 +37,7 @@ class ClipWebPageUseCase(
             is Outcome.Failure -> return@flow emit(value = ClipStep.Failed(error = extracted.error))
         }
 
-        val hasModel = llmEngine.readiness() is Outcome.Success
+        val hasModel = withNotes && llmEngine.readiness() is Outcome.Success
 
         if (!hasModel) {
             return@flow emit(

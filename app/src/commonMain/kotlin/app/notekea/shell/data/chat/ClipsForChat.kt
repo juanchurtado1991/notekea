@@ -135,7 +135,8 @@ class ClipsForChat(
                 value = WebClipSection
                     .notesOf(
                         done = step.copy(summary = describeSection(links = links)),
-                        today = today()
+                        today = today(),
+                        levels = depth
                     )
                     .map { (path, text) ->
                         NoteDraft(

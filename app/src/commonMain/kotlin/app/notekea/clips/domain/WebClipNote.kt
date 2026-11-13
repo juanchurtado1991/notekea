@@ -1,6 +1,7 @@
 package app.notekea.clips.domain
 
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.WebSourcesFolder
 import app.notekea.core.notes.domain.YouTubeLinks
 
 /**
@@ -8,10 +9,12 @@ import app.notekea.core.notes.domain.YouTubeLinks
  * page's YouTube videos under `## Videos`, and the article under `## Original text`, kept if the page goes away.
  */
 object WebClipNote {
-    val FOLDER = RelativePath(value = "Web sources")
+    val FOLDER = WebSourcesFolder.PATH
     private const val MAX_NAME = 80
     private val UNSAFE = Regex(pattern = "[\\\\/:*?\"<>|#^\\[\\]]")
-    private const val ORIGINAL = "## Original text"
+    const val ORIGINAL = "## Original text"
+    const val CLIPPED = "clipped: "
+    const val LEVELS = "levels: "
     private const val VIDEOS = "## Videos"
 
     // A title's brackets would end its embed's alt text early.
@@ -33,10 +36,14 @@ object WebClipNote {
     fun textOf(
         clip: WebClip,
         today: String,
-        before: String = ""
+        before: String = "",
+        levels: Int = 1
     ): String = buildString {
         append("---\nsource: \"").append(clip.url.replace("\"", "%22")).append("\"\n")
-        append("clipped: ").append(today).append("\n---\n\n")
+
+        // How deep its section's links were followed, so an update follows them as deep again.
+        if (levels > 1) append(LEVELS).append(levels).append('\n')
+        append(CLIPPED).append(today).append("\n---\n\n")
         append("# ").append(clip.title).append("\n\n")
         if (clip.notes.isNotBlank()) append(clip.notes.trim()).append("\n\n")
         if (before.isNotBlank()) append(before.trim()).append("\n\n")

@@ -7,7 +7,7 @@ import app.notekea.core.notes.domain.RelativePath
  * each linked page, and those in `Web sources/<title>/`, one note each, under names no two share.
  */
 object WebClipSection {
-    private const val PAGES = "## Pages"
+    const val PAGES = "## Pages"
     private const val SKIPPED = "Not clipped (no article found):"
 
     // Three pages at least, a paragraph on three in five of them is the site's, not the page's.
@@ -21,17 +21,19 @@ object WebClipSection {
     /** Each note's path and text; [today] is the date they were clipped (YYYY-MM-DD). */
     fun notesOf(
         done: SectionStep.Done,
-        today: String
+        today: String,
+        levels: Int = 1
     ): List<Pair<RelativePath, String>> = notesOfCleaned(
         done = cleaned(done = done),
-        today = today
+        today = today,
+        levels = levels
     )
 
     /**
      * [done] without what every page repeats (the site's menu, read as text on some sites) and without the site's
      * name after each title ("Axiom - traceloop"): both found on the Traceloop docs (2026-11-11).
      */
-    private fun cleaned(done: SectionStep.Done): SectionStep.Done {
+    fun cleaned(done: SectionStep.Done): SectionStep.Done {
         val clips = listOf(done.main) + done.pages
         if (clips.size < MIN_SHARED) return done
 
@@ -103,7 +105,8 @@ object WebClipSection {
 
     private fun notesOfCleaned(
         done: SectionStep.Done,
-        today: String
+        today: String,
+        levels: Int
     ): List<Pair<RelativePath, String>> {
         val folderName = WebClipNote.nameOf(title = done.main.title)
         val folder = WebClipNote.FOLDER.child(name = folderName)
@@ -156,7 +159,8 @@ object WebClipSection {
         val index = WebClipNote.textOf(
             clip = done.main,
             today = today,
-            before = listed
+            before = listed,
+            levels = levels
         )
 
         val main = WebClipNote.pathOf(title = done.main.title) to index
