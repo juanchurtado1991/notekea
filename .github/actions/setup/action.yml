@@ -1,0 +1,28 @@
+name: Set up the build
+description: >-
+  JDK 21 (Temurin), the embedding model the app bundles when asked, and Gradle: what every job sets up after its
+  checkout, in one place.
+inputs:
+  model:
+    description: Whether to restore the bundled embedding model (ROADMAP.md 2.2), 121 MB, kept by its SHA-256
+    required: false
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - name: Set up JDK 21
+      uses: actions/setup-java@v6
+      with:
+        distribution: temurin
+        java-version: 21
+
+    # The key is the model's SHA-256, as buildSrc's EmbeddingModel checks it: a new model is a new cache.
+    - name: Cache the embedding model
+      if: inputs.model == 'true'
+      uses: actions/cache@v6
+      with:
+        path: .gradle/models
+        key: embedding-model-15691dfe830257f569a1e3521977351d16eac18e48e414908dc98ed9b8455e07
+
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v6

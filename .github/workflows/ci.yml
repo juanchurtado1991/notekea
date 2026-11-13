@@ -45,16 +45,11 @@ jobs:
           echo "code=$code" >> "$GITHUB_OUTPUT"
           echo "Code changed: $code"
 
-      - name: Set up JDK 21
+      - name: Set up JDK and Gradle
         if: steps.changes.outputs.code == 'true'
-        uses: actions/setup-java@v6
+        uses: ./.github/actions/setup
         with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Set up Gradle
-        if: steps.changes.outputs.code == 'true'
-        uses: gradle/actions/setup-gradle@v6
+          model: 'false'
 
       # `check` runs ktlint and every test task of every module; `koverVerify` enforces the minimum coverage.
       - name: Lint, test and coverage
