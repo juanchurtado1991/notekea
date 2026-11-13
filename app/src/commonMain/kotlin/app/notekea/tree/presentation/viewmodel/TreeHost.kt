@@ -1,26 +1,17 @@
 package app.notekea.tree.presentation.viewmodel
 
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.ViewModelHost
 import app.notekea.tree.presentation.model.VaultTreeEffect
 import app.notekea.tree.presentation.model.VaultTreeState
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * What the sidebar's parts share with [VaultTreeViewModel], which routes the intents to them: the [state], the ways to
  * change it ([reduce], or [updateTree], which flattens the rows again and saves the tree's preferences), send an effect
  * ([emit]), start work ([launch]), open an entry in a tab ([open]) and select one before opening it ([reveal]).
  */
-internal interface TreeHost {
-    val state: StateFlow<VaultTreeState>
-
-    fun reduce(transform: (VaultTreeState) -> VaultTreeState)
-
+internal interface TreeHost : ViewModelHost<VaultTreeState, VaultTreeEffect> {
     fun updateTree(transform: (VaultTreeState) -> VaultTreeState)
-
-    fun emit(effect: VaultTreeEffect)
-
-    fun launch(block: suspend () -> Unit): Job
 
     fun open(path: RelativePath?)
 
