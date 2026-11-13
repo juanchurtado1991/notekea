@@ -21,6 +21,7 @@ import app.notekea.editor.domain.EmbedFinder
 import app.notekea.editor.domain.EmbedProblem
 import app.notekea.editor.domain.EmbedText
 import app.notekea.editor.domain.EmbeddedNoteText
+import app.notekea.editor.domain.FilePosters
 import app.notekea.editor.domain.YouTubeDetails
 import kotlinx.coroutines.withContext
 
@@ -35,7 +36,8 @@ class EditorAttachments(
     private val vaultSettingsReader: VaultSettingsReader,
     private val attachFile: AttachFileUseCase,
     private val youTubeDetails: YouTubeDetails,
-    private val dispatchers: AppDispatchers
+    private val dispatchers: AppDispatchers,
+    private val filePosters: FilePosters = FilePosters { _, _ -> null }
 ) {
     private val embedFinder = EmbedFinder()
     private val embeddedNoteText = EmbeddedNoteText()
@@ -175,7 +177,15 @@ class EditorAttachments(
         path: RelativePath?
     ): AttachmentView {
         val kind = AttachmentKind.of(name = path?.name ?: embed.target)
-        val image = if (path != null && kind == AttachmentKind.IMAGE) imageOf(path = path) else null
+
+        val image = when {
+            path == null -> null
+
+            kind == AttachmentKind.IMAGE -> imageOf(path = path)
+
+            // A PDF's first page and a video's frame, once made ([makePosters]); the card shows without it until then.
+            else -> images[path]?.also { images[path] = it.copy(reading = reading) }?.image
+        }
 
         val location = path
             ?.takeIf {
@@ -336,6 +346,47 @@ class EditorAttachments(
         }
 
         return files.orEmpty()
+    }
+
+    /**
+     * Makes the pictures [views] are still without: a PDF's first page, a video's frame ([FilePosters], slow the first
+     * time). True when one was made, so the note's embeds are read again to show it.
+     */
+    suspend fun makePosters(views: List<AttachmentView>): Boolean {
+        val missing = views
+            .flatMap {
+                listOf(it) + it.nested
+            }
+            .mapNotNull {
+                it.path?.takeIf { path ->
+                    it.image == null && FilePosters.has(path = path)
+                }
+            }
+            .distinct()
+            .filterNot {
+                it in images
+            }
+
+        missing.forEach { path ->
+            val poster = filePosters.of(
+                vaultPath = vaultPath,
+                path = path
+            )
+
+            images[path] = CachedImage(
+                reading = reading,
+                image = poster?.let {
+                    decodedImage(
+                        bytes = it,
+                        dispatcher = dispatchers.default
+                    )
+                }
+            )
+        }
+
+        return missing.any {
+            images[it]?.image != null
+        }
     }
 
     /** The picture at [path], decoded once and kept while the notes read use it (null when it cannot be read). */

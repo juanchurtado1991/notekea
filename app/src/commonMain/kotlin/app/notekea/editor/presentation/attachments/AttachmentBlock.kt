@@ -14,6 +14,7 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.YouTubeLinks
 import app.notekea.core.notes.domain.links.LinkKind
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaAttachmentImage
+import app.notekea.core.presentation.designsystem.components.attachments.NotekeaDocumentCard
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaEmbeddedNote
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaFileChip
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaMissingFile
@@ -82,6 +83,7 @@ fun AttachmentBlock(
 
         path != null && view.location != null -> VideoEmbed(
             path = path,
+            thumbnail = view.image,
             onIntent = onIntent,
             modifier = modifier
         )
@@ -91,6 +93,14 @@ fun AttachmentBlock(
             contentDescription = view.embed.label ?: view.embed.target,
             modifier = modifier,
             width = view.embed.width?.dp
+        )
+
+        path != null && image != null -> NotekeaDocumentCard(
+            name = path.name,
+            hint = stringResource(resource = hintOf(path = path)),
+            page = image,
+            onOpen = { onIntent(EditorIntent.OnAttachmentOpen(path = path)) },
+            modifier = modifier
         )
 
         path != null -> NotekeaFileChip(
@@ -146,7 +156,8 @@ private fun YouTubeEmbed(
 private fun VideoEmbed(
     path: RelativePath,
     onIntent: (EditorIntent) -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    thumbnail: ImageBitmap?
 ) {
     val format = path
         .name
@@ -158,7 +169,8 @@ private fun VideoEmbed(
         subtitle = stringResource(Res.string.video_local_subtitle, format),
         playLabel = stringResource(resource = Res.string.video_play),
         onPlay = { onIntent(EditorIntent.OnAttachmentOpen(path = path)) },
-        modifier = modifier
+        modifier = modifier,
+        thumbnail = thumbnail
     )
 }
 

@@ -7,6 +7,7 @@ import app.notekea.core.notes.domain.VaultSettingsReader
 import app.notekea.editor.domain.AttachFileUseCase
 import app.notekea.editor.domain.AttachmentPicker
 import app.notekea.editor.domain.ClipboardReader
+import app.notekea.editor.domain.FilePosters
 import app.notekea.editor.domain.VideoCompressor
 import app.notekea.editor.domain.YouTubeDetails
 
@@ -20,5 +21,6 @@ class AttachmentTools(
     val clipboardReader: ClipboardReader,
     val youTubeDetails: YouTubeDetails,
     val videoCompressor: VideoCompressor,
-    val dispatchers: AppDispatchers
+    val dispatchers: AppDispatchers,
+    val filePosters: FilePosters = FilePosters { _, _ -> null }
 )

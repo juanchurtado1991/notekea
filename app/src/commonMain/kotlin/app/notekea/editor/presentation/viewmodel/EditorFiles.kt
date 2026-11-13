@@ -44,7 +44,8 @@ internal class EditorFiles(
         vaultSettingsReader = tools.vaultSettingsReader,
         attachFile = tools.attachFile,
         youTubeDetails = tools.youTubeDetails,
-        dispatchers = tools.dispatchers
+        dispatchers = tools.dispatchers,
+        filePosters = tools.filePosters
     )
     private var attachmentsJob: Job? = null
     private var compression: Job? = null
@@ -80,6 +81,18 @@ internal class EditorFiles(
 
             host.reduce {
                 if (it.notePath == note) it.copy(attachments = views) else it
+            }
+
+            // The pictures of its PDFs and videos come after the note shows, each made once.
+            if (!attachments.makePosters(views = views)) return@launch
+
+            val pictured = attachments.viewsOf(
+                note = note,
+                text = body
+            )
+
+            host.reduce {
+                if (it.notePath == note) it.copy(attachments = pictured) else it
             }
         }
     }

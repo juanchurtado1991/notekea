@@ -28,5 +28,6 @@ val desktopModules: List<Module> = listOf(
     jvmSyncModule,
     jvmDocumentsModule,
     jvmClipsModule,
-    jvmVaultModule
+    jvmVaultModule,
+    jvmPostersModule
 )

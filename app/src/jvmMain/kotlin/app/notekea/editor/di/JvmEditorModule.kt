@@ -8,6 +8,7 @@ import app.notekea.editor.data.AwtClipboardReader
 import app.notekea.editor.data.FfmpegInstaller
 import app.notekea.editor.data.FfmpegTool
 import app.notekea.editor.data.FfmpegVideoCompressor
+import app.notekea.editor.data.FfmpegVideoFrames
 import app.notekea.editor.data.FileKitAttachmentPicker
 import app.notekea.editor.data.JvmLocalTimeFormatter
 import app.notekea.editor.data.KtorYouTubeDetails
@@ -42,7 +43,7 @@ val jvmEditorModule = module {
     single<AttachmentPicker> { FileKitAttachmentPicker() }
     single<LocalTimeFormatter> { JvmLocalTimeFormatter() }
 
-    single<VideoCompressor> {
+    single {
         val appData = get<PlatformConventions>().appDataDirectory
 
         val system = when (get<PlatformConventions>().operatingSystem) {
@@ -51,15 +52,26 @@ val jvmEditorModule = module {
             OperatingSystem.WINDOWS -> "windows"
         }
 
+        FfmpegInstaller(
+            folder = Path.of(appData, FFMPEG_FOLDER),
+            tool = FfmpegTool.of(
+                system = system,
+                architecture = System.getProperty("os.arch").orEmpty()
+            )
+        )
+    }
+
+    single<VideoCompressor> {
         FfmpegVideoCompressor(
-            installer = FfmpegInstaller(
-                folder = Path.of(appData, FFMPEG_FOLDER),
-                tool = FfmpegTool.of(
-                    system = system,
-                    architecture = System.getProperty("os.arch").orEmpty()
-                )
-            ),
-            workFolder = Path.of(appData, COMPRESSING_FOLDER),
+            installer = get(),
+            workFolder = Path.of(get<PlatformConventions>().appDataDirectory, COMPRESSING_FOLDER),
+            dispatchers = get()
+        )
+    }
+
+    single {
+        FfmpegVideoFrames(
+            installer = get(),
             dispatchers = get()
         )
     }
