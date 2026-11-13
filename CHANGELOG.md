@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Six new color themes replace seven of the eight before, each a 60/30/10 palette in light and dark: Polar, Desert,
+  Storm, Forest, Ocean and Lavender. Workspace Blue stays, and Notekea still starts with it. The note takes the first color, the sidebar and the tabs
+  the second, and buttons, links and the chosen row the third. A theme that is gone becomes the closest new one.
 - One editing mode: a note looks finished and is edited right there, so the Edit and Preview tabs are gone. The line
   the cursor is on shows its Markdown marks, muted; every other line reads as Preview drew it, and links, tags, task
   boxes, callouts, files and query tables work without leaving the text. `Mod+E` and the new Source button at the

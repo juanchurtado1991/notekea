@@ -38,7 +38,7 @@ class SettingsAppearanceStoreTest {
 
             store().save(
                 appearance = Appearance(
-                    theme = ColorTheme.SAGE,
+                    theme = ColorTheme.FOREST,
                     mode = ThemeMode.DARK
                 )
             )
@@ -47,7 +47,7 @@ class SettingsAppearanceStoreTest {
                 expected = listOf(
                     Appearance(),
                     Appearance(
-                        theme = ColorTheme.SAGE,
+                        theme = ColorTheme.FOREST,
                         mode = ThemeMode.DARK
                     )
                 ),
@@ -80,11 +80,11 @@ class SettingsAppearanceStoreTest {
     ) {
         settings.putString(
             key = "app.theme",
-            value = "deep_sage"
+            value = "lagoon"
         )
 
         assertEquals(
-            expected = ColorTheme.SAGE,
+            expected = ColorTheme.OCEAN,
             actual = store()
                 .observe()
                 .first()
@@ -124,12 +124,12 @@ class SettingsAppearanceStoreTest {
 
         advanceUntilIdle()
 
-        store.save(appearance = Appearance(theme = ColorTheme.HONEY))
+        store.save(appearance = Appearance(theme = ColorTheme.DESERT))
         advanceUntilIdle()
         following.join()
 
         assertEquals(
-            expected = listOf(Appearance(), Appearance(theme = ColorTheme.HONEY)),
+            expected = listOf(Appearance(), Appearance(theme = ColorTheme.DESERT)),
             actual = seen
         )
     }

@@ -38,15 +38,37 @@ class ColorThemeSchemesTest {
     }
 
     @Test
-    fun `Workspace Blue is the default and uses its own palette`() {
+    fun `Workspace Blue is the default, and every theme paints its sidebar and tabs apart from the page`() {
+        val flat = ColorTheme.entries.flatMap { theme ->
+            listOf(false, true).mapNotNull { dark ->
+                val scheme = ColorThemeSchemes.of(
+                    theme = theme,
+                    darkTheme = dark
+                )
+
+                theme.takeIf {
+                    scheme.sidebarSurface == scheme.background ||
+                        scheme.chromeSurface == scheme.background
+                }
+            }
+        }
+
+        assertEquals(
+            expected = ColorTheme.WORKSPACE_BLUE to emptyList(),
+            actual = ColorTheme.DEFAULT to flat
+        )
+    }
+
+    @Test
+    fun `Workspace Blue keeps its own palette`() {
         assertSame(
             expected = WorkspaceBlueSchemes.light,
-            actual = ColorThemeSchemes.of(ColorTheme.DEFAULT, darkTheme = false)
+            actual = ColorThemeSchemes.of(ColorTheme.WORKSPACE_BLUE, darkTheme = false)
         )
 
         assertSame(
             expected = WorkspaceBlueSchemes.dark,
-            actual = ColorThemeSchemes.of(ColorTheme.DEFAULT, darkTheme = true)
+            actual = ColorThemeSchemes.of(ColorTheme.WORKSPACE_BLUE, darkTheme = true)
         )
     }
 

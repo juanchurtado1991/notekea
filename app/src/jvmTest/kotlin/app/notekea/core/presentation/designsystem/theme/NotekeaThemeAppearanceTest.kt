@@ -22,15 +22,15 @@ class NotekeaThemeAppearanceTest {
     fun `the theme draws the chosen color theme in the chosen mode, or the system's under System`() {
         val cases = listOf(
             Appearance(
-                theme = ColorTheme.SAGE,
+                theme = ColorTheme.FOREST,
                 mode = ThemeMode.DARK
             ) to false,
             Appearance(
-                theme = ColorTheme.ROSE,
+                theme = ColorTheme.STORM,
                 mode = ThemeMode.LIGHT
             ) to true,
             Appearance(
-                theme = ColorTheme.LAGOON,
+                theme = ColorTheme.OCEAN,
                 mode = ThemeMode.SYSTEM
             ) to true,
             Appearance() to false
@@ -43,15 +43,15 @@ class NotekeaThemeAppearanceTest {
         assertEquals(
             expected = listOf(
                 ColorThemeSchemes.of(
-                    theme = ColorTheme.SAGE,
+                    theme = ColorTheme.FOREST,
                     darkTheme = true
                 ),
                 ColorThemeSchemes.of(
-                    theme = ColorTheme.ROSE,
+                    theme = ColorTheme.STORM,
                     darkTheme = false
                 ),
                 ColorThemeSchemes.of(
-                    theme = ColorTheme.LAGOON,
+                    theme = ColorTheme.OCEAN,
                     darkTheme = true
                 ),
                 WorkspaceBlueSchemes.light

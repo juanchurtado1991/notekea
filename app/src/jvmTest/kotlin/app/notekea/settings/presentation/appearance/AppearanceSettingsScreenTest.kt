@@ -61,12 +61,12 @@ class AppearanceSettingsScreenTest {
                 }
             }.use { scene ->
                 settle(scene = scene)
-                scene.clickText(text = "Sage") { settle(scene = scene) }
+                scene.clickText(text = "Forest") { settle(scene = scene) }
                 kept += store.kept
 
                 focusCard(
                     scene = scene,
-                    name = "Honey"
+                    name = "Desert"
                 )
 
                 scene.sendKeyEvent(
@@ -92,10 +92,10 @@ class AppearanceSettingsScreenTest {
 
         assertEquals(
             expected = listOf(
-                Appearance(theme = ColorTheme.SAGE),
-                Appearance(theme = ColorTheme.HONEY),
+                Appearance(theme = ColorTheme.FOREST),
+                Appearance(theme = ColorTheme.DESERT),
                 Appearance(
-                    theme = ColorTheme.HONEY,
+                    theme = ColorTheme.DESERT,
                     mode = ThemeMode.DARK
                 )
             ),

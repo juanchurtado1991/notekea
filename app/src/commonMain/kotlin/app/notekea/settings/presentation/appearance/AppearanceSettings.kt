@@ -46,13 +46,12 @@ import app.notekea.resources.appearance_system_accent
 import app.notekea.resources.appearance_system_accent_hint
 import app.notekea.resources.appearance_theme
 import app.notekea.resources.settings_section_appearance
-import app.notekea.resources.theme_clay
-import app.notekea.resources.theme_graphite
-import app.notekea.resources.theme_honey
-import app.notekea.resources.theme_iris
-import app.notekea.resources.theme_lagoon
-import app.notekea.resources.theme_rose
-import app.notekea.resources.theme_sage
+import app.notekea.resources.theme_desert
+import app.notekea.resources.theme_forest
+import app.notekea.resources.theme_lavender
+import app.notekea.resources.theme_ocean
+import app.notekea.resources.theme_polar
+import app.notekea.resources.theme_storm
 import app.notekea.resources.theme_workspace_blue
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -240,13 +239,12 @@ private fun ThemeChoice(
 /** The name a theme is shown with. */
 private fun nameOf(theme: ColorTheme): StringResource = when (theme) {
     ColorTheme.WORKSPACE_BLUE -> Res.string.theme_workspace_blue
-    ColorTheme.GRAPHITE -> Res.string.theme_graphite
-    ColorTheme.SAGE -> Res.string.theme_sage
-    ColorTheme.LAGOON -> Res.string.theme_lagoon
-    ColorTheme.IRIS -> Res.string.theme_iris
-    ColorTheme.ROSE -> Res.string.theme_rose
-    ColorTheme.CLAY -> Res.string.theme_clay
-    ColorTheme.HONEY -> Res.string.theme_honey
+    ColorTheme.POLAR -> Res.string.theme_polar
+    ColorTheme.DESERT -> Res.string.theme_desert
+    ColorTheme.STORM -> Res.string.theme_storm
+    ColorTheme.FOREST -> Res.string.theme_forest
+    ColorTheme.OCEAN -> Res.string.theme_ocean
+    ColorTheme.LAVENDER -> Res.string.theme_lavender
 }
 
 private val MODES = listOf(ThemeMode.SYSTEM, ThemeMode.LIGHT, ThemeMode.DARK)
@@ -256,7 +254,7 @@ private val MODES = listOf(ThemeMode.SYSTEM, ThemeMode.LIGHT, ThemeMode.DARK)
 private fun AppearanceSettingsPreview() {
     NotekeaPreviewThemes {
         AppearanceSettings(
-            state = AppearanceState(appearance = Appearance(theme = ColorTheme.LAGOON)),
+            state = AppearanceState(appearance = Appearance(theme = ColorTheme.OCEAN)),
             onIntent = {}
         )
     }

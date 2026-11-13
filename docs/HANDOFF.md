@@ -246,8 +246,8 @@ developer (Windows), each with Notekea QA and their guide (`qa/GUIDE_*.md`).
 
 ## Decisions to keep
 
-- **Default theme:** Workspace Blue (`ColorTheme.DEFAULT`, decided 2026-11-03). Themes are hand-tuned in
-  `ThemeColorSets` (2026-11-05); `ColorTheme.fromId` keeps the ids of the themes that are gone. Keep the theme's generic name: no third-party brand
+- **Default theme:** Workspace Blue (`ColorTheme.DEFAULT`, decided 2026-11-03, kept on 2026-11-12). The other six
+  themes are 60/30/10 palettes in `ThemeColorSets` (2026-11-12, `ROADMAP.md` 2.12); `ColorTheme.fromId` keeps the ids of the themes that are gone. Keep the theme's generic name: no third-party brand
   names or marks in the app.
 - **Architecture:** Clean Architecture + MVI + Koin + ports with fakes stays (decided 2026-10-28). A use case only
   when it decides something; files at most 350 lines of code, functions at most 60, lines at most 100 characters.

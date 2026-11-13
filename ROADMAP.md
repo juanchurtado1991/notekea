@@ -138,7 +138,7 @@ below is that first palette, which the logo keeps; the app's themes are in 2.12.
 - **Motion:** 150–200 ms for panel open/close; no animation longer than 250 ms; respect "reduce motion": the setting
   in Settings → Appearance or the system's turns animations off.
 - **Themes:** light and dark, following the system by default; since 2.12 also chosen in Settings → Appearance,
-  with eight color themes, Workspace Blue the one it starts with.
+  with seven color themes, Workspace Blue the one it starts with.
 - **Accessibility:** WCAG AA contrast for text, every action reachable by keyboard, visible focus ring,
   semantics for screen readers on all interactive elements.
 
@@ -643,24 +643,26 @@ the automated smoke runs of 1.16, and its smoke test also checks the code trim o
 ### ✅ 2.12 Color themes — `feature/color-themes` — [notekea#107](https://github.com/juanchurtado1991/notekea/pull/107)
 
 Settings → Appearance, the first section of Settings to be built: the light and dark mode, and a color theme. Themes
-were replaced on 2026-11-05: tones computed from two brand colors painted the whole window, so the eleven first themes
-became eight made by hand, all in the image of Workspace Blue, the theme the app starts with.
+were replaced on 2026-11-05 (eleven computed themes became eight made by hand), and again on 2026-11-12, as the
+developer asked: Workspace Blue stays as it was and the one the app starts with, and six themes, each a 60/30/10
+palette, replace the other seven. Polar, Desert and Storm come from three palettes the developer chose; Forest, Ocean
+and Lavender were made the same way.
 
-| Theme | Character | Lead, dark | Lead, light |
+| Theme | 60% (the note) | 30% (sidebar, tabs, selection) | 10% (buttons, links, tags) |
 |---|---|---|---|
-| Workspace Blue | Quiet grays, a clear blue, an orange accent | `#669DF1` | `#1868DB` |
-| Graphite | Almost monochrome | `#B9C0CC` | `#4A5160` |
-| Sage | A calm green | `#7FC29C` | `#2C7A55` |
-| Lagoon | A clean teal | `#5CC2C7` | `#0B7682` |
-| Iris | A soft violet | `#A998F4` | `#6A4ED6` |
-| Rose | An elegant pink | `#F08CA8` | `#BE3468` |
-| Clay | Warm terracotta, like paper | `#E3966C` | `#AD4F28` |
-| Honey | A quiet amber | `#E5B567` | `#8F6108` |
+| Polar | `#F1F3F4` | `#9CC6E0` | `#E4002B` |
+| Desert | `#D8C3A0` | `#5B5E3C` | `#FFD21F` |
+| Storm | `#5A6068` | `#1C1D20` | `#FF5F00` |
+| Forest | `#EEF1EC` | `#2F5D50` | `#C8733A` |
+| Ocean | `#F5F1E8` | `#1E4E79` | `#FF6B57` |
+| Lavender | `#EEEBF5` | `#5B4B8A` | `#2BB673` |
 
-Whoever kept a theme that is gone gets the closest one (`ColorTheme.fromId`), and the first palette's `default` id now
-leads to Workspace Blue.
+Each theme's light and dark versions keep the palette's hues and move its lightness: the 10% is darkened in light
+(yellow and orange the most) and lightened in dark until links and buttons read at WCAG AA. Whoever kept a theme that
+is gone gets the closest one (`ColorTheme.fromId`): Rose leads to Polar, Graphite to Storm, Clay and Honey to Desert,
+Sage to Forest, Lagoon to Ocean and Iris to Lavender.
 
-- **Colors:** every theme has gray surfaces with a touch of its hue and one lead color for actions, selection and links,
+- **Colors:** every theme has its note, its sidebar and tabs, and its lead color for actions, selection and links,
   in a light and a dark version. Every pair of text and background meets WCAG AA (4.5:1), checked by a test for every
   theme and mode. The logo takes the theme's colors. The colors of meaning (bookmarks, file types, warnings, errors)
   stay the same in every theme.

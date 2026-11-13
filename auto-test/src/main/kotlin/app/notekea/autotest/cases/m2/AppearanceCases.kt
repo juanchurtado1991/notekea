@@ -16,7 +16,7 @@ private const val OPEN_PLAYGROUND =
     "1. En Notekea, abre la Playground Vault (mira DATOS DE PRUEBA arriba)."
 private const val OPEN_APPEARANCE =
     "Haz clic en Ajustes (el engranaje abajo en la barra estrecha de la izquierda) y en Apariencia"
-private const val THEME = "Sage"
+private const val THEME = "Forest"
 private const val SELECTED_MILLIS = 10_000L
 
 /** The cases of 2.12, color themes (`MVP_SMOKE_TEST.md`): Settings → Appearance's mode and themes. */
@@ -146,10 +146,12 @@ private fun SuiteBuilder.themesLook() {
 
         expected(
             text =
-            "Cada clic cambia toda la ventana al instante (la lista de la izquierda, las " +
-                "pestañas, la nota y el logo) a los colores de la tarjeta, y todos los textos se " +
-                "siguen leyendo fácilmente. La tarjeta elegida tiene borde y una marca. Enter " +
-                "elige la tarjeta con el anillo, como un clic."
+            "Cada clic cambia toda la ventana al instante a los colores de la tarjeta. En los " +
+                "seis temas de paleta, la nota va en el primer color, la lista de la izquierda y " +
+                "las pestañas en el segundo, y los botones, los enlaces y la fila elegida en el " +
+                "tercero. Todos los " +
+                "textos se siguen leyendo fácilmente. La tarjeta elegida tiene borde y una " +
+                "marca. Enter elige la tarjeta con el anillo, como un clic."
         )
     }
 }

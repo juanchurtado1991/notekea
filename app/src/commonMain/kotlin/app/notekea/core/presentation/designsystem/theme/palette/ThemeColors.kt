@@ -3,13 +3,15 @@ package app.notekea.core.presentation.designsystem.theme.palette
 import androidx.compose.ui.graphics.Color
 
 /**
- * One mode of a theme: quiet grays with a touch of the theme's hue for the [page], the [surface] of the content and the
- * [raised] parts, and one [lead] color for what can be clicked. [selection] tints a chosen row and [accent] marks tags
- * and warnings. All are chosen by hand: tones computed from a brand color paint the whole window with it.
+ * One mode of a theme, from its 60/30/10 palette: the first color makes the [page] and the [surface] of the content,
+ * the second the [sidebar], the [chrome] (the row of tabs), the [raised] parts and the [selection], and the third the
+ * [lead] color of what can be clicked and the [accent] of tags.
  */
 internal data class ThemeColors(
     val page: Color,
     val surface: Color,
+    val sidebar: Color,
+    val chrome: Color,
     val raised: Color,
     val ink: Color,
     val muted: Color,

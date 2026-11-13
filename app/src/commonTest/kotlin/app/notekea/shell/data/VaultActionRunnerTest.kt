@@ -229,10 +229,10 @@ class VaultActionRunnerTest {
             notes = notes
         )
 
-        val isKnown = runner.setTheme(theme = "Sage")
+        val isKnown = runner.setTheme(theme = "Forest")
 
         assertEquals(
-            expected = Triple(true, "Mine", ColorTheme.SAGE),
+            expected = Triple(true, "Mine", ColorTheme.FOREST),
             actual = Triple(
                 failed is Outcome.Failure && isKnown,
                 store.texts[SUMMARY],
