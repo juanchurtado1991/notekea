@@ -1,17 +1,5 @@
 package app.notekea.chat.domain.context
 
-/** Where the person is in Notekea: a note, another file, a folder, one of the views, or Settings. */
-enum class WorkPlace(val said: String) {
-    NOTE(said = "the note"),
-    FILE(said = "the file"),
-    FOLDER(said = "the folder"),
-    GRAPH(said = "the graph view"),
-    QUERY(said = "the query view"),
-    TASKS(said = "the tasks view"),
-    STUDY(said = "the study cards"),
-    SETTINGS(said = "Settings")
-}
-
 /**
  * What the person has open as they ask (the developer's choice of 2026-11-13: always, shown as a chip): the [place]
  * and its [name] (a note's or folder's path), the [section] the cursor is in and the text [selected], if any.
