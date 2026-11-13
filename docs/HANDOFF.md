@@ -63,6 +63,24 @@ macOS slowed it tenfold and cases waiting for the index failed at random. The Yo
 thread (`CocoaMainThread`, through JNA); a local video's native library goes with the app (`VideoPlayerNatives`); a
 pasted documentation page asks its question in the chat again.
 
+**Later on 2026-11-13, also in #142:**
+
+- **The code review's suggestions:** each one is its own commit. These include the ViewModels' hosts
+  (`ViewModelHost`), the folders of chat, design system, notes domain, shell and graph, and one JUnit version.
+- **Study cards are multiple choice:** the developer's design A. The card sits in the middle with its deck, n of m and a
+  progress bar, then four options A to D (keys 1 to 4). The chat model writes the wrong options (`MakeChoicesUseCase`)
+  and makes the next card's ahead. A right choice is Good, a wrong one Hard, then Next (Enter). Without a model, or
+  while the options are written, Show answer works as before (4.6-03).
+- **The chat always knows where you are,** shown as chips over its field (the developer's choice 1). The chips name
+  the open note with the section at the cursor and the selected text, or a file, a folder, a view or Settings. The
+  plan, agent mode and the talk read it as one line (`WorkContext`), and a chip's × keeps its part out (3.3-12).
+- **The chat-model cases ran here for the first time** (models downloaded on 2026-11-13):
+  - Four Auto-Test parts loading the model at once ran the GPU out of memory, so the cases that ask a model now run
+    one after another in part 1 (`NotekeaSuiteParts.asksModel`).
+  - A reply or an agent's summary that only says nothing was found is now the not-found reply (3.3-05).
+- **Not looked into yet:** a ggml Metal abort when the app quits after using the model, and the onboarding card that
+  shows before the app finishes loading. The developer asked to wait until the smoke test ends.
+
 **Decisions of this pull request** (also in `ROADMAP.md` 5.1–5.4, `docs/macos-redesign.md`, `PLATFORM_GUIDELINES.md`,
 `qa/AUTO_TEST.md` *Language*):
 
