@@ -185,9 +185,9 @@ class VaultTreeViewModel(
 
             is VaultTreeIntent.OnRevealRequest -> files.showInFileManager(path = intent.path)
 
-            is VaultTreeIntent.OnRevealNote, is VaultTreeIntent.OnRevealInTree -> revealFromOutside(
-                intent = intent
-            )
+            is VaultTreeIntent.OnRevealNote -> reveal(path = intent.path)
+
+            is VaultTreeIntent.OnRevealInTree -> revealInTree(path = intent.path)
 
             is VaultTreeIntent.OnRowClick -> clickRow(
                 path = intent.path,
@@ -306,22 +306,15 @@ class VaultTreeViewModel(
     }
 
     /**
-     * An entry named outside the tree: a note chosen in the quick switcher is selected and opened; a folder or file of
-     * a path (the status bar, the folder above a title) is shown in Files, opening the sidebar if it was hidden.
+     * A folder or file named outside the tree (the status bar, the folder above a title) is shown in Files, opening the
+     * sidebar if it was hidden; a note chosen in the quick switcher goes to [reveal].
      */
-    private fun revealFromOutside(intent: VaultTreeIntent) {
-        when (intent) {
-            is VaultTreeIntent.OnRevealNote -> reveal(path = intent.path)
-
-            is VaultTreeIntent.OnRevealInTree ->
-                updateTree {
-                    reduceReveal(
-                        state = it,
-                        path = intent.path
-                    ).copy(isSidebarCollapsed = false)
-                }
-
-            else -> Unit
+    private fun revealInTree(path: RelativePath) {
+        updateTree {
+            reduceReveal(
+                state = it,
+                path = path
+            ).copy(isSidebarCollapsed = false)
         }
     }
 

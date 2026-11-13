@@ -130,11 +130,11 @@ class WorkspaceViewModel(
                 size = intent.size
             )
 
-            else -> onSidePanelIntent(intent = intent)
+            is WorkspaceIntent.SidePanel -> onSidePanelIntent(intent = intent)
         }
     }
 
-    private fun onSidePanelIntent(intent: WorkspaceIntent) {
+    private fun onSidePanelIntent(intent: WorkspaceIntent.SidePanel) {
         when (intent) {
             WorkspaceIntent.OnSidePanelToggle -> updateSidePanel {
                 it.copy(isVisible = !it.isVisible)
@@ -188,8 +188,6 @@ class WorkspaceViewModel(
 
                 it.copy(foldedSections = foldedSections)
             }
-
-            else -> Unit
         }
     }
 

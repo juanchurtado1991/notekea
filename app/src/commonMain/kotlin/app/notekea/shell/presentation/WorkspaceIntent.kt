@@ -10,6 +10,9 @@ import app.notekea.core.presentation.FeedIntent
 
 /** What the user did with the tabs and panes, or what the panes around them report. */
 sealed interface WorkspaceIntent {
+    /** The side panel: shown or not, its width, its mode, its sections and where the keyboard goes in it. */
+    sealed interface SidePanel : WorkspaceIntent
+
     /** The vault's files changed; [isLoaded] once the first scan is done, when the last run's tabs can be restored. */
     data class OnTreeChange(
         val tree: VaultTree,
@@ -83,20 +86,20 @@ sealed interface WorkspaceIntent {
         FeedIntent
 
     /** `Mod+Shift+\`, the toolbar's Outline or the panel's hide button. */
-    data object OnSidePanelToggle : WorkspaceIntent
+    data object OnSidePanelToggle : SidePanel
 
-    data class OnSidePanelResize(val widthDp: Int) : WorkspaceIntent
+    data class OnSidePanelResize(val widthDp: Int) : SidePanel
 
-    data class OnSidePanelModeSelect(val mode: SidePanelMode) : WorkspaceIntent
+    data class OnSidePanelModeSelect(val mode: SidePanelMode) : SidePanel
 
-    data class OnSidePanelSectionToggle(val section: SidePanelSection) : WorkspaceIntent
+    data class OnSidePanelSectionToggle(val section: SidePanelSection) : SidePanel
 
     /** Connections shows [tab]: Related, Linked or Unlinked. */
-    data class OnConnectionsTabSelect(val tab: ConnectionsTab) : WorkspaceIntent
+    data class OnConnectionsTabSelect(val tab: ConnectionsTab) : SidePanel
 
     /** `Mod+Shift+O`: the outline takes the keyboard, the panel shown on the inspector and the outline opened first. */
-    data object OnOutlineFocusRequest : WorkspaceIntent
+    data object OnOutlineFocusRequest : SidePanel
 
     /** `Mod+L`: the chat's question field takes the keyboard, the panel shown on the chat. */
-    data object OnChatFocusRequest : WorkspaceIntent
+    data object OnChatFocusRequest : SidePanel
 }
