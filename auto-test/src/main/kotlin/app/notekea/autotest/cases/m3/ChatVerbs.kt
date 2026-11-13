@@ -3,6 +3,7 @@ package app.notekea.autotest.cases.m3
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasText
 import app.notekea.autotest.cases.m1.AREPAS_FLOUR
 import app.notekea.autotest.cases.m1.PLAYGROUND
 import app.notekea.autotest.cases.m1.WELCOME
@@ -218,3 +219,23 @@ internal fun expectOnlyFrom(
 }
 
 private val SOURCE_LINE = Regex(pattern = """^\[\d+] ([^:]+):.*""")
+
+/** Fails unless one of [texts] is on screen, in part of a text: the words a model picks vary. */
+internal fun CaseScope.expectAnyText(vararg texts: String) {
+    step(description = "Expect one of ${texts.joinToString()}")
+
+    val isShown = texts.any { text ->
+        ui
+            .onAllNodes(
+                matcher = hasText(
+                    text = text,
+                    substring = true,
+                    ignoreCase = true
+                )
+            )
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+    }
+
+    if (!isShown) throw CaseFailure(message = "expected the reply to say ${texts.joinToString(separator = " or ")}")
+}

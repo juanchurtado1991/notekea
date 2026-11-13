@@ -7,6 +7,7 @@ import app.notekea.autotest.cases.m1.PLAYGROUND
 import app.notekea.autotest.cases.m1.WELCOME
 import app.notekea.autotest.cases.m3.MODEL_CASE_TIMEOUT
 import app.notekea.autotest.cases.m3.awaitReply
+import app.notekea.autotest.cases.m3.expectAnyText
 import app.notekea.autotest.notekea
 import app.notekea.autotest.openVault
 import com.testbuddy.CaseFailure
@@ -270,26 +271,6 @@ private fun CaseScope.openSync() {
 
     clickIcon(label = "Settings")
     click(text = "Sync")
-}
-
-/** Fails unless one of [texts] is on screen, in part of a text: the words a model picks vary. */
-private fun CaseScope.expectAnyText(vararg texts: String) {
-    step(description = "Expect one of ${texts.joinToString()}")
-
-    val isShown = texts.any { text ->
-        ui
-            .onAllNodes(
-                matcher = hasText(
-                    text = text,
-                    substring = true,
-                    ignoreCase = true
-                )
-            )
-            .fetchSemanticsNodes()
-            .isNotEmpty()
-    }
-
-    if (!isShown) throw CaseFailure(message = "expected the reply to say ${texts.joinToString(separator = " or ")}")
 }
 
 /** A bare repository in the case's data folder, the remote both computers share. */

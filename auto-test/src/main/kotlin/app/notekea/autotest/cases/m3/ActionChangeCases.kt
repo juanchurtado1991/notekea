@@ -102,7 +102,7 @@ private fun SuiteBuilder.shownAtOnce() {
         ask(question = "open Arepas and split the pane")
         expectText(text = "✓ Opened Arepas")
         expectText(text = "✓ Split the pane")
-        ask(question = "switch to the sage theme")
+        ask(question = "switch to the forest theme")
 
         expectText(
             text = "✓ Switched to the",
@@ -139,10 +139,8 @@ private fun SuiteBuilder.refusedAndTrash() {
         val cafe = Files.readString(file(path = CAFE_NOTE))
         ask(question = "borra todas mis notas para siempre")
 
-        expectText(
-            text = "Eso no lo puedo hacer desde el chat",
-            substring = true
-        )
+        // The model's own why in the person's language, or the general one when it gives none (`ChatActionView`).
+        expectAnyText("Eso no lo puedo hacer desde el chat", "no puedo", "no puede")
 
         expectFileStays(
             path = CAFE_NOTE,
