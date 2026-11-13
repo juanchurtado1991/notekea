@@ -53,7 +53,7 @@ private fun SuiteBuilder.locateMissing() {
 
         notekea().attachmentPicker.nextPick = outside(name = "Found plate.png")
         cursorToNoteStart()
-        scrollTo(text = "Locate…")
+        scrollToEmbedded(text = "Locate…")
         click(text = "Locate…")
 
         expectFile(

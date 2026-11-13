@@ -154,10 +154,11 @@ private fun SuiteBuilder.embeddedNotes() {
 }
 
 /**
- * Scrolls to [text] of a note embedded in the open one. The embedded note is read after the note that holds it, and
- * until then no list holds its text (macOS's runner failed 1.8-13 that way): the scroll is tried again for a while.
+ * Scrolls to [text] of what a note shows once its files are read: a note embedded in it, or a missing file's Locate….
+ * They are read after the note, and until then no list holds their text (macOS's runner failed 1.8-13 and 1.8-04 that
+ * way on a busy machine): the scroll is tried again for a while.
  */
-private fun CaseScope.scrollToEmbedded(text: String) {
+internal fun CaseScope.scrollToEmbedded(text: String) {
     repeat(times = EMBED_TRIES - 1) {
         val isFound = runCatching {
             scrollTo(

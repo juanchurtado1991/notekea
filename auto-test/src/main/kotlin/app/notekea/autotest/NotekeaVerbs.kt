@@ -32,6 +32,9 @@ private const val OPEN_FOLDER = "Open folder…"
 private const val FIND_NOTE = "Find a note by name or alias"
 private const val WAIT_MILLIS = 10_000L
 private const val RELAUNCH_MILLIS = 30_000L
+private const val RENAME = "Rename"
+private const val MENU_TRIES = 3
+private const val MENU_MILLIS = 2_000L
 
 // A busy machine (CI, several builds at once) indexes the Playground Vault in far more than a text's usual wait.
 private const val INDEX_MILLIS = 60_000L
@@ -236,9 +239,33 @@ fun CaseScope.renameInTree(
     newName: String
 ) {
     rightClickInTree(text = name)
-    click(text = "Rename")
+    clickUntilEditing(item = RENAME)
     type(text = newName)
     press(key = Key.Enter)
+}
+
+/**
+ * Clicks the menu's [item] until a text field has the keyboard. On a busy macOS runner a click on Rename as its menu
+ * opened did nothing, and the menu stayed open (1.4-05): while the item still shows, it is clicked again.
+ */
+private fun CaseScope.clickUntilEditing(item: String) {
+    repeat(times = MENU_TRIES) {
+        click(text = item)
+
+        val isEditing = runCatching {
+            ui.waitUntilAtLeastOneExists(
+                matcher = isFocused() and hasSetTextAction(),
+                timeoutMillis = MENU_MILLIS
+            )
+        }.isSuccess
+
+        val isMenuOpen = ui
+            .onAllNodes(hasText(text = item))
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+
+        if (isEditing || !isMenuOpen) return
+    }
 }
 
 /** The note's text field, found by a part of its text. */

@@ -1,18 +1,23 @@
 package app.notekea.autotest.cases.m5
 
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.isOff
+import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import app.notekea.autotest.cases.m1.PLAYGROUND
 import app.notekea.autotest.cases.m1.WELCOME
 import app.notekea.autotest.clickLast
 import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.relaunch
+import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
 import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.SuiteBuilder
 
 private const val LANGUAGE = "Language"
 private const val OPEN_LAST = "Open the last vault at startup"
+private const val SAVED_MILLIS = 10_000L
 
 /**
  * The cases of 5.2, Settings as macOS's System Settings (`MVP_SMOKE_TEST.md`, the developer's choice of 2026-11-11):
@@ -92,6 +97,8 @@ private fun SuiteBuilder.lastVault() {
         pressInWindow(shortcut = Mod + Key.Comma)
         expectText(text = LANGUAGE)
         clickIcon(label = OPEN_LAST)
+        // The switch turns off once the choice is saved: a relaunch before that read the old one (macOS, busy).
+        expectSwitchOff(label = OPEN_LAST)
         relaunch()
         expectText(text = "Open folder…")
         expectNoText(text = WELCOME)
@@ -151,4 +158,14 @@ private fun SuiteBuilder.look() {
                 "columna estrecha y luego a todo el panel. El paso 4 la deja como estaba."
         )
     }
+}
+
+/** Waits until the switch [label] is off, which it shows once the choice is saved. */
+private fun CaseScope.expectSwitchOff(label: String) {
+    step(description = "Expect “$label” off")
+
+    ui.waitUntilAtLeastOneExists(
+        matcher = hasContentDescription(value = label) and isOff(),
+        timeoutMillis = SAVED_MILLIS
+    )
 }
