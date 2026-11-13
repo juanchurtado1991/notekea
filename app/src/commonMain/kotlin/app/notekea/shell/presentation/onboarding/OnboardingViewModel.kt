@@ -34,6 +34,8 @@ class OnboardingViewModel(
 
             OnboardingIntent.OnWait -> reduce { it.copy(isWaiting = true) }
 
+            OnboardingIntent.OnWaitEnd -> reduce { it.copy(isWaiting = false) }
+
             OnboardingIntent.OnVaultOpened -> reduce {
                 val next = if (it.step == OnboardingStep.NOTES) OnboardingStep.AI else it.step
 

@@ -2,6 +2,7 @@ package app.notekea.shell.presentation.follow
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,6 +19,7 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalNoteLooks
 import app.notekea.core.presentation.designsystem.theme.NoteLooks
 import app.notekea.core.presentation.platform.LocalWebSourceUpdater
+import app.notekea.core.presentation.platform.LocalWindowLoading
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.shell.presentation.workspace.PaneEditors
@@ -38,6 +40,11 @@ internal fun FollowAssistants(
 ) {
     FollowChat(chat, state, viewModels, editors, searchIndex)
 
+    ReportLoaded(
+        vaultPath = state.vaultPath,
+        isLoading = state.isLoading
+    )
+
     ClipsOf(
         clip = clip,
         workspace = viewModels.workspace,
@@ -47,6 +54,25 @@ internal fun FollowAssistants(
             }
         }
     )
+}
+
+// The window is told once this vault's first scan ended, and that it is gone when the vault closes.
+@Composable
+private fun ReportLoaded(
+    vaultPath: String,
+    isLoading: Boolean
+) {
+    val loading = LocalWindowLoading.current
+
+    LaunchedEffect(vaultPath, isLoading) {
+        if (!isLoading) loading.loadedVault = vaultPath
+    }
+
+    DisposableEffect(vaultPath) {
+        onDispose {
+            if (loading.loadedVault == vaultPath) loading.loadedVault = null
+        }
+    }
 }
 
 /** The clip dialog over the workspace (4.4), and the clipped note opened in a tab once it is written. */

@@ -5,6 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -14,6 +17,7 @@ import app.notekea.ai.presentation.ModelManagerViewModel
 import app.notekea.core.presentation.designsystem.components.NotekeaDialog
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.formatBytes
+import app.notekea.core.presentation.platform.LocalWindowLoading
 import app.notekea.resources.Res
 import app.notekea.resources.welcome_new_vault_default_name
 import app.notekea.vault.presentation.welcome.WelcomeIntent
@@ -29,13 +33,25 @@ private const val SHEET_HEIGHT_DP = 440
  * acts through the welcome screen's own view model, and its AI step through Settings → AI model's.
  */
 @Composable
-fun OnboardingHost(viewModel: OnboardingViewModel = koinViewModel()) {
+fun OnboardingHost(
+    viewModel: OnboardingViewModel = koinViewModel(),
+    welcome: WelcomeViewModel = koinViewModel()
+) {
     val state by viewModel.state.collectAsState()
+    val welcomeState by welcome.state.collectAsState()
 
-    if (state.isShown) {
+    val isOpen = OnboardingGate.isOpen(
+        isShown = state.isShown,
+        isStarting = welcomeState.isLoading,
+        openedVault = welcomeState.openedVault?.path,
+        loadedVault = LocalWindowLoading.current.loadedVault
+    )
+
+    if (isOpen) {
         OnboardingSteps(
             state = state,
-            onIntent = viewModel::onIntent
+            onIntent = viewModel::onIntent,
+            welcome = welcome
         )
     }
 }
@@ -52,8 +68,25 @@ private fun OnboardingSteps(
     val suggestedName = stringResource(resource = Res.string.welcome_new_vault_default_name)
     val openedVault = welcomeState.openedVault
 
-    LaunchedEffect(openedVault) {
-        if (openedVault != null) onIntent(OnboardingIntent.OnVaultOpened)
+    // Also when the notes step is first reached with a vault already open (restored at startup): it has nothing to
+    // ask. Once per vault, so Back from the AI step still reaches the notes.
+    var passed by remember(openedVault) { mutableStateOf(value = false) }
+
+    LaunchedEffect(openedVault, state.step) {
+        if (openedVault != null &&
+            !passed &&
+            state.step == OnboardingStep.NOTES
+        ) {
+            passed = true
+            onIntent(OnboardingIntent.OnVaultOpened)
+        }
+    }
+
+    // The new vault form was cancelled: the sheet comes back instead of staying out of the way for good.
+    val hasForm = welcomeState.newVaultForm != null
+
+    LaunchedEffect(hasForm) {
+        if (!hasForm && openedVault == null) onIntent(OnboardingIntent.OnWaitEnd)
     }
 
     if (state.isWaiting) return

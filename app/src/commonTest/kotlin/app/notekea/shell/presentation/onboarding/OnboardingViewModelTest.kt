@@ -70,6 +70,24 @@ class OnboardingViewModelTest {
         }
 
     @Test
+    fun `a new vault form that is cancelled ends the wait, and the sheet stays on its step`() =
+        runTest(dispatcher) {
+            val viewModel = OnboardingViewModel(store = FakeAppPreferencesStore())
+            advanceUntilIdle()
+            send(viewModel, OnboardingIntent.OnContinue)
+            send(viewModel, OnboardingIntent.OnWait)
+            send(viewModel, OnboardingIntent.OnWaitEnd)
+
+            assertEquals(
+                expected = OnboardingState(
+                    isShown = true,
+                    step = OnboardingStep.NOTES
+                ),
+                actual = viewModel.state.value
+            )
+        }
+
+    @Test
     fun `once seen it does not show`() = runTest(dispatcher) {
         val seen = AppPreferences(hasSeenWelcome = true)
         val viewModel = OnboardingViewModel(store = FakeAppPreferencesStore(initial = seen))
