@@ -1,9 +1,10 @@
-package app.notekea.graph.presentation
+package app.notekea.graph.presentation.view
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.graph.presentation.model.GraphDot
 
 /** What the graph is drawn with: where each note is now and which notes stand out; [matches] while searching. */
 internal class GraphPaint(

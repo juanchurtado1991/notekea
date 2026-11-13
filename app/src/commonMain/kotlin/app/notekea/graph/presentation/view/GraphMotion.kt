@@ -1,8 +1,9 @@
-package app.notekea.graph.presentation
+package app.notekea.graph.presentation.view
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.geometry.Offset
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.graph.presentation.model.GraphDot
 
 /**
  * One move of the map from where its notes were to [dots]: notes that stay slide, new ones come out of the center, or

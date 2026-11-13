@@ -12,6 +12,7 @@ import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConvent
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.platform.LocalShortcutDispatcher
 import app.notekea.core.presentation.platform.ShortcutDispatcher
+import app.notekea.graph.presentation.model.GraphPreviewData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

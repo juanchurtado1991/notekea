@@ -35,7 +35,7 @@ import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.sidepanel.SidePanelHost
 import app.notekea.editor.presentation.view.EditorPaneTools
 import app.notekea.editor.presentation.viewmodel.EditorViewModel
-import app.notekea.graph.presentation.GraphViewModel
+import app.notekea.graph.presentation.viewmodel.GraphViewModel
 import app.notekea.query.presentation.QueryViewModel
 import app.notekea.search.presentation.index.SearchIndexIntent
 import app.notekea.search.presentation.index.SearchIndexNotice

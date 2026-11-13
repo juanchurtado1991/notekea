@@ -1,9 +1,11 @@
-package app.notekea.graph.presentation
+package app.notekea.graph.presentation.viewmodel
 
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.ViewModelHost
 import app.notekea.graph.domain.NoteGraph
+import app.notekea.graph.presentation.model.GraphEffect
+import app.notekea.graph.presentation.model.GraphState
 
 /**
  * What the graph's parts (search, linking) share with [GraphViewModel]: besides the state, the vault's [notes], the

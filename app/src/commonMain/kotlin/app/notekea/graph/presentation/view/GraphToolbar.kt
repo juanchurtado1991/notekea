@@ -1,4 +1,4 @@
-package app.notekea.graph.presentation
+package app.notekea.graph.presentation.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -22,6 +22,10 @@ import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConvent
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.platform.label
+import app.notekea.graph.presentation.model.GraphIntent
+import app.notekea.graph.presentation.model.GraphPreviewData
+import app.notekea.graph.presentation.model.GraphScope
+import app.notekea.graph.presentation.model.GraphState
 import app.notekea.resources.Res
 import app.notekea.resources.graph_depth_one
 import app.notekea.resources.graph_depth_two

@@ -1,4 +1,4 @@
-package app.notekea.graph.presentation
+package app.notekea.graph.presentation.view
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animate
@@ -44,6 +44,12 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.GraphPalette
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.motionTween
+import app.notekea.graph.presentation.model.GraphDot
+import app.notekea.graph.presentation.model.GraphIntent
+import app.notekea.graph.presentation.model.GraphLine
+import app.notekea.graph.presentation.model.GraphPreviewData
+import app.notekea.graph.presentation.model.GraphScope
+import app.notekea.graph.presentation.model.GraphState
 import kotlin.math.max
 import kotlin.math.min
 

@@ -1,10 +1,12 @@
-package app.notekea.graph.presentation
+package app.notekea.graph.presentation.viewmodel
 
 import app.notekea.core.notes.domain.MarkdownLineStripper
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.NoteTextCache
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.graph.domain.GraphNode
+import app.notekea.graph.presentation.model.GraphLine
+import app.notekea.graph.presentation.model.GraphPreview
 
 /** What the inspector shows of a note: a few lines of plain text from its body, and what the map joins it to. */
 internal class GraphPreviews(

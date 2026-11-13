@@ -2,7 +2,7 @@ package app.notekea.shell.presentation.workspace
 
 import app.notekea.cards.presentation.StudyViewModel
 import app.notekea.editor.presentation.viewmodel.EditorViewModel
-import app.notekea.graph.presentation.GraphViewModel
+import app.notekea.graph.presentation.viewmodel.GraphViewModel
 import app.notekea.query.presentation.QueryViewModel
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent
 import app.notekea.shell.presentation.tabs.DocumentFocus

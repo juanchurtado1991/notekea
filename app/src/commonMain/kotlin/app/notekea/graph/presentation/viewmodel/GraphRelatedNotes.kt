@@ -1,4 +1,4 @@
-package app.notekea.graph.presentation
+package app.notekea.graph.presentation.viewmodel
 
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.NoteEntry

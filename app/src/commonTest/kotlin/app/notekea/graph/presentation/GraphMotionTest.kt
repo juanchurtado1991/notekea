@@ -2,6 +2,8 @@ package app.notekea.graph.presentation
 
 import androidx.compose.ui.geometry.Offset
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.graph.presentation.model.GraphDot
+import app.notekea.graph.presentation.view.GraphMotion
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

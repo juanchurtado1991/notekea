@@ -1,6 +1,10 @@
 package app.notekea.graph.presentation
 
 import app.notekea.core.notes.domain.NoteFixtures.entry
+import app.notekea.graph.presentation.model.GraphDirection
+import app.notekea.graph.presentation.model.GraphEffect
+import app.notekea.graph.presentation.model.GraphIntent
+import app.notekea.graph.presentation.model.GraphScope
 import kotlinx.coroutines.launch
 import kotlin.test.Test
 import kotlin.test.assertEquals

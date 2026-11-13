@@ -4,7 +4,7 @@ import app.notekea.graph.data.SettingsGraphPreferencesStore
 import app.notekea.graph.domain.BuildNoteGraphUseCase
 import app.notekea.graph.domain.GraphPreferencesStore
 import app.notekea.graph.domain.LinkNotesUseCase
-import app.notekea.graph.presentation.GraphViewModel
+import app.notekea.graph.presentation.viewmodel.GraphViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module

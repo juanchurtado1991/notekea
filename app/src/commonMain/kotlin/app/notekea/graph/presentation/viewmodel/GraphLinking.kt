@@ -1,9 +1,11 @@
-package app.notekea.graph.presentation
+package app.notekea.graph.presentation.viewmodel
 
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.links.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.links.NoteRewrite
 import app.notekea.graph.domain.LinkNotesUseCase
+import app.notekea.graph.presentation.model.GraphEffect
+import app.notekea.graph.presentation.model.GraphState
 import kotlinx.coroutines.Job
 
 /** Linking the previewed note to another from the graph, and undoing the last link, one at a time. */

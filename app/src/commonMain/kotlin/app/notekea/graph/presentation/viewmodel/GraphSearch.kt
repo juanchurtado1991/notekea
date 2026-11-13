@@ -1,6 +1,8 @@
-package app.notekea.graph.presentation
+package app.notekea.graph.presentation.viewmodel
 
 import app.notekea.core.notes.domain.FuzzyMatcher
+import app.notekea.graph.presentation.model.GraphScope
+import app.notekea.graph.presentation.model.GraphState
 
 /** Find in the graph: the notes whose names match the query, and stepping from one to the next, centered on it. */
 internal class GraphSearch(

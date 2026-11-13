@@ -24,6 +24,8 @@ import app.notekea.graph.domain.BuildNoteGraphUseCase
 import app.notekea.graph.domain.GraphPreferences
 import app.notekea.graph.domain.GraphPreferencesStore
 import app.notekea.graph.domain.LinkNotesUseCase
+import app.notekea.graph.presentation.model.GraphIntent
+import app.notekea.graph.presentation.viewmodel.GraphViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel

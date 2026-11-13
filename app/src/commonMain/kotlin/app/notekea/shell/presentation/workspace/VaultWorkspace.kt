@@ -26,7 +26,7 @@ import app.notekea.editor.presentation.sidepanel.WithSidePanel
 import app.notekea.editor.presentation.view.EditorPaneTools
 import app.notekea.editor.presentation.viewmodel.EditorViewModel
 import app.notekea.graph.presentation.GraphContent
-import app.notekea.graph.presentation.GraphInspector
+import app.notekea.graph.presentation.view.GraphInspector
 import app.notekea.query.presentation.QueryContent
 import app.notekea.resources.Res
 import app.notekea.resources.tab_missing_message

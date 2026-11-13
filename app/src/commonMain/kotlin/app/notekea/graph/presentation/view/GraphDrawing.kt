@@ -1,4 +1,4 @@
-package app.notekea.graph.presentation
+package app.notekea.graph.presentation.view
 
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -12,6 +12,8 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.graph.presentation.model.GraphDot
+import app.notekea.graph.presentation.model.GraphLine
 
 private const val DIMMED = 0.18f
 private const val DEPTH_FADE = 0.2f

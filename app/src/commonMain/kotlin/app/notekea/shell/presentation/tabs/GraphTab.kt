@@ -8,8 +8,8 @@ import app.notekea.core.platform.domain.graphShortcut
 import app.notekea.core.presentation.platform.WindowShortcut
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.sidepanel.SidePanelHost
-import app.notekea.graph.presentation.GraphEffect
-import app.notekea.graph.presentation.GraphIntent
+import app.notekea.graph.presentation.model.GraphEffect
+import app.notekea.graph.presentation.model.GraphIntent
 import app.notekea.search.presentation.index.SearchIndexViewModel
 import app.notekea.shell.domain.Workspace
 import app.notekea.shell.presentation.workspace.WorkspaceIntent

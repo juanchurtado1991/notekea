@@ -1,4 +1,4 @@
-package app.notekea.graph.presentation
+package app.notekea.graph.presentation.viewmodel
 
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.core.notes.domain.FuzzyMatcher
@@ -15,6 +15,13 @@ import app.notekea.graph.domain.GraphPreferences
 import app.notekea.graph.domain.GraphPreferencesStore
 import app.notekea.graph.domain.LinkNotesUseCase
 import app.notekea.graph.domain.NoteGraph
+import app.notekea.graph.presentation.model.GraphDirection
+import app.notekea.graph.presentation.model.GraphDot
+import app.notekea.graph.presentation.model.GraphEffect
+import app.notekea.graph.presentation.model.GraphIntent
+import app.notekea.graph.presentation.model.GraphLine
+import app.notekea.graph.presentation.model.GraphScope
+import app.notekea.graph.presentation.model.GraphState
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive

@@ -37,6 +37,13 @@ import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.platform.WindowShortcut
+import app.notekea.graph.presentation.model.GraphDirection
+import app.notekea.graph.presentation.model.GraphIntent
+import app.notekea.graph.presentation.model.GraphPreviewData
+import app.notekea.graph.presentation.model.GraphState
+import app.notekea.graph.presentation.view.GraphCanvas
+import app.notekea.graph.presentation.view.GraphToolbar
+import app.notekea.graph.presentation.view.folderColor
 import app.notekea.resources.Res
 import app.notekea.resources.editor_find_count
 import app.notekea.resources.editor_find_none

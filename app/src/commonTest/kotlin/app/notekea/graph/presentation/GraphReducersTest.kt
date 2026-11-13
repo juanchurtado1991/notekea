@@ -6,6 +6,8 @@ import app.notekea.core.notes.domain.TextFolder
 import app.notekea.graph.domain.GraphNode
 import app.notekea.graph.domain.GraphPoint
 import app.notekea.graph.domain.NoteGraph
+import app.notekea.graph.presentation.viewmodel.dotsOf
+import app.notekea.graph.presentation.viewmodel.matchesOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

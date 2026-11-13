@@ -1,10 +1,13 @@
-package app.notekea.graph.presentation
+package app.notekea.graph.presentation.viewmodel
 
 import app.notekea.core.notes.domain.FuzzyMatcher
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.graph.domain.GraphNode
 import app.notekea.graph.domain.GraphPoint
 import app.notekea.graph.domain.NoteGraph
+import app.notekea.graph.presentation.model.GraphDirection
+import app.notekea.graph.presentation.model.GraphDot
+import app.notekea.graph.presentation.model.GraphLine
 import kotlin.math.abs
 import kotlin.math.sqrt
 
