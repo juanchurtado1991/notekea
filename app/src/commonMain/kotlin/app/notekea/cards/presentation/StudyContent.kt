@@ -55,7 +55,8 @@ fun StudyContent(
 ) {
     val focus = remember { FocusRequester() }
 
-    LaunchedEffect(state.current) {
+    // An option clicked takes the focus and loses it once it is disabled: the tab takes it back so Enter goes on.
+    LaunchedEffect(state.current, state.choices, state.chosen) {
         runCatching { focus.requestFocus() }
     }
 
