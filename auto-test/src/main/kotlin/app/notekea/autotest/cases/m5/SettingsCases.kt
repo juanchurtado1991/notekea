@@ -14,6 +14,8 @@ import com.testbuddy.CaseScope
 import com.testbuddy.ManualReason
 import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.SuiteBuilder
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 private const val LANGUAGE = "Language"
 private const val OPEN_LAST = "Open the last vault at startup"
@@ -108,7 +110,7 @@ private fun SuiteBuilder.lastVault() {
 private fun SuiteBuilder.filesInObsidian() {
     automated(
         id = "5.2-02",
-        title = "Settings → Files writes the daily note's date format to the vault's .obsidian, as Obsidian keeps it"
+        title = "Settings → Files writes the date format chosen to the vault's .obsidian, as Obsidian keeps it"
     ) {
         openVault(
             name = PLAYGROUND,
@@ -118,8 +120,10 @@ private fun SuiteBuilder.filesInObsidian() {
         pressInWindow(shortcut = Mod + Key.Comma)
         // The tree's section header says Files too: Settings' section is drawn over it, last.
         clickLast(text = "Files")
-        click(text = "YYYY-MM-DD")
-        type(text = "DD-MM-YYYY")
+        // Each format shows as today written in it (the developer's request of 2026-11-13), never as its letters.
+        val today = LocalDate.now()
+        click(text = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+        click(text = today.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
 
         expectFile(
             path = "$PLAYGROUND/.obsidian/daily-notes.json",

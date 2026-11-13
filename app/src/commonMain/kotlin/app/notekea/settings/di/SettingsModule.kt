@@ -23,6 +23,9 @@ val settingsModule = module {
         FilesSettingsViewModel(
             reader = get(),
             writer = get(),
+            attachmentStore = get(),
+            localCalendar = get(),
+            clock = get(),
             vaultPath = parameters.getOrNull()
         )
     }

@@ -2,8 +2,10 @@ package app.notekea.settings.presentation
 
 import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.appearance.domain.FakeAppearanceStore
+import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.logging.domain.FakeLogStore
 import app.notekea.core.logging.domain.FakeTextClipboard
+import app.notekea.core.notes.domain.FakeAttachmentStore
 import app.notekea.core.notes.domain.FakeVaultSettingsReader
 import app.notekea.core.notes.domain.FakeVaultSettingsWriter
 import app.notekea.core.platform.domain.FakeSystemEnvironment
@@ -15,6 +17,7 @@ import app.notekea.settings.presentation.files.FilesSettingsViewModel
 import app.notekea.settings.presentation.help.SettingsHelpViewModel
 import app.notekea.settings.presentation.preferences.PreferencesViewModel
 import kotlinx.coroutines.flow.emptyFlow
+import kotlin.time.Clock
 
 /** Settings' view models over fakes, for the screen tests that open the dialog without Koin. */
 fun testSettingsViewModels(
@@ -25,6 +28,9 @@ fun testSettingsViewModels(
     files = FilesSettingsViewModel(
         reader = FakeVaultSettingsReader(),
         writer = FakeVaultSettingsWriter(),
+        attachmentStore = FakeAttachmentStore(),
+        localCalendar = FakeLocalCalendar(),
+        clock = Clock.System,
         vaultPath = null
     ),
     about = AboutViewModel(

@@ -1,6 +1,7 @@
 package app.notekea.shell.presentation.workspace
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -11,6 +12,7 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.stacksAlertButtons
 import app.notekea.core.presentation.designsystem.components.NotekeaConfirmDialog
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
+import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.resources.Res
 import app.notekea.resources.switch_vault_confirm
 import app.notekea.resources.switch_vault_message
@@ -78,5 +80,20 @@ private fun SwitchVaultDialogPreview() {
             onConfirm = {},
             onDismiss = {}
         )
+    }
+}
+
+// Asked, as the rail's button asks it.
+@Preview
+@Composable
+private fun switchVaultAskedPreview() {
+    NotekeaPreviewThemes {
+        val ask = switchVaultAsked(
+            vaultName = "Playground Vault",
+            conventions = PreviewPlatformConventions.linux,
+            onSwitchVault = {}
+        )
+
+        LaunchedEffect(Unit) { ask() }
     }
 }
