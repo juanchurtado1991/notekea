@@ -76,19 +76,19 @@ sourceSets.main { resources.srcDir(files(bundledSmokeData).builtBy(bundleSmokeDa
 // `./gradlew :auto-test:test -PchatModels=$HOME/models` (or `:auto-test:run`). Without it, those Notekea QA downloaded.
 private val chatModels = providers.gradleProperty("chatModels").orNull
 
+// `-Pcases=3.3,3.9-01` runs only those cases, and -PchatModels gives a chat model, in the tests and in `run` alike.
+private val caseProperties = mapOf(
+    "notekea.autotest.cases" to providers.gradleProperty("cases").orNull,
+    "notekea.autotest.chatModels" to chatModels
+).filterValues { it != null }
+
 tasks.test {
     useJUnitPlatform()
-    chatModels?.let { systemProperty("notekea.autotest.chatModels", it) }
+    systemProperties(caseProperties)
 
     // A JVM runs several test classes, and the first runTest fixes the bound of every case's outer runTest (Test
     // Buddy's SuiteRunner raises it too late when another test came first): the cases' own timeouts still apply.
     systemProperty("kotlinx.coroutines.test.default_timeout", "20m")
-
-    // `-Pcases=3.3,3.9-01` runs only those cases, as on `:auto-test:run`.
-    providers
-        .gradleProperty("cases")
-        .orNull
-        ?.let { systemProperty("notekea.autotest.cases", it) }
 
     // The Auto-Test's parts and the smoke runs are test classes of their own: up to half the cores run them at the
     // same time, each in its own JVM, since every case starts the whole app with a global Koin.
@@ -211,14 +211,7 @@ tasks
     .matching {
         it.name == "run"
     }
-    .configureEach {
-        providers
-            .gradleProperty("cases")
-            .orNull
-            ?.let { systemProperty("notekea.autotest.cases", it) }
-
-        chatModels?.let { systemProperty("notekea.autotest.chatModels", it) }
-    }
+    .configureEach { systemProperties(caseProperties) }
 
 // `./gradlew :auto-test:packageQa` builds the Notekea QA installer of this system, like
 // packageDistributionForCurrentOS.

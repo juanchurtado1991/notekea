@@ -20,8 +20,8 @@ readability4j = "1.0.8"
 composemediaplayer = "0.11.4"
 webview-kmp = "1.0.1"
 jna = "5.19.1"
-junit-jupiter = "6.1.3"
-junit-platform = "6.1.3"
+# JUnit 6 versions its Jupiter and Platform together.
+junit = "6.1.3"
 kermit = "2.2.0"
 koin = "4.2.2"
 konsist = "0.18.1"
@@ -109,8 +109,8 @@ ktlint-rule-engine-core = { module = "com.pinterest.ktlint:ktlint-rule-engine-co
 ktlint-test = { module = "com.pinterest.ktlint:ktlint-test", version.ref = "ktlint-cli" }
 
 # Tests
-junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 konsist = { module = "com.lemonappdev:konsist", version.ref = "konsist" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
