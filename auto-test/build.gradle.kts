@@ -80,7 +80,9 @@ private val chatModels = providers.gradleProperty("chatModels").orNull
 private val caseProperties = mapOf(
     "notekea.autotest.cases" to providers.gradleProperty("cases").orNull,
     "notekea.autotest.chatModels" to chatModels
-).filterValues { it != null }
+).filterValues {
+    it != null
+}
 
 tasks.test {
     useJUnitPlatform()
