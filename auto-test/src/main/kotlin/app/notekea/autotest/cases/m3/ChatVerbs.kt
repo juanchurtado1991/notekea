@@ -11,11 +11,13 @@ import app.notekea.autotest.cases.m1.openPlaygroundNote
 import app.notekea.autotest.notekea
 import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
+import app.notekea.chat.domain.language.SpokenLanguage
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
 import com.testbuddy.ShortcutModifier.Mod
 import kotlin.time.Duration.Companion.minutes
 
+private val HEADER = Regex(pattern = "^(Scope|Outcome|Answered with): ")
 internal const val QUESTION_FIELD = "Ask about your notes…"
 internal const val NOT_FOUND = "I couldn't find this in your notes."
 internal const val WATER = "How much water does the arepa dough take?"
@@ -177,6 +179,34 @@ internal fun expectInChat(
         throw CaseFailure(
             message = "expected the chat to say ${texts.joinToString(separator = " or ") { "\"$it\"" }}, it said:\n$chat"
         )
+    }
+}
+
+/**
+ * The language of [reply] (a [replyTo]): of its own words, between the transcript's header lines and its sources,
+ * which are the notes' words. Looking for " el " or " la " failed a reply in Spanish with neither (2026-11-13).
+ */
+internal fun languageOf(reply: String): String? {
+    val said = reply
+        .substringBefore(delimiter = "\nSources:")
+        .lines()
+        .filterNot { line ->
+            line.startsWith(prefix = "##") || HEADER.containsMatchIn(input = line)
+        }
+        .joinToString(separator = " ")
+
+    return SpokenLanguage.of(text = said)
+}
+
+/** Fails unless [reply] is written in [language] ("Spanish"). */
+internal fun expectLanguage(
+    reply: String,
+    language: String
+) {
+    val written = languageOf(reply = reply)
+
+    if (written != language) {
+        throw CaseFailure(message = "expected the chat to answer in $language, it answered in $written:\n$reply")
     }
 }
 

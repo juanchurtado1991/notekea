@@ -96,7 +96,11 @@ private fun SuiteBuilder.talkAndFollowUps() {
         )
 
         expectInChat(opinion, "] Travel/Lisbon trip")
-        expectInChat(opinion, " el ", " la ", " es ")
+
+        expectLanguage(
+            reply = opinion,
+            language = "Spanish"
+        )
 
         expectInChat(
             replyTo(
