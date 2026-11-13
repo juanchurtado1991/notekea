@@ -34,8 +34,9 @@ object AnswerPrompt {
     }
 
     private const val INSTRUCTIONS =
-        "Answer in one to three sentences using only the excerpts, in the language of the question. Cite each " +
-            "sentence with the number of its excerpt, like [1]. If the excerpts do not contain the answer, reply " +
+        "Answer briefly using only the excerpts, in the language of the question: one to three sentences, or a " +
+            "short list when the answer is steps or several things. ${ReplyFormat.MARKDOWN} Cite each " +
+            "sentence or item with the number of its excerpt, like [1]. If the excerpts do not contain the answer, reply " +
             "exactly $NOT_FOUND. A question of what the person learned or thinks about something is answered with what the " +
             "excerpts say about it. Only when two excerpts give different values for the same thing (two counts of " +
             "one book list), say so and give each with its number; excerpts about other things do not disagree, " +
