@@ -13,6 +13,7 @@ import androidx.compose.ui.test.rightClick
 import app.notekea.autotest.SmokeScenarios
 import app.notekea.autotest.clickInTree
 import app.notekea.autotest.clickLast
+import app.notekea.autotest.leaveVault
 import app.notekea.autotest.openVault
 import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.relaunch
@@ -149,7 +150,7 @@ private fun SuiteBuilder.bookmarksReorder() {
         expectBookmarkOrder(names = listOf("Ideas", WELCOME, "Recipes", PLATE))
         relaunch()
         expectBookmarkOrder(names = listOf("Ideas", WELCOME, "Recipes", PLATE))
-        clickIcon(label = "Open another vault")
+        leaveVault()
 
         openVault(
             name = "Work Obsidian",

@@ -5,6 +5,7 @@ package app.notekea.smokerun
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -29,6 +30,7 @@ import kotlin.time.Duration.Companion.seconds
 private const val WAIT_MILLIS = 10_000L
 private val RUN_TIMEOUT = 5.minutes
 private const val OPEN_FOLDER = "Open folder…"
+private const val SWITCH_VAULT = "Open another vault"
 
 /** Waits until something on screen shows [text] (a part of it when [substring]). */
 internal fun ComposeUiTest.waitForText(
@@ -42,6 +44,16 @@ internal fun ComposeUiTest.waitForText(
     ),
     timeoutMillis = timeoutMillis
 )
+
+/**
+ * Leaves the open vault: the rail's Open another vault, then the dialog's own Open another vault (the developer's
+ * request of 2026-11-13: the rail's button asks first).
+ */
+internal fun ComposeUiTest.leaveVault() {
+    onNode(matcher = hasContentDescription(value = SWITCH_VAULT)).performClick()
+    waitForText(text = "Open another vault?")
+    onNode(matcher = hasText(text = SWITCH_VAULT)).performClick()
+}
 
 /**
  * Scrolls the list that holds [text] until it draws it: a note draws only the blocks on screen. What a block loads

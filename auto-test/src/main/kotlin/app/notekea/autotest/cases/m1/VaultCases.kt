@@ -3,6 +3,7 @@ package app.notekea.autotest.cases.m1
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onFirst
+import app.notekea.autotest.leaveVault
 import app.notekea.autotest.notekea
 import app.notekea.autotest.openVault
 import app.notekea.autotest.relaunch
@@ -13,7 +14,6 @@ import com.testbuddy.SuiteBuilder
 import java.nio.file.Files
 
 private const val OPEN_FOLDER = "Open folder…"
-private const val OPEN_ANOTHER = "Open another vault"
 private const val CREATE = "Create new vault"
 private const val CREATE_CONFIRM = "Create vault"
 private const val NO_NOTES = "This folder has no notes yet"
@@ -105,7 +105,7 @@ private fun SuiteBuilder.recentVaults() {
             shownText = NO_NOTES
         )
 
-        clickIcon(label = OPEN_ANOTHER)
+        leaveVault()
         expectText(text = "Just now")
 
         val order = listOf("Empty Vault", "Work Obsidian", PERSONAL_NOTES).map { top(text = it) }
@@ -295,7 +295,7 @@ private fun CaseScope.openAnother(
     name: String,
     shownText: String
 ) {
-    clickIcon(label = OPEN_ANOTHER)
+    leaveVault()
 
     openVault(
         name = name,

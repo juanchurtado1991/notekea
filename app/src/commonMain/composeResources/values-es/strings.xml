@@ -421,6 +421,9 @@
     <string name="tree_sorted_by_date">Ordenar notas: fecha de modificación</string>
     <string name="tree_sorted_by_name">Ordenar notas: nombre</string>
     <string name="tree_switch_vault">Abrir otra bóveda</string>
+    <string name="switch_vault_title">¿Abrir otra bóveda?</string>
+    <string name="switch_vault_message">“%1$s” se cerrará y elegirás otra bóveda. Tus notas ya están guardadas.</string>
+    <string name="switch_vault_confirm">Abrir otra bóveda</string>
     <string name="tree_today">Hoy</string>
     <string name="tree_untitled_folder">Carpeta sin título</string>
     <string name="tree_untitled_note">Sin título</string>

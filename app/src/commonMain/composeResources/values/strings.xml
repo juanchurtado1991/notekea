@@ -421,6 +421,9 @@
     <string name="tree_sorted_by_date">Sort notes: date modified</string>
     <string name="tree_sorted_by_name">Sort notes: name</string>
     <string name="tree_switch_vault">Open another vault</string>
+    <string name="switch_vault_title">Open another vault?</string>
+    <string name="switch_vault_message">“%1$s” will close and you’ll choose another vault. Your notes are already saved.</string>
+    <string name="switch_vault_confirm">Open another vault</string>
     <string name="tree_today">Today</string>
     <string name="tree_untitled_folder">Untitled folder</string>
     <string name="tree_untitled_note">Untitled</string>

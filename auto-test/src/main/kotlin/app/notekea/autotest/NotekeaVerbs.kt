@@ -29,6 +29,7 @@ import java.nio.file.Files
 private const val INDEX_READY = "ready to search"
 private const val NOTE_TEXT = "Note text"
 private const val OPEN_FOLDER = "Open folder…"
+private const val OPEN_ANOTHER_VAULT = "Open another vault"
 private const val FIND_NOTE = "Find a note by name or alias"
 private const val WAIT_MILLIS = 10_000L
 private const val RELAUNCH_MILLIS = 30_000L
@@ -98,6 +99,16 @@ fun CaseScope.openVault(
 
     expectText(text = shownText)
     if (waitsForIndex) awaitIndex()
+}
+
+/**
+ * Leaves the open vault for the screen that picks one: the rail's Open another vault, then the dialog's own Open
+ * another vault (the developer's request of 2026-11-13: the rail's button asks first).
+ */
+fun CaseScope.leaveVault() {
+    clickIcon(label = OPEN_ANOTHER_VAULT)
+    expectText(text = "Open another vault?")
+    click(text = OPEN_ANOTHER_VAULT)
 }
 
 /** Waits for the index with [INDEX_MILLIS]: it runs the real model, which takes its time on a busy machine. */

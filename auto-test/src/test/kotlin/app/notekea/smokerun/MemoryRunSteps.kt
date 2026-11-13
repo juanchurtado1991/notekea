@@ -97,7 +97,7 @@ internal fun ComposeUiTest.measureVault(
     }
 
     idle(run = run)
-    onNode(matcher = hasContentDescription(value = SWITCH_VAULT)).performClick()
+    leaveVault()
     waitForText(text = RECENT)
 
     SmokeRunReport.sample(

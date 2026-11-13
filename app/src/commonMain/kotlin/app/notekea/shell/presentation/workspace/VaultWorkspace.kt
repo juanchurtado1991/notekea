@@ -146,6 +146,12 @@ private fun WorkspaceBody(
 
     val dialogs = LocalWindowDialogs.current
 
+    val askSwitchVault = switchVaultAsked(
+        vaultName = vaultName,
+        conventions = state.platformConventions,
+        onSwitchVault = onSwitchVault
+    )
+
     val isPanelShown =
         if (sidePanel.isOverlay) sidePanel.isOverlayOpen else workspaceState.sidePanel.isVisible
 
@@ -153,7 +159,13 @@ private fun WorkspaceBody(
         state = state,
         vaultName = vaultName,
         onIntent = viewModels.tree::onIntent,
-        rail = railActionsOf(viewModels, sidePanel, findNote, onSwitchVault) { dialogs.shown = it },
+        rail = railActionsOf(
+            viewModels = viewModels,
+            sidePanel = sidePanel,
+            onSearch = findNote,
+            onSwitchVault = askSwitchVault,
+            onDialog = { dialogs.shown = it }
+        ),
         modifier = modifier,
         isSidePanelVisible = isPanelShown
     ) {

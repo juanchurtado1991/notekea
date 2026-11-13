@@ -29,7 +29,7 @@ class VaultRunTest {
             shownNote = HOME
         )
 
-        onNode(matcher = hasContentDescription(value = SWITCH_VAULT)).performClick()
+        leaveVault()
         waitForText(text = RECENT)
         onNode(matcher = hasText(text = SAMPLE_VAULT)).performClick()
         waitForText(text = HOME)
@@ -52,7 +52,7 @@ class VaultRunTest {
 
         editor(textPart = PANCAKES_TEXT).performTextInputSelection(selection = TextRange(index = 0))
         editor(textPart = PANCAKES_TEXT).performTextInput(text = TYPED)
-        onNode(matcher = hasContentDescription(value = SWITCH_VAULT)).performClick()
+        leaveVault()
         waitForText(text = RECENT)
 
         // Checked at once, not after the autosave's pause: leaving the vault clears its editors, so it saves first.

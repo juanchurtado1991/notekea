@@ -5,6 +5,7 @@ import androidx.compose.ui.test.hasContentDescription
 import app.notekea.autotest.clickInTree
 import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.expectOrderOnScreen
+import app.notekea.autotest.leaveVault
 import app.notekea.autotest.openNote
 import app.notekea.autotest.pressInWindow
 import app.notekea.autotest.typeAtEnd
@@ -42,7 +43,7 @@ private fun SuiteBuilder.savedOnSwitchingVault() {
             text = "\nLast word."
         )
 
-        clickIcon(label = "Open another vault")
+        leaveVault()
         expectText(text = "Open folder…")
         click(text = PLAYGROUND)
         expectText(text = WELCOME)
