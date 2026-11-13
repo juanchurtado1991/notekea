@@ -6,6 +6,12 @@ import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.TurnOutcome
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.notes.domain.RelativePath
+import co.touchlab.kermit.LogWriter
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
+import co.touchlab.kermit.platformLogWriter
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
 import kotlin.io.path.listDirectoryEntries
@@ -91,5 +97,46 @@ class FileChatHistoryStoreTest {
     private companion object {
         const val VAULT = "/home/someone/Notes"
         const val OTHER = "/home/someone/Work"
+        const val SAVES = 40
     }
+
+    // The macOS smoke of 2026-11-12: two saves at once shared the partial file, and the second found it moved away.
+    @Test
+    fun `saves at the same time each land, and none fails on the other's partial file`() =
+        runBlocking {
+            val failures = mutableListOf<String>()
+
+            Logger.setLogWriters(
+                object : LogWriter() {
+                    override fun log(
+                        severity: Severity,
+                        message: String,
+                        tag: String,
+                        throwable: Throwable?
+                    ) {
+                        synchronized(failures) { failures += message }
+                    }
+                }
+            )
+
+            try {
+                (1..SAVES)
+                    .map { count ->
+                        async {
+                            store.save(
+                                vaultPath = VAULT,
+                                turns = List(size = count) { turn }
+                            )
+                        }
+                    }
+                    .awaitAll()
+            } finally {
+                Logger.setLogWriters(platformLogWriter())
+            }
+
+            assertEquals(
+                expected = emptyList(),
+                actual = failures
+            )
+        }
 }

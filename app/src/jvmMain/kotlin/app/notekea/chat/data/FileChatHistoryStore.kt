@@ -5,6 +5,8 @@ import app.notekea.chat.domain.ChatTurn
 import app.notekea.core.domain.AppDispatchers
 import co.touchlab.kermit.Logger
 import com.ghost.serialization.Ghost
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.nio.file.Files
@@ -14,14 +16,15 @@ import java.security.MessageDigest
 
 /**
  * [ChatHistoryStore] as one JSON file per vault in [folder], named by a hash of the vault's path, written whole to a
- * file beside it and moved in place, so a crash never leaves half a history. A file that cannot be read is an empty
- * history: the chat goes on.
+ * file beside it and moved in place, so a crash never leaves half a history; writes go one at a time, as two at once
+ * shared the partial file. A file that cannot be read is an empty history: the chat goes on.
  */
 class FileChatHistoryStore(
     private val folder: Path,
     private val dispatchers: AppDispatchers
 ) : ChatHistoryStore {
     private val logger = Logger.withTag(tag = LOG_TAG)
+    private val writing = Mutex()
 
     override suspend fun load(vaultPath: String): List<ChatTurn> =
         withContext(context = dispatchers.io) {
@@ -46,6 +49,18 @@ class FileChatHistoryStore(
         vaultPath: String,
         turns: List<ChatTurn>
     ) = withContext(context = dispatchers.io) {
+        writing.withLock {
+            write(
+                vaultPath = vaultPath,
+                turns = turns
+            )
+        }
+    }
+
+    private fun write(
+        vaultPath: String,
+        turns: List<ChatTurn>
+    ) {
         val file = fileOf(vaultPath = vaultPath)
         val json = Ghost.encodeToString(ChatHistoryMappers.toDto(turns = turns))
 
@@ -64,15 +79,15 @@ class FileChatHistoryStore(
         } catch (exception: IOException) {
             logger.w(throwable = exception) { WRITE_FAILED_MESSAGE }
         }
-
-        Unit
     }
 
     override suspend fun clear(vaultPath: String) = withContext(context = dispatchers.io) {
-        try {
-            Files.deleteIfExists(fileOf(vaultPath = vaultPath))
-        } catch (exception: IOException) {
-            logger.w(throwable = exception) { WRITE_FAILED_MESSAGE }
+        writing.withLock {
+            try {
+                Files.deleteIfExists(fileOf(vaultPath = vaultPath))
+            } catch (exception: IOException) {
+                logger.w(throwable = exception) { WRITE_FAILED_MESSAGE }
+            }
         }
 
         Unit
