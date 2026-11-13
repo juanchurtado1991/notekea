@@ -31,6 +31,9 @@ sealed interface ClipIntent {
         val isShown: Boolean = true
     ) : ClipIntent
 
+    /** The status bar's entry was clicked: the update under way shows its dialog. */
+    data object OnUpdateShow : ClipIntent
+
     /** The update's dialog is closed; an update under way stops. */
     data object OnUpdateDismiss : ClipIntent
 

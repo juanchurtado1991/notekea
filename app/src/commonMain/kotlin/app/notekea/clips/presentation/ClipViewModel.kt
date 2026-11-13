@@ -100,6 +100,8 @@ class ClipViewModel(
                 isShown = intent.isShown
             )
 
+            ClipIntent.OnUpdateShow -> reduce { it.copy(isUpdateShown = true) }
+
             ClipIntent.OnUpdateDismiss -> {
                 updating?.cancel()
 

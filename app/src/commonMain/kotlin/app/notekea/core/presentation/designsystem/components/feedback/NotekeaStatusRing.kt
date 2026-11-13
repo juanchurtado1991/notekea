@@ -15,13 +15,26 @@ private const val PREVIEW_FRACTION = 0.28f
 
 /**
  * A small ring that fills as work of a known length goes on ([fraction], from 0 to 1), the size of a status bar icon:
- * the `NotekeaStatusLabel`'s leading element for "Indexing · 28 %".
+ * the `NotekeaStatusLabel`'s leading element for "Indexing · 28 %". With no [fraction] it turns: work of no known
+ * length (syncing with Git), so the status bar always shows that something is going on.
  */
 @Composable
 fun NotekeaStatusRing(
-    fraction: Float,
+    fraction: Float?,
     modifier: Modifier = Modifier
 ) {
+    val ring = modifier.size(size = RING_DP.dp)
+    val colors = MaterialTheme.colorScheme
+
+    if (fraction == null) {
+        return CircularProgressIndicator(
+            modifier = ring,
+            color = colors.primary,
+            strokeWidth = STROKE_DP.dp,
+            trackColor = colors.outlineVariant
+        )
+    }
+
     CircularProgressIndicator(
         progress = {
             fraction.coerceIn(
@@ -29,10 +42,10 @@ fun NotekeaStatusRing(
                 maximumValue = 1f
             )
         },
-        modifier = modifier.size(size = RING_DP.dp),
-        color = MaterialTheme.colorScheme.primary,
+        modifier = ring,
+        color = colors.primary,
         strokeWidth = STROKE_DP.dp,
-        trackColor = MaterialTheme.colorScheme.outlineVariant,
+        trackColor = colors.outlineVariant,
         gapSize = 0.dp
     )
 }

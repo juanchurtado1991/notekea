@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaStatusRing
 import app.notekea.core.presentation.designsystem.components.layout.NotekeaStatusLabel
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
@@ -22,8 +23,8 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The vault's sync in the status bar: up to date, syncing, changes pending, offline, or a problem in the error color;
- * nothing for a vault that does not sync. A click opens Settings → Sync ([onClick]).
+ * The vault's sync in the status bar: up to date, syncing (a ring turns), changes pending, offline, or a problem in
+ * the error color; nothing for a vault that does not sync. A click opens Settings → Sync ([onClick]).
  */
 @Composable
 fun SyncStatusItem(
@@ -34,12 +35,16 @@ fun SyncStatusItem(
 
     val (icon, isProblem) = lookOf(status = status)
 
+    // While it syncs a ring turns in the icon's place (the developer's request of 2026-11-13: work shows as work).
+    val isSyncing = status == SyncStatus.Syncing
+
     NotekeaStatusLabel(
         text = textOf(status = status),
-        icon = icon,
+        icon = icon.takeUnless { isSyncing },
         iconTint = if (isProblem) MaterialTheme.colorScheme.error else null,
         tooltip = stringResource(resource = Res.string.sync_status_tooltip),
-        onClick = onClick
+        onClick = onClick,
+        leading = if (isSyncing) ({ NotekeaStatusRing(fraction = null) }) else null
     )
 }
 

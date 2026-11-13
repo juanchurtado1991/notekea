@@ -1035,6 +1035,8 @@
     <string name="clip_clip">Recortar</string>
     <string name="clip_cancel">Cancelar</string>
     <string name="clip_levels">%1$d niveles</string>
+    <string name="clip_update_status">Fuentes web · %1$d de %2$d</string>
+    <string name="clip_update_status_tooltip">Actualizando las fuentes web: haz clic para verlo</string>
     <string name="clip_update_title">Actualizar las fuentes web</string>
     <string name="clip_update_starting">Mirando las notas por actualizar…</string>
     <string name="clip_update_reading">Leyendo la página %1$d de %2$d: %3$s</string>

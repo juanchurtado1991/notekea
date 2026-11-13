@@ -1035,6 +1035,8 @@
     <string name="clip_clip">Clip</string>
     <string name="clip_cancel">Cancel</string>
     <string name="clip_levels">%1$d levels deep</string>
+    <string name="clip_update_status">Web sources · %1$d of %2$d</string>
+    <string name="clip_update_status_tooltip">Updating the web sources: click to see it</string>
     <string name="clip_update_title">Update web sources</string>
     <string name="clip_update_starting">Looking at the notes to update…</string>
     <string name="clip_update_reading">Reading page %1$d of %2$d: %3$s</string>

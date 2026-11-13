@@ -96,6 +96,7 @@ internal fun WithVaultLocals(
     CompositionLocalProvider(
         LocalNoteLooks provides looks,
         LocalWebSourceUpdater provides update,
+        LocalVaultClips provides clip,
         content = content
     )
 }

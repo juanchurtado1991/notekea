@@ -86,6 +86,15 @@ pasted documentation page asks its question in the chat again.
   - On macOS a YouTube video plays in a tab inside Notekea's window (`MacWebView`: WKWebView through JNA, in this
     process). Windows and Linux still open the window of their own (`YouTubePlayerWindow`); doing the same there is
     open work, and that window was never seen playing since YouTube began asking players for their origin.
+- **Web sources, deeper and kept up to date** (the developer's requests, 2026-11-13):
+  - The chat and the clip dialog ask how deep to follow a section's links (2 or 3 levels, up to 150 pages) when the
+    site has no index of its pages, and the chat says how far the clip is (4.4-06).
+  - Update from the web, in the menu of the Web sources folder, of a section's folder and of a clipped note: each page
+    is read again, a changed one replaces the note's original text and keeps what was written above it, and a
+    section's new pages become notes (`UpdateWebSourcesUseCase`, 4.4-05). Settings → General can do it on its own
+    every day, week or month (`AutomaticWebUpdate`, 5.2-06). The status bar shows it, and a ring turns while Git syncs.
+- **Smaller changes of the same day:** the rail's Open another vault asks first (`SwitchVaultDialog`), and Settings →
+  Files chooses its folders and date format from lists instead of typing them (5.2-02).
 - **Not looked into yet:** a ggml Metal abort when the app quits after using the model, and the onboarding card that
   shows before the app finishes loading. The developer asked to wait until the smoke test ends.
 

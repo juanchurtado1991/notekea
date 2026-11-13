@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.ai.presentation.ModelDownloadViewModel
+import app.notekea.clips.presentation.WebUpdateStatus
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.platform.LocalWindowDialogs
@@ -39,13 +40,25 @@ internal fun SyncStatusOf(sync: SyncStatusViewModel) {
     )
 }
 
-/** The status bar's entries of the open vault: its sync, then the AI model's download and the search index. */
+/**
+ * The status bar's entries of the open vault: the update of its web sources ([LocalVaultClips]), its sync, then the
+ * AI model's download and the search index.
+ */
 @Composable
 internal fun VaultStatusOf(
     sync: SyncStatusViewModel,
     searchIndex: SearchIndexViewModel,
     modelDownload: ModelDownloadViewModel
 ) {
+    LocalVaultClips.current?.let {
+        val clips by it.state.collectAsState()
+
+        WebUpdateStatus(
+            state = clips,
+            onIntent = it::onIntent
+        )
+    }
+
     SyncStatusOf(sync = sync)
     AiStatusOf(searchIndex, modelDownload)
 }
