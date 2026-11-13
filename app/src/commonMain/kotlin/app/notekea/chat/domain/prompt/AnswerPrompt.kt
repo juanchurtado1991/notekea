@@ -14,7 +14,8 @@ object AnswerPrompt {
     // A short reply that only says the excerpts do not tell, in words of its own: "No se menciona en los extractos…".
     private val SAYS_NOT_FOUND = Regex(
         pattern = "^\\W*(no se (menciona|encuentra|encontr\\w*|dice|indica|especifica)|no (hay|encontr\\w*|aparece)|" +
-            "(the )?(excerpts?|passages?|notes?) (do|does) not|there is no|i (could not|couldn't|cannot|can't) " +
+            "(the )?(excerpts?|passages?|notes?) (do|does) not|there is no|no \\w+( \\w+){0,3} (was|were|is|are) " +
+            "(found|mentioned|listed)|i (could not|couldn't|cannot|can't) " +
             "find|(it is )?not (mentioned|found|stated)|no se puede (determinar|saber|decir)|" +
             "i cannot (tell|determine|say))\\b[^.]*\\b(extractos?|fragmentos?|excerpts?|passages?|notas|notes?|" +
             "mention\\w*|menciona\\w*|lista|list|informaci[oó]n|information)",
