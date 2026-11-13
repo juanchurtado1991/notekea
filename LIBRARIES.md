@@ -27,10 +27,10 @@ shows related notes and answers questions citing the exact paragraph. Everything
 | Material 3 | `org.jetbrains.compose.material3:material3` | 1.9.0 | Components |
 | ViewModel | `org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose` | 2.11.0 | Host of the MVI state (`StateFlow<State>`) per screen |
 | Compose resources | `org.jetbrains.compose.components:components-resources` | 1.12.2 | UI strings, icons and bundled fonts (`Res.*`, `ARCHITECTURE.md` §7); generated accessors in `app.notekea.resources`, excluded from coverage |
-| Android Gradle Plugin | `com.android.kotlin.multiplatform.library` | 9.4.1 | Android target in `app` (compileSdk 36, minSdk 26) so Android Studio renders the common `@Preview`s; there is no Android app module yet |
+| Android Gradle Plugin | `com.android.kotlin.multiplatform.library` | 9.5.0 | Android target in `app` (compileSdk 36, minSdk 26) so Android Studio renders the common `@Preview`s; there is no Android app module yet |
 | Compose UI tooling | `org.jetbrains.compose.ui:ui-tooling` (on `androidRuntimeClasspath`) | 1.12.2 | Renders previews in Android Studio |
 | Compose preview | `org.jetbrains.compose.ui:ui-tooling-preview` | 1.12.2 | `@Preview` annotation (`androidx.compose.ui.tooling.preview`) for IDE previews of every UI element (`GUIDELINES.md` §6) |
-| FileKit | `io.github.vinceglb:filekit-dialogs-compose` | 0.16.0 | Native folder picker for the vault |
+| FileKit | `io.github.vinceglb:filekit-dialogs-compose` | 0.17.0 | Native folder picker for the vault |
 | Lucide icons | `com.composables:icons-lucide-cmp` | 2.2.1 | UI icons as `ImageVector`s (MIT wrapper, ISC icons). Lucide is the icon set of Obsidian, so its users recognize folders, notes and actions at a glance; ~5.7 MB on the JVM against ~38 MB for the frozen `material-icons-extended`. Only `NotekeaIcons` imports it (Konsist) |
 | Markdown renderer | `com.mikepenz:multiplatform-markdown-renderer-m3` | 0.46.0 | Renders notes and chat answers |
 | Markdown renderer code | `com.mikepenz:multiplatform-markdown-renderer-code` | 0.46.0 | Colors code blocks by language in Read mode, like GitHub's preview; brings `dev.snipme:highlights` 1.1.0 (Apache-2.0, ~15 languages). Edit mode keeps code plain on purpose |
@@ -65,7 +65,8 @@ Decisions:
 
 ### Agents
 
-**Not in the build yet:** approved, and added back with the code that uses them (M3–M4), so the app does not ship them unused.
+**Not in the build:** agent mode (4.7) was built on plain coroutines, so Koog was never added. It stays approved for
+extensions as MCP servers after the MVP.
 
 | Library | Coordinates | Version | Purpose |
 |---|---|---|---|
@@ -192,7 +193,7 @@ Packages follow Clean Architecture by feature (`app.notekea.<feature>.{domain,da
 
 ```
 commonMain → Ghost, Okio, JetBrains Markdown, SQLDelight, Koin, Settings, Kermit,
-             Koog (agents-core, agents-tools; from M3–M4), Compose UI, ViewModel
+             Compose UI, ViewModel
              + domain interfaces: ai.domain.LlmEngine, index.domain.VectorIndex,
                sync.domain.GitSync, tree.domain.FileWatcher
 

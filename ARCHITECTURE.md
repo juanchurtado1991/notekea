@@ -12,15 +12,23 @@ Decided on 2026-10-23. Changing a decision requires updating this file in the sa
 app.notekea
 ├── core
 │   ├── domain          Outcome, AppDispatchers, shared domain types
-│   ├── presentation    BaseViewModel, the window's platform locals, and designsystem/ (theme, tokens, components,
-│   │                   previews, the gallery)
-│   ├── appearance      App-wide look the user sets: the UI zoom (UiZoomLevels, its store and use cases)
+│   ├── presentation    BaseViewModel, ViewModelHost (what a ViewModel shares with its parts), the window's platform
+│   │                   locals, and designsystem/ (theme, tokens, the gallery, and components/ in folders by kind:
+│   │                   tabs, menus, fields, markdown, attachments, feedback, layout, settings)
+│   ├── appearance      App-wide look the user sets: color theme, window bounds and the UI zoom (UiZoomLevels, its store)
+│   ├── documents       Reading documents (PDF, Office) as text, for the index and the chat
+│   ├── logging         The log file and what Copy diagnostics reads
+│   ├── preferences     The app's own preferences (language, opening the last vault, the editor's text)
+│   ├── settings        What Settings and the chat share about Settings (topics, the spotlight)
 │   ├── embedding       The embedding model's port, used by the index and search
 │   ├── llm             The chat model's port (LlmEngine), used by the chat, the queries and the actions
-│   ├── notes           What features share about notes: paths, documents, files, links, frontmatter
+│   ├── notes           What features share about notes: paths, entries, files, text; in domain/ by concept: links/,
+│   │                   frontmatter/, index/ (chunks, vectors, related notes), templates/, tasks/, sidepanel/
 │   └── platform        Platform abstraction (PLATFORM_GUIDELINES.md)
 ├── di                  App-level Koin module that includes every feature module
-├── shell               Assembles the window: panes, tabs, side panel, dialogs (About, Settings), what follows what
+├── shell               Assembles the window (VaultWindow): workspace/ (panes, tabs, side panel, dialogs), tabs/ (the
+│                       views opened as tabs), follow/ (what follows what between features), data/chat (what carries
+│                       out the chat's actions)
 └── <feature>           editor, tree, search, connections, graph, query, tasks, templates, vault, settings, ai,
                         chat
     ├── domain          Entities, <Feature>Error, repository interfaces, use cases
@@ -36,6 +44,8 @@ UI models, preview data), `view/` (the composables) and one folder per self-cont
 `attachments/`…), each of which may hold the same folders when it grows. A smaller feature stays flat. A sealed
 type's subtypes stay in its package (Kotlin requires it), so `PropertyIntent` lives in `model/` with `EditorIntent`.
 
+- `app` also has an Android target, with two files in `androidMain`, only so Android Studio renders the common
+  `@Preview`s; there is no Android app (`LIBRARIES.md`, Android Gradle Plugin).
 - `domain` depends on nothing but `core.domain` and the Kotlin standard library / coroutines.
 - `data` depends on `domain`; platform implementations live in `jvmMain` under the same package.
 - `presentation` depends on `domain` (use cases), never on `data`.
@@ -260,7 +270,7 @@ themselves.
   - Motion uses `NotekeaDimensions.MOTION_SHORT_MILLIS` (folds, fades), `MOTION_PANEL_MILLIS` (panels) and
     `MOTION_LONGEST_MILLIS`; folding content goes through `NotekeaFold`.
   - Colors with a meaning of their own (the bookmark star, file kinds: pictures, PDFs, sounds and videos) live in
-    `NotekeaColors`; a file's icon and color come from `notes.presentation.files` (`fileIconOf`, `fileTintOf`) so
+    `NotekeaColors`; a file's icon and color come from `tree.presentation.filepreview` (`fileIconOf`, `fileTintOf`) so
     the tree, the bookmarks and the tabs agree.
   - A list's selection is filled while it has the keyboard and a quiet grey otherwise; the focus ring is only for a
     keyboard position that is not the selection.
@@ -273,7 +283,7 @@ themselves.
 - **Missing piece? Add it to the design system**, not to the feature: a new file in `core.presentation.designsystem.components`
   named `Notekea<Element>` (or a descriptive name such as `EmptyState`), colors and sizes from the theme, optional
   parts as nullable slots, a `@Preview` of its variants in the same file, and a sample in the gallery in the same
-  pull request. Examples still to come: snackbars, the citation chip.
+  pull request, in the components/ folder of its kind. Example still to come: snackbars.
 - **Enforced by Konsist:** outside `core.presentation.designsystem.components` and `core.presentation.designsystem.theme`, importing a
   Material 3 component (`Button`, `OutlinedTextField`, `Tab`, `TabRow`, `Badge`, `AlertDialog`, `Card`, chips,
   `Checkbox`, `Switch`, `DropdownMenu`, `Snackbar`… or `androidx.compose.material3.*`) fails the build.
