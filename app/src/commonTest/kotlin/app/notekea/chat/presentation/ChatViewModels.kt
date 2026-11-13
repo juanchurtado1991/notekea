@@ -18,6 +18,7 @@ import app.notekea.chat.domain.HelpGuide
 import app.notekea.chat.domain.PageProblem
 import app.notekea.chat.domain.PlanRequestUseCase
 import app.notekea.chat.domain.WebPageClipper
+import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.embedding.domain.FakeTextEmbedder

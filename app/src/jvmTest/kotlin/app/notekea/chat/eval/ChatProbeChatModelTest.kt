@@ -22,9 +22,9 @@ import app.notekea.chat.domain.HelpGuide
 import app.notekea.chat.domain.PageProblem
 import app.notekea.chat.domain.PlanRequestUseCase
 import app.notekea.chat.domain.TurnOutcome
-import app.notekea.chat.presentation.ChatIntent
-import app.notekea.chat.presentation.ChatMode
-import app.notekea.chat.presentation.ChatViewModel
+import app.notekea.chat.presentation.model.ChatIntent
+import app.notekea.chat.presentation.model.ChatMode
+import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.core.appearance.domain.FakeAppearanceStore
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.data.JvmLocalCalendar

@@ -20,11 +20,11 @@ import app.notekea.ai.presentation.ModelDownloadEffect
 import app.notekea.ai.presentation.ModelDownloadState
 import app.notekea.ai.presentation.ModelDownloadStatus
 import app.notekea.ai.presentation.ModelDownloadViewModel
-import app.notekea.chat.presentation.ChatEffect
-import app.notekea.chat.presentation.ChatIntent
 import app.notekea.chat.presentation.ChatPanel
-import app.notekea.chat.presentation.ChatPreviewData
-import app.notekea.chat.presentation.ChatViewModel
+import app.notekea.chat.presentation.model.ChatEffect
+import app.notekea.chat.presentation.model.ChatIntent
+import app.notekea.chat.presentation.model.ChatPreviewData
+import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.core.presentation.platform.WindowDialog

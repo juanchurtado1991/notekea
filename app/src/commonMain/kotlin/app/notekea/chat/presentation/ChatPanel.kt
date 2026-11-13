@@ -34,6 +34,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.chat.domain.ChatScope
+import app.notekea.chat.presentation.model.ChatIntent
+import app.notekea.chat.presentation.model.ChatPreviewData
+import app.notekea.chat.presentation.model.ChatState
+import app.notekea.chat.presentation.model.ModelStatus
+import app.notekea.chat.presentation.view.ChatMemoryRing
+import app.notekea.chat.presentation.view.ChatMessages
+import app.notekea.chat.presentation.view.ChatModeMenu
+import app.notekea.chat.presentation.view.ChatNotice
 import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuState

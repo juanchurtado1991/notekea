@@ -5,7 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.chat.presentation.ChatViewModel
+import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.clips.presentation.ClipDialog
 import app.notekea.clips.presentation.ClipEffect
 import app.notekea.clips.presentation.ClipState

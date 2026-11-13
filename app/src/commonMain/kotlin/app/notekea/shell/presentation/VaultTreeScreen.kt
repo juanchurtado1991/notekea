@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import app.notekea.ai.presentation.ModelDownloadViewModel
 import app.notekea.cards.presentation.StudyViewModel
-import app.notekea.chat.presentation.ChatViewModel
+import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.clips.presentation.ClipIntent
 import app.notekea.clips.presentation.ClipViewModel
 import app.notekea.connections.presentation.NoteMentionsViewModel

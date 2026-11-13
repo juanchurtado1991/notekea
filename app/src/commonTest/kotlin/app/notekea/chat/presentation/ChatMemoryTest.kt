@@ -4,6 +4,10 @@ import app.notekea.chat.domain.ChatExchange
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.CompactChatUseCase
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.presentation.model.ChatEntry
+import app.notekea.chat.presentation.model.ChatStep
+import app.notekea.chat.presentation.viewmodel.ChatMemory
+import app.notekea.chat.presentation.viewmodel.after
 import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.llm.domain.LlmError

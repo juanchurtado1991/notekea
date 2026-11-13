@@ -16,7 +16,7 @@ import app.notekea.chat.domain.ConverseUseCase
 import app.notekea.chat.domain.DescribeVaultUseCase
 import app.notekea.chat.domain.HelpGuideSource
 import app.notekea.chat.domain.PlanRequestUseCase
-import app.notekea.chat.presentation.ChatViewModel
+import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module

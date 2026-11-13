@@ -16,6 +16,11 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
+import app.notekea.chat.presentation.model.ChatIntent
+import app.notekea.chat.presentation.model.ChatMode
+import app.notekea.chat.presentation.model.ChatPreviewData
+import app.notekea.chat.presentation.model.ChatState
+import app.notekea.chat.presentation.model.ModelStatus
 import app.notekea.core.llm.domain.ModelTier
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test

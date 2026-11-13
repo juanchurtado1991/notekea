@@ -3,6 +3,12 @@ package app.notekea.chat.presentation
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.FakeChatHistoryStore
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.presentation.model.ActionStatus
+import app.notekea.chat.presentation.model.AgentMoveLine
+import app.notekea.chat.presentation.model.ChatEntry
+import app.notekea.chat.presentation.model.ChatIntent
+import app.notekea.chat.presentation.model.ChatMode
+import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.llm.domain.FakeLlmEngine

@@ -7,6 +7,12 @@ import app.notekea.chat.domain.FakeChatHistoryStore
 import app.notekea.chat.domain.FoundNotes
 import app.notekea.chat.domain.FoundRow
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.presentation.model.ChatEntry
+import app.notekea.chat.presentation.model.ChatIntent
+import app.notekea.chat.presentation.model.ChatMode
+import app.notekea.chat.presentation.viewmodel.ChatViewModel
+import app.notekea.chat.presentation.viewmodel.after
+import app.notekea.core.domain.FakeClock
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.logging.domain.FakeTextClipboard
@@ -26,6 +32,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 /**
  * The chat probe of 2026-11-11 in the chat itself: a question that found tables is answered in words, a refusal says
@@ -59,16 +66,7 @@ class ChatProbeTest {
         Dispatchers.resetMain()
     }
 
-    private val clock = app
-        .notekea
-        .core
-        .domain
-        .FakeClock(
-            currentTime = kotlin
-                .time
-                .Instant
-                .parse("2026-11-11T09:00:00Z")
-        )
+    private val clock = FakeClock(currentTime = Instant.parse("2026-11-11T09:00:00Z"))
 
     private fun TestScope.started(): ChatViewModel {
         val viewModel = chatViewModel(

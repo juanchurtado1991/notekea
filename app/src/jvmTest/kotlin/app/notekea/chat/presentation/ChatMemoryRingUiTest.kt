@@ -23,6 +23,9 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.dp
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.FakeChatHistoryStore
+import app.notekea.chat.presentation.model.ChatIntent
+import app.notekea.chat.presentation.viewmodel.ChatViewModel
+import app.notekea.chat.presentation.viewmodel.after
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.logging.domain.FakeTextClipboard

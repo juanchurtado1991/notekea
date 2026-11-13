@@ -5,6 +5,7 @@ import app.notekea.chat.domain.FakeChatHistoryStore
 import app.notekea.chat.domain.NoteDraft
 import app.notekea.chat.domain.SectionAsked
 import app.notekea.chat.domain.WebPageClipper
+import app.notekea.chat.presentation.model.ChatIntent
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.llm.domain.FakeLlmEngine

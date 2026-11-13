@@ -3,7 +3,7 @@ package app.notekea.shell.presentation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import app.notekea.chat.presentation.ChatViewModel
+import app.notekea.chat.presentation.viewmodel.ChatViewModel
 import app.notekea.connections.presentation.ConnectionActions
 import app.notekea.connections.presentation.ConnectionsSection
 import app.notekea.connections.presentation.FollowNoteMentions
