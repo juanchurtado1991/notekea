@@ -52,7 +52,9 @@ class ShardCasesTest {
             suite.shard(
                 index = index,
                 count = 3,
-                together = { it.id in setOf("1.1-02", "1.1-05") }
+                together = {
+                    it.id in setOf("1.1-02", "1.1-05")
+                }
             )
         }
 
