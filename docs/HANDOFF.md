@@ -129,6 +129,23 @@ pasted documentation page asks its question in the chat again.
    (`bench/mine.py`), and the tournament's 504 questions (`bench/qset.json`) with their manual grades (`bench/mineS.py`,
    `bench/mineS2.py`).
 
+### The smoke of 2026-11-13: the chat and the web clips
+
+- **Chat:** answers are drawn as Markdown (`AnswerMarkdown`, `NotekeaMarkdown(isCompact, inlineContent)`; citations
+  stay chips, drawn inline through `InlineLinks`), the steps are a list of tasks with checks (`ChatTasks`,
+  `ChatEntry.passed`), and the list follows the text by what it measures (`FollowNewest`: Markdown is laid out a
+  moment after its text changes). The prompts ask for a shaped reply (`ReplyFormat.MARKDOWN`).
+- **Web clips:** a probe of fifteen real sites drove the fixes. The article is Markdown blocks (`HtmlMarkdown`,
+  `HtmlInline`, `HtmlTable`) cleaned of the site's chrome (`ArticleBlocks`, the extractor's `CHROME`); the section
+  search takes links from `<a>` only, walks `..`, drops a wiki's namespaces, and offers no section for a page with
+  hundreds of pages beside it in a site's first folder (`SectionLinks.mostBeside`). Notes clipped before read as
+  changed at their next update and are rewritten once in the new shape.
+- **Also:** the welcome waits for the vault's first scan (`OnboardingGate`, `WindowLoading`), and the YouTube
+  player hides under anything drawn over the window (`WindowCovers`, told by each overlay with `CoversWindow()`).
+- **Still open from the code review of 2026-11-13:** the YouTube player's window and cleanup, the chat's
+  presentation findings (undo, rollback, guards), and the medium findings of the editor, Settings, the tree, Git
+  and the rest.
+
 ## The release run
 
 Decided on 2026-11-04: there is no M2, M3 or M4 QA run. The only run left comes after 5.4 and before 5.5, on Windows,
