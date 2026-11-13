@@ -42,10 +42,18 @@ class FindSectionUseCase(
                 linked = linked
             )
 
-        val fromLinks = SectionLinks.within(
+        val ownLinks = SectionLinks.within(
             url = page.url,
             candidates = linked
         ).copy(canGoDeeper = true)
+
+        // A page with nothing under it that links hundreds beside it is an article of an encyclopedia or a shop's
+        // product: those are other subjects, not its section (Wikipedia offered 395 pages, 2026-11-13). A docs
+        // site's flat folder (TypeScript's handbook) lists its pages the same way, deeper in the site and fewer.
+        val most = SectionLinks.mostBeside(prefix = ownLinks.prefix)
+        val isLoose = !ownLinks.isUnderPage && ownLinks.urls.size > most
+
+        val fromLinks = if (isLoose) ownLinks.copy(urls = emptyList()) else ownLinks
 
         // An index of the site counts when it lists pages under this page. WordPress's llms.txt lists the site's
         // general pages, none of its documentation: the page's own links are its section then (2026-11-13).

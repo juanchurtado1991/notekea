@@ -50,9 +50,10 @@ data class SectionLinks(
     companion object {
         const val MAX_PAGES = 30
 
+        // A link of the page, never a stylesheet's or a font's address in its head (Wikipedia's "auth.wikimedia.org").
         // Quoted or not: Node.js's minified docs write href=assert.html.
         private val HREF = Regex(
-            pattern = "href\\s*=\\s*(?:\"([^\"#]*)\"|'([^'#]*)'|([^\\s>#\"']+))",
+            pattern = "<a\\b[^>]*?\\bhref\\s*=\\s*(?:\"([^\"#]*)\"|'([^'#]*)'|([^\\s>#\"']+))",
             option = RegexOption.IGNORE_CASE
         )
 
@@ -95,6 +96,21 @@ data class SectionLinks(
 
         /** The deepest the links are followed, and the most pages a clip that goes deeper than one level takes. */
         const val MAX_DEPTH = 3
+
+        /** How many pages beside a page are still its section: fewer in a site's first folder ("/wiki/"). */
+        fun mostBeside(prefix: String): Int {
+            val folders = prefix
+                .substringAfter(delimiter = "://")
+                .trim('/')
+                .count {
+                    it == '/'
+                }
+
+            return if (folders <= 1) MOST_BESIDE_TOP else MOST_BESIDE
+        }
+
+        private const val MOST_BESIDE_TOP = 60
+        private const val MOST_BESIDE = 200
         const val MAX_DEEP_PAGES = 150
 
         /**
@@ -145,12 +161,13 @@ data class SectionLinks(
 
             return HREF
                 .findAll(input = page.html)
-                .map { match ->
+                .mapNotNull { match ->
+                    // An empty href="" has none: docs.python.org's, which stopped the search (2026-11-13).
                     match
                         .groupValues
                         .drop(n = 1)
-                        .first { it.isNotEmpty() }
-                        .trim()
+                        .firstOrNull { it.isNotEmpty() }
+                        ?.trim()
                 }
                 .mapNotNull {
                     resolved(
@@ -239,8 +256,14 @@ data class SectionLinks(
         }
 
         // An address of a page, not of a file or of something the site's software serves to programs.
-        private fun isPage(url: String): Boolean =
-            !FILES.containsMatchIn(input = url) && !MACHINE.containsMatchIn(input = url)
+        private fun isPage(url: String): Boolean {
+            // "Special:Random", "Help:Contents": a wiki's own pages, never an article.
+            val isNamespace = ':' in url.substringAfter(delimiter = "://")
+
+            return !isNamespace &&
+                !FILES.containsMatchIn(input = url) &&
+                !MACHINE.containsMatchIn(input = url)
+        }
 
         /** Where a site may keep a file [name] about the page at [url]: its folder and each above it, deepest first. */
         fun placesAbove(
@@ -304,18 +327,46 @@ data class SectionLinks(
             more = 0
         )
 
-        // An address as the browser reads it from the page at [origin][path]: whole, from the root, or beside it.
+        // An address as the browser reads it from the page at [origin][path]: whole, from the root, or beside it,
+        // its "." and ".." walked; null for what is no address of a page (a script, a mail, text left by a template).
         private fun resolved(
             href: String,
             origin: String,
             path: String
-        ): String? = when {
-            href.isEmpty() -> null
-            href.startsWith(prefix = "http://") || href.startsWith(prefix = "https://") -> href
-            href.startsWith(prefix = "//") -> origin.substringBefore(delimiter = "//") + href
-            href.startsWith(prefix = "/") -> origin + href
-            href.contains(char = ':') -> null
-            else -> "$origin${path.substringBeforeLast(delimiter = '/')}/${href.removePrefix(prefix = "./")}"
+        ): String? {
+            val isWhole =
+                href.startsWith(prefix = "http://") || href.startsWith(prefix = "https://")
+
+            return when {
+                href.isEmpty() || BROKEN.containsMatchIn(input = href) -> null
+                isWhole -> walked(url = href)
+                href.startsWith(prefix = "//") -> walked(url = origin.substringBefore(delimiter = "//") + href)
+                href.startsWith(prefix = "/") -> walked(url = origin + href)
+                href.contains(char = ':') -> null
+                else -> walked(url = "$origin${path.substringBeforeLast(delimiter = '/')}/$href")
+            }
+        }
+
+        private val BROKEN = Regex(pattern = "[\\s\\\\{}<>|^`\"]")
+
+        // "/a/b/../c/./d" as "/a/c/d".
+        private fun walked(url: String): String {
+            val (origin, path) = partsOf(url = url) ?: return url
+            val rest = url.removePrefix(prefix = origin + path)
+            val isPlain = "/." !in path
+            if (isPlain) return url
+
+            val walked = mutableListOf<String>()
+
+            path.split('/').forEach { part ->
+                when (part) {
+                    ".." -> if (walked.size > 1) walked.removeAt(index = walked.lastIndex)
+                    "." -> Unit
+                    else -> walked += part
+                }
+            }
+
+            return origin + walked.joinToString(separator = "/") + rest
         }
     }
 }

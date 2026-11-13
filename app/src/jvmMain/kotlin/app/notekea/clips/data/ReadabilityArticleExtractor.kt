@@ -1,12 +1,14 @@
 package app.notekea.clips.data
 
 import app.notekea.clips.domain.Article
+import app.notekea.clips.domain.ArticleBlocks
 import app.notekea.clips.domain.ArticleExtractor
 import app.notekea.clips.domain.ClipError
 import app.notekea.clips.domain.FetchedPage
 import app.notekea.core.domain.Outcome
 import net.dankito.readability4j.Readability4J
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 
 /**
  * [ArticleExtractor] with Readability4J (Mozilla's Readability): the article's title and its paragraphs, headings and
@@ -22,15 +24,24 @@ class ReadabilityArticleExtractor : ArticleExtractor {
 
         val read = parsed
             .content
-            ?.let { blocksOf(html = it) }
+            ?.let {
+                blocksOf(
+                    root = Jsoup.parse(it, page.url).body(),
+                    title = parsed.title
+                )
+            }
             .orEmpty()
 
         // A short documentation page had Readability take its menu for the article; the page's <main> holds it.
         val main = Jsoup
-            .parse(page.html)
+            .parse(page.html, page.url)
             .selectFirst(MAIN)
-            ?.apply { select(CHROME).remove() }
-            ?.let { blocksOf(html = it.html()) }
+            ?.let {
+                blocksOf(
+                    root = it,
+                    title = parsed.title
+                )
+            }
             .orEmpty()
 
         val isMainBetter =
@@ -54,12 +65,31 @@ class ReadabilityArticleExtractor : ArticleExtractor {
         )
     }
 
-    private fun blocksOf(html: String): List<String> = Jsoup
-        .parse(html)
-        .select(BLOCKS)
-        .map { it.text().trim() }
-        .filter { it.isNotEmpty() }
-        .distinct()
+    // The article as Markdown blocks, without what the page draws around it nor its title said again.
+    private fun blocksOf(
+        root: Element,
+        title: String?
+    ): List<String> {
+        root.select(CHROME).remove()
+        val named = title.orEmpty().trim()
+
+        val blocks = HtmlMarkdown
+            .blocksOf(root = root)
+            .distinct()
+
+        return ArticleBlocks
+            .cleaned(blocks = blocks)
+            .filterIndexed { index, block ->
+                val words = block.trimStart('#', ' ')
+
+                val isTitle =
+                    index == 0 &&
+                        block.startsWith(prefix = "#") &&
+                        named.startsWith(prefix = words)
+
+                !isTitle
+            }
+    }
 
     // The words in sentences, not in menu entries of a word or two.
     private fun proseOf(paragraphs: List<String>): Int = paragraphs
@@ -70,14 +100,22 @@ class ReadabilityArticleExtractor : ArticleExtractor {
         .sum()
 
     private companion object {
-        // Mintlify's docs write paragraphs as <span data-as="p">.
-        const val BLOCKS = "p, [data-as=p], h1, h2, h3, h4, li, blockquote, pre"
         const val MIN_WORDS = 80
         const val MIN_MAIN_WORDS = 30
         const val PROSE_WORDS = 6
         const val MAIN = "main, [role=main], #content, article"
+
+        // Menus, the trail of where the page is, its table of contents, banners: around the article, not of it.
         const val CHROME =
-            "nav, aside, header, footer, [role=navigation], #sidebar, [id*=sidebar], [id*=navigation]"
+            "nav, aside, footer, [role=navigation], [role=banner], [role=complementary], [role=search], " +
+                "[role=alert], #sidebar, [id*=sidebar], [id*=navigation], [class*=breadcrumb], " +
+                "[aria-label*=breadcrumb i], .toc, #toc, [class*=table-of-contents], [class*=tableofcontents], " +
+                "[class*=on-this-page], [id*=in-this-article], [class*=in-this-article], [class*=skip-link], " +
+                "[class*=cookie], [class*=feedback], [class*=edit-this-page], .sr-only, .visually-hidden, " +
+                "main header nav, .mw-editsection, .navbox, .reflist, .noprint, .vector-header-container, " +
+                ".vector-column-start, .vector-page-toolbar, .vector-dropdown, .vector-toc, .vector-menu, " +
+                ".mw-portlet, .mw-jump-link, .catlinks, .printfooter, .mw-references-wrap, #p-lang-btn, " +
+                "devsite-toc, devsite-feedback, devsite-bookmark, devsite-page-rating"
         const val TITLE_CHARS = 60
     }
 }
