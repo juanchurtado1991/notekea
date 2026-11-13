@@ -100,3 +100,5 @@ internal val PALETTE_RESULTS = listOf(
 )
 internal val SAMPLE_DOCUMENTS = listOf("Pricing ideas", "2026-10-23", "Tomato plan")
 internal val SAMPLE_TABS = listOf("Related", "Backlinks", "Outline", "Chat")
+internal const val SAMPLE_PAGE_WIDTH = 30
+internal const val SAMPLE_PAGE_HEIGHT = 40

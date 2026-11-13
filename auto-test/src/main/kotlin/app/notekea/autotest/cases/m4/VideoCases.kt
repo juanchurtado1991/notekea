@@ -53,23 +53,26 @@ private fun SuiteBuilder.playing() {
 
         title(
             text =
-            "Un video se reproduce en su nota, y uno que esta computadora no puede " +
-                "reproducir se abre con su app"
+            "Un video se reproduce en su pestaña, con volumen y pantalla completa, y uno " +
+                "que esta computadora no puede reproducir se abre con su app"
         )
 
         steps(
             text =
             "1. Abre la Playground Vault y una nota; suelta en ella un mp4 real (un video " +
                 "del teléfono).\n2. Haz clic en su tarjeta; páusalo, haz clic en el medio de la " +
-                "barra de abajo y luego en ✕.\n3. En macOS, suelta un video .webm y haz clic en " +
-                "su tarjeta."
+                "barra, arrastra el volumen, haz clic en silenciar, luego en pantalla completa y " +
+                "pulsa Esc.\n3. En macOS, suelta un video .webm y haz clic en su tarjeta."
         )
 
         expected(
             text =
-            "El paso 2 reproduce el video ahí mismo con su tiempo; la barra lo lleva a la " +
-                "mitad; ✕ devuelve la tarjeta. El paso 3 dice que esta computadora no puede " +
-                "reproducirlo aquí, y un clic lo abre con su app."
+            "La tarjeta muestra una imagen del video (nunca un cuadro negro si el video " +
+                "tiene otro). El paso 2 abre el video en una pestaña propia y lo reproduce en " +
+                "toda la pestaña con su tiempo; la barra lo lleva a la mitad; el volumen y " +
+                "silenciar cambian el sonido; pantalla completa cubre la pantalla con los mismos " +
+                "controles y Esc sale. El paso 3 dice que esta computadora no puede reproducirlo " +
+                "aquí, y Abrir con su app lo abre."
         )
     }
 }
@@ -103,21 +106,25 @@ private fun SuiteBuilder.pastedYouTube() {
         title(
             text =
             "Un enlace de YouTube pegado se convierte en su tarjeta, con título una sola " +
-                "vez, y se reproduce en una ventana de Notekea"
+                "vez, y se reproduce en una pestaña de Notekea"
         )
 
         steps(
             text =
             "1. Copia la dirección de un video de YouTube desde el navegador.\n2. Abre una " +
                 "nota de la Playground Vault y pégala sola en una línea.\n3. Haz clic en su " +
-                "tarjeta.\n4. Cierra Notekea."
+                "tarjeta.\n4. Usa el volumen y la pantalla completa del reproductor.\n5. Cierra " +
+                "la pestaña."
         )
 
         expected(
             text =
             "El paso 2 escribe la inserción al instante; un momento después tiene el título " +
-                "del video y la tarjeta su imagen. El paso 3 abre una ventana de Notekea que " +
-                "reproduce el video. El paso 4 cierra también esa ventana."
+                "del video y la tarjeta su imagen. En macOS el paso 3 abre una pestaña con el " +
+                "nombre del video que lo reproduce dentro de la ventana de Notekea (sin un " +
+                "segundo Notekea en el Dock); el volumen y la pantalla completa son los de " +
+                "YouTube; cerrar la pestaña lo detiene. En Windows y Linux lo reproduce una " +
+                "ventana de Notekea, que se cierra al cerrar Notekea."
         )
     }
 }

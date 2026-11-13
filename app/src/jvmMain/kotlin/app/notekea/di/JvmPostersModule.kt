@@ -7,6 +7,7 @@ import app.notekea.documents.domain.PdfPages
 import app.notekea.editor.data.DesktopFilePosters
 import app.notekea.editor.data.FfmpegVideoFrames
 import app.notekea.editor.domain.FilePosters
+import org.koin.core.scope.Scope
 import org.koin.dsl.module
 import java.nio.file.Path
 
@@ -21,23 +22,38 @@ private const val PAGE_SCALE = 0.4f
  * features: the editor's cards, the documents' PDF pages.
  */
 val jvmPostersModule = module {
-    single<FilePosters> {
-        val pdfPages = get<PdfPages>()
-        val frames = get<FfmpegVideoFrames>()
+    single<FilePosters> { filePosters() }
+}
 
-        DesktopFilePosters(
-            folder = Path.of(get<PlatformConventions>().appDataDirectory, POSTERS_FOLDER),
-            pdfPage = { vaultPath, path ->
-                firstPage(
-                    pdfPages = pdfPages,
-                    vaultPath = vaultPath,
-                    path = path
+/**
+ * The desktop's [FilePosters]; without [withVideos] a video gets no picture, so the Auto-Test's cases, each in an
+ * app data folder of its own, never download FFmpeg for one.
+ */
+fun Scope.filePosters(withVideos: Boolean = true): FilePosters {
+    val pdfPages = get<PdfPages>()
+    val frames = get<FfmpegVideoFrames>()
+
+    return DesktopFilePosters(
+        folder = Path.of(get<PlatformConventions>().appDataDirectory, POSTERS_FOLDER),
+        pdfPage = { vaultPath, path ->
+            firstPage(
+                pdfPages = pdfPages,
+                vaultPath = vaultPath,
+                path = path
+            )
+        },
+        videoFrame = { file, seconds ->
+            if (withVideos) {
+                frames.frameAt(
+                    file = file,
+                    seconds = seconds
                 )
-            },
-            videoFrame = frames::frameAt,
-            dispatchers = get()
-        )
-    }
+            } else {
+                null
+            }
+        },
+        dispatchers = get()
+    )
 }
 
 // The PDF's first page as a PNG; the PDF is let go at once, its tab opens it again if it shows.

@@ -31,8 +31,9 @@ private fun SuiteBuilder.pictureSizes() {
             text =
             "El plato naranja y azul se ve tres veces: a su propio tamaño (480 de ancho, o " +
                 "el ancho de la nota si es más estrecha), a 200 de ancho, y una vez más desde el " +
-                "enlace Markdown. Weekly menu.pdf y broken.png se ven como fichas de archivo con " +
-                "un clip y \"Se abre con su app\". Lost photo.png dice \"Falta este archivo\" " +
+                "enlace Markdown. Weekly menu.pdf es una tarjeta con la imagen de su primera " +
+                "página y \"Se abre en una pestaña\"; broken.png es una ficha de archivo con un " +
+                "clip. Lost photo.png dice \"Falta este archivo\" " +
                 "con su nombre y Buscar…. En el último párrafo \"the menu\" es un enlace."
         )
     }

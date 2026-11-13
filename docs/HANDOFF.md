@@ -78,6 +78,14 @@ pasted documentation page asks its question in the chat again.
   - Four Auto-Test parts loading the model at once ran the GPU out of memory, so the cases that ask a model now run
     one after another in part 1 (`NotekeaSuiteParts.asksModel`).
   - A reply or an agent's summary that only says nothing was found is now the not-found reply (3.3-05).
+- **Files in notes open in Notekea** (the developer's smoke, 2026-11-13):
+  - A PDF's card shows its first page and opens the PDF's tab (1.8-03). Any file Notekea does not show still opens
+    with its app (`FilesShownHere`).
+  - A video's card shows a frame that is not black (`FilePosters`, with FFmpeg, downloaded the first time). A click
+    opens the video's tab, which plays it with volume and full screen (`VideoTab`, `NotekeaVideoControls`).
+  - On macOS a YouTube video plays in a tab inside Notekea's window (`MacWebView`: WKWebView through JNA, in this
+    process). Windows and Linux still open the window of their own (`YouTubePlayerWindow`); doing the same there is
+    open work, and that window was never seen playing since YouTube began asking players for their origin.
 - **Not looked into yet:** a ggml Metal abort when the app quits after using the model, and the onboarding card that
   shows before the app finishes loading. The developer asked to wait until the smoke test ends.
 

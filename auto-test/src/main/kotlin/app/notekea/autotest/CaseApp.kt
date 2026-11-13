@@ -34,7 +34,9 @@ import app.notekea.core.presentation.platform.ShortcutDispatcher
 import app.notekea.core.presentation.platform.WindowCloseGuard
 import app.notekea.core.presentation.platform.WindowHost
 import app.notekea.di.desktopModules
+import app.notekea.di.filePosters
 import app.notekea.editor.domain.AttachmentPicker
+import app.notekea.editor.domain.FilePosters
 import app.notekea.sync.domain.VaultSync
 import app.notekea.sync.domain.VaultSyncs
 import app.notekea.tree.data.VaultFolderTrash
@@ -212,6 +214,7 @@ class CaseApp(
         single<FolderPicker> { folderPicker }
         single<AttachmentPicker> { attachmentPicker }
         single<FileOpener> { fileOpener }
+        single<FilePosters> { filePosters(withVideos = false) }
         single<FileRevealer> { fileRevealer }
         single<TextClipboard> { clipboard }
         single<PageFetcher> { StandInDocsSite(real = KtorPageFetcher(dispatchers = get())) }

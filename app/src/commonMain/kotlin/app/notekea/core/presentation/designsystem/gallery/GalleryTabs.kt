@@ -25,6 +25,7 @@ import app.notekea.core.presentation.designsystem.components.NotekeaCard
 import app.notekea.core.presentation.designsystem.components.NotekeaGridCard
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaAttachmentImage
+import app.notekea.core.presentation.designsystem.components.attachments.NotekeaDocumentCard
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaEmbedNotice
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaEmbeddedNote
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaFileChip
@@ -262,6 +263,16 @@ internal fun AttachmentsSection() {
         NotekeaFileChip(
             name = SAMPLE_FILE,
             hint = SAMPLE_FILE_HINT,
+            onOpen = {}
+        )
+
+        NotekeaDocumentCard(
+            name = SAMPLE_FILE,
+            hint = SAMPLE_FILE_HINT,
+            page = ImageBitmap(
+                width = SAMPLE_PAGE_WIDTH,
+                height = SAMPLE_PAGE_HEIGHT
+            ),
             onOpen = {}
         )
 

@@ -1,16 +1,21 @@
 package app.notekea.autotest.cases.m1
 
+import androidx.compose.ui.input.key.Key
 import app.notekea.autotest.cursorToNoteStart
 import app.notekea.autotest.notekea
+import app.notekea.autotest.pressInWindow
 import com.testbuddy.CaseFailure
 import com.testbuddy.CaseScope
+import com.testbuddy.ShortcutModifier.Mod
 import com.testbuddy.SuiteBuilder
 
 private const val IMAGES_NOTE = "Images and files"
 private const val IMAGES_FILE = "$PLAYGROUND/Editor/Images and files.md"
 private const val IMAGES_SHOWN = "A picture at its own size"
 private const val MENU_PDF = "Weekly menu.pdf"
-private const val WAIT_MILLIS = 10_000L
+
+// The PDF's tab says it, the note never does.
+private const val OPEN_WITH_APP = "Open in the system’s app"
 
 /**
  * The cases of 1.8 that need the system's dialogs and apps, checked through the case's own picker and opener (the
@@ -22,10 +27,11 @@ internal fun SuiteBuilder.attachmentSystemCases() {
     attachFromMenu()
 }
 
+// The developer's smoke of 2026-11-13: a PDF opens in a tab of Notekea, as a double click in Files opens it.
 private fun SuiteBuilder.pdfOpens() {
     automated(
         id = "1.8-03",
-        title = "A PDF's chip and a link to it open the PDF with the system's app"
+        title = "A PDF's card and a link to it open the PDF in a tab of Notekea, not with the system's app"
     ) {
         openPlaygroundNote(
             name = IMAGES_NOTE,
@@ -34,10 +40,17 @@ private fun SuiteBuilder.pdfOpens() {
 
         cursorToNoteStart()
         scrollTo(text = MENU_PDF)
+        expectText(text = "Opens in a tab")
         click(text = MENU_PDF)
-        awaitOpened(times = 1)
+        expectText(text = OPEN_WITH_APP)
+        pressInWindow(shortcut = Mod + Key.W)
+        expectNoText(text = OPEN_WITH_APP)
         clickWords(words = "the menu")
-        awaitOpened(times = 2)
+        expectText(text = OPEN_WITH_APP)
+
+        if (notekea().fileOpener.opened.isNotEmpty()) {
+            throw CaseFailure(message = "expected $MENU_PDF opened in a tab, it opened with its app")
+        }
     }
 }
 
@@ -91,24 +104,3 @@ private fun SuiteBuilder.attachFromMenu() {
 
 /** The file [name] of the test data's Outside files folder, outside every vault. */
 private fun CaseScope.outside(name: String): String = file(path = "Outside files/$name").toString()
-
-/** Waits until the case's file opener was asked [times] times for the weekly menu's PDF. */
-private fun CaseScope.awaitOpened(times: Int) {
-    step(description = "Expect $MENU_PDF opened $times time(s) with its app")
-
-    try {
-        ui
-            .waitUntil(timeoutMillis = WAIT_MILLIS) {
-                notekea()
-                    .fileOpener
-                    .opened
-                    .count {
-                        it.name == MENU_PDF
-                    } >= times
-            }
-    } catch (exception: androidx.compose.ui.test.ComposeTimeoutException) {
-        throw CaseFailure(message = "expected $MENU_PDF opened $times time(s)").apply {
-            initCause(exception)
-        }
-    }
-}
