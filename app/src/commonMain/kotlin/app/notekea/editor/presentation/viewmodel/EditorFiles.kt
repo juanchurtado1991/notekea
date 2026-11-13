@@ -10,10 +10,12 @@ import app.notekea.core.notes.domain.YouTubeLinks
 import app.notekea.editor.domain.AttachmentSource
 import app.notekea.editor.domain.CompressStep
 import app.notekea.editor.domain.Embed
+import app.notekea.editor.domain.FilesShownHere
 import app.notekea.editor.domain.FormatAction
 import app.notekea.editor.domain.VideoLimits
 import app.notekea.editor.presentation.attachments.AttachmentTools
 import app.notekea.editor.presentation.attachments.EditorAttachments
+import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.EditorState
 import app.notekea.editor.presentation.model.VideoCompression
@@ -328,7 +330,11 @@ internal class EditorFiles(
     /** Whether [note], which an edit started from, is still the one in the text. */
     private fun isOpen(note: RelativePath): Boolean = host.state.value.notePath == note
 
+    // A document Notekea reads and a video open in a tab of their own; any other file with its app.
     private fun open(path: RelativePath) {
+        val isShownHere = FilesShownHere.holds(path = path)
+        if (isShownHere) return host.emit(effect = EditorEffect.OpenFile(path = path))
+
         host.launch {
             val opened = tools.fileOpener.open(
                 vaultPath = vaultPath,

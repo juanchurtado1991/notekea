@@ -159,6 +159,7 @@ private fun EditorEffects(
                 EditorEffect.Closed -> current.onClosed()
                 EditorEffect.Flushed -> flushed.trySend(element = Unit)
                 is EditorEffect.OpenLink -> current.onOpenLink(effect)
+                is EditorEffect.OpenFile -> current.onOpenFile(effect.path)
                 is EditorEffect.Renamed -> current.onRenamed(effect)
                 is EditorEffect.SearchTag -> current.onSearchTag(effect.tag)
                 EditorEffect.RequestNoteLink -> current.onRequestNoteLink()

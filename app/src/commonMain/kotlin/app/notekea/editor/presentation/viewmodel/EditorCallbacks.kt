@@ -14,6 +14,7 @@ data class EditorCallbacks(
     val onRenamed: (EditorEffect.Renamed) -> Unit,
     val onClosed: () -> Unit,
     val onOpenLink: (EditorEffect.OpenLink) -> Unit,
+    val onOpenFile: (RelativePath) -> Unit,
     val onSearchTag: (String) -> Unit,
     val onRequestNoteLink: () -> Unit,
     val onRequestTag: (String) -> Unit,

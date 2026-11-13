@@ -1,13 +1,7 @@
 package app.notekea.editor.presentation.attachments
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalUriHandler
@@ -25,10 +19,10 @@ import app.notekea.core.presentation.designsystem.components.attachments.Notekea
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaMissingFile
 import app.notekea.core.presentation.designsystem.components.attachments.NotekeaVideoCard
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
-import app.notekea.core.presentation.platform.LocalVideoPlayer
 import app.notekea.core.presentation.platform.LocalYouTubePlayer
 import app.notekea.editor.domain.Embed
 import app.notekea.editor.domain.EmbedKind
+import app.notekea.editor.domain.FilesShownHere
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.reading.ReadLink
 import app.notekea.editor.presentation.reading.ReadingView
@@ -37,12 +31,13 @@ import app.notekea.resources.Res
 import app.notekea.resources.attachment_locate
 import app.notekea.resources.attachment_missing
 import app.notekea.resources.attachment_open_hint
+import app.notekea.resources.attachment_tab_hint
 import app.notekea.resources.embedded_note_open
-import app.notekea.resources.video_cannot_play
 import app.notekea.resources.video_local_subtitle
 import app.notekea.resources.video_play
 import app.notekea.resources.video_youtube
 import app.notekea.resources.video_youtube_untitled
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -87,7 +82,6 @@ fun AttachmentBlock(
 
         path != null && view.location != null -> VideoEmbed(
             path = path,
-            location = view.location,
             onIntent = onIntent,
             modifier = modifier
         )
@@ -101,7 +95,7 @@ fun AttachmentBlock(
 
         path != null -> NotekeaFileChip(
             name = path.name,
-            hint = stringResource(resource = Res.string.attachment_open_hint),
+            hint = stringResource(resource = hintOf(path = path)),
             onOpen = { onIntent(EditorIntent.OnAttachmentOpen(path = path)) },
             modifier = modifier
         )
@@ -147,55 +141,25 @@ private fun YouTubeEmbed(
     )
 }
 
-/**
- * A video in the note: its card until it is played, then the system's player in its place, at most
- * [VIDEO_MAX_WIDTH_DP] wide; ✕ puts the card back. One this system cannot play says so and opens with its app.
- */
+/** A video in the note: its card, whose play opens the video in a tab of its own, where it plays. */
 @Composable
 private fun VideoEmbed(
     path: RelativePath,
-    location: String,
     onIntent: (EditorIntent) -> Unit,
     modifier: Modifier
 ) {
-    val player = LocalVideoPlayer.current
-    var isPlaying by remember(location) { mutableStateOf(value = false) }
-    var cannotPlay by remember(location) { mutableStateOf(value = false) }
-    val isPlayable = player != null && !cannotPlay
+    val format = path
+        .name
+        .substringAfterLast(delimiter = '.')
+        .uppercase()
 
-    if (isPlaying && player != null) {
-        player(
-            location,
-            { isPlaying = false },
-            {
-                isPlaying = false
-                cannotPlay = true
-            },
-            modifier
-                .fillMaxWidth()
-                .widthIn(max = VIDEO_MAX_WIDTH_DP.dp)
-        )
-    } else {
-        NotekeaVideoCard(
-            title = path.name.substringBeforeLast(delimiter = '.'),
-            subtitle = stringResource(
-                resource = Res.string.video_local_subtitle,
-                path
-                    .name
-                    .substringAfterLast(delimiter = '.')
-                    .uppercase()
-            ),
-            playLabel = stringResource(resource = Res.string.video_play),
-            onPlay = {
-                if (player != null) {
-                    isPlaying = true
-                } else {
-                    onIntent(EditorIntent.OnAttachmentOpen(path = path))
-                }
-            },
-            modifier = modifier
-        )
-    }
+    NotekeaVideoCard(
+        title = path.name.substringBeforeLast(delimiter = '.'),
+        subtitle = stringResource(Res.string.video_local_subtitle, format),
+        playLabel = stringResource(resource = Res.string.video_play),
+        onPlay = { onIntent(EditorIntent.OnAttachmentOpen(path = path)) },
+        modifier = modifier
+    )
 }
 
 /**
@@ -229,6 +193,13 @@ private fun EmbeddedNote(
             onIntent = onIntent
         )
     }
+}
+
+// What a click on a file's chip does: a tab of Notekea for the files it shows, the file's app for the others.
+private fun hintOf(path: RelativePath): StringResource = if (FilesShownHere.holds(path = path)) {
+    Res.string.attachment_tab_hint
+} else {
+    Res.string.attachment_open_hint
 }
 
 /** The link that opens the note at [path], as a click on a wiki link to it does. */
@@ -272,5 +243,4 @@ private fun AttachmentBlockPreview() {
 }
 
 private const val PREVIEW_FILE = "attachments/menu.pdf"
-private const val VIDEO_MAX_WIDTH_DP = 720
 internal const val SECTION_SEPARATOR = " › "

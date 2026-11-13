@@ -24,6 +24,12 @@ sealed interface EditorEffect {
         val inBackground: Boolean = false
     ) : EditorEffect
 
+    /**
+     * A file Notekea shows itself (a PDF or another document, a video) was clicked in the note: the window opens its
+     * tab, as a double click in Files does.
+     */
+    data class OpenFile(val path: RelativePath) : EditorEffect
+
     /** The text of the open note should take the keyboard. */
     data object FocusText : EditorEffect
 

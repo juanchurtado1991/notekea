@@ -12,7 +12,10 @@ import app.notekea.shell.presentation.workspace.PaneContext
 import app.notekea.tree.presentation.filepreview.FileDetails
 import app.notekea.tree.presentation.filepreview.FilePreview
 
-/** A file's tab: a document read in its viewer (4.5), any other file as its preview with its app and its folder. */
+/**
+ * A file's tab: a document read in its viewer (4.5), a video played ([VideoTab]), any other file as its preview with
+ * its app and its folder.
+ */
 @Composable
 internal fun FileTab(
     path: RelativePath,
@@ -28,19 +31,31 @@ internal fun FileTab(
     val state = context.state
     val file = state.tree.attachments[path] ?: return
 
-    FileDetails(
-        preview = context
-            .workspaceState
-            .previews[path]
-            ?.takeIf {
-                it.file == file
-            }
-            ?: FilePreview(
-                file = file,
-                kind = AttachmentKind.of(name = path.name)
-            ),
-        platformConventions = state.platformConventions,
-        onIntent = context.viewModels.tree::onIntent
+    val kind = AttachmentKind.of(name = path.name)
+
+    val details = @Composable {
+        FileDetails(
+            preview = context
+                .workspaceState
+                .previews[path]
+                ?.takeIf {
+                    it.file == file
+                }
+                ?: FilePreview(
+                    file = file,
+                    kind = kind
+                ),
+            platformConventions = state.platformConventions,
+            onIntent = context.viewModels.tree::onIntent
+        )
+    }
+
+    if (kind != AttachmentKind.VIDEO) return details()
+
+    VideoTab(
+        path = path,
+        location = "${state.vaultPath}${RelativePath.SEPARATOR}${path.value}",
+        details = details
     )
 }
 

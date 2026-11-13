@@ -953,7 +953,13 @@
     <string name="video_play">Reproducir</string>
     <string name="video_pause">Pausar</string>
     <string name="video_position">Posición en el video</string>
-    <string name="video_close">Cerrar el video</string>
+    <string name="video_mute">Silenciar</string>
+    <string name="video_unmute">Activar el sonido</string>
+    <string name="video_volume">Volumen</string>
+    <string name="video_fullscreen">Pantalla completa</string>
+    <string name="video_fullscreen_exit">Salir de pantalla completa</string>
+    <string name="attachment_tab_hint">Se abre en una pestaña</string>
+    <string name="video_tab_cannot_play">Esta computadora no puede reproducir este video aquí.</string>
     <string name="video_cannot_play">Esta computadora no puede reproducirlo aquí: haz clic para abrirlo con su app</string>
     <string name="video_youtube">YouTube</string>
     <string name="video_youtube_untitled">Video de YouTube</string>

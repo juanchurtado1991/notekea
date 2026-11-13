@@ -52,6 +52,7 @@ internal fun editorCallbacksOf(
                 )
             )
         },
+        onOpenFile = { workspace.onIntent(intent = WorkspaceIntent.OnOpen(path = it)) },
         onSearchTag = { tag ->
             viewModels.onSwitcher(
                 QuickSwitcherIntent.OnOpen(

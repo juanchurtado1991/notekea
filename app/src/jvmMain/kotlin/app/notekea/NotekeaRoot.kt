@@ -126,10 +126,9 @@ private fun AppLocals(
         LocalSystemReduceMotion provides isMotionReduced,
         LocalAppearance provides appearance,
         LocalFileDrop provides ::awtFileDrop,
-        LocalVideoPlayer provides { location, onClose, onCannotPlay, modifier ->
+        LocalVideoPlayer provides { location, onCannotPlay, modifier ->
             DesktopVideoPlayer(
                 location = location,
-                onClose = onClose,
                 onCannotPlay = onCannotPlay,
                 modifier = modifier
             )

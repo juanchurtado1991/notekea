@@ -11,12 +11,14 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.editor.domain.CompressError
 import app.notekea.editor.domain.CompressStep
 import app.notekea.editor.domain.EmbedProblem
+import app.notekea.editor.presentation.model.EditorEffect
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.editor.presentation.model.VideoCompression
 import app.notekea.editor.presentation.viewmodel.EditorViewModels
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -243,10 +245,10 @@ class EditorNewAttachmentsTest : EditorAttachmentsTestBase() {
         }
 
     @Test
-    fun `a file opens with the system's app, and a failure is shown until dismissed`() =
+    fun `a file Notekea does not show opens with the system's app, and a failure is shown until dismissed`() =
         runAttachmentsTest {
-            open(text = "![[menu.pdf]]")
-            val menu = RelativePath(value = "Recipes/menu.pdf")
+            open(text = "![[menu.zip]]")
+            val menu = RelativePath(value = "Recipes/menu.zip")
 
             send(intent = EditorIntent.OnAttachmentOpen(path = menu))
             fixture.opener.failure = NotesError.OpenFailed(path = menu.value)
@@ -263,6 +265,38 @@ class EditorNewAttachmentsTest : EditorAttachmentsTestBase() {
                         .toList(),
                     error,
                     viewModel.state.value.actionError
+                )
+            )
+        }
+
+    // The developer's smoke of 2026-11-13: a PDF's chip opened its app, and a video played inside the note.
+    @Test
+    fun `a PDF and a video clicked in a note open in a tab of Notekea, not with their app`() =
+        runAttachmentsTest {
+            open(text = "![[menu.pdf]]")
+            val effects = mutableListOf<EditorEffect>()
+
+            val collecting = launch {
+                viewModel.effects.collect { effects += it }
+            }
+
+            val menu = RelativePath(value = "Recipes/menu.pdf")
+            val trip = RelativePath(value = "attachments/trip.mp4")
+            send(intent = EditorIntent.OnAttachmentOpen(path = menu))
+            send(intent = EditorIntent.OnAttachmentOpen(path = trip))
+            collecting.cancel()
+
+            assertEquals(
+                expected = listOf<Any>(
+                    EditorEffect.OpenFile(path = menu),
+                    EditorEffect.OpenFile(path = trip),
+                    emptyList<RelativePath>()
+                ),
+                actual = effects.filterIsInstance<EditorEffect.OpenFile>() + listOf(
+                    fixture
+                        .opener
+                        .opened
+                        .toList()
                 )
             )
         }

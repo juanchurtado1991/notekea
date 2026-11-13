@@ -76,8 +76,10 @@ import com.composables.icons.lucide.ListTodo
 import com.composables.icons.lucide.ListTree
 import com.composables.icons.lucide.Lock
 import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Maximize
 import com.composables.icons.lucide.MessageSquareQuote
 import com.composables.icons.lucide.MessagesSquare
+import com.composables.icons.lucide.Minimize
 import com.composables.icons.lucide.Minus
 import com.composables.icons.lucide.Monitor
 import com.composables.icons.lucide.Moon
@@ -122,6 +124,8 @@ import com.composables.icons.lucide.Trash2
 import com.composables.icons.lucide.TriangleAlert
 import com.composables.icons.lucide.Type
 import com.composables.icons.lucide.Video
+import com.composables.icons.lucide.Volume2
+import com.composables.icons.lucide.VolumeX
 import com.composables.icons.lucide.X
 import com.composables.icons.lucide.Zap
 import com.composables.icons.lucide.ZoomIn
@@ -209,6 +213,10 @@ object NotekeaIcons {
     val MediaFile: ImageVector get() = Lucide.FilePlay
     val Pause: ImageVector get() = Lucide.Pause
     val Play: ImageVector get() = Lucide.Play
+    val VideoFullscreen: ImageVector get() = Lucide.Maximize
+    val VideoFullscreenExit: ImageVector get() = Lucide.Minimize
+    val VideoMuted: ImageVector get() = Lucide.VolumeX
+    val VideoVolume: ImageVector get() = Lucide.Volume2
     val Minimize: ImageVector get() = Lucide.Minus
     val Folder: ImageVector get() = Lucide.Folder
     val Home: ImageVector get() = Lucide.House

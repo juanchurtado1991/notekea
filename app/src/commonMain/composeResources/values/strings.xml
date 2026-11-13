@@ -953,7 +953,13 @@
     <string name="video_play">Play</string>
     <string name="video_pause">Pause</string>
     <string name="video_position">Position in the video</string>
-    <string name="video_close">Close the video</string>
+    <string name="video_mute">Mute</string>
+    <string name="video_unmute">Unmute</string>
+    <string name="video_volume">Volume</string>
+    <string name="video_fullscreen">Full screen</string>
+    <string name="video_fullscreen_exit">Exit full screen</string>
+    <string name="attachment_tab_hint">Opens in a tab</string>
+    <string name="video_tab_cannot_play">This computer can’t play this video here.</string>
     <string name="video_cannot_play">This computer can’t play it here: click to open it with its app</string>
     <string name="video_youtube">YouTube</string>
     <string name="video_youtube_untitled">YouTube video</string>
