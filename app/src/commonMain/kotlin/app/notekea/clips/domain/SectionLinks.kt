@@ -13,7 +13,9 @@ data class SectionLinks(
     // The pages past the first [MAX_PAGES], clipped only when the person asks for all of them.
     val rest: List<String> = emptyList(),
     // Found in the page's own links, not in an index of the site: the pages those link may be followed too.
-    val canGoDeeper: Boolean = false
+    val canGoDeeper: Boolean = false,
+    // The pages are under the page itself ("/documentation/…" for "/documentation"), not only beside it.
+    val isUnderPage: Boolean = false
 ) {
     /** Every page, the [rest] too: what "all of them" clips. */
     fun everyPage(): SectionLinks = copy(
@@ -61,6 +63,12 @@ data class SectionLinks(
 
         private val FILES = Regex(
             pattern = "\\.(png|jpe?g|gif|svg|webp|ico|css|js|json|xml|pdf|zip|gz|mp4|mp3|woff2?|ttf)$",
+            option = RegexOption.IGNORE_CASE
+        )
+
+        // What a site's software serves beside its pages (WordPress's feeds and API, 2026-11-13): never a page to clip.
+        private val MACHINE = Regex(
+            pattern = "/(feed|wp-json|wp-includes|wp-content|wp-admin|xmlrpc\\.php|cdn-cgi)(/|$)|\\.php$",
             option = RegexOption.IGNORE_CASE
         )
 
@@ -113,7 +121,7 @@ data class SectionLinks(
             return linksIn(page = page)
                 .map { it.substringBefore(delimiter = '?').substringBefore(delimiter = '#') }
                 .filter {
-                    it.startsWith(prefix = origin) && !FILES.containsMatchIn(input = it)
+                    it.startsWith(prefix = origin) && isPage(url = it)
                 }
                 .distinctBy {
                     keyOf(
@@ -170,7 +178,7 @@ data class SectionLinks(
             val pages = candidates
                 .map { it.substringBefore(delimiter = '?').substringBefore(delimiter = '#') }
                 .filter {
-                    it.startsWith(prefix = origin) && !FILES.containsMatchIn(input = it)
+                    it.startsWith(prefix = origin) && isPage(url = it)
                 }
                 .distinctBy {
                     keyOf(
@@ -225,9 +233,14 @@ data class SectionLinks(
             return SectionLinks(
                 prefix = origin + folder,
                 urls = under,
-                more = 0
+                more = 0,
+                isUnderPage = !isBeside
             )
         }
+
+        // An address of a page, not of a file or of something the site's software serves to programs.
+        private fun isPage(url: String): Boolean =
+            !FILES.containsMatchIn(input = url) && !MACHINE.containsMatchIn(input = url)
 
         /** Where a site may keep a file [name] about the page at [url]: its folder and each above it, deepest first. */
         fun placesAbove(

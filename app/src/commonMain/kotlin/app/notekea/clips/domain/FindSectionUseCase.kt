@@ -42,10 +42,18 @@ class FindSectionUseCase(
                 linked = linked
             )
 
-        val found = listed ?: SectionLinks.within(
+        val fromLinks = SectionLinks.within(
             url = page.url,
             candidates = linked
         ).copy(canGoDeeper = true)
+
+        // An index of the site counts when it lists pages under this page. WordPress's llms.txt lists the site's
+        // general pages, none of its documentation: the page's own links are its section then (2026-11-13).
+        val found = when {
+            listed?.isUnderPage == true -> listed
+            fromLinks.isUnderPage && fromLinks.urls.isNotEmpty() -> fromLinks
+            else -> listed ?: fromLinks
+        }
 
         val levels = depth.coerceIn(1, SectionLinks.MAX_DEPTH)
 

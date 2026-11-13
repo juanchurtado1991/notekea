@@ -93,4 +93,65 @@ class SectionDepthTest {
 
         return links
     }
+
+    // The developer's clip of https://wordpress.org/documentation/ (2026-11-13): the site's llms.txt lists its
+    // general pages, none of the documentation, and the clip took the ten pages of the top menu, with no levels asked.
+    @Test
+    fun `a site's index that lists nothing under the page gives way to the page's own links, and levels are offered`() =
+        runTest {
+            val pages = mapOf(
+                "https://w.org/documentation/" to
+                    "<a href=\"https://w.org/about/\">About</a> <a href=\"https://w.org/plugins/\">Plugins</a> " +
+                    "<a href=\"https://w.org/documentation/category/faqs/\">FAQs</a> " +
+                    "<a href=\"https://w.org/documentation/overview/\">Overview</a> " +
+                    "<a href=\"https://w.org/documentation/feed/\">Feed</a> " +
+                    "<a href=\"https://w.org/documentation/wp-json/\">API</a> " +
+                    "<a href=\"https://w.org/documentation/xmlrpc.php?rsd\">RSD</a> " +
+                    "<a href=\"https://w.org/documentation/?output_format=md\">Markdown</a>",
+                "https://w.org/llms.txt" to
+                    "# W\n\n- [About](https://w.org/about/): The project\n- [Plugins](https://w.org/plugins/): Plugins\n" +
+                    "- [Documentation](https://w.org/documentation/): Guides",
+                "https://w.org/documentation/category/faqs/" to
+                    "<a href=\"https://w.org/documentation/article/faq-install/\">Installing</a>",
+                "https://w.org/documentation/overview/" to ""
+            )
+
+            val fetcher = PageFetcher { url ->
+                pages[url]?.let {
+                    Outcome.Success(
+                        value = FetchedPage(
+                            url = url,
+                            html = it
+                        )
+                    )
+                } ?: Outcome.Failure(error = ClipError.Refused(status = 404))
+            }
+
+            val one =
+                FindSectionUseCase(fetcher = fetcher)(url = "https://w.org/documentation/") as Outcome.Success
+
+            val two = FindSectionUseCase(fetcher = fetcher)(
+                url = "https://w.org/documentation/",
+                depth = 2
+            ) as Outcome.Success
+
+            assertEquals(
+                expected = listOf<Any>(
+                    listOf("category/faqs/", "overview/"),
+                    true,
+                    listOf("category/faqs/", "overview/", "article/faq-install/")
+                ),
+                actual = listOf(
+                    one
+                        .value
+                        .urls
+                        .map { it.removePrefix(prefix = "https://w.org/documentation/") },
+                    one.value.canGoDeeper,
+                    two
+                        .value
+                        .urls
+                        .map { it.removePrefix(prefix = "https://w.org/documentation/") }
+                )
+            )
+        }
 }
