@@ -7,11 +7,13 @@ import app.notekea.clips.domain.DescribeSectionUseCase
 import app.notekea.clips.domain.FetchedPage
 import app.notekea.clips.domain.FindSectionUseCase
 import app.notekea.clips.domain.SupportCheck
+import app.notekea.clips.domain.UpdateWebSourcesUseCase
 import app.notekea.core.domain.FakeClock
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.FakeLocalCalendar
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.llm.domain.LlmError
+import app.notekea.core.notes.domain.FakeAttachmentStore
 import app.notekea.core.notes.domain.FakeNoteContentStore
 import app.notekea.core.notes.domain.FakeNoteFileOperations
 import kotlinx.coroutines.Dispatchers
@@ -70,6 +72,8 @@ class ClipSectionDialogTest {
         supportCheck = SupportCheck(llmEngine = engine)
     )
 
+    private val attachments = FakeAttachmentStore()
+
     private fun viewModel() = ClipViewModel(
         vaultPath = VAULT,
         clipWebPage = clip,
@@ -78,6 +82,15 @@ class ClipSectionDialogTest {
         }),
         clipSection = ClipSectionUseCase(clipWebPage = clip),
         describeSection = DescribeSectionUseCase(llmEngine = engine),
+        updateWebSources = UpdateWebSourcesUseCase(
+            clipWebPage = clip,
+            findSection = FindSectionUseCase(fetcher = { url ->
+                Outcome.Success(FetchedPage(url, pages[url].orEmpty()))
+            }),
+            attachmentStore = attachments,
+            noteContentStore = store,
+            noteFileOperations = files
+        ),
         noteContentStore = store,
         noteFileOperations = files,
         localCalendar = FakeLocalCalendar(),

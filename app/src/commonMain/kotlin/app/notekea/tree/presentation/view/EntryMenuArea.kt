@@ -4,11 +4,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import app.notekea.core.notes.domain.WebSourcesFolder
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuArea
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuState
 import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
+import app.notekea.core.presentation.platform.LocalWebSourceUpdater
 import app.notekea.core.presentation.platform.label
 import app.notekea.resources.Res
 import app.notekea.resources.tree_bookmark_add
@@ -17,6 +19,7 @@ import app.notekea.resources.tree_delete_file
 import app.notekea.resources.tree_delete_folder
 import app.notekea.resources.tree_delete_note
 import app.notekea.resources.tree_rename
+import app.notekea.resources.tree_update_web
 import app.notekea.tree.domain.FolderCard
 import app.notekea.tree.domain.TreeRow
 import app.notekea.tree.presentation.model.BookmarkIntent
@@ -91,6 +94,7 @@ private fun menuSections(
 
     return listOf(
         createItems,
+        webSection(row = row),
         editSection(
             row = row,
             state = state,
@@ -109,6 +113,22 @@ private fun menuSections(
             )
         )
     ).filter { it.isNotEmpty() }
+}
+
+// Update from the web, for the Web sources folder and what it holds (the developer's request of 2026-11-13).
+@Composable
+private fun webSection(row: TreeRow): List<NotekeaMenuItem> {
+    val update = LocalWebSourceUpdater.current ?: return emptyList()
+    val isWebSource = WebSourcesFolder.holds(path = row.path) && row !is TreeRow.File
+    if (!isWebSource) return emptyList()
+
+    return listOf(
+        NotekeaMenuItem(
+            label = stringResource(resource = Res.string.tree_update_web),
+            onClick = { update(row.path) },
+            icon = NotekeaIcons.Refresh
+        )
+    )
 }
 
 @Composable

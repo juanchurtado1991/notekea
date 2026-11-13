@@ -4,6 +4,7 @@ import app.notekea.clips.domain.ClipError
 import app.notekea.clips.domain.ClipStep
 import app.notekea.clips.domain.SectionLinks
 import app.notekea.clips.domain.SectionStep
+import app.notekea.clips.domain.UpdateStep
 
 /**
  * The clip dialog: whether it [isOpen], the [url] typed, the [step] of the clip under way, why it failed, and the
@@ -18,7 +19,10 @@ data class ClipState(
     val section: SectionLinks? = null,
     // What the section offers, in a sentence the model wrote; none without a model.
     val sectionSummary: String? = null,
-    val progress: SectionStep.Clipping? = null
+    val progress: SectionStep.Clipping? = null,
+    // An update of the web sources: how far it is, then what it changed; shown in a dialog of its own when asked for.
+    val update: UpdateStep? = null,
+    val isUpdateShown: Boolean = false
 ) {
     val isAsking: Boolean get() =
         section != null &&

@@ -1,5 +1,7 @@
 package app.notekea.clips.presentation
 
+import app.notekea.core.notes.domain.RelativePath
+
 sealed interface ClipIntent {
     /** "Clip web page…" in the editor's More menu: the dialog opens, empty. */
     data object OnOpen : ClipIntent
@@ -16,6 +18,21 @@ sealed interface ClipIntent {
 
     /** Asked about a section of more pages than are clipped by default: every one of them. */
     data object OnClipAll : ClipIntent
+
+    /** Asked about the page's section: the pages its pages link too, [levels] levels of links in all. */
+    data class OnClipDeep(val levels: Int) : ClipIntent
+
+    /**
+     * Update from the web, in the menu of the Web sources folder or of something in it: the clipped pages under [path]
+     * are read again. Without [isShown] it is the automatic update, which works with no dialog.
+     */
+    data class OnUpdate(
+        val path: RelativePath,
+        val isShown: Boolean = true
+    ) : ClipIntent
+
+    /** The update's dialog is closed; an update under way stops. */
+    data object OnUpdateDismiss : ClipIntent
 
     /** Cancel or Esc: a clip under way stops, and nothing is written. */
     data object OnDismiss : ClipIntent

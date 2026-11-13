@@ -52,6 +52,7 @@ import app.notekea.shell.presentation.follow.FollowTemplatePicker
 import app.notekea.shell.presentation.follow.FollowWorkspace
 import app.notekea.shell.presentation.follow.SyncConflictsOf
 import app.notekea.shell.presentation.follow.VaultStatusOf
+import app.notekea.shell.presentation.follow.WithVaultLocals
 import app.notekea.shell.presentation.follow.connectionsSidePanel
 import app.notekea.shell.presentation.tabs.FollowTools
 import app.notekea.shell.presentation.tabs.TabKind
@@ -156,7 +157,7 @@ fun VaultWindow(
     FollowAssistants(chatViewModel, clipViewModel, state, viewModels, editors, searchIndexViewModel)
 
     Box(modifier = modifier) {
-        CompositionLocalProvider(LocalNoteLooks provides rememberNoteLooks(state = state)) {
+        WithVaultLocals(rememberNoteLooks(state = state), clipViewModel) {
             VaultWorkspace(
                 state = state,
                 workspaceState = workspaceState,

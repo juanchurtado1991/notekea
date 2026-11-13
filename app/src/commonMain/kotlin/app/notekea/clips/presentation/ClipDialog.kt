@@ -38,6 +38,7 @@ import app.notekea.resources.clip_error_refused
 import app.notekea.resources.clip_error_slow
 import app.notekea.resources.clip_explain
 import app.notekea.resources.clip_fetching
+import app.notekea.resources.clip_levels
 import app.notekea.resources.clip_only_page
 import app.notekea.resources.clip_section_more
 import app.notekea.resources.clip_section_progress
@@ -50,6 +51,7 @@ import app.notekea.resources.clip_writing
 import org.jetbrains.compose.resources.stringResource
 
 private const val DIALOG_WIDTH_DP = 520
+private val DEEPER = listOf(2, 3)
 
 /**
  * "Clip web page…": the address to clip, what clipping does, how far it is (downloading, writing notes, checking them
@@ -174,6 +176,17 @@ private fun SectionQuestion(
                 text = stringResource(resource = Res.string.clip_with_section, links.urls.size),
                 onClick = { onIntent(ClipIntent.OnClipSection) }
             )
+
+            // The pages those pages link, and the ones they link: how deep is the person's to say.
+            if (links.canGoDeeper) {
+                DEEPER.forEach { levels ->
+                    NotekeaButton(
+                        text = stringResource(Res.string.clip_levels, levels),
+                        onClick = { onIntent(ClipIntent.OnClipDeep(levels = levels)) },
+                        style = NotekeaButtonStyle.SECONDARY
+                    )
+                }
+            }
 
             if (links.more > 0) {
                 NotekeaButton(

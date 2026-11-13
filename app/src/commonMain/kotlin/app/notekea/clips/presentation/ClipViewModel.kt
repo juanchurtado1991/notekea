@@ -7,6 +7,8 @@ import app.notekea.clips.domain.DescribeSectionUseCase
 import app.notekea.clips.domain.FindSectionUseCase
 import app.notekea.clips.domain.SectionLinks
 import app.notekea.clips.domain.SectionStep
+import app.notekea.clips.domain.UpdateStep
+import app.notekea.clips.domain.UpdateWebSourcesUseCase
 import app.notekea.clips.domain.WebClip
 import app.notekea.clips.domain.WebClipNote
 import app.notekea.clips.domain.WebClipSection
@@ -31,6 +33,7 @@ class ClipViewModel(
     private val findSection: FindSectionUseCase,
     private val clipSection: ClipSectionUseCase,
     private val describeSection: DescribeSectionUseCase,
+    private val updateWebSources: UpdateWebSourcesUseCase,
     private val noteContentStore: NoteContentStore,
     private val noteFileOperations: NoteFileOperations,
     private val localCalendar: LocalCalendar,
@@ -38,6 +41,10 @@ class ClipViewModel(
 ) : BaseViewModel<ClipState, ClipIntent, ClipEffect>(initialState = ClipState()) {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private var clipping: Job? = null
+    private var updating: Job? = null
+
+    // How deep the section being clipped follows its links, kept in its index for the updates to come.
+    private var levels = 1
 
     override fun handleIntent(intent: ClipIntent) {
         when (intent) {
@@ -66,6 +73,24 @@ class ClipViewModel(
                     .value
                     .section
                     ?.let { clipWhole(links = it.everyPage()) }
+
+            is ClipIntent.OnClipDeep -> clipDeep(levels = intent.levels)
+
+            is ClipIntent.OnUpdate -> update(
+                path = intent.path,
+                isShown = intent.isShown
+            )
+
+            ClipIntent.OnUpdateDismiss -> {
+                updating?.cancel()
+
+                reduce {
+                    it.copy(
+                        update = null,
+                        isUpdateShown = false
+                    )
+                }
+            }
 
             ClipIntent.OnDismiss -> {
                 clipping?.cancel()
@@ -137,6 +162,63 @@ class ClipViewModel(
         }
     }
 
+    // The section again, the links of its pages followed too, then clipped whole.
+    private fun clipDeep(levels: Int) {
+        clipping = launchGuarded(onError = ::logError) {
+            reduce {
+                it.copy(
+                    step = ClipStep.Fetching,
+                    section = null
+                )
+            }
+
+            val found = findSection(
+                url = url,
+                depth = levels
+            )
+
+            reduce { it.copy(step = null) }
+            this.levels = levels
+
+            when (found) {
+                is Outcome.Success -> clipWhole(links = found.value)
+                is Outcome.Failure -> reduce { it.copy(error = found.error) }
+            }
+        }
+    }
+
+    // One update at a time; the automatic one never takes the place of one the person asked for.
+    private fun update(
+        path: RelativePath,
+        isShown: Boolean
+    ) {
+        if (updating?.isActive == true) return
+
+        reduce {
+            it.copy(
+                update = null,
+                isUpdateShown = isShown
+            )
+        }
+
+        updating = launchGuarded(onError = ::logError) {
+            updateWebSources(
+                vaultPath = vaultPath,
+                target = path,
+                today = today()
+            ).collect { step ->
+                reduce { it.copy(update = step) }
+
+                if (step is UpdateStep.Done && step.updated.isNotEmpty()) {
+                    emit(effect = ClipEffect.Rewritten(paths = step.updated))
+                }
+            }
+
+            // Nobody is shown the automatic update's end.
+            if (!state.value.isUpdateShown) reduce { it.copy(update = null) }
+        }
+    }
+
     private fun clipWhole(links: SectionLinks) {
         clipping = launchGuarded(onError = ::logError) {
             clipSection(
@@ -204,8 +286,11 @@ class ClipViewModel(
 
         val notes = WebClipSection.notesOf(
             done = done.copy(main = done.main.copy(title = title)),
-            today = today()
+            today = today(),
+            levels = levels
         )
+
+        levels = 1
 
         val folder = WebClipNote.FOLDER.child(name = WebClipNote.nameOf(title = title))
 

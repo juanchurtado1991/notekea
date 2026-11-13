@@ -1028,6 +1028,15 @@
     <string name="clip_url_hint">https://example.com/an-article</string>
     <string name="clip_clip">Clip</string>
     <string name="clip_cancel">Cancel</string>
+    <string name="clip_levels">%1$d levels deep</string>
+    <string name="clip_update_title">Update web sources</string>
+    <string name="clip_update_starting">Looking at the notes to update…</string>
+    <string name="clip_update_reading">Reading page %1$d of %2$d: %3$s</string>
+    <string name="clip_update_done">%1$d updated, %2$d new, %3$d unchanged.</string>
+    <string name="clip_update_none">There is nothing clipped from the web here.</string>
+    <string name="clip_update_failed">%1$d pages could not be read; their notes stay as they were.</string>
+    <string name="clip_update_close">Close</string>
+    <string name="tree_update_web">Update from the web</string>
     <string name="clip_fetching">Downloading the page…</string>
     <string name="clip_writing">Writing notes about it…</string>
     <string name="clip_checking">Checking the notes against the article…</string>

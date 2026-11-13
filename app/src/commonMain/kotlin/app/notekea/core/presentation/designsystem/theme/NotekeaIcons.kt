@@ -96,6 +96,7 @@ import com.composables.icons.lucide.Pencil
 import com.composables.icons.lucide.Play
 import com.composables.icons.lucide.Plus
 import com.composables.icons.lucide.Quote
+import com.composables.icons.lucide.RefreshCw
 import com.composables.icons.lucide.Search
 import com.composables.icons.lucide.SearchX
 import com.composables.icons.lucide.SendHorizontal
@@ -213,6 +214,7 @@ object NotekeaIcons {
     val MediaFile: ImageVector get() = Lucide.FilePlay
     val Pause: ImageVector get() = Lucide.Pause
     val Play: ImageVector get() = Lucide.Play
+    val Refresh: ImageVector get() = Lucide.RefreshCw
     val VideoFullscreen: ImageVector get() = Lucide.Maximize
     val VideoFullscreenExit: ImageVector get() = Lucide.Minimize
     val VideoMuted: ImageVector get() = Lucide.VolumeX
