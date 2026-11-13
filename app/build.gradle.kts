@@ -109,6 +109,7 @@ kotlin {
             implementation(libs.java.keyring)
             implementation(libs.composemediaplayer)
             implementation(libs.webview.kmp)
+            implementation(libs.jna)
             implementation(libs.jgit)
             implementation(libs.pdfbox)
             implementation(libs.readability4j)

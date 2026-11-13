@@ -209,8 +209,9 @@ on macOS or Windows yet. The developer continues on their Mac:
 (`ROADMAP.md` 2.12); the rail in groups (Search, Files, Side panel; Today, Tasks, Graph, Query, Study; Open another
 vault and Settings), with no About button, About being in Settings; Settings' icons drawn as the rail's. Notekea QA's
 automatic run starts with App Nap off (`-NSAppSleepDisabled YES`, Test Buddy's `AppProcess`): behind another window
-macOS slowed it tenfold and cases waiting for the index failed at random. Still open: the YouTube window crashes on
-macOS (its web view needs Cocoa's main thread).
+macOS slowed it tenfold and cases waiting for the index failed at random. The YouTube window is made on Cocoa's main
+thread (`CocoaMainThread`, through JNA); a local video's native library goes with the app (`VideoPlayerNatives`); a
+pasted documentation page asks its question in the chat again.
 
 **Decisions of this pull request** (also in `ROADMAP.md` 5.1–5.4, `docs/macos-redesign.md`, `PLATFORM_GUIDELINES.md`,
 `qa/AUTO_TEST.md` *Language*):
