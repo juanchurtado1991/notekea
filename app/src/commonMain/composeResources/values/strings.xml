@@ -252,6 +252,12 @@
     <string name="settings_language_english">English</string>
     <string name="settings_language_spanish">Español</string>
     <string name="settings_language_hint">System follows your computer’s language. The chat always answers in the language you write in.</string>
+    <string name="settings_web_update">Update web sources</string>
+    <string name="settings_web_update_never">Never</string>
+    <string name="settings_web_update_daily">Every day</string>
+    <string name="settings_web_update_weekly">Every week</string>
+    <string name="settings_web_update_monthly">Every month</string>
+    <string name="settings_web_update_hint">Notekea reads the pages of your Web sources again while a vault is open and updates the notes whose page changed. You can also do it from the folder’s menu.</string>
     <string name="settings_open_last_vault">Open the last vault at startup</string>
     <string name="settings_open_last_vault_hint">Off, Notekea starts on the welcome screen with your vaults listed.</string>
     <string name="settings_show_welcome">Welcome</string>

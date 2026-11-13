@@ -1,5 +1,6 @@
 package app.notekea.clips.di
 
+import app.notekea.clips.domain.AutomaticWebUpdate
 import app.notekea.clips.domain.ClipSectionUseCase
 import app.notekea.clips.domain.ClipWebPageUseCase
 import app.notekea.clips.domain.DescribeSectionUseCase
@@ -33,7 +34,12 @@ val clipsModule = module {
             noteContentStore = get(),
             noteFileOperations = get(),
             localCalendar = get(),
-            clock = get()
+            clock = get(),
+            automatic = AutomaticWebUpdate(
+                preferences = get(),
+                log = get(),
+                clock = get()
+            )
         )
     }
 }

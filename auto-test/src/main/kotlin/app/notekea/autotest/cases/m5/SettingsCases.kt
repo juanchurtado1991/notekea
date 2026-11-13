@@ -31,6 +31,7 @@ fun SuiteBuilder.settingsCases() {
     look()
     language()
     macLook()
+    webUpdateSettingCases()
 }
 
 private fun SuiteBuilder.language() {

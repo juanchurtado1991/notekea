@@ -32,6 +32,8 @@ class PreferencesViewModel(
 
             PreferencesIntent.OnShowWelcomeAgain -> save { it.copy(hasSeenWelcome = false) }
 
+            is PreferencesIntent.OnWebUpdateChoose -> save { it.copy(webUpdate = intent.every) }
+
             is PreferencesIntent.OnTextSizeChoose -> save { it.copy(textSize = intent.size) }
 
             is PreferencesIntent.OnLineWidthChoose -> save { it.copy(lineWidth = intent.width) }

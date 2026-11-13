@@ -252,6 +252,12 @@
     <string name="settings_language_english">English</string>
     <string name="settings_language_spanish">Español</string>
     <string name="settings_language_hint">Sistema sigue el idioma de tu computadora. El chat siempre responde en el idioma en que escribes.</string>
+    <string name="settings_web_update">Actualizar las fuentes web</string>
+    <string name="settings_web_update_never">Nunca</string>
+    <string name="settings_web_update_daily">Cada día</string>
+    <string name="settings_web_update_weekly">Cada semana</string>
+    <string name="settings_web_update_monthly">Cada mes</string>
+    <string name="settings_web_update_hint">Notekea vuelve a leer las páginas de tus Web sources mientras una bóveda está abierta y actualiza las notas cuya página cambió. También puedes hacerlo desde el menú de la carpeta.</string>
     <string name="settings_open_last_vault">Abrir la última bóveda al iniciar</string>
     <string name="settings_open_last_vault_hint">Si está desactivado, Notekea empieza en la pantalla de bienvenida con tus bóvedas.</string>
     <string name="settings_show_welcome">Bienvenida</string>

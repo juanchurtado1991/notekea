@@ -1,5 +1,6 @@
 package app.notekea.clips.presentation
 
+import app.notekea.clips.domain.AutomaticWebUpdate
 import app.notekea.clips.domain.ClipSectionUseCase
 import app.notekea.clips.domain.ClipStep
 import app.notekea.clips.domain.ClipWebPageUseCase
@@ -17,6 +18,7 @@ import app.notekea.core.domain.time.LocalCalendar
 import app.notekea.core.notes.domain.NoteContentStore
 import app.notekea.core.notes.domain.NoteFileOperations
 import app.notekea.core.notes.domain.RelativePath
+import app.notekea.core.notes.domain.WebSourcesFolder
 import app.notekea.core.presentation.BaseViewModel
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
@@ -37,10 +39,27 @@ class ClipViewModel(
     private val noteContentStore: NoteContentStore,
     private val noteFileOperations: NoteFileOperations,
     private val localCalendar: LocalCalendar,
-    private val clock: Clock
+    private val clock: Clock,
+    private val automatic: AutomaticWebUpdate? = null
 ) : BaseViewModel<ClipState, ClipIntent, ClipEffect>(initialState = ClipState()) {
     private val logger = Logger.withTag(tag = LOG_TAG)
     private var clipping: Job? = null
+
+    init {
+        // While the vault is open, the web sources are updated when their turn comes (Settings → General).
+        automatic?.let { due ->
+            launchGuarded(onError = ::logError) {
+                due.turns(vaultPath = vaultPath).collect {
+                    onIntent(
+                        intent = ClipIntent.OnUpdate(
+                            path = WebSourcesFolder.PATH,
+                            isShown = false
+                        )
+                    )
+                }
+            }
+        }
+    }
     private var updating: Job? = null
 
     // How deep the section being clipped follows its links, kept in its index for the updates to come.
