@@ -1,7 +1,7 @@
 package app.notekea.shell.presentation
 
-import app.notekea.chat.domain.ActionKind
-import app.notekea.chat.domain.ActionStep
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.core.notes.domain.SidePanelMode
 import app.notekea.editor.presentation.model.EditorIntent
 import app.notekea.search.presentation.switcher.QuickSwitcherIntent

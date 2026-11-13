@@ -1,12 +1,12 @@
 package app.notekea.chat.presentation
 
-import app.notekea.chat.domain.ActionProblem
-import app.notekea.chat.domain.AnswerPrompt
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.FakeChatHistoryStore
-import app.notekea.chat.domain.FoundNotes
-import app.notekea.chat.domain.FoundRow
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.plan.ActionProblem
+import app.notekea.chat.domain.plan.FoundNotes
+import app.notekea.chat.domain.plan.FoundRow
+import app.notekea.chat.domain.prompt.AnswerPrompt
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatIntent
 import app.notekea.chat.presentation.model.ChatMode

@@ -1,10 +1,10 @@
 package app.notekea.chat.presentation.viewmodel
 
-import app.notekea.chat.domain.AgentUse
-import app.notekea.chat.domain.AnswerStep
 import app.notekea.chat.domain.ChatExchange
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.agent.AgentUse
+import app.notekea.chat.domain.answer.AnswerStep
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatMode
 import app.notekea.chat.presentation.model.ChatStep

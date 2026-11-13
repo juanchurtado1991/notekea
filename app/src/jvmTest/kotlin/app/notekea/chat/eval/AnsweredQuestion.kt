@@ -1,6 +1,6 @@
 package app.notekea.chat.eval
 
-import app.notekea.chat.domain.AnswerSource
+import app.notekea.chat.domain.answer.AnswerSource
 
 /**
  * How one [question] went: the [answer] (null when the notes did not answer it), the passages [read] and [cited],

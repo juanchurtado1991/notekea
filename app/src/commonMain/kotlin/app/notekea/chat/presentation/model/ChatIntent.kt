@@ -1,8 +1,8 @@
 package app.notekea.chat.presentation.model
 
-import app.notekea.chat.domain.AnswerSource
 import app.notekea.chat.domain.ChatScope
-import app.notekea.chat.domain.FoundRow
+import app.notekea.chat.domain.answer.AnswerSource
+import app.notekea.chat.domain.plan.FoundRow
 import app.notekea.chat.presentation.viewmodel.after
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath

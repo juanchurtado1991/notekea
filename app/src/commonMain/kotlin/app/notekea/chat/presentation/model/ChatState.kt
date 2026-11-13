@@ -1,7 +1,7 @@
 package app.notekea.chat.presentation.model
 
 import app.notekea.chat.domain.ChatScope
-import app.notekea.chat.domain.DeepQuestion
+import app.notekea.chat.domain.answer.DeepQuestion
 import app.notekea.chat.presentation.viewmodel.ChatReply
 import app.notekea.core.llm.domain.ModelTier
 

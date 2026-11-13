@@ -1,6 +1,6 @@
 package app.notekea.chat.presentation
 
-import app.notekea.chat.domain.AgentUse
+import app.notekea.chat.domain.agent.AgentUse
 import app.notekea.chat.presentation.model.ChatMode
 import app.notekea.chat.presentation.model.ChatState
 import app.notekea.chat.presentation.viewmodel.ChatReply

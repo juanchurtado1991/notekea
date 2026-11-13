@@ -1,7 +1,7 @@
 package app.notekea.chat.data
 
-import app.notekea.chat.domain.HelpGuide
-import app.notekea.chat.domain.HelpGuideSource
+import app.notekea.chat.domain.help.HelpGuide
+import app.notekea.chat.domain.help.HelpGuideSource
 import app.notekea.core.domain.AppDispatchers
 import app.notekea.resources.Res
 import kotlinx.coroutines.withContext

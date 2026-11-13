@@ -35,9 +35,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.chat.domain.AnswerSource
 import app.notekea.chat.domain.ChatError
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.answer.AnswerSource
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatIntent
 import app.notekea.chat.presentation.model.ChatPreviewData

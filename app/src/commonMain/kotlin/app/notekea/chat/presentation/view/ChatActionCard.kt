@@ -22,9 +22,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.chat.domain.ActionKind
-import app.notekea.chat.domain.ActionStep
-import app.notekea.chat.domain.NoteDraft
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.chat.domain.plan.NoteDraft
 import app.notekea.chat.presentation.model.ActionStatus
 import app.notekea.chat.presentation.model.ChatAction
 import app.notekea.chat.presentation.model.ChatPreviewData

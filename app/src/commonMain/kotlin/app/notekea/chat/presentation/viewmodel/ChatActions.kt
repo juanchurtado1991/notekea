@@ -1,17 +1,17 @@
 package app.notekea.chat.presentation.viewmodel
 
-import app.notekea.chat.domain.ActOnRequestUseCase
-import app.notekea.chat.domain.ActionContext
-import app.notekea.chat.domain.ActionKind
-import app.notekea.chat.domain.ActionProblem
-import app.notekea.chat.domain.ActionRunner
-import app.notekea.chat.domain.ActionTurnStep
-import app.notekea.chat.domain.AgentUse
-import app.notekea.chat.domain.AskedWords
 import app.notekea.chat.domain.ChatExchange
-import app.notekea.chat.domain.FoundNotes
-import app.notekea.chat.domain.SpokenLanguage
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.agent.AgentUse
+import app.notekea.chat.domain.answer.AskedWords
+import app.notekea.chat.domain.language.SpokenLanguage
+import app.notekea.chat.domain.plan.ActOnRequestUseCase
+import app.notekea.chat.domain.plan.ActionContext
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionProblem
+import app.notekea.chat.domain.plan.ActionRunner
+import app.notekea.chat.domain.plan.ActionTurnStep
+import app.notekea.chat.domain.plan.FoundNotes
 import app.notekea.chat.presentation.model.ActionStatus
 import app.notekea.chat.presentation.model.ChatAction
 import app.notekea.chat.presentation.model.ChatEffect

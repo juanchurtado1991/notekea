@@ -1,6 +1,6 @@
 package app.notekea.shell.data
 
-import app.notekea.chat.domain.DonePlan
+import app.notekea.chat.domain.plan.DonePlan
 import app.notekea.core.notes.domain.RelativePath
 
 /** What one plan did, and how to take it back, newest last. */

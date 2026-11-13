@@ -6,7 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.chat.domain.AgentTaskPrompt
+import app.notekea.chat.domain.prompt.AgentTaskPrompt
 import app.notekea.chat.presentation.model.AgentMoveLine
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

@@ -1,5 +1,20 @@
 package app.notekea.chat.domain
 
+import app.notekea.chat.domain.answer.Answer
+import app.notekea.chat.domain.answer.PropertyPassages
+import app.notekea.chat.domain.answer.QuestionKept
+import app.notekea.chat.domain.answer.RefusalChecked
+import app.notekea.chat.domain.answer.SumsChecked
+import app.notekea.chat.domain.language.ReplyReworded
+import app.notekea.chat.domain.language.SpokenLanguage
+import app.notekea.chat.domain.language.inLanguage
+import app.notekea.chat.domain.plan.ActionField
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.CheckPlanUseCase
+import app.notekea.chat.domain.plan.PlannedStep
+import app.notekea.chat.domain.plan.ThemeWords
+import app.notekea.chat.domain.prompt.AnswerPrompt
+import app.notekea.chat.domain.prompt.ConversePrompt
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.ChatRole
 import app.notekea.core.notes.domain.NoteFixtures.entry

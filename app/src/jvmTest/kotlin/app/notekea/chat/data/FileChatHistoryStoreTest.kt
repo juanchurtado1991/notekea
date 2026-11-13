@@ -1,9 +1,9 @@
 package app.notekea.chat.data
 
-import app.notekea.chat.domain.AnswerSource
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.answer.AnswerSource
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.notes.domain.RelativePath
 import co.touchlab.kermit.LogWriter

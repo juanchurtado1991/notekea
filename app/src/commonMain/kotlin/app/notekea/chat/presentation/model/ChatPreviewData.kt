@@ -1,13 +1,13 @@
 package app.notekea.chat.presentation.model
 
-import app.notekea.chat.domain.ActionKind
-import app.notekea.chat.domain.ActionStep
-import app.notekea.chat.domain.AnswerSource
 import app.notekea.chat.domain.ChatScope
-import app.notekea.chat.domain.FoundNotes
-import app.notekea.chat.domain.FoundRow
-import app.notekea.chat.domain.NoteDraft
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.answer.AnswerSource
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.chat.domain.plan.FoundNotes
+import app.notekea.chat.domain.plan.FoundRow
+import app.notekea.chat.domain.plan.NoteDraft
 import app.notekea.core.notes.domain.RelativePath
 
 /** A chat as the previews show it: an answered question with its sources, and one being written. */

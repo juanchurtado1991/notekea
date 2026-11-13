@@ -1,10 +1,10 @@
 package app.notekea.shell.data
 
-import app.notekea.chat.domain.NoteDraft
-import app.notekea.chat.domain.PageProblem
-import app.notekea.chat.domain.PageReader
-import app.notekea.chat.domain.SectionAsked
-import app.notekea.chat.domain.WebPageClipper
+import app.notekea.chat.domain.plan.NoteDraft
+import app.notekea.chat.domain.plan.PageProblem
+import app.notekea.chat.domain.plan.PageReader
+import app.notekea.chat.domain.plan.SectionAsked
+import app.notekea.chat.domain.plan.WebPageClipper
 import app.notekea.clips.domain.ArticleExtractor
 import app.notekea.clips.domain.ClipError
 import app.notekea.clips.domain.ClipSectionUseCase

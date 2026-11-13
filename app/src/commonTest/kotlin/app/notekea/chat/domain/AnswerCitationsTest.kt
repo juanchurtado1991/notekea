@@ -1,5 +1,7 @@
 package app.notekea.chat.domain
 
+import app.notekea.chat.domain.answer.AnswerCitations
+import app.notekea.chat.domain.answer.AnswerSource
 import app.notekea.core.notes.domain.RelativePath
 import kotlin.test.Test
 import kotlin.test.assertEquals

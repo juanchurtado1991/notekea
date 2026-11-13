@@ -1,7 +1,7 @@
 package app.notekea.chat.presentation.viewmodel
 
-import app.notekea.chat.domain.AnswerStep
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.answer.AnswerStep
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatStep
 

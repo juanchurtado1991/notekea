@@ -1,14 +1,14 @@
 package app.notekea.chat.presentation.viewmodel
 
-import app.notekea.chat.domain.AgentAnswerUseCase
-import app.notekea.chat.domain.AnswerFromFoundUseCase
-import app.notekea.chat.domain.AnswerFromNotesUseCase
-import app.notekea.chat.domain.AnswerHelpUseCase
-import app.notekea.chat.domain.AnswerStep
 import app.notekea.chat.domain.ChatExchange
-import app.notekea.chat.domain.ConverseUseCase
-import app.notekea.chat.domain.DescribeVaultUseCase
-import app.notekea.chat.domain.SpokenLanguage
+import app.notekea.chat.domain.agent.AgentAnswerUseCase
+import app.notekea.chat.domain.answer.AnswerFromFoundUseCase
+import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.AnswerStep
+import app.notekea.chat.domain.answer.ConverseUseCase
+import app.notekea.chat.domain.answer.DescribeVaultUseCase
+import app.notekea.chat.domain.help.AnswerHelpUseCase
+import app.notekea.chat.domain.language.SpokenLanguage
 import app.notekea.chat.presentation.model.ChatStep
 import app.notekea.core.notes.domain.NoteEntry
 import app.notekea.core.notes.domain.RelativePath

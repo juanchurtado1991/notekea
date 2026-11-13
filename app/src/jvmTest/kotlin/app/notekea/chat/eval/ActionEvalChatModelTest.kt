@@ -4,10 +4,10 @@ import app.notekea.ai.data.LlamaLlmEngine
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSize
 import app.notekea.chat.data.GhostActionPlanReader
-import app.notekea.chat.domain.ActionContext
-import app.notekea.chat.domain.ActionField
-import app.notekea.chat.domain.PlanRequestUseCase
-import app.notekea.chat.domain.PlannedStep
+import app.notekea.chat.domain.plan.ActionContext
+import app.notekea.chat.domain.plan.ActionField
+import app.notekea.chat.domain.plan.PlanRequestUseCase
+import app.notekea.chat.domain.plan.PlannedStep
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import com.fasterxml.jackson.databind.ObjectMapper

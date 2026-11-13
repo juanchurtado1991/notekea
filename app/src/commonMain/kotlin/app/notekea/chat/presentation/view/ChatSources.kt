@@ -17,7 +17,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.chat.domain.AnswerSource
+import app.notekea.chat.domain.answer.AnswerSource
 import app.notekea.chat.presentation.model.ChatPreviewData
 import app.notekea.core.presentation.designsystem.components.NotekeaCitationChip
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes

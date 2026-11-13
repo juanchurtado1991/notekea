@@ -1,6 +1,6 @@
 package app.notekea.chat.presentation.viewmodel
 
-import app.notekea.chat.domain.FoundRow
+import app.notekea.chat.domain.plan.FoundRow
 import app.notekea.chat.presentation.model.ChatEffect
 
 /** A task opens at its line; a note opens. */

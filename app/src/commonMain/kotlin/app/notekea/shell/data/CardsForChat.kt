@@ -3,8 +3,8 @@ package app.notekea.shell.data
 import app.notekea.cards.domain.CardFormat
 import app.notekea.cards.domain.CardsProblem
 import app.notekea.cards.domain.MakeCardsUseCase
-import app.notekea.chat.domain.ActionProblem
-import app.notekea.chat.domain.CardMaker
+import app.notekea.chat.domain.plan.ActionProblem
+import app.notekea.chat.domain.plan.CardMaker
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.RelativePath
 

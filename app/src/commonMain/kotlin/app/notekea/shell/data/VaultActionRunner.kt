@@ -1,11 +1,11 @@
 package app.notekea.shell.data
 
-import app.notekea.chat.domain.ActionKind
-import app.notekea.chat.domain.ActionProblem
-import app.notekea.chat.domain.ActionRunner
-import app.notekea.chat.domain.ActionStep
-import app.notekea.chat.domain.DonePlan
-import app.notekea.chat.domain.FoundNotes
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionProblem
+import app.notekea.chat.domain.plan.ActionRunner
+import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.chat.domain.plan.DonePlan
+import app.notekea.chat.domain.plan.FoundNotes
 import app.notekea.core.appearance.domain.AppearanceStore
 import app.notekea.core.appearance.domain.ColorTheme
 import app.notekea.core.appearance.domain.ThemeMode

@@ -1,10 +1,10 @@
 package app.notekea.shell.data
 
-import app.notekea.chat.domain.ActionKind
-import app.notekea.chat.domain.ActionProblem
-import app.notekea.chat.domain.ActionStep
-import app.notekea.chat.domain.FoundNotes
-import app.notekea.chat.domain.FoundRow
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionProblem
+import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.chat.domain.plan.FoundNotes
+import app.notekea.chat.domain.plan.FoundRow
 import app.notekea.core.domain.Outcome
 import app.notekea.core.domain.time.CalendarDate
 import app.notekea.core.domain.time.LocalCalendar

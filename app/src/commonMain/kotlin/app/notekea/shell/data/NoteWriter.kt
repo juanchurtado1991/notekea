@@ -1,7 +1,7 @@
 package app.notekea.shell.data
 
-import app.notekea.chat.domain.ActionProblem
-import app.notekea.chat.domain.ActionStep
+import app.notekea.chat.domain.plan.ActionProblem
+import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.ApplyLinkUpdatesUseCase
 import app.notekea.core.notes.domain.NoteContentStore

@@ -1,11 +1,11 @@
 package app.notekea.chat.presentation.viewmodel
 
-import app.notekea.chat.domain.ActionProblem
-import app.notekea.chat.domain.AgentStep
-import app.notekea.chat.domain.AgentTaskUseCase
 import app.notekea.chat.domain.ChatExchange
-import app.notekea.chat.domain.SpokenLanguage
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.agent.AgentStep
+import app.notekea.chat.domain.agent.AgentTaskUseCase
+import app.notekea.chat.domain.language.SpokenLanguage
+import app.notekea.chat.domain.plan.ActionProblem
 import app.notekea.chat.presentation.model.ActionStatus
 import app.notekea.chat.presentation.model.AgentMoveLine
 import app.notekea.chat.presentation.model.ChatAction

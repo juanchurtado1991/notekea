@@ -1,8 +1,8 @@
 package app.notekea.chat.eval
 
-import app.notekea.chat.domain.ActionKind
-import app.notekea.chat.domain.ActionStep
-import app.notekea.chat.domain.AgentStep
+import app.notekea.chat.domain.agent.AgentStep
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionStep
 
 /** A task for [AgentEvalChatModelTest]: what is asked and what its end must hold; the problem found, or null. */
 class AgentEvalCase(

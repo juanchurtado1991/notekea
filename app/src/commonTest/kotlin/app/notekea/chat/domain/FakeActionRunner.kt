@@ -1,5 +1,10 @@
 package app.notekea.chat.domain
 
+import app.notekea.chat.domain.plan.ActionProblem
+import app.notekea.chat.domain.plan.ActionRunner
+import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.chat.domain.plan.DonePlan
+import app.notekea.chat.domain.plan.FoundNotes
 import app.notekea.core.domain.Outcome
 import app.notekea.core.notes.domain.NoteEntry
 

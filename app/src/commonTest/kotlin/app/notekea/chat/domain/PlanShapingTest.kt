@@ -1,6 +1,11 @@
 package app.notekea.chat.domain
 
 import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.domain.plan.ActionContext
+import app.notekea.chat.domain.plan.ActionField
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.PlanRequestUseCase
+import app.notekea.chat.domain.plan.PlannedStep
 import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.notes.domain.RelativePath

@@ -3,8 +3,8 @@ package app.notekea.chat.presentation
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.FakeChatHistoryStore
-import app.notekea.chat.domain.HelpGuide
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.help.HelpGuide
 import app.notekea.chat.presentation.model.ChatEntry
 import app.notekea.chat.presentation.model.ChatIntent
 import app.notekea.chat.presentation.viewmodel.ChatViewModel

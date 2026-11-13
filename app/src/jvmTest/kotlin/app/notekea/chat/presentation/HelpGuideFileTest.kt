@@ -1,6 +1,6 @@
 package app.notekea.chat.presentation
 
-import app.notekea.chat.domain.HelpGuide
+import app.notekea.chat.domain.help.HelpGuide
 import app.notekea.chat.presentation.viewmodel.HelpShortcuts
 import app.notekea.core.platform.domain.FakeSystemEnvironment
 import app.notekea.core.platform.domain.ResolvePlatformConventionsUseCase

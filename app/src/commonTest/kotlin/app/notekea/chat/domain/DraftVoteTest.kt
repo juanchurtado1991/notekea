@@ -1,5 +1,7 @@
 package app.notekea.chat.domain
 
+import app.notekea.chat.domain.agent.DraftVote
+import app.notekea.chat.domain.prompt.AnswerPrompt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

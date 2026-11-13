@@ -1,6 +1,6 @@
 package app.notekea.chat.presentation.model
 
-import app.notekea.chat.domain.ActionStep
+import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.core.notes.domain.RelativePath
 
 sealed interface ChatEffect {

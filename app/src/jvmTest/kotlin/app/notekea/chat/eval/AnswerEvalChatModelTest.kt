@@ -4,9 +4,9 @@ import app.notekea.ai.data.LlamaLlmEngine
 import app.notekea.ai.domain.ModelSetup
 import app.notekea.ai.domain.ModelSize
 import app.notekea.chat.data.GhostActionPlanReader
-import app.notekea.chat.domain.AgentAnswerUseCase
-import app.notekea.chat.domain.AnswerFromNotesUseCase
-import app.notekea.chat.domain.AnswerStep
+import app.notekea.chat.domain.agent.AgentAnswerUseCase
+import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.AnswerStep
 import app.notekea.core.data.JvmAppDispatchers
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.data.LlamaTextEmbedder

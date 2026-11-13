@@ -1,7 +1,7 @@
 package app.notekea.shell.data
 
-import app.notekea.chat.domain.AnswerHelpUseCase
-import app.notekea.chat.domain.HelpGuide
+import app.notekea.chat.domain.help.AnswerHelpUseCase
+import app.notekea.chat.domain.help.HelpGuide
 import app.notekea.core.llm.domain.FakeLlmEngine
 import app.notekea.core.llm.domain.LlmError
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions

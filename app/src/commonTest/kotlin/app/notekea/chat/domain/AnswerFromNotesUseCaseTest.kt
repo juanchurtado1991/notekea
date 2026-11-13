@@ -1,5 +1,7 @@
 package app.notekea.chat.domain
 
+import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.AnswerStep
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.EmbeddingError
 import app.notekea.core.embedding.domain.FakeTextEmbedder

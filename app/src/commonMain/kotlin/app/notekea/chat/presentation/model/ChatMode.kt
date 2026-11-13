@@ -1,6 +1,6 @@
 package app.notekea.chat.presentation.model
 
-import app.notekea.chat.domain.AgentUse
+import app.notekea.chat.domain.agent.AgentUse
 
 /**
  * How the chat answers, chosen under its question field: [AUTO] picks for each request, the rest are what the person

@@ -1,11 +1,11 @@
 package app.notekea.chat.data
 
-import app.notekea.chat.domain.ActionField
-import app.notekea.chat.domain.ActionKind
-import app.notekea.chat.domain.ActionPlanReader
-import app.notekea.chat.domain.AgentMove
-import app.notekea.chat.domain.AgentTaskMove
-import app.notekea.chat.domain.PlannedStep
+import app.notekea.chat.domain.agent.AgentMove
+import app.notekea.chat.domain.agent.AgentTaskMove
+import app.notekea.chat.domain.plan.ActionField
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionPlanReader
+import app.notekea.chat.domain.plan.PlannedStep
 import com.ghost.serialization.Ghost
 import com.ghost.serialization.exception.GhostJsonException
 

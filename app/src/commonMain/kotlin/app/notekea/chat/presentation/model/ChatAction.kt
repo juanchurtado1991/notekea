@@ -1,9 +1,9 @@
 package app.notekea.chat.presentation.model
 
-import app.notekea.chat.domain.ActionProblem
-import app.notekea.chat.domain.ActionStep
-import app.notekea.chat.domain.DonePlan
-import app.notekea.chat.domain.FoundNotes
+import app.notekea.chat.domain.plan.ActionProblem
+import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.chat.domain.plan.DonePlan
+import app.notekea.chat.domain.plan.FoundNotes
 
 /**
  * What the chat did, or proposes, for a request that is not a question (3.8, 3.9): the tables it [found], the steps it

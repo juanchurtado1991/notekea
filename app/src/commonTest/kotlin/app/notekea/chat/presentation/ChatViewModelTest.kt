@@ -1,18 +1,18 @@
 package app.notekea.chat.presentation
 
 import app.notekea.chat.data.GhostActionPlanReader
-import app.notekea.chat.domain.ActOnRequestUseCase
-import app.notekea.chat.domain.AgentAnswerUseCase
-import app.notekea.chat.domain.AnswerFromNotesUseCase
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
-import app.notekea.chat.domain.CheckPlanUseCase
-import app.notekea.chat.domain.ComposeNotesUseCase
-import app.notekea.chat.domain.ConverseUseCase
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.FakeChatHistoryStore
-import app.notekea.chat.domain.PlanRequestUseCase
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.agent.AgentAnswerUseCase
+import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.answer.ConverseUseCase
+import app.notekea.chat.domain.plan.ActOnRequestUseCase
+import app.notekea.chat.domain.plan.CheckPlanUseCase
+import app.notekea.chat.domain.plan.ComposeNotesUseCase
+import app.notekea.chat.domain.plan.PlanRequestUseCase
 import app.notekea.chat.presentation.model.ActionStatus
 import app.notekea.chat.presentation.model.ChatEffect
 import app.notekea.chat.presentation.model.ChatIntent

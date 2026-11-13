@@ -1,6 +1,15 @@
 package app.notekea.chat.domain
 
 import app.notekea.chat.data.GhostActionPlanReader
+import app.notekea.chat.domain.agent.AgentStep
+import app.notekea.chat.domain.agent.AgentTaskUseCase
+import app.notekea.chat.domain.answer.AnswerFromNotesUseCase
+import app.notekea.chat.domain.plan.ActionContext
+import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.plan.ActionStep
+import app.notekea.chat.domain.plan.CheckPlanUseCase
+import app.notekea.chat.domain.plan.ComposeNotesUseCase
+import app.notekea.chat.domain.prompt.AgentTaskPrompt
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.FakeTextEmbedder
 import app.notekea.core.llm.domain.FakeLlmEngine

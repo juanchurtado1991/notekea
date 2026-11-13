@@ -1,9 +1,9 @@
 package app.notekea.shell.di
 
-import app.notekea.chat.domain.ActionRunner
-import app.notekea.chat.domain.CardMaker
-import app.notekea.chat.domain.PageReader
-import app.notekea.chat.domain.WebPageClipper
+import app.notekea.chat.domain.plan.ActionRunner
+import app.notekea.chat.domain.plan.CardMaker
+import app.notekea.chat.domain.plan.PageReader
+import app.notekea.chat.domain.plan.WebPageClipper
 import app.notekea.settings.domain.SettingsHelpSource
 import app.notekea.shell.data.CardsForChat
 import app.notekea.shell.data.ClipsForChat

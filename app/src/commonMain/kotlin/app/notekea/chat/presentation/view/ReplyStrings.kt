@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.chat.domain.ReplyLanguage
+import app.notekea.chat.domain.language.ReplyLanguage
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.resources.Res
 import app.notekea.resources.chat_acted

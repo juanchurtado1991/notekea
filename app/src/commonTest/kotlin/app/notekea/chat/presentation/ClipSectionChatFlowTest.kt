@@ -2,9 +2,9 @@ package app.notekea.chat.presentation
 
 import app.notekea.chat.domain.FakeActionRunner
 import app.notekea.chat.domain.FakeChatHistoryStore
-import app.notekea.chat.domain.NoteDraft
-import app.notekea.chat.domain.SectionAsked
-import app.notekea.chat.domain.WebPageClipper
+import app.notekea.chat.domain.plan.NoteDraft
+import app.notekea.chat.domain.plan.SectionAsked
+import app.notekea.chat.domain.plan.WebPageClipper
 import app.notekea.chat.presentation.model.ChatIntent
 import app.notekea.core.domain.Outcome
 import app.notekea.core.embedding.domain.FakeTextEmbedder

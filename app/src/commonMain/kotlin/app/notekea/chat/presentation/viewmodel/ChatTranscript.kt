@@ -1,7 +1,7 @@
 package app.notekea.chat.presentation.viewmodel
 
-import app.notekea.chat.domain.ActionStep
-import app.notekea.chat.domain.AnswerSource
+import app.notekea.chat.domain.answer.AnswerSource
+import app.notekea.chat.domain.plan.ActionStep
 import app.notekea.chat.presentation.model.ChatAction
 import app.notekea.chat.presentation.model.ChatState
 

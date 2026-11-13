@@ -1,5 +1,6 @@
 package app.notekea.chat.domain
 
+import app.notekea.chat.domain.plan.UrlsNamed
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

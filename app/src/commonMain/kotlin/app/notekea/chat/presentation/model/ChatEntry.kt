@@ -1,12 +1,12 @@
 package app.notekea.chat.presentation.model
 
-import app.notekea.chat.domain.AnswerSource
 import app.notekea.chat.domain.ChatError
 import app.notekea.chat.domain.ChatScope
 import app.notekea.chat.domain.ChatTurn
-import app.notekea.chat.domain.ReplyLanguage
-import app.notekea.chat.domain.SectionAsked
 import app.notekea.chat.domain.TurnOutcome
+import app.notekea.chat.domain.answer.AnswerSource
+import app.notekea.chat.domain.language.ReplyLanguage
+import app.notekea.chat.domain.plan.SectionAsked
 
 /**
  * A question of the chat and its answer, keyed by [id]: [step] says where it stands, [sources] are the passages its

@@ -1,6 +1,6 @@
 package app.notekea.chat.presentation.viewmodel
 
-import app.notekea.chat.domain.FoundNotes
+import app.notekea.chat.domain.plan.FoundNotes
 import app.notekea.core.notes.domain.RelativePath
 
 /** What is left to do once a request is planned: nothing more, answer it, talk, explain the app or the vault. */

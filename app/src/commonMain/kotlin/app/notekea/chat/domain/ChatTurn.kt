@@ -1,5 +1,7 @@
 package app.notekea.chat.domain
 
+import app.notekea.chat.domain.answer.AnswerSource
+
 /**
  * A question of the chat and how it ended: asked of [scope] (the note or folder [scopeName] names, when not the
  * vault), its [answer] text and the [sources] it cites as `[n]`, kept in the vault's chat history.

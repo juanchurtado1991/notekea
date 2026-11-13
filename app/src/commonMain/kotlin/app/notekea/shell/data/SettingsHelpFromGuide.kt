@@ -1,10 +1,10 @@
 package app.notekea.shell.data
 
-import app.notekea.chat.domain.AnswerHelpUseCase
-import app.notekea.chat.domain.AnswerStep
 import app.notekea.chat.domain.ChatError
 import app.notekea.chat.domain.ChatExchange
-import app.notekea.chat.domain.SpokenLanguage
+import app.notekea.chat.domain.answer.AnswerStep
+import app.notekea.chat.domain.help.AnswerHelpUseCase
+import app.notekea.chat.domain.language.SpokenLanguage
 import app.notekea.chat.presentation.viewmodel.HelpShortcuts
 import app.notekea.core.llm.domain.LlmError
 import app.notekea.core.platform.domain.PlatformConventions
