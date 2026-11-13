@@ -8,7 +8,7 @@ import java.nio.file.Path
 
 /**
  * Runs a suite's automated cases as JUnit 5 tests, one per case named after its ID, so CI runs the cases the Auto-Test
- * app runs: `class NotekeaSuiteTest : TestBuddyJUnit(notekeaSuite)`. A case
+ * app runs: `class MyAppSuiteTest : TestBuddyJUnit(myAppSuite)`. A case
  * without its [Precondition] is reported as skipped.
  */
 public abstract class TestBuddyJUnit(private val suite: Suite) {

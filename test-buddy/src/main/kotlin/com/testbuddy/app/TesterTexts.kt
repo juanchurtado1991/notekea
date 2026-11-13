@@ -107,9 +107,8 @@ internal class TesterTexts(
             testData = "TEST DATA",
             freshCopyOf = { "This case uses a fresh copy of $it:" },
             openDataHint = {
-                "To open it in $it: click Open another vault at the bottom left (when a vault is open), then " +
-                    "Open folder…, go to that folder and choose it. Each case starts from a new copy, so what you " +
-                    "changed in an earlier case is gone."
+                "Open that folder in $it. Each case starts from a new copy, so what you changed in an earlier " +
+                    "case is gone."
             },
             skippedNeed = { count, missing -> "$count skipped: they need $missing." },
             copied = "Copied",
@@ -174,9 +173,8 @@ internal class TesterTexts(
             testData = "DATOS DE PRUEBA",
             freshCopyOf = { "Este caso usa una copia nueva de $it:" },
             openDataHint = {
-                "Para abrirla en $it: haz clic en Abrir otra bóveda abajo a la izquierda (si hay una bóveda " +
-                    "abierta), luego en Abrir carpeta…, ve a esa carpeta y elígela. Cada caso empieza con una copia " +
-                    "nueva, así que lo que cambiaste en un caso anterior ya no está."
+                "Abre esa carpeta en $it. Cada caso empieza con una copia nueva, así que lo que cambiaste en un " +
+                    "caso anterior ya no está."
             },
             skippedNeed = { count, missing -> "$count omitidos: necesitan $missing." },
             copied = "Copiado",

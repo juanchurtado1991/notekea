@@ -20,6 +20,7 @@ public class SuiteBuilder internal constructor(
         height = DEFAULT_HEIGHT
     )
     private var diagnostics: () -> String? = { null }
+    private var openDataHint: String? = null
     private var content: (@Composable (CaseFolders) -> Unit)? = null
 
     /** Shows the app on a case's [CaseFolders]: its data folder must be [CaseFolders.appData], never the real one. */
@@ -46,6 +47,11 @@ public class SuiteBuilder internal constructor(
     /** What the report ends with, read when it is made: the installed app's recent log, for one. */
     public fun diagnostics(read: () -> String?) {
         diagnostics = read
+    }
+
+    /** How a tester opens a case's folder of test data in the app, in the suite's language. */
+    public fun openDataHint(text: String) {
+        openDataHint = text
     }
 
     public fun automated(
@@ -91,6 +97,7 @@ public class SuiteBuilder internal constructor(
         window = window,
         dataSources = dataSources.toList(),
         diagnostics = diagnostics,
+        openDataHint = openDataHint,
         content = requireNotNull(content) { "The suite of $appName does not say how to launch it" }
     )
 

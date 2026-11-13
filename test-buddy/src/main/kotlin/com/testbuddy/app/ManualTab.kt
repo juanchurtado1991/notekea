@@ -30,7 +30,8 @@ internal fun ManualTab(
     cases: List<ManualCase>,
     dataFolder: Path,
     state: ManagerState,
-    actions: ManagerActions
+    actions: ManagerActions,
+    openDataHint: String?
 ) {
     val case = cases.getOrNull(state.manualIndex)
     val texts = LocalTesterTexts.current
@@ -84,6 +85,7 @@ internal fun ManualTab(
 
                 state.manualStep == 0 -> TestDataCard(
                     appName = appName,
+                    openDataHint = openDataHint,
                     folders = case.data,
                     dataFolder = dataFolder
                 )

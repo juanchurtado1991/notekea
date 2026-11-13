@@ -70,6 +70,12 @@ object NotekeaSuite {
 
             data(from = SmokeData.folder)
 
+            openDataHint(
+                text = "Para abrirla en Notekea: haz clic en Abrir otra bóveda abajo a la izquierda (si hay una " +
+                    "bóveda abierta), luego en Abrir carpeta…, ve a esa carpeta y elígela. Cada caso empieza con " +
+                    "una copia nueva, así que lo que cambiaste en un caso anterior ya no está."
+            )
+
             window(
                 width = WINDOW_WIDTH,
                 height = WINDOW_HEIGHT

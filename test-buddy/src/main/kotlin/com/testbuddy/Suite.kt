@@ -13,7 +13,8 @@ public class Suite internal constructor(
     internal val window: WindowSize,
     internal val dataSources: List<Path>,
     internal val diagnostics: () -> String?,
-    internal val content: @Composable (CaseFolders) -> Unit
+    internal val content: @Composable (CaseFolders) -> Unit,
+    internal val openDataHint: String?
 ) {
     /** The same suite with other cases: a part of it, or the cases of one feature. */
     internal fun withCases(
@@ -28,6 +29,7 @@ public class Suite internal constructor(
         window = window,
         dataSources = dataSources,
         diagnostics = diagnostics,
+        openDataHint = openDataHint,
         content = content
     )
 }

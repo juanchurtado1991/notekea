@@ -10,13 +10,15 @@ import java.nio.file.Path
 
 /**
  * What a manual case works on, as an instruction: each folder of test data it needs ([folders]), freshly copied into
- * [dataFolder] for this case, where it is on the disk (selectable), and how to open it in the app.
+ * [dataFolder] for this case, where it is on the disk (selectable), and how to open it in the app: the suite's own
+ * words ([openDataHint]) or the manager's.
  */
 @Composable
 internal fun TestDataCard(
     appName: String,
     folders: List<String>,
-    dataFolder: Path
+    dataFolder: Path,
+    openDataHint: String?
 ) {
     val texts = LocalTesterTexts.current
 
@@ -40,7 +42,7 @@ internal fun TestDataCard(
         }
 
         Text(
-            text = texts.openDataHint(appName),
+            text = openDataHint ?: texts.openDataHint(appName),
             fontSize = 11.sp,
             color = AutoTestColors.Muted
         )

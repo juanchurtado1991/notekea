@@ -60,6 +60,7 @@ internal fun ManagerContent(
 
                 ManagerTab.MANUAL -> ManualTab(
                     appName = suite.appName,
+                    openDataHint = suite.openDataHint,
                     cases = suite.manual,
                     dataFolder = dataFolder,
                     state = state,
