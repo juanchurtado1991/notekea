@@ -23,9 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.chat.presentation.model.ChatMode
 import app.notekea.chat.presentation.viewmodel.nameOf
 import app.notekea.core.llm.domain.ModelTier
-import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
-import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuState
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuArea
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuState
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons

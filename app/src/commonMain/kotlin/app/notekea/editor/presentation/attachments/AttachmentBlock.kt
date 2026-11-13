@@ -19,11 +19,11 @@ import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.LinkKind
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.YouTubeLinks
-import app.notekea.core.presentation.designsystem.components.NotekeaAttachmentImage
-import app.notekea.core.presentation.designsystem.components.NotekeaEmbeddedNote
-import app.notekea.core.presentation.designsystem.components.NotekeaFileChip
-import app.notekea.core.presentation.designsystem.components.NotekeaMissingFile
-import app.notekea.core.presentation.designsystem.components.NotekeaVideoCard
+import app.notekea.core.presentation.designsystem.components.attachments.NotekeaAttachmentImage
+import app.notekea.core.presentation.designsystem.components.attachments.NotekeaEmbeddedNote
+import app.notekea.core.presentation.designsystem.components.attachments.NotekeaFileChip
+import app.notekea.core.presentation.designsystem.components.attachments.NotekeaMissingFile
+import app.notekea.core.presentation.designsystem.components.attachments.NotekeaVideoCard
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.platform.LocalVideoPlayer
 import app.notekea.core.presentation.platform.LocalYouTubePlayer

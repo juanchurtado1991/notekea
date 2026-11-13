@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.components.NotekeaCitationChip
-import app.notekea.core.presentation.designsystem.components.NotekeaPromptField
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaPromptField
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 
 private const val CHAT_TITLE = "Chat"

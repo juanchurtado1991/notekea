@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.IntOffset
 import app.notekea.core.notes.domain.TaskFinder
-import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.editor.presentation.markdown.MarkdownHighlighter
 import app.notekea.editor.presentation.markdown.ShownText

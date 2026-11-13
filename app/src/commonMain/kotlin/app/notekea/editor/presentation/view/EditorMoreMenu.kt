@@ -8,9 +8,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.domain.markdown.CalloutKind
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaGridSizePicker
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuButton
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
-import app.notekea.core.presentation.designsystem.components.calloutIcon
+import app.notekea.core.presentation.designsystem.components.markdown.calloutIcon
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuButton
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.editor.domain.FormatAction

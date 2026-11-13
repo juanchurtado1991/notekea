@@ -26,10 +26,10 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaLogo
-import app.notekea.core.presentation.designsystem.components.NotekeaProgressIndicator
-import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
-import app.notekea.core.presentation.designsystem.components.NotekeaTitleBarBand
 import app.notekea.core.presentation.designsystem.components.NotekeaWordmark
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaProgressIndicator
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaScrollArea
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaTitleBarBand
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.platform.label

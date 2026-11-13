@@ -8,9 +8,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.Shortcut
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuButton
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
-import app.notekea.core.presentation.designsystem.components.NotekeaToolbarGroups
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaToolbarGroups
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuButton
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.platform.label

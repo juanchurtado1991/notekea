@@ -16,8 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.notekea.core.presentation.designsystem.components.ErrorBanner
-import app.notekea.core.presentation.designsystem.components.NotekeaTextField
+import app.notekea.core.presentation.designsystem.components.feedback.ErrorBanner
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaTextField
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.editor.presentation.model.EditorIntent

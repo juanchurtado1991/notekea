@@ -1,6 +1,7 @@
 package app.notekea.core.presentation.designsystem.components
 
 import androidx.compose.ui.input.key.Key
+import app.notekea.core.presentation.designsystem.components.menus.PaletteKeyAction
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

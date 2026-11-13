@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.presentation.designsystem.components.LocalMarkdownTableCells
+import app.notekea.core.presentation.designsystem.components.markdown.LocalMarkdownTableCells
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.editor.presentation.attachments.AttachmentView

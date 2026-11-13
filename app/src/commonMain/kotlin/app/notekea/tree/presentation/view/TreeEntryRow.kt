@@ -17,10 +17,10 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.NotesError
 import app.notekea.core.notes.presentation.notesErrorMessage
 import app.notekea.core.platform.domain.OperatingSystem
-import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuState
-import app.notekea.core.presentation.designsystem.components.NotekeaInlineTextField
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.NotekeaTreeItem
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaInlineTextField
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuState
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalNoteLooks
 import app.notekea.core.presentation.designsystem.theme.NotekeaColors

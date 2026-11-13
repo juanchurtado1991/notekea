@@ -29,9 +29,9 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
-import app.notekea.core.presentation.designsystem.components.NotekeaLazyScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaPassageRow
 import app.notekea.core.presentation.designsystem.components.focusBorder
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaLazyScrollArea
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalNoteLooks
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

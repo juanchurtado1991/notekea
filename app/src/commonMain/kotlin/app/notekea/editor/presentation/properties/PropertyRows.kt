@@ -35,12 +35,12 @@ import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.core.notes.domain.PropertyKeys
 import app.notekea.core.notes.domain.PropertyValue
 import app.notekea.core.notes.presentation.PropertyValueEditor
-import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
-import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuState
-import app.notekea.core.presentation.designsystem.components.NotekeaFieldFrame
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
-import app.notekea.core.presentation.designsystem.components.NotekeaPropertyField
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaFieldFrame
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaPropertyField
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuArea
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuState
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons

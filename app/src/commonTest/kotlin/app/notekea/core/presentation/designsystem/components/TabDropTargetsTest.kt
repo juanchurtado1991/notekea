@@ -2,6 +2,8 @@ package app.notekea.core.presentation.designsystem.components
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import app.notekea.core.presentation.designsystem.components.tabs.TabDrag
+import app.notekea.core.presentation.designsystem.components.tabs.TabDropTargets
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

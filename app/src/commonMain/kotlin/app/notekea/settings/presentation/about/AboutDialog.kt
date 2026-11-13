@@ -32,8 +32,8 @@ import app.notekea.core.presentation.designsystem.components.NotekeaDialog
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.NotekeaKeycaps
 import app.notekea.core.presentation.designsystem.components.NotekeaLogo
-import app.notekea.core.presentation.designsystem.components.NotekeaScrollArea
 import app.notekea.core.presentation.designsystem.components.NotekeaWordmark
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaScrollArea
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

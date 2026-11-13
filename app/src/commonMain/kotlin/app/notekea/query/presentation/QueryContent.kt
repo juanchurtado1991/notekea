@@ -17,9 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.presentation.designsystem.components.EmptyState
-import app.notekea.core.presentation.designsystem.components.NotekeaLazyScrollArea
-import app.notekea.core.presentation.designsystem.components.NotekeaNotice
+import app.notekea.core.presentation.designsystem.components.feedback.EmptyState
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaNotice
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaLazyScrollArea
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons

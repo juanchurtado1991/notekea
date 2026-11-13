@@ -7,8 +7,8 @@ import app.notekea.ai.domain.InstallProgress
 import app.notekea.ai.domain.InstallSession
 import app.notekea.ai.domain.ModelError
 import app.notekea.ai.domain.ModelSize
-import app.notekea.core.presentation.designsystem.components.NotekeaStatusLabel
-import app.notekea.core.presentation.designsystem.components.NotekeaStatusRing
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaStatusRing
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaStatusLabel
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res

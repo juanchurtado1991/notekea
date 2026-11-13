@@ -10,6 +10,10 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaSegment
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaSegmentedControl
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaToolRail
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaToolRailItem
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.keyDown

@@ -17,7 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.presentation.designsystem.components.NotekeaChip
-import app.notekea.core.presentation.designsystem.components.NotekeaMarkdown
+import app.notekea.core.presentation.designsystem.components.markdown.NotekeaMarkdown
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.query.domain.QueryParse

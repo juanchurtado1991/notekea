@@ -28,11 +28,11 @@ import app.notekea.core.notes.domain.SidePanelMode
 import app.notekea.core.notes.domain.SidePanelPreferences
 import app.notekea.core.notes.domain.SidePanelSection
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.designsystem.components.NotekeaFold
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
-import app.notekea.core.presentation.designsystem.components.NotekeaSegment
-import app.notekea.core.presentation.designsystem.components.NotekeaSegmentedControl
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaSegment
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaSegmentedControl
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaFold
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons

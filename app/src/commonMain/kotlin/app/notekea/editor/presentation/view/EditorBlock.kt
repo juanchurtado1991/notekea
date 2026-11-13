@@ -21,7 +21,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
-import app.notekea.core.presentation.designsystem.components.TextMarks
+import app.notekea.core.presentation.designsystem.components.markdown.TextMarks
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.editor.domain.TableText
 import app.notekea.editor.presentation.attachments.AttachmentView

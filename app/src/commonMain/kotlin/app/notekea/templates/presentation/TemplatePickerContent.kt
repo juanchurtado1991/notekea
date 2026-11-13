@@ -16,10 +16,10 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.presentation.notesErrorMessage
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.designsystem.components.EmptyState
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
-import app.notekea.core.presentation.designsystem.components.NotekeaPalette
-import app.notekea.core.presentation.designsystem.components.NotekeaPaletteItem
+import app.notekea.core.presentation.designsystem.components.feedback.EmptyState
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaPalette
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaPaletteItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

@@ -16,9 +16,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuButton
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
-import app.notekea.core.presentation.designsystem.components.NotekeaTooltip
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaTooltip
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuButton
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

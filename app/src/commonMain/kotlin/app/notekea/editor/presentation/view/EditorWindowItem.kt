@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import app.notekea.core.domain.StringPatterns.NEW_LINE_CHAR
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.designsystem.components.TextMarks
+import app.notekea.core.presentation.designsystem.components.markdown.TextMarks
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.editor.domain.TableCell

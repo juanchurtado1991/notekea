@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.presentation.designsystem.components.NotekeaVideoFrame
-import app.notekea.core.presentation.designsystem.components.VideoFrameLabels
+import app.notekea.core.presentation.designsystem.components.attachments.NotekeaVideoFrame
+import app.notekea.core.presentation.designsystem.components.attachments.VideoFrameLabels
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.resources.Res
 import app.notekea.resources.video_close

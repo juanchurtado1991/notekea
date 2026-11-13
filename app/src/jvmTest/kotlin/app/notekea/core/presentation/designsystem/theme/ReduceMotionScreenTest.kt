@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.use
 import app.notekea.core.appearance.domain.Appearance
 import app.notekea.core.presentation.UiThread
-import app.notekea.core.presentation.designsystem.components.NotekeaSplitPane
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaSplitPane
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

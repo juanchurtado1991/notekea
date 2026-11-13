@@ -17,9 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
-import app.notekea.core.presentation.designsystem.components.NotekeaToolButton
-import app.notekea.core.presentation.designsystem.components.NotekeaToolMenu
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaToolButton
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaToolMenu
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons

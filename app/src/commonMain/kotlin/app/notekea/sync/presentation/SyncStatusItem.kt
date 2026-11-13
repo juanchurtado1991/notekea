@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.presentation.designsystem.components.NotekeaStatusLabel
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaStatusLabel
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res

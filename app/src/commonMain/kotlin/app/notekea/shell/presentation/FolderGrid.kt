@@ -24,8 +24,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.presentation.designsystem.components.EmptyState
 import app.notekea.core.presentation.designsystem.components.NotekeaGridCard
+import app.notekea.core.presentation.designsystem.components.feedback.EmptyState
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons

@@ -36,10 +36,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.notes.domain.OutlineHeading
-import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
-import app.notekea.core.presentation.designsystem.components.NotekeaLazyScrollArea
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.NotekeaTreeItem
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaLazyScrollArea
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuArea
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalReduceMotion
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

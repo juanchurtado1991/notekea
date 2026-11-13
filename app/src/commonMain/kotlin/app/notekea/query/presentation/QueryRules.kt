@@ -19,10 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.time.MomentFormat
-import app.notekea.core.presentation.designsystem.components.NotekeaFieldFrame
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
-import app.notekea.core.presentation.designsystem.components.NotekeaPropertyField
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaFieldFrame
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaPropertyField
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons

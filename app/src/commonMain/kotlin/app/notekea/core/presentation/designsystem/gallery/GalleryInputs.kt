@@ -17,15 +17,15 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaCard
-import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.NotekeaFindBar
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
-import app.notekea.core.presentation.designsystem.components.NotekeaInlineTextField
 import app.notekea.core.presentation.designsystem.components.NotekeaListItem
-import app.notekea.core.presentation.designsystem.components.NotekeaSkeletonRow
-import app.notekea.core.presentation.designsystem.components.NotekeaTextField
-import app.notekea.core.presentation.designsystem.components.NotekeaTitleField
 import app.notekea.core.presentation.designsystem.components.NotekeaTreeItem
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaSkeletonRow
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaCheckbox
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaInlineTextField
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaTextField
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaTitleField
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 

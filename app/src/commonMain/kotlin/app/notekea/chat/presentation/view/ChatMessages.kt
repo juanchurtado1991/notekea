@@ -44,7 +44,7 @@ import app.notekea.chat.presentation.model.ChatPreviewData
 import app.notekea.chat.presentation.model.ChatStep
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
-import app.notekea.core.presentation.designsystem.components.NotekeaLazyScrollArea
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaLazyScrollArea
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalReduceMotion
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

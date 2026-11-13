@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.presentation.designsystem.components.NotekeaStatusRing
-import app.notekea.core.presentation.designsystem.components.NotekeaTooltip
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaStatusRing
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaTooltip
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.resources.Res

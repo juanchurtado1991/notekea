@@ -30,8 +30,8 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.presentation.notesErrorMessage
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
-import app.notekea.core.presentation.designsystem.components.NotekeaTitleField
-import app.notekea.core.presentation.designsystem.components.NotekeaTooltip
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaTooltip
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaTitleField
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaColors
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

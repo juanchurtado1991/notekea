@@ -7,10 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaKeycaps
-import app.notekea.core.presentation.designsystem.components.NotekeaSettingsGroup
-import app.notekea.core.presentation.designsystem.components.NotekeaSettingsPage
-import app.notekea.core.presentation.designsystem.components.NotekeaSettingsRow
-import app.notekea.core.presentation.designsystem.components.NotekeaSpotlight
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaSpotlight
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsGroup
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsPage
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsRow
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

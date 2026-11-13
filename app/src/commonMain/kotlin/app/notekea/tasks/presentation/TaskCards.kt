@@ -27,8 +27,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.domain.time.LocalMoment
-import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
-import app.notekea.core.presentation.designsystem.components.NotekeaProgressBar
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaProgressBar
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.LocalNoteLooks
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

@@ -16,7 +16,7 @@ import app.notekea.ai.domain.InstallProgress
 import app.notekea.ai.domain.ModelSize
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
-import app.notekea.core.presentation.designsystem.components.NotekeaProgressBar
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaProgressBar
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.formatBytes

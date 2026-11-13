@@ -29,8 +29,8 @@ import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaCard
-import app.notekea.core.presentation.designsystem.components.NotekeaProgressIndicator
-import app.notekea.core.presentation.designsystem.components.NotekeaTextField
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaProgressIndicator
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaTextField
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.platform.displayPath

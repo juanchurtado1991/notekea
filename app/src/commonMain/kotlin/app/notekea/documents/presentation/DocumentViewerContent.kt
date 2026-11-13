@@ -33,7 +33,7 @@ import app.notekea.core.documents.domain.DocumentError
 import app.notekea.core.documents.domain.DocumentFormat
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
-import app.notekea.core.presentation.designsystem.components.NotekeaProgressIndicator
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaProgressIndicator
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.documents.domain.PageMark

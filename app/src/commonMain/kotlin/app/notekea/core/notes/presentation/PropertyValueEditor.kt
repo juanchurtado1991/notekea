@@ -22,10 +22,10 @@ import app.notekea.core.domain.time.MomentFormat
 import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.core.notes.domain.PropertyKeys
 import app.notekea.core.notes.domain.PropertyValue
-import app.notekea.core.presentation.designsystem.components.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.components.NotekeaChip
-import app.notekea.core.presentation.designsystem.components.NotekeaDateField
-import app.notekea.core.presentation.designsystem.components.NotekeaPropertyField
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaCheckbox
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaDateField
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaPropertyField
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.readableDate

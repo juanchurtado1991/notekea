@@ -15,11 +15,11 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaLogo
-import app.notekea.core.presentation.designsystem.components.NotekeaSettingsGroup
-import app.notekea.core.presentation.designsystem.components.NotekeaSettingsPage
-import app.notekea.core.presentation.designsystem.components.NotekeaSettingsRow
-import app.notekea.core.presentation.designsystem.components.NotekeaSpotlight
 import app.notekea.core.presentation.designsystem.components.NotekeaWordmark
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaSpotlight
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsGroup
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsPage
+import app.notekea.core.presentation.designsystem.components.settings.NotekeaSettingsRow
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.platform.LocalAppVersion

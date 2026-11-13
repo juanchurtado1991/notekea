@@ -7,8 +7,8 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.Shortcut
 import app.notekea.core.platform.domain.graphShortcut
 import app.notekea.core.presentation.designsystem.components.NotekeaLogo
-import app.notekea.core.presentation.designsystem.components.NotekeaToolRail
-import app.notekea.core.presentation.designsystem.components.NotekeaToolRailItem
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaToolRail
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaToolRailItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.platform.label

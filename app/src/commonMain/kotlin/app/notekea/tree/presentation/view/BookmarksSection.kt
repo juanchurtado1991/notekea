@@ -26,12 +26,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
-import app.notekea.core.presentation.designsystem.components.NotekeaFold
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.components.NotekeaSectionHeader
 import app.notekea.core.presentation.designsystem.components.NotekeaTreeItem
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaFold
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuArea
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons

@@ -14,10 +14,10 @@ import androidx.compose.ui.unit.Density
 import app.notekea.core.notes.domain.OutlineFinder
 import app.notekea.core.notes.domain.TaskFinder
 import app.notekea.core.notes.domain.percentDecoded
-import app.notekea.core.presentation.designsystem.components.NotekeaMarkdown
-import app.notekea.core.presentation.designsystem.components.ScaledBitmapPainter
-import app.notekea.core.presentation.designsystem.components.TextMarks
-import app.notekea.core.presentation.designsystem.components.attachmentImageSize
+import app.notekea.core.presentation.designsystem.components.attachments.ScaledBitmapPainter
+import app.notekea.core.presentation.designsystem.components.attachments.attachmentImageSize
+import app.notekea.core.presentation.designsystem.components.markdown.NotekeaMarkdown
+import app.notekea.core.presentation.designsystem.components.markdown.TextMarks
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.editor.presentation.attachments.AttachmentBlock

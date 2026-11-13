@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.designsystem.components.markdown.NotekeaMarkdown
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
 

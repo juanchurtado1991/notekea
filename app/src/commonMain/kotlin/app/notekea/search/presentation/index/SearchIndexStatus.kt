@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.notes.domain.IndexRunError
-import app.notekea.core.presentation.designsystem.components.NotekeaPopover
-import app.notekea.core.presentation.designsystem.components.NotekeaStatusLabel
-import app.notekea.core.presentation.designsystem.components.NotekeaStatusRing
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaStatusRing
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaStatusLabel
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaPopover
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res

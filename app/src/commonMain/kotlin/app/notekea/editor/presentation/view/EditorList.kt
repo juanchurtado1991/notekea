@@ -35,8 +35,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.preferences.domain.LineWidth
-import app.notekea.core.presentation.designsystem.components.NotekeaSkeletonRow
-import app.notekea.core.presentation.designsystem.components.TextMarks
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaSkeletonRow
+import app.notekea.core.presentation.designsystem.components.markdown.TextMarks
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.platform.LocalAppPreferences

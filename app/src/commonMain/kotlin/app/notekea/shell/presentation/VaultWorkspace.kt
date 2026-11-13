@@ -15,7 +15,7 @@ import app.notekea.core.documents.domain.DocumentFormat
 import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.NaturalNameComparator
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.presentation.designsystem.components.EmptyState
+import app.notekea.core.presentation.designsystem.components.feedback.EmptyState
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.platform.LocalWindowDialogs
 import app.notekea.editor.presentation.EditorScreen

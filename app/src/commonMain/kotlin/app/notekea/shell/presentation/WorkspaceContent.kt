@@ -33,8 +33,8 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.platform.domain.Shortcut
-import app.notekea.core.presentation.designsystem.components.EmptyState
 import app.notekea.core.presentation.designsystem.components.NotekeaActionRow
+import app.notekea.core.presentation.designsystem.components.feedback.EmptyState
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

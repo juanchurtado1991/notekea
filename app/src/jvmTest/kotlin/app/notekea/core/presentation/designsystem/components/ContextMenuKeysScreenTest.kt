@@ -15,6 +15,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuArea
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuState
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
+import app.notekea.core.presentation.designsystem.components.tabs.NotekeaTabStrip
+import app.notekea.core.presentation.designsystem.components.tabs.NotekeaTabStripItem
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.keyDown
 import app.notekea.core.presentation.keyUp

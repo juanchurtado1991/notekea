@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.presentation.designsystem.components.ErrorBanner
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
+import app.notekea.core.presentation.designsystem.components.feedback.ErrorBanner
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.resources.Res
 import app.notekea.resources.sync_conflict_banner

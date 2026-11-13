@@ -10,6 +10,7 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaTextField
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.nodes

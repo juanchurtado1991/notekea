@@ -8,9 +8,9 @@ import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.notes.domain.VaultTree
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
-import app.notekea.core.presentation.designsystem.components.NotekeaTabStrip
-import app.notekea.core.presentation.designsystem.components.NotekeaTabStripItem
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
+import app.notekea.core.presentation.designsystem.components.tabs.NotekeaTabStrip
+import app.notekea.core.presentation.designsystem.components.tabs.NotekeaTabStripItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons

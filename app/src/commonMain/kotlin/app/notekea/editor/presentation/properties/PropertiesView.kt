@@ -30,9 +30,9 @@ import androidx.compose.ui.unit.dp
 import app.notekea.core.notes.domain.FrontmatterContent
 import app.notekea.core.notes.domain.NoteProperty
 import app.notekea.core.presentation.designsystem.components.NotekeaChip
-import app.notekea.core.presentation.designsystem.components.NotekeaFold
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.focusBorder
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaFold
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons

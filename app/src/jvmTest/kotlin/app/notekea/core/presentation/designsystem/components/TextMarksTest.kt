@@ -6,6 +6,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.designsystem.components.markdown.NotekeaMarkdown
+import app.notekea.core.presentation.designsystem.components.markdown.TextMarks
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import kotlin.test.Test
 import kotlin.test.assertEquals

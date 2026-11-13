@@ -8,6 +8,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.use
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaPalette
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import javax.swing.JPanel
 import kotlin.test.Test

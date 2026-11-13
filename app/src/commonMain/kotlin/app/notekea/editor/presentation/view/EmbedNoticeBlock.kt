@@ -7,7 +7,7 @@ import app.notekea.core.domain.StringPatterns
 import app.notekea.core.domain.markdown.MarkdownSyntax
 import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.LinkKind
-import app.notekea.core.presentation.designsystem.components.NotekeaEmbedNotice
+import app.notekea.core.presentation.designsystem.components.attachments.NotekeaEmbedNotice
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.editor.domain.Embed
 import app.notekea.editor.domain.EmbedKind

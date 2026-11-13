@@ -3,7 +3,7 @@ package app.notekea.search.presentation.index
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import app.notekea.core.presentation.designsystem.components.NotekeaNotice
+import app.notekea.core.presentation.designsystem.components.feedback.NotekeaNotice
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.resources.Res

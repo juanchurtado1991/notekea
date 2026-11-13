@@ -22,9 +22,9 @@ import app.notekea.core.notes.domain.AttachmentKind
 import app.notekea.core.notes.domain.NoteFile
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.platform.domain.PlatformConventions
-import app.notekea.core.presentation.designsystem.components.NotekeaAttachmentImage
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
+import app.notekea.core.presentation.designsystem.components.attachments.NotekeaAttachmentImage
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.preview.PreviewPlatformConventions
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

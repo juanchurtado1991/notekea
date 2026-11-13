@@ -16,14 +16,14 @@ import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
 import app.notekea.core.presentation.designsystem.components.NotekeaCard
 import app.notekea.core.presentation.designsystem.components.NotekeaConfirmDialog
-import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.designsystem.components.NotekeaGridSizePicker
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
-import app.notekea.core.presentation.designsystem.components.NotekeaMarkdown
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuButton
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
-import app.notekea.core.presentation.designsystem.components.NotekeaSplitPane
-import app.notekea.core.presentation.designsystem.components.PaneSide
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaSplitPane
+import app.notekea.core.presentation.designsystem.components.layout.PaneSide
+import app.notekea.core.presentation.designsystem.components.markdown.NotekeaMarkdown
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuArea
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuButton
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 

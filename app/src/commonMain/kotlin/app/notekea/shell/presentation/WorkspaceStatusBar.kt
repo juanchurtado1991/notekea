@@ -9,10 +9,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.notekea.core.domain.StringPatterns
 import app.notekea.core.notes.domain.RelativePath
-import app.notekea.core.presentation.designsystem.components.NotekeaStatusBar
-import app.notekea.core.presentation.designsystem.components.NotekeaStatusLabel
-import app.notekea.core.presentation.designsystem.components.NotekeaStatusProgress
-import app.notekea.core.presentation.designsystem.components.NotekeaStatusSeparator
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaStatusBar
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaStatusLabel
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaStatusProgress
+import app.notekea.core.presentation.designsystem.components.layout.NotekeaStatusSeparator
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaColors
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions

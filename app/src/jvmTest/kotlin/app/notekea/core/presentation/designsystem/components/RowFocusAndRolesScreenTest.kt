@@ -21,6 +21,7 @@ import app.notekea.connections.presentation.RelatedNotesState
 import app.notekea.core.notes.domain.FrontmatterContent
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.core.presentation.UiThread
+import app.notekea.core.presentation.designsystem.components.fields.NotekeaCheckbox
 import app.notekea.core.presentation.designsystem.theme.NotekeaIcons
 import app.notekea.core.presentation.designsystem.theme.NotekeaTheme
 import app.notekea.core.presentation.keyDown

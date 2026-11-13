@@ -1,5 +1,6 @@
 package app.notekea.core.presentation.designsystem.components
 
+import app.notekea.core.presentation.designsystem.components.feedback.StatusIndicator
 import app.notekea.core.presentation.designsystem.theme.WorkspaceBlueSchemes
 import kotlin.test.Test
 import kotlin.test.assertEquals

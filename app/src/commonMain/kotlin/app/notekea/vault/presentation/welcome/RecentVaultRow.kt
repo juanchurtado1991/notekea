@@ -15,9 +15,9 @@ import app.notekea.core.domain.time.ElapsedTime
 import app.notekea.core.platform.domain.PlatformConventions
 import app.notekea.core.presentation.designsystem.components.NotekeaButton
 import app.notekea.core.presentation.designsystem.components.NotekeaButtonStyle
-import app.notekea.core.presentation.designsystem.components.NotekeaContextMenuArea
 import app.notekea.core.presentation.designsystem.components.NotekeaListItem
-import app.notekea.core.presentation.designsystem.components.NotekeaMenuItem
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaContextMenuArea
+import app.notekea.core.presentation.designsystem.components.menus.NotekeaMenuItem
 import app.notekea.core.presentation.designsystem.preview.NotekeaPreviewThemes
 import app.notekea.core.presentation.designsystem.theme.NotekeaDimensions
 import app.notekea.core.presentation.elapsedTimeText
