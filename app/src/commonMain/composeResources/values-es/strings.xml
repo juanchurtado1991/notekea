@@ -794,7 +794,6 @@
     <string name="chat_found_none">No notes match.</string>
     <string name="chat_found_count">%1$d notes</string>
     <string name="chat_found_tasks">%1$d tasks</string>
-    <string name="chat_found_note">Nota</string>
     <string name="chat_problem_note">There is no note called “%1$s” in this vault.</string>
     <string name="chat_problem_folder">There is no folder called “%1$s” in this vault.</string>
     <string name="chat_problem_missing">I need to know the %1$s to do that.</string>
@@ -940,7 +939,6 @@
     <string name="sync_connect">Conectar</string>
     <string name="sync_now">Sincronizar ahora</string>
     <string name="sync_disconnect">Dejar de sincronizar</string>
-    <string name="sync_connected">Sincronizada con %1$s</string>
     <string name="sync_error_auth">El repositorio rechazó el token. Comprueba que puede escribir en este repositorio.</string>
     <string name="sync_error_offline">No se puede llegar al repositorio ahora. Notekea lo sigue intentando sola.</string>
     <string name="sync_error_address">Esta no es la dirección de un repositorio Git. Empieza con https://</string>

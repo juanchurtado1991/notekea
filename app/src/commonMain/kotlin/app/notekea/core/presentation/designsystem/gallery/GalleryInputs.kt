@@ -22,7 +22,6 @@ import app.notekea.core.presentation.designsystem.components.NotekeaFindBar
 import app.notekea.core.presentation.designsystem.components.NotekeaIconButton
 import app.notekea.core.presentation.designsystem.components.NotekeaInlineTextField
 import app.notekea.core.presentation.designsystem.components.NotekeaListItem
-import app.notekea.core.presentation.designsystem.components.NotekeaSearchButton
 import app.notekea.core.presentation.designsystem.components.NotekeaSkeletonRow
 import app.notekea.core.presentation.designsystem.components.NotekeaTextField
 import app.notekea.core.presentation.designsystem.components.NotekeaTitleField
@@ -98,12 +97,6 @@ private fun PageInputsSamples() {
         value = title,
         onCommit = { title = it },
         label = NOTE_PRICING
-    )
-
-    NotekeaSearchButton(
-        label = SEARCH_LABEL,
-        onClick = {},
-        shortcutHint = SEARCH_SHORTCUT
     )
 
     var isTaskDone by remember { mutableStateOf(value = false) }

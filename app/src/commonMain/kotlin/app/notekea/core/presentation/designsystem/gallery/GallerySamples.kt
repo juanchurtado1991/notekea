@@ -74,7 +74,6 @@ internal const val SAMPLE_MISSING = "This file is missing"
 internal const val SAMPLE_MISSING_PATH = "attachments/plate.png"
 internal const val SAMPLE_PLACEHOLDER = "Search notes…"
 internal const val SEARCH_LABEL = "Search notes"
-internal const val SEARCH_SHORTCUT = "Ctrl+P"
 internal const val SKELETON_LONG_FRACTION = 0.7f
 internal const val SKELETON_SHORT_FRACTION = 0.5f
 internal const val SPLIT_END = "Editor"
