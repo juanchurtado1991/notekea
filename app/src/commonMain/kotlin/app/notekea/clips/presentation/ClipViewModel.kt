@@ -213,7 +213,12 @@ class ClipViewModel(
         path: RelativePath,
         isShown: Boolean
     ) {
-        if (updating?.isActive == true) return
+        // One under way, the automatic one perhaps: asked for again, it only shows itself.
+        if (updating?.isActive == true) {
+            if (isShown) reduce { it.copy(isUpdateShown = true) }
+
+            return
+        }
 
         reduce {
             it.copy(
@@ -230,14 +235,20 @@ class ClipViewModel(
             ).collect { step ->
                 reduce { it.copy(update = step) }
 
-                if (step is UpdateStep.Done && step.updated.isNotEmpty()) {
-                    emit(effect = ClipEffect.Rewritten(paths = step.updated))
-                }
+                if (step is UpdateStep.Done) finished(done = step)
             }
 
             // Nobody is shown the automatic update's end.
             if (!state.value.isUpdateShown) reduce { it.copy(update = null) }
         }
+    }
+
+    // The editors read the rewritten notes again, and the automatic update's next turn counts from a run that read
+    // at least one page: offline, it is tried again the next time it is looked at.
+    private suspend fun finished(done: UpdateStep.Done) {
+        if (done.updated.isNotEmpty()) emit(effect = ClipEffect.Rewritten(paths = done.updated))
+        val read = done.updated.size + done.added.size + done.unchanged
+        if (read > 0 || done.failed == 0) automatic?.done(vaultPath = vaultPath)
     }
 
     private fun clipWhole(links: SectionLinks) {
@@ -373,10 +384,12 @@ class ClipViewModel(
     private fun logError(throwable: Throwable) {
         logger.w(throwable = throwable) { FAILED_MESSAGE }
 
+        // An update that failed half way never leaves the status bar saying it is still reading.
         reduce {
             it.copy(
                 step = null,
-                progress = null
+                progress = null,
+                update = null
             )
         }
     }

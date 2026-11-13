@@ -39,7 +39,7 @@ class AutomaticWebUpdateTest {
     }
 
     @Test
-    fun `never gives no turn, and every week gives one at once and the next a week later, a vault at a time`() =
+    fun `never gives no turn, a turn that read nothing comes again, the next a week after one that did`() =
         runTest {
             val store = FakeAppPreferencesStore(initial = AppPreferences())
             var turns = 0
@@ -52,8 +52,10 @@ class AutomaticWebUpdateTest {
             )
 
             val job = launch {
+                // The update a turn asks for reads its pages from the second turn on: the first was offline.
                 automatic.turns(vaultPath = "/vault").collect {
                     turns++
+                    if (turns > 1) automatic.done(vaultPath = "/vault")
                 }
             }
 
@@ -64,6 +66,10 @@ class AutomaticWebUpdateTest {
             advanceTimeBy(delayTime = 1.hours)
             runCurrent()
             val first = turns
+
+            advanceTimeBy(delayTime = 1.hours)
+            runCurrent()
+            val retried = turns
 
             now += 6.days
             advanceTimeBy(delayTime = 1.hours)
@@ -76,8 +82,8 @@ class AutomaticWebUpdateTest {
             job.cancel()
 
             assertEquals(
-                expected = listOf(0, 1, 1, 2),
-                actual = listOf(never, first, beforeAWeek, turns)
+                expected = listOf(0, 1, 2, 2, 3),
+                actual = listOf(never, first, retried, beforeAWeek, turns)
             )
         }
 

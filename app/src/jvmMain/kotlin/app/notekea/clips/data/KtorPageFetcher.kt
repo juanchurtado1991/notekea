@@ -62,7 +62,14 @@ class KtorPageFetcher(private val dispatchers: AppDispatchers) : PageFetcher {
                 val location = response.headers[HttpHeaders.Location]
 
                 if (status in REDIRECTS && location != null) {
-                    current = URI(current).resolve(location).toString()
+                    // A Location no address can be made of ("/docs/my page") is a page that cannot be read.
+                    current = try {
+                        URI(current).resolve(location).toString()
+                    } catch (_: IllegalArgumentException) {
+                        val unreadable = ClipError.Refused(status = status)
+
+                        return@withContext Outcome.Failure(error = unreadable)
+                    }
 
                     return@repeat
                 }

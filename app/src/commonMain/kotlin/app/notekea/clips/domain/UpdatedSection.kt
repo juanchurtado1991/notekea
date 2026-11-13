@@ -4,7 +4,8 @@ import app.notekea.core.notes.domain.RelativePath
 
 /**
  * One section of web sources updated ([UpdateWebSourcesUseCase]): its pages read again, cleaned together of what the
- * site repeats on each, compared with the notes, and the pages its index now links that no note has clipped as new.
+ * site repeats on each, compared with the notes as they are when each is written, and the pages its index now links
+ * that no note came from clipped as new, without the model.
  */
 internal class UpdatedSection(
     private val section: SourceSection,
@@ -18,81 +19,114 @@ internal class UpdatedSection(
             tools.clipOf(url = note.source)
         }
 
-        val fresh = newPages(onPage = onPage)
-        val cleaned = cleaned(clips = clips.values.filterNotNull() + fresh)
-
-        val updated = clips
-            .mapNotNull { (note, clip) ->
-                clip?.let {
-                    note to (cleaned[it.url] ?: it)
-                }
-            }
-            .filter { (note, clip) ->
-                clip
-                    .article
-                    .text
-                    .trim() != WebSourceNote.originalOf(text = note.text)
-            }
-            .filter { (note, clip) ->
-                tools.write(
-                    vaultPath = vaultPath,
-                    path = note.path,
-                    text = WebSourceNote.updated(
-                        text = note.text,
-                        article = clip.article.text,
-                        today = today
-                    )
-                )
-            }
-            .map { (note, _) -> note.path }
-
-        val added = added(
-            clips = fresh.map {
-                cleaned[it.url] ?: it
-            }
+        val fresh = newPages(
+            read = clips.values.filterNotNull(),
+            onPage = onPage
         )
 
-        val failed = clips.values.count {
-            it == null
+        val cleaned = cleaned(clips = clips.values.filterNotNull() + fresh)
+        var result = UpdateStep.Done()
+
+        clips.forEach { (note, clip) ->
+            val article = clip
+                ?.let {
+                    cleaned[it.url] ?: it
+                }
+                ?.article
+                ?.text
+
+            result = when (rewritten(note = note, article = article)) {
+                true -> result.copy(updated = result.updated + note.path)
+                false -> result.copy(unchanged = result.unchanged + 1)
+                null -> result.copy(failed = result.failed + 1)
+            }
         }
 
-        return UpdateStep.Done(
-            updated = updated,
-            added = added,
-            unchanged = section.notes.size - updated.size - failed,
-            failed = failed
+        return result.copy(
+            added = added(
+                clips = fresh.map {
+                    cleaned[it.url] ?: it
+                }
+            )
         )
     }
 
-    // The pages the index links now that no note of the section came from, clipped with their notes as a first clip.
-    private suspend fun newPages(onPage: suspend (String) -> Unit): List<WebClip> {
+    // Whether the note was rewritten with [article]; null when its page could not be read, or reads as gone. The
+    // note is read again here, minutes after the update began: what the person wrote meanwhile is what is kept.
+    private suspend fun rewritten(
+        note: SourceNote,
+        article: String?
+    ): Boolean? {
+        article ?: return null
+
+        val latest = tools.read(
+            vaultPath = vaultPath,
+            path = note.path
+        ) ?: return null
+
+        val isGone = WebSourceNote.looksGone(
+            text = latest,
+            article = article
+        )
+
+        if (isGone) return null
+
+        val isSame = WebSourceNote.isSame(
+            text = latest,
+            article = article
+        )
+
+        if (isSame) return false
+
+        val isWritten = tools.write(
+            vaultPath = vaultPath,
+            path = note.path,
+            text = WebSourceNote.updated(
+                text = latest,
+                article = article,
+                today = today
+            )
+        )
+
+        return if (isWritten) true else null
+    }
+
+    // The pages the index links now that no note of the section came from. A link that only redirects to a page a
+    // note has (/docs/latest/x to /docs/v3/x) is not new: its address is known once it is read.
+    private suspend fun newPages(
+        read: List<WebClip>,
+        onPage: suspend (String) -> Unit
+    ): List<WebClip> {
         val index = section.index ?: return emptyList()
 
         // A page clipped alone stays alone: only a section, clipped with its pages, gets the new ones.
-        val isSection = section.notes.size > 1 || WebClipSection.PAGES in index.text
+        val isSection = section.notes.size > 1 || WebSourceNote.hasPages(text = index.text)
         if (!isSection) return emptyList()
 
-        val known = section
-            .notes
-            .map { keyOf(url = it.source) }
-            .toSet()
+        val known = (section.notes.map { it.source } + read.map { it.url })
+            .map { WebSourceNote.keyOf(url = it) }
+            .toMutableSet()
 
-        return tools
+        val linked = tools
             .pagesOf(
                 url = index.source,
                 levels = WebSourceNote.levelsOf(text = index.text)
             )
             .filter {
-                keyOf(url = it) !in known
+                WebSourceNote.keyOf(url = it) !in known
             }
-            .mapNotNull { url ->
-                onPage(url)
+            .distinctBy { WebSourceNote.keyOf(url = it) }
 
-                tools.clipOf(
-                    url = url,
-                    withNotes = true
-                )
-            }
+        return linked.mapNotNull { url ->
+            onPage(url)
+            val clip = tools.clipOf(url = url) ?: return@mapNotNull null
+
+            // Where the link ended, once followed: a page a note already has, or one two links led to.
+            val isNew = known.add(WebSourceNote.keyOf(url = clip.url))
+            known += WebSourceNote.keyOf(url = url)
+
+            clip.takeIf { isNew }
+        }
     }
 
     // The clips by their address, without the site's menus and name, when they are a section and not a page alone.
@@ -110,24 +144,16 @@ internal class UpdatedSection(
         return (listOf(done.main) + done.pages).associateBy { it.url }
     }
 
+    // Each new page as a note under a name no note of the folder has, the person's own included, then in the index.
     private suspend fun added(clips: List<WebClip>): List<RelativePath> {
         val index = section.index ?: return emptyList()
         if (clips.isEmpty()) return emptyList()
-
-        val taken = section
-            .notes
-            .map {
-                it
-                    .path
-                    .nameWithoutExtension
-                    .lowercase()
-            }
-            .toMutableSet()
+        val taken = section.names.toMutableSet()
 
         val written = clips.mapNotNull { clip ->
-            var name = WebClipNote.nameOf(title = clip.title)
+            val wanted = WebClipNote.nameOf(title = clip.title)
+            var name = wanted
             var number = 1
-            val wanted = name
 
             while (!taken.add(name.lowercase())) {
                 number++
@@ -136,19 +162,16 @@ internal class UpdatedSection(
 
             val path = section.folder.child(name = "$name${RelativePath.MARKDOWN_EXTENSION}")
 
-            val text = WebClipNote.textOf(
-                clip = clip,
-                today = today
+            val isWritten = tools.create(
+                vaultPath = vaultPath,
+                path = path,
+                text = WebClipNote.textOf(
+                    clip = clip,
+                    today = today
+                )
             )
 
-            (path to name).takeIf {
-                tools.write(
-                    vaultPath = vaultPath,
-                    path = path,
-                    text = text,
-                    isNew = true
-                )
-            }
+            (path to name).takeIf { isWritten }
         }
 
         val links = written.map { (_, name) -> "${section.folder.name}/$name|$name" }
@@ -156,7 +179,7 @@ internal class UpdatedSection(
         val latest = tools.read(
             vaultPath = vaultPath,
             path = index.path
-        ) ?: index.text
+        ) ?: return written.map { it.first }
 
         tools.write(
             vaultPath = vaultPath,
@@ -169,15 +192,4 @@ internal class UpdatedSection(
 
         return written.map { it.first }
     }
-
-    // An address however it is written: with or without its last slash, its ".md" or its "www.".
-    private fun keyOf(url: String): String = url
-        .substringBefore(delimiter = '#')
-        .substringBefore(delimiter = '?')
-        .removeSuffix(suffix = "/")
-        .removeSuffix(suffix = ".md")
-        .removeSuffix(suffix = ".html")
-        .substringAfter(delimiter = "://")
-        .removePrefix(prefix = "www.")
-        .lowercase()
 }

@@ -1,6 +1,7 @@
 package app.notekea.core.preferences.data
 
 import app.notekea.core.domain.AppDispatchers
+import app.notekea.core.notes.data.VaultKeyHash
 import app.notekea.core.preferences.domain.WebUpdateLog
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.withContext
@@ -24,7 +25,9 @@ class SettingsWebUpdateLog(
         )
     }
 
-    private fun keyOf(vaultPath: String): String = KEY_PREFIX + vaultPath.hashCode()
+    // The vault's own key, as its bookmarks and tabs use: two folders never share one.
+    private fun keyOf(vaultPath: String): String =
+        KEY_PREFIX + VaultKeyHash.of(vaultPath = vaultPath)
 
     private companion object {
         const val KEY_PREFIX = "app.web_updated."

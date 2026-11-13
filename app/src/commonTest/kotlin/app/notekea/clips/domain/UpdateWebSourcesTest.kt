@@ -30,18 +30,27 @@ class UpdateWebSourcesTest {
         "https://y.com/sleep" to "Sleep sorts what was learned."
     )
 
-    private val fetcher = PageFetcher { url ->
+    // "/docs/latest" answers as "/docs/axiom", as a site that redirects does.
+    private val redirects = mutableMapOf<String, String>()
+    private var onFetch: (String) -> Unit = {}
+
+    private val fetcher = PageFetcher { asked ->
+        val url = redirects[asked] ?: asked
+        onFetch(url)
+
         if (url in articles) {
             Outcome.Success(
                 value = FetchedPage(
                     url = url,
-                    html = "<a href=/docs/axiom>Axiom</a> <a href=/docs/datadog>Datadog</a>"
+                    html = links
                 )
             )
         } else {
             Outcome.Failure(error = ClipError.Refused(status = 404))
         }
     }
+
+    private var links = "<a href=/docs/axiom>Axiom</a> <a href=/docs/datadog>Datadog</a>"
 
     private val clipWebPage = ClipWebPageUseCase(
         fetcher = fetcher,
@@ -194,6 +203,150 @@ class UpdateWebSourcesTest {
                 )
             )
         }
+
+    // The code review of 2026-11-13: the notes were read when the update began and written minutes later.
+    @Test
+    fun `what the person writes in a note while the update runs is kept`() = runTest {
+        note(
+            path = "Web sources/Sleep.md",
+            source = "https://y.com/sleep",
+            original = "Old text."
+        )
+
+        val path = RelativePath(value = "Web sources/Sleep.md")
+
+        onFetch = {
+            contents.texts[path] = contents
+                .texts
+                .getValue(path)
+                .replace("# Title", "# Title\n\nWritten meanwhile.")
+        }
+
+        update(
+            vaultPath = "/vault",
+            target = path,
+            today = "2026-11-13"
+        ).toList()
+
+        val text = contents.texts.getValue(path)
+
+        assertEquals(
+            expected = listOf(true, true),
+            actual = listOf("Written meanwhile." in text, "Sleep sorts what was learned." in text)
+        )
+    }
+
+    @Test
+    fun `a new page never takes the name of a note the person keeps in the section's folder`() =
+        runTest {
+            note(
+                path = "Web sources/Docs.md",
+                source = "https://x.com/docs",
+                original = "Intro, rewritten this week.",
+                above = "## Pages\n\n- [[Docs/Axiom|Axiom]]\n\n"
+            )
+
+            note(
+                path = "Web sources/Docs/Axiom.md",
+                source = "https://x.com/docs/axiom",
+                original = "Send traces to Axiom."
+            )
+
+            val mine = RelativePath(value = "Web sources/Docs/Datadog.md")
+            contents.texts[mine] = "My own note on Datadog."
+            files.contents[mine] = byteArrayOf()
+
+            val done = update(
+                vaultPath = "/vault",
+                target = RelativePath(value = "Web sources"),
+                today = "2026-11-13"
+            ).toList().last() as UpdateStep.Done
+
+            assertEquals(
+                expected = listOf<Any>("My own note on Datadog.", listOf(RelativePath(value = "Web sources/Docs/Datadog 2.md"))),
+                actual = listOf(contents.texts.getValue(mine), done.added)
+            )
+        }
+
+    @Test
+    fun `a link that redirects to a page a note has is not a new page, however often it is updated`() =
+        runTest {
+            links = "<a href=/docs/latest>Axiom</a>"
+            redirects["https://x.com/docs/latest"] = "https://x.com/docs/axiom"
+
+            note(
+                path = "Web sources/Docs.md",
+                source = "https://x.com/docs",
+                original = "Intro, rewritten this week.",
+                above = "## Pages\n\n- [[Docs/Axiom|Axiom]]\n\n"
+            )
+
+            note(
+                path = "Web sources/Docs/Axiom.md",
+                source = "https://x.com/docs/axiom",
+                original = "Send traces to Axiom."
+            )
+
+            val runs = (1..2).map {
+                update(
+                    vaultPath = "/vault",
+                    target = RelativePath(value = "Web sources"),
+                    today = "2026-11-13"
+                ).toList().last()
+            }
+
+            assertEquals(
+                expected = List(size = 2) { UpdateStep.Done(unchanged = 2) },
+                actual = runs
+            )
+        }
+
+    @Test
+    fun `a note with Windows line ends is the same note, a heading of the person's is not the article's, a wall is no update`() {
+        val windows =
+            "---\r\nsource: \"https://y.com/a\"\r\nclipped: 2026-10-01\r\n---\r\n\r\n# A\r\n\r\n" +
+                "### Original text\r\n\r\nMine.\r\n\r\n## Original text\r\n\r\nLine one.\r\n\r\nLine two.\r\n"
+
+        val rewritten = WebSourceNote.updated(
+            text = windows,
+            article = "New one.\n\nNew two.",
+            today = "2026-11-13"
+        )
+
+        val long = "word ".repeat(n = 200)
+
+        assertEquals(
+            expected = listOf<Any>(true, true, true, false, true),
+            actual = listOf(
+                WebSourceNote.isSame(
+                    text = windows,
+                    article = "Line one.\n\nLine two."
+                ),
+                "### Original text\r\n\r\nMine.\r\n\r\n## Original text\r\n\r\nNew one.\r\n\r\nNew two.\r\n" in rewritten,
+                "clipped: 2026-11-13\r\n" in rewritten,
+                "\n" in rewritten.replace("\r\n", ""),
+                WebSourceNote.looksGone(
+                    text = "## Original text\n\n$long",
+                    article = "Accept our cookies to go on."
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `new pages join the list above the original text, never a list inside the article`() {
+        val index =
+            "# Docs\n\n## Pages\n\n- [[Docs/Axiom|Axiom]]\n\n## Original text\n\n- [[not a page]]\n"
+
+        assertEquals(
+            expected = "# Docs\n\n## Pages\n\n- [[Docs/Axiom|Axiom]]\n- [[Docs/Datadog|Datadog]]\n\n" +
+                "## Original text\n\n- [[not a page]]\n",
+            actual = WebSourceNote.withPages(
+                text = index,
+                links = listOf("Docs/Datadog|Datadog")
+            )
+        )
+    }
 
     private companion object {
         const val ORIGINAL = "## Original text"

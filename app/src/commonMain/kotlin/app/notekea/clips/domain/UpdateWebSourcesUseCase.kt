@@ -104,28 +104,38 @@ class UpdateWebSourcesUseCase(
     internal suspend fun write(
         vaultPath: String,
         path: RelativePath,
-        text: String,
-        isNew: Boolean = false
-    ): Boolean {
-        if (isNew) {
-            path.parent?.let {
-                noteFileOperations.createFolder(
-                    vaultPath = vaultPath,
-                    path = it
-                )
-            }
+        text: String
+    ): Boolean = noteContentStore.write(
+        vaultPath = vaultPath,
+        path = path,
+        content = text
+    ) is Outcome.Success
 
-            noteFileOperations.createFile(
+    /** A new note at [path]; false, and nothing written, when something is there already. */
+    internal suspend fun create(
+        vaultPath: String,
+        path: RelativePath,
+        text: String
+    ): Boolean {
+        path.parent?.let {
+            noteFileOperations.createFolder(
                 vaultPath = vaultPath,
-                path = path
+                path = it
             )
         }
 
-        return noteContentStore.write(
+        val created = noteFileOperations.createFile(
+            vaultPath = vaultPath,
+            path = path
+        )
+
+        if (created is Outcome.Failure) return false
+
+        return write(
             vaultPath = vaultPath,
             path = path,
-            content = text
-        ) is Outcome.Success
+            text = text
+        )
     }
 
     // The clipped notes [target] names, by section: a page clipped alone is a section of one, and a note inside a
@@ -171,7 +181,10 @@ class UpdateWebSourcesUseCase(
                     notes = read,
                     index = read.firstOrNull {
                         it.path.parent == WebSourcesFolder.PATH
-                    }
+                    },
+                    names = paths
+                        .map { it.nameWithoutExtension.lowercase() }
+                        .toSet()
                 )
             }
             .filter { it.notes.isNotEmpty() }
