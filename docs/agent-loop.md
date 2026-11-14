@@ -389,6 +389,22 @@ Everything above is the Medium model on Apple silicon (Metal). Not measured: the
 the CPU (step 2 measures it where it changes the engine); the Small and Large models in the tool formats (their
 profiles are measured when the loop reaches them, step 5 and 6); the model's reasoning turned on.
 
+## Step 1, done — 2026-11-14
+
+`chat/domain/tool`: `ChatTool` (name, description, arguments, effect, the target of a call, `run`), `ToolCall`,
+`ToolResult` (with where it comes from: the vault, or untrusted text), `ToolContext` (the vault, the task, what the
+turn read in `TurnReads`, the vault's names indexed once a turn) and `ToolRegistry`, which generates the prompt's
+list and the grammar of step 0 (`{"tool": …}` first, then only that tool's arguments). Today's five look-ups are
+tools (`tool/lookup`: `SearchTool`, `ReadTool`, `FindTool`, `TasksTool`, `FetchTool`); `AgentLookUp` and its `when`
+are gone, and `AgentTaskUseCase` runs a move through the registry.
+
+Nothing the model sees changed: the agent's prompt and its flat schema are today's, the generated ones wait for
+step 5. `ToolResult`'s other faces (`forPerson`, `passages`) come with the tools that need them, in step 4.
+
+**The gate.** Every test of the chat passes untouched, the 126 recorded replies among them. With the real model
+(Medium): the 30 tasks of 4.7, 27 right (90 %; the bar to offer agent mode is 80 %), 35 s a task; the wider
+evaluation, 7 of 21 (33 %), the same seven as before, 42 s a task against 39.
+
 ## Risks, said plainly
 
 - **The local model bounds it.** A 4B model will not reason like Claude. The loop makes it honest, grounded and

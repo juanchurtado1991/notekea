@@ -3,6 +3,11 @@ package app.notekea.chat.domain.prompt
 import app.notekea.chat.domain.plan.ActionContext
 import app.notekea.chat.domain.plan.ActionField
 import app.notekea.chat.domain.plan.ActionKind
+import app.notekea.chat.domain.tool.lookup.FetchTool
+import app.notekea.chat.domain.tool.lookup.FindTool
+import app.notekea.chat.domain.tool.lookup.ReadTool
+import app.notekea.chat.domain.tool.lookup.SearchTool
+import app.notekea.chat.domain.tool.lookup.TasksTool
 import app.notekea.core.llm.domain.ChatMessage
 import app.notekea.core.llm.domain.ChatRole
 
@@ -12,11 +17,11 @@ import app.notekea.core.llm.domain.ChatRole
  * changes are a plan of 3.9's actions, confirmed on a card at the end.
  */
 object AgentTaskPrompt {
-    const val SEARCH = "search"
-    const val READ = "read"
-    const val FIND = "find"
-    const val TASKS = "tasks"
-    const val FETCH = "fetch"
+    const val SEARCH = SearchTool.NAME
+    const val READ = ReadTool.NAME
+    const val FIND = FindTool.NAME
+    const val TASKS = TasksTool.NAME
+    const val FETCH = FetchTool.NAME
     const val PROPOSE = "propose"
     const val FINISH = "finish"
     private const val MAX_FOUND_CHARS = 9_000

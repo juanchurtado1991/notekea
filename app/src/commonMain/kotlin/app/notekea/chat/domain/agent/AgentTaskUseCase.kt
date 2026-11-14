@@ -11,6 +11,13 @@ import app.notekea.chat.domain.plan.PageReader
 import app.notekea.chat.domain.plan.PlannedStep
 import app.notekea.chat.domain.plan.UrlsNamed
 import app.notekea.chat.domain.prompt.AgentTaskPrompt
+import app.notekea.chat.domain.tool.ToolContext
+import app.notekea.chat.domain.tool.ToolRegistry
+import app.notekea.chat.domain.tool.lookup.FetchTool
+import app.notekea.chat.domain.tool.lookup.FindTool
+import app.notekea.chat.domain.tool.lookup.ReadTool
+import app.notekea.chat.domain.tool.lookup.SearchTool
+import app.notekea.chat.domain.tool.lookup.TasksTool
 import app.notekea.core.domain.Outcome
 import app.notekea.core.llm.domain.GenerationOptions
 import app.notekea.core.llm.domain.LlmEngine
@@ -42,6 +49,17 @@ class AgentTaskUseCase(
 ) {
     private val finalAnswer = AgentFinalAnswer(llmEngine = llmEngine)
 
+    // The look-ups a move may be, as tools (`docs/agent-loop.md`, step 1); the prompt still lists them by hand.
+    private val lookUps = ToolRegistry(
+        tools = listOf(
+            SearchTool(answerFromNotes = answerFromNotes),
+            ReadTool(noteTextCache = noteTextCache),
+            FindTool(actionRunner = actionRunner),
+            TasksTool(actionRunner = actionRunner),
+            FetchTool(pageReader = pageReader)
+        )
+    )
+
     operator fun invoke(
         task: String,
         vaultPath: String,
@@ -55,13 +73,10 @@ class AgentTaskUseCase(
         var mustEnd = false
         val deadline = clock.now() + TIME_LIMIT
 
-        val lookUp = AgentLookUp(
-            answerFromNotes = answerFromNotes,
-            noteTextCache = noteTextCache,
-            actionRunner = actionRunner,
-            pageReader = pageReader,
+        val tools = ToolContext(
             vaultPath = vaultPath,
             notes = notes,
+            task = task,
             openNote = openNote
         )
 
@@ -84,7 +99,7 @@ class AgentTaskUseCase(
                     found = found,
                     asked = GroundedSteps.asked(
                         planned = planned,
-                        read = lookUp.read
+                        read = tools.reads.read
                     ),
                     vault = VaultAt(vaultPath, notes, openNote)
                 )
@@ -92,9 +107,9 @@ class AgentTaskUseCase(
                 AgentTaskPrompt.PROPOSE -> return@flow proposed(
                     move = GroundedSteps.of(
                         move = move,
-                        read = lookUp.read
+                        read = tools.reads.read
                     ),
-                    unreadable = lookUp.blind,
+                    unreadable = tools.reads.blind,
                     task = task,
                     vaultPath = vaultPath,
                     notes = notes,
@@ -102,29 +117,24 @@ class AgentTaskUseCase(
                 )
 
                 else -> {
-                    val key = lookUp.keyOf(move = move)
+                    val call = move.asCall()
+                    val target = lookUps[call.name]?.targetOf(call, tools).orEmpty()
 
                     emit(
                         value = AgentStep.Moving(
                             number = number,
                             move = move.move,
-                            target = targetOf(
-                                move = move,
-                                lookUp = lookUp
-                            )
+                            target = target
                         )
                     )
 
-                    val isNew = made.add(key)
+                    val isNew = made.add(lookUps.keyOf(call, tools))
                     mustEnd = mustEnd || !isNew
 
                     found += if (isNew) {
-                        lookUp.result(
-                            move = move,
-                            task = task
-                        )
+                        lookUps[call.name]?.run(call, tools)?.forModel ?: UNKNOWN_MOVE
                     } else {
-                        "(${move.move} ${targetOf(move, lookUp)} again: its result is above)"
+                        "(${move.move} $target again: its result is above)"
                     }
                 }
             }
@@ -291,19 +301,8 @@ class AgentTaskUseCase(
         )
     }
 
-    // A note read is listed by its path in the vault ("Read Recipes/Arepas"), however the model named it.
-    private fun targetOf(
-        move: AgentTaskMove,
-        lookUp: AgentLookUp
-    ): String {
-        val note = move.note?.let {
-            lookUp.pathOf(name = it) ?: it
-        }
-
-        return move.query ?: note ?: move.url ?: ""
-    }
-
     companion object {
+        private const val UNKNOWN_MOVE = "(unknown move)"
         const val MAX_MOVES = 30
         val TIME_LIMIT = 10.minutes
         private const val MOVE_TOKENS = 900
