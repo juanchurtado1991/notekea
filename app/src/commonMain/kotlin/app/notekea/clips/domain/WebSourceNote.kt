@@ -157,6 +157,19 @@ object WebSourceNote {
         return lines.joinToString(separator = ending) + rest
     }
 
+    /** The names of the pages the index [text] lists, as its links call them ("- [[Docs/Rows|Rows]]" is "Rows"). */
+    fun pagesOf(text: String): List<String> = headOf(text = text)
+        .lines()
+        .filter { it.startsWith(prefix = LINK) }
+        .map {
+            it
+                .substringAfter(delimiter = LINK)
+                .substringBefore(delimiter = "]]")
+                .substringAfter(delimiter = '|')
+                .substringAfterLast(delimiter = '/')
+                .trim()
+        }
+
     /** An address however it is written: its last slash, "www.", "/index", a ".md" or ".html" copy, upper case. */
     fun keyOf(url: String): String = url
         .substringBefore(delimiter = '#')

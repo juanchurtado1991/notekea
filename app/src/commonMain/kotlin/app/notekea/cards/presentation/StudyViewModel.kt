@@ -83,10 +83,14 @@ class StudyViewModel(
         launchGuarded(onError = ::logError) {
             val today = today()
 
-            val cards = readDeck(
-                vaultPath = vaultPath,
-                notes = notes
-            )
+            // After an answer being written, never beside it: read a moment before, the deck still had the card
+            // as due and it came back to be answered again (the code review of 2026-11-13).
+            val cards = writing.withLock {
+                readDeck(
+                    vaultPath = vaultPath,
+                    notes = notes
+                )
+            }
 
             val due = cards.filter {
                 it.isDue(today = today)

@@ -163,8 +163,19 @@ internal class UpdatedSection(
         if (clips.isEmpty()) return emptyList()
         val taken = section.names.toMutableSet()
 
+        // A page the index lists whose note is gone was deleted by the person: it is not clipped back at every
+        // update (the code review of 2026-11-13).
+        val deleted = WebSourceNote
+            .pagesOf(text = index.text)
+            .map { it.lowercase() }
+            .filter {
+                it !in section.names
+            }
+            .toSet()
+
         val written = clips.mapNotNull { clip ->
             val wanted = WebClipNote.nameOf(title = clip.title)
+            if (wanted.lowercase() in deleted) return@mapNotNull null
             var name = wanted
             var number = 1
 

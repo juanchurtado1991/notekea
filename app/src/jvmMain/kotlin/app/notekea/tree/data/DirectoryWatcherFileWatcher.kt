@@ -5,6 +5,7 @@ import app.notekea.core.notes.data.HiddenSkippingFileTreeVisitor
 import app.notekea.core.notes.domain.RelativePath
 import app.notekea.tree.domain.FileWatcher
 import app.notekea.tree.domain.VaultChange
+import co.touchlab.kermit.Logger
 import io.methvin.watcher.DirectoryChangeEvent
 import io.methvin.watcher.DirectoryWatcher
 import kotlinx.coroutines.channels.Channel
@@ -48,6 +49,8 @@ class DirectoryWatcherFileWatcher(
 
         watcher?.watchAsync(eventLoop)?.whenComplete { _, error ->
             if (error != null) {
+                // Said in the log: the tree is read once more and then follows nothing, which nothing told.
+                logger.w(throwable = error) { STOPPED_MESSAGE }
                 trySend(element = VaultChange.Overflow)
             }
         }
@@ -83,7 +86,8 @@ class DirectoryWatcherFileWatcher(
                 )?.let(onChange)
             }
             .build()
-    } catch (_: IOException) {
+    } catch (exception: IOException) {
+        logger.w(throwable = exception) { STOPPED_MESSAGE }
         null
     }
 
@@ -152,6 +156,8 @@ class DirectoryWatcherFileWatcher(
     companion object {
         private const val HIDDEN_PREFIX = "."
         private const val THREAD_NAME = "notekea-file-watcher"
+        private const val STOPPED_MESSAGE = "The vault's folder is no longer watched for changes"
+        private val logger = Logger.withTag(tag = "FileWatcher")
         private val ROOT_CHECK_INTERVAL = 2.seconds
     }
 }

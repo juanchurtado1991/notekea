@@ -268,6 +268,34 @@ class UpdateWebSourcesTest {
             )
         }
 
+    // The code review of 2026-11-13: a page the person deleted from a section came back at every update.
+    @Test
+    fun `a page the index lists whose note the person deleted is not clipped back`() = runTest {
+        note(
+            path = "Web sources/Docs.md",
+            source = "https://x.com/docs",
+            original = "Intro, rewritten this week.",
+            above = "## Pages\n\n- [[Docs/Axiom|Axiom]]\n- [[Docs/Datadog|Datadog]]\n\n"
+        )
+
+        note(
+            path = "Web sources/Docs/Axiom.md",
+            source = "https://x.com/docs/axiom",
+            original = "Send traces to Axiom."
+        )
+
+        val done = update(
+            vaultPath = "/vault",
+            target = RelativePath(value = "Web sources"),
+            today = "2026-11-13"
+        ).toList().last() as UpdateStep.Done
+
+        assertEquals(
+            expected = emptyList(),
+            actual = done.added
+        )
+    }
+
     @Test
     fun `a link that redirects to a page a note has is not a new page, however often it is updated`() =
         runTest {
