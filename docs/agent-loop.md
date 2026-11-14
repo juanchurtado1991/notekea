@@ -145,6 +145,24 @@ A greeting or a plain question is settled by the router's one call and costs wha
 gets the same loop with a smaller profile; if its evaluation falls short it keeps the fast path only, behind the
 same interface.
 
+## The modes go
+
+Decided with the developer on 2026-11-14. Auto, Fast, Deep thinking and Agent are a menu for choosing among three
+engines; with one loop there is nothing to choose. The menu is removed in step 6, and what it gave is kept another
+way:
+
+- **The router decides the effort as well as the kind of work**: the short path for a greeting or a plain
+  question; more moves, whole documents and the strong verification for a task over a long document.
+- **It can be said in words** ("answer quickly", "check it thoroughly"), which the router reads.
+- **Stop** ends a turn that takes longer than wanted, with what it had.
+
+What stays where the menu was: the model in use (Small, Medium, Large) and the memory ring.
+
+**The condition**, measured in step 6: the evaluation sets get the effort each request should have, and the menu
+goes only if the router gets it right for nearly all. If it does not, one control of effort stays (Fast, Auto,
+Thorough) in the menu's place. Deep thinking's three drafts and vote go either way: reading side by side saves no
+time on Metal (measured above), and step 7's verification serves what it was for.
+
 ## How it is built, and the gate at each step
 
 **The evaluation sets decide**, not an impression. `smoke-data/eval/actions.json` (106 requests), `answers.json`,
@@ -172,7 +190,7 @@ may fall, and time is measured beside correctness. The old path stays, switchabl
    `count`, `date`, `plan`, `note`, `ask_user`; skills and the vault's instructions.
 5. **The changing tools and the single loop** in agent mode: `RunTurnUseCase`, the router and the toolsets,
    `write_note` by sections, `edit_note`.
-6. **The planner retired**: every mode on the loop, compared with the old path on the sets and on every Auto-Test
+6. **The planner retired, and the modes with it** ("The modes go"): everything on the loop, compared with the old path on the sets and on every Auto-Test
    case of 3.3, 3.6, 3.8, 3.9, 4.4, 4.6 and 4.7; then the old path and its setting are removed.
 7. **`TurnVerifier`** as the one last stage: the backed-sentence check, the critic if it earns its time, the stale
    and the untrusted rules.
@@ -382,12 +400,12 @@ profiles are measured when the loop reaches them, step 5 and 6); the model's rea
 - **Size.** Steps 3, 5 and 6 touch most of `chat/`. They are done behind the same `ChatViewModel` intents, and the
   old path stays switchable until step 6, so there is always a working chat to fall back to.
 
-## To decide with the developer
+## Decided with the developer (2026-11-14)
 
-1. **The commit hook.** It runs `check koverVerify`, the whole real-app suite (about 30 minutes), so every commit
-   of this work would skip it. Proposed: ktlint and the unit and architecture tests (about two minutes); the
-   real-app suite stays in CI and on demand.
-2. **The chat history kept on disk changes shape** (step 3). Proposed: yes, the old history converted once.
-3. **The vault's instructions and the person's own skills** add a setting and a folder to the product. Proposed:
-   yes to both, in step 4.
-4. **The repair of a repository left half merged**: proposed after step 1, since it is small and unrelated.
+1. **The commit hook** runs ktlint and the unit and architecture tests (about two minutes); the real-app suite
+   stays in CI and on demand. Done.
+2. **The chat history kept on disk changes shape** in step 3, the old history converted once.
+3. **The vault's instructions and the person's own skills**: yes to both, in step 4.
+4. **The repair of a repository left half merged** comes after step 1.
+5. **A loop of our own, not Koog**: confirmed after reading the comparison above.
+6. **The modes go**, on the condition above.
