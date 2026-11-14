@@ -142,6 +142,16 @@ pasted documentation page asks its question in the chat again.
   changed at their next update and are rewritten once in the new shape.
 - **Also:** the welcome waits for the vault's first scan (`OnboardingGate`, `WindowLoading`), and the YouTube
   player hides under anything drawn over the window (`WindowCovers`, told by each overlay with `CoversWindow()`).
+- **A page's links (chat):** four rows (`ChatSectionQuestion`, `NotekeaOptionRow`), a deep choice counted first
+  (`WebPageClipper.counted`, `ClipWords.COUNT_FIRST`, `SectionRequest`), the scan kept for the clip
+  (`ClipsForChat.scan`), the whole documentation up to 1,000 pages (`SectionLinks.FULL_DEPTH`), no model summary
+  past 40 pages. `SectionLinks.isIndex` suggests going deeper.
+- **Agent answers:** written apart from the moves, from what they found only (`AgentFinalAnswer`): asked for
+  Markdown inside the move's own summary, the model made up an answer (Auto-Test 3.3-05).
+- **Follow-ups:** `FollowUps`, `ChatFollowUps`, under the last answer.
+- **Agreed with the developer, not built yet:** when the notes do not hold the answer, offer to look for it in
+  the site the closest web sources came from, list up to five pages not clipped yet, clip the chosen ones into
+  their section and answer again.
 - **Still open from the code review of 2026-11-13:** the YouTube player's window and cleanup, the chat's
   presentation findings (undo, rollback, guards), and the medium findings of the editor, Settings, the tree, Git
   and the rest.
