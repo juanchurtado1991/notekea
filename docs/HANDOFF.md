@@ -246,6 +246,10 @@ repository's index: its import case counted 2 pending changes, and the index was
 now runs Gradle without git's variables. Left open: the app itself would follow a `GIT_INDEX_FILE` or `GIT_DIR` of
 its environment the same way; `JGitRepository` could open its repositories without reading the environment.
 
+Decided on 2026-11-14 after step 0: a loop of our own and not Koog, and **the modes go** in step 6 (the router
+decides the effort; the menu leaves if it gets it right on the evaluation sets). Step 1 is next: `ChatTool`,
+`ToolResult` and the registry, with today's look-ups as tools behind `AgentTaskUseCase`, nothing visible changing.
+
 Decided with it: the commit hook runs lint and the unit tests only (about two minutes; `./gradlew check koverVerify`
 is CI's and for before a large push), the chat history on disk changes shape in step 3 with the old one converted
 once, the vault gets its instructions note and the person's own skills in step 4, and the repair of a repository left
